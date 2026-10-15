@@ -7,13 +7,13 @@ This document defines the URA Finale scenario for Trainer Desk. It is written in
 - `docs/scenarios/01-ura-finale.md` — 142-line scenario guide (fan gates, camp, facilities, stamina thresholds, deck shapes, mood effects)
 - `docs/UMAMUSUME_REFERENCE.md` §2.2.1 — URA Finale `[Global]` mechanics summary (Happy Meek, fan gates, beginner targets)
 - `config/scenarios.php:111-130` — config matrix entry (`cap_bonus`, `widgets`, `panels`, `facility_level_source`, `scenario_links`)
-- `.scratch-uma/scenarios.json` — GameTora data export (`stats:[200,200,200,200,200]`, `start_en:1750897800`)
+- `.scratch-uma/cited/scenarios.json` — GameTora data export (`stats:[200,200,200,200,200]`, `start_en:1750897800`)
 - `SCENARIO-PUBLISHER-REFERENCES.md:892-996` — Game8 extraction (July 1, 2026 rework confirmation)
 - [Game8, URA Finale Scenario Guide](https://game8.co/games/Umamusume-Pretty-Derby/archives/536520) (last updated July 6, 2026)
 
 **Cross-check note.** URA Finale enters SCENARIO-PUBLISHER-REFERENCES.md:33 "solely through the Game8 extraction" — uma.guide and GameTora cover only Trackblazer and Unity Cup. There is no second publisher to cross-check against for URA Finale. The config matrix and the scenario guide are the first author and the Game8 page the second; they agree on every figure cited below.
 
-The July 1, 2026 rework added Happy Meek duels and raised caps from 1200 to 1400 in all stats. `config/scenarios.php:114` (`cap_bonus` = 200 each) and `.scratch-uma/scenarios.json` (`stats:[200,200,200,200,200]`) both record this; the Game8 page confirms it in §"Increased Stat Caps".
+The July 1, 2026 rework added Happy Meek duels and raised caps from 1200 to 1400 in all stats. `config/scenarios.php:114` (`cap_bonus` = 200 each) and `.scratch-uma/cited/scenarios.json` (`stats:[200,200,200,200,200]`) both record this; the Game8 page confirms it in §"Increased Stat Caps".
 
 ---
 
@@ -50,7 +50,7 @@ Facility level rises by repetition (every 4 same-stat trainings)
 Scenario Link: Aoi Kiryuin
 ```
 
-The +200 cap_bonus is from `config/scenarios.php:114` and `.scratch-uma/scenarios.json:stats`. Aoi Kiryuin is the scenario link; `config/scenarios.php:126` lists her and `docs/scenarios/01-ura-finale.md:16-19` confirms her event role.
+The +200 cap_bonus is from `config/scenarios.php:114` and `.scratch-uma/cited/scenarios.json:stats`. Aoi Kiryuin is the scenario link; `config/scenarios.php:126` lists her and `docs/scenarios/01-ura-finale.md:16-19` confirms her event role.
 
 ---
 
@@ -117,7 +117,7 @@ DUels         Happy Meek     0/6 duels won so far
               Past My Limits  ✗ not yet in reach
 
 RULE CONFIDENCE
-  Stat caps                 config/scenarios.php:114 + .scratch-uma/scenarios.json
+  Stat caps                 config/scenarios.php:114 + .scratch-uma/cited/scenarios.json
   Fan gates                 docs/scenarios/01-ura-finale.md + Game8
   Stamina floors            docs/scenarios/01-ura-finale.md + UMAMUSUME_REFERENCE.md §2.2.1
   Training level (repetition) config/scenarios.php:127 ($facility_level_source = 'repetition')

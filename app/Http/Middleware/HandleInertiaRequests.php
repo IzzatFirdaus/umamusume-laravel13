@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Preference;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -48,6 +49,16 @@ class HandleInertiaRequests extends Middleware
             // ported pages and the layout render it the same way.
             'flash' => [
                 'status' => fn () => $request->session()->get('status'),
+            ],
+            // Shared so every page can read display preferences without each controller
+            // re-querying the store (PLAN 6B.14, 6B.15).
+            'preferences' => [
+                'settings' => Preference::settings(),
+            ],
+            // The Dashboard's layout gate (DL.14): a config fact shared so the page's `wide_bento`
+            // branch and the Settings radio read one flag rather than two.
+            'dashboard' => [
+                'wide_bento_enabled' => (bool) config('dashboard.wide_bento_enabled'),
             ],
         ];
     }

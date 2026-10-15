@@ -6,6 +6,8 @@ import FormDetail from '../../components/catalog/FormDetail.vue';
 import FormTabs from '../../components/catalog/FormTabs.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
+import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
+import SparkChip from '../../components/SparkChip.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 
 interface Alias {
@@ -132,7 +134,7 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
         <template #title>{{ trainee.name }}</template>
 
         <div class="flex justify-end">
-            <Link href="/umamusume" class="text-sm text-ink-muted hover:underline">Back to catalog</Link>
+            <Link href="/umamusume" class="text-sm text-ink-muted hover:underline transition-colors duration-150 ease-out">Back to catalog</Link>
         </div>
 
         <section class="mt-4" aria-labelledby="basic-information">
@@ -338,7 +340,10 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
             </p>
             <template v-else>
                 <template v-for="list in skillLists" :key="list.label">
-                    <h3 class="mt-4 text-lg font-semibold text-ink-strong">{{ list.label }}</h3>
+                    <h3 class="mt-4 text-lg font-semibold text-ink-strong flex items-baseline gap-2">
+                        {{ list.label }}
+                        <SparkChip :label="list.label" variant="skill" size="sm" />
+                    </h3>
                     <ul class="mt-1">
                         <SkillRow v-for="skill in list.skills" :key="skill.id" :skill="skill" />
                         <li v-if="list.skills.length === 0 && !list.has_ids" class="py-1.5 text-sm text-ink-muted">
@@ -450,6 +455,7 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
                 <li v-for="source in provenance" :key="source.url" class="text-ink">
                     <a :href="source.url" class="text-ink-strong underline">{{ source.url }}</a>
                     <span class="text-ink-muted"> · {{ source.source_key }} · fetched {{ source.fetched_at_display }}</span>
+                    <ProvenanceBadge state="confirmed" title="Fetched source" class="ml-2" />
                 </li>
             </ul>
             <p class="mt-2 text-xs text-ink-muted">

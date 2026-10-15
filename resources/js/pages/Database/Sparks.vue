@@ -20,6 +20,7 @@
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
+import SparkChip from '../../components/SparkChip.vue';
 import ReferenceDrawer from '../../components/database/ReferenceDrawer.vue';
 import SourceNote from '../../components/database/SourceNote.vue';
 import { Head } from '@inertiajs/vue3';
@@ -54,10 +55,9 @@ const props = defineProps<{
     totalCount: number;
 }>();
 
-/** §18's four spark families have no committed token set in this build, so the chip is neutral and
- * the category word carries the identity. Inventing a colour mapping would state a distinction the
- * design system does not own; the word is the distinction, and it always prints. */
-const chip = 'bg-sunken text-ink-strong';
+// §18's four spark families have no committed token set in this build, so `SparkChip` renders every
+// variant neutral and the category word carries the identity. Inventing a colour mapping would state
+// a distinction the design system does not own; the word is the distinction, and it always prints.
 
 const selected = ref<Category | null>(null);
 const trigger = ref<HTMLElement | null>(null);
@@ -79,7 +79,7 @@ const close = async (): Promise<void> => {
         <Head title="Sparks" />
         <template #title>Sparks</template>
 
-        <h2 class="text-2xl font-semibold text-ink-strong">Sparks</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Sparks</h2>
 
         <p class="mt-4 max-w-3xl text-sm text-ink-muted">
             The Spark categories a finished Umamusume can carry, and the odds a Spark rolls at one,
@@ -99,7 +99,7 @@ const close = async (): Promise<void> => {
         <section
             v-if="props.categories.length === 0"
             aria-labelledby="sparks-empty"
-            class="mt-4 rounded-md border border-dashed border-rule bg-raised p-6"
+            class="mt-4 rounded-md border border-dashed border-rule bg-panel p-6"
         >
             <h3 id="sparks-empty" class="text-lg font-semibold text-ink-strong">
                 No Spark categories are sourced
@@ -118,18 +118,16 @@ const close = async (): Promise<void> => {
             <li
                 v-for="row in props.categories"
                 :key="row.category"
-                class="rounded-md border border-rule bg-raised"
+                 class="rounded-md border border-rule bg-panel"
             >
                 <button
                     type="button"
-                    class="flex min-h-11 w-full flex-wrap items-baseline justify-between gap-x-4 gap-y-2 px-4 py-3 text-left hover:bg-panel"
+                    class="flex min-h-11 w-full flex-wrap items-baseline justify-between gap-x-4 gap-y-2 px-4 py-3 text-left hover:bg-panel transition-colors duration-150 ease-out"
                     :aria-expanded="selected?.category === row.category"
                     @click="open(row, $event)"
                 >
                     <span class="flex flex-wrap items-center gap-2">
-                        <span class="rounded-full px-2 py-0.5 text-xs font-semibold" :class="chip">
-                            {{ row.category }}
-                        </span>
+                        <SparkChip :label="row.category" size="sm" />
                         <span class="text-sm font-medium text-ink-strong">{{ row.global_name }}</span>
                     </span>
 
@@ -184,7 +182,7 @@ const close = async (): Promise<void> => {
             <p class="mt-2 max-w-3xl text-sm text-ink-muted">{{ props.rollOddsNote }}</p>
 
             <div
-                class="mt-3 overflow-x-auto rounded-md border border-rule bg-raised"
+                 class="mt-3 overflow-x-auto rounded-md border border-rule bg-panel"
                 role="region"
                 tabindex="0"
                 aria-label="Star-roll odds, scrollable"

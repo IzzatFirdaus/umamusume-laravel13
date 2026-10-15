@@ -810,7 +810,7 @@ five Active runs (`id` 7, 52, 107, 136, 216) with `sqlite_sequence` at 216.
 when the runs table holds no rows: `runs.spec.ts:41` and `career-legacy-deck-steps.spec.ts:268` assert
 `getByText('No runs yet')`, `dashboard.spec.ts:65` asserts `getByText('No active career. Start a new
 training run.')`, and `dashboard.spec.ts:163` asserts the `Start a new training run` link.
-Proven both directions on a scratch DB at `.scratch-uma/d11-iso.sqlite` (`migrate --seed`, served on the
+Proven both directions on a scratch DB at `.scratch-uma/cited/d11-iso.sqlite` (`migrate --seed`, served on the
 session's own port 8141 with `DB_DATABASE` and `PLAYWRIGHT_BASE_URL` set):
 
 ```bash
@@ -861,7 +861,7 @@ spec (KI-68 records the same status for the feature test). Every case except `:2
 `LegacyController::roster()` (`:308`), which reads the **`veterans` table**. Two measured facts:
 
 - `veterans` is empty on every database in reach: `database/database.sqlite` 0 rows,
-  `.scratch-uma/browser.sqlite` 0, and a fresh `migrate --seed` 0. No seeder touches it
+  `.scratch-uma/cited/browser.sqlite` 0, and a fresh `migrate --seed` 0. No seeder touches it
   (`grep -ril veteran database/seeders/` returns nothing) and `app/Actions/RecordVeteran.php` is referenced
   only in docblocks, never called. So the roster picker renders no options, and Playwright waits out its
   180s budget on `did not find some options`. Re-running the whole spec on the fresh seeded scratch
@@ -1194,7 +1194,7 @@ created` and left the old row in place beside the new one:
 
 The orphan was removed on the same day: it was engine-owned (`is_manual = 0`), referenced by no
 `race_entries` row (`count(*) where race_catalog_slot_id = 409` was 0), tagged with a key no config declares,
-and reproducible from the snapshot. It was dumped to `.scratch-uma/ki71-orphan-row-409.json` before the
+and reproducible from the snapshot. It was dumped to `.scratch-uma/cited/ki71-orphan-row-409.json` before the
 single-row delete, which reported `rows_deleted=1`.
 
 **Proving commands** (2026-10-08, after the fix, the reparse and the cleanup):
@@ -2347,7 +2347,7 @@ skip, and then guards the skip so it cannot become a way to pass on nothing
 same way for the same reason: `career-race-planner.spec.ts:197` keeps `control.placed`, `preferences.spec.ts:241`
 keeps `height > 0`.
 
-**Proving command.** `PLAYWRIGHT_PORT=8255 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/browser-8255.sqlite npx playwright test
+**Proving command.** `PLAYWRIGHT_PORT=8255 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/cited/browser-8255.sqlite npx playwright test
 scenario-panel.spec.ts` -> 7 passed, 1 failed, the failure reading `control 17 is not sized to the 44px contract`,
 expected `>= 44`, received `0`. Reproduced three times in one session, at two different line numbers of the same
 file, which rules out a host-load flake.

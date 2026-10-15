@@ -37,16 +37,21 @@ class DatabaseController extends Controller
      */
     public function index(): Response
     {
+        // Each area's `source` states, in one of the three arms the hub's own subtitle names, where
+        // the data behind the door came from: the fetch engine's catalog tables, `config/scenarios.php`
+        // (the only place scenario facts live, D-240), or the reference guide transcribed into
+        // `config/reference.php`. The hub adds no new fact — it moves the provenance each view already
+        // states onto the row that leads to it (frontend-fidelity Slice 3.2).
         return Inertia::render('Database/Index', [
             'areas' => [
-                ['label' => 'Trainees', 'url' => route('database.trainees')],
-                ['label' => 'Support Cards', 'url' => route('database.supports')],
-                ['label' => 'Skills', 'url' => route('database.skills')],
-                ['label' => 'Races', 'url' => route('database.races')],
-                ['label' => 'Events', 'url' => route('database.events')],
-                ['label' => 'Scenarios', 'url' => route('database.scenarios')],
-                ['label' => 'Shop Items', 'url' => route('database.shop-items')],
-                ['label' => 'Sparks', 'url' => route('database.sparks')],
+                ['label' => 'Trainees', 'url' => route('database.trainees'), 'source' => 'Fetched'],
+                ['label' => 'Support Cards', 'url' => route('database.supports'), 'source' => 'Fetched'],
+                ['label' => 'Skills', 'url' => route('database.skills'), 'source' => 'Fetched'],
+                ['label' => 'Races', 'url' => route('database.races'), 'source' => 'Fetched'],
+                ['label' => 'Events', 'url' => route('database.events'), 'source' => 'Transcribed'],
+                ['label' => 'Scenarios', 'url' => route('database.scenarios'), 'source' => 'Config'],
+                ['label' => 'Shop Items', 'url' => route('database.shop-items'), 'source' => 'Transcribed'],
+                ['label' => 'Sparks', 'url' => route('database.sparks'), 'source' => 'Transcribed'],
             ],
         ]);
     }

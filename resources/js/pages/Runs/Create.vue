@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
 import TraineeCombobox from '../../components/TraineeCombobox.vue';
+import { BaseInput, BaseSelect, BaseTextarea } from '../../components/Form';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -55,6 +56,23 @@ const form = useForm({
 const trainees = computed(() =>
     props.roster.map((row) => ({ id: String(row.umamusumeId), name: row.trainee })),
 );
+
+// The shared select takes `options` as an array; the record props read the same here as the raw
+// `v-for (label, key)` did, with the empty-value row that carries this screen's honesty note kept
+// first for scenario and both parents.
+const scenarioOptions = computed(() => [
+    { value: '', label: 'Not set (baseline strip)' },
+    ...Object.entries(props.scenarios).map(([key, label]) => ({ value: key, label })),
+]);
+
+const statusOptions = computed(() =>
+    Object.entries(props.statuses).map(([value, label]) => ({ value, label })),
+);
+
+const parentOptions = computed(() => [
+    { value: '', label: 'Not set' },
+    ...trainees.value.map((trainee) => ({ value: trainee.id, label: trainee.name })),
+]);
 
 function onCommit(hit: { trainee: TraineeRow; card: CardRow }): void {
     form.umamusume_id = String(hit.trainee.umamusumeId);
@@ -111,131 +129,89 @@ function submit(): void {
             <!-- A select over the composition matrix, because the request validates `scenario` against
                  its keys: free text here could only ever produce a rejected submission. Leaving it empty
                  is a real option and renders the baseline strip. -->
-            <label class="block">
-                <span class="font-medium text-ink">Scenario (optional)</span>
-                <select
-                    v-model="form.scenario"
-                    name="scenario"
-                    :aria-invalid="form.errors.scenario ? 'true' : undefined"
-                    :aria-describedby="form.errors.scenario ? 'create-scenario-error' : undefined"
-                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                >
-                    <option value="">Not set (baseline strip)</option>
-                    <option v-for="(label, key) in scenarios" :key="key" :value="key">{{ label }}</option>
-                </select>
-                <p v-if="form.errors.scenario" id="create-scenario-error" class="mt-1 text-risk">{{ form.errors.scenario }}</p>
-            </label>
+            <BaseSelect
+                :model-value="form.scenario"
+                id="create-scenario"
+                name="scenario"
+                label="Scenario (optional)"
+                :options="scenarioOptions"
+                :error="form.errors.scenario"
+                @update:model-value="(v: string | number | null) => (form.scenario = String(v ?? ''))"
+            />
 
-            <label class="block">
-                <span class="font-medium text-ink">Status *</span>
-                <select
-                    v-model="form.status"
-                    name="status"
-                    required
-                    :aria-invalid="form.errors.status ? 'true' : undefined"
-                    :aria-describedby="form.errors.status ? 'create-status-error' : undefined"
-                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                >
-                    <option v-for="(label, value) in statuses" :key="value" :value="value">{{ label }}</option>
-                </select>
-                <p v-if="form.errors.status" id="create-status-error" class="mt-1 text-risk">{{ form.errors.status }}</p>
-            </label>
+            <BaseSelect
+                :model-value="form.status"
+                id="create-status"
+                name="status"
+                label="Status *"
+                :options="statusOptions"
+                required
+                :error="form.errors.status"
+                @update:model-value="(v: string | number | null) => (form.status = String(v ?? ''))"
+            />
 
             <!-- Four fields the request validates and the model persists, surfaced here because the run
                  page already reads them back (the inheritance row, the Grade Point period in the meter,
                  the shop panel's countdown). All four are nullable, so leaving one empty keeps the shape
                  a run had before this block existed. -->
-            <label class="block">
-                <span class="font-medium text-ink">Inheritance parent A (optional)</span>
-                <select
-                    v-model="form.inheritance_parent_a_id"
-                    name="inheritance_parent_a_id"
-                    :aria-invalid="form.errors.inheritance_parent_a_id ? 'true' : undefined"
-                    :aria-describedby="form.errors.inheritance_parent_a_id ? 'create-inheritance_parent_a_id-error' : undefined"
-                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                >
-                    <option value="">Not set</option>
-                    <option v-for="trainee in trainees" :key="trainee.id" :value="trainee.id">{{ trainee.name }}</option>
-                </select>
-                <p v-if="form.errors.inheritance_parent_a_id" id="create-inheritance_parent_a_id-error" class="mt-1 text-risk">
-                    {{ form.errors.inheritance_parent_a_id }}
-                </p>
-            </label>
+            <BaseSelect
+                :model-value="form.inheritance_parent_a_id"
+                id="create-inheritance_parent_a_id"
+                name="inheritance_parent_a_id"
+                label="Inheritance parent A (optional)"
+                :options="parentOptions"
+                :error="form.errors.inheritance_parent_a_id"
+                @update:model-value="(v: string | number | null) => (form.inheritance_parent_a_id = String(v ?? ''))"
+            />
 
-            <label class="block">
-                <span class="font-medium text-ink">Inheritance parent B (optional)</span>
-                <select
-                    v-model="form.inheritance_parent_b_id"
-                    name="inheritance_parent_b_id"
-                    :aria-invalid="form.errors.inheritance_parent_b_id ? 'true' : undefined"
-                    :aria-describedby="form.errors.inheritance_parent_b_id ? 'create-inheritance_parent_b_id-error' : undefined"
-                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                >
-                    <option value="">Not set</option>
-                    <option v-for="trainee in trainees" :key="trainee.id" :value="trainee.id">{{ trainee.name }}</option>
-                </select>
-                <p v-if="form.errors.inheritance_parent_b_id" id="create-inheritance_parent_b_id-error" class="mt-1 text-risk">
-                    {{ form.errors.inheritance_parent_b_id }}
-                </p>
-            </label>
+            <BaseSelect
+                :model-value="form.inheritance_parent_b_id"
+                id="create-inheritance_parent_b_id"
+                name="inheritance_parent_b_id"
+                label="Inheritance parent B (optional)"
+                :options="parentOptions"
+                :error="form.errors.inheritance_parent_b_id"
+                @update:model-value="(v: string | number | null) => (form.inheritance_parent_b_id = String(v ?? ''))"
+            />
 
             <!-- The Grade Point period is entered, never derived (D-270). A scenario that does not compose
                  the grade_objectives panel is rejected by the request's own closure, so a Trainer who
                  picks period 3 on URA Finals sees the message there rather than the value silently
                  dropped. -->
-            <label class="block">
-                <span class="font-medium text-ink">Current Grade Point period (optional)</span>
-                <input
-                    v-model="form.current_objective_index"
-                    type="number"
-                    name="current_objective_index"
-                    min="1"
-                    :max="maxObjectiveIndex"
-                    :aria-invalid="form.errors.current_objective_index ? 'true' : undefined"
-                    :aria-describedby="form.errors.current_objective_index ? 'create-current_objective_index-error' : undefined"
-                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                    :class="form.errors.current_objective_index ? 'border-risk' : ''"
-                >
-                <span class="mt-1 block text-xs text-ink-muted">
-                    1 to {{ maxObjectiveIndex }}, tracked in the Grade Point meter on the run page. Only
-                    scenarios that compose the Grade Point panel accept a value here.
-                </span>
-                <p v-if="form.errors.current_objective_index" id="create-current_objective_index-error" class="mt-1 text-risk">
-                    {{ form.errors.current_objective_index }}
-                </p>
-            </label>
+            <BaseInput
+                :model-value="form.current_objective_index"
+                type="number"
+                id="create-current_objective_index"
+                name="current_objective_index"
+                label="Current Grade Point period (optional)"
+                min="1"
+                :max="maxObjectiveIndex"
+                :error="form.errors.current_objective_index"
+                :hint="`1 to ${maxObjectiveIndex}, tracked in the Grade Point meter on the run page. Only scenarios that compose the Grade Point panel accept a value here.`"
+                @update:model-value="(v: string | number) => (form.current_objective_index = String(v))"
+            />
 
-            <label class="block">
-                <span class="font-medium text-ink">Shop resets in (optional)</span>
-                <input
-                    v-model="form.shop_resets_in"
-                    type="number"
-                    name="shop_resets_in"
-                    min="0"
-                    :aria-invalid="form.errors.shop_resets_in ? 'true' : undefined"
-                    :aria-describedby="form.errors.shop_resets_in ? 'create-shop_resets_in-error' : undefined"
-                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                    :class="form.errors.shop_resets_in ? 'border-risk' : ''"
-                >
-                <span class="mt-1 block text-xs text-ink-muted">
-                    Turns until the shop rotation as you read it. The scenario's own upper bound applies
-                    at the model layer.
-                </span>
-                <p v-if="form.errors.shop_resets_in" id="create-shop_resets_in-error" class="mt-1 text-risk">{{ form.errors.shop_resets_in }}</p>
-            </label>
+            <BaseInput
+                :model-value="form.shop_resets_in"
+                type="number"
+                id="create-shop_resets_in"
+                name="shop_resets_in"
+                label="Shop resets in (optional)"
+                min="0"
+                :error="form.errors.shop_resets_in"
+                hint="Turns until the shop rotation as you read it. The scenario's own upper bound applies at the model layer."
+                @update:model-value="(v: string | number) => (form.shop_resets_in = String(v))"
+            />
 
-            <label class="block">
-                <span class="font-medium text-ink">Notes (optional)</span>
-                <textarea
-                    v-model="form.notes"
-                    name="notes"
-                    rows="3"
-                    :aria-invalid="form.errors.notes ? 'true' : undefined"
-                    :aria-describedby="form.errors.notes ? 'create-notes-error' : undefined"
-                    class="mt-1 block w-full rounded-md border border-rule bg-raised px-2 py-1 text-ink"
-                />
-                <p v-if="form.errors.notes" id="create-notes-error" class="mt-1 text-risk">{{ form.errors.notes }}</p>
-            </label>
+            <BaseTextarea
+                :model-value="form.notes"
+                id="create-notes"
+                name="notes"
+                label="Notes (optional)"
+                :rows="3"
+                :error="form.errors.notes"
+                @update:model-value="(v: string | number) => (form.notes = String(v))"
+            />
 
             <button
                 type="submit"

@@ -89,7 +89,7 @@ function focusRow(): void {
     <li
         :id="`deck-slot-${position}`"
         tabindex="-1"
-        class="flex flex-wrap items-start gap-x-4 gap-y-2 rounded-lg border border-rule bg-raised px-3 py-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+        class="flex flex-wrap items-start gap-x-4 gap-y-2 rounded-lg border border-rule bg-raised px-3 py-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
     >
         <ArtworkSlot
             v-if="card"
@@ -112,13 +112,12 @@ function focusRow(): void {
             <!-- An empty slot is a deliberate statement a Trainer makes, so it reads as a statement
                  rather than as a blank control: the card is not equipped, and here is where to put it. -->
             <p v-if="!card" class="text-ink-muted">
-                Not equipped. The six cards are the deck the run starts with, so an empty slot here is a
-                gap the Trainer can still fill.
+                Not equipped.
             </p>
 
             <template v-else>
                 <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <a :href="card.url" class="font-semibold text-ink hover:underline">{{ card.name }}</a>
+                    <a :href="card.url" class="font-semibold text-ink hover:underline transition-colors duration-150 ease-out">{{ card.name }}</a>
                     <span class="font-mono text-xs text-ink-muted">{{ card.rarity_word }}</span>
                     <SupportTypeMark :type="card.type" :label="card.type_label" />
                 </div>
@@ -197,7 +196,7 @@ function focusRow(): void {
 
             <button
                 type="button"
-                class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2"
+                class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
                 @click="emit('replace', position)"
             >
                 Replace

@@ -8,6 +8,47 @@ const page = usePage();
 const appVersion = computed(() => page.props.app?.version ?? null);
 const flashStatus = computed(() => page.props.flash?.status ?? null);
 
+// The banner dismisses itself after five seconds and can be dismissed by hand (plan 6B.6).
+// The watch keys on `page.props` identity, not on the message text: two saves in a row flash
+// the same sentence, and a watch on the text alone would miss the second one after a dismiss.
+const FLASH_DISMISS_MS = 5000;
+const visibleFlash = ref<string | null>(flashStatus.value);
+let flashTimer: ReturnType<typeof setTimeout> | undefined;
+
+function scheduleFlashDismiss(): void {
+    if (flashTimer !== undefined) {
+        clearTimeout(flashTimer);
+    }
+
+    if (visibleFlash.value === null) {
+        return;
+    }
+
+    flashTimer = setTimeout(() => {
+        visibleFlash.value = null;
+    }, FLASH_DISMISS_MS);
+}
+
+if (visibleFlash.value !== null) {
+    scheduleFlashDismiss();
+}
+
+watch(
+    () => page.props,
+    () => {
+        visibleFlash.value = flashStatus.value;
+        scheduleFlashDismiss();
+    },
+);
+
+function dismissFlash(): void {
+    visibleFlash.value = null;
+
+    if (flashTimer !== undefined) {
+        clearTimeout(flashTimer);
+    }
+}
+
 // The mobile bar's More disclosure. `<details>` is the native widget, so the expanded state, the
 // `aria-expanded` announcement and the keyboard path come from the platform rather than from focus code
 // written here. The state is mirrored in a ref because the layout instance survives a client-side visit:
@@ -169,7 +210,7 @@ function toggleRail(): void {
 
 const linkClass =
     'flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
-const activeClass = 'bg-raised text-ink-strong';
+const activeClass = 'bg-brand-accent-ink text-on-brand-chrome';
 const disabledClass =
     'flex min-h-11 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium text-ink-muted';
 const mobileClass =
@@ -220,7 +261,7 @@ const moreIsCurrent = computed(() =>
                 </span>
                 <button
                     type="button"
-                    class="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-ink hover:bg-raised hover:text-ink-strong"
+                    class="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-ink hover:bg-raised hover:text-ink-strong transition-colors duration-150 ease-out"
                     :aria-expanded="railCollapsed ? 'false' : 'true'"
                     aria-controls="primary-nav"
                     :title="railCollapsed ? 'Expand navigation' : undefined"
@@ -285,19 +326,27 @@ const moreIsCurrent = computed(() =>
         <div class="flex min-w-0 flex-1 flex-col">
             <header
                 role="banner"
-                class="flex items-center justify-between gap-4 border-b border-rule bg-panel px-6 py-3"
+                class="relative flex items-center justify-between gap-4 border-b-2 border-b-brand-accent bg-brand-chrome px-6 py-3 text-on-brand-chrome"
             >
-                <h1 class="text-3xl font-semibold text-ink-strong">
-                    <slot name="title" />
-                </h1>
+                <div class="flex flex-col gap-1 min-w-0">
+                    <span
+                        class="text-xs font-semibold uppercase tracking-wider text-on-brand-chrome/80"
+                        v-if="$slots.eyebrow"
+                    >
+                        <slot name="eyebrow" />
+                    </span>
+                    <h1 class="text-3xl font-semibold text-on-brand-chrome truncate">
+                        <slot name="title" />
+                    </h1>
+                </div>
                 <span
                     v-if="appVersion"
-                    class="font-mono text-xs tabular-nums text-ink-muted"
+                    class="font-mono text-xs tabular-nums text-on-brand-chrome/80"
                     title="Application version"
                 >
                     v{{ appVersion }}
                 </span>
-                <span v-else class="text-xs text-ink-muted" title="Application version not recorded">
+                <span v-else class="text-xs text-on-brand-chrome/80" title="Application version not recorded">
                     N/A
                 </span>
             </header>
@@ -307,15 +356,29 @@ const moreIsCurrent = computed(() =>
                 <!-- The flash region is always mounted and carries only its text (WCAG 4.1.3): a live
                      region announces what changes inside it, so a region created in the same tick as its
                      message may never be announced. Empty, it is sr-only and says nothing; the classes
-                     that paint the banner arrive with the message. -->
-                <p
-                     role="status"
-                     :class="flashStatus
-                         ? 'mb-4 rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink'
-                         : 'sr-only'"
-                 >
-                     {{ flashStatus ?? '' }}
-                 </p>
+                     that paint the banner arrive with the message. The dismiss button is a sibling of
+                     the region, never inside it: `role="status"` is read as its own text, and a control
+                     in the region would join the announcement. -->
+                <div
+                    class="flex items-center justify-between gap-2"
+                    :class="visibleFlash ? 'mb-4 rounded-md border border-rule bg-raised px-3 py-2' : ''"
+                >
+                    <p
+                         role="status"
+                         :class="visibleFlash ? 'text-sm text-ink' : 'sr-only'"
+                     >
+                         {{ visibleFlash ?? '' }}
+                     </p>
+                    <button
+                        v-if="visibleFlash"
+                        type="button"
+                        aria-label="Dismiss"
+                        class="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-ink-muted hover:text-ink-strong transition-colors duration-150 ease-out"
+                        @click="dismissFlash"
+                    >
+                        ✕
+                    </button>
+                </div>
                 <slot />
             </main>
         </div>

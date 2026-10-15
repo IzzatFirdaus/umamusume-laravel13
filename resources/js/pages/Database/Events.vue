@@ -62,7 +62,7 @@ const close = async (): Promise<void> => {
         <Head title="Events" />
         <template #title>Events</template>
 
-        <h2 class="text-2xl font-semibold text-ink-strong">Recurring event types</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Recurring event types</h2>
 
         <p class="mt-4 max-w-3xl text-sm text-ink-muted">
             The event families that recur on the Global and JP servers, with the cadence the reference
@@ -106,7 +106,7 @@ const close = async (): Promise<void> => {
             >
                 <button
                     type="button"
-                    class="flex min-h-11 w-full flex-wrap items-baseline justify-between gap-x-4 gap-y-2 px-4 py-3 text-left hover:bg-panel"
+                    class="flex min-h-11 w-full flex-wrap items-baseline justify-between gap-x-4 gap-y-2 px-4 py-3 text-left hover:bg-panel transition-colors duration-150 ease-out"
                     :aria-expanded="selected?.name === row.name"
                     @click="open(row, $event)"
                 >

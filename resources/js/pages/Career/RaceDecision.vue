@@ -241,10 +241,10 @@ function submitManual(): void {
                     </Link>
                 </p>
 
-                <p
-                    v-if="props.empty !== null"
-                    class="mt-2 rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink"
-                >
+                 <p
+                     v-if="props.empty !== null"
+                     class="mt-2 rounded-md border border-dashed border-rule bg-panel p-4 text-sm text-ink"
+                 >
                     {{ props.empty }}
                 </p>
                 <ul v-else class="mt-3 flex flex-col gap-3">
@@ -273,59 +273,88 @@ function submitManual(): void {
                     :aria-busy="manualForm.processing"
                     @submit.prevent="submitManual"
                 >
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink-muted">Race title *</span>
-                        <input v-model="manualForm.title" type="text" name="title" required maxlength="255" placeholder="e.g. Practice Race" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                    </label>
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink-muted">Month *</span>
-                        <select v-model="manualForm.month" name="month" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                            <option value="">select</option>
-                            <option v-for="month in monthOptions" :key="month" :value="month">{{ month }}</option>
-                        </select>
-                    </label>
+                     <label class="flex flex-col gap-1">
+                         <span class="text-ink-muted">Race title *</span>
+                         <BaseInput
+                           v-model="manualForm.title"
+                           type="text"
+                           name="title"
+                           required
+                           maxlength="255"
+                           placeholder="e.g. Practice Race"
+                         />
+                     </label>
+                     <label class="flex flex-col gap-1">
+                         <span class="text-ink-muted">Month *</span>
+                         <BaseSelect
+                           v-model="manualForm.month"
+                           name="month"
+                           required
+                           :options="monthOptions.map(month => ({ value: month, label: month }))"
+                         />
+                     </label>
                     <label class="flex flex-col gap-1">
                         <span class="text-ink-muted">Half *</span>
-                        <select v-model="manualForm.half" name="half" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                            <option value="">select</option>
-                            <option value="Early">Early</option>
-                            <option value="Late">Late</option>
-                        </select>
+                         <BaseSelect
+                           v-model="manualForm.half"
+                           name="half"
+                           required
+                           :options="[{ value: '', label: 'select' }, { value: 'Early', label: 'Early' }, { value: 'Late', label: 'Late' }]"
+                         />
                     </label>
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink-muted">Tier (optional)</span>
-                        <input v-model="manualForm.tier" type="text" name="tier" maxlength="10" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                    </label>
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink-muted">Outcome</span>
-                        <select v-model="manualForm.status" name="status" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                            <option v-for="status in props.race_statuses" :key="status" :value="status">{{ status }}</option>
-                        </select>
-                    </label>
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink-muted">Placement</span>
-                        <input v-model="manualForm.placement" type="number" name="placement" min="1" max="99" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                    </label>
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink-muted">Fans gained</span>
-                        <input v-model="manualForm.fans_gain" type="number" name="fans_gain" min="0" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                    </label>
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink-muted">Logged turn</span>
-                        <select v-model="manualForm.turn_entry_id" name="turn_entry_id" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                            <option value="">not named</option>
-                            <option v-for="turn in props.entry.turns" :key="turn.id" :value="String(turn.id)">Turn {{ turn.turn }}</option>
-                        </select>
-                    </label>
-                    <div class="flex items-end">
-                        <button
-                            type="submit"
-                            :disabled="manualForm.processing"
-                            class="enamel inline-flex min-h-11 items-center justify-center rounded-full bg-chrome px-4 font-semibold text-on-chrome disabled:opacity-60"
-                        >
-                            {{ manualForm.processing ? 'Saving…' : 'Record race' }}
-                        </button>
-                    </div>
+                     <label class="flex flex-col gap-1">
+                         <span class="text-ink-muted">Tier (optional)</span>
+                         <BaseInput
+                           v-model="manualForm.tier"
+                           type="text"
+                           name="tier"
+                           maxlength="10"
+                         />
+                     </label>
+                     <label class="flex flex-col gap-1">
+                         <span class="text-ink-muted">Outcome</span>
+                         <BaseSelect
+                           v-model="manualForm.status"
+                           name="status"
+                           :options="props.race_statuses.map(status => ({ value: status, label: status }))"
+                         />
+                     </label>
+                     <label class="flex flex-col gap-1">
+                         <span class="text-ink-muted">Placement</span>
+                         <BaseInput
+                           v-model="manualForm.placement"
+                           type="number"
+                           name="placement"
+                           min="1"
+                           max="99"
+                         />
+                     </label>
+                     <label class="flex flex-col gap-1">
+                         <span class="text-ink-muted">Fans gained</span>
+                         <BaseInput
+                           v-model="manualForm.fans_gain"
+                           type="number"
+                           name="fans_gain"
+                           min="0"
+                         />
+                     </label>
+                     <label class="flex flex-col gap-1">
+                         <span class="text-ink-muted">Logged turn</span>
+                         <BaseSelect
+                           v-model="manualForm.turn_entry_id"
+                           name="turn_entry_id"
+                           :options="[{ value: '', label: 'not named' }, ...props.entry.turns.map(turn => ({ value: String(turn.id), label: `Turn ${turn.turn}` }))]"
+                         />
+                     </label>
+                     <div class="flex items-end">
+                         <BaseButton
+                           type="submit"
+                           variant="enamel"
+                           :disabled="manualForm.processing"
+                         >
+                           {{ manualForm.processing ? 'Saving…' : 'Record race' }}
+                         </BaseButton>
+                     </div>
                     <p
                         v-if="manualForm.hasErrors"
                         ref="alertRef"
@@ -338,7 +367,7 @@ function submitManual(): void {
                 </form>
 
                 <div v-if="props.manual_slots.length > 0" class="mt-4">
-                    <h3 class="text-sm font-semibold text-ink-strong">Races entered by hand</h3>
+                    <h3 class="text-lg font-semibold text-ink-strong">Races entered by hand</h3>
                     <ul class="mt-2 flex flex-col gap-1.5" aria-label="Hand-entered races">
                         <li
                             v-for="slot in props.manual_slots"

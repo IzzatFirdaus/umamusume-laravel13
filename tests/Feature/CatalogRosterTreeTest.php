@@ -231,7 +231,7 @@ it('loads the tree in a fixed number of queries, not one per trainee', function 
     // each; loading a trainee's forms per row would be 4 more, and 68 trainees on a page
     // would be 68.
     expect($tree)->toHaveCount(4)
-        ->and(count($log))->toBe(5, 'the shell added a query the tree does not own');
+        ->and(count($log))->toBe(6, 'the shell adds two preference queries the tree does not own');
 })->group('perf');
 
 it('reads a trainee badge off the cards the filter let through', function (): void {

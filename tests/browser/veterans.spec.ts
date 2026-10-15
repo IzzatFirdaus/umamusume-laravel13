@@ -12,10 +12,16 @@
  * Axe coverage is provided by `tests/browser/accessibility.spec.ts`: `@axe-core/playwright` is installed
  * and scans pages against `wcag2a`, `wcag2aa`, and `wcag21aa`; this spec retains the hand-rolled checks
  * for target size, keyboard path, focus order, reflow and console errors.
- * This spec writes no database row.
+ * The first two claims above and the empty-library case write nothing. The card-shape cases at the end DO
+ * file careers (`tests/utils/file-career.ts`), because a paragraph that appears once is only observable on a
+ * library that is not empty; they tear their runs down in `afterEach`, so the empty-state case still meets
+ * an empty table whenever it runs. This spec's writes are all cleaned up before the next test starts.
  */
 
 import { expect, test } from '@playwright/test';
+import { deleteRun } from '../utils/delete-run';
+import { fileCareer } from '../utils/file-career';
+import { VETERAN_ANCESTRY_NOTE } from '../../resources/js/domain/veteranNote';
 
 test.describe('Mobile navigation', () => {
     test('shows five slots at 320px, not a scrolling copy of the sidebar', async ({ page }) => {
@@ -83,7 +89,7 @@ test.describe('Mobile navigation', () => {
 });
 
 test.describe('Veteran library', () => {
-    test('says the library holds nothing filed rather than showing a blank list', async ({ page }) => {
+test('says the library holds nothing filed rather than showing a blank list', async ({ page }) => {
         await page.goto('/veterans');
         await page.locator('#app > *').first().waitFor();
 
@@ -104,7 +110,10 @@ test.describe('Veteran library', () => {
         await expect(page.getByRole('button', { name: 'Filter' })).toBeVisible();
 
         // The brief's unsupportable features are stated as absences with their reason on the page.
-        await expect(page.getByText('NOT IN THIS BUILD')).toBeVisible();
+        // The "Not in this build" section is now a collapsible <details> element.
+        await expect(page.getByText('Not in this build')).toBeVisible();
+        // Expand the details to check the absence notes
+        await page.locator('details summary:has-text("Not in this build")').click();
         await expect(page.getByText(/Favorite, archive, delete/)).toBeVisible();
         await expect(page.getByText(/no sourced table/i).or(page.getByText(/No sourced table/))).toBeVisible();
     });
@@ -196,5 +205,117 @@ test.describe('Veteran library', () => {
         await expect(page.getByRole('main')).toHaveCount(1);
         await expect(page.getByRole('link', { name: 'Skip to content' })).toHaveCount(1);
         await expect(page.getByRole('link', { name: 'Leave setup' })).toBeVisible();
+    });
+});
+
+const createdRunUrls: string[] = [];
+
+test.afterEach(async ({ page }) => {
+    for (const url of createdRunUrls.splice(0)) {
+        await deleteRun(page, url);
+    }
+});
+
+test.describe('Veteran cards', () => {
+    /**
+     * Files a career, opens the library and returns the row it landed in. The library only shows a
+     * non-empty list once something is filed, so every case below starts by putting one there.
+     */
+    async function openLibraryRow(
+        page: import('@playwright/test').Page,
+        trainee: string,
+        tag: string | null,
+        notes: string | null = null,
+    ) {
+        createdRunUrls.push(await fileCareer(page, trainee, tag, notes));
+
+        await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
+
+        return page.getByRole('listitem').filter({ hasText: trainee });
+    }
+
+    /**
+     * A note in the shape the legacy tracker imported: this career's own clause, then the one sentence
+     * every tracker career ends with. `RecordVeteran` never writes that sentence, so a browser case can
+     * only reach the split by filing it, and the split is what Phase 8.1 changes.
+     */
+    const trackedNote = (clause: string): string => `${clause} ${VETERAN_ANCESTRY_NOTE}`;
+
+    test('states the shared ancestry sentence once above the list, not once per card', async ({ page }) => {
+        await openLibraryRow(page, 'Agnes Digital', 'Speed', trackedNote('Career finished, Vodka 1st place.'));
+        await openLibraryRow(page, 'Eishin Flash', null, trackedNote('Career ended, URA Finale Finals won 1st.'));
+
+        const ancestry = page.getByText(/Legacy ancestry unrecorded:/);
+
+        // One statement for the whole list (Phase 8.1), and it sits outside every card: the sentence is
+        // about what the tracker did not record, which is the same for every row here.
+        await expect(ancestry).toHaveCount(1);
+        expect(await ancestry.evaluate((element) => element.closest('li') !== null)).toBe(false);
+
+        // Each card keeps only the clause that is its own, and none of them repeats the sentence the list
+        // just stated. A card printing the stored note verbatim would fail here twice over.
+        await expect(page.getByRole('listitem').filter({ hasText: 'Career finished, Vodka 1st place.' })).toHaveCount(1);
+        await expect(page.getByRole('listitem').filter({ hasText: 'Career ended, URA Finale Finals won 1st.' })).toHaveCount(1);
+        expect(
+            await page.getByRole('listitem').evaluateAll((rows) =>
+                rows.filter((row) => row.textContent?.includes('Legacy ancestry unrecorded:') ?? false).length,
+            ),
+            'a card still repeats the sentence the list states once',
+        ).toBe(0);
+    });
+
+    test('says why there are no tags instead of printing a bare N/A', async ({ page }) => {
+        const row = await openLibraryRow(page, 'Agnes Digital', null);
+
+        // The plan's reason channel: the absence states itself, and carries a channel for why.
+        await expect(row.getByText('No tags recorded')).toBeVisible();
+        await expect(row.getByText(/^N\/A/)).toHaveCount(0);
+
+        // And it disappears on a career that does carry one, so it is a state rather than a caption.
+        await expect(page.getByText('No tags recorded')).toHaveCount(1);
+    });
+
+    test('puts the career action in the header row rather than under the note', async ({ page }) => {
+        const row = await openLibraryRow(page, 'Agnes Digital', 'Speed');
+
+        // The row's children: `VeteranRow` supplies the card root, and its own blocks hang off that, so
+        // the header is the first block inside it and the footer actions the last. The Compare door is
+        // read as belonging to the row the Trainer is looking at rather than as a footnote below the
+        // paragraph (Phase 8.3; Law 6 Proximity).
+        const header = row.locator(':scope > div > div').first();
+        const footer = row.locator(':scope > div > div').last();
+
+        // Exactly one in the whole card, and it sits in the header block: a second copy in the footer
+        // would fail both assertions at once.
+        await expect(row.getByRole('link', { name: 'Compare this career' })).toHaveCount(1);
+        await expect(header.getByRole('link', { name: 'Compare this career' })).toBeVisible();
+        expect(
+            await footer.getByRole('link', { name: 'Compare this career' }).count(),
+            'the card still carries a bottom action beside the Compare link',
+        ).toBe(0);
+
+        // The header block also names the action, so the row reads as one.
+        await expect(header).toContainText('Compare this career');
+    });
+
+    test('collapses the notes that are not in this build by default', async ({ page }) => {
+        await page.goto('/veterans');
+        await page.locator('#app > *').first().waitFor();
+
+        const summary = page.locator('details summary').filter({ hasText: 'Not in this build' });
+        await expect(summary).toBeVisible();
+
+        // Closed, so the screen's default read is the library rather than a wall of absences the Trainer
+        // did not ask about (Phase 8.8). The notes stay reachable, and by keyboard as a native
+        // `<summary>`.
+        const details = page.locator('details').filter({ hasText: 'Not in this build' });
+        await expect(details).toHaveCount(1);
+        expect(await details.getAttribute('open')).toBeNull();
+
+        await summary.focus();
+        await page.keyboard.press('Enter');
+        await expect(details).toHaveAttribute('open', '');
+        await expect(page.getByText(/Favorite, archive, delete/)).toBeVisible();
     });
 });

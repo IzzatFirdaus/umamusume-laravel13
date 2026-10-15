@@ -34,6 +34,7 @@ const props = defineProps<{
 <template>
     <AppLayout>
         <Head title="Skill search" />
+        <template #eyebrow>Reference</template>
         <template #title>Skill search</template>
 
         <SkillCatalog

@@ -149,9 +149,24 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
 </script>
 
 <template>
-    <SetupLayout :step="props.step" :visited="props.visited">
+    <SetupLayout :step="props.step" :visited="props.visited" :saved="props.saved">
         <Head title="Career contract" />
+        <template #eyebrow>Setup</template>
         <template #title>Career contract</template>
+
+<!-- Back breadcrumb -->
+        <nav class="mt-4 mb-2" aria-label="Breadcrumb">
+            <Link href="/career/setup/preflight" class="inline-flex min-h-11 items-center text-sm font-medium text-brand-accent-ink hover:underline transition-colors duration-150 ease-out" aria-label="Back to preflight step">
+                ← Back to preflight
+            </Link>
+        </nav>
+
+        <!-- Header: eyebrow + large title + subtitle -->
+        <header class="mb-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 6 of 6</p>
+            <p class="mt-1 text-2xl font-semibold text-ink-strong">Career contract</p>
+            <p class="mt-1 text-sm text-ink-muted">Everything the six steps recorded, in the order you entered it.</p>
+        </header>
 
         <p class="mt-4 text-sm text-ink-muted">
             Everything the six steps recorded, in the order you entered it. Nothing here is asked again.
@@ -186,9 +201,6 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
                     <span aria-hidden="true" class="font-mono font-bold text-goal-line">!</span>
                     <span class="font-semibold text-ink-strong">{{ warning.title }}.</span>
                     <span class="text-ink">{{ warning.detail }}</span>
-                    <Link :href="warning.href" class="min-h-11 font-medium text-ink-strong underline">
-                        Open that step
-                    </Link>
                 </li>
             </ul>
         </section>
@@ -349,7 +361,7 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
                      onto the slot row this screen creates (`ADR-0023`, D3). Said at the commitment screen
                      because this page's own promise is "everything the six steps recorded", and a position
                      left unclassified is the one entered fact that arrives as an absence. -->
-                <p class="mt-2 rounded-md border border-dashed border-rule bg-raised p-3 text-xs text-ink-muted">
+                <p class="mt-2 rounded-md border border-dashed border-rule bg-panel p-3 text-xs text-ink-muted">
                     The owned or rented flag is in this setup draft, and starting the career writes it onto
                     each slot's deck row, one value per position. A position holding no card creates no deck
                     row, and a card whose flag was never chosen is stored as no flag, never as Owned.
@@ -412,31 +424,31 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
                  and the round trip is lossless by construction. -->
             <Link
                 :href="props.edit.scenario"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
             >
                 Edit Scenario
             </Link>
             <Link
                 :href="props.edit.trainee"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
             >
                 Edit Trainee
             </Link>
             <Link
                 :href="props.edit.target"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
             >
                 Edit Target
             </Link>
             <Link
                 :href="props.edit.legacy"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
             >
                 Edit Legacy
             </Link>
             <Link
                 :href="props.edit.deck"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
             >
                 Edit Deck
             </Link>

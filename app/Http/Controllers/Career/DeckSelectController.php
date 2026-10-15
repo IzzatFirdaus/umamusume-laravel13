@@ -73,6 +73,7 @@ class DeckSelectController extends Controller
 
         return Inertia::render('Career/DeckSelect', [
             'visited' => SetupDraft::visited(),
+            'saved' => SetupDraft::saved(),
             'slots' => array_map(
                 fn (array $slot): array => [
                     'position' => $slot['position'],

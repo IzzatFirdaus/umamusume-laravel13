@@ -6,6 +6,7 @@ import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import DeckAnalysis from '../../components/support/DeckAnalysis.vue';
 import SupportSlot from '../../components/support/SupportSlot.vue';
 import SupportTypeMark from '../../components/support/SupportTypeMark.vue';
+import { BaseInput, BaseSelect, BaseButton } from '../../components/Form';
 
 /*
  * The deck builder (SCREEN-007, `SCR-CAR-007`).
@@ -268,7 +269,7 @@ function save(): void {
         <Head title="Support deck" />
         <template #title>Support deck</template>
 
-        <h2 class="text-2xl font-semibold text-ink-strong">Support deck</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Support deck</h2>
 
         <p class="mt-1 text-sm text-ink-muted">
             <template v-if="run.name">
@@ -342,60 +343,31 @@ function save(): void {
                 </p>
 
                 <form class="mt-3 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink">Type</span>
-                        <select
-                            v-model="type"
-                            name="type"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
-                        >
-                            <option value="">All</option>
-                            <option v-for="option in types" :key="option.key" :value="option.key">
-                                {{ option.label }}
-                            </option>
-                        </select>
-                    </label>
-
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink">Rarity</span>
-                        <select
-                            v-model="rarity"
-                            name="rarity"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
-                        >
-                            <option value="">All</option>
-                            <option v-for="(word, value) in rarities" :key="value" :value="value">{{ word }}</option>
-                        </select>
-                    </label>
-
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink">Availability</span>
-                        <select
-                            v-model="status"
-                            name="status"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
-                        >
-                            <option value="">All</option>
-                            <option v-for="option in availabilities" :key="option" :value="option">{{ option }}</option>
-                        </select>
-                    </label>
-
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink">Name contains</span>
-                        <input
-                            v-model="search"
-                            name="query"
-                            type="search"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
-                        />
-                    </label>
-
-                    <button
-                        type="submit"
-                        class="h-11 rounded-full border border-rule px-3 py-1.5 font-semibold text-ink hover:bg-sunken"
-                    >
-                        Filter
-                    </button>
+                    <BaseSelect
+                        v-model="type"
+                        name="type"
+                        label="Type"
+                        :options="[{ value: '', label: 'All' }, ...types.map(option => ({ value: option.key, label: option.label }))]"
+                    />
+                    <BaseSelect
+                        v-model="rarity"
+                        name="rarity"
+                        label="Rarity"
+                        :options="[{ value: '', label: 'All' }, ...Object.entries(rarities).map(([value, word]) => ({ value, label: word }))]"
+                    />
+                    <BaseSelect
+                        v-model="status"
+                        name="status"
+                        label="Availability"
+                        :options="[{ value: '', label: 'All' }, ...availabilities.map(option => ({ value: option, label: option }))]"
+                    />
+                    <BaseInput
+                        v-model="search"
+                        name="query"
+                        type="search"
+                        label="Name contains"
+                    />
+                    <BaseButton type="submit" variant="secondary">Filter</BaseButton>
                 </form>
 
                 <p v-if="errors.type" class="mt-2 text-sm text-risk">Type: {{ errors.type }}</p>
@@ -445,7 +417,7 @@ function save(): void {
                                 reserve
                             />
 
-                            <a :href="card.url" class="font-semibold text-ink-strong hover:underline">{{ card.name }}</a>
+                            <a :href="card.url" class="font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">{{ card.name }}</a>
                             <span class="font-mono text-xs text-ink-muted">{{ card.rarity_word }}</span>
                             <SupportTypeMark :type="card.type" :label="card.type_label" />
                             <span v-if="card.scenario_link === 'linked'" class="rounded-full bg-green-tint px-2 py-0.5 text-xs font-semibold text-ink-strong">
@@ -464,7 +436,7 @@ function save(): void {
                             <div class="ml-auto flex shrink-0 items-center gap-1">
                                 <button
                                     type="button"
-                                    class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2"
+                                    class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
                                     @click="equip(card.id)"
                                 >
                                     Equip to {{ slots.find((slot) => slot.position === picker.fillingSlot)?.label }}
@@ -473,7 +445,7 @@ function save(): void {
                                 <button
                                     v-if="slots.some((slot) => slot.selected === String(card.id))"
                                     type="button"
-                                    class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2"
+                                    class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
                                     @click="clearSlot(slots.find((slot) => slot.selected === String(card.id))!.position)"
                                 >
                                     Clear
@@ -489,7 +461,7 @@ function save(): void {
                                 v-if="link.url"
                                 :href="link.url"
                                 :aria-current="link.active ? 'page' : undefined"
-                                class="min-h-11 rounded-md border border-rule px-3 py-2 text-ink hover:bg-raised"
+                                class="min-h-11 rounded-md border border-rule px-3 py-2 text-ink hover:bg-raised transition-colors duration-150 ease-out"
                                 :class="link.active ? 'bg-raised font-bold text-ink-strong' : ''"
                                 v-html="link.label"
                             />

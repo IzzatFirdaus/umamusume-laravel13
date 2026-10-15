@@ -66,7 +66,7 @@ const heldTitle = 'Counted from this run\'s recorded purchases, against the cap 
 
 <template>
     <section :aria-labelledby="headingId" class="flex flex-col gap-3 border-t border-rule pt-3">
-        <h4 :id="headingId" class="text-base font-semibold text-ink-strong">
+        <h4 :id="headingId" class="text-lg font-semibold text-ink-strong">
             Shop ledger
         </h4>
 

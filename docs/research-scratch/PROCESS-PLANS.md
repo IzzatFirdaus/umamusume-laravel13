@@ -58,6 +58,26 @@ here raises a threshold to make a gate pass.
 
 **Placement note:** The C-5 enforcement gap file (`2026-09-30-c5-down-enforcement-gap.md`) was listed in Group A in the original consolidation plan. It is placed here in Group F (Process/Plans) because it is an engineering process finding about an enforcement gap, not governance or register material. This decision preserves the intent that Group A contains binding rules and gate definitions, while Group F holds process analyses and implementation plans.
 
+**Round 14 (2026-10-10, augment-only):** the four scenario implementation plans and the three Trainer
+Desk 2.0 prompt sets, all live documents that remain in place, embedded verbatim as their own sections:
+`docs/Our-Grand-Concert-plan.md` (1145 lines), `docs/Trackblazer-plan.md` (583), `docs/Unity-Cup-plan.md`
+(561), `docs/URA-Finale-plan.md` (381), `docs/Trainer-Desk-2.0-G-Prompts.md` (1046),
+`docs/Trainer-Docs-2.0-D-Prompts.md` (542), `docs/Trainer-Docs-2.0-E-Prompts.md` (230). Each section is
+the canonical reading copy while the source stays the live working file; nothing was deleted and no
+citation was repointed.
+
+**Round 15 (2026-10-12, consolidation):** the owner ordered the three Trainer Desk 2.0 prompt sets
+consolidated and their originals deleted. Each embedded section was re-verified line-by-line against
+its source before the delete (G: 687 of 687 non-blank lines matched in order, D: 380 of 380, E: 166 of
+166, one-level heading demotion allowed; 0 missing in each). The originals
+`docs/Trainer-Desk-2.0-G-Prompts.md` (untracked, so its deletion is not recoverable from history),
+`docs/Trainer-Docs-2.0-D-Prompts.md` and `docs/Trainer-Docs-2.0-E-Prompts.md` (both tracked and clean
+at HEAD, recoverable from history) were then deleted from `docs/`; these sections are now the only
+copies and the citation targets. Two live citations were repointed in the same pass:
+`docs/proposals/provenance-and-absence-contracts.md` §22 and
+`docs/research-scratch/PLANS-AND-BRIEFS.md` §"E6 — Our Grand Concert baseline strip". The four scenario
+implementation plans above remain live and in place; only the three prompt sets were deleted.
+
 ---
 
 ## 2026-10-01-scratch-tree-reorganization-plan.md
@@ -1507,7 +1527,7 @@ python tools/doc_census.py 2>&1 | grep 'dead markdown links' | tee /tmp/dead-bas
 python tools/doc_census.py 2>&1 | sed -n '/most-cited dead targets/,$p'
 ```text
 
-- [ ] **Step 3: Apply the known absorption map to the eight densest targets.** — **SCOPED DOWN:** the two O-2-gated targets (36 + 32 hits) cannot be repointed until the ruling; the convention fix (Task 6) was chosen over bulk editing because KNOWN-ISSUES.md entries are dated records and may not be edited in place, and most of DESIGN-CORPUS / SKILLS-MECHANICS hits are provenance lines the census overcounts. Measured precisely: 200 actionable refs across 29 files (`python .scratch-uma/task5-worklist.py`). Verified section anchors:
+- [ ] **Step 3: Apply the known absorption map to the eight densest targets.** — **SCOPED DOWN:** the two O-2-gated targets (36 + 32 hits) cannot be repointed until the ruling; the convention fix (Task 6) was chosen over bulk editing because KNOWN-ISSUES.md entries are dated records and may not be edited in place, and most of DESIGN-CORPUS / SKILLS-MECHANICS hits are provenance lines the census overcounts. Measured precisely: 200 actionable refs across 29 files (`python .scratch-uma/cited/task5-worklist.py`). Verified section anchors:
 
 | Cited path                                                   | Hits       | Repoint to                                                                                       |
 | ------------------------------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------ |
@@ -1989,7 +2009,7 @@ slice introduced (a banned word used as ordinary English in a comment) was rewor
 than adjudicated. No stale status
 lines: KI-8's "rendered by this route and nothing else", KI-11's open half and audit rows 7.2
 and 9 were corrected in the same commit that closes them. Atomic commits per concern: seven.
-R17 fixture: every measurement ran on `.scratch-uma/slice5.sqlite`, rebuilt for this slice with
+R17 fixture: every measurement ran on `.scratch-uma/cited/slice5.sqlite`, rebuilt for this slice with
 mood, full stat lines and an Energy value chosen per band state; `database/database.sqlite` was
 never opened. Checkout coherence: `git cat-file -e HEAD:…` verified in-session for each new file
 (`tests/Feature/RunViewFrameTest.php`, `tests/Feature/KeyboardPathTest.php`,
@@ -2354,7 +2374,7 @@ semantics. The fourth is no longer open.
 **Decided: no, and the burden of proof sits with the round trip, which was fast.** T1 builds
 preview-before-commit server-rendered, and the evidence that decision needs is
 the latency of the request Livewire would remove. Measured on the run-detail page today, loopback
-`php artisan serve` on `127.0.0.1:8144` against the R17 fixture (`.scratch-uma/slice5.sqlite`,
+`php artisan serve` on `127.0.0.1:8144` against the R17 fixture (`.scratch-uma/cited/slice5.sqlite`,
 rebuilt isolated), `curl -w '%{time_starttransfer}'` after one warm-up request that compiles the
 Blade views, n=20, no writes: **median 0.047 s, p95 0.076 s**, min 0.039, max 0.111, and 39,156
 bytes of HTML per round trip. `php artisan serve` is the single-threaded dev server with
@@ -2720,3 +2740,4546 @@ The directory contains ~150 files mixed at root level with 4 subdirectories (`p1
 | `*.csv`, `t0-*.txt`, `cookies.txt`, `stage-list.txt`                                                                  | `temp/`                                               |
 | `p17/`, `s14/`, `s15/`                                                                                                | `experiments/` (preserved as-is)                      |
 | `shots/`                                                                                                              | `reports/screenshots/` (merged)                       |
+
+---
+
+## Our-Grand-Concert-plan.md
+
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/Our-Grand-Concert-plan.md` (1145 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+
+## Our Grand Concert — Incremental Implementation Roadmap
+
+**Project:** Trainer Desk 2.0  
+**Scenario:** Our Grand Concert  
+**Purpose:** Incrementally complete the existing Our Grand Concert implementation without speculative mechanics, duplicate architecture, broad refactors, or unverified game data.
+
+---
+
+### Implementation Principle
+
+Our Grand Concert is implemented as a sequence of narrow, independently verifiable slices.
+
+Every slice follows:
+
+> **Evidence → smallest truthful representation → canonical lifecycle → UI → tests → stop**
+
+A roadmap item is **not** permission to implement every mechanic implied by its name.
+
+At every boundary:
+
+- Read the authoritative project documentation first.
+- Search the existing codebase before creating new architecture.
+- Prefer existing models, TurnEvents, controllers, requests, capabilities, and UI surfaces.
+- Do not invent unsupported game mechanics.
+- Do not infer numeric values from external/community sources when project evidence marks them unverified.
+- Do not create duplicate models, tables, endpoints, stores, or frameworks.
+- Keep observed facts separate from derived state and recommendations.
+- Stop when the assigned slice is complete.
+- A slice may split, collapse, be deferred, or conclude with a documented exclusion if evidence does not justify implementation.
+
+#### Evidence hierarchy
+
+When implementing scenario mechanics, distinguish:
+
+1. **Authoritative and verified** — safe to implement/render.
+2. **Observed in the application but not formally documented** — may be represented only where the observation itself is trustworthy.
+3. **Documented as unverified** — do not render or calculate as fact.
+4. **Inferred/community/external mechanics** — do not silently promote to project truth.
+
+---
+
+## Phase A — Performance
+
+### Slice 1 — Baseline Grand Concert Audit
+
+**Status: COMPLETE**
+
+Establish the current implementation state before making changes.
+
+#### Scope
+
+Audit:
+
+- scenario registration;
+- scenario selection;
+- trainee selection;
+- training target;
+- inheritance/Legacy;
+- support deck;
+- preflight;
+- career state;
+- Performance;
+- Lessons;
+- Songs;
+- Live Bonuses;
+- Promotional Lives;
+- Grand Concert/finale;
+- Trainer Advisor;
+- Career Report;
+- veteran/Legacy handoff.
+
+Identify existing architecture, missing pieces, known defects, disabled panels/capabilities, and explicit documentation boundaries.
+
+#### Outcome
+
+Created the incremental implementation map and established that Grand Concert functionality must be completed in narrow slices rather than through a broad rewrite.
+
+---
+
+### Slice 2 — Grand Concert Finale Race Catalog Correction
+
+**Status: COMPLETE**
+
+#### Scope
+
+Correct the Grand Concert finale race catalog scenario key:
+
+```text
+final_live => our_grand_concert
+```
+
+instead of the incorrect:
+
+```text
+final_live => grand_concert
+```
+
+Verify the resulting catalog identity and ensure there is one valid finale row for the scenario.
+
+#### Additional work
+
+- Investigated the orphaned engine-owned catalog row.
+- Backed up the row before removal.
+- Verified it was not referenced by race entries.
+- Removed only the incorrect duplicate/orphan.
+- Revalidated the race planner's scenario-scoped lookup.
+
+#### Outcome
+
+Grand Concert finale catalog data is correctly associated with `our_grand_concert`.
+
+Commit:
+
+```text
+480b711716b0756443a3f5e3aeac3a7f879e3abc
+fix(parser): correct Grand Concert final scenario key to our_grand_concert (KI-71)
+```
+
+---
+
+### Slice 3 — Performance Domain Foundation
+
+**Status: COMPLETE**
+
+Establish Performance as a typed scenario observation without inventing a Performance balance system.
+
+#### Authoritative Global terminology
+
+The verified Global client terms are:
+
+- Dance
+- Passion
+- Vocals
+- Visuals
+- Composure
+
+Do **not** substitute the GameTora/JP-derived term "Mental".
+
+#### Architecture
+
+Implemented:
+
+```text
+app/Enums/PerformanceType.php
+app/Models/TurnEvents/PerformancePayload.php
+app/Models/TurnEvent.php
+tests/Feature/PerformanceFoundationTest.php
+```
+
+Payload:
+
+```json
+{
+  "type": "Dance",
+  "delta": 12
+}
+```
+
+`delta` is signed:
+
+- positive = Performance acquired;
+- negative = Performance spent.
+
+#### Explicitly not implemented
+
+- starting values;
+- current totals;
+- caps;
+- acquisition formulas;
+- spending costs;
+- conversion formulas;
+- Lesson costs;
+- Song costs;
+- Hype;
+- Live Bonus;
+- stat mappings.
+
+Performance TurnEvents are observations, not an absolute balance.
+
+---
+
+### Slice 4 — Performance Turn-Write Integration
+
+**Status: COMPLETE**
+
+Wire Performance observations into the canonical turn-writing lifecycle.
+
+#### Scope
+
+Extend the existing:
+
+```text
+runs.turns.store
+```
+
+path rather than creating a Performance endpoint.
+
+Use:
+
+```text
+performance[type]
+performance[delta]
+```
+
+and persist the observation as the existing Scenario TurnEvent type.
+
+#### Constraints
+
+- Existing turn transaction remains authoritative.
+- No scenario-specific duplicate write path.
+- No automatic calculation.
+- Numeric strings from browser forms remain valid and are cast appropriately.
+- Empty Performance pair produces no event.
+
+---
+
+### Slice 5 — Performance Read-Side Integration
+
+**Status: COMPLETE**
+
+Expose recorded Performance observations through the canonical `TrainingRun` read path.
+
+Implemented:
+
+```text
+TrainingRun::performanceObservations()
+```
+
+Output is deterministic and contains:
+
+```text
+turn
+event_id
+type
+delta
+```
+
+#### Explicit boundary
+
+The method does **not**:
+
+- sum Performance;
+- derive a current Performance balance;
+- infer starting values;
+- calculate costs;
+- calculate caps.
+
+It exposes the recorded observations only.
+
+---
+
+### Slice 6 — Trainer-Facing Performance Observation Input
+
+**Status: COMPLETE**
+
+Add Performance observation input to the actual committing turn-entry surface.
+
+#### Surface
+
+```text
+resources/js/pages/Runs/Show.vue
+```
+
+using the existing GuidedStep / turn-entry architecture.
+
+#### Capability
+
+Performance input is enabled through:
+
+```text
+performance_input => true
+```
+
+for `our_grand_concert`.
+
+It is deliberately not a new panel.
+
+#### UI
+
+Fields:
+
+- Performance type;
+- signed Performance change.
+
+Exact options:
+
+- Dance
+- Passion
+- Vocals
+- Visuals
+- Composure
+
+No default selection.
+
+No invented min/max.
+
+No calculated total.
+
+#### User-facing semantics
+
+Positive values represent Performance gained.
+
+Negative values represent Performance spent.
+
+The UI explicitly explains that the application does not maintain a Performance total because the available source does not establish starting values, training-turn payments, or Lesson costs.
+
+#### Specification
+
+`SCREEN_SPEC.md` updated for SCR-RUN-003.
+
+#### Validation
+
+Invalid terminology such as:
+
+```text
+Mental
+Vocal
+Visual
+Dancing
+dance
+```
+
+is rejected.
+
+Zero and decimal values are rejected.
+
+Browser-form numeric strings are accepted.
+
+---
+
+### Slice 7 — TrainingDetail Consistency Boundary
+
+**Status: COMPLETE**
+
+Determine whether:
+
+```text
+resources/js/pages/Career/TrainingDetail.vue
+```
+
+is an equivalent committing turn-entry surface.
+
+#### Determination
+
+It is **not**.
+
+Although it submits to:
+
+```text
+runs.turns.store
+```
+
+it always submits:
+
+```text
+stage: preview
+```
+
+and does not reach the committing confirmation path.
+
+Its own screen explicitly states that the turn is not written until confirmation occurs elsewhere.
+
+#### Decision
+
+Do **not** add Performance controls to TrainingDetail.
+
+Performance remains on the actual committing Runs/Show turn-entry surface.
+
+#### Regression protection
+
+Added:
+
+```text
+tests/Feature/TrainingDetailPerformanceBoundaryTest.php
+```
+
+The tests establish that:
+
+- TrainingDetail remains preview-only;
+- no turn/event is written by its preview submission;
+- Performance data can survive the preview hand-off;
+- invalid Performance values are not silently dropped.
+
+#### Specification
+
+`SCREEN_SPEC.md` SCR-CAR-012 updated with the boundary decision and reopen condition.
+
+---
+
+## Phase B — Lessons
+
+### Slice 8 — Lessons Evidence + Foundation
+
+**Status: COMPLETE** (ran 2026-10-09 and was re-tested the same day; the gate closed with no Lesson representation
+established, recorded in `SCREEN_SPEC.md` §7-19)
+
+Establish exactly what the project can truthfully represent about Lessons.
+
+#### First determine
+
+- whether a canonical Lesson representation already exists;
+- whether Lessons are observations, actions, or both;
+- whether a Lesson has an established TurnEvent representation;
+- whether Lesson categories/types are authoritative;
+- whether costs are authoritative;
+- whether Performance effects are authoritative;
+- whether Hype/stat effects are authoritative;
+- whether confirmation/reservation terminology is verified.
+
+#### Important boundary
+
+The Grand Concert documentation explicitly identifies some Lesson-related information as unverified.
+
+Do **not** implement:
+
+- unverified Lesson labels;
+- cost curves;
+- per-level magnitudes;
+- inferred Performance gains;
+- inferred Hype;
+- inferred stat effects.
+
+#### Possible outcome
+
+If only a minimal Lesson observation is supported, implement only that foundation.
+
+If no truthful representation is currently supported, document the boundary and add a regression test rather than inventing a Lesson system.
+
+---
+
+### Slice 9 — Lessons Turn Lifecycle
+
+**Status: PLANNED**
+
+Only if Slice 8 establishes a valid Lesson representation.
+
+Integrate Lessons into the canonical turn/event lifecycle.
+
+#### Preferred architecture
+
+Reuse:
+
+- existing TurnEvent infrastructure;
+- canonical turn write path;
+- `TrainingRun` read-side conventions;
+- existing scenario capability/configuration.
+
+#### Do not create
+
+- Lesson table;
+- standalone Lesson model;
+- separate Lesson endpoint;
+- duplicate turn-writing path;
+- speculative calculation engine.
+
+#### Tests
+
+Verify:
+
+- valid Lesson representation;
+- invalid values;
+- persistence;
+- readback;
+- deterministic ordering;
+- no accidental total/balance calculation.
+
+---
+
+### Slice 10 — Lessons Trainer UI
+
+**Status: PLANNED**
+
+Only if authoritative evidence supports a truthful Trainer-facing Lesson interaction.
+
+#### Preferred surface
+
+The actual committing turn-entry surface.
+
+Do not add Lesson controls to `TrainingDetail.vue`.
+
+#### UI constraints
+
+- exact verified terminology;
+- no invented defaults;
+- no unverified costs;
+- no unverified magnitudes;
+- no automatic Lesson selection;
+- no hidden calculations.
+
+If evidence does not support truthful UI, document the exclusion instead.
+
+---
+
+## Phase C — Songs
+
+### Slice 11 — Songs Evidence + Foundation
+
+**Status: BLOCKED BY EVIDENCE** (gate run 2026-10-09; the determination is in `SCREEN_SPEC.md` §7-21)
+
+Establish the authoritative Song representation.
+
+#### Outcome of the gate
+
+**Songs — BLOCKED BY EVIDENCE.** The noun and the count are settled; nothing a field could carry is.
+
+- **Settled:** **songs** is Cygames' own English (notice 905), so it needs no capture. The **23** and its
+  availability segments are corroborated row for row by both publishers, and reference §7 row 49 treats the count
+  and the segment gating as settled while leaving the naming open.
+- **Not settled:** the language of the 23 titles (row 49, unresolved); the Performance type each cost figure
+  belongs to (not recoverable from either page's text layer); any magnitude (no cost curve, no Hype per Song);
+  whether acquiring a Song consumes a turn and what the client calls the action.
+- **New measured negative:** no Song title appears in any committed data this repository holds. Of nine distinctive
+  fragments from `docs/scenarios/07`'s title table grepped against `database/seeders/data/`, eight return 0 hits and
+  the ninth, `Umadol`, matches only unrelated client skill and card names (`Rising to Umadol Stardom!`). The one
+  local scenario JSON in the tree, `.scratch-uma/cited/static_scenarios.json`, is a gitignored GameTora scratch copy that
+  no commit has ever touched and it carries no Song key. Row 49 is therefore not closable locally; it needs the
+  `[Global]` Lesson-menu frame that gap §7-19 already names.
+- **Smallest truthful representation:** already exists and is generic. `TurnEventType::Scenario` with
+  `source_name` and nullable `deltas` carries "the Trainer says this happened" for any scenario event, so a Song
+  needs no enum, table, column, route, flag or component. A `Song` enum would pick a language the client was never
+  read stating; a Song count would state a timing no source publishes.
+- **Absence is guarded by committed tests:** `tests/Feature/GrandConcertPanelTest.php:93` (payload) and
+  `tests/browser/grand-concert-panel.spec.ts:98` (markup) both refuse a `song` string.
+- **Reopen condition:** a `[Global]` capture of the Lesson menu. Nothing before that is implementable without
+  inventing client text or a number.
+
+#### Determine
+
+- verified Song terminology;
+- whether individual Song names are authoritative;
+- whether Song acquisition is an observed event or action;
+- whether Song spending/selection is represented;
+- whether costs are verified;
+- whether Song effects are verified;
+- whether Hype effects are verified;
+- whether Song timing is verified.
+
+#### Explicit warning
+
+The existing Grand Concert documentation identifies the **23 Song titles** and other Song-related details as unverified where applicable.
+
+Do not render or encode unverified Song data merely because it appears in an external source.
+
+---
+
+### Slice 12 — Songs Lifecycle Integration
+
+**Status: BLOCKED BY EVIDENCE** (gated on Slice 11, which closed the gate: no truthful Song representation exists to integrate)
+
+If Slice 11 establishes a truthful representation:
+
+- integrate Songs into the canonical turn/event lifecycle;
+- provide a typed read path where justified;
+- preserve observed-vs-derived separation;
+- avoid calculating unsupported Song state.
+
+No new standalone subsystem unless existing architecture genuinely requires one.
+
+---
+
+### Slice 13 — Songs Trainer UI
+
+**Status: BLOCKED BY EVIDENCE** (gated on Slice 11; there is no verified Song interaction or status to display)
+
+Add the minimum verified Song interaction/status information to the appropriate committing surface.
+
+Do not expose:
+
+- unverified Song costs;
+- unverified effects;
+- unsupported Hype calculations;
+- speculative Song availability;
+- automatic recommendations masquerading as game facts.
+
+---
+
+## Phase D — Live Systems
+
+### Slice 14 — Live Bonus Evidence + Foundation
+
+**Status: BLOCKED BY EVIDENCE** (gate run 2026-10-09; the determination is in `SCREEN_SPEC.md` §7-22)
+
+Establish what Live Bonus state can actually be represented.
+
+#### Outcome of the gate
+
+**Live Bonuses — BLOCKED BY EVIDENCE.** The structure is the best-corroborated thing in this scenario and the
+vocabulary is the worst-evidenced, and a field needs both.
+
+- **Settled (tier A and B, not the client):** a Lesson pays two layers of reward and one is deferred. GameTora
+  names both layers and their behaviour; Game8 independently describes the deferred activation ("Takes effect
+  after concerts") while collapsing both under one heading, "Mastery Bonus". Two publishers that disagree on every
+  noun agree on the shape. Reference §7 row 51 adopts the partition "for the mechanics" and adopts "neither name
+  … for display".
+- **Not settled:** every English word. The corpus carries **six renderings for three objects** — GameTora's
+  Friendship Bonus / Speciality Rate Up / Support Event Chance Up against Game8's Friendship Training
+  Effectiveness / Specialty Priority / Support Chain Event Frequency — and notice 905 "names neither bonus layer",
+  which is what keeps row 51 open. Its "boosting training effects" sentence is about what a Lesson pays in
+  general; reading it onto the deferred layer is inference.
+- **Two measured negatives, both local.** In the app's own committed dictionary
+  `database/seeders/data/support_effects.ca447e53.json` (all 35 rows read), `友情ボーナス` is id 1 with one English
+  name, `得意率アップ` is id 19 with **two conflicting ones** (`name_en` "Specialty Priority", `name_en_eon`
+  "Specialty Rate Up"), and `サポート連続イベント率アップ` has **no row at all** — so the divergence between the two
+  guides is reproduced inside one file, and the third type of a three-type mechanic has no stored row. And
+  "Friendship Bonus" is **already displayed copy** in this application, as a support-card effect name from that
+  GameTora dictionary (`SupportEffect.php:17`, asserted by `SupportCardPageTest.php:85,93,253,261`), which is a
+  trap rather than a settlement: different domain, no capture, and no source says the scenario's bonus and a
+  card's effect are one counter.
+- **The magnitude boundary is narrower than the shorthand in this slice said.** "No Live Bonus percentage ladder"
+  is true, and "no number exists" is false: the **first-instance** value of each type is printed row for row by
+  both publishers inside the Song table (`Friendship Bonus +5%` and `+10%`, `Speciality Rate Up +5`, `Support
+  Event Chance Up +1`). What is absent is the level progression. Every one of those figures is third-party prose
+  riding on a Song title whose language row 49 has not settled, so the standard `SCREEN_SPEC.md` §7-21 applied to
+  Songs rejects them here too.
+- **Single-source only, with no corroboration at all:** that a bonus persists for the entirety of the run, that it
+  has levels raised by repeating the same bonus in another Lesson, and that automatically granted Songs do or do
+  not pay one. GameTora's "Automatically gained songs also count" sentence is about the Hype gauge, not about
+  bonuses.
+- **Smallest truthful representation:** already exists, generic, and unchanged from Slices 8 and 11.
+  `TurnEventType::Scenario` with `source_name` and nullable `deltas` records "I queued a Friendship Bonus this
+  turn" today. A `LiveBonusType` enum would pick among six renderings the client was never read stating and would
+  have to name a third case no committed row supports, so it fails the test `PerformanceType` passes. Percentage,
+  level, duration and stacking fields, a current-bonus reader, and any Live Bonus → Song / Lesson /
+  `support_effects` key are all unimplemented because unevidenced, not deferred.
+- **Absence is guarded:** `tests/Feature/GrandConcertPanelTest.php:103`'s refusal list grew from five words to eight
+  on this gate and now refuses `live bonus`, `practice bonus` and `mastery bonus` beside `song`, `lesson` and
+  `hype`. No second structural file was added: `LessonEvidenceBoundaryTest.php:84` already pins that an
+  unrecognised key on the turn write is collected as nothing and stored as nothing, and its structural refusals
+  cover the same shape.
+- **Reopen condition:** the same `[Global]` Lesson-menu capture gaps §7-19 and §7-21 name, and it owes this gate
+  the layer label, each of the three type names as printed, and which type each Song row carries. One cheaper
+  local route to try first, which does **not** close the gate alone: `docs/research-scratch/DESIGN-CORPUS.md:4261`
+  records **Our Grand Concert: None found**, and the corpus's screen-type table (`:4269-4282`) documents no
+  support-card effect list, only rail avatars, a Career Profile "Support Cards" row and an unread **Perks**
+  button. Support effects are server-wide rather than scenario-specific, so an existing frame may already
+  measure the client's word for `友情ボーナス` and `得意率アップ`. That settles two of six renderings for the
+  support-effect domain only; a ladder needs no frame and has no source.
+
+#### Determine
+
+Superseded by the outcome above. The five questions this slice asked (terminology, observations versus derived
+values, sources of existence, per-value authority, and whether a current total is representable) are each answered
+in §7-22: terminology unmeasured, existence corroborated at tier B, no per-value authority, and no current total
+derivable.
+
+#### Explicit boundary
+
+The existing documentation marks the **Live Bonus percentage ladder** as unverified. Confirmed and sharpened: the
+ladder is unpublished while the first-instance values are published by both guides as third-party prose. Neither
+is encodable.
+
+Do not invent or encode it.
+
+
+---
+
+### Slice 15 — Live Bonus Lifecycle / Read Model
+
+**Status: BLOCKED BY EVIDENCE** (gated on Slice 14, which closed the gate: no verified Live Bonus vocabulary or value exists to persist or read)
+
+If Slice 14 establishes valid data:
+
+- persist verified Live Bonus observations;
+- expose them through canonical read-side architecture;
+- preserve provenance;
+- do not derive unsupported percentages.
+
+No speculative balance/meter system.
+
+---
+
+### Slice 16 — Promotional Lives Evidence + Foundation
+
+**Status: BLOCKED BY EVIDENCE** (gate run 2026-10-09; the determination is in `SCREEN_SPEC.md` §7-23)
+
+Establish the authoritative representation and lifecycle boundary for Promotional Lives.
+
+#### Naming correction first
+
+The `[Global]` client calls these **Promo Concert**, not "Promotional Lives". Cygames' notice 905 prints "**Four
+Promo Concerts and one Grand Concert** are held, making for a total of five concerts", and Game8 independently uses
+"Promo Concerts" too. "Promotional Lives" is GameTora's rendering of the JP word, which makes this Phase's own
+title guide vocabulary rather than client vocabulary — the one Grand Concert mechanic in the whole line whose noun
+is already settled at tier S, and settled against the roadmap's name.
+
+That is a naming fact, not an implementation licence, and this slice changes no code. `docs/UMAMUSUME_REFERENCE.md`
+§2.9 ruled the same thing on the day of the primary read; the guards already carry the asymmetry
+(`GrandConcertPanelTest.php:107` and `tests/browser/grand-concert-panel.spec.ts:98` refuse `promotional live`, and
+nothing refuses `promo concert` because that word is licensed copy). **Whether Phase D is retitled "Promo
+Concerts" is the owner's decision and is raised, not made.**
+
+#### Outcome of the gate
+
+**Promo Concerts — BLOCKED BY EVIDENCE.** Unlike Slices 8, 11 and 14, the blocker is not vocabulary. It is a
+calendar position, a lifecycle, and a table that can hold either.
+
+- **Settled at tier S:** the noun (**Promo Concert**, **Grand Concert**), the count (**four plus one, five
+  concerts**), the cadence (**biannually, from the second half of December of the trainee's junior year**), the
+  gauge's official name (**Live Performance Expectations**) and the max-gauge outcome (**Great Success**). No
+  other Grand Concert mechanic has ever had this.
+- **Not settled, and it is structural, not textual.** Neither timeline table can hold the series.
+  `scenario_slots` has **no `year` column** and its live unique index is `(scenario_key, month, half, kind,
+  source_key)`, so two Late-December concerts in different career years collide; `ScenarioSlot::VALID_KINDS` is
+  `goal_race / team_race / grade_deadline / scripted_event / free_race` with no concert kind, and the model's
+  `saving` guard throws on any other. `race_catalog_slots` does carry `year`, but it is race-shaped (non-null
+  `grade_code`, plus `distance`, `surface`, `track_id`) and engine-owned from the GameTora instance export.
+- **Measured negative:** searching every committed race name for Concert, Live, Promo or Grand returns **zero
+  rows**. The catalog holds the scenario's finale (`final_live => our_grand_concert`, mandatory, the value KI-71
+  corrected at `480b711`) and none of its four Promo Concerts — so the finale is a calendar row and the concerts
+  are nothing.
+- **Timing is not derivable without invention.** No source prints the (year, half) positions. GameTora's "before
+  the 1st/2nd/3rd/4th Promo Live" segments gate **Song lesson unlocks**, not concert dates; Game8's per-year
+  figures are the same unlock pattern. Placing the first concert needs this app's mapping of "junior year" to a
+  career-year integer, which no source supplies.
+- **Lifecycle unknown in every direction the app would need:** whether a concert occupies a turn (`docs/scenarios/07`
+  states the turn shape of the live events was never published as a turn list), whether it can be declined or
+  missed, and whether a confirmation, stage or result screen exists. GameTora's "you may choose to do lessons
+  before stepping onto the stage … like you would learn skills before races" is an analogy for the *lesson* step,
+  not evidence of a concert screen.
+- **The outcome set is one word deep.** **Great Success** is official; `大成功` is the JP string; GameTora's "great
+  or normal success" is its own English. No source names the other outcomes as printed or says how many tiers
+  exist, so an outcome enum ships one licensed case and one inferred case.
+- **Costs:** no source states a concert consumes Performance, and the one official relation runs the other way —
+  gauge max *guarantees* a Great Success. Its subject is the still-unbuilt Live Performance Expectations concept,
+  so the relation stands recorded and unmodelled.
+- **Every payout is single-source:** 5 skill points per Technique Lesson and 25 per Song Lesson, and the +50
+  resource-cap rise (GameTora); "each Promo Concert grants a stat increase" (Game8); "a Great Success raises stat
+  caps" (GameTora); "the outcome of the Promo Lives feeds the finale" (GameTora, no mechanism named). The notice
+  "publishes no number of any kind".
+- **Smallest truthful representation:** already exists, generic. `TurnEventType::Scenario` with `source_name` and
+  nullable `deltas` records "the second Promo Concert happened at turn N and was a Great Success" today, in words
+  the Trainer supplies. The fourth consecutive gate to reach that finding.
+- **Rejected as invention:** `PromotionalLiveType`, `PromotionalLivePayload`, a model or table, a state machine, a
+  milestone scheduler, a cost or reward calculator, a `concert` kind in `scenario_slots` (that is a schema change,
+  which §11 makes travel with a migration, an `ARCHITECTURE-ESSENTIALS.md` digest, a PRD citation and an ADR —
+  spent backwards to hold a schedule no source pins down), synthetic `race_catalog_slots` rows for a non-race, and
+  any Promo Concert → Song / Lesson / Live Bonus / Hype key.
+- **Stale claim reported, not edited:** `database/migrations/2026_09_27_153416_create_scenario_slots_table.php:15`
+  still says "Our Grand Concert has no guide at all", false since the 2026-10-05 read. Per `AGENTS.md` §2 the code
+  wins and the rule is stale; a schema file's prose is not this slice's surface.
+- **Reopen condition:** **two** captures, and one alone is not enough — a `[Global]` **pre-live / backstage screen**
+  (the event's own name, the gauge label, whatever the client calls the action) **and** a `[Global]` **career
+  calendar or goal row** showing where the four concerts sit, because only a screen settles a (year, half)
+  position. Magnitudes need a source rather than a frame: no screen resolves 5 / 25 skill points or the +50.
+
+#### Determine
+
+Superseded by the outcome above. The five questions this slice asked are each answered in §7-23: what constitutes
+it (a scheduled concert, official, but with no unplaceable-in-data date), what can be observed (the event and a
+licensed outcome word), what can be entered (nothing the app may prefill), which outcomes are authoritative (one),
+and what remains unverified (turn shape, interaction, costs, payouts, repeatability, the finale relation).
+
+Do not assume mechanics from external/community sources.
+
+---
+
+### Slice 17 — Promotional Lives Lifecycle
+
+**Status: BLOCKED BY EVIDENCE** (gated on Slice 16, which closed the gate: no Promotional Live representation exists and no table can hold the series without a schema change)
+
+Integrate verified Promotional Live observations/results into the existing run lifecycle.
+
+Reuse existing:
+
+- TurnEvents;
+- run state;
+- read-side methods;
+- capability configuration.
+
+No duplicate subsystem.
+
+---
+
+### Slice 18 — Promotional Lives Trainer UI
+
+**Status: BLOCKED BY EVIDENCE** (gated on Slice 16; there is no verified interaction, schedule or status to display, though the event's own noun is official)
+
+Add the minimum truthful Trainer-facing Promotional Live interaction/status surface.
+
+Do not expose speculative success formulas, Hype effects, bonus percentages, or rewards.
+
+---
+
+## Phase E — Grand Concert + Intelligence
+
+### Slice 19 — Grand Concert Finale State Foundation
+
+**Status: COMPLETE** (landed 2026-10-09 at `aa5d975`; the reasoning is in
+`app/Services/Scenario/FinaleReader.php`'s docblock and `CockpitController::finaleAbsence()`, and the
+cases are in `tests/Feature/FinaleAbsenceTest.php`)
+
+What the slice asked for is settled by reading the catalogue rather than the config. The finale is a
+scenario-scoped mandatory row in the career calendar, so `CockpitController::finaleAbsence()` answers
+from that row instead of from the `config/scenarios.php` `finale` key, which stays undeclared because
+no component reads its contents. Three answers, and the branch is driven by the row's presence rather
+than by a scenario name, so a scenario name in the payload path would be a second source for the
+layout path, which `AGENTS.md` §7 forbids.
+
+- On the calendar: the absence sentence names the mandatory race and states that the scenario declares
+  no structure beyond it.
+- Not on the calendar: the sentence denies a finale, which is now true rather than a blanket claim.
+- Declared structure: no absence sentence at all, because there is nothing absent.
+- A row belonging to another scenario is ignored, so a shared catalogue cannot leak one scenario's
+  finale into another's screen.
+
+No finale state machine was built. The representation is the catalogue row's presence plus the run's
+own reading of it, which is what Slice 20 reports.
+
+---
+
+### Slice 20 — Grand Concert Execution + Reporting
+
+**Status: COMPLETE** (landed 2026-10-09 at `aa5d975`; `SCR-CAR-018`, cases in
+`tests/Feature/FinaleReportingTest.php`)
+
+The verified finale observations reach the existing read-only reporting path through `ResultController`
+and `/run/{run}/result`, with no new endpoint and no speculative success calculation. One server-side
+reader (`FinaleReader`) feeds both the Career Result and the Cockpit, so no two screens can disagree.
+
+Three states, and the middle one is the one nothing could previously say:
+
+- **Not yet reached.** `placement` and `turn` are null rather than zero or an empty string, because a
+  screen that printed an empty placement cell for a finale nobody has run would state a finish that
+  does not exist (D-220).
+- **Reached with nothing recorded.** The position is read from the highest logged turn against the
+  finale block, so one row is enough; no count is taken.
+- **Recorded.** The run's own stored outcome word, placement and turn. The outcome set is one word
+  deep: the run's status label, not a finale-specific vocabulary.
+
+A scenario whose calendar carries no finale row emits no finale state at all, and the old `finale` key
+is gone rather than left standing as a null, which is how a reader tells a scenario with no finale row
+from a payload that never carried the key. The catalogue row's own title is not carried: it reads
+"URA Finals Final (Grand Live)" and is filed as KI-82.
+
+---
+
+### Slice 21 — Scenario-Aware Trainer Advisor
+
+**Status: COMPLETE** (landed 2026-10-09 at `ad8dc77`; `ScenarioAdvisorFinaleTest`, cases in tests/Feature/ScenarioAdvisorFinaleTest.php)
+
+Only after underlying Grand Concert state exists.
+
+Update Trainer Advisor so that it can consume verified Grand Concert-specific state.
+
+#### Critical rule
+
+Do not make Advisor scenario-aware by inventing scenario mechanics.
+
+Advisor recommendations must distinguish:
+
+```text
+Observed fact
+Derived fact
+Recommendation
+```
+
+and maintain provenance.
+
+---
+
+### Slice 22 — Scenario Cockpit Integration
+
+**Status: COMPLETE** (landed 2026-10-09 at `aa5d975`; `CockpitFinaleStripTest` and `CareerCockpitTest` pin the scenario-state surfaces, cases in tests/Feature/CockpitFinaleStripTest.php)
+
+Expose verified Grand Concert state through the existing Career Cockpit/turn flow.
+
+Respect existing:
+
+```text
+config/scenarios.php
+```
+
+capabilities and panel gates.
+
+Do not turn every scenario mechanic into a new panel.
+
+Use existing cockpit composition patterns.
+
+---
+
+## Phase F — Acceptance / Hardening
+
+### Slice 23 — Cross-Feature Consistency Audit
+
+**Status: COMPLETE** (`aa5d975`; see the Cross-Feature Consistency entry in the Current Status table, page 1125)
+
+Audit the complete chain:
+
+```text
+Performance
+    ↓
+Lessons
+    ↓
+Songs
+    ↓
+Live Bonuses
+    ↓
+Promotional Lives
+    ↓
+Grand Concert
+```
+
+Verify that each feature:
+
+- uses canonical architecture;
+- has no duplicate state representation;
+- preserves observed-vs-derived separation;
+- has consistent TurnEvent behavior;
+- has deterministic read-side behavior;
+- has correct scenario capability gating;
+- does not expose unverified mechanics;
+- does not silently calculate unsupported totals;
+- has appropriate tests;
+- has matching SCREEN_SPEC documentation.
+
+Only fix demonstrated inconsistencies.
+
+No broad refactor for aesthetic reasons.
+
+---
+
+### Slice 24 — Full Grand Concert Acceptance Pass
+
+**Status: COMPLETE** (see the acceptance record at 2026-10-09, below)
+
+Perform the final scenario readiness assessment.
+
+#### Verify
+
+##### Scenario entry
+
+- scenario registration;
+- scenario selection;
+- trainee selection;
+- training target;
+- inheritance;
+- support deck;
+- preflight.
+
+##### Career lifecycle
+
+- run creation;
+- turn entry;
+- Performance;
+- Lessons;
+- Songs;
+- Live Bonuses;
+- Promotional Lives;
+- finale;
+- Career Report;
+- veteran/Legacy handoff.
+
+##### UI
+
+- capability visibility;
+- panel visibility;
+- turn-entry surfaces;
+- validation;
+- confirmation;
+- readback;
+- empty states;
+- provenance/explanations.
+
+##### Data integrity
+
+- scenario-scoped race catalog;
+- no duplicate finale;
+- no speculative database state;
+- no accidental canonical DB mutation.
+
+##### Tests
+
+Run the appropriate project testing levels according to `AGENTS.md §9`.
+
+Only claim gates that were actually executed.
+
+#### Acceptance record — 2026-10-09
+
+The scenario is complete as far as current evidence permits. Every actionable criterion above is
+verified against the passing feature tests on this tree, not against a remembered state:
+
+- **Scenario entry** — `CareerScenarioSelectTest`, `CareerTraineeSelectTest`, `CareerBuildTargetTest`,
+  `CareerInheritanceEventTest`, `CareerLegacyDeckStepsTest`, `CareerPreflightTest`: green.
+- **Career lifecycle** — `CareerCockpitTest` (run creation, turn entry, correction, status/scenario/period
+  writes), `CareerTrainingDetailTest` (Performance), `CareerResultTest` (Career Report),
+  `CareerSaveVeteranTest` (veteran handoff): green.
+- **UI** — `GrandConcertPanelTest` and `ScenarioPanelTest` (capability visibility, panel visibility,
+  validation, readback, empty states, provenance): green.
+- **Data integrity** — scenario-scoped race catalog and the finale reads are pinned by
+  `CockpitFinaleStripTest`, `FinaleAbsenceTest`, `FinaleReportingTest`, `RunRaceStripTest`: green.
+- **Blocked mechanics (Lessons, Songs, Live Bonuses, Promo Concerts)** — the acceptance is the absence,
+  and it is stated: `config/scenarios.php:480`'s `panel_absence` ("The mechanics for this scenario are
+  sourced, but no capture of the client's own screens exists yet, so no panel is drawn."), asserted by
+  `GrandConcertPanelTest`. No surface invents a mechanic.
+
+**Gates, as actually run.** `php artisan test --compact`: **8 failed, 2 skipped, 1489 passed (26155
+assertions), 341.74s**. All eight failures are the F2 cutover's, not this scenario's: six in
+`StatBandTest` (its `StatBand`/`GradeBadge` subject retired with `Runs/Show.vue`, the F2 close-out's
+Delta C) and two in `TurnEntryFieldSourceTest` (stale assertions left by `1ec92ab`, the energy-state
+change). `npm run typecheck` exit 0; `npm run build` exit 0; `composer lore` exit 0 (302 pre-existing
+hits); `composer lore-code` exit 0 (118 pre-existing hits).
+
+**Browser walk: not completed.** The harness cannot own its port: a leaked `php artisan serve` holds the
+default `:8127` (KI-73), and the box was contended enough that the suite ran ~46s per case (KI-74), so
+the run was voided as a signal rather than read. The failures seen before the void were all F2 cutover
+leftovers — `career-cockpit.spec.ts`'s stale "run screen" link copy, `career-result.spec.ts`'s stale
+`runs.show` status flow, and `run-detail.spec.ts` driving the redirected page — and the concurrent
+session was repairing them in the working tree during this pass (`career-cockpit.spec.ts:114` and
+`career-result.spec.ts:35` are already repointed, and `run-detail.spec.ts` is staged for deletion).
+
+*Corrected 2026-10-10.* The sentence above that these eight failures were "repaired by a concurrent session during the pass" is superseded. Of the eight, **six were in `StatBandTest`** and were **retired** under the owner's ruling R-A1 (the subject, `GradeBadge.vue` and `StatBand.vue`, was deleted by F2's Delta C cleanup). The remaining **two were in `TurnEntryFieldSourceTest`** and were **adapted by F2** in a later commit after `1ec92ab` changed `TrainingDetail.vue`'s import. All eight were F2's to close; F2 closed them outside the Grand Concert line. The Grand Concert acceptance did not see them repaired mid-run.
+
+---
+
+## Global Out-of-Scope Rules
+
+These rules apply to every remaining slice unless a future slice explicitly establishes verified evidence for them.
+
+Do not:
+
+- invent game mechanics;
+- invent numeric costs;
+- invent starting values;
+- invent caps;
+- invent Hype formulas;
+- invent Live Bonus percentages;
+- invent Song effects;
+- invent Lesson effects;
+- infer unsupported Performance conversions;
+- create speculative recommendation logic;
+- create duplicate models/tables;
+- create duplicate endpoints;
+- create a second turn-writing path;
+- add unnecessary global state;
+- introduce a new frontend framework;
+- perform broad refactors;
+- redesign unrelated screens;
+- modify unrelated concurrent work.
+
+---
+
+## Repository Safety Constraints
+
+The following areas are protected and must not be modified by scenario slices unless explicitly authorized by a separate task:
+
+```text
+config/database-safety.php
+app/Services/DatabaseSafety/
+tests/browser/global-setup.ts
+playwright.config.ts
+.scratch-uma/incident-2026-10-08-devdb/
+.scratch-uma/db-recovery-2026-10-08/
+composer.json
+composer.lock
+D:/Projects/uma_musume_race_planner/
+```
+
+Never run destructive database commands against the canonical database.
+
+Do not use the canonical development database as a disposable test database.
+
+Do not commit changes unless a separate instruction explicitly authorizes a commit.
+
+Do not clean or revert unrelated concurrent work.
+
+---
+
+## Slice Completion Contract
+
+Every slice must end with a report containing:
+
+1. **Determination**
+2. **Evidence**
+3. **Files changed**
+4. **Architecture decision**
+5. **UI behavior**
+6. **Mechanics explicitly not implemented**
+7. **Tests and gates actually run**
+8. **Safety/concurrency confirmation**
+9. **Git/commit status**
+10. **Explicit stop**
+
+An agent must stop after its assigned slice.
+
+A later slice may be started only after the previous slice has been reviewed/accepted.
+
+---
+
+## Current Status
+
+```text
+Phase A — Performance
+  Slice 1  Baseline audit                         COMPLETE
+  Slice 2  Finale race catalog correction        COMPLETE
+  Slice 3  Performance foundation                 COMPLETE
+  Slice 4  Performance turn-write                COMPLETE
+  Slice 5  Performance read-side                 COMPLETE
+  Slice 6  Performance Trainer input              COMPLETE
+  Slice 7  TrainingDetail boundary                COMPLETE
+
+Phase B — Lessons
+  Slice 8  Evidence + foundation                  COMPLETE (gate closed: no Lesson representation exists)
+  Slice 9  Turn lifecycle                         BLOCKED BY EVIDENCE
+  Slice 10 Trainer UI                             BLOCKED BY EVIDENCE
+
+Phase C — Songs
+  Slice 11 Evidence + foundation                  BLOCKED BY EVIDENCE
+  Slice 12 Lifecycle integration                  BLOCKED BY EVIDENCE
+  Slice 13 Trainer UI                             BLOCKED BY EVIDENCE
+
+Phase D — Live systems
+  Slice 14 Live Bonus foundation                  BLOCKED BY EVIDENCE
+  Slice 15 Live Bonus lifecycle                   BLOCKED BY EVIDENCE
+  Slice 16 Promotional Lives foundation          BLOCKED BY EVIDENCE (client noun is Promo Concert)
+  Slice 17 Promotional Lives lifecycle            BLOCKED BY EVIDENCE
+  Slice 18 Promotional Lives UI                  BLOCKED BY EVIDENCE
+
+Phase E — Grand Concert + Intelligence
+  Slice 19 Finale state foundation                COMPLETE
+  Slice 20 Finale execution/reporting             COMPLETE
+  Slice 21 Scenario-aware Advisor                 COMPLETE
+  Slice 22 Scenario cockpit integration           COMPLETE
+
+Phase F — Acceptance
+  Slice 23 Cross-feature consistency audit        COMPLETE (aa5d975)
+  Slice 24 Full Grand Concert acceptance          COMPLETE (see the acceptance record, 2026-10-09)
+```
+
+### Definition of "Complete"
+
+Our Grand Concert is considered implementation-complete only when the existing Trainer Desk architecture can truthfully represent and expose the verified scenario lifecycle from career setup through Grand Concert completion, while clearly distinguishing:
+
+```text
+Observed Game State
+        ↓
+Derived State
+        ↓
+Recommendation
+```
+
+and without presenting unsupported game mechanics as facts.
+
+**Completion does not mean implementing every mechanic found on external wikis.**
+
+It means implementing everything the project's authoritative evidence supports, documenting what remains unknown, and ensuring the application never fabricates certainty where the underlying game data has not been verified.
+
+---
+
+## Trackblazer-plan.md
+
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/Trackblazer-plan.md` (583 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+
+## Trackblazer — Implementation Plan
+
+**Project:** Trainer Desk 2.0  
+**Scenario:** Trackblazer (Make a New Track / MANT)  
+**Purpose:** Spec the Trackblazer career cockpit, the screens that differ from Grand Concert, and the pre-run planning flow.
+
+---
+
+### Sources
+
+- `docs/UMAMUSUME_REFERENCE.md` (sections 1.3.4, 1.4.8, 2.2.3, 2.5, 2.7)
+- [`GameTora, Trackblazer Scenario`](https://gametora.com/umamusume/trackblazer) (last updated 2026-03-12)
+- [`uma.guide, Trackblazer Guide`](https://uma.guide/guides/trackblazer) (last updated Apr 29, 2026)
+- [`Game8, Trackblazer Scenario Guide`](https://game8.co/games/Umamusume-Pretty-Derby/archives/580723) (returned pre-release copy)
+- `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` sections "Trackblazer (uma.guide)" and "Trackblazer (GameTora)"
+
+---
+
+### 1. The Central UX Concept
+
+Grand Concert is a conversion loop: training makes Performance, Lessons turn it into Songs, Songs raise Hype. Trackblazer is an economy loop with a hard deadline. The persistent question changes to:
+
+**Race, train, or rest this turn, and does it keep me alive at the next Grade Point checkpoint?**
+
+About half of all turns are races, and a typical career runs 30 to 40 of them. That is why the race decision, not the training decision, should lead the cockpit.
+
+```
+   RACE ──► placement ──► Grade Points + Shop Coins + stats/SP/fans
+    ▲                          │                 │
+    │                          ▼                 ▼
+    │                   CHECKPOINT          SPECIAL SHOP
+    │                  (60 / 300 / 300)          │
+    │                   miss = run ends          ▼
+    │                                    ITEMS (energy, training
+    │                                    boosts, race bonus, ...)
+    │                                            │
+    └──────── stronger races / training ◄────────┘
+
+   EPITHMET ROUTES: win every race in a route = bonus stats/hints
+   FINALE: Twinkle Star Climax (3 races, Victory Points)
+```
+
+Three meters stay on screen all run: Grade Point runway, Coin bank, and Race fatigue. They play the role Performance played in the Grand Concert cockpit.
+
+---
+
+### 2. Scenario Select
+
+The scenario card should show what makes Trackblazer different. It also loads the rules engine.
+
+```
+TRACKBLAZER
+Race-driven career. Grade Points replace career goals.
+
+Stat caps   SPD 1200  STA 1900  POW 1200  GUT 1200  WIT 1500
+No career goals  •  No secret events  •  No Scenario Link
+```
+
+The caps are the figures in the reference, and whether they are live on Global today is still open (section 15). The engine loads these tables, each with a source badge:
+
+- Grade Point objectives, by checkpoint profile
+- Grade Points per race grade, and the placement modifiers
+- Shop Coins by placement
+- The shop catalog
+- Race-fatigue odds
+- Epithet routes
+- Year-end unique-skill gates
+- Finale rules
+
+---
+
+### 3. Trainee & Target
+
+Trackblazer needs four checks that the Grand Concert flow did not.
+
+**Checkpoint profile.** Both sources agree on three of the numbers, so default to the standard profile and let the Trainer override it:
+
+- Standard: 60 / 300 / 300.
+- High-dirt, low-turf trainees (Haru Urara is the example both sources give): 30 / 200 / 300.
+- Short-distance turf trainees (Curren Chan is GameTora's example): sources disagree on the first number (section 15).
+
+Show the profile as editable, with a source badge, and tell the Trainer to confirm it against the in-game objectives screen.
+
+`config/scenarios.php` carries all three tracks (`standard` / `dirt_leaning` / `limited_turf_range`); `TrainingRun::gradeObjectives()` renders only `standard` and says so, because a wrong denominator is worse than a conservative one. Tracked as **KI-15**, OPEN.
+
+**Race coverage.** Mile and Medium dominate graded racing. By uma.guide's counts, 24 of 30 unique G1s, 25 of 36 G2s and 50 of 69 G3s are Mile or Medium. The guide says to bring at least a C, ideally a B, in both. So show a coverage number:
+
+```
+RACE COVERAGE
+Graded races this trainee can run at C or better:
+G1  21 / 30    G2  22 / 36    G3  44 / 69
+⚠ Weak Medium aptitude: 14 G1s are Medium
+```
+
+The values above are illustrative. The real numbers come from the aptitude data joined to the race list.
+
+**Secret-event warnings.** Secret events and career goals are disabled. Both guides give the same example: Silence Suzuka cannot get Runaway here. If the Trainer's target relies on a secret event, flag it before the run starts.
+
+`docs/UMAMUSUME_REFERENCE.md` §2.2.3 confirms: "Character secret events do not fire here, which is the mechanical reason a character cannot unlock an extra strategy option in this scenario."
+
+**Cap-aware targets.** Speed, Power and Guts cap at 1200, Stamina at 1900, Wit at 1500. The target screen should show headroom per stat, so a Trainer does not aim Speed at 1400.
+
+---
+
+### 4. Legacy Lab (Deltas Only)
+
+- No Scenario Link badge, because Trackblazer has zero linked characters. `docs/UMAMUSUME_REFERENCE.md` §2.2.3: "this scenario has zero linked characters, the only one of the fourteen with none."
+- The scenario factor is **"Climax Scenario"**, which gives Stamina and Guts on inheritance. `docs/UMAMUSUME_REFERENCE.md` §2.7: "The Trackblazer scenario factor is printed as 'Climax Scenario' and grants Stamina and Guts bonuses on successful inheritance."
+- Only show cap-raise projections where the data supports them. The cap-breakthrough rule in the reference is JP-tagged. The Global 2026-07-01 rework raises caps above the 1200 base; whether the raised Trackblazer caps (1900 Stamina, 1500 Wit) are live on Global today is open (section 15).
+
+---
+
+### 5. Support Deck Builder (Deltas)
+
+Deck effects you evaluate:
+
+- Race Bonus (effect id 15). uma.guide says to stay at or above 50. Draw a meter with a marker at 50, labelled as a community guideline and not a game rule.
+- Fan Bonus (16).
+- Skill Point Bonus (30).
+- Failure Protection (27).
+- Energy Cost Reduction (28).
+- Bond coverage.
+
+Archetypes are suggestions, not rules. The guide describes two frameworks:
+
+- Speed + Wit: 2 Speed and 2 Wit, with the remaining slots flexed for skills or Stamina.
+- Wit + Guts: 3 Guts and 2 Wit, leaning on Guts Ankle Weights. It can cap Guts, but skills and Stamina are harder to source.
+
+Detect which shape the deck resembles, but evaluate the real cards.
+
+**Friendship is valued differently here.** uma.guide says a lone friendship training often isn't worth skipping a graded race, because race rewards are high and Trackblazer training bases are low. Base facility values match Unity Cup's (lower than URA Finale's): Speed +8/+4/+2 SP, Stamina +7/+3/+2 SP, Power +4/+6/+2 SP, Guts +3/+3/+6/+2 SP, Wit +2/+6/+3 SP (energy costs −19 to −20, Wit +5). The Advisor should compare friendship value against race value instead of assuming friendship wins.
+
+Source: `SCENARIO-PUBLISHER-REFERENCES.md` lines 260-268 and 1276-1280.
+
+---
+
+### 6. Route Planner (New, and the Key Pre-Run Screen)
+
+This takes the place the Concert Planner held in the Grand Concert flow. The route is a plan, not a script, and both guides say to deviate when a training turn is exceptional.
+
+```
+ROUTE PLAN                             Rice Shower • Standard profile
+
+JUNIOR         ──●debut───────────────────●60 GP checkpoint──
+ GP this period   0 / 60   planned: 100   floor (2nd-3rd): 52
+
+CLASSIC        ─────[SUMMER]──────────────●300 GP checkpoint─
+ GP this period   0 / 300  planned: 340   floor: 214
+
+SENIOR         ─────[SUMMER]──────────────●300 GP─[FINALE]───
+ GP this period   0 / 300  planned: 320   floor: 190
+
+EPITHMET ROUTES IN PLAN
+ Oka Sho / Oaks / Shuka Sho line    1 of 3 planned   ⚠ 2 races unscheduled
+ Spring Champion                    0 of 3
+ Mile route                         2 of 3
+
+FLAGS
+ ⚠ 5 consecutive races planned in Classic spring (fatigue risk)
+ ⚠ Year-end gate, Classic: 60,000 fans + Akikawa bond 31
+ ○ Rival races are random; they cannot be scheduled
+```
+
+The numbers above are illustrative. What is sourced:
+
+- Grade Points for a win: G1 100, G2 80, G3 60, OP 40, Pre-OP 20. Source: `SCENARIO-PUBLISHER-REFERENCES.md` lines 92-100.
+- Placement modifiers (uma.guide, single source): 1st 100%, 2nd 60%, 3rd 40%, 4th-5th 20%, 6th and lower 10%. Source: `SCENARIO-PUBLISHER-REFERENCES.md` lines 102-110.
+- Points never carry over. Each period starts at zero. Source: both publishers, confirmed in `docs/UMAMUSUME_REFERENCE.md` §2.2.3.
+
+So the planner can show three numbers per period: needed, planned if you win, and a floor if you finish 2nd to 3rd. A G2 win is 80 and a G2 second place is 48.
+
+---
+
+### 7. Run Preflight
+
+```
+RUN PREFLIGHT
+
+TRAINEE   Rice Shower     SCENARIO  Trackblazer
+PROFILE   Standard 60 / 300 / 300 (confirm in game)
+
+CHECKPOINTS
+ ✓ Junior 60 GP reachable (plan 100, floor 52)
+ ⚠ Floor is under target: needs 1+ win
+ ✓ Classic / Senior reachable
+
+RACE COVERAGE      ✓ Mile B  ✓ Medium A  ○ Long A
+DECK               ✓ Race Bonus 56%   ⚠ Stamina coverage low
+ROUTES             ✓ 3 epithet routes planned
+YEAR-END GATES     ⚠ Akikawa bond plan needed (19 / 31 / 51)
+SECRET EVENTS      ✓ Plan does not depend on any
+
+RULE CONFIDENCE
+ GP table, coin table, shop    community-sourced
+ Checkpoint profile            confirm in game
+
+[ START CAREER ]
+```
+
+---
+
+### 8. The Career Cockpit
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│ TRACKBLAZER                          CLASSIC • TURN 31 • Energy 54  │
+├─────────────────────────────────────────────────────────────────────┤
+│ GRADE POINT RUNWAY            period needs 300                      │
+│ ███████████░░░░░░░░░  172 / 300    128 short • 9 turns left        │
+│ Races that fit: 2 G2 wins + 1 G3 win ≈ 220                          │
+├─────────────────────────────────────────────────────────────────────┤
+│ COINS  210       SHOP refresh in 3 turns      ITEMS 7 (cap 5/item) │
+│ RACE FATIGUE  2 consecutive races  → next race: see table          │
+├─────────────────────────────────────────────────────────────────────┤
+│ ★ RECOMMENDED: RACE (G2, mile)                                      │
+│                                                                     │
+│ 1st  +80 GP  +100 coins   2nd  +48 GP  +60 coins   3rd  +32 GP  +60 │
+│                                                                     │
+│ WHY                                                                 │
+│ You are 128 GP short with 9 turns left. A G2 win is worth 80.       │
+│ Training Speed here gains less than the checkpoint risk costs.      │
+│ ⚠ A third consecutive race raises fatigue risk (60% Mood Down).     │
+│                                                                     │
+│ [ RACE ]                                                            │
+│                                                                     │
+│ Alternatives                                                        │
+│ ○ Train Wit: safer, +energy, does not move the runway               │
+│ ○ Rest: clears the race chain, loses a turn of GP                   │
+│ ○ Use Good-Luck Charm, then train Power: 0% failure for 1 turn      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+Every number in that wireframe is illustrative. The tie to sources:
+
+- 80 GP and 100 coins are the G2 first-place values. Source: `SCENARIO-PUBLISHER-REFERENCES.md` lines 92-99 and 116-121.
+- 48 GP is 80 × 60%. Source: line 107.
+- The fatigue figure comes from the table in section 10.
+
+Two design points:
+
+- The Race Desk should show the same breakdown for any race the Trainer picks. I would not display an exact placement probability, and I would show the 1st, 2nd and 3rd branches instead.
+- After a period's threshold is met, further Grade Points do not help the checkpoint. The Advisor should say so ("checkpoint met; this race is now worth coins, stats and epithet progress only"). Races still pay coins, stats and fans after that.
+
+---
+
+### 9. Advisor Priority Hierarchy
+
+1. Don't end the run. This is Grade Point feasibility at the next checkpoint, plus the debut race (which costs energy here).
+2. Don't wreck the run. This covers energy floors and race fatigue.
+3. Route integrity. An epithet needs every race in its route won, so a skipped race can break a route.
+4. Economy. This is the coin bank, the shop rotation, the Summer stockpile and the finale reserve.
+5. Training target.
+6. Optimization.
+
+The explanation shape stays the same: recommendation, reason, alternatives. For example, "Speed gives the most raw stats, but a race is better now because you are 128 GP short."
+
+---
+
+### 10. Race Fatigue Panel
+
+Consecutive races matter more here than in any other scenario. uma.guide publishes the odds of the fatigue event by consecutive-race count. Show the row for the current count:
+
+```
+RACE FATIGUE          chain so far: 2
+
+                       1 race   2 races   3 races   4+ races
+Mood Down (1+ energy)    0%       0%        60%       100%
+Mood Down (0 energy)    15%      33%       90%+      100%
+Skin Outbreak (1+)       0%       0%        15%        33%
+Skin Outbreak (0)        4%       8%        25%        33%
+3 random stats -10 (any)  0%       0%         0%        40%
+
+Cannot occur after late December.
+Guaranteed recovery events: Classic early Feb (+1 mood), early Mar (+20
+energy), late Sep (+1 mood); Senior late Jun (+20 energy), late Oct (+1
+mood), late Dec (+30 energy).
+```
+
+Source: `SCENARIO-PUBLISHER-REFERENCES.md` lines 229-242.
+
+Items mitigate this, so the Advisor should factor in what the Trainer is holding. The guide says to race without fear if you hold the right items. Two caveats:
+
+1. The guide does not say whether "3 races" counts the upcoming race or the ones already run. Show the exact row being read, and flag the convention as unverified.
+2. "After late December" does not say which year.
+
+---
+
+### 11. Shop Drawer (In the Cockpit, Not a Separate Page)
+
+The shop is used almost every turn, so it should be a drawer in the cockpit. Display the rules the game imposes:
+
+- The shop is locked until the Debut race. (`SCENARIO-PUBLISHER-REFERENCES.md` line 374)
+- It refreshes every 6 turns. (line 375)
+- A maximum of 5 copies per item. (line 376)
+- Race-triggered items last 3 turns.
+- Sales are 10% to 20%. (line 379)
+- Multi-turn items cannot be used while still active. (line 380)
+- A lower-grade item used before a higher one is wasted, and the reverse is not possible. (line 380)
+
+```
+SHOP                                coins 210   refresh in 3 turns
+
+★ ADVISOR      Keep 100+ coins: Summer starts in 6 turns and the shop resets then
+
+Master Cleat Hammer    40   +35% race bonus, 1 turn     held 1/5
+Empowering Megaphone   70   +60% training, 2 turns      held 2/5
+Reset Whistle          20   shuffle support cards       held 0/5
+Good-Luck Charm        40   0% failure, 1 turn          held 1/5
+Vita 65                75   +65 energy                  held 0/5
+
+Community tags (uma.guide, opinion): Must Buy / Skip
+```
+
+Keep community opinions visibly separate from game rules. Items you will want to track:
+
+- Training Applications (150 coins) permanently raise a facility level for the run. (line 433)
+- Grilled Carrots (40) give +5 bond to all supports. (line 411)
+- Yummy Cat Food (10) gives +5 Akikawa bond. uma.guide says to skip it (line 317), but section 14 gives a case where it matters.
+- Scholar's Hat (280 coins) — "the equivalent of 3 first-place wins" — grants the Fast Learner discount on skill hints. (line 443)
+- Stat books at +7 or +15, avoid the +3 ones — recommended purchase tiers. (line 444)
+- Royal Kale Juice restores 100 Energy at the cost of 1 Mood; the mood debuff is fixed with a Cupcake. (line 445)
+- Cleat Hammers do not stack: Master Cleat Hammer used after Artisan Cleat Hammer gives only the 35% from the Master, not a combined 55%. (line 447)
+- Empowering Megaphone (60% training boost, 2 turns) overwrites an earlier Coaching Megaphone. (line 446)
+
+Reserve rules from uma.guide, shown as guidance:
+
+- Keep at least 100 coins entering Summer. (line 271)
+- Stock two Megaphones for the four Summer turns. (line 275)
+- Save about 150 coins for the final shop. (line 297)
+- Save three Gold Hammers for the finale. (line 296)
+
+Full item list source: `SCENARIO-PUBLISHER-REFERENCES.md` lines 383-453; Summer Camp window: line 1225; cleat hammer stacking and Empowering Megaphone overwrite: lines 446-447.
+
+---
+
+### 12. Epithet Tracker
+
+Epithets pay random stats, and some give hints. Examples from uma.guide:
+
+- Lady: win the Oka Sho, Japanese Oaks and Shuka Sho, for 2 random stats +10.
+- Stunning: the Satsuki Sho, Japanese Derby and Kikuka Sho line, for +10.
+- Goddess: Lady plus three more races, for +15.
+- The dirt epithets: win 5, 10 or 15 dirt races, and 3, 4, 5 or 9 dirt G1s.
+
+Source: `SCENARIO-PUBLISHER-REFERENCES.md` lines 125-176 (epithet tables).
+
+Show each route as a chain: won, remaining, and whether it is still alive. If a race in a route is lost, grey the whole route out and say so.
+
+**Summer Camp.** Early July to Late August, in both Classic and Senior Years, training facilities reach temporary Level 5. This is the highest-value training window for the scenario, and cleat hammers / megaphones reserved for it pay the most. Source: `SCENARIO-PUBLISHER-REFERENCES.md` line 1225 (`[Both]`).
+
+---
+
+### 13. Year-End Gate (Unique Skill Level-Up)
+
+The gate is separate from Grade Points. In late December of each year the game picks the "Umamusume of the Year". uma.guide gives numeric thresholds:
+
+- Junior: 5,000 fans and Akikawa bond 19.
+- Classic: 60,000 fans and bond 31.
+- Senior: 120,000 fans and bond 51.
+
+GameTora describes the same gate as bar colors (blue 1 bar, blue 2 bars, green 3 bars) and says the fan and win requirements are unclear. The two are consistent if one bar is about 20 points. Treat the uma.guide numbers as single-source.
+
+```
+YEAR-END GATE  Classic, late December
+Fans         41,200 / 60,000     ⚠ 18,800 short
+Akikawa bond     24 / 31         ⚠ 7 short
+```
+
+Source: `SCENARIO-PUBLISHER-REFERENCES.md` lines 300-308.
+
+If bond is the shortfall, the Advisor can note that Yummy Cat Food costs 10 coins for +5. That is a derivation from the item list (line 410). uma.guide itself says to skip the item (line 317), so label the recommendation as derived, not sourced.
+
+---
+
+### 14. Twinkle Star Climax Briefing
+
+The finale is three races and three training turns. It is a mini-league, not an elimination bracket. Victory Points by placement:
+
+- 1st 10, 2nd 8, 3rd 6, 4th 4, 5th-6th 3, 7th-9th 2, 10th-13th 1, 14th and lower 0.
+- The maximum is 30, and the top total wins.
+
+```
+TWINKLE STAR CLIMAX PREFLIGHT
+
+FINAL STATS      SPD 1180  STA 1620  POW 1090  GUT 880  WIT 1210
+VICTORY POINTS   0 / 30 possible
+TRAINING TURNS   3  (hold a few training items)
+HAMMERS HELD     Gold 3   ✓ recommended: 3
+COINS            150      ✓ the finale races pay no coins
+```
+
+Per uma.guide, each finale race gives a base +10 to all stats, which is why the hammers matter. Winning also gives a hint for the Radiant Star skill. GameTora says the finale's distance and terrain depend on the races you ran across the three years, but does not give the rule, so it would not be modeled.
+
+Source: `SCENARIO-PUBLISHER-REFERENCES.md` lines 279-298 and 460-478.
+
+---
+
+### 15. What I Could Not Confirm
+
+1. **Short-distance turf checkpoints.** GameTora (page stamped 2026-03-12) says Curren Chan's profile is 60 / 200 / 300, with only the third objective reduced. uma.guide (2026-04-29) says sprinters with weak other aptitudes follow the dirt profile, 30 / 200 / 300. `config/scenarios.php` carries all three tracks (`standard` / `dirt_leaning` / `limited_turf_range`); `TrainingRun::gradeObjectives()` renders only `standard` and says so, because a wrong denominator is worse than a conservative one. Keep the profile editable and confirm in game. KI-15, OPEN.
+
+2. **Stat caps on Global.** RESOLVED. The GameTora data export `scenarios.json` (fetched 2026-09-27, after the 2026-07-01 update) carries Trackblazer `stats: [0, 700, 0, 0, 300]` over the 1200 base, confirming 1200 / 1900 / 1200 / 1200 / 1500 on Global. The config `cap_bonus` matches exactly, with `live_on_global` set to `2026-03-12`.
+
+3. **Names.** GameTora calls it the "Special Shop", and uma.guide calls it the "Coin Shop" or "Climax Store". Do not hard-code a display name until it is read from the client.
+
+4. **Placement modifiers.** RESOLVED. The 100/60/40/20/10% curve is confirmed `[Both]` — uma.guide prints it as a labeled table and GameTora records the same modifiers in prose ("proportionally lower"). Source: `SCENARIO-PUBLISHER-REFERENCES.md` lines 104-110.
+
+5. **Race stat table.** uma.guide's per-grade table gives base figures with Race Bonus and hammer scaling. The page excerpt does not say how the stat figure is split across stats, so treat the unit as unclear until checked.
+
+6. **Alarm Clock retries.** PARTIALLY RESOLVED. SCENARIO-PUBLISHER-REFERENCES.md:1223 confirms the per-career cap is **5 Alarm Clocks** ("the item that re-runs a race you failed to win, up to 5 per career"), not three per run as the wiki stated. The resume point remains unconfirmed: the wording is *that race*, not a period start (UMAMUSUME_REFERENCE.md §2.2.3). Which turn the retry resumes on is unstated by any source.
+
+7. **Finale selection rule, and which year "after late December" means in the fatigue rule.**
+
+What I would not build:
+
+- A fixed "best route" that plays itself. Trainer decides, assistant advises.
+- A placement-probability number. The game does not publish one.
+- A hard-coded shop tier list presented as a game rule.
+
+---
+
+### MVP Screen Set
+
+1. Trainer Home
+2. Trainee & Target
+3. Legacy Lab
+4. Support Deck Builder
+5. Route Planner
+6. Run Preflight
+7. Career Cockpit (with the Race Desk and Shop drawer)
+8. Checkpoint & Finale Briefing
+9. Career Report / Veteran
+
+#7 should again get most of the design effort. The route planner is the screen that has no equivalent in Grand Concert.
+
+---
+
+### 16. DECISION CONTRACT
+
+Every recommendation the Advisor produces follows this shape — it must not be a bare action label:
+
+1. **Current state and immediate objective.**
+2. **Recommended action** and expected benefit (with numbers).
+3. **Best alternative** and its trade-off.
+4. **Confidence** — verified, derived, configurable, or unknown — with the source badge.
+5. **Conditions that would change the recommendation.**
+
+Example:
+
+> **★ RECOMMENDED: RACE (G2, Mile)**
+>
+> You need 128 GP this period with 9 turns left. A G2 win is worth 80; the floor (2nd–3rd) is 48.
+>
+> - **Race G2 Mile:** +80 GP (1st), +100 coins, advances route progress.
+> - **Alternative — train Speed:** +stats but 0 GP; checkpoint risk remains.
+> - **Confidence: verified** (GP values, `SCENARIO-PUBLISHER-REFERENCES.md` lines 92–99).
+> - **Switch if:** fatigue chain hits 3 (60% Mood Down), or a Summer Camp turn opens (bank coins first).
+
+---
+
+### 17. RACE CALENDAR PANEL
+
+Trackblazer is race-driven, so the race calendar deserves a dedicated panel in the cockpit — not just the route planner's period view.
+
+```
+RACE CALENDAR                Classic • Turn 31
+
+UPCOMING RACES                             DISTANCE / SURFACE
+• G2 Mile (Satsuki Sho qualifier)           Mile / Turf
+  → 4 turns                                Win: +80 GP, +100 coins
+• G3 Sprint (fill-in)                       Sprint / Turf
+  → 2 turns                                Win: +60 GP, +80 coins
+• G1 Long (Derby lead-up)                   Long / Turf
+  → 18 turns                               Win: +100 GP, +150 coins
+
+CONSEQUENCES OF SKIPPING
+• G2 Mile: +1 route gap → Spring Champion route at risk
+• G3 Sprint: no impact on epithet progress
+• G1 Long: -100 GP from runway, -150 coins from economy
+
+ADVISOR: Race the G2 Mile now. You are 128 GP short with 9 turns left.
+```
+
+Source values: GP per grade from §6 (G1 100, G2 80, G3 60), placement modifiers from §6.
+
+---
+
+### 18. SCHEDULE RISK WARNINGS
+
+The cockpit should surface five risk types as flags, each with a severity level:
+
+| Risk                     | Trigger                              | Severity | Mitigation                                  |
+| ------------------------ | ------------------------------------ | -------- | ------------------------------------------- |
+| Race density             | 3+ consecutive races without rest    | High     | Insert rest turn or use recovery item       |
+| Fitness deficit          | 2+ consecutive races at 1 energy      | Medium   | Hold Vita 65 or Good-Luck Charm             |
+| GP shortfall             | Floor projection < checkpoint target  | High     | Race higher-grade or use Master Cleat       |
+| Coin shortfall           | < 100 entering Summer                 | Medium   | Race an extra G2 before Summer              |
+| Epithet decay            | Lost race in an active route          | High     | Grey the route; abandon or replan           |
+
+Source: fatigue table §10, coin reserves §11, GP values §6, epithet rules §12, checkpoint tables SCENARIO-PUBLISHER-REFERENCES.md §7.
+
+---
+
+### 19. RESOURCE LEDGER
+
+A persistent ledger tracks coins, items, and expected income/expense across the remaining career.
+
+```
+RESOURCE LEDGER                    Classic • Turn 31
+
+COINS
+  Current:          210
+  Projected inflow: +180 (2 races)
+  Projected cost:   -120 (2 Megaphones + Hammer)
+  Summer reserve:   100 (target)
+
+ITEMS
+  Good-Luck Charm   1/5   ✓ hold for fatigue risk
+  Master Cleat       1/5   ⚠ use before G1 Long (next race)
+  Empowering Meg.    2/5   ✓ Summer stock: 2 held, need 2 more
+
+ADVISOR: Hold 100+ coins: Summer starts in 6 turns and the shop resets then.
+```
+
+Rules: shop locked until Debut (§11), refresh every 6 turns (§11), 5 copies per item max (§11), Summer Camp window (§12).
+
+---
+
+### 20. ACCEPTANCE CRITERIA
+
+| Feature                    | Success Criterion                                                                 | Edge Case                              |
+| -------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------- |
+| Race Calendar panel        | Shows next 3 races, distances, GP/coin values, and skip consequences              | No eligible races in upcoming period    |
+| Schedule risk warnings     | Flags fatigue chains, GP shortfalls, and coin shortfalls before they bite         | All risks resolved (empty flag set)     |
+| Resource ledger            | Tracks coins + 5 key items, forecasts to Summer and Finale                       | Item held at 5/5 cap                    |
+| Checkpoint projector       | Shows needed, planned (wins), and floor (2nd–3rd) for each GP period             | Current period already failed           |
+| Route tracker              | Greys out routes when a race is lost, tracks remaining per route                  | Rival races random (cannot schedule)    |
+| Recommendation reconciliation | Predicted outcome vs actual entry updates run state and flags deviation        | User edits state manually              |
+
+---
+
+### 21. VERIFICATION STATUS
+
+Each feature carries one of three levels — never collapsed:
+
+- **Implemented** — the code exists and the behavior is connected.
+- **Verified** — automated tests or reproducible manual checks demonstrate the intended behavior.
+- **Game-validated** — calculations have been compared against authoritative mechanics or observed in-game.
+
+A page that renders is not verified. A verified calculation can still rest on an incorrect understanding of the game. This distinction is tracked per feature.
+
+---
+
+### 22. IMPLEMENTATION AND TESTING PLAN
+
+| Phase                      | Deliverable                                                                     | Completion evidence                                              |
+| -------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 0. Reconnaissance          | Inspect existing scenario code, plans, contracts, routes, data models and tests | Inventory of existing, partial, missing and conflicting behavior |
+| 1. Rules audit             | Document verified scenario mechanics and unresolved assumptions                 | Source-backed rules and explicit unknowns                        |
+| 2. State model             | Define run state, transitions, persistence and validation                       | Tests for valid and invalid state changes                        |
+| 3. Decision engine         | Implement scenario-specific candidate evaluation and ranking                    | Deterministic tests using known inputs and expected outputs      |
+| 4. Command center          | Build the primary screen around the next actionable decision                    | UI tests for loading, empty, error, stale and normal states      |
+| 5. Reconciliation          | Compare predicted versus actual outcomes                                        | Tests for updating run state without losing history              |
+| 6. End-to-end verification | Exercise complete careers and edge cases                                        | Reproducible scenarios, regression results and completion report |
+
+**Trackblazer focus:** phase 3 builds the Grade Point rules engine (GP per grade, placement modifiers, coin payouts, fatigue odds). Phase 4 builds the Race Desk and Shop drawer. Phase 5 adds reconciliation for race outcomes (predicted GP vs. actual placement). Phase 6 validates checkpoint feasibility against in-game captures.
+
+---
+
+### 23. PRIORITY MATRIX
+
+| Priority | Scope                    | Rationale                                                  |
+| -------- | ------------------------ | ---------------------------------------------------------- |
+| P0       | Canonical run state, GP rules, regression tests | Protects the trustworthiness of the race-driven scenario     |
+| P1       | Next-action recommendations, deadline tracking, risk warnings | Turns Cockpit from display into a command center          |
+| P2       | Resource forecasting, route optimization, matchup analysis | Materially affects coin and GP planning                   |
+| P3       | Keyboard-friendly controls, richer historical analytics | Convenience only                                           |
+
+---
+
+### Note on Grand Concert Write-Up
+
+The Grand Concert write-up uses GameTora's wording (Hype, Mental, Vocal and Visual). The reference's section 2.9 has Cygames' official Global copy for the same objects (Live Performance Expectations, Composure, Vocals, Visuals). That is worth a pass before it goes into a spec.
+
+---
+
+## Unity-Cup-plan.md
+
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/Unity-Cup-plan.md` (561 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+
+## Unity Cup Plan
+
+This document defines the Unity Cup scenario for Trainer Desk. It is written in the same architectural style as the Trackblazer plan: it assumes the shared cockpit frame, the three-layer model (Trainer Home, Career Cockpit, Advisor), decision cards, visible uncertainty, and the Veteran loop, all of which carry over unchanged. Only the Unity Cup-specific deltas are spelled out here.
+
+### Sources
+
+- Your `UMAMUSUME_REFERENCE.md` (sections 1.3.4, 2.1, 2.2.2, 2.5)
+- [GameTora, Unity Cup Scenario](https://gametora.com/umamusume/unity-cup) (last updated 2026-07-20)
+- [Game8, Unity Cup Guide](https://game8.co/games/Umamusume-Pretty-Derby/archives/545572) (returned pre-update copy)
+- [uma.guide, Unity Cup Deckbuilding Guide](https://uma.guide/guides/unity-cup-deckbuilding-guide) (last updated Feb 2, 2026)
+- [uma.guide, Special Scaling Skills](https://uma.guide/guides/skills-special-scaling)
+
+Unity Cup changed a lot on Global on 2026-07-01. The Game8 page returned the pre-update values (older training bonuses, no Extreme Spirit Burst). GameTora (updated 2026-07-20) supplied every post-update number. Game8 and uma.guide supply the schedule, deck advice, and team-name data, which are tagged where they predate the update.
+
+---
+
+### 1. THE CENTRAL UX CONCEPT
+
+Unity Cup is URA with a second thing to raise: your team. The persistent question becomes:
+
+> Which training turn builds the most team and trainee value, and should I cash a Spirit Burst now or bank it?
+
+Facility levels no longer rise with use. They are set by your team's stat rank for that training type (F/G = Lv1, D/E = Lv2, B/C = Lv3, A = Lv4, S = Lv5). So training with teammates is also how you raise your own training bonuses.
+
+```
+   TRAIN WITH TEAMMATES (white flames)
+        │
+        ├─► spirit gauge fills ──► SPIRIT BURST ──► big member stats, trainee stats,
+        │                                            skill hint
+        │                              │
+        │                              └─► EXTREME BURST (once per member, after
+        │                                   normal): 0% failure, raises member caps,
+        │                                   Ignited Spirit hint
+        ▼
+   TEAM STAT RANKS rise ──► FACILITY LEVELS rise ──► better training
+        │
+        ▼
+   TEAM RACES every 6 months (5 races vs an NPC team) ──► league rank, stats
+        │
+        ▼
+   ZENITH FINALS ──► then the three URA Finals races
+```
+
+The race calendar and career goals are the URA ones. The "extra sprinkle" is entirely the team layer.
+
+The defining design principle: the Advisor must compare two kinds of value — what a training action gives the trainee now, versus what it contributes to the team and to future training opportunities. The UI should make that trade-off legible, not just report the numbers.
+
+---
+
+### 2. SCENARIO SELECT
+
+```
+UNITY CUP
+Team career. Spirit Bursts, team races, Zenith finals.
+
+Stat caps   SPD 1300  STA 1300  POW 1300  GUT 1300  WIT 1800
+Facility levels set by team rank, not by use
+Scenario Link: Taiki Shuttle, Rice Shower, Haru Urara,
+               Matikanefukukitaru, Riko Kashimoto
+```
+
+The cap figures match both the reference and GameTora's current page. The five linked names are from the reference's scenario data; GameTora's article names four story characters plus Riko as the linked Pal card.
+
+---
+
+### 3. TRAINEE & TARGET (DELTAS)
+
+- Career goals and the fan gates are the URA ones, so keep that screen mostly as is.
+- The unique-skill level-up gates are 60,000 fans by Valentine's Day, 70,000 by early April, and 120,000 by late December of Senior year. Dirt-leaning trainees (Haru Urara, Smart Falcon) use 40,000 / 60,000 / 80,000.
+- Akikawa is absent here, so the April gate has no green-bond requirement.
+- Add a Team Name picker, chosen in late September of Junior year. The options depend on which linked character is your trainee or in your deck. Winning the finals grants a gold skill by name (Game8's pre-update table):
+
+| Team Name          | Linked Character        | Gold Skill Granted |
+|--------------------|-------------------------|--------------------|
+| Happy Hoppers      | Taiki Shuttle           | Mile Maven         |
+| Sunny Runners      | Matikanefukukitaru      | Clairvoyance       |
+| Carrot Pudding     | Haru Urara              | Indomitable        |
+| Blue Bloom         | Rice Shower             | Cooldown           |
+| Team Carrot        | (fallback)              | No Stopping Me!    |
+
+- Show cap headroom per stat. Wit is the outlier at 1800.
+
+---
+
+### 4. LEGACY LAB (DELTAS)
+
+- The scenario factor is "Unity Cup" and grants Power and Wit on inheritance.
+- Beating the strengthened Zenith makes it easier to get the scenario factor, and it unlocks the "+" versions of the scenario skill factors.
+- Linked characters get extra bonuses. Show them as a read-only list, since the badge is derived and not stored per card.
+
+---
+
+### 5. SUPPORT DECK BUILDER (DELTAS)
+
+The team is built from your deck, so the deck screen should show which slots become teammates:
+
+- Support cards (except Pals) become team members. They are the only members with a bond gauge, so they are the only ones that can do friendship training.
+- Story characters join early, and random characters join after each team race. These have no gauge, but they can take part in Special Training and Spirit Bursts.
+
+Deck guidance from uma.guide (Feb 2026, before the July update):
+
+- The framework is 2 Speed, 3 Wit, and Riko Kashimoto.
+- Riko is the linked Pal and is called a must-slot in most decks.
+- Race Bonus: aim for at least 35 total, up to 50 to 60 with multiple SSRs.
+- Power cards are weak here because you get Power mainly from Sparks. Stamina cards are best avoided.
+
+Present these as community guidance, and let the Trainer's own cards and distance goal override them. Show Race Bonus as a meter with markers at 35 and 50 to 60, labelled as guidelines.
+
+---
+
+### 6. TEAM PLANNER (NEW, AND THE KEY PRE-RUN SCREEN)
+
+This is the Unity Cup equivalent of the Route Planner. It turns the team layer into something the Trainer can plan before starting.
+
+```
+TEAM PLAN                                   Rice Shower • Blue Bloom
+
+TEAM MEMBERS (from your deck)
+ Speed SSR      ✓ team member
+ Speed SR       ✓ team member
+ Wit SSR        ✓ team member
+ Wit SSR        ✓ team member
+ Wit SR         ✓ team member
+ Riko (Pal)     ✗ not a team member, but linked: +energy, +events
+
+JOINS LATER   Story: Haru Urara, Rice Shower, Matikanefukukitaru, Taiki Shuttle
+              Random characters after each team race
+
+DISTANCE GROUPS (up to 3 per group)
+ Sprint   [ ]   Mile  [ ]   Medium [ ]   Long [ ]   Dirt [ ]
+
+TEAM RACE CALENDAR            Junior late Dec • Classic late Jun • Classic late Dec
+                              Senior late Jun • FINALS Senior late Dec
+```
+
+The race calendar comes from Game8's pre-update page, so it is tagged as such. The planner also reminds the Trainer that team members should sit in the distance where their aptitude is A.
+
+---
+
+### 7. RUN PREFLIGHT
+
+```
+RUN PREFLIGHT
+
+TEAM NAME     Blue Bloom → Cooldown (if finals won)       ✓ available
+DECK          Race Bonus 41%   ✓ above 35
+              Riko slotted     ✓
+TEAM PLAN     Wit cards: 3     ✓ burst/energy support
+              Stamina cards: 0 ✓
+GOALS         URA fan gates    ✓ planned
+ELITE TEAM    Needs league rank 10+, team rank A+, 1+ Extreme Burst by the 4th race
+              ⚠ none planned yet
+
+RULE CONFIDENCE
+ Burst/Extreme values (post-update)   GameTora, 2026-07-20
+ Race calendar                        Game8, pre-update
+```
+
+---
+
+### 8. THE CAREER COCKPIT
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│ UNITY CUP                           CLASSIC • TURN 31 • Energy 58    │
+├──────────────────────────────────────────────────────────────────────┤
+│ TEAM BOARD                  League rank 6 • Team rank B              │
+│            rank   facility                                           │
+│ Speed       A       Lv 4                                             │
+│ Stamina     C       Lv 3                                             │
+│ Power       C       Lv 3                                             │
+│ Guts        D       Lv 2                                             │
+│ Wit         B       Lv 3                                             │
+│ Next team race: 14 turns   Weakest group: Dirt                       │
+│ Bursts done: 5  (next skill breakpoint: 7)   Extreme done: 1         │
+├──────────────────────────────────────────────────────────────────────┤
+│ BURST BANK                                                           │
+│ Rice Shower (linked)  normal burst READY   best on: Stamina          │
+│ Fine Motion           gauge 70%                                      │
+├──────────────────────────────────────────────────────────────────────┤
+│ ★ RECOMMENDED: TRAIN STAMINA                                         │
+│                                                                      │
+│ 4 flames: +6 Stamina, +3 Guts, +5 SP (Special Training)              │
+│ Rice Shower burst (linked): +20 Stamina, +10 Guts, +10 SP            │
+│                                                                      │
+│ WHY                                                                  │
+│ Cashing the burst here raises your weakest team stat and moves       │
+│ Stamina toward B (facility Lv 3 → Lv 3). No energy penalty.         │
+│ ⚠ Banking it for a Wit tile gives less because Rice Shower's         │
+│   burst is a Stamina one.                                            │
+│                                                                      │
+│ [ TRAIN STAMINA ]                                                    │
+│ Alternatives                                                         │
+│ ○ Wit: +energy, burst not ready for it                               │
+│ ○ Optional race: only if a goal requires it                          │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+All numbers in that wireframe are illustrative except where tied to a table:
+
+- The 4-flame row and the linked burst values come from GameTora's post-update tables.
+- The rank-to-level mapping is the published one (F/G = Lv1, D/E = Lv2, B/C = Lv3, A = Lv4, S = Lv5).
+
+Two behaviours to build in:
+
+#### Flame triggers
+
+Flames are the trigger. A training only pays the extra Special Training stats when it has at least 2 white flames. GameTora's per-flame table for Speed, Stamina and Power:
+
+| Flames | Primary | Secondary | SP |
+|--------|---------|-----------|-----|
+| 2      | 2       | 1         | 3   |
+| 3      | 4       | 1         | 3   |
+| 4      | 6       | 3         | 5   |
+| 5      | 10      | 5         | 7   |
+
+#### Bursts can be held
+
+Per GameTora, "you don't have to trigger it at the first opportunity", and an unused burst can come back on another facility. That is why the Burst Bank exists.
+
+---
+
+### 8a. TEAM BOARD (PERMANENT COCKPIT ELEMENT)
+
+The Team Board is a permanent fixture of the Career Cockpit — not a one-off pre-race screen, but a continuously visible summary that makes the team-development trade-off legible on every turn. It should support manual team assignments, show each member's aptitude and available skills, track development through training, and forecast which categories need attention before the next showdown.
+
+```
+UNITY CUP · TEAM BOARD                      Classic • Turn 31 • Energy 58
+
+OVERALL TEAM RANK           A
+NEXT CUP                    4 turns
+
+FACILITY PROGRESSION
+Speed       A → Lv 4        (rank determines facility level)
+Stamina     B → Lv 3
+Power       A → Lv 4
+Guts        C → Lv 2
+Wit         B → Lv 3
+
+TEAM STAT RANKS
+Speed       A                Mile       Review mile aptitude and available skills
+Stamina     B                Medium     Review balanced race coverage
+Power       A                Long       Review stamina and long-distance skills
+Guts        C                Dirt       Review dirt aptitude and available racers
+Wit         B
+
+ADVISOR PRIORITY
+Develop weak team categories (Guts → B), improve facility ranks,
+and assign the most suitable available racers before the next Cup.
+```
+
+The Team Board tracks four things the Trainer needs on every turn:
+
+1. **Overall team rank** — the aggregate that determines Zenith-finals eligibility.
+2. **Facility progression** — the rank-to-level mapping for each stat, derived from team stat ranks, shown as the current rank transitioning to the next level.
+3. **Team stat ranks** — the five-letter-rank grid (Speed, Stamina, Power, Guts, Wit), the same scale that drives facility levels.
+4. **Team race coverage** — a distance-by-distance checklist (Sprint, Mile, Medium, Long, Dirt) that surfaces aptitude and available-skill gaps per category.
+
+All values must come from the actual team data via `TrainingRun::gradeObjectives()` and the rules engine; the wireframe above is illustrative only.
+
+---
+
+### 9. ADVISOR PRIORITY HIERARCHY
+
+1. **Don't end the run.** The URA goal races, fan gates, and energy come first, and the Alarm Clock covers goal-race failures.
+2. **Team race readiness.** How many turns until the next race, which distance group is weakest, and whether a loss would drop the league rank.
+3. **Burst economics.** Cash or bank, which facility, and progress toward the 4 / 7 / 10 / 13 burst-count breakpoints.
+4. **Facility levels.** These are derived from team ranks, so show what a training does to the rank.
+5. **Training target.**
+6. **Optimization.**
+
+Each recommendation must carry a dual-value readout: the trainee gain this turn versus the team-gain / future-opportunity cost. The Advisor should make that trade-off explicit rather than collapsing it into a single number.
+
+An optional race is rarely worth a turn here. Game8 says to skip non-goal races in favour of teammate training, because a race turn is a turn not spent developing the team.
+
+---
+
+### 10. BURST BANK AND EXTREME BURSTS
+
+This is the new mechanic, so it gets its own panel. For each team member, show:
+
+- Gauge progress (a full gauge means the next Special Training with them bursts).
+- Whether the normal burst is ready, and whether the Extreme burst is unlocked (it appears for that member during the next Unity Training after their normal burst).
+- Where cashing it pays most. The stat bonus depends on the facility.
+
+Values to load as data (GameTora, post-update):
+
+#### Normal burst — Speed tile
+
+| Variant   | Speed | Power | SP  |
+|-----------|-------|-------|-----|
+| Base      | +15   | +7    | +5  |
+| Linked    | +20   | +10   | +10 |
+
+#### Extreme burst — Speed tile
+
+| Variant   | Speed | Power | SP  |
+|-----------|-------|-------|-----|
+| Base      | +20   | +10   | +15 |
+| Linked    | +25   | +15   | +20 |
+
+#### Wit tile
+
+- Normal burst: +15 Wit and +2 Speed. A burst on a Wit tile adds +5 energy recovery.
+- Bursts are additive, so there is no bonus for stacking several.
+- The hint level from a burst is the card's hint bonus plus 2, and one more for linked cards. The hint comes from the support card's own pool.
+
+An Extreme burst also sets that turn's failure chance to 0%, raises the member's stat caps, and gives a hint for the Ignited Spirit skill for that facility. Treat it as a zero-risk turn when planning energy.
+
+---
+
+### 11. TEAM RACE BRIEFING (EVERY SIX MONTHS)
+
+```
+TEAM RACE 2 of 4                    Classic late June
+League rank 6      Alarm Clocks 2
+
+OPPONENT (top = strongest)
+ ○ Strong     rank if won: (read from game)
+ ○ Medium
+ ○ Weak
+
+TAZUNA'S OVERVIEW (enter what the game shows)
+ Sprint ●●○   Mile ●○○   Medium ●●●   Long ●●○   Dirt ○○○
+ Total circles: 8  ✓ ≥ 3 is the "safe" reading
+
+WIN CONDITION   3 of 5 races won → league rank rises. Lose → it falls.
+```
+
+Rules to encode:
+
+- A team race is five races, one each of Sprint, Mile, Medium, Long and Dirt.
+- Winning at least three raises league rank, and a loss lowers it.
+- Alarm Clocks can be used on a team-race loss since the 2026-07-01 update.
+- GameTora says at least three circles in total is the generally safe reading of Tazuna's overview.
+
+#### ELITE TEAM (race 4 only)
+
+```
+ELITE TEAM (race 4 only)
+  League rank ≥ 10     ✓ 11
+  Team rank ≥ A        ✓ A
+  1+ Extreme Burst     ✓ 2
+  → option available. Winning gives extra stats and lets you face the
+    strengthened Zenith in the finals.
+```
+
+#### Team Roster Dashboard
+
+The briefing should also surface the team development layer — who needs what, and whether they can deliver at the next Cup:
+
+```
+TEAM ROSTER                      League rank 6 • Next Cup in 4 turns
+
+Member            Stat focus     Rank  Needs before Cup       Contribution
+Rice Shower       Stamina        B     +30 Sta for race 2     Burst: Stamina tile
+Fine Motion       Speed          A     —                      Burst: Speed tile (Lv 2)
+Biwa Hayahide     Power          C     +50 Power, +2 wins     Epithet: Goddess route
+Silence Suzuka†   Guts           D     Bond 2 bars, +40 Guts  Burst: Guts tile
+Mejiro Ryan†      Wit            C     +30 Wit                 Burst: Wit tile
+
+† Story characters (no bond gauge, no Friendship training)
+```
+
+This makes the trade-off explicit: training Rice Shower's Stamina this turn raises a facility level for everyone, but leaves Biwa at C rank for the next Cup.
+
+#### Tournament Readiness
+
+```
+TOURNAMENT READINESS                    Classic late June • Next Cup in 4 turns
+
+OPPONENT PROJECTIONS (top = strongest)
+  ○ Strong     rank if won: A+          ⚠ Rice Shower needs +30 Stamina for Guts races
+  ○ Medium     rank if won: B           ✓ Biwa's Power is borderline
+  ○ Weak       rank if won: C
+
+RACE PREVIEW
+  Sprint     Stamina 580      ✓ covered (Rice Shower +20 from burst)
+  Mile       Power 920        ⚠ borderline (Fine Motion +30 needed)
+  Medium     Speed 1010       ✓ covered
+  Long       Stamina 1180     ✓ covered
+  Dirt       Guts 640         ⚠ low (Mejiro Ryan bond not ready)
+
+UNRESOLVED RISKS
+  • Mejiro Ryan Dirt Guts: no Spirit Burst hint unlocked yet
+  • Biwa Hayahide: C rank in Power → facility stays at Lv 3
+```
+
+---
+
+### 12. FINALS BRIEFING
+
+```
+UNITY CUP FINALS                Senior late December
+
+OPPONENT       Zenith  (strengthened if the elite team was beaten)
+TEAM RANK      S   → "It's On" hint (+3 levels with a linked trainee)
+               S+  → one more hint level (new rank in the July update)
+
+BURST COUNT    9   breakpoints: 4 / 7 / 10 / 13
+SKILL EVENT    "Team Zenith Declares War", Senior late November:
+               skill type follows your highest team stat rank
+
+THEN: the three URA Finals races.
+```
+
+The late-November event gives hint levels by burst count (GameTora):
+
+| Bursts | Hint Level | Bonus |
+|--------|------------|-------|
+| 4+     | white Lv1  | +10   |
+| 7+     | white Lv3  | +20   |
+| 10+    | gold Lv1   | +30   |
+| 13+    | gold Lv3   | +40   |
+
+The skill's strength scales with team total stats. uma.guide's example is that 3,580 total Speed gives a 1.1x multiplier.
+
+---
+
+### 13. CAREER REPORT
+
+Unity Cup specifics for the report: final team ranks per stat, league rank, bursts and Extreme bursts, team races won, whether the elite team and strengthened Zenith were beaten, and which gold skill the team name earned. Then offer "Promote to Veteran" as before.
+
+---
+
+### 14. WHAT I COULD NOT CONFIRM
+
+1. **Rank stat thresholds.** GameTora says members are ranked by the average of their stats, but no source read gives the stat-value boundary for each letter rank. Read the rank from the game, and only project a rank if the rule becomes available.
+
+2. **Burst payout split.** The table shows total gains but does not state how much goes to the teammate versus the trainee (the scenario guide says "a large boost to the teammate, a moderate boost to your trainee" but gives no ratio). The Advisor shows the table total and does not split it.
+
+3. **Burst-count breakpoints.** RESOLVED. Post-update sources agree on four non-overlapping bands: 4–6, 7–9, 10–12, 13+ (docs/scenarios/02-unity-cup.md:209-218, SCENARIO-PUBLISHER-REFERENCES.md:1105-1108, config `spirit_burst_bands`). The earlier "4 to 9" / "7 to 9" overlap was pre-rework; the corrected values are non-overlapping and the plan's 4 / 7 / 10 / 13 breakpoints are confirmed.
+
+4. **Event timing.** RESOLVED. Post-rework sources place the burst-count skill event at **Senior Year, Late November** (docs/scenarios/02-unity-cup.md:220, SCENARIO-PUBLISHER-REFERENCES.md:1109). The Game8 extract that printed "Early November" was pre-update; the plan correctly adopted Late November.
+
+5. **Elite team colour.** RESOLVED. The elite team's background is **pink/purple** — the discrepancy was that GameTora's update-list entry used "purple" for Extreme Spirit Bursts while a later section used "pink" for the elite team itself; both colours describe the same pink/purple background (docs/scenarios/02-unity-cup.md:174, SCENARIO-PUBLISHER-REFERENCES.md:1095, UX-DELIVERABLES.md:3058).
+
+6. **Pre-update Game8 data.** Game8's team-rank all-stat bonuses (F +2 up to S +5) and its "rank 5 gives +50" claim before the finals predate the update, so they are left out.
+
+7. **Calendar.** RESOLVED. All five team-race dates are confirmed from post-update sources: Round 1 Junior Late Dec, Round 2 Classic Late Jun, Round 3 Classic Late Dec, Round 4 Senior Late Jun, Finals Senior Late Dec (SCENARIO-PUBLISHER-REFERENCES.md:1021-1025, docs/scenarios/02-unity-cup.md:141-147).
+
+8. **"Result Pts".** RESOLVED. DESIGN-CORPUS.md:1174, 1215, 3612 and 4258 record `Result Pts` as an observed Unity Cup UI counter, measured from captured frames alongside Team Rank and Spirit Burst counts. The term reaches the repo from client captures, not just the reference.
+
+9. **Pal membership.** RESOLVED. docs/scenarios/02-unity-cup.md:56 and :261 state explicitly: "Pal-type cards are excluded from the team roster, so a Pal buys you no Spirit Bursts at all." The GameTora team description is corroborated by the scenario guide.
+
+10. **Alarm Clock limits on team-race retries.** PARTIALLY RESOLVED. The 2026-07-01 rework added Alarm Clock retry on a lost Team Race, confirmed live (SCENARIO-PUBLISHER-REFERENCES.md:577, :661, :1016; docs/scenarios/02-unity-cup.md:151; config `loss_retryable_with_alarm_clock`). The general per-career cap ("up to 5 Alarm Clocks per career", SCENARIO-PUBLISHER-REFERENCES.md:1223) is from the data export but is not Unity-Cup-specific; the per-run allowance and resume turn for a team-race retry remain undocumented.
+
+11. **Names.** Team names and skill names are from English guides, not captured client strings.
+
+---
+
+### WHAT I WOULD NOT BUILD
+
+- An auto-player.
+- Fake win-probability numbers for team races (use Tazuna's circles as entered).
+- A fixed "best deck" that overrides the Trainer's collection.
+
+---
+
+### MVP SCREEN SET
+
+1. Trainer Home
+2. Trainee & Target
+3. Legacy Lab
+4. Support Deck Builder
+5. Team Planner
+6. Run Preflight
+7. Career Cockpit (with Team Board and Burst Bank)
+8. Team Race & Finals Briefing
+9. Career Report / Veteran
+
+#7 gets most of the design effort again, and the Team Planner has no equivalent in URA.
+
+The following table maps the recommended MVP features to the screen set above for implementation prioritisation:
+
+| Priority | Feature                  | Screen(s)                | Why it matters                                                |
+| -------- | ------------------------ | ------------------------ | ------------------------------------------------------------- |
+| 1        | Career Cockpit           | #7                       | Integrates trainee growth and team development                |
+| 2        | Team Board               | #7 (permanent panel)     | Tracks members, aptitude, ranks and race coverage             |
+| 3        | Unity Training evaluator | #7                       | Identifies valuable multi-member training                     |
+| 4        | Spirit Burst planner     | #7 (§10 Burst Bank)      | Tracks gauges and helps time burst opportunities              |
+| 5        | Unity Cup match planner  | #8                       | Evaluates opponents and five-race team assignments            |
+| 6        | Support Deck Builder     | #4                       | Balances scenario-linked effects, training and skill coverage |
+| 7        | Career Report / Veteran  | #9                       | Preserves trainee outcomes and team-development history       |
+
+---
+
+### 17. DECISION CONTRACT
+
+Every recommendation the Advisor produces follows this shape — it must not be a bare action label:
+
+1. **Current state and immediate objective.**
+2. **Recommended action** and expected benefit (with numbers).
+3. **Best alternative** and its trade-off.
+4. **Confidence** — verified, derived, configurable, or unknown — with the source badge.
+5. **Conditions that would change the recommendation.**
+
+Example:
+
+> **★ RECOMMENDED: TRAIN STAMINA**
+>
+> You are 18,800 fans short of the Classic gate with 8 turns remaining, and Stamina is below the Medium-distance floor.
+>
+> - **Train Stamina (Lv 3):** +6 Sta, +3 Guts, +5 SP. Facility is 4/12 to Lv 4.
+> - **Alternative — race a G3 (Mile):** +100 coins, +60 GP if 1st, but consumes energy and risks Mood Down from fatigue.
+> - **Confidence: verified** (facility level by repetition, config `facility_level_source = 'repetition'`).
+> - **Switch if:** Summer camp starts in 6 turns (bank energy first), or Akikawa bond reaches 3-bar (Fan Fest gate opened).
+
+---
+
+### 18. ACCEPTANCE CRITERIA
+
+Each planned feature ships with concrete success conditions:
+
+| Feature                    | Success Criterion                                                                 | Edge Case                                  |
+| -------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------ |
+| Career Cockpit             | Shows trainee stats, team ranks, burst gauges, and next cup date in a single view | Team member has zero bonds                 |
+| Team Board                 | Tracks 5+ members, surfaces weak race categories, updates after training          | All members at S rank (no upgrades left)   |
+| Spirit Burst planner       | Warns when a burst is missed (turn passed without cashing)                        | Burst ready on multiple members simultaneously |
+| Unity Training evaluator   | Identifies multi-member trainings worth 3+ flames                                 | No teammates available for a facility      |
+| Unity Cup match planner    | Assigns 5 racers to 5 distances, highlights missing aptitudes                     | Fewer than 5 eligible team members         |
+| Recommendation reconciliation | Predicted outcome vs actual entry updates the run state and flags deviation    | User edits state manually after the fact   |
+
+---
+
+### 19. VERIFICATION STATUS
+
+Each feature carries one of three levels — never collapsed:
+
+- **Implemented** — the code exists and the behavior is connected.
+- **Verified** — automated tests or reproducible manual checks demonstrate the intended behavior.
+- **Game-validated** — calculations have been compared against authoritative mechanics or observed in-game.
+
+An "Implemented and verified" feature can still rest on an incorrect understanding of the game. A page that renders is not verified. This distinction is tracked per feature, not per scenario.
+
+---
+
+### 20. IMPLEMENTATION AND TESTING PLAN
+
+| Phase                      | Deliverable                                                                     | Completion evidence                                              |
+| -------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 0. Reconnaissance          | Inspect existing scenario code, plans, contracts, routes, data models and tests | Inventory of existing, partial, missing and conflicting behavior |
+| 1. Rules audit             | Document verified scenario mechanics and unresolved assumptions                 | Source-backed rules and explicit unknowns                        |
+| 2. State model             | Define run state, transitions, persistence and validation                       | Tests for valid and invalid state changes                        |
+| 3. Decision engine         | Implement scenario-specific candidate evaluation and ranking                    | Deterministic tests using known inputs and expected outputs      |
+| 4. Command center          | Build the primary screen around the next actionable decision                      | UI tests for loading, empty, error, stale and normal states      |
+| 5. Reconciliation          | Compare predicted versus actual outcomes                                        | Tests for updating run state without losing history              |
+| 6. End-to-end verification | Exercise complete careers and edge cases                                        | Reproducible scenarios, regression results and completion report |
+
+**Unity Cup focus:** phase 4 builds the Team Board and Unity Training evaluator as integrated cockpit panels. Phase 5 adds reconciliation for Spirit Burst outcomes (predicted stat gain vs. actual). Phase 6 validates team-rank-to-facility-level math against in-game captures.
+
+---
+
+### 21. PRIORITY MATRIX
+
+| Priority | Scope                    | Rationale                                                  |
+| -------- | ------------------------ | ---------------------------------------------------------- |
+| P0       | Canonical run state, scenario isolation, regression tests | Protects the trustworthiness of team-development tracking  |
+| P1       | Next-action recommendations, deadline tracking, dual-value readout | Turns the cockpit from a display into a command center     |
+| P2       | Matchup analysis, support-deck optimization for team synergy | Materially affects tournament outcomes                     |
+| P3       | Keyboard-friendly controls, richer historical analytics | Convenience only                                           |
+
+---
+
+## URA-Finale-plan.md
+
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/URA-Finale-plan.md` (381 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+
+## URA Finale Plan
+
+This document defines the URA Finale scenario for Trainer Desk. It is written in the same architectural style as the Unity Cup plan: it assumes the shared cockpit frame, the three-layer model (Trainer Home, Career Cockpit, Advisor), decision cards, visible uncertainty, and the Veteran loop, all of which carry over unchanged. Only the URA Finale-specific deltas are spelled out here.
+
+### Sources
+
+- `docs/scenarios/01-ura-finale.md` — 142-line scenario guide (fan gates, camp, facilities, stamina thresholds, deck shapes, mood effects)
+- `docs/UMAMUSUME_REFERENCE.md` §2.2.1 — URA Finale `[Global]` mechanics summary (Happy Meek, fan gates, beginner targets)
+- `config/scenarios.php:111-130` — config matrix entry (`cap_bonus`, `widgets`, `panels`, `facility_level_source`, `scenario_links`)
+- `.scratch-uma/cited/scenarios.json` — GameTora data export (`stats:[200,200,200,200,200]`, `start_en:1750897800`)
+- `SCENARIO-PUBLISHER-REFERENCES.md:892-996` — Game8 extraction (July 1, 2026 rework confirmation)
+- [Game8, URA Finale Scenario Guide](https://game8.co/games/Umamusume-Pretty-Derby/archives/536520) (last updated July 6, 2026)
+
+**Cross-check note.** URA Finale enters SCENARIO-PUBLISHER-REFERENCES.md:33 "solely through the Game8 extraction" — uma.guide and GameTora cover only Trackblazer and Unity Cup. There is no second publisher to cross-check against for URA Finale. The config matrix and the scenario guide are the first author and the Game8 page the second; they agree on every figure cited below.
+
+The July 1, 2026 rework added Happy Meek duels and raised caps from 1200 to 1400 in all stats. `config/scenarios.php:114` (`cap_bonus` = 200 each) and `.scratch-uma/cited/scenarios.json` (`stats:[200,200,200,200,200]`) both record this; the Game8 page confirms it in §"Increased Stat Caps".
+
+---
+
+### 1. THE CENTRAL UX CONCEPT
+
+URA Finale is the fundamentals scenario. There is no team, no shop, no mid-scenario currency, and no special program. The single thing layered on top of the base training loop is the **Happy Meek duel**:
+
+```
+         STAT TRAINING turn
+               │
+               ├─► Happy Meek may appear
+               │        │
+               │        ├─► WIN → stat gain + cap bump + racing-spirit hint + 30 SP
+               │        └─► LOSE → minor stat gain + 15 SP
+               │
+               └─► 6 wins escalate her to powered-up state at the finals
+                     WIN → Past My Limits skill + 200+ SP + enhanced spirit spark
+```
+
+The persistent question for URA is:
+
+> Which training turn raises the stats I need for the next fan gate or goal race, and should I spend energy on a Happy Meek duel now or save it for a Summer facility upgrade?
+
+---
+
+### 2. SCENARIO SELECT
+
+```
+URA FINALE
+Fundamentals. Happy Meek duels for cap increases.
+
+Stat caps   SPD 1400  STA 1400  POW 1400  GUT 1400  WIT 1400
+Facility level rises by repetition (every 4 same-stat trainings)
+Scenario Link: Aoi Kiryuin
+```
+
+The +200 cap_bonus is from `config/scenarios.php:114` and `.scratch-uma/cited/scenarios.json:stats`. Aoi Kiryuin is the scenario link; `config/scenarios.php:126` lists her and `docs/scenarios/01-ura-finale.md:16-19` confirms her event role.
+
+---
+
+### 3. TRAINEE & TARGET (DELTAS)
+
+The career goals, fan gates, and goal-race ladder are the URA defaults carried from `docs/scenarios/01-ura-finale.md:77-84` and confirmed in Game8 §"Run More Races to Get Fans and Upgrade Unique Skill".
+
+- **Fan gates** (Turf / Dirt): Valentine's Day 60,000 / 40,000 (Senior, early Feb); Fan Fest 70,000 / 60,000 (Senior, early Apr, with 3-bar Director Akikawa friendship); Holiday Season 120,000 / 80,000 (Senior, late Dec). Source: `docs/scenarios/01-ura-finale.md:80-83`, Game8 §"Run More Races...", UMAMUSUME_REFERENCE.md §2.2.1.
+- **Stamina floors** by distance: Sprint 350–450, Mile 450–550, Medium 600–700, Long 700–800. Source: `docs/scenarios/01-ura-finale.md:66-73`, UMAMUSUME_REFERENCE.md §2.2.1.
+- **Unique Skill level-up gates** at those same fan thresholds. Source: same as fan gates above.
+- **Goal race distance.** The finale distance is determined by the most-raced distance type across the career; ties resolve to the shortest distance. This is the URA-specific distance ledger and the one surface where URA diverges from the other scenarios' fixed calendars. Source: `docs/scenarios/01-ura-finale.md:140` ("plan a race calendar"), confirmed by Game8 §"Ensure You Have Enough Stamina" listing all four distance-specific thresholds as the decision driver.
+
+No new goal-race or fan-gate screen is needed — the shared `race_calendar` panel handles distance tracking and the `career_goals` panel handles the gates. Both are `true` in `config/scenarios.php:117-124`.
+
+---
+
+### 4. LEGACY LAB (DELTAS)
+
+Three scripted Inspiration events scale stat boosts off the Legacy's own build — Junior Year start, Classic Year early April, Senior Year early April. Source: `docs/scenarios/01-ura-finale.md:43`.
+
+There is **no scenario factor** in URA Finale. Unlike Unity Cup (`Power` and `Wit` on inheritance) or Trackblazer (distance-dependent stat grants), URA's Legacy inherits base stats and skills only. The Legacy Lab screen should show no scenario-factor badge to avoid implying a bonus that does not exist.
+
+---
+
+### 5. SUPPORT DECK BUILDER (DELTAS)
+
+Deck templates from `docs/scenarios/01-ura-finale.md:56-80` and confirmed in Game8 §"Use Proper Support Cards That Will Benefit Your Umamusume":
+
+| Distance   | Build 1                | Build 2                          |
+| ---------- | ---------------------- | -------------------------------- |
+| Sprint     | 4× Speed, 2× Power     | 3× Speed, 1× Wit, 2× Power       |
+| Mile       | 4× Speed, 2× Power     | 3× Speed, 1× Wit, 2× Power       |
+| Medium     | 4× Speed, 1× Friend/Guts, 1× Power | 3× Speed, 1× Wit, 1× Friend/Guts, 1× Power |
+| Long       | 4× Speed, 2× Friend/Guts | 3× Speed, 1× Wit, 2× Friend/Guts  |
+
+Key principles:
+- Check the skills a card provides — a card's built-in skill matching the trainee's running style/distance becomes purchasable during training. Source: Game8 §"Pay Attention to Skills that Cards Provide".
+- Speed is close to universally valuable regardless of build.
+- Stamina cards are best avoided (you get Stamina mainly from stats, and the Stamina floor is a hard prerequisite, not a flex).
+
+Present these as community guidance only; the Trainer's own cards and distance goal override them.
+
+---
+
+### 6. RUN PREFLIGHT
+
+```
+RUN PREFLIGHT                                    URA Finale
+
+DECK          Race Bonus 41%   ✓ adequate for beginner targets
+              Aoi Kiryuin (SR) ✓ Scenario Link present
+LEGACY        [Legacy Uma Name]  → Inspiration events scale on this
+TARGET        Sprint  →  Speed 800+, Stamina ≥ 400
+              Mile    →  Speed 800+, Stamina ≥ 500
+              Medium  →  Speed 800+, Stamina ≥ 600
+              Long    →  Speed 800+, Stamina ≥ 700
+GOALS         URA fan gates   ✓ planned
+FANS          Valentine 60k   ✓ (10 weeks out)
+              Fan Fest 70k    ✓ (22 weeks out, Akikawa friendship planned)
+              Holiday 120k    ✓ (final gate)
+CAMP          Summer Y2: Jul–Aug, 4 turns, all Lvl 5  ✓ timed
+              Summer Y3: Jul–Aug, 4 turns, all Lvl 5  ✓ timed
+DUels         Happy Meek     0/6 duels won so far
+              Past My Limits  ✗ not yet in reach
+
+RULE CONFIDENCE
+  Stat caps                 config/scenarios.php:114 + .scratch-uma/cited/scenarios.json
+  Fan gates                 docs/scenarios/01-ura-finale.md + Game8
+  Stamina floors            docs/scenarios/01-ura-finale.md + UMAMUSUME_REFERENCE.md §2.2.1
+  Training level (repetition) config/scenarios.php:127 ($facility_level_source = 'repetition')
+```
+
+---
+
+### 7. THE CAREER COCKPIT
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│ URA FINALE                 CLASSIC • TURN 31 • Energy 58           │
+├──────────────────────────────────────────────────────────────────────╢
+│ FACILITY LEVELS              Training facility level by repetition  │
+│ Speed       3    (12 trainings)                                     │
+│ Stamina     2    (8 trainings)                                      │
+│ Power       3    (12 trainings)                                     │
+│ Guts        2    (8 trainings)                                      │
+│ Wit         3    (12 trainings)                                     │
+├──────────────────────────────────────────────────────────────────────╢
+│ FAN GATES                                                           │
+│ Valentine's Day    48,000 / 60,000 (Turf) — 14 turns to gate        │
+│ Fan Fest           32,000 / 70,000 (Turf) — 22 turns to gate        │
+│ Holiday Season     18,000 / 120,000 (Turf) — 44 turns to gate       │
+├──────────────────────────────────────────────────────────────────────╢
+│ DUEL TRACKER                                                        │
+│ Happy Meek:  3 / 6 wins   (2 more to escalation)                    │
+│ Racing Spirit hints earned: Speed Lv1, Power Lv1                    │
+├──────────────────────────────────────────────────────────────────────╢
+│ ★ RECOMMENDED: TRAIN STA                                            │
+│                                                                  │
+│ 4 flames: +6 Sta, +3 Guts, +5 SP (repetition Lv3)                  │
+│                                                                    │
+│ WHY                                                                  │
+│ Stamina is your weakest floor for a Medium-distance build.           │
+│ Facility is at Lv 2; one more block of 4 reaches Lv 3.               │
+│ Energy 58 → 18 after training. Summer starts in 6 turns;              │
+│ you need 60 for 4 Lvl-5 facility turns. Recreation on turn 33        │
+│ covers the gap.                                                    │
+│                                                                    │
+│ [ TRAIN STA ]                                                      │
+│ Alternatives                                                       │
+│ ○ Speed: +facility, but Stamina floor is the blocker                 │
+│ ○ Optional race: only if a goal requires it                          │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+All numbers in that wireframe are illustrative except the rule they encode: facility level rises every 4 repetitions (`config/scenarios.php:127`), and Stamina is a floor not a flex stat.
+
+---
+
+### 8. HAPPY MEEK DUEL PANEL (NEW, THE KEY IN-RUN SCREEN)
+
+This is the URA-only mechanic, so it gets a dedicated panel — not folded into the generic cockpit.
+
+#### When she appears
+
+Happy Meek appears on any stat-training turn after the "I'm Here to Challenge You" event. Source: Game8 §"Training With Happy Meek". She does **not** give Friendship trainings (unlike Team Sirius or Heirs to the Throne). Source: Game8 §"Training With Happy Meek".
+
+#### Duel choice
+
+You are prompted to pick between three options: two random stats and the stat you dueled Happy Meek on. Each option has an icon indicating win chance. Source: Game8 §"Duel for Additional Stat Cap Increases and Skill Points".
+
+#### Rewards
+
+| Outcome | Primary                     | Secondary        | Cap bump | Skill Points | Racing Spirit hint |
+| ------- | --------------------------- | ---------------- | -------- | ------------ | ------------------- |
+| Win     | Stat gain (varies)          | Related stat +SP | +1 tier  | 30           | Yes (stat-appropriate) |
+| Lose    | Minor stat gain             | —                | —        | 15           | —                   |
+
+Source: Game8 §"Duel for...", UMAMUSUME_REFERENCE.md §2.2.1.
+
+#### Escalation
+
+After **6 wins**, Happy Meek escalates to a powered-up state at the finals. Beating her there grants:
+- The `Past My Limits` skill (source: Game8 §"Powered Up Happy Meek", and the linked skill page title)
+- 200 or more Skill Points
+- A chance at an enhanced Racing Spirit spark (carries a stat bonus and a skill hint into inheritance)
+
+Source: Game8 §"Powered Up Happy Meek", UMAMUSUME_REFERENCE.md §2.2.1.
+
+#### Racing Spirit skills
+
+Each Racing Spirit skill activates on the stat you dueled Happy Meek on. Source: Game8 §"New Racing Spirit Skills":
+
+| Skill                    | Effect                                                  |
+| ------------------------ | ------------------------------------------------------- |
+| Racing Spirit: Speed     | Slightly increase velocity upon approaching late-race   |
+| Racing Spirit: Stamina   | Moderately expend endurance to moderately increase velocity in the last spurt |
+| Racing Spirit: Power     | Slightly increase velocity for a medium duration when passing another runner in the last spurt |
+| Racing Spirit: Guts      | Slightly increase acceleration when dueling             |
+| Racing Spirit: Wit       | Slightly increase velocity upon activating 2 skills during the second half |
+| Racing Spirit: Mood      | Stamina, Guts, and Wit might moderately increase when mood is good or great |
+
+Display these as hints earned — the duel tells you which Racing Spirit skill the hint is for, and winning a powered-up duel enhances the spark that carries the hint into inheritance.
+
+---
+
+### 9. ADVISOR PRIORITY HIERARCHY
+
+1. **Don't end the run.** The URA goal races, fan gates, and energy come first, and the Alarm Clock covers goal-race failures.
+2. **Summer timing.** Is Summer within 6 turns? Bank full energy and good mood now — a forced Rest during Summer wastes the free Level-5 facility turns.
+3. **Fan gate runway.** How many turns until the next fan gate, and is your race calendar on track to clear it?
+4. **Happy Meek duel economics.** Cash the duel now (energy cost vs. stat gain + cap bump + SP) or save energy for Summer. A duel win also raises a cap, which matters for Long builds hitting the 1200→1400 transition.
+5. **Facility level.** Track repetition counts; a stat at 8/12 trainings is one block away from the next level.
+6. **Stamina floor.** Before a Medium or Long race, is Stamina at the floor? If not, that training turn is non-negotiable.
+7. **Training target.**
+8. **Optimization.**
+
+---
+
+### 10. CAREER REPORT
+
+URA Finale specifics for the report: final stat breakdown, which fan gates were cleared, Summer camp utilization, Happy Meek duel record (wins / escalation), Racing Spirit hints earned, unique skill level at career end, and whether the finale was won. Then offer "Promote to Veteran" as before.
+
+Post-race rewards (Game8 §"After URA Finale Races"):
+- **Qualifier win:** All stats +10, +40 Skill Points, affected by Race Bonus.
+- **Semifinals win:** All stats +10, +60 Skill Points, affected by Race Bonus.
+- **Finals win:** All stats +10, +80 Skill Points, affected by Race Bonus.
+
+---
+
+### 11. WHAT I COULD NOT CONFIRM
+
+1. **Per-option duel win-chance percentages.** Game8 states each option "has an icon which indicates your chances of winning" but does not print the percentage values. Read the icon from the game; the plan's duel rewards table is confirmed, the exact probability per option is not.
+
+2. **Happy Meek stat-gain formulas.** Game8 says winning grants "stat gains" and a cap bump but does not quantify the per-stat gain values beyond "the stat you dueled on." The 30/15 Skill Point split and the Racing Spirit hint award are confirmed; the exact stat-delta per win is not in any cited source.
+
+3. **Aoi Kiryuin event bonuses.** `docs/scenarios/01-ura-finale.md:17` states she "boosts your stats via her interactions with another character, Happy Meek" but does not quantify the multiplier. Game8 §"Aoi Kiryuin is the Scenario Link" confirms the link role and recommends the SR card to amplify effects, but gives no numeric bonus. Treat this as a qualitative bonus, not a quantified one.
+
+4. **Turns-per-year count.** The Game8 calendar uses relative timing ("After 11 turns", "Early July", "Late August") but does not give a total turn count per year. The Summer window is confirmed as 4 turns, Early July through Late August, in both Classic and Senior years. The exact turn offset from career start to each event is in `docs/scenarios/01-ura-finale.md:86-132` but the source notes (line 88-92) explicitly defer race-timing to `docs/scenarios/09-global-race-calendar.md`.
+
+5. **Powered-up Happy Meek exact stat values.** Game8 §"Powered Up Happy Meek" states she "gets increased stats and is overall harder to beat" but does not list the specific numbers. The reward list (Past My Limits skill, 200+ SP, enhanced spark) is confirmed.
+
+6. **Enhanced Racing Spirit spark mechanics.** "A chance to get an enhanced spark" — the exact trigger rate and the exact stat-bonus amount are not quantified in any cited source.
+
+7. **Raffle Time! outcomes.** Game8 §"Raffle Time!" lists one of four random effects but does not state the probability distribution among them. Treated as a non-quantified random event.
+
+8. **New Year's Resolutions / New Year's Shrine Visit choice weights.** Game8 lists the three options per event but does not state whether the choice is purely player-selected (it is — these are choice events, not random). This is confirmed by the scenario guide calling them "Choice:" events (`docs/scenarios/01-ura-finale.md:117-119`); the plan records the options, not probabilities.
+
+---
+
+### WHAT I WOULD NOT BUILD
+
+- An auto-player for Happy Meek duels (read the icon, let the Trainer decide).
+- A fixed "best deck" that overrides the Trainer's collection (present deck templates as guidance, not prescription).
+- The enhanced Racing Spirit spark rate as a numeric prediction (no source quotes it).
+- A stamina floor that silently defaults to a value a run has not recorded (render `N/A` with a title, never a default).
+
+---
+
+### MVP SCREEN SET
+
+1. Trainer Home
+2. Trainee & Target
+3. Legacy Lab
+4. Support Deck Builder
+5. Run Preflight
+6. Career Cockpit (with Fan Gates, Facility Levels, and Duel Tracker)
+7. Happy Meek Duel Panel (in-run overlay triggered on a duel appearance)
+8. Career Report / Veteran
+
+§6 and §7 get most of the URA-specific design effort. The Duel Panel exists because URA Finale is the only scenario where a single in-run choice (duel stat + option) carries a cap-bump reward, and that choice is opaque without the panel surfacing the Racing Spirit hint tied to each result.
+
+---
+
+### 12. DECISION CONTRACT
+
+Every recommendation the Advisor produces follows this shape — it must not be a bare action label:
+
+1. **Current state and immediate objective.**
+2. **Recommended action** and expected benefit (with numbers).
+3. **Best alternative** and its trade-off.
+4. **Confidence** — verified, derived, configurable, or unknown — with the source badge.
+5. **Conditions that would change the recommendation.**
+
+Example:
+
+> **★ RECOMMENDED: TRAIN STA**
+>
+> You are at 48,000 / 60,000 fans for Valentine's gate, 14 turns out, and Stamina is below the Medium-distance floor (600–700).
+>
+> - **Train Stamina (Lv 2):** +8 Sta, +4 SP. Facility is 6/8 to Lv 3.
+> - **Alternative — race a Tier 2 (Mile):** +4 Skill Points, +fans, but consumes energy and risks mood drop.
+> - **Confidence: verified** (facility level by repetition, config `facility_level_source = 'repetition'`).
+> - **Switch if:** Summer camp starts in 5 turns (bank energy first), or Happy Meek appears on a Speed tile (cap-bump opportunity).
+
+---
+
+### 13. CAREER MILESTONE TRACKER
+
+URA Finale is a deadline scenario: three goal races with win-or-end stakes, three fan-gate events, and two Summer camps. The cockpit should surface a timeline, not just the current turn.
+
+```
+CAREER MILESTONES
+
+UPCOMING
+  • Valentine's Day gate    60,000 fans    14 turns    ⚠ 12,000 short
+  • Summer camp (Y2)        4 turns        18 turns    Energy: 58 / 60
+  • Fan Fest gate           70,000 fans    22 turns    ⚠ 32,000 short
+  • URA Qualifier           Win required   36 turns    Speed target: 800+
+
+COMPLETED
+  • Junior debut            ✓ (Turn 11)
+  • Inspiration 1           ✓ (Career start)
+  • Inspiration 2           ✓ (Classic Apr)
+  • 3-bar Akikawa friend    ✓ (for Fan Fest)
+```
+
+The timeline should distinguish **optimal now** (e.g., train Stamina) from **keeping the run viable later** (e.g., bank energy before Summer, hit Valentine's gate for Unique Skill upgrade).
+
+---
+
+### 14. ACCEPTANCE CRITERIA
+
+| Feature                    | Success Criterion                                                                 | Edge Case                              |
+| -------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------- |
+| Career Cockpit             | Shows stat caps, facility levels, fan gates, and duel count in a single view      | No fans yet (N/A, not 0)                 |
+| Happy Meek Duel Panel      | Surfaces the 3 options, their icons, and Racing Spirit hint tied to each outcome  | All 6 duel wins achieved (escalation shown) |
+| Career Milestone Tracker   | Surfaces each gate 5+ turns in advance, flags shortfalls                          | Gate already missed (run-at-risk flag)   |
+| Stamina floor check        | Flags before any Medium/Long race if Stamina is below the distance floor          | Dirt surface (different floor threshold) |
+| Recommendation reconciliation | Predicted outcome vs actual entry updates the run state and flags deviation   | User edits state manually              |
+
+---
+
+### 15. VERIFICATION STATUS
+
+Each feature carries one of three levels — never collapsed:
+
+- **Implemented** — the code exists and the behavior is connected.
+- **Verified** — automated tests or reproducible manual checks demonstrate the intended behavior.
+- **Game-validated** — calculations have been compared against authoritative mechanics or observed in-game.
+
+A page that renders is not verified. A verified calculation can still rest on an incorrect understanding of the game. This distinction is tracked per feature.
+
+---
+
+### 16. IMPLEMENTATION AND TESTING PLAN
+
+| Phase                      | Deliverable                                                                     | Completion evidence                                              |
+| -------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 0. Reconnaissance          | Inspect existing scenario code, plans, contracts, routes, data models and tests | Inventory of existing, partial, missing and conflicting behavior |
+| 1. Rules audit             | Document verified scenario mechanics and unresolved assumptions                 | Source-backed rules and explicit unknowns                        |
+| 2. State model             | Define run state, transitions, persistence and validation                       | Tests for valid and invalid state changes                        |
+| 3. Decision engine         | Implement scenario-specific candidate evaluation and ranking                    | Deterministic tests using known inputs and expected outputs      |
+| 4. Command center          | Build the primary screen around the next actionable decision                    | UI tests for loading, empty, error, stale and normal states      |
+| 5. Reconciliation          | Compare predicted versus actual outcomes                                        | Tests for updating run state without losing history              |
+| 6. End-to-end verification | Exercise complete careers and edge cases                                        | Reproducible scenarios, regression results and completion report |
+
+**URA Finale focus:** phase 3 builds the scenario rules layer (repetition-based facility levels, fan gates, Happy Meek duel rewards as verified). Phase 4 builds the Career Cockpit with the Duel Panel. Phase 5 adds reconciliation for duel outcomes (predicted stat gain vs. actual). Phase 6 validates cap-bump behavior against in-game captures.
+
+---
+
+### 17. PRIORITY MATRIX
+
+| Priority | Scope                    | Rationale                                                  |
+| -------- | ------------------------ | ---------------------------------------------------------- |
+| P0       | Canonical run state, verified mechanics, regression tests | Protects the trustworthiness of the fundamentals scenario    |
+| P1       | Next-action recommendations, deadline tracking, duel preview | Turns Cockpit from display into a command center          |
+| P2       | Stat-cap ceiling arithmetic, distance-floor optimization | Materially affects finale eligibility                     |
+| P3       | Keyboard-friendly controls, richer historical analytics | Convenience only                                           |
+
+---
+
+## Trainer-Desk-2.0-G-Prompts.md
+
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/Trainer-Desk-2.0-G-Prompts.md` (1046 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+>
+> **Consolidated 2026-10-12 (Round 15).** The original was deleted after line-by-line verification (687 of 687 non-blank source lines found in this section, in order, 0 missing). The original was untracked, so this section is the only copy. Cite this anchor, not the deleted path.
+
+## Trainer Desk 2.0 — Phase G Prompt Set (Revised)
+
+This revision separates the execution contract from the slice specifications and makes the amendments you identified. It keeps the detailed scenario requirements, source hierarchy, and owner questions intact.
+
+Three layers, used in order:
+
+1. **Phase G Execution Contract** (Part 1) — authority, preflight, safety, workflow, gates, reporting. Paste once before any G slice.
+2. **Shared Architecture Contract** (Part 2) — configuration-driven capability selection, the Next Decision contract, provenance, prohibited mechanics. Embedded in the master and referenced by every slice.
+3. **Slice Specifications G1–G7** (Part 3) — feature behavior and acceptance tests. Paste one at a time after the master.
+
+---
+
+## PART 1 — PHASE G EXECUTION CONTRACT
+
+**Scope:** Scenario decision surfaces, the shared Next Decision contract, cross-scenario consistency, and Phase G acceptance.
+
+**Project:** `umamusume-laravel13` — Laravel 13, Inertia v3, Vue 3, TypeScript, Tailwind v4, Pest 4, Playwright.
+
+**Objective:** Implement FD-1 through FD-5 from `docs/proposals/frontend-development-plan.md` §9a, using the approved screen specifications, design briefs, scenario plans, existing persistence contracts, and repository conventions.
+
+Phase G extends the landed D8 Career Cockpit and E1–E6 scenario-panel work. It must not create a second frontend architecture, introduce unsupported game mechanics, or replace established contracts without authorization.
+
+The G1–G7 specifications define individual deliverables, source requirements, acceptance criteria, and owner questions. This document governs their execution and takes precedence over informal interpretation of those specifications.
+
+---
+
+### 1. Non-negotiable execution rules
+
+1. **Establish repository truth before implementation.** Read the actual files, configuration, routes, Form Requests, models, migrations, components, tests, and Git state. A proposed feature or field in a design document is not evidence that its implementation exists.
+2. **Do not invent game mechanics.** Every displayed game value, rule, threshold, calculation, and recommendation must have an authorized source. When evidence is insufficient, preserve the documented absence behavior or omit the feature where the specification directs.
+3. **Keep the UI scenario-agnostic.** Scenario capabilities come from the resolved configuration matrix, `panels.*`, and `widgets[]`. No scenario-specific conditional rendering based on scenario names, labels, or key literals. A fifth scenario must require configuration, not component changes.
+4. **Preserve existing write contracts.** Use existing routes and Form Requests. Do not introduce migrations, routes, enum values, packages, or new persistence semantics without the required authorization.
+5. **Make decisions traceable.** Every recommendation must have a derivable reason. Every computed value must identify its provenance. Never substitute a numeric score or confidence value for an explanation.
+6. **Protect shared-worktree integrity.** Do not overwrite, revert, stage, or commit another session's work. Do not assume a clean Git status. Stop before implementation if file ownership or the safety of the working tree cannot be established.
+7. **Test claims, not intentions.** Report actual command output, exit status, relevant test counts, and known blockers. Never describe an unexecuted gate as passing.
+8. **Minimize the diff.** Implement the smallest architecture that satisfies the approved contract. No unrelated refactoring, visual redesign, opportunistic cleanup, or speculative abstraction.
+9. **Separate implementation from release readiness.** A slice can have verified implementation with a blocked browser gate, but it cannot claim full acceptance. The applicable owner-approved baseline determines whether implementation may begin.
+10. **Stop at authority boundaries.** When a decision requires owner approval, document the alternatives and evidence. Do not silently choose an irreversible or contract-changing interpretation.
+
+---
+
+### 2. Mandatory preflight and stop conditions
+
+Complete preflight before running any G slice.
+
+#### 2.1 Shared-worktree coordination
+
+Read `docs/proposals/provenance-and-absence-contracts.md` §15 and inspect the actual repository state.
+
+Confirm:
+
+- Which session owns the relevant files.
+- Whether another session is currently modifying the same tree.
+- Which files are safe to edit.
+- Whether the working tree contains uncommitted work that must be preserved.
+- Whether the coordination ruling in §20(h) has been resolved.
+
+**Stop before modifying files** if ownership conflicts remain unresolved or the tree cannot be modified safely. Report the conflicting ownership, affected files, and exact decision required.
+
+Do not treat a previous agent's assertion that the coordination issue was resolved as proof. Verify the current state.
+
+#### 2.2 KI-88 browser blocker
+
+KI-88 concerns the Cockpit header forms `saveStatus`, `saveScenario`, and `savePeriod`, which lack submit controls required by existing browser fixtures.
+
+Before implementation, establish:
+
+1. The current reproduction and affected browser specs.
+2. The owner's decision between the candidate save-control and autosave behaviors.
+3. The authorized KI-88 fix and the files it may change.
+4. The baseline browser results after that fix, including the 44px target sweep and axe scan.
+
+Do not independently choose between the two save behaviors. Do not change the save interaction merely to satisfy test fixtures.
+
+**Blocking policy:**
+
+- Until the owner resolves the KI-88 behavior, do not implement changes that depend on that behavior.
+- Until the owner resolves the Phase G baseline policy, do not claim browser acceptance or full Phase G acceptance.
+- If the owner explicitly permits isolated work before KI-88 is fixed, a slice may proceed only when its implementation is independent of the unresolved save behavior and shared-tree coordination is safe.
+- Record any baseline failure separately from failures introduced by the slice.
+
+If no such authorization exists, stop and report. Do not reinterpret this exception as permission to bypass the prerequisite.
+
+#### 2.3 Open decisions
+
+Read `docs/proposals/provenance-and-absence-contracts.md` §9 and §20.
+
+Treat unresolved owner decisions as follows:
+
+| Decision | Required behavior |
+|---|---|
+| Group C wording | Does not block G1–G2 unless the affected copy is required |
+| Motion | Does not block G1–G2 unless the affected interaction depends on it |
+| 768px minimum | Does not block G1–G2 unless the affected layout depends on it |
+| `Runs/Show.vue` ownership | Resolve before modifying that surface |
+| Shared-tree coordination | Resolve before modifying files |
+| Other owner-controlled decisions | Keep the affected behavior out of scope until authorized |
+
+The individual slice specifications may introduce additional blocking questions. Apply the same rule: identify the exact affected deliverable rather than expanding the blocker to unrelated work.
+
+#### 2.4 Dependency verification
+
+Before starting implementation, verify that D8 and E1 have landed and that the required preceding slices are complete.
+
+The intended execution order is:
+
+- G1: capability audit and shared Next Decision contract.
+- G2: objectives, deadlines, and action reconciliation.
+- G3: URA Finale surfaces.
+- G4: Unity Cup surfaces.
+- G5: Trackblazer planning and race surfaces.
+- G6: Trackblazer shop, resource, and epithet surfaces.
+- G7: cross-scenario consistency and final acceptance.
+
+G3, G4, and G5 may run in parallel after G2 only when file ownership is disjoint, G1's contract is stable, and G2's contract changes are complete. G6 additionally depends on G5.
+
+If those conditions cannot be demonstrated, serialize the work.
+
+---
+
+### 3. Required source reading
+
+Read the following in order, recording any missing or contradictory authority in the slice plan.
+
+1. `AGENTS.md`
+2. `docs/proposals/frontend-development-plan.md` — Global Constraints, §3, §4, §8, §9, §9a, §10, §12, and §13.
+3. `docs/proposals/screen-spec-2.0.md` — the relevant SCREEN-nnn sections, the Product Direction Corrections table, and §18–20.
+4. `docs/proposals/design-2.0.md` — §2, §4, §5, §13, §19–24, §25–28, §29, §35, §36, §40, §45, and §49, plus any additional sections named in the slice specification.
+5. `docs/proposals/provenance-and-absence-contracts.md` — §1, §2, §9, §12, §15, and §20 as relevant.
+6. `config/scenarios.php` — inspect actual configuration keys and structures.
+7. `SCREEN_SPEC.md` and `DESIGN.md`.
+8. The relevant scenario plans:
+   - `docs/URA-Finale-plan.md`
+   - `docs/Unity-Cup-plan.md`
+   - `docs/Trackblazer-plan.md`
+   - `docs/Our-Grand-Concert-plan.md`
+9. The specific source documents, services, controllers, models, routes, Form Requests, and components identified in the individual G specification.
+
+Do not assume that a file, section, key, route, model column, or test exists because it appears in the prompt. Verify it.
+
+#### Authority order
+
+Apply this order:
+
+1. Landed ADRs and binding owner rulings.
+2. `AGENTS.md` and repository-wide constraints.
+3. `frontend-development-plan.md`.
+4. `screen-spec-2.0.md` and `design-2.0.md`.
+5. Scenario plans and research documents, within their evidentiary authority.
+6. Installed skills as implementation methodology only.
+
+When two sources conflict, identify the precise conflict and apply the governing authority. Do not silently reconcile conflicting documents by inventing a third interpretation.
+
+If a required decision remains unresolved, report the alternatives and stop only the affected work.
+
+---
+
+### 4. Phase G shared architecture contract
+
+#### 4.1 Scenario capability registry
+
+The scenario configuration is the authority for scenario capabilities.
+
+- Read real configuration keys; never guess them.
+- Resolve scenario behavior through the existing configuration matrix.
+- Use `panels.*` and `widgets[]` for panel registration and availability.
+- Gate shared behavior through declared capabilities, not scenario identity.
+- Do not add per-scenario component branches, test-fixture branches, CSS classes, or prop contracts based on scenario names or labels.
+- A fifth scenario must be supported by configuration without editing a component.
+
+G1's capability audit is the evidence base for later slice plans. It must distinguish what configuration declares from what persistence, write paths, and UI actually implement.
+
+Use the status vocabulary `shipped`, `partial`, `missing`, `blocked`, and `not applicable`. Include the evidence and reason for each classification.
+
+#### 4.2 Shared Next Decision contract
+
+G1 establishes the contract consumed by G2–G6.
+
+The recommendation follows the documented sequence:
+
+**Current state and objective → Recommended action and benefit → Best alternative and trade-off → Provenance-backed explanation → Conditions that change the recommendation.**
+
+The contract must distinguish a valid recommendation from an inability to rank actions.
+
+- A valid recommendation contains an action, destination, and source-supported benefits.
+- Alternatives state their opportunity costs.
+- Explanation rows carry provenance states and explanatory titles.
+- Refusal identifies why ranking is impossible and which required inputs are missing.
+- `recommended` and `refusal` are mutually exclusive.
+- No score or numeric confidence is permitted.
+- No recommendation ships without a derivable reason line.
+
+The five-element contract in G1 is authoritative. Any subsequent slice that proposes a shape change must explicitly identify the change, its compatibility implications, and its tests before implementing it.
+
+G2 and G4 may extend the contract only within their approved scope. They must not independently redefine the shared type or create competing representations of the same fact.
+
+#### 4.3 Held computations
+
+The following remain prohibited under `ADR-0020` and the existing absence contracts:
+
+- Race win probabilities.
+- Readiness bands and risk percentages prohibited by `ADR-0016`.
+- Per-training yield and failure percentages.
+- Inheritance computation.
+- Shop-item recommendations.
+- Grand Concert mechanics not yet authorized.
+- Numeric confidence or scores.
+- Unsupported recommended timing or projected benefit.
+- Unsupported opponent-strength projections.
+- Any additional predicted outcome not supported by an approved source.
+
+A held value must follow the applicable documented absence behavior. Where a named `N/A` is required, its `title` must identify the precise missing evidence or authorization. Do not use an invented fallback number, dash, or generic "unavailable" message.
+
+#### 4.4 Provenance and terminology
+
+Use the existing `ProvenanceBadge.vue` from D4. Do not redefine its glyphs, states, or semantics.
+
+Every derived figure must expose its provenance. Every absence must explain why the value cannot be shown. Labels must distinguish recorded facts, calculations, estimates, unknowns, and community guidance.
+
+Use the repository's approved terminology:
+
+- Support Cards
+- Scouts
+- Veteran Umamusume
+- Pal
+- Wit
+- Sparks
+- Trackblazer
+
+Use the exact approved label `2026-07-01 Global rework`.
+
+Do not introduce alternative terminology merely because it is more familiar.
+
+---
+
+### 5. Skills and execution method
+
+Skills are methods, not authorities. Read their actual instructions and report missing skills. Do not claim to have used a skill that was not available or consulted.
+
+#### Baseline method
+
+Use the following skills at the relevant phase:
+
+**Planning**
+
+- `using-agent-skills`
+- `planning-and-task-breakdown`
+- `spec-driven-development`
+- `infer-conventions`
+
+**Implementation**
+
+- `incremental-implementation`
+- `test-driven-development`
+- `laravel-best-practices`
+- `testing-best-practices`
+- `frontend-ui-engineering`
+- `tailwindcss-development`
+- `constraint-driven-development`
+- `source-driven-development`
+
+**Review and verification**
+
+- `doubt-driven-development`
+- `code-review-and-quality`
+- `browser-testing-with-devtools`
+
+**Copy and layout**
+
+- `antislop`
+- `antislop-ui`
+- `antislop-human`
+- `antislop-copywriting`
+- `antislop-layoutmobile`
+- `antislop-code` for comments.
+
+Load slice-specific skills from the relevant G specification. Do not reload every skill's full instructions for every slice if the applicable instructions are already available in the active context. Never assume an uninstalled skill is installed.
+
+`freeze`, `careful`, `design-review`, and `impeccable` are optional. Report their availability only when relevant.
+
+Do not install new packages to satisfy skill advice.
+
+---
+
+### 6. Required workflow for each slice
+
+#### Phase A — Reconnaissance and plan
+
+Before editing, produce a slice plan containing:
+
+1. Scope and acceptance criteria.
+2. Verified prerequisites and dependencies.
+3. Source-to-field mapping for every material number, label, calculation, and recommendation.
+4. Current state of the relevant backend and frontend contracts.
+5. Exact files expected to change.
+6. Props, types, configuration, and persistence contracts.
+7. Tests to add or update.
+8. Known baseline failures and applicable gates.
+9. Open questions and owner-controlled decisions.
+10. Explicit exclusions, especially held mechanics.
+
+Identify whether each requirement is supported by existing data, derivable from supported data, blocked by missing data, or requires owner authorization.
+
+Do not begin implementation while a required contract or file-ownership decision is unresolved.
+
+#### Phase B — Test-driven implementation
+
+1. Write or update the focused failing test.
+2. Implement the smallest backend or configuration change required.
+3. Implement the shared component or scenario panel using established repository patterns.
+4. Integrate it through the existing page and configuration contract.
+5. Verify that the focused test passes.
+6. Add regression tests for absent data, invalid states, configuration changes, and boundary conditions.
+7. Add the browser spec for the affected screen.
+
+Use the existing routes and Form Requests for writes. Vue submits through the established form contract and displays validation errors; it does not replace backend validation.
+
+Do not use `uses()` or `withoutVite()` in test files. Do not run `vue-tsc`. Do not introduce a package or migration without authorization.
+
+#### Phase C — Accessibility and browser verification
+
+Each affected panel must have loading, empty, and error states. Each state must explain what is missing, why it matters, and what the Trainer can do next.
+
+Verify:
+
+- WCAG 2.2 AA.
+- Keyboard access and visible focus.
+- Minimum 44px interaction targets.
+- Correct labels and `aria-describedby` for errors.
+- Polite announcements for non-urgent status changes.
+- Reduced-motion preferences.
+- Focus trapping, Escape behavior, and focus return for dialogs and drawers.
+- 320px reflow.
+- 200% zoom.
+- No drag-only interaction.
+- State communicated by text and glyph, not colour alone.
+- Sticky elements do not obscure focused controls.
+- Meters display both a numeric value and a labelled bar.
+
+Write or update `tests/browser/<screen>.spec.ts`. Include rendered-copy assertions, keyboard paths, the 44px sweep, and axe A/AA checks if the existing dependency supports them.
+
+If KI-88 prevents a meaningful browser run, report the affected specs and the blocker. Do not weaken assertions, add test-only submit controls, or misclassify the failure as a slice pass.
+
+#### Phase D — Doubt-driven review
+
+Challenge every non-trivial implementation decision.
+
+Ask:
+
+- Is the displayed fact recorded, calculated, estimated, or unknown?
+- Can the calculation be reproduced from the cited source and inputs?
+- Is a design proposal being mistaken for an implemented capability?
+- Does the UI imply a recommendation, prediction, or guarantee that is not authorized?
+- Does a missing value produce a truthful refusal?
+- Does the new abstraction duplicate an existing service or state representation?
+- Does the component depend on a scenario name?
+- Is any write bypassing the existing persistence contract?
+- Is any test passing because of a fabricated fixture or hard-coded scenario assumption?
+
+Fix demonstrated defects within scope. Report unresolved owner decisions without silently resolving them.
+
+#### Phase E — Documentation and final review
+
+Update `SCREEN_SPEC.md` §2 with every screen added or materially changed. Each entry must include loading, empty, and error behavior.
+
+Review the complete diff for:
+
+- Unrelated changes.
+- Unapproved migrations, routes, packages, or schema changes.
+- Scenario-name branching.
+- Unsupported mechanics and values.
+- Missing provenance.
+- Accessibility regressions.
+- Missing regression tests.
+- Documentation that disagrees with the implementation.
+
+Do not stage or commit changes unless explicitly authorized.
+
+---
+
+### 7. Required hand-off sequence
+
+Run the following gates in order where the repository and environment permit:
+
+1. Targeted Pest tests.
+2. `php artisan test --compact`
+3. `vendor/bin/pint --dirty --format agent`
+4. `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`
+5. `npm run typecheck`
+6. `npm run build`
+7. `npm run test:browser`
+8. `composer lore`
+9. `composer lore-code`
+10. `php artisan migrate:status`
+
+For every gate, report:
+
+- The exact command.
+- Exit status.
+- Relevant counts or output.
+- Whether it passed, failed, or was blocked.
+- Whether the failure is pre-existing, caused by the slice, or undetermined.
+- The evidence supporting that attribution.
+
+Do not claim a gate is clean when it was skipped, timed out, or did not execute.
+
+Use the actual development database for `php artisan migrate:status`, as required by `AGENTS.md` §9. Do not substitute a scratch database.
+
+For `composer lore` and `composer lore-code`, report every relevant hit and give a specific ruling per hit. Do not suppress hits merely to obtain a clean result.
+
+#### Gate attribution
+
+A baseline failure may be classified as pre-existing only when the evidence supports that classification. If the cause is uncertain, mark it `undetermined`.
+
+A blocked browser gate does not erase passing unit tests. Passing unit tests do not imply browser acceptance.
+
+A slice may be reported as **implementation complete, acceptance blocked** when its own deliverables are verified but an authorized external prerequisite prevents full verification. It must not be reported as fully accepted.
+
+---
+
+### 8. Hard rules
+
+- Copy existing page, controller, component, and test patterns.
+- New pages require an appropriate controller method using `Inertia::render`, explicit arrays rather than Eloquent models, a route, and a Pest `assertInertia` test.
+- Writes use existing routes and Form Requests.
+- Do not trust client-supplied costs, balances, or other authoritative values.
+- No new npm or Composer package.
+- No unapproved migration or enum value.
+- No `vue-tsc`.
+- No `uses()` or `withoutVite()` in tests.
+- No unapproved ADR creation. Draft proposed ADR text in the report if necessary.
+- No broad refactoring or unrelated cleanup.
+- No weakening existing tests to conceal failures.
+- No committing or staging shared-tree changes without explicit authorization.
+- No unsupported mechanics, predictions, numeric scores, or invented defaults.
+- No component-level scenario-name branching.
+
+---
+
+### 9. Final report contract
+
+Every slice must finish with the following sections.
+
+**Determination** — State whether the slice is accepted, implementation complete with acceptance blocked, incomplete, or stopped at a prerequisite.
+
+**Evidence** — Summarize the authoritative source evidence and the source-to-field decisions that governed the implementation.
+
+**Files changed** — List every changed, added, and deleted file with a brief explanation. Identify changes made by the slice separately from pre-existing or concurrent changes.
+
+**Architecture and contracts** — Report the props, types, service boundaries, configuration contracts, persistence paths, and any backward-compatibility changes.
+
+**UI behavior** — Describe loading, empty, error, refusal, and normal states, plus accessibility behavior.
+
+**Mechanics explicitly not implemented** — List held, unsupported, blocked, or deliberately excluded behavior.
+
+**Tests and gates** — List every command actually executed, its result, the relevant output, and failure attribution.
+
+**Deviations** — List each deviation from the approved plan and explain why it was necessary.
+
+**Owner decisions** — List unresolved decisions, the evidence, the available alternatives, and the affected work. Do not convert an open question into an unapproved implementation.
+
+**Safety and concurrency** — Report shared-tree ownership checks, files protected from concurrent changes, and any remaining risk.
+
+**Git and commit status** — Report the actual Git state. Never claim a commit exists if none was made.
+
+**Skills used** — Name each skill actually consulted and describe its contribution. List unavailable or skipped skills and the reason.
+
+**Explicit stop** — State whether work may proceed to the next dependent slice. Name any blocker that prevents continuation.
+
+---
+
+### 10. Phase G completion criteria
+
+Phase G is complete only when:
+
+- G1–G6 satisfy their slice-specific acceptance criteria.
+- The shared Next Decision contract is consistent across all four Global scenarios.
+- Configuration-based capability gating is tested, including a fifth scenario configured in a test without component edits.
+- The FD-3 objective and deadline behavior is covered.
+- The FD-4 reconciliation behavior preserves correction history.
+- All scenario-specific surfaces satisfy their evidence and absence contracts.
+- G7's cross-scenario audit is complete.
+- `SCREEN_SPEC.md` documents every added or changed screen and its empty, loading, and error states.
+- Every demonstrated inconsistency is fixed with a regression test or reported as an owner decision.
+- The Grand Concert baseline strip still renders when all relevant panels are off, satisfying G-41 and preserving the `partially_documented` ruling.
+- The full acceptance sequence has been executed and its results reported honestly.
+- No unresolved prerequisite, unauthorized contract change, or unreported blocking failure is concealed.
+
+**Start with preflight and the slice plan. Do not begin implementation until the applicable prerequisites and file ownership are verified.**
+
+---
+
+## PART 2 — SHARED ARCHITECTURE CONTRACT
+
+The shared architecture contract is §4 of the master execution contract above. Every G slice consumes it. Two additions apply.
+
+**Contract migration is authorized only by the master.** If a G slice needs to change the Next Decision shape, the change must be:
+
+1. Named in the slice's plan phase.
+2. Justified against the contract's compatibility tests.
+3. Reviewed against every parallel consumer (G2–G6).
+4. Approved by the owner before implementation.
+
+No slice may independently redefine `NextDecision`, `RecordedAction`, `ObjectiveRow`, or any shared type.
+
+**Test fixtures must not invent scenario identity.** A fifth-scenario test constructs the scenario from `config()->set` with keys drawn only from existing config vocabulary. A fixture may not use a scenario name, a scenario key literal, or a scenario-specific branch to prove scenario-agnosticism.
+
+---
+
+## PART 3 — SLICE SPECIFICATIONS
+
+Each specification assumes the master execution contract has been read, preflight has been completed, and file ownership is established. Each specification ends with an **Explicit stop** condition.
+
+---
+
+### PROMPT G1: Capability audit and the shared Next Decision contract
+
+**Scope:** FD-1 audit; FD-2 shared contract; scenario panel registry consumed by G2–G6. Depends on D8, E1.
+
+**Preflight:** Verify D8 and E1 landed. Verify `config/scenarios.php` is the version current in the tree. Verify `ProvenanceBadge.vue` from D4 exists. Verify the Cockpit's scenario region is E1's `ScenarioPanel.vue` mount.
+
+**Freeze points:** This slice produces the shared contract G2–G6 consume. Implementation may not begin until the contract shape is confirmed in the plan phase against the four Global scenarios and against a fifth-scenario `config()->set` fixture. Any subsequent change to `NextDecision`, `RecordedAction`, or `ObjectiveRow` is a contract migration (see Part 2).
+
+**Add-on skills (beyond the baseline):**
+
+- `api-and-interface-design` — fix the types in `resources/js/types.ts` once.
+- `constraint-driven-development` — G-33 is the headline gate; make it a test.
+- `code-simplification` — one decision service, one component, zero per-scenario conditionals.
+- `performance-optimization` — the payload is read on every Cockpit render; avoid N+1.
+
+**Source reading:** `frontend-development-plan.md` §8 ("Recommendation contract (D8)"), §9a FD-1 and FD-2; `design-2.0.md` §2, §19, §25–28; `screen-spec-2.0.md` §12, §13, §29–30; `provenance-and-absence-contracts.md` §1, §2, §9 (ruling 1c); `config/scenarios.php` (all four entries); `app/Services/Advisor/TrainerAdvisor.php`; `config/advisor.php`; `resources/js/components/career/RecommendationCard.vue`, `AdvisorRail.vue`, `ActionGrid.vue`, `CareerStatePanel.vue`, `CareerHeader.vue`.
+
+#### Evidence gate (before implementation)
+
+Produce the FD-1 audit as a slice-plan table. For each of the four Global scenarios, list:
+
+- The capability the config declares — every relevant key, read from the tree, not from this prompt.
+- The state the run actually records — from `training_runs`, `turn_entries`, `turn_events`, `race_entries`, `scenario_slots`, `deck_slots`, `veterans`.
+- The write paths that exist — from `routes/web.php` and the Form Requests.
+- A status classification per capability: `shipped` / `partial` / `missing` / `blocked` / `not applicable`.
+
+The audit is the evidence base for G2–G6. If a capability is not in the tree, it is `missing`; do not propose it as `shipped` because a design document describes it.
+
+Then freeze the `NextDecision` contract shape. Confirm the exact TypeScript interface, the backend output, the refusal states, and the component props against the audit. The contract is frozen when:
+
+- The four Global scenarios each produce a valid payload against the current tree.
+- A fifth scenario constructed by `config()->set` produces the same shape with zero component edits.
+- The refusal payload fires when the tree cannot rank (missing energy, missing `build_target`, no objective).
+- The contract contains no `score` and no `confidence` field.
+
+Report the freeze confirmation as part of the slice plan. Do not proceed to implementation until it is recorded.
+
+#### Build
+
+**FD-1 audit** — the table produced in the evidence gate is the deliverable. It lives in the slice plan.
+
+**FD-2 backend service** — `app/Services/Advisor/NextDecision.php` or the same family as `TrainerAdvisor` (read both and pick the smaller-diff option; report the choice). Inputs: run, resolved scenario config, current state, recorded objectives/deadlines, `build_target`. Outputs the frozen shape:
+
+```ts
+interface NextDecision {
+    priority: string
+    recommended: { action: string; action_url: string; benefit: string[] } | null
+    alternatives: Array<{ action: string; action_url: string; tradeoff: string }>
+    why: Array<{ text: string; badge: ProvenanceState; title: string }>
+    switch_if: string[]
+    refusal: { reason: string; missing: string[] } | null
+}
+```
+
+`recommended` and `refusal` are mutually exclusive. When the engine cannot rank, it returns `refusal` and no `recommended`. The confidence element is expressed as one or more `why` rows carrying a `ProvenanceBadge`, not a summary label.
+
+**FD-2 component** — `components/career/NextDecision.vue`. Renders the five-element shape. `why` rows render as a `<dl>`, each row's `ProvenanceBadge` beside its text. The refusal state renders the design-2.0 §2 distinction: "No suitable action found" vs "Not enough information" are two separate copies.
+
+**Cockpit integration** — replace the current `RecommendationCard` + `AdvisorRail` composition in `Cockpit.vue` with `NextDecision.vue`. Keep `AdvisorRail` as the slot for the reasons list. `ActionGrid` entries link to decision screens and to any panel the scenario declares. Do not redesign the Cockpit layout — the three-column desktop shape is D8's and stands. `band` is retired: energy is either recorded (and the advisor ranks) or absent (and the advisor refuses).
+
+**Shared building blocks** — `ScenarioStatusBadge`, `ResourceMeter`, `AlertRow` already exist from E1. Reuse them. Build any additional shared block only if two later slices would otherwise invent one.
+
+#### Tests
+
+- Pest: same `NextDecision` payload shape across all four Global scenarios.
+- Pest: a fifth scenario injected via `config()->set` produces the same shape without a component edit.
+- Pest: refusal fires when energy is absent and when `build_target` is null; `recommended` is null in both.
+- Pest: key-set assertion proves no `score` and no `confidence` field exists in the payload.
+- Grep: no scenario names, `scenario.label` comparisons, or key literals in conditionals.
+- Playwright: five-element shape renders; each `ProvenanceBadge` has its accessible name; refusal copy distinguishes the two cases; 320px reflow; 44px sweep.
+
+#### Acceptance
+
+The contract shape is frozen, tested against four scenarios plus a fifth, and the audit table is complete. No later slice has started.
+
+#### Owner questions
+
+1. Does `NextDecision` replace `TrainerAdvisor`, or wrap it? Read both; pick the smaller-diff option; report the choice.
+2. The `priority` field is a single sentence. Should the multi-objective hierarchy from `screen-spec-2.0.md` §29 be exposed as a ranked list, or kept as the one-line current priority? Report both shapes.
+
+#### Explicit stop
+
+Stop after the audit, the contract, and its tests are reported. Do not begin G2. Report the frozen contract shape for owner review; G2 depends on this being stable.
+
+---
+
+### PROMPT G2: FD-3 objectives and deadlines + FD-4 action reconciliation
+
+**Scope:** Objective and deadline context (FD-3); action reconciliation loop (FD-4). Depends on G1's frozen contract.
+
+**Preflight:** Verify G1's contract is frozen and the compatibility tests pass. Verify no other session is editing `Cockpit.vue`, `RecommendationCard.vue`, `AdvisorRail.vue`, or `CareerTimeline.vue`.
+
+**Freeze points:** This slice extends the `NextDecision` contract with `objectives[]` and `recorded_action`. Both are contract migrations; both are named in the plan phase and reported before implementation.
+
+**Add-on skills:**
+
+- `spec-driven-development` — write the objective state machine and the reconciliation state machine before coding.
+- `doubt-driven-development` — challenge the deadline window against the E2 ruling ("due and not recorded").
+- `laravel-best-practices` — reconciliation writes through existing `runs.turns.*` and `runs.events.*` routes.
+- `api-and-interface-design` — one typed history-entry shape shareable by G5, G6, D14, D15, D16.
+- `antislop-human` — the "enter actual result" prompt announces politely and never steals focus.
+
+**Source reading:** `frontend-development-plan.md` §9a FD-3, FD-4; `design-2.0.md` §2 (Forecast/Commit/Reconcile), §22, §36, §37, §38; `screen-spec-2.0.md` §12 ("Explicit states"), §18, §19, §22, §32; `provenance-and-absence-contracts.md` §9 (ruling 7a); `SCREEN_SPEC.md` `SCR-CAR-017` and `SCR-CAR-018`; `app/Http/Controllers/Career/TimelineController.php`; `resources/js/components/career/CareerTimeline.vue`; `resources/js/pages/Career/Timeline.vue`; `resources/js/components/career/RunRaceStrip.vue`.
+
+#### Evidence gate
+
+Before implementation, establish:
+
+- The objective classes the config declares, and where each class comes from (`race_catalog_slots`, `training_runs`, recorded `TurnEvent` rows). Do not invent a class.
+- The priority ordering. If config does not declare one, propose the ordering as an open question and stop the priority line before implementation; the rest of FD-3 proceeds.
+- The write routes that will record the actual result for each action type. Training → `runs.turns.update`. Race → `runs.races.store`. Event → `runs.events.store`. If a route for an action type does not exist, that action type's reconciliation is out of scope and reported.
+
+#### Build
+
+**FD-3 objectives.** Add `objectives[]` to the `NextDecision` payload and a shared `ObjectiveRow.vue`. Objective shape: `{ label, state, due_turn, due_label, consequence, source, badge, title }`. State ∈ `upcoming` | `current` | `completed` | `missed` | `unknown`. Priority is a config value at `config/scenarios.php`'s top level (`objective_priority`), inherited by a fifth scenario.
+
+Deadline context: a mandatory objective inside the current window fires a `Critical` `AlertRow` from E1, on the same rule E2 uses (`is_mandatory` and `isAtOrBeforeTurn()` and not recorded). Copy reads "due and not recorded". The next mandatory objective and its turn are always shown when one exists.
+
+**FD-4 reconciliation.** Extend `NextDecision` with `recorded_action: RecordedAction | null`.
+
+```ts
+interface RecordedAction {
+    id: number
+    decision: NextDecision                       // frozen snapshot at the time of the action
+    action: string
+    expected: Array<{ text: string; badge: ProvenanceState }>
+    actual: Array<{ text: string; badge: ProvenanceState }> | null
+    reconciliation: { match: boolean; note: string } | null
+    recorded_at: string
+    corrected_from: number | null
+}
+```
+
+The `decision` field is a snapshot of the recommendation **at the time of the action**. It is not a recomputation of the current recommendation. Define how actual results and corrections append history before coding the UI; the history append is tested against the existing `turn_entries`/`turn_events` tables and never rewrites a previous row.
+
+Three states: `action under review` (forecast shown), `action recorded, actual result pending` (grey out, "Enter actual result"), `action recorded, actual result entered` (reconciliation shown). Recorded actions display on the Cockpit's left rail, capped at three, with a link to D14's Timeline for the full history.
+
+**No undo in this slice.** Render the recorded action with a "Correct" link that opens the existing correction form on D8's Cockpit. Report the undo contract as unresolved.
+
+#### Tests
+
+- Pest: objective state machine — upcoming, completed, missed, unknown — each with its own row shape.
+- Pest: priority line reads from the config-declared ordering; a fifth scenario inherits it.
+- Pest: reconciliation state machine — recorded without actual, recorded with actual, corrected — three separate payload shapes.
+- Pest: correction appends a new entry and does not silently rewrite the previous one (assert both rows exist in storage).
+- Pest: `recorded_action.decision` is the snapshot, not the current recommendation (mutate the run state after recording; assert the stored snapshot is unchanged).
+- Grep: no `undo` route, no `score`, no `confidence`, no `win_probability`.
+- Playwright: objective row state as glyph plus text; reconciliation shows expected vs actual side by side; polite announcement; 320px reflow; 44px sweep.
+
+#### Acceptance
+
+FD-3 and FD-4 land with their tests. The priority ordering question is either resolved by config or reported open. The undo contract is reported open. No other slice's contract is modified.
+
+#### Owner questions
+
+1. Objective priority ordering. If config does not declare it, propose the ordering from `screen-spec-2.0.md` §29 and stop the priority line until the owner rules.
+2. Undo contract. The plan's FD-4 exit condition names it but does not settle the shape.
+3. Recorded-action cap on the Cockpit (three). Confirm or change.
+
+#### Explicit stop
+
+Stop after FD-3 and FD-4 land. Do not begin G3–G6 until the contract extensions are reported and the priority ordering is either config-declared or explicitly deferred.
+
+---
+
+### PROMPT G3: URA Finale decision surfaces
+
+**Scope:** Happy Meek Duel Panel; Career Milestone Tracker; Pre-Final Review. Extends E2's URA panel; does not replace it. Depends on G1, G2.
+
+**Preflight:** Verify G1 and G2 landed. Verify the run's write path records duel appearances — read `turn_entries`, `turn_events`, and the `TurnEvents/*Payload` classes. If the write path does not record a duel appearance, the duel overlay is display-only and driven by a Trainer-entered flag; **do not add a database column**. Report as an owner question.
+
+**Freeze points:** None for the shared contract. Any change to `NextDecision` from this slice is unauthorized.
+
+**Add-on skills:**
+
+- `source-driven-development` — every field traces to `docs/scenarios/01-ura-finale.md`, `UMAMUSUME_REFERENCE.md` §2.2.1, `config/scenarios.php` `ura_finale`, or a recorded run column. The plan's §11 exclusions are the exclusion list.
+- `doubt-driven-development` — challenge every number on the Duel Panel. The Racing Spirit hint award is stated; the per-stat gain values are not. The Aoi Kiryuin bonus is qualitative.
+- `antislop-ui` — URA is deliberately quiet (`design-2.0.md` §26).
+- `frontend-ui-engineering` — the Duel Panel is a modal with focus trap, Escape, and focus return.
+- `antislop-copywriting` — `N/A` titles name the reason precisely.
+
+**Source reading:** `docs/URA-Finale-plan.md` §8, §13, and §11; `screen-spec-2.0.md` §18; `design-2.0.md` §26, §29, §31; `config/scenarios.php` `ura_finale`; `docs/scenarios/01-ura-finale.md` §77–84; `resources/js/components/scenario/UraPanel.vue`.
+
+#### Evidence gate
+
+Before implementation:
+
+- Prove which recorded field, if any, establishes a duel appearance. Cite the model and the write path.
+- Prove which fields the recorded turn carries (options, selected stat, outcome).
+- Confirm the fan-gate thresholds (60k / 70k / 120k, and dirt variants) are in config or in a recorded entry. If not, propose config placement as an owner question; do not hard-code them.
+
+#### Build
+
+**Happy Meek Duel Panel.** Triggered by a recorded duel appearance. Content: the three duel options (only if the recorded turn carries them; otherwise the selected stat only), the Racing Spirit hint tied to each outcome (names from `docs/URA-Finale-plan.md` §8's table), the win-chance icon glyph only (no percentage, no band), the duel count (`n / 6 wins`), and the escalation reward (`Past My Limits`, 200+ SP). The enhanced-spark rate is `N/A` with a title. Focus trap, Escape, focus return.
+
+**Career Milestone Tracker.** An `<ol>` with glyph plus text (`●` completed, `◉` current, `○` upcoming, `×` missed). Milestones from the recorded calendar and the config's fan-gate thresholds. Each milestone shows label, due turn, state, consequence (when the source states one), and a link to the decision screen that addresses it.
+
+**Pre-Final Review.** A section of the milestone tracker that appears within a config-declared pre-final window. Content: recorded strengths (stats above the finale's distance floor), known deficits, unresolved requirements. The distance floors come from `docs/URA-Finale-plan.md` §3; they are read from config or recorded Trainer entries, not hard-coded.
+
+#### Tests
+
+- Pest: Duel Panel renders the recorded options, the hint table, the duel count, and the `N/A` for the spark rate.
+- Pest: milestone tracker reads from config and recorded data; a missed milestone is marked `missed`.
+- Pest: Pre-Final Review fires only within the configured window.
+- Grep: no hard-coded 60,000 / 70,000 / 120,000; no numeric win chance; no "recommended stat".
+- Playwright: Duel Panel opens/closes by keyboard with focus return; tracker renders each state as glyph plus text; 320px reflow; 44px sweep.
+
+#### Acceptance
+
+The three surfaces land with their tests. No database column was added. The turn-write-path limitation is reported as an owner question.
+
+#### Owner questions
+
+1. Does the turn-write path record duel appearances? If not, does the owner approve a Trainer-entered flag on the turn (nullable column) or a display-only panel driven by a checkbox on the training decision screen?
+2. Fan-gate thresholds: config or Trainer-entered? Recommend config; do not decide.
+
+#### Explicit stop
+
+Stop after the three surfaces land. Do not proceed to G4 until the duel-appearance evidence question is answered.
+
+---
+
+### PROMPT G4: Unity Cup decision surfaces
+
+**Scope:** Team Board; Burst Bank; Team Race Briefing; Tournament Readiness; dual-value readout. Extends E3's Unity Cup panel; does not replace it. Depends on G1, G2.
+
+**Preflight:** Verify G1 and G2 landed. Verify the run's team-write path exists — check `runs.deck.sync` and any team-write route. If no team-write route exists, the Team Board is read-only; report as an owner question.
+
+**Freeze points:** The dual-value readout is a **contract migration** of `NextDecision.recommended.benefit`. The current type `string[]` does not express two separately labelled values. Specify the typed representation **before** changing the component, and test that the additional data appears only when the resolved capability declares `team`. Do not modify the shared contract while G3, G5 or G6 are consuming it. If parallel work is active, this slice waits.
+
+**Add-on skills:**
+
+- `source-driven-development` — every field traces to `docs/Unity-Cup-plan.md`, `docs/scenarios/02-unity-cup.md`, `SCENARIO-PUBLISHER-REFERENCES.md` §7, or a recorded run column. The plan's §14 exclusions are the exclusion list.
+- `doubt-driven-development` — the dual-value readout is the central abstraction; every number on both sides must trace. Rank thresholds are unpublished (plan §14 item 1); burst payout split is unpublished (item 2).
+- `frontend-ui-engineering` — the Team Board is a `<table>` with row-level keyboard reach.
+- `antislop-layoutmobile` — the Team Board stacks by column at 320px.
+- `performance-optimization` — eager-load team data; the board reads on every Cockpit render.
+
+**Source reading:** `docs/Unity-Cup-plan.md` §1, §6, §8, §8a, §9, §10, §11, §12, §14; `screen-spec-2.0.md` §19; `design-2.0.md` §27, §15, §45; `frontend-development-plan.md` §9a FD-5, §9 E3, §9.1; `config/scenarios.php` `unity_cup` (`spirit_burst_bands`, `burst_payout_timing`); `resources/js/components/scenario/UnityCupPanel.vue`; `TrainingRun::latestTeamRank()`, `spiritBurstRoster()`, `raceEntries()`.
+
+#### Evidence gate
+
+Before implementation:
+
+- Confirm the config keys that drive the Team Board: rank ladder, facility-level source, coverage threshold. Do not guess.
+- Confirm the team write path.
+- Confirm the `NextDecision.recommended.benefit` shape and its consumers. The dual-value readout's typed representation is named in the plan phase and reported before implementation.
+
+#### Build
+
+**Team Board** (permanent region of E3's panel). Four regions: overall team rank; facility progression (rank → level, from config); team stat ranks (five-letter grid, from recorded data); race coverage (distance-by-distance state, computed from recorded roster aptitudes against the config threshold). The coverage threshold is config; cite the key.
+
+**Burst Bank** (in E3's panel). Per member: gauge (value and bar, labelled); normal burst ready / Extreme unlocked; best facility for cashing (config + member stat focus; `Calculated`). Do NOT show "recommended timing" or "projected benefit" — held.
+
+**Team Race Briefing** (drawer). Content: next team race, recorded circle reading, win condition from config or the reference doc, Alarm Clock retry availability from config. No opponent projection; no "rank if won".
+
+**Tournament Readiness** (section of the panel). Race preview per distance (same coverage rule as the Team Board); unresolved risks; one "Insufficient data for opponent strength projection" line.
+
+**Dual-value readout** (contract migration). Add a typed `team_value: Array<{ label: string; value: string; badge: ProvenanceState }>` field to `NextDecision.recommended`. Component renders two labelled columns ("Trainee value" / "Team value"). Field appears only when the resolved capability declares `team`. **Do not modify the shared contract while G3, G5 or G6 are actively consuming it.** If parallel work is active, this slice's contract migration is serialized before G5/G6.
+
+#### Tests
+
+- Pest: Team Board renders from config and recorded data; missing team stat reads `N/A`.
+- Pest: coverage rule uses the config threshold; the three states are reachable **given** the config declares the threshold (do not assert reachability if the threshold is not config-declared).
+- Pest: Burst Bank's best-facility line is `Calculated`; its reason names the member stat focus and the config key.
+- Pest: dual-value readout fires only when the resolved capability declares `team`.
+- Grep: no "recommended timing", "projected benefit", "rank if won", "win probability".
+- Playwright: Team Board table with row-level keyboard reach; Burst Bank meters value+bar; Team Race Briefing opens/closes with focus return; 320px stack; 44px sweep.
+
+#### Acceptance
+
+Four surfaces land with their tests. The dual-value readout contract migration is reported and tested before G5 or G6 proceed.
+
+#### Owner questions
+
+1. Team member writes: supported or read-only? If read-only, the board says so.
+2. Rank thresholds: unpublished (`docs/Unity-Cup-plan.md` §14 item 1). Read from run; do not project.
+3. Dual-value readout shape: two columns or combined line? Report candidates.
+
+#### Explicit stop
+
+Stop after the four surfaces land and the contract migration is reported. Do not begin G5 until the migration is confirmed stable.
+
+---
+
+### PROMPT G5: Trackblazer planning and race surfaces
+
+**Scope:** Route Planner (pre-run planning panel); Race Calendar Panel; Race Fatigue Panel. Extends E4's Trackblazer panel; does not replace it. Depends on G1, G2. **Not** dependent on G4's contract migration if the two slices do not touch the same contract fields.
+
+**Preflight:** Verify G1 and G2 landed. Verify G4's contract migration is either complete or does not intersect this slice's work. Verify the calendar write path (`runs.races.store`).
+
+**Freeze points:** None for the shared contract if G4's migration is separate. If G4's migration intersects, coordinate.
+
+**Add-on skills:**
+
+- `source-driven-development` — every field traces to `docs/Trackblazer-plan.md`, `SCENARIO-PUBLISHER-REFERENCES.md`, `docs/scenarios/03-trackblazer.md`, `config/scenarios.php` `trackblazer`, or a recorded run column. The plan's §15 exclusions are the exclusion list.
+- `doubt-driven-development` — the fatigue table's caveats must be visible in the panel itself, not only in the source.
+- `frontend-ui-engineering` — the Route Planner is an aligned property list; the Race Calendar Panel is an `<ol>` grouped by period.
+- `antislop-copywriting` — flags worded exactly ("5 consecutive races planned in Classic spring (fatigue risk)").
+- `performance-optimization` — one eager-loaded query per period.
+
+**Source reading:** `docs/Trackblazer-plan.md` §1, §3, §6, §7, §8, §10, §12, §15, §17, §18; `screen-spec-2.0.md` §20; `design-2.0.md` §28, §21, §45; `config/scenarios.php` `trackblazer`; `resources/js/components/scenario/TrackblazerPanel.vue`; `docs/scenarios/03-trackblazer.md`.
+
+#### Evidence gate
+
+Before implementation:
+
+- Confirm the placement-modifier table exists with line citations (`SCENARIO-PUBLISHER-REFERENCES.md` lines 104–110). If not, the floor derivation is not built.
+- Confirm the checkpoint profiles' config keys (KI-15 records the conservative default). If only `standard` renders, do not silently render the other two.
+- Confirm the fatigue table source and its two caveats.
+- Confirm the year-end gate thresholds' location (config or Trainer entry).
+
+**Provenance of each calculation** (must be named in the plan phase):
+
+- Race plan entries per period: **Trainer-entered**.
+- GP per grade: **sourced** (`SCENARIO-PUBLISHER-REFERENCES.md` lines 92–100).
+- Placement-modifier arithmetic: **calculated** from the sourced modifiers and the entered plan.
+- Fatigue odds: **community-sourced** (`SCENARIO-PUBLISHER-REFERENCES.md` lines 229–242), with the two caveats visible.
+- A deterministic floor is not a projected outcome. Do not label the floor with a projected-outcome word.
+
+#### Build
+
+**Route Planner.** Content: three checkpoint periods with the current period's GP runway (needed from config, planned from Trainer entry, floor from the arithmetic); epithet routes with progress; flags (consecutive-race density, year-end gate, unschedulable rival races). The floor derivation uses the placement modifiers applied to the planned races' GP values; cite the source lines. Prominent at low turn count; collapses after the first checkpoint.
+
+**Race Calendar Panel.** Extends E4's calendar region. Next three races with distance/surface/grade, GP/coin values, and skip consequences (negative GP, epithet route effect, coin loss). Skip consequences are `Calculated` (derived comparison against the period target).
+
+**Race Fatigue Panel.** Collapsible. Current consecutive-race chain; relevant row of the fatigue table; the two caveats as **visible text in the panel**, not only in a `title`; guaranteed recovery events as a read-only list with source citation.
+
+#### Tests
+
+- Pest: Route Planner's floor derivation from the placement modifiers and the entered races.
+- Pest: Epithet route progress reads from recorded races and config.
+- Pest: Race Fatigue Panel's two caveats render as visible text.
+- Pest: Race Calendar Panel's skip consequences are `Calculated`; no win probability appears.
+- Grep: no "win probability", no "expected outcome", no "predicted".
+- Playwright: three periods render with the current period emphasised; skip consequences readable; chain row matches recorded count; 320px reflow; 44px sweep.
+
+#### Acceptance
+
+The three surfaces land with their tests. The provenance of each calculation is named. KI-15 is either resolved (if the owner rules) or reported open.
+
+#### Owner questions
+
+1. Checkpoint profiles: does this slice render the other two tracks, or keep the conservative default? KI-15 is open.
+2. Route Planner location: wizard step or cockpit panel? The wizard is settled at six steps.
+3. Year-end gate thresholds: config or Trainer entry?
+
+#### Explicit stop
+
+Stop after the three surfaces land. Do not begin G6 until G5's provenance table is reported.
+
+---
+
+### PROMPT G6: Trackblazer cockpit surfaces
+
+**Scope:** Shop Drawer; Resource Ledger; Epithet Tracker. Extends E4's Trackblazer panel; does not replace it. Depends on G1, G2, G5.
+
+**Preflight:** Verify G5 landed. Verify the purchase write route (`runs.purchases.store`) and its Form Request.
+
+**Freeze points:** None for the shared contract.
+
+**Add-on skills:**
+
+- `source-driven-development` — the shop catalogue rows come from `config/scenarios.php` `trackblazer.shop`; item effects trace to `SCENARIO-PUBLISHER-REFERENCES.md` lines 383–453.
+- `doubt-driven-development` — every shop element is challenged for an implied recommendation. Community guidance is labelled `Community`; the plan's derivations are labelled `Calculated`; game rules are `Confirmed`.
+- `security-and-hardening` — purchases write through `runs.purchases.store`; the Form Request is the authority; do not trust client cost or coin totals.
+- `frontend-ui-engineering` — the Shop Drawer traps focus, closes on Escape, returns focus.
+- `antislop-copywriting` — item rows as exact labelled values. Community tags visibly separate from game rules.
+- `antislop-layoutmobile` — the drawer at 320px takes the full width; items stack.
+
+**Source reading:** `docs/Trackblazer-plan.md` §11, §12, §19; `screen-spec-2.0.md` §20; `design-2.0.md` §28, §32, §45; `config/scenarios.php` `trackblazer.shop` and its `verified_at`; `resources/js/components/scenario/TrackblazerPanel.vue`; `runs.purchases.store`.
+
+#### Evidence gate
+
+Before implementation, prove the following boundary:
+
+- **Game rules** — sourced from `SCENARIO-PUBLISHER-REFERENCES.md` and marked `Confirmed`.
+- **Community guidance** — sourced from uma.guide (`docs/Trackblazer-plan.md` §11) and marked `Community`.
+- **Calculations** — derived by this tool from entered data and marked `Calculated`.
+- **Recorded balances** — entered or stored and marked `Confirmed`.
+
+Every reserve line ("Keep 100+ coins entering Summer") is community guidance. Do not derive a new reserve number. Do not present a community tag as an authoritative recommendation.
+
+#### Build
+
+**Shop Drawer.** A drawer opened from the Cockpit's action area. Content: coins and refresh timer (recorded); item list from config (item, cost, effect, duration, held count with the cap); game rules block (`Confirmed`, cited); community tags (`Must Buy` / `Skip` labelled with source); reserve guidance labelled `Community`. "Record Purchase" posts through `runs.purchases.store`. Purchased items list below.
+
+**Resource Ledger.** A cockpit panel. Coins, five key items held, current balance, projected inflow (planned races), projected cost (planned purchases), Summer reserve target. Projections `Calculated`; actuals `Confirmed`; reserve target `Community`. The ledger distinguishes actual / planned / hypothetical balances with visible labels.
+
+**Epithet Tracker.** A cockpit panel. Each epithet route from config as a chain. Each race: state (won/remaining/lost/not started) from `raceEntries`. A route with a lost race is greyed with text ("Route broken: Oka Sho not won"). A route with all races won is `completed`. Rival races are shown but marked "cannot be scheduled".
+
+#### Tests
+
+- Pest: shop catalogue renders from config with held count and cap.
+- Pest: game rules block cites source lines; each rule `Confirmed`.
+- Pest: reserve guidance is labelled `Community`, not `Confirmed` or `Calculated`.
+- Pest: Resource Ledger projections `Calculated`; actuals `Confirmed`.
+- Pest: Epithet Tracker route state derives from recorded races.
+- Grep: no "recommended purchase", "best value", "Twinkle Star Climax" outside a named-absence `title`.
+- Playwright: Shop Drawer opens/closes by keyboard with focus return; ledger's three balance states are labelled; epithet route with a lost race is greyed with text; 320px reflow; 44px sweep.
+
+#### Acceptance
+
+The three surfaces land with their tests. The four-way boundary (game rules / community / calculations / recorded) is enforced in code and in tests.
+
+#### Owner questions
+
+1. Shop jump E4 already added: drawer or jump-to-region? Report which shipped and which this slice ships.
+2. Reserve guidance numbers: rendered as labelled community guidance, or under a disclosure?
+
+#### Explicit stop
+
+Stop after the three surfaces land. Do not begin G7 until the boundary is reported and the reserve guidance question is reported.
+
+---
+
+### PROMPT G7: Cross-scenario consistency audit and Phase G acceptance
+
+**Scope:** Audit the full chain (Performance → Lessons → Songs → Live Bonuses → Promotional Lives → Grand Concert, plus URA / Unity Cup / Trackblazer decision surfaces) for consistency; fix demonstrated inconsistencies; run Phase G acceptance. Depends on G1–G6.
+
+**Preflight:** Verify G1–G6 landed. Verify the audit table is complete. Verify file ownership across the tree is established.
+
+**Freeze points:** None. This slice fixes demonstrated inconsistencies only; no broad refactor.
+
+**Add-on skills:**
+
+- `spec-driven-development` — write the audit checklist before running it.
+- `doubt-driven-development` — fix only demonstrated inconsistencies.
+- `code-review-and-quality` — final self-review.
+- `constraint-driven-development` — re-run every gate against the full Phase G tree.
+- `browser-testing-with-devtools` — full cross-scenario walkthrough at 1280/768/320 with reduced motion and 200% zoom.
+
+**Source reading:** `docs/Our-Grand-Concert-plan.md` Slice 23 and Slice 24; `frontend-development-plan.md` §9a FD-5, §10, §12, §13; all G1–G6 slice plans.
+
+#### The audit must produce evidence rows, not a checklist
+
+Produce a table with one row per (scenario, screen, criterion) triple. Each row must identify the implementation or test that proves the result. A row that cites neither is a defect to be investigated.
+
+Criteria per row:
+
+- Uses the shared `NextDecision` contract from G1.
+- No duplicate state representation.
+- Observed-vs-derived separation preserved (`ProvenanceBadge` on every computed figure).
+- `TurnEvent` behavior consistent across scenarios.
+- Read-side behavior deterministic.
+- Scenario capability gating correct.
+- No unverified mechanic exposed.
+- No silently calculated unsupported total.
+- Tests exist.
+- `SCREEN_SPEC.md` documentation matches.
+
+The audit table is the deliverable. Only demonstrated inconsistencies are fixed.
+
+#### Regression attribution
+
+For each finding, classify:
+
+- **Phase G regression** — introduced by a G1–G6 slice; fixed in this slice with a regression test.
+- **Inherited defect** — pre-existing on the tree; reported as an owner question, not fixed unless the fix is within Phase G's authorized scope.
+- **Undetermined** — cause unclear; reported as `undetermined` with the evidence.
+
+Do not classify a failure as pre-existing without evidence. Do not classify a failure as a slice regression without evidence.
+
+#### Phase G acceptance pass
+
+Run the hand-off sequence from the master contract, on the Phase G tree:
+
+- `php artisan test --compact`
+- `vendor/bin/pint --dirty --format agent`
+- `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`
+- `npm run typecheck`
+- `npm run build`
+- `npm run test:browser`
+- `composer lore`
+- `composer lore-code`
+- `php artisan migrate:status`
+
+Report each gate's real output, exit status, relevant counts, and the failure attribution per the master contract's §7.
+
+Re-verify the Grand Concert baseline strip renders with every panel off (G-41) and that `partially_documented` is intact.
+
+#### Diff report
+
+Report the Phase G diff size (files, lines added/removed) without staging or committing. Do not stage or commit. The owner's commit strategy is separate.
+
+#### Acceptance
+
+- The audit table is complete, one row per (scenario, screen, criterion).
+- Every demonstrated inconsistency is fixed with a regression test or reported as an owner decision.
+- The Phase G acceptance pass is executed and reported.
+- `SCREEN_SPEC.md` §2 has a row for every screen G1–G6 added, with empty/loading/error states.
+- A "Skills used" report names each skill and what it changed.
+
+#### Owner questions
+
+1. Any inconsistency that requires a decision rather than a fix — reported, not decided.
+2. Phase G diff size — reported for the owner's commit strategy.
+
+#### Explicit stop
+
+Stop after the audit and the acceptance pass are reported. Do not stage or commit. Phase G is complete when the owner accepts the audit and the acceptance pass.
+
+---
+
+## Part 4 — Amendments applied
+
+This section records the specific amendments from your review, so a reader can see what changed and why.
+
+### Master contract changes
+
+| Issue | Amendment |
+|---|---|
+| Prerequisites too broad | Master §2.2 now distinguishes KI-88 blocking acceptance from KI-88 blocking all work. Isolated work may proceed under explicit owner authorization, with baseline failures recorded separately. |
+| Shared contract not settled | Master §4.2 declares the G1 contract authoritative; any subsequent change is a contract migration requiring owner approval (Part 2). |
+| Infrastructure assumed | Master §3 and every slice spec require verifying files, keys, routes, and columns against the tree, not against the prompt. Each slice's evidence gate names what must be proven before implementation. |
+| Tests demand unsupported behavior | Slice G4's coverage-threshold test now fires only when config declares the threshold. Slice G5 separates provenance of each calculation. Slice G7 requires evidence rows, not a checklist. |
+| Skill-loading expensive | Master §5 keeps the baseline but instructs not to reload every skill's full instructions per slice. Slice-specific skills are named in each spec. |
+| Gates not attributable | Master §7 requires per-gate attribution (pre-existing / slice / undetermined) with evidence. |
+| Discovery/design/implementation/release combined | Master §6 separates the phases with explicit stop conditions. Each slice's "Explicit stop" names what must not proceed. |
+
+### Slice amendments
+
+| Slice | Amendment |
+|---|---|
+| G1 | Freeze point added: contract shape must be confirmed against four scenarios plus a fifth (`config()->set`) before implementation. Compatibility tests are the gate. |
+| G2 | `RecordedAction.decision` is a snapshot at action time, not a recomputation. History append is defined before UI. Undo reported open. |
+| G3 | Duel overlay conditional on evidence: first prove the recorded field; no silent database column; display-only alternative if the write path does not record. |
+| G4 | Dual-value readout is an explicit contract migration; typed representation named before component change; test that it fires only when capability declares `team`; no parallel contract modification. |
+| G5 | Provenance of each calculation named (entered / sourced / calculated / community). Fatigue caveats visible in the panel. Floor is not a projected outcome. |
+| G6 | Game rules / community guidance / calculations / recorded balances kept visually and semantically distinct. Server-side validation through the existing Form Request. Community never presented as authoritative. |
+| G7 | Audit produces evidence rows, not a checklist. Each row cites implementation or test. Only demonstrated inconsistencies fixed. Inherited defects distinguished from Phase G regressions. Diff reported without staging or committing. |
+
+---
+
+## Trainer-Docs-2.0-D-Prompts.md
+
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/Trainer-Docs-2.0-D-Prompts.md` (542 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+>
+> **Consolidated 2026-10-12 (Round 15).** The original was deleted after line-by-line verification (380 of 380 non-blank source lines found in this section, in order, 0 missing). It was tracked and clean at HEAD, so the delete is recoverable from history. Cite this anchor, not the deleted path.
+
+I read SKILL.md. It lists 115 global and 39 project-local skills, and I mapped the useful ones to each slice. The shared context now carries a baseline skill set, a skill precedence rule, and a skills-used report line. Every prompt gets its own add-on skills, each with the reason it applies.
+
+Two choices to know about:
+
+* I only used skills that fit the repo's constraints. I left out `pick-ui-library` (no new packages), the `design-taste` / `high-end-visual-design` family (they push redesigns), and the animation skills (the MOTION dial is 1).
+* The shared context now says that if a skill's default advice conflicts with AGENTS.md, an ADR or the plan, the repo wins. `tailwindcss-development` suggests `dark:` variants, for example, and the repo forbids them.
+
+==============================================================  
+SHARED CONTEXT (paste before every prompt)
+===========================================================================================================
+
+You are working in the Trainer Desk 2.0 repo (Laravel 13, Inertia v3, Vue 3, TypeScript, Tailwind v4, Pest 4, Playwright). You are building ONE slice of Phase D of the Trainer Desk 2.0 frontend.
+
+READ FIRST, in this order:
+
+1. AGENTS.md
+2. docs/proposals/frontend-development-plan.md: Global Constraints, sections 2, 3, 8, 12 and 13, plus your slice's row
+3. docs/proposals/screen-spec-2.0.md: your SCREEN-nnn section AND the "Product direction corrections" table
+4. docs/proposals/design-2.0.md: the sections named in your prompt
+5. DESIGN.md and SCREEN_SPEC.md
+
+AUTHORITY ORDER: landed ADRs, then AGENTS.md, then the development plan, then the two design briefs. The briefs are design intent. The plan is the authorization. Skills (below) are METHOD only. If a skill's default advice conflicts with any repo document (for example a skill suggesting dark: variants, a new package, an extra animation, a redesign, a placeholder image, or a recommendation score), the repo wins. Say so in your report and move on.
+
+SKILLS: how to use them  
+Load each skill by name at the phase shown. If a skill is not installed, say so in your report and apply its intent anyway.
+
+Baseline skills (every slice):
+
+* using-agent-skills: governs how you find and invoke the rest.
+* planning-and-task-breakdown + spec-driven-development: PLAN PHASE. Turn your slice into an ordered task list and a short written spec (files, props contract, tests, open questions) before any code.
+* incremental-implementation + test-driven-development: BUILD PHASE. Thin vertical steps: failing props test, controller, page, passing test, Playwright spec.
+* laravel-best-practices + testing-best-practices: controllers, Form Requests, query shape, Pest structure, naming, isolation.
+* frontend-ui-engineering + tailwindcss-development: Vue components, layout, state, WCAG. Tokens only, never dark: and never zinc-*.
+* antislop, antislop-ui, antislop-human, antislop-copywriting, antislop-layoutmobile: apply to every string and layout you write (no filler copy, honest empty states, keyboard and focus, tap targets, no horizontal overflow). antislop-code for comments (keep only the ones that carry information).
+* constraint-driven-development: the repo's gates (G-19, G-33, G-47, DesignTokensTest) and CONSTRAINTS.md are the contract. Check your diff against them.
+* doubt-driven-development: REVIEW PHASE. For every non-trivial decision you made (persistence mechanism, thresholds, anything you inferred), get an adversarial fresh-context challenge before it stands, and report the result.
+* code-review-and-quality: final self-review of the diff before hand-off. The diff must contain no unrelated file.
+* browser-testing-with-devtools: VERIFY PHASE. Check console errors, focus order, 320px reflow, 200% zoom and reduced-motion in a real browser alongside the Playwright spec.
+
+Optional if installed: freeze (restrict edits to resources/js, app/Http, routes, tests, config as needed for your slice), careful (before any destructive command), design-review (visual QA pass on flagship screens).
+
+HARD RULES
+
+* Copy the page pattern of resources/js/pages/Catalog/Index.vue: AppLayout, <Head title>, #title slot, useForm with @submit.prevent, router.get with preserveState and preserveScroll. Do not invent a second pattern.
+* Each page gets a controller method returning Inertia::render('Page', $props), a route, and a Pest test using assertInertia. Map models to explicit arrays. Never pass Eloquent models. No uses() or withoutVite() in test files.
+* Writes keep their existing Form Requests and routes. The Vue form only posts.
+* Tokens only: no zinc-* utilities, no dark: outside the theme override block.
+* Never branch on a scenario name. Read config/scenarios.php through props (panels.* flags, widgets[]).
+* Unrecorded or unsourced values render as "N/A" with a title attribute explaining why. Never a default, never a dash, never an invented number.
+* Trust vocabulary: every computed figure carries Confirmed / Calculated / Estimated / Unknown. ProvenanceBadge.vue is built in D4. Before D4, show only entered or stored values and named absences.
+* HELD computation stays held: no race win probability or readiness band, no inheritance computation or "expected inheritance", no per-training stat yields or failure %, no shop recommendation, no Grand Concert mechanics, no numeric confidence or score.
+* Global terminology only: Support Cards, Scouts, Veteran Umamusume, Pal, Wit, Sparks. Print "Trackblazer", not "Twinkle Star Climax". Write "2026-07-01 Global rework".
+* WCAG 2.2 AA: keyboard path, visible focus, h-11 / min-h-11 (44px) targets, labels, aria-describedby on errors, lang="ja" on Japanese names, prefers-reduced-motion respected, no drag-only interaction (always give a button alternative), sticky UI must not cover focus. Never show state through colour alone.
+* Every page has loading, empty and error states. An empty state says what is missing, why it matters, and what to do.
+* Wizard slices (D2 to D7) carry entered values forward and never re-ask for them (WCAG 3.3.7).
+* Navigation: AppLayout already has nine destinations, two of them named absences (to: null). Miller's Law says at most eight. Replace a named absence instead of adding an entry. If a slice would exceed eight, stop and report.
+* Wizard persistence: build_target lives on training_runs and runs.deck.sync is run-scoped, so the D2 to D7 wizard needs a draft/planning run or an equivalent. Decide the smallest mechanism using existing TrainingRun statuses. Do not invent an enum value, column or migration without owner approval. Report the decision.
+* No new npm or composer package. No vue-tsc. Do not file an ADR; draft the text in your report if one seems needed.
+* Add or extend the SCR-CAR-* (or matching area) row in SCREEN_SPEC.md section 2 with the empty / loading / error state table.
+
+PROCESS: plan phase (skills above), then build phase with TDD, then Playwright spec in tests/browser/<screen>.spec.ts (rendered copy, 44px sweep, keyboard path, axe A + AA if the dependency already exists), then review and verify phases.
+
+HAND-OFF SEQUENCE, report real output and never claim an unrun gate passed: targeted tests, php artisan test --compact, vendor/bin/pint --dirty --format agent, vendor/bin/phpstan analyse --no-progress --memory-limit=1G, npm run typecheck, npm run build, npm run test:browser, composer lore + composer lore-code with a ruling per hit.
+
+FINAL REPORT must include: files changed, props contract, every deviation from the plan and why, open questions for the owner, gate output, and a "Skills used" list with one line each (what it changed in your work) plus any skill you skipped and why.
+
+==============================================================  
+PROMPT D1: Dashboard enrichment (SCREEN-001)
+=============================================================================================================
+
+TASK: Enrich resources/js/pages/Dashboard.vue and its controller props. Depends on C1 (BuildTarget) and C3 (veterans).
+
+SKILLS (add to baseline):
+
+* performance-optimization: the dashboard aggregates several sources. Eager-load, avoid N+1, cap recent lists, and use Cache::remember only where the catalog pattern already does.
+* api-and-interface-design: define the dashboard props contract (activeCareer, recentVeterans, dataStatus) once, typed in resources/js/types.ts.
+* antislop-copywriting: the empty states and the DataStatus line must be specific, not generic ("Welcome back" filler is fine only if the spec has it).
+
+READ: screen-spec-2.0 SCREEN-001 plus the data-status note under "Product direction corrections"; design-2.0 sections 4, 29, 39, 48; plan section 8 row D1; plan section 13 rows "Paradox of the Active User" and "Von Restorff".
+
+BUILD:
+
+* ActiveCareerCard: the active run's trainee name, scenario label, year and half, turn, Energy, and the scenario's primary resource (read from config widgets[], not by scenario name). Primary action "Resume Career" links to the run. Energy reads "N/A" with a title when no turn has recorded it.
+* Quick actions: New Career, Legacy Lab, Support Cards. A destination whose slice has not landed is a named absence (to: null), not a dead link.
+* Recent Veterans from the C3 list action. Recent Builds only if a real source exists; otherwise a named absence.
+* Legacy-goal gaps only if C1 and C3 give a real comparison. Otherwise omit the panel and say why in the report.
+* DataStatus: a subtle "GLOBAL DATA ● Current" badge with the verified date from config/scenarios.php. Glyph plus text. The ruleset line reads "N/A" with a title because app.ruleset is null.
+* Empty state when no active career: "No active career. Start a new training run." plus what / why / what-to-do per design-2.0 section 29.
+* No onboarding wall: the page is usable on first load.
+
+ACCEPTANCE: every panel is real data or a named absence with no invented counts. Props test covers active, no-active and no-veterans cases. Playwright covers the empty state, Resume link, DataStatus text and 44px sweep. lang="ja" on any Japanese name.
+
+==============================================================  
+PROMPT D2: Scenario Selection + SetupLayout (SCREEN-002)
+=========================================================================================================================
+
+TASK: Create layouts/SetupLayout.vue and pages/Career/ScenarioSelect.vue. This is the first screen of the setup wizard.
+
+SKILLS (add to baseline):
+
+* spec-driven-development: write the wizard contract first (steps, carried state, what each step reads and writes). D3 to D7 will build on it.
+* doubt-driven-development: the wizard-persistence decision is the riskiest call in this slice. Challenge it adversarially (what breaks on refresh, back button, two tabs, abandoned drafts) before it stands.
+* constraint-driven-development: G-33 (no scenario-name branching) is the central gate here.
+* antislop-ui + antislop-layoutmobile: four cards must be distinct by content, not decoration; no overflow at 320px.
+* design-review (optional, global): one visual QA pass on the card grid.
+
+READ: screen-spec-2.0 SCREEN-002 and its correction row (four scenarios, no star ratings); design-2.0 sections 13, 25, 48; plan sections 8 (D2) and 9 (E6); config/scenarios.php, especially the our_grand_concert entry with documented => false.
+
+BUILD:
+
+* SetupLayout: minimal wizard shell with a step indicator ("Step n of 6"), skip link, a labelled nav, and the same landmarks as AppLayout. Do not add CareerLayout yet.
+* ScenarioSelect: four cards generated by looping the scenarios the controller resolves from config/scenarios.php. Each shows name, short description, what it optimizes (primary / secondary / training complexity as text, NO star ratings or difficulty), primary mechanic, availability (live_on_global date), and ruleset version rendered as "N/A" with a title.
+* Grand Concert card: a "PARTIALLY DOCUMENTED" badge with glyph and text. Its description says only baseline tracking is available. Do not write mechanics the config does not hold.
+* Primary action per card: "Select Scenario". Use a radio-group or card-button pattern with a full keyboard path and aria-checked / aria-pressed. Carry the selection to D3 via the persistence decision.
+* Adding a fifth scenario must be one config entry and zero component edits. Prove it with a test that iterates the config.
+
+ACCEPTANCE: grep the diff for scenario-name branching (none allowed). Four cards render. The Grand Concert baseline state is visible. Selection survives navigation to the next step and back.
+
+==============================================================  
+PROMPT D3: Trainee Selection + Trainee Profile (SCREEN-003 / SCREEN-004)
+=========================================================================================================================================
+
+TASK: Create pages/Career/TraineeSelect.vue and pages/Career/TraineeProfile.vue. Depends on D2.
+
+SKILLS (add to baseline):
+
+* code-simplification: reuse, do not copy. Extract shared bodies from Catalog/Index.vue and Catalog/Show.vue into components if both screens need them. Behaviour of the catalog pages must not change.
+* performance-optimization: the roster query is the heaviest in the wizard. Keep the catalog's cardScope() and PageSize::clamp, avoid N+1 on aptitudes and cards.
+* antislop-layoutmobile: card grids and the filter bar at 320px.
+* source-driven-development: ground each filter and profile section in a real column or relation. Cite the model or migration in your slice plan.
+
+READ: screen-spec-2.0 SCREEN-003 and SCREEN-004; design-2.0 sections 17, 42, 45a, 46; existing pages/Catalog/Index.vue and Show.vue, components/AptitudeGrid.vue, FormTabs.vue, ArtworkSlot.vue, SkillRow.vue, TraineeCombobox.vue; CatalogController (cardScope() and the filter queries).
+
+BUILD:
+
+* TraineeSelect: reuse the catalog queries and Paginator pattern. Searchable, sortable roster. Filters only where real columns or relations exist (Surface, Distance, Running style, Aptitude, Unique skill, Character). If Growth rate or Scenario suitability have no data, omit them and list the omission in the report.
+* Trainee card: name (lang="ja" for the Japanese name), aptitude badges as letter plus text (S/A strong, B/C neutral, D/E weak, F/G very weak), "View Profile" and the primary "Select Trainee". ArtworkSlot follows 45a geometry; when absent it renders the text-only row with no placeholder.
+* TraineeProfile sections: Basic (name, rarity, version, growth rates only if stored), Aptitudes, Skills (unique, starting, awakening, event, only lists the data holds), Career goals (only if stored), Build analysis. Build analysis shows sourced facts only. "Recommended stat distribution" and "useful inheritance" are unsourced, so render "N/A" with a title.
+* Selecting stores the trainee in wizard state and goes to D4. "Back" keeps the chosen scenario.
+
+ACCEPTANCE: components reused, not duplicated. Aptitude never colour-only. Props test covers filter behaviour. Playwright covers keyboard selection and the 44px sweep. Existing catalog specs still pass.
+
+==============================================================  
+PROMPT D4: Build Target + ProvenanceBadge (SCREEN-005)
+=======================================================================================================================
+
+TASK: Build components/ProvenanceBadge.vue and pages/Career/BuildTarget.vue. Depends on C1.
+
+SKILLS (add to baseline):
+
+* api-and-interface-design: ProvenanceBadge is a shared contract used by every later slice. Fix its prop type (state union, optional source), its accessible-name rule and its placement rule once, and export the type.
+* security-and-hardening: server-side validation is the authority. Stat targets clamp through ScenarioCaps::forRun in the Form Request. The client clamp is a convenience. Check mass-assignment and that skill_priorities cannot carry unexpected keys.
+* doubt-driven-development: challenge the purposes conflict and the missing risk-tolerance field before deciding how to report them.
+* source-driven-development: ground payload shape in BuildTargetPayload, StoreBuildTargetRequest and ScenarioCaps.
+* antislop-human: error messages tied to inputs, focus moves to the first error.
+
+READ: screen-spec-2.0 SCREEN-005 and its Career Plan correction; design-2.0 sections 15, 20, 36, 49; plan C1 (section 7) and the D4 row; app/Models/Advisor/BuildTargetPayload, StoreBuildTargetRequest, ScenarioCaps::forRun.
+
+BUILD:
+
+* ProvenanceBadge.vue: the ONLY place the four glyphs live. States Confirmed / Calculated / Estimated / Unknown. Each has a distinct glyph plus visible text, 3:1 non-text contrast, an accessible name, and a title. It sits adjacent to the figure it labels.
+* BuildTarget page headed "Your target" (never "The correct target"). Fields come from BuildTargetPayload only: purpose, distance, surface, style, five stat targets, ordered skill priorities.
+* Purpose options come from the C1 enum (StoryClear, ChampionsMeeting, ParentFarming, SkillFarming). The screen spec lists six. Do NOT add values. Report the difference to the owner.
+* Risk tolerance and per-skill Required / High / Optional / Ignore marks are in the screen spec but not in the C1 payload. Do not build them without owner approval; list them as open questions.
+* Stat targets: numeric input plus a bar showing distance to target, each labelled. Show the cap beside the field and server errors tied to the input with aria-describedby.
+* Skill priorities: ordered list with Move up / Move down buttons (no drag-only).
+* Human-readable summary generated only from entered values, badge Calculated. If a field is empty the summary names the absence.
+* Absent target: the page names the absence and does not default values.
+
+ACCEPTANCE: props test round-trips the payload and the cap clamp. Playwright covers keyboard reorder, cap error text, and the badge's text plus accessible name. Grep proves no glyph is defined outside ProvenanceBadge.
+
+==============================================================  
+PROMPT D5: Legacy Lab, record-only (SCREEN-006)
+================================================================================================================
+
+TASK: Create pages/Legacy/Index.vue, Legacy/Builder.vue and Legacy/Compare.vue. Depends on C3. Record-only: pick, browse, compare.
+
+SKILLS (add to baseline):
+
+* doubt-driven-development: the line between "record" and "compute" is where this slice fails. Challenge every displayed number and label: is it entered, stored, or derived? Derived means it does not ship.
+* source-driven-development: UMAMUSUME_REFERENCE.md section 1.5 (sparks, star-roll odds, six-node tree) and ADR-0010 / ADR-0020 section 3. Cite lines in your slice plan.
+* code-simplification: one SparkChip component for every spark (Law of Similarity), one ancestry-node component.
+* frontend-ui-engineering: the six-node graph needs a real accessible structure (a labelled list or tree with connector lines as decoration), not an SVG-only picture.
+* antislop-ui: no decorative anime flourish; connectors and chips carry meaning.
+
+READ: screen-spec-2.0 SCREEN-006 and its correction row; design-2.0 sections 18, 22, 29, 46 and the knowledge-grounding rows on Sparks and Affinity; plan D5 and section 3 (the Sparks row); ADR-0020 section 3; ADR-0010; LegacySelectionPayload.
+
+BUILD:
+
+* A persistent banner on every Legacy screen: "Record only. This screen stores and compares what you enter. It does not compute inheritance." Glyph plus text.
+* Index: browse recorded veterans (C3 list action). Filters: spark type, distance, surface, style, scenario, rating. Offer only what C3 supports.
+* Builder: a six-node ancestry graph (Trainee on top; Parent A and Parent B; four grandparents A1, A2, B1, B2) joined by visible connector lines. Assigning a veteran to a node is a button flow ("Assign to Parent A") with a full keyboard path, no drag. Each node shows recorded Blue / Pink / Green / White sparks via the shared SparkChip (colour AND label AND star count).
+* Spark probabilities: show one only if the repo already holds a sourced star-roll table (reference section 1.5), labelled Estimated. Otherwise "N/A" with a title. Never sum, aggregate, or show "expected inheritance", payout totals or a recommended combination. Affinity is not computed: render "N/A" with a title.
+* Compare: up to four veterans side by side, identical properties aligned in rows (design-2.0 section 46), recorded values only.
+* Primary action "Confirm Inheritance", saving via the existing LegacySelectionPayload path.
+
+ACCEPTANCE: grep shows no inheritance, affinity or optimization computation. Props test covers filters and the six-node payload. Playwright covers keyboard assignment, the banner and compare alignment.
+
+==============================================================  
+PROMPT D6: Support Deck Builder (SCREEN-007)
+=============================================================================================================
+
+TASK: Create pages/Support/Builder.vue over the existing runs.deck.sync write, plus components/support/{SupportSlot,DeckAnalysis}.vue as needed.
+
+SKILLS (add to baseline):
+
+* source-driven-development: every analysis number must trace to SupportCardEffects anchors (UMAMUSUME_REFERENCE.md section 1.4, SUPPORT-CARDS.md). Cite them.
+* code-simplification + deprecation-and-migration: DeckPanel.vue and the run page's deck payload already exist. Extract and reuse. Do not delete anything without a zero-consumer grep, and keep runs.deck.sync behaviour (including the 2026-10-05 closed-slot change).
+* performance-optimization: the card picker lists many cards. Keep the paginated query shape of SupportCardController.
+* doubt-driven-development: challenge each deck-analysis category: is it derivable, or is it a score in disguise?
+* frontend-ui-engineering: slot replacement is a stateful keyboard interaction. Define focus return after a replacement.
+
+READ: screen-spec-2.0 SCREEN-007 and its correction row; design-2.0 sections 12, 17, 33, 42, 45a; plan D6; components/DeckPanel.vue, the run deck payload in TrainingRunController, SupportCardEffects, pages/SupportCards/Index.vue and Show.vue.
+
+BUILD:
+
+* Six slots, each with an ownership flag OWNED / RENTED as a labelled toggle with text. Do not assume "five owned plus one borrowed".
+* Seven support types as one typed list: Speed, Stamina, Power, Guts, Wit, Pal, Group. Type shown as text plus icon.
+* Scenario Link: DERIVED from scenario plus character at render time, never stored on the card. If the repo cannot derive it, "N/A" with a title.
+* Card picker with filters only where data exists (type, rarity, level, limit break, skill, training bonus, race bonus, scenario compatibility). Keyboard slot replacement, no drag.
+* Deck analysis by category (training power, early run, race bonus, safety, events, skills). Compute a category only from stated SupportCardEffects anchor values, show the actual numbers with a Calculated badge. No composite score, and no bar unless the number is printed beside it. Strengths and weaknesses are plain text derived from those numbers. "Recommended replacement" is NOT built: render a named absence.
+* Primary action "Confirm Deck", posting through the existing runs.deck.sync and its Form Request.
+* Image slots follow 45a. Absent artwork shows no placeholder.
+
+ACCEPTANCE: props test covers six slots, the ownership flag, seven types. Playwright covers slot replacement by keyboard, the 44px sweep, and that analysis shows numbers with labels.
+
+==============================================================  
+PROMPT D7: Run Preflight / Career Contract (SCREEN-008)
+========================================================================================================================
+
+TASK: Create pages/Career/Preflight.vue. Depends on D4, D5, D6.
+
+SKILLS (add to baseline):
+
+* spec-driven-development: write the warning rules as a table in the slice plan (trigger, data read, reason line) before coding. Each rule must be testable.
+* doubt-driven-development: challenge every threshold. The aptitude cut-off must come from design-2.0 section 17's tiers, not from you.
+* security-and-hardening: the preview is not a trust boundary. "Start Career" must re-run the Form Requests server-side and refuse stale or tampered wizard state.
+* api-and-interface-design: the contract prop that composes D4 to D6 should be one typed object, so Edit / Back round-trips are lossless.
+
+READ: screen-spec-2.0 SCREEN-008 and its "Career Contract" correction; design-2.0 sections 13, 14, 21, 36; plan D7; design-2.0 section 17 for aptitude tiers.
+
+BUILD:
+
+* Sections Build (trainee, scenario, target, six legacy members), Support deck (six cards and the D6 analysis), Target (stats, skill priorities, race profile). Everything is read from carried wizard state. Nothing is re-asked.
+* Warnings: only those derivable from entered data, each with a one-line reason citing the values. Derivable examples: a target distance, surface or style whose trainee aptitude is D or lower (state the threshold in your plan); a skill priority with no source on the trainee, deck or legacy; a missing wizard section. Do NOT ship "weak stamina plan", "poor support synergy" or "missing scenario requirement" unless derivable from sourced data. Report what you skipped.
+* Each warning: glyph plus text. Warnings never block; the Trainer decides. Only hard server validation errors block.
+* Actions: Back, Edit Legacy, Edit Deck, Edit Target (each returns to its step with values intact), and the primary "Start Career", posting to the existing run-creation route and redirecting to the run.
+* Ruleset snapshot field: "N/A" with a title (app.ruleset is null).
+
+ACCEPTANCE: props test covers the full contract, each warning trigger, and that Start Career creates a run. Playwright covers Edit then return with values intact, the warning text, and focus moving to the first error after a failed submit.
+
+==============================================================  
+PROMPT D8: Career Cockpit + CareerLayout (SCREEN-009)
+======================================================================================================================
+
+TASK: Create layouts/CareerLayout.vue, pages/Career/Cockpit.vue, and components/career/{CareerHeader,CareerStatePanel,ActionGrid,RecommendationCard,AdvisorRail}.vue. Depends on C2 and D7. This is the flagship screen.
+
+SKILLS (add to baseline):
+
+* impeccable: use its critique and polish passes on the finished cockpit, within the repo's tokens and MOTION dial 1. Its suggestions never override DESIGN.md.
+* design-review (optional, global): visual hierarchy QA against design-2.0 section 4 (four levels). The recommendation card is the only accented element.
+* code-simplification: reuse the 19 components in the Runs/Show.vue import graph (StatBand, EnergyGauge, MoodPill, ResourceStrip, GuidedStep, RaceCalendar). Wire them, do not rewrite them.
+* performance-optimization: the cockpit is read on every turn. Keep the payload lean and avoid N+1 on turns and goals.
+* antislop-layoutmobile + antislop-human: three breakpoints, no horizontal scroll for primary decisions, sticky-nav scroll-padding so focus is never obscured (2.4.11).
+* doubt-driven-development: challenge that no field in the advisor props smuggles a score or numeric confidence.
+* browser-testing-with-devtools: check 1280, 768 and 320 widths, 200% zoom and reduced motion in a real browser.
+
+READ: screen-spec-2.0 SCREEN-009, sections 13, 29, 33, plus the "state machine" correction; design-2.0 sections 2, 4, 19, 23, 24, 36, 38, 40; plan D8 including the "Recommendation contract (D8)" paragraph; app/Services/Advisor/TrainerAdvisor and config/advisor.php; the existing pages/Runs/Show.vue and its 19 components.
+
+BUILD:
+
+* Do not delete Runs/Show.vue or its components. Decide the route in your slice plan (the spec says it descends from GET /training-runs/{run}) and keep all existing write routes.
+* Layout: desktop three columns (Timeline about 20%, Current decision about 50%, Advisor about 30%); tablet two columns with the timeline as a horizontal strip; mobile single column in the order Header, Current State, Recommendation, Action, Scenario, Timeline.
+* CareerHeader: scenario, year, month, turn, Energy, Mood, Fans, Skill Points, scenario resources from config widgets[].
+* CareerStatePanel: five stats plus four meta values. Each stat shows "current / target" AND a bar. Missing values read "N/A".
+* ActionGrid: Training, Race, Rest, Recreation, Scenario action, Event, Inheritance. Exactly one carries a "RECOMMENDED" marker. Entries link to D9 to D12 if landed, otherwise they are named absences.
+* RecommendationCard / AdvisorRail props exactly: { action, band: 'AtOrAboveAdvisory'|'BelowAdvisory', reasons: string[], alternative: string|null, risk: string|null }. Band printed as text plus glyph, with reason lines. NO score and NO numeric confidence. It never auto-executes; the Trainer's action is always their own button. When Energy is absent show no band and no ranking and print "Recommendation unavailable because Energy has not been entered."
+* Manual correction goes through the existing runs.turns.update. Do not build undo unless a route already exists.
+
+ACCEPTANCE: props test for the advisor contract with Energy absent and present. Grep confirms no scenario-name branching. Playwright covers the three breakpoints, reflow with no horizontal scroll, the keyboard path through the grid, and the reduced-motion check.
+
+==============================================================  
+PROMPT D9: Training Decision detail (SCREEN-010)
+=================================================================================================================
+
+TASK: Create components/career/TrainingCard.vue and pages/Career/TrainingDetail.vue. Depends on D8.
+
+SKILLS (add to baseline):
+
+* source-driven-development: every term shown on a training card must trace to PROCESS-PLANS.md "trainer-advisor.md" sections 1, 3 and 5, config/advisor.php, or Trainer-entered data. Cite them.
+* antislop-copywriting: write the N/A titles precisely ("No published source; excluded by the advisor spec, ADR-0001 section 3"), not generic "unavailable".
+* doubt-driven-development: challenge every number on the card. If you cannot name its source, it becomes N/A.
+* frontend-ui-engineering: progressive disclosure with aria-expanded and a stable focus order.
+
+READ: screen-spec-2.0 SCREEN-010 and its correction row (yields are unsourced, render N/A); design-2.0 sections 12, 24, 35, 36; plan D9; PROCESS-PLANS.md section "trainer-advisor.md" sections 1, 3, 5; config/advisor.php.
+
+BUILD:
+
+* Option cards for Speed, Stamina, Power, Guts, Wit. Default summary shows only what is sourced or entered: Energy cost (config session_cost 17 to 28 rendered "E−28 … E−17"; Wit shows wit_cost 0 as "RiskNotMeasured"), supports entered for that training if recorded, bond gains if entered, and target deficit (target minus current, badge Calculated).
+* DO NOT print "+62 Speed / +25 Power", "Failure: 2%" or any invented yield. Render "N/A" with a title citing the exclusion.
+* Expandable details (disclosure button, aria-expanded): expected gains N/A, energy cost, failure probability N/A, support effects (stated anchor values only), bond gains, scenario effects, target impact.
+* Actions: "Train" posts through the existing guided-turn write (runs.turns.store); "Inspect details" toggles the disclosure. The recommended option, if any, carries the single RECOMMENDED marker.
+* Risk words (LOW / MEDIUM / HIGH RISK) only where a sourced rule supports them; otherwise "N/A".
+
+ACCEPTANCE: grep proves no hard-coded yield or failure number. Props test covers option payloads. Playwright covers the disclosure by keyboard and the N/A titles.
+
+==============================================================  
+PROMPT D10: Race Decision (SCREEN-011)
+=======================================================================================================
+
+TASK: Create components/career/RaceCard.vue and pages/Career/RaceDecision.vue. Depends on D8.
+
+SKILLS (add to baseline):
+
+* source-driven-development: race facts come from RaceCatalogSlot and the calendar data only. Cite the model and migration.
+* doubt-driven-development: the briefs ask for readiness bands and risk thresholds, but the plan holds all race prediction on ADR-0016. Challenge any string, prop or enum that implies a prediction.
+* frontend-ui-engineering: the race-detail drawer needs focus trap, Escape to close, and focus return to the opener.
+* antislop-human: Level 1 "Critical" mandatory-race alerts are glyph plus text, never colour alone.
+
+READ: screen-spec-2.0 SCREEN-011 and its correction row; design-2.0 sections 21, 32, 36; plan D10 and the ADR-0016 note in sections 3 and 6; RaceCatalogSlot, components/RaceCalendar.vue and RacePanel.vue, the existing runs.races.store route.
+
+BUILD:
+
+* RaceCard shows race name, grade, distance, surface, running style, fan gain, reward and skill-point gain, only fields present on RaceCatalogSlot or entered by the Trainer. Missing fields read "N/A" with a title. Do not hard-code distance bands; if distance_band is shown it carries a source/confidence note (the 1400m Sprint-versus-Mile conflict).
+* Win probability and readiness bands (Excellent / Good / Borderline / Poor) are NOT computed. Render "Readiness: N/A" with a title naming the ADR-0016 data blocker. The percentage risk indicator is not built.
+* Mandatory-race deadlines come from the calendar data, Level 1 "Critical", glyph plus text.
+* Actions: "Enter Race" posts via runs.races.store; "Skip" returns without recording. Details open in a drawer or inline disclosure with focus management.
+
+ACCEPTANCE: grep proves no win-percentage string. Props test covers present and absent race fields. Playwright covers the N/A title text, the drawer's keyboard behaviour and the 44px sweep.
+
+==============================================================  
+PROMPT D11: Event Decision (SCREEN-012)
+========================================================================================================
+
+TASK: Create components/career/EventCard.vue and pages/Career/EventDecision.vue. Depends on D8.
+
+SKILLS (add to baseline):
+
+* api-and-interface-design: the event props contract must mirror the TurnEvents*Payload classes exactly. Do not widen it for fields the spec wants but the payloads lack.
+* security-and-hardening: event text and notes are untrusted. No v-html, validate through the existing Form Request, tie errors to inputs.
+* doubt-driven-development: challenge the advisor panel. A recommendation without a derivable reason line must not ship.
+* antislop-human: the "outcome incomplete" warning is glyph plus text; the override path is as prominent as the recommended path.
+
+READ: screen-spec-2.0 SCREEN-012 and its event-model correction; design-2.0 sections 2, 36, 38; plan D11; TurnEvent, the TurnEvents*Payload classes, and the existing event recording in TrainingRunController.
+
+BUILD:
+
+* Event model in the UI: source (Support / Character / Scenario / Random), event name, choices, known outcomes per choice, current career state alongside. Build only the sources and outcome fields the payload classes hold.
+* Choices are labelled radio options. Outcomes show recorded effects only. A choice with no recorded outcome prints "⚠ Event outcome incomplete. Choose manually."
+* Advisor panel: show a recommended option only when the engine returns one with a derivable reason line. Otherwise "No recommendation available" and why. The Trainer can always override. Never preselect the recommended option.
+* Primary action "Record Choice" posts through the existing TurnEvent write and its Form Request. Errors tie to inputs with aria-describedby.
+
+ACCEPTANCE: props test covers complete and incomplete outcomes plus the override path. Playwright covers the incomplete warning, keyboard selection and the recorded result.
+
+==============================================================  
+PROMPT D12: Inheritance Event, record-only (SCREEN-013)
+========================================================================================================================
+
+TASK: Create pages/Career/InheritanceEvent.vue. Depends on D8.
+
+SKILLS (add to baseline):
+
+* source-driven-development: use the same SparkChip and the reference section 1.5 facts as D5. Take milestone turns only from config or recorded events, and cite where.
+* doubt-driven-development: predicted versus observed is the contract of this screen (ADR-0020 section 3). Challenge any element that blurs them.
+* code-simplification: reuse SparkChip and the timeline glyph component. Do not fork them.
+* antislop-ui: two clearly separate regions with their own headings and badges, not one merged table.
+
+READ: screen-spec-2.0 SCREEN-013 and its correction row (probability, not guarantees); design-2.0 sections 18, 22, 49; plan D12; ADR-0020 section 3; LegacySelectionPayload and the existing event recording.
+
+BUILD:
+
+* Parent and grandparent sparks from the run's legacy selection, via SparkChip.
+* Observed outcomes: a form to record the inspiration result the Trainer saw in the game (which sparks activated, previous inheritance), posted through the existing event recording. Predicted and observed are visually apart, each with a heading and badge (Estimated vs Confirmed). Observed is always Confirmed because the Trainer entered it.
+* Predicted / "expected inheritance": NOT computed. Show "N/A" with a title citing ADR-0020 section 3. A sourced star-roll table may be shown as Estimated, never summed.
+* Milestone timeline with glyph plus text (● completed, ◉ current, ○ upcoming, × missed). Do not hard-code "Classic April".
+
+ACCEPTANCE: props test proves observed values round-trip and that no predicted total exists in the payload. Playwright covers keyboard entry and the predicted-versus-observed separation.
+
+==============================================================  
+PROMPT D13: Skills Planner (SCR-013, design-2.0 only)
+======================================================================================================================
+
+TASK: Create pages/Career/SkillsPlanner.vue. Depends on D8. This screen exists only in design-2.0.
+
+SKILLS (add to baseline):
+
+* spec-driven-development: write the state model first (Required / Available / Learned / Inherited): where each state is read from and its precedence when a skill qualifies for two.
+* source-driven-development: hint-level discount percentages must come from a sourced table in config or the reference doc. If none exists, the discounted cost is N/A. Cite what you found or the absence.
+* doubt-driven-development: the race-fit assessment is where a recommendation could sneak in (OQ-5 stays open). Challenge any wording that ranks or advises.
+* frontend-ui-engineering: ordered list with button-based reordering and a live-region announcement of the new position.
+
+READ: plan D13 and open question OQ-5; design-2.0 sections 15, 17, 33; components/SkillRow.vue, the run's skillCatalog and skillGroups props, the runs.skills.sync write, and BuildTarget skill_priorities.
+
+BUILD:
+
+* Skill states Required / Available / Learned / Inherited, each text plus glyph. Required comes from the Trainer's ordered skill priorities in the BuildTarget.
+* SP coverage: sum SP cost of Required skills against current Skill Points and warn (glyph plus text) when SP cannot cover them. Badge Calculated.
+* Hint-level discount: base cost × (1 − discount%), with percentages only from a sourced table. Otherwise "N/A" with a title.
+* Race-fit assessment per skill: the skill's recorded conditions (distance, surface, style, course, weather, ground, phase) beside the build target as a plain "matches / does not match / not recorded". No score.
+* No skill recommendation of any kind.
+* Priority reorder via Move up / Move down buttons. Save through runs.skills.sync and its Form Request.
+
+ACCEPTANCE: props test covers the SP warning and each state. Playwright covers keyboard reorder, the warning text and the 44px sweep.
+
+==============================================================  
+PROMPT D14: Career Timeline (SCREEN-018)
+=========================================================================================================
+
+TASK: Create components/career/CareerTimeline.vue and pages/Career/Timeline.vue. Depends on D8.
+
+SKILLS (add to baseline):
+
+* performance-optimization: a full career is 70+ turns with events. Eager-load TurnEvent per turn, paginate or window the list, and avoid N+1.
+* api-and-interface-design: define one typed history-entry shape (turn, kind, before, after, corrected_from) that D8's strip, D15 and D16 can reuse.
+* source-driven-development: ground the before/after mapping in ADR-0003 and turnRows(); cite them.
+* antislop-human: the rail is a list with proper semantics (ol), each entry reachable by keyboard, glyph plus text for state.
+
+READ: screen-spec-2.0 SCREEN-018 and its decision-audit correction; design-2.0 sections 22, 32, 37; plan D14; TurnEntry and TurnEvent, turnRows(), ADR-0003.
+
+BUILD:
+
+* One vertical rail with glyph plus text: ● completed, ◉ current, ○ upcoming, × missed or failed. Each entry: turn, action label, before state, after state. Entries expand inline (aria-expanded) or open a drawer with focus management.
+* Decision audit: BEFORE, ACTION, EXPECTED, ACTUAL, RESULT, accepted / rejected only where recorded. Anything unstored prints "N/A" with a title. Do not show advisor confidence.
+* Corrections appear as additional entries and are never silently rewritten. A past decision is read-only here.
+* Filters by type (training, races, events, inheritance, scenario actions, purchases), only for types that exist in the data.
+* Link to the matching decision screens where they exist.
+
+ACCEPTANCE: props test proves the before/after mapping and that a correction appends. Playwright covers the keyboard path through the rail, the expansion and glyph-plus-text states.
+
+==============================================================  
+PROMPT D15: Career Result (SCREEN-019)
+=======================================================================================================
+
+TASK: Create pages/Career/Result.vue. Depends on D8.
+
+SKILLS (add to baseline):
+
+* antislop-copywriting: calm, specific summary copy (Peak-End Rule). No celebratory filler, no "Great job!".
+* impeccable: one polish pass on hierarchy and spacing, within tokens.
+* doubt-driven-development: challenge every aggregate. Per-stat deficits are fine; any single "quality", "completion %" or "legacy value" figure is not.
+* design-review (optional, global): quick visual QA.
+
+READ: screen-spec-2.0 SCREEN-019 and its correction (Veteran Creation framing); design-2.0 sections 4, 15, 17, 45; plan D15 and the "Peak-End Rule" row in section 13.
+
+BUILD:
+
+* Reads a finished run only. If not finished, show an empty state that says what is missing and links back to the cockpit.
+* Sections: Final build (five stats with value AND the target they were set against; skills; aptitudes with letter badges), Race history (races, wins, losses, G1 wins, from recorded entries only), Scenario result (objectives and rewards from the scenario config and recorded data; panels driven by flags, not scenario names).
+* NO derived build-quality score, no aggregate target-completion percentage, no legacy-value rating, no "best use recommendation". Per-stat deficit against target is allowed, badge Calculated.
+* Ruleset line "N/A" with a title.
+* Primary action "Save Veteran" to D16.
+
+ACCEPTANCE: props test for finished and unfinished runs. Playwright covers the unfinished empty state, the headings and the 44px sweep.
+
+==============================================================  
+PROMPT D16: Save Veteran + Veteran Library + Comparison (SCREEN-020 / 021 / 022)
+=================================================================================================================================================
+
+TASK: Create pages/Career/SaveVeteran.vue, pages/Veterans/Index.vue, Veterans/Show.vue and Veterans/Compare.vue. Depends on C3 and D15.
+
+SKILLS (add to baseline):
+
+* security-and-hardening: notes and custom tags are free text. Never v-html. Validate length and shape in the Form Request. Delete is destructive: confirm, authorise as the repo does, and test the refusal path.
+* careful (optional, global): active before any destructive command while testing delete.
+* api-and-interface-design: define the veteran list/show props once and reuse in Index, Show, Compare and the Legacy Lab picker.
+* doubt-driven-development: challenge "Factors", "Ancestry" and "Find Parents for This Build" for hidden computation. They are search and display only.
+* code-simplification: reuse SparkChip, the ancestry graph from D5 and the comparison row component from D5.
+* laravel-best-practices: list/filter/sort queries use indexed stored fields and explicit allow-lists.
+
+READ: screen-spec-2.0 SCREEN-020 to 022 and their correction rows; design-2.0 sections 18, 29, 31, 46; plan D16 and C3 (section 7); ADR-0020 section 3; ADR-0010; the veterans table and its record / list / show actions.
+
+BUILD:
+
+* SaveVeteran: name, tags, notes (free text). Tags are SUGGESTIONS (Speed, Stamina, Power, Guts, Wit, Sprint, Mile, Medium, Long, Dirt, Turf, Front Runner, Pace Chaser, Late Surger, End Closer, Skill, Race, Scenario) the Trainer toggles, plus custom tags. Workflow: review recorded sparks, tag, save. Factor analysis and "legacy value" are computation and NOT built: "N/A" with a title citing ADR-0020 section 3. Write no recommendations such as "Excellent Medium parent".
+* Index: three views, Veterans (all), Factors (searchable inventory of recorded factors), Ancestry (six-node graph of where a veteran came from, using SparkChip). Search, filter and sort only on stored fields. "Find Parents for This Build" navigates to the Legacy Lab with the build's filters applied (a search, not an optimizer).
+* Favorite, archive, delete: build ONLY if C3 provides them; delete needs a confirmation dialog with focus management. Otherwise list them as not built.
+* Show: the recorded veteran with ruleset line "N/A". Empty state "No Veterans Yet" (what / why / action).
+* Compare: up to four, aligned property rows, recorded values only.
+
+ACCEPTANCE: grep proves no inheritance computation. Props test covers tags, filters, compare limit. Playwright covers tag toggling by keyboard, the empty state and the delete confirmation if present.
+
+==============================================================  
+PROMPT D17: Database (SCREEN-023)
+==================================================================================================
+
+TASK: Create pages/Database/{Trainees,Supports,Skills,Races,Scenarios}.vue. Depends on A1 to A3 (landed).
+
+SKILLS (add to baseline):
+
+* code-simplification + deprecation-and-migration: reuse, don't fork. Extract shared list and detail bodies, keep /umamusume, /skills and /support-cards working, and prove with the existing browser specs that nothing regressed. Redirect only if an owner ruling exists.
+* performance-optimization: reference tables are the largest lists in the app. Keep server-side pagination and the existing cache keys.
+* antislop-layoutmobile: wide tables scroll inside their own container, never the page, at 320px.
+* source-driven-development: the Scenarios page prints config/scenarios.php as-is with its own verification date; cite the header.
+
+READ: screen-spec-2.0 SCREEN-023; design-2.0 sections 29, 32, 34; plan D17 and the "Deliberately traded" note in section 13; the existing pages/Catalog/_, Skills/_, SupportCards/* and their controllers; config/scenarios.php.
+
+BUILD:
+
+* Reuse the ported screens. Add a Database hub linking to the five areas. Trainees, Supports and Skills present existing data; do not rebuild their queries.
+* Races: from RaceCatalogSlot. With 0 rows, name the offline state (what is missing, why, what to do). No placeholder races.
+* Scenarios: render the resolved matrix from config/scenarios.php as-is (caps, panels, widgets, live date, documented flag). Grand Concert shows baseline plus "PARTIALLY DOCUMENTED". No scenario-name branching.
+* Events, Shop Items and Sparks tabs are out of scope; list them as deferred.
+* Density is allowed here and nowhere else. Tables still need labelled columns and keyboard-reachable rows.
+* Image slots follow 45a.
+
+ACCEPTANCE: Playwright covers the hub, the Races offline state, the Scenarios matrix and 320px reflow. Existing catalog, skills and support specs pass untouched.
+
+==============================================================  
+PROMPT D18: Settings (SCREEN-024)
+==================================================================================================
+
+TASK: Extend pages/Preferences/Edit.vue into Settings categories: General, Recommendation, Data, Game version.
+
+SKILLS (add to baseline):
+
+* laravel-best-practices: any migration needs a working down(), an ARCHITECTURE-ESSENTIALS.md digest update and a PRD citation (AGENTS.md section 11). Stop and ask before writing one.
+* deprecation-and-migration: if a preference column is added, use expand-then-contract and keep the existing preferences working.
+* documentation-and-adrs: update the SCREEN_SPEC.md row and the digest. Draft (do not file) any ADR text the owner might need.
+* security-and-hardening + careful (optional, global): Reset is destructive. Confirmation dialog, server-side guard, and a test of the refusal path.
+* doubt-driven-development: challenge each proposed preference. If nothing reads it, it should not exist.
+* antislop-human: save feedback is a polite live region that never steals focus.
+
+READ: screen-spec-2.0 SCREEN-024; design-2.0 sections 34, 47, 48; plan D18 and risk 4 in section 11; PreferencesController, its Form Request, the preferences columns and tests/browser/preferences.spec.ts.
+
+BUILD:
+
+* Category navigation inside the page: a labelled tablist or anchored fieldsets with a keyboard path and stable Help placement (WCAG 3.2.6). Keep existing preferences and the existing spec passing.
+* General (theme, language, units, default scenario) and Recommendation (aggressiveness, risk tolerance, stat-target defaults): add a control ONLY if its column already exists or the owner approves the migration. In your slice plan list every proposed preference, mark which already have a column, and stop and ask before any migration. "Race risk thresholds" is NOT built because it depends on win probability.
+* Data (import, export, backup, restore, reset): link only to import and export routes that already exist. Reset is destructive and needs a confirmation dialog with focus trap, Escape and focus return; build it only if a route exists, otherwise a named absence.
+* Game version: "Global Ruleset, Version: N/A" with a title explaining that no ruleset string is sourced; plus the verified date from config/scenarios.php.
+* Save feedback: polite live region ("✓ Preferences saved").
+
+ACCEPTANCE: props test for each real preference, existing preferences tests unchanged. Playwright covers category navigation by keyboard, the saved message, the N/A ruleset row and the reset confirmation if it exists.
+
+==============================================================  
+NOTES
+======================================================================
+
+* Skills the prompts lean on hardest: doubt-driven-development for the slices where computation could creep in (D5, D7, D10, D12, D13, D16) and for the wizard-persistence decision (D2). source-driven-development grounds any number on screen in a model, config or reference line.
+* Global-only skills (design-review, careful, freeze) are marked optional. SKILL.md shows them installed globally but not in `.agents/skills/`, so an agent in a clean sandbox may not have them. The prompts tell the agent to say so and carry on.
+* I did not use `qa`, `ship`, `land-and-deploy` or `review`. `qa` fixes bugs and could touch unrelated files, and the others change git or deploy state. The hand-off sequence already covers verification, and the owner decides when to ship.
+* The "Skills used" line in the final report is there so you can see which skills the agent applied. If one is never reported, it probably wasn't loaded.
+
+---
+
+## Trainer-Docs-2.0-E-Prompts.md
+
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/Trainer-Docs-2.0-E-Prompts.md` (230 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+>
+> **Consolidated 2026-10-12 (Round 15).** The original was deleted after line-by-line verification (166 of 166 non-blank source lines found in this section, in order, 0 missing). It was tracked and clean at HEAD, so the delete is recoverable from history. Cite this anchor, not the deleted path.
+
+The E-slice prompts follow, E1 through E6. Paste the SHARED CONTEXT (E-phase) block above each one. It replaces the D-phase block and keeps the same baseline skills.
+
+==============================================================  
+SHARED CONTEXT, E-PHASE (paste before every E prompt)
+======================================================================================================================
+
+You are working in the Trainer Desk 2.0 repo (Laravel 13, Inertia v3, Vue 3, TypeScript, Tailwind v4, Pest 4, Playwright). You are building ONE slice of Phase E (scenario panels) of the Trainer Desk 2.0 frontend. Phase E plugs into the Career Cockpit that D8 built. If D8 has not landed, stop and report.
+
+READ FIRST, in this order:
+
+1. AGENTS.md
+2. docs/proposals/frontend-development-plan.md: Global Constraints, sections 3, 8 (the "Scenario panel contract (E1)" paragraph), 9 (Phase E), 10, 12, 13, plus your slice's row in section 4
+3. docs/proposals/screen-spec-2.0.md: your SCREEN-nnn section AND the "Product direction corrections" table
+4. docs/proposals/design-2.0.md: sections 4, 25 to 28, 29, 36, 45, 45a, 49 and the "Appendix, Frontend architecture"
+5. config/scenarios.php (read the real key names; never guess them), DESIGN.md, SCREEN_SPEC.md
+
+AUTHORITY ORDER: landed ADRs, then AGENTS.md, then the development plan, then the two design briefs. The briefs are design intent. The plan is the authorization. Skills are METHOD only. If a skill's default advice conflicts with a repo document (dark: variants, a new package, extra animation, a redesign, a recommendation score), the repo wins. Say so in your report.
+
+THE CENTRAL RULE OF PHASE E: the UI must not know how a scenario works (G-33, D-240). Panels are selected by panels.* flags and widgets[] read from config/scenarios.php through props. No component, test fixture, prop or class name may branch on scenario.label, scenario name, or a scenario key literal. The component FILE names from the brief (UraPanel.vue, UnityCupPanel.vue, TrackblazerPanel.vue) are allowed, but they are registered against widget or flag keys, not scenario names. A fifth scenario must be one config entry and zero component edits.
+
+SKILLS: load each by name at the phase shown. If one is not installed, say so in your report and apply its intent anyway.  
+Baseline (every slice):
+
+* using-agent-skills: governs how you find and invoke the rest.
+* planning-and-task-breakdown + spec-driven-development: PLAN PHASE. Write the slice plan (files, props contract, tests, open questions) before code.
+* incremental-implementation + test-driven-development: BUILD PHASE. Failing props test, controller, component, passing test, Playwright spec.
+* laravel-best-practices + testing-best-practices: controllers, Form Requests, query shape, Pest structure.
+* frontend-ui-engineering + tailwindcss-development: Vue components, layout, state, WCAG. Tokens only, never dark: and never zinc-*.
+* antislop, antislop-ui, antislop-human, antislop-copywriting, antislop-layoutmobile: apply to every string and layout. antislop-code for comments.
+* constraint-driven-development: the repo's gates (G-19, G-33, G-41, G-47, DesignTokensTest) are the contract. Check your diff against them.
+* source-driven-development: every number or label you print traces to config/scenarios.php, a model, a migration, an ADR or a reference-doc line. Cite it in the slice plan.
+* doubt-driven-development: REVIEW PHASE. Challenge every non-trivial decision (especially anything that looks like a recommendation or a prediction) and report the result.
+* code-review-and-quality: final self-review. The diff must contain no unrelated file.
+* browser-testing-with-devtools: VERIFY PHASE. Console errors, focus order, 320px reflow, 200% zoom and reduced motion in a real browser.  
+  Optional if installed: freeze (restrict edits to the files your slice needs), design-review (visual QA).
+
+HARD RULES
+
+* Panels are static modules with their own currencies and objectives, mounted inside the Cockpit's scenario region as "Career Cockpit + Scenario Panel" (design-2.0 section 25). The Cockpit layout itself must not change per scenario.
+* Copy the repo's page and component patterns; do not invent a second one. Any new page gets a controller method returning Inertia::render with explicit arrays (never Eloquent models), a route, and a Pest assertInertia test. No uses() or withoutVite() in test files.
+* Writes keep their existing Form Requests and routes (runs.purchases.store, runs.races.store, runs.turns.*). Vue only posts and handles useForm errors.
+* Unrecorded or unsourced values render as "N/A" with a title attribute explaining why. Never a default, a dash, or an invented number. ProvenanceBadge.vue (built in D4) labels every computed figure Confirmed / Calculated / Estimated / Unknown. Use it, never redefine the glyphs.
+* HELD computation stays held: no race win probability, readiness band or risk percentage (ADR-0016), no per-training yields or failure %, no inheritance computation, no shop-item recommendation (rotation not modelled), no Grand Concert mechanics, no numeric confidence or score, no "recommended timing" or "projected benefit".
+* Global terminology: Support Cards, Scouts, Veteran Umamusume, Pal, Wit, Sparks. Print "Trackblazer", never "Twinkle Star Climax" (UNVERIFIED, conflict row 31). Write "2026-07-01 Global rework".
+* WCAG 2.2 AA: keyboard path, visible focus, min-h-11 (44px) targets, labels, aria-describedby on errors, prefers-reduced-motion respected, no drag-only interaction, state never by colour alone (glyph plus text), sticky UI must not cover focus. Meters are numbers AND bars, with the bar labelled.
+* Every panel has loading, empty and error states, and each says what is missing, why it matters and what to do.
+* Do not delete a Blade x-* component until its consumer count is zero (grep). If B1 already deleted a reference component (x-team-rank-gauge, x-team-race-panel, x-spirit-burst-roster, x-grade-point-meter, x-shop-panel, x-epithet-checklist), recover it from git history (git log --diff-filter=D, git show) and port its logic and props; do not rewrite from memory.
+* No new npm or composer package. No vue-tsc. Do not file an ADR; draft text in your report if one seems needed.
+* Update SCREEN_SPEC.md section 2 with the screen's row and its empty / loading / error state table.
+
+PROCESS: plan phase, then TDD build, then Playwright spec in tests/browser/<screen>.spec.ts (rendered copy, 44px sweep, keyboard path, axe A + AA if the dependency exists), then review and verify phases.
+
+HAND-OFF SEQUENCE, report real output and never claim an unrun gate passed: targeted tests, php artisan test --compact, vendor/bin/pint --dirty --format agent, vendor/bin/phpstan analyse --no-progress --memory-limit=1G, npm run typecheck, npm run build, npm run test:browser, composer lore + composer lore-code with a ruling per hit.
+
+FINAL REPORT: files changed, props contract, every deviation from the plan and why, open questions for the owner, gate output, and a "Skills used" list (one line each, plus skipped skills and why).
+
+==============================================================  
+PROMPT E1: Scenario panel shell bound to config/scenarios.php (SCREEN-014 / 015 / 016)
+=======================================================================================================================================================
+
+TASK: Create components/scenario/ScenarioPanel.vue (the shell) and the panel registry that maps config widget and flag keys to renderer components. Mount it in the Cockpit's scenario region. Depends on D8. E2, E3, E4 and E6 plug into this slice, so its contract must be right the first time.
+
+SKILLS (add to baseline):
+
+* api-and-interface-design: this slice defines the contract that four later slices consume. Fix the types in resources/js/types.ts once and keep them stable.
+* doubt-driven-development: challenge the registry. What renders when a widget key has no renderer? What if panels.* is all false? What if the scenario is unknown to the frontend? Each must fail visibly and safely.
+* constraint-driven-development: G-33 is the headline gate here; make it a test, not a promise.
+* code-simplification: one shell, one registry, zero per-scenario conditionals.
+
+READ: plan section 8 "Scenario panel contract (E1)" and section 9 "E1 — the shell"; design-2.0 section 25 (Cockpit + Scenario Panel), section 49 appendix shape; screen-spec-2.0 SCREEN-014 to 016 headers and the corrections table rows for "§1–2" and "§26–31"; config/scenarios.php (all four entries, including our_grand_concert with documented => false); the Cockpit (D8) scenario region.
+
+BUILD:
+
+* Adopt the brief's section 49 shape as-is: { name, version, status, resources, objectives, actions, alerts, recommendations, finale }. Rules from the plan: version renders as a named absence ("N/A" with a title, because app.ruleset is null), and any "recommendations" entry that implies prediction renders as a named absence where the corpus is silent.
+* ScenarioPanel.vue takes the resolved scenario array from the Cockpit as a prop. It switches on panels.* flags and widgets[] only. It never reads scenario.label for logic (display of the label as text is fine).
+* Registry: a typed map of widget or flag key to async-free renderer component. An unrecognised key renders a labelled fallback ("This scenario declares a widget this build cannot draw") rather than an error or a blank. A scenario with every panel off renders only the baseline strip (E6 owns its content; E1 just must not break).
+* Shared building blocks the panels reuse: ScenarioStatusBadge (status text plus glyph, including PARTIALLY DOCUMENTED from documented => false), ResourceMeter (value AND bar, labelled, "N/A" when unrecorded), AlertRow (glyph plus text). Build them here so E2 to E4 do not each invent one.
+* Placement: inside the Cockpit's scenario region at all breakpoints (desktop right of the decision area per D8, tablet and mobile in the D8 order). The Cockpit header and state panel must render identically across all four scenarios.
+* Loading, empty and error states for the shell per design-2.0 sections 29 and 30 (no skeleton class; DesignTokensTest forbids it).
+
+ACCEPTANCE:
+
+* A Pest test renders the same run header for all four Global scenarios (G-33's own assertion).
+* A test adds a fifth scenario entry via config()->set (with a new widget set drawn only from existing keys) and asserts a panel renders with zero component changes.
+* A grep over the diff for scenario names, scenario.label comparisons and key literals in conditionals returns nothing.
+* Playwright: shell landmarks, status badge text, fallback text for an unknown widget key, 320px reflow, 44px sweep.
+
+==============================================================  
+PROMPT E2: URA panel, goals and Happy Meek (SCREEN-014)
+========================================================================================================================
+
+TASK: Create components/scenario/UraPanel.vue, registered in the E1 registry against the widget or flag keys that config/scenarios.php assigns to URA's panels. Depends on E1.
+
+SKILLS (add to baseline):
+
+* source-driven-development: URA is the least complex scenario (design-2.0 section 26). Every field must trace to config or an existing run column. Cite the config keys in your slice plan.
+* doubt-driven-development: the screen spec asks for "potential reward" and "final-race contribution" for Happy Meek. Challenge each: sourced, entered, or unsourced?
+* antislop-ui: URA is deliberately quiet. No decorative permanent panels beyond what the spec lists.
+
+READ: screen-spec-2.0 SCREEN-014 (section 18); design-2.0 section 26 (URA Visual Language: career goals, Happy Meek, finale progression, avoid unnecessary permanent panels), section 22 (timeline glyphs), section 36; plan section 9 "E2 URA"; the run's existing goal data (read TrainingRunController, the goals relation and the run page props); config/scenarios.php URA entry.
+
+BUILD:
+
+* Career goals: the character's goals as recorded on the run, each with status as glyph plus text (● completed, ◉ current, ○ upcoming, × missed) and the turn deadline when stored. Mandatory races within the goals link to the D10 race screen if it exists.
+* URA progression and finale preparation: a short strip derived only from recorded goals and config milestones. Do not hard-code race names or turns.
+* Happy Meek module: current level (Trainer-entered value, badge Confirmed), duel availability (only if a stored or configured field exists), potential reward and final-race contribution. Render each of the last two as "N/A" with a title unless the repo already holds a sourced value. Do not estimate.
+* Alerts: a mandatory goal race inside the deadline window is a Level 1 "Critical" AlertRow (glyph plus text), derived from the calendar data only.
+* Recording a Happy Meek level or goal outcome goes through an existing write. If none exists, the module is read-only and the slice plan says so for the owner. Do not add a migration.
+* Reuse E1's ResourceMeter, AlertRow and status badge. No new permanent panels.
+
+ACCEPTANCE: props test covers goals in each state, Happy Meek with and without a recorded level, and N/A fields. A grep proves no scenario-name branching. Playwright covers goal states as text, the Critical alert, the N/A titles, keyboard path and the 44px sweep.
+
+==============================================================  
+PROMPT E3: Unity Cup panel, Team Cockpit (SCREEN-015)
+======================================================================================================================
+
+TASK: Create components/scenario/UnityCupPanel.vue (the Team Cockpit), registered against the config keys for Unity Cup's panels. Port the three Blade references. Depends on E1.
+
+SKILLS (add to baseline):
+
+* code-simplification + deprecation-and-migration: this is a port. Recover x-team-rank-gauge, x-team-race-panel and x-spirit-burst-roster (from the tree, or from git history if B1 deleted them) and carry over their props and logic. Behaviour parity first, redesign second. Delete a Blade component only when its grep consumer count is zero.
+* source-driven-development: Spirit, Spirit Burst, Extreme Spirit Burst, team rank and Special Training numbers come from config/scenarios.php or run data only. Cite the keys.
+* doubt-driven-development: the spec's "burst readiness", "recommended timing" and "projected benefit" are advice. Challenge each: derivable from stated config values, or not?
+* frontend-ui-engineering: the roster is a labelled list or table with row-level keyboard reach, not a div grid.
+
+READ: screen-spec-2.0 SCREEN-015 (section 19) and its Components table row (reuses x-spirit-burst-roster, x-team-rank-gauge, x-team-race-panel); design-2.0 section 27 (Unity Cup Visual Language: team cards, member rows, Spirit meters, burst indicators; the Team Panel is a first-class UI element), sections 15 and 45; plan section 9 "E3"; config/scenarios.php Unity Cup entry; the existing Blade components and the run page's Unity-related props.
+
+BUILD:
+
+* Team Panel (first-class): team rank as the recorded letter grade (for example "A+"), per-stat team grades (Speed, Stamina, Power, Guts, Wit) as letter plus text, only for values recorded on the run. Missing values read "N/A".
+* Team composition and member rows: members from the run's recorded team data (stats, role), as a labelled table or list.
+* Team races: reuse the x-team-race-panel logic with race facts from RaceCatalogSlot or recorded data. No win probability, no risk percentage.
+* Spirit and bursts: current Spirit as value AND bar (ResourceMeter), burst indicators for Spirit Burst and Extreme Spirit Burst as glyph plus text, with the thresholds taken from config. Burst readiness is shown only as "current Spirit versus the configured threshold" (Calculated). "Recommended timing" and "projected benefit" are NOT built: render a named absence with a title.
+* Special Training: shown as recorded or configured facts only.
+* Recording Spirit or team state goes through existing writes. If none exists, read-only; list it as an open question. No migration.
+* Responsive: desktop shows team cards beside the Spirit meters; mobile stacks, with no horizontal scroll.
+
+ACCEPTANCE: props test covers a full team, a partial team and no team data. Grep proves no scenario-name branching. Playwright covers the roster by keyboard, meter text AND bar, burst glyph plus text, the named absence for timing/benefit, 320px reflow and the 44px sweep.
+
+==============================================================  
+PROMPT E4: Trackblazer panel, grade points, shop, epithets (SCREEN-016)
+========================================================================================================================================
+
+TASK: Create components/scenario/TrackblazerPanel.vue registered against Trackblazer's config keys. Port the three Blade references. Depends on E1.
+
+SKILLS (add to baseline):
+
+* code-simplification + deprecation-and-migration: recover x-grade-point-meter, x-shop-panel and x-epithet-checklist (tree or git history) and port props and logic. Grep consumers before any deletion.
+* doubt-driven-development: the screen spec shows a "Recommended Purchase" card with a reason line. The plan holds it. Challenge every shop element for an implied recommendation, including sort order, default selection and badge wording.
+* security-and-hardening: purchases write through runs.purchases.store. Keep its Form Request as the authority, tie errors to inputs, and never trust client-side cost or coin totals.
+* source-driven-development: shop catalogue rows come from config trackblazer.shop. Cite the keys and the verification date.
+* antislop-copywriting: shop rows are scan-read. Write item, cost, effect and duration as exact labelled values.
+
+READ: screen-spec-2.0 SCREEN-016 (section 20) and its Components row (reuses x-shop-panel, x-grade-point-meter, x-epithet-checklist; shop recommendation HELD); design-2.0 section 28 (Trackblazer Visual Language: Grade Points, Shop Coins, Race Calendar, Shop Inventory, Rival Alerts; the Shop must be quickly accessible from the Cockpit), section 45; plan section 3 (Shop row) and section 9 "E4"; config/scenarios.php Trackblazer entry and trackblazer.shop; the existing purchases write and its Form Request.
+
+BUILD:
+
+* Grade Points meter: current value, thresholds from config, value AND bar, remaining to next threshold (Calculated). Shop Coins: the recorded balance, "N/A" when unrecorded.
+* Shop catalogue: a labelled table or list of item, cost, effect, duration from config. Catalogue order is the config order. NO "Recommended Purchase" card, NO recommended flag, NO "best value" sort or highlight, NO default-selected item. State once, in text, that the shop rotation is not modelled so this is the catalogue only.
+* Recording a purchase: select item, then a plain "Record Purchase" button posting through runs.purchases.store. Show the server's validation errors tied to inputs. Show purchased items for the run as a list.
+* Epithet checklist: items from config or recorded data, each as checked / unchecked with glyph plus text. Do not infer completion.
+* Rival races and race schedule: from RaceCatalogSlot or recorded data only, as facts. Rival alerts are AlertRows (glyph plus text) triggered only by data on the calendar.
+* Do not print "Twinkle Star Climax". The finale reads "Trackblazer finale" and any official title is a named absence with a title citing conflict row 31.
+* Quick access: the Cockpit's action area gets a "Shop" entry that scrolls or navigates to this panel's shop region with focus moved to its heading (2.4.11 safe).
+
+ACCEPTANCE: a grep over the diff finds none of: "recommended", "best value", "Twinkle Star Climax" outside the named-absence title. Props test covers the catalogue, a recorded purchase and a rejected purchase. Grep proves no scenario-name branching. Playwright covers the shop by keyboard, the purchase round-trip and error text, glyph plus text for epithets, the 44px sweep and 320px reflow.
+
+==============================================================  
+PROMPT E5: Scenario Race Planner (SCREEN-017)
+==============================================================================================================
+
+TASK: Create pages/Career/RacePlanner.vue (or the route the D8 slice plan fixed for Cockpit sub-pages) and components/career/RacePlanList.vue. Race facts only, no win probability. Depends on D8. It reuses RaceCard from D10 if D10 has landed.
+
+SKILLS (add to baseline):
+
+* source-driven-development: every race field traces to RaceCatalogSlot, its migration, or the calendar data. Cite them. The 1400m Sprint-versus-Mile conflict means distance_band, if shown, carries source and confidence, and is never hard-coded.
+* doubt-driven-development: the spec asks for "expected risk", a "Win probability: 84%" recommendation block and "No critical training deadline will be missed". Challenge each line and keep only what is derivable.
+* code-simplification: reuse D10's RaceCard and D5's comparison row pattern. No second race component.
+* performance-optimization: the planner lists a full calendar. Keep one eager-loaded query and paginate or group by phase.
+* frontend-ui-engineering: reward comparison is a real labelled table with keyboard-reachable rows.
+
+READ: screen-spec-2.0 SCREEN-017 (section 21), its header banner about win-probability being HELD under ADR-0016 and ADR-0020 section 4, and the correction "race simulator explicitly deferred"; design-2.0 sections 21, 32, 46; plan section 3 (Race win probability row) and section 9 "E5"; RaceCatalogSlot, components/RaceCalendar.vue, RacePanel.vue, the existing runs.races.store route.
+
+BUILD:
+
+* Four groups: upcoming, mandatory, optional, rival races, taken from the calendar and RaceCatalogSlot. A group with no data shows a named empty state (what is missing, why, what to do). The rival group is shown only where the data exists.
+* Reward comparison: selected races side by side (up to four) with aligned rows: grade, distance, surface, fan gain, reward, skill-point gain, Grade Points or Shop Coins where config defines them. Missing fields read "N/A" with a title.
+* Target alignment: plain matches / does not match / not recorded text for race distance, surface and style against the BuildTarget. No score and no percentage. Badge Calculated.
+* Expected risk and win probability: render "Win probability: N/A" and "Expected risk: N/A", each with a title naming the ADR-0016 data blocker. Do not build readiness bands or LOW / MEDIUM / HIGH wording. Do not render the spec's recommendation block.
+* Deadline awareness: show mandatory races with their turn and a Level 1 "Critical" AlertRow when the calendar puts one inside the current window. Do not claim "no deadline will be missed"; state only the next mandatory race and its turn.
+* Actions: "Enter Race" posts via runs.races.store; "Skip" returns without recording.
+
+ACCEPTANCE: a grep proves no win-percentage string and no readiness-band enum. Props test covers each group present and absent, N/A fields and a four-race comparison. Playwright covers the keyboard path through the groups and comparison table, the N/A titles, the Critical alert text, 320px reflow and the 44px sweep.
+
+==============================================================  
+PROMPT E6: Grand Concert panel, baseline strip only (SCR-017, design-2.0 only)
+===============================================================================================================================================
+
+TASK: Create the baseline strip for the fourth scenario, registered in the E1 registry for the "every panel off" case. Depends on E1. NOTE: this is SCR-017 (Grand Concert panel) from design-2.0. It is NOT SCREEN-017 (the Scenario Race Planner), which is E5. Do not mix the two.
+
+SKILLS (add to baseline):
+
+* doubt-driven-development: the point of this slice is restraint. Challenge every element for an invented mechanic. If it is not in config/scenarios.php or the run data, it does not appear.
+* source-driven-development: cite the scenario's config entry (documented => false, the caps, the verification date) and the sourcing rows in plan section 3 ("Grand Concert mechanics").
+* antislop-copywriting: the honesty line must be plain and specific, not apologetic filler.
+* constraint-driven-development: G-41 and G-33 are the gates; make G-41's assertion a test.
+
+READ: plan section 3 (Grand Concert mechanics row), section 9 "E6" (D-241, G-41); screen-spec-2.0 corrections rows "§1–2" and "§26–31" and the SCREEN-014 to 017 summary row; design-2.0 sections 25, 29, 49; config/scenarios.php our_grand_concert entry; docs/scenarios/07 (the stub).
+
+BUILD:
+
+* The baseline strip shows only what the config and the run hold: scenario name, the "PARTIALLY DOCUMENTED" status badge (glyph plus text), the five stat caps from config (they were corroborated by two independent sources on 2026-10-05), the config verification date, and the run's own tracked values (the ordinary career state the Cockpit already shows).
+* Every panel is off. Songs, lessons and Performance Tokens do not exist in the corpus, and the panel says so in one plain sentence with a title pointing at the stub. Do not list placeholder songs, lessons, tokens, objectives or recommendations. Do not add input fields for mechanics nobody has documented.
+* Advanced advisor features are limited: the Cockpit's recommendation for this scenario uses only the generic engine, and this panel adds nothing to it. Print that scope in text so the Trainer is not left guessing.
+* Because the caps are sourced but the mechanics are not, show caps with badge Confirmed (sourced) and the mechanics line with badge Unknown.
+* Use E1's ScenarioStatusBadge, ResourceMeter and AlertRow. No Grand-Concert-specific component beyond the strip itself.
+* When mechanics are verified later, the change should be a config edit plus new widget renderers. State this in your slice plan so the owner knows the extension point.
+
+ACCEPTANCE: G-41's assertion as a test (every panel flag off yields the strip and nothing else). A test proves no songs, lessons or token strings appear anywhere in the rendered props or markup. Grep proves no scenario-name branching. Playwright covers the badge text, the caps list, the honesty sentence and its title, 320px reflow and the 44px sweep.
+
+==============================================================  
+NOTES
+======================================================================
+
+* Name collision: SCREEN-017 is the Scenario Race Planner (E5). SCR-017 is the Grand Concert panel (E6, design-2.0 only). The E6 prompt says so in its first line.
+* G-33 and the component names: the brief names UraPanel, UnityCupPanel and TrackblazerPanel, which can look like branching on scenario. The prompts allow those file names but require registration against widget or flag keys from config. I didn't have config/scenarios.php, so every prompt says to read the real key names and never guess them.
+* Held items the spec still shows: Spirit "recommended timing" and "projected benefit" (E3), Happy Meek "potential reward" and "final-race contribution" (E2), the shop "Recommended Purchase" card (E4), "Win probability", "Expected risk" and the recommendation block (E5). The prompts render each as a named "N/A" absence, or leave it out where the plan says so.
+* Blade references: the plan says Phase E keeps the six x-* references, but B1 may delete the zero-consumer ones. E3 and E4 tell the agent to recover them from git history if so.
+* Writes: Happy Meek level, Spirit and team state have no known existing write routes. E2 and E3 therefore build those parts read-only if none exists, and report it as an open question. A migration needs owner approval.
+* Dependencies: E1 first, then E2, E3, E4 and E6 can run in parallel. E5 needs only D8, and reuses D10's RaceCard if that has landed.

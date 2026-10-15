@@ -47,7 +47,7 @@ const bonusText = (bonus: number): string => (bonus > 0 ? `+${bonus}` : `${bonus
         <Head title="Scenarios" />
         <template #title>Scenarios</template>
 
-        <h2 class="text-2xl font-semibold text-ink-strong">Scenario matrix</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Scenario matrix</h2>
 
         <p class="mt-4 max-w-3xl text-sm text-ink-muted">
             The composition matrix in <code class="font-mono text-xs">config/scenarios.php</code>, printed
@@ -62,7 +62,7 @@ const bonusText = (bonus: number): string => (bonus > 0 ? `+${bonus}` : `${bonus
                 v-for="(scenario, key) in props.scenarios"
                 :key="key"
                 :aria-labelledby="`scenario-${key}`"
-                class="rounded-md border border-rule bg-raised p-5"
+                 class="rounded-md border border-rule bg-panel p-5"
             >
                 <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
                     <h3 :id="`scenario-${key}`" class="text-xl font-semibold text-ink-strong">
@@ -87,7 +87,7 @@ const bonusText = (bonus: number): string => (bonus > 0 ? `+${bonus}` : `${bonus
 
                 <div class="mt-4 grid gap-5 lg:grid-cols-2">
                     <div>
-                        <h4 class="text-sm font-semibold text-ink-strong">Caps</h4>
+                        <h4 class="text-lg font-semibold text-ink-strong">Caps</h4>
 
                         <table class="mt-2 w-full text-sm">
                             <caption class="sr-only">
@@ -116,7 +116,7 @@ const bonusText = (bonus: number): string => (bonus > 0 ? `+${bonus}` : `${bonus
 
                     <div class="space-y-4">
                         <div>
-                            <h4 class="text-sm font-semibold text-ink-strong">Widgets</h4>
+                            <h4 class="text-lg font-semibold text-ink-strong">Widgets</h4>
 
                             <ul class="mt-2 flex flex-wrap gap-1.5">
                                 <li
@@ -130,7 +130,7 @@ const bonusText = (bonus: number): string => (bonus > 0 ? `+${bonus}` : `${bonus
                         </div>
 
                         <div>
-                            <h4 class="text-sm font-semibold text-ink-strong">Panels</h4>
+                            <h4 class="text-lg font-semibold text-ink-strong">Panels</h4>
 
                             <ul class="mt-2 divide-y divide-rule border-y border-rule">
                                 <li

@@ -219,7 +219,7 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                 : `border ${groupBorder[group] ?? 'border-rule'}`,
         ]"
     >
-        <h3 class="flex flex-wrap items-baseline gap-x-2 text-base font-bold text-ink-strong">
+        <h3 class="flex flex-wrap items-baseline gap-x-2 text-lg font-bold text-ink-strong">
             {{ props.option.key }}
             <span v-if="props.option.recommended" class="text-xs font-bold">
                 <span aria-hidden="true">★</span> RECOMMENDED
@@ -298,7 +298,7 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
 
             <button
                 type="button"
-                class="inline-flex min-h-11 items-center rounded-full border-2 border-rule px-4 text-sm font-bold text-ink-strong hover:border-green-line"
+                class="inline-flex min-h-11 items-center rounded-full border-2 border-rule px-4 text-sm font-bold text-ink-strong hover:border-green-line transition-colors duration-150 ease-out"
                 :aria-expanded="open"
                 :aria-controls="detailsId"
                 @click="open = !open"

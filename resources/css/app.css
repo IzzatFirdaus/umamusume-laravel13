@@ -49,22 +49,33 @@
      * dark-first promotion of the raceboard anchors. Dark stays a supported theme; its values
      * live in the html[data-theme='dark'] block below. Neither set is a dimming of the other:
      * every value here was measured, and every pair was contrast-checked in the browser.
+     *
+     * 2026-10-15 (Track 2-D, owner-signed): page → #F4F4FF, ink-muted → #6A6A75.
+     * The starting draft in the planning doc and the values here are the same; both are open
+     * until the G-18 pair rows run.
+     *
+     * 2026-10-15 (Phase 11.1/11.3 repair). The ruled page move narrowed two measured steps below
+     * their contract: light `ink-muted on sunken` fell to 4.33:1 and light `panel on page` to
+     * 1.03:1. Neither ruled token moves, so the two NON-ruled surfaces they are measured against
+     * moved instead — `panel` #F8F8FB → #FBFBFD (step 1.06:1) and `sunken` #E7E7EC → #EDEDF1
+     * (pair 4.57:1). The rule edge still carries the card boundary; the surfaces only stop
+     * collapsing into each other.
      */
-    --color-page: #F2F1F8;
-    --color-panel: #F8F8FB;
+    --color-page: #F4F4FF;
+    --color-panel: #FBFBFD;
     --color-raised: #FFFFFF;
-    --color-sunken: #E7E7EC;
+    --color-sunken: #EDEDF1;
     --color-idle: #D2D2DB;
     --color-disabled: #D0D1D0;
     --color-ink: #6A5641;
     --color-ink-strong: #482720;
-    --color-ink-muted: #6E6459;
+    --color-ink-muted: #6A6A75;
     /* ink-faint is a non-text token: borders, hairline ticks, disabled glyphs.
        Measured as body-size text it lands at 3.18 on white and 2.58 on the sunken
        surface, so it must never carry a label. The accessible subordinate tier is
        ink-muted, which clears 4.5 on every surface in both themes. */
     --color-ink-faint: #988F87;
-    --color-rule: #E4E1EA;
+    --color-rule: #6E6C73;
 
     /* Semantic roles. Green is action and affordability only, never "good". */
     --color-green: #7FCC09;
@@ -186,6 +197,28 @@
     --color-line-wit: #D6EACC;
     --color-line-sp: #CCE4EA;
 
+    /* Support-type badge tiles. Each is the client's own type-chip hue, taken from the icon
+     * set authored under `docs/design-research/icons_svg/`: the blue shoe, the red heart, the
+     * orange arm, the pink flame, the green cap, the amber Pal and the green Group. The badge
+     * draws a white glyph over a tile mixed from this token, so the seven read apart at a
+     * glance (UMAMUSUME_REFERENCE.md §1.4.7, DESIGN-CORPUS.md §6.0b). */
+    --color-type-speed: #3FA3F2;
+    --color-type-stamina: #F76E61;
+    --color-type-power: #FB951F;
+    --color-type-guts: #FA72A4;
+    --color-type-wit: #25BC85;
+    --color-type-friend: #FCAE35;
+    --color-type-group: #3BC977;
+
+    /* The glyph artwork constants `SupportTypeMark.vue` draws with, so no hex lives in a component
+     * (Phase 11.18). These are illustration ink, not surfaces: the glyph is white in both themes
+     * because the tile under it is the client's chip hue in both, so none of them is overridden in
+     * the dark block, and none owes a G-18 pair (it fills a glyph, not a text/background pair). */
+    --color-mark-ink: #FFFFFF;
+    --color-mark-pal: #FBAE2A;
+    --color-mark-group-soft: #B8F2CF;
+    --color-mark-group-line: #2EC06C;
+
     /* Grade badge fills. Light fills with ink-strong letters: white on these
      * families measures 1.20-1.44 in this theme and is banned (D-258, G-47). */
     --color-grade-g: #D6E2D8;
@@ -216,6 +249,30 @@
      */
     --color-lattice: #6ABE01;
     --color-anchor: #0B6FB8;
+
+    /*
+     * Brand chrome / accent. The marketing palette the ship did not carry (Track 2-D amendments
+     * 2026-10-14/15): brand-chrome is the top-bar fill, brand-accent is the call-to-action chip,
+     * brand-accent-ink is the violet text/affordance, brand-accent-soft is its light backdrop.
+     * Status-positive and status-caution are category roles, not "good" / "bad": a status pill and a
+     * primary button never share a fill (Phase 11.11-11.12). Every new role owes a measured G-18
+     * pair; values here are the ruling's starting draft and `DesignTokensTest` is the gate.
+     */
+    --color-brand-chrome: #2255FF;
+    --color-on-brand-chrome: #FFFFFF;
+    --color-brand-accent: #FF77CC;
+    --color-brand-accent-ink: #8877FF;
+    --color-brand-accent-soft: #EEEBFF;
+    --color-status-positive: #BBDD11;
+    --color-status-positive-ink: #0D0C0F;
+    --color-status-caution: #FFE9A8;
+    --color-status-caution-ink: #6A4A00;
+
+    /*
+     * Overlay shadow. Phase 11.14. Applied with `filter: drop-shadow()`, never `box-shadow`, so the
+     * shape survives non-rectangular boundaries and the rule edge stays free.
+     */
+    --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.18);
 }
 
 :root {
@@ -230,8 +287,33 @@
  */
 html[data-theme='dark'] {
     color-scheme: dark;
-    --color-page: #0D0C0F;
-    --color-panel: #121013;
+    /*
+     * 2026-10-14 (frontend-fidelity Slice 0.4): the page and panel steps were widened.
+     *
+     * The two surfaces read as one in this theme: `page` #0D0C0F and `panel` #121013
+     * measured 1.04:1 apart, so a bordered card dissolved into the surface behind it and
+     * the separation rode entirely on `--color-rule`. That still works — the rule edge
+     * measures 3.77:1 against the old page and 3.88:1 against this one, and the G-18
+     * contract row `rule on page` holds the boundary to WCAG 1.4.11's 3:1 — but the
+     * sanctioned mechanism was the *only* thing carrying the shape, and DESIGN.md §2.3
+     * names "the rule edge and the raised/sunken step" as the pair of separators.
+     *
+     * `page` moved darker and `panel` moved lighter, which widens the step to 1.34:1.
+     * The step cannot reach 3:1, and the reason is arithmetic rather than taste: a
+     * surface that carries `--color-ink-muted` is capped by the G-18 row
+     * `ink-muted on panel` at 4.5:1, which bounds dark `panel` at a relative
+     * luminance of 0.0522, and the contrast formula's +0.05 floor means even a pure
+     * black page against that bound only reaches 2.04:1. Raising it further would
+     * fail the text pair the gate already enforces. So the raised/sunken step is
+     * strengthened to the maximum the contract allows and the rule edge keeps its
+     * three-to-one job, which is the shape DESIGN.md describes.
+     *
+     * A latent inversion went with it: dark `panel` #121013 sat *below* `sunken`
+     * #1A181D, while light has `panel` above `sunken`. `panel` #26262E now sits
+     * between `sunken` and `raised`, mirroring the light ramp's order.
+     */
+    --color-page: #08070A;
+    --color-panel: #26262E;
     --color-raised: #24262A;
     --color-sunken: #1A181D;
     --color-idle: #32343A;
@@ -240,7 +322,7 @@ html[data-theme='dark'] {
     --color-ink-strong: #FFFFFF;
     --color-ink-muted: #AAABB5;
     --color-ink-faint: #7C7D87;
-    --color-rule: #2E2C33;
+    --color-rule: #6E6C73;
 
     --color-green-deep: #9BE83A;
     --color-green-tint: #1F2A12;
@@ -281,6 +363,17 @@ html[data-theme='dark'] {
     --color-line-wit: #26302A;
     --color-line-sp: #242E35;
 
+    /* Support-type badge tiles, dark theme. The client's chip hues hold on the charcoal
+     * raised surface (--color-raised #24262A); the badge glyph is white in both themes, so
+     * the tiles carry the identity rather than washing the seven to one ink. */
+    --color-type-speed: #4FA9F0;
+    --color-type-stamina: #F57265;
+    --color-type-power: #F79A2A;
+    --color-type-guts: #F679A6;
+    --color-type-wit: #2BBE89;
+    --color-type-friend: #FBB345;
+    --color-type-group: #45C97E;
+
     --color-grade-g: #2C3A2F;
     --color-grade-f: #38343F;
     --color-grade-e: #3E2A4A;
@@ -293,6 +386,22 @@ html[data-theme='dark'] {
 
     --color-scrim: rgba(0, 0, 0, 0.62);
     --color-anchor: #8FC4EE;
+
+    /*
+     * Brand and status dark overrides (Track 2-D amendments 2026-10-14/15). Each is the same hue
+     * stepped until it clears the same threshold the light value cleared, so a non-conditional
+     * component survives both themes without forking.
+     */
+    --color-brand-chrome: #1A3FCC;
+    --color-on-brand-chrome: #FFFFFF;
+    --color-brand-accent: #CC5FA8;
+    --color-brand-accent-ink: #9F8FFF;
+    --color-brand-accent-soft: #2A2640;
+    --color-status-positive: #8FBF09;
+    --color-status-positive-ink: #0D0C0F;
+    --color-status-caution: #8A6F1A;
+    --color-status-caution-ink: #F4E4B0;
+    --shadow-overlay: 0 6px 16px rgb(0 0 0 / 0.32);
 }
 
 /*
@@ -313,6 +422,31 @@ html[data-theme='dark'] {
         pointer-events: none;
         background: linear-gradient(116deg, rgba(255, 255, 255, 0.30) 0 34%, rgba(255, 255, 255, 0) 34.5% 100%);
     }
+}
+
+/* The action accent. `bg-action` and `text-on-action` alias the existing chrome token pair so
+   components reference a meaning rather than a colour name. Green is action and affordability
+   only, never "good" (DESIGN.md §2.3). */
+@utility bg-action {
+    background-color: var(--color-chrome);
+}
+
+@utility text-on-action {
+    color: var(--color-on-chrome);
+}
+
+@utility border-action {
+    border-color: var(--color-chrome);
+}
+
+/*
+ * The one overlay elevation (Track 2-B amendment, DESIGN.md §2.3). `drop-shadow`, never
+ * `box-shadow`: the shadow follows the element's own outline rather than a rectangle, and the
+ * hairline rule keeps its job as the card boundary. Applied only to true overlays — a modal
+ * dialog or a floating panel — never to an embedded card or a normal panel (Phase 12.2).
+ */
+@utility overlay-shadow {
+    filter: drop-shadow(var(--shadow-overlay));
 }
 
 /* Argyle lattice bleeding in from the left end of a capsule header and clipped by the pill. */

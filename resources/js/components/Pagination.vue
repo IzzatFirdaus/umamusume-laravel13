@@ -29,7 +29,7 @@ defineProps<{ links: PagerLink[] }>();
                 :href="link.url"
                 preserve-scroll
                 :aria-current="link.active ? 'page' : undefined"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised transition-colors duration-150 ease-out"
                 :class="link.active ? 'bg-raised font-bold text-ink-strong' : ''"
             >
                 <span v-html="link.label" />

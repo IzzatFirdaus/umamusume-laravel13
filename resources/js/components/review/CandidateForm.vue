@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
+import { BaseInput, BaseSelect } from '../Form';
 
 // One verdict form per pending candidate. Each control's accessible name carries the
 // candidate's own name (F14): on a queue that renders one group per row, a generic
 // "Status" label would be technically named and useless. Asserted in the browser spec.
+// The visible label sits above the control; the aria-label keeps the candidate-named
+// form of the name, and WCAG 2.5.3 holds because the visible text is its prefix.
+// The queue's one accented primary (plan 6A.4): only the topmost unresolved card renders enamel.
+// The shared controls are multi-root, so the class that sizes them rides a wrapper div.
 const props = defineProps<{
     candidate: {
         id: number;
@@ -11,6 +16,7 @@ const props = defineProps<{
         suggested_umamusume_id: number | null;
     };
     aliasLanguages: { value: string; label: string }[];
+    accented?: boolean;
 }>();
 
 const form = useForm({
@@ -23,11 +29,22 @@ const form = useForm({
     alias_language: '',
 });
 
-const hasError = (): boolean =>
-    Boolean(form.errors.status || form.errors.umamusume_id || form.errors.alias_language);
+const statusId = `review-status-${props.candidate.id}`;
+const umamusumeId = `review-umamusume-${props.candidate.id}`;
+const aliasId = `review-alias-language-${props.candidate.id}`;
 
-const errorId = `review-errors-${props.candidate.id}`;
-const describedBy = (): string | undefined => (hasError() ? errorId : undefined);
+const verdictOptions = [
+    { value: '', label: 'Not set' },
+    { value: 'Confirmed', label: 'Confirm (merge into suggestion, or create)' },
+    { value: 'Aliased', label: 'Add as alias of…' },
+    { value: 'Rejected', label: 'Reject' },
+];
+
+const aliasOptions = [{ value: '', label: 'Not set' }, ...props.aliasLanguages];
+
+function onIdInput(value: string | number | File | null): void {
+    form.umamusume_id = typeof value === 'string' || typeof value === 'number' ? value : '';
+}
 
 function submit(): void {
     form.post(`/review/${props.candidate.id}`);
@@ -35,64 +52,66 @@ function submit(): void {
 </script>
 
 <template>
-    <form class="mt-3 flex flex-wrap items-center gap-2" @submit.prevent="submit">
-        <label class="sr-only" :for="`review-status-${candidate.id}`">Verdict for {{ candidate.proposed_name }}</label>
-        <select
-            :id="`review-status-${candidate.id}`"
-            v-model="form.status"
-            name="status"
-            :aria-invalid="form.errors.status ? 'true' : undefined"
-            :aria-describedby="describedBy()"
-            class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
-        >
-            <option value="">Not set</option>
-            <option value="Confirmed">Confirm (merge into suggestion, or create)</option>
-            <option value="Aliased">Add as alias of…</option>
-            <option value="Rejected">Reject</option>
-        </select>
+    <form
+        class="mt-3 flex flex-wrap items-end gap-x-3 gap-y-2"
+        :aria-busy="form.processing ? 'true' : null"
+        @submit.prevent="submit"
+    >
+        <div class="w-44">
+            <BaseSelect
+                :id="statusId"
+                name="status"
+                :model-value="form.status"
+                label="Verdict"
+                :aria-label="`Verdict for ${candidate.proposed_name}`"
+                :options="verdictOptions"
+                :error="form.errors.status"
+                :disabled="form.processing"
+                @update:model-value="(v) => (form.status = v === null ? '' : String(v))"
+            />
+        </div>
 
-        <label class="sr-only" :for="`review-umamusume-${candidate.id}`">Umamusume id (optional) for {{ candidate.proposed_name }}</label>
-        <input
-            :id="`review-umamusume-${candidate.id}`"
-            v-model="form.umamusume_id"
-            type="number"
-            name="umamusume_id"
-            placeholder="Umamusume id (optional)"
-            :aria-invalid="form.errors.umamusume_id ? 'true' : undefined"
-            :aria-describedby="describedBy()"
-            class="min-h-11 w-44 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
-        >
+        <div class="w-44">
+            <BaseInput
+                :id="umamusumeId"
+                name="umamusume_id"
+                :model-value="form.umamusume_id"
+                type="number"
+                label="Umamusume id"
+                :aria-label="`Umamusume id for ${candidate.proposed_name}`"
+                hint="(optional)"
+                title="The catalog row's id to merge into. Leave empty to use the suggestion."
+                :error="form.errors.umamusume_id"
+                :disabled="form.processing"
+                @update:model-value="onIdInput"
+            />
+        </div>
 
-        <label class="sr-only" :for="`review-alias-language-${candidate.id}`">Alias language for {{ candidate.proposed_name }}</label>
-        <select
-            :id="`review-alias-language-${candidate.id}`"
-            v-model="form.alias_language"
-            name="alias_language"
-            :aria-invalid="form.errors.alias_language ? 'true' : undefined"
-            :aria-describedby="describedBy()"
-            class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
-        >
-            <option value="">Alias language</option>
-            <option v-for="language in aliasLanguages" :key="language.value" :value="language.value">
-                {{ language.label }}
-            </option>
-        </select>
+        <div class="w-44">
+            <BaseSelect
+                :id="aliasId"
+                name="alias_language"
+                :model-value="form.alias_language"
+                label="Alias language"
+                :aria-label="`Alias language for ${candidate.proposed_name}`"
+                :options="aliasOptions"
+                :error="form.errors.alias_language"
+                :disabled="form.processing"
+                @update:model-value="(v) => (form.alias_language = v === null ? '' : String(v))"
+            />
+        </div>
 
         <!-- The visible word stays in the name (WCAG 2.5.3, Label in Name). -->
         <button
             type="submit"
             :aria-label="`Resolve ${candidate.proposed_name}`"
-            class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-3 font-semibold text-on-chrome"
+            :disabled="form.processing"
+            class="inline-flex min-h-11 items-center rounded-full px-3 font-semibold transition-colors duration-150 ease-out disabled:opacity-60 disabled:cursor-wait"
+            :class="accented
+                ? 'enamel bg-chrome text-on-chrome'
+                : 'border border-rule bg-raised text-ink-strong hover:bg-panel'"
         >
             Resolve
         </button>
-
-        <!-- Every field this form can fail on, stacked: the request can return umamusume_id
-             and alias_language together, and fixing one at a time re-submits blind to the other. -->
-        <ul v-if="hasError()" :id="errorId" role="alert" class="mt-1 w-full space-y-0.5 text-sm text-risk">
-            <li v-if="form.errors.status">{{ form.errors.status }}</li>
-            <li v-if="form.errors.umamusume_id">{{ form.errors.umamusume_id }}</li>
-            <li v-if="form.errors.alias_language">{{ form.errors.alias_language }}</li>
-        </ul>
     </form>
 </template>

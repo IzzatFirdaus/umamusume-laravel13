@@ -14,6 +14,8 @@
  * write on this page, so there is no `useForm` here.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import AbsenceValue from '../../components/AbsenceValue.vue';
+import { BaseInput, BaseSelect, BaseButton } from '../../components/Form';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -80,9 +82,10 @@ function applyFilters(): void {
 <template>
     <AppLayout>
         <Head title="Legacy Lab" />
+        <template #eyebrow>Reference</template>
         <template #title>Legacy Lab</template>
 
-        <h2 class="text-2xl font-semibold text-ink-strong">Veteran library</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Veteran library</h2>
 
         <!--
             The record-only banner, on every Legacy screen, as glyph plus text (the prompt's
@@ -100,44 +103,29 @@ function applyFilters(): void {
         </p>
 
         <form class="mt-4 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
-            <label class="flex flex-col gap-1">
-                <span class="text-ink">Trainee</span>
-                <select
-                    v-model="trainee"
-                    name="trainee"
-                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                >
-                    <option value="">All</option>
-                    <option v-for="(name, id) in trainees" :key="id" :value="id">{{ name }}</option>
-                </select>
-            </label>
-
-            <label class="flex flex-col gap-1">
-                <span class="text-ink">Scenario</span>
-                <select
-                    v-model="scenario"
-                    name="scenario"
-                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                >
-                    <option value="">All</option>
-                    <option v-for="(label, key) in scenarios" :key="key" :value="key">{{ label }}</option>
-                </select>
-            </label>
-
-            <label class="flex flex-col gap-1">
-                <span class="text-ink">Tag</span>
-                <input
-                    v-model="tag"
-                    type="text"
-                    name="tag"
-                    placeholder="Distance, surface, style, Spark type"
-                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                >
-            </label>
-
-            <button type="submit" class="enamel h-11 rounded-full bg-chrome px-3 font-semibold text-on-chrome">
-                Filter
-            </button>
+            <BaseSelect
+                v-model="trainee"
+                id="legacy-filter-trainee"
+                name="trainee"
+                label="Trainee"
+                :options="[{ value: '', label: 'All' }, ...Object.entries(trainees).map(([id, name]) => ({ value: id, label: name }))]"
+            />
+            <BaseSelect
+                v-model="scenario"
+                id="legacy-filter-scenario"
+                name="scenario"
+                label="Scenario"
+                :options="[{ value: '', label: 'All' }, ...Object.entries(scenarios).map(([key, label]) => ({ value: key, label }))]"
+            />
+            <BaseInput
+                v-model="tag"
+                id="legacy-filter-tag"
+                name="tag"
+                type="text"
+                placeholder="Distance, surface, style, Spark type"
+                label="Tag"
+            />
+            <BaseButton type="submit" variant="primary">Filter</BaseButton>
         </form>
 
         <p v-if="errors.trainee" role="alert" class="mt-2 text-sm text-risk">Trainee: {{ errors.trainee }}</p>
@@ -181,7 +169,7 @@ function applyFilters(): void {
                 >
                     <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                         <span class="font-semibold text-ink-strong">
-                            <Link :href="veteran.veteran_url" class="hover:underline">
+                            <Link :href="veteran.veteran_url" class="hover:underline transition-colors duration-150 ease-out">
                                 {{ veteran.trainee }}
                             </Link>
                             <span
@@ -190,12 +178,15 @@ function applyFilters(): void {
                                 class="ml-2 text-sm font-normal text-ink-muted"
                             >{{ veteran.trainee_ja }}</span>
                         </span>
-                        <!-- The run's state is not printed: only a Completed run is recordable as a
-                             Veteran (`RecordVeteran`), so a status column here says the same word on
-                             every row. -->
-                        <span class="flex items-baseline gap-3 text-xs text-ink-muted">
+                        <div class="flex items-baseline gap-3 text-xs text-ink-muted">
                             <span>{{ veteran.scenario_label }}</span>
-                        </span>
+                            <a
+                                :href="`/legacy/compare?runs[]=${veteran.run_id}`"
+                                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
+                            >
+                                Compare
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Tags are the Trainer's own facets, printed as they were entered. No tag is
@@ -208,9 +199,7 @@ function applyFilters(): void {
                             class="rounded-full bg-sunken px-2 py-0.5 text-xs text-ink"
                         >{{ tagName }}</span>
                     </p>
-                    <p v-else class="mt-2 text-xs text-ink-muted" title="You saved this Veteran with no tags.">
-                        No tags.
-                    </p>
+                    <AbsenceValue v-else compact reason="You saved this Veteran with no tags." />
 
                     <p v-if="veteran.notes" class="mt-2 text-ink-muted">{{ veteran.notes }}</p>
 
@@ -224,7 +213,7 @@ function applyFilters(): void {
                         <a
                             v-if="veteran.builder_url"
                             :href="veteran.builder_url"
-                            class="inline-flex min-h-11 items-center rounded-full bg-chrome px-3 font-semibold text-on-chrome"
+                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
                         >
                             Open Legacy builder
                         </a>
@@ -235,13 +224,6 @@ function applyFilters(): void {
                         >
                             No Legacy selection recorded for this run yet.
                         </span>
-
-                        <a
-                            :href="`/legacy/compare?runs[]=${veteran.run_id}`"
-                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
-                        >
-                            Compare
-                        </a>
                     </p>
                 </li>
             </ul>
@@ -252,7 +234,7 @@ function applyFilters(): void {
                         v-if="link.url"
                         :href="link.url"
                         :aria-current="link.active ? 'page' : undefined"
-                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised"
+                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised transition-colors duration-150 ease-out"
                         :class="link.active ? 'bg-raised font-bold text-ink-strong' : ''"
                         v-html="link.label"
                     />

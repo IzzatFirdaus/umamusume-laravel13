@@ -73,6 +73,7 @@ class LegacySelectController extends Controller
 
         return Inertia::render('Career/LegacySelect', [
             'visited' => SetupDraft::visited(),
+            'saved' => SetupDraft::saved(),
             'trainee' => $trainee === null
                 ? null
                 : ['id' => $trainee->id, 'name' => $trainee->name, 'name_ja' => $trainee->name_ja],

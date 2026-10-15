@@ -59,7 +59,7 @@ const conditions = computed(() => props.skill.condition_groups ?? []);
         <template #title>{{ skill.name }}</template>
 
         <div class="flex justify-end">
-            <Link href="/skills" class="text-sm text-ink-muted hover:underline">Back to skill search</Link>
+            <Link href="/skills" class="text-sm text-ink-muted hover:underline transition-colors duration-150 ease-out">Back to skill search</Link>
         </div>
 
         <!-- The index's dedupe rule carried over: 18 of the 623 [Global] rows store the same
@@ -68,7 +68,7 @@ const conditions = computed(() => props.skill.condition_groups ?? []);
             {{ skill.name_ja }}
         </p>
 
-        <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-rule bg-raised p-4 text-sm md:grid-cols-3">
+        <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-rule bg-panel p-4 text-sm md:grid-cols-3">
             <div>
                 <dt class="text-ink-muted">Type</dt>
                 <dd class="text-ink">
@@ -104,7 +104,7 @@ const conditions = computed(() => props.skill.condition_groups ?? []);
             <h2 id="mechanics" class="text-lg font-semibold text-ink-strong">Mechanics</h2>
 
             <template v-if="conditions.length > 0">
-                <div v-for="(group, index) in conditions" :key="index" class="mt-3 rounded-md border border-rule bg-raised p-3 text-sm">
+                 <div v-for="(group, index) in conditions" :key="index" class="mt-3 rounded-md border border-rule bg-panel p-3 text-sm">
                     <h3 v-if="conditions.length > 1" class="text-lg font-semibold text-ink-strong">
                         Activation {{ index + 1 }}
                     </h3>

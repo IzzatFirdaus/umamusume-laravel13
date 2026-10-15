@@ -65,11 +65,26 @@ it('heads the ruleset version the same way on the wizard card and the Cockpit st
 it('prints each fact on a scenario card under one label, and never one label twice', function (): void {
     $source = scenarioCardTemplate();
 
-    preg_match_all('/<dt[^>]*>([^<]+)<\/dt>/', $source, $matches);
+    // Match both SubCell labels and raw <dt> in file order.
+    // SubCell label="..." can appear before />; raw <dt>content</dt>.
+    // Use a combined regex that finds label="..." on SubCell lines and <dt> on dt lines,
+    // preserving file order by scanning line by line.
+    $lines = explode("\n", $source);
+    $labels = [];
+    foreach ($lines as $line) {
+        // SubCell label="..."
+        if (strpos($line, '<SubCell') !== false && preg_match('/label="([^"]+)"/', $line, $m)) {
+            $labels[] = trim($m[1]);
+        }
+        // raw <dt>...</dt>
+        if (preg_match('/<dt[^>]*>([^<]+)<\/dt>/', $line, $m)) {
+            $labels[] = trim($m[1]);
+        }
+    }
 
-    // The card's own fact grid then its recorded metadata, in the order the template prints them. One
-    // entry per fact: a duplicated heading fails this, and so does a pattern that matched nothing.
-    expect(array_map(trim(...), $matches[1]))->toBe([
+    // The card's own fact grid then its recorded metadata, in the order the template prints them.
+    // One entry per fact: a duplicated heading fails this, and so does a pattern that matched nothing.
+    expect($labels)->toBe([
         'Optimizes',
         'Systems',
         'Tracked resources',

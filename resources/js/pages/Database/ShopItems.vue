@@ -16,6 +16,7 @@
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
+import SparkChip from '../../components/SparkChip.vue';
 import ReferenceDrawer from '../../components/database/ReferenceDrawer.vue';
 import SourceNote from '../../components/database/SourceNote.vue';
 import { Head } from '@inertiajs/vue3';
@@ -71,7 +72,7 @@ const close = async (): Promise<void> => {
         <Head title="Shop Items" />
         <template #title>Shop Items</template>
 
-        <h2 class="text-2xl font-semibold text-ink-strong">Shop items</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Shop items</h2>
 
         <p class="mt-4 max-w-3xl text-sm text-ink-muted">
             Consumables and currencies, with the client's own effect string and where each is actually
@@ -91,7 +92,7 @@ const close = async (): Promise<void> => {
         <section
             v-if="props.rows.length === 0"
             aria-labelledby="shop-empty"
-            class="mt-4 rounded-md border border-dashed border-rule bg-raised p-6"
+            class="mt-4 rounded-md border border-dashed border-rule bg-panel p-6"
         >
             <h3 id="shop-empty" class="text-lg font-semibold text-ink-strong">
                 Item catalogue not loaded in this build
@@ -111,23 +112,23 @@ const close = async (): Promise<void> => {
             <li
                 v-for="row in props.rows"
                 :key="row.name"
-                class="rounded-md border border-rule bg-raised"
+                 class="rounded-md border border-rule bg-panel"
             >
                 <button
                     type="button"
-                    class="flex min-h-11 w-full flex-wrap items-baseline justify-between gap-x-4 gap-y-2 px-4 py-3 text-left hover:bg-panel"
+                    class="flex min-h-11 w-full flex-wrap items-baseline justify-between gap-x-4 gap-y-2 px-4 py-3 text-left hover:bg-panel transition-colors duration-150 ease-out"
                     :aria-expanded="selected?.name === row.name"
                     @click="open(row, $event)"
                 >
                     <span class="text-sm font-medium text-ink-strong">{{ row.name }}</span>
 
                     <span class="flex flex-wrap items-center gap-2">
-                        <span class="rounded-full bg-sunken px-2 py-0.5 text-xs text-ink-strong">
-                            {{ row.kind === 'currency' ? 'Currency' : 'Consumable' }}
-                        </span>
-                        <span class="rounded-full bg-sunken px-2 py-0.5 text-xs text-ink-strong">
-                            {{ row.spend_site }}
-                        </span>
+                        <SparkChip
+                            :label="row.kind === 'currency' ? 'Currency' : 'Consumable'"
+                            :variant="row.kind === 'currency' ? 'currency' : 'consumable'"
+                            size="sm"
+                        />
+                        <SparkChip :label="row.spend_site" size="sm" />
                         <ProvenanceBadge :state="row.state" :title="row.source_title" />
                     </span>
                 </button>
@@ -178,7 +179,7 @@ const close = async (): Promise<void> => {
                 <li
                     v-for="item in props.scenarioShop.items"
                     :key="item.name"
-                    class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-md border border-rule bg-raised px-4 py-2 text-sm"
+                     class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-md border border-rule bg-panel px-4 py-2 text-sm"
                 >
                     <span class="font-medium text-ink-strong">{{ item.name }}</span>
                     <span class="text-ink-muted">{{ item.effect }}</span>

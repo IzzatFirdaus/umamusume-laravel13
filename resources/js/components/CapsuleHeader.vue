@@ -6,6 +6,6 @@ defineProps<{ title: string }>();
 
 <template>
     <div class="lattice-bleed flex h-11 items-center rounded-full bg-chrome pr-5 pl-20">
-        <span class="text-base font-bold text-on-chrome">{{ title }}</span>
+        <span class="text-lg font-semibold text-on-chrome">{{ title }}</span>
     </div>
 </template>

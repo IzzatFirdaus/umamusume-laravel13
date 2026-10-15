@@ -26,6 +26,10 @@ import AncestryNode from '../../components/legacy/AncestryNode.vue';
 import SparkChip from '../../components/legacy/SparkChip.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import BaseInput from '@/components/Form/BaseInput.vue';
+import BaseSelect from '@/components/Form/BaseSelect.vue';
+import BaseCheckbox from '@/components/Form/BaseCheckbox.vue';
+import BaseButton from '@/components/Form/BaseButton.vue';
 
 interface SparkRow {
     kind: string;
@@ -228,6 +232,25 @@ function removeAncestorSpark(index: number, ancestorIndex: number, sparkIndex: n
     form.legacies[index].ancestors_sparks[ancestorIndex].splice(sparkIndex, 1);
 }
 
+const confirmDialog = ref<HTMLDialogElement | null>(null);
+
+/**
+ * The confirmation is destructive-only. A run that already stores a selection is about to lose it, so
+ * the write waits behind a dialog that says so in the run's own words. A run with nothing stored has
+ * nothing to destroy and the press is the write (`Slice 7.11`). The dialog is a native `<dialog>`
+ * opened with `showModal()`, which is where the focus trap and the Escape close come from rather than
+ * from focus code written here.
+ */
+function requestConfirm(): void {
+    if (!props.hasSelection) {
+        submit();
+
+        return;
+    }
+
+    confirmDialog.value?.showModal();
+}
+
 function submit(): void {
     // The payload posts exactly what the column stores: the parent is named by the Veteran it was
     // picked from, the ancestors are names, and every rank and Spark figure travels as the Trainer
@@ -260,6 +283,8 @@ function submit(): void {
             })),
         })),
     })).put(`/legacy/${props.run.id}`);
+
+    confirmDialog.value?.close();
 }
 
 const hasAnyNode = computed(() =>
@@ -274,9 +299,9 @@ const hasAnyNode = computed(() =>
         <Head title="Legacy builder" />
         <template #title>Legacy builder</template>
 
-        <h2 class="text-2xl font-semibold text-ink-strong">
+        <h2 class="text-lg font-semibold text-ink-strong">
             {{ trainee.name }}
-            <span v-if="trainee.name_ja" lang="ja" class="ml-2 text-lg font-normal text-ink-muted">
+            <span v-if="trainee.name_ja" lang="ja" class="ml-2 text-sm font-normal text-ink-muted">
                 {{ trainee.name_ja }}
             </span>
         </h2>
@@ -359,40 +384,31 @@ const hasAnyNode = computed(() =>
                                 <li
                                     v-for="(ancestor, ancestorIndex) in parent.ancestors"
                                     :key="ancestor.slot"
-                                    class="rounded-md border border-rule bg-raised p-3"
+                                     class="rounded-md border border-rule bg-panel p-3"
                                 >
                                     <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                                         {{ ancestor.slot }}
                                     </p>
-                                    <label class="mt-1 block text-xs font-medium text-ink" :for="`ancestor-${parent.slot}-${ancestorIndex}`">
-                                        {{ ancestor.slot }}
-                                    </label>
-                                    <input
-                                        :id="`ancestor-${parent.slot}-${ancestorIndex}`"
-                                        v-model="form.legacies[index].ancestors[ancestorIndex]"
-                                        type="text"
-                                        list="known-umamusume-names"
-                                        autocomplete="off"
-                                        :aria-describedby="ancestorError(index, ancestorIndex) ? `ancestor-${parent.slot}-${ancestorIndex}-error` : undefined"
-                                        :class="[
-                                            'mt-1 block min-h-11 w-full rounded-md border bg-raised px-2 text-sm text-ink',
-                                            ancestorError(index, ancestorIndex) ? 'border-risk' : 'border-rule',
-                                        ]"
-                                    >
-                                    <p
-                                        v-if="ancestorError(index, ancestorIndex)"
-                                        :id="`ancestor-${parent.slot}-${ancestorIndex}-error`"
-                                        class="mt-1 text-xs text-risk"
-                                    >
-                                        {{ ancestorError(index, ancestorIndex) }}
-                                    </p>
-                                    <p
-                                        v-else
-                                        class="mt-1 text-xs text-ink-muted"
-                                        title="An ancestor is stored by name. Leave it blank if you have not recorded one."
-                                    >
-                                        Enter the name as you read it. Blank stays N/A.
-                                    </p>
+<label class="mt-1 block text-xs font-medium text-ink" :for="`ancestor-${parent.slot}-${ancestorIndex}`">
+                                         {{ ancestor.slot }}
+                                     </label>
+                                     <BaseInput
+                                         :id="`ancestor-${parent.slot}-${ancestorIndex}`"
+                                         v-model="form.legacies[index].ancestors[ancestorIndex]"
+                                         type="text"
+                                         list="known-umamusume-names"
+                                         autocomplete="off"
+                                         :aria-describedby="ancestorError(index, ancestorIndex) ? `ancestor-${parent.slot}-${ancestorIndex}-error` : undefined"
+                                         :error="ancestorError(index, ancestorIndex)"
+                                         hint="An ancestor is stored by name. Leave it blank if you have not recorded one."
+                                     />
+                                     <p
+                                         v-if="ancestorError(index, ancestorIndex)"
+                                         :id="`ancestor-${parent.slot}-${ancestorIndex}-error`"
+                                         class="mt-1 text-xs text-risk"
+                                     >
+                                         {{ ancestorError(index, ancestorIndex) }}
+                                     </p>
 
                                     <!-- The grandparent's two rank fields, the same two facts the wizard
                                          step carries per ancestor (R3-09: four of the six ranks in the
@@ -400,37 +416,34 @@ const hasAnyNode = computed(() =>
                                          the wizard's "Own rank" because this screen has two kinds of rank
                                          in one column and the Builder's browser spec pins `Own rank` to
                                          the parent's star count; the wording names the node instead. -->
-                                    <label
-                                        class="mt-2 block text-xs font-medium text-ink"
-                                        :for="`ancestor-rank-letter-${parent.slot}-${ancestorIndex}`"
-                                    >
-                                        Grandparent rank (letters)
-                                    </label>
-                                    <input
-                                        :id="`ancestor-rank-letter-${parent.slot}-${ancestorIndex}`"
-                                        v-model="form.legacies[index].ancestors_rank_letters[ancestorIndex]"
-                                        type="text"
-                                        list="known-rank-letters"
-                                        autocomplete="off"
-                                        class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-sm text-ink"
-                                    >
-                                    <p class="mt-1 text-xs text-ink-muted">
-                                        The letter the client shows, from its own set. Blank stays not recorded.
-                                    </p>
+<label
+                                         class="mt-2 block text-xs font-medium text-ink"
+                                         :for="`ancestor-rank-letter-${parent.slot}-${ancestorIndex}`"
+                                     >
+                                         Grandparent rank (letters)
+                                     </label>
+                                     <BaseInput
+                                         :id="`ancestor-rank-letter-${parent.slot}-${ancestorIndex}`"
+                                         v-model="form.legacies[index].ancestors_rank_letters[ancestorIndex]"
+                                         type="text"
+                                         list="known-rank-letters"
+                                         autocomplete="off"
+                                         hint="The letter the client shows, from its own set. Blank stays not recorded."
+                                     />
 
-                                    <label
-                                        class="mt-2 block text-xs font-medium text-ink"
-                                        :for="`ancestor-rank-${parent.slot}-${ancestorIndex}`"
-                                    >
-                                        Grandparent rank (stars)
-                                    </label>
-                                    <input
-                                        :id="`ancestor-rank-${parent.slot}-${ancestorIndex}`"
-                                        v-model="form.legacies[index].ancestors_rank[ancestorIndex]"
-                                        type="number"
-                                        min="0"
-                                        class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-sm text-ink"
-                                    >
+                                     <label
+                                         class="mt-2 block text-xs font-medium text-ink"
+                                         :for="`ancestor-rank-${parent.slot}-${ancestorIndex}`"
+                                     >
+                                         Grandparent rank (stars)
+                                     </label>
+                                     <BaseInput
+                                         :id="`ancestor-rank-${parent.slot}-${ancestorIndex}`"
+                                         v-model="form.legacies[index].ancestors_rank[ancestorIndex]"
+                                         type="number"
+                                         min="0"
+                                         hint="Blank stays N/A. Unbounded on purpose: the sources give no ceiling on a Legacy's own star count (ADR-0010)."
+                                     />
 
                                     <!-- The grandparent's own Sparks, the same record the wizard step edits.
                                          The category select and the target it filters are the wizard's
@@ -447,38 +460,42 @@ const hasAnyNode = computed(() =>
                                             Sparks for {{ ancestor.slot }}
                                         </summary>
 
-                                        <ul
+<ul
                                             v-if="form.legacies[index].ancestors_sparks[ancestorIndex].length > 0"
                                             class="mt-2 space-y-2"
                                         >
                                             <li
                                                 v-for="(spark, sparkIndex) in form.legacies[index].ancestors_sparks[ancestorIndex]"
                                                 :key="sparkIndex"
-                                                class="flex flex-wrap items-end gap-2 rounded-md border border-rule bg-raised p-2"
+                                                 class="flex flex-wrap items-end gap-2 rounded-md border border-rule bg-panel p-2"
                                             >
-                                                <label class="flex flex-col gap-1 text-xs text-ink">
-                                                    <span>Kind</span>
-                                                    <select v-model="spark.kind" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm">
-                                                        <option v-for="(label, kind) in sparkKinds" :key="kind" :value="kind">{{ label }}</option>
-                                                    </select>
-                                                </label>
-                                                <label class="flex flex-col gap-1 text-xs text-ink">
-                                                    <span>Category</span>
-                                                    <select v-model="spark.category" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm" @change="spark.target = ''">
-                                                        <option v-for="category in SPARK_CATEGORIES" :key="category" :value="category">{{ category }}</option>
-                                                    </select>
-                                                </label>
-                                                <label class="flex flex-col gap-1 text-xs text-ink">
-                                                    <span>Target</span>
-                                                    <select v-model="spark.target" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm">
-                                                        <option value="">Not recorded</option>
-                                                        <option v-for="target in sparkTargets[spark.category]" :key="target" :value="target">{{ target }}</option>
-                                                    </select>
-                                                </label>
-                                                <label class="flex flex-col gap-1 text-xs text-ink">
-                                                    <span>Stars</span>
-                                                    <input v-model="spark.stars" type="number" min="1" max="3" class="min-h-11 w-20 rounded-md border border-rule bg-raised px-2 text-sm">
-                                                </label>
+                                                <BaseSelect
+                                                    :id="`ancestor-spark-kind-${parent.slot}-${ancestorIndex}-${sparkIndex}`"
+                                                    v-model="spark.kind"
+                                                    label="Kind"
+                                                    :options="Object.keys(sparkKinds).map(kind => ({ value: kind, label: sparkKinds[kind] }))"
+                                                  />
+                                                <BaseSelect
+                                                    :id="`ancestor-spark-category-${parent.slot}-${ancestorIndex}-${sparkIndex}`"
+                                                    v-model="spark.category"
+                                                    label="Category"
+                                                    :options="SPARK_CATEGORIES.map(category => ({ value: category, label: category }))"
+                                                    @change="spark.target = ''"
+                                                  />
+                                                <BaseSelect
+                                                    :id="`ancestor-spark-target-${parent.slot}-${ancestorIndex}-${sparkIndex}`"
+                                                    v-model="spark.target"
+                                                    label="Target"
+                                                    :options="[{ value: '', label: 'Not recorded' }, ...(sparkTargets[spark.category] || []).map(target => ({ value: target, label: target }))]"
+                                                  />
+                                                <BaseInput
+                                                    :id="`ancestor-spark-stars-${parent.slot}-${ancestorIndex}-${sparkIndex}`"
+                                                    v-model="spark.stars"
+                                                    type="number"
+                                                    min="1"
+                                                    max="3"
+                                                    label="Stars"
+                                                  />
                                                 <button
                                                     type="button"
                                                     class="min-h-11 rounded-md border border-rule px-3 text-sm font-medium text-ink"
@@ -508,60 +525,58 @@ const hasAnyNode = computed(() =>
                             <!-- The parent's recorded fields: her own rank, whether she is rented,
                                  and her Spark list. Each is entered, and each is nullable because a
                                  half-read screen is a real state (ADR-0010 Consequences §3). -->
-                            <div class="mt-3 rounded-md border border-rule bg-raised p-3">
+                             <div class="mt-3 rounded-md border border-rule bg-panel p-3">
                                 <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                                     {{ parent.label }} as you read her
                                 </p>
 
-                                <label class="mt-2 block text-xs font-medium text-ink" :for="`rank-${parent.slot}`">
-                                    Own rank
-                                </label>
-                                <input
-                                    :id="`rank-${parent.slot}`"
-                                    v-model="form.legacies[index].rank"
-                                    type="number"
-                                    min="0"
-                                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-sm text-ink"
-                                >
-                                <p class="mt-1 text-xs text-ink-muted">
-                                    Blank stays N/A. Unbounded on purpose: the sources give no ceiling
-                                    on a Legacy’s own star count (ADR-0010).
-                                </p>
+<label class="mt-2 block text-xs font-medium text-ink" :for="`rank-${parent.slot}`">
+                                     Own rank
+                                 </label>
+                                 <BaseInput
+                                     :id="`rank-${parent.slot}`"
+                                     v-model="form.legacies[index].rank"
+                                     type="number"
+                                     min="0"
+                                     hint="Blank stays N/A. Unbounded on purpose: the sources give no ceiling on a Legacy's own star count (ADR-0010)."
+                                 />
+                                 <p class="mt-1 text-xs text-ink-muted">
+                                     Blank stays N/A. Unbounded on purpose: the sources give no ceiling
+                                     on a Legacy's own star count (ADR-0010).
+                                 </p>
 
                                 <!-- The letter rank the client prints beside the star count, the same
                                      field the wizard step edits against the same request. It sits after
                                      the star count here because the Builder's browser spec pins
                                      `Own rank` to the star count input; the wizard's order is letters
                                      first, and this screen does not reorder what a spec holds. -->
-                                <label class="mt-3 block text-xs font-medium text-ink" :for="`rank-letter-${parent.slot}`">
-                                    Own rank (letters)
-                                </label>
-                                <input
-                                    :id="`rank-letter-${parent.slot}`"
-                                    v-model="form.legacies[index].rank_letter"
-                                    type="text"
-                                    list="known-rank-letters"
-                                    autocomplete="off"
-                                    :aria-describedby="fieldError(index, 'rank_letter') ? `rank-letter-${parent.slot}-error` : undefined"
-                                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-sm text-ink"
-                                >
-                                <p
-                                    v-if="fieldError(index, 'rank_letter')"
-                                    :id="`rank-letter-${parent.slot}-error`"
-                                    class="mt-1 text-xs text-risk"
-                                >
-                                    {{ fieldError(index, 'rank_letter') }}
-                                </p>
-                                <p class="mt-1 text-xs text-ink-muted">
-                                    The letter the client shows, from its own set. Blank stays not recorded.
-                                </p>
+<label class="mt-3 block text-xs font-medium text-ink" :for="`rank-letter-${parent.slot}`">
+                                     Own rank (letters)
+                                 </label>
+                                 <BaseInput
+                                     :id="`rank-letter-${parent.slot}`"
+                                     v-model="form.legacies[index].rank_letter"
+                                     type="text"
+                                     list="known-rank-letters"
+                                     autocomplete="off"
+                                     :error="fieldError(index, 'rank_letter')"
+                                     hint="The letter the client shows, from its own set. Blank stays not recorded."
+                                 />
+                                 <p
+                                     v-if="fieldError(index, 'rank_letter')"
+                                     :id="`rank-letter-${parent.slot}-error`"
+                                     class="mt-1 text-xs text-risk"
+                                 >
+                                     {{ fieldError(index, 'rank_letter') }}
+                                 </p>
+                                 <p class="mt-1 text-xs text-ink-muted">
+                                     The letter the client shows, from its own set. Blank stays not recorded.
+                                 </p>
 
                                 <label class="mt-3 flex min-h-11 items-center gap-2">
-                                    <input
-                                        v-model="form.legacies[index].is_guest"
-                                        type="checkbox"
-                                        class="h-5 w-5 rounded-md border-rule"
-                                    >
+                                     <BaseCheckbox
+                                         v-model="form.legacies[index].is_guest"
+                                       />
                                     <span class="text-xs text-ink">Rented from a friend</span>
                                 </label>
 
@@ -578,49 +593,38 @@ const hasAnyNode = computed(() =>
                                         No Sparks recorded.
                                     </p>
 
-                                    <ul v-else class="mt-2 space-y-2">
+<ul v-else class="mt-2 space-y-2">
                                         <li
                                             v-for="(spark, sparkIndex) in form.legacies[index].sparks"
                                             :key="sparkIndex"
                                             class="flex flex-wrap items-end gap-2 rounded-md border border-rule bg-panel p-2"
                                         >
-                                            <label class="flex flex-col gap-1 text-xs text-ink">
-                                                <span>Kind</span>
-                                                <select
-                                                    v-model="spark.kind"
-                                                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm"
-                                                >
-                                                    <option
-                                                        v-for="(label, kind) in sparkKinds"
-                                                        :key="kind"
-                                                        :value="kind"
-                                                    >{{ label }}</option>
-                                                </select>
-                                            </label>
+                                            <BaseSelect
+                                                :id="`spark-kind-${parent.slot}-${sparkIndex}`"
+                                                v-model="spark.kind"
+                                                label="Kind"
+                                                :options="Object.keys(sparkKinds).map(kind => ({ value: kind, label: sparkKinds[kind] }))"
+                                              />
 
-                                            <label class="flex flex-col gap-1 text-xs text-ink">
-                                                <span>Applies to</span>
-                                                <input
-                                                    v-model="spark.target"
-                                                    type="text"
-                                                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm"
-                                                >
-                                            </label>
+                                            <BaseInput
+                                                :id="`spark-target-${parent.slot}-${sparkIndex}`"
+                                                v-model="spark.target"
+                                                type="text"
+                                                label="Applies to"
+                                              />
 
-                                            <label class="flex flex-col gap-1 text-xs text-ink">
-                                                <span>Stars</span>
-                                                <input
-                                                    v-model="spark.stars"
-                                                    type="number"
-                                                    min="1"
-                                                    max="3"
-                                                    class="min-h-11 w-20 rounded-md border border-rule bg-raised px-2 text-sm"
-                                                >
-                                            </label>
+<BaseInput
+                                                :id="`spark-stars-${parent.slot}-${sparkIndex}`"
+                                                v-model="spark.stars"
+                                                type="number"
+                                                min="1"
+                                                max="3"
+                                                label="Stars"
+                                              />
 
                                             <button
                                                 type="button"
-                                                class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken"
+                                                class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken transition-colors duration-150 ease-out"
                                                 @click="removeSpark(index, sparkIndex)"
                                             >
                                                 Remove Spark
@@ -658,22 +662,19 @@ const hasAnyNode = computed(() =>
                 because the natural next question on this screen is what the grade is worth in stat
                 points and the answer is that this tool does not price it (ADR-0010, D-270).
             -->
-            <div class="mt-4 max-w-sm">
-                <label class="block text-xs font-medium text-ink" for="affinity">Affinity for the pair</label>
-                <select
-                    id="affinity"
-                    v-model="form.affinity"
-                    name="affinity"
-                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-sm text-ink"
-                >
-                    <option value="">Not recorded</option>
-                    <option v-for="grade in affinityGrades" :key="grade" :value="grade">{{ grade }}</option>
-                </select>
-                <p class="mt-1 text-xs text-ink-muted" title="REFERENCE §1.5.4 grades each link; this records the pair's own grade as read.">
-                    The grade you read for the pair, not a score. This tool does not price it.
-                </p>
-                <p v-if="form.errors.affinity" class="mt-1 text-xs text-risk">{{ form.errors.affinity }}</p>
-            </div>
+<div class="mt-4 max-w-sm">
+                 <label class="block text-xs font-medium text-ink" for="affinity">Affinity for the pair</label>
+                 <BaseSelect
+                     id="affinity"
+                     v-model="form.affinity"
+                     name="affinity"
+                     :options="[{ value: '', label: 'Not recorded' }, ...affinityGrades.map(grade => ({ value: grade, label: grade }))]"
+                 />
+                 <p class="mt-1 text-xs text-ink-muted" title="REFERENCE §1.5.4 grades each link; this records the pair's own grade as read.">
+                     The grade you read for the pair, not a score. This tool does not price it.
+                 </p>
+                 <p v-if="form.errors.affinity" class="mt-1 text-xs text-risk">{{ form.errors.affinity }}</p>
+             </div>
 
             <p
                 v-if="form.errors.legacies"
@@ -683,26 +684,62 @@ const hasAnyNode = computed(() =>
                 {{ form.errors.legacies }}
             </p>
 
-            <div class="mt-5 flex flex-wrap items-center gap-3">
-                <button
-                    type="submit"
-                    :disabled="form.processing"
-                    class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 font-semibold text-on-chrome disabled:opacity-60"
-                >
-                    {{ form.processing ? 'Saving…' : 'Confirm Inheritance' }}
-                </button>
+<div class="mt-5 flex flex-wrap items-center gap-3">
+                 <BaseButton
+                     type="button"
+                     variant="enamel"
+                     :disabled="form.processing"
+                     @click="requestConfirm"
+                 >
+                     {{ form.processing ? 'Saving…' : 'Confirm Inheritance' }}
+                 </BaseButton>
 
-                <a
-                    :href="`/legacy/compare?runs[]=${run.id}`"
-                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
-                >
-                    Compare this run
-                </a>
+                 <a
+                     :href="`/legacy/compare?runs[]=${run.id}`"
+                     class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
+                 >
+                     Compare this run
+                 </a>
 
-                <p v-if="hasAnyNode" class="text-sm text-ink-muted">
+                 <p v-if="hasAnyNode" class="text-sm text-ink-muted">
+                     Nothing is saved until you confirm.
+                 </p>
+             </div>
+
+            <!-- Destructive confirmation. A native `<dialog>` opened with `showModal()`: the focus
+                 trap, the Escape close and the inert background are the platform's, and the shadow is
+                 the one overlay elevation (Track 2-B). -->
+            <dialog
+                ref="confirmDialog"
+                aria-labelledby="legacy-confirm-title"
+                class="overlay-shadow w-full max-w-md rounded-lg border border-rule bg-panel p-6 text-ink backdrop:bg-scrim"
+            >
+                <h3 id="legacy-confirm-title" class="text-lg font-semibold text-ink-strong">Confirm Inheritance</h3>
+                <p class="mt-2 text-sm text-ink">
+                    This will replace the entire Legacy selection for this run with the values you entered.
+                    Any previous selection will be lost.
+                </p>
+                <p class="mt-2 text-xs text-ink-muted">
                     Nothing is saved until you confirm.
                 </p>
-            </div>
+                <div class="mt-4 flex justify-end gap-2">
+                    <BaseButton
+                        type="button"
+                        variant="secondary"
+                        @click="confirmDialog?.close()"
+                    >
+                        Cancel
+                    </BaseButton>
+                    <BaseButton
+                        type="button"
+                        variant="enamel"
+                        :disabled="form.processing"
+                        @click="submit"
+                    >
+                        {{ form.processing ? 'Saving…' : 'Confirm' }}
+                    </BaseButton>
+                </div>
+            </dialog>
         </form>
     </AppLayout>
 </template>

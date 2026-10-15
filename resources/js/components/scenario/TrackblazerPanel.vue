@@ -46,6 +46,7 @@ import AlertRow from './AlertRow.vue';
 import { useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import type { ProvenanceState } from '../../types';
+import { BaseInput } from '../Form';
 
 type Badge = ProvenanceState;
 
@@ -409,7 +410,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                         <p class="text-xs font-bold uppercase tracking-widest text-ink-muted">
                             Working toward
                         </p>
-                        <p class="mt-1 text-base font-semibold text-ink-strong">
+                        <p class="mt-1 text-lg font-semibold text-ink-strong">
                             {{ currentPeriod.name }}
                         </p>
 
@@ -667,24 +668,15 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                 >
                     <div class="flex flex-col gap-1">
                         <label for="purchase-turn" class="font-medium text-ink">Turn</label>
-                        <input
+                        <BaseInput
                             id="purchase-turn"
                             v-model="purchaseForm.turn"
                             type="number"
                             name="turn"
                             min="1"
                             required
-                            :aria-invalid="purchaseForm.errors.turn !== undefined ? 'true' : 'false'"
-                            :aria-describedby="purchaseForm.errors.turn !== undefined ? 'purchase-turn-error' : undefined"
-                            class="w-20 rounded-md border border-rule bg-raised px-2 py-1 text-ink min-h-11"
-                        >
-                        <span
-                            v-if="purchaseForm.errors.turn !== undefined"
-                            id="purchase-turn-error"
-                            class="text-xs text-risk"
-                        >
-                            {{ purchaseForm.errors.turn }}
-                        </span>
+                            :error="purchaseForm.errors.turn"
+                        />
                     </div>
                     <div class="flex flex-col gap-1">
                         <label for="purchase-item" class="font-medium text-ink">Item</label>
@@ -695,7 +687,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                             raise on a normal submit. No default is selected; the empty value is
                             the form's initial state and a real item is required to post.
                         -->
-                        <input
+                        <BaseInput
                             id="purchase-item"
                             v-model="purchaseForm.item"
                             type="text"
@@ -703,64 +695,37 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                             list="purchase-item-list"
                             maxlength="120"
                             required
-                            :aria-invalid="purchaseForm.errors.item !== undefined ? 'true' : 'false'"
-                            :aria-describedby="purchaseForm.errors.item !== undefined ? 'purchase-item-error' : undefined"
-                            class="min-w-32 rounded-md border border-rule bg-raised px-2 py-1 text-ink min-h-11"
-                        >
+                            :error="purchaseForm.errors.item"
+                        />
                         <datalist id="purchase-item-list">
                             <option v-for="row in catalogue" :key="row.name" :value="row.name">
                                 {{ row.cost }} coins
                             </option>
                         </datalist>
-                        <span
-                            v-if="purchaseForm.errors.item !== undefined"
-                            id="purchase-item-error"
-                            class="text-xs text-risk"
-                        >
-                            {{ purchaseForm.errors.item }}
-                        </span>
                     </div>
                     <div class="flex flex-col gap-1">
                         <label for="purchase-cost" class="font-medium text-ink">Cost read</label>
-                        <input
+                        <BaseInput
                             id="purchase-cost"
                             v-model.number="purchaseForm.cost"
                             type="number"
                             name="cost"
                             min="0"
                             required
-                            :aria-invalid="purchaseForm.errors.cost !== undefined ? 'true' : 'false'"
-                            :aria-describedby="purchaseForm.errors.cost !== undefined ? 'purchase-cost-error' : undefined"
-                            class="w-20 rounded-md border border-rule bg-raised px-2 py-1 text-ink min-h-11"
-                        >
-                        <span
-                            v-if="purchaseForm.errors.cost !== undefined"
-                            id="purchase-cost-error"
-                            class="text-xs text-risk"
-                        >
-                            {{ purchaseForm.errors.cost }}
-                        </span>
+                            :error="purchaseForm.errors.cost"
+                        />
                     </div>
                     <div class="flex grow flex-col gap-1">
                         <label for="purchase-effect" class="font-medium text-ink">Effect read</label>
-                        <input
+                        <BaseInput
                             id="purchase-effect"
                             v-model="purchaseForm.effect"
                             type="text"
                             name="effect"
                             maxlength="255"
                             required
-                            :aria-invalid="purchaseForm.errors.effect !== undefined ? 'true' : 'false'"
-                            :aria-describedby="purchaseForm.errors.effect !== undefined ? 'purchase-effect-error' : undefined"
-                            class="rounded-md border border-rule bg-raised px-2 py-1 text-ink min-h-11"
-                        >
-                        <span
-                            v-if="purchaseForm.errors.effect !== undefined"
-                            id="purchase-effect-error"
-                            class="text-xs text-risk"
-                        >
-                            {{ purchaseForm.errors.effect }}
-                        </span>
+                            :error="purchaseForm.errors.effect"
+                        />
                     </div>
                     <button
                         type="submit"

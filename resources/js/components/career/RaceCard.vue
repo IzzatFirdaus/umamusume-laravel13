@@ -23,6 +23,7 @@ import AbsenceValue from '../AbsenceValue.vue';
 import GoalMark from './GoalMark.vue';
 import { useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
+import { BaseSelect } from '../Form';
 
 interface Fact {
     key: string;
@@ -217,7 +218,7 @@ const folds = computed<boolean>(
 
         <dialog
             ref="dialog"
-            class="ml-auto h-full max-h-none w-full max-w-md rounded-none border-l border-rule bg-page p-0 text-ink backdrop:bg-scrim"
+            class="overlay-shadow ml-auto h-full max-h-none w-full max-w-md rounded-none border-l border-rule bg-page p-0 text-ink backdrop:bg-scrim"
             @close="closed"
         >
             <div class="flex h-full flex-col gap-4 overflow-y-auto p-4">
@@ -256,10 +257,11 @@ const folds = computed<boolean>(
                 <form class="flex flex-col gap-3" @submit.prevent="enter">
                     <label v-if="props.entry.turns.length > 0" class="flex flex-col gap-1 text-sm">
                         <span class="font-medium text-ink">Turn this race was run on (optional)</span>
-                        <select v-model="form.turn_entry_id" name="turn_entry_id" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                            <option value="">not tied to a turn</option>
-                            <option v-for="turn in props.entry.turns" :key="turn.id" :value="String(turn.id)">Turn {{ turn.turn }}</option>
-                        </select>
+                        <BaseSelect
+                            v-model="form.turn_entry_id"
+                            name="turn_entry_id"
+                            :options="[{ value: '', label: 'not tied to a turn' }, ...props.entry.turns.map(turn => ({ value: String(turn.id), label: `Turn ${turn.turn}` }))]"
+                        />
                     </label>
 
                     <!-- Every message the write refused with, not the first alone: the request can

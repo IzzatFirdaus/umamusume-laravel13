@@ -112,7 +112,7 @@ const treatment = (state: string): string => {
                 {{ form.processing ? 'Recording…' : 'Record snapshot' }}
             </button>
             <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Recording the snapshot…</p>
-            <a :href="props.back" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised">Edit the snapshot</a>
+            <a :href="props.back" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">Edit the snapshot</a>
         </div>
     </AppLayout>
 </template>

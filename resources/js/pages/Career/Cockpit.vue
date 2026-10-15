@@ -32,6 +32,9 @@ import AdvisorRail from '../../components/career/AdvisorRail.vue';
 import RunRaceStrip from '../../components/career/RunRaceStrip.vue';
 import ScenarioPanel from '../../components/scenario/ScenarioPanel.vue';
 import UnityCupEditor from '../../components/career/UnityCupEditor.vue';
+import BaseInput from '@/Components/Form/BaseInput.vue';
+import BaseSelect from '@/Components/Form/BaseSelect.vue';
+import BaseRadio from '@/Components/Form/BaseRadio.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { TURN_ENTRY_ENERGY_BANDS as energyBands, TURN_ENTRY_ENERGY_STATES as energyStates, TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
 import { computed, nextTick, ref, watch } from 'vue';
@@ -466,6 +469,7 @@ const jumpToShop = (): void => {
         :run-url="props.run.run_url"
     >
         <Head :title="`Career: ${props.run.trainee}`" />
+        <template #eyebrow>Cockpit</template>
         <template #title>{{ props.run.trainee }}</template>
 
         <p v-if="visiting" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
@@ -481,7 +485,7 @@ const jumpToShop = (): void => {
         <nav aria-label="On this page" class="mb-4 border-b border-rule bg-page py-1 md:sticky md:top-0 md:z-10 md:-mx-6 md:px-6">
             <ul class="flex flex-wrap gap-1 text-sm">
                 <li v-for="link in sectionLinks" :key="link.href">
-                    <a :href="link.href" class="inline-flex min-h-11 items-center rounded-md px-3 text-ink hover:bg-raised hover:text-ink-strong">{{ link.label }}</a>
+                    <a :href="link.href" class="inline-flex min-h-11 items-center rounded-md px-3 text-ink hover:bg-raised hover:text-ink-strong transition-colors duration-150 ease-out">{{ link.label }}</a>
                 </li>
             </ul>
         </nav>
@@ -549,14 +553,12 @@ const jumpToShop = (): void => {
                 <li class="flex flex-col gap-1">
                     <label for="status" class="text-ink-muted">Status</label>
                     <form @submit.prevent="saveStatus">
-                        <select
-                            id="status"
-                            v-model="statusForm.status"
-                            name="status"
-                            class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                        >
-                            <option v-for="(label, value) in props.run.status_labels" :key="value" :value="value">{{ label }}</option>
-                        </select>
+                         <BaseSelect
+                           id="status"
+                           v-model="statusForm.status"
+                           name="status"
+                           :options="Object.keys(props.run.status_labels).map(value => ({ value: value, label: props.run.status_labels[value] }))"
+                         />
                         <button
                             type="submit"
                             class="mt-1 inline-flex min-h-11 items-center rounded-full border-2 border-rule px-4 font-bold text-ink-strong disabled:opacity-60"
@@ -571,15 +573,12 @@ const jumpToShop = (): void => {
                 <li class="flex flex-col gap-1">
                     <label for="scenario" class="text-ink-muted">Scenario</label>
                     <form @submit.prevent="saveScenario">
-                        <select
-                            id="scenario"
-                            v-model="scenarioForm.scenario"
-                            name="scenario"
-                            class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                        >
-                            <option value="">No scenario set</option>
-                            <option v-for="(label, key) in props.run.scenarios" :key="key" :value="key">{{ label }}</option>
-                        </select>
+                         <BaseSelect
+                           id="scenario"
+                           v-model="scenarioForm.scenario"
+                           name="scenario"
+                           :options="[{ value: '', label: 'No scenario set' }, ...Object.keys(props.run.scenarios).map(key => ({ value: key, label: props.run.scenarios[key] }))]"
+                         />
                         <button
                             type="submit"
                             class="mt-1 inline-flex min-h-11 items-center rounded-full border-2 border-rule px-4 font-bold text-ink-strong disabled:opacity-60"
@@ -597,21 +596,12 @@ const jumpToShop = (): void => {
                 >
                     <label for="current_objective_index" class="text-ink-muted">Grade Point period</label>
                     <form @submit.prevent="savePeriod">
-                        <select
-                            id="current_objective_index"
-                            v-model="periodForm.current_objective_index"
-                            name="current_objective_index"
-                            class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                        >
-                            <option value="">Not reported</option>
-                            <option
-                                v-for="objective in props.gradeObjectives"
-                                :key="objective.index"
-                                :value="String(objective.index)"
-                            >
-                                {{ objective.index }}. {{ objective.name }}
-                            </option>
-                        </select>
+                         <BaseSelect
+                           id="current_objective_index"
+                           v-model="periodForm.current_objective_index"
+                           name="current_objective_index"
+                           :options="[{ value: '', label: 'Not reported' }, ...props.gradeObjectives.map(objective => ({ value: String(objective.index), label: objective.index + '. ' + objective.name }))]"
+                         />
                         <button
                             type="submit"
                             class="mt-1 inline-flex min-h-11 items-center rounded-full border-2 border-rule px-4 font-bold text-ink-strong disabled:opacity-60"
@@ -632,27 +622,23 @@ const jumpToShop = (): void => {
                         <span class="flex flex-wrap items-end gap-3">
                             <label for="trainee_rarity" class="flex flex-col gap-1">
                                 <span class="text-xs text-ink-muted">Rarity</span>
-                                <select
-                                    id="trainee_rarity"
-                                    v-model="identityForm.trainee_rarity"
-                                    name="trainee_rarity"
-                                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                                >
-                                    <option value="">Not stated</option>
-                                    <option v-for="rarity in [1, 2, 3]" :key="rarity" :value="String(rarity)">★{{ rarity }}</option>
-                                </select>
+                         <BaseSelect
+                           id="trainee_rarity"
+                           v-model="identityForm.trainee_rarity"
+                           name="trainee_rarity"
+                           :options="[{ value: '', label: 'Not stated' }, ...[1, 2, 3].map(rarity => ({ value: String(rarity), label: '★' + String(rarity) }))]"
+                         />
                             </label>
                             <label for="potential_level" class="flex flex-col gap-1">
                                 <span class="text-xs text-ink-muted">Potential Level</span>
-                                <input
-                                    id="potential_level"
-                                    v-model="identityForm.potential_level"
-                                    type="number"
-                                    name="potential_level"
-                                    min="1"
-                                    max="5"
-                                    class="min-h-11 w-24 rounded-md border border-rule bg-raised px-2 text-ink"
-                                >
+                                     <BaseInput
+                                         id="potential_level"
+                                         v-model="identityForm.potential_level"
+                                         type="number"
+                                         name="potential_level"
+                                         min="1"
+                                         max="5"
+                                       />
                             </label>
                         </span>
                         <fieldset class="flex flex-wrap items-end gap-3">
@@ -665,15 +651,14 @@ const jumpToShop = (): void => {
                             >
                                 <span class="text-xs text-ink-muted">{{ stat }}</span>
                                 <span class="flex items-center gap-1">
-                                    <input
-                                        :id="`growth_rate_${stat}`"
-                                        v-model="identityForm.growth_rate[stat]"
-                                        type="number"
-                                        :name="`growth_rate[${stat}]`"
-                                        min="0"
-                                        max="30"
-                                        class="min-h-11 w-20 rounded-md border border-rule bg-raised px-2 text-ink"
-                                    >
+                                     <BaseInput
+                                         :id="`growth_rate_${stat}`"
+                                         v-model="identityForm.growth_rate[stat]"
+                                         type="number"
+                                         :name="`growth_rate[${stat}]`"
+                                         min="0"
+                                         max="30"
+                                       />
                                     <span class="text-ink-muted">%</span>
                                 </span>
                             </label>
@@ -691,15 +676,14 @@ const jumpToShop = (): void => {
                             >
                                 <span class="text-xs text-ink-muted">{{ stat }}</span>
                                 <span class="flex items-center gap-1">
-                                    <input
-                                        :id="`ceiling_${stat}`"
-                                        v-model="identityForm[capColumn(String(stat))]"
-                                        type="number"
-                                        :name="capColumn(String(stat))"
-                                        :aria-label="`${stat} ceiling`"
-                                        min="1"
-                                        class="min-h-11 w-24 rounded-md border border-rule bg-raised px-2 font-mono text-ink tabular-nums"
-                                    >
+                                     <BaseInput
+                                         :id="`ceiling_${stat}`"
+                                         v-model="identityForm[capColumn(String(stat))]"
+                                         type="number"
+                                         :name="capColumn(String(stat))"
+                                         :aria-label="`${stat} ceiling`"
+                                         min="1"
+                                       />
                                     <span
                                         class="text-xs text-ink-muted"
                                         title="The figure this scenario publishes in its own cap table. An entered ceiling replaces it for this run; leaving the field empty restores it."
@@ -749,21 +733,19 @@ const jumpToShop = (): void => {
                     <!-- The turn selector (F2, plan §9.6 ruling 2). It sits outside the disclosure so a
                          switch does not close the form; `?edit_turn=<id>` is the same query the run
                          screen and the Timeline's decision link already use. -->
-                    <label class="flex items-center gap-2 text-sm" for="correction-turn-select">
+<label class="flex items-center gap-2 text-sm" for="correction-turn-select">
                         <span class="text-ink-muted">Correct turn</span>
-                        <select
+                        <BaseSelect
                             id="correction-turn-select"
                             ref="turnSelector"
                             :value="String(props.correction.selected_turn_id)"
-                            class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                            @change="switchTurn(($event.target as HTMLSelectElement).value)"
-                        >
-                            <option v-for="turn in props.correction.turns" :key="turn.id" :value="String(turn.id)">Turn {{ turn.turn }}</option>
-                        </select>
+                            @update:model-value="switchTurn($event)"
+                            :options="props.correction.turns.map(turn => ({ value: String(turn.id), label: 'Turn ' + turn.turn }))"
+                        />
                     </label>
 
                     <details class="mt-2 rounded-lg border border-rule bg-panel p-4">
-                        <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
+<summary class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong">
                             Correct turn {{ props.correction.turn }} by hand
                         </summary>
                         <p class="mt-2 text-sm text-ink-muted">
@@ -785,61 +767,83 @@ const jumpToShop = (): void => {
                         </div>
 
                         <form class="mt-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-3" @submit.prevent="saveCorrection">
-                            <label class="flex flex-col gap-1">
-                                <span class="text-ink-muted">Turn *</span>
-                                <input v-model="correctionForm.turn" type="number" name="turn" min="1" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                            </label>
-                            <label v-for="field in statFields" :key="field.name" class="flex flex-col gap-1">
-                                <span class="text-ink-muted">{{ field.label }} *</span>
-                                <input v-model="correctionForm[field.name]" type="number" :name="field.name" min="0" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                            </label>
-                            <label class="flex flex-col gap-1">
-                                <span class="text-ink-muted">Skill Points</span>
-                                <input v-model="correctionForm.sp" type="number" name="sp" min="0" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                            </label>
+                            <BaseInput
+                              v-model="correctionForm.turn"
+                              type="number"
+                              id="turn"
+                              name="turn"
+                              label="Turn *"
+                              required
+                              :error="correctionForm.errors.turn"
+                            />
+                            <BaseInput
+                              v-for="field in statFields"
+                              :key="field.name"
+                              v-model="correctionForm[field.name]"
+                              type="number"
+                              :id="field.name"
+                              name="field.name"
+                              :label="`${field.label} *`"
+                              required
+                              :error="correctionForm.errors[field.name]"
+                            />
+                            <BaseInput
+                              v-model="correctionForm.sp"
+                              type="number"
+                              id="sp"
+                              name="sp"
+                              label="Skill Points"
+                              :error="correctionForm.errors.sp"
+                            />
                             <fieldset class="col-span-2 flex flex-col gap-1 md:col-span-3">
                                 <legend class="text-ink-muted">Energy</legend>
                                 <div class="flex flex-wrap items-center gap-x-4">
-                                    <label v-for="state in energyStates" :key="state.value" class="flex min-h-11 items-center gap-1 text-sm text-ink">
-                                        <input v-model="correctionForm.energy_state" type="radio" name="energy_state" :value="state.value">
-                                        <span>{{ state.label }}</span>
-                                    </label>
+                                    <BaseRadio
+                                      v-for="state in energyStates"
+                                      :key="state.value"
+                                      v-model="correctionForm.energy_state"
+                                      :id="`energy_state_${state.value}`"
+                                      name="energy_state"
+                                      :label="state.label"
+                                      :value="state.value"
+                                      :error="correctionForm.errors.energy_state"
+                                    />
                                 </div>
-                                <input
-                                    v-if="correctionForm.energy_state === 'exact'"
-                                    v-model="correctionForm.energy"
-                                    type="number"
-                                    name="energy"
-                                    aria-label="Energy figure"
-                                    min="0"
-                                    max="100"
-                                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                                >
-                                <select
-                                    v-else-if="correctionForm.energy_state === 'band'"
-                                    v-model="correctionForm.energy_band"
-                                    name="energy_band"
-                                    aria-label="Energy band"
-                                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                                >
-                                    <option v-for="band in energyBands" :key="band.value" :value="band.value">{{ band.label }}</option>
-                                </select>
+                                <BaseInput
+                                  v-if="correctionForm.energy_state === 'exact'"
+                                  v-model="correctionForm.energy"
+                                  type="number"
+                                  id="energy"
+                                  name="energy"
+                                  label="Energy figure"
+                                  :min="0"
+                                  :max="100"
+                                  :error="correctionForm.errors.energy"
+                                />
+                                <BaseSelect
+                                  v-else-if="correctionForm.energy_state === 'band'"
+                                  v-model="correctionForm.energy_band"
+                                  name="energy_band"
+                                  label="Energy band"
+                                  :options="energyBands"
+                                  :error="correctionForm.errors.energy_band"
+                                />
                             </fieldset>
-                            <label class="flex flex-col gap-1">
-                                <span class="text-ink-muted">Fans</span>
-                                <input v-model="correctionForm.fans" type="number" name="fans" min="0" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                            </label>
-                            <label class="flex flex-col gap-1">
-                                <span class="text-ink-muted">Mood</span>
-                                <select v-model="correctionForm.mood" name="mood" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                                    <option value="">not recorded</option>
-                                    <option value="GREAT">GREAT</option>
-                                    <option value="GOOD">GOOD</option>
-                                    <option value="NORMAL">NORMAL</option>
-                                    <option value="BAD">BAD</option>
-                                    <option value="AWFUL">AWFUL</option>
-                                </select>
-                            </label>
+                            <BaseInput
+                              v-model="correctionForm.fans"
+                              type="number"
+                              id="fans"
+                              name="fans"
+                              label="Fans"
+                              :error="correctionForm.errors.fans"
+                            />
+                            <BaseSelect
+                              v-model="correctionForm.mood"
+                              name="mood"
+                              label="Mood"
+                              :options="[{ value: '', label: 'not recorded' }, { value: 'GREAT', label: 'GREAT' }, { value: 'GOOD', label: 'GOOD' }, { value: 'NORMAL', label: 'NORMAL' }, { value: 'BAD', label: 'BAD' }, { value: 'AWFUL', label: 'AWFUL' }]"
+                              :error="correctionForm.errors.mood"
+                            />
                             <button
                                 type="submit"
                                 class="enamel inline-flex min-h-11 items-center justify-center rounded-full bg-chrome px-4 font-semibold text-on-chrome disabled:opacity-60 md:col-span-3"
@@ -860,7 +864,7 @@ const jumpToShop = (): void => {
                              disclosure inside the correction panel: the write is `runs.turns.destroy`,
                              the route the record screen already used. -->
                         <details class="mt-3 border-t border-rule pt-3">
-                            <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-risk">
+                            <summary class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-risk">
                                 Delete turn {{ props.correction.turn }}
                             </summary>
                             <p class="mt-2 text-sm text-ink-muted">
@@ -881,7 +885,7 @@ const jumpToShop = (): void => {
                 </section>
             </div>
 
-            <div class="order-2 min-w-0 md:order-none md:col-start-2 md:row-span-2 md:row-start-2 lg:col-start-3 lg:row-start-1 lg:sticky lg:top-16">
+            <div class="order-2 min-w-0 md:order-none md:col-start-2 md:row-span-2 md:row-start-2 lg:col-start-3 lg:row-start-1">
                 <AdvisorRail :decision="props.advisor.decision" :race-url="raceDoor" :timeline-url="props.run.timeline_url" />
             </div>
 
@@ -892,7 +896,7 @@ const jumpToShop = (): void => {
                 <section
                     v-if="empty"
                     aria-labelledby="career-empty-heading"
-                    class="mb-3 rounded-lg border border-dashed border-rule bg-raised p-4"
+                     class="mb-3 rounded-lg border border-dashed border-rule bg-panel p-4"
                 >
                     <h2 id="career-empty-heading" class="text-lg font-semibold text-ink-strong">No turn recorded yet</h2>
                     <p class="mt-1 text-sm text-ink">
@@ -976,7 +980,7 @@ const jumpToShop = (): void => {
                      is the URL. -->
                 <details class="mt-4">
                     <summary
-                        class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-risk"
+                        class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-risk"
                     >
                         Delete this career
                     </summary>

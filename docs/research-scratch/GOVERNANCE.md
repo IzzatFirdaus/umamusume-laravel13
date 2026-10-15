@@ -742,7 +742,7 @@ is untouched by this branch's commit (proof in §7).
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Branch           | `docs/frontend-review` (based on `master` @ `7d4b8cf`)                                                                                                                                                                                                                                                                                                      |
 | Boot commands    | `New-Item -ItemType Directory .scratch-uma` → `$env:DB_DATABASE="D:\Projects\umamusume-laravel13\.scratch-uma\frontend-review.sqlite"` → `php artisan migrate --seed` → `php .scratch-uma\frontend-review-fixture.php` (via tinker `require`) → `.scratch-uma\serve-8144.cmd` (sets `DB_DATABASE`, then `php artisan serve --host=127.0.0.1 --port=8144`)   |
-| Scratch DB       | `.scratch-uma/frontend-review.sqlite` (gitignored via `.gitignore:88 /.scratch-uma/`; the shared `database/database.sqlite` was never written — verified read-only)                                                                                                                                                                                         |
+| Scratch DB       | `.scratch-uma/cited/frontend-review.sqlite` (gitignored via `.gitignore:88 /.scratch-uma/`; the shared `database/database.sqlite` was never written — verified read-only)                                                                                                                                                                                         |
 | Theme control    | `Preference::put('theme', 'light'/'dark')` on the scratch DB; the layout renders `data-theme` server-side from `AppServiceProvider`'s view composer                                                                                                                                                                                                         |
 | Server PID       | 20036 (`php-cgi.exe` child of the 8144 wrapper; `netstat`-verified bound to 127.0.0.1:8144 and serving the scratch DB)                                                                                                                                                                                                                                      |
 | Timestamp        | 2026-09-28, captures 21:22–22:58 local (all taken after the scratch DB, the final view-code state, and the server-DB confirmation were in place)                                                                                                                                                                                                            |
@@ -758,7 +758,7 @@ reflect the confirmed scratch build.
 
 #### R17 fixture (seven states)
 
-Built by `.scratch-uma/frontend-review-fixture.php`, seeded on top of
+Built by `.scratch-uma/cited/frontend-review-fixture.php`, seeded on top of
 `php artisan migrate --seed` (24 tables, 10 skills, 2 Umamusume, 4 scenario defs):
 
 1. **Run 1 — populated URA Finale:** 2 turns (energy/mood/fans), 4 skills across Suggested/Acquired/Skipped, 4 calendar slots (fan gate, mandatory goal, maiden gate, past goal) with one completed race (1st) and one Skipped entry.
@@ -1149,8 +1149,8 @@ open and both are *correctly* visible (they are deliberate withholdings).
   (capture times 21:22–22:58 local vs. final view mtime 20:37 local, §1 caveat).
 - The shared `database/database.sqlite` was never opened for write by this
   audit: all migrate/seed/tinker/screenshot commands ran with `DB_DATABASE`
-  pointed at the gitignored `.scratch-uma/frontend-review.sqlite` (probe
-  `php .scratch-uma/list-runs.php` without the env var shows the shared DB
+  pointed at the gitignored `.scratch-uma/cited/frontend-review.sqlite` (probe
+  `php .scratch-uma/cited/list-runs.php` without the env var shows the shared DB
   still holds its own single run, untouched).
 
 ---

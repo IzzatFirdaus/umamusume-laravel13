@@ -46,6 +46,7 @@ const props = defineProps<{
 <template>
     <AppLayout>
         <Head title="Support cards" />
+        <template #eyebrow>Deck</template>
         <template #title>Support cards</template>
 
         <SupportCardCatalog

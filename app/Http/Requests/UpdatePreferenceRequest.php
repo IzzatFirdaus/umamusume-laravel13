@@ -80,6 +80,9 @@ class UpdatePreferenceRequest extends FormRequest
             // One language, because the corpus is Global-labelled. The control is a disabled
             // single-option select, so this rule exists for the boundary rather than for the form.
             'settings.language' => ['nullable', Rule::in(Preference::LANGUAGES)],
+            'settings.dashboard_layout' => ['nullable', Rule::in(['bento', 'wide_bento', 'focused'])],
+            'settings.dashboard_hidden_cards' => ['nullable', 'array'],
+            'settings.dashboard_hidden_cards.*' => ['string', Rule::in(['active_career', 'next_best_action', 'quick_actions', 'recent_veterans', 'data_status'])],
         ];
     }
 

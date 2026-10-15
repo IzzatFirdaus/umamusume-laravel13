@@ -77,7 +77,7 @@ test('states the empty career in words a Trainer can act on', async ({ page }) =
 
     // The two panels with no source name the absence rather than rendering an empty box.
     await expect(page.getByText('No Veterans recorded yet.')).toBeVisible();
-    await expect(page.getByText('No builds recorded yet.')).toBeVisible();
+    await expect(page.getByText('Recent builds: none yet.')).toBeVisible();
 });
 
 test('reads the data-status badge, its verification date and the named ruleset', async ({ page }) => {
@@ -144,10 +144,12 @@ test('names the active career and resumes it from the keyboard', async ({ page }
     await expect(card.getByTitle(/not standing anywhere on the calendar yet/)).toHaveText('N/A');
     await expect(card.getByTitle(/No logged turn has recorded Energy/)).toHaveText('N/A');
 
-    // The scenario's own resource, resolved from `config('scenarios')` by subtracting the baseline's
-    // widget list. No column records it yet, so it is N/A with that reason attached.
+    // Team Rank has its own row now (Slice 1.1), read through the model's one owner
+    // (`latestTeamRank()`): a brand-new run has nothing reported, so it is N/A with the reason
+    // attached. Unity Cup's config widget IS the rank, so the resource slot defers to this row
+    // rather than printing a second, permanently-absent Team Rank cell beside it.
     await expect(card.getByText('Team Rank')).toBeVisible();
-    await expect(card.getByTitle(/No column records this scenario resource yet/)).toHaveText('N/A');
+    await expect(card.getByTitle(/No logged turn has reported a team rank yet/)).toHaveText('N/A');
 
     // R2-04: this is the state the snapshot door exists for. A Trainer already partway through a
     // career in the client is the one who has a career to resume here, so the door has to be on the
@@ -256,4 +258,64 @@ test('announces a visit in flight and takes over the failure state', async ({ pa
 
     await page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'Support Cards' }).click();
     await expect(page.getByRole('alert')).toContainText('That page could not be loaded');
+});
+
+test('honours the dashboard layout preference: bento by default, focused single-column', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+
+    // Default is bento: the grid carries the bento layout and the four always-present regions show.
+    const grid = page.locator('[data-layout]');
+    await expect(grid).toHaveAttribute('data-layout', 'bento');
+    for (const name of ['ACTIVE CAREER', 'QUICK ACTIONS', 'RECENT VETERANS', 'DATA STATUS']) {
+        await expect(page.getByRole('region', { name })).toBeVisible();
+    }
+
+    // Focused: set it through Settings, then read it back here. The grid becomes single-column at
+    // max-w-3xl (DL.1, DL.4).
+    await page.goto('/preferences');
+    await page.locator('#app > *').first().waitFor();
+    await page.getByRole('radio', { name: 'Focused' }).check();
+    await page.getByRole('button', { name: 'Save preferences' }).click();
+    await expect(page.getByRole('status')).toHaveText('Preferences saved.');
+
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+    const focused = page.locator('[data-layout]');
+    await expect(focused).toHaveAttribute('data-layout', 'focused');
+    await expect(focused).toHaveClass(/grid-cols-1/);
+    await expect(focused).toHaveClass(/max-w-3xl/);
+
+    // Reset to Bento so the suite leaves the shared store as it found it.
+    await page.goto('/preferences');
+    await page.locator('#app > *').first().waitFor();
+    await page.getByRole('radio', { name: 'Bento', exact: true }).check();
+    await page.getByRole('button', { name: 'Save preferences' }).click();
+    await expect(page.getByRole('status')).toHaveText('Preferences saved.');
+
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.locator('[data-layout]')).toHaveAttribute('data-layout', 'bento');
+});
+
+test('renders wide bento at max-w-7xl when selected', async ({ page }) => {
+    await page.goto('/preferences');
+    await page.locator('#app > *').first().waitFor();
+    await page.getByRole('radio', { name: 'Wide Bento' }).check();
+    await page.getByRole('button', { name: 'Save preferences' }).click();
+    await expect(page.getByRole('status')).toHaveText('Preferences saved.');
+
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+    const wide = page.locator('[data-layout]');
+    await expect(wide).toHaveAttribute('data-layout', 'wide_bento');
+    await expect(wide).toHaveClass(/max-w-7xl/);
+    await expect(wide).toHaveClass(/grid-cols-12/);
+
+    // Reset to Bento so the suite leaves the shared store as it found it.
+    await page.goto('/preferences');
+    await page.locator('#app > *').first().waitFor();
+    await page.getByRole('radio', { name: 'Bento', exact: true }).check();
+    await page.getByRole('button', { name: 'Save preferences' }).click();
+    await expect(page.getByRole('status')).toHaveText('Preferences saved.');
 });

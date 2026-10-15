@@ -14,6 +14,7 @@
  * once.
  */
 import { useForm } from '@inertiajs/vue3';
+import { BaseInput } from '../Form';
 
 const props = defineProps<{
     /** `route('runs.update', $run)`, supplied by the server like the header forms' own action. */
@@ -82,82 +83,75 @@ const save = (): void => {
         <form class="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2" @submit.prevent="save">
             <label for="team_name" class="flex flex-col gap-1">
                 <span class="text-ink-muted">Team name</span>
-                <input
+                <BaseInput
                     id="team_name"
                     v-model="form.team_name"
                     type="text"
                     name="team_name"
                     maxlength="255"
-                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                >
+                />
             </label>
             <label for="team_motto" class="flex flex-col gap-1">
                 <span class="text-ink-muted">Team motto</span>
-                <input
+                <BaseInput
                     id="team_motto"
                     v-model="form.team_motto"
                     type="text"
                     name="team_motto"
                     maxlength="255"
-                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                >
+                />
             </label>
             <label for="team_league_placement" class="flex flex-col gap-1">
                 <span class="text-ink-muted">League placement</span>
-                <input
+                <BaseInput
                     id="team_league_placement"
                     v-model="form.team_league_placement"
                     type="number"
                     name="team_league_placement"
                     min="1"
                     max="99"
-                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                >
+                />
             </label>
             <label for="team_preseason_wins" class="flex flex-col gap-1">
                 <span class="text-ink-muted">Preseason wins</span>
-                <input
+                <BaseInput
                     id="team_preseason_wins"
                     v-model="form.team_preseason_wins"
                     type="number"
                     name="team_preseason_wins"
                     min="0"
                     max="4"
-                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                >
+                />
             </label>
             <label for="unity_trainings_count" class="flex flex-col gap-1">
                 <span class="text-ink-muted">Unity Trainings</span>
-                <input
+                <BaseInput
                     id="unity_trainings_count"
                     v-model="form.unity_trainings_count"
                     type="number"
                     name="unity_trainings_count"
                     min="0"
-                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                >
+                />
             </label>
             <label for="spirit_bursts_count" class="flex flex-col gap-1">
                 <span class="text-ink-muted">Spirit Bursts</span>
-                <input
+                <BaseInput
                     id="spirit_bursts_count"
                     v-model="form.spirit_bursts_count"
                     type="number"
                     name="spirit_bursts_count"
                     min="0"
-                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                >
+                />
             </label>
             <label for="extreme_bursts_count" class="flex flex-col gap-1">
                 <span class="text-ink-muted">Extreme Bursts</span>
-                <input
+                <BaseInput
                     id="extreme_bursts_count"
                     v-model="form.extreme_bursts_count"
                     type="number"
                     name="extreme_bursts_count"
                     min="0"
-                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                >
+                />
             </label>
 
             <div class="flex flex-col gap-1">

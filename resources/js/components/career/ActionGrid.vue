@@ -62,7 +62,7 @@ const entryClass =
                 >
                     <span class="flex flex-wrap items-baseline gap-x-2">
                         <NavGlyph v-if="marks[action.key]" :name="marks[action.key]" class="self-center" />
-                        <span class="text-base font-semibold text-ink-strong">{{ action.label }}</span>
+                        <span class="text-lg font-semibold text-ink-strong">{{ action.label }}</span>
                         <span v-if="action.recommended" class="text-xs font-bold text-ink-strong">
                             <span aria-hidden="true">★</span> RECOMMENDED
                         </span>

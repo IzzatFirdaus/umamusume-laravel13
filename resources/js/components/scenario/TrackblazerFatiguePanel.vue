@@ -55,7 +55,7 @@ const chains = computed((): string[] => Object.keys(props.fatigue.table));
 
 <template>
     <section :aria-labelledby="headingId" class="flex flex-col gap-3 rounded-md border border-rule bg-panel p-4">
-        <h4 :id="headingId" class="text-base font-semibold text-ink-strong">
+        <h4 :id="headingId" class="text-lg font-semibold text-ink-strong">
             Race fatigue
         </h4>
 

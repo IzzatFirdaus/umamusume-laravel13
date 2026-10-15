@@ -18,11 +18,22 @@ This document consolidates the following source files verbatim (no summarization
   2026-10-06 as the section `## 2026-10-05-image-slot-display.md` at the end of this file. Chosen home:
   it is a bite-sized slice plan with a per-task progress table, a slice log and a filed erratum, which is
   the class of the Task 16 brief and the replan above, and its subject is owned elsewhere
-  (`docs/adr/0021-sourced-character-artwork.md` for the mirror, `DESIGN.md` §4.7 for the slot rules,
+  (`docs/adr/0021-sourced-character-artwork.md` for the mirror, `DESIGN.md` Â§4.7 for the slot rules,
   `PRD.md` OQ-6 for what is still open), so the plan itself is the only piece with no master. It was
   fully executed: the progress table records all ten tasks, Task 9 as blocked with no placeable surface
   and Task 4, 5, 6 and 8 as superseded in part by the Inertia port. The original was tracked, so its
   deletion after this fold is recoverable from git history.
+- `docs/proposals/provenance-and-absence-contracts.md` (839 lines, appended 2026-10-10, Round 14,
+  augment-only) as the section `## provenance-and-absence-contracts.md`, and
+  `docs/proposals/screen-spec-2.0.md` (1,787 lines, appended 2026-10-10, Round 14, augment-only) as the
+  section `## screen-spec-2.0.md`: both are live Trainer Desk 2.0 reference documents (a pre-ruling
+  reconciliation proposal and the 2.0 screen-set target, reference-only, not authorization) that stay at
+  their own paths; nothing was deleted and no citation was repointed.
+- `docs/proposals/provenance-and-absence-contracts.md` (839 lines) and `docs/proposals/screen-spec-2.0.md`
+  (1,787 lines), embedded verbatim 2026-10-10 (Round 14, augment-only) as the sections
+  `## provenance-and-absence-contracts.md` and `## screen-spec-2.0.md`. The first is the reconciliation
+  proposal with its ten owner rulings; the second is the 2.0 screen-set target with its governance holds.
+  Both stay live at their own paths; nothing was deleted and no citation was repointed.
 
 ---
 
@@ -392,7 +403,7 @@ exclusion becomes live again with no edit.
 
 ## Owner gate O-3 package, 2026-10-02: the 24 UNTRACKED citations, categorized
 
-Enumerated with a read-only script (`.scratch-uma/untracked-citations.py`). "UNTRACKED" means the census finds
+Enumerated with a read-only script (`.scratch-uma/cited/untracked-citations.py`). "UNTRACKED" means the census finds
 the path on disk but not in `git ls-files`, so the citation works on this machine and breaks on a fresh clone.
 
 | Ref                                                      | Cites   | Ignored by                   | Disposition                                                                                                                                                                                                                                                                                                          |
@@ -527,7 +538,7 @@ The three are one decision. The audit's F-5 asked for a content-hash snapshot pa
 what surfaced KI-27: the path is a property of the **document**, while `storage/` is shared by every
 database on this machine, so a second database is told "nothing changed" and stays empty.
 
-Measured by the audit, not by me: after 1,910 rows landed in `.scratch-uma/skills-c5.sqlite`,
+Measured by the audit, not by me: after 1,910 rows landed in `.scratch-uma/cited/skills-c5.sqlite`,
 `uma:fetch` against `database/database.sqlite` printed "unchanged", and that database held 0
 GlobalReleased client-named skills. `uma:reparse` then wrote 7 updated and 1,903 created.
 
@@ -607,7 +618,7 @@ Owner: Architect.
 `character_cards` row `card_id=103601` carries `title="[unsigned]"` beside a real release date and
 rarity, and the catalog list, the detail page and the run-form selector print `[unsigned]` as though it
 were the costume name. Re-measured against `database/database.sqlite` on 2026-10-04 (read-only,
-`.scratch-uma/ki38-probe.php`): exactly one row, `rarity 3`, `global_release_date 2026-06-18`,
+`.scratch-uma/cited/ki38-probe.php`): exactly one row, `rarity 3`, `global_release_date 2026-06-18`,
 `unconfirmed = 0`, out of 106 stored cards. The audit's own figure was one placeholder over the 268-row
 export, so the export and the table agree.
 
@@ -2099,7 +2110,9 @@ use the ActionGrid only; no other scenario-actions entries are added by E4.
 ## E6 — Our Grand Concert baseline strip (SCR-017), 2026-10-07
 
 Written before code. The dispatch brief for this slice is
-`docs/Trainer-Docs-2.0-E-Prompts.md` §"PROMPT E6". Three of its premises do not hold on
+`docs/research-scratch/PROCESS-PLANS.md`, section `## Trainer-Docs-2.0-E-Prompts.md`, §"PROMPT E6"
+(repointed 2026-10-12 when the original `docs/Trainer-Docs-2.0-E-Prompts.md` was consolidated and
+deleted). Three of its premises do not hold on
 this tree; they are corrected in the section below rather than followed, because following
 them would put a false sentence in shipped copy and would take a ruling the plan reserves
 to the owner.
@@ -2458,3 +2471,2643 @@ stay untouched.
   `public/hot` file** with `public/build/manifest.json` present: check the file and the Vite origin
   (`curl -m 8 -o /dev/null -w '%{http_code}' http://127.0.0.1:5174/resources/js/spa.ts`) before reading a
   180-second per-case timeout as a page defect.
+
+---
+
+## provenance-and-absence-contracts.md
+
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/proposals/provenance-and-absence-contracts.md` (839 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+
+## Provenance and absence contracts — reconciliation proposal
+
+> **Reference only. Not authorization.** Nothing in this file is a decision, and no behavior, label,
+> badge, copy string, seeder or spec was changed to produce it. Each section names the exact files an
+> approval would touch and changes none of them. It exists because the repository carries four live
+> semantic contradictions and the next implementation pass must not guess at their resolution.
+>
+> Recorded 2026-10-09 by the Impeccable audit pass, as the hand-off for an owner decision →
+> implementation cycle. **Status changed the same day: §§1-8 are the pre-ruling analysis and stand as
+> written; §9 onward records the owner's answers, the text held for the shared files, and the coordination
+> escalation. Read §9 before acting on §§1-8.** `SCREEN_SPEC.md` §7 items 18 and 20 are the defect-side records; this file is the
+> proposal-side counterpart, kept out of the active specification because `SCREEN_SPEC.md`, `DESIGN.md`
+> and `KNOWN-ISSUES.md` are all under concurrent edit in this worktree.
+>
+> **On the line numbers.** Every `file:NNN` below was re-read from the working tree on 2026-10-09 and its
+> cited line checked to contain the thing claimed, not merely to exist. They will still drift: this tree is
+> under concurrent edit and `TrainingCard.vue` moved under an earlier draft of this file, which is how the
+> first version came to cite the Energy cost span as the deck tally. Each citation therefore carries the
+> row or state word it argues for, so a reader who finds a different number still finds the right code.
+
+### 0. What governs what
+
+The chain, per `AGENTS.md` §2, is quality bar → gate registry → accepted ADRs → `PRD.md` →
+`ARCHITECTURE.md` → `SCREEN_SPEC.md` (screen behavior) → `DESIGN.md` (visual system). Two findings from
+reading it in full:
+
+1. **`ADR-0006` Decision 1 assigns this question to `DESIGN.md`**: root `DESIGN.md` is "the single source
+   of truth for the app's visual contract". `DESIGN.md` **defines none of the four labels**: across the whole
+   file `Confirmed`, `Calculated` and `Estimated` appear zero times, and it names `ProvenanceBadge` once, at
+   `:738`, inside the 2026-10-09 dated correction that records the contradiction rather than resolving it.
+   The designated authority is the empty one, which is why §1 below is a proposal rather than a restatement.
+   What `DESIGN.md` *does* own here is the absence rule at §4.2 (`:394-401`, "an unrecorded value renders
+   `N/A` with a `title` naming the kind of absence … never `Unknown`") and the marker-placement rules in §5
+   (`:568-594`); both are quoted below because both bear on §1 and §2.
+2. **The repository has two different things called "provenance".** The binding one is *data* provenance:
+   `GOVERNANCE.md:251-252` and `:1384` require every engine-owned fact to carry a `data_sources` row
+   (`url`, `fetched_at`, `snapshot_path`, `confidence`, `source_timezone`), and "a fact without provenance
+   is deleted, not stored". The other is *display* provenance — the four badge labels, which describe how
+   a rendered number was obtained. They are related only at the seam `ADR-0001` §2 creates: a derived
+   number must show the declared constants behind it. §3 is that seam. Note the collision in vocabulary:
+   `data_sources.confidence` is a pipeline field, and the UI word "Confidence" is separately banned as an
+   invented statistic — the two must never be conflated by a future implementation.
+
+`ADR-0020` status is **Accepted (owner ruling 2026-10-04)**, so its §2 guardrail list binds.
+
+3. **`ADR-0020` §2's mandate is narrower than it is usually quoted as, and one written definition of the
+   labels does exist.** Its sentence (`docs/adr/0020-trainer-desk-2-program.md:73-74`) adopts
+   "✓ confirmed / ≈ calculated / △ RNG / ? user input" as the display contract **for the advisor's numbers** —
+   not for every figure in the app. That scope has two consequences the owner has to hold while deciding:
+   the `Estimated` and `Unknown` chips on the reference views and the scenario panels are outside what the
+   accepted ADR regulates, while the advisor surfaces are inside it and ship two labels the ADR does not name
+   and omit the two it does. And `config/reference.php:28-34` is the one place in the repository that
+   **defines all four labels in writing** — `confirmed` "the doc backs the value with an official notice URL
+   or an S-file", `estimated` "the doc backs it only with a third-party guide, or marks the contents unread",
+   `unknown` "the doc marks the value unverified", `calculated` "no row here is derived by this app; the
+   state is reserved". Those are *source-strength* definitions; `ProvenanceBadge.vue:26-27` defines
+   `unknown` as "the state for 'there is no number'", an *existence* claim, and `ADR-0001` §3 defines the
+   estimated figure as the tool's own opt-in model. §1 below is therefore not "nothing defines these"; it is
+   "**three artifacts define them on three different axes**", and the axis has to be chosen.
+
+4. **The absence form IS settled, and settled at the top of the chain — the earlier draft of this file
+   cited the wrong layer.** `GOVERNANCE.md:433-444` carries "**Disclosure pattern (false zero), settled
+   ruling 2026-09-28**": a field that is zero because it is untracked or not applicable "renders as `N/A`
+   with a tooltip **where useful** … optionally **plus a static disclosure line**", never as `0`, never with
+   an em dash. `ARCHITECTURE-ESSENTIALS.md:37` states the same as requirement D-220, adding the operative
+   parenthetical that the `title` must name **which kind of absence**. Both sit above `DESIGN.md` §4.2, which
+   is where §2 of this file was quoting from. Consequences the owner should see plainly: `AbsenceValue`'s
+   visible reason line is the sanctioned "static disclosure line" branch; a `title` tooltip is optional, not
+   required; and **neither text mentions a provenance badge on an absent value at all**. So §2 below is
+   enforcement of a settled ruling rather than new policy, and a `title` that names the field instead of the
+   absence is a compliance gap, not a style preference. What the settled ruling leaves genuinely open is only
+   the chip-removal step, because removing a visible element is a behavior change.
+   Nothing in `GOVERNANCE.md` mentions the four display-provenance labels: the bar settles the absence form
+   and is silent on the badge vocabulary.
+
+### 1. Provenance vocabulary
+
+Census on this tree, counted two ways because the two counts answer different questions and adding them
+would be a mistake. **Sites** — places a badge is written: 22 `<ProvenanceBadge>` usages in
+`resources/js`. Nineteen carry a literal `state="…"`, and those nineteen are 6 `confirmed`, 6 `calculated`,
+3 `estimated`, 4 `unknown`. Three take `:state="row.state"` from the server
+(`resources/js/pages/Database/Events.vue:120`, `resources/js/pages/Database/ShopItems.vue:124`, `resources/js/pages/Database/Sparks.vue:137`). **Instances** — badges a
+Trainer can actually see at once: the three dynamic sites each sit inside a `v-for` over
+`config('reference.*')`, whose 26 declared rows are 24 `confirmed`, 1 `unknown` and 1 `estimated`
+(`config/reference.php:105` and `:129` are the two non-`confirmed` rows; every `shop_items` and `sparks` row
+is `confirmed`, and no reference row is `calculated` — the file's own mapping at `:33` says "no row here is
+derived by this app; the state is reserved"). So 19 + 26 = **45 rendered badges**: 30 `confirmed`,
+6 `calculated`, 4 `estimated`, 5 `unknown`, and **0 `RNG`, 0 `user input`** on both counts. The last two are
+mandated by `ADR-0020` §2 and `PRD.md` FR-F-3 and are emitted by neither the templates nor the config, while
+the shipped `estimated` and `unknown` are named by neither of those two artifacts. The vocabulary is closed
+in code, not just in the docs: `ProvenanceBadge.vue:12` exports
+`ProvenanceState = 'confirmed' | 'calculated' | 'estimated' | 'unknown'`, and each of the three reference
+pages re-declares the same union locally because a consuming SFC cannot put an imported type in
+`defineProps<>` (`ProvenanceBadge.vue:6-10`). Any fifth label is therefore a four-file type change, not a
+string.
+
+| Label | Proposed meaning | Positive example (shipped) | Exclusion — what it must never mark | Evidence status |
+|---|---|---|---|---|
+| **Confirmed** | The figure is a reading taken as-is from a named owner: a source-published value, a declared constant, or a value the Trainer entered. No arithmetic was performed on it. | Energy cost `E−28 … E−17` (`TrainingCard.vue:234`, a config constant with source and date); hint-ladder percentages (`SkillsPlanner.vue:213`, "Read off the [Global] Learn screen on 2026-10-03"); observed inheritance outcomes (`InheritanceEvent.vue:346`, "Entered by the Trainer") | Anything the tool computed, summed, counted, compared or interpolated — even when every input is a reading | **Inference from four shipped rationales**, consistent with `ADR-0001` §2's entered/declared split. The *definition* is new policy |
+| **Calculated** | The figure is the tool's own arithmetic over readings, deterministic and reproducible, with the arithmetic stated beside it. | Target deficit (`TrainingCard.vue:251`, `state="calculated"` beside the deficit row); RacePlanner target alignment (`RacePlanner.vue:268`, "derived from two recorded values, so it is a comparison rather than a reading"); SP coverage (`SkillsPlanner.vue:180`, "the sum of the base prices"); build-target summary (`BuildTarget.vue:530`, "assembled by this tool from the values entered, not a stored fact") | Any figure whose inputs are not all recorded, and any model output (that is `Estimated`) | **Inference**, and the four rationales above are mutually independent. `ADR-0001` §2's R4 replacement is the nearest contract text |
+| **Estimated** | Two candidate meanings, and the shipped chips follow the one the accepted ADR does **not** describe. (a) `ADR-0001` §3: the tool's own model output, **off by default**, formula and parameters on the same surface, labelled as this tool's model and not the game's. (b) `config/reference.php:31`: "the doc backs it only with a third-party guide, or marks the contents unread" — a *weak source*, not a model. | All four shipped chips are meaning (b): `UnityCupPanel.vue:110` (the +30 read beside the S emblem), `:164` (a band table transcribed from one publisher), `InheritanceEvent.vue:249` ("Sourced probabilities from the chosen parents and grandparents. **No outcome is computed**"), and `config/reference.php:129`. **Meaning (a) is implemented nowhere:** the `failure_estimate` preference is stored and read back but renders no number — `tests/Feature/PreferenceControlsTest.php:24` states the reason in its own docblock, "it shows no number, because there is no number", and `TrainerAdvisor` ships the two bands only. So no chip today claims a modelled figure, and the opt-in half of `ADR-0001` §3 is an unbuilt option, not a violated rule | A sourced value (that is `Confirmed` under meaning (a), `Estimated` under meaning (b) — the two readings disagree here); a game mechanic presented as fact; any win probability (`ADR-0016`, `PRD.md` §6.11, and `design-2.0` §49's own "Estimated win chance: 82%" example is the banned figure, held by that document's governance banner) | **The word is authorized by two artifacts on different axes.** `ADR-0001` §3 authorizes (a) and the app does not do (a). `config/reference.php` defines (b) and the app does do (b), outside the advisor scope |
+| **Unknown** | *No single defensible proposal, and two live definitions already compete.* `config/reference.php:32` defines it as **"the doc marks the value unverified"** — a statement about a source. `ProvenanceBadge.vue:26-27` defines it as "the state for 'there is no number'" — a statement about a value. `DESIGN.md` §4.2, restated in a dated 2026-10-08 correction, says an unrecorded value renders `N/A` with a reason naming the kind of absence, **"never `Unknown`"**. Nothing in the accepted chain arbitrates | The two shipped meanings: the reference Events row (source unverified) and the four absence chips (value absent) | A value the tool derived, and any value that is present and well-sourced | **Contradicted on one reading, authored on another.** The five emissions split: 1 is a source-strength mark with a written definition, 4 are absence marks the absence rule forbids. This is the label whose meaning the owner must pick, per surface class |
+
+Two consequences the owner must rule on, stated without preference:
+
+- **`Estimated` and `Unknown` are not the same kind of accident, and neither is a simple omission.**
+  `ADR-0001` §3 authorizes an *opt-in modelled figure* and the app renders none — the `failure_estimate`
+  toggle stores and restores a value that gates nothing (`tests/Feature/PreferenceControlsTest.php:24` says
+  so outright). The four shipped `Estimated` chips instead mark *weakly sourced* figures, which is the
+  `config/reference.php:31` meaning. So `Estimated` is not "authorized in substance and merely missing from
+  `ADR-0020` §2's list"; it is a **second, undocumented sense of the word**, used on surfaces the ADR does not
+  reach. `Unknown` is a third case: a written source-strength definition in one file, a value-existence
+  definition in the component, and a prohibition on unrecorded values in `DESIGN.md`.
+- **`RNG` and `user input` must not be added because `ADR-0020` names them.** No shipped figure is a dice
+  roll, and Trainer-entered values already read as `Confirmed` under the proposed table. Introducing two
+  labels with no referent would be vocabulary, not information.
+
+The deck tally (`TrainingCard.vue:242`, the "Supports entered for this training" badge) and the published
+caps (`ScenarioPanel.vue:204`, sourced from `ScenarioCaps::caps()`, which computes
+`min(base_cap + cap_bonus, hard_cap)`) are the two call sites where the proposed table and
+`SCREEN_SPEC.md` disagree: the SCR-CAR-012 Figure/Source table records the deck tally as `Confirmed` at
+`:1961` and "Current value, target, cap" as `Confirmed` at `:1964`, while `:2323` records the Skill Point
+coverage — also a sum over stored rows — as `Calculated`. Under the proposed table both become `Calculated`.
+`SupportCardEffects::atCap()` stays `Confirmed`: it selects the highest non-`-1` anchor and formats it, and
+performs no arithmetic (`:1962` states that row and labels it `Confirmed`, which the reading supports).
+
+#### 1a. Runtime inventory of the label, deduplicated
+
+Counted from the tree on 2026-10-09 by scanning every `resources/js` SFC for `<ProvenanceBadge` and then
+resolving each state to its producer. **Sites** and **rendered instances** are two different denominators and
+are never added together.
+
+| Producer | Sites | Emission | Reachable instances | What the label qualifies | Meaning axis in force | Coverage |
+|---|---|---|---|---|---|---|
+| `TrainingCard.vue:226/:323/:365` | 3 | `unknown` (literal) | 3, when the value is absent | An `AbsenceValue` in a figure row | value-existence | No test asserts these three chips |
+| `ScenarioPanel.vue:246` | 1 | `unknown` (literal) | 1, when a panel is undrawn | A prose absence line | value-existence | `tests/browser/grand-concert-panel.spec.ts:83` |
+| `TrainingCard.vue:234/:242`, `ScenarioPanel.vue:204`, `SkillsPlanner.vue:213`, `InheritanceEvent.vue:346/:376` | 6 | `confirmed` (literal) | 6 | A figure or an entered record | reading-vs-derivation | `career-inheritance-event.spec.ts`, `career-skills-planner.spec.ts`, `support-cards.spec.ts`, `scenario-panel.spec.ts` |
+| `TrainingCard.vue:251/:311`, `BuildTarget.vue:530`, `RacePlanner.vue:268`, `Result.vue:161`, `SkillsPlanner.vue:180` | 6 | `calculated` (literal) | 6 | A derived figure | reading-vs-derivation | `career-build-target.spec.ts`, `career-skills-planner.spec.ts`, `support-deck.spec.ts` |
+| `UnityCupPanel.vue:110/:164`, `InheritanceEvent.vue:249` | 3 | `estimated` (literal) | 3, two of them flag-guarded | A weakly **sourced** figure, never a model | source-strength | `unity-cup-panel.spec.ts:58`, `career-inheritance-event.spec.ts` |
+| `resources/js/pages/Database/Events.vue:120`, `resources/js/pages/Database/ShopItems.vue:124`, `resources/js/pages/Database/Sparks.vue:137` | 3 | `:state="row.state"` from `config('reference.*')` | **26 rows** — Events 10 (8 `confirmed`, 1 `unknown`, 1 `estimated`), ShopItems 10 (`confirmed`), Sparks 6 (`confirmed`) | The row's citation strength, not any figure | source-strength, defined in writing at `config/reference.php:30-33` | `tests/Feature/DatabaseTest.php:125`/`:129` (two rows only), `tests/browser/database.spec.ts:69-70` |
+| — | 0 | `rng` / `user-input` | 0 | — | — | Mandated by `ADR-0020` §2 and `PRD.md` FR-F-3, emitted by nothing |
+
+Totals: **22 sites, 45 rendered instances** — 30 `confirmed`, 6 `calculated`, 4 `estimated`, 5 `unknown`,
+0 `RNG`, 0 `user input`. The two reference-view facts nobody should have to rediscover: the config's
+`:33` reserves `calculated` ("no row here is derived by this app"), and **nothing validates the config strings
+against the union** — `ProvenanceBadge.vue:61` indexes `BADGES[props.state]` with no fallback, so an
+out-of-vocabulary value in `config/reference.php` is a render-time failure on a Database page, not a build
+failure.
+
+Three identifiers spell `unknown` and are **not** this label; they must not be swept into any §1 or §2 change:
+
+| Identifier | File | Values | Renders as |
+|---|---|---|---|
+| Scenario Link state | `app/Models/SupportCard.php:186-205` | `linked` / `not_linked` / `unknown` | `N/A` with the note as its `title` — never a badge (`app/Http/Controllers/TrainingRunController.php:1182-1183`, `app/Http/Controllers/Career/DeckSelectController.php:206-207`) |
+| Cap-bonus shape | `app/Http/Controllers/Career/ScenarioSelectController.php:158-174` | `uniform` / `peaked` / `unknown` | Prose, or nothing: `resources/js/pages/Career/ScenarioSelect.vue:78` returns `null` for `unknown` |
+| Pipeline candidate verdict | `app/Enums/CandidateStatus.php` | `Pending` / `Confirmed` / `Aliased` / `Rejected` | **Displayed as a word on `/review`**: `resources/js/components/review/CandidateForm.vue:44` offers `<option value="Confirmed">Confirm (merge into suggestion, or create)</option>`. Same word, different claim — a human adjudication, not a figure's origin |
+| Advisor/legacy prose | `resources/js/pages/Career/InheritanceEvent.vue:20` | "Predicted carries `Estimated`; Observed carries `Confirmed`" | A fifth voice: a page's own docblock states a vocabulary rule that no specification writes down |
+
+### 2. Absence versus provenance ownership
+
+**Proposal requiring approval:** `ProvenanceBadge` qualifies a *value that is displayed*. `AbsenceValue`
+owns the *statement that no value exists*, including which kind of non-existence it is. A row is therefore
+either a figure with a label, or an absence with a reason — not both.
+
+Split the claim in two, because the chain settles one half and not the other. **Settled:** how an absent
+value renders. `GOVERNANCE.md:433-444` (the bar, top of the chain) and D-220 through
+`ARCHITECTURE-ESSENTIALS.md:37` require `N/A` plus a `title` naming which kind of absence, with an optional
+static disclosure line, and forbid a default or a `0`. `ADR-0020` §2 line 70 repeats it as "a named absence or
+an `N/A`, never invented". So the `AbsenceValue` side of the split is existing requirement, not proposal.
+**Not settled:** whether a provenance chip may accompany that absence. No artifact in the chain says either
+way, and `ProvenanceBadge.vue:26`'s "A figure with no badge is a bug" pulls in the opposite direction from
+`DESIGN.md` §4.2's "never `Unknown`". The proposal is therefore new policy on one axis only — it decides that
+a badge's scope is a displayed value, which is the reading under which the two existing statements stop
+contradicting each other. Approving it does not change how any absence renders; it removes four chips that
+currently sit beside an absence that already renders correctly.
+
+Tested against the cases named in the brief:
+
+| Case | Under the proposal |
+|---|---|
+| Energy not recorded | `AbsenceValue` only. Reason: the Trainer's own gap ("this run has recorded no Energy") |
+| Target not set | `AbsenceValue` only. Same class: Trainer's gap |
+| Deck count | A figure. `ProvenanceBadge`, and the label question defers to §1 |
+| Published cap | A figure. `ProvenanceBadge`, label defers to §1 |
+| Observed inheritance result | A figure, `Confirmed` — the existing title already says "entered by the Trainer" |
+| Derived deficit | A figure, `Calculated` — both readings agree |
+| Design exclusion (no source publishes it) | **The hard case.** It is an absence, so `AbsenceValue` owns it — but four shipped `unknown` chips assert it is a figure with a provenance (enumerated below; a fifth `unknown` in the runtime population marks a reference row's source strength and is not in this dispute). Approving §2 means removing those four chips; declining it means §4.2 needs an amendment |
+
+> **Ruled and applied 2026-10-09 (owner ruling 2a): all four chips in this section were removed from the
+> working tree.** The `ScenarioPanel.vue:245-248` and `TrainingCard.vue:226`/`:323`/`:365` coordinates below
+> are the pre-ruling positions, kept because the analysis names them; §16 carries the post-edit state.
+
+Do not read the last row as a recommendation to delete badges. Four chips are in this dispute, not five, and
+one `unknown` was wrongly counted in an earlier draft of this file. The four are the literal chips that sit
+beside an `AbsenceValue` or an absence line: `TrainingCard.vue:226` (Expected gains), `:323` (Failure
+probability), `:365` (Bond gains) and `ScenarioPanel.vue:246` (the `panel_absence` line). The fifth
+`unknown` in the runtime inventory — the Events row declared at `config/reference.php:105` and rendered
+through `resources/js/pages/Database/Events.vue:120` — is a **different kind of object**: it qualifies how well the whole row is
+sourced ("the doc marks the value unverified", the config file's own mapping at `:32`), sits beside no value
+at all, and would remain under §2 even if all four absence chips were removed. Approving §2 changes those
+four and nothing else. A grep for `state="unknown"` misses the fifth and so under-counts the vocabulary
+population while over-counting the change surface; §1's census and this paragraph are counted separately on
+purpose.
+
+They are not four identical cases either. The three in `TrainingCard` badge an `AbsenceValue` sitting in a
+*figure* row — each has a `<dt>` asking for a number ("Expected gains", "Failure probability", "Bond gains")
+— so removing the chip changes what a Trainer sees on a row they currently read as labeled.
+`ScenarioPanel.vue:245-248` badges a `panel_absence` line that is already a prose absence statement with no
+figure row above it, which is the case where the two owners most obviously overlap.
+
+### 3. Making load-bearing constants visible
+
+`ADR-0001` §2 requires the constants behind a derived number to be "visible wherever the number appears",
+and §7 identifies session cost 17–28 and injury −5 to −10 as the load-bearing pair, both from a
+2023-02-25 source flagged **STALE**. Today `TrainingCard.vue:96-101` composes source, read date and stale
+flag into `costTitle`, which reaches the browser only as the `title` attribute on the figure at `:233`,
+beside a `Confirmed` chip at `:234` — so the requirement is met by hover and by
+nothing else. **The requirement is not in question; only the presentation is.**
+
+Three patterns, none implemented. Before them, one precedent that changes the cost estimate: **the app
+already prints this kind of metadata visibly.** `ScenarioPanel.vue:205-208` renders `Verified {{
+props.scenario.caps.verified_at }}` as a visible `text-xs` sibling beside the `Confirmed` chip at `:204`, and
+`Dashboard.vue:300-301` prints the same `Verified <date>` string on the data-status line. So a visible read
+date is an existing shipped idiom, not a new one; what is missing everywhere is a visible **source** and a
+visible **stale** flag, both of which live only in `title` text today.
+
+The `title` route has a hard floor worth stating plainly: **a `title` tooltip is not reachable by keyboard and
+not reachable by touch.** `AGENTS.md` §13 and the browser specs hold the 44px touch contract, so the app is
+written for touch use, and on a touch device the constant's source and its stale flag are simply unavailable.
+Screen readers sit between the two cases, and the difference matters for any §3 decision. A badge folds its
+caller's `title` into its own accessible name (`ProvenanceBadge.vue:63`, with `role="img"` at `:68`), so
+`Confirmed: <reason>` is announced as one statement. The TrainingCard cost's reason sits on a plain `span` at
+`:233`, where a `title` is at best optional help text: it is not in the accessible name and is announced
+inconsistently at best, never on a keyboard or touch path. So the sentence "the reason is announced" is true
+of the badge and not of the figure, and **`ADR-0001` §2's word "visible" fails for both on keyboard and touch
+regardless of how the screen-reader case resolves.** That is not a design preference, and it is the strongest
+argument for P1: an inline metadata line is the only pattern that satisfies sighted keyboard users, touch
+users, and screen-reader users with one mechanism.
+
+**P1 — inline metadata line under the figure.** `E−28 … E−17 ✓ Confirmed` then
+`GameWith 2023-02-25 · stale` in `text-xs text-ink-muted`.
+Accessible: no new interaction, nothing hidden, announced in reading order. Responsive: adds one line per
+figure; at 320px single-column this is the cheapest option. Fits the language: yes — the repo already uses
+`text-xs text-ink-muted` sub-lines for exactly this register. New interaction: none. Touches
+`ProvenanceBadge`: no. Preserves copy: yes, the string is already written. Cost: it is the one pattern that
+makes the stale flag impossible to miss, and it is also the one that adds height to the densest card.
+
+**P2 — reuse `AbsenceValue`'s disclosure for present values.** A `▸` on the figure that opens the
+source/date/stale note.
+Accessible: keyboard and screen-reader reachable, proven by the migrated surfaces. Responsive: bounded by
+the existing `max-w-sm`; no overflow measured. Fits the language: partly — but it hides required
+information behind a deliberate action, which is what §4.2's rule is about. New interaction: no new
+component, though it extends `AbsenceValue` beyond absence, which §2 argues against. Touches
+`ProvenanceBadge`: no. Preserves copy: yes. **Weakest on this requirement specifically: `ADR-0001` §2 says
+visible, not reachable.**
+
+**P3 — a per-card "constants" affordance listing every constant the card used.**
+Accessible: needs a new disclosure or dialog; the drawer pattern exists in `RaceCard.vue`. Responsive:
+worst of the three at 320px. Fits the language: arguably the most tactical. New interaction: yes — a
+second provenance surface, which risks becoming the "second provenance system" the absence pattern was
+explicitly kept from becoming. Touches `ProvenanceBadge`: likely yes. Preserves copy: yes, and adds more.
+
+No pattern is recommended, because the choice is a density-versus-visibility trade on the app's densest
+surface and that is a design judgment. **P1 is the only one that satisfies `ADR-0001` §2's word "visible" without a
+new interaction**, if the owner wants a starting point.
+
+### 4. KI-69 Class 3 — the fixture contract
+
+Established by reading, not by running, and re-read after the two peer commits that landed during this
+session. `career-inheritance-event.spec.ts:36-97` builds its state through the application — create a run,
+log turns, open the run-scoped Legacy Lab builder, then
+`selectOption({ label: 'Symboli Rudolf' })` at `:71` and `'Special Week'` at `:85` on
+`select[name="legacies.0.legacy_id"]`. Those two labels are the **whole library dependency**: every other
+field the fixture touches is typed rather than chosen from data.
+
+**But the library is only one of Class 3's two blockers, and fixing it does not turn the suite green.**
+`KNOWN-ISSUES.md` KI-69 (still **OPEN**, re-read at `:762-783`) measured both: with Veterans inserted the
+failure moved off the picker and onto `input[name="legacies.0.rank"]`, because the shipped builder renders
+**no `name` attribute on any of the other legacy fields**. Measured on the current tree:
+
+| Field the spec addresses by `name` | What `Builder.vue` actually renders | Locator available today |
+|---|---|---|
+| `legacies.N.legacy_id` | `:name="controlName"` on the select (`resources/js/pages/Legacy/Builder.vue:242` → `AncestryNode.vue:139`) | works |
+| `legacies.N.rank` (`spec:72`, `:86`) | `:id="\`rank-${parent.slot}\`"`, no `name` (`:309`) | `#rank-{slot}` |
+| `legacies.N.ancestors.M` (`spec:73-74`, `:88-89`) | `:id="\`ancestor-${parent.slot}-${ancestorIndex}\`"`, no `name` (`:269`) | `#ancestor-{slot}-{i}` |
+| `legacies.1.is_guest` (`spec:87`) | bare checkbox: no `id`, no `name` (`:321-325`) | `getByLabel('Rented from a friend')` |
+| `legacies.N.sparks.K.kind` (`spec:76`, `:80`, `:91`, `:95`) | select inside a `<label>` with no `id`, no `name` (`:349-359`) | `getByLabel` on the kind label |
+| `legacies.N.sparks.K.target` and `.stars` (`spec:77-78`, `:81-82`, `:92-93`, `:96-97`) | inputs with neither `id` nor `name` (`:364-368`, `:373-379`) | `getByLabel('Applies to')` / `getByLabel('Stars')` |
+
+Nineteen of the fixture's locators therefore address a form contract the component does not have, exactly as
+KI-69 states: "The spec was written against a form contract the component does not have." So **Option A is
+necessary and not sufficient**, and the honest scope of Class 3 is *two* changes: seed or otherwise provide
+the roster rows, and choose one of the two locator strategies.
+
+| Choice | What it means | Cost |
+|---|---|---|
+| A1 — re-target the spec at ids and labels | Test-only change. The two fields with ids travel as `#rank-…`/`#ancestor-…`; the four without ids travel as `getByLabel`. Leaves the builder's markup untouched | Spec edits across ~19 lines; and the missing `name` attributes stay a latent trap for the next spec |
+| A2 — add `name` attributes to the builder's legacy inputs | Production change to `Builder.vue` (and `AncestryNode.vue`), matching the contract the spec already assumes | Touches a component under concurrent edit; needs the same field-name audit the picker fix needed |
+
+`A1` is the smaller and safer change and is what this file recommends alongside the label repoint, because
+the builder posts through Inertia's `form.legacies` object rather than a native form submit, so `name`
+attributes are a testability affordance here, not a functional requirement — and that reasoning is exactly why
+they were never added.
+
+`TrackerVeteransSeeder` files seven Veterans from the committed tracker: Maruzensky ×2, Mayano Top Gun,
+Haru Urara, Daiwa Scarlet, Vodka ×2. Neither named trainee appears. `LegacyController::roster()` renders
+`name` as the bare `umamusume->name`, so the two duplicated trainees also produce two visually identical
+options — a separate finding, recorded in the appendix.
+
+Related and worth stating plainly: **the picker could not have worked at all before this session's
+`AncestryNode` fix**, because the selection was dropped on save. Part of Class 3's seven failures was a code
+defect, now fixed. What remains is **both** blockers above, not fixture identity alone — the seeder is
+deliberately absent from `DatabaseSeeder` (`database/seeders/TrackerVeteransSeeder.php:50`, "a fresh install
+does not silently write Trainer history"), so `migrate --seed` on the browser scratch database still leaves
+`veterans` empty, and the harness build step has to opt into running it.
+
+| Axis | Option A — repoint the specs | Option B — deterministic test-only Veterans |
+|---|---|---|
+| Fidelity to real user data | Uses the same rows a Trainer would see. The chosen parents are real careers, not props | Invents careers that never happened, even when labelled synthetic |
+| Determinism | Fully — the seeder is idempotent on `import_source` | Fully, if the fixture is deterministic; but it adds a second source of library rows to keep stable |
+| Maintenance | Two literals in one spec file, plus the ~19 locators of A1 or the `name` attributes of A2 | A new seeder or factory path, plus its own test, plus a rule for who may run it |
+| Product semantics | None touched | Forces a decision about whether a Veteran may exist without a real completed career behind it — `PRD.md` FR-G-1 defines one as "a record built from a completed run" |
+| Contamination risk | None | Real: a synthetic-history seeder is one mis-wired registration away from appearing in a Trainer's library, and `AGENTS.md` §11 already treats seeded bodies as committed data |
+| Harness compatibility | Needs one addition either way: `tests/browser/global-setup.ts:64` runs `php artisan migrate --seed`, and `DatabaseSeeder` does **not** register `TrackerVeteransSeeder` (`database/seeders/DatabaseSeeder.php` calls five seeders; `TrackerVeteransSeeder.php:50` states it is deliberately unregistered so a fresh install never writes Trainer history). So Option A needs the harness to opt into the seeder — a change to the KI-69 contract too, just a smaller one | Needs the harness build step to opt into a second seeder, which is the same class of change |
+
+**Recommendation, labeled as a decision and not implemented:** **Option A** on the library half — repoint
+`{ label: 'Symboli Rudolf' }` and `{ label: 'Special Week' }` at two of the three *uniquely-named* seeded
+trainees, `Mayano Top Gun` and `Daiwa Scarlet`, because the duplicate names would make a
+`{ label: 'Maruzensky' }` or `{ label: 'Vodka' }` selection ambiguous — paired with **A1** on the locator half
+(re-target the nineteen `name=` selectors at the ids and labels the component really renders). Option A leaves
+the assertions meaning the same thing: they still ask what the inheritance screen shows once a Legacy
+selection exists, and the screen's own props are unchanged by the choice. Option B buys nothing Option A does
+not, at the cost of inventing trainer history that `FR-G-1` defines as recorded, not constructed.
+
+One consequence worth stating before anyone picks: **neither option makes Class 3 green on its own.** The
+fixture blocker and the locator blocker are independent, and the harness has to opt into the seeder either way.
+`KNOWN-ISSUES.md` KI-69's Class 3 heading says the fixture "needs data no code path creates"; measured today
+it needs that data *and* a locator contract the component honours.
+
+### 5. CareerStatePanel absence interaction
+
+The problem, stated precisely: `CareerStatePanel.vue:64-69` puts two `AbsenceValue` markers and a `/`
+separator in one `flex items-baseline` row, and `:76-78` additionally prints a visible prose reason for the
+same state. So one row states the same gap twice — once as the disclosure's accessible name (`:65` and `:68`
+carry `currentHint`/`targetHint`, which name the kind of absence: "No turn has recorded this stat yet." /
+"No target was entered for this stat.") and once as the shorter `v-else` sentence "No reading recorded yet" /
+"No target set", which names the same gap less specifically — and opening
+either marker grows its box against the separator. `DESIGN.md:571` says a caller that prints prose needs no
+component; here both run.
+
+The second half of the same panel is worse, and the owner should see it before choosing. `:82-97` renders the
+four meta values through **three different absence idioms in one `<dl>`**: `EnergyGauge` at `:86` owns its own
+unrecorded rendering, `MoodPill` at `:87` takes an `unrecorded="N/A, not recorded"` prop string, and Fans and
+Skill Points fall through to `AbsenceValue` at `:88-93`. So the panel a Trainer reads as one block already
+answers "what does a missing value look like" three ways, and a fourth through the two stat markers. Any §5
+choice that touches only `:64-69` leaves that split in place; naming it here is the whole reason for the
+section.
+
+The five states, spelled out against the code as it runs today (`:64-78`), before any option is chosen:
+
+| State | Marker row `:64-70` | Below it `:73-78` | Keyboard | What a screen reader hears |
+|---|---|---|---|---|
+| Current absent, target present | `N/A` marker, `/`, the target number | progress bar hidden (`:73` needs both), prose **"No reading recorded yet"** | one disclosure tab stop | label, "N/A, No turn has recorded this stat yet.", the target value, then the prose sentence again |
+| Current present, target absent | the number, `/`, `N/A` marker | bar hidden, prose **"No target set"** | one disclosure tab stop | label, the value, "N/A, No target was entered for this stat.", then the prose |
+| **Both absent** | `N/A`, `/`, `N/A` | bar hidden; the ternary at `:77` picks **only** "No reading recorded yet" | two tab stops | two distinct reasons announced, then **one** prose sentence — the target gap is named only inside its disclosure |
+| Both present | two numbers, `/` | bar renders; no prose | none | label, value, value |
+| Any marker opened | its reason becomes a visible line inside the same flex row, so the row grows and the `/` stays baseline-aligned | unchanged | `Enter`/`Space` toggles; the `<summary>` is the stop | the reason is already in the accessible name, so opening adds nothing audible |
+
+Options, none implemented:
+
+- **O1 — prose only, no disclosure.** The row keeps the `:76-78` sentence and drops the two markers. This is
+  the option the visual system already asks for: `DESIGN.md:571` says a caller that "already prints its
+  reason as visible prose beside the marker keeps doing that **and needs no component**", and the bar's
+  settled ruling (`GOVERNANCE.md:433-444`) sanctions the static disclosure line on its own. The prose is not
+  conditional in a way that hides anything: `:73`/`:76` make it print whenever either value is null, so the
+  reason is always visible. Cost: the reason becomes shorter than the disclosure's (`"No reading recorded
+  yet"` names no kind of absence beyond "not recorded"), and the two gaps collapse into one sentence in the
+  both-null case.
+- **O2 — one paired disclosure.** The row becomes a single `N/A / N/A` marker whose reason names both sides.
+  Compact, one tab stop, but a screen reader hears one announcement for two distinct gaps, which is worse
+  for the current/target distinction the panel exists to show.
+- **O3 — two independent disclosures, each `min-w-0 flex-1`, separator demoted to a word (`to`).** Keeps the
+  per-field reason that `currentHint`/`targetHint` already write, keeps two tab stops where two gaps exist,
+  and costs one line of height when either opens. This is the shape the TrainingCard row fix uses. Cost: it
+  keeps the duplication `DESIGN.md:571` argues against, and it raises the compact-24px target question twice
+  per row (`AbsenceValue.vue:42` records compact as the deliberate dense form at 24px against the house
+  44px, and `DESIGN.md:572` sanctions that).
+
+**What changed in this draft:** the earlier version recommended O3. Read against `DESIGN.md:571` the
+recommendation inverts — **O1 is the conformant option**, because the rule says a caller printing its reason
+as visible prose needs no component, and this caller does print prose. O3 is the option that carries more
+information per gap; it is also the option that keeps a second, redundant statement of the same fact. The
+choice is therefore a real trade the owner makes, not a default the repo has already settled: `DESIGN.md`
+speaks to absences whose reason needs a component at all, and this row already has a sentence. If O1 is
+chosen, the prose should name the kind of absence (it currently says "No reading recorded yet" / "No target
+set"), because the bar's rule is a `title` or line "naming which kind of absence" (D-220).
+
+### 6. SaveVeteran parent-rank wording
+
+`SaveVeteran.vue:248-249` puts `title="The parent's own rank as the career recorded it."` on the span that
+renders `Rank: {{ parent.rank ?? 'N/A' }}`, inside the parent list that begins at `:244`. The read path is
+worth naming before any wording is chosen, because an earlier draft of this section got it slightly wrong:
+the value comes from `AncestryGraph::build($run->legacySelection(), …)` at
+`app/Http/Controllers/Career/SaveVeteranController.php:96-101`, and `AncestryGraph.php:160` takes
+`$legacy['rank']` — **this** career's own Legacy Lab entry for the parent. It is not the parent's career
+record, and no Veteran row is read for it. So the current sentence is true but easy to misread, and the fix
+is not only "state a reason": it is "say whose record". Distinguish the three things a sentence can be:
+
+- **fact about the source** — "the parent's own rank as the career recorded it" (current text; true, not a
+  reason, and ambiguous about *which* career)
+- **absence reason** — why this particular row is empty, which is what D-220 and the settled ruling ask the
+  `title` to carry
+- **provenance** — how a present value was obtained (the badge's job, not the reason's)
+
+Candidates, neither shipped, each checked against the read path above:
+
+- **C1** "You have not recorded a rank for this parent." — states the gap, names the right owner, and matches
+  the sibling component's existing form word for word: `AncestryNode.vue:100` already says
+  `reason="You have not recorded this Legacy’s own rank."` for the same field on the builder. An earlier draft
+  of this section proposed "This parent's rank was never recorded **on the career it came from**", and that is
+  withdrawn: the read path is this career's own payload, so blaming the parent's career would state a source
+  the code never touches.
+- **C2** "You have not recorded a rank for this parent, so the row is blank rather than zero." — C1 plus the
+  false-zero guard the bar carries at `GOVERNANCE.md:439` ("Never render `0` for a value the schema cannot
+  observe"), at the cost of a longer string inside a narrow chip.
+
+C1 is the minimal conforming correction, C2 the more informative one; both satisfy the requirement, which is
+D-220's and not taste. Final wording stays the owner's.
+
+One more thing on the same list, recorded rather than acted on: `SaveVeteran.vue:246` renders
+`parent.name ?? 'Not recorded'` — a prose fallback — while `:249` renders `Rank: … 'N/A'`, the ruled idiom.
+One `<li>`, two absence forms. The settled ruling and D-220 govern the `N/A` half; nothing settles the
+fallback-word half, and `AGENTS.md` §5's "never a default" reads as though a substituted word *is* a default.
+
+### 7. What each approval would change
+
+| Approval | Files that would change |
+|---|---|
+| §1 vocabulary definitions | `DESIGN.md` §5 (new), then `TrainingCard.vue:234`/`:242` and `ScenarioPanel.vue:204` labels if the reading/derivation rule is adopted, and the `SCREEN_SPEC.md` SCR-CAR-012 Figure/Source rows `:1957`-`:1965` plus the Skill Point coverage line `:2323` to match |
+| §2 absence ownership | the four absence-adjacent `unknown` call sites (`TrainingCard.vue:226`/`:323`/`:365`, `ScenarioPanel.vue:246`), or `DESIGN.md` §4.2 — one or the other must move. The reference views' `unknown` row is not in this set |
+| §3 constant visibility | `TrainingCard.vue` (the `costTitle` site at `:233`/`:234` and its computed at `:96-101`); under P2 also `AbsenceValue.vue`'s contract; under P3 also `ProvenanceBadge.vue` and a new surface. `SkillsPlanner.vue:214`, `RaceCard.vue` and `ScenarioPanel.vue:205-208` carry the same register and should move together or be named as exceptions |
+| §4 Class 3 | `tests/browser/career-inheritance-event.spec.ts:71`/`:85` (labels) **and** `:72-97` (the nineteen `name=` locators, via A1) **or** `Builder.vue` / `AncestryNode.vue` input markup (via A2), **and** `tests/browser/global-setup.ts:64` (opt the seeder in). Option B adds a new seeder and its test |
+| §5 panel interaction | `CareerStatePanel.vue:60-78` — under O1 the two markers at `:65`/`:68` go and `:76-78` stays; under O3 the row layout and the `:67` separator change |
+| §6 rank copy | `SaveVeteran.vue:248-249` |
+| Register entry | `KNOWN-ISSUES.md` KI-81 for the picker defect, which is owed and cannot be written correctly until a closure commit exists. The G-4 disposition in the appendix is a second register candidate (it belongs under KI-58's own entry, whose reproducer no longer reproduces) |
+
+### 8. Explicitly unchanged by this pass
+
+No badge label changed. No absence site migrated. No component redesigned. No copy string shipped.
+`TrackerVeteransSeeder` unmodified and unrun. No Class 3 spec altered. No fifth provenance category
+proposed anywhere in this file. No database touched.
+
+#### 8a. Evidence freshness, stated so a later pass does not read a stale figure as current
+
+The runtime evidence behind this file is **from 2026-10-08 and predates the D1-D5 commits**
+(`291f6ea`, `033c974`, `a4b2b26`, `fdebcc9`, `be02297`, `dd6dd22`, all 2026-10-09):
+
+- Last executed browser gate for these surfaces: `24 passed / 0 failed` (`.scratch-uma/gate-final3.log`,
+  20:04Z), covering `ancestry-node-picker`, `career-legacy-deck-steps`, `career-training-detail`, `legacy`.
+- Earlier logs record `51 passed / 0 failed` twice (15:31Z, 16:54Z) **before** `ancestry-node-picker.spec.ts`
+  existed, and `51 passed / 1 failed` at 18:42Z (`.scratch-uma/gate-p3.log`) where the picker's
+  "reads the current pick back from its prop" case failed on `picked: 9` vs `picked: 7`. That failure was
+  fixed and re-run as the 24/0 above.
+- **Citing "51/0" alongside "24/0" as the current checkpoint is therefore wrong**: no 51-case run has ever
+  included the picker spec and passed.
+- `python tools/gate.py`: re-run 2026-10-09, still `GATE FAIL: 10 finding(s) across 3 file(s)` (see appendix
+  item 4). It reads only `docs/design-research/prototypes/*.html`, so the D1-D5 commits cannot have changed it.
+- Not run this pass and not claimed: `php artisan test`, `npm run typecheck`, `vendor/bin/pint`, PHPStan, the
+  lore gates, and `migrate:status`. The D3 commit added a migration
+  (`database/migrations/…_add_ownership_to_deck_slots_table.php`), so `AGENTS.md` §9's dev-database check is
+  **owed to the next pass** and KI-60's failure mode is live on this tree.
+
+### Appendix — four observations recorded, not acted on
+
+1. `LegacyController` exposes the library twice: the browse list labels rows `"<name> · run #<id>"` while
+   `roster()`, which feeds the builder's picker, labels them with the bare trainee name. A library holding
+   two careers for one trainee therefore shows the Trainer two indistinguishable options. The docblock
+   above `roster()` claims the two "cannot disagree about who is in the library", which is true of the
+   population and not of the label.
+2. **The words `unknown` and `Confirmed` are already spoken by other vocabularies.** Enumerated in §1a. The
+   sharpest case: `SupportCard::scenarioLinkState()` (`app/Models/SupportCard.php:186-205`) returns
+   `linked` / `not_linked` / `unknown`, and its `unknown` renders as `N/A` with the note as its `title` — not
+   as a badge (`app/Http/Controllers/TrainingRunController.php:1182-1183` and `:1194`,
+   `app/Http/Controllers/Career/DeckSelectController.php:206-207`); two callers read it, so it is genuinely
+   one owner, which is the right design. Whatever §1 decides, an implementation pass must not assume those
+   `unknown`s are the badge's, and `ADR-0020` §2's `RNG` / `user input` labels would arrive into that
+   collision — while `/review` already shows the word **Confirm** to mean "a human resolved this match"
+   (`resources/js/components/review/CandidateForm.vue:44`).
+3. `docs/design-research/CONSTRAINTS.md` is absent from this tree — its D-rules (D-20, D-100, D-256) are
+   cited from components and from `ADR-0001` §6, and `AGENTS.md` §17 says folded sources were deleted after
+   verification. Any §1 approval should cite the master that now carries those rules, not the deleted file.
+4. **The design-artifact gate is failing, and its cause is only half resolved.** `python tools/gate.py` exits
+   1 with ten `[G-4 raw hex]` findings across `screen-a-scenario-v10.html`, `screen-c-event-v1-inline.html`
+   and `screen-c-event-v2-preview-column.html` — **tracked** prototypes, clean in the tree, committed at
+   `e0e043c` (2026-09-27); reproduced identically on 2026-10-09. `KNOWN-ISSUES.md` KI-58 (still **OPEN**,
+   filed 2026-10-03) describes the instrument fault: the loader read a `docs/design-research/DESIGN.md` that
+   the re-baseline folded and deleted, and the "few tokens" guard could not fire because the second leg alone
+   cleared the threshold. That fix has landed — `7d8b62a` (2026-10-08) points `load_token_hexes()` at
+   `resources/css/app.css` — and KI-58's three reproducer hexes (`#B45309`, `#0667B0`, `#6E6459`) are legal
+   today. The ten failures are the **mirror case**: `#7A7067` and `#106F9F` were token values in the deleted
+   research document and are absent from the shipped theme, and `#C5A558` and `#FDF7EF` appear only in the
+   gitignored `docs/design-research/_scratch/analysis/tokens/tokens.json`, never in a theme block. So: real
+   prototype debt, an open register entry whose stated reproducer no longer reproduces, root `README.md:306` still
+   calling KI-58 an open defect, `gate.py:6` still citing the absent `CONSTRAINTS.md` as its rule source, and
+   the silent-leg guard now passing at 92 theme hexes against its 40 threshold. `AGENTS.md` §11 marks the
+   `docs/design-research/` prototypes do-not-hand-edit, so this cannot be cleared by an agent editing the
+   artifacts; it needs an owner disposition (repair the prototypes, re-scope the gate, or extend the map with
+   a stated reason). Nothing in this proposal causes it and nothing in it claims the gate passes.
+
+### 9. Owner rulings, answered 2026-10-09
+
+The ten questions this artifact raised were answered the same day. Each row is the ruling plus the one line
+of evidence it rests on. §§1-8 above are the analysis that produced them and are not edited here.
+
+| # | Ruling | Evidence it rests on |
+|---|---|---|
+| **1** | **1c, split by surface class.** `ADR-0020` §2 regulates the advisor's numbers; `config/reference.php:30-33` regulates the reference views; neither reaches the other. Both get written down in `DESIGN.md` prose. Zero code. | `ADR-0020` §2:73-74 scopes the vocabulary "for the advisor's numbers"; the config block defines its own four mappings and reserves `calculated` at `:33` |
+| **2** | **2a, remove all four absence chips** (`TrainingCard.vue:226`/`:323`/`:365`, `ScenarioPanel.vue:246`), and update `grand-concert-panel.spec.ts:83` with the ruling named as the reason. **This is policy, not enforcement.** | `DESIGN.md` §4.2 and D-220 fix how an absence renders; nothing in the chain ever said a chip may not accompany one |
+| **3** | **3b, per-surface meaning.** The reference views keep "the doc marks the value unverified"; absences retire the word. The one config `unknown` at `reference.php:105` stays. | Coheres with 2; the two emissions were never the same claim (`reference.php:32` vs `ProvenanceBadge.vue:26-27`) |
+| **4** | **4b, ratify sense (b).** `Estimated` means weakly sourced. `ADR-0001` §3 gets a narrow appended note that sense (a) is unbuilt; its substance is not rewritten and its text is not deleted. | Sense (a) has no legal object: `design-2.0` §49's worked example is a win chance, and `PRD.md` §6.11 forbids computing one |
+| **5** | **5a, P1 inline.** The constant's source, read date and stale flag print visibly under the figure; the one-line cost on the densest card is accepted. `ScenarioPanel.vue:205-208` and `Dashboard.vue:300-301` are cited as the shipped precedent in the commit message. | `ADR-0001` §2:46 says **visible**; §7:101 says every suggestion **displays** the date. A `title` is mouse-only, so it fails both on keyboard and touch |
+| **6** | **6a, Option A + A1.** Repoint the two labels to `Mayano Top Gun` and `Daiwa Scarlet`; re-target the ~19 `name=` locators at ids and labels; `global-setup.ts:64` opts the seeder in. Test-only, real rows, no `FR-G-1` collision. → **Partly superseded before it could be executed**, by `c29a71b` (13:44, another session): the A1 locator work landed as written, and the label half was removed instead of repointed — the fixture now leaves the parent pick **unchosen**, because `legacy_id` is nullable and the scratch DB holds no Veterans, with the picker's own contract covered by `ancestry-node-picker.spec.ts`. **Consequence: the seeder opt-in must not be added.** Seeding seven Veterans would break the empty-`veterans` condition plan §4.1 item 7 requires, and no spec needs them any more. | Both blockers were independent; the peer deleted one by removing the dependency rather than satisfying it |
+| **7** | **7a, O1 prose only.** The two markers go; the prose must name the kind of absence (D-220). The panel's other half, `:82-97`'s three absence idioms through one `<dl>`, is **explicitly out of scope** and recorded as future cleanup. | `DESIGN.md:571`: a caller printing its reason as visible prose "needs no component" |
+| **8** | **8a, C1.** "You have not recorded a rank for this parent." | `AncestryNode.vue:100` already says it in that voice for the same field; `AncestryGraph.php:160` shows the rank is this career's own payload |
+| **9** | **9b, one line.** `SaveVeteran.vue:246` moves to `N/A` + reason. The wider sweep was not the ruling; see §14. | `AGENTS.md` §5: an unrecorded value renders `N/A` with a `title`, never a default |
+| **10** | **10a with an explicit `AGENTS.md` §11 dispensation.** Repair the three tracked prototypes, hex to token. **10b re-scope is refused**: the gate is correctly reporting. Bookkeeping ships as a separate package (§13). | `git ls-files` proves the three files tracked and clean; the four hexes are absent from `resources/css/app.css` |
+
+**Correction to §2, owed by this pass.** §2 called the four-chip removal "enforcement of a settled ruling
+rather than new policy". The ruling is **policy**: the settled text governs how an absence *renders* and is
+silent on whether a badge may sit beside it. The analysis in §2 remains useful; the label on it was wrong.
+
+### 10. Convention: how the two records change
+
+1. **`ADR-0001` §3 closes by appended dated note, never by rewrite** — `AGENTS.md` §11 requires a dated
+   erratum that preserves the original sentence. The note says: sense (a), the opt-in modelled figure, is
+   unbuilt; sense (b), a weakly sourced figure, is what ships; §6.11 leaves no legal target for (a).
+2. **KI-58 closes by a dated closure line under its own entry**, naming `7d8b62a` as the fix, and the mirror
+   case is filed as a **new** entry continuing the numbering. No existing entry is renumbered, and KI-81
+   stays reserved for the picker defect (§7).
+
+### 11. The four locations that carry the vocabulary question
+
+Closing one without the others leaves a live contradiction, so all four move together: `DESIGN.md` §5 (the
+definitions themselves), `SCREEN_SPEC.md` §7 item 18 (the defect record), `PRODUCT.md`'s "Open" list at
+`:207-214` (which already says "Which provenance vocabulary the product uses is unsettled"), and this
+artifact's §1. A fifth, smaller fix travels with them: **`PRODUCT.md:302` cites
+`RenderedCopyHygieneTest` as enforcing `DESIGN.md`'s absence rule**, which is the exact error
+`DESIGN.md` §10 corrected on 2026-10-09 — that test checks dashes, the `N/A`-instead-of-a-glyph rule and its
+own scan coverage, and never contains the word `Unknown`.
+
+### 12. Ruled text, held for paste (do not paste while the files are hot)
+
+*`DESIGN.md` §5, replacing the "no written definition" state:*
+
+> **The four labels carry two axes, and the axis is set by surface class.** On the Trainer Advisor's surfaces
+> the state describes the relationship between the figure and its inputs: `Confirmed` is a reading taken as-is
+> from a named owner, `Calculated` is this tool's own arithmetic over readings. On the Database reference
+> views the state describes how well the row is sourced, exactly as `config/reference.php:30-33` defines it,
+> and `calculated` stays reserved there. Neither reading governs the other's surfaces. **The type is shared
+> where the meaning is not:** `ProvenanceState` is one union in `ProvenanceBadge.vue:12`, re-declared locally
+> in `pages/Database/{Events,ShopItems,Sparks}.vue`, because a consuming SFC cannot name an imported type in
+> `defineProps<>`. A fifth label is therefore a four-file change even when it applies to one surface class,
+> and no runtime check maps config strings onto the union.
+
+*`SCREEN_SPEC.md` §7 item 18, appended dated note (original text preserved):*
+
+> *Ruled 2026-10-09 (owner). The axis is per surface class, written into `DESIGN.md` §5: derivation on the
+> advisor's numbers, source strength on the reference views. The four absence chips were removed as policy,
+> not as enforcement of a settled rule, and the `Unknown` beside an absence is retired. The entry stays open
+> as the record of the contradiction it documents and closes with the commit that lands those edits.*
+
+*`ADR-0001` §3, appended dated note; `PRODUCT.md` Open-section close-out; both follow the same shape:
+quote the ruling, name the date, leave the original sentences standing.*
+
+### 13. 10a bookkeeping text, pending peer-sync paste
+
+1. **KI-58 closure line:** "*Closed 2026-10-09. `7d8b62a` (2026-10-08) implemented fix option 1 —
+   `load_token_hexes()` now reads `resources/css/app.css` and both theme blocks — and the entry's three
+   reproducer hexes (`#B45309`, `#0667B0`, `#6E6459`) are legal today. What remains is the mirror case,
+   filed separately; the register text above is preserved as written.*"
+2. **New mirror-case entry**, naming the four hexes and the three tracked prototypes: `#7A7067` and
+   `#106F9F` were token values in the deleted `docs/design-research/DESIGN.md` at `e0e043c`; `#C5A558` and
+   `#FDF7EF` appear only in the gitignored `docs/design-research/_scratch/analysis/tokens/tokens.json` and
+   never in a theme. Ten findings across `screen-a-scenario-v10.html`, `screen-c-event-v1-inline.html` and
+   `screen-c-event-v2-preview-column.html`; reproduction command `python tools/gate.py`; closure is the
+   hex-to-token repair under the owner's §11 dispensation, and closure does not re-scope the gate.
+3. **`tools/gate.py:6`** cites `docs/design-research/CONSTRAINTS.md` as its rule source; that file no longer
+   exists, and the rules live in the `docs/research-scratch/` masters.
+4. **Root `README.md:306`** still calls KI-58 an open defect affecting rendered-prototype checks; after item 1 it
+   must point at the new mirror-case entry instead.
+
+### 14. Ruling 9b, classified
+
+Ruling 9b reached one line: `SaveVeteran.vue:246` now renders `N/A` with "You have not recorded a parent for
+this slot." as its reason. The wider set is classified here rather than swept, because in most of these sites
+the substituted words *are* the reason and replacing them with `N/A` would delete information. **Every path
+in this table is relative to `resources/js/`.**
+
+| Group | Sites | Status |
+|---|---|---|
+| Done | `SaveVeteran.vue:246` | landed in the working tree |
+| **A** — unrecorded value in a value cell, needs `N/A` + reason | `scenario/TeamRacePanel.vue:44`, `pages/Catalog/Show.vue:163`, `pages/Runs/Show.vue:267` | **held for owner scoping.** `Runs/Show.vue` additionally carries ~45 uncommitted peer lines and is blocked this turn regardless |
+| **A′** — unresolvable reference, not an unrecorded value | `pages/Runs/Import.vue:106` (`'Unknown trainee'`: a stored id that resolves to no row) | **held.** Its honest sentence is not an absence; needs its own wording |
+| **C** — sentence objects; a wording decision, not a substitution | `career/RecommendationCard.vue:64`, `components/DeckPanel.vue:138`, `pages/SupportCards/Show.vue:149`, `components/GradePointMeter.vue:54`, `pages/Career/TraineeSelect.vue:119`, `scenario/TeamRacePanel.vue:42`, `pages/Runs/Show.vue:225` | **held.** A mechanical `?? 'N/A'` on `'No action to rank'` prints a value marker where the sentence was the explanation |
+| Not in scope | the remaining `??` sites: already an `N/A` form, or non-display defaults (CSS classes, form initial values, a `:key`, four `:placeholder` attributes at `Runs/Show.vue:606/612/619/623`, the error-message default at `SkillsPlanner.vue:272`) | **leave** |
+
+### 15. Coordination escalation, 2026-10-09
+
+Two sessions are implementing rulings 2a/3b/5a/7a/8a/9b in this one working tree. Evidence, all measured
+rather than inferred: `tests/browser/grand-concert-panel.spec.ts` is modified in the tree and carries the
+2a-shaped assertion and a comment citing the owner's 2026-10-09 ruling, while HEAD still asserts the chip is
+visible; `database/browser-scratch.sqlite` and four `test-results/career-inheritance-event-*` directories
+were written within seconds of a check, so a browser run is live; and six commits landed on master during
+this review (`291f6ea`, `033c974`, `a4b2b26`, `fdebcc9`, `be02297`, `dd6dd22`), two of them while the run was
+in flight. There is no channel between the sessions.
+
+The consequence for the shared tree: the peer's live run is executing against this session's uncommitted
+component edits, so neither session's browser numbers are attributable, and either session can overwrite the
+other's file on its next write. The component half of 2a and the spec half are a matched pair; committing one
+without the other puts red on master, and a partial-staging workaround in a tree that commits hourly is the
+mechanism that has already dropped hunks here twice.
+
+**The question for the owner, unanswered as of this writing: which session owns which of rulings
+2a/3b/5a/7a/8a/9b, and which session stands down?** Until it is answered, this session holds its four
+component files uncommitted, writes nothing to `DESIGN.md`, `SCREEN_SPEC.md`, `PRODUCT.md`, `README.md`,
+`KNOWN-ISSUES.md` or `docs/adr/`, starts no browser run, and takes neither 6a nor 10a's file edits.
+
+### 16. Held state, stated plainly
+
+* **Uncommitted, intact, verified this pass:** `career/TrainingCard.vue` (chips at `:226`/`:323`/`:365`
+  gone; `costConstants` defined at `:107`, printed at `:252`), `scenario/ScenarioPanel.vue` (chip gone),
+  `career/CareerStatePanel.vue` (markers gone, `statAbsence` at `:50`, printed at `:87`),
+  `pages/Career/SaveVeteran.vue` (8a and 9b).
+* **Verified only by typecheck and reading:** `npm run typecheck` exits 0, and `state="unknown"` now appears
+  zero times in `resources/js`. **No browser or Pest run was executed for these edits**, because a peer run
+  holds the harness. Nothing here is runtime-verified, and no green claim is made for it.
+* **Not run, and not substitutable:** `php artisan migrate:status` on the dev file is an owner action. A
+  scratch identity answers the wrong question, because D3 added
+  `2026_10_09_120000_add_ownership_to_deck_slots_table.php` and KI-60's failure mode is a committed
+  migration that never ran against `database/database.sqlite`. **Until it is run, no session's "the suite is
+  green" statement is evidence about the application** — 1,326 tests passed once with four migrations
+  pending and the landing page returning 500.
+
+### 17. Executed 2026-10-09, this pass
+
+| Ruling | Landed in the tree | Evidence |
+|---|---|---|
+| 2a, 3b | `TrainingCard.vue` (three chips), `ScenarioPanel.vue` (the fourth) | `state="unknown"` now appears **zero** times in `resources/js`; `npm run typecheck` exit 0 |
+| 5a | `TrainingCard.vue` `costConstants`, defined at `:107`, printed at `:252` | a visible `text-xs` line under the figure; the `title` stays, so the tooltip assertions this card already had still hold |
+| 7a | `CareerStatePanel.vue` `statAbsence` at `:50`, printed at `:87` | markers gone; the both-absent row now names **both** gaps, which the old ternary did not |
+| 8a, 9b | `SaveVeteran.vue:246`/`:248`, `TeamRacePanel.vue:44`, `Catalog/Show.vue:163` | group A's first two sites landed; `Runs/Show.vue:267` held (peer lines in the file); A′ and C held for wording |
+| 4b | `docs/adr/0001` §3 | dated note appended; §3's bullets untouched |
+| 1c | `DESIGN.md` §5 | per-surface axes, the shared-`ProvenanceState` caveat, and the absent runtime guard, all written down |
+| 10a | `tools/gate.py:6` and the three prototypes | **`GATE PASS: 3 prototype(s), all machine-checkable gates green`** (`.scratch-uma/gate-after-10a.txt`); ten replacements with per-file counts proven (2 + 4 + 4); `#106F9F`→`--color-sp-ink` is evidenced by the artefacts' own dark half `#4FC3F7`, which equals the shipped dark token |
+| register | KI-58 closed with its text intact; **KI-83** filed for the mirror case | KI-82 was taken by a peer commit at 13:53, so the numbering continued past it; KI-81 stays reserved |
+| 15 | `SCREEN_SPEC.md` §7-18 | dated ruling note appended, entry text preserved |
+
+**Two things this pass could not do, and both are mechanical, not cautious.**
+
+1. **`PRODUCT.md` was not edited.** `AGENTS.md:381` lists it as generator-owned with "the generator wins",
+   so hand-editing the `:302` stale `RenderedCopyHygieneTest` citation and the `:207-214` open record would
+   be overwritten at the next generation rather than fixed. Both texts are drafted in §11 and §12 and need to
+   enter through the generator's own source, or by your hand. That makes the fourth location §11 named the
+   one that an agent cannot write in.
+2. **`DESIGN.md`, `SCREEN_SPEC.md` and `KNOWN-ISSUES.md` were written but not committed.** Each carries
+   uncommitted hunks from other passes, and the only non-interactive routes are a whole-file pathspec commit
+   — which would land another session's work under this message — or `git apply --cached`, which you revoked
+   on 2026-10-09 after it dropped hunks twice here. `git add -p` is interactive and unavailable to this tool.
+   So those three stay modified-in-tree for a session that can commit them wholesale or split them by hand.
+
+**Browser gate not run, deliberately.** KI-80 (open, another session) records that the suite's scratch
+database is one shared repo path, so a second session's `globalSetup` **deletes** the first one's data
+mid-run; a peer run was live minutes before this line was written. The Vue edits therefore rest on typecheck,
+the gate pass, and reading the markup — not on Chromium, and no runtime claim is made for them.
+
+### 18. Remaining-work pass, executed 2026-10-09
+
+This pass lands `cf68a7a`, `e373588`, `0c1ec6d`, `fc5fa1a`, `4f1aae8`, `92abcca`, `9849f8c`, `b3ba5f3`,
+`59ae3e3`, `284f40d` and this file on `master`; each pathspec commit was blob-verified
+(`git rev-parse HEAD:<path>` against the rebuilt file) before the peer's lines were restored.
+
+**Tier 0, landed.** `DESIGN.md` §5 and §10 (`cf68a7a`, corrected forward by `e373588`), `SCREEN_SPEC.md`
+§7 items 18 and 20 (`0c1ec6d`), `KNOWN-ISSUES.md` KI-58 closure plus KI-83 (`fc5fa1a`). The first
+isolation splice treated a unified-diff header as a 0-based index, so a replacement hunk kept the line it
+was meant to remove and removed the next one instead; the tool now asserts that the lines it cuts are
+byte-identical to the hunk's own removed lines, and the damage was fixed by a follow-up commit rather
+than a rewrite.
+
+**Tier 1, landed.** `4f1aae8` deletes every `focus-visible:outline-green` override; `92abcca` prints the
+constants behind the coverage, caps and race-fact figures; `9849f8c` rewords the unresolvable trainee id;
+`b3ba5f3` corrects §8's site list and stops pre-deciding the motion question; `59ae3e3` files KI-81 in its
+reserved slot; `284f40d` records SCR-VET-004's correction 3.
+
+Three of the seven Tier 1 premises did not survive contact with the tree, and each is reported rather than
+built to match the brief:
+
+1. **"four `outline-green` deletions" is 22.** `DESIGN.md` §8 named two Blade templates as the call sites;
+   both were deleted in slice B1 (`0ea8d43`). The overrides were actually 22 sites across seven Vue
+   components — three in `skills/SkillCatalog.vue`, four in `support/SupportCardCatalog.vue`, two in
+   `support/SupportSlot.vue`, one in `TraineeCombobox.vue`, three in `Runs/Show.vue`, six in
+   `Support/Builder.vue`, three in `Veterans/Index.vue`. All 22 are deleted, each site keeps its outline
+   width and offset, and `grep -r outline-green resources/` returns 0.
+2. **The `veteran-compare.spec.ts` assertion was already loosened**, at `eb2d7e9` and not by this session:
+   `:98` waits on the path with any query while `:89` keeps the library door's `veterans[]=N`, which is
+   server-rendered and really does emit that spelling. So the deliverable became the status record
+   (`§4.20` correction 3), not an edit to a passing spec. Section 3's `SCR-VET-004` row still repeats the
+   stale failure cause; it lies inside a concurrent session's uncommitted hunk range, so it is named in
+   that correction instead of being edited there.
+3. **There is no unheld 768px claim to withdraw.** `DESIGN.md` §2.3's own status bullet already calls the
+   minimum "a proposal, not a ratified contract" resting "on an attribute read rather than a browser
+   measurement", §10 marks it **Unverified**, and §11 question 5 puts the choice in front of the owner.
+   Withdrawing the number would delete the measured half (the two wide tables, 476px at the narrowest
+   viewport tested, and their scrolling contract), so nothing moved. Measuring it is Tier 2's work.
+
+**Tier 1, held.** `Dashboard.vue:300-301` prints the verified date visibly already; what it lacks is the
+source, and `dataStatus` is typed `{ label, state, verified_at }` — no source string exists in the payload,
+so adding one is a `DashboardController` change, and that file carries a concurrent session's uncommitted
+lines. Left as decision (d) below rather than invented as copy.
+
+### 19. Tier 2 runbook, KI-80, not executed this pass
+
+The remaining budget did not cover writing the fix *and* running the six held specs, so this is the runbook,
+not a claim.
+
+1. `tests/browser/global-setup.ts` currently points every session at one `database/browser-scratch.sqlite`
+   and wipes it. Give it a per-session path from `process.env.PLAYWRIGHT_SCRATCH_DB`, falling back to the
+   shared path only when the variable is unset, and have the wipe touch only that path.
+2. Build each copy with `VACUUM INTO` from `database/database.sqlite` — never `cp`: a WAL database copied
+   file-by-file arrives malformed, missing tables, or silently empty. Seed a Veteran set into the copy so
+   KI-69 class 3 can stop being a fixture blocker.
+3. Serve each session's own port and kill the server inside the same command as the spec run; a backgrounded
+   `artisan serve` dies between turns, and a leaked one answers 500, which reads as a web-server timeout.
+4. Then the six held specs: `career-inheritance-event`, `grand-concert-panel`, `scenario-panel`,
+   `veteran-compare`, `ancestry-node-picker`, `career-training-detail`. Report each with its own exit code;
+   no session may claim the suite is green until `php artisan migrate:status` has been run on the dev file
+   (KI-60, owner action).
+
+### 20. Decisions owed, as at the end of this pass
+
+| # | Decision | Why it is not an agent's |
+|---|---|---|
+| a | Group C's seven sentence-objects (`RecommendationCard.vue:64`, `DeckPanel.vue:138`, `SupportCards/Show.vue:149`, `GradePointMeter.vue:54`, `TraineeSelect.vue:119`, `TeamRacePanel.vue:42`, `Runs/Show.vue:225`): `N/A` plus reason, or the sentence stays | A mechanical substitution deletes the information the sentence carries |
+| b | `Runs/Show.vue:267`, the third group A site | The file carries ~45 concurrent lines; the site is cold but the commit is not separable without a decision on who owns the file |
+| c | Whether to guard config provenance strings against `ProvenanceState` at build time | `ProvenanceBadge.vue:61` indexes `BADGES` with no fallback, so an out-of-vocabulary `state` in `config/reference.php` fails at render; the fix is a validator nobody has authorised |
+| d | Whether `dataStatus` gains a `source` field so the dashboard can print it | Server payload change in a file another session is editing |
+| e | `DESIGN.md` §11 question 3, motion: keep the tree motionless or ratify one transition token | §8 no longer pre-decides it |
+| f | `DESIGN.md` §11 question 5, the 768px minimum: ratify with the measurement or withdraw the number | Needs the browser gate Tier 2 unblocks |
+| g | KI-84: ten feature-test files staged for deletion by a concurrent session, three of them Our Grand Concert's own absence guards | The Floor requires owner approval for a deleted test |
+| h | Section 15's coordination question, still unanswered: which session owns rulings 2a/3b/5a/7a/8a/9b | Both sessions are landing them; `822d97b` and `92abcca` touched the same file within minutes of each other |
+
+**Gates for this pass.** `npm run typecheck` exit 0. `php tools/lore.php`: 303 hits, none in a line this
+pass added (proved by comparing hit line numbers against the added-line set of this pass's commits; the doc
+hits are pre-existing forbidden-list and substring-in-word classes). `composer lore-code`: 121 hits, zero
+in the four Vue files. `vendor/bin/pint --dirty` and PHPStan: not run, no PHP changed. `php artisan test`:
+not run; the change class is Vue and the Level 3 checkpoint is still owed before this slice is called done.
+`php artisan migrate:status`: not run, owner action. Browser: not run, KI-80.
+
+### 21. Browser-unblock pass, executed 2026-10-09 (Tier A to F of the remaining-work prompt)
+
+The prompt that opened this pass is the execution half: KI-80 first, then the six held browser gates, then
+the last UI items, the cumulative PHP gates and the register work. Commits added by it: `4996877` (KI-80),
+`554a6b4` (app.css header), `53ce731` (README), `86177eb` (DESIGN §2.2 and §11), `1e7f3a5` (KI-88),
+`39da5d5` and `625e012` (the two cumulative PHP fixes). A concurrent session then marked KI-80 FIXED IN
+TREE in `d8739a9`, naming `4996877` — not closed, because its closure evidence is the browser suite and
+KI-88 blocks three of the six specs.
+
+**Tier A, KI-80 landed at `4996877`, with one instruction corrected.** `SCRATCH_DATABASE` was one constant;
+it now comes from `PLAYWRIGHT_SCRATCH_DB` or from a default carrying the pid and the load-time millisecond,
+and the delete step is `removeScratchDatabase(path)`, which removes exactly that path and its `-wal`/`-shm`
+siblings. **`VACUUM INTO` from the canonical dev database was not used, contrary to the brief.** The KI-69
+contract is a database built from nothing because five cases assert empty states (`No runs yet` in two
+specs, three dashboard cases with no active career), and a copy of the dev file would carry whichever runs a
+peer left behind and fail them for the wrong reason; the dev file is still never opened, and each run's
+own db-guard output proves `targets canonical: no`. `.gitignore` needed no edit: `/database/*.sqlite*`
+already covers the new names. Evidence: `scratch-isolation.spec.ts` 3 passed (named path, pid default, the
+sweep leaves a peer's file and siblings alone), then two real invocations in parallel on :8180 and :8181
+with distinct scratch files, both exit 0, 3 passed each (47.8s / 47.1s), logs `.scratch-uma/tierA-par1.log`
+and `tierA-par2.log`.
+
+**Tier B, the six gates, with the tree — not HEAD — as the subject.** Every case below ran on its own port
+and its own scratch database, and every result describes the working tree, which carried 97 dirty entries
+when the first spec started and 78 when the last finished; a concurrent session committed twice mid-batch.
+That is the limitation KI-80's fix does not remove: the database is now private per run, the source is not.
+One case is unaffected by it (`career-inheritance-event` passed before either peer commit landed) and one is
+excluded outright (`career-training-detail`, below).
+
+| Spec | Port / log | Result |
+|---|---|---|
+| `career-inheritance-event` | 8180, `tierB-inheritance.log` | **8 passed, exit 0** — the Class 3 cases, first green browser run for that screen |
+| `career-save-veteran` | 8181, `tierB-save-veteran.log` | **5 failed**, all at the fixture's `:54` pre-cutover URL wait |
+| `veteran-compare` | 8182, `tierB-veteran-compare.log` | **1 passed / 3 failed**, same wait at `:53` |
+| `career-training-detail` | 8183, `tierB-training-detail.log` | **6 failed**, timed out on a `Record this training` button its spec (` M`, +26/−23) expects; a concurrent session holds that file, so not counted as evidence |
+| `career-cockpit` | 8184, `tierB-cockpit.log` | **4 passed / 3 failed** in 9.8m: the 1280/768/320 layout, the keyboard ring and the reduced-motion case are green; `:113` expects a link to the deleted run screen, `:226` sizes a control that is not there, `:237` is the stale wait |
+| `career-race-strip` | 8185, `tierB-race-strip.log` | **6 failed**, same wait at `:42` |
+
+So the redirect the cutover landed inverts the earlier picture: the database collision is gone and one spec
+is fully green, but 30 fixture waits across 22 spec files still expect the address `runs.show` no longer
+serves. Both halves are filed as **KI-88**, with the probe that proves the application half: the cockpit's
+three header forms (`saveStatus` `:310`, `saveScenario` `:325`, `savePeriod` `:343`) each open a form whose
+handler hangs off a submit event and render **no** button or submit input — `form locator('button,
+[type="submit"]')` resolved to 0 elements across 32 retries.
+
+**Tier C.** `app.css`'s header now states light is the default (`554a6b4`), with the same block's two dead
+citations repointed to `docs/research-scratch/DESIGN-CORPUS.md`; README's Current Limitations line now
+names KI-58 as closed and KI-83 as the live mirror case (`53ce731`). `DESIGN.md` §2.2 and §11 carry the
+dated close-out (`86177eb`). The dashboard's `source` field stays a held decision: `dataStatus` is typed
+`{label, state, verified_at}` and `DashboardController` is another session's file.
+
+**Tier D.** `phpstan analyse app/` was **2 errors a file, both in committed finale code, both fixed**:
+`Advice.php:22` and `TrainerAdvisor.php:108` each returned or took an `array` with no value type while
+Advice's own inline docblock already spelled the shape out. `pint --test app/ database/ tests/` was 3
+issues, of which `TrainerAdvisor.php`'s missing final newline and one test file's chaining indentation are
+fixed or resolved; **one remains and is not mine to touch**: `tests/Feature/FinaleVocabularyTest.php` is an
+untracked file a concurrent session created this hour, so fixing it would edit work in flight — named here
+instead. Post-fix: PHPStan `[OK] No errors`, Pint clean on `app/Services/Advisor/`.
+
+**Tier D.1, the Level 3 Pest checkpoint: not run, and the reason is attribution rather than time.** The
+suite builds its own schema from `phpunit.xml`'s in-memory database, so a scratch file changes nothing; but
+the tree holds 26 modified and 13 deleted test files from another session, and a run over it would produce
+a number that describes neither HEAD nor this pass. Recorded as owed, not as green.
+
+**Tier E.** KI-84's test deletions were **not** landed and **not** reverted, and the reason is that the set
+will not hold still: KI-84 records ten staged, this pass measured thirteen gone with three of them staged,
+and by the time this section was written the staged set was empty again with twelve deleted, fifteen
+modified and seven untracked. Every count here is a dated reading, not a state. The ` D` set cannot have its
+assertions run because the files are off disk, and two of the twelve guard subjects the cutover deleted
+(`RunViewTargetSizeTest` reads `Runs/Show.vue`; `RunStatusControlTest` pinned the run page's status select,
+which is the control KI-88 says nothing now renders), so the honest disposition is the owner's under the
+Floor, not an agent's — it was already theirs at §20(g), now with the split measured. The `outline-green`
+re-check (5.2) was satisfied at `4f1aae8` and needed nothing further: zero occurrences under `resources/`
+at HEAD.
+
+**Tier F.** All the owner decisions the prompt lists are recorded, each with its anchor: `migrate:status`
+(§16, §20), group C (§14, §20a), `PRODUCT.md` regeneration (§11, §20 note), Unity Cup capture
+(`SCREEN_SPEC.md` §7-6), artwork placement (`DESIGN.md` §4.7, §11 Q7, PRD OQ-6), the 768px question left as
+`DESIGN.md` §11 Q5 rather than withdrawn, 4b's sense (a) (`ADR-0001` §3's dated note), and §20's remaining
+rows. Two are added by this pass and are not in §20's table: **KI-88's remedy** (a Save control per header
+form versus autosave on change, which changes what the 44px sweep and the axe scan measure) and **KI-84's
+13-file deletion split**, which needs the owner's approval under the Floor before any session commits it.
+
+---
+
+## screen-spec-2.0.md
+
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/proposals/screen-spec-2.0.md` (1787 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+
+## Uma Trainer Desk — Screen Specification (2.0 design target)
+
+> **Status: 2.0 design target — reference only, filed 2026-10-04. Not authorization.**
+>
+> Source: owner-supplied design brief (attachment, 2026-10-04), reproduced verbatim below the rule line.
+> This specifies the Trainer Desk 2.0 screen set for the Inertia + Vue rewrite authorized by `ADR-0020` §1.
+> It is the *target* for the SPA slice. The **current** Blade app is documented by `SCREEN_SPEC.md`; where
+> the two disagree about what exists today, `SCREEN_SPEC.md` wins.
+>
+> **Governance holds — these sections describe computation the project has ruled deferred or banned, and
+> filing this document does not authorize them:**
+>
+> - **SCREEN-010 / SCREEN-014** — per-training stat-yield numbers ("+62 Speed / +25 Power") and numeric
+>   "Failure: 2%": no source publishes these. The approved advisor v1 excludes them
+>   (`docs/research-scratch/PROCESS-PLANS.md`, section `## trainer-advisor.md` §1, §5; `ADR-0001` §3).
+> - **SCREEN-011 / SCREEN-017** — race win-probability ("Win probability: 84%") and risk percentages:
+>   race prediction, deferred on the `ADR-0016` data blocker; `ADR-0020` §4 reaffirms §6.11.
+> - **SCREEN-006** — "expected inheritance" and "up to three recommended combinations": inheritance
+>   computation. Only the record-only Veteran library is authorized (`ADR-0020` §3, `ADR-0010`).
+> - **SCREEN-016** — shop-item "recommendation": the shop rotation is not modelled
+>   (`config/scenarios.php` `trackblazer.shop`).
+> - **§30** — numeric confidence / turn-delay quantification: a reason line is authorized
+>   (`ADR-0001` §4); a numeric confidence model is not sourced.
+>
+> Where this target and a landed ADR conflict, the ADR wins (`AGENTS.md` §2). The deferred sections are
+> kept verbatim so the design intent survives for the slice that closes their blocker.
+> *Dated close-out 2026-10-08 (documentation-sync pass): the Inertia + Vue rewrite this banner says "§1
+> targets" landed through Phases A–E, and each screen in this inventory shipped under the union-with-
+> `design-2.0.md` mapping the plan's §4 preamble records. `SCREEN_SPEC.md` §3/§4 is the authoritative record
+> of what exists (`SCR-CAR-001`–`024`, `SCR-VET-001`–`004`, `SCR-SYS-005`–`007`), and the plan's §4–§9
+> close-outs record each slice. The governance holds above still bind: the win-probability, per-training
+> yield, expected-inheritance, shop-recommendation and numeric-confidence sections remain unbuilt and
+> render `N/A` with the blocker named, exactly as this banner states. Nothing in this file's screen set was
+> changed to match what shipped — it remains the design target it was filed as.*
+
+---
+
+### Product direction corrections (added 2026-10-05)
+
+A new product/UX strategy document (owner-supplied, 2026-10-05) corrects several assumptions in this brief.
+This section records those corrections without rewriting the brief itself. The brief stays verbatim; the
+corrections are additive notes so a reader can tell what stands and what must change before implementation.
+
+**Core UX model shift.** The application is reoriented from "career optimizer" to **"Trainer's planning desk."**
+It separates **Preparation mode** ("What am I going to build?") from **Active Career mode** ("Given what actually
+happened, what should I do next?"). The app never pretends its simulated state is authoritative game state.
+
+**Screen-level corrections:**
+
+| Screen                             | Original assumption                     | Corrected direction                                                                                                                                                                                                                                                                                                                                                                                           |
+| ---------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SCREEN-002 (Scenario Selection)    | Three scenarios with difficulty stars   | **Four Global scenarios**; remove star ratings; show optimization focus (primary/secondary/training complexity); Grand Concert marked "PARTIALLY DOCUMENTED"                                                                                                                                                                                                                                                  |
+| SCREEN-005 (Build Target)          | Generic stat targets                    | Add **Career Plan object**: purpose, scenario, trainee, race profile, stat/aptitude/style/skill targets, legacy/support requirements, risk tolerance. Render as "Your target" not "The correct target"                                                                                                                                                                                                        |
+| SCREEN-006 (Legacy Lab)            | Two-parent picker                       | Upgrade to **six-node ancestry planner** (Parent A/B + four grandparents). Show Spark probabilities (`~10% ★★★`), not guarantees. Distinguish Blue/Pink/Green/White/Scenario Sparks. Optimize entire ancestry configuration. **Factor yield clarified 2026-10-05**: exactly 1 Blue + 1 Pink per run, at most 1 Green (requires 3★ parent), White sparks unbounded — model as variable yield, not a slot cap   |
+| SCREEN-007 (Support Deck)          | Five owned + one borrowed               | **Six slots**, ownership flag (OWNED/RENTED). **Seven support types**: Speed, Stamina, Power, Guts, Wit, Pal, Group. Scenario Link derived from scenario+character, not stored on card. Granular deck analysis (training power, early run, race, safety, events, skills)                                                                                                                                      |
+| SCREEN-008 (Run Preflight)         | Simple validation                       | Rename internally to **"Career Contract"**: scenario, trainee, six Legacy members, sparks analyzed, support deck, race profile, stat/skill/aptitude targets, risk profile. Warnings for low factor probability, missing aptitudes                                                                                                                                                                             |
+| SCREEN-009 (Career Cockpit)        | Dashboard                               | Make it a **state machine**: explicit `CareerState` (year, half, turn, energy, mood, stats, SP, fans, bonds, races, events, goals, scenario_state, inheritance_state, action_history). Every action: BEFORE → USER ENTERS → EXPECTED → ACTUAL → UPDATED STATE → RECALCULATED                                                                                                                                  |
+| SCREEN-010 (Training Decision)     | "+62 Speed / +25 Power" yields          | Per-training yields are **unsourced** (§1.1.1 ⚠️ STALE). Render `N/A`. Keep decision card structure but remove specific yield numbers                                                                                                                                                                                                                                                                         |
+| SCREEN-011 (Race Decision)         | Win probability percentage              | Race prediction **deferred** (`ADR-0016`). Use conservative readiness bands (Excellent/Good/Borderline/Poor), not fake precision ("Win probability: 84%"). Model race as complex object (surface, distance, band, style, grade, venue, layout, corners, straights, elevation, weather, ground, season, time, fans, skill interactions, scenario effects)                                                      |
+| SCREEN-012 (Event Decision)        | Simple choice recording                 | Model event as: source (Support/Character/Scenario/Random), choices, known outcomes, current career state, expected effect, recommendation. If outcome incomplete: "⚠ Event outcome incomplete — choose manually"                                                                                                                                                                                             |
+| SCREEN-013 (Inheritance Event)     | Expected inheritance display            | Show **probability, not guarantees**. Factor outlook: `Speed ★★★ Potential payout: +21 Estimated roll: ~10%`. NOT "guaranteed"                                                                                                                                                                                                                                                                                |
+| SCREEN-014–017 (Scenario Panels)   | Static modules                          | Each panel genuinely different: URA (goals + Happy Meek), Unity Cup (**Team Cockpit** with team rank/spirit/bursts), Trackblazer (Grade Points + shop + rivals + Twinkle Star Climax), Grand Concert (basic tracker only, advanced advisor limited)                                                                                                                                                           |
+| SCREEN-018 (Career Timeline)       | Turn log                                | Record **decisions, not just turns**: BEFORE state, ACTION, EXPECTED result, ACTUAL result, RESULT, DECISION accepted/rejected, ADVISOR CONFIDENCE. Creates career audit trail                                                                                                                                                                                                                                |
+| SCREEN-019 (Career Result)         | Summary report                          | Upgrade to **Veteran Creation screen**: career result, aptitudes, skills, race history, sparks, legacy value (factor quality assessment), best use recommendation                                                                                                                                                                                                                                             |
+| SCREEN-020 (Save Veteran)          | Simple save                             | Add **Factor Analysis** workflow: veteran review → factor analysis → legacy value → tag → save. Recommendation: "Excellent Medium parent. Best used for: Medium, Pace Chaser, Speed-oriented builds"                                                                                                                                                                                                          |
+| SCREEN-021 (Veteran Library)       | List view                               | Three views: **Veterans** (all completed careers), **Factors** (searchable factor inventory), **Ancestry** (see where Veteran came from — six-node graph). Add "Find Parents for This Build" button                                                                                                                                                                                                           |
+| SCREEN-022 (Veteran Comparison)    | Side-by-side stats                      | Add factor comparison, ancestry visualization, compatibility calculation. Search by factor requirements, aptitude requirements, skill requirements, compatibility, scenario requirements                                                                                                                                                                                                                      |
+| New (not numbered)                 | —                                       | Add **Race Planner sophistication**: course analysis (final corner, slope, backstretch, final straight, last-spurt conditions, position triggers). Don't hard-code distance ranges without resolving conflicts (1400m: Game8=Sprint vs export=Mile)                                                                                                                                                           |
+
+**New interaction patterns:**
+
+- **Undo last recorded action**: Safe because local planning tool, not game manipulation
+- **Screenshot-assisted entry** (future): Import screenshot → OCR → user confirmation → store as `USER_CONFIRMED_SCREENSHOT`
+- **Three complexity levels**: Beginner ("What should I do?" → "Train Speed"), Intermediate (+ why), Advanced (full modifier breakdown)
+- **Progressive disclosure**: Default shows summary; expand for training calculation, support contribution, scenario modifier, race requirements, source/confidence
+
+**Data integrity layer additions:**
+
+Every important game mechanic represented as `GameRule` with: key, scenario_id, server, version, value, source, source_type, confidence, verified_at, notes. Example:
+
+```text
+scenario.trackblazer.stat_cap.stamina
+value: 1900
+server: global
+source: gametora_scenario_export
+confidence: verified
+verified_at: 2026-09-27
+```text
+
+**Terminology authority:** Global terminology is authoritative (Scouts, Transfer Requests, Veteran Umamusume, Pal, Wit, Inspiration, Legacies, Sparks). UI always uses Global labels; internal keys separate. JP-only mechanics explicitly excluded (four Global scenarios vs fourteen JP; JP-only features like Independent Training marked unverified for Global).
+
+**Confidence model:** Every recommendation carries confidence level: HIGH (supported by current client/data + current source), MEDIUM (current data + older guide), LOW (derived from incomplete information), UNVERIFIED (do not use for automatic recommendation). Example: "Train Speed — Confidence: HIGH" vs "Predicted exact stamina for 2200m — Confidence: LOW" (no verified metres-per-Stamina conversion).
+
+**Multi-objective optimizer architecture:** Hard constraints (mandatory race within N turns, fan requirements) come before optimization (career goals, scenario objectives, build targets, legacy value, risk model). LLM explains recommendation, does not invent it.
+
+**Versioning mandatory:** Every career run preserves ruleset snapshot. Old Veteran says "Ruleset: Global Trackblazer v2026-04" not silently recalculated with today's rules. Data status indicator on dashboard: "GLOBAL DATA ● Current Updated: 2026-09-27" or "⚠ Snapshot Last verified: 2026-09-27".
+
+**Strongest differentiator clarified:** Not "calculates training gains" (existing calculators do that). It is: **"Understands relationship between current Career Plan, six-person Legacy configuration, Support Deck, current Career State, and the Veteran being created."**
+
+---
+
+### Knowledge grounding (added 2026-10-05)
+
+The brief numbers its own screens `SCREEN-001` … `SCREEN-027`. The repository numbers screens
+`SCR-<AREA>-<nnn>` (`SCREEN_SPEC.md` §2). This section maps the two so a slice can cite one ID, and
+records what the corpus holds for each screen's data. It does not edit the brief.
+
+**Terminology.** "July 2026 rebalance" → the corpus's **2026-07-01 Global rework**
+(`docs/UMAMUSUME_REFERENCE.md` L1016; `SCENARIO-PUBLISHER-REFERENCES.md` L544). "Support Decks" in the
+brief's nav (§3) is the repository's **Support Cards** (`SCREEN_SPEC.md` §3 nav order).
+
+**Screen mapping.** This document's screens are `SCREEN-001` … `SCREEN-024`. `design-2.0.md` carries a
+**different** inventory (`SCR-001` … `SCR-027`) that adds a Skills Planner and a Grand Concert panel and
+omits Inheritance Event, Career Timeline and Veteran Comparison. The two lists disagree; neither is
+authoritative over the other, and the development plan builds their union. "Port" = the screen exists today
+and this rewrite re-renders it in Vue; "New" = no current screen.
+
+| Brief ID     | Screen                        | Repo ID                                                   | Route / source                                                                   | State                                                            |
+| ------------ | ----------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| SCREEN-001   | Dashboard                     | — (SPA `Dashboard.vue`)                                   | `GET /` (`home`)                                                                 | Partly built; Active-Career/Recent-Veterans are named absences   |
+| SCREEN-002   | Scenario Selection            | New                                                       | `config/scenarios.php`                                                           | New; binds the four-scenario matrix                              |
+| SCREEN-003   | Trainee Selection             | `SCR-CAT-001`                                             | `GET /umamusume`                                                                 | Port                                                             |
+| SCREEN-004   | Trainee Profile               | `SCR-CAT-002`                                             | `GET /umamusume/{slug}`                                                          | Port                                                             |
+| SCREEN-005   | Build Target                  | New (`FR-F`)                                              | `training_runs.build_target`                                                     | New; spec `PROCESS-PLANS.md` `## trainer-advisor.md` §2          |
+| SCREEN-006   | Legacy Lab                    | New (`FR-G`, record-only)                                 | Veteran library                                                                  | New; optimization parts **held** (`ADR-0020` §3)                 |
+| SCREEN-007   | Support Deck Builder          | New                                                       | `runs.deck.sync`; `x-deck-editor`                                                | New screen over an existing write path                           |
+| SCREEN-008   | Run Preflight                 | New                                                       | composes 005–007                                                                 | New                                                              |
+| SCREEN-009   | Career Cockpit                | New (descends `SCR-RUN-003`)                              | `GET /training-runs/{run}`                                                       | New; the flagship screen                                         |
+| SCREEN-010   | Training Decision             | New (`FR-F`)                                              | advisor spec                                                                     | New; per-training yields **held**                                |
+| SCREEN-011   | Race Decision                 | New                                                       | `RaceCatalogSlot`                                                                | New; win-probability **held** (`ADR-0016`)                       |
+| SCREEN-012   | Event Decision                | New                                                       | `TurnEvent` + `TurnEvents\*Payload`                                              | New over existing event recording                                |
+| SCREEN-013   | Inheritance Event             | New                                                       | —                                                                                | New; **record-only** (`ADR-0020` §3)                             |
+| SCREEN-014   | Scenario Panel: URA Finale    | New                                                       | `ura_finale`                                                                     | New                                                              |
+| SCREEN-015   | Scenario Panel: Unity Cup     | New                                                       | `unity_cup`; `x-spirit-burst-roster`, `x-team-rank-gauge`, `x-team-race-panel`   | New over existing components                                     |
+| SCREEN-016   | Scenario Panel: Trackblazer   | New                                                       | `trackblazer`; `x-shop-panel`, `x-grade-point-meter`, `x-epithet-checklist`      | New; shop recommendation **held** (rotation not modelled)        |
+| SCREEN-017   | Scenario Race Planner         | New                                                       | `RaceCatalogSlot`                                                                | New; win-probability **held** (`ADR-0016`)                       |
+| SCREEN-018   | Career Timeline               | New                                                       | `TurnEntry` / `TurnEvent`                                                        | New                                                              |
+| SCREEN-019   | Career Result                 | New                                                       | `TrainingRun`                                                                    | New                                                              |
+| SCREEN-020   | Save Veteran                  | New (`FR-G`)                                              | —                                                                                | New                                                              |
+| SCREEN-021   | Veteran Library               | New (`FR-G`)                                              | —                                                                                | New                                                              |
+| SCREEN-022   | Veteran Comparison            | New (`FR-G`)                                              | —                                                                                | New                                                              |
+| SCREEN-023   | Database                      | `SCR-CAT-001/002`, `SCR-SKL-001/002`, `SCR-SUP-001/002`   | `GET /umamusume`, `/skills`, `/support-cards`                                    | Port; races and scenarios are new                                |
+| SCREEN-024   | Settings                      | `SCR-SYS-002`                                             | `GET /preferences`                                                               | Ported to Vue 2026-10-04                                         |
+
+**From `design-2.0.md` but not here:** a Skills Planner (`SCR-013`) and a Grand Concert panel (`SCR-017`).
+Both are in the development plan's union. Grand Concert's panel is a baseline strip only (below).
+
+**Not in either brief but already shipping:** the Review queue (`SCR-REV-001`, `GET /review`, ported to Vue)
+and the run import screens (`SCR-RUN-004`/`005`). They stay.
+
+**Corpus authority per screen's data.** Scenario panels read `config/scenarios.php`, whose per-number
+provenance is stated in its own header (`GameTora scenarios.json`, verified 2026-09-27). Sparks/Affinity
+data (006, 013, 021) is `UMAMUSUME_REFERENCE.md` §1.5. Support-card effects (007, 022) are §1.4. The
+Trackblazer shop catalogue and epithet routes are transcribed from `SCENARIO-PUBLISHER-REFERENCES.md`.
+
+**Unknowns the plan must render as absence, never invent:** Grand Concert mechanics (07 stub, §2.2.4
+❌ UNVERIFIED); race distance/surface on goal races and any win probability (`ADR-0016`); per-training
+stat yields and failure % (§1.1.1 ⚠️ STALE, excluded by the advisor spec); the official scenario title
+"Twinkle Star Climax" (§7 conflict row 31 ❌ UNVERIFIED as the official name; "Trackblazer" is the export
+label); the factor-slot count (§1.5 L641 ❌ UNVERIFIED); and the `app.ruleset` string, currently `null`.
+
+---
+
+## Uma Trainer Desk — Screen Specification
+
+**Project:** Uma Trainer Desk
+**Platform:** Local-only web application
+**Stack:** Laravel 13 + Inertia.js + Vue 3
+**Primary use:** Umamusume: Pretty Derby career planning and run management
+**Target server:** Global English
+**Primary scenarios:** URA Finale, Unity Cup, Trackblazer
+**Future-compatible:** Additional scenarios such as Brighter Together: Our Grand Concert
+
+---
+
+### 1. Product Definition
+
+Uma Trainer Desk is a local-first Trainer companion application for planning,
+tracking, and analyzing Umamusume career runs.
+
+The application does NOT attempt to play the game automatically.
+
+It assists the player by:
+
+- planning a career before starting
+- evaluating trainee builds
+- comparing inheritance candidates
+- building support card decks
+- tracking career state
+- comparing available actions
+- explaining recommendations
+- tracking scenario-specific mechanics
+- recording the completed career
+- maintaining a Veteran/Legacy library
+
+The user remains the final decision-maker.
+
+---
+
+## 2. Primary User Flow
+
+```text
+Dashboard
+    │
+    ▼
+New Career
+    │
+    ▼
+Scenario Selection
+    │
+    ▼
+Trainee Selection
+    │
+    ▼
+Build Target
+    │
+    ▼
+Inheritance / Legacy Lab
+    │
+    ▼
+Support Deck Builder
+    │
+    ▼
+Run Preflight
+    │
+    ▼
+Career Cockpit
+    │
+    ├── Training
+    ├── Race
+    ├── Rest
+    ├── Recreation
+    ├── Scenario Action
+    ├── Event
+    └── Inheritance
+    │
+    ▼
+Career Result
+    │
+    ▼
+Save Veteran
+    │
+    ▼
+Veteran / Legacy Library
+```text
+
+---
+
+## 3. Application Shell
+
+All screens except the initial setup screens use the Application Shell.
+
+```text
+┌──────────────────────────────────────────────────────────┐
+│ Logo / App Name                  Current Career / Profile │
+├──────────────┬───────────────────────────────────────────┤
+│              │                                           │
+│ Navigation   │               Page Content                │
+│              │                                           │
+│ Dashboard    │                                           │
+│ New Career   │                                           │
+│ Legacy Lab   │                                           │
+│ Support      │                                           │
+│ Veterans     │                                           │
+│ Database     │                                           │
+│ Settings     │                                           │
+│              │                                           │
+├──────────────┴───────────────────────────────────────────┤
+│ Status / Local Data / Version                            │
+└──────────────────────────────────────────────────────────┘
+```text
+
+### Global navigation
+
+- Dashboard
+- New Career
+- Legacy Lab
+- Support Decks
+- Veterans
+- Database
+- Settings
+
+When a career is active, a dedicated Career navigation becomes available.
+
+---
+
+## 4. SCREEN-001 — Dashboard
+
+### Purpose
+
+Landing screen for returning users.
+
+### Primary goals
+
+- resume active career
+- start new career
+- inspect recent veterans
+- access legacy tools
+- see application/data status
+
+### Layout
+
+```text
+┌──────────────────────────────────────────────────────────┐
+│ Uma Trainer Desk                                         │
+│                                                          │
+│ Welcome back, Trainer.                                  │
+│                                                          │
+│ ┌──────────────────────────────────────────────────────┐ │
+│ │ ACTIVE CAREER                                        │ │
+│ │                                                      │ │
+│ │ Tokai Teio                                           │ │
+│ │ Trackblazer · Senior Year                            │ │
+│ │                                                      │ │
+│ │ Turn 37 · Energy 72 · Grade Points 280              │ │
+│ │                                                      │ │
+│ │ [Resume Career]                                      │ │
+│ └──────────────────────────────────────────────────────┘ │
+│                                                          │
+│ [New Career]   [Legacy Lab]   [Support Decks]            │
+│                                                          │
+│ Recent Veterans                                          │
+│ Recent Builds                                            │
+└──────────────────────────────────────────────────────────┘
+```text
+
+### Components
+
+- ActiveCareerCard
+- NewCareerButton
+- RecentVeterans
+- RecentBuilds
+- DataStatus
+- QuickActions
+
+### Empty state
+
+If no active career exists:
+
+> No active career. Start a new training run.
+
+---
+
+## 5. SCREEN-002 — Scenario Selection
+
+### Purpose
+
+Choose the career scenario.
+
+### Scenario cards
+
+Each card must display:
+
+- scenario name
+- short description
+- complexity
+- primary mechanic
+- recommended use
+- availability
+- ruleset version
+
+### Current scenarios
+
+#### URA Finale
+
+Primary mechanic:
+
+- standard career progression
+- character goals
+- Happy Meek system
+
+#### Unity Cup
+
+Primary mechanic:
+
+- team development
+- team races
+- Spirit
+- Spirit Bursts
+- Extreme Spirit Bursts
+
+#### Trackblazer
+
+Primary mechanic:
+
+- Grade Points
+- Shop Coins
+- Pro Shop
+- Rival races
+- Twinkle Star Climax
+
+### Future scenarios
+
+Future scenarios must be represented through the same Scenario interface.
+
+The UI must not assume that every scenario uses:
+
+- the same objectives
+- the same currencies
+- the same finale
+- the same training rules
+
+---
+
+## 6. SCREEN-003 — Trainee Selection
+
+### Purpose
+
+Select the trainee for the career.
+
+### Features
+
+- searchable roster
+- sorting
+- filtering
+- trainee comparison
+- detailed trainee profile
+
+### Filters
+
+- Surface
+- Distance
+- Running style
+- Aptitude
+- Growth rate
+- Scenario suitability
+- Unique skill
+- Character
+
+### Trainee card
+
+```text
+┌──────────────────────────────────────┐
+│ Tokai Teio                          │
+│                                      │
+│ Turf       A                         │
+│ Sprint     F                         │
+│ Mile       E                         │
+│ Medium     A                         │
+│ Long       B                         │
+│                                      │
+│ Pace Chaser A                        │
+│                                      │
+│ Growth                                     │
+│ Speed +20%                              │
+│ Power +10%                              │
+│                                      │
+│ [View Profile] [Select]              │
+└──────────────────────────────────────┘
+```text
+
+---
+
+## 7. SCREEN-004 — Trainee Profile
+
+### Purpose
+
+Provide complete build-relevant information before selection.
+
+### Sections
+
+#### Basic
+
+- Name
+- Rarity
+- Version
+- Growth rates
+
+#### Aptitudes
+
+- Surface
+- Distance
+- Running style
+
+#### Skills
+
+- Unique skill
+- Starting skills
+- Awakening skills
+- Event skills
+
+#### Career goals
+
+Display the trainee's expected career objectives.
+
+#### Build analysis
+
+Show:
+
+- ideal distances
+- suitable running styles
+- recommended stat distribution
+- useful inheritance
+- useful support types
+
+---
+
+## 8. SCREEN-005 — Build Target
+
+### Purpose
+
+Define what the player wants from the run.
+
+### Target purpose
+
+Options:
+
+- Story Clear
+- Competitive Build
+- Champions Meeting
+- Parent Farming
+- Skill Farming
+- General Training
+
+### Race profile
+
+- Surface
+- Distance
+- Running style
+
+### Target stats
+
+```text
+Speed       1200
+Stamina      700
+Power       1000
+Guts         400
+Wit          900
+```text
+
+### Skill priorities
+
+Each skill may be marked:
+
+- Required
+- High priority
+- Optional
+- Ignore
+
+### Target summary
+
+The screen must generate a human-readable summary:
+
+> Build Tokai Teio for Turf Medium-distance Pace Chaser.
+> Prioritize Speed, Power and Wit.
+> Focus inheritance on Medium and Pace Chaser aptitude.
+
+---
+
+## 9. SCREEN-006 — Legacy Lab
+
+### Purpose
+
+Select and optimize inheritance.
+
+This is a primary feature of the application.
+
+### Layout
+
+```text
+┌──────────────────────────────────────────────────────────┐
+│ LEGACY LAB                                               │
+├───────────────────────┬──────────────────────────────────┤
+│ Candidate Veterans    │ Current Build                    │
+│                       │                                  │
+│ Search                │ Trainee                          │
+│ Filters               │       ↓                          │
+│                       │ Parent A      Parent B            │
+│ Veteran cards         │       ↓          ↓                │
+│                       │ Grandparents                     │
+│                       │                                  │
+│                       │ Inheritance Analysis             │
+└───────────────────────┴──────────────────────────────────┘
+```text
+
+### Candidate filters
+
+- Blue Sparks
+- Pink Sparks
+- Green Sparks
+- White Sparks
+- Distance
+- Surface
+- Running style
+- Skills
+- Race history
+- Scenario factor
+- Affinity
+
+### Parent slots
+
+- Parent A
+- Parent B
+
+### Grandparent visualization
+
+Show:
+
+```text
+Parent A
+├── Grandparent A1
+└── Grandparent A2
+
+Parent B
+├── Grandparent B1
+└── Grandparent B2
+```text
+
+### Compatibility analysis
+
+Display:
+
+- affinity
+- expected inheritance
+- useful Sparks
+- missing Sparks
+- race compatibility
+- skill coverage
+
+### Recommendation
+
+Provide up to three candidate combinations.
+
+Each recommendation must include a reason.
+
+Example:
+
+> Recommended because it provides the strongest Medium aptitude coverage
+> while retaining the required Speed and skill Sparks.
+
+---
+
+## 10. SCREEN-007 — Support Deck Builder
+
+### Purpose
+
+Build the six-card support deck.
+
+### Slots
+
+- five owned cards
+- one borrowed card
+
+### Layout
+
+```text
+┌──────────────────────────────────────────────────────────┐
+│ SUPPORT DECK                                             │
+│                                                          │
+│ [Speed] [Speed] [Power] [Wit] [Wit] [Borrowed]          │
+│                                                          │
+├──────────────────────────────────────────────────────────┤
+│ DECK ANALYSIS                                            │
+│                                                          │
+│ Training        ████████░░                              │
+│ Skill Coverage  █████████░                              │
+│ Race Bonus      ██████░░░░                              │
+│ Bond Potential  █████████░                              │
+│ Scenario Fit    ████████░░                              │
+└──────────────────────────────────────────────────────────┘
+```text
+
+### Filters
+
+- Type
+- Rarity
+- Level
+- Limit Break
+- Skill
+- Training bonus
+- Race bonus
+- Scenario compatibility
+
+### Deck analysis
+
+Must explain:
+
+- strengths
+- weaknesses
+- skill coverage
+- stat coverage
+- scenario compatibility
+- recommended replacement
+
+---
+
+## 11. SCREEN-008 — Run Preflight
+
+### Purpose
+
+Final validation before creating a career run.
+
+### Sections
+
+#### Build
+
+- trainee
+- scenario
+- target
+- inheritance
+
+#### Support deck
+
+- six cards
+- deck analysis
+
+#### Target
+
+- stats
+- skills
+- race profile
+
+#### Warnings
+
+Examples:
+
+- Missing distance aptitude
+- Weak stamina plan
+- Low skill coverage
+- Poor support synergy
+- Missing scenario requirement
+
+### Actions
+
+- Back
+- Edit Legacy
+- Edit Deck
+- Edit Target
+- Start Career
+
+---
+
+## 12. SCREEN-009 — Career Cockpit
+
+### Purpose
+
+Primary screen used throughout the career.
+
+This is the application's most important screen.
+
+### Layout
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│ Career Header                                               │
+├──────────────┬──────────────────────────────┬───────────────┤
+│ Timeline     │ Current Turn                 │ Advisor       │
+│              │                              │               │
+│ Career       │ Current stats                │ Best Action   │
+│ milestones   │ Training options             │ Why           │
+│              │ Race                         │ Projection    │
+│              │ Scenario action              │ Alternatives  │
+│              │                              │               │
+├──────────────┴──────────────────────────────┴───────────────┤
+│ Scenario Panel / Upcoming Events / Race Calendar            │
+└─────────────────────────────────────────────────────────────┘
+```text
+
+### Header
+
+Show:
+
+- scenario
+- year
+- month
+- turn
+- energy
+- mood
+- fans
+- skill points
+- scenario resources
+
+### Next Decision Component (new spec)
+
+The Advisor column is a shared component, not a screen variant. It receives scenario-specific objectives, constraints, and rules via props — never by branching on scenario name.
+
+**Required behavior:**
+
+- Display the current objective and the reason it matters now.
+- Present a recommended action only when sufficient verified rules and state support it.
+- Explain the decisive factors and relevant trade-offs (constraints, opportunity cost, missing information).
+- Show viable alternatives where the available data permits a meaningful comparison.
+- Distinguish recorded facts, calculated results, estimates, and unknown values using the trust vocabulary (Confirmed / Calculated / Estimated / Unknown, per `ADR-0020` §2).
+- Let the user choose another action without being blocked by the recommendation.
+- Record the action, expected consequences where supportable, and actual result when entered.
+- Re-evaluate the next decision after the run state changes.
+
+**Explicit states:**
+
+```
+No action selected yet
+  → "No recommendation — insufficient verified rules or state to rank actions"
+
+Action under review
+  → show forecasted consequences with provenance labels
+
+Action recorded, actual result pending
+  → grey out, show "ENTER ACTUAL RESULT"
+
+Action recorded, actual result entered
+  → show reconciliation (expectation vs. observation)
+
+No eligible action
+  → "No viable action available — all options violate a constraint"
+```
+
+---
+
+## 13. Career State Panel
+
+Always display:
+
+```text
+Speed
+Stamina
+Power
+Guts
+Wit
+
+Energy
+Mood
+Fans
+Skill Points
+```text
+
+Stat targets should appear as progress bars.
+
+---
+
+## 14. SCREEN-010 — Training Decision
+
+### Purpose
+
+Compare available training actions.
+
+### Training card
+
+```text
+SPEED
+
+Facility level: 3 (repetition: 12/16)
+Energy cost: 19
+
+Support: 3 flames
+Bond gains: +7 / +7 / +5
+
+Target impact:
+Speed: 742 / 800 (93%)
+
+Missing data: exact stat yield (+X Speed), failure probability
+```
+
+**No per-training stat yields.** Numeric training gains are unsourced (`ADR-0020` §3, deferral table line 13-14). The card explains the factors used to compare actions without showing unsupported yield or failure numbers.
+
+### Actions
+
+- Train
+- Inspect details
+
+### Details
+
+Display:
+
+- facility level and progress to next
+- energy cost
+- support flame count
+- bond gains (per support card, where recorded)
+- scenario effects (where verified, e.g. Happy Meek duel on Stamina)
+- target impact (distance to goal, with provenance label)
+
+---
+
+## 15. SCREEN-011 — Race Decision
+
+### Purpose
+
+Select whether and where to race.
+
+### Race cards
+
+Display:
+
+- race name
+- grade
+- distance
+- surface
+- running style
+- expected reward (Confirmed / Calculated / Estimated)
+- fan gain
+- skill point gain
+- scenario reward (if sourced)
+
+**No numeric win probability.** Race prediction is deferred on the `ADR-0016` data blocker (`ADR-0020` §4). Instead, show readiness bands using verified stat comparisons:
+
+```
+READINESS BANDS
+
+EXCELLENT  Your stat profile matches the race requirements
+GOOD       Minor deficits, win is plausible with skill support
+BORDERLINE Key stat below the distance-appropriate floor
+POOR       Stamina or Speed well below the distance floor
+
+Missing data: opponent strength, exact placement modifiers
+```
+
+### Risk indicator
+
+```text
+LOW       No fatigue chain, full energy
+MEDIUM    2-consecutive race chain (see §10 Race Fatigue)
+HIGH      3+ consecutive races (fatigue event likely)
+```
+
+The exact thresholds come from the race-fatigue table (`SCENARIO-PUBLISHER-REFERENCES.md §7`); they are Trackblazer-specific and must not be hardcoded in the component.
+
+---
+
+## 16. SCREEN-012 — Event Decision
+
+### Purpose
+
+Record event choices and their effects.
+
+### Layout
+
+```text
+EVENT
+
+Kitasan Black
+
+Option A
++20 Speed
++10 SP
+
+Option B
++30 Energy
++10 Mood
+
+────────────────────
+
+Trainer Advisor
+
+Recommended: Option B
+
+Reason:
+Energy is currently low and the next
+important race is approaching.
+```text
+
+The user must be able to override the recommendation.
+
+---
+
+## 17. SCREEN-013 — Inheritance Event
+
+### Purpose
+
+Track inheritance milestones during the career.
+
+### Display
+
+- parent Sparks
+- grandparent Sparks
+- expected inheritance
+- previous inheritance
+- newly activated Sparks
+
+### Timeline
+
+```text
+Career Start
+    ✓
+
+Classic April
+    ○
+
+Senior April
+    ○
+```text
+
+---
+
+## 18. SCREEN-014 — Scenario Panel: URA Finale
+
+### Purpose
+
+Expose URA-specific information.
+
+### Components
+
+- character goals
+- URA progression
+- Happy Meek status
+- finale preparation
+- upcoming mandatory races
+
+### Happy Meek
+
+Show:
+
+- current level (wins / 6)
+- duel availability (next training turn)
+- potential reward (stat, cap bump, Racing Spirit hint, SP)
+- final-race contribution (powered-up state at 6 wins → Past My Limits)
+
+### Career Milestone Tracker (new)
+
+A milestone strip showing the current career objective, deadline, completion state, and next required step:
+
+```
+MILESTONES
+
+[ ✓ ] Valentine's gate (60k fans)    completed, turn 8
+[ • ] Fan Fest gate (70k fans)       32k / 70k, 18 turns left
+[ ○ ] Holiday gate (120k fans)       upcoming, 42 turns left
+[ • ] URA Qualifier                scheduled, turn 36
+[ ○ ] URA Semifinals               lock after Qualifier win
+[ ○ ] URA Finals                   lock after Semifinals win
+```
+
+Source: `docs/scenarios/01-ura-finale.md:77-84`, `UMAMUSUME_REFERENCE.md §2.2.1`.
+
+### Readiness Summary (new)
+
+Assess race preparation using verified data only:
+
+```
+READINESS FOR URA QUALIFIER (Scheduled: turn 36)
+
+Distance    Medium    ✓ Stamina 610 ≥ 600 floor
+Surface     Turf      ✓ aptitude B
+Stat target Speed 800  ⚠ 742 / 800
+Skills      Last spurt  ✓ owned
+            Power surge  ⚠ hint unlocked, not purchased
+
+Missing data: exact qualifier distance (determined by most-raced type)
+```
+
+### Training-vs-Recovery Decision Area (new)
+
+Explain the current priority and known trade-offs: train, rest, or race. Each option shows its primary constraint and what it preserves for later:
+
+```
+RECOMMENDED: TRAIN STAMINA
+  Supports: Medium-distance floor ahead of Qualifier
+  Constraint: facility at Lv 2, 1 block from Lv 3
+  Trade-off: -40 energy; Summer camp in 6 turns
+
+[ Train Stamina ]   [ Race a Tier 2 (SP: +40) ]   [ Rest ]
+```
+
+### Pre-Final Review (new)
+
+Before the three finale races, identify recorded strengths, known deficits, and unresolved requirements:
+
+```
+PRE-FINALE READINESS
+
+Strengths:   Speed 920+, Stamina 650+, Guts 700+
+Deficits:    Power 580 (below 600 Medium floor)
+Unresolved:  Qualifier distance (tied to most-raced type)
+```
+
+---
+
+## 19. SCREEN-015 — Scenario Panel: Unity Cup
+
+### Purpose
+
+Manage scenario-specific team progression.
+
+### Components
+
+- team rank
+- team member stats
+- team composition
+- team races
+- Special Training
+- Spirit
+- Spirit Burst
+- Extreme Spirit Burst
+
+### Team management view (enhanced)
+
+A team roster dashboard that tracks members, their relevant strengths, development needs, and contribution to upcoming competitions. Show each member's aptitude and available skills, and distinguish individual trainee development from team-level progression:
+
+```
+TEAM ROSTER                                Next Cup: 4 turns
+
+Member          Stat focus   Rank  Needs before Cup        Contribution
+Rice Shower      Stamina     B     +30 Sta for race 2     Burst: Stamina tile
+Fine Motion      Speed       A     —                      Burst: Speed tile (Lv 2)
+Biwa Hayahide    Power       C     +50 Power, +2 wins     Epithet: Goddess route
+Silence Suzuka†   Guts       D     Bond 2 bars            Burst: Guts tile
+Mejiro Ryan†      Wit        C     +30 Wit                Burst: Wit tile
+
+† Story characters (no bond gauge, no Friendship training)
+```
+
+Source: `docs/scenarios/02-unity-cup.md`, `SCENARIO-PUBLISHER-REFERENCES.md §7`.
+
+### Tournament preparation (new)
+
+Show known requirements, relevant rival information, and unresolved readiness concerns. Explicit missing-data states when the opponent, matchup, or team calculation is unavailable:
+
+```
+TOURNAMENT READINESS              Classic late June • Next Cup in 4 turns
+
+OPPONENT PROJECTIONS
+  ○ Strong     rank if won: A+         ⚠ Rice Shower needs +30 Stamina
+  ○ Medium     rank if won: B          ✓ Biwa's Power is borderline
+  ○ Weak       rank if won: C
+
+RACE PREVIEW
+  Sprint     ✓ covered (Fine Motion +20 from burst)
+  Mile       ⚠ borderline (Fine Motion +30 needed)
+  Medium     ✓ covered
+  Long       ✓ covered
+  Dirt       ⚠ Mejiro Ryan bond not ready
+
+Status: Insufficient data for opponent strength projection
+```
+
+### Spirit panel
+
+Display:
+
+- current Spirit
+- burst readiness (gauge vs. configured threshold)
+- recommended timing (held advice — see `ADR-0020` §3)
+- projected benefit (held advice — see `ADR-0020` §3)
+
+---
+
+## 20. SCREEN-016 — Scenario Panel: Trackblazer
+
+### Purpose
+
+Manage Trackblazer-specific resources.
+
+### Components
+
+- Grade Points
+- Shop Coins
+- Pro Shop
+- purchased items
+- Rival races
+- race schedule
+- Twinkle Star Climax
+
+### Race calendar (new)
+
+Visualize upcoming races, known objectives, and the current preparation window. Chronological view with distance, surface, grade, and consequence of selection:
+
+```
+RACE CALENDAR                    Classic • Turn 31
+
+UPCOMING (next 6 turns)
+  Turn 34  G2 Mile (Turf)        +80 GP, +100 coins  ✓ in plan
+  Turn 35  G3 Sprint (Turf)      +60 GP, +80 coins    ✓ in plan
+  Turn 36  G1 Long (Turf)        +100 GP, +150 coins  ⚠ tight spacing
+
+CONSEQUENCES OF SKIPPING
+  G2 Mile: -80 GP from runway, -2 route progress
+  G3 Sprint: no objective impact
+  G1 Long: -100 GP, epithet route at risk
+
+Status: 128 GP needed, 220 projected (with wins)
+```
+
+Source: `SCENARIO-PUBLISHER-REFERENCES.md §7`, `docs/Trackblazer-plan.md §6`.
+
+### Resource ledger (new)
+
+Track Grade Points, purchased items, and remaining balances. Distinguish actual balances from planned spending and hypothetical spending:
+
+```
+RESOURCE LEDGER
+
+GRADE POINTS
+  Current:        172 / 300 (Classic period)
+  Projected:      392 (2 G2 wins + 1 G3 win)
+  Shortfall:      none
+
+COINS
+  Current:        210
+  Planned spend:  100 (Summer items)
+  Reserve:        150 (final shop)
+
+ITEMS
+  Good-Luck Charm  1/5   ✓ held
+  Master Cleat     1/5   ⚠ use before G1 Long
+  Empowering Meg.  2/5   ✓ Summer stock
+```
+
+### Race-versus-training comparison (new)
+
+Make the opportunity cost of each option explicit — not just GP vs. stats, but fatigue, recovery, and epithet progress:
+
+```
+RACE VS. TRAINING
+
+Race G2 Mile:        +80 GP, +100 coins, 1 fatigue, -2 route progress if skipped
+Train Speed:         +6 Speed, +3 Power, +5 SP, facility +0.25 progression
+Rest:                clears fatigue chain, -1 turn of GP
+
+ADVISOR: Race G2 Mile — you are 128 GP short with 9 turns left.
+         Training Speed gains less than the checkpoint risk costs.
+```
+
+### Schedule risk warnings (new)
+
+Flag potentially unsustainable race sequences, inadequate recovery, and missed objective opportunities, using only supported data:
+
+```
+SCHEDULE RISKS
+
+⚠ 5 consecutive races planned in Classic spring (fatigue risk)
+⚠ Year-end gate: 60k fans + Akikawa bond 31 needed
+○ Rival races are random; cannot be scheduled
+```
+
+Source: fatigue table `SCENARIO-PUBLISHER-REFERENCES.md §7 lines 229-242`, year-end gate §13.
+
+### Late-career resource planning (new)
+
+Review remaining objectives and available resources before the finale:
+
+```
+LATE-CAREER REVIEW
+
+Remaining GP:     190 (Senior period)
+Coins:            150 (no income after finale races)
+Hammers held:     3/5  ✓ recommended
+Megaphones:       2/5  ✓ Summer stock sufficient
+```
+
+### Shop
+
+Display:
+
+- item
+- cost
+- effect
+- duration
+- eligibility (locked until Debut, per `SCENARIO-PUBLISHER-REFERENCES.md` line 374)
+
+**No recommendation field.** The shop rotation is not modelled (`config/scenarios.php` `trackblazer.shop`); displaying a "recommended purchase" would fabricate data. Community opinions are shown as separate, labelled tags only.
+
+Example:
+
+```text
+Pro Shop                                coins 210   refresh in 3 turns
+
+Master Cleat Hammer    40   +35% race bonus, 1 turn     held 1/5
+Empowering Megaphone   70   +60% training, 2 turns      held 2/5
+Reset Whistle          20   shuffle support cards       held 0/5
+Good-Luck Charm        40   0% failure, 1 turn          held 1/5
+Vita 65                75   +65 energy                  held 0/5
+
+Community tags (uma.guide): Must Buy / Skip
+```
+
+---
+
+## 20b. SCREEN-016b — Scenario Panel: Grand Concert (our_grand_concert)
+
+### Purpose
+
+Surface verified Grand Concert state. The evidence hierarchy (`docs/Our-Grand-Concert-plan.md`) determines what is renderable:
+
+- **Available (Confirmed):** Performance type (Dance, Passion, Vocals, Visuals, Composure) and signed delta as turn observations.
+- **Observed but undocumented:** nothing beyond the above.
+- **Documented as unverified:** starting values, caps, Lesson costs, Song titles, Live Bonus percentages, Hype, Promo Concert timing, outcome words beyond "Great Success".
+- **Inferred/community:** none rendered.
+
+### Components
+
+- Performance strip (type selector + signed delta input)
+- Finale presence indicator (catalogue row-driven, not config-key-driven)
+- Blocked-mechanic placeholders (Lessons, Songs, Live Bonuses, Promo Concerts) with the evidence gate and reopen condition
+
+### States
+
+- **Pre-debut:** Performance input disabled; "Waiting for career start."
+- **Active:** Performance type selector (5 options, no default) + signed delta field.
+- **Recording error:** zero, decimal, or invalid terminology rejected (`GrandConcertPanelTest.php:93,103`).
+
+### What is explicitly not built
+
+- Starting values, current totals, caps, acquisition formulas, Lesson costs, Song titles, Hype, Live Bonus percentages, Promo Concert scheduling, or any recommendation logic. The panel states the evidence boundary and links to `SCREEN_SPEC.md` §7-19 through §7-23 for the reopen conditions.
+
+Source: `docs/Our-Grand-Concert-plan.md` Slices 1–18, `docs/UMAMUSUME_REFERENCE.md §2.9`.
+
+---
+
+## 21. SCREEN-017 — Scenario Race Planner
+
+### Purpose
+
+Provide scenario-aware race planning.
+
+### Features
+
+- upcoming races
+- mandatory races
+- optional races
+- Rival races
+- reward comparison
+- target alignment
+- expected risk
+
+### Recommendation
+
+```text
+RECOMMENDED
+
+Race — Kyoto 1600m (G2 Mile, Turf)
+
+READINESS: GOOD (Speed meets target, Stamina at floor)
+
+Benefits:
+  + 80 Grade Points
+  + 100 Shop Coins
+  + Route progress (2 of 3 on Spring Champion line)
+
+Trade-off:
+  -2 fatigue risk on this chain
+  Training Speed now would gain less than the checkpoint risk
+
+Missing data: opponent strength, exact placement modifiers
+```
+
+**No numeric win probability.** Race prediction is deferred on the `ADR-0016` data blocker. The recommendation shows readiness bands, known benefits, and the opportunity cost — never a fabricated percentage.
+
+---
+
+## 22. SCREEN-018 — Career Timeline
+
+### Purpose
+
+Provide a complete historical view of the run.
+
+### Timeline events
+
+- training
+- races
+- events
+- inheritance
+- scenario actions
+- purchases
+- important decisions
+
+Each event records:
+
+- before state
+- action
+- expected consequence (where supportable, with provenance label)
+- actual result (when entered by the user)
+- after state
+- advisor confidence at time of decision
+
+Example:
+
+```text
+Turn 37
+
+TRAIN SPEED
+
+Before:
+Speed 842
+Energy 72
+
+Expected (Calculated):
++6 Speed, +2 Power, +5 SP
+Facility: 8/12 to Lv 3
+
+Action: Train Speed  ✓
+
+Actual:
+Speed 904
+Energy 51
+
+After:
+Speed 904
+Energy 51
+Facility: 9/12 to Lv 3
+
+Advisor at turn 37: recommended Speed training (verified, repetition level)
+```
+
+---
+
+## 23. SCREEN-019 — Career Result
+
+### Purpose
+
+Summarize the completed career.
+
+### Sections
+
+#### Final build
+
+- stats
+- skills
+- aptitudes
+
+#### Race history
+
+- races
+- wins
+- losses
+- G1 victories
+
+#### Scenario result
+
+- objectives
+- scenario score
+- scenario rewards
+
+#### Build quality
+
+- target completion
+- skill coverage
+- inheritance quality
+
+---
+
+## 24. SCREEN-020 — Save Veteran
+
+### Purpose
+
+Convert the finished trainee into a reusable Veteran record.
+
+### Fields
+
+- Veteran name
+- tags
+- notes
+- parent suitability
+- intended use
+
+### Suggested tags
+
+- Speed
+- Stamina
+- Power
+- Guts
+- Wit
+- Sprint
+- Mile
+- Medium
+- Long
+- Dirt
+- Turf
+- Front Runner
+- Pace Chaser
+- Late Surger
+- End Closer
+- Skill
+- Race
+- Scenario
+
+---
+
+## 25. SCREEN-021 — Veteran Library
+
+### Purpose
+
+Manage completed veterans.
+
+### Features
+
+- search
+- filtering
+- sorting
+- comparison
+- favorite
+- archive
+- delete
+
+### Sort options
+
+- Spark quality
+- aptitude
+- skill coverage
+- race history
+- completion date
+- scenario
+- overall usefulness
+
+---
+
+## 26. SCREEN-022 — Veteran Comparison
+
+Compare up to four veterans.
+
+Columns:
+
+- stats
+- Sparks
+- skills
+- race history
+- aptitude
+- scenario factor
+- inheritance usefulness
+
+---
+
+## 27. SCREEN-023 — Database
+
+### Purpose
+
+Browse game data.
+
+### Sections
+
+- Trainees
+- Support Cards
+- Skills
+- Races
+- Events
+- Scenarios
+- Shop Items
+- Sparks
+
+Database screens are informational and should not overwhelm the main career workflow.
+
+---
+
+## 28. SCREEN-024 — Settings
+
+### Categories
+
+#### General
+
+- theme
+- language
+- units
+- default scenario
+
+#### Recommendation
+
+- recommendation aggressiveness
+- risk tolerance
+- stat target defaults
+- race risk thresholds
+
+#### Data
+
+- import
+- export
+- backup
+- restore
+- reset
+
+#### Game Version
+
+Display:
+
+```text
+Global Ruleset
+Version: YYYY.MM
+```text
+
+Game data and scenario rules must be versioned.
+
+---
+
+## 29. Global Interaction Rules
+
+### Recommendation hierarchy
+
+The recommendation engine evaluates:
+
+1. Survival / avoiding failure
+2. Mandatory objectives
+3. Scenario objectives
+4. Build targets
+5. Support bonding
+6. Scenario resources
+7. Long-term optimization
+
+### Recommendations must be explainable
+
+Never show:
+
+> "Best action: Train Speed."
+
+without a reason.
+
+Instead:
+
+> Train Speed because Speed is 94 below target, three supports gain bond,
+> and there is no mandatory race before the next recovery opportunity.
+
+---
+
+## 30. Recommendation States
+
+Every recommendation has:
+
+- Recommended action
+- Confidence
+- Reasons
+- Alternatives
+- Risks
+
+Example:
+
+```text
+BEST ACTION
+Train Speed
+
+Confidence: HIGH
+
+Reasons:
++ Target deficit
++ Strong support concentration
++ Low failure chance
++ No immediate race requirement
+
+Alternative:
+Train Wit
+
+Risk:
+Delays Speed target by approximately one turn.
+```text
+
+---
+
+## 31. Data Integrity
+
+The application must distinguish:
+
+CONFIRMED
+
+- manually entered state
+- database values
+
+CALCULATED
+
+- derived stat
+- recommendation
+- projected outcome
+
+PROBABILISTIC
+
+- estimated race result
+- RNG outcome
+
+UNKNOWN
+
+- information not yet entered
+
+---
+
+## 32. Career State Persistence
+
+Every action should be persisted locally.
+
+A CareerRun contains:
+
+- scenario
+- trainee
+- target
+- inheritance
+- support deck
+- current state
+- action history
+- scenario state
+- final result
+
+The user must be able to:
+
+- resume
+- inspect history
+- undo the latest action
+- manually correct state
+
+---
+
+## 33. Responsive Behavior
+
+### Desktop
+
+Primary target.
+
+Use:
+
+```text
+Navigation
++
+Timeline
++
+Main Decision Area
++
+Advisor
+```text
+
+### Tablet
+
+Collapse:
+
+- Timeline into drawer
+- Advisor into collapsible panel
+
+### Mobile
+
+Use a single-column workflow:
+
+```text
+Header
+Current State
+Recommendation
+Action
+Scenario
+Timeline
+```text
+
+Never require horizontal scrolling for primary decisions.
+
+---
+
+## 34. Accessibility
+
+Requirements:
+
+- keyboard navigation
+- visible focus
+- minimum touch target 44px
+- semantic headings
+- accessible labels
+- do not rely on color alone
+- support reduced motion
+- sufficient contrast
+- numerical values paired with visual indicators
+
+**Image slots** are governed by `design-2.0` §42 (alt text, reserved-box contrast, label-in-name) and §45a (per-screen placement, geometry, click action). WCAG 2.2 AA conformance for slot-bearing screens is verified by the axe pass in `docs/proposals/frontend-development-plan.md` §12, *per screen*; the law-by-law review of "recognition rather than recall" and "minimal design" sits in that plan's §13.
+
+---
+
+## 35. Sourced image slots
+
+Per-screen placement is `design-2.0` §45a; the Blade parity rule is `DESIGN.md` §4.7. A cell that ships no `<img>` today stays a text-only row. The four absence states (`never mirrored`, `gone upstream`, `unreadable on disk`, `not yet mirrored`) render identically — there is no broken frame, no grey box, no placeholder glyph (R-31). Skill icons are deferred until `skills.iconid` exists as a column (a migration of its own; `ADR-0021` Verification records the finding). Reduced motion is inherited from `design-2.0` §43 and from `frontend-development-plan.md` §12.2: a slot's reveal is no animation, so a fixed focal-length layout is what a screen reader and a sighted Trainer both experience.
+
+---
+
+## 36. Error States
+
+The UI must clearly handle:
+
+- incomplete career state
+- missing database data
+- invalid support deck
+- invalid inheritance configuration
+- stale game ruleset
+- corrupted local data
+- unavailable recommendation
+
+Example:
+
+> Recommendation unavailable because Energy and Mood have not been entered.
+
+Do not silently guess.
+
+---
+
+## 37. Screen States for Changed Screens
+
+For each screen that changed in this pass, the following states must be defined and handled:
+
+- **Initial / empty** — no run data loaded.
+- **Normal populated** — full run state with verified data.
+- **Partial or unknown data** — some fields missing, stale, or `N/A`.
+- **Validation or recording error** — user entry fails validation or save fails.
+- **Completed or no-longer-applicable** — objective achieved or superseded.
+- **Recommendation unavailable** — insufficient rules or state to rank actions.
+
+| Screen        | States asserted in browser tests                                                                 |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| SCREEN-009    | Empty run (no state), populated run with recommendation, recommendation unsupported, action recorded but result pending, action recorded with reconciliation |
+| SCREEN-014    | Pre-debut (no fan gates active), gates active with partial progress, qualifier passed, pre-finale review, all gates completed |
+| SCREEN-015    | No team data, partial roster, full roster with mixed ranks, tournament locked, team rank `N/A` (no recorded letter) |
+| SCREEN-016    | Pre-debut (shop locked), shop open with partial coin balance, GP period completed, finale reached (coin income ends), schedule risk flagged |
+
+**Keyboard and narrow-screen behavior:** the primary recommendation must remain visible above secondary charts and logs at 320px width. The Next Decision component must be reachable via keyboard in a single `Tab` from the stat bands. Colour is never the sole status indicator — text and icon must carry the same meaning.

@@ -10,6 +10,12 @@
 import ArtworkSlot from '../ArtworkSlot.vue';
 import Pagination from '../Pagination.vue';
 import RarityChip from '../RarityChip.vue';
+import ProvenanceBadge from '../ProvenanceBadge.vue';
+import SparkChip from '../SparkChip.vue';
+import BaseInput from '../Form/BaseInput.vue';
+import BaseSelect from '../Form/BaseSelect.vue';
+import BaseCheckbox from '../Form/BaseCheckbox.vue';
+import BaseButton from '../Form/BaseButton.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -35,6 +41,8 @@ interface Trainee {
     artworkURL: string | null;
     form_count: number;
     cards: Card[];
+    /** Provenance state for the trainee's data. */
+    provenance?: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
 }
 
 interface Paginator<T> {
@@ -88,34 +96,37 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
 </script>
 
 <template>
-    <h2 class="text-2xl font-semibold text-ink-strong">Umamusume catalog</h2>
+    <h2 class="text-lg font-semibold text-ink-strong">Umamusume catalog</h2>
 
-    <form class="mt-4 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
-        <label class="flex flex-col gap-1">
-            <span class="text-ink-muted">Search</span>
-            <input
-                v-model="search"
-                type="text"
-                name="search"
-                placeholder="Trainee or card name"
-                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-            >
-        </label>
-        <label class="flex flex-col gap-1">
-            <span class="text-ink-muted">Release status</span>
-            <select v-model="status" name="status" class="h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                <option value="all">{{ allStatusesLabel }}</option>
-                <option v-for="s in statuses" :key="s.value" :value="s.value">{{ s.label }}</option>
-            </select>
-        </label>
-        <label class="flex items-center gap-2 pb-1.5">
-            <input v-model="showUnconfirmed" type="checkbox" name="show_unconfirmed" value="1" class="rounded-md border-rule">
-            <span class="text-ink-muted">Show unconfirmed cards</span>
-        </label>
-        <button type="submit" class="enamel h-11 rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">
-            Filter
-        </button>
-    </form>
+    <div class="mt-4 rounded-md border border-rule bg-raised p-4">
+        <form class="flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
+            <label class="flex flex-col gap-1">
+                <span class="text-ink-muted">Search</span>
+                <BaseInput
+                    v-model="search"
+                    type="text"
+                    id="trainee-search"
+                    name="search"
+                    placeholder="Trainee or card name"
+                />
+            </label>
+            <label class="flex flex-col gap-1">
+                <span class="text-ink-muted">Release status</span>
+                <BaseSelect
+                    v-model="status"
+                    :options="[{ value: 'all', label: allStatusesLabel }, ...statuses.map((s) => ({ value: s.value, label: s.label }))]"
+                    placeholder="All"
+                />
+            </label>
+            <label class="flex items-center gap-2 pb-1.5">
+                <BaseCheckbox v-model="showUnconfirmed" name="show_unconfirmed" value="1" />
+                <span class="text-ink-muted">Show unconfirmed cards</span>
+            </label>
+            <BaseButton type="submit" variant="primary" size="md">
+                Filter
+            </BaseButton>
+        </form>
+    </div>
 
     <p v-if="loading" role="status" class="mt-4 text-sm text-ink-muted">Loading results…</p>
 
@@ -160,7 +171,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                          control. -->
                     <span class="flex items-center gap-3">
                         <ArtworkSlot :url="trainee.artworkURL" alt="" size="size-12" reserve />
-                        <Link :href="`/umamusume/${trainee.slug}`" class="font-semibold text-ink-strong hover:underline">
+                        <Link :href="`/umamusume/${trainee.slug}`" class="text-lg font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">
                             {{ trainee.name }}
                             <span v-if="trainee.name_ja" lang="ja" class="ml-2 text-sm font-normal text-ink-muted">
                                 {{ trainee.name_ja }}
@@ -170,9 +181,13 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                     <span class="flex items-baseline gap-3 text-xs text-ink-muted">
                         <template v-if="trainee.max_rarity">
                             <RarityChip :label="trainee.max_rarity.label" :stars="trainee.max_rarity.stars" />
-                            <span>{{ trainee.form_count }} {{ formCountLabel(trainee.form_count) }}</span>
+                            <SparkChip :label="`${trainee.form_count} ${formCountLabel(trainee.form_count)}`" variant="consumable" size="sm" />
                         </template>
                         <span v-else>no forms recorded</span>
+                        <ProvenanceBadge
+                            v-if="trainee.provenance"
+                            :state="trainee.provenance"
+                        />
                         <span>{{ trainee.release_status_label }}</span>
                     </span>
                 </h3>
@@ -192,7 +207,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                              is a trainee portrait, so the name lives in the header, not here. -->
                         <div class="flex items-center gap-3">
                             <ArtworkSlot :url="card.artworkURL" alt="" size="size-10" reserve />
-                            <h4 class="text-sm font-medium text-ink">{{ card.title }}</h4>
+                            <h4 class="text-lg font-semibold text-ink">{{ card.title }}</h4>
                         </div>
                         <span class="flex items-baseline gap-3 text-xs text-ink-muted">
                             <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
@@ -212,3 +227,4 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
         <Pagination :links="umamusumes.links" />
     </template>
 </template>
+

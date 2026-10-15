@@ -424,3 +424,97 @@ it('writes a server-side backup that opens as a sqlite database carrying the fil
         }
     }
 });
+
+/*
+ * The Dashboard layout preference (DL.7, DL.12, DL.14): the round trip of the two keys the layout
+ * path reads, their absent defaults, the refusal of an unknown layout, and the Wide Bento gate.
+ */
+
+it('round-trips the dashboard layout and hidden cards', function (): void {
+    test()->put('/preferences', [
+        'theme' => 'light',
+        'failure_estimate' => 'off',
+        'settings' => [
+            'dashboard_layout' => 'focused',
+            'dashboard_hidden_cards' => ['recent_veterans', 'data_status'],
+        ],
+    ])->assertRedirect();
+
+    $settings = Preference::settings();
+
+    expect($settings['dashboard_layout'])->toBe('focused')
+        ->and($settings['dashboard_hidden_cards'])->toBe(['recent_veterans', 'data_status']);
+
+    test()->get('/preferences')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('settings.dashboard_layout', 'focused')
+            ->where('settings.dashboard_hidden_cards', ['recent_veterans', 'data_status']));
+});
+
+it('defaults the dashboard layout and hidden cards when nothing is stored', function (): void {
+    // Absence is the default: no row means `bento` with every card shown, which the page resolves
+    // from null rather than a stored value (DL.7).
+    test()->get('/preferences')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('settings.dashboard_layout', null)
+            ->where('settings.dashboard_hidden_cards', null));
+});
+
+it('refuses a dashboard layout outside the three the screen offers', function (): void {
+    test()->put('/preferences', [
+        'theme' => 'light',
+        'failure_estimate' => 'off',
+        'settings' => ['dashboard_layout' => 'wideopen'],
+    ])->assertSessionHasErrors('settings.dashboard_layout');
+
+    // Nothing is stored: the unknown value is refused, so the read path never sees it (DL.7).
+    expect(Preference::settings())->toBe([]);
+});
+
+it('refuses a hidden card id the dashboard does not compose', function (): void {
+    test()->put('/preferences', [
+        'theme' => 'light',
+        'failure_estimate' => 'off',
+        'settings' => ['dashboard_hidden_cards' => ['recent_builds']],
+    ])->assertSessionHasErrors('settings.dashboard_hidden_cards.0');
+
+    expect(Preference::settings())->toBe([]);
+});
+
+it('coerces wide_bento to bento when the flag is explicitly off', function (): void {
+    // The old fallback behavior: with the flag off, the writer coerces wide_bento → bento.
+    config(['dashboard.wide_bento_enabled' => false]);
+    Preference::putSettings(['dashboard_layout' => 'wide_bento']);
+
+    test()->put('/preferences', [
+        'theme' => 'light',
+        'failure_estimate' => 'off',
+        'settings' => ['dashboard_layout' => 'wide_bento'],
+    ])->assertRedirect();
+
+    expect(Preference::settings()['dashboard_layout'])->toBe('bento');
+});
+
+it('ships wide bento enabled by default per the DESIGN.md ruling', function (): void {
+    // The DESIGN.md §2.3 ruling landed: the default flag is now true.
+    test()->get('/preferences')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('wideBentoEnabled', true));
+});
+
+it('enables wide bento end-to-end with the default flag', function (): void {
+    // The default flag is now true; the radio is enabled and submissions store wide_bento.
+    test()->get('/preferences')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('wideBentoEnabled', true));
+
+    test()->put('/preferences', [
+        'theme' => 'light',
+        'failure_estimate' => 'off',
+        'settings' => ['dashboard_layout' => 'wide_bento'],
+    ])->assertRedirect();
+
+    expect(Preference::settings()['dashboard_layout'])->toBe('wide_bento');
+});

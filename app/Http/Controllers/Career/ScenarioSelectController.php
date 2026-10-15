@@ -48,6 +48,7 @@ class ScenarioSelectController extends Controller
 
         return Inertia::render('Career/ScenarioSelect', [
             'visited' => SetupDraft::visited(),
+            'saved' => SetupDraft::saved(),
             'scenarios' => $this->cards(),
             // The Trainer's stored default pre-selects nothing when the draft already names a
             // scenario: a career in progress is what the Trainer chose for it, and a preference

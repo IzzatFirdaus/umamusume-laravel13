@@ -20,7 +20,7 @@ defineProps<{
             read off the client, and this run has none entered yet.
         </p>
         <p v-else class="flex flex-wrap items-baseline gap-x-3 text-sm">
-            <span class="text-base font-bold text-ink-strong">{{ current.rank }}</span>
+            <span class="text-lg font-bold text-ink-strong">{{ current.rank }}</span>
             <span class="text-ink">
                 <template v-if="current.level === null">above the top rung: grants a second hint, no higher facility</template>
                 <template v-else>

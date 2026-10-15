@@ -15,6 +15,7 @@
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
+import SubCell from '../../components/SubCell.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref } from 'vue';
 
@@ -99,9 +100,24 @@ const optimizesText = (card: ScenarioCard): string | null => {
 </script>
 
 <template>
-    <SetupLayout :step="1" :visited="props.visited">
+    <SetupLayout :step="1" :visited="props.visited" :saved="props.saved">
         <Head title="Choose a scenario" />
+        <template #eyebrow>Setup</template>
         <template #title>Choose a scenario</template>
+
+        <!-- Back breadcrumb -->
+        <nav class="mt-4 mb-2" aria-label="Breadcrumb">
+            <Link href="/career/setup/scenario" class="inline-flex min-h-11 items-center text-sm font-medium text-brand-accent-ink hover:underline transition-colors duration-150 ease-out" aria-label="Back to scenario step">
+                ← Back to scenario
+            </Link>
+        </nav>
+
+        <!-- Header: eyebrow + large title + subtitle -->
+        <header class="mb-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 1 of 6</p>
+            <p class="mt-1 text-2xl font-semibold text-ink-strong">Choose a scenario</p>
+            <p class="mt-1 text-sm text-ink-muted">The scenario decides which resources, systems and stat ceilings apply.</p>
+        </header>
 
         <p class="max-w-3xl text-sm text-ink-muted">
             The scenario decides which resources this tool tracks, which systems it can show, and which
@@ -179,63 +195,24 @@ const optimizesText = (card: ScenarioCard): string | null => {
                         Facts and mechanics
                     </summary>
 
-                    <dl class="mt-3 space-y-2 text-sm">
-                        <div class="flex flex-wrap justify-between gap-x-4">
-                            <dt class="text-ink-muted">Optimizes</dt>
-                            <dd v-if="optimizesText(card)" class="text-ink">{{ optimizesText(card) }}</dd>
-                            <dd v-else class="text-ink-muted"><AbsenceValue compact reason="This scenario publishes no stat cap bonus." /></dd>
-                        </div>
-                        <div class="flex flex-wrap justify-between gap-x-4">
-                            <dt class="text-ink-muted">Systems</dt>
-                            <dd v-if="card.systems.length > 0" class="text-ink">{{ card.systems.join(', ') }}</dd>
-                            <dd v-else class="text-ink-muted" title="Every panel in the matrix is off for this scenario.">
-                                No scenario system
-                            </dd>
-                        </div>
-                        <div class="flex flex-wrap justify-between gap-x-4">
-                            <dt class="text-ink-muted">Tracked resources</dt>
-                            <dd v-if="card.resources.length > 0" class="text-ink">{{ card.resources.join(', ') }}</dd>
-                            <dd v-else class="text-ink-muted" title="It composes only the widgets every scenario carries.">
-                                None beyond the generic strip
-                            </dd>
-                        </div>
-                        <div class="flex flex-wrap justify-between gap-x-4">
-                            <dt class="text-ink-muted">Turn loop</dt>
-                            <dd v-if="card.loop.length > 0" class="text-ink">{{ card.loop.join(' → ') }}</dd>
-                            <dd v-else class="text-ink-muted"><AbsenceValue compact reason="No turn loop steps are recorded for this scenario." /></dd>
-                        </div>
-                        <div class="flex flex-wrap justify-between gap-x-4">
-                            <dt class="text-ink-muted">Live on Global</dt>
-                            <dd v-if="card.live_on_global" class="font-mono text-ink">{{ card.live_on_global }}</dd>
-                            <dd v-else class="text-ink-muted"><AbsenceValue compact reason="No Global availability date is recorded for this scenario." /></dd>
-                        </div>
+                    <div class="mt-3 space-y-2 text-sm" role="list" aria-label="Facts and mechanics">
+                        <SubCell label="Optimizes" :value="optimizesText(card) ?? 'N/A'" :title="optimizesText(card) ? undefined : 'This scenario publishes no stat cap bonus.'" />
+                        <SubCell label="Systems" :value="card.systems.length > 0 ? card.systems.join(', ') : 'N/A'" :title="card.systems.length > 0 ? undefined : 'Every panel in the matrix is off for this scenario.'" />
+                        <SubCell label="Tracked resources" :value="card.resources.length > 0 ? card.resources.join(', ') : 'None beyond the generic strip'" :title="card.resources.length > 0 ? undefined : 'It composes only the widgets every scenario carries.'" />
+                        <SubCell label="Turn loop" :value="card.loop.length > 0 ? card.loop.join(' → ') : 'N/A'" :title="card.loop.length > 0 ? undefined : 'No turn loop steps are recorded for this scenario.'" />
+                        <SubCell label="Live on Global" :value="card.live_on_global ?? 'N/A'" :title="card.live_on_global ? undefined : 'No Global availability date is recorded for this scenario.'" />
                         <div class="flex flex-wrap justify-between gap-x-4">
                             <dt class="text-ink-muted">Ruleset version</dt>
-                            <dd v-if="props.ruleset.value === null" class="font-mono text-ink">
+                            <dd v-if="props.ruleset.value === null" class="text-ink-muted">
                                 <AbsenceValue compact :reason="props.ruleset.title" />
                             </dd>
                             <dd v-else class="font-mono text-ink" :title="props.ruleset.title">
                                 {{ props.ruleset.value }}
                             </dd>
                         </div>
-                        <!-- The brief asks for a short description and a recommended use. Neither the
-                             corpus nor `config/scenarios.php` holds either, so they are named absences:
-                             a sentence written here would be an invented fact (AGENTS.md §5). -->
-                        <div class="flex flex-wrap justify-between gap-x-4">
-                            <dt class="text-ink-muted">Description</dt>
-                            <dd v-if="card.description === null" class="text-ink-muted">
-                                <AbsenceValue compact reason="No sourced one-line description exists for any scenario in this repository." />
-                            </dd>
-                            <dd v-else class="text-ink-muted">{{ card.description }}</dd>
-                        </div>
-                        <div class="flex flex-wrap justify-between gap-x-4">
-                            <dt class="text-ink-muted">Recommended use</dt>
-                            <dd v-if="card.recommended_use === null" class="text-ink-muted">
-                                <AbsenceValue compact reason="Recommending a use would be a judgement this tool holds no source for." />
-                            </dd>
-                            <dd v-else class="text-ink-muted">{{ card.recommended_use }}</dd>
-                        </div>
-                    </dl>
+                        <SubCell label="Description" :value="card.description ?? 'N/A'" :title="card.description ? undefined : 'No sourced one-line description exists for any scenario in this repository.'" />
+                        <SubCell label="Recommended use" :value="card.recommended_use ?? 'N/A'" :title="card.recommended_use ? undefined : 'Recommending a use would be a judgement this tool holds no source for.'" />
+                    </div>
 
                     <!-- The scenario's recorded metadata, straight from the matrix. A scenario the matrix
                          does not describe prints the named absence rather than a sentence invented here. -->
@@ -269,13 +246,18 @@ const optimizesText = (card: ScenarioCard): string | null => {
                     <button
                         :id="`scenario-${card.key}`"
                         type="button"
-                        class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome disabled:cursor-wait disabled:bg-disabled"
+                        :class="[
+                            'enamel inline-flex min-h-11 items-center rounded-full px-4 text-sm font-bold disabled:cursor-wait disabled:bg-disabled',
+                            props.selected === card.key
+                                ? 'bg-chrome text-on-chrome'
+                                : 'border border-rule bg-raised text-ink hover:bg-sunken transition-colors duration-150 ease-out'
+                        ]"
                         :aria-pressed="props.selected === card.key ? 'true' : 'false'"
                         :aria-describedby="form.errors.scenario ? 'scenario-error' : undefined"
                         :disabled="form.processing"
                         @click="choose(card)"
                     >
-                        {{ choosing === card.key ? 'Saving…' : 'Select Scenario' }}
+                        Select Scenario
                     </button>
                     <!-- The stored state is a word, and it sits beside the action rather than inside
                          the card's heading: inside the `<h2>` it would have become part of the

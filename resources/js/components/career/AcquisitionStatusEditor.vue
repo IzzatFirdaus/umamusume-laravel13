@@ -12,6 +12,7 @@
  */
 import { useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
+import { BaseInput, BaseSelect } from '../Form';
 
 interface PlanRow {
     id: number | null;
@@ -127,24 +128,21 @@ function save(): void {
                         <td class="py-2">{{ row.recorded?.status ?? 'Not set' }}</td>
                         <td class="py-2">
                             <label :for="`skill-${row.id}-status`" class="sr-only">Change status for {{ row.name }}</label>
-                            <select
+                            <BaseSelect
                                 :id="`skill-${row.id}-status`"
-                                :value="currentStatus(row)"
-                                class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                                @change="changeStatus(row, ($event.target as HTMLSelectElement).value)"
-                            >
-                                <option v-for="option in props.options" :key="option.value" :value="option.value">{{ option.label }}</option>
-                            </select>
+                                :model-value="currentStatus(row)"
+                                :options="props.options.map(option => ({ value: option.value, label: option.label }))"
+                                @update:model-value="value => changeStatus(row, value)"
+                            />
                         </td>
                         <td class="py-2">
                             <label :for="`skill-${row.id}-turn`" class="sr-only">Turn acquired for {{ row.name }}</label>
-                            <input
+                            <BaseInput
                                 :id="`skill-${row.id}-turn`"
                                 type="number"
                                 min="1"
-                                :value="currentTurn(row)"
-                                class="h-11 w-16 rounded-md border border-rule bg-raised px-2 text-ink"
-                                @input="changeTurn(row, ($event.target as HTMLInputElement).value)"
+                                :model-value="currentTurn(row)"
+                                @update:model-value="value => changeTurn(row, value)"
                             />
                         </td>
                     </tr>

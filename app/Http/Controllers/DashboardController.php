@@ -113,6 +113,7 @@ class DashboardController extends Controller
             'turn' => $turn,
             'energy' => $strip['energy'],
             'resource' => $this->primaryResource($run, $strip),
+            'team_rank' => $this->teamRank($run),
             // "Resume" continues the career, so it opens the Cockpit (SCREEN-009, `SCR-CAR-011`), the
             // screen the run is read from every turn, not the record sheet that logs its turns.
             'resume_url' => route('runs.cockpit', $run),
@@ -139,6 +140,34 @@ class DashboardController extends Controller
     }
 
     /**
+     * The Team Rank the run's scenario carries, read through the model's one owner
+     * (`TrainingRun::latestTeamRank()`), never recomputed here.
+     *
+     * A scenario that does not compose the ladder has no rank to state, and a scenario that
+     * does, with no reported turn yet, has nothing to report — both render `N/A` with the
+     * reason carried on the row, the same channel the Energy cell and `primaryResource()`
+     * use (frontend-fidelity Slice 1.1).
+     *
+     * @return array{value: string|null, value_hint: string}
+     */
+    private function teamRank(TrainingRun $run): array
+    {
+        if (! $run->composesPanel('team_rank_ladder')) {
+            return [
+                'value' => null,
+                'value_hint' => 'The run\'s scenario composes no team rank ladder, so there is no rank to show.',
+            ];
+        }
+
+        $rank = $run->latestTeamRank();
+
+        return [
+            'value' => $rank?->rank,
+            'value_hint' => 'No logged turn has reported a team rank yet.',
+        ];
+    }
+
+    /**
      * The one resource the run's scenario composes beyond the three every scenario carries, or null
      * for a scenario that composes none (URA Finale, Our Grand Concert).
      *
@@ -154,6 +183,13 @@ class DashboardController extends Controller
         $widget = $this->primaryWidget($run);
 
         if ($widget === null) {
+            return null;
+        }
+
+        // Unity Cup's widget IS the team rank, and the rank has its own row now (`teamRank()`,
+        // Slice 1.1): it is the one scenario widget with a real owner that reports it, so leaving
+        // it here too would render a second, permanently-absent Team Rank cell beside the live one.
+        if ($widget === 'team_rank') {
             return null;
         }
 

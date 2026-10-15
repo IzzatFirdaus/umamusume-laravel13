@@ -67,7 +67,7 @@ defineProps<{
                     :aria-labelledby="`deck-category-${key}`"
                     class="rounded-md border border-rule bg-raised p-3"
                 >
-                    <h4 :id="`deck-category-${key}`" class="font-semibold text-ink-strong">
+                    <h4 :id="`deck-category-${key}`" class="text-lg font-semibold text-ink-strong">
                         {{ category.label }}
                     </h4>
 
@@ -121,7 +121,7 @@ defineProps<{
                  otherwise lose a number the source publishes. §1.4.8 records nine such effects as
                  carried by no card at all, so this is empty on every deck the catalogue holds today. -->
             <section v-if="uncategorised.length > 0" class="mt-4" aria-labelledby="deck-uncategorised">
-                <h4 id="deck-uncategorised" class="font-semibold text-ink-strong">Effects outside the six categories</h4>
+                <h4 id="deck-uncategorised" class="text-lg font-semibold text-ink-strong">Effects outside the six categories</h4>
                 <ul class="mt-2 space-y-2">
                     <li v-for="effect in uncategorised" :key="effect.effect_id" class="text-sm text-ink">
                         {{ effect.name ?? `[Unverified] effect ${effect.effect_id}` }}
@@ -132,7 +132,7 @@ defineProps<{
 
             <div class="mt-5 grid gap-4 md:grid-cols-2">
                 <section class="rounded-md border border-rule bg-raised p-3" aria-labelledby="deck-strengths">
-                    <h4 id="deck-strengths" class="font-semibold text-ink-strong">What the deck covers</h4>
+                    <h4 id="deck-strengths" class="text-lg font-semibold text-ink-strong">What the deck covers</h4>
                     <ul v-if="strengths.length > 0" class="mt-2 list-disc space-y-1 pl-5 text-sm text-ink-muted">
                         <li v-for="line in strengths" :key="line">{{ line }}</li>
                     </ul>
@@ -142,7 +142,7 @@ defineProps<{
                 </section>
 
                 <section class="rounded-md border border-rule bg-raised p-3" aria-labelledby="deck-weaknesses">
-                    <h4 id="deck-weaknesses" class="font-semibold text-ink-strong">What the deck carries nothing in</h4>
+                    <h4 id="deck-weaknesses" class="text-lg font-semibold text-ink-strong">What the deck carries nothing in</h4>
                     <ul v-if="weaknesses.length > 0" class="mt-2 list-disc space-y-1 pl-5 text-sm text-ink-muted">
                         <li v-for="line in weaknesses" :key="line">{{ line }}</li>
                     </ul>
@@ -156,7 +156,7 @@ defineProps<{
                  honest rendering: naming a card to swap would be a judgement the corpus cannot source,
                  and a deck has no optimal arrangement this tool is permitted to claim. -->
             <section class="mt-4 rounded-md border border-dashed border-rule bg-raised p-3" aria-labelledby="deck-replacement">
-                <h4 id="deck-replacement" class="font-semibold text-ink-strong">Recommended replacement</h4>
+                <h4 id="deck-replacement" class="text-lg font-semibold text-ink-strong">Recommended replacement</h4>
                 <p class="mt-1 text-sm text-ink-muted">
                     Not built. No source states which card belongs in a slot, so a recommended replacement
                     here would be this tool's own opinion dressed as a fact. The category figures above are

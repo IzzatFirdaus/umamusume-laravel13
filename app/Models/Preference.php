@@ -51,7 +51,7 @@ class Preference extends Model
      * the client does, no source publishes an imperial rendering, and a key with no reader is
      * the drift `KEYS` exists to refuse. `race_risk_thresholds` is held on `ADR-0016`.
      */
-    public const SETTINGS_KEYS = ['default_scenario', 'recommendation_aggressiveness', 'stat_target_defaults', 'language'];
+    public const SETTINGS_KEYS = ['default_scenario', 'recommendation_aggressiveness', 'stat_target_defaults', 'language', 'dashboard_layout', 'dashboard_hidden_cards'];
 
     /**
      * The recommendation-aggressiveness values the screen offers. Stored now; `TrainerAdvisor`

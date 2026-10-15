@@ -15,9 +15,9 @@ use Illuminate\Foundation\Http\FormRequest;
  * Legacy read-back, and its docblock gives the reason: on a surface about configurations, a column of
  * absences looks compared and is not. The comparison the library offers is about *careers*, and the career a
  * Trainer most wants to look at beside another is the one they just filed and have not built a Legacy on —
- so a rule that drops it would remove the subject of the screen. Different eligibility, different request.
- * The shared part, four columns and no more, is `design-2.0` §46's own limit and is restated as a constant
- * the page prints rather than a second number the page could disagree with.
+ * so a rule that drops it would remove the subject of the screen. Different eligibility, different request.
+ * The shared part, six columns and no more, is restated as a constant the page prints rather than a second
+ * number the page could disagree with.
  *
  * Selection is by `veterans` ids, not run ids: this screen's units are library rows, and `Veteran` is the
  * row. A Veteran is unique per run (`create_veterans_table`), so the two never disagree about which career is
@@ -25,7 +25,12 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class VeteranCompareRequest extends FormRequest
 {
-    public const MAX_VETERANS = 4;
+    /**
+     * Six, the number the sticky matrix fits at 1280 before the columns crowd. The earlier cap of four was
+     * a wide-matrix layout limit, not a domain one, and the sticky-first-column rewrite (Phase 8) removed
+     * the reason for it: a property label no longer scrolls away, so six narrow columns stay readable.
+     */
+    public const MAX_VETERANS = 6;
 
     /**
      * A refused selection goes back to the library, where the Trainer picks again.

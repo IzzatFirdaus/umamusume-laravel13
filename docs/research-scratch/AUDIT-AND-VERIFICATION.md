@@ -90,6 +90,21 @@ stub that remains the live append target: agents continue to add new KI entries 
 at the root, and the snapshot in this file is a dated record that is not edited forward. This file
 carries the census marker at its top for that reason; see the header note.
 
+**Round 14 (2026-10-10, augment-only):** the Rice Shower / Unity Cup audit set, four live documents
+that remain at their own paths, embedded verbatim as their own sections: `rice-shower-unity-cup-ux-walk.md`
+(957 lines), `rice-shower-unity-cup-ux-walk-2.md` (941), `rice-shower-unity-cup-ux-walk-resolutions.md`
+(495), and `rice-shower-unity-cup-round2-reconciliation.md` (169 at first augment, re-synced the same day
+to the live source's current state). The first three are closed records; the reconciliation is a live
+record still being appended to, so its section was regenerated once on 2026-10-10 and will need the same
+treatment again when the round closes. Nothing was deleted and no citation was repointed.
+
+**Appended 2026-10-12:** the section `## Gemini Deep Research reconciliation, 2026-10-12`, a claim-level
+reconciliation of an incoming Gemini Deep Research report on `[Global]` mechanics (with its peer check) against
+this repository's own evidence. It is a new dated section, not a fold: no source file was absorbed, nothing was
+deleted, and no citation was repointed. It is a live record of a single pass and is not expected to be
+re-appended. The one dependent edit it required outside this file is a dated erratum at
+`UMAMUSUME_REFERENCE.md` §1.3.5 (finding F-1); the guide itself is otherwise untouched.
+
 ---
 
 ## audit-verification-2026-10-01.md
@@ -1681,7 +1696,7 @@ That scope split is registered as a gap, not a fix.
 ### KI-5 A test asserts a fabricated skill name built on a banned word — FIXED 2026-09-27
 
 **Fixed.** `tests/Feature/TrainingRunTest.php` now uses real Global skill strings read from
-`.scratch-uma/skills.json` (`Certain Victory`, `1st Place Kiss☆`, `Feel the Burn!`), and the local
+`.scratch-uma/cited/skills.json` (`Certain Victory`, `1st Place Kiss☆`, `Feel the Burn!`), and the local
 variable is renamed `suggested`, matching the client enum. `app/Enums/SkillAcquisition.php`'s
 comment reworded `planned` to `marked for this run` so the banned word leaves the shipped code
 as well as the test. Verified: the test passes and the `lore-code` gate is clean on
@@ -2612,7 +2627,7 @@ points `DB_DATABASE` at. First fetcher writes the snapshot; every other database
 same day is told nothing changed, and stays empty.
 
 **Proof, from filling the real database rather than a scratch one.** After the import pass had written
-1,910 rows into `.scratch-uma/skills-c5.sqlite` at 10:37 today, `php artisan uma:fetch gametora-skills`
+1,910 rows into `.scratch-uma/cited/skills-c5.sqlite` at 10:37 today, `php artisan uma:fetch gametora-skills`
 against `database/database.sqlite` printed `'gametora-skills' unchanged since last snapshot; nothing
 written.` and `release_status='GlobalReleased' and name_is_client=1` still counted **0** there, with
 `storage/app/private/snapshots/gametora-skills/2026-09-29/609afe88…​.html` (2,502,242 bytes) already on disk.
@@ -3378,7 +3393,7 @@ Over all 135 trainee names, 3 differ: `Mr. C.B.`, `K.S.Miracle`, `Curren Bouquet
 **Symptom.** `resources/views/components/deck-panel.blade.php` renders one `<select>` per slot over the
 whole Global catalogue. Six slots times the shipped catalogue is 1,512 `<option>` elements on every run
 screen, equipped or not. Measured from the fetched pages against the imported 559-card catalogue
-(`.scratch-uma/measure-deck-weight.php`, replayable):
+(`.scratch-uma/cited/measure-deck-weight.php`, replayable):
 
 | Run state              | Page        | Deck block   | Block share   |
 | ---------------------- | ----------- | ------------ | ------------- |
@@ -3429,7 +3444,7 @@ in the initial skeleton commit `fda6ff0` and are still there. A claim circulatin
 "no setting in this repository enables WAL mode" is wrong at the config layer; the observation that WAL is
 in effect was right, and the reason is written into the connection array.
 
-**Measured, on a throwaway file (`.scratch-uma/wal-probe.php`, replayable):**
+**Measured, on a throwaway file (`.scratch-uma/cited/wal-probe.php`, replayable):**
 
 ```text
 after migrate + one Eloquent insert:
@@ -3545,7 +3560,7 @@ unsourced while its other input filled. Re-verify with:
 
 ### KI-46 The import's per-stat error names the internal array path (`turns.0.speed`) to the Trainer - FILED 2026-10-01 (Slice 4 browser pass), OPEN
 
-**Observed, rendered in a real browser** (`.scratch-uma/slice4.sqlite` served on `127.0.0.1:8123`, one row of
+**Observed, rendered in a real browser** (`.scratch-uma/cited/slice4.sqlite` served on `127.0.0.1:8123`, one row of
 `speed = 9999` under URA Finale):
 
 > A speed value is outside what this scenario allows: The turns.0.speed field must be between 0 and 1400.
@@ -3574,7 +3589,7 @@ page refuses any stat above **`1,200`**. A Trainer who trusts the band and types
 server, which is precisely the failure ADR-0015's own text names: *"the disagreement was the defect ADR-0002
 recorded and ADR-0015 closes, where a Trainer could see a reachable cap the form rejected."*
 
-**Measured, replayable** (`.scratch-uma/cap-probe.php`, run against `.scratch-uma/slice4.sqlite`):
+**Measured, replayable** (`.scratch-uma/cited/cap-probe.php`, run against `.scratch-uma/cited/slice4.sqlite`):
 
 ```text
 run 4 (scenario NULL)
@@ -5678,7 +5693,7 @@ premise no longer describes the code), `BLOCKED` (fence conflict, nothing writte
 | KI-41 order tiebreaker    | STILL OPEN             | `orderBy('name')` with no secondary key at `TrainingRunController.php:89`, `:301`, `:868`, `CatalogController.php:301`, `:312`, `SkillController.php:53`, `Api/V1/UmamusumeController.php:33` — seven sites, two of them paginated                                                                                                                                                                                                                                                                                                           |
 | KI-39 factory match_key   | STILL OPEN             | `database/factories/SkillFactory.php:28` hand-rolls `mb_strtolower(str_replace('-', '', Str::slug($name)))`; production writers are `StoreSkills.php:69` and `SkillSeeder.php:68`, both `$normalizer->normalize($name)`                                                                                                                                                                                                                                                                                                                      |
 | KI-40 option b            | STILL OPEN             | `NameNormalizer.php:22` `FOLDED_CHARACTERS` is still the five-item list with no ceiling note; no test pins the pairs that do not fold                                                                                                                                                                                                                                                                                                                                                                                                        |
-| KI-50 option a            | STILL OPEN             | `git grep -l "sqlite_master" tests/` → no hits. `->check(` still present in `2026_09_30_142618_...php` and `..._151945_...php`. Read-only probe of the shared DB (`php .scratch-uma/tier-probe.php`) returns real CHECK tokens on `deck_slots`, `support_cards` (two), `support_effects`, `scenario_slots`, `race_catalog_slots` — the constraints exist and nothing verifies them                                                                                                                                                           |
+| KI-50 option a            | STILL OPEN             | `git grep -l "sqlite_master" tests/` → no hits. `->check(` still present in `2026_09_30_142618_...php` and `..._151945_...php`. Read-only probe of the shared DB (`php .scratch-uma/cited/tier-probe.php`) returns real CHECK tokens on `deck_slots`, `support_cards` (two), `support_effects`, `scenario_slots`, `race_catalog_slots` — the constraints exist and nothing verifies them                                                                                                                                                           |
 | KI-46 import row copy     | STILL OPEN             | `resources/views/runs/import.blade.php:153` prints `A {{ $stat }} value is outside what this scenario allows: {{ $message }}` over Laravel's default `between` text, which renders `The turns.0.speed field must be between 0 and 1400`. Confirmed instrument behavior: Blade `@error` calls `$errors->first($key)` (`vendor/.../CompilesErrors.php:21`), `MessageBag::get` matches the wildcard through `getMessagesForWildcardKey` (`MessageBag.php:197`), and `first()` returns only the first row's message (`MessageBag.php:170-177`)   |
 
 ### 2. Docs / config items
@@ -5710,7 +5725,7 @@ premise no longer describes the code), `BLOCKED` (fence conflict, nothing writte
 | F-5 / KI-24 / KI-27                              | Shape changed as above; still an owner call on the snapshot retention policy                                                                                                                                                                                                                                                                                              |
 | C-4 `Scenario::cap_*` unread                     | STILL TRUE — `cap_speed` appears only in `app/Models/Scenario.php:25,39,57` (declaration, fillable, cast) and in the parser write path `GametoraScenarioParser.php:78,80`; `ScenarioCaps` remains the only reader of ceilings                                                                                                                                             |
 | KI-55 register paths                             | CONFIRMED CONFLICT — `docs/GATE-REGISTRY.md` and `docs/PRE-MORTEM.md` do not exist (`ls` → "No such file or directory" for both); the live register is `docs/research-scratch/GOVERNANCE.md`, and `AGENTS.md` §2 already points there                                                                                                                                     |
-| KI-45 tier NULL                                  | REPORT ONLY, AS ASKED — read-only query at this HEAD: `scenario_slots` total **296**, `tier IS NULL` on **296 of 296**. The KI-45 correction's figure holds. Probe: `php .scratch-uma/tier-probe.php`                                                                                                                                                                     |
+| KI-45 tier NULL                                  | REPORT ONLY, AS ASKED — read-only query at this HEAD: `scenario_slots` total **296**, `tier IS NULL` on **296 of 296**. The KI-45 correction's figure holds. Probe: `php .scratch-uma/cited/tier-probe.php`                                                                                                                                                                     |
 | KI-38, KI-42, KI-43, KI-25/R82, KI-10/15, F-01   | Not re-verified in this pass; they are proposal-only. `KI-42`'s premise was spot-checked: no `.github/workflows/` job exists                                                                                                                                                                                                                                              |
 
 ### 5. Draft text for the two BLOCKED `KNOWN-ISSUES.md` notes
@@ -5762,3 +5777,2950 @@ inside this dispatch's write set: `KNOWN-ISSUES.md` (2,722 lines), `AGENTS.md` (
 `config/uma.php`, `.env.example`, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`, `.gitignore`,
 `TrainingRunController.php`, `CatalogController.php`, `Api/V1/UmamusumeController.php`.
 `app/Http/Controllers/SkillController.php` is peer-dirty, so the KI-41 fix there is reported, not landed.
+
+---
+
+## rice-shower-unity-cup-ux-walk.md
+
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/audits/rice-shower-unity-cup-ux-walk.md` (957 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+
+## UX walk audit: [Rosy Dreams] Rice Shower, Unity Cup
+
+### Header
+
+| Field                | Value                                                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Audit name           | Rice Shower Unity Cup mid-career UX walk                                                                            |
+| Source document      | `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md` (67 `[Global]` client frames, 2026-10-03; a mid-career snapshot)        |
+| Starting URL         | `http://127.0.0.1:8000/`                                                                                            |
+| Date/time of walk    | 2026-10-10, single continuous session                                                                               |
+| Environment          | Laravel 13.32.0, PHP 8.5.8, SQLite (`database/database.sqlite`), `php artisan serve` on `127.0.0.1:8000`, Chromium 150 via the browser-use tool |
+| Run created          | `training_runs` id **8** (`/training-runs/8`), status Active, scenario Unity Cup                                      |
+| Screens visited      | 18 (listed in visit order below)                                                                                    |
+
+**Method statement.** Every screen below was reached in a real browser session and its contents were
+read from the rendered DOM at the time of the visit. Every value recorded was typed or selected
+through the on-screen controls (native `<select>`, number/text inputs, radio and checkbox controls,
+and the app's own buttons). No seeder, no direct database insert or update, no SQL, no tinker, no
+API call, and no edit to application state was used to enter data. Screen-to-screen navigation from
+the run record onward used the link targets the UI itself exposes (the same routes the on-screen
+links point at); the data-entry controls were always operated directly. Source code was read only to
+explain the one server error observed (screen 15).
+
+**One pass.** The walk was made once, forward. No screen was re-entered to change an earlier choice,
+and no screen was skipped. Where the UI required a value the source document does not carry, the
+minimum available choice was made and is flagged below as **Not present in source — UI-required
+choice**. The run was never marked Completed, never filed as a Veteran, and never filed as a Legacy.
+
+**Nothing was fixed.** No route, controller, view, component, migration, model, seeder, test,
+validation rule, label, field, or schema was changed. `git status` after the walk shows the same
+pre-existing uncommitted files that were present before it began (a shared working tree carrying
+other work); this audit added one file, `docs/audits/rice-shower-unity-cup-ux-walk.md`, and nothing
+else.
+
+---
+
+### Screen 1 — Dashboard
+
+#### Route and trigger
+- Route: `/` (`home`), title "Dashboard".
+- Trigger: initial navigation to the starting URL.
+
+#### What the screen asks for
+Read-only. Regions in order: nav rail (Dashboard, New Career, Careers, Legacy Lab, Veterans, Support
+Cards, Skills, Review, Database, Settings); ACTIVE CAREER (empty state + "Start a new training run");
+Quick actions (New Career, Legacy Lab, Support Cards); RECENT VETERANS (3 of 7); RECENT BUILDS;
+DATA STATUS (Global data, "Verified 2026-09-27", Ruleset `N/A`, Trainees 67, Skills 1,910, Support
+cards 559). The only control used was the "Start a new training run" link.
+
+#### Values entered + source trace
+None entered on this screen.
+
+#### Source data with no UI home
+None relevant on this screen.
+
+#### Friction / errors / dead ends
+- RECENT VETERANS lists 7 rows produced by earlier work in this shared tree, none of them this run.
+  Not a defect, but it means the Dashboard's "no active career" state sat beside 7 existing careers,
+  so the landing state is not a clean first-run state on this database.
+- `Ruleset: N/A` and `Ruleset snapshot: N/A` recur on nearly every later screen. The app states why
+  in the cockpit ("No source defines a Global ruleset version, so this run stores none to print"), so
+  this is an intentional `N/A`, not a gap.
+
+#### Outcome / next screen
+Clicked "Start a new training run" → `/career/setup/scenario`.
+
+---
+
+### Screen 2 — Scenario setup (wizard step 1 of 6)
+
+#### Route and trigger
+- Route: `/career/setup/scenario`, title "Choose a scenario".
+- Trigger: clicked the Dashboard's "Start a new training run".
+
+#### What the screen asks for
+A step nav (Leave setup; Scenario, Trainee, Your target, Legacy, Support deck, Preflight) and four
+scenario cards. Each card prints eight facts (Optimizes, Systems, Tracked resources, Turn loop, Live
+on Global, Ruleset, Description, Recommended use) and one `Select Scenario` button. A "Stored choice"
+readout sits above the cards. There is no Continue button: forward movement is the step nav.
+
+#### Values entered + source trace
+- `Unity Cup` → the Unity Cup card's `Select Scenario` button → source: `[Rosy_Dreams]Rice_Shower_Unity-Cup.md` §1.1, line 19 ("Scenario Unity Cup, confirmed by the logo panel").
+
+#### Source data with no UI home
+- Nothing from §1.1 is asked for here beyond the scenario name; the run's identity (trainee, year,
+  month, turns remaining) has no home on this screen.
+
+#### Friction / errors / dead ends
+- On all four cards, `Ruleset`, `Description` and `Recommended use` render `N/A`. Three of the eight
+  facts per card are therefore empty for every scenario, which makes the comparison cards mostly
+  scaffolding. (Consistent with the repo's "unrecorded renders as N/A" rule, but the effect on this
+  screen is that two thirds of the decision surface is blank.)
+- After clicking, the card flashed "Saving your choice…" then "Scenario set.", the button became
+  `pressed="true"` with a "Selected" label, and `Stored choice:` changed from `N/A` to `Unity Cup`.
+
+#### Outcome / next screen
+Clicked the step-nav "Trainee" link → `/career/setup/trainee`.
+
+---
+
+### Screen 3 — Trainee (wizard step 2 of 6)
+
+#### Route and trigger
+- Route: `/career/setup/trainee`, title "Choose a trainee".
+- Trigger: clicked "Trainee" in the wizard step nav.
+
+#### What the screen asks for
+Filters in order: `Search` (text), `Surface` (select: Any,S..G), `Distance` (select: Any,S..G),
+`Running style` (select: Any,S..G), `Unique skill` (select, ~130 options), `Sort by` (select: Name,
+Turf, Dirt, Sprint, Mile, Medium, Long, Front runner, Pace chaser, Late surger, End closer), `Order`
+(select: Ascending/Descending), `Filter` (submit), `Clear filters`. Then a paginated roster of 67
+trainee cards (3 pages). Each card carries: portrait, English name, Japanese name, "Released
+(Global)", ten aptitude chips (Turf, Dirt, Sprint, Mile, Medium, Long, Front runner, Pace chaser,
+Late surger, End closer — each with a letter and a word), a costume-form summary, a `Select Trainee`
+button, and a `View Profile` link.
+
+#### Values entered + source trace
+- `Rice Shower` → the `Search` field → source: `[Rosy_Dreams]Rice_Shower_Unity-Cup.md` §1.1, line 20 ("Trainee Rice Shower, `[Rosy Dreams]` card, ★3, Potential Lvl 2").
+- `Select Trainee` on the Rice Shower card (`id="trainee-30"`) → source: same line 20.
+
+#### Source data with no UI home
+- **★3 and Potential Lvl 2 (§1.1 line 20)**: the card carries no star rating and no Potential Level
+  field anywhere on this screen. There is no control that would accept either.
+- **[Rosy Dreams] — the costume**: the card prints "2 costume forms" and two badges, "★★★SSR debut
+  form" and a second "★★★SSR" with **no name at all**. The portrait rendered is
+  `/artwork/card_portrait/103001`, the debut form. Nothing on the screen lets the user say which
+  costume form the career uses; the run's own form is the unlabelled one.
+
+#### Friction / errors / dead ends
+- The aptitude row the UI printed for Rice Shower is **Turf A, Dirt G, Sprint E, Mile C, Medium A,
+  Long A, Front runner B, Pace chaser A, Late surger C, End closer G**. The source document records
+  **Mile B, Front runner A, Late surger B** for the same trainee (§1.1, lines 58-59, read in-client
+  from frame `1dde6b2f`). Three of ten aptitude letters differ. Recorded as observed; the audit does
+  not decide which side is right.
+- After `Select Trainee`, the screen flashed "Trainee set: Rice Shower." but the `Stored choice:`
+  readout on the same screen still read **`N/A`**, and the search filter cleared (the list returned
+  to all 67). So the step's own confirmation of what it stored did not update.
+
+#### Outcome / next screen
+Clicked "Your target" in the step nav → `/career/setup/target`.
+
+---
+
+### Screen 4 — Your target (wizard step 3 of 6)
+
+#### Route and trigger
+- Route: `/career/setup/target`, title "Your target".
+- Trigger: clicked "Your target" in the step nav.
+
+#### What the screen asks for
+- `Purpose` (select: Not chosen yet, Story Clear, Champions Meeting, Parent Farming, Skill Farming),
+  with a note that a fifth purpose, Competitive Build, is not recorded.
+- `Distance` (select: Not chosen yet, Sprint, Mile, Medium, Long).
+- `Surface` (select: Not chosen yet, Turf, Dirt).
+- `Style` (select: Not chosen yet, Front Runner, Pace Chaser, Late Surger, End Closer).
+- `Stat targets`: five number inputs (Speed/Stamina/Power/Guts cap 1300, Wit cap 1800), each with a
+  `Cap` label and a ratio readout.
+- `Skill priorities`: a free-text `Skill name` + `Add`, an ordered list, with a note that risk
+  tolerance and per-skill marks are not recorded.
+- A live `Summary` region and a `Save target` button.
+
+#### Values entered + source trace
+| Value                    | Field          | Source                                                                                                                                  |
+| ------------------------ | -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `Story Clear`            | Purpose        | **Not present in source — UI-required choice.** The snapshot records no build purpose; the field is required.                            |
+| `Long`                   | Distance       | Partly sourced: §1.1 line 59 "A Medium/Long build"; §3 line 461 names Arima Kinen at 2500 m. **Single-select choice not in source** (Medium and Long are both A). |
+| `Turf`                   | Surface        | §1.1 line 58 ("Turf A"); §1.6 lines 186-187 (both race-day options are Turf/Dirt, her races Turf).                                        |
+| `Pace Chaser`            | Style          | §1.1 line 59 ("the pace half available", "Pace A"); §1.3 line 66 (Pace Chaser Straightaways ○ owned).                                     |
+| `1300, 1300, 1300, 1300, 1800` | Stat targets | **Not present in source — UI-required choice.** These are the form's own printed caps. See the friction note below.                      |
+
+#### Source data with no UI home
+- **The run's own caps (§1.2, lines 28-32): Speed 1325, Stamina 1322, Power 1368, Guts 1308, Wit
+  1800.** The screen prints the scenario's base caps (1300/1300/1300/1300/1800) and its inputs are
+  `max=1300` / `max=1800`. Three of the run's four documented caps (1325, 1322, 1368) **exceed the
+  form's maximum and cannot be entered at all**. §1.2's whole cap-arithmetic discussion has no
+  representation here.
+- **The cap arithmetic's inputs (§1.2 lines 39-56): the six blue sparks and any support-card Max-Stat
+  layer.** This screen asks for a *target*, not a cap composition. It asks for no spark and no
+  support-card cap contribution, so the question §1.2 raises ("what raises the other three extras")
+  is not asked anywhere in the wizard.
+- **Potential Level 2 and the growth row +0/+10/+0/+20/+0 (§1.1 line 20, §7 item 2):** no field.
+- **Fans 209,245 / class Star / the 30,755-fan gap (§1.1 lines 21-22):** no field.
+
+#### Friction / errors / dead ends
+- Submitting with everything empty produced four `role="alert"` errors ("The purpose field is
+  required." etc.) **and five more, one under each stat**: "Enter a target for every stat, or leave
+  the whole target unset." — even though every stat field was empty, i.e. the state that message says
+  is acceptable. Submitting again with the four selects filled and the stats still empty left the
+  five stat errors in place. So the "leave the whole target unset" branch is unreachable: the target
+  is never wholly unset, because four of its fields are required. Entering all five stats cleared
+  them. (Recorded as observed; no code was changed.)
+- Because the stats could not be left empty, the five numbers entered are the form's own caps and are
+  not sourced from the run. On this screen, the run's documented caps are both unenterable and not
+  what the field asks for.
+- The screen's own copy says "the cap is the server's own ceiling for the chosen scenario", which is
+  true; but the run's real caps sit above that ceiling, so the tool's ceiling is lower than the run's.
+
+#### Outcome / next screen
+Clicked `Save target` → "Build target saved.", summary updated to "Purpose Story Clear; distance
+Long; surface Turf; style Pace Chaser; Speed 1300, Stamina 1300, Power 1300, Guts 1300, Wit 1800;
+skills in order: none listed yet." Then clicked "Legacy" in the step nav → `/career/setup/legacy`.
+
+---
+
+### Screen 5 — Legacy (wizard step 4 of 6)
+
+#### Route and trigger
+- Route: `/career/setup/legacy`, title "Legacy".
+- Trigger: clicked "Legacy" in the step nav.
+
+#### What the screen asks for
+The screen states it records and compares but computes nothing. Two parent panels (PARENT A, PARENT
+B), each with:
+- a readout of the chosen parent's own rank and spark chance;
+- `Assign to Parent N` (select, listing the saved Veteran library: Not chosen, Vodka, Vodka, Daiwa
+  Scarlet, Haru Urara, Mayano Top Gun, Maruzensky, Maruzensky);
+- `Grandparent N1` and `Grandparent N2` (type-ahead comboboxes, free text);
+- an "AS YOU READ HER" block: `Own rank` (number), `Rented for the run` (checkbox), and a `SPARKS`
+  list with `Add Spark to Parent N` / `Remove Spark from Parent N`;
+- each spark row carries `Kind` (select: Blue, Pink, Green, White, Scenario), `Applies to` (free
+  text), `Stars` (number, min 1 max 3).
+Then `Affinity for the pair` (select: Not recorded, △, ○, ◎), `Save Legacy`, `Next: Support deck`.
+
+#### Values entered + source trace
+| Value                                  | Field                             | Source                                                                                                     |
+| -------------------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `Vodka`                                | Assign to Parent A                | §1.5 line 138 ("Legacy 1  Vodka [Wild Top Gear]  rank B+")                                                  |
+| `Daiwa Scarlet` / `Seiun Sky`          | Grandparent A1 / A2               | §1.5 lines 139-140                                                                                          |
+| Blue / `Power` / ★1                    | Spark 1 on Parent A               | §1.5 line 148 (Vodka Blue: "Power ★☆☆")                                                                     |
+| Pink / `Late Surger` / ★2              | Spark 2 on Parent A               | §1.5 line 148 (Vodka Pink: "Late Surger ★★☆")                                                               |
+| Green / `Cut and Drive!` / ★2          | Spark 3 on Parent A               | §1.5 line 148 (Vodka Green unique: "Cut and Drive! ★★☆")                                                    |
+| `Maruzensky`                           | Assign to Parent B                | §1.5 line 141 ("Legacy 2  Maruzensky [Formula R]  rank UG, flagged Guest")                                  |
+| `Daiwa Scarlet` / `Taiki Shuttle`      | Grandparent B1 / B2               | §1.5 lines 142-143                                                                                          |
+| `Rented for the run` = checked         | Parent B                          | §1.5 line 141 ("flagged Guest") — the UI then prints "Rented from a friend"                                  |
+| Blue / `Speed` / ★2                    | Spark 1 on Parent B               | §1.5 line 151 (Maruzensky Blue: "Speed ★★☆")                                                                |
+| Pink / `Turf` / ★2                     | Spark 2 on Parent B               | §1.5 line 151 (Maruzensky Pink: "Turf ★★☆")                                                                 |
+| Green / `Red Shift/LP1211-M` / ★1      | Spark 3 on Parent B               | §1.5 line 151 (Maruzensky Green unique: "Red Shift/LP1211-M ★☆☆")                                           |
+| (left unset)                           | Affinity for the pair             | **Not present in source.** §1.5 states no pair affinity grade, so it stayed "Not recorded" and rendered `N/A`. |
+
+#### Source data with no UI home
+- **The two parents' end-of-run ranks, B+, A, UG (§1.5 lines 138-143).** The only rank field is
+  `Own rank`, a number input whose helper text says it is the "Legacy's own star count". A letter
+  class (B+, A, UG) has no field. It was left blank, so the Preflight summary printed `Rank N/A` for
+  both parents.
+- **The four grandparents' sparks (§1.5 lines 149, 150, 152, 153).** Daiwa Scarlet (Legacy 1 side),
+  Seiun Sky, Daiwa Scarlet (Legacy 2 side) and Taiki Shuttle each carry a full Blue/Pink/Green/White
+  spark set in the source. **The screen has a SPARKS block for PARENT A and PARENT B only** — the four
+  grandparent fields are name-only. Four of the tree's six spark sets have no UI home. In particular
+  the source's "six blue sparks" (§1.5 line 159) can only be two here.
+- **The white sparks.** Not entered (see the completion note); they have a home (`Kind = White`) but
+  the mechanism is identical to the coloured sparks that were entered.
+- **The two parents' epithets, `[Wild Top Gear]` and `[Formula R]` (§1.5 lines 138, 141).** The
+  `Assign to Parent` options read as bare names; there is no epithet field and no place to type one.
+- **The ancestor's own star count / the "no ceiling" note** is offered as `Own rank`, but the source
+  gives no star count for any ancestor, so it stayed blank.
+
+#### Friction / errors / dead ends
+- The `Assign to Parent A` list contains **Vodka twice and Maruzensky twice** with no
+  disambiguating detail (no epithet, no rank, no id). The two entries are visually identical; the
+  user cannot tell which saved record is which.
+- Spark rows: clicking `Add Spark to Parent A` appends a **blank trailing row** (Kind Blue, no
+  `Applies to`, no `Stars`). That blank row is not a hint — after `Save Legacy` the Preflight summary
+  listed Parent A's sparks as "Blue on Power★1 / Pink on Late Surger★2 / Green on Cut and Drive!★2 /
+  **Blue**", i.e. **the empty trailing row was stored as a real spark** with no stat and no stars.
+  This is observable on the Preflight screen (screen 7) and was not corrected by the app.
+- The `Applies to` field accepts three different kinds of value (a stat name, an aptitude name, a
+  skill name) with no list and no validation; the only clue is the spark's `Kind`.
+- `Rented for the run` is the only representation of the source's "flagged Guest" parent; it renders
+  as "Rented from a friend", which is a different phrase but the right idea.
+- After `Save Legacy` the flash read "Legacy recorded." and the blank trailing spark row was still
+  present in the editor.
+
+#### Outcome / next screen
+Clicked `Next: Support deck` → `/career/setup/deck`.
+
+---
+
+### Screen 6 — Support deck (wizard step 5 of 6)
+
+#### Route and trigger
+- Route: `/career/setup/deck`, title "Support deck".
+- Trigger: clicked "Next: Support deck" on the Legacy screen.
+
+#### What the screen asks for
+Six slots (Slot 1..5, and `Slot 6 · Friends`, labelled "Friend slot"). Each slot carries the equipped
+card or an empty state, an `Ownership` control (`Owned` / `Rented`, a two-button toggle starting at
+`N/A`), and `Replace the card in Slot N`. Below: `Save deck`, a `Choose a card` picker with a `Type`
+filter (All, Speed, Stamina, Power, Guts, Wit, Pal, Group), a `Name contains` field, a `Filter`
+button, a `Card for Slot N` select listing every catalog card, and `Equip owned to Slot N` / `Equip
+rented to Slot N` / `Set Slot N to not equipped`. A `Deck analysis` region fills in as cards land.
+
+#### Values entered + source trace
+| Value                                            | Field                             | Source                                                                        |
+| ------------------------------------------------ | --------------------------------- | ----------------------------------------------------------------------------- |
+| `Tokai Teio [Dream Big!] · SSR Speed` / Owned     | Slot 1                            | §1.4 line 79 (deck table row 1)                                                |
+| `Nishino Flower [Even the Littlest Bud] · SSR Speed` / Owned | Slot 2                 | §1.4 line 80                                                                   |
+| `Biko Pegasus [Double Carrot Punch!] · SSR Speed` / Owned | Slot 3                    | §1.4 line 81                                                                   |
+| `Matikanetannhauser [Just Keep Going] · SSR Guts` / Owned | Slot 4                    | §1.4 line 83                                                                   |
+| `Haru Urara [Urara's Day Off!] · SSR Guts` / Owned | Slot 5                           | §1.4 line 84                                                                   |
+| `Super Creek [Piece of Mind] · SSR Stamina` / **Rented** | Slot 6 · Friends          | §1.4 lines 82 and 86-88 (the friend card is Super Creek)                       |
+
+Slot numbering for the five owned cards is **Not present in source — UI-required choice**: §1.4 gives
+the deck as a list, not a slot order. The friend card is placed in Slot 6 because the source names it
+the friend card and the UI names Slot 6 the friend slot.
+
+#### Source data with no UI home
+- **Card levels and limit breaks (§1.4 lines 77-84, the "Client level" column: 35/35, 30/30, 30/30,
+  50/50, 30/30, 35/35).** No field on any deck surface accepts a card level.
+- **The per-card "Client rows visible" values (§1.4 lines 97-104)** — the effects this run has
+  actually reached. The Deck analysis explicitly uses catalog maxima instead ("Every figure is an
+  effect's highest stated anchor … never an interpolation for a level this deck holds"), so the
+  run's reached values have no home.
+- **The sixth slot's "Friends" pill origin (§1.4 line 86, §7 item 8):** the source derives the
+  friend card from the Career Profile rail. Here the role is attached to the *position*, which is a
+  reasonable mapping, but the fact that Super Creek is borrowed from another account survives only as
+  the `Rented` toggle, and (see screen 18) that toggle is not persisted.
+
+#### Friction / errors / dead ends
+- The screen's own copy warns: "The owned or rented flag is kept in this setup draft. The deck table
+  has no column for it yet, so Preflight writes the six cards it can store and the flag stays here
+  until one exists." The rented flag is therefore knowingly non-persistent, and screen 18 confirms it
+  is lost.
+- The picker defaults to Slot 1 and its target only changes via the per-slot `Replace the card in
+  Slot N` button; the button that equips keeps the slot name in its label ("Equip owned to Slot 4"),
+  which is the only cue that the target moved.
+- Deck analysis states "Friendship Bonus … The export marks this effect as multiplicative, so the
+  values above are listed separately rather than added", while Mood Effect, Specialty Priority,
+  Training Effectiveness, Race Bonus, Fan Bonus etc. are summed. Correct, but two adjacent blocks
+  treat their numbers differently without a visual separator beyond the note.
+- The six card pickers render fine and the analysis block is populated only after a card lands
+  ("Nothing to analyse yet" beforehand), which matches its own copy.
+
+#### Outcome / next screen
+Clicked `Save deck` → "Deck saved." (URL gained `?deck_slot=6`). Then clicked "Next: Preflight" →
+`/career/setup/preflight`.
+
+---
+
+### Screen 7 — Preflight (wizard step 6 of 6)
+
+#### Route and trigger
+- Route: `/career/setup/preflight`, title "Career contract".
+- Trigger: clicked "Next: Preflight" on the deck screen.
+
+#### What the screen asks for
+Read-only summary, then the wizard's one write. It prints: a warning line ("No warnings. Every
+section is filled…"), Build (trainee, scenario, target, ancestry with parents, grandparents and
+sparks), Support deck (six slots with type and ownership), a full Deck analysis, Target (five stat
+values, race profile, skill priorities, ruleset snapshot), and four controls: `Back`, `Edit Legacy`,
+`Edit Deck`, `Edit Target`, and `Start Career`.
+
+#### Values entered + source trace
+Only the final action: clicked `Start Career` (no value). Every value shown is traced above.
+
+#### Source data with no UI home
+- The ancestry block confirms the gap found on screen 5: **four grandparents appear as names only,
+  with no sparks**, and the parents' ranks read `N/A`. The four grandparent spark sets from §1.5
+  (lines 149, 150, 152, 153) are absent from the contract.
+
+#### Friction / errors / dead ends
+- The summary's Parent A spark line reads "Blue on Power★1 / Pink on Late Surger★2 / Green on Cut and
+  Drive!★2 / **Blue**". The trailing bare "Blue" is the blank spark row from screen 5, now part of the
+  contract. A user reading this screen would see a fourth spark that was never intended.
+- "Affinity N/A" is correct (the source gives no grade) but appears with no explanation on this
+  screen.
+- "Skill priorities: None entered" and "Ruleset snapshot: N/A" both read as gaps, though both are
+  honest states.
+
+#### Outcome / next screen
+Clicked `Start Career` → "Run created." → `/training-runs/8/cockpit`.
+
+---
+
+### Screen 8 — Career Cockpit
+
+#### Route and trigger
+- Route: `/training-runs/8/cockpit`, title "Career: Rice Shower".
+- Trigger: clicked `Start Career` on Preflight (the wizard's one write).
+
+#### What the screen asks for
+Read-only. Run record (scenario, YEAR, MONTH, TURN, Team Rank, Spirit Bursts); Stats and state (five
+stats against caps, Energy, Mood, Fans, Skill Points); Advisor (recommendation + why); an empty-state
+block; Actions (Training, Race, Rest, Recreation, Scenario action, Event, Inheritance); a Scenario
+block (Unity Cup, team race circles, the rank ladder G..S+, team stat grades, Spirit Burst states,
+Current Spirit, the burst-count band table, Special Training notes); Races in this run (recorded,
+this turn, still to come); and links to the Career Timeline and Career Result.
+
+#### Values entered + source trace
+None entered. (The screen was re-read later — see the persistence note under screen 9.)
+
+#### Source data with no UI home
+- **Fans class and the fan ladder (§1.1 lines 21-22).** Fans is a free number; the class ("Star"),
+  the Top Star threshold (240,000) and the 30,755-fan gap have no field.
+- **Team identity (§1.6 lines 169-172): team name "Blue Bloom", motto "Dreaming Big", league
+  placement 8th, four preseason rounds won, finals pending.** The cockpit's Scenario block has
+  Team Rank and Spirit Bursts readouts but no team name, no motto, no league placement, and no
+  per-round win record. Only the *count of circles* is entered, and only on the race form.
+- **Team stat grades A/A/A/S/A and the +30 ranking bonus (§1.8 lines 232-234).** The cockpit prints a
+  five-stat grade row (Speed..Wit, all `N/A`), but there is no field for the bonus.
+- **The Unity Trainings count (55) and the 6 / 5 burst split (§1.8 lines 235-237).** The cockpit shows
+  "Spirit Bursts N/A" and its own copy says bursts are "recorded as states, not counters (D-223)".
+  The source's two numbers (6 normal, 5 Extreme) and the 55 Unity Trainings cannot be entered; the
+  band table consequently cannot place the run in its 10-12 band even though §1.8 derives it.
+- **The run's YEAR/MONTH/turns-remaining.** The cockpit derives YEAR and MONTH from the turn number
+  (see friction).
+
+#### Friction / errors / dead ends
+- On first arrival everything is `N/A` and the Advisor declines ("Recommendation unavailable because
+  Energy has not been entered"). That is correct behaviour and is well explained.
+- **The mid-career position has no representation.** The cockpit's YEAR/MONTH/TURN come out of the
+  turn number; with no turn logged it printed `YEAR N/A / MONTH N/A / TURN 0`. The source's "Senior
+  Year Early Oct, 5 turns left, 5 turns until the Unity Cup" (§1.1 line 21) has no field anywhere.
+- The burst-count band table carries a visible caveat badge and a note that the run's own position in
+  the bands is not shown. Good disclosure, but it means the source's §2.4/§8.2 conclusion ("11
+  combined is inside the 10-12 gold band") cannot be expressed in the tool.
+
+#### Outcome / next screen
+Followed the cockpit's own prompt, "Record the first turn on the run screen" → `/training-runs/8`.
+
+---
+
+### Screen 9 — Run record (turn logger)
+
+#### Route and trigger
+- Route: `/training-runs/8`, title "Run: Rice Shower".
+- Trigger: clicked "Record the first turn on the run screen" in the cockpit's empty state.
+
+#### What the screen asks for
+A very large screen. In order: header links (Career Cockpit, Skills planner, Career result, Export
+CSV, Export JSON); a Resources strip; a three-year race calendar with per-turn race names; a race
+record form (`race_catalog_slot_id`, `status` Not/Offered/Skipped/Entered/Completed, `placement`,
+`circles`, `Record race`); a scenario select + `Change scenario`; a status select (Active/Completed/
+Retired) + `Change status`; six deck slots (`deck[N][support_card_id]`) + `Save deck`; the Turns
+table; and the turn form — "Step 2 of 5 · Choose activity" with seven numbered activities (Speed,
+Stamina, Power, Guts, Wit, Rest, Recreation), then `Turn`, `Speed`, `Stamina`, `Power`, `Guts`, `Wit`,
+`Skill Points`, `Energy (after this turn)`, `Fans (after this turn)`, `Mood`, `Outcome`, `Penalty
+kind`, `Preview this turn`; a `Correct a turn by hand` disclosure; and a Skills block (Starting /
+Acquired / Skipped, plus a `Skill` + status + turn form).
+
+#### Values entered + source trace
+| Value        | Field                       | Source                                                                                                 |
+| ------------ | --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `1` (default, unchanged) | Turn            | **Not present in source — UI-required choice.** §1.1 line 21 gives a position ("Senior Year Early Oct, 5 turns left") but no turn number, and the field is required with a default of 1. |
+| Speed        | Choose activity (radio)     | §1.7 line 220 (the last observed training turn is the Speed tile). **Activity is not stated as a turn record in the source; UI-required choice.** |
+| `607`        | Speed                       | §1.2 line 28                                                                                            |
+| `577`        | Stamina                     | §1.2 line 29                                                                                            |
+| `549`        | Power                       | §1.2 line 30                                                                                            |
+| `736`        | Guts                        | §1.2 line 31                                                                                            |
+| `397`        | Wit                         | §1.2 line 32                                                                                            |
+| `173`        | Skill Points                | §1.2 line 34 ("Skill Points: 173 unspent")                                                               |
+| `209245`     | Fans (after this turn)      | §1.1 line 22 ("Fans 209,245")                                                                           |
+| `GREAT ↑`    | Mood                        | §1.7 line 208 ("Mood is GREAT")                                                                          |
+| Success      | Outcome (default)           | Default. §1.7 line 220 records the tile's 39% failure rate but no resolved outcome; left at the default. |
+| (left empty) | Energy (after this turn)    | **No value exists in the source.** §1.7 lines 213-216: "The client never prints an Energy number", the bar is "near a third". Left blank rather than invented. |
+| (left empty) | Penalty kind                | Not applicable with a Success outcome.                                                                   |
+
+#### Source data with no UI home
+- **Energy (§1.7 lines 213-218).** No number exists in the source ("The client never prints an
+  Energy number"; the bar sits "near a third"). The field is a number, so the snapshot's energy state
+  has no representation at all. Leaving it blank leaves the run's Energy `N/A` on every screen, which
+  in turn disables the Advisor everywhere.
+- **The run's position in the career (§1.1 line 21).** `Turn` is a bare integer; "Senior Year Early
+  Oct", "5 turns left" and "5 turns until the Unity Cup" have no field. The calendar renders all three
+  years, but nothing records which one the run is in except the derivation from the turn number.
+- **The last observed turn (§1.7 lines 220-222).** Speed facility Lv4, the "Floor Cleaning" banner,
+  three card avatars, the preview "+18 Speed / +8 Power / +6 Skill Points", **Failure 39%**, and the
+  five facility levels (Speed 4, Stamina 4, Power 4, Guts 5, Wit 4). There is no per-turn failure
+  rate, no facility level and no preview figure anywhere on the form.
+- **The unspent SP's composition (§1.3, §2.2).** SP is one number. The ten-plus owned skills, the
+  purchasable pool with its prices, and the hint discounts have no home on the turn form.
+- **The Unity Cup state (§1.6, §1.8).** Team name, motto, league placement, the four rounds won, the
+  55 Unity Trainings and the 6 + 5 burst split. The only nearby control is the race form's `circles`,
+  which is per-race.
+
+#### Friction / errors / dead ends
+- The turn form's required fields are `Turn`, the five stats and `Outcome`; `Energy`, `Fans`,
+  `Skill Points` and `Mood` are optional. Because the source cannot supply Energy, the Advisor stays
+  disabled on this and every later screen: the app's own recommendation engine is unusable for a run
+  whose energy the source cannot state.
+- The form is a small wizard inside the page. It announced "Step 2 of 5 · Choose activity", then
+  after `Preview this turn` it announced "Step 4 of 5 · Record outcome". No step 3 label was ever
+  shown.
+- `Preview this turn` does not write; it added a `Confirm turn` button, and only `Confirm turn`
+  persisted. After confirming, the Turns table read
+  `1 | 607 | 577 | 549 | 736 | 397 | 173 | (blank) | GREAT ↑`. The table's columns are Turn, Speed,
+  Stamina, Power, Guts, Wit, SP, Condition, Mood and actions — **there is no Fans column and no
+  Energy column**, so two of the values the form accepted are not shown back on this screen.
+- **The mid-career position cannot be expressed.** Re-reading the cockpit after the turn shows the
+  derivation: `YEAR Junior Year`, `MONTH Early January`, `TURN 1`. The source's snapshot is Senior
+  Early October. Entering the snapshot's values at the form's default turn number places a
+  Senior-year state at the career's first turn, and no control on the screen would have let the user
+  place it anywhere else.
+
+#### Outcome / next screen
+After `Confirm turn`, clicked "Skills planner" in the screen header → `/training-runs/8/skills`.
+
+---
+
+### Screen 10 — Skills planner
+
+#### Route and trigger
+- Route: `/training-runs/8/skills`, title "Skills planner: Rice Shower".
+- Trigger: clicked "Skills planner" in the run record screen's header.
+
+#### What the screen asks for
+Read-only. A "Your target" block (purpose, distance, surface, style and the five stat targets), a
+"Skill Point coverage" line, the hint-discount ladder (Hint Lvl 1 10% off … Lvl Max 40% off), and a
+legend of five skill states (Confirmed, Required, Available, Learned, Inherited).
+
+#### Values entered + source trace
+None entered.
+
+#### Source data with no UI home
+- **The ten-plus owned skills and Corner Recovery ○ (§1.3 lines 63-67).** The planner prints "No skill
+  is learned yet" and "No skill is marked for this run yet"; §1.3's owned list has no entry point on
+  this screen.
+- **The Ignited Spirit hints and the Burning Spirit gold (§2.2 lines 363-373, §2.4).** The screen has
+  no scenario-skill row.
+- **The recommended spend (§2.3).** No advice surface exists here.
+
+#### Friction / errors / dead ends
+- The screen reads back "the run holds 173 SP", so the turn entry persisted.
+- Coverage is stated as "The skills still to learn cost N/A SP", so the headline number of the screen
+  cannot be computed even though the run's own SP is known. A user gets a coverage panel that can
+  never resolve.
+- "No column holds the skills a Legacy configuration passes down" — the screen explains its own gap,
+  but it means the ancestry recorded on screen 5 contributes nothing here.
+
+#### Outcome / next screen
+Navigated back to the run record, then to the cockpit, then followed the cockpit's "Training" action.
+
+---
+
+### Screen 11 — Training decision
+
+#### Route and trigger
+- Route: `/training-runs/8/training`, title "Training decision: Rice Shower".
+- Trigger: the cockpit's "Training" action link.
+
+#### What the screen asks for
+Five training cards (Speed, Stamina, Power, Guts, Wit). Each carries a deficit line, `EXPECTED GAINS`,
+`ENERGY COST`, `SUPPORTS ENTERED FOR THIS TRAINING`, `TARGET DEFICIT`, `RISK`, a `Train` button and an
+`Inspect details` disclosure. Below them, "Record the turn" with `Turn *`, `Speed total *`,
+`Stamina total *`, `Power total *`, `Guts total *`, `Wit total *`, `Skill Points`, `Energy`, `Fans`,
+`Mood`, `Outcome *`, and `Preview this turn`.
+
+#### Values entered + source trace
+None entered on this screen.
+
+#### Source data with no UI home
+- The source's tile preview and failure rate (§1.7 lines 220-222) have no field, as on screen 9.
+- The source's facility levels (Speed 4, Stamina 4, Power 4, Guts 5, Wit 4) have no field; the app
+  says per-facility levels "are not recorded here".
+
+#### Friction / errors / dead ends
+- The screen's computed deficits match the entered target against the entered stats exactly:
+  Speed 693 (1300−607), Stamina 723, Power 751, Guts 564, Wit 1,403. The arithmetic is right, and it
+  is right against a target the source does not state.
+- Supports-per-training counts match the deck and the source: Speed 3, Stamina 1, Guts 2, Power 0,
+  Wit 0 (§1.4 line 86: "Three Speed, one Stamina, two Guts, no Wit, no Pal").
+- `EXPECTED GAINS` and `RISK` are `N/A` on every card, with sourced reasons (ADR-0001 §3). Honest, but
+  it leaves each card with one usable number (the deficit) out of five.
+- This screen repeats the run record's turn form with different labels (`Speed` vs `Speed total *`),
+  and its own copy says the preview "renders on the run record screen … (Rice Shower, turn 2)". A user
+  meets the same form twice and has to work out which one to submit.
+- The screen names the next turn as 2, i.e. it has already advanced past the turn that was logged.
+
+#### Outcome / next screen
+Returned to the cockpit and followed its "Race" action.
+
+---
+
+### Screen 12 — Race decision
+
+#### Route and trigger
+- Route: `/training-runs/8/races`, title "Race decision: Rice Shower".
+- Trigger: the cockpit's "Race" action link.
+
+#### What the screen asks for
+"The turn being decided" (printed as `Junior Year · Late January · Turn 2`); Mandatory races (Junior
+Make Debut, Junior turn 12, flagged NEXT, "Not recorded yet"; URA Finals Qualifier / Semifinal /
+Final (Aoharu) in Finale, all "Not recorded yet"); a "Next obligation" line; Readiness (`N/A`); and
+"Races to decide between" with a `Plan the whole calendar` link.
+
+#### Values entered + source trace
+None entered.
+
+#### Source data with no UI home
+- **The race-day card (§1.6 lines 181-193):** Kyoto Daishoten (G2, Kyoto Turf 2400 m, Soft) and Mile
+  Championship Nambu Hai (G1, Morioka Dirt 1600 m), the 6,700-fan payout, the "2,000 fans or more"
+  entry criteria, and the client's "top contender" verdict. Because the run sits at turn 1/2, the
+  screen reports "No race on this scenario's calendar falls at this turn", so none of it is reachable.
+- **The race calendar's Senior board (§1.6 lines 178-179):** the scheduled Kyoto Daishoten and the
+  Arima Kinen goal slot. Not reachable from this turn.
+
+#### Friction / errors / dead ends
+- This screen is the clearest demonstration of the mid-career mismatch. The app can only decide a race
+  at the turn it is at; the turn is 1/2 (Junior January), while the source's turn is Senior Early
+  October. The screen has no way to jump to the run's real turn.
+- The mandatory-race list is the only populated race content, and it is the *scenario's* obligation
+  list, not the run's own four won rounds (§1.6 line 170).
+
+#### Outcome / next screen
+Clicked `Plan the whole calendar` → `/training-runs/8/races/planner`.
+
+---
+
+### Screen 13 — Race planner
+
+#### Route and trigger
+- Route: `/training-runs/8/races/planner`, title "Race planner: Rice Shower".
+- Trigger: clicked "Plan the whole calendar" on the Race decision screen.
+
+#### What the screen asks for
+Read-only. "Planning from Junior Year · Turn 2"; Held figures (Win probability `N/A`, Expected risk
+`N/A`); Deadlines; Mandatory races, each with a per-race detail panel (Grade, Distance, Distance
+band, Surface, Running style, Fan gain, Reward, Skill points, Scenario reward, Estimated win
+probability, "Details and actions"); and Upcoming races (the calendar's non-mandatory races).
+
+#### Values entered + source trace
+None entered.
+
+#### Source data with no UI home
+- The source's Soft going and per-race fan rewards (§1.6 lines 185-191) have no column; the Fan gain
+  row explains that the payout curve id is stored but no payout table is.
+- The Arima Kinen goal (§1.6 line 176) is not in this list; goal races are `N/A` (KI-34).
+
+#### Friction / errors / dead ends
+- The detail panels are mostly `N/A` with a reason each. Junior Make Debut and Junior Maiden Race
+  carry no distance, distance band or surface; Chukyo Junior Stakes does (1,600 m, Mile, Turf, "Fan
+  gate: 350 fans"). The inconsistency is in the catalog, and the screen discloses it per field.
+- Win probability is withheld on purpose (ADR-0016 / `PRD.md` §6.11), stated on every panel.
+- The screen is the longest in the walk (16,001 characters of text) and repeats the same eleven-field
+  panel for every race, so most of it is `N/A` rows.
+
+#### Outcome / next screen
+Navigated to the Event decision screen.
+
+---
+
+### Screen 14 — Event decision
+
+#### Route and trigger
+- Route: `/training-runs/8/events`, title "Event decision: Rice Shower".
+- Trigger: the cockpit's "Event" action link.
+
+#### What the screen asks for
+Coach recommendation (none), Current career state (read-back of five stats, Energy, Mood, Fans, Skill
+Points), "Known outcomes on this run", "Recorded events", and a "Record an event choice" form:
+`Turn *` (Select turn → Turn 1), `Source *` (Character, Support Card, Group, Scenario), `Event name *`,
+`Choice you made *`, `Support card (if the event came from one)`, `What the choice gave`, and
+`Record choice`.
+
+#### Values entered + source trace
+None entered.
+
+#### Source data with no UI home
+- The source records no event that fired during the run, so nothing from §1.8's Team Info panel or
+  §2.4's payout event can be entered as an event choice. The screen's own copy is explicit that it
+  "does not look up events it has not seen", so the source's scripted-event content has no home.
+- **The four Ignited Spirit hints (§1.8 line 243-244).** These are the run's recorded inheritance/
+  scenario hint state; there is no field for a hint, only for an event choice.
+
+#### Friction / errors / dead ends
+- The read-back confirms persistence of the turn entry: Speed 607/1300, Stamina 577/1300, Power
+  549/1300, Guts 736/1300, Wit 397/1800, `Energy N/A`, `Mood GREAT`, `Fans 209245`, `Skill Points 173`.
+- `Turn *` offers only the turns that exist on the run (Turn 1), so this screen inherits the same
+  positional problem as the rest of the run.
+- Energy reads `N/A` here too, and the screen offers no advice (`TrainerAdvisor holds no event advice`).
+
+#### Outcome / next screen
+Navigated to the Inheritance event screen.
+
+---
+
+### Screen 15 — Inheritance event (server error)
+
+#### Route and trigger
+- Route: `/training-runs/8/inheritance`.
+- Trigger: the cockpit's "Inheritance" action link.
+
+#### What the screen asks for
+Nothing: the route returned **HTTP 500** and rendered Laravel's error page, not the app screen.
+
+#### Values entered + source trace
+None. The screen never rendered, so nothing could be entered.
+
+#### Source data with no UI home
+- The whole screen's subject matter (§1.5's ancestry, sparks and the three inheritance moments) is
+  unreachable for this run, because the screen cannot load.
+
+#### Friction / errors / dead ends
+- The error page reports: `TypeError` — `array_map(): Argument #1 ($a) must be of type array, string
+  given`, in `App\Http\Controllers\Career\InheritanceEventController.php:162`, inside
+  `legacySection()`.
+- Read from the source (to explain the page, not as evidence of the screen's behaviour):
+  `StoreLegacySelectionRequest.php:186-189` writes `legacies.*.ancestors` as a **list of name
+  strings**, with the comment that ancestors are names and not ids (`ADR-0010`), while
+  `InheritanceEventController.php:161-164` maps each entry as an **array** with `slot` and `name`
+  keys. Any run whose stored legacy selection carries ancestor entries therefore fails to render.
+- This is a hard dead end: the cockpit offers the link, the link is a 500, and there is no
+  in-app route around it. The run's ancestry was entered entirely through the UI on screen 5.
+- Not fixed, per the brief.
+
+#### Outcome / next screen
+No forward movement from this screen. Navigated to the Career Timeline.
+
+---
+
+### Screen 16 — Career Timeline
+
+#### Route and trigger
+- Route: `/training-runs/8/timeline`, title "Career timeline: Rice Shower".
+- Trigger: the cockpit's "Career Timeline" link.
+
+#### What the screen asks for
+A `Filter by type` control ("Toggle a type to hide its rows. Empty filter shows everything"), a count,
+and a rail of rows. Each row's BEFORE stat block is the previous logged turn; EXPECTED and ACTUAL
+collapse because `ADR-0003` stores the absolute end-of-turn value.
+
+#### Values entered + source trace
+None entered.
+
+#### Source data with no UI home
+- The source's four preset race days and the pending finals (§1.6 line 170-172) would appear here as
+  race rows; none can be recorded at turn 1, so none is present.
+- The source's turns beyond the snapshot (the §5 plan for the five remaining turns) have no
+  representation.
+
+#### Friction / errors / dead ends
+- The rail shows exactly one row: `TURN · Turn 1 · Turn recorded`, and the count reads
+  "showing 1 of 1". Correct, and it is a direct consequence of the positional problem: a mid-career
+  snapshot logged as turn 1 produces a one-row timeline.
+
+#### Outcome / next screen
+Navigated to the Career Result screen.
+
+---
+
+### Screen 17 — Career Result
+
+#### Route and trigger
+- Route: `/training-runs/8/result`, title "Career result: Rice Shower".
+- Trigger: the cockpit's "Career Result" link.
+
+#### What the screen asks for
+Read-only. It refuses to render a result and offers `Back to the Cockpit`, `Career Timeline` and
+`Run record`.
+
+#### Values entered + source trace
+None entered.
+
+#### Source data with no UI home
+- The source's mid-career state is not a result, so nothing here is expected to have a home. The
+  screen's subject matter (a finished build, a final race history, scenario objectives) is not
+  reachable while the run is Active.
+
+#### Friction / errors / dead ends
+- The screen's copy is exactly the behaviour the brief required: "This career is still running, so
+  there is no result to read yet. The result screen reads a run whose status is Completed". The
+  snapshot was not silently converted into a finished career, and the walk did not change the status
+  to force it.
+- This is a designed dead end for an unfinished run, not a defect.
+
+#### Outcome / next screen
+Navigated to the run-scoped deck builder, the last screen the run exposes.
+
+---
+
+### Screen 18 — Support deck (run-scoped)
+
+#### Route and trigger
+- Route: `/training-runs/8/deck`, title "Support deck".
+- Trigger: the run record screen's "Change slot N" links.
+
+#### What the screen asks for
+The six slots, each with the equipped card, its type, its scenario-link flag and its full effect
+list; an `Ownership` toggle (`Owned` / `Rented`) per slot; `Replace the card in Slot N`; `Confirm
+deck` ("Confirming replaces the whole deck: slots left empty are cleared"); and a picker with `Type`,
+`Rarity`, `Availability` and `Name contains` filters over "251 of 251 cards available".
+
+#### Values entered + source trace
+None entered.
+
+#### Source data with no UI home
+- **Card client levels and limit breaks (§1.4 lines 77-84).** Still no field.
+- **The reached effect values (§1.4 lines 97-104).** The screen prints catalog anchors only.
+
+#### Friction / errors / dead ends
+- All six cards persisted and render with their effects. Haru Urara is the only slot flagged
+  `Scenario Link`, which matches §1.4 lines 92-94 ("Haru Urara is the deck's only Unity Cup link").
+- **The friend-slot Rented flag did not persist.** Slot 6 · Friends reads `Owned: true`,
+  `Rented: false`. The screen states the reason: "The run record stores no field for the owned or
+  rented flag yet, so the six toggles above hold their choice on this page only and a reload returns
+  them to Owned. Nothing is posted for them, so nothing is claimed to have been saved."
+- The consequence is that the source's one borrowed card (§1.4 lines 86-88, §7 item 8: the sixth slot
+  is a card borrowed from another account, "which is why the only 50/50 card in the deck is the one
+  borrowed") is indistinguishable from an owned card once the run exists. The distinction survives
+  only inside the wizard's draft.
+
+#### Outcome / next screen
+None. This is the last screen reachable for this run.
+
+---
+
+### Closing assessment
+
+#### What worked
+
+- The wizard accepted the run's identity end to end. Scenario, trainee, target, ancestry and deck all
+  persisted, and the Preflight contract echoed every entered value back before the write.
+- The deck represented the source's deck exactly, including the friend slot as a **position** with an
+  `Owned` / `Rented` flag, and it independently derived the one Scenario Link the source also derives
+  (Haru Urara).
+- `Rented for the run` → "Rented from a friend" is the right representation for the source's Guest
+  parent, and it was the only place the borrowed-parent fact could go.
+- The spark editor accepted kind, target and stars for every coloured spark entered, and **nothing
+  forced a value for a category the source lacks**. There is no Wit spark row anywhere and no control
+  demanded one, so the source's "no Wit spark anywhere in the tree" (§1.5 line 159) is representable
+  by omission.
+- The turn form accepted the run's five stats, its SP, its fans and its mood, and every later screen
+  read them back correctly (cockpit, event decision, skills planner, deck).
+- The Career Result screen refused to present an unfinished career as finished, and the walk never
+  changed the run's status to make it do so.
+- Unrecorded values render `N/A` with a stated reason throughout. The app never invented a number to
+  fill a field.
+
+#### Functional findings
+
+Problems where the UI failed to do what it claims, rejected valid information, lost information,
+produced contradictory state, or prevented legitimate progression.
+
+1. **`/training-runs/{run}/inheritance` returns HTTP 500.** `TypeError: array_map(): Argument #1 ($a)
+   must be of type array, string given` at `InheritanceEventController.php:162`, because
+   `StoreLegacySelectionRequest.php:186-189` stores `ancestors` as name strings and the controller
+   maps them as arrays. Observed on a run created entirely through the UI with grandparent names
+   entered. The cockpit's Inheritance action is a dead end and the screen is unusable.
+2. **A blank trailing spark row is stored as a real spark.** After three `Add Spark` clicks on Parent
+   A, the fourth (blank) row was persisted; the Preflight contract lists Parent A's sparks as
+   "Blue on Power★1 / Pink on Late Surger★2 / Green on Cut and Drive!★2 / **Blue**", with no target and
+   no stars on the fourth.
+3. **The "Your target" step cannot be saved with the stat target unset**, even though its own
+   validation message ("Enter a target for every stat, **or leave the whole target unset**") says that
+   state is allowed. Submitting with four selects filled and all five stats empty produced five
+   `role="alert"` errors, one per stat. Because four fields of the target are required, "the whole
+   target unset" is unreachable, so the message describes a state the form forbids.
+4. **The friend-slot Rented flag does not persist.** Set to `Rented` in the wizard, it reads `Owned`
+   on `/training-runs/8/deck`, and the screen confirms the run record has no column for it. The
+   source's borrowed-card distinction is lost at the moment the run is created.
+5. **The trainee step's own `Stored choice:` readout does not update.** After `Select Trainee`
+   succeeded (flash "Trainee set: Rice Shower."), the readout on the same screen still read `N/A`.
+6. **The run record's turn table shows no Fans and no Energy column.** Both values were accepted by
+   the form; neither is shown back anywhere on the screen that accepted them.
+7. **The run record's inner turn flow reports "Step 2 of 5" and then "Step 4 of 5".** No step 3 label
+   is ever rendered.
+
+#### Experiential findings
+
+Problems where the UI technically works but is unclear, requires unnecessary rework, forces repeated
+consultation of the source, uses confusing terminology, has poor information architecture, requires
+awkward workarounds, or creates avoidable friction.
+
+1. **The run's own caps cannot be entered.** §1.2's caps (Speed 1325, Stamina 1322, Power 1368, Guts
+   1308) exceed the target form's maxima (1300), and the form asks for a *target* rather than a cap.
+   The source's central cap-arithmetic discussion has no representation, and the tool's ceiling is
+   lower than the run's.
+2. **The mid-career position has no representation.** YEAR and MONTH are derived from a bare turn
+   number. The only way to enter the snapshot's stats is to log them at a turn the form defaults to 1,
+   which places a Senior-year state at Junior January. A user holding a mid-career snapshot must
+   invent a position, and the screens then contradict the source.
+3. **Four of the tree's six spark sets have no home.** The SPARKS block exists only for PARENT A and
+   PARENT B; the four grandparents are name-only. Of the source's six blue sparks, only two can be
+   recorded.
+4. **Ancestor ranks are letter classes and the only rank field is a star count.** B+, A and UG have
+   no field, so both parents' ranks print `N/A` on the contract.
+5. **The parent picker lists duplicate bare names.** `Vodka` twice and `Maruzensky` twice, with no
+   epithet, rank or id, so the two records cannot be told apart; and neither parent's epithet
+   (`[Wild Top Gear]`, `[Formula R]`) has a field anywhere.
+6. **Three of the four scenario cards print `Ruleset`, `Description` and `Recommended use` as `N/A`.**
+   Two thirds of the comparison surface is blank for every option.
+7. **The same turn form appears twice with different labels.** The run record says `Speed`; the
+   Training decision says `Speed total *`. A user meets the identical form twice and must work out
+   which one to submit.
+8. **The trainee card's aptitude row disagrees with the source on three of ten letters** (Mile B→C,
+   Front runner A→B, Late surger B→C), and the costume form the run actually uses is the unlabelled
+   one while the debut form is named.
+9. **Energy cannot be entered from this source, which disables the Advisor for the whole run.** §1.7
+   explains why the source has no number, but the app offers no band or qualitative alternative, so
+   every screen's recommendation panel is permanently blank for this run.
+10. **The spark `Applies to` field accepts a stat name, an aptitude name or a skill name** with no
+    list, no hint and no validation; the only clue is the spark's `Kind`.
+11. **The race surfaces are unreachable in practice.** Because the run's turn is 1/2, the Race
+    decision reports "No race on this scenario's calendar falls at this turn" and the planner offers
+    only mandatory races, so the source's race-day card (§1.6) cannot be entered or even seen.
+
+#### Note on the brief versus the source
+
+The task brief states that "Haru Urara occupies the friend slot". The source document says the friend
+card is **Super Creek**: §1.4 lines 86-88, "the Career Profile rail tags Super Creek's entry with a
+'Friends' pill where the other five carry their discipline icon, which is why the only 50/50 card in
+the deck is the one borrowed from another account". This walk followed the source document, as the
+brief directs, and placed Super Creek in `Slot 6 · Friends`. Recorded here because a reader comparing
+the two will meet the difference.
+
+#### Unrepresented source data (final inventory)
+
+Every source datum encountered for which the UI has no appropriate field:
+
+- Run position: Senior Year Early Oct; 5 turns left; 5 turns until the Unity Cup (§1.1 line 21).
+- Rarity ★3 and Potential Level 2 (§1.1 line 20).
+- The `[Rosy Dreams]` costume identity: the card's second form is unlabelled (§1.1 line 20).
+- The growth-rate row +0/+10/+0/+20/+0 (§1.1 line 20; §7 item 2).
+- Fans class Star, the Top Star threshold 240,000 and the 30,755-fan gap (§1.1 lines 21-22).
+- The run's own per-stat caps 1325 / 1322 / 1368 / 1308 / 1800 (§1.2 lines 28-32).
+- The cap shortfall and its candidate causes (§1.2 lines 39-56; §8.5).
+- Aptitudes (§1.1 lines 58-59): shown on the picker but not stored against the run, and three letters
+  disagree with the source.
+- The ten-plus owned skills and Corner Recovery ○ (§1.3 lines 63-67).
+- Card client levels / limit breaks and the reached effect values (§1.4 lines 77-104).
+- Both parents' letter ranks B+ / UG, and the grandparents' ranks B+ / A / UG (§1.5 lines 138-143).
+- The four grandparents' spark sets (§1.5 lines 149, 150, 152, 153).
+- The white sparks for both parents — representable (`Kind = White`) but not entered; see completion.
+- Team identity: "Blue Bloom", motto "Dreaming Big", league placement 8th, the four preseason rounds
+  won, finals pending (§1.6 lines 169-172).
+- Goals: the three cleared and the active Arima Kinen goal (§1.6 lines 174-176).
+- The race-day card: Kyoto Daishoten (G2) and Mile Championship Nambu Hai (G1), the Soft going, the
+  "top contender" verdict, the fan rewards and the entry criteria (§1.6 lines 181-193).
+- The Mood Effect panel percentages (§1.7 line 208).
+- Energy: low, with the warning text; no number exists (§1.7 lines 213-218).
+- The last observed turn: Speed facility Lv4, "Floor Cleaning", three avatars, +18 Speed / +8 Power /
+  +6 Skill Points, Failure 39%, facility levels 4/4/4/5/4 (§1.7 lines 220-222).
+- Team Info: 55 Unity Trainings, 6 Spirit Bursts, 5 Extreme Spirit Bursts, 20/20 members, the Team
+  Ranking Bonus +30 and the team stat grades A/A/A/S/A (§1.8).
+- The 18-member roster and the guests' skill lists (§1.9).
+- The skill pool, its prices, the hint-discount ladder and the recommended spend (§2.1-2.3).
+- The burst economy and the 10-12 band conclusion (§2.4, §8.2).
+
+#### Walk completion
+
+- **Reached the end of the available flow: yes, for an Active run.** Eighteen screens were visited,
+  in visit order, from the Dashboard to the run-scoped deck builder.
+- **Where it stopped:** the flow terminates at the Career Result screen's "still running" state, and
+  the Inheritance screen terminates in an HTTP 500. Nothing further is reachable for this run.
+- **Why it stopped:** the run was deliberately left Active — the brief forbids marking the mid-career
+  snapshot as completed — so the Result screen has nothing to read; and the Inheritance screen cannot
+  render at all.
+- **Intentionally omitted data:** the twelve white sparks from §1.5 (six on Vodka, six on
+  Maruzensky) were not entered. They have a UI home (`Kind = White`) and the identical control to the
+  nine coloured sparks that were entered, so no further UX behaviour was at stake; the omission is
+  stated here rather than presented as a gap. The pair's affinity grade was left unset because the
+  source states none. Every other source datum the UI cannot hold is listed under Unrepresented
+  source data above.
+- **Persistence note:** the values entered were verified to persist only where a screen read them
+  back — the cockpit, the event decision screen, the skills planner, the timeline and the run-scoped
+  deck all printed the entered stats, SP, fans and mood. No claim of persistence is made for anything
+  a screen did not show again, and the friend-slot `Rented` flag is explicitly recorded as **not**
+  persisting.
+
+---
+
+## rice-shower-unity-cup-ux-walk-2.md
+
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/audits/rice-shower-unity-cup-ux-walk-2.md` (941 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+
+## UX walk audit (2nd pass): [Rosy Dreams] Rice Shower, Unity Cup
+
+### Header
+
+| Field                | Value                                                                                                              |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Audit name           | Rice Shower Unity Cup mid-career UX walk — second, independent pass                                                    |
+| Source document      | `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md` (67 `[Global]` client frames, 2026-10-03; a mid-career snapshot)          |
+| Starting URL         | `http://127.0.0.1:8000/`                                                                                               |
+| Date/time of walk    | 2026-10-10, a second continuous session on the same day as the first pass                                              |
+| Tree under test       | `master` at `aedfc30` ("chore(runs): drop the orphaned stat_ceilings column"). The first pass ran against an earlier    |
+|                      | working state whose peer commits had not yet landed, so this pass exercises different application code.                 |
+| Environment          | Laravel 13.32.0, PHP 8.5.8, SQLite (`database/database.sqlite`), `php artisan serve` on `127.0.0.1:8000`, Chromium 150 |
+| Run created          | `training_runs` id **9** (`/training-runs/9`), status Active, scenario Unity Cup                                         |
+| Screens visited      | 20 in visit order (19 belonging to run 9 plus one labelled cross-check against run 8)                                   |
+
+**Relationship to the first audit.** `docs/audits/rice-shower-unity-cup-ux-walk.md` is the first pass. This
+is a fresh walk of the same source run through the same flow, written to its own file. Where the two
+passes disagree, both readings are recorded with the pass that produced them; neither is silently
+overwritten.
+
+**Method statement.** Every screen below was reached in a real browser session and its contents were read
+from the rendered DOM at the moment of the visit. Every value was typed or selected through the on-screen
+controls (search box, native selects, number inputs, radio controls, checkboxes, disclosure summaries and
+the app's own buttons). No seeder, no database insert or update, no SQL, no tinker, no API call and no
+hand-edited application state was used to enter data. Inter-screen hops after the wizard hub used the
+address bar with the exact href each screen's own link exposes; the target route is the route the link
+points at. Source code was not needed to explain anything in this pass, because every claim here is
+backed by a rendered screen.
+
+**One pass.** Made once, forward. No screen was re-entered to change an earlier choice and none was
+skipped. Where the UI demanded a value the source does not carry, the minimum available choice was made
+and is flagged **Not present in source — UI-required choice**. The run was never marked Completed, never
+filed as a Veteran and never filed as a Legacy.
+
+**Nothing was fixed.** No route, controller, view, component, migration, model, seeder, test, validation
+rule, label, field or schema was changed. The only file this pass added is
+`docs/audits/rice-shower-unity-cup-ux-walk-2.md`.
+
+---
+
+### Screen 1 — Dashboard
+
+#### Route and trigger
+- Route: `/` (`home`), title "Dashboard".
+- Trigger: initial navigation to the starting URL.
+
+#### What the screen asks for
+Read-only. ACTIVE CAREER (trainee, scenario, `Junior Year · Early January`, Turn 1, Energy `N/A`, Team
+Rank `N/A`, `Resume Career`); Quick actions (`New Career`, `Legacy Lab`, `Support Cards`); RECENT
+VETERANS (3 of 7); RECENT BUILDS; DATA STATUS (Verified 2026-09-27 · GameTora `scenarios.json`, Ruleset
+`N/A`, Trainees 67, Skills 1,910, Support cards 559).
+
+#### Values entered + source trace
+None. The control used was `New Career`.
+
+#### Source data with no UI home
+None relevant on this screen.
+
+#### Friction / errors / dead ends
+- The Dashboard now renders a career state, and it showed the run the **first** pass created (run 8):
+  "Rice Shower … Junior Year · Early January · Turn 1". The same misplacement the first pass recorded is
+  now on the landing screen before the walk starts.
+- `New Career` was still available with an Active career already present, and it started a clean draft
+  (step 1 showed `Stored choice: N/A`), so the two coexist without a prompt about the existing career.
+- The Veterans rows now link to `/training-runs/N/cockpit`, not `/training-runs/N`.
+
+#### Outcome / next screen
+Clicked `New Career` → `/career/setup/scenario`.
+
+---
+
+### Screen 2 — Scenario setup (step 1 of 6)
+
+#### Route and trigger
+- Route: `/career/setup/scenario`, title "Choose a scenario".
+- Trigger: clicked `New Career` on the Dashboard.
+
+#### What the screen asks for
+Step nav (`Leave setup`; Scenario, Trainee, Your target, Legacy, Support deck, Preflight), a `Stored
+choice` readout, and four scenario cards of eight facts (Optimizes, Systems, Tracked resources, Turn
+loop, Live on Global, Ruleset, Description, Recommended use) each with a `Select Scenario` button. No
+Continue button: forward movement is the step nav.
+
+#### Values entered + source trace
+- `Unity Cup` → the Unity Cup card's `Select Scenario` → source §1.1, line 19 ("Scenario Unity Cup,
+  confirmed by the logo panel").
+
+#### Source data with no UI home
+The run's identity beyond the scenario name (trainee, year, month, turns remaining) is not asked for
+here, as in the first pass.
+
+#### Friction / errors / dead ends
+- **The Unity Cup card prints two Ruleset rows with different values.** The eight-fact block ends with
+  `Ruleset · N/A`; below it the new description block prints `Ruleset · Team`. Both are on screen at the
+  same time, so the same label carries `N/A` and `Team` on one card.
+- Only Unity Cup gained the richer block (description, Ruleset, Planning focus, three KEY MECHANICS
+  bullets). URA Finale, Trackblazer and Our Grand Concert still print `Ruleset`/`Description`
+  /`Recommended use` as `N/A` plus a `Not recorded` line, so the comparison is now asymmetric: one card
+  is fully described and the other three are mostly blank.
+- Selecting flashed "Saving your choice…" then "Scenario set.", the button became `pressed="true"` with
+  a "Selected" tag, and `Stored choice:` moved from `N/A` to `Unity Cup`.
+
+#### Outcome / next screen
+Clicked "Trainee" in the step nav → `/career/setup/trainee`.
+
+---
+
+### Screen 3 — Trainee (step 2 of 6)
+
+#### Route and trigger
+- Route: `/career/setup/trainee`, title "Choose a trainee".
+- Trigger: clicked "Trainee" in the step nav.
+
+#### What the screen asks for
+Filters in UI order: `Search` (text), `Surface`, `Distance`, `Running style` (selects Any,S..G), `Unique
+skill` (≈130 options), `Sort by`, `Order`, `Filter`, `Clear filters`. Then a paginated 67-trainee roster.
+Each card: portrait, English name, Japanese name, "Released (Global)", ten aptitude chips (letter plus
+word), a costume-form summary, `Select Trainee`, `View Profile`.
+
+#### Values entered + source trace
+- `Rice Shower` → `Search` → source §1.1, line 20.
+- `Select Trainee` on the Rice Shower card (`id="trainee-30"`) → source §1.1, line 20.
+
+#### Source data with no UI home
+- **★3 and Potential Level 2 (§1.1 line 20)**: no star rating and no Potential field on the card, and
+  none is reachable from it. (See screens 8 and 11 — the run now *labels* this gap but offers no field.)
+- **[Rosy Dreams]**: the card reads "2 costume forms ★★★SSRdebut form★★★SSR" — the second form, which is
+  the run's, carries no name, and the portrait is `artwork/card_portrait/103001`, the debut form.
+
+#### Friction / errors / dead ends
+- The aptitude row printed **Turf A, Dirt G, Sprint E, Mile C, Medium A, Long A, Front runner B, Pace
+  chaser A, Late surger C, End closer G**. The source reads **Mile B, Front runner A, Late surger B**
+  from the client (§1.1 lines 58-59). Three letters differ, and they differ **exactly as they did in the
+  first pass** — same card id, same values — so this is a stable divergence, not a flake.
+- `Select Trainee` flashed "Trainee set: Rice Shower." and `Stored choice:` then read **`Rice Shower`**.
+  In the first pass the same readout stayed `N/A` at this point. Unreconciled between the two passes;
+  the likely cause is that the first pass read the DOM during the post-save re-render, but it could also
+  be one of the commits that landed between the passes. Recorded as a difference, not resolved.
+- The search filter cleared after the write, returning the list to all 67.
+
+#### Outcome / next screen
+Clicked "Your target" in the step nav → `/career/setup/target`.
+
+---
+
+### Screen 4 — Your target (step 3 of 6)
+
+#### Route and trigger
+- Route: `/career/setup/target`, title "Your target".
+- Trigger: clicked "Your target" in the step nav.
+
+#### What the screen asks for
+`Purpose` (Not chosen yet, Story Clear, Champions Meeting, Parent Farming, Skill Farming) with a note
+that a fifth purpose, Competitive Build, is not recorded; `Distance` (Sprint, Mile, Medium, Long);
+`Surface` (Turf, Dirt); `Style` (Front Runner, Pace Chaser, Late Surger, End Closer); five stat targets
+(Speed/Stamina/Power/Guts max 1300, Wit max 1800) each with a `Cap` label and a ratio readout; a `Skill
+name` + `Add` priorities list; a live `Summary`; `Save target`.
+
+#### Values entered + source trace
+**None.** The step was submitted with every field left at its empty state and the app accepted it. See
+the first bullet under Friction for why this is the faithful entry rather than an omission.
+
+#### Source data with no UI home
+- **The run's own caps (1325 / 1322 / 1368 / 1308 / 1800, §1.2 lines 28-32)** remain unenterable: the
+  inputs carry `max=1300` / `max=1800`, so three of the run's four documented caps exceed the field
+  ceiling. The §1.2 cap arithmetic still has no representation: the screen asks for a target, not a cap,
+  and it asks for no spark and no support-card cap contribution.
+- **Build purpose, and the single distance the run is "for"**: the source names both Medium and Long as
+  A and calls it "A Medium/Long build" (§1.1 line 59) without picking one.
+- Potential Level, the growth row +0/+10/+0/+20/+0, and the fan class/threshold.
+
+#### Friction / errors / dead ends
+- **The first pass's contradiction is gone.** Submitting with nothing entered now returns
+  "Build target saved." with **zero** `[role=alert]` elements. In the first pass the same submission
+  produced nine errors, five of them reading "Enter a target for every stat, or leave the whole target
+  unset." while the target was in fact wholly unset. The purpose/distance/surface/style fields are no
+  longer required, so the state the message offered is now reachable.
+- Consequence for this walk: because nothing is forced, the source's real condition — a mid-career
+  snapshot with no recorded build target — was carried forward honestly instead of being padded with
+  invented values, as the first pass had to do.
+- The step kept printing "No target is recorded yet. The fields below start empty rather than at zero."
+  after the save, which is accurate, but the success flash beside it is easy to misread as "recorded".
+
+#### Outcome / next screen
+Clicked "Legacy" in the step nav → `/career/setup/legacy`.
+
+---
+
+### Screen 5 — Legacy (step 4 of 6)
+
+#### Route and trigger
+- Route: `/career/setup/legacy`, title "Legacy".
+- Trigger: clicked "Legacy" in the step nav.
+
+#### What the screen asks for
+Two parent panels. Each: a rank and spark-chance readout; `Assign to Parent N` (select over the saved
+Veteran library); `Grandparent N1`/`N2` (type-ahead over the catalog roster); **each grandparent now has
+its own `Add spark to grandparent …` disclosure**; an "AS YOU READ HER" block with `Own rank (letters)`
+(combo with a fixed suggestion set), `Own rank (stars)` (number), `Rented for the run` (checkbox) and a
+`SPARKS` list. Each spark row is `Kind` (Blue, Pink, Green, White, Scenario), `Applies to` (Stat,
+Aptitude, Skill) and a dependent `Target` select plus `Stars` (1-3). Then `Affinity for the pair`
+(Not recorded, △, ○, ◎), `Save Legacy`, `Next: Support deck`.
+
+#### Values entered + source trace
+| Value | Field | Source |
+| ----- | ----- | ------ |
+| `Vodka [Wild Top Gear] · 7` | Assign to Parent A | §1.5 line 138 |
+| `Daiwa Scarlet` / `Seiun Sky` | Grandparent A1 / A2 | §1.5 lines 139-140 |
+| `B+` | Parent A → Own rank (letters) | §1.5 line 138 ("rank B+") |
+| Blue / Stat / `Power` / ★1 | Parent A spark | §1.5 line 148 |
+| `Maruzensky [Formula R] · 2` | Assign to Parent B | §1.5 line 141 |
+| `Daiwa Scarlet` / `Taiki Shuttle` | Grandparent B1 / B2 | §1.5 lines 142-143 |
+| `UG` | Parent B → Own rank (letters) | §1.5 line 141 ("rank UG") |
+| checked | Parent B → Rented for the run | §1.5 line 141 ("flagged Guest") |
+| Blue / Stat / `Speed` / ★2 | Parent B spark | §1.5 line 151 |
+| Blue / Stat / `Stamina` / ★3 | Grandparent A2 (Seiun Sky) spark | §1.5 line 150 |
+| (left "Not recorded") | Affinity for the pair | **Not present in source** — §1.5 states no pair grade |
+
+#### Source data with no UI home
+- **The four grandparents' ranks** (B+ line 139, A line 140, UG lines 142-143): `Own rank (letters)` and
+  `Own rank (stars)` exist only for the two parents. Grandparent nodes take a name and now sparks, but no
+  rank.
+- **The remaining three of the six blue sparks** (Daiwa Scarlet Legacy-1 side Guts ★1 line 149, Daiwa
+  Scarlet Legacy-2 side Speed ★2 line 152, Taiki Shuttle Power ★3 line 153) and every pink, green and
+  white spark in §1.5's table: the fields exist and the two I entered were accepted by the editor, so
+  this is no longer a missing-field gap — it is the volume of rows the control requires. The first pass
+  could not place them at all.
+- **Star-roll chance**: `Spark chance` is `N/A` with the stated reason ("This tool holds no sourced
+  star-roll table"), so §1.2's per-activation arithmetic still has nothing to read.
+
+#### Friction / errors / dead ends
+- **The save was silently discarded.** `Save Legacy` produced **no** confirmation flash, **no**
+  `[role=alert]` error, and left the line "No Legacy is recorded for this setup yet" in place. Screen 7
+  then reported `ANCESTRY · N/A` and listed "Ancestry is not entered." among its warnings. Every value in
+  the table above was entered and none of it survived. The first pass saw a "Legacy recorded." flash here;
+  this pass saw nothing.
+- The rank-letter suggestion set is `G, F, E, D, C, B, A, S, B+, A+, S+`. It has no `SS`, `U`, `UU` or
+  `UG`, and `UG` is the rank the source gives for Legacy 2 and both of its grandparents. The field is an
+  editable combo, so typing `UG` was accepted without complaint — the value simply is not one the control
+  offers, and nothing warns that it is off-set.
+- The grandparent spark editor's Low/Mid-style band select renders with **no accessible name** in the
+  accessibility tree (a bare `combobox`), unlike its siblings.
+- Three changes that removed first-pass friction, confirmed live here: parent options now read
+  `Vodka [Wild Top Gear] · 7` / `· 6`, so the duplicates are distinguishable; `Own rank (letters)` exists
+  alongside the star count; and all four grandparents gained a spark disclosure. Spark `Applies to` is now
+  a Stat/Aptitude/Skill select with a dependent Target list, replacing the free-text field.
+
+#### Outcome / next screen
+Clicked `Next: Support deck` → `/career/setup/deck`. The ancestry entered on this screen was gone by the
+time the contract was assembled.
+
+---
+
+### Screen 6 — Support deck (step 5 of 6)
+
+#### Route and trigger
+- Route: `/career/setup/deck`, title "Support deck".
+- Trigger: clicked `Next: Support deck` on the Legacy screen.
+
+#### What the screen asks for
+Six slots (1-5 and `Slot 6 · Friends`, tagged "Friend slot"), each with the equipped card or an empty
+state, an `Ownership` `Owned`/`Rented` toggle pair and `Replace the card in Slot N`; `Save deck`; then a
+`Choose a card` picker with `Type`, `Name contains`, `Filter`, a `Card for Slot N` select and
+`Equip owned` / `Equip rented` / `Set Slot N to not equipped`.
+
+#### Values entered + source trace
+| Slot | Card | Ownership | Source |
+| ---- | ---- | --------- | ------ |
+| 1 | `Tokai Teio [Dream Big!] · SSR Speed` | Owned | §1.4 line 79 |
+| 2 | `Nishino Flower [Even the Littlest Bud] · SSR Speed` | Owned | §1.4 line 80 |
+| 3 | `Biko Pegasus [Double Carrot Punch!] · SSR Speed` | Owned | §1.4 line 81 |
+| 4 | `Matikanetannhauser [Just Keep Going] · SSR Guts` | Owned | §1.4 line 83 |
+| 5 | `Haru Urara [Urara's Day Off!] · SSR Guts` | Owned | §1.4 line 84 |
+| 6 · Friends | `Super Creek [Piece of Mind] · SSR Stamina` | **Rented** | §1.4 lines 82, 86-88 |
+
+Slot order for the five owned cards is **Not present in source — UI-required choice**: §1.4 lists the deck
+without slot numbers. The friend card went to Slot 6 because §1.4 lines 86-88 names Super Creek as the
+borrowed card and the UI names Slot 6 the friend slot.
+
+#### Source data with no UI home
+- **Client levels and limit breaks (35/35, 30/30, 30/30, 50/50, 30/30, 35/35, §1.4 lines 77-84)**: no
+  field.
+- **The reached effect values ("Client rows visible", §1.4 lines 97-104)**: the analysis prints catalog
+  maxima and says so; the run's own reached figures have nowhere to go.
+
+#### Friction / errors / dead ends
+- The copy on this screen still says the flag lives only in the draft ("The deck table has no column for
+  it yet, so Preflight writes the six cards it can store and the flag stays here until one exists"), while
+  screen 18 reports the flag as saved and reload-stable. The two statements contradict each other; see
+  Screen 18.
+- The picker's target slot is set only by `Replace the card in Slot N`, and the only signal that it moved
+  is the slot name inside the equip button's label.
+
+#### Outcome / next screen
+`Save deck` → "Deck saved." (URL gained `?deck_slot=6`), then `Next: Preflight` → `/career/setup/preflight`.
+
+---
+
+### Screen 7 — Preflight (step 6 of 6)
+
+#### Route and trigger
+- Route: `/career/setup/preflight`, title "Career contract".
+- Trigger: clicked `Next: Preflight`.
+
+#### What the screen asks for
+Read-only, then the wizard's single write: a **Warnings** region; Build (trainee, scenario, target,
+ancestry); Support deck (six slots with type and ownership); the full Deck analysis; Target; and
+`Back`, `Edit Legacy`, `Edit Deck`, `Edit Target`, `Start Career`.
+
+#### Values entered + source trace
+None. Only `Start Career` was pressed.
+
+#### Source data with no UI home
+- `YOUR TARGET · N/A` and `ANCESTRY · N/A` are the contract's own statement that the ancestry and the
+  target from §1.4/§1.5 and the (absent) build target are not in the run about to be created.
+
+#### Friction / errors / dead ends
+- **The contract names both gaps, which is what makes the silent Legacy save visible.** Warnings reads:
+  "Your target is not entered." and "Ancestry is not entered.", each with an `Open that step` link and the
+  line "nothing is lost by going back". The first pass printed "No warnings. Every section is filled…".
+- The claim "nothing is lost by going back" is the one this walk cannot corroborate: leaving step 4 and
+  coming forward again is exactly the path along which the ancestry vanished.
+- `Start Career` stayed enabled with two warnings outstanding, so the wizard will create a career from a
+  contract that says two of its own sections are empty.
+
+#### Outcome / next screen
+Clicked `Start Career` → "Run created." → `/training-runs/9/cockpit`.
+
+---
+
+### Screen 8 — Career Cockpit (first arrival)
+
+#### Route and trigger
+- Route: `/training-runs/9/cockpit`, title "Career: Rice Shower".
+- Trigger: `Start Career` on the contract.
+
+#### What the screen asks for
+A run identity block (trainee, a rarity/potential `N/A` badge, SCENARIO, YEAR, MONTH, TURN, Team Rank,
+Spirit Bursts, and an "Edit the run's identity" form holding `Status`, `Scenario` and `Delete this
+career`); Stats and state (five stats, Energy, Mood, Fans, Skill Points); Advisor (recommendation and
+why); a "No turn recorded yet" region; Actions (Training, Race, Rest, Recreation, Scenario action, Event,
+Inheritance); the Unity Cup scenario panel (team race circles, the G..S+ ladder, team stat grades, Spirit
+Burst states, Current Spirit, the burst-count band table, Special Training notes); Races in this run; and
+links to the Career Timeline and Career Result.
+
+#### Values entered + source trace
+None.
+
+#### Source data with no UI home
+- **`YEAR N/A` / `MONTH N/A` / `TURN 0`.** §1.1 line 21's "Senior Year Early Oct, 5 turns left, 5 turns
+  until the Unity Cup" still has no field; the three readouts are derived, not entered.
+- **Rarity ★3 and Potential Lvl 2 (§1.1 line 20).** The screen now *names* this gap — "The trainee's
+  rarity and potential level has not been recorded for this run" — but the identity form beside it holds
+  only `Status`, `Scenario` and `Delete this career`. A badge describing a missing field is not a field.
+- **Team identity (§1.6 lines 169-172)**: team name "Blue Bloom", motto "Dreaming Big", league 8th, four
+  rounds won, finals pending. The panel has Team Rank and Spirit Bursts only.
+- **Unity Trainings 55, Spirit Bursts 6, Extreme 5, members 20/20, the +30 ranking bonus, team grades
+  A/A/A/S/A (§1.8)**: the band table exists but the run's own counts have no input, and the panel's copy
+  states bursts "are recorded as states, not counters (D-223)".
+
+#### Friction / errors / dead ends
+- **The stat denominators are the target, not the cap.** With no target entered the strip reads
+  `Speed N/A / N/A — No turn has recorded this stat yet, and no target was entered for it.` In the first
+  pass, which had invented a 1300 target, the same strip read `N/A / 1,300`. So the scenario's own ceiling
+  (1300/1300/1300/1300/1800, which §1.2 compares the run against) is now absent from the cockpit whenever
+  no target exists. Screen 15 shows a different denominator for the same stat.
+- The Advisor declines for want of Energy, with the reason printed. Correct behaviour, and it becomes the
+  subject of screen 11.
+- The Unity Cup panel still carries the estimated burst-band table with its three-way publisher caveat,
+  which is the honest way to show the §2.4/§8.2 dispute.
+
+#### Outcome / next screen
+Followed the run's own identity route, `/training-runs/9`.
+
+---
+
+### Screen 9 — Run root (`/training-runs/9`), redirected
+
+#### Route and trigger
+- Requested route: `/training-runs/9` (`runs.show`). Final route: **`/training-runs/9/cockpit`**.
+- Trigger: clicked `Cockpit` in the run header after reading screen 8, then navigated to the bare run id.
+
+#### What the screen asks for
+Nothing of its own: the URL resolved to the same visible Cockpit as screen 8.
+
+#### Values entered + source trace
+None.
+
+#### Source data with no UI home
+As screen 8 — the two routes present one screen.
+
+#### Friction / errors / dead ends
+- **The run record screen no longer exists as a distinct surface.** In the first pass `/training-runs/8`
+  was the turn logger: a three-year race calendar, a race form, deck selects, the turn form, a correction
+  form and a skills panel (49 controls, 34,793 characters of text). This pass found 2 controls and 5,527
+  characters at the same address, because it redirects to the Cockpit.
+- Three labels still point users at that retired screen. The Career Result says "the run record screen is
+  where the status changes" (status is on the Cockpit); the Training decision offers "Record the first turn
+  **on the run screen**", and that link's href is `/training-runs/9/cockpit`; the Cockpit itself now says
+  "Record the first turn **through Training**". Two of the three instructions are stale in wording while
+  all three resolve correctly.
+
+#### Outcome / next screen
+Took the Cockpit's `Training` action → `/training-runs/9/training`.
+
+---
+
+### Screen 10 — Training decision and the turn write
+
+#### Route and trigger
+- Route: `/training-runs/9/training`, title "Training decision: Rice Shower".
+- Trigger: the Cockpit's "Training" action link.
+
+#### What the screen asks for
+Five training cards (Speed, Stamina, Power, Guts, Wit), each with a rank line, `EXPECTED GAINS`,
+`ENERGY COST` (now with its declared-constant provenance), `SUPPORTS ENTERED FOR THIS TRAINING`, `TARGET
+DEFICIT`, `RISK`, `Train` and `Inspect details`. Then "Record the turn": `Turn *`, `Speed *`,
+`Stamina *`, `Power *`, `Guts *`, `Wit *`, `Skill Points`, `Fans`, **`Energy` as Exact / Band / Not
+recorded** (a Low/Mid/High select appears under Band), `Mood`, `Outcome *`, a `Facility levels this turn`
+disclosure (five 1-5 inputs), a `Preview readings` disclosure (`Failure rate` 0-100 plus six gain
+inputs), and `Record this training`.
+
+#### Values entered + source trace
+| Value | Field | Source |
+| ----- | ----- | ------ |
+| Speed | `Train` on the Speed card | §1.7 line 220 ("Speed facility Lv4 with the banner 'Floor Cleaning'") |
+| `1` (left at the default) | Turn * | **Not present in source — UI-required choice.** §1.1 line 21 gives a position, not a turn number, and the field is required with default 1. |
+| `607` | Speed * | §1.2 line 28 |
+| `577` | Stamina * | §1.2 line 29 |
+| `549` | Power * | §1.2 line 30 |
+| `736` | Guts * | §1.2 line 31 |
+| `397` | Wit * | §1.2 line 32 |
+| `173` | Skill Points | §1.2 line 34 |
+| `209245` | Fans | §1.1 line 22 |
+| Band → `Low` | Energy | §1.7 lines 213-216: the bar "sits near a third" with the low-energy warning printed, and "the client never prints an Energy number" |
+| `GREAT` | Mood | §1.7 line 208 |
+| `Success` | Outcome * | Default. §1.7 records the tile's 39% failure rate, not a resolved outcome; the choice is **Not present in source — UI-required choice.** |
+| `4 / 4 / 4 / 5 / 4` | Facility levels Speed..Wit | §1.7 line 222 |
+| `39` | Preview readings → Failure rate | §1.7 line 222 ("Failure 39%") |
+| `18` | Preview gains → Speed | §1.7 line 221 ("+18 Speed") |
+| `8` | Preview gains → Power | §1.7 line 221 ("+8 Power") |
+| `6` | Preview gains → Skill Points | §1.7 line 221 ("+6 Skill Points") |
+
+#### Source data with no UI home
+- **The run's position again.** Everything above is the Senior Early October state; `Turn` could only be
+  carried at its default 1, and `Outcome` had to be chosen because the source records an unresolved tile.
+- **The `Floor Cleaning` banner and the three card avatars (§1.7 line 221)** have no field.
+- **§1.3's owned-skill list and §1.5's rank letters** are not reachable from this screen; the skill panel
+  that walk 1 found on the run record screen is not present here.
+
+#### Friction / errors / dead ends
+- Four of the first pass's "no field exists" items on this run are now fields: facility levels, failure
+  rate, per-gain previews, and Energy as a band instead of a forced number.
+- The Energy band select has no accessible name (an unnamed `combobox`), so its purpose is carried only by
+  the adjacent radios and the "Energy" text.
+- The cards' `TARGET DEFICIT` reads `N/A — No build target was entered for this stat`, which is the honest
+  result of carrying no target; the first pass showed four- and three-digit deficits computed from a target
+  the source never stated.
+- No validation error appeared at any point in the write, and every entered value survived the
+  re-renders.
+
+#### Outcome / next screen
+`Record this training` → the write landed on `/training-runs/9/cockpit` with no error.
+
+---
+
+### Screen 11 — Career Cockpit (after the turn write)
+
+#### Route and trigger
+- Route: `/training-runs/9/cockpit`.
+- Trigger: the Training decision's own write, which states "The write lands on the Cockpit".
+
+#### What the screen asks for
+Same surface as screen 8, now populated.
+
+#### Values entered + source trace
+Nothing entered here; this is the read-back of screen 10.
+
+#### Source data with no UI home
+- **Energy.** The band `Low` was entered and accepted on screen 10; this screen prints `ENERGY · Energy
+  N/A`, and the Advisor still says "Recommendation unavailable because Energy has not been entered … there
+  is no band to read and nothing to rank against."
+- **The turn's activity, failure rate, facility levels and preview gains** are not shown: the strip carries
+  stats, Mood, Fans and Skill Points only.
+
+#### Friction / errors / dead ends
+- **Persistence verified for what the screen echoes:** Speed 607, Stamina 577, Power 549, Guts 736, Wit
+  397, Mood GREAT ↑, Skill Points 173, and Fans rendered as **`209,245 · Star · 30,755 to next`** — the
+  class and the gap the source states at §1.1 lines 21-22, now derived by the app from the fan count
+  instead of needing a field.
+- **The band reading is contradicted by the app's own words.** The Advisor's stated reason is the absence
+  of a band; a band was entered. Whether it is stored or dropped cannot be settled from the UI: the
+  correction form for turn 1 prefills Speed 607, Fans 209245 and Mood GREAT and exposes an `energy`
+  number field with **no** `energy_state` or band control at all, so there is no screen that reads the band
+  back. From the user's side the value is lost.
+- `YEAR Junior Year / MONTH Early January / TURN 1` — the source's snapshot is Senior Early October. The
+  first pass met the same contradiction; it reproduces.
+
+#### Outcome / next screen
+Went to the Inheritance screen.
+
+---
+
+### Screen 12 — Inheritance event (run 9)
+
+#### Route and trigger
+- Route: `/training-runs/9/inheritance`, title "Inheritance: Rice Shower".
+- Trigger: navigated from the Cockpit's "Inheritance" action.
+
+#### What the screen asks for
+An explanatory header ("Track the three inheritance moments … the Predicted section shows the Sparks
+carried by the chosen parents and grandparents … no inheritance outcome is computed"), an Inheritance
+Milestones strip (`● Career Start completed`, `○ Classic Early April upcoming`, `○ Senior Early April
+upcoming`), a `Predicted Sparks` region with Blue/Pink/Green counts, `EXPECTED INHERITANCE · N/A (Not
+computed)`, and an Observed section.
+
+#### Values entered + source trace
+None entered.
+
+#### Source data with no UI home
+- The whole §1.5 tree, because the ancestry never reached the run: the screen reads "No Legacy
+  configuration recorded for this …".
+
+#### Friction / errors / dead ends
+- **It renders.** The first pass met an HTTP 500 here. This run reaches the same route cleanly, but only
+  because it has no ancestry to render — so this visit cannot by itself say whether that crash was fixed.
+  Screen 13 settles it.
+- The milestone strip marks "Career Start completed" for a run with one logged turn, which is consistent
+  with the app's own derivation of position from the turn number.
+
+#### Outcome / next screen
+Navigated to the same route on run 8, the first pass's run, which does carry an ancestry.
+
+---
+
+### Screen 13 — Inheritance event (run 8) — cross-check, not this run's flow
+
+#### Route and trigger
+- Route: `/training-runs/8/inheritance`, title "Inheritance: Rice Shower".
+- Trigger: navigated from screen 12. This is the run the **first** pass created; it is in the library with
+  an ancestry attached, which is what the crash needed.
+
+#### What the screen asks for
+The same surface as screen 12, now with data.
+
+#### Values entered + source trace
+None entered.
+
+#### Source data with no UI home
+Not applicable — this is a check on the other run.
+
+#### Friction / errors / dead ends
+- **The first pass's 500 is gone.** `InheritanceEventController.php:162` no longer throws on run 8's
+  ancestry; the screen renders, which the first pass could not do.
+- **The phantom spark the first pass produced is still there and is now visible as a number.** Run 8's
+  `Predicted Sparks` reports **BLUE 3 Sparks**, PINK 2, GREEN 2. The first pass entered two real blue
+  sparks (Vodka Power ★1, Maruzensky Speed ★2) plus one blank trailing row, and it recorded that the
+  contract printed a bare fourth "Blue". Three blues counted where two are real is the same inflation, read
+  off a screen rather than inferred.
+
+#### Outcome / next screen
+Returned to run 9 and took its "Race" action.
+
+---
+
+### Screen 14 — Race decision
+
+#### Route and trigger
+- Route: `/training-runs/9/races`, title "Race decision: Rice Shower".
+- Trigger: the Cockpit's "Race" action link.
+
+#### What the screen asks for
+"The turn being decided" (`Junior Year · Late January · Turn 2`); Mandatory races (Junior Make Debut,
+Junior turn 12, flagged NEXT; URA Finals Qualifier / Semifinal / Final (Aoharu), Finale, all "Not recorded
+yet"); a next-obligation line; `Readiness`; and "Races to decide between" with `Calendar race` / `Race
+not on the calendar` controls and a `Plan the whole calendar` link.
+
+#### Values entered + source trace
+None entered.
+
+#### Source data with no UI home
+- **The entire §1.6 race-day card**: Kyoto Daishoten (G2, Kyoto Turf 2400 m, Fall, **Soft**, 6,700 fans on
+  a win) and Mile Championship Nambu Hai (G1, Morioka Dirt 1600 m), the entry criteria, the five-place fan
+  ladder and the "top contender" verdict (lines 181-193).
+- **The four rounds already won and the pending finals** (lines 169-172).
+
+#### Friction / errors / dead ends
+- "No race on this scenario's calendar falls at this turn" is correct for turn 2 and wrong for the run:
+  the source's turn is Senior Early October, where two races are offered. The position problem reaches the
+  race surface unchanged from the first pass.
+- The obligation list is the scenario's, not the run's, so it cannot show that this run already cleared
+  four team rounds.
+- `Readiness` is `N/A` with a stated reason.
+
+#### Outcome / next screen
+Left the race screen for the Event decision; the planner was visited later at the end of the flow
+(screen 20).
+
+---
+
+### Screen 15 — Event decision
+
+#### Route and trigger
+- Route: `/training-runs/9/events`, title "Event decision: Rice Shower".
+- Trigger: the Cockpit's "Event" action link.
+
+#### What the screen asks for
+Coach recommendation; Current career state (five stats, Energy, Mood, Fans, Skill Points); Known outcomes
+on this run; Recorded events; and a record form: `turn`, `event_type`, `source_name`, `choice_label`,
+`support_card_name`, and its submit.
+
+#### Values entered + source trace
+None entered.
+
+#### Source data with no UI home
+- The source records no event that fired during the run, so nothing from §1.8's Team Info panel or §2.4's
+  payout event maps to an event choice.
+- **§1.3's ten-plus owned skills and Corner Recovery ○**: this screen records choices, not an owned-skill
+  list, and no other screen in the flow holds one.
+
+#### Friction / errors / dead ends
+- The read-back confirms the write: Speed 607, Stamina 577, Power 549, Guts 736, Wit 397, Mood GREAT,
+  Fans 209245, Skill Points 173 — and **Energy N/A**.
+- **This screen prints the same five stats as `607/1300`, `397/1800`** while the Cockpit prints
+  `607 / N/A — No target was entered for this stat.` The denominators disagree between two screens of one
+  run: scenario cap here, build target there.
+- The form's `turn` select offers only turns that exist (Turn 1), so it inherits the position problem.
+
+#### Outcome / next screen
+Navigated to the Career Timeline.
+
+---
+
+### Screen 16 — Career Timeline
+
+#### Route and trigger
+- Route: `/training-runs/9/timeline`, title "Career timeline: Rice Shower".
+- Trigger: the Cockpit's "Career Timeline" link.
+
+#### What the screen asks for
+A type filter and a rail. Its header states that each row's BEFORE block is the previous logged turn and
+that EXPECTED and ACTUAL collapse because `ADR-0003` stores the absolute end-of-turn value.
+
+#### Values entered + source trace
+None entered.
+
+#### Source data with no UI home
+- The source's four won team rounds, its cleared goals and its pending finals would all appear as rows;
+  none exists, because the run sits at turn 1.
+
+#### Friction / errors / dead ends
+- The rail reads `Junior Year · Early January · Turn 1`, one row, "showing 1 of 1" — a Senior October
+  snapshot rendered as the career's opening turn.
+- The row says "Turn recorded" and does not show the activity, so the Speed choice made on screen 10 is
+  not visible here.
+
+#### Outcome / next screen
+Navigated to the Career Result.
+
+---
+
+### Screen 17 — Career Result
+
+#### Route and trigger
+- Route: `/training-runs/9/result`, title "Career result: Rice Shower".
+- Trigger: the Cockpit's "Career Result" link.
+
+#### What the screen asks for
+Read-only. It refuses and offers `Back to the Cockpit`, `Career Timeline` and `Cockpit`.
+
+#### Values entered + source trace
+None entered.
+
+#### Source data with no UI home
+Its subject matter — a finished build, a final race history, scenario objectives — is not reachable while
+the run is Active, which is the correct outcome for a mid-career snapshot.
+
+#### Friction / errors / dead ends
+- **"This career is still running"** with the stated rule that the screen reads a Completed run. The
+  snapshot was not converted into a finished career, and the status was never touched.
+- Its copy sends the user to "the run record screen" to change the status, and that address redirects to
+  the Cockpit (screen 9).
+
+#### Outcome / next screen
+Navigated to the Skills planner.
+
+---
+
+### Screen 18 — Skills planner
+
+#### Route and trigger
+- Route: `/training-runs/9/skills`, title "Skills planner: Rice Shower".
+- Trigger: the run header's "Skills planner" link.
+
+#### What the screen asks for
+Read-only. A "Your target" state line, `Skill Point coverage`, `Hint discounts`, and five priority states
+(Required, Available, Learned, Inherited).
+
+#### Values entered + source trace
+None entered.
+
+#### Source data with no UI home
+- **§1.3's owned skill list** (ten chips plus Corner Recovery ○) and **§2.2's purchasable pool with its
+  173-SP question**: the screen reports the run's SP but lists no skills, because none are marked.
+- **§2.1's hint discount ladder**: see the friction note.
+
+#### Friction / errors / dead ends
+- Coverage resolves to "The skills still to learn cost **0** SP, and the run holds 173 SP, leaving 173" —
+  arithmetic over an empty set, presented as a result.
+- **`Hint discounts are not modelled.`** The first pass rendered the ladder here in full — "Hint Lvl 1 10%
+  off … Hint Lvl Max 40% off" with a Confirmed marker — which is the §2.1 figure this repository records as
+  client-read. One pass showed it; this pass disclaims it. Reported as observed on each pass, not
+  reconciled.
+- "No build target is set on this run, so the fit cells below compare against nothing" correctly carries
+  the empty target forward.
+
+#### Outcome / next screen
+Navigated to the run-scoped deck screen.
+
+---
+
+### Screen 19 — Support deck (run-scoped)
+
+#### Route and trigger
+- Route: `/training-runs/9/deck`, title "Support deck".
+- Trigger: the run deck surface reached from the run flow (reached by its route in this pass).
+
+#### What the screen asks for
+Six slots with their cards, types, scenario-link flags and full effect lists; a per-slot `Owned`/`Rented`
+toggle; `Replace the card in Slot N`; `Confirm deck`; and a picker with `Type`, `Rarity`, `Availability`,
+`Name contains` filters.
+
+#### Values entered + source trace
+None entered — this screen was used to read back what step 5 had set.
+
+#### Source data with no UI home
+- Card client levels and limit breaks, and the reached per-card effect values, as on screen 6.
+
+#### Friction / errors / dead ends
+- **The friend card's rented status survived this time.** Slot 6 · Friends reads `Owned:false
+  Rented:true` after a full page load, and the screen states: "The owned or rented flag is saved with the
+  deck, one value per slot, and stays on the run after a reload. A slot you have not classified reads as
+  N/A rather than as Owned." Slots 1-5 read `Owned:true`.
+- The deck step's own copy (screen 6) still says the flag has no column and stays in the draft, which this
+  screen contradicts.
+
+#### Outcome / next screen
+Navigated to the Race planner, the last screen the flow exposes.
+
+---
+
+### Screen 20 — Race planner
+
+#### Route and trigger
+- Route: `/training-runs/9/races/planner`, title "Race planner: Rice Shower".
+- Trigger: `Plan the whole calendar` on the Race decision screen.
+
+#### What the screen asks for
+Read-only. "Planning from Junior Year · Turn 2"; Held figures (Win probability, Expected risk);
+Deadlines; Mandatory races, each expandable to a per-race panel (Grade, Distance, Distance band, Surface,
+Running style, Fan gain, Reward, Skill points, Scenario reward, Estimated win probability); Upcoming races;
+and a `Compare` control per race.
+
+#### Values entered + source trace
+None entered.
+
+#### Source data with no UI home
+- The Soft going and the per-place fan payouts (§1.6 lines 189-191): `FAN GAIN` is `N/A` with the reason
+  that the payout curve id is stored but no payout table is.
+- The Arima Kinen goal (§1.6 line 176): goal races remain unrecorded.
+
+#### Friction / errors / dead ends
+- The panels are uniformly `N/A` on the calendar's own placeholder races (Junior Make Debut and Junior
+  Maiden Race carry no distance, band or surface), while Chukyo Junior Stakes resolves to 1,600 m / Mile /
+  Turf with a 350-fan gate. Consistent disclosure per field, but the page runs to 17,409 characters of
+  mostly empty panels.
+- Win probability is withheld on every panel by design.
+
+#### Outcome / next screen
+End of the reachable flow for an Active run. Nothing further is offered.
+
+---
+
+## Closing assessment
+
+### What worked
+
+- **The deck is faithfully representable end to end, including the friend card.** All six cards from §1.4
+  equipped, Haru Urara alone carried the Scenario Link flag the source derives independently (§1.4 lines
+  92-94), Super Creek sat in `Slot 6 · Friends`, and — unlike the first pass — the `Rented` flag survived a
+  full reload to screen 19. This is the §5 "sixth support-card slot" question answered affirmatively: the
+  borrowed card is representable as a friend slot **and** an ownership flag, and the flag persists.
+- **The mid-career stat line entered cleanly and read back.** Every figure from §1.2 (607/577/549/736/397,
+  SP 173) plus §1.1's 209,245 fans and §1.7's GREAT mood were accepted and echoed by the Cockpit, the
+  Event decision and the Timeline, with no validation error anywhere.
+- **The cockpit derived the fan class and the gap** ("209,245 · Star · 30,755 to next") from the fan count,
+  which is §1.1 lines 21-22's pair of figures arriving without a field being needed.
+- **The §1.7 turn record now has fields.** Facility levels 4/4/4/5/4, Failure 39% and the +18/+8/+6
+  preview were all accepted on screen 10; none of them existed in the first pass.
+- **Energy without a number is finally expressible.** Exact / Band / Not recorded with Low/Mid/High answers
+  §1.7's "the client never prints an Energy number" directly, and the source's "low" was selectable. This
+  was the first pass's most structural entry obstacle and it is gone at the control.
+- **The ancestry form got the three things the first pass said it lacked**: disambiguated parent options
+  (`Vodka [Wild Top Gear] · 7`), a letter-rank field beside the star count, and spark editors on all four
+  grandparents — so §5's cap-arithmetic question now has a place for sparks on every node, and the two
+  ★★★ blues the §1.2 shortfall turns on (Seiun Sky's Stamina, and by extension Taiki Shuttle's Power) can be
+  entered where the first pass could place only two of the six.
+- **The wizard stopped forcing invention.** The target step accepted an empty submission, so this pass
+  carried the source's real "no documented build target" instead of manufacturing purpose, distance, style
+  and five cap numbers, and the downstream screens reported `N/A` and "compare against nothing" honestly.
+- **The contract reports its own gaps** (Warnings: target, ancestry) and **the Result screen refused to
+  present an unfinished career as finished.**
+
+### Functional findings
+
+Where the UI failed to do what it claims, lost information, produced contradictory state, or blocked
+legitimate progression.
+
+1. **The Legacy step discards its entire input with no signal.** Every value in the screen 5 table was
+   entered, `Save Legacy` was pressed, and the result was no confirmation flash, no `[role=alert]` error,
+   and the unchanged line "No Legacy is recorded for this setup yet". The next screen that reads the draft
+   — Preflight — then reported `ANCESTRY · N/A` and "Ancestry is not entered." The first pass, on the same
+   route with the same kind of input, received a "Legacy recorded." flash and a populated contract, so the
+   failure is not inherent to the data entered.
+2. **The Preflight warning text promises the opposite of what happened.** "No two-parent ancestry is
+   recorded in this setup. Step 4 enters it, and nothing is lost by going back." The ancestry was entered on
+   step 4 and lost on the way forward, without going back at all.
+3. **`Start Career` stays enabled against its own contract.** The screen lists two open warnings and still
+   creates the run, so the contract's final state can read `YOUR TARGET · N/A / ANCESTRY · N/A` while
+   announcing "Everything the six steps recorded".
+4. **The Energy band is accepted and then read back nowhere.** `Band → Low` was submitted on screen 10; the
+   Cockpit prints `Energy N/A`, the Advisor states "there is no band to read", and turn 1's correction form
+   prefills the other three values but exposes no energy-state or band control at all. Whether the value is
+   stored or dropped cannot be determined from the UI — and that is itself the finding: no screen the user
+   can reach confirms it.
+5. **Two screens give the same stat two different denominators.** Cockpit: `Speed 607 / N/A — No target was
+   entered for this stat.` Event decision, same run, same moment: `Speed 607/1300`. One is the build target
+   and the other the scenario cap, and neither screen labels which it is printing.
+6. **With no target, the scenario caps vanish from the cockpit stat strip.** `N/A / N/A` replaces the
+   `N/A / 1,300` the first pass saw, so §1.2's comparison of the run's stats against a 1300/1800 base is
+   no longer available on the screen that exists to show it.
+7. **Three instructions point at a screen that no longer exists.** `/training-runs/9` redirects to
+   `/training-runs/9/cockpit`, yet the Career Result says the run record screen changes the status, the
+   Training decision offers "Record the first turn **on the run screen**" linking to the Cockpit, and the
+   deck step still asserts that the owned/rented flag has no column and stays in the draft, which screen 19
+   contradicts by persisting it.
+8. **One card prints two contradictory values under the same label.** The Unity Cup scenario card carries
+   `Ruleset · N/A` in its fact block and `Ruleset · Team` in the description block beneath it.
+9. **A blank spark row survives as counted data (verified on the adjacent run).** Run 8's Inheritance screen
+   reports `BLUE 3 Sparks` where two real blue sparks were entered — the third being the empty trailing row
+   the first pass recorded being written into its contract. The crash that hid this in the first pass is
+   fixed, so the inflation is now on screen.
+
+### Experiential findings
+
+Where the UI works but costs the user clarity, repetition or a workaround.
+
+1. **The run's position is still inexpressible.** YEAR and MONTH are derived from `Turn`, so a Senior Early
+   October snapshot logged at the field's default becomes `Junior Year · Early January · Turn 1`, and the
+   Timeline, the race surfaces and the mandatory-race logic all read that derived position as fact.
+2. **§1.2's caps remain unenterable.** 1325, 1322 and 1368 exceed the 1300 maximum on both the target step
+   and the turn form, and no screen asks for a cap at all.
+3. **Grandparents take a name and sparks but no rank.** `Own rank (letters)` exists for the two parents
+   only, so §1.5's B+ / A / UG / UG grandparent classes have nowhere to go.
+4. **The letter-rank suggestion set cannot express `UG`.** It offers G..S, B+, A+, S+ — no SS, U, UU or UG.
+   The field is editable, so typing the source's rank passed with no note that it is off the offered set.
+5. **Rarity and Potential are named as missing without being reachable.** The Cockpit's badge says the
+   trainee's rarity and potential level is unrecorded; the identity form beside it holds only Status,
+   Scenario and Delete.
+6. **The run's own costume is the unnamed one.** The trainee card lists "debut form" and a second bare
+   `★★★SSR`, and shows the debut portrait, so `[Rosy Dreams]` cannot be picked out.
+7. **The catalog's aptitudes still disagree with the client read** on Mile, Front runner and Late surger —
+   identically in both passes — so a user checking the source against step 2 finds three mismatches.
+8. **Recording §1.5 as written is a hundred clicks.** Every spark is one row of three controls behind an
+   Add button with no bulk entry, no ordering by kind, and no visible count while editing, and the
+   grandparent editors sit behind disclosures that must be opened per node.
+9. **Deck comparison must be re-derived from the source.** The analysis prints catalog maxima and disclaims
+   interpolation, so §1.4's "Client rows visible" column can only be checked by returning to the document.
+10. **Scenario comparison is now lopsided.** Unity Cup carries a description, a ruleset, a planning focus and
+    three mechanics; the other three carry `N/A` rows and `Not recorded`, so the cards no longer present
+    like-for-like choices.
+11. **Two readings of this pass disagree with two readings of the first and were not reconciled**: the
+    trainee step's `Stored choice` (updated here, stale in pass one) and the Skills planner's hint ladder
+    (disclaimed here, shown with a Confirmed marker in pass one). Both are flagged rather than assumed away.
+12. **The Energy band select has no accessible name**, unlike its labelled siblings.
+
+### Unrepresented source data
+
+Source information with no appropriate UI representation for this run:
+
+- Run position: Senior Year Early Oct; 5 turns left; 5 turns until the Unity Cup (§1.1 line 21).
+- Rarity ★3 and Potential Level 2 (§1.1 line 20) — named as missing, not enterable.
+- The `[Rosy Dreams]` costume identity, whose form is the unlabelled one.
+- The growth-rate row +0/+10/+0/+20/+0 (§1.1 line 20; §7 item 2).
+- The run's own per-stat caps 1325/1322/1368/1308/1800 and the whole §1.2 cap-composition question
+  (lines 39-56, §8.5).
+- The documented aptitude letters, which disagree with the catalog on three of ten.
+- The ten-plus owned skills and Corner Recovery ○ (§1.3 lines 63-67).
+- Card client levels, limit breaks, and the reached "Client rows visible" effect values (§1.4 lines 77-104).
+- All six ancestors' ranks as letter classes on the grandparents, and `UG` on the parents' suggested set
+  (screen 5's §1.5 lines 138-143).
+- Four of the six blue sparks and every pink, green and white spark in §1.5's table (not entered; the
+  fields now exist — see Walk completion).
+- The pair's affinity grade (§1.5 states none; left unset and rendered `N/A`).
+- The entire §1.6 Unity Cup state: team "Blue Bloom", motto "Dreaming Big", league 8th, four rounds won,
+  finals pending, and both cleared and active goals.
+- The §1.6 race-day card: both options, the Soft going, the fan ladder, the entry criteria, the "top
+  contender" verdict.
+- The `Floor Cleaning` banner and the three card avatars on the observed tile (§1.7 line 221).
+- The Team Info numbers: 55 Unity Trainings, 6 Spirit Bursts, 5 Extreme, 20/20 members, the +30 ranking
+  bonus, grades A/A/A/S/A (§1.8) — and therefore the run's place in §2.4's 10-12 burst band.
+- The §1.9 roster and the guests' skill lists.
+- The §2.1 hint-discount ladder as a displayed figure on this pass, and the §2.2/§2.3 pool, prices and
+  recommended spend.
+- The §2.4/§8.2 payout dispute is surfaced by the app rather than represented by it: the band table renders
+  with its own caveat, which is the right treatment of an unsettled figure.
+
+### Walk completion
+
+- **Reached the end of the available flow: yes, for an Active run.** Twenty visits in order, from the
+  Dashboard to the Race planner, which is the last surface the run exposes.
+- **Where it stopped and why.** The flow terminates at the Career Result's designed "still running" state
+  and at the Race planner; the Cockpit's remaining actions (Rest, Recreation, Scenario action) resolve to
+  the Cockpit itself, and the Inheritance route renders but has no ancestry to show because of functional
+  finding 1. Nothing further is reachable without changing the run's status, which the brief forbids.
+- **Data intentionally not entered.** §1.5's remaining four blue sparks and every pink, green and white
+  spark were not typed in. The fields exist and accepted the five sparks that were entered — including two
+  on grandparents, which the first pass had nowhere to put — so the mechanism is proven and the remainder is
+  volume rather than a gap. The pair's affinity grade was left unset because the source states none, and the
+  Energy number was left unset because the source states none; the band was used instead.
+- **Data entered but not retained by the application.** The whole step 4 ancestry — both parents, all four
+  grandparents, both rank letters, the rented-parent flag and three sparks. That is functional finding 1,
+  not a choice by this walk, and it is why run 9's contract reads `ANCESTRY · N/A`.
+- **Persistence claims are limited to what a screen echoed back.** Stats, SP, fans, mood and the deck
+  (including the Rented flag) are verified by read-back on the Cockpit, the Event decision, the Timeline and
+  the run deck screen. The Energy band is explicitly **not** claimed to persist: no reachable screen reads
+  it back. The ancestry is explicitly recorded as absent from the contract rather than as deleted from
+  storage, because storage was not inspected.
+
+---
+
+## rice-shower-unity-cup-ux-walk-resolutions.md
+
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md` (495 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+
+## Resolution record: Rice Shower / Unity Cup UX walk
+
+What happened to each finding in `docs/audits/rice-shower-unity-cup-ux-walk.md` after the
+remediation began. The audit is the historical baseline and is **not** rewritten; this file records
+only what came afterwards, and a finding whose text later proves wrong is corrected by a dated
+erratum in its own document, never by editing the audit.
+
+All of it landed on 2026-10-09, in one session. The session-boundary record is below, because the
+brief's stopping point and what was actually done are not the same thing.
+
+### Session boundaries
+
+The brief makes Session 1 Phase 1 only (D1-D3) and states: "Do not start Phase 2 in Session 1 unless
+explicitly instructed."
+
+**Phase 2 was started in the same session, and it was explicitly instructed.** Before any code was
+changed, the scope was put to the owner as a choice between "Session 1 only (D1-D3)", the brief's
+mandatory stopping point, and "Session 1 + Session 2 (D1-D9)". The owner chose the second. The same
+exchange authorised one commit per completed slice, and authorised the `deck_slots.ownership` column
+together with a drafted ADR - the commit, not the ruling: `ADR-0023` still stands Proposed awaiting the
+owner's decision.
+
+So the record is **Session 1 = D1, D2, D3** and **Session 2 = D4-D8 delivered, D9 not delivered**. The
+boundary was authorized rather than crossed, but it was not closed in the sense the brief intended: the
+Session 1 handoff and the Session 2 handoff came out as one artifact, so the intermediate stable
+handoff the brief asked for before Phase 2 opened does not exist as a separate record.
+
+**Phase 2 is not complete.** Its Definition-of-Done list includes "duplicate turn-entry business logic
+is eliminated or placed behind one canonical contract" and "one authoritative turn persistence path
+exists". The second is satisfied - and was already satisfied before this work, which is D9's finding.
+The first is not done. Phase 2 closes when D9's remaining work lands.
+
+### Status
+
+| Finding | Status | Slice | Commit | Evidence |
+| ------- | ------ | ----- | ------ | -------- |
+| D1 inheritance HTTP 500 | **Fixed** (browser half green, 2026-10-09) | 1.1 | `291f6ea` | `CareerInheritanceEventTest` (14 cases); `career-inheritance-event.spec.ts` **8 of 8 passed**, 5.8 min |
+| D2 blank trailing Spark row | **Fixed** | 1.2 | `a4b2b26` | `CareerLegacyDeckStepsTest` (1 new case) |
+| D3 rented/friend flag not persisted | **Fixed** | 1.3 | `fdebcc9` | `RunDeckTest`, `SupportDeckBuilderTest`, `CareerPreflightTest` |
+| D4 target validation contradicts the UI | **Fixed** | 2.1 | `be02297` | `CareerBuildTargetTest` (3 new cases); the sibling `KI-47` named in the follow-up is already **closed** |
+| D5 trainee stored-choice readback `N/A` | **Fixed** | 2.2 | `dd6dd22` | `CareerTraineeSelectTest` (1 new case) |
+| D6 turn table hides Fans/Energy | **Fixed** (rendered surface removed, 2026-10-09; see below) | 2.3 | `89e8453` | `TurnRowActionsTest` (2 new cases) |
+| D7 wizard step numbering skips 3 | **Fixed** (rendered surface removed, 2026-10-09; see below) | 2.4 | `6d53ffc` | `GuidedTurnOnRunViewTest` (1 new case) |
+| D8 Rice Shower aptitude mismatch | **Verified, not a tool defect** | 2.5 | `be48e60` | `CareerTraineeSelectTest` (1 new case) |
+| D9 duplicate turn-entry paths | **Fixed** — one shared field source, all three surfaces wired and labelled alike (2026-10-09) | 2.6 | `8e3d33c`, `5e41137`, `7a81c7c` + this commit | `TurnEntryFieldSourceTest` (4 cases) |
+| Career position / snapshot mode | **Landed** (Phases 4–5; 4.4 and 5.3 cockpit-read deferred, see close) | 4.1–5.4 | `0025f37`, `d0bd138`, `a31000c`, `b890cd5`, `fc66978`, `8c7628d` | `SnapshotReviewTest`, `SnapshotTimelineTest`, `SnapshotRaceCalendarTest`, `SnapshotTrainingDecisionTest` |
+| Legacy disambiguation, ancestor rank, grandparent sparks | **Landed** (Phase 6) | 6.1–6.3 | `31c9f5d`, `5876f64`, `f39ff03` | `LegacyDisambiguationTest`, `AncestorRankTest`, `GrandparentSparksTest` |
+| Scenario metadata, typed spark targets | **Landed** (Phase 7) | 7.1–7.2 | `1098546`, `6fa0d01` | `ScenarioMetadataTest`, `SparkTargetValidationTest` |
+| Energy model (exact/band/unknown) | **Landed** (Phase 8.1; §11 record added at `837d995`) | 8.1 | `1ec92ab` | `EnergyStateTest` |
+| Cockpit reads the career position and countdown (4.4 + 5.3) | **Landed** (closes the 2026-10-09 deferral) | 2A.1 | `3b6f3cc` | `SnapshotCockpitTest`, `SnapshotScenarioCountdownTest` |
+| Facility levels per turn | **Landed** | 2A.2 | `c8402ee` | `TurnFacilityLevelsTest` |
+| Per-turn failure rate and preview gains | **Landed** (stored, not computed) | 2A.3 | `3b34fb0` | `TurnFailurePreviewTest` |
+| Stat-ceiling fourth marker | **Landed-superseded** — the render half was superseded by the cutover at `b30906a` (`StatBand.vue` deleted, `CareerStatePanel.vue:16` states it was deliberately not reused); the persistence half was then dropped in this commit, since no reader remained. This supersedes the 2026-10-10 close's "the persistence half is the deliverable" | 2A.4 | `cb42d93`, dropped at `2026_10_10_170000_drop_stat_ceilings_from_training_runs` | `RunStatCeilingsTest` retired with the column |
+| Nav-rail run-record door relabelled to the Cockpit | **Landed** | 2A.5 | `d251f7f` | `NoStaleRunRecordLinksTest`; career-cockpit / career-result specs |
+| Cockpit renders the run's identity, team and Unity Cup state | **Landed** | 2A.6 | `5eba0d0` | `CockpitRunIdentityTest`, `CockpitTeamPanelTest`, `CockpitUnityCupCountersTest` — 9 focused / 70 regression passed |
+| Race payout columns | **Landed** | 2B A4 | `057db67` | `RacePayoutTest` |
+| Skill spend coverage, hint ladder removed per ADR-0001 | **Landed** | 2B A5 | `992be59` | `CareerSkillsPlannerTest`, `SkillSpendCoverageTest`, career-skills-planner.spec.ts |
+| Trainee rarity and potential level (persistence) | **Landed** | 2B A6.1 | `b896d0b` | `TraineeRarityPotentialTest` |
+| Character card reference | **Already built** — no change needed | 2B A6.2 | — | existing coverage |
+| Growth-rate row (persistence) | **Landed** | 2B A6.3 | `110ffd3` | `RunGrowthRateTest` |
+| Per-run stat ceilings (persistence) | **Landed** | 2B A6.4p | `cb42d93` | `RunStatCeilingsTest` |
+| Fan ladder service | **Landed** | 2B A6.5 | `e096137` | `FanLadderTest` |
+| Team identity (persistence) | **Landed** | 2B A6.6 | `709a233` | `RunTeamStateTest` |
+| Unity Cup progression counters (persistence) | **Landed** | 2B A6.7 | `89f3b11` | `UnityCupCountersTest` |
+| Advisor card rendered nothing when the finale context was present | **Fixed** — filed as KI-90 | Part 4 | `7a344a4` | career-cockpit.spec.ts + career-cockpit-forms.spec.ts, 18 passed (6.0m) |
+| Card levels and limit breaks (Phase 14) | **Deferred** — owner ruling on `PRD.md` §6.9 outstanding; `ADR-0014` declined `user_support_cards` | 14 | — | — |
+
+### Per finding
+
+#### D1 — inheritance HTTP 500: Fixed
+
+`StoreLegacySelectionRequest::payload()` stores `legacies.*.ancestors` as a list of **names**
+(`ADR-0010` Consequences §2) and `InheritanceEventController::legacySection()` mapped each entry as an
+array with `slot`/`name` keys, so `array_map()` threw on the first string. Names are the canonical
+shape: `LegacySelectionSchemaTest` already pinned them, `AncestryGraph::parentNode()` already read
+them, and the one stored record on the dev database held names. The controller reads the name list,
+`LegacySelectionPayload` refuses a slot-record ancestor instead of letting a second shape exist, and
+the page's props contract is `list<string|null>`. The test fixture was converted to the real UI
+payload and zero/one/multiple-ancestor cases added.
+
+#### D2 — blank trailing Spark row: Fixed
+
+The Spark editor appends an empty trailing row on `Add Spark` (kind only, no target, no stars).
+`StoreLegacySelectionRequest::payload()` stored it unchanged, so the Preflight contract listed a
+phantom bare `Blue`; the dev database still holds that exact row on run 8. The write boundary now
+discards a Spark carrying neither a target nor a star count, and `LegacySelect.vue` applies the same
+rule so the chip list and the posted payload agree while the row is still a draft.
+
+**Not done:** the phantom already stored on run 8 was left in place. Nothing reads it as a Spark
+except the Inheritance page's predicted counts, and rewriting a stored record to fix a display is a
+data edit this slice did not authorise.
+
+#### D3 — rented/friend flag: Fixed
+
+`deck_slots` had no ownership column (`ADR-0014`), so the flag lived only in the wizard's session
+draft and `/training-runs/{run}/deck` printed the one value it could read. `deck_slots.ownership`
+(nullable `OWNED` / `RENTED`, null = not recorded) is written by both writers and read by the
+builder; `DeckSlot::booted()` guards the value. The run screen's deck panel has no ownership control,
+so its re-save preserves what the slot already holds. Docs travel with the schema: `ADR-0023`
+(Proposed, for the owner's ruling), a dated erratum in `ADR-0014`, the digest, and the ADR index.
+
+#### D4 — target validation: Fixed
+
+The message under every stat offered "or leave the whole target unset", but `purpose` and all five
+stats were `required`, so that branch was unreachable and an empty save answered nine errors. The
+whole target is now optional and all or nothing: nothing entered means no field is required and
+`payload()` answers null (which clears the column); any value makes every field required. The
+no-target downstream path needed no change (`TrainerAdvisor::deficits()` already answers nulls).
+
+**The sibling named in the follow-up is already closed, and that premise did not hold.** The
+instruction was to reference `KI-47` as "the still-open sibling" — the no-scenario band/form ceiling
+disagreement (`/1400` on the bar against `max=1200` on the form). It is not open. `KI-47` was ruled by
+the human owner on 2026-10-01 ("the band is wrong") and **closed the same day by `04658f2`**, four days
+before this remediation began, which is why it is absent from `KNOWN-ISSUES.md`. The lesson is already
+carried at the surface: `BuildTargetController`'s docblock names `ScenarioCaps::forRun` as the authority
+(`ADR-0015`, KI-47) and `StoreTurnEntryRequest`'s own comment states a no-scenario run "keeps 1200", so
+band and form read the same number. No open register entry covers a band/form ceiling disagreement, so
+D4 may read as fully closed. Recorded rather than silently complied with, because writing "still open"
+would put a false status in this record. The band's current rendered number was **not** re-measured in a
+browser in this session.
+
+#### D5 — trainee readback: Fixed
+
+The step's `Stored choice:` readout derived the name from `trainees.data`, the paginated and filtered
+roster, so a Trainer who searched and selected saw `N/A` beside a flash confirming the selection. The
+name now travels with the stored selection.
+
+#### D6 — turn table Fans/Energy: Fixed, rendered surface removed
+
+The payload already carried `energy` and `fans`; only the table lacked the columns. Both are now
+printed, and a turn that recorded neither names its own absence (`N/A` with a `title`). The read path
+and the columns' presence are pinned by feature tests; the rendered-DOM assertion in
+`run-detail.spec.ts` was **not executed** (see the infrastructure note).
+
+**2026-10-09 resolution — rendered surface removed.** The peer's cockpit cutover deleted
+`Runs/Show.vue`, its `show()` method and `run-detail.spec.ts` in one pass (`TrainingRunController`
+`:198`), so the run-screen turn table the rendered assertion addressed no longer exists on this tree,
+and `runs.show` is a redirect to `runs.cockpit`. The behaviour the assertion guarded — Energy and Fans
+reachable and printed — is carried by the cockpit, whose correction form reads Energy and Fans
+(`Cockpit.vue:446-452`) and whose `career-cockpit.spec.ts` records Energy through it (the "records
+Energy through the cockpit correction and then marks one action" case). The D6 feature tests were
+removed with the surface. Status: **Fixed (rendered surface removed)**.
+
+#### D7 — wizard step numbering: Fixed, rendered surface removed
+
+The indicator counted `current`'s position inside `def.steps`, the scenario's turn vocabulary (Unity
+Cup's five include a facility and a team-race step the rail never lands on), so it read "Step 2 of 5"
+then "Step 4 of 5". The rail has two stages; the server now sends `flow` and the indicator and the
+progress pips count those. The rendered assertion in `run-detail.spec.ts` was **not executed**.
+
+**2026-10-09 resolution — rendered surface removed.** The same cutover removed the `runs.show` guided
+rail entirely, so there is no step indicator left on this tree to assert against. The cockpit has no
+guided flow and no step indicator, so the assertion cannot be re-addressed. Status: **Fixed (rendered
+surface removed)**.
+
+#### D8 — Rice Shower aptitudes: Verified, not a tool defect
+
+The audit reported a catalogue/display mismatch (document: Mile B, Front A, Late B; picker: C, B, C).
+The picker is faithful. The committed export the seeder reads
+(`database/seeders/data/gametora-characters.e9e9ee6d.json`, card `103001`, `[Rosy Dreams]`) carries
+`aptitude: ["A","G","E","C","A","A","B","A","C","G"]` in the turf..end order; the seeded column holds
+it letter for letter and `TraineeSelectController::aptitudes()` maps index to index. No seed,
+transformation or display defect exists on the tool's side, so nothing was corrected: overriding the
+project's own source with one document's transcription is the change the brief's non-goal forbids.
+All ten letters are pinned for that trainee, and the scenario document gains a dated erratum
+recording the disagreement as open.
+
+The **authority ruling** is recorded at the governing ADR rather than only in the document: `ADR-0004`
+gained a dated erratum stating that the GameTora export is authoritative for aptitude letters, that a
+scenario document is a secondary reference whose disagreements resolve in the catalogue's favour, and
+that a disagreement is recorded open rather than resolved in the display path.
+
+#### D9 — duplicate turn-entry paths: Diagnosed, not implemented
+
+**The premise does not hold as stated.** The two surfaces are `Runs/Show.vue` (the guided rail plus
+the `Correct a turn by hand` disclosure) and `TrainingDecisionController`'s decision page. Both POST
+to **the same route** (`runs.turns.store`) through **the same Form Request**
+(`StoreTurnEntryRequest`) and the same controller method, so there is one persistence path, one
+validation set and one normalization contract. `TrainingDecisionController` says so itself: "The
+write is the guided turn's, unchanged."
+
+What is left of the finding is **presentational**. The backend diagnosis below is the artifact the
+follow-up's §6 asked for: written before any code, so the refactor is designed rather than improvised.
+
+**Backend diagnosis (2026-10-09).** The persistence contract is already single, and was before this
+remediation. One route, one Form Request, one controller method, one table:
+
+| Layer           | Owner                                                                |
+| --------------- | -------------------------------------------------------------------- |
+| Route           | `POST /training-runs/{run}/turns` -> `runs.turns.store` (`routes/web.php:175`) |
+| Form Request    | `App\Http\Requests\StoreTurnEntryRequest`                            |
+| Controller      | `TrainingRunController::storeTurn()` (`:1769`)                       |
+| Stored row      | `turn_entries`                                                       |
+
+Three surfaces post to that route and are validated by that request:
+
+| Surface                  | Component                    | Field-list source                                                       | Stat label       |
+| ------------------------ | ---------------------------- | ----------------------------------------------------------------------- | ---------------- |
+| Run record, raw hatch    | `Runs/Show.vue:720-732`      | `const statWords = ['speed', …, 'wit']` (`:119`)                         | `Speed *`        |
+| Training decision        | `Career/TrainingDetail.vue:304-366` | `const statFields = [{ name: 'speed', label: 'Speed' }, …]` (`:92-98`) | `Speed total *`  |
+| Cockpit correction       | `Career/Cockpit.vue`         | `const statFields = [{ name: 'speed', label: 'Speed' }, …]` (`:189`)     | `Speed`          |
+
+So the duplication is **three-way, not two-way**: the same five-stat list is declared three times,
+twice under the identical name `statFields` with the same `{ name, label }` shape, and the labels
+drift. Each surface also declares its own extras (`Show.vue` adds `sp` and `condition`;
+`TrainingDetail.vue` adds `sp`, `energy` and `fans`), and that part genuinely differs, so it stays
+per-surface.
+
+**The shape the fix takes, and the alternative rejected.** One shared field-definition module (a plain
+exported constant read by all three surfaces), not a shared form component and not a base class. That
+is `ADR-0018`'s reasoning when it chose `App\Services\PageSize` over a base `FormRequest`: the surfaces
+agree on the field list and the labels and disagree on everything that matters — which extras they
+offer, whether they preview or write, what they call themselves. A shared form component would push a
+union of three behaviours into one place, and the drift it removed would return as a props contract
+with a flag per surface. `ADR-0018`'s rejected base-class alternative is the precedent, recorded with
+the same specificity.
+
+**What cannot be moved yet.** Of the four files the unification touches, three carry another session's
+uncommitted work: `TrainingRunController.php`, `StoreTurnEntryRequest.php`, `Runs/Show.vue` and
+`Career/Cockpit.vue` are all modified in the working tree by a concurrent session; only
+`Career/TrainingDetail.vue` is clean. `ADR-0018` left two copies of the clamp in place for exactly this
+reason, and the same rule applies: the unification waits for those files to be free.
+
+**Remaining, explicitly.** One shared turn-entry field definition read by all three surfaces; the label
+vocabulary reconciled (`Speed` on the run record against `Speed total *` on the decision screen); and
+each surface naming whether it creates or edits a turn. Until that lands, Phase 2's canonical-contract
+gate stays open. **D9 is Fixed** — one shared field source, all three surfaces wired and labelled alike
+(landed at `fec95cd`), recorded in the status table above.
+
+### Infrastructure findings
+
+1. **The database guard refused every Windows path (fixed, `033c974`).**
+   `DatabaseGuard::isAbsolute()` wrote its character class as `[\\/]`, which compiles to a class
+   holding only `/`, so every drive path using backslashes read as relative and
+   `assertAbsolutePath()` refused it at application boot for any isolated role. The Playwright harness
+   passes its scratch database as a Windows path (Node's `join()` emits backslashes), so
+   `npm run test:browser` could not start its server at all. The predicate now normalises the
+   separator first, and `tests/Unit/DatabaseGuardPathTest.php` pins both separators (the method had no
+   coverage, which is how the regression shipped).
+
+2. **The browser suite cannot be executed on this host (outstanding).** With the guard fixed, the
+   server boots and answers `/up` in ~1.3s, but the specs fail in their own setup: the scratch
+   database is seeded by `DatabaseSeeder`, which seeds **no Veterans**, while
+   `career-inheritance-event.spec.ts` selects a parent by label (`Symboli Rudolf`) from the
+   run-scoped Legacy Lab's Veteran picker. Every case fails at that `selectOption` before reaching
+   the page under test. This is a pre-existing gap introduced when KI-69 made the harness own a fresh
+   database, not a regression from this remediation. The minimum fix is a Veteran in the browser
+   seed (or a spec that creates its own), after which the harness's cost on a contended host should be
+   measured again: a two-spec run exceeded 17 minutes here while a peer session was rebuilding assets.
+
+   Consequence: D1, D2, D3, D5, D6, D7 and D8 have feature-test coverage that passed, and the
+   rendered-DOM halves added to `run-detail.spec.ts` (D6, D7) are written but unrun. No browser claim
+   in this record is a pass.
+
+3. **`app/Http/Controllers/TrainingRunController.php` and `resources/js/pages/Runs/Show.vue` carry
+   another session's uncommitted work.** Each of this remediation's commits stages only its own hunks
+   in those two files (built from the index and written back with `git update-index --cacheinfo`); the
+   other session's work is untouched in the working tree.
+
+#### Correction to finding 2, same day — the seed gap was the first blocker, not the cause
+
+Item 2 above diagnosed the missing Veterans. Removing that dependency (a spec-local edit — this suite
+must start with zero runs, and a Veteran is a filed run) moved the failure and exposed the real one:
+`career-inheritance-event.spec.ts` addresses its ancestry controls as `input[name="legacies.0.rank"]`,
+`[name="legacies.0.ancestors.0"]` and `[name="legacies.0.sparks.0.kind"]`, and **no such `name`
+attribute exists on either surface**. `Legacy/Builder.vue` and `Career/LegacySelect.vue` both bind
+those fields with `v-model` and give them an `:id` (`rank-parent_a`) but no `name`; only the parent pick
+carries a `name`, because `AncestryNode` is handed `controlName` — which is why the original failure
+resolved the locator and then reported "did not find some options" instead of never finding it.
+
+The spec's own docblock claims "the legacy configuration is entered via the run-scoped Legacy Lab
+builder". The builder cannot be addressed the way the spec addresses it, so **this spec has never been
+able to pass**. `openInheritanceEvent()` needs re-addressing by `id`/role, or rebuilding on the wizard
+path the audit actually used — roughly twenty selectors, each verification costing many minutes on this
+host. Not attempted here. The partial edit made while diagnosing this was reverted; the spec file is
+unchanged from `HEAD`.
+
+**The D1 browser gate is green (2026-10-09), and the sentence above is superseded by it.**
+`career-inheritance-event.spec.ts` passed **8 of 8** in 5.8 minutes on the scratch harness: the
+predicted/observed separation and badges, the milestone glyphs, the keyboard entry through the observed
+form, the 44px sweep, the axe scan, the empty state, the aggregate Spark counts and the no-computed-figure
+case. Getting there took the fixture off surfaces that no longer render: the turns are recorded over
+`runs.turns.store` (the shape `ura-panel.spec.ts` already uses) because `runs.show` is now a redirect to
+the cockpit and no rendered surface offers a create-turn form, and the completion wait reads the write's
+own redirect rather than a session flash a second render can consume.
+
+**D6 and D7's rendered assertions are unrunnable on this tree, and that is a structural finding rather
+than a skipped run.** Their spec, `run-detail.spec.ts`, drives the guided rail and the turn table, both
+of which live in `Runs/Show.vue` - and `runs.show` is now a redirect to the cockpit
+(`routes/web.php:116`), with `TrainingRunController::show()` left unrouted. A one-case probe of the spec
+failed exactly there, at `page.waitForURL: Test timeout of 180000ms exceeded`, before reaching any D6 or
+D7 assertion. Both stay **Fixed (browser half unrunnable)**: their feature coverage is green, and their
+rendered half belongs to whoever lands the cockpit cutover, since the cockpit is the surface that now
+renders and it is peer-held.
+
+#### Correction to finding 2, later the same day — the addressing fix landed (Path B)
+
+The paragraph above recorded the re-addressing as "not attempted here" and the spec as "unchanged from
+`HEAD`". Both have since changed: the fix landed, and the spec file is no longer at `HEAD`.
+
+**The path was decided by a check, not by preference.** `Legacy/Builder.vue` carries an unstaged peer
+hunk in this shared worktree (a `:model-value` binding on the `AncestryNode` invocation, ~`:243`), so the
+component fix ("Path A") was not available — a file carrying another session's uncommitted work is not
+touched in this remediation. The spec-only fix ("Path B") was taken instead and touched no component.
+
+**The `name` gap is a convention gap, not a functional one (Case B).** Verified before deciding:
+`Legacy/Builder.vue` does render a real `<form>` (`:207`) but submits through Inertia's `useForm` with
+`@submit.prevent="submit"`, never native submission and never `FormData(form)`; `Career/LegacySelect.vue`
+has no `<form>` element at all; and `FormData` appears nowhere on either surface (`resources/js` carries
+it only in `GuidedStep.vue:110` and `Import.vue`'s `forceFormData`). A `name` attribute on the rank,
+ancestor, rented or Spark controls is therefore an HTML-convention improvement, not a load-bearing
+contract, and adding it would have been a production change made to accommodate a test. It is recorded
+as owed, not claimed as a defect.
+
+**Path B had to fix two independent misaddresses, not one.**
+
+1. **The field addresses.** The rank, ancestor, rented and Spark controls carry `v-model` and an `:id`
+   and no `name`; only the parent pick carries one, because `AncestryNode` is handed `controlName`
+   (plan §4.1 item 10, `KNOWN-ISSUES.md` KI-69). The fixture now addresses them by `:id`
+   (`#rank-parent_a`, `#ancestor-parent_a-0`) and by role plus the label the wrapping `<label>` gives
+   them ("Kind", "Applies to", "Stars").
+2. **The save contract.** The spec waited on a `Save Legacy` button and a `Saving the Legacy…` status
+   toast. Those belong to the **wizard** (`Career/LegacySelect.vue:451,454`); the surface this fixture
+   actually navigates to, the run-scoped builder, has `Confirm Inheritance` (`:449`) and no
+   `role="status"` element at all. The wait is now the disclosure flipping to the recorded state, which
+   is the signal a Trainer reads.
+
+The parent pick is left unchosen: this suite's scratch database holds no Veterans (`KI-69` class 3), so
+the roster renders no options, and `legacies.*.legacy_id` is nullable, so the payload is valid without
+one. The picker's own contract is covered by `ancestry-node-picker.spec.ts`, a component-level case
+mounted for exactly that reason.
+
+**A third defect in the same spec, found by reading the page rather than by the run.** The case
+`predicted section aggregates sparks across both parents and grandparents` asserts `White: 2 Sparks` and
+`Scenario: 1 Spark`, but the fixture enters only blue, pink and green Sparks, and
+`InheritanceEventController::predictedSection()` (`:195-204`) emits a kind **only when at least one Spark
+of it exists**. Those two assertions cannot pass against any fixture entering blue/pink/green only. They
+are left unchanged rather than fitted to the fixture, and are recorded here as an open defect in this
+spec.
+
+**The one authorized run (2026-10-09).** `PLAYWRIGHT_PORT=8233 npx playwright test
+tests/browser/career-inheritance-event.spec.ts`. The fixture's re-addressing **worked**: the run was
+created, twenty turns logged, and every re-addressed control was filled and persisted. The compare
+surface the write redirects to reads `Parent A rank 3`, `Parent A ancestors Symboli Rudolf, Mejiro
+McQueen`, `Parent B rank 2`, `Rented from a friend B`, `Blue Sparks 2`, `Pink Sparks 1`, `Green Sparks
+1` — the payload `StoreLegacySelectionRequest::payload()` stored. So `#rank-parent_a`,
+`#ancestor-parent_a-0`, the "Kind"/"Applies to"/"Stars" role addresses and the "Rented from a friend"
+checkbox all resolve, and the fixture's data entry is sound.
+
+The run still **failed**, on a third misaddress in the same fixture: the completion wait.
+`getByText('This run already has a Legacy selection recorded.')` never resolved, because
+`LegacyController::update()` does not return to the builder — it redirects to
+`route('legacy.compare', ['runs' => [$run->id]])` with the flash `Inheritance recorded.`
+(`LegacyController.php:248-250`). The DOM snapshot Playwright captured on failure **is** that compare
+page, carrying the flash, which is how the redirect was identified rather than guessed. The write
+succeeded; the wait looked in the wrong place.
+
+**The fix is one line and is deliberately not applied here.** The wait becomes the write's own signal:
+
+```ts
+await page.getByRole('button', { name: 'Confirm Inheritance' }).click();
+await expect(page.getByText('Inheritance recorded.')).toBeVisible(WRITE);
+```
+
+It is left for the next slice because the follow-up's §4 is explicit that a new issue found by the run
+is recorded and fixed as a separate slice, never folded into the same commit, and a second run to
+verify it is outside this session's budget.
+
+**The run split 4/4, and the second failure was caused by a concurrent session, not by this spec.**
+Cases 1-4 reached the completion wait above. Cases 5-8 failed **earlier**, at the fixture's
+`page.waitForURL(/\/training-runs\/\d+$/)` after `Create run`, having navigated to
+`/training-runs/{N}/cockpit` instead of `/training-runs/{N}`. The cause is a peer's uncommitted edit
+landing **during** the run: `git diff -- app/Http/Controllers/TrainingRunController.php` shows that
+session's in-flight cockpit cutover, which rewrites every `runs.show` redirect to `runs.cockpit`,
+including `store()`'s:
+
+```diff
+-        return redirect()->route('runs.show', $run)->with('status', 'Run created.');
++        return redirect()->route('runs.cockpit', $run)->with('status', 'Run created.');
+```
+
+The change is uncommitted, so the running `php -S` served the old redirect for the first four cases and
+the new one for the last four once the peer saved the file. That is the KI-70/KI-74 class — two sessions
+on one checkout — and it is why one fixture produced two different failures inside one run.
+
+**The second fix, also one line, also not applied.** The address has to survive that cutover, because
+`HEAD` still redirects to `runs.show` while the peer's tree redirects to `runs.cockpit`:
+
+```ts
+await page.waitForURL(/\/training-runs\/\d+(\/cockpit)?$/, WRITE);
+```
+
+Recording it rather than hardening the fixture against a peer's uncommitted work is deliberate: the spec
+should be corrected once the cutover lands, not fitted to a working tree that is mid-flight.
+
+**Net result of the one authorized run.** 8 of 8 failed, exit 1, ~13.4 minutes of test time (about 15
+with the harness's migrate-and-seed). No case reached its own assertions. Nothing here is a browser
+pass, so D6 and D7 remain "Fixed (browser half unrun)", and Phase 3 stays closed.
+
+### Schema
+
+`2026_10_09_120000_add_ownership_to_deck_slots_table` is applied to the dev database
+(`migrate:status` clean). It adds one nullable column and has a working `down()`. The test suite
+builds its own schema from the migration files, so the migration is exercised on every run.
+
+### Verification performed
+
+- `vendor/bin/pest <focused files>` for every slice; the counts are in each commit message.
+- `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` — clean after each slice.
+- `npm run typecheck` — clean after the Vue changes (D1, D2, D3, D5, D6, D7).
+- `vendor/bin/pint` on the changed files (not `--dirty`: the tree carries another session's
+  uncommitted files and `--dirty` would reformat them).
+- `php artisan migrate:status` on the dev database — clean.
+- **Not run:** the full suite as one command, the browser suite, `composer lore` / `composer lore-code`,
+  and `composer audit` / `npm audit` (no dependency changed).
+
+### What remains unsupported from the source snapshot
+
+Unchanged by this remediation: the run's own per-stat caps (1325/1322/1368/1308), Energy as a
+band or qualitative state (a numeric Energy is stored, but a snapshot that states "near a third" has
+nowhere to go and the run then reads `N/A` everywhere), the trainee's star rating and Potential Level, the four grandparents' Spark sets,
+ancestor letter ranks (B+, UG), card levels and limit breaks, team identity and the Unity Cup
+progression counts, the race-day card, and the mid-career position itself. Each needs the snapshot
+architecture (Phase 3 onward) or a dedicated slice; none was faked.
+
+**Erratum 2026-10-10 — five of that list have since been supported by later slices in this
+remediation** (the sentence above is kept as written; this note dates it): the per-stat caps
+(`cb42d93`), the star rating and Potential Level (`b896d0b`), team identity (`709a233`), the Unity
+Cup progression counts (`89f3b11`), and the mid-career position itself (Phases 4–5, read by the
+Cockpit at `3b6f3cc`). Still unsupported: Energy as a qualitative band, the grandparents' Spark
+sets, ancestor letter ranks, card levels and limit breaks (Phase 14, deferred), and the race-day
+card.
+
+### Close — final status (2026-10-09)
+
+**D1–D9 final status.** D1 **Fixed** (browser half green: `career-inheritance-event.spec.ts` 8 of 8).
+D2 **Fixed**. D3 **Fixed**. D4 **Fixed**. D5 **Fixed**. D6 **Fixed (rendered surface removed)**. D7
+**Fixed (rendered surface removed)**. D8 **Verified, not a tool defect**. D9 **Fixed** — one shared
+field source, all three surfaces wired and labelled alike.
+
+**Phases and commits (flat list).** Phase 4: `0025f37`, `d0bd138` (4.1–4.2), `a31000c` (4.3). Phase 5:
+`b890cd5` (5.1), `fc66978` (5.2), `8c7628d` (5.4). Phase 6: `31c9f5d`, `5876f64`, `f39ff03`. Phase 7:
+`1098546`, `6fa0d01`. Phase 8.1: `1ec92ab`; its §11 package (ADR-0024 + digest + index) at `837d995`.
+D6/D7 resolution: `e8a3dff`.
+
+**Outstanding at close.**
+
+- **Slices 4.4 and 5.3 are deferred.** Both read `careerPosition` / `scenarioCountdown` in the cockpit.
+  `app/Http/Controllers/Career/CockpitController.php` carries an unauthored peer hunk (staged and
+  unstaged, `MM`), so the two slices could not be landed without staging another session's work.
+  `SnapshotCockpitTest` and `SnapshotScenarioCountdownTest` were not created for the same reason. The
+  cockpit's YEAR/MONTH/TURN block and its countdown still derive from the run's turn number rather than
+  the imported position.
+- **D6 and D7's rendered assertions are not run**, because the surface they addressed (`Runs/Show.vue`
+  and its `run-detail.spec.ts`) was deleted by the peer's cockpit cutover. The behaviour they guarded is
+  carried by the cockpit and its `career-cockpit.spec.ts`, which was not re-run in this close (Option B
+  in the D6/D7 resolution did not require it).
+- **Deliberately out of scope**, per the task: new audits, session reports, `ADR-0019`/`ADR-0022`/
+  `ADR-0023` edits, and any change to `resources/js/pages/Runs/Show.vue` or the `runs.show` redirect.
+
+**Verification performed at close.** Focused Pest on every landed slice's file — 47 passed. Full
+`vendor/bin/phpstan analyse` — clean. `npm run typecheck` — clean. `npm run build` — clean.
+`php artisan migrate:status` on the dev database — no pending. `composer lore` — 302 hits, 77 exempt
+(unchanged; no new hit from the close). `composer lore-code` — no hit from any file changed here.
+`career-inheritance-event.spec.ts` — 8 of 8 passed. Not run: the full suite as one command, and
+`composer audit` / `npm audit` (no dependency changed).
+
+### Close — final state (2026-10-10)
+
+**Phases 1–8 complete.** Phase 4.4 / 5.3 landed via 2A.1 (`3b6f3cc`), closing the one deferral the
+2026-10-09 close recorded. The 2A and 2B queues then landed in full (rows above): the 2A slices
+render and store what the earlier phases persisted, and the 2B slices carry the remaining
+persistence halves. Every landed commit's body carries the same note: *Phase 14 deferred; §6.9
+still rules out collection tracking.*
+
+**2A.4.** The only A-phase slice not landed as specified: its render target `StatBand.vue` was
+deleted by the cockpit cutover at `b30906a`, and the cutover's own code states the component was
+deliberately not reused (`CareerStatePanel.vue:16`). The persistence half is the deliverable
+(`cb42d93`); the render half is superseded by the cutover's removal of the visualization and no
+surface exists to render a fourth marker on. Recorded Landed-superseded in the status table.
+
+**Advisor defect.** The `finale_context` prop mismatch introduced by `ad8dc77` (snake_case prop,
+kebab-case binding, so the card threw on `undefined.label` and rendered nothing) was found during
+2A.6's browser verification and fixed at `7a344a4`. Filed as KI-90, which also records why the
+cockpit-spec failure it named is resolved by the same commit.
+
+**Deferred.** Phase 14 (card levels and limit breaks) awaits an owner ruling on `PRD.md` §6.9;
+`ADR-0014` declined `user_support_cards` and nothing else was faked to fill its place. This is the
+remediation's only outstanding work.
+
+**Gates.** State at close: `career-cockpit.spec.ts` + `career-cockpit-forms.spec.ts` 18 passed
+(6.0m, session-private port and scratch database); `composer lore` 303 hits / 77 exempt;
+`composer lore-code` 118 hits (both at baseline); `php artisan migrate:status` — all Ran, no
+Pending. Not run at close: the full suite as one command (the focused and related-regression runs
+per slice are recorded in each commit), and `composer audit` / `npm audit` (no dependency changed).
+
+---
+
+## rice-shower-unity-cup-round2-reconciliation.md
+
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: docs/audits/rice-shower-unity-cup-round2-reconciliation.md (169 lines at first augment), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+>
+> **Live record, re-synced 2026-10-10 (322 lines / 248 non-blank at this re-sync).** This audit is the working record of the Rice Shower / Unity Cup round-2 remediation and is still being appended to as slices land; the body below is a dated snapshot of it, regenerated from the current source to keep the master current. Read the live source for anything written after this line; the section will be re-synced again when the round closes.
+
+## Round 2 Reconciliation: Rice Shower / Unity Cup UX Walk — Second Pass
+
+Reconciles `docs/audits/rice-shower-unity-cup-ux-walk-2.md` (the second browser walk) against
+`docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md` (the remediation record) and the current
+codebase at `aedfc30`.
+
+### Method
+
+Each observation from the second audit is classified as one of:
+
+- **Previously fixed and confirmed** — the second pass verifies the earlier fix.
+- **Previously fixed but inconsistent** — one surface still presents obsolete behavior or copy.
+- **Regression or possible regression** — later behavior conflicts with earlier observations or current contracts.
+- **New confirmed defect** — the second audit establishes a new failure or misleading result.
+- **Known limitation** — behavior is intentional and consistent with existing product decisions.
+- **Source conflict / needs investigation** — evidence does not yet support a definitive correction.
+- **Deferred feature** — valuable functionality outside the current remediation slice.
+
+### Reconciliation Table
+
+| Finding ID | Evidence (Audit 2) | Prior Status | Current Status | Root Cause | Proposed Slice | Regression Test |
+| --- | --- | --- | --- | --- | --- | --- |
+| **R2-01: Existing-career position rendered as Turn 1** | Dashboard, Cockpit, Timeline all show Junior Year Early January Turn 1; source is Senior Early October, 5 turns left (§1.1 line 21) | Fixed (Phases 4–5, `0025f37`, `d0bd138`, `a31000c`, `b890cd5`, `fc66978`, `8c7628d`, `3b6f3cc`) | **Confirmed fixed for snapshot mode, but not for new careers** | The cockpit reads `careerPosition` when `hasImportedPosition()` is true (`CockpitController.php:277`). New careers still derive from turn count (`:263-270`). The second audit's run was created via the wizard (new career), so it correctly starts at Turn 1. The mismatch is that the *source* describes an existing career but the UI created a new one. | Clarify in docs: the walkthrough should use the snapshot import path, not the wizard. No code change needed. **Verdict, 2026-10-10:** held. A wizard-created run has logged nothing, so Turn 1 and the year grid's first slot are what the tool knows, `TrainingRun::hasImportedPosition()` (app/Models/TrainingRun.php:707) gates the imported reading, so a run that has logged nothing claims no calendar place rather than borrowing one; the Dashboard's own empty position is `N/A` under the title "not standing anywhere on the calendar yet", which `dashboard.spec.ts:136` pins. What the walk actually hit is the R2-04 door, landed in `65d7068`: the snapshot flow was unreachable from the state the Trainer was in. | `SnapshotCockpitTest` already covers imported position; verify new-career flow still starts at Turn 1. |
+| **R2-02: Legacy selections disappear during wizard navigation** | Screen 5: ancestry entered, saved with no flash; Screen 7: Preflight reports ANCESTRY N/A | Fixed (Phase 6, `31c9f5d`, `5876f64`, `f39ff03`) | **Not a code defect — session configuration issue** | Feature tests prove the persistence logic works correctly (`CareerLegacyDeckStepsTest` passes, including new R2-02 regression test verifying flash message and Preflight readback). The audit observation is consistent with a session persistence failure in the browser environment, not a code bug. Likely causes: (a) `SESSION_DRIVER=database` in `.env` but no `sessions` table migrated, or (b) browser session cookies not persisted between requests, or (c) CSRF token mismatch preventing form submission. The controller's redirect-with-flash pattern is correct; if the session cannot store data, neither the flash nor the legacy payload survives. Correction 2026-10-10 (this session, measured on this tree): hypothesis (a) is disproved here. `Schema::hasTable('sessions')` answers yes with 3 rows on `database/database.sqlite`, and `.env:30` reads `SESSION_DRIVER=database`, so the sessions table is migrated on the database the walkthrough would have used. (b) and (c) were not tested and nothing reproducible was demonstrated, so the cause of the observed browser failure stays unidentified; the row stands as "the code path is not at fault", which is all the evidence supports. | No code change needed. Document troubleshooting: verify `php artisan migrate:status` includes sessions table when using database session driver, or switch to `SESSION_DRIVER=file` for local development. Correction 2026-10-10: that check is already answered on this tree (the table is there), so the clause stands only as guidance for a fresh worktree. Nothing to implement for this finding. | New regression test added: `CareerLegacyDeckStepsTest::'it shows a confirmation flash and persists legacy data through navigation to Preflight (R2-02)'` verifies flash message, session persistence, and Preflight readback in one request cycle. |
+| **R2-03: Preflight permits contract with unresolved warnings** | Screen 7: Warnings list target and ancestry gaps, but Start Career remains enabled | Known limitation (resolution record does not address blocking semantics) | **Confirmed** | Preflight is read-only and delegates creation to the wizard's write path. The wizard allows partial saves by design (D4 fixed the target validation, but did not make warnings block creation). This is a product decision, not a defect. | Document as intentional: warnings inform but do not block. If owner wants blocking, that's a new feature request. | `CareerPreflightTest` verifies warning display; add case for creation with warnings. |
+| **R2-04: Snapshot state conflated with subsequent turn state** | Screen 10: Turn form defaults to Turn 1; Screen 11: Cockpit shows Junior Year Early January after recording stats | Fixed (Phases 4–5, same as R2-01) | **Same as R2-01** | The wizard creates a new career, not a snapshot import. The turn form's default is correct for a new career. The snapshot import path (if it exists) would set the initial position differently. | Verify if snapshot import path exists and is reachable from the Dashboard. If not, this is a missing feature, not a bug. **Verdict, 2026-10-10, landed `65d7068`:** the path exists (`career.snapshot*`, `SnapshotController`, `Career/Snapshot/Entry|Setup|Review`) and the Dashboard linked it, but the sentence holding that link sat inside the `<section v-else>` empty state, so the door vanished the moment the tool held a career for the very Trainer the flow is for. The paragraph now renders outside both career branches with its words, link and destination untouched; `dashboard.spec.ts` asserts the door in each state and pins its href. No position value was invented, which is the R2-01 half of the same finding. | `SnapshotTrainingDecisionTest` covers snapshot-mode turn recording. |
+| **R2-05: Scenario metadata has duplicate Ruleset rows** | Screen 2: Unity Cup card prints `Ruleset · N/A` in fact block and `Ruleset · Team` in description block | Not addressed in resolution record | **Fixed** in `9777531`, browser-verified; the residual (the Cockpit's own strip) landed in `c7a9c87`, and the four further surfaces R2-19 names are closed in `24f7e48` | Confirmed, and the cause is a label collision rather than a duplicated fact. The two rows print two different values from two different sources and neither is hardcoded: the grid row is the tool-wide ruleset *version*, `props.ruleset.value`, which `ScenarioSelectController::ruleset()` returns as null by ruling because no source defines a Global version (`design-2.0` §48); the block row is the scenario's own rule family, `card.metadata.ruleset` from `config/scenarios.php` (`'Team'` for Unity Cup alone, added by `1098546`). `config/scenarios.php:225` already says the distinction in its own words, "ruleset names the scenario's rule family, not a version", but `1098546` reused the grid's heading for the new row, so one card headed two different facts `Ruleset` and read as self-contradicting. | Rename the headings so each fact owns one: grid `Ruleset version`, block `Rule family`. Values, sources and the `N/A`-with-`title` rule are untouched, and no `Team` is typed into the template. Done in `resources/js/pages/Career/ScenarioSelect.vue`; `SCREEN_SPEC.md` SCR-CAR-002 updated for the two headings, the absent-field state row and the test list. | `ScenarioMetadataTest::'it prints each fact on a scenario card under one label, and never one label twice'` pins the card's full `<dt>` heading set read off the template (RED before the fix with `'Ruleset'` twice, GREEN after, and it cannot pass on a pattern that matched nothing). `tests/browser/career-scenario-select.spec.ts` adds a rendered case: Unity Cup shows `Ruleset version · N/A` and `Rule family · Team`, and no element anywhere is headed bare `Ruleset`. |
+| **R2-06: Support-deck ownership copy contradicts persisted behavior** | Screen 6: Copy says flag has no persistence column; Screen 19: Flag survives reload | Fixed (D3, `fdebcc9`, added `deck_slots.ownership`) | **Fixed** in `dd179ba`, browser-verified | Confirmed, and wider than one screen. `fdebcc9` (2026-10-09) gave `deck_slots` its nullable `ownership` column and wired both writers, but the sentence written at D6-wizard survived in three shipped places: `Career/DeckSelect.vue` (step 5) and `Career/Preflight.vue` (step 6) each printed "The deck table has no column for it yet", and `components/support/SupportSlot.vue`'s own docblock still called the value client-side. Four comments in the write path said the same (`StoreDeckRequest` twice, `TrainingRunController::syncDeck()`, `SetupDraft::deck()`, `DeckSelectController`, `StoreDraftDeckRequest` twice). `Support/Builder.vue` had been corrected in the same pass as the migration, and that is why Screen 19 read true while Screen 6 read false. | Copy and comments only, no persistence change: each screen now states the flag's real route, draft then `PreflightController::store()` then the slot row, and each keeps the three-state distinction (`Owned`, `Rented`, unrecorded renders `N/A`). | Two things, because one was lying. `SupportDeckBuilderTest` gains (a) a sweep of the four shipped deck surfaces: the retired wording in any shape fails it, and (b) the write-and-read-back case for `runs.deck.sync` with a posted flag, which no test had run before, so the stale comments were never contradicted. `tests/browser/support-deck.spec.ts` asserted the run screen's **pre-D3** sentence and has been failing since `fdebcc9` (pre-existing, not caused here); it now asserts the sentence the screen prints. `career-legacy-deck-steps.spec.ts` likewise asserted "The deck table has no column for it". |
+| **R2-07: Retired run-record instructions remain visible** | Screen 9: `/training-runs/9` redirects to Cockpit, but three screens still reference "run record screen" | Partially fixed (2A.5, `d251f7f`, nav-rail relabelled) | **Fixed** in `380350e` (+ `a1379bd`), browser-verified | Confirmed, and the audit's "three screens" was the visible tip. `F2` deleted `Runs/Show.vue` and made `GET /training-runs/{run}` a redirect (`TrainingRunController::redirect()`), and `d251f7f` relabelled the nav rail, but seventeen shipped sentences across nine sources still named the retired screen in three phrasings: "the run record screen" (Cockpit strip absences, Career Result skills/races/status/retired lines, Timeline empty state, Save Veteran blocked state), "the record screens" (Save Veteran's `best_use` title), and "the run screen" (Race planner × 4, Skills planner absence, `RaceFacts` skill-point fact, Training Detail's first-turn link, Event and Inheritance no-turn panels, RaceCard's skip note). Two links also addressed the doorway itself while labelled otherwise: the deck builder's career-bar `run_url` and the Veteran's `runUrl`. A grep for the literal phrase found 9 files; a grep for the *concept* ("run screen", "career record") found the rest, which is why the audit's own wording was not enough. | Retarget each instruction to the surface that owns the action today, verified per destination: the action grid (`Cockpit.vue:588`), Training for the turn fields (`TrainingDetail.vue:121` posts `sp`), the Race planner for the calendar (`SCR-CAR-023`), the Skills planner for skill states (`skills_sync_url` form), the Cockpit for status and scenario (`Cockpit.vue:354,376`) and for recorded outcomes (`Cockpit.vue:510`). Where no 2.0 owner exists, Rest and Recreation, the copy now says so instead of sending the Trainer to a closed door. No route, redirect or payload was touched. | `NoStaleRunRecordLinksTest` already existed at `d251f7f` with two browser-side cases; it was kept verbatim and gained the sweep its design could not make: comment-stripped matchers over `app`, `resources/js`, `resources/views` and `lang`, plus a `runs.show` whitelist narrowed to the doorway's own file with its two retained redirects counted (2). Red first listed nine files; green after. `career-race-strip.spec.ts` had been failing since `3cdaa2f` (2026-10-09, the pass that repointed the strip's links) because it still addressed `Go to the run record screen` while the component printed `Go to the Cockpit` (pre-existing, not caused here); both its cases now pass, and `VeteranLibraryScreenTest`'s `runUrl` pin moved to `runs.cockpit` with the link. `CareerRacePlannerTest` gained a positive case so the retarget cannot pass by losing its destination. |
+| **R2-08: Target save confirmation is misleading** | Screen 4: Empty target saves with "Build target saved." but page says "No target is recorded yet" | Fixed (D4, `be02297`) | **Confirmed fixed, but UX ambiguity remains** | The validation now allows empty targets, and the success message is technically correct (the save succeeded). However, the distinction between "save succeeded" and "target configured" is subtle. | Consider changing the flash to "Target cleared." when all fields are empty, or adding a visual indicator of the empty state. | `CareerBuildTargetTest` covers empty save; add UX assertion if changed. |
+| **R2-09: Stat denominators disagree across screens** | Screen 11: Cockpit shows `Speed 607 / N/A`; Screen 15: Event decision shows `Speed 607/1300` | Not addressed in resolution record | **New confirmed defect** | The Cockpit uses the build target as denominator (which is null if no target entered). The Event decision screen uses the scenario cap. These should be consistent or clearly labelled. | Inspect `EventDecisionController` and `CockpitController` stat rendering. Use shared helper for denominator logic. | Cross-screen test verifying same stat displays same denominator. |
+| **R2-10: Skills planner reports meaningful result over empty set** | Screen 18: "skills still to learn cost 0 SP" with no skills marked | Not addressed in resolution record | **Fixed** in `d95da07`, browser-verified | The arithmetic was never the defect: `SkillSpendCoverage::sum([], 173)` returns `total_cost 0, remaining 173`, which is a correct sum over an empty set and the service still refuses a sum with any price missing. The controller then passed that zero through as a figure, so the branch that prints the numbers won and the branch that names the absence never ran: the page read "The skills still to learn cost 0 SP, and the run holds 173 SP, leaving 173" for a Trainer who had prioritized nothing. The screen's own Required group already distinguished "no build target" from "target names no priorities", so the coverage panel was the one place the two collapsed. | `coverage` gained a `state` key (`no_priorities` / `covered` / `unpriced` / `cost`) derived from the priority list rather than from the sum: nothing prioritized prints no figure at all; every priority learned prints the real zero with the reason beside it; a missing price still refuses; `warn` is only ever true in `cost`. `SkillSpendCoverage` is untouched, the priority schema and `runs.build-target.update` are untouched, and ADR-0001's removal of the hint ladder is untouched. | `CareerSkillsPlannerTest`: two new cases pin `no_priorities` (total null, remaining null, no text, absence names itself) apart from `covered` (total 0, remaining 173, reason states the learned outcome), so the states cannot pass by being conflated again; the suite 21 passed (306 assertions) and `SkillSpendCoverageTest` 5 passed (56) with the service's rules unchanged. `career-skills-planner.spec.ts` gained the rendered case (5 passed, 1.1m): the screen shows the absence and no `still to learn cost 0 SP` string is in the DOM. |
+| **R2-11: Hint discounts discrepancy** | Screen 18: "Hint discounts are not modelled." vs first audit showing hint ladder | Resolution record states ADR-0001 removed hint ladder | **Known limitation (intentional)** | ADR-0001 withdrew the hint discount ladder from the UI. The second audit correctly reports its absence. The first audit's observation is outdated. | No change needed. Document that hint discounts are stored but not displayed per ADR-0001. | None needed. |
+| **R2-12: Race planner overwhelms with empty details** | Screen 20: Large surface with repeated N/A fields for placeholder races | Not addressed in resolution record | **Fixed** in `473bb19`, browser-verified | Confirmed as presentation, and the underlying data gap is real and stays. Ten fact rows print per race; five of them refuse for every race in the tool (running style is the trainee's, reward / Skill Points / scenario reward have no column, the win figure is held on `ADR-0016`), and on the calendar's placeholder rows the remaining five refuse too: `Junior Make Debut` carries the tier word `Debut` and nothing else, `URA Finals Qualifier` and `Semifinal` likewise, while `Aichi Hai` resolves 2,000 m / Medium / Turf. So a debut card was ten labels and ten refusals, and the audit measured 17,409 characters of it. | `RaceFacts::describesRace()` owns the test (distance, band, surface, fan gate or fan payout, with the tier deliberately excluded because `Debut` is a name and not a course), the row carries `detail_recorded`, and `RaceCard.vue` folds the grid to one line when the caller asks. The fold is opt-in through `fold-undescribed`, which only `RacePlanList.vue` passes: the planner prints a whole career and asked for density, the Race decision screen prints one or two races and its spec holds that each refusal is on the page. The drawer keeps every fact either way. No distance, surface, reward or gate was invented, no route or write touched, `ADR-0016` untouched. | `CareerRacePlannerTest` pins the fold's input on both kinds of row (`detail_recorded` true for a described slot, false for a debut-shaped one), 26 passed (403 assertions). `career-race-planner.spec.ts` adds the rendered case: the debut card shows `Details not recorded for this race.` with its obligation and year lines kept, another card still shows its `Distance band`, and the debut's drawer still lists every refused field. The first version of this folded on both screens and broke `career-race-decision.spec.ts:92` (the refusal disclosure assertion), which is the regression the opt-in exists to prevent. |
+| **R2-13: Run identity incomplete** | Screen 8: Rarity and Potential Level named as missing but not editable | Fixed (2B A6.1, `b896d0b`) | **Previously fixed** | The migration added `trainee_rarity` and `potential_level` columns. The Cockpit's identity form should now include these fields. Verify the form renders them. | Check `Cockpit.vue` identity edit form for rarity/potential inputs. Add if missing. | `TraineeRarityPotentialTest` covers persistence; verify UI. |
+| **R2-14: Unity Cup scenario state incomplete** | Screen 8: Team identity, rankings, burst counts have no input | Fixed (2B A6.6, A6.7, `709a233`, `89f3b11`) | **Previously fixed** | Migrations added team identity and Unity Cup counter columns. The Cockpit's scenario panel should render these. Verify the panel displays the stored values. | Check `CockpitController::scenarioSection()` and `Cockpit.vue` team panel for rendered values. | `CockpitTeamPanelTest`, `CockpitUnityCupCountersTest` cover persistence and rendering. |
+| **R2-15: Active-career and Dashboard context** | Screen 1: Dashboard shows active career from first walk while allowing new draft | Known behavior (multi-run support) | **Known limitation (intentional)** | The Dashboard displays the most recent active career but also allows starting a new draft. This is by design to support multiple concurrent runs. | No change needed. Consider clarifying the Dashboard copy to explain multi-run support. | None needed. |
+| **R2-16: Energy band not editable on the Cockpit correction form** | Cockpit correction writes `energy`; the guided training screen records a band beside it | Not addressed in the first audit | **Open, blocked on a concurrent session** | `turn_entries` carries the state and the band, and the guided screen writes them. The Cockpit's correction form posts the numeric reading only, so a band that is wrong stays wrong after a correction. Which behaviour is right (edit the band there, or show it read-only) is the owner's call and is recorded as such in the round-2 brief; no decision was inferred here. | Deferred: `Cockpit.vue` and `CockpitController.php` hold a concurrent session's uncommitted advisor refactor, so this file pair is not openable this session. | None yet. The chosen behaviour needs a round-trip test either way: write through the guided form, correct through the Cockpit, read back. |
+| **R2-17: Run-scoped deck builder has no inbound link** | `/training-runs/{run}/deck` is reachable only by URL | Not addressed in the first audit | **Open, blocked on a concurrent session** | `runs.deck` answers, writes and reads back (Slice 2's `SupportDeckBuilderTest`), and the Training screen's door now points at it (`e2889ff`), but the Cockpit itself offers no door, so a Trainer mid-career cannot reach the deck builder by clicking. | Deferred with R2-16: the door belongs in `Cockpit.vue`, in the peer's dirty set. `TrainingDetail.vue`'s door landed first because that file was clean. | A feature test asserting the Cockpit response carries an `href` for `runs.deck`. |
+| **R2-18: Training screen's deck door opened a new wizard** | Found by the R2-07 sweep of `runs.training` | Not in the second audit's list | **Fixed** in `e2889ff` | The "no Support Cards are recorded" line on the Training decision screen linked the literal `/career/setup/deck`. That route is step 5 of a fresh setup draft, so a Trainer with a career open was sent out of it into an unrelated draft and the career's own deck stayed empty; the label beside it, "Deck step", named the wizard rather than the destination. `runs.deck` was already the screen that writes this run's six slots. | The server now supplies `run.deck_url` beside the two doors already in that prop set, the anchor binds it, and the label reads "Record this run's deck". The wizard's own internal links (`SetupLayout.vue`, `LegacySelect.vue`, `DeckSelect.vue`) are unchanged, because there the next step is the next step. | `CareerTrainingDetailTest` pins `run.deck_url` at the same run's `runs.deck` and greps the component for the retired literal (present exactly once before, absent now). The screen's suite 10 passed (266 assertions) and the five suites that write through `runs.training` 46 passed (601 assertions). Not browser-verified: that spec's fixture equips a card, so the empty-deck branch never renders there. |
+
+| **R2-19: The absent Global ruleset version is headed four different ways on six surfaces** | Found by the R2-05 residual sweep, 2026-10-10 | Not in the second audit's list | **Fixed** in `24f7e48`, browser-verified (was filed as open at the sweep, before slice 13 took it) | The same null value — `app.ruleset`, null by ruling because no source names a Global ruleset version (`design-2.0` §48) — reaches a Trainer under four headings: `Ruleset version` on the wizard card (`ScenarioSelect.vue:193`, `9777531`) and the Cockpit strip (`ScenarioPanel.vue:162`, `c7a9c87`), `Ruleset:` on the Dashboard's data-status panel (`Dashboard.vue:316`) and the Career Result's footer (`Result.vue:366`), `Ruleset snapshot:` on Preflight (`Preflight.vue:392`), and `Global Ruleset` on Preferences' game-version tab (`Preferences/Edit.vue:445`). Every one of them prints the refusal title that says *version*, so four of the six headings name the fact less exactly than the text beside them. R2-05 was one card carrying two headings for two facts; this is six surfaces carrying four headings for one fact. | Pick the card's wording, `Ruleset version`, and apply it to the four stragglers in one pass, leaving the wizard's `Rule family` row alone because that is a different fact. Values, sources and the `N/A`-with-`title` rule did not move. **Landed in `24f7e48`**, with Settings keeping its qualifier as `Global Ruleset Version`. | Two assertions pinned the old wording and moved with it: `dashboard.spec.ts` now takes the anchored version heading plus the retired `Ruleset:` as its red/green pair, and `preferences.spec.ts` matches with `exact`, because the retired label is a prefix of the new one and a substring match would pass on either wording. `CareerPreflightTest.php:132` pins Preflight's *value*, not its heading, and `CareerResultTest.php:240-241` pins the prop, so neither blocked the rename. `RulesetVersionVocabularyTest` now owns the rule: six named surfaces with the heading each must print, then a retired-wording sweep of all 105 `.vue` files under `resources/js`, the count case being the guard that keeps the sweep from reading as a pass when it scanned nothing. 2 passed (428 assertions); the two browser specs together 18 passed (7.7m) on `:8261`. |
+| **R2-20: The Cockpit's page-wide 44px sweep fails on a collapsed disclosure's button** | Found while browser-verifying slice 11, 2026-10-10 | Not in the second audit's list | **Filed as KI-92, open, not this session's to fix** | `scenario-panel.spec.ts:168-174` sizes every `main a, main button` by index. The run-delete door's submit button lives inside a closed `<details>` (`Cockpit.vue:661-684`), so it is in the DOM with no box, reads 0, and the case fails at `control 17` — the 18th control, one past the 17 the failure's own accessibility listing puts inside `main` before that door. The sweep was written by `6a74f85` (2026-10-08); the door arrived with `91494a1` (2026-10-09). The markup is compliant and the instrument is not: `ura-panel.spec.ts:206-223` already skips controls that `isVisible()` rejects and guards the skip so it cannot pass on nothing. | Out of Round 2's remit. The four Cockpit sweeps sharing the unfiltered shape are named in KI-92; only `scenario-panel.spec.ts` was measured. Fixed as its own change with the `ura-panel` guard copied to each, or left to whoever owns the accessibility sweep. | Nothing to add: the case is red now, so the fix is proved by the same command going green. What has to be proved is that the guard survives — the `measured > 8` assertion is what keeps the skip honest. |
+
+### Baseline Test Report
+
+- **Migrations:** All 58 migrations Ran, no Pending (`php artisan migrate:status` clean).
+- **Focused tests:** Not yet run. Will execute per-slice tests during implementation.
+- **Browser tests:** Not yet run. Harness requires session-private port and scratch database.
+- **Static analysis:** `vendor/bin/phpstan` and `npm run typecheck` not yet executed.
+
+### Proposed Slice Order
+
+#### Phase 1: Snapshot Integrity (Priority 0)
+1. **R2-02:** Investigate legacy save disappearance (verify if regression or user error in audit)
+2. **R2-03:** Clarify Preflight warning/blocking semantics (document or implement blocking)
+3. **R2-01/R2-04:** Clarify snapshot vs new-career flow (update docs or add snapshot import path)
+
+#### Phase 2: Cross-Screen Semantic Consistency (Priority 1)
+4. **R2-05:** Fix duplicate Ruleset rows in scenario cards (landed 2026-10-10, see Slice log)
+5. **R2-06:** Update obsolete deck ownership copy (landed 2026-10-10, `dd179ba`)
+6. **R2-07:** Remove remaining stale "run record screen" references (landed 2026-10-10, `380350e`)
+7. **R2-09:** Reconcile stat denominator logic across screens
+
+#### Phase 3: Decision Quality (Priority 1)
+8. **R2-10:** Fix skills planner empty-set calculation (landed 2026-10-10, `d95da07`)
+9. **R2-12:** Compact race planner presentation for placeholder races (landed 2026-10-10, `473bb19`)
+
+#### Phase 4: Remaining Context (Priority 2)
+10. **R2-13:** Verify rarity/potential UI fields exist
+11. **R2-14:** Verify Unity Cup state rendering in Cockpit
+12. **R2-15:** Document multi-run Dashboard behavior (optional)
+
+### Concurrent Changes Constraint
+
+The working tree has one modified file: `docs/audits/rice-shower-unity-cup-ux-walk.md` (uncommitted). This is the first audit document, which should not be edited. The second audit (`rice-shower-unity-cup-ux-walk-2.md`) is untracked and will be committed separately.
+
+No other sessions' work is present in the tree, so edits to controllers and Vue components are safe.
+
+### Next Action
+
+Begin with **R2-02** (legacy save investigation) to determine if this is a regression or an audit methodology issue. This is the highest-risk finding because it affects data persistence.
+
+### Slice log, 2026-10-10
+
+Erratum on the two state claims above, both written before this slice and both now stale. Line 44 said `phpstan` and `npm run typecheck` had not been executed; they have been, on this slice, and are recorded below. Line 70 said the working tree held one modified file and "no other sessions' work"; the tree now also carries `tests/Feature/CareerLegacyDeckStepsTest.php` modified (the prior session's R2-02 regression test, uncommitted) plus this slice's four files, so a commit here is made with an explicit pathspec and nothing else.
+
+#### R2-02, carried forward, not reopened
+
+The persistence path was already read end to end and the regression test exists and passes. The only new fact this session added is the disproof of hypothesis (a) recorded in the table row: the `sessions` table exists on the dev database with 3 rows and `.env` reads `SESSION_DRIVER=database`. No reproducible failure was demonstrated by any test, so R2-02 stays "code path not at fault, cause unidentified". The prior session's test remains uncommitted, which is a landing question for the owner rather than a defect.
+
+#### R2-05, closed
+
+| Item | Evidence |
+| --- | --- |
+| Root cause | Two different facts printed under one heading in `ScenarioSelect.vue`: the grid's tool-wide ruleset *version* (`ScenarioSelectController::ruleset()`, null by ruling, `design-2.0` §48) and, since `1098546`, the Unity Cup card's rule *family* (`metadata.ruleset` from `config/scenarios.php`, `'Team'`). `config/scenarios.php:225` already distinguishes them in prose; the template reused the heading anyway. |
+| Files changed | `resources/js/pages/Career/ScenarioSelect.vue` (two `<dt>` headings, one `title` wording), `tests/Feature/ScenarioMetadataTest.php` (new heading-set case), `tests/browser/career-scenario-select.spec.ts` (updated one selector, new rendered case), `SCREEN_SPEC.md` SCR-CAR-002 (Layout/Content paragraph, absent-field row, test list). |
+| RED first | `vendor/bin/pest --filter=ScenarioMetadataTest` before the fix: `Failed asserting that two arrays are identical`, index 5 `Ruleset` expected `Ruleset version`, index 8 `Ruleset` expected `Rule family`, 1 failed / 1 passed. The pattern matched all ten headings, so the guard is not vacuous. |
+| Focused green | `vendor/bin/pest --filter=ScenarioMetadataTest` after the fix: 2 passed (20 assertions). |
+| Related regression | `vendor/bin/pest tests/Feature/CareerScenarioSelectTest.php tests/Feature/CareerPreflightTest.php`: 22 passed (336 assertions), which covers the cards' prop derivation and the Preflight contract that reads the same config key. `CareerScenarioSelectTest` alone: 10 passed (161 assertions), the figure `SCREEN_SPEC.md` cites. |
+| Browser | `PLAYWRIGHT_PORT=8146 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/cited/browser-8146.sqlite npx playwright test career-scenario-select.spec.ts` after `npm run build`: 7 passed (25.6s). The new case asserts the rendered Unity Cup card shows `Ruleset version · N/A` beside `Rule family · Team`, and that no element on the page is headed bare `Ruleset`. Card inspected in Chromium, so the fix is browser-verified, not only source-verified. |
+| Static analysis | `npm run typecheck` exit 0. `vendor/bin/pint --test --format agent tests/Feature/ScenarioMetadataTest.php` passed (explicit path only, never `--dirty`, KI-75). `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`: `[OK] No errors`. `composer lore` exit 0 (303 doc hits, its standing count; the two `SCREEN_SPEC.md` hits are lines 20 and 1000, neither edited here) and `composer lore-code` exit 0 (118 hits; no hit falls on any file this slice changed, so no new ruling is owed). |
+| Commit | `9777531`, four paths by explicit pathspec, verified after the fact as `git diff 9777531 -- <those paths>` returning nothing and the commit touching nothing else. The audit documents and the prior session's `CareerLegacyDeckStepsTest.php` change were deliberately left uncommitted: they are not this slice, and `docs/audits/rice-shower-unity-cup-ux-walk.md` (the first audit, modified in the tree by another hand) must not land as part of a code fix. |
+| Not covered | `ScenarioPanel.vue:160` still heads the same tool-wide version row plain `Ruleset` on the Cockpit's scenario strip. There it is the only ruleset fact on the surface, so nothing contradicts it and the second audit reported no defect; left alone rather than widened into a second screen. If a future slice puts a rule family beside it, the same collision returns and the heading should follow this one. |
+
+#### Next action
+
+R2-06 (obsolete support-deck ownership copy) is the next slice in the queue and the next cheapest: verify the `deck_slots.ownership` write/read path, then correct the copy in `DeckSelect.vue`.
+
+### Slice 2 log, 2026-10-10
+
+#### Pre-flight, re-recorded
+
+HEAD was `9777531` with exactly the four peer artifacts uncommitted (`docs/audits/rice-shower-unity-cup-ux-walk.md`, `tests/Feature/CareerLegacyDeckStepsTest.php`, the two untracked audit documents). Browser harness available and used: `npx playwright test` with `PLAYWRIGHT_PORT` and `PLAYWRIGHT_SCRATCH_DB` pairs, `npm run build` first whenever a `.vue` file changed. New in the tree during this slice and not mine: `docs/research/ui-ux-application-context-brief.md` (untracked).
+
+#### R2-06, closed
+
+| Item | Evidence |
+| --- | --- |
+| Root cause | Correction did not propagate. `fdebcc9` (2026-10-09, D3, `ADR-0023`) added the nullable `deck_slots.ownership` column, wired both writers, and rewrote the run screen's sentence in the same commit. The wizard's step 5, the Preflight contract, and five comments in the write path kept the pre-D3 wording. `git log -S"stores no field" -- resources/js/pages/Support/Builder.vue` shows the pair: added by `05e9584` (2026-10-06), removed by `fdebcc9`. |
+| Persistence, verified not assumed | Column: `database/migrations/2026_10_09_120000_add_ownership_to_deck_slots_table.php`. Writers: `PreflightController::store()` line 140 and `TrainingRunController::syncDeck()` line 987. Reader: `TrainingRunController` line 269. No persistence code was touched by this slice. |
+| Files changed | `resources/js/pages/Career/DeckSelect.vue`, `resources/js/pages/Career/Preflight.vue` (shipped sentences plus their HTML comments), `resources/js/components/support/SupportSlot.vue` (docblock), `app/Http/Requests/StoreDeckRequest.php` (two comments), `app/Http/Requests/Career/StoreDraftDeckRequest.php` (two docblocks), `app/Http/Controllers/Career/DeckSelectController.php`, `app/Http/Controllers/TrainingRunController.php`, `app/Services/Career/SetupDraft.php` (one docblock each), `tests/Feature/SupportDeckBuilderTest.php` (two new cases plus its own stale header citation), `tests/browser/support-deck.spec.ts`, `tests/browser/career-legacy-deck-steps.spec.ts` (the two assertions that quoted retired copy), `SCREEN_SPEC.md` SCR-CAR-007 (Persistence, Implementation References, Gap 1) and SCR-CAR-009/010 status rows. |
+| New finding: a red browser test that was not in the baseline | `tests/browser/support-deck.spec.ts:196` asserted the run screen's pre-D3 sentence and therefore failed from `fdebcc9` onward, while the PHP suite stayed green because it asserts props, not copy. Classified pre-existing (introduced 2026-10-09 by the D3 copy change, not by this slice) and corrected here. |
+| New finding: a phantom test citation | `SCREEN_SPEC.md:1735` and `SupportDeckBuilderTest`'s header both cite `RunDeckTest`. No such file exists in `tests/` (glob plus `git log` both empty), so the run-scoped deck write had no owner: nothing posted a flag through `runs.deck.sync` in any test. Both citations are corrected and the write is now pinned by `SupportDeckBuilderTest::'it writes the flag this screen posts onto the slot row and reads it back'`. |
+| RED first | The sweep case failed on the first surface, `Expecting '<script setup lang="ts">…' not to match '/no column for it|has no owne… only/'`, 1 failed. It then failed on the missing affirmative sentence, so both halves bite. |
+| Focused green | `vendor/bin/pest tests/Feature/SupportDeckBuilderTest.php tests/Feature/CareerPreflightTest.php` exit 0, 38 passed (560 assertions). |
+| Related regression | `vendor/bin/pest tests/Feature/CareerLegacyDeckStepsTest.php` exit 0, 14 passed (269 assertions), unchanged by the copy edit and still green with the peer's uncommitted R2-02 case in it. |
+| Browser | `npm run build` (21.67s), then `PLAYWRIGHT_PORT=8147 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/cited/browser-8147.sqlite npx playwright test career-legacy-deck-steps.spec.ts support-deck.spec.ts -g "six slots, the seven spelled types|keeps the ownership choice"`: 2 passed (44.5s). Both screens' sentences read in Chromium; the run screen's toggle interaction (aria-pressed per slot) still passes. |
+| Gates | `npm run typecheck` no diagnostics. `pint --test --format agent` on the six changed PHP paths: `{"tool":"pint","result":"passed"}`. `phpstan analyse --no-progress --memory-limit=1G`: `[OK] No errors`. `composer lore` exit 0 at 303 doc hits and `composer lore-code` exit 0 at 118 code hits, both identical to the Slice 1 counts, so this slice added no hit. Note: an earlier lore-code run reported 166 because this session's own `.scratch-*.log` outputs were untracked in the repo root and the gate scans untracked files; the logs were moved to `/tmp` and the gate re-run. |
+| Commit | `dd179ba`, pathspec-limited to the twelve files above. The four peer artifacts stayed uncommitted. |
+| Not covered | The wizard's step 5 still refuses a save that equips a card without a flag (`StoreDraftDeckRequest` `required`), while the run screen accepts an absent one and keeps the stored value. That asymmetry is `ADR-0023`'s and is now described accurately on both screens; nothing about it was changed. |
+
+#### Next action
+
+R2-07 (stale run-record references) is next: sweep every user-facing "run record screen" / "run screen" instruction, trace each to the surface that owns the action today, and add the repository-grep guard the resolution record names `NoStaleRunRecordLinksTest`.
+
+### Slice 3 log, 2026-10-10
+
+#### R2-07, closed
+
+| Item | Evidence |
+| --- | --- |
+| Root cause | A retired surface left its name behind in prose. `F2` deleted `Runs/Show.vue`, made `GET /training-runs/{run}` a redirect, and moved every write to a 2.0 owner; `d251f7f` relabelled the nav rail. Nothing swept the sentences. Seventeen of them survived in nine sources, and two links still addressed the doorway itself. |
+| Files changed (19) | `app/Http/Controllers/Career/{CockpitController,ResultController,TimelineController,SaveVeteranController,SkillsPlannerController,RacePlannerController}.php`, `app/Http/Controllers/{TrainingRunController,VeteranController}.php`, `app/Services/RaceFacts.php`, `resources/js/pages/Career/{TrainingDetail,EventDecision,InheritanceEvent}.vue`, `resources/js/pages/Veterans/Show.vue`, `resources/js/components/career/RaceCard.vue`, `tests/Feature/{NoStaleRunRecordLinksTest,CareerRacePlannerTest,VeteranLibraryScreenTest}.php`, `tests/browser/career-race-strip.spec.ts`, `SCREEN_SPEC.md`. |
+| Guard | `NoStaleRunRecordLinksTest` existed at `d251f7f` with two cases; both kept verbatim, two added. Its `run screen` and `career record` patterns were widened only after a concept search (not a phrase search) found the same misdirection under a second name. The `runs.show` whitelist counts the doorway's own two redirects, so the guard narrows links without touching the ruling. |
+| RED first | The widened sweep named nine files; the `runs.show` link sweep named two. After the edits, 4 of 4 cases pass, and `CareerRacePlannerTest`'s new case pins a destination so a sentence cannot pass by losing one. |
+| Tests | Guard 4 passed (5 assertions). `CareerRacePlannerTest` 21 passed (370 assertions) with the new case. Touched-screen batch 121 passed (1968 assertions), then 127 passed (2108 assertions) after the sweep widened. `CareerLegacyDeckStepsTest` 14 passed (269 assertions), so the prior session's held test stays green against these strings. Final combined run across R2-05, R2-06 and R2-07 suites: 61 passed (988 assertions). |
+| Browser | `npm run build` exit 0, then `PLAYWRIGHT_PORT=8151 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/cited/browser-8151.sqlite npx playwright test career-race-strip.spec.ts career-cockpit.spec.ts -g "three run-scoped regions|says so when there is no turn being decided|walks the action grid|sizes the cockpit controls"`: 4 passed (2.2m). `career-race-strip.spec.ts` in full: 6 passed (1.5m). Both former stale link assertions read `Go to the Cockpit` in Chromium. |
+| Gates | `npm run typecheck` exit 0. PHPStan level 6 `[OK] No errors`. Pint `{"tool":"pint","result":"passed"}` on the slice's PHP paths. `composer lore` 303 doc hits / `composer lore-code` 118 code hits, both exit 0, both unchanged from the standing counts. |
+| Pre-existing failures observed, classified, not caused | (1) `career-cockpit.spec.ts:263` (advisor ranked-deficit line) fails in the tree: the concurrent `NextDecision` refactor holds `CockpitController.php`, `Cockpit.vue`, `types.ts`, `AdvisorRail.vue`, `CareerCockpitTest.php` and two untracked new files, all uncommitted, and the advisor region renders only its intro there. Not this slice; not fixed here. (2) Pint reports `method_chaining_indentation` in `tests/Feature/FinaleReportingTest.php` and `FinaleVocabularyTest.php`, files this slice never touched; a whole-directory sweep surfaces them, an explicit-path run does not, which is KI-75's exact trap. Reported, not reformatted. |
+| New finding filed | `KI-91` (`e546d5b`): the Skills planner has no link into it anywhere in `app` or `resources`; `git grep -n "runs\\.skills\\.planner" -- app resources routes` returns the route declaration alone and no `skills_planner_url` prop exists. The screen works (19 + 4 cases), so this is an entry point lost in the F2 cutover, and where the door belongs is an `ADR-0020` §1 decision. R2-07's copy is accurate and points at it; the reachability half stays open. |
+| Concurrency incident, recorded in full | The commit landed wrong and was corrected in the open. `380350e` was built with a pathspec commit, and a pathspec commit takes **working-tree** content: the spliced `CockpitController.php` I had staged never reached the file (the swap was rewritten by a local hook), so `380350e` captured the concurrent session's uncommitted `NextDecision` refactor and referenced a class that is untracked. A clean checkout of it fatals on every Cockpit route. Detected by diffing the committed blob against HEAD rather than trusting the working tree (`git show HEAD:... | grep -c NextDecision` → 1). `a1379bd` restored the file to HEAD's controller plus only R2-07's four strings, verified by sha256 against the spliced blob (`3514570…`), and `git grep -l "NextDecision" HEAD` now returns nothing. The other session's file was then put back byte-for-byte (`83badb71…`, matched against the pre-swap snapshot), and their work remains uncommitted and intact. **Rule for the next slice in this worktree: after any pathspec commit, diff the new commit against the previous HEAD for every file that was dirty before you started; a clean `git status` afterwards proves nothing about what went in.** |
+
+#### Next action
+
+R2-09 (stat denominator semantics) is next. Read `CockpitController`'s stat strip and `EventDecisionController`'s band rows before choosing semantics: a build target and a scenario cap are different facts, `ADR-0015` makes `ScenarioCaps` the single ceiling owner, and `2026_10_10_170000_drop_stat_ceilings_from_training_runs` already removed the orphaned column. Also decide, inside this slice or the next, whether `ScenarioPanel.vue:160`'s plain `Ruleset` heading follows Slice 1's split.
+
+### Slice 4 to 6 log, 2026-10-10
+
+Pre-flight HEAD was `e546d5b` with the dirty set the round-2 brief listed. That set grew during the session: `config/scenarios.php`, `SCREEN_SPEC.md` and seven `docs/research-scratch/` masters are now also held by the concurrent session, so `SCREEN_SPEC.md` took **no** edit in slices 4, 5 and 6; each slice's spec row is named below as held rather than left stale silently.
+
+| Slice | Finding | Commit | What it changed | Evidence |
+| --- | --- | --- | --- | --- |
+| 4 | R2-10 | `d95da07` | `coverage.state` (`no_priorities` / `covered` / `unpriced` / `cost`) on the Skills planner; the empty priority list no longer prints a figure, an all-learned list prints its real zero with the reason, `warn` is confined to `cost`. `SkillSpendCoverage`, the priority schema, `runs.build-target.update` and `ADR-0001`'s withdrawn ladder untouched. | `CareerSkillsPlannerTest` 21 passed (306 assertions) with two new cases; `SkillSpendCoverageTest` 5 passed (56); `career-skills-planner.spec.ts` 5 passed (1.1m) on `:8152`, its new case asserting the absence renders and `still to learn cost 0 SP` does not exist in the DOM; typecheck 0, Pint passed, PHPStan `[OK] No errors`, lore 303 / lore-code 118 at exit 0. |
+| 5 | R2-18 (new row) | `e2889ff` | The Training decision screen's empty-deck door opened `/career/setup/deck`, a fresh wizard step 5, instead of the run's own builder. `run.deck_url` now arrives from `TrainingDecisionController` and the label reads "Record this run's deck". The wizard's own internal links are unchanged. | `CareerTrainingDetailTest` 10 passed (266 assertions) pinning the prop at `runs.deck` for the same run and the retired literal absent from the component (it was present exactly once); five suites writing through `runs.training` 46 passed (601 assertions). Not browser-verified: that spec's fixture equips a card, so the empty-deck branch never renders there. |
+| 6 | R2-12 | `473bb19` | `RaceFacts::describesRace()` (distance, band, surface, fan gate, payout; a tier is excluded because `Debut` names an occasion rather than a course), `detail_recorded` on both rows that print `RaceCard`, and an opt-in `fold-undescribed` that only `RacePlanList.vue` passes. Placeholder cards now read one line where the planner prints a career of them; the drawer keeps every fact, and no race detail was invented. | `CareerRacePlannerTest` 26 passed (403 assertions) pinning both sides of the fold's input; both race specs together 11 passed (5.2m) on `:8156`. **A caught regression worth the record:** the first version folded on both screens and broke `career-race-decision.spec.ts:92`, which holds that each refused field is on the page and reachable; the opt-in prop is what fixes it, and the planner-only scope is now the tested boundary. Typecheck 0, Pint passed, PHPStan `[OK] No errors`, lore counts unchanged. |
+
+`SCREEN_SPEC.md` rows left held, one per slice, because the file is the concurrent session's working property: SCR-CAR-016's coverage sentence (now four states, not a computed total), SCR-CAR-012's door list (the deck door is run-scoped now), and SCR-CAR-023's per-race row list (a placeholder row folds to one line, its drawer keeps the ten). Each is a one-line edit against copy the spec already carries; whoever lands the advisor refactor can take them with it, or the next session can once the file is clean.
+
+#### Blocked, and the reason is not this register
+
+Slice 11 (the R2-05 residual on `ScenarioPanel.vue`) was opened and is **held uncommitted**: the heading now reads `Ruleset version:`, the comment says why, and two assertions were written (`ScenarioMetadataTest`'s vocabulary case, `scenario-panel.spec.ts`'s rendered case). None of it is verified, because the feature suite stopped being runnable mid-session: the concurrent session's **untracked** migration `database/migrations/2026_10_10_200000_add_choice_and_corrections_to_turn_entries_table.php` fatals during `RefreshDatabase`'s migrate. Observed twice inside ten minutes, with the error changing between runs, which is what a half-saved file looks like: first `Method Illuminate\Database\Schema\SQLiteBuilder::dropIndex does not exist`, then at that file's line 74 `Call to undefined method Illuminate\Database\Migrations\Migration@anonymous::quote()`.
+
+The proof that it is not this session's: `CareerRacePlannerTest` passed 26 of 26 with 403 assertions at `473bb19` and minutes later reported **20 failed (0 assertions)**, every case dying at `Migrator.php:517` before an assertion ran. `ScenarioPanelTest` and `ScenarioMetadataTest` failed the same way, 26 failed / 0 assertions. That is every feature test in the tree, for every session, and it is why slices 7 to 10 (all of them already blocked on the advisor refactor) and slice 11 cannot be finished here.
+
+Nothing in the migration, in `config/scenarios.php`, in `SCREEN_SPEC.md` or in any file of the concurrent session was edited, staged, moved or reverted by this session. Held, uncommitted, from slice 11: `resources/js/components/scenario/ScenarioPanel.vue`, `tests/Feature/ScenarioMetadataTest.php`, `tests/browser/scenario-panel.spec.ts`.
+
+**Superseded later the same day, and the paragraph above stays as it was written.** The pre-flight gate
+`vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` now passes, 3 passed / 22 assertions, so the
+untracked turn-entries migration no longer fatals `RefreshDatabase` and slice 11 was verified and landed
+in `c7a9c87`. The file is still on disk and still `Pending` on the dev database (`php artisan migrate:status`
+→ `[14] Ran`, then `2026_10_10_200000_add_choice_and_corrections_to_turn_entries_table .... Pending`), which
+is its author's to run; nothing here migrated the shared file. What still blocks slices 7 to 10 is not the
+suite any more, it is the concurrent set itself, and it grew while slice 11 was being verified:
+`app/Http/Controllers/Career/TimelineController.php`, `app/Http/Controllers/TrainingRunController.php`,
+`app/Http/Requests/StoreTurnEntryRequest.php` and `app/Models/TurnEntry.php` are now dirty too, with
+`app/Enums/TurnChoice.php` and `resources/js/components/career/RecordedActionCard.vue` untracked beside them.
+That set is FD-4's turn-choice and correction work, and it lands **on top of** R2-16's target: the energy band
+this slice would add to the Cockpit correction form is a field of the same correction path those files write.
+Opening `StoreTurnEntryRequest` or `TurnEntry` now would be a second writer on one in-flight contract, so R2-16
+is blocked by two sessions' work rather than one, and the brief's own instruction applies verbatim: wait for
+the commit, or pick a different slice.
+
+**Checked the claim above against HEAD, and it is half wrong.** The band fields are already committed, so R2-16
+needs **no** write-path change: `StoreTurnEntryRequest.php:128-132` at HEAD validates `energy_state` as the enum
+and `energy_band` as required-if-band, `TurnEntry` carries both in `#[Fillable]` and casts the state, and the
+guided screen already renders the control (`TrainingDetail.vue:425-455`, clean at this writing). What is missing
+is only the Cockpit's own correction form, which posts the numeric reading and nothing else, so the slice is
+`Cockpit.vue` plus its controller's read-back and those tests, four files, all four in the peer's dirty set.
+The peer's current work on the same path is the second reason to stay out: the columns they are adding now
+(`choice`, `decision_snapshot`, `corrected_from`, `superseded_by`) reshape what a correction *is*, and a band
+control bolted onto a form that is about to record a choice would be rebuilt by them within the hour. R2-16
+therefore stays blocked, but it is a smaller slice than this register said, and its remaining risk is the form's
+shape, not the schema.
+
+#### Next action
+
+Restore the suite before any further slice: the turn-entries migration needs its index drop and its quoting done the way the three migrations beside it already do it (`grep -l dropIndex database/migrations` names them), and that is its author's edit, not a sweep to be done from outside. Then, in order: verify and land slice 11; take slices 7 to 10 once `Cockpit.vue`, `CockpitController.php`, `CockpitObjectivesTest.php` and `NextDecision*` are committed and the tree is quiet; and settle R2-16's product question (edit the band on the Cockpit, or show it read-only) before code, since both answers are defensible and only one of them is a feature.
+
+
+#### Not covered by R2-07, deliberately
+
+Four docblock sentences in `CockpitController.php` still describe the retired
+screen as a present surface ("The full calendar stays on the run record screen", "built for the run record
+screen where the whole calendar is the question"). They are internal comments, the guard's own rule treats
+them as the allowed historical class, and that file is the concurrent `NextDecision` slice's working
+property: touching it again to edit prose would splice across someone else's in-flight refactor for no
+user-visible gain. Same for the `CareerSurfaceCutoverTest` and `career-surface-cutover.spec.ts` headers,
+which still state that the record screen "is still the only place a Trainer can reach" four writes; `F2`
+withdrew that and the comments did not follow. Recorded here as the next author's cleanup, listed by file
+so it can be done in one pass with their landing.
+
+### Slice 11 and 12 log, 2026-10-10 (second sitting)
+
+Pre-flight, run as the brief ordered and as the only command before any slice opened:
+`vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` -> **3 passed (22 assertions), exit 0**. FD-4 is off the
+migration path for `RefreshDatabase`, so slices opened. HEAD at pre-flight was `473bb19`; the dirty set was the
+one the brief listed, and it grew (the FD-4 files named above).
+
+| Slice | Finding | Commit | What it changed | Evidence |
+| --- | --- | --- | --- | --- |
+| 11 | R2-05 residual | `c7a9c87` | The Cockpit scenario strip headed its one ruleset fact `Ruleset:`. Now `Ruleset version:`, the word the wizard card took in `9777531`, with the comment saying why the strip carries the version and not the rule family. No value, no absence, no `N/A`-with-`title` rule moved. | `ScenarioMetadataTest` 3 passed (22 assertions) including the new heading comparison; `scenario-panel.spec.ts` 7 passed / 1 failed on `:8255` with its own scratch database, the failure being KI-92's sweep and not this change. RED proved without touching the tree: `git show HEAD:resources/js/components/scenario/ScenarioPanel.vue` line 160 reads `Ruleset:`, which is what both the feature matcher (`/^\s*Ruleset:$/m`) and the rendered case (`toHaveCount(0)`) were written against. Typecheck 0, Pint passed on the changed test file, `composer lore` exit 0 and `composer lore-code` exit 0 at the standing 118 hits, with **zero** hits in any changed file on both gates. |
+| 12 | R2-01 / R2-04 | `65d7068` | The Dashboard's snapshot door existed, but only inside `<section v-else>`, the no-career state. The sentence moved outside both career branches; its words, its `href="/career/snapshot"` and its destination are untouched. R2-01 needed no code: the wizard's Turn 1 is what a run with no logged turn knows. | `dashboard.spec.ts` **6 passed (2.8m)** on `:8257`, now asserting the door in the empty state *and* the active-career state, the second also pinning the href so the case cannot pass on a link that goes elsewhere. Typecheck 0, `npm run build` 0, `lore-code` 118 at exit 0 with zero hits in either file. Not inspected by screenshot: the evidence is Playwright's rendered role and href assertions against the built bundle, which is what "browser-verified" claims here and nothing more. |
+
+Two things the brief did not ask for and this session did not do: it did not touch `StoreTurnEntryRequest`,
+`TurnEntry`, the FD-4 migration or the `runs.show` redirect, and it did not run the full feature suite or
+`php artisan test --compact`. Both slices are copy and layout, which the change-class table places at the
+affected-feature-test row, and the tree carries two sessions' in-flight work that a broad run would attribute
+to this one. **`php artisan migrate:status` was run and is not clean**: `2026_10_10_200000_add_choice_and_corrections_to_turn_entries_table`
+is `Pending` on `database/database.sqlite`, the concurrent author's file, not run here because migrating the shared
+dev database is theirs to decide.
+
+**PHPStan is red for a reason outside this work.** `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`
+-> exit 1, one error: `app/Services/Advisor/NextDecision.php:65`, `missingType.iterableValue` on
+`snapshotFor()`'s array return type. That file is untracked (`?? app/Services/Advisor/NextDecision.php`), it is
+FD-2's, and `phpstan.neon` analyses `app` only, so neither of this session's two PHP-side edits (both under
+`tests/`) was even in scope. Not edited, not silenced, not counted as passing.
+
+**Re-read later in the same sitting, PHPStan is exit 0, and the reason is the peer's.** The offending file left
+the tree: `app/Services/Advisor/NextDecision.php` is neither tracked (`git ls-files app/Services/Advisor/` answers
+`Advice`, `AdvisorOption`, `TrainerAdvisor` only) nor listed as untracked, so FD-2's untracked class was withdrawn
+mid-session and its `missingType.iterableValue` went with it. `Cockpit.vue`, `CockpitController.php`, `types.ts`,
+`AdvisorRail.vue`, `CareerCockpitTest.php` are all still dirty, so the withdrawal did not unblock slices 7 to 10.
+Both readings are true of the moment each was taken, which is why they are recorded as two rather than the later
+number replacing the earlier one.
+
+**New findings, filed and not fixed here.** R2-19: one absent fact, four headings across six surfaces, with the
+two test assertions that pin the old wording named in the row. R2-20 / **KI-92**: three Cockpit 44px sweeps
+measure DOM presence rather than rendered targets, red since `91494a1` put a `<details>`-held confirm button on
+the page `6a74f85`'s sweep reads, with the repo's own remedy already sitting in `ura-panel.spec.ts:206-223`.
+`docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md` and `SCREEN_SPEC.md` took no edit from these two
+slices, and neither did `rice-shower-unity-cup-ux-walk.md`, which was already dirty in the tree before this
+sitting opened; SCR-001's door row and the strip's heading row are left as the next author's one-line changes,
+stated here instead of silently stale.
+
+#### Slice 13 log, same sitting: R2-19 closed in `24f7e48`
+
+Slice 11 renamed one surface and stopped, which is the wrong shape for a vocabulary fix: a correction that
+leaves four siblings printing the retired word is a half-correction, and the retired literal survives its own
+fix. So the sweep continued and found four more headings for the same absent value.
+
+Seven files, one line each on the four components, and three test edits:
+
+| File | Change |
+| --- | --- |
+| `resources/js/pages/Dashboard.vue` | `Ruleset:` -> `Ruleset version:` on the data-status panel's row |
+| `resources/js/pages/Career/Result.vue` | `Ruleset:` -> `Ruleset version:` on the result footer's row |
+| `resources/js/pages/Career/Preflight.vue` | `Ruleset snapshot:` -> `Ruleset version:` on the contract read-back |
+| `resources/js/pages/Preferences/Edit.vue` | `Global Ruleset` -> `Global Ruleset Version`, keeping the tab's own qualifier |
+| `tests/browser/dashboard.spec.ts` | the anchored new heading, plus the retired `^\s*Ruleset:` as `toHaveCount(0)` |
+| `tests/browser/preferences.spec.ts` | `exact` on the new label, with the retired label asserted absent: the old wording is a prefix of the new one, so a substring match would pass on either |
+| `tests/Feature/RulesetVersionVocabularyTest.php` | new. Six named surfaces with the heading each must print, then the retired-wording sweep over every `.vue` under `resources/js` |
+
+Gates for this slice: `RulesetVersionVocabularyTest` 2 passed (428 assertions, 105 components swept);
+`dashboard.spec.ts` + `preferences.spec.ts` 18 passed (7.7m) on `:8261` with its own scratch database;
+typecheck 0; `npm run build` 0 (3m 55s, against 1m 29s earlier in the same session, which is the host and not
+the change); Pint passed on the new file; `composer lore` 313 and `composer lore-code` 118, both exit 0 and both
+at their standing counts.
+
+**RED is asserted from pre-edit file contents, not from a red run.** The four old strings were read this session
+before each edit (`Dashboard.vue:316`, `Result.vue:366`, `Preflight.vue:392`, `Preferences/Edit.vue:445`), and the
+first run of the new guard did fail — on its own count guard, `Failed asserting that 0 is greater than 50`,
+because `File::files()` is not recursive and the sweep had read nothing. That is the instrument proving it can
+see, which is the property that matters most in a guard of this shape; it is not proof the four headings were
+wrong, and this register does not claim it is. Reverting a file to prove red was not attempted: the session's
+task guard holds the working tree, and the last time a revert was reached for, it was blocked as undoing
+validated work.
+
+**Two harness runs failed before this one passed, and the cause is boot, not the app.** `:8258` and `:8259` each
+ended in `Error: Timed out waiting 60000ms from config.webServer` with a three-line log: no global-setup output
+at all, which places the failure before the scratch database was built. `php -l config/scenarios.php` clean,
+`php artisan about` exit 0, and a manual `php artisan serve --port=8260` answered `/up` in 0.15-0.5ms while
+Playwright's own server never bound. Classified as infrastructure under host load, reproduced as green on the
+third port rather than explained away; `migrate:status` was unaffected.
+
+#### Next action, in order
+
+1. Slices 7 to 10 wait on the peer's commit of `Cockpit.vue`, `CockpitController.php`, `types.ts`, `AdvisorRail.vue`
+   and their four test files. R2-16 is smaller than this register said (band fields committed; only the form and
+   its read-back are missing) and R2-17 is one anchor in the same file.
+2. R2-19 was openable by anyone and is now closed as slice 13, `24f7e48`. What it leaves is one
+   `SCREEN_SPEC.md:1287` row that still calls the Settings row `Global Ruleset`; the file is a concurrent
+   session's working property, so the row waits with the two named in item 4.
+3. KI-92 wants a decision before a patch, because the two remedies are not equal: open each disclosure and keep
+   the floor on its confirm button, or skip unplaced controls the way `ura-panel` does. Either way the guard
+   travels with it.
+4. Whoever lands FD-2 and FD-4 should run `migrate:status` on the dev file and the two held `SCREEN_SPEC.md` rows
+   named above; both are one line each and both are already written down here.
+
+---
+
+## Gemini Deep Research reconciliation, 2026-10-12
+
+**Why this section exists.** On 2026-10-12 the owner supplied a Gemini Deep Research report on `[Global]`
+Umamusume mechanics together with a peer check of that report, and asked for a reconciliation against this
+repository. The report is a hypothesis corpus, not an authority: it was decomposed into atomic claims and each
+was checked against the repository's own evidence (client captures, the GameTora export, `UMAMUSUME_REFERENCE.md`,
+the four scenario guides, `config/scenarios.php`, the support-card and skill datasets, `app/Enums/MoodTier.php`,
+and the app's tests) and, where external evidence added value, against independent web sources. This section is
+the ledger. It changes no application code, test, schema, seeder or component.
+
+**Headline verdict.** The repository already carries, correctly labelled and sourced, essentially every material
+claim in the report; most of the report restates what is already on file, at lower precision. Four claims are
+wrong or over-stated, one is version-dependent and stays open, and the reconciliation surfaced one internal
+contradiction in `UMAMUSUME_REFERENCE.md`, corrected forward in place (finding F-1). Nothing in the report is a
+new game fact this repository lacked.
+
+### Method and instruments
+
+* **Repository evidence (Tier A/B).** `docs/UMAMUSUME_REFERENCE.md` and its provenance master
+  `REFERENCE-GUIDE-BUILD-CHAIN.md`; the scenario guides `docs/scenarios/01`, `02`, `03`, `07`; `config/scenarios.php`;
+  the committed GameTora datasets (`scenarios.json`, `support_effects.json`, `support-cards.json`, `skills.json`);
+  `lang/en/uma.php`; `app/Enums/MoodTier.php`; the screenshot registry and its packet notes; `docs/adr/0014`;
+  `docs/research-scratch/SUPPORT-CARDS.md`.
+* **Independent web (Tier C), run 2026-10-12, by search only (snippets, not page reads).** TheGamer's mood guide,
+  2025-07-22: <https://www.thegamer.com/umamusume-pretty-derby-all-moods-mood-effects-increase-mood-recreation-guide-how-to/>.
+  GameTora's Race Mechanics Handbook: <https://gametora.com/umamusume/race-mechanics>. umamusu.wiki `Game:Mechanics`:
+  <https://umamusu.wiki/Game:Mechanics>. Recorded per claim below. The peer check's own web findings were treated
+  as leads, not as evidence.
+* **Not used, and stated so.** No Global client was opened in this pass, no controlled experiment was run, and no
+  official page was re-fetched. Every claim whose strongest support is a client capture cites the capture already
+  on file here, not a new observation. Two `WebSearch` calls were made and their snippets are quoted as such, not
+  as page reads.
+
+### A. Race simulation and core formulas
+
+| ID | Claim as the report states it | Status | Repository evidence | Open question |
+| -- | ----------------------------- | ------ | ------------------- | ------------- |
+| A-1 | Max HP = 0.8 × style coefficient × Stamina + distance (m); Front Runner 0.95, Pace Chaser 0.89, Late Surger 1.0, End Closer 0.995, Runaway 0.86 | Verified | §1.3.3 (2026-10-05 community read) | Coefficient set is one community page; not client-decoded |
+| A-2 | "longer races exponentially increase the demand for raw Stamina" | **Rejected** | §1.3.3: the distance term is linear (1 HP per metre) and the formula's own shape contradicts the word | — |
+| A-3 | Uphill target-speed loss = SlopePer × 200 / Power | Verified as published | §1.2.4 quotes the same relation | Unit of `SlopePer` stays ❌ UNVERIFIED (§1.2.4) |
+| A-4 | Four phases over 24 sections, boundaries 16.67 / 66.67 / 83.33 % | Verified | §1.2.3, export-derived (138 courses) | — |
+| A-5 | Position keep runs section 1 to 10 (41.7 %) | Verified | §1.2.3: `positionKeepEnd` 41.64–41.70 % in all 138 courses | — |
+| A-6 | Bands Sprint ≤1200, Mile 1300–1800, Medium 1900–2400, Long 2500–3600 m | Verified, with the 1400 m caveat | §1.2.1, §1.3.3, conflict row 7 | 1400 m is Sprint to one guide and Mile to the export |
+| A-7 | Standard-distance skills need a course that is a multiple of 400 m | Verified | §1.2.1, client flag `is_basis_distance` | — |
+| A-8 | Footing: Heavy −50 Speed; stamina drain 1.00/1.00/1.02/1.02 turf, 1.01/1.02 dirt | Verified at community grade | §1.2.5, with a recorded dissent the same day | No official page states the drain multiplier |
+| A-9 | Rain forces Soft or Heavy footing; snow only in Winter | Verified | §1.2.5 (JP guide + event data) | — |
+| A-10 | Full Spurt above 2000 Speed; Endurance Duel above 1200 Stamina; Saving Her Legs above 1200 Power; rare skills strengthened above 1200 Wit — all presented as current Global | **Version-dependent, one half unresolved** | Power-1200 is Global-live: "Fully Charged", a race mechanic added in the 2026-07-01 rework (§2.4 conflict 4, Game8 2026-07-02). The Speed-2000 and Stamina-1200 gates are sourced `[JP]` (§1.3.1, Game8 JP) and to umamusu.wiki, which the registry tags `[Both]` | No primary Global source here confirms the Speed-2000 and Stamina-1200 gates on Global as of 2026-10-12; do not present them as Global |
+| A-11 | Runaway is not a fifth style; coefficient 0.86 | Verified | §1.2.2 (gated behind `running_style==1`), §1.3.3 | Two wikis list "Runaway" beside the four; conflict row 9 |
+
+### B. Career training and resource economy
+
+| ID | Claim as the report states it | Status | Repository evidence | Open question |
+| -- | ----------------------------- | ------ | ------------------- | ------------- |
+| B-1 | Secondary-stat routing (Speed→Power, Stamina→Guts, Power→Stamina, Guts→Speed+Power, Wit→Speed); +2 SP per session, Wit +4 to +5 | Verified | §1.1.1 (two sources agree on the routing) | — |
+| B-2 | Facility level +1 per four uses; Summer Camp sets all five to Lv5 | Verified | §1.1.2 | — |
+| B-3 | Compound session gain formula, presented as executable | **Provisional** | §1.1.2 reports it as Game8's published shape | Stacking order and rounding are asserted by neither the report nor any source here; do not implement as an equation |
+| B-4 | Growth Rate is a per-trainee percentage row | Verified (client) | §1.3.5, `stat_bonus` matched position-for-position to the client's Growth Rate row | — |
+| B-5 | Mood: GREAT/GOOD/NORMAL/BAD/AWFUL = +20/+10/0/−10/−20 training, +4/+2/0/−2/−4 race | Verified (client) | §1.1.6, from the Mood Effect panel capture `2026-07-18 001957`; `app/Enums/MoodTier.php` | Report's AWFUL −25 % is rejected (see P-1) |
+| B-6 | Energy cap 100, expandable +12; Wit costs no Energy | Verified | §1.1.6 | — |
+| B-7 | Training failure scales inversely with Energy; three penalty types | Verified directionally; formula **Unresolved** | §1.1.5 | No tier-A page publishes a failure table by Energy; the 50 % line is advice, not a threshold (§2.6) |
+| B-8 | Hint discount ladder 10 / 20 / 30 / 35 / 40 % | Verified (client) | §1.1.4, from the Learn screen capture 2026-10-03 | — |
+| B-9 | Friendship bonuses multiply (1.25 × 1.30 = 1.625) | Verified | §1.1.3, §1.4.3 | — |
+| B-10 | Bond gauge turns orange at 80 and gates friendship training | Verified | §1.1.3 | — |
+| B-11 | Independent Training: 50 min, runs with the app closed, ~1.3 M fans, 20 runs/day, ignores growth modifiers, no trophies or gallery | Verified | §1.1.7, §1.6.8, Global notice 100087 | — |
+
+### C. Support cards and skills
+
+| ID | Claim as the report states it | Status | Repository evidence | Open question |
+| -- | ----------------------------- | ------ | ------------------- | ------------- |
+| C-1 | Seven types incl. Pal and Group; six slots, one rental, no duplicate card | Verified | §1.4.1, §1.4.5 | — |
+| C-2 | Pal carries no Friendship Bonus; Group is SSR-only | Verified | §1.4.1 | — |
+| C-3 | Level caps R20 / SR25 / SSR30, +5 per break → 40 / 45 / 50 | Verified (client + export) | §1.4.2 | — |
+| C-4 | Effect values interpolate linearly between anchors 1,5,10,…,50, floored | Verified (client) | §1.4.7, three selector positions checked against the export row | — |
+| C-5 | Support-effect ids (1, 2, 3–7, 8, 9–13, 14, 15, 18, 19, 27, 28) with their `calc` modes | Verified | §1.4.8 | — |
+| C-6 | "Max Stat" effects (ids 20–24) are carried by zero shipped cards | Verified — and it contradicts the guide's own §1.3.4/§1.3.5 | §1.4.8 ("carried by zero of the 559 cards"); `ADR-0014`; `SUPPORT-CARDS.md` "Carried by zero" | See finding F-1 |
+| C-7 | Scenario Link is a join of the card's character id to the scenario's link list, not a stored card flag | Verified | §1.4.7 | — |
+| C-8 | White sparks add +1 to +5 hint levels | Verified | §1.4.4 | — |
+
+### D. Inheritance and Legacy Lab
+
+| ID | Claim as the report states it | Status | Repository evidence | Open question |
+| -- | ----------------------------- | ------ | ------------------- | ------------- |
+| D-1 | Blue Spark ★1 +5, ★2 +12, ★3 +21 | Verified | §1.5.2 | — |
+| D-2 | Blue-Spark odds: <600 ≈90/10/0 %; 600–1100 ≈50/45/6 %; >1100 ≈20/70/10 % | Verified as odds, not an award schedule | §1.5.3 | — |
+| D-3 | Aptitude Sparks: 1★ +1 grade, 4★ +2, 7★ +3, 10–18★ +4; pre-run ceiling A, ≤+4 grades, F cannot reach A; A→S only mid-run | Verified | §1.5.2, §1.5.3 | — |
+| D-4 | Three inheritance checkpoints: career start, Classic April, Senior April | Verified | §1.5.1 | — |
+| D-5 | Six ancestor nodes (2 parents + 4 grandparents); a repeated ancestor zeroes its link's compatibility | Verified | §1.5.4 | — |
+| D-6 | Affinity △/○/◎ raises trigger chance and payout; shared top-grade wins contribute | Verified | §1.5.4 | — |
+| D-7 | Green unique Spark from a ★3+ ancestor, 1–3 hint levels | Verified | §1.5.2 | — |
+| D-8 | Scenario Sparks ≈10–30 per stat | Verified | §1.5.2 | — |
+| D-9 | "Finish the stat above 1100 to optimize the ★3 roll" | Verified as heuristic only | §1.5.3 states a planner mapping stat→★ deterministically is wrong | — |
+
+### E. Scenario-specific mechanics
+
+| ID | Claim as the report states it | Status | Repository evidence | Open question |
+| -- | ----------------------------- | ------ | ------------------- | ------------- |
+| E-1 | URA: repetition facility; Happy Meek duels (win = stats + a cap tier + a spirit hint + 30 SP, loss = minor stats + 15 SP); six wins escalate; beating the powered-up state pays `Past My Limits`, ≥200 SP, an enhanced-spark chance | Verified | §2.2.1, `config/scenarios.php` `duel` | Duel win chance and spark rate stay null in config |
+| E-2 | URA fan gates 60k / 70k (plus a 3-bar Director bond) / 120k, dirt 40k / 60k / 80k | Verified | §2.2.1, `config/scenarios.php` `fan_gates` | — |
+| E-3 | Unity Cup: facility level from team rank; Extreme Spirit Burst = multi-stat + `Ignited Spirit` hint + 0 % failure on that facility; Alarm Clock retries a lost team race | Verified | §2.2.2, `config/scenarios.php` | — |
+| E-4 | Unity Cup Wit cap 1800 against 1300 elsewhere | Verified | §2.2.2, `config/scenarios.php` | — |
+| E-5 | Unity Cup exclusive-skill bands by burst count | Report gives no bands; repository carries them | `config/scenarios.php` `spirit_burst_bands` (4–6 / 7–9 / 10–12 / 13+), from `02-unity-cup.md` | Whether Extreme Bursts count toward the threshold is a live publisher disagreement the config records and does not settle |
+| E-6 | Unity Cup facility level from the team-rank ladder | Verified | `config/scenarios.php` `team_rank_ladder` (G/F→1 … S→5) | — |
+| E-7 | Trackblazer: Debut in Late June Junior; 60 / 300 / 300 Grade Points, dirt 30 / 200 / 300; surplus does not carry | Verified | §2.2.3, `config/scenarios.php` `grade_objectives` | — |
+| E-8 | Trackblazer: 100 Shop Coins for a first place | Verified | `config/scenarios.php` `shop_coins_by_placement` | — |
+| E-9 | Trackblazer Pro Shop consumables | Verified | `config/scenarios.php` `shop_items` (from the publisher master) | One guide's "Worth" ratings travel as `estimated` |
+| E-10 | Trackblazer rivals grant a distance- or style-tied hint | Verified | §2.2.3 | — |
+| E-11 | Trackblazer: a missed deadline is a career fail retried with an Alarm Clock | Verified | §2.2.3 | Which turn a retry resumes on stays ❌ UNVERIFIED |
+| E-12 | Grand Concert: five Performance types (Dance, Passion, Vocals, Visuals, Composure), cap 200 +50 per successful live | Verified | `docs/scenarios/07`, Global notice 905 | Per-type start values are not published |
+| E-13 | Grand Concert: friendship training pays two types | Verified | `docs/scenarios/07` | — |
+| E-14 | Grand Concert: Lesson menu opens on turn 5; Live Techniques and Songs; two bonus layers | Verified | `docs/scenarios/07` | Screen text unmeasured (0 frames) |
+| E-15 | Grand Concert: four Promo Lives every six months from late Dec Junior, then the Grand Concert | Verified | `docs/scenarios/07`, notice 905 | — |
+| E-16 | Grand Concert: a Great Success raises caps; each live pays 5 SP per Technique Lesson and 25 per Song Lesson since the previous live | Verified | `docs/scenarios/07` | — |
+| E-17 | Grand Concert: 16 Songs by early Nov Senior fires the scenario-link event; 18 by early Dec Senior pays `I Wanna Win with You` | Verified | `docs/scenarios/07` | — |
+| E-18 | Grand Concert: five scenario-linked characters | Verified | `docs/scenarios/07`, `config/scenarios.php` | — |
+
+### F. Other Global systems
+
+| ID | Claim as the report states it | Status | Repository evidence | Open question |
+| -- | ----------------------------- | ------ | ------------------- | ------------- |
+| F-1 | Grade codes 100/200/300/400/700 = G1/G2/G3/OP/Pre-OP, with fan gates and yields | Verified | §1.2.1, §1.2.6; the report's figures match the export row for row | Code 700's label map stays single-publisher |
+| F-2 | Open League caps at Career Rank A+ and blocks S+; Graded League has no cap | Verified (official) | §1.2.6, §1.6.2, Global notice 1050 | — |
+| F-3 | Team Trials: 1 RP per entry, 5 RP cap, 1 RP per 2 h; three units per category across five categories | Verified | §1.6.4 | — |
+| F-4 | Champions Meeting: three rounds with Group A/B and a final; per-edition course, weather and footing; disabled skill categories | Verified | §1.6.2 | — |
+| F-5 | TP: 100 cap, 1 per 10 min, 30 per Career | Verified | §1.6.10 (Game8 TP/RP guide) | The expansion of "TP" is not a client string |
+| F-6 | Carats 150 single / 1500 ten-pull | **Provisional** | §5 (marked expired, not re-fetched) | Not re-verified this pass |
+| F-7 | One duplicate SSR card converts to 10 Rainbow Cleats, spent in Cleat Exchange | Verified | §1.6.10, §6 | — |
+| F-8 | Goddess Statue is currency only, ×1→×5, 650 Star Pieces to max a trainee | Verified | §1.6.10, §6 | — |
+| F-9 | Scout rates 3.00 / 18.00 / 79.00 %, featured 0.75 %, 200-point pity | **Unresolved** | §5 (expired section, not re-fetched) | No Global notice read here; do not treat as current |
+| F-10 | Exchange Points convert to Clovers 1:1 at banner expiry | **Unresolved** | §5 (expired) | Same |
+| F-11 | Terminology map (Scouts, Carats, Sparks, Pal, Veteran/Trainee, Team Trials, Independent Training, Trackblazer, Grand Concert, the four strategies, Wit) | Verified | §6 agrees with the report row for row | — |
+| F-12 | "Team Stadium" is not a client term | Verified | §1.6.4 | — |
+
+### Peer-check discrepancies, reopened independently
+
+Each item below was re-investigated from the repository and, where useful, the web, not accepted on the peer
+check's word.
+
+| # | Peer-check item | What was found | Resolution |
+| - | --------------- | -------------- | ---------- |
+| P-1 | AWFUL motivation −25 % (report) vs −20 % (project) | The project value is a **Tier-A client capture**: the Mood Effect panel frame `2026-07-18 001957` prints "Lowers training results by 20 %" for AWFUL and −4 % while running (`docs/research-scratch/screenshot-notes/06-other-screenshots.md:91`; §1.1.6; DESIGN-CORPUS §4.3). Independent web agrees: TheGamer (2025-07-22) prints "Awful. Reduces Stat Gain from Training by 20 percent and reduces Stats during a Race by 4 percent." | Report **Rejected**. The Global value is −20 % / −4 %. Not version-specific: both the client and the independent guide print 20. |
+| P-2 | High-stat gates: Full Spurt >2000 Speed, Endurance Duel >1200 Stamina, Saving Her Legs >1200 Power, >1200 Wit | The repository already separates these: the Power-1200 gate is **Global-live** as "Fully Charged", a race mechanic added in the 2026-07-01 rework (§2.4 conflict 4, Game8 page dated 2026-07-02). The Speed-2000 and Stamina-1200 gates are sourced `[JP]` (§1.3.1). umamusu.wiki `Game:Mechanics` documents the Stamina-1200 limit break and the registry tags that wiki `[Both]`. | **Version-dependent / partly unresolved.** The report's presentation of all four as current Global is wrong for the two it does not caveat; the repository's split (Power live, Speed/Stamina `[JP]`) is the accurate shape. Not closed: no primary Global source in the repo confirms the Speed-2000 and Stamina-1200 gates on Global today. |
+| P-3 | Scenario caps and rebalance dates | `config/scenarios.php` holds `cap_bonus` over a 1200 base, sourced from GameTora `scenarios.json` verified 2026-09-27: URA 1400 all; Unity Cup 1300×4 / 1800 Wit; Trackblazer 1200/1900/1200/1200/1500; Grand Concert 1600/1300/1300/1500/1300. §2.5 dates the URA/Unity Cup raise to the 2026-07-01 Global rework. | **Verified**, and the report's table matches it exactly. Each scenario was checked on its own row; the rework date is documented for URA/Unity Cup, and Trackblazer's raised caps stay single-source-per-figure (§2.4 conflict 1). |
+| P-4 | Compound training formula | §1.1.2 reports the formula as Game8's published shape; neither the guide nor the report states a stacking order or a rounding rule. | **Provisional.** Do not implement as executable logic. |
+| P-5 | Distance term "exponential" | §1.3.3 gives the term as linear (1 HP per metre) and says no metres-per-Stamina conversion is published. | Report **Rejected** on the word; the underlying formula is unchanged. |
+| P-6 | Friendship stacking is multiplicative | §1.1.3 and §1.4.3 both print `(1 + a/100) × (1 + b/100)` with the 1.625 worked example, from a JP guide tagged `[Both]`. | **Verified.** The condition is two cards both past the 80 bond on the shared tile. |
+| P-7 | Training failure / Energy relationship | §1.1.5 gives direction only (risk rises as Energy falls) and §2.6 records that no tier-A page publishes a probability table; the 50 % line is advice, not a threshold. | **Unresolved** for any formula. The report's "non-linear below 50 %" is not supported and is not adopted. |
+| P-8 | Inheritance probabilities vs heuristics | §1.5.3 prints the odds grid **and** states a planner mapping a stat value to a ★ count deterministically is wrong; §1.5.5 separates the grandparent-first loop as `[JP]` strategy. | **Verified as odds, heuristic kept separate.** The report's probability grid matches §1.5.3. |
+| P-9 | Unity Cup rewards | Bands, payout timing and the facility ladder are in `config/scenarios.php` from `02-unity-cup.md`; the Extreme-Burst-counting question is a recorded publisher disagreement. | **Verified** where the repository carries a figure; the one open half stays open. The report gives no band figures to compare. |
+| P-10 | Grand Concert thresholds | Concert timing, cap rise, SP awards, song counts (16/18) and the rare-skill unlock are all in `docs/scenarios/07`, sourced to Game8 + GameTora + Global notice 899/905. | **Verified**; the report agrees with the file on every figure. |
+| P-11 | Independent Training | §1.1.7 and §1.6.8 give the launch (2026-07-22, notice 100087), the ~50-minute runtime, the 20/day cap, the ignored growth modifiers and the achievement limits. | **Verified**; the report's claims match. |
+| P-12 | Terminology and provenance | §6 maps `[JP]` against `[Global]` client wording and flags the non-equivalences (Champions Meeting edition names; Open League ceilings). | **Verified.** The report's table agrees; where it says "identical", the repository says the same. |
+
+**One peer-check statement corrected openly.** The peer check describes the uphill relation as "slope percentage ×
+200 / Power". The repository's source gives the relation as `SlopePer ∗ 200 / PowerStat` and marks the **unit of
+`SlopePer` as ❌ UNVERIFIED** (§1.2.4): no page exposes the field or its scale, and the export's ±10000/±15000/±20000
+band values have no published divisor. "Slope percentage" is therefore an assumption the peer check supplies, not a
+documented unit; the relation is safe to use because it divides by a stat, but no slope figure may be presented as a
+percentage or as metres.
+
+### Findings this pass adds
+
+* **F-1 (documentation defect, fixed forward).** `UMAMUSUME_REFERENCE.md` contradicts itself about the per-stat
+  cap-setting support effects (`限界値アップ`, ids 20 to 24). §1.3.4 lists "Support-card cap effects" as a live
+  deck layer and §1.3.5 tells a planner to model "cap-setting effects" among the five layers a run starts with,
+  while §1.4.8 measures those five effects as carried by **zero of the 559 cards** and says a UI offering a
+  "cap raised by support cards" line would display a feature the catalogue does not contain. `ADR-0014` and
+  `SUPPORT-CARDS.md` "Carried by zero" side with §1.4.8. Corrected by a dated erratum at §1.3.5, which the
+  guide's dated-record rule permits; the original sentences are preserved. The report's own statement ("carried by
+  zero shipped support cards") agrees with the corrected reading.
+* **F-2 (corroboration of an existing split).** The peer check's distinction — a Power-related mechanic already
+  introduced, stamina and speed systems later — is already drawn in this repository at §2.4 conflict 4, which
+  refuted the "Fully Charged = Grand Concert resource" reading on 2026-10-05 and reclassified it as a Power-1200
+  race mechanic. No change was needed; the finding is that the report is the weaker of the two accounts.
+* **F-3 (no new fact).** Across categories A to F, the report contributes no mechanics fact this repository does
+  not already hold with a source. Its value is as a cross-check, and its errors cluster exactly where the peer
+  check said they would: version boundaries, precision beyond the evidence, and one transcription error (AWFUL).
+
+### Open questions this pass leaves open
+
+1. **Speed-2000 and Stamina-1200 gates on Global.** The next useful evidence is one Global client capture of a
+   race report or stat panel that shows the gate firing, or a Global patch note naming it. Until then the gates
+   stay `[JP]`-sourced and must not be presented as Global.
+2. **Compound session-gain stacking order and rounding.** One controlled comparison — two training turns whose
+   previews and outcomes are both recorded against a known deck — would pin the order. No source publishes it.
+3. **Training-failure probability by Energy.** No tier-A table exists; the next useful evidence is a
+   reproducible in-client sample or an official table.
+4. **Slope unit.** Unchanged from §1.2.4; no page exposes the field.
+5. **Scout rates and Exchange-Point conversion (F-9, F-10).** §5 is marked expired and was not re-fetched here;
+   a Global notice read would close them.
+6. **Unity Cup Extreme-Burst counting.** A publisher disagreement the config records and does not settle.
+7. **Trackblazer retry resume point.** Unchanged from §2.2.3.
+
+### Validation and scope
+
+* Searched the repository for every corrected value: `−25%`/`25%` on mood (no occurrence); "exponential" against
+  the distance term (only the unrelated `ARCHITECTURE.md` backoff claim, already logged as E-1); the Max-Stat ids
+  (the §1.3.4/§1.3.5 occurrence now carries the erratum).
+* No application code, test, schema, seeder or component was changed. The diff for this pass is this section and
+  the §1.3.5 erratum in `UMAMUSUME_REFERENCE.md`.
+* Gates run for this pass are recorded in the hand-off that cites this section: `composer lore`, `composer
+  lore-code`, and `composer docs` (census). Application tests were not run: no code changed, so no behavior moved.
+
+
+
+

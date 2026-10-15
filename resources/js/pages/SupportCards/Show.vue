@@ -73,7 +73,7 @@ const skillSections = computed(() => [
         <template #title>{{ card.name }}</template>
 
         <div class="flex justify-end">
-            <Link href="/support-cards" class="text-sm text-ink-muted hover:underline">Back to support cards</Link>
+            <Link href="/support-cards" class="text-sm text-ink-muted hover:underline transition-colors duration-150 ease-out">Back to support cards</Link>
         </div>
 
         <!-- The header thumbnail (`ADR-0021` read half, `design-2.0` §45a "Support-card detail,
@@ -100,7 +100,7 @@ const skillSections = computed(() => [
             <p v-if="hasJapanese" lang="ja" class="text-sm text-ink-muted">{{ japaneseName }}</p>
         </div>
 
-        <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-rule bg-raised p-4 text-sm md:grid-cols-3">
+        <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-rule bg-panel p-4 text-sm md:grid-cols-3">
             <div>
                 <dt class="text-ink-muted">Rarity</dt>
                 <dd class="flex items-baseline gap-2 text-ink">

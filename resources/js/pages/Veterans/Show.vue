@@ -52,8 +52,8 @@ const doorClass =
         </p>
 
         <section aria-labelledby="veteran-record" class="mt-4 rounded-md border border-rule bg-raised p-4">
-            <h2 id="veteran-record" class="text-xs font-bold tracking-wide text-ink-muted">
-                THE RECORD
+            <h2 id="veteran-record" class="text-lg font-semibold text-ink-strong">
+                The Record
             </h2>
 
             <dl class="mt-3 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
@@ -63,7 +63,7 @@ const doorClass =
                         <div class="flex items-center gap-3">
                             <ArtworkSlot :url="props.artworkURL" alt="" size="size-12" reserve />
                             <span>
-                                <a :href="props.traineeUrl" class="font-semibold hover:underline">
+                                <a :href="props.traineeUrl" class="font-semibold hover:underline transition-colors duration-150 ease-out">
                                     {{ props.veteran.trainee }}
                                 </a>
                                 <span
@@ -157,8 +157,8 @@ const doorClass =
         </section>
 
         <section aria-labelledby="veteran-parents" class="mt-4 rounded-md border border-rule bg-raised p-4">
-            <h2 id="veteran-parents" class="text-xs font-bold tracking-wide text-ink-muted">
-                BUILT FROM
+            <h2 id="veteran-parents" class="text-lg font-semibold text-ink-strong">
+                Built from
             </h2>
             <p class="mt-1 text-xs text-ink-muted">
                 The two inheritance parents the run recorded. Their own two ancestors are on the Legacy
@@ -201,8 +201,8 @@ const doorClass =
         </div>
 
         <section aria-labelledby="veteran-absences" class="mt-8">
-            <h2 id="veteran-absences" class="text-xs font-bold tracking-wide text-ink-muted">
-                NOT IN THIS BUILD
+            <h2 id="veteran-absences" class="text-lg font-semibold text-ink-strong">
+                Not in this build
             </h2>
             <ul class="mt-2 space-y-2 text-sm text-ink-muted">
                 <li v-for="absence in props.absences" :key="absence.label">

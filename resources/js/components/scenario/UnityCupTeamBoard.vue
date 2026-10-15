@@ -51,7 +51,7 @@ const headingId = 'unity-cup-team-coverage';
         class="rounded-md border border-rule bg-panel p-3"
         :aria-labelledby="headingId"
     >
-        <h4 :id="headingId" class="text-base font-semibold text-ink-strong">
+        <h4 :id="headingId" class="text-lg font-semibold text-ink-strong">
             Team race coverage
         </h4>
 

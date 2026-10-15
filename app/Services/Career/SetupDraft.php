@@ -204,6 +204,48 @@ final class SetupDraft
     }
 
     /**
+     * The steps that have data stored in the draft (slice 4.1 three-state fix).
+     * Only steps with actual saved data show "done".
+     *
+     * @return list<int>
+     */
+    public static function saved(): array
+    {
+        $bag = self::bag();
+        $saved = [];
+
+        // Step 1: scenario
+        if (isset($bag['scenario']) && is_string($bag['scenario']) && $bag['scenario'] !== '') {
+            $saved[] = 1;
+        }
+
+        // Step 2: trainee (umamusume_id)
+        if (isset($bag['umamusume_id']) && is_int($bag['umamusume_id'])) {
+            $saved[] = 2;
+        }
+
+        // Step 3: build target (caps)
+        if (isset($bag['caps']) && is_array($bag['caps']) && !empty($bag['caps'])) {
+            $saved[] = 3;
+        }
+
+        // Step 4: legacy selection
+        if (isset($bag['legacy_selection']) && is_array($bag['legacy_selection']) && !empty($bag['legacy_selection'])) {
+            $saved[] = 4;
+        }
+
+        // Step 5: deck
+        if (isset($bag['deck']) && is_array($bag['deck']) && !empty($bag['deck'])) {
+            $saved[] = 5;
+        }
+
+        // Step 6: preflight - always saved when run is created
+        // This is handled by the preflight step itself
+
+        return array_values(array_filter($saved, is_int(...)));
+    }
+
+    /**
      * Record that a step's screen was opened. Idempotent per step; a non-integer already in the
      * bag is dropped on the way out rather than cast, the same rule `caps()` applies.
      */

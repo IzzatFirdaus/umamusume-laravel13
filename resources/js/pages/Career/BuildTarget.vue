@@ -25,6 +25,8 @@
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
+import SubCell from '../../components/SubCell.vue';
+import { BaseSelect, BaseInput, BaseButton } from '../../components/Form';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref } from 'vue';
 
@@ -145,7 +147,7 @@ const fieldOrder = computed<string[]>(() => [
     'skill_priorities',
 ]);
 
-const controlId = (key: string): string => `field-${key.replace(/\./g, '_')}`;
+const controlId = (key: string): string => key.replace(/\./g, '_');
 const errorId = (key: string): string => `error-${key.replace(/\./g, '_')}`;
 
 // A key belongs to a field when it is that field or sits under it: each stat's error key lives under
@@ -252,15 +254,13 @@ const summary = computed((): string => {
     clauses.push(form.surface === '' ? 'surface not chosen yet' : `surface ${form.surface}`);
     clauses.push(form.style === '' ? 'style not chosen yet' : `style ${form.style}`);
 
-    clauses.push(
-        props.statOrder
-            .map((stat) => {
-                const value = entered(stat);
-
-                return `${stat} ${value === null ? 'not entered' : value}`;
-            })
-            .join(', '),
-    );
+    const stats = props.statOrder
+        .map((stat) => {
+            const value = entered(stat);
+            return `${stat} ${value === null ? 'not entered' : value}`;
+        })
+        .join(', ');
+    clauses.push(stats);
 
     clauses.push(
         form.skill_priorities.length === 0
@@ -299,9 +299,24 @@ function removeAt(index: number): void {
 </script>
 
 <template>
-    <SetupLayout :step="3" :visited="props.visited">
+    <SetupLayout :step="3" :visited="props.visited" :saved="props.saved">
         <Head title="Your target" />
+        <template #eyebrow>Setup</template>
         <template #title>Your target</template>
+
+        <!-- Back breadcrumb -->
+        <nav class="mt-4 mb-2" aria-label="Breadcrumb">
+            <Link href="/career/setup/target" class="inline-flex min-h-11 items-center text-sm font-medium text-brand-accent-ink hover:underline transition-colors duration-150 ease-out" aria-label="Back to target step">
+                ← Back to target
+            </Link>
+        </nav>
+
+        <!-- Header: eyebrow + large title + subtitle -->
+        <header class="mb-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 3 of 6</p>
+            <p class="mt-1 text-2xl font-semibold text-ink-strong">Your target</p>
+            <p class="mt-1 text-sm text-ink-muted">The target is what this career is built to reach.</p>
+        </header>
 
         <p class="max-w-3xl text-sm text-ink-muted">
             The target is what this career is built to reach. It is entered as one object and replaced
@@ -355,66 +370,41 @@ function removeAt(index: number): void {
              with its own `aria-describedby` and focus. -->
         <form class="mt-5 max-w-3xl space-y-6" novalidate @submit.prevent="submit">
             <fieldset class="rounded-lg border border-rule bg-panel p-4">
-                <legend class="px-1 text-sm font-semibold text-ink-strong">What the career is for</legend>
+                <legend class="px-1 text-lg font-semibold text-ink-strong">What the career is for</legend>
 
                 <div class="grid gap-4 sm:grid-cols-2">
-                    <label class="flex flex-col gap-1">
-                        <span class="text-sm text-ink-muted">Purpose</span>
-                        <select
-                            :id="controlId('purpose')"
-                            v-model="form.purpose"
-                            name="purpose"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                            :aria-describedby="describedBy('purpose')"
-                        >
-                            <option value="">Not chosen yet</option>
-                            <option v-for="option in props.purposeOptions" :key="option.value" :value="option.value">
-                                {{ option.label }}
-                            </option>
-                        </select>
-                    </label>
-
-                    <label class="flex flex-col gap-1">
-                        <span class="text-sm text-ink-muted">Distance</span>
-                        <select
-                            :id="controlId('distance')"
-                            v-model="form.distance"
-                            name="distance"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                            :aria-describedby="describedBy('distance')"
-                        >
-                            <option value="">Not chosen yet</option>
-                            <option v-for="band in props.distanceBands" :key="band" :value="band">{{ band }}</option>
-                        </select>
-                    </label>
-
-                    <label class="flex flex-col gap-1">
-                        <span class="text-sm text-ink-muted">Surface</span>
-                        <select
-                            :id="controlId('surface')"
-                            v-model="form.surface"
-                            name="surface"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                            :aria-describedby="describedBy('surface')"
-                        >
-                            <option value="">Not chosen yet</option>
-                            <option v-for="surface in props.surfaces" :key="surface" :value="surface">{{ surface }}</option>
-                        </select>
-                    </label>
-
-                    <label class="flex flex-col gap-1">
-                        <span class="text-sm text-ink-muted">Style</span>
-                        <select
-                            :id="controlId('style')"
-                            v-model="form.style"
-                            name="style"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                            :aria-describedby="describedBy('style')"
-                        >
-                            <option value="">Not chosen yet</option>
-                            <option v-for="style in props.styles" :key="style" :value="style">{{ style }}</option>
-                        </select>
-                    </label>
+                    <BaseSelect
+                        v-model="form.purpose"
+                        :id="controlId('purpose')"
+                        name="purpose"
+                        label="Purpose"
+                        :options="[{ value: '', label: 'Not chosen yet' }, ...props.purposeOptions]"
+                        :aria-describedby="describedBy('purpose')"
+                    />
+                    <BaseSelect
+                        v-model="form.distance"
+                        :id="controlId('distance')"
+                        name="distance"
+                        label="Distance"
+                        :options="[{ value: '', label: 'Not chosen yet' }, ...props.distanceBands.map(b => ({ value: b, label: b }))]"
+                        :aria-describedby="describedBy('distance')"
+                    />
+                    <BaseSelect
+                        v-model="form.surface"
+                        :id="controlId('surface')"
+                        name="surface"
+                        label="Surface"
+                        :options="[{ value: '', label: 'Not chosen yet' }, ...props.surfaces.map(s => ({ value: s, label: s }))]"
+                        :aria-describedby="describedBy('surface')"
+                    />
+                    <BaseSelect
+                        v-model="form.style"
+                        :id="controlId('style')"
+                        name="style"
+                        label="Style"
+                        :options="[{ value: '', label: 'Not chosen yet' }, ...props.styles.map(s => ({ value: s, label: s }))]"
+                        :aria-describedby="describedBy('style')"
+                    />
                 </div>
 
                 <p
@@ -453,60 +443,76 @@ function removeAt(index: number): void {
             </fieldset>
 
             <fieldset class="rounded-lg border border-rule bg-panel p-4">
-                <legend class="px-1 text-sm font-semibold text-ink-strong">Stat targets</legend>
+                <legend class="px-1 text-lg font-semibold text-ink-strong">Stat targets & ceilings</legend>
 
                 <p class="text-sm text-ink-muted">
-                    The bar is the entered number against the cap, and the cap is the server's own
-                    ceiling for the chosen scenario. Whether a target is reachable in the turns left is
-                    not computed here.
+                    Target is the number you aim for this run. Ceiling is the highest the client shows;
+                    leave empty to keep the scenario's published figure.
                 </p>
 
                 <div class="mt-4 space-y-4">
-                    <div v-for="stat in props.statOrder" :key="stat" :data-stat="stat" class="space-y-1">
-                        <label class="flex flex-col gap-1">
-                            <span class="text-sm text-ink-muted">{{ stat }}</span>
-                            <span class="flex flex-wrap items-center gap-3">
-                                <input
-                                    :id="controlId(`targets.${stat}`)"
-                                    v-model.number="form.targets[stat]"
-                                    type="number"
-                                    :name="`targets[${stat}]`"
-                                    :aria-label="stat"
-                                    min="0"
-                                    :max="cap(stat)"
-                                    inputmode="numeric"
-                                    class="h-11 w-32 rounded-md border border-rule bg-raised px-2 font-mono text-ink tabular-nums"
-                                    :aria-describedby="describedBy(`targets.${stat}`)"
-                                >
-                                <span class="text-xs text-ink-muted" :title="capTitle(stat)">Cap {{ cap(stat) }}</span>
-                            </span>
-                        </label>
-
-                        <!-- Bar and number together, always: the number is the readout and the bar is
-                             its illustration, so the bar alone never stands in for a value. -->
-                        <span class="flex flex-wrap items-center gap-2">
-                            <span class="h-2 w-36 overflow-hidden rounded-md bg-sunken" aria-hidden="true">
-                                <span
-                                    class="block h-full bg-chrome"
-                                    :data-fill="percent(stat)"
-                                    :style="{ width: `${percent(stat)}%` }"
-                                ></span>
-                            </span>
-                            <AbsenceValue
-                                v-if="entered(stat) === null"
-                                compact
-                                class="font-mono"
-                                reason="No target entered for this stat yet."
+                    <div v-for="stat in props.statOrder" :key="stat" :data-stat="stat" class="grid gap-3 sm:grid-cols-2">
+                        <!-- Target column -->
+                        <div class="space-y-1">
+                            <BaseInput
+                                v-model.number="form.targets[stat]"
+                                :id="controlId(`targets.${stat}`)"
+                                type="number"
+                                :name="`targets[${stat}]`"
+                                :aria-label="stat"
+                                :min="0"
+                                :max="cap(stat)"
+                                inputmode="numeric"
+                                :aria-describedby="describedBy(`targets.${stat}`)"
+                                label="{{ stat }}"
+                                value-class="font-mono text-ink tabular-nums"
+                                :error="errorOf(`targets.${stat}`)"
                             />
-                            <span v-else class="font-mono text-xs text-ink tabular-nums">{{ enteredLabel(stat) }}</span>
-                        </span>
+                            <span class="text-xs text-ink-muted" :title="capTitle(stat)">Cap {{ cap(stat) }}</span>
 
-                        <p
-                            v-if="errorOf(`targets.${stat}`)"
-                            :id="errorId(`targets.${stat}`)"
-                            role="alert"
-                            class="rounded-md border border-risk bg-raised px-3 py-2 text-sm text-ink"
-                        >{{ errorOf(`targets.${stat}`) }}</p>
+                            <span class="flex flex-wrap items-center gap-2">
+                                <span class="h-2 w-36 overflow-hidden rounded-md bg-sunken" aria-hidden="true">
+                                    <span
+                                        class="block h-full bg-chrome"
+                                        :data-fill="percent(stat)"
+                                        :style="{ width: `${percent(stat)}%` }"
+                                    ></span>
+                                </span>
+                                <AbsenceValue
+                                    v-if="entered(stat) === null"
+                                    compact
+                                    class="font-mono"
+                                    reason="No target entered for this stat yet."
+                                />
+                                <span v-else class="font-mono text-xs text-ink tabular-nums">{{ enteredLabel(stat) }}</span>
+                            </span>
+                        </div>
+
+                        <!-- Ceiling column (only for stats that have an enterable ceiling) -->
+                        <div v-if="props.capStats.includes(stat)" class="space-y-1">
+                            <BaseInput
+                                v-model="form[capColumn(stat)]"
+                                :id="controlId(capColumn(stat))"
+                                type="number"
+                                :name="capColumn(stat)"
+                                :aria-label="`${stat} ceiling`"
+                                :min="1"
+                                :max="props.hardCap"
+                                inputmode="numeric"
+                                :aria-describedby="describedBy(capColumn(stat))"
+                                label="{{ stat }} ceiling"
+                                value-class="font-mono text-ink tabular-nums"
+                                class="w-full"
+                                :error="errorOf(capColumn(stat))"
+                            />
+                            <span class="text-xs text-ink-muted" :title="scenarioTitle">
+                                Scenario publishes {{ props.scenarioCaps[stat] }}
+                            </span>
+                        </div>
+                        <!-- Placeholder for stats without ceiling (the fifth stat) to keep grid alignment -->
+                        <div v-else class="space-y-1">
+                            <span class="text-xs text-ink-muted">No enterable ceiling for this stat</span>
+                        </div>
                     </div>
                 </div>
 
@@ -519,47 +525,7 @@ function removeAt(index: number): void {
             </fieldset>
 
             <fieldset class="rounded-lg border border-rule bg-panel p-4">
-                <legend class="px-1 text-sm font-semibold text-ink-strong">Stat ceilings</legend>
-
-                <p class="text-sm text-ink-muted">
-                    The highest each stat can reach in this run, as the client shows it. Leave a field
-                    empty to keep the figure the scenario publishes: this tool records what is read and
-                    never computes a ceiling from sparks or card effects.
-                </p>
-
-                <div class="mt-4 space-y-3">
-                    <div v-for="stat in props.capStats" :key="stat" class="flex flex-wrap items-end gap-3">
-                        <label class="flex flex-col gap-1">
-                            <span class="text-sm text-ink-muted">{{ stat }}</span>
-                            <input
-                                :id="controlId(capColumn(stat))"
-                                v-model="form[capColumn(stat)]"
-                                type="number"
-                                :name="capColumn(stat)"
-                                :aria-label="`${stat} ceiling`"
-                                min="1"
-                                :max="props.hardCap"
-                                inputmode="numeric"
-                                class="h-11 w-32 rounded-md border border-rule bg-raised px-2 font-mono text-ink tabular-nums"
-                                :aria-describedby="describedBy(capColumn(stat))"
-                            >
-                        </label>
-                        <span class="text-xs text-ink-muted" :title="scenarioTitle">
-                            Scenario publishes {{ props.scenarioCaps[stat] }}
-                        </span>
-
-                        <p
-                            v-if="errorOf(capColumn(stat))"
-                            :id="errorId(capColumn(stat))"
-                            role="alert"
-                            class="w-full rounded-md border border-risk bg-raised px-3 py-2 text-sm text-ink"
-                        >{{ errorOf(capColumn(stat)) }}</p>
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset class="rounded-lg border border-rule bg-panel p-4">
-                <legend class="px-1 text-sm font-semibold text-ink-strong">Skill priorities</legend>
+                <legend class="px-1 text-lg font-semibold text-ink-strong">Skill priorities</legend>
 
                 <p class="text-sm text-ink-muted">
                     An ordered list of skill names, most important first. Reorder with the buttons; no
@@ -567,26 +533,19 @@ function removeAt(index: number): void {
                 </p>
 
                 <div class="mt-3 flex flex-wrap items-end gap-2">
-                    <label class="flex flex-col gap-1">
-                        <span class="text-sm text-ink-muted">Skill name</span>
-                        <input
-                            :id="controlId('skill_priorities')"
-                            v-model="newSkill"
-                            type="text"
-                            name="skill_name"
-                            maxlength="255"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                            :aria-describedby="describedBy('skill_priorities')"
-                        >
-                    </label>
-                    <button
-                        type="button"
-                        class="inline-flex min-h-11 items-center rounded-full border border-rule bg-raised px-4 text-sm font-medium text-ink hover:bg-sunken disabled:cursor-not-allowed disabled:opacity-60"
-                        :disabled="newSkill.trim() === ''"
-                        @click="addSkill"
-                    >
+                    <BaseInput
+                        v-model="newSkill"
+                        :id="controlId('skill_priorities')"
+                        type="text"
+                        name="skill_name"
+                        maxlength="255"
+                        label="Skill name"
+                        :aria-describedby="describedBy('skill_priorities')"
+                        placeholder="Enter skill name"
+                    />
+                    <BaseButton type="button" variant="secondary" :disabled="newSkill.trim() === ''" @click="addSkill">
                         Add
-                    </button>
+                    </BaseButton>
                 </div>
 
                 <ol v-if="form.skill_priorities.length > 0" class="mt-4 space-y-2">
@@ -600,7 +559,7 @@ function removeAt(index: number): void {
                         <span class="mr-auto text-sm text-ink-strong">{{ name }}</span>
                         <button
                             type="button"
-                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm text-ink hover:bg-raised disabled:cursor-not-allowed disabled:opacity-60"
+                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm text-ink hover:bg-raised disabled:cursor-not-allowed disabled:opacity-60 transition-colors duration-150 ease-out"
                             :disabled="index === 0"
                             :aria-label="`Move ${name} up`"
                             @click="move(index, -1)"
@@ -609,7 +568,7 @@ function removeAt(index: number): void {
                         </button>
                         <button
                             type="button"
-                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm text-ink hover:bg-raised disabled:cursor-not-allowed disabled:opacity-60"
+                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm text-ink hover:bg-raised disabled:cursor-not-allowed disabled:opacity-60 transition-colors duration-150 ease-out"
                             :disabled="index === form.skill_priorities.length - 1"
                             :aria-label="`Move ${name} down`"
                             @click="move(index, 1)"
@@ -618,7 +577,7 @@ function removeAt(index: number): void {
                         </button>
                         <button
                             type="button"
-                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm text-ink hover:bg-raised"
+                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm text-ink hover:bg-raised transition-colors duration-150 ease-out"
                             :aria-label="`Remove ${name}`"
                             @click="removeAt(index)"
                         >
@@ -644,16 +603,13 @@ function removeAt(index: number): void {
                 </p>
             </fieldset>
 
-            <div class="flex flex-wrap items-center gap-3">
-                <button
-                    type="submit"
-                    class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome disabled:cursor-wait disabled:bg-disabled"
-                    :disabled="form.processing"
-                >
+<div class="flex flex-wrap items-center gap-3">
+                <BaseButton type="submit" variant="primary" :disabled="form.processing">
                     {{ form.processing ? 'Saving…' : 'Save target' }}
-                </button>
+                </BaseButton>
                 <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving your target…</p>
             </div>
         </form>
     </SetupLayout>
 </template>
+

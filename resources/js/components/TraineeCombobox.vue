@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue';
 
+// This component implements a custom combobox (ARIA 1.2 combobox pattern with listbox popup)
+// using a raw <input role="combobox"> with aria-controls, aria-expanded, aria-activedescendant,
+// aria-autocomplete, and a sibling <ul role="listbox">. These are composite widget semantics
+// that BaseInput does not and cannot support — BaseInput is for simple form controls only.
+// Keeping the raw input here is the correct choice; adding combobox props to BaseInput would
+// pollute a shared primitive with pattern-specific machinery.
+
 interface CardRow {
     selectionId: number;
     sourceCardId: number;
@@ -457,7 +464,7 @@ if (restored !== null) {
             :aria-invalid="invalid ? 'true' : undefined"
             autocomplete="off"
             placeholder="Trainee or card name"
-            class="h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
+            class="h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
             :class="invalid ? 'border-risk' : ''"
             @focus="onFocus"
             @blur="setOpen(false)"

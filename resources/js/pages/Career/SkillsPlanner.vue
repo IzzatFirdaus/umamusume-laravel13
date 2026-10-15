@@ -18,6 +18,7 @@ import CareerLayout from '../../layouts/CareerLayout.vue';
 import SkillPlanRow from '../../components/career/SkillPlanRow.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import AcquisitionStatusEditor from '../../components/career/AcquisitionStatusEditor.vue';
+import { BaseButton, BaseSelect } from '../../components/Form';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
@@ -370,20 +371,16 @@ const coverageConstants = computed(() =>
                 Nothing left to add: the catalogue offers no Global skill this run does not already hold.
             </p>
             <form v-else class="mt-3 flex max-w-3xl flex-wrap items-end gap-3 text-sm" @submit.prevent="addPickedSkill">
-                <label class="flex flex-col gap-1">
-                    <span class="text-ink-muted">Skill to add</span>
-                    <select v-model="pickedSkill" class="h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                        <option value="">Choose a skill</option>
-                        <option v-for="skill in props.picker_skills" :key="skill.id" :value="skill.id">{{ skill.name }}</option>
-                    </select>
-                </label>
-                <button
-                    type="submit"
-                    class="inline-flex h-11 items-center rounded-full border border-rule px-4 text-sm font-bold text-ink hover:bg-sunken disabled:cursor-wait disabled:bg-disabled"
-                    :disabled="pickerForm.processing"
-                >
+                <BaseSelect
+                    v-model="pickedSkill"
+                    id="add-skill-picker"
+                    name="skill"
+                    label="Skill to add"
+                    :options="[{ value: '', label: 'Choose a skill' }, ...props.picker_skills.map(s => ({ value: s.id, label: s.name }))]"
+                />
+                <BaseButton type="submit" variant="secondary" :disabled="pickerForm.processing">
                     Add skill
-                </button>
+                </BaseButton>
             </form>
             <p v-if="pickerForm.processing" role="status" class="mt-2 text-sm text-ink-muted">Adding the skill…</p>
             <p v-if="pickerError" role="alert" class="mt-2 text-sm text-risk">{{ pickerError }}</p>

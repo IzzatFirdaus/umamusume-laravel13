@@ -25,6 +25,7 @@ import AbsenceValue from '../../components/AbsenceValue.vue';
 import RarityChip from '../../components/RarityChip.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import AptitudeBadge from '../../components/AptitudeBadge.vue';
+import { BaseInput, BaseSelect, BaseButton } from '../../components/Form';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, nextTick, ref } from 'vue';
 
@@ -218,9 +219,24 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
 </script>
 
 <template>
-    <SetupLayout :step="2" :visited="props.visited">
+    <SetupLayout :step="2" :visited="props.visited" :saved="props.saved">
         <Head title="Choose a trainee" />
+        <template #eyebrow>Setup</template>
         <template #title>Choose a trainee</template>
+
+        <!-- Back breadcrumb -->
+        <nav class="mt-4 mb-2" aria-label="Breadcrumb">
+            <Link href="/career/setup/trainee" class="inline-flex min-h-11 items-center text-sm font-medium text-brand-accent-ink hover:underline transition-colors duration-150 ease-out" aria-label="Back to trainee step">
+                ← Back to trainee
+            </Link>
+        </nav>
+
+        <!-- Header: eyebrow + large title + subtitle -->
+        <header class="mb-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 2 of 6</p>
+            <p class="mt-1 text-2xl font-semibold text-ink-strong">Choose a trainee</p>
+            <p class="mt-1 text-sm text-ink-muted">Pick the trainee the career is built on.</p>
+        </header>
 
         <p class="max-w-3xl text-sm text-ink-muted">
             The roster is the catalog this tool has fetched. Pick the trainee the career is built on; the
@@ -249,81 +265,63 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
             <AbsenceValue v-else compact reason="No trainee has been chosen in this setup draft yet." />
         </p>
 
-        <form class="mt-5 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
-            <label class="flex flex-col gap-1">
-                <span class="text-ink-muted">Search</span>
-                <input
+        <!-- Filter bar in bordered container -->
+        <div class="mt-5 rounded-md border border-rule bg-raised p-4">
+            <form class="flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
+                <BaseInput
                     v-model="filterValues.search"
                     type="text"
+                    id="filter-search"
                     name="search"
                     placeholder="Trainee name"
-                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                >
-            </label>
-
-            <label v-for="facet in props.facets" :key="facet.param" class="flex flex-col gap-1">
-                <span class="text-ink-muted">{{ facet.label }}</span>
-                <select
-                    :id="`filter-${facet.param}`"
+                    label="Search"
+                />
+                <BaseSelect
+                    v-for="facet in props.facets"
+                    :key="facet.param"
                     v-model="filterValues[facet.param]"
+                    :id="`filter-${facet.param}`"
                     :name="facet.param"
-                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                >
-                    <option value="">Any</option>
-                    <option v-for="letter in facet.letters" :key="letter" :value="letter">{{ letter }}</option>
-                </select>
-            </label>
-
-            <label class="flex flex-col gap-1">
-                <span class="text-ink-muted">Unique skill</span>
-                <select
+                    :label="facet.label"
+                    :options="facet.letters.map(l => ({ value: l, label: l }))"
+                    placeholder="Any"
+                />
+                <BaseSelect
                     v-model="filterValues.skill"
+                    id="filter-skill"
                     name="skill"
-                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                >
-                    <option value="">Any</option>
-                    <option v-for="option in props.uniqueSkills" :key="option.export_id" :value="String(option.export_id)">
-                        {{ option.name }}
-                    </option>
-                </select>
-            </label>
-
-            <label class="flex flex-col gap-1">
-                <span class="text-ink-muted">Sort by</span>
-                <select v-model="sortBy" name="sortBy" class="h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                    <option v-for="option in props.sortKeys" :key="option.value" :value="option.value">{{ option.label }}</option>
-                </select>
-            </label>
-
-            <label class="flex flex-col gap-1">
-                <span class="text-ink-muted">Order</span>
-                <!-- Neutral words, because the control means two different things depending on the sort
-                     key: name order, or best-letter-first on an aptitude column. The title says which. -->
-                <select
+                    label="Unique skill"
+                    :options="props.uniqueSkills.map(o => ({ value: String(o.export_id), label: o.name }))"
+                    placeholder="Any"
+                />
+                <BaseSelect
+                    v-model="sortBy"
+                    id="filter-sortBy"
+                    name="sortBy"
+                    label="Sort by"
+                    :options="props.sortKeys.map(o => ({ value: o.value, label: o.label }))"
+                />
+                <BaseSelect
                     v-model="direction"
+                    id="filter-direction"
                     name="direction"
-                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                    title="Ascending orders names A to Z and aptitudes from the best letter, S, down to G."
-                >
-                    <option value="asc">Ascending</option>
-                    <option value="desc">Descending</option>
-                </select>
-            </label>
+                    label="Order"
+                    :options="[{ value: 'asc', label: 'Ascending' }, { value: 'desc', label: 'Descending' }]"
+                    :aria-describedby="filter-direction"
+                />
+                <BaseButton type="submit" variant="secondary">
+                    Filter
+                </BaseButton>
+                <BaseButton type="button" variant="secondary" @click="clearFilters">
+                    Clear filters
+                </BaseButton>
+            </form>
 
-            <button
-                type="submit"
-                class="inline-flex h-11 items-center rounded-full border border-rule bg-raised px-4 text-sm font-medium text-ink hover:bg-sunken"
-            >
-                Filter
-            </button>
-            <button
-                type="button"
-                class="inline-flex h-11 items-center rounded-full border border-rule bg-raised px-4 text-sm font-medium text-ink hover:bg-sunken"
-                @click="clearFilters"
-            >
-                Clear filters
-            </button>
-        </form>
+            <!-- Row-count line -->
+            <p v-if="props.trainees.total > 0" class="mt-2 text-xs text-ink-muted">
+                {{ props.trainees.total }} trainee{{ props.trainees.total !== 1 ? 's' : '' }} match{{ props.trainees.total !== 1 ? 's' : '' }}.
+            </p>
+        </div>
 
         <p v-if="loading" role="status" class="mt-3 text-sm text-ink-muted">Loading the roster…</p>
 
@@ -381,23 +379,23 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
                 <div v-else class="mt-3 flex flex-wrap gap-1.5">
                     <AptitudeBadge
                         v-for="cell in primaryAxes"
-                        :key="cell.key"
+                        :key="cell.value"
                         :label="cell.label"
-                        :letter="trainee.aptitudes[cell.key] ?? null"
+                        :letter="trainee.aptitudes[cell.value] ?? null"
                     />
                     <!-- The style axis is the density a selection screen does not owe at full weight;
                          the summary carries the count, and every badge keeps its letter and its word
                          in the DOM whether the disclosure is open or closed. -->
                     <details v-if="styleAxes.length > 0">
-                        <summary class="inline-flex min-h-11 cursor-pointer items-center rounded-md border border-rule px-2 text-xs text-ink-muted hover:bg-raised">
+                        <summary class="inline-flex min-h-11 cursor-pointer items-center rounded-md border border-rule px-2 text-xs text-ink-muted hover:bg-raised transition-colors duration-150 ease-out">
                             Show all aptitudes ({{ styleAxes.length }})
                         </summary>
                         <div class="mt-1 flex flex-wrap gap-1.5">
                             <AptitudeBadge
                                 v-for="cell in styleAxes"
-                                :key="cell.key"
+                                :key="cell.value"
                                 :label="cell.label"
-                                :letter="trainee.aptitudes[cell.key] ?? null"
+                                :letter="trainee.aptitudes[cell.value] ?? null"
                             />
                         </div>
                     </details>
@@ -425,32 +423,32 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
                     :for="`trainee-form-${trainee.id}`"
                 >
                     <span class="text-ink-muted">Costume form for this career</span>
-                    <select
+                    <BaseSelect
                         :id="`trainee-form-${trainee.id}`"
                         v-model="pickedForm[trainee.id]"
-                        class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                    >
-                        <option :value="null">Not stated</option>
-                        <option v-for="card in trainee.forms" :key="card.id" :value="card.id">
-                            {{ card.title }}{{ card.is_debut_form ? ' (debut form)' : '' }}
-                        </option>
-                    </select>
+                        :options="[{ value: null, label: 'Not stated' }, ...trainee.forms.map(card => ({ value: card.id, label: `${card.title}${card.is_debut_form ? ' (debut form)' : ''}` }))]"
+                    />
                 </label>
 
                 <p class="mt-4 flex flex-wrap items-center gap-3">
                     <button
                         :id="`trainee-${trainee.id}`"
                         type="button"
-                        class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome disabled:cursor-wait disabled:bg-disabled"
+                        :class="[
+                            'enamel inline-flex min-h-11 items-center rounded-full px-4 text-sm font-bold disabled:cursor-wait disabled:bg-disabled',
+                            props.selected === trainee.id
+                                ? 'bg-chrome text-on-chrome'
+                                : 'border border-rule bg-raised text-ink hover:bg-sunken transition-colors duration-150 ease-out'
+                        ]"
                         :aria-pressed="props.selected === trainee.id ? 'true' : 'false'"
                         :disabled="selectForm.processing"
                         @click="choose(trainee)"
                     >
-                        {{ chosen === trainee.id ? 'Saving…' : 'Select Trainee' }}
+                        Select Trainee
                     </button>
                     <a
                         :href="`/career/setup/trainee/${trainee.id}`"
-                        class="inline-flex min-h-11 items-center rounded-full border border-rule px-4 text-sm font-medium text-ink hover:bg-raised"
+                        class="inline-flex min-h-11 items-center rounded-full border border-rule px-4 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
                     >
                         View Profile
                     </a>
@@ -472,7 +470,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
                     v-if="link.url"
                     :href="link.url"
                     :aria-current="link.active ? 'page' : undefined"
-                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised"
+                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised transition-colors duration-150 ease-out"
                     :class="link.active ? 'bg-raised font-bold text-ink-strong' : ''"
                     v-html="link.label"
                 />

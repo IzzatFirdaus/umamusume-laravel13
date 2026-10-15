@@ -29,6 +29,7 @@ const doorClass =
 
 <template>
     <AppLayout>
+        <template v-if="$slots.eyebrow" #eyebrow><slot name="eyebrow" /></template>
         <template #title><slot name="title" /></template>
 
         <section

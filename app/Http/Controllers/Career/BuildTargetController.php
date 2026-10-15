@@ -54,6 +54,7 @@ class BuildTargetController extends Controller
 
         return Inertia::render('Career/BuildTarget', [
             'visited' => SetupDraft::visited(),
+            'saved' => SetupDraft::saved(),
             // The stored payload as entered, or null before one exists: the page names the absence
             // rather than inventing a target. _Dated note 2026-10-08 (D18b): the page now pre-fills
             // the five stat inputs from the Trainer's stored defaults where no target is stored —

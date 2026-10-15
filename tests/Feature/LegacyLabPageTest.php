@@ -503,6 +503,39 @@ it('caps the comparison at four and names the refusal', function (): void {
         ->assertSessionHasErrors('runs');
 });
 
+it('accepts three runs and renders the comparison without redirect', function (): void {
+    $runs = collect(range(1, 3))->map(fn (int $index): TrainingRun => activeRun("Trainee {$index}", ['legacy_selection' => sixNodePayload()]));
+
+    $query = $runs->map(fn (TrainingRun $run): string => 'runs[]='.$run->id)->implode('&');
+
+    test()->get("/legacy/compare?{$query}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Legacy/Compare')
+            ->count('columns', 3)
+            ->where('columns.0.run_id', $runs[0]->id)
+            ->where('columns.1.run_id', $runs[1]->id)
+            ->where('columns.2.run_id', $runs[2]->id)
+        );
+});
+
+it('accepts four runs and renders the comparison without redirect', function (): void {
+    $runs = collect(range(1, 4))->map(fn (int $index): TrainingRun => activeRun("Trainee {$index}", ['legacy_selection' => sixNodePayload()]));
+
+    $query = $runs->map(fn (TrainingRun $run): string => 'runs[]='.$run->id)->implode('&');
+
+    test()->get("/legacy/compare?{$query}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Legacy/Compare')
+            ->count('columns', 4)
+            ->where('columns.0.run_id', $runs[0]->id)
+            ->where('columns.1.run_id', $runs[1]->id)
+            ->where('columns.2.run_id', $runs[2]->id)
+            ->where('columns.3.run_id', $runs[3]->id)
+        );
+});
+
 it('lists no comparable run when none carries a selection', function (): void {
     // A run with no payload would print a column of N/A, which is a screen that looks compared and
     // is not, so it is not offered at all.

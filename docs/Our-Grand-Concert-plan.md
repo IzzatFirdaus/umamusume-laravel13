@@ -512,7 +512,7 @@ Establish the authoritative Song representation.
 - **New measured negative:** no Song title appears in any committed data this repository holds. Of nine distinctive
   fragments from `docs/scenarios/07`'s title table grepped against `database/seeders/data/`, eight return 0 hits and
   the ninth, `Umadol`, matches only unrelated client skill and card names (`Rising to Umadol Stardom!`). The one
-  local scenario JSON in the tree, `.scratch-uma/static_scenarios.json`, is a gitignored GameTora scratch copy that
+  local scenario JSON in the tree, `.scratch-uma/cited/static_scenarios.json`, is a gitignored GameTora scratch copy that
   no commit has ever touched and it carries no Song key. Row 49 is therefore not closable locally; it needs the
   `[Global]` Lesson-menu frame that gap §7-19 already names.
 - **Smallest truthful representation:** already exists and is generic. `TurnEventType::Scenario` with

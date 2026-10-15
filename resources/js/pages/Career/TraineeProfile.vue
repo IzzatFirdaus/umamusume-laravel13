@@ -187,6 +187,19 @@ const profile = computed(() => props.trainee.profile);
                     <dd v-else class="text-ink-muted" title="The profile document states no height for this trainee.">N/A</dd>
                 </div>
                 <div class="flex flex-wrap justify-between gap-x-4">
+                    <dt class="text-ink-muted">Three sizes</dt>
+                    <!-- The same read `Catalog/Show.vue` makes of the same three columns, so the two
+                         screens cannot print one trainee's measurements differently. All three arrive
+                         together or not at all (`UmamusumeProfile::hasThreeSizes()`), which is why one
+                         guard covers the row. -->
+                    <dd v-if="profile?.three_sizes" class="text-ink">
+                        {{ profile.three_sizes.b }} · {{ profile.three_sizes.h }} ·
+                        {{ profile.three_sizes.w }} cm
+                        <span class="block text-xs text-ink-muted">bust · height · waist</span>
+                    </dd>
+                    <dd v-else class="text-ink-muted" title="The profile document states no three-sizes measurement for this trainee.">N/A</dd>
+                </div>
+                <div class="flex flex-wrap justify-between gap-x-4">
                     <dt class="text-ink-muted">Version</dt>
                     <!-- A named absence, not a blank: the brief asks for a version and no column holds one
                          (`app.ruleset` is null by ruling, and there is no trainee version either). -->
@@ -242,7 +255,7 @@ const profile = computed(() => props.trainee.profile);
                 <li v-for="card in props.forms" :key="card.id" class="rounded-md border border-rule bg-panel p-4">
                     <h3 class="flex flex-wrap items-center gap-3">
                         <ArtworkSlot :url="card.artworkURL" alt="" size="size-10" reserve />
-                        <span class="text-base font-semibold text-ink-strong">{{ card.title }}</span>
+                        <span class="text-lg font-semibold text-ink-strong">{{ card.title }}</span>
                         <span class="flex flex-wrap items-baseline gap-3 text-xs text-ink-muted">
                             <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
                             <span class="font-mono">{{ card.rarity_word }}</span>
@@ -253,7 +266,7 @@ const profile = computed(() => props.trainee.profile);
 
                     <div class="mt-4 grid gap-6 lg:grid-cols-2">
                         <div v-for="list in card.skillLists" :key="list.key">
-                            <h4 class="text-sm font-semibold text-ink-strong">{{ list.label }}</h4>
+                            <h4 class="text-lg font-semibold text-ink-strong">{{ list.label }}</h4>
 
                             <p
                                 v-if="list.skills.length === 0 && list.unresolved === 0"

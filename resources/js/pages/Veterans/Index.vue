@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
+import { BaseInput, BaseSelect, BaseButton } from '../../components/Form';
+import { carriesAncestryNote, VETERAN_ANCESTRY_NOTE, veteranResultClause } from '../../domain/veteranNote';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import VeteranRow from '../../components/VeteranRow.vue';
 
 // Typed locally, the rule every page in this rewrite follows: TypeScript 7 does not resolve the
 // generated `PageProps` union, so an imported type would fail the typecheck rather than describe the
@@ -101,11 +104,17 @@ const filtered = computed(
         props.filters.scenario !== null ||
         props.filters.tag !== null,
 );
+
+/** The hoisted sentence is only stated when a card on this page actually carried it. */
+const hasSharedAncestryNote = computed(() =>
+    props.veterans.data.some((veteran) => carriesAncestryNote(veteran.notes)),
+);
 </script>
 
 <template>
     <AppLayout>
         <Head title="Veteran library" />
+        <template #eyebrow>Library</template>
         <template #title>Veteran library</template>
 
         <p
@@ -117,49 +126,53 @@ const filtered = computed(
         </p>
 
         <form class="mt-4 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
-            <label class="flex flex-col gap-1">
-                <span class="text-ink">Trainee</span>
-                <select
-                    v-model="trainee"
-                    name="trainee"
-                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
-                >
-                    <option value="">All</option>
-                    <option v-for="option in traineeOptions" :key="option.id" :value="String(option.id)">
-                        {{ option.name }}
-                    </option>
-                </select>
-            </label>
-
-            <label class="flex flex-col gap-1">
-                <span class="text-ink">Scenario</span>
-                <select
-                    v-model="scenario"
-                    name="scenario"
-                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
-                >
-                    <option value="">All</option>
-                    <option v-for="(label, key) in scenarios" :key="key" :value="key">{{ label }}</option>
-                </select>
-            </label>
-
-            <label class="flex flex-col gap-1">
-                <span class="text-ink">Tag</span>
-                <input
-                    v-model="tag"
-                    type="text"
-                    name="tag"
-                    placeholder="One tag, as you typed it"
-                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
-                >
-            </label>
-
-            <button
-                type="submit"
-                class="h-11 rounded-full border border-rule px-3 py-1.5 font-semibold text-ink hover:bg-sunken"
-            >
-                Filter
-            </button>
+            <BaseSelect
+                v-model="trainee"
+                id="veteran-filter-trainee"
+                name="trainee"
+                label="Trainee"
+                :options="[{ value: '', label: 'All' }, ...Object.entries(traineeOptions).map(([id, name]) => ({ value: id, label: name }))]"
+            />
+            <BaseSelect
+                v-model="scenario"
+                id="veteran-filter-scenario"
+                name="scenario"
+                label="Scenario"
+                :options="[{ value: '', label: 'All' }, ...Object.entries(scenarios).map(([key, label]) => ({ value: key, label }))]"
+            />
+            <BaseInput
+                v-model="tag"
+                id="veteran-filter-tag"
+                name="tag"
+                type="text"
+                placeholder="One tag, as you typed it"
+                label="Tag"
+            />
+            <div class="flex flex-col gap-1">
+                <span class="text-ink-muted">Order</span>
+                <div class="flex gap-1" role="group" aria-label="Sort order">
+                    <BaseButton
+                        type="button"
+                        variant="secondary"
+                        :class="props.order === 'newest' ? 'bg-raised font-bold text-ink-strong' : ''"
+                        :aria-current="props.order === 'newest' ? 'true' : undefined"
+                        @click="visitOrder('newest')"
+                    >
+                        Newest first
+                    </BaseButton>
+                    <BaseButton
+                        type="button"
+                        variant="secondary"
+                        :class="props.order === 'oldest' ? 'bg-raised font-bold text-ink-strong' : ''"
+                        title="Order of the library's own records. No column holds the date a career finished, so this is not a completion date."
+                        :aria-current="props.order === 'oldest' ? 'true' : undefined"
+                        @click="visitOrder('oldest')"
+                    >
+                        Oldest first
+                    </BaseButton>
+                </div>
+            </div>
+            <BaseButton type="submit" variant="primary">Filter</BaseButton>
         </form>
 
         <p v-if="errors.trainee" role="alert" class="mt-2 text-sm text-risk">Trainee: {{ errors.trainee }}</p>
@@ -172,7 +185,7 @@ const filtered = computed(
         <p class="mt-3 flex flex-wrap items-center gap-3 text-sm">
             <a
                 :href="props.find_parents_url"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
             >Find parents for this build</a>
             <span class="text-ink-muted">Searches the Legacy Lab with the tags you are filtering by.</span>
         </p>
@@ -189,6 +202,13 @@ const filtered = computed(
             <template v-else>
                 {{ veterans.total }} Veterans in the library.
             </template>
+        </p>
+
+        <!-- Stated once for the whole list, above it, rather than once per card: the ancestry sentence is
+             about what the tracker did not record, which is the same for every row here, and repeating it
+             seven times buries the one clause per card that is actually about that career. -->
+        <p v-if="hasSharedAncestryNote" class="mt-2 text-sm text-ink-muted">
+            {{ VETERAN_ANCESTRY_NOTE }}
         </p>
 
         <!-- The two lines are different states and neither is an error: an empty library means nothing has
@@ -216,64 +236,8 @@ const filtered = computed(
         </p>
 
         <ul v-else class="mt-2 divide-y divide-rule rounded-md border border-rule bg-raised">
-            <li v-for="veteran in veterans.data" :key="veteran.id" class="px-4 py-3 text-sm">
-                <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                    <a :href="veteran.veteran_url" class="font-semibold text-ink-strong hover:underline">
-                        {{ veteran.trainee }}
-                    </a>
-
-                    <span
-                        v-if="veteran.trainee_ja !== null && veteran.trainee_ja !== veteran.trainee"
-                        lang="ja"
-                        class="text-ink-muted"
-                    >
-                        {{ veteran.trainee_ja }}
-                    </span>
-
-                    <!-- No status: only a Completed run is recordable as a Veteran (`RecordVeteran`),
-                         so a status on every row is one word repeated, not a fact about this one. -->
-                    <span class="ml-auto text-xs text-ink-muted">
-                        {{ veteran.scenario_label }}
-                    </span>
-                </div>
-
-                <p v-if="veteran.tags.length > 0" class="mt-1 flex flex-wrap gap-1 text-xs">
-                    <span
-                        v-for="rowTag in veteran.tags"
-                        :key="rowTag"
-                        class="rounded-full bg-sunken px-2 py-0.5 text-ink-strong"
-                        title="A tag you typed on this record. Tags are the Trainer's own words, not client vocabulary."
-                    >
-                        {{ rowTag }}
-                    </span>
-                </p>
-
-                <p v-else class="mt-1 text-xs">
-                    <span title="No tag was recorded on this Veteran.">N/A</span>
-                    <span class="text-ink-muted"> tagged</span>
-                </p>
-
-                <p v-if="veteran.notes !== null" class="mt-1 text-xs text-ink-muted">{{ veteran.notes }}</p>
-
-                <div class="mt-2 flex flex-wrap gap-2">
-                    <a
-                        v-if="veteran.builder_url"
-                        :href="veteran.builder_url"
-                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
-                    >
-                        Open in Legacy Lab
-                    </a>
-                    <!-- The library's own comparison, which lines careers up. It takes the Veteran id rather
-                         than the run id, and it does not require a Legacy read-back: the career a Trainer
-                         most wants beside another is often the one they just filed. The Legacy Lab's compare
-                         stays where it belongs, comparing the configurations behind `builder_url` above. -->
-                    <a
-                        :href="`/veterans/compare?veterans[]=${veteran.id}`"
-                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
-                    >
-                        Compare this career
-                    </a>
-                </div>
+            <li v-for="veteran in veterans.data" :key="veteran.id">
+                <VeteranRow :veteran="veteran" />
             </li>
         </ul>
 
@@ -283,7 +247,7 @@ const filtered = computed(
                     v-if="link.url"
                     :href="link.url"
                     :aria-current="link.active ? 'page' : undefined"
-                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised"
+                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised transition-colors duration-150 ease-out"
                     :class="link.active ? 'bg-raised font-bold text-ink-strong' : ''"
                     v-html="link.label"
                 />
@@ -291,38 +255,16 @@ const filtered = computed(
             </template>
         </nav>
 
-        <p class="mt-6 flex flex-wrap items-center gap-2 text-sm text-ink-muted">
-            <span>Order:</span>
-            <button
-                type="button"
-                class="inline-flex min-h-11 items-center rounded-md px-3 font-medium"
-                :class="props.order === 'newest' ? 'bg-raised font-bold text-ink-strong' : 'text-ink hover:bg-raised'"
-                :aria-current="props.order === 'newest' ? 'true' : undefined"
-                @click="visitOrder('newest')"
-            >
-                Newest first
-            </button>
-            <button
-                type="button"
-                class="inline-flex min-h-11 items-center rounded-md px-3 font-medium"
-                :class="props.order === 'oldest' ? 'bg-raised font-bold text-ink-strong' : 'text-ink hover:bg-raised'"
-                title="Order of the library's own records. No column holds the date a career finished, so this is not a completion date."
-                :aria-current="props.order === 'oldest' ? 'true' : undefined"
-                @click="visitOrder('oldest')"
-            >
-                Oldest first
-            </button>
-        </p>
-
-        <section aria-labelledby="library-absences" class="mt-8">
-            <h2 id="library-absences" class="text-xs font-bold tracking-wide text-ink-muted">
-                NOT IN THIS BUILD
-            </h2>
+        <details class="mt-8">
+            <summary id="library-absences" class="text-lg font-semibold text-ink-strong cursor-pointer list-none">
+                Not in this build
+                <span class="text-sm font-normal text-ink-muted ml-2">(3 notes)</span>
+            </summary>
             <ul class="mt-2 space-y-2 text-sm text-ink-muted">
                 <li v-for="absence in absences" :key="absence.label">
                     <span class="text-ink">{{ absence.label }}</span>: {{ absence.reason }}
                 </li>
             </ul>
-        </section>
+        </details>
     </AppLayout>
 </template>

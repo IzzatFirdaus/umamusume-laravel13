@@ -11,7 +11,7 @@ defineProps<{
 
 <template>
     <li class="flex flex-wrap items-baseline gap-2 border-b border-rule py-1.5 last:border-b-0">
-        <Link v-if="skill.url" :href="skill.url" class="text-ink hover:underline">{{ skill.name }}</Link>
+        <Link v-if="skill.url" :href="skill.url" class="text-ink hover:underline transition-colors duration-150 ease-out">{{ skill.name }}</Link>
         <span v-else class="text-ink">{{ skill.name }}</span>
 
         <span

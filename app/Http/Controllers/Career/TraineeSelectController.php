@@ -87,6 +87,7 @@ class TraineeSelectController extends Controller
 
         return Inertia::render('Career/TraineeSelect', [
             'visited' => SetupDraft::visited(),
+            'saved' => SetupDraft::saved(),
             'trainees' => $trainees,
             'selected' => $draft['umamusume_id'],
             // The form the draft already names, so a Trainer who returns to this step sees the choice they

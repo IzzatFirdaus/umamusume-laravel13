@@ -24,6 +24,7 @@
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import SparkChip from '../../components/legacy/SparkChip.vue';
+import { BaseButton, BaseInput, BaseTextarea } from '../../components/Form';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, reactive, ref } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
@@ -187,8 +188,8 @@ function save(): void {
             <h2 id="blocked-heading" class="text-lg font-semibold text-ink-strong">Nothing to file yet</h2>
             <p role="alert" class="mt-2 text-sm text-ink">{{ props.blocked }}</p>
             <p class="mt-3 flex flex-wrap gap-3 text-sm">
-                <Link href="/training-runs" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-sunken">Open the run list</Link>
-                <a :href="props.run_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-sunken">This career's record</a>
+                <Link href="/training-runs" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-sunken transition-colors duration-150 ease-out">Open the run list</Link>
+                <a :href="props.run_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-sunken transition-colors duration-150 ease-out">This career's record</a>
             </p>
         </section>
 
@@ -236,7 +237,7 @@ function save(): void {
                     </div>
                 </dl>
 
-                <h3 class="mt-4 text-sm font-semibold text-ink-strong">Sparks it carries</h3>
+                <h3 class="mt-4 text-lg font-semibold text-ink-strong">Sparks it carries</h3>
                 <p v-if="props.graph.parents.length === 0" class="mt-1 text-sm text-ink-muted" role="status">
                     This career records no parents, so it carries no Sparks. A parent is chosen on the Legacy Lab.
                 </p>
@@ -318,26 +319,23 @@ function save(): void {
                     </div>
 
                     <div class="mt-4 flex flex-wrap items-end gap-2">
-                        <label class="flex flex-col gap-1 text-sm" for="custom-tag">
-                            <span class="text-ink-muted">Your own tag</span>
-                            <input
-                                id="custom-tag"
-                                v-model="newTag"
-                                type="text"
-                                :maxlength="props.limits.max_tag_length"
-                                :aria-describedby="tagErrors.length > 0 ? 'tag-errors' : 'tags-help'"
-                                placeholder="Any word you would search by"
-                                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                            >
-                        </label>
-                        <button
+                        <BaseInput
+                            v-model="newTag"
+                            id="custom-tag"
+                            type="text"
+                            :maxlength="props.limits.max_tag_length"
+                            :aria-describedby="tagErrors.length > 0 ? 'tag-errors' : 'tags-help'"
+                            placeholder="Any word you would search by"
+                            label="Your own tag"
+                        />
+                        <BaseButton
                             type="button"
-                            class="inline-flex h-11 items-center rounded-full border border-rule px-4 text-sm font-bold text-ink hover:bg-sunken disabled:opacity-50"
+                            variant="secondary"
                             :disabled="newTag.trim() === ''"
                             @click="addCustomTag"
                         >
                             Add tag
-                        </button>
+                        </BaseButton>
                     </div>
 
                     <ul v-if="customTags.length > 0" class="mt-2 flex flex-wrap gap-2">
@@ -373,36 +371,29 @@ function save(): void {
 
                 <section aria-labelledby="note-heading" class="rounded-md border border-rule bg-panel p-4">
                     <h2 id="note-heading" class="text-lg font-semibold text-ink-strong">Note</h2>
-                    <label class="mt-1 block text-sm" for="veteran-notes">
-                        <span class="text-ink-muted">What you want to remember about this career</span>
-                        <textarea
-                            id="veteran-notes"
-                            v-model="form.notes"
-                            rows="4"
-                            :maxlength="props.limits.max_notes_length"
-                            class="mt-1 w-full rounded-md border border-rule bg-raised px-2 py-1 text-ink"
-                            :aria-describedby="form.errors.notes ? 'notes-error' : 'notes-help'"
-                        ></textarea>
-                    </label>
-                    <p id="notes-help" class="mt-1 text-xs text-ink-muted">
-                        Free text, up to {{ props.limits.max_notes_length }} characters. Printed on the library's detail screen exactly as you write it.
-                    </p>
-                    <p v-if="form.errors.notes" id="notes-error" role="alert" class="mt-1 text-sm text-risk">
-                        {{ form.errors.notes }}
-                    </p>
-                </section>
+                    <BaseTextarea
+                        v-model="form.notes"
+                        id="veteran-notes"
+                        name="notes"
+                        rows="4"
+                        :maxlength="props.limits.max_notes_length"
+                        label="What you want to remember about this career"
+                        hint="Free text, up to {{ props.limits.max_notes_length }} characters. Printed on the library's detail screen exactly as you write it."
+                        :error="form.errors.notes"
+                    />
 
                 <div class="flex flex-wrap items-center gap-3">
-                    <button
+                    <BaseButton
                         type="submit"
-                        class="enamel inline-flex h-11 items-center rounded-full bg-chrome px-5 text-sm font-bold text-on-chrome disabled:opacity-50"
+                        variant="primary"
                         :disabled="form.processing || saving.busy"
                     >
                         {{ form.processing ? 'Saving…' : (props.saved === null ? 'Save Veteran' : 'Update Veteran') }}
-                    </button>
-                    <a :href="props.result_url" class="inline-flex min-h-11 items-center text-sm text-ink underline">Back to the result</a>
-                    <a :href="props.library_url" class="inline-flex min-h-11 items-center text-sm text-ink underline">Open the library</a>
+                    </BaseButton>
+                    <Link :href="props.result_url" class="inline-flex min-h-11 items-center text-sm text-ink underline">Back to the result</Link>
+                    <Link :href="props.library_url" class="inline-flex min-h-11 items-center text-sm text-ink underline">Open the library</Link>
                 </div>
+                </section>
             </form>
 
             <!-- Step 3 is the save itself: the button above posts to `runs.veteran.store` and the library row

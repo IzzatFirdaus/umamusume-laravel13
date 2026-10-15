@@ -130,7 +130,7 @@ const visibleCount = computed(() =>
         <CareerTimeline v-else :entries="props.entries" :active-kinds="activeKinds" />
 
         <div class="mt-4 max-w-sm">
-            <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised">
+            <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">
                 Back to Cockpit
             </a>
         </div>

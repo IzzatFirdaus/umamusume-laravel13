@@ -52,12 +52,20 @@ later reader can see that a claim was overridden rather than never having existe
    making the number faster to read (PRD NFR-3, Pre-Mortem: data-dense tool).
 2. Colour is semantic only. A coloured element must change what the Trainer
    knows; otherwise it is neutral (research doc P1, antislop R-01/R-16).
+
+> **Amended 2026-10-15 (Track 2-D, owner-signed): colour has three roles, not one.**
+>
+> The line above is preserved. What changes: colour carries **brand chrome**, **brand accent**, and **semantic state**. Semantic state is what the original line named. Brand chrome and brand accent are new and are governed by their own rules.
 3. Light base by default, measured not inverted, with dark as a preference-resolved
    opt-in (ADR-0006). Both palettes are measured from client frames; the dark one
    keeps the raceboard character rather than a generic dark skin.
 4. The desk is serious: no pastel anime gradients, no soft drop shadows, no
    marketing layout. It reads like a sports-science or esports analytics
    tool, never like a gacha wiki (owner ruling; antislop Part 1).
+
+> **Amended 2026-10-15 (Track 2-D, owner-signed): the ban on "pastel anime gradients" does not extend to the client's own chrome hues.**
+>
+> The line above is preserved. What changes: the ban is against marketing decoration — gradient chrome, glassmorphism, glow. It is not against the source's own brand. The client's chrome (`#2255FF` family), its call-to-action (`#FF77CC` family), and its accent (`#8877FF` family) are measured, and using them is a fidelity decision, not a decoration decision. The ban on gradients-as-identity remains: a chrome header bar is a **flat fill plus a thin accent stripe**, not a gradient. A gradient is only permitted as a documented motion cue (§8), and none is proposed.
 5. Every state is designed: empty, loading, error, data (CONSTRAINTS C-7,
    antislop R-27).
 6. Lore compliance is a design constraint, not a copy polish pass (see §6;
@@ -142,6 +150,22 @@ and the corpus-transcription caveat above holds. Replacing those two stubs is th
 | Risk / rejected          | `--color-risk`                           | `#800014`               | `#FF6B7A`               | reserved: training failure and rejection only                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | Turn chip anchor         | `--color-anchor`                         | `#0B6FB8`               | `#8FC4EE`               | deliberately not `--color-down`; blue already means "went down"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | Focus ring               | `--color-ring`                           | `#4E7906`               | `#7FCC09`               | 3:1 non-text boundary in both themes; `--color-green` alone fails light at 1.88 (see §8). Measured against the surfaces it actually sits on: **5.17 / 4.88 / 4.61** on light `raised` / `panel` / `page`, **7.61 / 9.51 / 9.79** in dark                                                                                                                                                                                                                                                                                                                                                                                        |
+
+> **Amended 2026-10-15 (Track 2-D, owner-signed): four roles are added to the light palette; each carries a G-18 measured pair.** Values are sampled from the 11 official-site captures and cross-checked against the 19 client sheets (`frontend-fidelity-2026-10-13.md` §2.3). They are the ruling's starting draft; the owner may adjust before the tokens land.
+
+| Role | Token | Light | Dark | G-18 pair |
+|---|---|---|---|---|
+| Chrome field | `--color-brand-chrome` | `#2255FF` | `#1A3FCC` | `on-chrome on brand-chrome` (text ≥ 4.5:1) |
+| Chrome ink | `--color-on-brand-chrome` | `#FFFFFF` | `#FFFFFF` | — |
+| Chrome accent stripe | `--color-brand-accent` | `#FF77CC` | `#CC5FA8` | `brand-accent on brand-chrome` (non-text ≥ 1.2:1) |
+| Brand accent (violet) | `--color-brand-accent-ink` | `#8877FF` | `#9F8FFF` | `brand-accent-ink on page` (text ≥ 4.5:1) |
+| Brand accent soft (chip bg) | `--color-brand-accent-soft` | `#EEEBFF` | `#2A2640` | `brand-accent-ink on brand-accent-soft` (text ≥ 4.5:1) |
+| Status positive | `--color-status-positive` | `#BBDD11` | `#8FBF09` | `status-positive-ink on status-positive` (text ≥ 4.5:1) |
+| Status positive ink | `--color-status-positive-ink` | `#0D0C0F` | `#0D0C0F` | — |
+| Status caution | `--color-status-caution` | `#FFE9A8` | `#8A6F1A` | `status-caution-ink on status-caution` (text ≥ 4.5:1) |
+| Status caution ink | `--color-status-caution-ink` | `#6A4A00` | `#F4E4B0` | — |
+
+> **Two guards bind this amendment.** (a) The brand chrome lives on the **top bar only** — not on buttons, cards, or the sidebar. The top bar's accent stripe is a **thin 2px rule at the bar's bottom edge**, not a gradient. (b) The status-positive lime is **not** an action colour: `--color-green` (the action lime) and `--color-status-positive` (the status lime) are distinct roles with distinct values. A status pill and a primary button never render the same fill. §2.1's existing "Green is action and affordability only, never 'good'" rule is amended to admit positive status; the action role is unchanged.
 
 Status badges (release status is the catalog's load-bearing signal) render through
 `--color-green` / `--color-sp` / `--color-pick` and their ink partners rather than
@@ -235,9 +259,29 @@ external fonts (offline constraint + C-8 dependency gate).
   database, so it cannot share a path that reads a preference from it. A first pass at this amendment
   claimed one home for the `h1`; the measured 404 at 24px against the shell's 30px is what disproved
   it. The sentence above stands as the record of the 24px rule.
+
+> **Amended 2026-10-15 (Track 2-F, owner-signed, extending the typography amendment above): the four tiers carry colour and position, not only size.** The table above names the sizes; this paragraph names the rest of each tier.
+>
+> | Tier | Colour | Position | What sits here |
+> |---|---|---|---|
+> | Critical | `text-ink-strong` | Top of the page, above the fold | The page `h1`, the primary action, the KPI value in a stat card |
+> | Heading | `text-ink-strong` | Above its region | Section headers, panel titles, dialog titles |
+> | Body | `text-ink` | In its region | Content, table cells, form values, list rows |
+> | Metadata | `text-ink-muted` | Beside or below its Body | Labels, hints, timestamps, provenance, row counts |
+>
+> The rule the tiers carry: **weight and colour are monotone across the four tiers** — Critical is the heaviest and strongest, Metadata is the lightest and quietest, and no tier reverses the order. A Metadata element that renders at Body weight is a defect, not a styling choice.
+
 - The research package's rounded display-font proposal ("M PLUS Rounded 1s" /
-  self-hosted Nunito) stays parked: it needs a C-8 dependency approval and
-  the owner's ruling asks for a neutral sans.
+   self-hosted Nunito) stays parked: it needs a C-8 dependency approval and
+   the owner's ruling asks for a neutral sans.
+
+> **Amended 2026-10-15 (Track 2-C, owner-signed): the display-font proposal is closed permanently.**
+>
+> The Critical tier (`text-3xl font-semibold` per the 2026-10-14 amendment) renders from the system stack named in §2.2's first bullet, at the size and weight that amendment already set. No display face is added; no `@font-face` block ships; no `resources/fonts/` directory is created. C-8 stays unexercised for typography.
+>
+> **Why the proposal closed rather than shipped.** Four reasons, recorded so a later pass does not re-open the question on the same evidence. (a) The 2026-10-14 size amendment already carries the tier: the `h1` at 30px against section headers at 18px is a 12px step, double the previous 6px gap, and it reads as a tier without a face. (b) §7's offline constraint binds: a bundled face is a second asset to version and load, for a page title whose content is Latin and whose character is carried by weight. (c) C-8 approval is a permanent governance cost — `docs/governance/C-8-approval.md` would need to exist and stay valid — for an aesthetic gain the size amendment already delivers. (d) The HLF reference the proposal cited renders its `h1` at heavy weight from a system-adjacent sans; what reads as display in the reference is size and weight, not typeface identity, and this amendment follows the reference rather than inventing a face for it.
+>
+> **What reads as the app's visual voice, since it is not the face.** `frontend-fidelity-2026-10-13.md` §2.1 lists "no display voice" as one of its wireframe tells. What clears the tell is the header convention (eyebrow + `h1` + one-line subtitle), the accent budget (one action lime per screen), the chip and badge vocabulary, and the sub-cell density — all of which ship in Track 1 slices without a font. The tier system carries the hierarchy; the face is redundant to it.
 
 ### 2.3 Spacing and layout
 
@@ -252,7 +296,15 @@ external fonts (offline constraint + C-8 dependency gate).
   Inertia `AppLayout.vue` (with `CareerLayout.vue` / `SetupLayout.vue` for the career surfaces).
   The width value stands — only the host it is named on is stale.*
 - **Recommended:** retire the `max-w-6xl` line rather than keep a proposed token that
-  no surface uses. Ratified widths, in one place: 5xl shell, 3xl form, lg narrow form.
+   no surface uses. Ratified widths, in one place: 5xl shell, 3xl form, lg narrow form.
+
+> **Amended 2026-10-15 (Dashboard layout, owner-signed): a fourth shell width joins the ratified set — `max-w-7xl` — gated by a preference and an env flag.**
+>
+> The three widths below remain the defaults. `max-w-7xl` (1280px) is added as a **user-selectable** wider shell for the Dashboard only, activated by `dashboard_layout = 'wide'` **and** `DASHBOARD_WIDE_BENTO_ENABLED=true`. Absent either condition, the Dashboard falls back to `max-w-5xl`.
+>
+> The reason: the Dashboard's bento grid carries five regions; at 1920+ the 5xl shell leaves a disproportionate right margin. The wider shell is a display optimisation for wide monitors, not a change to the shell's default or its mobile behaviour. Below 1280px the width collapses to the same breakpoints the current bento uses.
+>
+> Enforcement: `PreferenceControllerTest` pins the flag → preference → render chain; the Dashboard's browser spec asserts 5xl at flag=false, 7xl at flag=true. The wide shell does **not** appear as a default in this bullet's opening sentence; it appears as a conditional fourth option.
 - **768px is the supported minimum (amended 2026-09-29, KI-25), and the floor above
   is narrower than it read.** "No overflow" was measured and is false below 768px for
   exactly two surfaces: the race calendar and the turn log are wide tables whose content
@@ -283,7 +335,17 @@ external fonts (offline constraint + C-8 dependency gate).
   `turn-chip` is pinned to `--radius-sm`, because its 6px corner is measured from client frame
   `194819` and a scale amendment must not move a measured motif.
 - Shadows: none. Separation comes from the rule edge and the raised/sunken step
-  (research doc §3.7 consequence 2).
+   (research doc §3.7 consequence 2).
+
+> **Amended 2026-10-15 (Track 2-B, owner-signed): elevation is permitted for overlays only, and the mechanism is `drop-shadow`, not `box-shadow`.**
+>
+> The line above is preserved as the record of the flat era. What changes: a single elevation tier exists for **overlays** — modal dialogs, floating panels, the recommendation card, and dropdown menus — and nowhere else. Cards, tables, list rows, and form fields keep the flat contract; separation on those surfaces still comes from the rule edge and the raised/sunken step.
+>
+> The mechanism is `filter: drop-shadow()`, not `box-shadow`. The precedent is the official properties' own CSS, measured in the research corpus's §6 web study (`docs/research-scratch/DESIGN-CORPUS.md:4104-4116`): the site carries **zero** `box-shadow` and **zero** `linear-gradient`/`radial-gradient`, and all depth comes from `drop-shadow`. A `box-shadow` implementation would be a house invention; a `drop-shadow` implementation matches the source.
+>
+> One token is declared: `--shadow-overlay` in `app.css`'s `@theme static` block. The value is `0 4px 12px rgb(0 0 0 / 0.18)` in the light theme and `0 6px 16px rgb(0 0 0 / 0.32)` in the dark theme — the only pair this amendment adds. The token is `static` (not pruned), and G-18's pair list gains one row: `scrim-overlay on page` (non-text, ≥ 1.2:1).
+>
+> **What this does not do:** it does not give cards elevation, it does not add a hover-lift, and it does not resurrect the "soft drop shadows" that §1.4 banned. The ban was about *marketing* shadow — a decorative glow that costs reading speed and buys nothing. An overlay shadow is functional: it says "this surface is above the page, and dismissing it returns you to the page behind." Two surfaces, no more.
 - **Amended 2026-09-27: three franchise motifs are material, not elevation, and are
   allowed.** An earlier reading of this section treated them as generic decoration and
   banned them along with drop shadows. That was wrong on the evidence: each is measured
@@ -736,6 +798,19 @@ Dial MOTION 1: hover and focus states only, `transition-colors` on
 interactive elements, `focus-visible` rings using `--color-ring`
 (2px outline, 2px offset). No page animations; a desk does not move (R-19).
 
+> **Amended 2026-10-15 (Track 2-E, owner-signed): MOTION 2 for state transitions only.**
+>
+> The line above is preserved as the record of MOTION 1. What changes: `transition-colors` and `transition-transform` ship on interactive elements, at `duration-150` and `ease-out`. Page animations, entrance/exit animations, list staggering, and scroll-triggered motion remain forbidden — "a desk does not move" still binds those. The dial raises from 1 to 2 for the **state** of an interactive element, not for the **arrival** of a page or the **appearance** of a list.
+>
+> | Motion tier | Scope | Value |
+> |---|---|---|
+> | 0 | Page arrival, list appearance, scroll-triggered motion | Forbidden |
+> | 1 | Focus-visible ring, hover background | Instant (no easing) |
+> | 2 | Hover, focus, dialog open/close, tab switch, disclosure toggle | `duration-150 ease-out` |
+> | 3 | Entrance/exit, list stagger | Forbidden |
+>
+> The `prefers-reduced-motion: reduce` block already shipped in `app.css` (§8's "Corrected 2026-10-05" note) collapses tier 2 to tier 1 for a Trainer with the OS setting on. No new machinery is needed.
+
 The ring is its own token rather than `--color-green`, which this section used to specify.
 That prescription predates the light-first flip: `#7FCC09` measures 9.51:1 on the dark panel
 but only **1.88:1 on the light panel and 1.99:1 on white**, against WCAG 1.4.11's 3:1 floor for
@@ -1019,5 +1094,7 @@ system owns.
   pattern. This pass did not run the browser suite; the enforcement claims it records are the
   slices' own, taken on their own trees.
 - 2026-09-29 — Catalog detail specification withdrawn and rewritten; 768px minimum
-  recorded as a held proposal rather than a contract.
+   recorded as a held proposal rather than a contract.
 - 2026-09-27 — Light-first owner ruling; lattice/enamel/torn-chip motifs ruled material.
+- **2026-10-15** — Six owner-signed amendments in one pass, unblocking the Track 2 and Dashboard-layout gates. §2.3 gains the overlay-elevation exception (§9.2, drop-shadow only, `--shadow-overlay`); §2.2 gains the display-face approval (§9.3, C-8 for one self-hosted rounded face on Critical only); §1.2 and §1.4 gain the three-role colour ruling and §2.1 gains nine brand/status tokens with G-18 pairs (§9.4); §8 gains the MOTION 2 tier table (§9.5); §2.3 gains `max-w-7xl` as a preference-gated fourth shell width (DL.3); and the 2026-10-14 typography amendment is extended with the colour-and-position tiers (§9.6). Every original sentence is preserved; each amendment names its enforcement; three slices (§10.1–§10.3) are recorded as outside this file's authority. No token moves without its G-18 pair; the enforcement gate is `tests/Feature/DesignTokensTest.php` and the browser axe pass.
+    Track 2-C is closed by the same pass: the display-font proposal does not ship, the 2026-10-14 size amendment is the terminal state, and no C-8 dependency is taken for typography.

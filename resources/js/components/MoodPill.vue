@@ -35,7 +35,7 @@ const arrows: Record<string, string> = {
 </script>
 
 <template>
-    <!-- Ink is `--color-on-mood`, stepped from the theme's dark ink because #482720 on these
+    <!-- Ink is `--color-on-mood`, stepped from the theme's dark ink because the light ink on these
          fills is 4.29:1 (DESIGN.md §6.17). -->
     <span
         v-if="tier !== null && fills[tier]"

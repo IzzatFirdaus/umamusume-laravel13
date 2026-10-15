@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
+import { BaseInput, BaseSelect, BaseTextarea } from '../../components/Form';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -58,6 +59,25 @@ const errors = computed(() => ({
     ...form.errors,
 }));
 const statNames = ['speed', 'stamina', 'power', 'guts', 'wit'];
+
+// The shared selects take `options` as an array; the trainee rows compose the same `Name · ja`
+// label the raw option carried, and scenario/status keep their leading empty-value row.
+const importTraineeOptions = computed(() => [
+    { value: '', label: 'Choose a trainee' },
+    ...props.trainees.map((trainee) => ({
+        value: String(trainee.id),
+        label: trainee.name_ja === null || trainee.name_ja === '' ? trainee.name : `${trainee.name} · ${trainee.name_ja}`,
+    })),
+]);
+
+const importScenarioOptions = computed(() => [
+    { value: '', label: 'Not set (baseline strip)' },
+    ...Object.entries(props.scenarios).map(([key, label]) => ({ value: key, label })),
+]);
+
+const importStatusOptions = computed(() =>
+    Object.entries(props.statuses).map(([value, label]) => ({ value, label })),
+);
 
 function onFile(event: Event): void {
     form.file = (event.target as HTMLInputElement).files?.[0] ?? null;
@@ -260,102 +280,71 @@ function confirmImport(): void {
             :aria-busy="form.processing"
             @submit.prevent="form.post('/training-runs/import/preview', { forceFormData: true })"
         >
-            <label class="block">
-                <span class="font-medium text-ink">Trainee *</span>
-                <!-- A plain select rather than the create page's combobox: an import names a trainee you
-                     already ran, and the costume-card gate the combobox exists to enforce has no field here. -->
-                <select
-                    v-model="form.umamusume_id"
-                    name="umamusume_id"
-                    required
-                    :aria-invalid="errors.umamusume_id ? 'true' : undefined"
-                    :aria-describedby="errors.umamusume_id ? 'import-umamusume_id-error' : undefined"
-                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                    :class="errors.umamusume_id ? 'border-risk' : ''"
-                >
-                    <option value="">Choose a trainee</option>
-                    <option v-for="trainee in trainees" :key="trainee.id" :value="String(trainee.id)">
-                        {{ trainee.name }}<template v-if="trainee.name_ja"> · {{ trainee.name_ja }} </template>
-                    </option>
-                </select>
-                <p v-if="errors.umamusume_id" id="import-umamusume_id-error" class="mt-1 text-risk">{{ errors.umamusume_id }}</p>
-            </label>
+            <BaseSelect
+                :model-value="form.umamusume_id"
+                id="import-umamusume_id"
+                name="umamusume_id"
+                label="Trainee *"
+                :options="importTraineeOptions"
+                required
+                :error="errors.umamusume_id"
+                @update:model-value="(v: string | number | null) => (form.umamusume_id = String(v ?? ''))"
+            />
+            <!-- A plain select rather than the create page's combobox: an import names a trainee you
+                 already ran, and the costume-card gate the combobox exists to enforce has no field here. -->
 
-            <label class="block">
-                <span class="font-medium text-ink">Scenario (optional)</span>
-                <select
-                    v-model="form.scenario"
-                    name="scenario"
-                    :aria-invalid="errors.scenario ? 'true' : undefined"
-                    :aria-describedby="errors.scenario ? 'import-scenario-error' : undefined"
-                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                    :class="errors.scenario ? 'border-risk' : ''"
-                >
-                    <option value="">Not set (baseline strip)</option>
-                    <option v-for="(label, key) in scenarios" :key="key" :value="key">{{ label }}</option>
-                </select>
-                <p v-if="errors.scenario" id="import-scenario-error" class="mt-1 text-risk">{{ errors.scenario }}</p>
-            </label>
+            <BaseSelect
+                :model-value="form.scenario"
+                id="import-scenario"
+                name="scenario"
+                label="Scenario (optional)"
+                :options="importScenarioOptions"
+                :error="errors.scenario"
+                @update:model-value="(v: string | number | null) => (form.scenario = String(v ?? ''))"
+            />
 
-            <label class="block">
-                <span class="font-medium text-ink">Status *</span>
-                <select
-                    v-model="form.status"
-                    name="status"
-                    required
-                    :aria-invalid="errors.status ? 'true' : undefined"
-                    :aria-describedby="errors.status ? 'import-status-error' : undefined"
-                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                >
-                    <option v-for="(label, value) in statuses" :key="value" :value="value">{{ label }}</option>
-                </select>
-                <p v-if="errors.status" id="import-status-error" class="mt-1 text-risk">{{ errors.status }}</p>
-            </label>
+            <BaseSelect
+                :model-value="form.status"
+                id="import-status"
+                name="status"
+                label="Status *"
+                :options="importStatusOptions"
+                required
+                :error="errors.status"
+                @update:model-value="(v: string | number | null) => (form.status = String(v ?? ''))"
+            />
 
-            <label class="block">
-                <span class="font-medium text-ink">Notes (optional)</span>
-                <textarea v-model="form.notes" name="notes" rows="2" class="mt-1 block w-full rounded-md border border-rule bg-raised px-2 py-1 text-ink" />
-            </label>
+            <BaseTextarea
+                :model-value="form.notes"
+                id="import-notes"
+                name="notes"
+                label="Notes (optional)"
+                :rows="2"
+                @update:model-value="(v: string | number) => (form.notes = String(v))"
+            />
 
-            <div class="flex flex-col gap-1">
-                <label for="import-file" class="font-medium text-ink">CSV file</label>
-                <!-- When both are present the file wins: the request copies the upload into `csv` before
-                     `csv` is validated, so choosing a file cannot silently mix with a stale paste. -->
-                <input
-                    id="import-file"
+            <BaseInput
                     type="file"
+                    id="import-file"
                     name="file"
+                    label="CSV file"
                     accept=".csv,text/csv"
-                    class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
+                    :error="errors.file"
                     @change="onFile"
-                >
-                <p v-if="errors.file" class="mt-1 text-risk">{{ errors.file }}</p>
-            </div>
-
-            <label class="flex flex-col gap-1">
-                <span class="font-medium text-ink">or paste the CSV</span>
-                <span class="font-mono text-xs text-ink-muted">{{ headers.join(', ') }}</span>
-                <!-- No `required` here on purpose. A native constraint is evaluated against this field alone,
-                     so a Trainer who chooses the file and leaves the box empty gets "Please fill out this
-                     field" and the form never submits: the upload path the field above exists for, closed.
-                     The server has the rule with the pair in view, and its message says so in the words this
-                     form needs. -->
-                <textarea
-                    v-model="form.csv"
-                    name="csv"
-                    rows="8"
-                    class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 font-mono text-xs text-ink"
-                    :class="errors.csv || errors.turns || rowErrors.length ? 'border-risk' : ''"
-                    :aria-invalid="errors.csv || errors.turns || rowErrors.length ? 'true' : undefined"
-                    :aria-describedby="errors.csv || errors.turns || rowErrors.length ? 'import-csv-errors' : undefined"
-                    :placeholder="headers.join(',')"
                 />
-                <div id="import-csv-errors">
-                    <p v-if="errors.csv" class="mt-1 text-risk">{{ errors.csv }}</p>
-                    <p v-if="errors.turns" class="mt-1 text-risk">{{ errors.turns }}</p>
-                    <p v-for="(message, index) in rowErrors" :key="index" class="mt-1 text-risk">{{ message }}</p>
-                </div>
-            </label>
+
+            <BaseTextarea
+                    :model-value="form.csv"
+                    id="import-csv"
+                    name="csv"
+                    label="or paste the CSV"
+                    :rows="8"
+                    :placeholder="headers.join(',')"
+                    :error="errors.csv || errors.turns || rowErrors.length ? (errors.csv ?? errors.turns ?? rowErrors[0] ?? 'Validation error') : undefined"
+                    :aria-describedby="errors.csv || errors.turns || rowErrors.length ? 'import-csv-errors' : undefined"
+                    class="font-mono text-xs"
+                    @update:model-value="(v: string | number) => (form.csv = String(v))"
+                />
 
             <button
                 type="submit"
@@ -367,3 +356,4 @@ function confirmImport(): void {
         </form>
     </AppLayout>
 </template>
+

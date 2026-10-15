@@ -85,7 +85,7 @@ const groups = computed((): { label: string; rows: CalendarRow[] }[] => {
 
 <template>
     <section :aria-labelledby="headingId" class="flex flex-col gap-3 rounded-md border border-rule bg-panel p-4">
-        <h4 :id="headingId" class="text-base font-semibold text-ink-strong">
+        <h4 :id="headingId" class="text-lg font-semibold text-ink-strong">
             Races ahead
         </h4>
 

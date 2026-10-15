@@ -54,7 +54,7 @@ const gates = (slot: Slot): string[] =>
         <Head title="Races" />
         <template #title>Races</template>
 
-        <h2 class="text-2xl font-semibold text-ink-strong">Race database</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Race database</h2>
 
         <p class="mt-4 max-w-3xl text-sm text-ink-muted">
             Every slot of the shared [Global] career calendar, one row per race per turn. The run's race
@@ -65,7 +65,7 @@ const gates = (slot: Slot): string[] =>
         <section
             v-if="props.totalCount === 0"
             aria-labelledby="races-offline"
-            class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6"
+            class="mt-8 rounded-md border border-dashed border-rule bg-panel p-6"
         >
             <h3 id="races-offline" class="text-lg font-semibold text-ink-strong">
                 The race database is offline
@@ -88,7 +88,7 @@ const gates = (slot: Slot): string[] =>
             <p class="mt-6 text-sm text-ink-muted">{{ props.slots.total }} of {{ props.totalCount }} slots</p>
 
             <div
-                class="mt-2 overflow-x-auto rounded-md border border-rule bg-raised"
+                 class="mt-2 overflow-x-auto rounded-md border border-rule bg-panel"
                 role="region"
                 tabindex="0"
                 aria-label="Race slots, scrollable"

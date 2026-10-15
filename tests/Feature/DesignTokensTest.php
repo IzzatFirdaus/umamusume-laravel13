@@ -234,7 +234,54 @@ it('draws every selection boundary with the line token, never the fill token', f
     expect($offenders)->toBe([]);
 });
 
+/**
+ * The paragraph above is the tripwire: this count moved three times, and every move was
+ * someone writing the number by hand while the tree had already grown past it.
+ */
 it('counts every colour token the static theme declares', function (): void {
+    // 53 through Slice 5, plus the five mood fills and `--color-on-mood` from
+    // Slice 6. The count is a tripwire for an undeclared token, not a budget: a
+    // new colour role is added here and in DESIGN.md §3.1 together, and this row
+    // moves with it. `--color-on-green` was retired 2026-10-09 with the last
+    // consumer of its `text-on-green` utility, the low-Energy advisory badge on
+    // the guided rail that owner ruling R-2 retired; a declaration cites a use,
+    // and no plan or design document names one for it. `DESIGN.md` §2.1 still says
+    // 60 because that row predates R-2; the stylesheet is the authority and it
+    // declares 59, which is also what `TokenPairHygieneTest` records.
+    //
+    // 2026-10-14: 59 -> 66. The seven `--color-type-*` support-type glyph fills
+    // (`SupportTypeMark.vue`) are the client's own chip colours, added so the seven
+    // types read apart instead of washing to one ink (UMAMUSUME_REFERENCE.md §1.4.7,
+    // DESIGN-CORPUS.md §6.0b). They fill a glyph, not a text/background pair, so no
+    // G-18 contract row is owed; they are declared here because every colour role is.
+    //
+    // 2026-10-15: 66 -> 79. Track 2-D owns nine brand and status rows declared as
+    // amendments to the marketing palette: chrome, on-chrome, accent, accent-ink,
+    // accent-soft, status-positive, status-positive-ink, status-caution,
+    // status-caution-ink. Phase 11.18 adds four more so the glyph artwork in
+    // `SupportTypeMark.vue` carries no hex of its own: mark-ink, mark-pal,
+    // mark-group-soft, mark-group-line. They fill a glyph, not a text/background
+    // pair, so no G-18 contract row is owed for the four.
+    $tokens = themeStaticColorTokens();
+
+    expect($tokens)->toHaveCount(79)
+        ->and($tokens)->toContain('--color-goal')
+        ->and($tokens)->toContain('--color-goal-line');
+});
+
+/**
+ * Every `--color-*` token the static theme block declares, read from the stylesheet
+ * rather than remembered by hand.
+ *
+ * The browser gate below is the other reader of this list, and the two must agree:
+ * a token the stylesheet declares but the browser cannot resolve is D-288's
+ * failure, and one it resolves but nothing declares is a phantom that only exists
+ * because some utility emitted a hex.
+ *
+ * @return array<int, string>
+ */
+function themeStaticColorTokens(): array
+{
     $css = (string) file_get_contents(base_path('resources/css/app.css'));
     $theme = substr($css, strpos($css, '@theme static'));
     $open = strpos($theme, '{');
@@ -256,76 +303,419 @@ it('counts every colour token the static theme declares', function (): void {
 
     $block = preg_replace('#/\*.*?\*/#s', '', substr($theme, $open + 1, $end - $open - 1));
 
-    preg_match_all('/(--color-[a-z0-9-]+)\s*:/', $block, $matches);
+    preg_match_all('/(--color-[a-z0-9-]+)\s*:/', (string) $block, $matches);
 
-    // 53 through Slice 5, plus the five mood fills and `--color-on-mood` from
-    // Slice 6. The count is a tripwire for an undeclared token, not a budget: a
-    // new colour role is added here and in DESIGN.md §3.1 together, and this row
-    // moves with it. `--color-on-green` was retired 2026-10-09 with the last
-    // consumer of its `text-on-green` utility, the low-Energy advisory badge on
-    // the guided rail that owner ruling R-2 retired; a declaration cites a use,
-    // and no plan or design document names one for it.
-    expect(array_unique($matches[1]))->toHaveCount(59)
-        ->and($matches[1])->toContain('--color-goal')
-        ->and($matches[1])->toContain('--color-goal-line');
-});
+    return array_values(array_unique($matches[1]));
+}
+
+/**
+ * G-18's contract: the text/background combinations this system paints, and the
+ * threshold each one owes.
+ *
+ * `text` marks a pair that carries copy, which owes WCAG 2.1 AA at 4.5:1 (D-10). The
+ * pairs that do not carry copy owe 1.4.11's 3:1 instead: a selection boundary, a
+ * progress fill and a state outline are information, but they are not text, and
+ * holding them to 4.5:1 would fail every hairline in the system.
+ *
+ * Membership is the recovered R9 browser pass: the pairs `DESIGN-CORPUS.md` §3.4
+ * and §3.7 list as approved, the calendar, capsule and stat-band rows measured in
+ * the slice-2 and slice-3 verification records, and the energy-band, advisory,
+ * delta and failure-chip rows measured in slice-5. Ratios were transcribed there
+ * from `getComputedStyle` on the rendered element per D-288, not from a source
+ * hex. The retired `on-green` pair is absent because owner ruling R-2 retired
+ * `--color-on-green` with its only consumer on 2026-10-09, so what this list
+ * counted was 19 rather than 20; 2026-10-13 adds `ink-muted on raised` and
+ * `ink-muted on panel` (cockpit/wizard UI audit 2026-10-12 §2.9), making it 21.
+ *
+ * @return array<string, array{foreground: string, background: string, text: bool}>
+ */
+function g18ContractPairs(): array
+{
+    return [
+        // Body ink on the surfaces it is set on.
+        'ink on panel' => ['foreground' => 'ink', 'background' => 'panel', 'text' => true],
+        'ink on raised' => ['foreground' => 'ink', 'background' => 'raised', 'text' => true],
+        'ink-muted on sunken' => ['foreground' => 'ink-muted', 'background' => 'sunken', 'text' => true],
+        // 2026-10-13: the muted tier's heaviest consumers print on raised and panel
+        // (raised-cell labels, panel sub-copy), so both pairings join the contract
+        // (cockpit/wizard UI audit 2026-10-12 §2.9) instead of staying hand-computed.
+        'ink-muted on raised' => ['foreground' => 'ink-muted', 'background' => 'raised', 'text' => true],
+        'ink-muted on panel' => ['foreground' => 'ink-muted', 'background' => 'panel', 'text' => true],
+
+        // Per-stat band tints: wayfinding, never identity (D-113, D-114).
+        'ink on tint-speed' => ['foreground' => 'ink', 'background' => 'tint-speed', 'text' => true],
+        'ink on tint-stamina' => ['foreground' => 'ink', 'background' => 'tint-stamina', 'text' => true],
+        'ink on tint-power' => ['foreground' => 'ink', 'background' => 'tint-power', 'text' => true],
+        'ink on tint-guts' => ['foreground' => 'ink', 'background' => 'tint-guts', 'text' => true],
+        'ink on tint-wit' => ['foreground' => 'ink', 'background' => 'tint-wit', 'text' => true],
+        'ink on tint-sp' => ['foreground' => 'ink', 'background' => 'tint-sp', 'text' => true],
+
+        // Fills with their own ink, the pair each one exists for.
+        'ink on green-tint' => ['foreground' => 'ink', 'background' => 'green-tint', 'text' => true],
+        'ink-strong on raised' => ['foreground' => 'ink-strong', 'background' => 'raised', 'text' => true],
+        'on-chrome on chrome' => ['foreground' => 'on-chrome', 'background' => 'chrome', 'text' => true],
+        'on-pick on pick' => ['foreground' => 'on-pick', 'background' => 'pick', 'text' => true],
+        'on-pick on green' => ['foreground' => 'on-pick', 'background' => 'green', 'text' => true],
+
+        // Deltas and the goal cell: never colour-only (D-12, §6.16b).
+        'up on panel' => ['foreground' => 'up', 'background' => 'panel', 'text' => true],
+        'down on raised' => ['foreground' => 'down', 'background' => 'raised', 'text' => true],
+        'goal on raised' => ['foreground' => 'goal', 'background' => 'raised', 'text' => false],
+        'goal-line on raised' => ['foreground' => 'goal-line', 'background' => 'raised', 'text' => false],
+
+        // The progress fill on its own track, the one repair the pass caught.
+        'green-deep on sunken' => ['foreground' => 'green-deep', 'background' => 'sunken', 'text' => false],
+
+        // Card boundary: border-rule on page (WCAG 1.4.11 non-text, 3:1).
+        'rule on page' => ['foreground' => 'rule', 'background' => 'page', 'text' => false],
+
+        // Track 2-D brand and status additions (Phase 11.16). Each new role owes a
+        // measured G-18 pair; values are the ruling's starting draft and these rows
+        // are the gate. Failures here mean a token needs stepping, never that a row
+        // is removed (addendum prohibition 1).
+        'on-brand-chrome on brand-chrome' => ['foreground' => 'on-brand-chrome', 'background' => 'brand-chrome', 'text' => true],
+        'brand-accent-ink on page' => ['foreground' => 'brand-accent-ink', 'background' => 'page', 'text' => true],
+        'brand-accent-ink on brand-accent-soft' => ['foreground' => 'brand-accent-ink', 'background' => 'brand-accent-soft', 'text' => true],
+        'on-brand-chrome on brand-accent' => ['foreground' => 'on-brand-chrome', 'background' => 'brand-accent', 'text' => false],
+        'status-positive-ink on status-positive' => ['foreground' => 'status-positive-ink', 'background' => 'status-positive', 'text' => true],
+        'status-caution-ink on status-caution' => ['foreground' => 'status-caution-ink', 'background' => 'status-caution', 'text' => true],
+        'ink-strong on status-caution' => ['foreground' => 'ink-strong', 'background' => 'status-caution', 'text' => true],
+        'ink-muted on brand-accent-soft' => ['foreground' => 'ink-muted', 'background' => 'brand-accent-soft', 'text' => true],
+        'on-brand-chrome on status-positive' => ['foreground' => 'on-brand-chrome', 'background' => 'status-positive', 'text' => true],
+        'ink-strong on brand-accent-soft' => ['foreground' => 'ink-strong', 'background' => 'brand-accent-soft', 'text' => true],
+    ];
+}
+
+/**
+ * The nine grade-badge fills, each measured against `ink-strong`.
+ *
+ * Nine letters, not seventeen: `config/scenarios.php` bands every stat at 50-point
+ * half-steps and emits the nine letters these tokens are named for. White on the
+ * light fills measures 1.20-1.44 and is banned (G-47), so the ink is `ink-strong`
+ * in both themes.
+ *
+ * @return array<int, string>
+ */
+function g18GradeBadgeTokens(): array
+{
+    return [
+        'grade-g', 'grade-f', 'grade-e', 'grade-d', 'grade-c',
+        'grade-b', 'grade-a', 'grade-s', 'grade-ss',
+    ];
+}
+
+/**
+ * The script that resolves a token list in a given theme.
+ *
+ * `getPropertyValue` on `documentElement` returns the *specified* value, which can
+ * be a hex, a `color-mix()` or a keyword, so it is normalised by routing it through
+ * a probe element's `color` and reading the computed value back: that is the one
+ * form the browser cannot leave half-resolved. An empty string is returned as an
+ * empty string rather than by falling back to the probe's inherited colour, which
+ * is the silent false pass D-288 was written about.
+ */
+function resolvedTokenScript(array $names, string $theme): string
+{
+    return sprintf(
+        '(() => {'
+        .'document.documentElement.dataset.theme = %s;'
+        .'const root = getComputedStyle(document.documentElement);'
+        .'const probe = document.createElement("span");'
+        .'probe.style.cssText = "position:absolute;left:-9999px;top:0";'
+        .'document.body.appendChild(probe);'
+        .'const read = (name) => {'
+        .'  const raw = root.getPropertyValue(name).trim();'
+        .'  if (raw === "") { return { raw: "", resolved: "" }; }'
+        .'  probe.style.color = ""; probe.style.color = raw;'
+        .'  return { raw: raw, resolved: getComputedStyle(probe).color };'
+        .'};'
+        .'const out = {};'
+        .'for (const name of %s) { out[name] = read(name); }'
+        .'probe.remove();'
+        .'return out;'
+        .'})()',
+        json_encode($theme),
+        json_encode(array_values($names)),
+    );
+}
+
+/**
+ * An `rgb()` / `rgba()` computed value as its three channels, or null if it is not
+ * a colour at all.
+ *
+ * @return array<int, int>|null
+ */
+function parseComputedColor(string $value): ?array
+{
+    if (preg_match('/^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/i', $value, $matches) === 1) {
+        return [
+            (int) round((float) $matches[1]),
+            (int) round((float) $matches[2]),
+            (int) round((float) $matches[3]),
+        ];
+    }
+
+    return null;
+}
+
+/**
+ * WCAG 2.1 relative luminance, linearising each channel exactly as
+ * `DESIGN-CORPUS.md` §3.4 states the formula.
+ *
+ * @param  array<int, int>  $rgb
+ */
+function relativeLuminance(array $rgb): float
+{
+    $channels = array_map(
+        static function (int $channel): float {
+            $component = $channel / 255;
+
+            return $component <= 0.03928 ? $component / 12.92 : (($component + 0.055) / 1.055) ** 2.4;
+        },
+        $rgb,
+    );
+
+    return 0.2126 * $channels[0] + 0.7152 * $channels[1] + 0.0722 * $channels[2];
+}
+
+/**
+ * The WCAG 2.1 contrast ratio between two colours.
+ *
+ * @param  array<int, int>  $foreground
+ * @param  array<int, int>  $background
+ */
+function contrastRatio(array $foreground, array $background): float
+{
+    $lighter = max(relativeLuminance($foreground), relativeLuminance($background));
+    $darker = min(relativeLuminance($foreground), relativeLuminance($background));
+
+    return ($lighter + 0.05) / ($darker + 0.05);
+}
 
 /**
  * Browser-based contrast and token-resolution gate (D-288, G-18).
  *
- * These tests require a Playwright browser driver. They are skipped when no
- * browser is available, but they are the authoritative gate for:
- * - D-288: read getComputedStyle(root) for every token, fail on empty
- * - G-18: all 19 text/background pairs + 9 grade-badge fills clear 4.5:1 in both themes
+ * D-288 requires reading the resolved custom property rather than sampling through
+ * an element that already has a colour, and treating empty as a failure: Tailwind
+ * prunes an `@theme` token nothing references, an undefined `var()` then inherits
+ * whatever the element had, and a naive probe reports a pass for a colour that was
+ * never declared. The gate therefore reads every token off `documentElement` in
+ * both themes and fails on the first empty one.
  *
- * The measured corpus values (FRONTEND-SPEC-DIVERGENCE.md §5):
- * - Light worst pair: up/panel 4.74
- * - Dark worst pair: down/raised 5.48
- * - Grade badges: 9.00+ in both themes
+ * G-18 is D-10 applied per theme (D-103): every pair in `g18ContractPairs()` clears
+ * 4.5:1 for text or 3:1 for a non-text boundary in light *and* dark, with no
+ * component that only works in one of them.
  */
 describe('browser contrast and token resolution (D-288, G-18)', function (): void {
     beforeEach(function (): void {
         if (! class_exists(Browser::class)) {
             $this->markTestSkipped('Playwright browser driver not installed; skipping D-288/G-18 browser gate.');
         }
+
+        /*
+         * `tests/Pest.php` strips `@vite` from every Feature test so the suite
+         * needs no build manifest. This gate reads resolved custom properties, so
+         * it needs the real sheet: without it the rendered HTML carries no
+         * stylesheet at all, every `getPropertyValue` returns an empty string, and
+         * D-288's "fail on empty" fires on a missing asset rather than on a
+         * missing token. Restoring the facade puts the built manifest back, and the
+         * browser server serves `public/build` as a static file.
+         */
+        $this->withVite();
     });
 
-    it('resolves all 60 tokens in both themes and fails on empty', function (): void {
-        // This test uses Pest Browser (Playwright) to:
-        // 1. Visit each page in both light and dark themes
-        // 2. Read getComputedStyle(document.documentElement) for every --color-* token
-        // 3. Assert no token resolves to empty string (Tailwind prunes unreferenced @theme tokens)
-        // 4. Assert all 19 text/background pairs + 9 grade-badge fills ≥ 4.5:1 in both themes
-        //
-        // When Playwright is installed, this test becomes the authoritative gate.
-        // The static corpus values from FRONTEND-SPEC-DIVERGENCE.md §5 are:
-        // - Light worst pair: up/panel 4.74
-        // - Dark worst pair: down/raised 5.48
-        // - Grade badges: 9.00+ in both themes
-        //
-        // Implementation notes:
-        // - Tokens: 60 --color-* custom properties from app.css @theme static, the
-        //   number asserted by the static count test above. 50 before the
-        //   --color-goal pair landed in Slice 2, plus --color-pick-line in Slice 3.
-        //   --color-ring, --color-on-pick
-        //   and --color-goal are all theme-split, so a single-theme check would not
-        //   catch a wrong pair. The 41 and 43 this note carried earlier were both
-        //   stale on arrival: the tint and line families had already grown the
-        //   block past them, which is why the count is measured now.
-        // - Non-text boundary pairs must clear WCAG 1.4.11's 3:1, not 4.5:1: the focus
-        //   ring measures 4.88/5.17 on light panel/raised and 9.51/7.61 on dark, while
-        //   --color-green (the value this rule replaced) is 1.88 on the light panel.
-        // - Pairs: defined in design-research/DESIGN.md §3.4
-        // - Grade badges: 9 grades × 2 themes = 18 fills + 9 letters
-        $this->markTestIncomplete('Requires Playwright; implementation follows Pest Browser API.');
+    it('resolves every declared token in both themes and fails on empty', function (): void {
+        $page = visit('/umamusume');
+        $names = themeStaticColorTokens();
+
+        expect($names)->toHaveCount(79);
+
+        foreach (['light', 'dark'] as $theme) {
+            /** @var array<string, array{raw: string, resolved: string}> $resolved */
+            $resolved = (array) $page->script(resolvedTokenScript($names, $theme));
+
+            $empty = [];
+            $unparsable = [];
+
+            foreach ($names as $name) {
+                $value = $resolved[$name]['raw'] ?? '';
+
+                if ($value === '') {
+                    $empty[] = $name;
+
+                    continue;
+                }
+
+                if (parseComputedColor($resolved[$name]['resolved'] ?? '') === null) {
+                    $unparsable[] = $name.' ('.$value.')';
+                }
+            }
+
+            expect($empty)->toBe([], sprintf(
+                '%s theme leaves %d declared token(s) unresolved. A token Tailwind pruned resolves to nothing,'
+                .' and an undefined var() inherits silently, so a contrast probe would report someone else\'s colour.'
+                .' @theme static is what prevents this (D-288).',
+                $theme,
+                count($empty),
+            ));
+
+            expect($unparsable)->toBe([], sprintf(
+                '%s theme resolved %d token(s) to something that is not a colour.',
+                $theme,
+                count($unparsable),
+            ));
+        }
     });
 
     it('asserts the G-18 pair list matches the design contract', function (): void {
-        // G-18 requires every text/background pair used for real copy to pass WCAG 2.1 AA
-        // at its size: 4.5:1 for text under 18.66px bold or 24px regular, 3:1 above.
-        // design-research/DESIGN.md §3.4 lists the approved pairs with computed ratios.
-        //
-        // This test validates the live page against that table in both themes.
-        $this->markTestIncomplete('Requires Playwright; compares live ratios against the design contract table.');
+        $page = visit('/umamusume');
+
+        $pairs = g18ContractPairs();
+        $badges = g18GradeBadgeTokens();
+
+        expect($pairs)->toHaveCount(32)
+            ->and($badges)->toHaveCount(9)
+            ->and(array_keys($pairs))->toBe([
+                'ink on panel', 'ink on raised', 'ink-muted on sunken', 'ink-muted on raised', 'ink-muted on panel',
+                'ink on tint-speed', 'ink on tint-stamina', 'ink on tint-power', 'ink on tint-guts', 'ink on tint-wit',
+                'ink on tint-sp', 'ink on green-tint', 'ink-strong on raised', 'on-chrome on chrome',
+                'on-pick on pick', 'on-pick on green', 'up on panel', 'down on raised',
+                'goal on raised', 'goal-line on raised', 'green-deep on sunken', 'rule on page',
+                'on-brand-chrome on brand-chrome', 'brand-accent-ink on page',
+                'brand-accent-ink on brand-accent-soft', 'on-brand-chrome on brand-accent',
+                'status-positive-ink on status-positive', 'status-caution-ink on status-caution',
+                'ink-strong on status-caution', 'ink-muted on brand-accent-soft',
+                'on-brand-chrome on status-positive', 'ink-strong on brand-accent-soft',
+            ]);
+
+        $roles = collect($pairs)
+            ->flatMap(static fn (array $pair): array => [$pair['foreground'], $pair['background']])
+            ->merge($badges)
+            ->merge(['ink-strong'])
+            ->unique()
+            ->values()
+            ->all();
+
+        $names = array_map(static fn (string $role): string => '--color-'.$role, $roles);
+
+        foreach (['light', 'dark'] as $theme) {
+            /** @var array<string, array{raw: string, resolved: string}> $resolved */
+            $resolved = (array) $page->script(resolvedTokenScript($names, $theme));
+
+            $colors = [];
+
+            foreach ($roles as $role) {
+                $colors[$role] = parseComputedColor($resolved['--color-'.$role]['resolved'] ?? '');
+            }
+
+            expect(array_filter($colors, static fn (?array $rgb): bool => $rgb === null))->toBe([], sprintf(
+                '%s theme left one or more contract roles unreadable; no ratio below it can be trusted.',
+                $theme,
+            ));
+
+            foreach ($pairs as $label => $pair) {
+                $ratio = contrastRatio($colors[$pair['foreground']], $colors[$pair['background']]);
+                $threshold = $pair['text'] ? 4.5 : 3.0;
+
+                expect($ratio)->toBeGreaterThanOrEqual($threshold, sprintf(
+                    '%s theme: the contract pair "%s" (--color-%s on --color-%s) measures %.2f:1, under the %.1f:1 %s'
+                    .' threshold. Every ratio the corpus records for it clears this bar.',
+                    $theme,
+                    $label,
+                    $pair['foreground'],
+                    $pair['background'],
+                    $ratio,
+                    $threshold,
+                    $pair['text'] ? 'text' : 'non-text boundary',
+                ));
+            }
+
+            foreach ($badges as $badge) {
+                $ratio = contrastRatio($colors[$badge], $colors['ink-strong']);
+
+                expect($ratio)->toBeGreaterThanOrEqual(4.5, sprintf(
+                    '%s theme: grade badge "%s" measures %.2f:1 against ink-strong, under the 4.5:1 the grade letter'
+                    .' needs. White on these fills measures 1.20-1.44 and is banned (G-47).',
+                    $theme,
+                    $badge,
+                    $ratio,
+                ));
+            }
+        }
+    });
+
+    /*
+     * The card surface against the page behind it, measured and floored rather than
+     * contracted at 3:1 (frontend-fidelity Slice 0.4, 2026-10-14).
+     *
+     * `app.css`'s dark override widened the `page`/`panel` step and this test is the
+     * check that the widening holds and that the sanctioned separator still carries
+     * WCAG 1.4.11. Three numbers matter here, and the third is the honest one:
+     *
+     *  1. `rule on page` clears 3:1 in both themes. That is the card boundary and the
+     *     mechanism DESIGN.md §2.3 names first, and it is the row that actually owes the
+     *     3:1 in the contract above.
+     *  2. The dark `panel`/`page` step is floored at 1.25:1, up from the 1.04:1 the two
+     *     surfaces read at before this slice. It is a floor, not the target, and moving
+     *     it up requires a text token to move with it.
+     *  3. The light step is floored at 1.05:1, which is where it was and stays. The
+     *     light theme never had the dark theme's dissolution problem, and this slice did
+     *     not touch its ramp.
+     *
+     * Why the surface step cannot be contracted at 3:1: a surface that carries
+     * `--color-ink-muted` is already capped by the G-18 row `ink-muted on panel` at
+     * 4.5:1, which bounds dark `panel` at a relative luminance of 0.0522. The contrast
+     * formula's +0.05 floor means a pure black page against that bound still only
+     * reaches 2.04:1, and light would have to be driven near-black to reach 3:1 against
+     * its own panel. Reaching 3:1 on the surface means failing 4.5:1 on the text set on
+     * it. So the target is recorded here as the arithmetic fact it is, and the rule
+     * edge keeps the obligation it already clears.
+     */
+    it('measures the card surface step and keeps the rule edge above 3:1', function (): void {
+        $page = visit('/umamusume');
+
+        foreach (['light', 'dark'] as $theme) {
+            /** @var array<string, array{raw: string, resolved: string}> $resolved */
+            $resolved = (array) $page->script(resolvedTokenScript(
+                ['--color-panel', '--color-page', '--color-rule'],
+                $theme,
+            ));
+
+            $panel = parseComputedColor($resolved['--color-panel']['resolved'] ?? '');
+            $pageColor = parseComputedColor($resolved['--color-page']['resolved'] ?? '');
+            $rule = parseComputedColor($resolved['--color-rule']['resolved'] ?? '');
+
+            expect($panel)->not->toBeNull()
+                ->and($pageColor)->not->toBeNull()
+                ->and($rule)->not->toBeNull();
+
+            /** @var array<int, int> $panel */
+            /** @var array<int, int> $pageColor */
+            /** @var array<int, int> $rule */
+            $surfaceStep = contrastRatio($panel, $pageColor);
+            $boundaryStep = contrastRatio($rule, $pageColor);
+
+            // The boundary, which is the part WCAG 1.4.11 asks about.
+            expect($boundaryStep)->toBeGreaterThanOrEqual(3.0, sprintf(
+                '%s theme: the card boundary (--color-rule on --color-page) measures %.2f:1, under the 3:1'
+                .' WCAG 1.4.11 needs for the visual information identifying the component.',
+                $theme,
+                $boundaryStep,
+            ));
+
+            // The surface step, floored per theme at what each ramp was widened to.
+            $floor = $theme === 'dark' ? 1.25 : 1.05;
+
+            expect($surfaceStep)->toBeGreaterThanOrEqual($floor, sprintf(
+                '%s theme: the card surface (--color-panel on --color-page) measures %.2f:1, under the %.2f:1'
+                .' floor this slice widened the ramp to. 3:1 is not reachable here: a surface carrying'
+                .' ink-muted is capped at 4.5:1 by the ink-muted contract row, which bounds dark panel at'
+                .' a relative luminance of 0.0522, and even a pure black page against that bound only'
+                .' reaches 2.04:1.',
+                $theme,
+                $surfaceStep,
+                $floor,
+            ));
+        }
     });
 });

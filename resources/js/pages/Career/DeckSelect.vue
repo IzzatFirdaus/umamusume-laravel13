@@ -26,6 +26,7 @@ import DeckAnalysis from '../../components/support/DeckAnalysis.vue';
 import SupportSlot from '../../components/support/SupportSlot.vue';
 import SupportTypeMark from '../../components/support/SupportTypeMark.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
+import { BaseInput, BaseSelect, BaseButton } from '../../components/Form';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref } from 'vue';
 
@@ -131,6 +132,9 @@ const fieldErrors = computed(() =>
 const fillingLabel = (): string =>
     props.slots.find((slot) => slot.position === filling.value)?.label ?? `Slot ${filling.value}`;
 
+/** The card the picker's target slot currently holds, or null when the slot is empty. */
+const fillingSlotCard = computed(() => props.slots.find((slot) => slot.position === filling.value)?.card ?? null);
+
 /**
  * A refusal names the slot in the words the slot already carries on this screen. The validation key is a
  * field path (`deck.3.ownership`, `deck.2.support_card_id`), and a Trainer reading it learns the shape of
@@ -198,6 +202,7 @@ function equip(ownership: 'OWNED' | 'RENTED'): void {
     save();
 }
 
+/** A clear is a write of its own: the slot returns to its named empty text and the flag to `N/A`. */
 function clearSlot(): void {
     form.deck[filling.value] = { support_card_id: '', ownership: '' };
     save();
@@ -221,9 +226,24 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
 </script>
 
 <template>
-    <SetupLayout :step="5" :visited="props.visited">
+    <SetupLayout :step="5" :visited="props.visited" :saved="props.saved">
         <Head title="Support deck" />
+        <template #eyebrow>Setup</template>
         <template #title>Support deck</template>
+
+        <!-- Back breadcrumb -->
+        <nav class="mt-4 mb-2" aria-label="Breadcrumb">
+            <Link href="/career/setup/deck" class="inline-flex min-h-11 items-center text-sm font-medium text-brand-accent-ink hover:underline transition-colors duration-150 ease-out" aria-label="Back to deck step">
+                ← Back to deck
+            </Link>
+        </nav>
+
+        <!-- Header: eyebrow + large title + subtitle -->
+        <header class="mb-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 5 of 6</p>
+            <p class="mt-1 text-2xl font-semibold text-ink-strong">Support deck</p>
+            <p class="mt-1 text-sm text-ink-muted">A deck is the six cards equipped before the career starts.</p>
+        </header>
 
         <p class="max-w-3xl text-sm text-ink-muted">
             A deck is the six cards equipped before the career starts. Position six is the friend slot, and
@@ -250,6 +270,11 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
             <section aria-labelledby="draft-slots-heading">
                 <h2 id="draft-slots-heading" class="text-lg font-semibold text-ink-strong">The six slots</h2>
 
+                <p class="mt-1 text-xs text-ink-muted">
+                    Not equipped. The six cards are the deck the run starts with, so an empty slot here is a
+                    gap the Trainer can still fill.
+                </p>
+
                 <ul class="mt-3 space-y-2">
                     <SupportSlot
                         v-for="slot in props.slots"
@@ -265,10 +290,10 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                     />
                 </ul>
 
-                <p
-                    v-if="form.errors.deck && !form.processing"
-                    class="mt-3 rounded-md border border-dashed border-rule bg-raised p-3 text-xs text-ink-muted"
-                >
+                 <p
+                     v-if="form.errors.deck && !form.processing"
+                     class="mt-3 rounded-md border border-dashed border-rule bg-panel p-3 text-xs text-ink-muted"
+                 >
                     A slot that holds a card has to say whether you own it or rented it. Nothing is stored
                     until you choose one of the two.
                 </p>
@@ -276,7 +301,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                 <!-- Where the flag goes, said next to the six toggles it describes: the draft holds it
                      while the setup is in flight, and Preflight writes it onto the run's deck row when
                      the career starts (`ADR-0023`, D3). -->
-                <p class="mt-3 rounded-md border border-dashed border-rule bg-raised p-3 text-xs text-ink-muted">
+                <p class="mt-3 rounded-md border border-dashed border-rule bg-panel p-3 text-xs text-ink-muted">
                     The owned or rented flag is kept in this setup draft, and Preflight writes it onto the run
                     as one value per slot, where it stays after a reload. A slot you have not classified reads
                     as N/A rather than as Owned.
@@ -309,38 +334,25 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                     </span>
                 </p>
 
-                <form class="mt-3 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="filter()">
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink">Type</span>
-                        <select
+                <div class="mt-3 rounded-lg border border-rule bg-panel p-3">
+                    <form class="flex flex-wrap items-end gap-3 text-sm" @submit.prevent="filter()">
+                        <BaseSelect
                             v-model="type"
+                            id="deck-filter-type"
                             name="type"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                        >
-                            <option value="">All</option>
-                            <option v-for="kind in props.types" :key="kind.key" :value="kind.key">
-                                {{ kind.label }}
-                            </option>
-                        </select>
-                    </label>
-
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink">Name contains</span>
-                        <input
+                            label="Type"
+                            :options="[{ value: '', label: 'All' }, ...props.types.map(k => ({ value: k.key, label: k.label }))]"
+                        />
+                        <BaseInput
                             v-model="search"
+                            id="deck-filter-search"
                             name="q"
                             type="search"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                        >
-                    </label>
-
-                    <button
-                        type="submit"
-                        class="h-11 rounded-full border border-rule px-3 py-1.5 font-semibold text-ink hover:bg-sunken"
-                    >
-                        Filter
-                    </button>
-                </form>
+                            label="Name contains"
+                        />
+                        <BaseButton type="submit" variant="secondary">Filter</BaseButton>
+                    </form>
+                </div>
 
                 <p v-if="props.picker.type || props.picker.query" class="mt-2 text-xs text-ink-muted">
                     {{ props.picker.options.length }} card{{ props.picker.options.length === 1 ? '' : 's' }}
@@ -348,10 +360,10 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                         v-if="props.picker.query"> and a name containing {{ props.picker.query }}</template>.
                 </p>
 
-                <p
-                    v-if="props.picker.options.length === 0"
-                    class="mt-3 rounded-lg border border-dashed border-rule bg-raised p-5 text-sm text-ink-muted"
-                >
+                 <p
+                     v-if="props.picker.options.length === 0"
+                     class="mt-3 rounded-lg border border-dashed border-rule bg-panel p-5 text-sm text-ink-muted"
+                 >
                     The support-card catalog holds no row matching that. Run
                     <code>php artisan uma:fetch gametora-support-cards</code> to fill it, or
                     <code>php artisan uma:reparse gametora-support-cards</code> if a fetch says the document
@@ -359,45 +371,46 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                     mistake in the filter.
                 </p>
 
-                <div v-else class="mt-3 flex flex-wrap items-end gap-3">
-                    <label class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-                        <span class="text-ink">Card for {{ fillingLabel() }}</span>
-                        <select
-                            id="deck-pick"
-                            class="h-11 max-w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                        >
-                            <option value="">Not equipped</option>
-                            <option v-for="card in props.picker.options" :key="card.id" :value="String(card.id)">
-                                {{ card.label }}
-                            </option>
-                        </select>
-                    </label>
+                <div
+                    v-else
+                    role="group"
+                    :aria-label="`Card for Slot ${filling}`"
+                    class="mt-3 flex flex-wrap items-end gap-3"
+                >
+                    <!-- The group states which slot the picker aims at, one-based, and says whether that slot
+                         currently holds a card. `fillingLabel()` returns the server's descriptive label
+                         ("Slot 3 · Friends"), which is why the group carries the bare `Card for Slot 3` name
+                         the retarget contract names. -->
+                    <BaseSelect
+                        id="deck-pick"
+                        :label="fillingLabel()"
+                        :options="[{ value: '', label: 'Not equipped' }, ...props.picker.options.map(c => ({ value: String(c.id), label: c.label }))]"
+                    />
 
-                    <button
-                        type="button"
-                        class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken"
-                        @click="equip('OWNED')"
-                    >
+                    <!-- Three named writes, one per outcome, each stating the slot it targets. A single
+                         assignment select would name the outcome without naming the slot, and the slot is
+                         the thing the picker was just retargeted to. -->
+                    <BaseButton type="button" variant="secondary" @click="equip('OWNED')">
                         Equip owned to {{ fillingLabel() }}
                         <span class="sr-only"> the card selected in the picker</span>
-                    </button>
+                    </BaseButton>
 
-                    <button
-                        type="button"
-                        class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken"
-                        @click="equip('RENTED')"
-                    >
+                    <BaseButton type="button" variant="secondary" @click="equip('RENTED')">
                         Equip rented to {{ fillingLabel() }}
                         <span class="sr-only"> the card selected in the picker</span>
-                    </button>
+                    </BaseButton>
 
-                    <button
-                        type="button"
-                        class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken"
-                        @click="clearSlot"
-                    >
+                    <BaseButton type="button" variant="secondary" @click="clearSlot()">
                         Set {{ fillingLabel() }} to not equipped
-                    </button>
+                    </BaseButton>
+
+                    <p
+                        v-if="!fillingSlotCard"
+                        class="basis-full text-xs text-ink-muted"
+                    >
+                        Slot {{ filling }} holds no card yet. Equipping here fills it; the slot stays empty
+                        until you save.
+                    </p>
                 </div>
 
                 <ul class="mt-2 space-y-1">
@@ -423,13 +436,13 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
         <div class="mt-6 flex flex-wrap items-center gap-3">
             <a
                 href="/career/setup/legacy"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
             >
                 Back: Legacy
             </a>
             <a
                 href="/career/setup/preflight"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
             >
                 Next: Preflight
             </a>

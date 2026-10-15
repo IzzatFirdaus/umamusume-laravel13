@@ -30,6 +30,7 @@
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import TrainingCard from '../../components/career/TrainingCard.vue';
+import { BaseInput, BaseSelect, BaseRadio } from '../../components/Form';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
@@ -409,7 +410,7 @@ const capFor = (label: string): number =>
             <form class="mt-3 grid max-w-3xl grid-cols-2 gap-3 text-sm md:grid-cols-3" @submit.prevent="recordTurn">
                 <label class="flex flex-col gap-1">
                     <span class="text-ink-muted">Turn *</span>
-                    <input
+                    <BaseInput
                         id="turn-turn"
                         v-model="form.turn"
                         type="number"
@@ -417,14 +418,13 @@ const capFor = (label: string): number =>
                         min="1"
                         required
                         :aria-describedby="describedBy('turn')"
-                        class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                    >
-                    <span v-if="errorOf('turn')" :id="`turn-turn-error`" class="text-xs text-risk">{{ errorOf('turn') }}</span>
+                        :error="errorOf('turn')"
+                    />
                 </label>
 
                 <label v-for="field in statFields" :key="field.name" class="flex flex-col gap-1">
                     <span class="text-ink-muted">{{ field.label }} *</span>
-                    <input
+                    <BaseInput
                         :id="`turn-${field.name}`"
                         v-model="form[field.name]"
                         type="number"
@@ -434,14 +434,13 @@ const capFor = (label: string): number =>
                         :placeholder="placeholder(field.name)"
                         required
                         :aria-describedby="describedBy(field.name)"
-                        class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                    >
-                    <span v-if="errorOf(field.name)" :id="`turn-${field.name}-error`" class="text-xs text-risk">{{ errorOf(field.name) }}</span>
+                        :error="errorOf(field.name)"
+                    />
                 </label>
 
                 <label v-for="field in optionalFields" :key="field.name" class="flex flex-col gap-1">
                     <span class="text-ink-muted">{{ field.label }}</span>
-                    <input
+                    <BaseInput
                         :id="`turn-${field.name}`"
                         v-model="form[field.name]"
                         type="number"
@@ -450,9 +449,8 @@ const capFor = (label: string): number =>
                         :max="field.max"
                         :placeholder="placeholder(field.name)"
                         :aria-describedby="describedBy(field.name)"
-                        class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                    >
-                    <span v-if="errorOf(field.name)" :id="`turn-${field.name}-error`" class="text-xs text-risk">{{ errorOf(field.name) }}</span>
+                        :error="errorOf(field.name)"
+                    />
                 </label>
 
                 <!-- Energy as a state, not only a number: a figure when the Trainer read one, a band when
@@ -461,12 +459,17 @@ const capFor = (label: string): number =>
                 <fieldset class="flex flex-col gap-1">
                     <legend class="text-ink-muted">Energy</legend>
                     <div class="flex flex-wrap gap-3">
-                        <label v-for="state in energyStates" :key="state.value" class="flex min-h-11 items-center gap-1 text-sm text-ink">
-                            <input v-model="form.energy_state" type="radio" name="energy_state" :value="state.value">
-                            {{ state.label }}
-                        </label>
+                        <BaseRadio
+                            v-for="state in energyStates"
+                            :key="state.value"
+                            v-model="form.energy_state"
+                            :value="state.value"
+                            name="energy_state"
+                            :label="state.label"
+                            inline
+                        />
                     </div>
-                    <input
+                    <BaseInput
                         v-if="form.energy_state === 'exact'"
                         id="turn-energy"
                         v-model="form.energy"
@@ -476,75 +479,64 @@ const capFor = (label: string): number =>
                         max="100"
                         :placeholder="placeholder('energy')"
                         :aria-describedby="describedBy('energy')"
-                        class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                    >
-                    <select
+                        :error="errorOf('energy')"
+                    />
+                    <BaseSelect
                         v-else-if="form.energy_state === 'band'"
                         id="turn-energy-band"
                         v-model="form.energy_band"
                         name="energy_band"
-                        aria-label="Energy band"
+                        :options="energyBands.map(band => ({ value: band.value, label: band.label }))"
                         :aria-describedby="describedBy('energy_band')"
-                        class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                    >
-                        <option v-for="band in energyBands" :key="band.value" :value="band.value">{{ band.label }}</option>
-                    </select>
+                        :error="errorOf('energy_band')"
+                    />
                     <p v-else class="text-xs text-ink-muted" title="Energy is recorded as not recorded for this turn.">
                         Not recorded
                     </p>
-                    <span v-if="errorOf('energy')" id="turn-energy-error" class="text-xs text-risk">{{ errorOf('energy') }}</span>
-                    <span v-if="errorOf('energy_band')" id="turn-energy_band-error" class="text-xs text-risk">{{ errorOf('energy_band') }}</span>
                 </fieldset>
 
                 <label class="flex flex-col gap-1">
                     <span class="text-ink-muted">Mood</span>
-                    <select
+                    <BaseSelect
                         id="turn-mood"
                         v-model="form.mood"
                         name="mood"
+                        :options="[{ value: '', label: 'not recorded' }, ...props.write.moods.map(tier => ({ value: tier, label: tier }))]"
                         :aria-describedby="describedBy('mood')"
-                        class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                    >
-                        <option value="">not recorded</option>
-                        <option v-for="tier in props.write.moods" :key="tier" :value="tier">{{ tier }}</option>
-                    </select>
-                    <span v-if="errorOf('mood')" id="turn-mood-error" class="text-xs text-risk">{{ errorOf('mood') }}</span>
+                        :error="errorOf('mood')"
+                    />
                 </label>
 
                 <label class="flex flex-col gap-1">
                     <span class="text-ink-muted">Outcome *</span>
-                    <select
+                    <BaseSelect
                         id="turn-outcome"
                         v-model="form.outcome"
                         name="outcome"
+                        :options="[{ value: '', label: 'Choose' }, { value: 'Success', label: 'Success' }, { value: 'Failure', label: 'Failure' }]"
                         required
                         :aria-describedby="describedBy('outcome')"
-                        class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                    >
-                        <option value="">Choose</option>
-                        <option value="Success">Success</option>
-                        <option value="Failure">Failure</option>
-                    </select>
-                    <span v-if="errorOf('outcome')" id="turn-outcome-error" class="text-xs text-risk">{{ errorOf('outcome') }}</span>
-                </label>
+                        :error="errorOf('outcome')"
+                        />
+                    </label>
 
-                <label v-if="form.outcome === 'Failure'" class="flex flex-col gap-1">
+                    <label v-if="form.outcome === 'Failure'" class="flex flex-col gap-1">
                     <span class="text-ink-muted">Penalty kind *</span>
-                    <select
+                    <BaseSelect
                         id="turn-penalty_kind"
                         v-model="form.penalty_kind"
                         name="penalty_kind"
+                        :options="[
+                            { value: '', label: 'Choose' },
+                            { value: 'energy', label: 'Energy' },
+                            { value: 'mood', label: 'Mood' },
+                            { value: 'stat', label: 'A stat' }
+                        ]"
                         required
                         :aria-describedby="describedBy('penalty_kind')"
-                        class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                    >
-                        <option value="">Choose</option>
-                        <option value="energy">Energy</option>
-                        <option value="mood">Mood</option>
-                        <option value="stat">A stat</option>
-                    </select>
-                    <span v-if="errorOf('penalty_kind')" id="turn-penalty_kind-error" class="text-xs text-risk">{{ errorOf('penalty_kind') }}</span>
-                </label>
+                        :error="errorOf('penalty_kind')"
+                                            />
+                    </label>
 
                 <!-- The Performance observation pair (Our Grand Concert only, the dated rail row in
                      SCREEN_SPEC.md). A change, never a level: the corpus publishes no starting value,
@@ -553,30 +545,26 @@ const capFor = (label: string): number =>
                 <template v-if="props.write.performance.enabled">
                     <label class="flex flex-col gap-1">
                         <span class="text-ink-muted">Performance type</span>
-                        <select
+                        <BaseSelect
                             id="turn-performance-type"
                             v-model="performanceType"
                             name="performance[type]"
+                            :options="[{ value: '', label: 'none, nothing to record' }, ...props.write.performance.types.map(word => ({ value: word, label: word }))]"
                             :aria-describedby="errorOf('performance.type') === undefined ? undefined : 'turn-performance-type-error'"
-                            class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                        >
-                            <option value="">none, nothing to record</option>
-                            <option v-for="word in props.write.performance.types" :key="word" :value="word">{{ word }}</option>
-                        </select>
-                        <span v-if="errorOf('performance.type')" id="turn-performance-type-error" class="text-xs text-risk">{{ errorOf('performance.type') }}</span>
+                            :error="errorOf('performance.type')"
+                        />
                     </label>
                     <label class="flex flex-col gap-1">
                         <span class="text-ink-muted">Performance change</span>
-                        <input
+                        <BaseInput
                             id="turn-performance-delta"
                             v-model="performanceDelta"
                             type="number"
                             name="performance[delta]"
                             step="1"
                             :aria-describedby="errorOf('performance.delta') === undefined ? undefined : 'turn-performance-delta-error'"
-                            class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                        >
-                        <span v-if="errorOf('performance.delta')" id="turn-performance-delta-error" class="text-xs text-risk">{{ errorOf('performance.delta') }}</span>
+                            :error="errorOf('performance.delta')"
+                        />
                     </label>
                 </template>
 
@@ -584,14 +572,14 @@ const capFor = (label: string): number =>
                      design: a turn logged without reading the ladder records no level, and a zero would
                      claim a facility at its floor. Behind a disclosure because it is five inputs most
                      turns do not need, and a collapsed `details` keeps them out of the tab order. -->
-                <details class="rounded-md border border-rule bg-raised p-3 md:col-span-3">
-                    <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
+<details class="rounded-md border border-rule bg-raised p-3 md:col-span-3">
+                    <summary class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong">
                         Facility levels this turn
                     </summary>
                     <div class="mt-2 grid grid-cols-2 gap-3 md:grid-cols-5">
                         <label v-for="field in facilityFields" :key="field.name" class="flex flex-col gap-1">
                             <span class="text-ink-muted">{{ field.label }}</span>
-                            <input
+                            <BaseInput
                                 :id="`turn-${field.name}`"
                                 v-model="form[field.name]"
                                 type="number"
@@ -599,9 +587,8 @@ const capFor = (label: string): number =>
                                 min="1"
                                 max="5"
                                 :aria-describedby="describedBy(field.name)"
-                                class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                            >
-                            <span v-if="errorOf(field.name)" :id="`turn-${field.name}-error`" class="text-xs text-risk">{{ errorOf(field.name) }}</span>
+                                :error="errorOf(field.name)"
+                            />
                         </label>
                     </div>
                     <p class="mt-2 text-xs text-ink-muted">
@@ -615,13 +602,13 @@ const capFor = (label: string): number =>
                      and never projects an outcome (`ADR-0016`, `PRD.md` §6.11). Optional by design, so
                      a turn logged without reading them stores neither. -->
                 <details class="rounded-md border border-rule bg-raised p-3 md:col-span-3">
-                    <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
+                    <summary class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong">
                         Preview readings
                     </summary>
                     <div class="mt-2 grid grid-cols-2 gap-3 md:grid-cols-6">
                         <label class="col-span-2 flex flex-col gap-1 md:col-span-1">
                             <span class="text-ink-muted">Failure rate</span>
-                            <input
+                            <BaseInput
                                 id="turn-failure_rate"
                                 v-model="form.failure_rate"
                                 type="number"
@@ -629,31 +616,31 @@ const capFor = (label: string): number =>
                                 min="0"
                                 max="100"
                                 :aria-describedby="describedBy('failure_rate')"
-                                class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                            >
-                            <span v-if="errorOf('failure_rate')" id="turn-failure_rate-error" class="text-xs text-risk">{{ errorOf('failure_rate') }}</span>
+                                :error="errorOf('failure_rate')"
+                            />
                         </label>
-                        <label v-for="field in previewFields" :key="field.name" class="flex flex-col gap-1">
-                            <span class="text-ink-muted">{{ field.label }}</span>
-                            <input
-                                :id="`turn-preview_gains-${field.name}`"
-                                v-model="form.preview_gains[field.name]"
-                                type="number"
-                                :name="`preview_gains[${field.name}]`"
-                                :aria-describedby="errorOf(`preview_gains.${field.name}`) === undefined ? undefined : `turn-preview_gains-${field.name}-error`"
-                                class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
-                            >
-                            <span v-if="errorOf(`preview_gains.${field.name}`)" :id="`turn-preview_gains-${field.name}-error`" class="text-xs text-risk">{{ errorOf(`preview_gains.${field.name}`) }}</span>
-                        </label>
-                    </div>
-                    <p class="mt-2 text-xs text-ink-muted">
+                        <template v-for="field in previewFields" :key="field.name">
+                            <label class="flex flex-col gap-1">
+                                <span class="text-ink-muted">{{ field.label }}</span>
+                                <BaseInput
+                                    :id="`turn-preview_gains-${field.name}`"
+                                    v-model="form.preview_gains[field.name]"
+                                    type="number"
+                                    :name="`preview_gains[${field.name}]`"
+                                    :aria-describedby="errorOf(`preview_gains.${field.name}`) === undefined ? undefined : `turn-preview_gains-${field.name}-error`"
+                                    :error="errorOf(`preview_gains.${field.name}`)"
+                                />
+                            </label>
+                        </template>
+                        <p class="mt-2 text-xs text-ink-muted">
                         What the client showed: the failure percentage and the gains it previewed. Enter
                         a negative number when the preview showed a drop. Leave them blank when this turn
                         did not read them.
                     </p>
-                </details>
+                </div>
+            </details>
 
-                <div class="flex flex-wrap items-end gap-3 md:col-span-3">
+            <div class="flex flex-wrap items-end gap-3 md:col-span-3">
                     <button
                         type="submit"
                         class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome disabled:cursor-wait disabled:bg-disabled"

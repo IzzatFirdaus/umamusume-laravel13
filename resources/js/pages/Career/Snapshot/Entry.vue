@@ -39,7 +39,7 @@ import { Head } from '@inertiajs/vue3';
                 </a>
                 <a
                     href="/"
-                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
+                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
                 >
                     Back to the dashboard
                 </a>

@@ -71,7 +71,7 @@ async function move(delta: number): Promise<void> {
 <template>
     <li class="rounded-md border border-rule bg-raised p-3">
         <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-            <h4 class="text-sm font-semibold text-ink-strong">
+            <h4 class="text-lg font-semibold text-ink-strong">
                 {{ props.row.name }}
                 <span v-if="props.row.name_ja !== null" lang="ja" class="ml-1 font-normal text-ink-muted">{{ props.row.name_ja }}</span>
                 <span

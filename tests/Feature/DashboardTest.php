@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Enums\RunStatus;
+use App\Enums\TurnEventType;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use App\Models\TurnEvent;
 use App\Models\Umamusume;
 use App\Models\Veteran;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -85,12 +87,41 @@ it('names the active career with its scenario, position, turn, energy and primar
             ->where('activeCareer.position_label', 'Junior Year · Early July')
             ->where('activeCareer.turn', 13)
             ->where('activeCareer.energy', 72)
-            // Unity Cup's one widget beyond the baseline three is `team_rank`, read from config by
-            // subtraction rather than by scenario name (G-33).
-            ->where('activeCareer.resource.label', 'Team Rank')
-            ->where('activeCareer.resource.value', null)
-            ->has('activeCareer.resource.value_hint')
+            // Unity Cup's one widget beyond the baseline three is `team_rank`, and the rank now has
+            // its own row with a real owner (`teamRank()` reads `latestTeamRank()`), so the resource
+            // slot defers to it rather than rendering a second, permanently-absent Team Rank cell.
+            ->where('activeCareer.resource', null)
+            ->where('activeCareer.team_rank.value', null)
+            ->where('activeCareer.team_rank.value_hint', 'No logged turn has reported a team rank yet.')
             ->where('activeCareer.resume_url', route('runs.cockpit', $run)));
+});
+
+it('reads the reported team rank onto the active career card', function (): void {
+    $run = runWithTurns(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 4, energy: 60);
+
+    TurnEvent::create([
+        'training_run_id' => $run->id,
+        'turn' => 4,
+        'event_type' => TurnEventType::Scenario,
+        'source_name' => 'Unity Training',
+        'deltas' => ['rank' => 'S'],
+    ]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('activeCareer.team_rank.value', 'S')
+            ->where('activeCareer.resource', null));
+});
+
+it('names the team rank absence for a scenario that composes no ladder', function (): void {
+    runWithTurns(['scenario' => 'ura_finale', 'status' => RunStatus::Active], turns: 2, energy: 60);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('activeCareer.team_rank.value', null)
+            ->where('activeCareer.team_rank.value_hint', 'The run\'s scenario composes no team rank ladder, so there is no rank to show.'));
 });
 
 it('reads the primary resource from the scenario config rather than from a scenario name', function (): void {

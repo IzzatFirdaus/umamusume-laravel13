@@ -9,22 +9,31 @@
  *
  * No area counts on this page. Each area states how many rows it holds, and the catalog's first screen
  * is filtered to [Global] while `umamusume` also holds JP-only rows, so a figure here would be one no
- * area corroborates on arrival.
+ * area corroborates on arrival. What each row does carry is its source arm — Fetched, Config or
+ * Transcribed — the three the subtitle names, moved from each view's own provenance onto the door.
  *
  * The sidebar's Database entry points at this hub rather than at `/umamusume`, so the hub has an
  * inbound click path without adding an eleventh destination to the nav.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import SubCell from '../../components/SubCell.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
 const props = defineProps<{
-    areas: { label: string; url: string }[];
+    areas: { label: string; url: string; source: string }[];
 }>();
+
+const sourceReason: Record<string, string> = {
+    Fetched: 'Fetched from the engine sources and read straight off the catalog tables.',
+    Config: 'Read from config/scenarios.php, the only place scenario facts live (D-240).',
+    Transcribed: 'Transcribed from docs/UMAMUSUME_REFERENCE.md into config/reference.php.',
+};
 </script>
 
 <template>
     <AppLayout>
         <Head title="Database" />
+        <template #eyebrow>Data Quality</template>
         <template #title>Database</template>
 
         <p class="mt-4 max-w-3xl text-sm text-ink-muted">
@@ -33,18 +42,27 @@ const props = defineProps<{
             here writes.
         </p>
 
-        <nav aria-label="Database areas" class="mt-6">
-            <ul class="divide-y divide-rule rounded-md border border-rule bg-raised">
-                <li v-for="area in props.areas" :key="area.label">
-                    <Link
-                        :href="area.url"
-                        :prefetch="'hover'"
-                        class="flex min-h-11 items-center px-4 text-sm font-medium text-ink-strong hover:bg-panel"
-                    >
-                        {{ area.label }}
-                    </Link>
-                </li>
-            </ul>
-        </nav>
+         <nav aria-label="Database areas" class="mt-6">
+             <ul class="divide-y divide-rule rounded-md border border-rule bg-panel">
+                 <li v-for="area in props.areas" :key="area.label" class="flex items-center gap-x-4 px-4 py-2">
+                     <!-- The source cell sits beside the link, not inside it: a link's accessible name is
+                          its contents, and the hub's rows are addressed by their exact label elsewhere
+                          (`database.spec.ts`); "Events Source Transcribed" would be a different name. -->
+                     <Link
+                         :href="area.url"
+                         :prefetch="'hover'"
+                         class="flex min-h-11 flex-1 items-center text-sm font-medium text-ink-strong hover:bg-panel transition-colors duration-150 ease-out"
+                     >
+                         {{ area.label }}
+                     </Link>
+                     <SubCell
+                         label="Source"
+                         :value="area.source"
+                         value-class="font-mono text-sm text-ink-strong"
+                         :title="sourceReason[area.source]"
+                     />
+                 </li>
+             </ul>
+         </nav>
     </AppLayout>
 </template>

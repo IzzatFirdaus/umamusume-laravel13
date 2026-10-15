@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
+import { BaseButton, BaseCheckbox, BaseInput, BaseRadio, BaseSelect } from '../../components/Form';
+import { buttonClasses } from '../../components/Form/buttonStyles';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, onUnmounted, ref } from 'vue';
 
 const props = defineProps<{
     theme: 'light' | 'dark' | null;
@@ -13,6 +15,8 @@ const props = defineProps<{
         recommendation_aggressiveness: string | null;
         stat_target_defaults: Record<string, number> | null;
         language: string | null;
+        dashboard_layout: string | null;
+        dashboard_hidden_cards: string[] | null;
     };
     scenarioOptions: { value: string; label: string }[];
     aggressivenessOptions: { value: string; label: string }[];
@@ -20,6 +24,8 @@ const props = defineProps<{
     hardCap: number;
     exportUrl: string;
     backupUrl: string;
+    /** The `dashboard.wide_bento_enabled` flag (DL.14): when false, Wide Bento stays disabled. */
+    wideBentoEnabled: boolean;
 }>();
 
 const page = usePage();
@@ -37,7 +43,84 @@ const form = useForm({
             props.statOrder.map((stat) => [stat, props.settings.stat_target_defaults?.[stat] ?? '']),
         ),
         language: props.settings.language ?? 'en',
+        // A stored `wide_bento` with the flag off is not a selectable value: the disabled radio is
+        // authoritative, so the form falls back to `bento` rather than re-submitting a layout the
+        // Trainer cannot choose (DL.12/DL.14).
+        dashboard_layout:
+            props.settings.dashboard_layout === 'wide_bento' && !props.wideBentoEnabled
+                ? 'bento'
+                : (props.settings.dashboard_layout ?? 'bento'),
+        dashboard_hidden_cards: props.settings.dashboard_hidden_cards ?? [],
     },
+});
+
+// The "Show on Dashboard" checkboxes invert the stored `dashboard_hidden_cards`: a card is
+// checked when it is NOT in the hidden list. The hidden list is recomputed from `shownCards`
+// on submit so the store never receives "show" semantics it does not authorise.
+const DASHBOARD_CARDS: ReadonlyArray<{ id: string; label: string }> = [
+    { id: 'active_career', label: 'Active Career' },
+    { id: 'next_best_action', label: 'Next Best Action' },
+    { id: 'quick_actions', label: 'Quick Actions' },
+    { id: 'recent_veterans', label: 'Recent Veterans' },
+    { id: 'data_status', label: 'Data Status' },
+];
+
+const shownCards = ref<string[]>(
+    DASHBOARD_CARDS.filter((card) => !(props.settings.dashboard_hidden_cards ?? []).includes(card.id)).map((card) => card.id),
+);
+
+function isCardShown(cardId: string): boolean {
+    return shownCards.value.includes(cardId);
+}
+
+function toggleCard(cardId: string, checked: boolean): void {
+    if (checked) {
+        if (!shownCards.value.includes(cardId)) {
+            shownCards.value.push(cardId);
+        }
+    } else {
+        shownCards.value = shownCards.value.filter((id) => id !== cardId);
+    }
+}
+
+// Reset layout to defaults (DL.6): a two-click inline confirm, no modal. The first click arms the
+// button and flips its label to `Reset?`; a second click within five seconds restores `bento` and an
+// empty hidden list and submits. The label reverts on its own, so an abandoned arm leaves no state.
+const resetArmed = ref(false);
+const resetStatus = ref('');
+let resetTimer: ReturnType<typeof setTimeout> | null = null;
+
+function armReset(): void {
+    if (resetArmed.value) {
+        commitReset();
+
+        return;
+    }
+
+    resetArmed.value = true;
+    resetTimer = setTimeout(() => {
+        resetArmed.value = false;
+        resetTimer = null;
+    }, 5000);
+}
+
+function commitReset(): void {
+    if (resetTimer !== null) {
+        clearTimeout(resetTimer);
+        resetTimer = null;
+    }
+
+    resetArmed.value = false;
+    form.settings.dashboard_layout = 'bento';
+    shownCards.value = DASHBOARD_CARDS.map((card) => card.id);
+    resetStatus.value = 'Dashboard layout reset to defaults.';
+    submit();
+}
+
+onUnmounted(() => {
+    if (resetTimer !== null) {
+        clearTimeout(resetTimer);
+    }
 });
 
 // The Data panel's Backup is a second action, not a field of the preferences form: it writes a
@@ -56,10 +139,25 @@ const categories: ReadonlyArray<Category> = [
     { id: 'game-version', label: 'Game version' },
 ];
 
-const activeCategory = ref('general');
+const tabParam = new URLSearchParams(window.location.search).get('tab');
+const activeCategory = ref(
+    tabParam !== null && categories.some((category) => category.id === tabParam) ? tabParam : 'general',
+);
 
-function onEstimateToggle(event: Event): void {
-    form.failure_estimate = (event.target as HTMLInputElement).checked ? 'on' : 'off';
+// The tab lives in the URL so a reload lands on the tab the Trainer was reading (plan 6B.10);
+// replaceState changes only the address, keeping Inertia's own history state intact.
+function selectCategory(id: string): void {
+    activeCategory.value = id;
+
+    const url = new URL(window.location.href);
+
+    if (id === 'general') {
+        url.searchParams.delete('tab');
+    } else {
+        url.searchParams.set('tab', id);
+    }
+
+    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}`);
 }
 
 function onTabKeydown(event: KeyboardEvent): void {
@@ -95,7 +193,7 @@ function onTabKeydown(event: KeyboardEvent): void {
 }
 
 function focusTab(index: number): void {
-    activeCategory.value = categories[index].id;
+    selectCategory(categories[index].id);
 
     void nextTick(() => {
         const tabs = document.querySelectorAll<HTMLElement>('[role="tab"]');
@@ -122,6 +220,8 @@ const errorKeys: ReadonlyArray<string> = [
     'settings.recommendation_aggressiveness',
     'settings.stat_target_defaults',
     ...props.statOrder.map((stat) => `settings.stat_target_defaults.${stat}`),
+    'settings.dashboard_layout',
+    'settings.dashboard_hidden_cards',
     'settings',
     'preferences',
 ];
@@ -135,11 +235,16 @@ const errorCategory = (key: string): string =>
         : 'general';
 
 function submit(): void {
+    // Sync the inverted checkbox state back into the stored blob: hide = the cards NOT shown.
+    form.settings.dashboard_hidden_cards = DASHBOARD_CARDS
+        .filter((card) => !shownCards.value.includes(card.id))
+        .map((card) => card.id);
+
     form.put('/preferences', {
         onError: () => {
             const firstKey = Object.keys(form.errors)[0];
 
-            activeCategory.value = errorCategory(firstKey);
+            selectCategory(errorCategory(firstKey));
 
             // The panel must swap before the control can take focus, and every control's id is
             // `controlId(its error key)`, which is the idiom `BuildTarget.vue:140` already uses. A
@@ -160,9 +265,10 @@ function runBackup(): void {
 <template>
     <AppLayout>
         <Head title="Settings" />
+        <template #eyebrow>Preferences</template>
         <template #title>Settings</template>
 
-        <h2 class="text-2xl font-semibold text-ink-strong">Preferences</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Preferences</h2>
         <p class="mt-1 text-sm text-ink-muted">
             Settings are stored in this app's database for a single Trainer and read back on the next
             full page load. A preference this tool cannot store is named rather than offered.
@@ -187,8 +293,8 @@ function runBackup(): void {
                     :aria-selected="activeCategory === category.id"
                     :aria-controls="`settings-panel-${category.id}`"
                     :tabindex="activeCategory === category.id ? 0 : -1"
-                    @click="activeCategory = category.id"
-                    class="inline-flex min-h-11 items-center border-b-2 px-4 py-2 text-sm font-medium focus:outline-none"
+                    @click="selectCategory(category.id)"
+                    class="inline-flex min-h-11 items-center border-b-2 px-4 py-2 text-sm font-medium focus:outline-none transition-colors duration-150 ease-out"
                     :class="
                         activeCategory === category.id
                             ? 'border-pick-line text-ink-strong'
@@ -207,88 +313,140 @@ function runBackup(): void {
                 aria-labelledby="settings-tab-general"
                 class="space-y-4"
             >
-                <label class="block">
-                    <span class="font-medium text-ink">Theme</span>
-                    <select
-                        v-model="form.theme"
-                        name="theme"
-                        :id="controlId('theme')"
-                        :aria-describedby="describedBy('theme')"
-                        class="mt-1 block w-full min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                    >
-                        <!-- The third authorized value is the absence of a row, so "follow the system"
-                             writes nothing rather than storing the word `system`. -->
-                        <option value="">Follow the system</option>
-                        <option value="light">Light</option>
-                        <option value="dark">Dark</option>
-                    </select>
-                </label>
+                <p class="text-sm text-ink-muted">Appearance, language and default scenario.</p>
 
-                <label class="inline-flex min-h-11 items-center gap-2">
-                    <input
-                        type="checkbox"
-                        name="failure_estimate"
-                        :id="controlId('failure_estimate')"
-                        class="h-5 w-5 accent-chrome"
-                        :aria-describedby="describedBy('failure_estimate')"
-                        :checked="form.failure_estimate === 'on'"
-                        @change="onEstimateToggle"
-                    >
-                    <span class="font-medium text-ink">Numeric failure estimate</span>
-                </label>
+                <!-- The third authorized value is the absence of a row, so "follow the system"
+                     writes nothing rather than storing the word `system`. -->
+                <BaseSelect
+                    :model-value="form.theme"
+                    :id="controlId('theme')"
+                    name="theme"
+                    label="Theme"
+                    :options="[
+                        { value: '', label: 'Follow the system' },
+                        { value: 'light', label: 'Light' },
+                        { value: 'dark', label: 'Dark' },
+                    ]"
+                    :aria-describedby="describedBy('theme')"
+                    @update:model-value="(v: string | number | null) => (form.theme = String(v ?? ''))"
+                />
+
+                <BaseCheckbox
+                    :model-value="form.failure_estimate === 'on'"
+                    :id="controlId('failure_estimate')"
+                    name="failure_estimate"
+                    label="Numeric failure estimate"
+                    :aria-describedby="describedBy('failure_estimate')"
+                    @update:model-value="(v: boolean | string | number) => (form.failure_estimate = v === true ? 'on' : 'off')"
+                />
 
                 <p class="text-xs text-ink-muted">
-                    Turning the estimate on changes no screen yet: no source publishes a failure
-                    curve, and any number this tool prints has to show its formula beside it, so
-                    there is nothing honest to render until a model exists. The choice is stored,
-                    and the band the app can source from Energy (Safe, Caution, Danger) shows
-                    either way.
+                    Numeric failure estimate is {{ form.failure_estimate === 'on' ? 'on' : 'off' }}.
+                    No source publishes a failure curve; the stored choice is kept for a future model.
                 </p>
 
-                <label class="block">
-                    <span class="font-medium text-ink">Language</span>
-                    <!-- One option, disabled, because the corpus is Global-labelled: offering a second
-                         language would be a false choice, and an absence would hide the one this build
-                         has. The value travels with the form even though the control cannot change it,
-                         so what the screen states is what the store holds. -->
-                    <select
-                        v-model="form.settings.language"
-                        name="settings[language]"
-                        :id="controlId('settings.language')"
-                        disabled
-                        title="This build is Global-labelled only: the corpus holds no other language's strings, so there is nothing to switch to."
-                        class="mt-1 block w-full min-h-11 rounded-md border border-rule bg-sunken px-2 text-ink-muted"
-                    >
-                        <option value="en">English (Global)</option>
-                    </select>
-                </label>
+                <!-- One option, disabled, because the corpus is Global-labelled: offering a second
+                     language would be a false choice, and an absence would hide the one this build
+                     has. The value travels with the form even though the control cannot change it,
+                     so what the screen states is what the store holds. The explanation rides as a
+                     visible hint, not a `title`: a disabled control does not surface tooltips
+                     reliably, and a stated absence should be read, not hovered for. -->
+                <BaseSelect
+                    :model-value="form.settings.language"
+                    :id="controlId('settings.language')"
+                    name="settings[language]"
+                    label="Language"
+                    :options="[{ value: 'en', label: 'English (Global)' }]"
+                    disabled
+                    hint="This build is Global-labelled only: the corpus holds no other language's strings, so there is nothing to switch to."
+                />
 
-                <label class="block">
-                    <span class="font-medium text-ink">Default scenario</span>
-                    <!-- One option per entry the matrix composes, read as a whole: no branch on any
-                         of them (D-240, gate G-33). -->
-                    <select
-                        v-model="form.settings.default_scenario"
-                        name="settings[default_scenario]"
-                        :id="controlId('settings.default_scenario')"
-                        :aria-describedby="describedBy('settings.default_scenario')"
-                        class="mt-1 block w-full min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                    >
-                        <option value="">No default</option>
-                        <option v-for="option in scenarioOptions" :key="option.value" :value="option.value">
-                            {{ option.label }}
-                        </option>
-                    </select>
-                </label>
+<BaseSelect
+  v-model="form.settings.default_scenario"
+  :id="controlId('settings.default_scenario')"
+  name="settings[default_scenario]"
+  label="Default scenario"
+  :options="[{ value: '', label: 'No default' }, ...scenarioOptions.map(o => ({ value: o.value, label: o.label }))]"
+  :aria-describedby="describedBy('settings.default_scenario')"
+/>
                 <!-- Outside the label: a label's text becomes the control's accessible name, and a
                      hint is not part of that name. The errors render in one block below the panels. -->
                 <p class="-mt-2 text-xs text-ink-muted">
                     Pre-selects the scenario on the new-career screen, until a career is chosen.
                 </p>
 
+                <!-- Dashboard layout (PLAN 6B.14): three radios, one per layout. Wide Bento is gated
+                     until the design ruling lands, so it renders disabled with a reason channel. -->
+                <fieldset class="space-y-2">
+                    <legend class="text-lg font-semibold text-ink-strong">Dashboard layout</legend>
+                    <p class="text-xs text-ink-muted">
+                        How the four dashboard regions arrange themselves above the fold.
+                    </p>
+
+                    <BaseRadio
+                        v-model="form.settings.dashboard_layout"
+                        :id="controlId('settings.dashboard_layout')"
+                        name="settings[dashboard_layout]"
+                        label="Bento"
+                        value="bento"
+                        hint="Cards arranged in a grid. Best for 1280-1600px screens."
+                        :aria-describedby="describedBy('settings.dashboard_layout')"
+                    />
+
+                    <BaseRadio
+                        v-model="form.settings.dashboard_layout"
+                        :id="controlId('settings.dashboard_layout_wide')"
+                        name="settings[dashboard_layout]"
+                        label="Wide Bento"
+                        value="wide_bento"
+                        hint="Same grid, wider. Uses more of very wide screens."
+                        :disabled="!props.wideBentoEnabled"
+                    />
+
+                    <BaseRadio
+                        v-model="form.settings.dashboard_layout"
+                        :id="controlId('settings.dashboard_layout_focused')"
+                        name="settings[dashboard_layout]"
+                        label="Focused"
+                        value="focused"
+                        hint="Single column, centred. Best for reading-oriented work."
+                        :aria-describedby="describedBy('settings.dashboard_layout')"
+                    />
+                </fieldset>
+
+                <!-- Show on Dashboard (PLAN 6B.14): the stored value is `dashboard_hidden_cards`
+                     (the cards to hide), so the checkboxes invert it: checked = shown, unchecked = hidden.
+                     The submit handler recomputes the hidden list from the shown set. -->
+                <fieldset class="space-y-2">
+                    <legend class="text-lg font-semibold text-ink-strong">Show on Dashboard</legend>
+                    <p class="text-xs text-ink-muted">
+                        Toggle which dashboard cards appear when you open the Dashboard.
+                    </p>
+
+                    <BaseCheckbox
+                        v-for="card in DASHBOARD_CARDS"
+                        :key="card.id"
+                        :model-value="isCardShown(card.id)"
+                        :id="`dashboard_card_${card.id}`"
+                        :name="`settings[dashboard_hidden_cards][${card.id}]`"
+                        :label="card.label"
+                        :aria-describedby="describedBy('settings.dashboard_hidden_cards')"
+                        @update:model-value="(v: boolean | string | number) => toggleCard(card.id, v === true)"
+                    />
+                </fieldset>
+
+                <!-- Reset layout to defaults (DL.6): secondary, below the checkbox group, inline
+                     two-click confirm. Restores `bento` with every card shown and submits. -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <BaseButton type="button" variant="secondary" @click="armReset">
+                        {{ resetArmed ? 'Reset?' : 'Reset layout to defaults' }}
+                    </BaseButton>
+                    <p v-if="resetStatus" role="status" class="sr-only">{{ resetStatus }}</p>
+                </div>
+
                 <dl class="border-t border-rule pt-3 space-y-2">
                     <div class="flex justify-between">
-                        <dt class="text-ink">Units</dt>
+                        <dt class="text-lg font-semibold text-ink-strong">Units</dt>
                         <dd
                             class="text-ink-muted"
                             title="Sourcing absence: the only unit this tool prints is race distance, and it prints metres because the client does. No source in the corpus publishes an imperial rendering, so there is nothing to convert."
@@ -307,53 +465,41 @@ function runBackup(): void {
                 aria-labelledby="settings-tab-recommendation"
                 class="space-y-4"
             >
-                <label class="block">
-                    <span class="font-medium text-ink">Recommendation aggressiveness</span>
-                    <select
-                        v-model="form.settings.recommendation_aggressiveness"
-                        name="settings[recommendation_aggressiveness]"
-                        :id="controlId('settings.recommendation_aggressiveness')"
-                        :aria-describedby="describedBy('settings.recommendation_aggressiveness')"
-                        title="Stored now; the advisor reads it in a follow-up slice."
-                        class="mt-1 block w-full min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-                    >
-                        <option value="">Not set</option>
-                        <option v-for="option in aggressivenessOptions" :key="option.value" :value="option.value">
-                            {{ option.label }}
-                        </option>
-                    </select>
-                </label>
+                <p class="text-sm text-ink-muted">Advisor defaults and stat-target pre-fills.</p>
+
+<BaseSelect
+  v-model="form.settings.recommendation_aggressiveness"
+  :id="controlId('settings.recommendation_aggressiveness')"
+  name="settings[recommendation_aggressiveness]"
+  label="Recommendation aggressiveness"
+  :options="[{ value: '', label: 'Not set' }, ...aggressivenessOptions.map(o => ({ value: o.value, label: o.label }))]"
+  :aria-describedby="describedBy('settings.recommendation_aggressiveness')"
+  title="Stored now; the advisor reads it in a follow-up slice."
+/>
 
                 <fieldset class="space-y-2">
-                    <legend class="font-medium text-ink">Stat-target defaults</legend>
+                    <legend class="text-lg font-semibold text-ink-strong">Stat-target defaults</legend>
                     <p class="text-xs text-ink-muted">
                         Pre-fills the Build Target screen's five stat inputs when no target has been
                         entered. The engine ceiling is {{ hardCap }}, the number no stat may pass
                         whatever the scenario's own bonus says.
                     </p>
-                    <label
-                        v-for="stat in statOrder"
-                        :key="stat"
-                        class="flex items-center justify-between gap-3"
-                    >
-                        <span class="font-medium text-ink">{{ stat }}</span>
-                        <!-- No `min`/`max` here on purpose: an HTML clamp would stop the submit before the
-                         Form Request saw it, and the bound has one owner. Build Target made the same
-                         choice for the same inputs. -->
-                    <input
+                    <template v-for="stat in statOrder" :key="stat">
+                        <BaseInput
                             v-model="form.settings.stat_target_defaults[stat]"
                             type="number"
                             :name="`settings[stat_target_defaults][${stat}]`"
                             :id="controlId(`settings.stat_target_defaults.${stat}`)"
-                            :aria-describedby="describedBy(`settings.stat_target_defaults.${stat}`)"
-                            class="mt-1 block w-32 min-h-11 rounded-md border border-rule bg-raised px-2 text-right font-mono tabular-nums text-ink"
-                        >
-                    </label>
+                            :label="stat"
+                            :hint="`0-${hardCap}`"
+                            :error="form.errors[`settings.stat_target_defaults.${stat}`]"
+                        />
+                    </template>
                 </fieldset>
 
                 <dl class="border-t border-rule pt-3 space-y-2">
                     <div class="flex justify-between">
-                        <dt class="text-ink">Risk tolerance</dt>
+                        <dt class="text-lg font-semibold text-ink-strong">Risk tolerance</dt>
                         <dd
                             class="text-ink-muted"
                             title="Whether a risk tolerance enters the stored payload is the Build Target screen's own open question, not this one's to settle."
@@ -372,23 +518,25 @@ function runBackup(): void {
                 aria-labelledby="settings-tab-data"
                 class="space-y-4"
             >
+                <p class="text-sm text-ink-muted">Import, export and backup.</p>
+
                 <dl class="border-t border-rule pt-3 space-y-2">
                     <div class="flex justify-between">
-                        <dt class="text-ink">Import</dt>
+                        <dt class="text-lg font-semibold text-ink-strong">Import</dt>
                         <dd>
                             <a
                                 :href="importUrl"
-                                class="inline-flex min-h-11 items-center text-pick-line hover:underline"
+                                :class="buttonClasses('secondary')"
                                 >Open import</a
                             >
                         </dd>
                     </div>
                     <div class="flex justify-between">
-                        <dt class="text-ink">Export</dt>
+                        <dt class="text-lg font-semibold text-ink-strong">Export</dt>
                         <dd>
                             <a
                                 :href="exportUrl"
-                                class="inline-flex min-h-11 items-center text-pick-line hover:underline"
+                                :class="buttonClasses('secondary')"
                             >Download export</a>
                         </dd>
                     </div>
@@ -400,18 +548,18 @@ function runBackup(): void {
                     path in the message above. Nothing is downloaded, and restoring one is a
                     deliberate owner action rather than a screen button.
                 </p>
-                <button
+                <BaseButton
                     type="button"
+                    variant="secondary"
                     :disabled="backupForm.processing"
-                    class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-bold text-ink-strong hover:bg-panel disabled:opacity-60"
                     @click="runBackup"
                 >
                     {{ backupForm.processing ? 'Backing up…' : 'Back up now' }}
-                </button>
+                </BaseButton>
 
                 <dl class="border-t border-rule pt-3 space-y-2">
                     <div class="flex justify-between">
-                        <dt class="text-ink">Restore</dt>
+                        <dt class="text-lg font-semibold text-ink-strong">Restore</dt>
                         <dd
                             class="text-ink-muted"
                             title="Destructive: restoring replaces the database file, which is an owner's action to take. Absent rather than a button without a backend."
@@ -420,7 +568,7 @@ function runBackup(): void {
                         </dd>
                     </div>
                     <div class="flex justify-between">
-                        <dt class="text-ink">Reset</dt>
+                        <dt class="text-lg font-semibold text-ink-strong">Reset</dt>
                         <dd
                             class="text-ink-muted"
                             title="Destructive; adding it needs the owner's approval"
@@ -439,9 +587,11 @@ function runBackup(): void {
                 aria-labelledby="settings-tab-game-version"
                 class="space-y-4"
             >
+                <p class="text-sm text-ink-muted">Ruleset version and last-verified date.</p>
+
                 <dl class="border-t border-rule pt-3 space-y-2">
                     <div class="flex justify-between">
-                        <dt class="text-ink">Global Ruleset Version</dt>
+                        <dt class="text-lg font-semibold text-ink-strong">Global Ruleset Version</dt>
                         <dd
                             :class="
                                 rulesetVersion
@@ -458,8 +608,11 @@ function runBackup(): void {
                         </dd>
                     </div>
                     <div class="flex justify-between">
-                        <dt class="text-ink">Verified</dt>
-                        <dd class="text-ink">
+                        <dt class="text-lg font-semibold text-ink-strong">Verified</dt>
+                        <dd
+                            class="text-ink"
+                            :title="verifiedAt ? undefined : 'No verification date is recorded for this build.'"
+                        >
                             {{ verifiedAt ?? 'N/A' }}
                         </dd>
                     </div>
@@ -469,19 +622,23 @@ function runBackup(): void {
             <p
                 v-for="key in visibleErrors"
                 :key="key"
-                :id="errorId(key)"
+                :id="`error-block-${key}`"
                 class="text-risk"
             >
                 {{ errorOf(key) }}
             </p>
 
+            <!-- The one accented primary on the screen (plan 6B.12); the tab strip's gold underline
+                 is the selection state, not a second action accent. -->
             <button
                 type="submit"
                 :disabled="form.processing"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-bold text-ink-strong hover:bg-panel disabled:opacity-60"
+                class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome disabled:opacity-60 transition-colors duration-150 ease-out"
             >
                 {{ form.processing ? 'Saving…' : 'Save preferences' }}
             </button>
+            <p class="text-xs text-ink-muted">Saves every tab in one write.</p>
         </form>
     </AppLayout>
 </template>
+

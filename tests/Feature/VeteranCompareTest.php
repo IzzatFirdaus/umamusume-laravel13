@@ -61,18 +61,30 @@ it('lines up the filed careers the Trainer selected, in the order they named the
             ->where('columns.0.career.turns', 1)
             // The ten axes arrive once, not derived from whichever column came first.
             ->has('aptitude_axes', 10)
-            ->where('max', 4));
+            ->where('max', 6));
 });
 
-it('refuses a fifth career rather than wrapping the table past its region', function (): void {
+it('refuses a seventh career rather than wrapping the table past its region', function (): void {
     $ids = [];
 
-    foreach (range(1, 5) as $i) {
+    foreach (range(1, 7) as $i) {
         $ids[] = compareVeteran("Comparison Candidate $i", ['Speed'])->id;
     }
 
     $this->get(route('veterans.compare', ['veterans' => $ids]))
         ->assertSessionHasErrors('veterans');
+});
+
+it('accepts six careers, which the sticky matrix fits', function (): void {
+    $ids = [];
+
+    foreach (range(1, 6) as $i) {
+        $ids[] = compareVeteran("Six Candidate $i", ['Speed'])->id;
+    }
+
+    $this->get(route('veterans.compare', ['veterans' => $ids]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->has('columns', 6));
 });
 
 it('compares a filed career that has no Legacy read-back, which the Legacy Lab surface refuses', function (): void {

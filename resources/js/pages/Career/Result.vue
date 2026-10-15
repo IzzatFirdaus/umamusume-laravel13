@@ -125,11 +125,11 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                 >Back to the Cockpit</a>
                 <a
                     :href="props.run.timeline_url"
-                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
+                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
                 >Career Timeline</a>
                 <a
                     :href="props.run.run_url"
-                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
+                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
                 >Cockpit</a>
             </div>
         </section>
@@ -181,7 +181,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                     No build target was set for this run, so the stats above are read against no target.
                 </p>
 
-                <h3 class="mt-4 text-sm font-semibold text-ink-strong">Skills learned</h3>
+                <h3 class="mt-4 text-lg font-semibold text-ink-strong">Skills learned</h3>
                 <p v-if="props.build.skills.empty !== null" class="mt-1 text-sm text-ink-muted">
                     {{ props.build.skills.empty }}
                 </p>
@@ -201,7 +201,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                     Skills on the run's list that it did not learn: {{ props.build.skills.not_learned }}.
                 </p>
 
-                <h3 class="mt-4 text-sm font-semibold text-ink-strong">Aptitudes</h3>
+                <h3 class="mt-4 text-lg font-semibold text-ink-strong">Aptitudes</h3>
                 <p class="mt-1 text-xs text-ink-muted">
                     These belong to {{ props.run.trainee }} and did not change during the career; no column
                     records an aptitude being altered.
@@ -338,11 +338,11 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                 <div class="mt-3 flex flex-wrap gap-2">
                     <a
                         :href="props.run.timeline_url"
-                        class="inline-flex min-h-11 items-center rounded-full border border-rule px-4 font-semibold text-ink hover:bg-sunken"
+                        class="inline-flex min-h-11 items-center rounded-full border border-rule px-4 font-semibold text-ink hover:bg-sunken transition-colors duration-150 ease-out"
                     >View Career Timeline</a>
                     <a
                         :href="props.run.run_url"
-                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
+                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
                     >Cockpit</a>
                 </div>
 
@@ -370,7 +370,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
         </template>
 
         <div v-if="props.empty === null" class="mt-4 max-w-sm">
-            <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised">
+            <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">
                 Back to Cockpit
             </a>
         </div>

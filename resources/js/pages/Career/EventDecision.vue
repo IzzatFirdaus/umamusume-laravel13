@@ -218,11 +218,11 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
         <section aria-labelledby="event-state-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
             <h2 id="event-state-heading" class="text-lg font-semibold text-ink-strong">Current career state</h2>
             <dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                <div
-                    v-for="stat in props.state.stats"
-                    :key="stat.key"
-                    class="rounded-md border border-rule bg-raised p-2"
-                >
+                 <div
+                     v-for="stat in props.state.stats"
+                     :key="stat.key"
+                     class="rounded-md border border-rule bg-panel p-2"
+                 >
                     <dt class="text-xs text-ink-muted">{{ stat.label }}</dt>
                     <dd class="mt-0.5 font-mono text-sm tabular-nums text-ink-strong">
                         <span :title="statTitle(stat)">{{ statValue(stat) }}</span>
@@ -231,11 +231,11 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                 </div>
             </dl>
             <dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <div
-                    v-for="item in props.state.meta"
-                    :key="item.key"
-                    class="rounded-md border border-rule bg-raised p-2"
-                >
+                 <div
+                     v-for="item in props.state.meta"
+                     :key="item.key"
+                     class="rounded-md border border-rule bg-panel p-2"
+                 >
                     <dt class="text-xs text-ink-muted">{{ item.label }}</dt>
                     <dd class="mt-0.5 font-mono text-sm tabular-nums text-ink-strong">
                         <!-- A band reading rides on `band_text` (R3-01): the number is genuinely absent and
@@ -254,18 +254,18 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                 no result was entered when the choice fired.
             </p>
 
-            <p
-                v-if="props.known.length === 0"
-                class="mt-3 rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink"
-            >
+             <p
+                 v-if="props.known.length === 0"
+                 class="mt-3 rounded-md border border-dashed border-rule bg-panel p-4 text-sm text-ink"
+             >
                 No recorded choices yet. The first entry below becomes the first known outcome.
             </p>
             <ul v-else class="mt-3 flex flex-col gap-2">
-                <li
-                    v-for="group in props.known"
-                    :key="`${group.event_type}|${group.source_name}`"
-                    class="rounded-md border border-rule bg-raised p-3"
-                >
+                 <li
+                     v-for="group in props.known"
+                     :key="`${group.event_type}|${group.source_name}`"
+                     class="rounded-md border border-rule bg-panel p-3"
+                 >
                     <p class="flex flex-wrap items-baseline gap-2 text-sm">
                         <span class="rounded-md bg-pick px-1.5 py-0.5 text-xs font-semibold text-on-pick">{{ group.source_label }}</span>
                         <span class="font-semibold text-ink-strong">{{ group.source_name }}</span>
@@ -296,10 +296,10 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
         <section aria-labelledby="event-history-heading" class="mt-4">
             <h2 id="event-history-heading" class="text-lg font-semibold text-ink-strong">Recorded events</h2>
 
-            <p
-                v-if="props.empty !== null"
-                class="mt-2 rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink"
-            >
+             <p
+                 v-if="props.empty !== null"
+                 class="mt-2 rounded-md border border-dashed border-rule bg-panel p-4 text-sm text-ink"
+             >
                 {{ props.empty }}
             </p>
             <ul v-else class="mt-3 flex flex-col gap-3">
@@ -336,130 +336,94 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
             </div>
 
             <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <label class="flex flex-col gap-1">
-                    <span class="text-xs text-ink-muted">Turn *</span>
-                    <select
-                        v-model="form.turn"
-                        name="turn"
-                        required
-                        class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm text-ink"
-                    >
-                        <option value="">Select turn</option>
-                        <option
-                            v-for="turn in props.write.turns"
-                            :key="turn.id"
-                            :value="turn.turn"
-                        >
-                            Turn {{ turn.turn }}
-                        </option>
-                    </select>
-                    <p v-if="form.errors.turn" class="text-xs text-risk">{{ form.errors.turn }}</p>
-                </label>
+<BaseSelect
+  v-model="form.turn"
+  name="turn"
+  label="Turn *"
+  required
+  :options="[{ value: '', label: 'Select turn' }, ...props.write.turns.map(t => ({ value: t.turn, label: `Turn ${t.turn}` }))]"
+  :error="form.errors.turn"
+/>
 
-                <label class="flex flex-col gap-1">
-                    <span class="text-xs text-ink-muted">Source *</span>
-                    <select
-                        v-model="form.event_type"
-                        name="event_type"
-                        required
-                        class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm text-ink"
-                    >
-                        <option value="">Select source</option>
-                        <option
-                            v-for="source in props.write.sources"
-                            :key="source.value"
-                            :value="source.value"
-                        >
-                            {{ source.label }}
-                        </option>
-                    </select>
-                    <p v-if="form.errors.event_type" class="text-xs text-risk">{{ form.errors.event_type }}</p>
-                </label>
+<BaseSelect
+  v-model="form.event_type"
+  name="event_type"
+  label="Source *"
+  required
+  :options="[{ value: '', label: 'Select source' }, ...props.write.sources.map(s => ({ value: s.value, label: s.label }))]"
+  :error="form.errors.event_type"
+/>
 
-                <label class="flex flex-col gap-1">
-                    <span class="text-xs text-ink-muted">Event name *</span>
-                    <input
-                        v-model="form.source_name"
-                        type="text"
-                        name="source_name"
-                        required
-                        placeholder="e.g., Go Beyond"
-                        class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm text-ink"
-                    />
-                    <p v-if="form.errors.source_name" class="text-xs text-risk">{{ form.errors.source_name }}</p>
-                </label>
+<BaseInput
+  v-model="form.source_name"
+  type="text"
+  name="source_name"
+  label="Event name *"
+  required
+  placeholder="e.g., Go Beyond"
+  :error="form.errors.source_name"
+/>
             </div>
 
             <!-- Known choices for this event, as a keyboard radio group. Nothing is preselected;
                  the manual field below stays the fallback for an unseen choice. -->
-            <fieldset
-                v-if="knownForName !== null"
-                class="mt-3 rounded-md border border-rule bg-raised p-3"
-            >
+             <fieldset
+                 v-if="knownForName !== null"
+                 class="mt-3 rounded-md border border-rule bg-panel p-3"
+             >
                 <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-ink-muted">
                     Choices seen on this run
                 </legend>
-                <label
-                    v-for="(choice, index) in knownForName.choices"
-                    :key="choice.label"
-                    class="flex min-h-11 cursor-pointer items-center gap-2 px-1 text-sm"
+                <BaseRadio
+                  v-for="(choice, index) in knownForName.choices"
+                  :key="choice.label"
+                  v-model="form.choice_label"
+                  :id="`known_choice_${index}`"
+                  name="known_choice"
+                  :value="choice.label"
+                  :label="null"
                 >
-                    <input
-                        type="radio"
-                        name="known_choice"
-                        class="size-4 accent-chrome"
-                        :value="choice.label"
-                        :checked="form.choice_label === choice.label"
-                        @change="selectChoice(index, choice.label)"
-                    />
-                    <span class="text-ink">{{ choice.label }}</span>
-                    <span v-if="choice.outcome_recorded && choice.outcome !== null" class="text-ink-muted">
-                        {{ choice.outcome }}
-                    </span>
-                    <span
-                        v-else
-                        class="rounded-full border border-risk px-2 py-0.5 text-xs font-semibold text-risk"
-                        title="No recorded outcome was entered for this choice. Choose manually."
-                    >⚠ Outcome incomplete</span>
-                </label>
+                  <span class="text-ink">{{ choice.label }}</span>
+                  <span v-if="choice.outcome_recorded && choice.outcome !== null" class="text-ink-muted">
+                      {{ choice.outcome }}
+                  </span>
+                  <span
+                      v-else
+                      class="rounded-full border border-risk px-2 py-0.5 text-xs font-semibold text-risk"
+                      title="No recorded outcome was entered for this choice. Choose manually."
+                  >âš  Outcome incomplete</span>
+                </BaseRadio>
             </fieldset>
 
             <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <label class="flex flex-col gap-1">
-                    <span class="text-xs text-ink-muted">Choice you made *</span>
-                    <input
-                        v-model="form.choice_label"
-                        type="text"
-                        name="choice_label"
-                        required
-                        placeholder="Option A, Encourage, …"
-                        class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm text-ink"
-                    />
-                    <p v-if="form.errors.choice_label" class="text-xs text-risk">{{ form.errors.choice_label }}</p>
-                </label>
+<BaseInput
+  v-model="form.choice_label"
+  type="text"
+  name="choice_label"
+  label="Choice you made *"
+  required
+  placeholder="Option A, Encourage, â€¦"
+  :error="form.errors.choice_label"
+/>
 
-                <label class="flex flex-col gap-1">
-                    <span class="text-xs text-ink-muted">Support card (if the event came from one)</span>
-                    <input
-                        v-model="form.support_card_name"
-                        type="text"
-                        name="support_card_name"
-                        placeholder="e.g., Kitasan Black"
-                        class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm text-ink"
-                    />
-                </label>
+<BaseInput
+  v-model="form.support_card_name"
+  type="text"
+  name="support_card_name"
+  label="Support card (if the event came from one)"
+  placeholder="e.g., Kitasan Black"
+  :error="form.errors.support_card_name"
+/>
             </div>
 
-            <label class="mt-3 flex flex-col gap-1">
-                <span class="text-xs text-ink-muted">What the choice gave</span>
-                <textarea
-                    v-model="form.origin_note"
-                    name="origin_note"
-                    rows="2"
-                    placeholder="e.g., +30 Energy, +10 Mood"
-                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm text-ink resize-none"
-                />
-            </label>
+<BaseTextarea
+  v-model="form.origin_note"
+  name="origin_note"
+  label="What the choice gave"
+  rows="2"
+  placeholder="e.g., +30 Energy, +10 Mood"
+  :error="form.errors.origin_note"
+/>
 
             <div class="mt-3 flex flex-wrap items-center gap-2">
                 <button
@@ -475,13 +439,13 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                 </p>
             </div>
         </form>
-        <p v-else class="mt-4 rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink">
+         <p v-else class="mt-4 rounded-md border border-dashed border-rule bg-panel p-4 text-sm text-ink">
             No turns logged yet. Record at least one turn on the Cockpit before recording an
             event choice.
         </p>
 
         <div class="mt-4 max-w-sm">
-            <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised">
+            <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">
                 Back to Cockpit
             </a>
         </div>

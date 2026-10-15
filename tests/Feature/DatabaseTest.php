@@ -14,6 +14,9 @@ use Inertia\Testing\AssertableInertia as Assert;
  * shared list components the originals use. Two are DB- and config-derived: Races from RaceCatalogSlot,
  * Scenarios from config/scenarios.php. Three are transcribed from `docs/UMAMUSUME_REFERENCE.md` into
  * `config/reference.php`: Events, Shop Items and Sparks. All read-only; no redirects, no forms.
+ *
+ * Slice 3.1: Config → badge index validation. Every `state` value in config/reference.php must be one
+ * of the four ProvenanceBadge states: confirmed, calculated, estimated, unknown.
  */
 it('renders the Database hub with links to the eight areas', function (): void {
     $this->get('/database')
@@ -26,10 +29,36 @@ it('renders the Database hub with links to the eight areas', function (): void {
             // Items, Sparks).
             ->where('areas.4.label', 'Events')
             ->where('areas.6.label', 'Shop Items')
-            ->where('areas.7.label', 'Sparks'));
+            ->where('areas.7.label', 'Sparks')
+            // Each door carries the source arm its own view states (Slice 3.2): the fetched catalog
+            // tables, the config matrix, or the reference-guide transcriptions.
+            ->where('areas.0.source', 'Fetched')
+            ->where('areas.4.source', 'Transcribed')
+            ->where('areas.5.source', 'Config'));
 });
 
-it('renders the Trainees area with the shared catalog list', function (): void {
+it('validates the config → badge index for reference views', function (): void {
+    $config = config('reference');
+
+    $validStates = ['confirmed', 'calculated', 'estimated', 'unknown'];
+
+    // Events rows
+    foreach ((array) ($config['events']['rows'] ?? []) as $row) {
+        expect($validStates)->toContain($row['state'] ?? null);
+    }
+
+    // Shop Items rows
+    foreach ((array) ($config['shop_items']['rows'] ?? []) as $row) {
+        expect($validStates)->toContain($row['state'] ?? null);
+    }
+
+    // Sparks categories
+    foreach ((array) ($config['sparks']['categories'] ?? []) as $category) {
+        expect($validStates)->toContain($category['state'] ?? null);
+    }
+});
+ 
+ it('renders the Trainees area with the shared catalog list', function (): void {
     $this->get('/database/trainees')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page

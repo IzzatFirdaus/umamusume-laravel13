@@ -47,6 +47,7 @@ const props = defineProps<{
 <template>
     <AppLayout>
         <Head title="Umamusume catalog" />
+        <template #eyebrow>Compare</template>
         <template #title>Database</template>
 
         <TraineeCatalog

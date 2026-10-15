@@ -93,6 +93,7 @@ class PreflightController extends Controller
         return Inertia::render('Career/Preflight', [
             'step' => 6,
             'visited' => SetupDraft::visited(),
+            'saved' => SetupDraft::saved(),
             'contract' => [
                 'complete' => $complete,
                 'build' => $build,

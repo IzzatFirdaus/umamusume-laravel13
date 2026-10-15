@@ -21,6 +21,7 @@
  */
 import AbsenceValue from '../AbsenceValue.vue';
 import SparkChip from './SparkChip.vue';
+import { BaseSelect } from '../Form';
 
 interface SparkRow {
     kind: string;
@@ -135,26 +136,19 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
             <label class="block text-xs font-medium text-ink" :for="controlName">
                 Assign to {{ label }}
             </label>
-            <select
+            <BaseSelect
                 :id="controlName"
                 :name="controlName"
-                :value="modelValue"
-                class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-sm text-ink"
-                :class="error ? 'border-risk' : ''"
-                :aria-describedby="error ? `${controlName}-error` : undefined"
-                :aria-invalid="error ? 'true' : undefined"
-                @change="emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
-            >
-                <option value="">Not chosen</option>
-                <option v-for="option in options ?? []" :key="option.id" :value="option.id">
-                    {{ option.label ?? option.name }}
-                </option>
-            </select>
+                :model-value="modelValue"
+                :options="[
+                    { value: '', label: 'Not chosen' },
+                    ...(options ?? []).map(option => ({ value: option.id, label: option.label ?? option.name }))
+                ]"
+                @update:model-value="emit('update:modelValue', $event)"
+                :error="error"
+            />
             <!-- The error is tied to its control with `aria-describedby` (WCAG 3.3.1) rather than
                  rendered near it and left for the Trainer to connect by eye. -->
-            <p v-if="error" :id="`${controlName}-error`" class="mt-1 text-xs text-risk">
-                {{ error }}
-            </p>
         </div>
     </li>
 </template>

@@ -10,6 +10,10 @@
 import ArtworkSlot from '../ArtworkSlot.vue';
 import Pagination from '../Pagination.vue';
 import RarityChip from '../RarityChip.vue';
+import ProvenanceBadge from '../ProvenanceBadge.vue';
+import SparkChip from '../SparkChip.vue';
+import BaseSelect from '../Form/BaseSelect.vue';
+import BaseButton from '../Form/BaseButton.vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -89,70 +93,54 @@ function applyFilters(): void {
 </script>
 
 <template>
-    <h2 class="text-2xl font-semibold text-ink-strong">Support cards</h2>
+    <h2 class="text-lg font-semibold text-ink-strong">Support cards</h2>
 
     <!-- Control height is `h-11`, the value DESIGN.md §6.14 fixes for a form input and the one
          skills/index already carries, so the two filter surfaces measure the same in a browser. -->
-    <form class="mt-4 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
-        <label class="flex flex-col gap-1">
-            <span class="text-ink">Rarity</span>
-            <select
+    <div class="mt-4 rounded-md border border-rule bg-raised p-4">
+        <form class="flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
+            <BaseSelect
                 v-model="rarity"
+                id="support-card-rarity"
                 name="rarity"
-                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-            >
-                <option value="">All</option>
-                <!-- PHP keys this map on ints and JSON hands them back as text, so `value` is the
-                     query string's own '3' and the picker selects without a cast. -->
-                <option v-for="(word, value) in rarityWords" :key="value" :value="value">{{ word }}</option>
-            </select>
-        </label>
-
-        <label class="flex flex-col gap-1">
-            <span class="text-ink">Type</span>
-            <select
+                label="Rarity"
+                :options="[{ value: '', label: 'All' }, ...Object.entries(rarityWords).map(([value, word]) => ({ value, label: word }))]"
+                placeholder="All"
+            />
+            <BaseSelect
                 v-model="type"
+                id="support-card-type"
                 name="type"
-                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-            >
-                <option value="">All</option>
-                <option v-for="(word, value) in typeWords" :key="value" :value="value">{{ word }}</option>
-            </select>
-        </label>
-
-        <label class="flex flex-col gap-1">
-            <span class="text-ink">Availability</span>
-            <select
+                label="Type"
+                :options="[{ value: '', label: 'All' }, ...Object.entries(typeWords).map(([value, word]) => ({ value, label: word }))]"
+                placeholder="All"
+            />
+            <BaseSelect
                 v-model="status"
+                id="support-card-status"
                 name="status"
-                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-            >
-                <option value="">All</option>
-                <option v-for="option in availabilities" :key="option" :value="option">{{ option }}</option>
-            </select>
-        </label>
-
-        <label class="flex flex-col gap-1">
-            <span class="text-ink">Sort by</span>
-            <select
+                label="Availability"
+                :options="[{ value: '', label: 'All' }, ...availabilities.map((option) => ({ value: option, label: option }))]"
+                placeholder="All"
+            />
+            <BaseSelect
                 v-model="sort"
+                id="support-card-sort"
                 name="sort"
-                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
-            >
-                <option value="">Name</option>
-                <option v-for="(label, value) in sorts" :key="value" :value="value">{{ label }}</option>
-            </select>
-        </label>
+                label="Sort by"
+                :options="[{ value: '', label: 'Name' }, ...Object.entries(sorts).map(([value, label]) => ({ value, label }))]"
+                placeholder="Name"
+            />
+            <BaseButton type="submit" variant="primary" size="md">
+                Filter
+            </BaseButton>
+        </form>
 
-        <button type="submit" class="enamel h-11 rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">
-            Filter
-        </button>
-    </form>
-
-    <p v-if="errors.rarity" class="mt-2 text-sm text-risk">Rarity: {{ errors.rarity }}</p>
-    <p v-if="errors.type" class="mt-2 text-sm text-risk">Type: {{ errors.type }}</p>
-    <p v-if="errors.status" class="mt-2 text-sm text-risk">Availability: {{ errors.status }}</p>
-    <p v-if="errors.sort" class="mt-2 text-sm text-risk">Sort by: {{ errors.sort }}</p>
+        <p v-if="errors.rarity" class="mt-2 text-sm text-risk">Rarity: {{ errors.rarity }}</p>
+        <p v-if="errors.type" class="mt-2 text-sm text-risk">Type: {{ errors.type }}</p>
+        <p v-if="errors.status" class="mt-2 text-sm text-risk">Availability: {{ errors.status }}</p>
+        <p v-if="errors.sort" class="mt-2 text-sm text-risk">Sort by: {{ errors.sort }}</p>
+    </div>
 
     <p v-if="loading" role="status" class="mt-4 text-sm text-ink-muted">Loading results…</p>
 
@@ -216,12 +204,12 @@ function applyFilters(): void {
                     reserve
                 />
 
-                <Link :href="card.url" class="font-semibold text-ink-strong hover:underline">{{ card.name }}</Link>
+                <Link :href="card.url" class="font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">{{ card.name }}</Link>
 
                 <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
 
-                <span class="rounded-full bg-sunken px-2 py-0.5 text-xs text-ink-strong">{{ card.rarity_word }}</span>
-                <span class="rounded-full bg-sunken px-2 py-0.5 text-xs text-ink-strong">{{ card.type_label }}</span>
+                <SparkChip :label="card.rarity_word" size="sm" />
+                <SparkChip :label="card.type_label" variant="stat" size="sm" />
 
                 <!-- The word carries the state on its own, so no colour role and no tooltip: the
                      column already states it in the client's own terms. -->

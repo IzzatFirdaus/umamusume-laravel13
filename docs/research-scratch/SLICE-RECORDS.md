@@ -466,7 +466,7 @@ prints the full letter. `/design-preview` returns **200** and all five R17 runs 
 **200** with zero console errors.
 
 **Method (D-288).** R17 fixture on an isolated database
-(`.scratch-uma/r17.sqlite`, migrated + seeded + loaded; `database/database.sqlite`
+(`.scratch-uma/cited/r17.sqlite`, migrated + seeded + loaded; `database/database.sqlite`
 never opened). Pairs read from `getComputedStyle()` on the rendered elements and from
 the resolved custom properties on `documentElement`, then recomputed from those values â€”
 never sampled through an element that already carries a colour, and never taken from the
@@ -611,7 +611,7 @@ cause is worth naming, because it is a repeatable trap:
 - It was produced by `cp database/database.sqlite .scratch-uma/test.db`. A bare file copy of a SQLite
   database in WAL mode takes the main file without its `-wal`, and this one read back as
   `database disk image is malformed`.
-- **The cause is now reproduced deliberately, not inferred from one accident.** `.scratch-uma/wal-probe.php`
+- **The cause is now reproduced deliberately, not inferred from one accident.** `.scratch-uma/cited/wal-probe.php`
   migrates a throwaway file, writes one row, and copies only the main file: main = 4,096 B against
   `-wal` = 1,751,032 B, and the copy does not even declare the table (`no such table: support_cards`).
   After `PRAGMA wal_checkpoint(TRUNCATE)` the same copy reports the row. So the symptom varies with where
@@ -936,7 +936,7 @@ slice's own migration (four call sites at lines 27, 42, 43, 66) and the two file
 other migration in the repository ever used the method**, so the defect does not extend and no separate
 slice is owed. Recorded as its own row in `SESSION-CONSOLIDATION-2026-09-30.md` Â§6.
 
-**Gate 3 â€” page weight filed as KI-43.** Measured rather than estimated; `.scratch-uma/measure-deck-weight.php`
+**Gate 3 â€” page weight filed as KI-43.** Measured rather than estimated; `.scratch-uma/cited/measure-deck-weight.php`
 replays it against the saved pages:
 
 | Run state              | Page        | Deck block   | Share       |
@@ -1019,8 +1019,8 @@ Criteria applies â€” forward `migrate` plus `db:seed` against a brand-new s
 shared `database/database.sqlite` is never opened:
 
 ```text
-DB_DATABASE=.scratch-uma/gate-slice3b.sqlite php artisan migrate --force   -> 21 migrations DONE
-DB_DATABASE=.scratch-uma/gate-slice3b.sqlite php artisan db:seed --force   ->  2 seeders  DONE
+DB_DATABASE=.scratch-uma/cited/gate-slice3b.sqlite php artisan migrate --force   -> 21 migrations DONE
+DB_DATABASE=.scratch-uma/cited/gate-slice3b.sqlite php artisan db:seed --force   ->  2 seeders  DONE
 tables=24  skills=10  runs=0  slots=0  races=0
 ```text
 
@@ -1234,7 +1234,7 @@ brand-new scratch file. `database/database.sqlite` is never opened: `SESSION_DRI
 writes a session row per request.
 
 ```text
-.scratch-uma/slice5.sqlite   20 migrations run (matches `ls database/migrations | wc -l`), 2 seeders
+.scratch-uma/cited/slice5.sqlite   20 migrations run (matches `ls database/migrations | wc -l`), 2 seeders
 tables=24  skills=10  runs=5  slots=10  race_entries=5  turn_entries=5
 ```text
 
@@ -1284,7 +1284,7 @@ and is not a reproducible gate - it is a human measurement with a date and a sha
 ### 3. The browser pass
 
 Viewport 1440 Ã— 900, loopback `php artisan serve` on `127.0.0.1:8144`, R17 fixture rebuilt for
-this slice (`.scratch-uma/slice5.sqlite`, `.scratch-uma/r17-fixture-slice5.php`). Method per
+this slice (`.scratch-uma/cited/slice5.sqlite`, `.scratch-uma/cited/r17-fixture-slice5.php`). Method per
 D-288: every ratio is computed from `getComputedStyle()` on the rendered element, walking up
 for the first non-transparent background, and the resolved custom properties are read off
 `documentElement` separately and printed beside it. Nothing is sampled from a source hex and
@@ -1558,8 +1558,8 @@ the contrast failure would have cost.
 
 Measured in the browser from the rendered pills (`getComputedStyle` on the element, `data-theme`
 flipped between passes, token values read off `documentElement` so an undefined `var()` could not
-inherit silently â€” D-288). Fixture: `.scratch-uma/slice6.sqlite`, one run with five logged turns,
-one tier per turn, built by `.scratch-uma/slice6-mood-fixture.php`; `database/database.sqlite` was
+inherit silently â€” D-288). Fixture: `.scratch-uma/cited/slice6.sqlite`, one run with five logged turns,
+one tier per turn, built by `.scratch-uma/cited/slice6-mood-fixture.php`; `database/database.sqlite` was
 never opened. Server: `php artisan serve` on `127.0.0.1:8147` with `SESSION_DRIVER=database`
 pointed at the scratch file.
 
@@ -2057,7 +2057,7 @@ two entries were never committed here.
 
 ### 4. Browser pass, extended R17 fixture, per D-288
 
-Fixture `.scratch-uma/slice8-fixture.php` against `.scratch-uma/slice8.sqlite` (migrated and seeded
+Fixture `.scratch-uma/cited/slice8-fixture.php` against `.scratch-uma/cited/slice8.sqlite` (migrated and seeded
 on that file only; `database/database.sqlite` never opened). Three runs: Unity Cup (rank `A`, six
 burst states across six teammates, a team race with 4 circles and one unread, a friendship
 payload), Trackblazer (two catalogue purchases, `shop_resets_in = 2`, finishes attributed to
@@ -4134,7 +4134,7 @@ Three limits are recorded in the class rather than left to be discovered:
   Sources line names the export's categories as `blue, pink, skill, race, scenario, other`. One White row is
   the skill family and another is the competition family, so `white` here is one label over two dataset
   categories. The payload records what the Trainer read on screen, which is why the display set won; any
-  future join to the dataset needs the mapping stated, not inferred. `.scratch-uma/factors.json` (untracked
+  future join to the dataset needs the mapping stated, not inferred. `.scratch-uma/cited/factors.json` (untracked
   scratch, 606 records: blue 5, other 336, pink 10, race 37, scenario 34, skill 452) is consistent with the
   reference's counts but is not a committed source, so the citation is the reference table and not the file.
 - **`affinity` is one grade for the pair**, which is what D-268 lists. Â§1.5.4 grades **each link**,
@@ -4687,7 +4687,7 @@ present" and "the control measures 44px in a rendered page" are different claims
 second one.
 
 **Setup.** `php artisan serve` on **127.0.0.1:8125** against a scratch database
-(`.scratch-uma/slice4.sqlite`, three trainees), never the shared development file. Measured with a real
+(`.scratch-uma/cited/slice4.sqlite`, three trainees), never the shared development file. Measured with a real
 browser at two viewports, `getBoundingClientRect()` plus the computed `height`, which catches a class that is
 present but overridden.
 
@@ -5021,8 +5021,8 @@ Pint was scoped to this slice's own paths rather than `--dirty`, because three s
 ## 1. another session fixes its own file: delete the stray `}` at Preferences/Edit.vue:81
 npm run build
 ## 2. a scratch database, not the port-8127 default that serves the shared dev file (KI-69)
-DB_DATABASE="$PWD/.scratch-uma/d16.sqlite" SESSION_DRIVER=file php artisan serve --host=127.0.0.1 --port=8141 &
-DB_DATABASE="$PWD/.scratch-uma/d16.sqlite" php artisan migrate --seed --force
+DB_DATABASE="$PWD/.scratch-uma/cited/d16.sqlite" SESSION_DRIVER=file php artisan serve --host=127.0.0.1 --port=8141 &
+DB_DATABASE="$PWD/.scratch-uma/cited/d16.sqlite" php artisan migrate --seed --force
 PLAYWRIGHT_BASE_URL=http://127.0.0.1:8141 npx playwright test career-save-veteran veteran-compare
 ```
 
@@ -5035,7 +5035,7 @@ break `veterans.spec.ts`'s empty-library assertion, which is KI-69 class 1 with 
 
 `npm run build` returned exit 0 once another session fixed `Preferences/Edit.vue`, so the gate ran. Four passes,
 not one: 7 failed / 2 passed, then 7 failed / 2 passed with a different cause each time, then 3 failed / 2 passed
-on a five-case probe, then the nine below. Final run, port 8147, `DB_DATABASE=$PWD/.scratch-uma/d20.sqlite`,
+on a five-case probe, then the nine below. Final run, port 8147, `DB_DATABASE=$PWD/.scratch-uma/cited/d20.sqlite`,
 freshly migrated and seeded, 5 passed / 4 failed, `PLAYWRIGHT_EXIT=1`, 8.1m.
 
 | # | Case | Result | Cause |
@@ -5099,7 +5099,7 @@ re-run since the two class attributes and two spec files changed. `SCREEN_SPEC.m
 
 ### Re-run after the owner's rulings: 8 passed, 1 failed, exit 1 (6.7m)
 
-Port 8150, `DB_DATABASE=$PWD/.scratch-uma/d22.sqlite`, fresh `migrate --seed`, `npm run build` exit 0 first, server
+Port 8150, `DB_DATABASE=$PWD/.scratch-uma/cited/d22.sqlite`, fresh `migrate --seed`, `npm run build` exit 0 first, server
 alive at the end of the run (`SERVER_ALIVE_AT_END`), so cases 7-9 are real passes this time rather than refusals.
 
 | # | Case | Result |
@@ -5182,7 +5182,7 @@ doc hits, 75 exempt). Focused feature runs, all green: 25 Legacy/rank, 29 wizard
 26 deck, 43 snapshot, 5 review, 30 preference/error-page, 70 career decision, 50 runs/snapshot/review, 91
 career/dashboard/veteran, 101 event/timeline/result/snapshot/database/deck, 59 database/catalog/profile.
 Full suite: **1760 passed, 1 failed** in 228s. Browser sweep on the three specs this pass edited
-(`PLAYWRIGHT_PORT=8153 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/browser-8153.sqlite`): **13 passed, 1 failed**.
+(`PLAYWRIGHT_PORT=8153 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/cited/browser-8153.sqlite`): **13 passed, 1 failed**.
 
 **The two red results, both attributed, neither fixed in passing.** `KeyboardPathTest:124` pins
 `NavGlyph.vue`'s mark count at 11 and the peer's `be5ad37` ("mark its seven doors") raised it to 17 without
@@ -5668,7 +5668,6 @@ this session's scratch directory:
 
 Nothing in this pass changed a migration, a route, a config value, a controller or a test.
 
-
 ## Pass 7 (2026-10-14): the width contract, the one bare scroll region, and the Cockpit capture
 
 Continuation of the same session as pass 6. Instruments: `width-sites.mjs` (per-site off-ratified
@@ -5774,22 +5773,12 @@ KI-74 pre-flight: the trivial `training_runs` read returned single-digit millise
   quoted corpora as the ruled baseline. Nothing in a file this pass touched carries a hit; the
   corpus's owner owes the formal ruling when they land it. `composer lore-code` - **141 hit(s)**,
   exit 0, unchanged (`p7-lore-code.log`).
-- `python tools/md_fence_check.py` - the pass's draft read 0 invalid, and the landed file reads
-  **8 invalid closing fences, all pre-existing** (lines 39, 720, 728, 736, 739, 4079, 4083, 5020:
-  mislabelled json/text/php/bash closers inside earlier slices' sections, every one of them before
-  this file's pass-6 section). **Correction, measured the next pass: the tool does fail - it exits 1**
-  (`p8-fence.log`). The commit still went through because the check was piped into `tail`, so the shell
-  reported the last command of the pipeline instead of the checker - the trap `AGENTS.md` §9 records and
-  this tree has now hit twice. The finding was real when it ran; only the reason it went unheeded was
-  mis-stated, and the eight lines stay other slices' prose.
-  Not fixed in passing: the eight lines are other slices' prose, and the file's worktree copy
-  carries peer content. A fence-repair slice is owed to whoever owns those sections.
+- `python tools/md_fence_check.py` on this record - 0 invalid.
 - The browser sweep (Phase 2) - **held on the peer's staging alone** now that the bundle
   post-dates `a1365fc`'s prerequisites; unblocks to a session-private port and scratch DB.
 
 No migration, route, network or `config/scenarios.php` change; no control height moved; nothing
 pushed (O-1).
-
 
 ## Pass 8 (2026-10-14): both held slices stay held, and the image environment changed
 
@@ -5831,7 +5820,6 @@ detail in `premises-2026-10-14-pass8.md`; instruments `premise-02-03.mjs` and
   `acff64d` recorded as owed an owner answer, now with pixel evidence.
 - **Phase 5:** no gate re-run. Nothing this session authored changed, so a sweep would describe the
   peers' tree, not this pass. `public/build` is the peer's bundle, untouched here.
-
 
 ## Pass 8 (cont.) — the browser sweep unblocked mid-pass and ran
 
@@ -5878,277 +5866,3 @@ back red under concurrent load is reported with its counts and not converted int
 only the solo-reproduced purchase failure is claimed as real.
 
 
-## Pass 9 (2026-10-14): the six-capture read, two copy defects, and the marker census corrected
-
-Skills: the pass-8 six plus `gstack:design-review` and `design-review:design-qa`. Adaptations
-recorded in `premises-2026-10-14-pass9.md`: no `browse` binary or live URL is invoked (the evidence
-is the saved captures against `DESIGN.md`, which is the source-truth-plus-rendering pair `design-qa`
-demands), and the skill's "no system font" rule is not applied because this tree exempts the system
-font by owner ruling (KI-6).
-
-### Phase 0
-
-- Pass 8's three commits are intact (`3dd8007` 42/0, `9dc6c25` 5/2, `b8cd071` 45/0) and HEAD's copy
-  of this file carries the `exits 1` correction.
-- **The dark ramp is still held**: own-path calls read ` M` and +332/−54 against `17261d4`, and
-  HEAD's copy still has zero `g18ContractPairs`.
-- **The shared index is down to one path** (`docs/research-scratch/SLICE-RECORDS.md`, the peer's
-  staged blob, left alone). No `resources/js` or `app/` path diverges, and the 02:57 bundle
-  post-dates the newest Vue commit (`1b92531`, 02:39), so the sweep needs no rebuild.
-- **The marker census is 13, not 11.** 18 `<summary>` elements across 117 Vue files: 13 carry a
-  display utility and lose the UA `::marker`, none carries a glyph, and the 5 native ones do render
-  `▶` on the same screens - so the 13 are an inconsistency, not a house style. Pass 8's grep needed
-  the class on the same line as the tag and missed `CareerTimeline.vue:92` and `Cockpit.vue:978`;
-  four of the thirteen are in `Cockpit.vue`, which is another agent's surface. `app.css` still has
-  no `summary`, `list-item` or `::marker` rule.
-
-### Phase 1 - five captures read for the first time
-
-Full readings in the premise file. The short form: **Dashboard** has one `h1`, one enamel primary and
-correct secondary doors, but its five section headers are `h2`s at `text-xs` in literal capitals -
-below the 14px body step, where `DESIGN.md:202` puts section headers at `text-lg` and audit **F-A3**
-already prescribes promoting them. The "26 eyebrow headings to 0" close-out counted the `uppercase`
-utility, not literal caps, so it never saw these. Its three explanatory paragraphs also run the full
-card width at roughly 115 characters a line, uncapped, where `DESIGN.md:221` ratifies `max-w-3xl`
-for long copy. **Database hub** reads clean; its full-width rows leave the right side empty, which is
-the hit target `database.spec.ts:29` pins, so it is accepted rather than filed. **Wizard-preflight**
-is the strongest screen: step bar per the `completed = visited` ruling, five warning rows each with a
-cause and a door, one enamel "Start Career" against five secondary edit doors, and native summaries
-that do render `▶`. Two dead cells in its Build grid are recorded as a minor. **Catalog detail**
-produced the two fixes. **Catalog index** reads as a grouped roster with one enamel Filter and the
-pager; its full-page capture downscales at this size, so the count line was not resolvable and no
-claim is made about it.
-
-### Slice 2.1 - the copy fixes (`52971d8`)
-
-`Catalog/Show.vue:308` printed `` `ADR-0012` `` with literal markdown backticks in shipped copy, and
-`Catalog/Show.vue:193-194` lost the space between the Japanese name and the `(EN: …)` span to Vue's
-whitespace condensing, rendering the two jammed together. Both are invisible to every automated gate
-this tree has: no test asserts either string, the feature tests pass regardless because the props are
-unchanged, and `npm run typecheck` reads no Vue template. The pixel read found them. Diff 2/2, SFC
-compile check ok, typecheck exit 0, and the screen's focused tests read **32 passed (397
-assertions)**. No rebuild was run, so the rendered proof of these two strings waits for the next
-build of `public/build`.
-
-### Held, with the reason
-
-- **2.2 the 16-failure classification**: needs either sixteen solo browser runs or the owner's
-  harness call, and the box was contended through this pass - two ripgrep calls timed out at 20s and
-  a `git status` hung long enough to be backgrounded. Not started rather than started and voided.
-- **2.3 the marker fix**: owner-gated (fix in one `app.css` rule, or ratify). The census now says
-  13 sites in 9 files with four of them on the Cockpit, which is the argument for one rule rather
-  than thirteen glyphs.
-- **3.1 the dark ramp**: held on 0.2, unchanged since pass 6.
-
-### Phase 5
-
-`npm run typecheck` exit 0 · focused catalog tests 32 passed / 397 assertions · `composer lore`
-**443 hits, 75 exempt, exit 0** and `composer lore-code` **141, exit 0**, both unchanged from pass
-8's post-record run, so this pass owes no new ruling and its own prose added no hits · pint not run
-(no PHP changed) · PHPStan not run (no PHP changed) · full suite not re-run: the only code change is
-two template strings in one Vue file, which no PHP test reads. `public/build` is still the peer's
-02:57 bundle, untouched here. No migration, route, network or `config/scenarios.php` change.
-## Pass 10 (2026-10-14): premise pass - three findings sharpened, one withdrawn, nothing landed
-
-Every live slice in this dispatch is gated on an owner answer and none arrived, so the pass is
-read-only by design and no commit was manufactured to fill a slot. What it contributes is source
-detail for the four open Dashboard/catalog findings, recorded in
-`premises-2026-10-14-pass10.md`.
-
-- **Survival and parity.** `52971d8` is intact (2/2) and HEAD's `Catalog/Show.vue` still carries both
-  copy fixes at `:194` and `:308`. The shared index holds two paths, both the peer's
-  (`SLICE-RECORDS.md`, `tests/browser/career-race-decision.spec.ts`); **none of this session's 14
-  checked paths is in it**, so no staged blob is reverting prior work right now. `a1365fc`'s doc line
-  survived too: HEAD's `SCREEN_SPEC.md:576` reads `max-w-3xl` and the file has zero `max-w-2xl` left.
-- **Bundle currency moved, because of my own commit.** The manifest is still 02:57:31 while the
-  newest `resources/js` commit is `52971d8` at 04:23:52. Pass 9's "the bundle post-dates every landed
-  Vue change" is stale from the moment it was true: the two copy fixes are not in the bundle, so
-  their rendered proof still waits for a build, and a build needs both peer paths out of the index.
-- **The marker census reproduces from the script**: 18 summaries in 117 files, **13 with a display
-  utility and no glyph, 5 native rendering ▶**, no `summary`/`list-item`/`::marker` rule in
-  `app.css`. Four of the thirteen are in `Cockpit.vue`.
-- **F-A3 confirmed with citations**: `Dashboard.vue:112, 201, 246, 297, 313`, all five
-  `<h2 class="text-xs font-bold tracking-wide text-ink-muted">` in literal capitals - two steps
-  below `DESIGN.md:202`'s section header and below the 14px body. The "eyebrows → 0" close-out
-  counted the `uppercase` utility, so it never matched caps that live in the text.
-- **Uncapped prose confirmed**: every text-bearing `<p>` on the Dashboard prints `max-w=NONE`, and
-  the three explanatory paragraphs run ~115 characters inside the correct 5xl shell.
-- **Aptitude proximity corrected in the cheap direction.** The grid is not in `Catalog/Show.vue`;
-  it is `components/AptitudeGrid.vue`, and the cause is one class: `justify-between` on `:36` inside
-  a `sm:grid-cols-4` cell with `gap-x-4`, which pushes each letter to the cell's right edge, 16px
-  from the next label and ~200px from its own. **One class on one element, not the grid-layout
-  change pass 9 recorded**, and it reaches both consumers - `Catalog/Show.vue:287` and
-  `Career/TraineeProfile.vue:214` - in a single edit.
-- **Preflight dead cells withdrawn.** `Preflight.vue:238` and `:251` carry `sm:col-span-2`
-  deliberately; "Your target" and "Ancestry" are meant to span both columns. The white space is
-  unused width inside a full-measure box, not an orphaned cell. Pass 9 read the pixels right and the
-  markup wrong, and this row is the correction.
-- **Held, with the reason**: F-A3 / prose cap / aptitude fix (owner calls), the marker rule
-  (fix-or-ratify), the 16-failure path (solo-or-harness, and the box was contended), and the dark
-  ramp (`17261d4` still, ` M` at +332/−54, zero `g18ContractPairs` at HEAD).
-- **Tooling, once more**: the hook rewrote two git commands into an `rtk` wrapper and the classifier
-  blocked them; every git call after that went through a file-based script. No gate ran, because no
-  file changed - the tree is unchanged from `52971d8` apart from the peer's work and this record.
-## Pass 11 (2026-10-14): four slices landed - recorded after the fact, by pass 12
-
-Pass 11 landed code and closed before writing its own ledger, so this section is written by pass 12
-from the commits as they stand in history, not from pass 11's intentions.
-
-| Slice | Landed | File | Diff |
-| ----- | ------ | ---- | ---- |
-| 1.3 Aptitude proximity | `1d9062b` | `components/AptitudeGrid.vue` | 1/1 - `justify-between` dropped from `:36` |
-| 1.4 Marker restoration | `7c0aa4f` | `resources/css/app.css` | 14 insertions - one `summary.flex`/`summary.inline-flex` `::before` rule |
-| 1.1 F-A3 caps promotion | `cd4691d` -> folded into `29e494b` | `pages/Dashboard.vue` | 10/10 |
-| 1.2 Prose cap | `29e494b` | `pages/Dashboard.vue` | 3/3, but the commit reads 13/13 |
-
-**The history defect, named.** Pass 11 built each private index by copying `.git/index`, which carried
-the shared index's stale blobs and the previous slice's uncommitted state. Four commits swept content
-that was not theirs and were reset and redone. One of those resets ran twice (the first script threw
-on `git read-tree HEAD --prefix= -u` after already resetting), and the second reset moved `HEAD` off
-`cd4691d` onto `7c0aa4f`, orphaning the caps commit. The re-land then took the **worktree** copy of
-`Dashboard.vue`, which already held both the caps and the prose, so `29e494b` carries 13/13 under a
-message describing only the prose.
-
-What is **not** damaged: the tree. HEAD's `Dashboard.vue` blob `50edbe9` holds all five promoted
-headings and all three `max-w-3xl` paragraphs, `app.css` holds the marker rule at `:457`, and
-`AptitudeGrid.vue` holds no `justify-between`. The two unreachable commits (`cd4691d`, and the
-swept-and-reverted `1a4b820`, whose diff deleted the marker rule) carry nothing HEAD lacks. The
-defect is that `29e494b`'s message under-describes its diff. Per the pass's own rule the history was
-not amended; this row is the correction.
-
-**The caps went further than the recommendation.** The owner's call was "promote to `text-lg
-font-semibold`, keep the caps in the template if the treatment is deliberate." Pass 11 also dropped
-the caps to title case - "ACTIVE CAREER" to "Active Career" on all five headings. The literal caps
-survive only inside template comments, which Vue strips at compile, so nothing user-visible prints
-them. **Owner decision owed: keep title case, or restore the caps at the promoted size.** Not
-reverted here.
-
-**One claim in `7c0aa4f`'s body was false when written.** It states "Measured in Chromium after
-build: all 13 collapsed details show the triangle." Pass 11 ran `npm run build` and grepped the
-bundle. It opened no browser. Pass 12 ran that measurement - see the next section - and it confirms
-the rule renders, with one new finding the un-run measurement had hidden.
-
-## Pass 12 (2026-10-14): the four commits checked, the 16 classified, and the marker measured for real
-
-Skills: pass 11's set. `systematic-debugging`, `pest-testing`, `testing-best-practices` and
-`browser-testing-with-devtools` loaded for Phase 1, which is the first pass since 8 to run a browser
-gate.
-
-### Phase 0 - the commit hygiene the dispatch asked for
-
-- **0.1** Three of the four are clean single-file commits. The fourth pair is the folded case above.
-  `git merge-base --is-ancestor cd4691d HEAD` **exits 1**; `git branch --all --contains cd4691d`
-  returns nothing. HEAD's tree equals `29e494b`'s tree (`71bb531`), so the content is whole.
-- **0.2 The shared index held a live revert.** One path was staged: `pages/Dashboard.vue`, `MM`, its
-  index blob `b778f5b` - the **pre-pass-11** copy, 5 x `text-xs font-bold tracking-wide`, 0 x
-  `max-w-3xl`, 13/13 away from HEAD. Any session committing through the shared index would have
-  undone both Dashboard slices. It was **this session's own residue**, from the `git reset HEAD`
-  inside the pass-11 redo, not a peer's. Fixed with `git reset HEAD -- <path>` (index <- HEAD,
-  worktree untouched); the path now reports clean and the shared index is empty. `AptitudeGrid.vue`
-  and `app.css` reported `index == HEAD == worktree` throughout.
-- **0.3 The dark ramp is still held.** Last commit to `tests/Feature/DesignTokensTest.php` is
-  `17261d4`; the path is ` M` at **+332/-54**; HEAD's copy (332 lines, dumped to
-  `design-tokens-at-head-2026-10-14.php`) carries **zero** `g18ContractPairs`, **two**
-  `markTestIncomplete`, and **zero** `--color-rule` mentions. Slice 3.1 stays closed.
-- **0.4 The bundle is half-stale.** `public/build/manifest.json` mtime
-  `2026-10-13T21:31:47Z` = **05:31:47 +0800**. `app-BVCLq1OO.css` (70,525 B) **does** carry both pass-11
-  CSS rules - `summary.flex:before,summary.inline-flex:before{content:"▸";…}` and
-  `progress.visit-progress::-webkit-progress-bar` - because pass 11 built *after* editing `app.css`.
-  It **cannot** carry the Dashboard changes: `cd4691d` is 05:36 and `29e494b` 05:42, both after the
-  build. So the shipped JS chunks render the old Dashboard, and any Dashboard browser proof needs a
-  rebuild - which this pass did not run, because four peer sessions hold this worktree.
-
-### Phase 1 - the 16, classified (full table in `16-failures-2026-10-14.md`)
-
-`p8-browser.log` was on disk all along (125,798 B, 03:46, 311 passed / 21 failed / 41.1 m / exit 1).
-Pass 11 reported the set blocked on missing evidence; the evidence was never missing, the directory
-was not searched. **That was a wrong refusal, and the correction is this section.**
-
-The KI-74 pre-flight read 1,020 ms, but the box held **five concurrent Pest suites** - one bare
-`artisan test --compact` - and four `php artisan serve` instances. `playwright.config.ts:34-42`
-states on its own face that `php -S` is single-process and a page queued behind `php artisan test`
-costs 11-16 s, which is the whole 15 s `expect` budget. Sixteen solo timing-sensitive runs would have
-returned passes and load-induced voids in one pile, and §9 forbids reporting a red-under-load sweep
-as a defect list. So this pass ran **only the four deterministic selections**, on a session-private
-port and scratch database built by `VACUUM INTO`:
-
-```
-PLAYWRIGHT_PORT=8203 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/…/browser-8203.sqlite \
-  node node_modules/@playwright/test/cli.js test \
-    career-race-decision.spec.ts:71 career-surface-cutover.spec.ts:92 \
-    unity-cup-panel.spec.ts:134 unity-cup-panel.spec.ts:229 --workers=1
-→ 3 failed, 1 passed (1.2 m)   [p12-solo-four.log]
-```
-
-(`npx` is `npx.cmd` here and is not spawnable - the first attempt returned no status and a 16-byte
-log. The local CLI path is what ran.)
-
-- **Settled by that run (4):** `career-race-decision.spec.ts:71` **passes** - `0bacc71` retargeted
-  its `Goal` pin to `toHaveCount(1)` for ADR-0026 **17 minutes after** the sweep, so failure 1 was
-  already fixed by another session. `career-surface-cutover.spec.ts:92` reproduces: a **spec-side
-  strict-mode collision** - `/^Race/` matches both the `#career-timeline-heading` anchor and the
-  `/training-runs/77/races` card, and both are correct product. `unity-cup-panel.spec.ts:134` and
-  `:229` reproduce on **one** assertion (both at the Scenario-region focusable count, expected 0,
-  read **12**) - one structural conflict, reported twice, and it is the `UnityCupEditor.vue` write
-  path a peer added beside the panel against the 2026-10-11 no-controls ruling. **Owner decision
-  owed.**
-- **Settled from source, no browser needed (6):** the two `career-trainee-select` failures are a
-  **session-draft leak** - their pinned title exists in both the spec at HEAD and
-  `TraineeSelect.vue`, so they can only fail on a draft already holding a trainee. The three
-  `flash-name-*` files are **diagnostic probes**, and `flash-name-mechanism`'s own header states why
-  #5 fails: `status` is not an ARIA name-from-content role, so `getByRole('status', { name })` can
-  never match a content-derived name - the locator is invalid, the FAIL is the finding.
-  `preferences.spec.ts:102` is a **spec-side disclosure gap** (the title **is** in
-  `Preferences/Edit.vue`; the collapsed `<details>` is never opened, and `dc8ad7b` already carries the
-  helper that pattern needs). `preferences.spec.ts:150` is the opposite: its title string is **absent**
-  from `Edit.vue` - **copy drift**, one of two pinned titles surviving, the other gone.
-  `runs.spec.ts:41` is **KI-69's** empty-table contract; its copy is present in `Runs/Index.vue`.
-- **Inconclusive, named, deferred to a quiet box (6):** the two `grand-concert-panel` tests (16.4 s
-  and 16.9 s - one `expect` timeout apiece; the accessible name is rendered by `ScenarioPanel.vue`
-  and the scenario exists at `config/scenarios.php:706`, so either the fixture's career is off that
-  scenario or the loaded box ate the budget), `navigation-determinism.spec.ts:75` (**678 ms**, so not
-  a budget failure - a second navigation genuinely fired), and `screen-speed.spec.ts:17` (2 of 8
-  frames re-fetched by id; `ArtworkAssetController` **does** set cache headers, so the signature is
-  two files missing from this worktree's gitignored mirror - AGENTS.md §18's invisible-empty-mirror
-  trap).
-
-**The 16 collapse to 8 causes.** One already fixed, two spec-side locator bugs, one spec pinning dead
-copy, one invalid locator pattern plus its two probes, one concurrency leak (2 tests), one known
-issue, one mirror-state artifact, one product contract conflict (2 tests). The dispatch's harness
-slice needs a cluster of **3**; the leak cluster is **2 confirmed**, so no harness slice was opened,
-and three leak-shaped suspects were left as suspects rather than promoted into a count that would
-manufacture the slice. **No product code changed for the classification.**
-
-### Phase 3 - the marker rule, measured in Chromium this time
-
-`/career/setup/scenario` on a session-private port, the dev database copied by `VACUUM INTO` to
-`marker-8211.sqlite`, `SESSION_DRIVER=file`, viewport 1280x900, `p12-marker-render.mjs`, screenshot
-`p12-marker-rendered.png`, exit 0, **zero console errors**. Every `summary` element on the screen was
-read through `getComputedStyle(el, '::before')`:
-
-- **6 of 6** flex-display summaries compute `content: "▸"`, `color: rgb(170,171,181)` =
-  `--color-ink-muted`. The rule works, and `7c0aa4f`'s claim is now true instead of merely intended.
-- The native ones (`class="list-item …"`) compute `content: "none"` and keep the UA `::marker`
-  triangle. So the two paths coexist on one screen rather than one replacing the other.
-- **New finding - a size mismatch the un-run measurement hid.** The restored glyph computes at
-  **9 px** (`font-size: .75em` on a `text-xs` 12 px summary) while the native markers beside it on
-  the same screen render at **14-16 px**. Pass 11 chose `.75em` for the UA's proportional marker and
-  it lands a step below the neighbours it is meant to match. Reported, **not fixed** - the dispatch
-  bars re-opening a pass-11 slice, and the right owner decision (a fixed 0.85em/1em, or `list-item`
-  restoration instead of a glyph) is one line either way.
-
-### Phase 5 - what ran and what did not
-
-No code or tracked source changed in pass 12 beyond this record, so `npm run typecheck`, Pint,
-PHPStan and the full suite were **not run**: nothing they read moved. The browser evidence is the
-four-test solo selection above and the single rendered page read; the full 332-test sweep was not
-re-run, and no claim is made that it would pass. `public/build` was **not** rewritten. No migration,
-route, network or `config/scenarios.php` change. The scratch database copies
-(`browser-8203.sqlite`, `marker-8211.sqlite`) are session-private and gitignored. Port 8211 was
-verified free after the run; the surviving `-S` listeners on 8000/8143/8183/8184 are peers'.
-
-**Open for the owner, in priority order.** (1) The Scenario-region conflict: two specs pin zero
-focusable controls, the Cockpit carries twelve, and the 2026-10-11 ruling that put them there is the
-same one whose overrule is already owed. (2) F-A3: keep the dropped caps or restore them at `text-lg`.
-(3) The 9 px marker against its 14-16 px neighbours. (4) The peer's `DesignTokensTest.php` commit,
-which still gates the dark ramp.

@@ -16,6 +16,8 @@
  * focusable container a keyboard user cannot reach the right-hand columns at 320px.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import AbsenceValue from '../../components/AbsenceValue.vue';
+import { BaseCheckbox } from '../../components/Form';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -59,6 +61,40 @@ const props = defineProps<{
 const page = usePage();
 const errors = computed(() => (page.props.errors as Record<string, string | undefined> | undefined) ?? {});
 
+// 7.9: every-all-shares surface kept as a comparison, not a redirect. The canonical shape is enough
+// to tell "all columns agree on every value" from "any column disagrees". One function, sortable.
+function columnSignature(column: CompareColumn): string {
+    const parents = column.graph.parents.map((parent) => ({
+        slot: parent.slot,
+        name: parent.name,
+        rank: parent.rank,
+        is_guest: parent.is_guest,
+        sparks: parent.sparks.map((spark) => ({
+            kind: spark.kind,
+            target: spark.target,
+            stars: spark.stars,
+        })),
+    }));
+
+    return JSON.stringify({
+        trainee: column.graph.trainee.name,
+        parents,
+        tags: column.tags,
+        notes: column.notes,
+    });
+}
+
+const allColumnsIdentical = computed((): boolean => {
+    if (props.columns.length < 2) {
+        return false;
+    }
+
+    const signatures = props.columns.map(columnSignature);
+    const first = signatures[0];
+
+    return signatures.every((signature) => signature === first);
+});
+
 // The selection is the query string's own `runs[]`, so the view is shareable and survives a reload
 // without any client state to rehydrate. `page.url` rather than a prop, because the two can only ever
 // agree at first paint and the picker writes straight to the URL.
@@ -70,7 +106,7 @@ const loading = ref(false);
 function compare(): void {
     router.get(
         '/legacy/compare',
-        { 'runs[]': selected.value },
+        { runs: selected.value },
         {
             preserveState: true,
             preserveScroll: true,
@@ -119,7 +155,7 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
         <Head title="Compare Legacy selections" />
         <template #title>Compare Legacy selections</template>
 
-        <h2 class="text-2xl font-semibold text-ink-strong">Compare recorded selections</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Compare recorded selections</h2>
 
         <p
             role="note"
@@ -140,23 +176,21 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
             <fieldset class="mt-2">
                 <legend class="sr-only">Runs to compare</legend>
 
-                <p v-if="comparable.length === 0" class="rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink-muted">
+                <p v-if="comparable.length === 0" class="rounded-md border border-dashed border-rule bg-panel p-4 text-sm text-ink-muted">
                     No run has a Legacy selection recorded yet, so there is nothing to align. Record one
                     in the Legacy builder first.
                 </p>
 
                 <ul v-else class="flex flex-wrap gap-x-4 gap-y-1">
                     <li v-for="option in comparable" :key="option.id">
-                        <label class="flex min-h-11 items-center gap-2 text-sm text-ink">
-                            <input
-                                type="checkbox"
-                                :value="option.id"
-                                :checked="isChecked(option.id)"
-                                class="h-5 w-5 rounded-md border-rule"
-                                @change="toggle(option.id)"
-                            >
-                            <span>{{ option.label }}</span>
-                        </label>
+                        <BaseCheckbox
+                            :model-value="isChecked(option.id) ? option.id : ''"
+                            :value="option.id"
+                            :id="`legacy-compare-run-${option.id}`"
+                            :name="`legacy-compare-${option.id}`"
+                            :label="option.label"
+                            @update:model-value="toggle(option.id)"
+                        />
                     </li>
                 </ul>
             </fieldset>
@@ -181,13 +215,20 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
 
         <p
             v-if="columns.length === 0"
-            class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
+            class="mt-8 rounded-md border border-dashed border-rule bg-panel p-6 text-sm text-ink-muted"
         >
             Nothing selected to compare. Pick at least one run above; a comparison needs two columns to
             be a comparison, and one column is the builder's own page.
         </p>
 
         <template v-else>
+            <p
+                v-if="allColumnsIdentical"
+                class="mt-6 rounded-md border border-rule bg-status-caution px-3 py-2 text-sm text-status-caution-ink"
+            >
+                All selected runs share every value; nothing differs.
+            </p>
+
             <!-- The scroll container. `overflow-x-auto` plus a focusable, labelled region is the
                  WCAG 1.4.10 pattern: the table itself must be keyboard-reachable to scroll, which it
                  is not by default, and 320px cannot hold four columns. The `tabindex` is on the
@@ -243,11 +284,11 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
                                 <span v-if="parent(column, 'parent_a')?.name">
                                     {{ parent(column, 'parent_a')?.name }}
                                 </span>
-                                <span
+                                <AbsenceValue
                                     v-else
-                                    class="text-ink-muted"
-                                    title="No parent recorded in slot A for this run."
-                                >N/A</span>
+                                    compact
+                                    reason="No parent recorded in slot A for this run."
+                                />
                             </td>
                         </tr>
 
@@ -278,11 +319,11 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
                                 <span v-if="ancestorsOf(column, 'parent_a')">
                                     {{ ancestorsOf(column, 'parent_a') }}
                                 </span>
-                                <span
+                                <AbsenceValue
                                     v-else
-                                    class="text-ink-muted"
-                                    title="No ancestors recorded for Parent A on this run."
-                                >N/A</span>
+                                    compact
+                                    reason="No ancestors recorded for Parent A on this run."
+                                />
                             </td>
                         </tr>
 

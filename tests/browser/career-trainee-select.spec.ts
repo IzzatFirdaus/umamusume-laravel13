@@ -47,24 +47,34 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(first.locator('span[lang="ja"]')).toHaveText('アドマイヤベガ');
 
         // The aptitude badges state the axis and the band in words, never colour alone (`design-2.0`
-        // §17). The roster fixture publishes no letters, so the word every badge carries is the
-        // absence word - which is still the badge's second statement, and the sweep below the
-        // disclosure is the contract check: all ten badges name their axis and carry a letter slot
-        // and a word beside it, six at full weight and four behind the count-summary.
+        // §17). The seeded roster publishes all ten letters (the seeder replays the committed
+        // `gametora-characters` export), so every badge carries a real letter and its band rather than
+        // the absence words: Admire Vega's six full-weight badges are Turf A, Dirt G, Sprint F, Mile C,
+        // Medium A and Long C, and her four style badges sit behind the count-summary. A badge that
+        // read its axis by the wrong key printed "N/A / Not published" on every row while the columns
+        // held letters, which is the regression this pins.
         await expect(first.getByText('Turf', { exact: true })).toBeVisible();
         await expect(first.getByText('Show all aptitudes (4)')).toBeVisible();
         await first.getByText('Show all aptitudes (4)').click();
         await expect(first.getByText('Front runner', { exact: true })).toBeVisible();
-        await expect(first.getByText('N/A')).toHaveCount(10);
-        await expect(first.getByText('Not published')).toHaveCount(10);
+
+        // Bands across the ten axes: Turf A, Medium A and End closer A are Strong; Mile C, Long C and
+        // Late surger B are Neutral; Dirt G, Sprint F, Front runner G and Pace chaser G are Very weak.
+        // No badge is an absence, so neither absence word appears anywhere in the card.
+        await expect(first.getByText('Strong', { exact: true })).toHaveCount(3);
+        await expect(first.getByText('Neutral', { exact: true })).toHaveCount(3);
+        await expect(first.getByText('Very weak', { exact: true })).toHaveCount(4);
+        await expect(first.getByText('N/A', { exact: true })).toHaveCount(0);
+        await expect(first.getByText('Not published', { exact: true })).toHaveCount(0);
 
         // Two actions per card: the read one and the primary one.
         await expect(first.getByRole('button', { name: 'Select Trainee', exact: true })).toBeVisible();
         await expect(first.getByRole('link', { name: 'View Profile' })).toBeVisible();
 
         // The wizard shell: step 2 is the current step, and since D7 all six steps are live links, so
-        // the step nav holds no named absence.
-        await expect(page.getByRole('link', { name: 'Trainee' })).toHaveAttribute('aria-current', 'step');
+        // the step nav holds no named absence. The back breadcrumb also has a "Trainee" link, so we
+        // scope to the Setup steps nav to avoid strict-mode violations.
+        await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByRole('link', { name: 'Trainee' })).toHaveAttribute('aria-current', 'step');
         await expect(page.getByText('Step 2 of 6').first()).toBeVisible();
         await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByText('not built')).toHaveCount(0);
 
@@ -187,6 +197,8 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(page.getByRole('heading', { name: 'Basic' })).toBeVisible();
         await expect(page.getByText('Mar 12, 1996')).toBeVisible();
         await expect(page.getByText('157 cm')).toBeVisible();
+        await expect(page.getByText('85 · 82 · 57 cm')).toBeVisible();
+        await expect(page.getByText('bust · height · waist')).toBeVisible();
         await expect(page.getByText('咲々木瞳')).toBeVisible();
         await expect(page.getByText('Hitomi Sasaki')).toBeVisible();
 

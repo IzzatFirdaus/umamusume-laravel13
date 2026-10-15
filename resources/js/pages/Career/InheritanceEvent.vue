@@ -184,17 +184,17 @@ const statusGlyphClass = (status: Milestone['status']): string => {
         </p>
 
         <!-- Empty state when no legacy selection exists -->
-        <section
-            v-if="props.empty"
-            aria-labelledby="inheritance-empty-heading"
-            class="mt-4 rounded-md border border-dashed border-rule bg-raised p-4"
-        >
+             <section
+                 v-if="props.empty"
+                 aria-labelledby="inheritance-empty-heading"
+                 class="mt-4 rounded-md border border-dashed border-rule bg-panel p-4"
+             >
             <h2 id="inheritance-empty-heading" class="text-lg font-semibold text-ink-strong">
                 No Legacy configuration yet
             </h2>
             <p class="mt-2 text-sm text-ink">{{ props.empty }}</p>
             <div class="mt-3 flex flex-wrap gap-2">
-                <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised">
+                <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">
                     Back to Cockpit
                 </a>
                 <a href="/career/setup/legacy" class="inline-flex min-h-11 items-center rounded-md bg-chrome px-3 font-semibold text-on-chrome">
@@ -219,11 +219,11 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                 </p>
 
                 <ol class="mt-3 space-y-2" role="list" aria-label="Inheritance milestones">
-                    <li
-                        v-for="milestone in props.milestones"
-                        :key="milestone.key"
-                        class="flex items-center gap-3 rounded-md border border-rule bg-raised p-3"
-                    >
+                     <li
+                         v-for="milestone in props.milestones"
+                         :key="milestone.key"
+                         class="flex items-center gap-3 rounded-md border border-rule bg-panel p-3"
+                     >
                         <span
                             :class="statusGlyphClass(milestone.status)"
                             :title="milestone.title"
@@ -259,11 +259,11 @@ const statusGlyphClass = (status: Milestone['status']): string => {
 
             <!-- Aggregated predicted sparks by kind -->
             <div v-if="sortedPredictedSparks.length > 0" class="mt-3 space-y-2">
-                <div
-                    v-for="spark in sortedPredictedSparks"
-                    :key="spark.kind"
-                    class="flex flex-wrap items-center gap-2 rounded-md border border-rule bg-raised p-2"
-                >
+                 <div
+                     v-for="spark in sortedPredictedSparks"
+                     :key="spark.kind"
+                     class="flex flex-wrap items-center gap-2 rounded-md border border-rule bg-panel p-2"
+                 >
                     <span class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                         {{ spark.kind_label }}
                     </span>
@@ -356,11 +356,11 @@ const statusGlyphClass = (status: Milestone['status']): string => {
 
             <!-- Recorded events list -->
             <div v-if="props.observed.events.length > 0" class="mt-3 space-y-2">
-                <div
-                    v-for="event in props.observed.events"
-                    :key="event.id"
-                    class="rounded-md border border-rule bg-raised p-3"
-                >
+                 <div
+                     v-for="event in props.observed.events"
+                     :key="event.id"
+                     class="rounded-md border border-rule bg-panel p-3"
+                 >
                     <div class="flex flex-wrap items-start gap-2">
                         <span class="inline-flex min-w-[7rem] shrink-0 text-xs font-semibold uppercase tracking-wide text-ink-muted">
                             Turn {{ event.turn }}
@@ -386,12 +386,12 @@ const statusGlyphClass = (status: Milestone['status']): string => {
             </p>
 
             <!-- Record new observed event form -->
-            <form
-                v-if="props.write.turns.length > 0"
-                class="mt-4 rounded-md border border-rule bg-raised p-3"
-                @submit.prevent="submitEvent"
-            >
-                <h3 class="text-sm font-semibold text-ink-strong">Record an inheritance event</h3>
+             <form
+                 v-if="props.write.turns.length > 0"
+                 class="mt-4 rounded-md border border-rule bg-panel p-3"
+                 @submit.prevent="submitEvent"
+             >
+                <h3 class="text-lg font-semibold text-ink-strong">Record an inheritance event</h3>
                 <p class="mt-1 text-xs text-ink-muted">
                     Enter what you saw in the client. This creates a Confirmed TurnEvent of type Inheritance.
                 </p>
@@ -410,69 +410,43 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                 </div>
 
                 <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    <label class="flex flex-col gap-1">
-                        <span class="text-xs text-ink-muted">Turn *</span>
-                        <select
-                            v-model="form.turn"
-                            name="turn"
-                            required
-                            class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm text-ink"
-                        >
-                            <option value="">Select turn</option>
-                            <option
-                                v-for="turn in props.write.turns"
-                                :key="turn.id"
-                                :value="turn.turn"
-                            >
-                                Turn {{ turn.turn }}
-                            </option>
-                        </select>
-                        <p v-if="form.errors.turn" class="text-xs text-risk">{{ form.errors.turn }}</p>
-                    </label>
+<BaseSelect
+  v-model="form.turn"
+  name="turn"
+  label="Turn *"
+  required
+  :options="[{ value: '', label: 'Select turn' }, ...props.write.turns.map(t => ({ value: t.turn, label: `Turn ${t.turn}` }))]"
+  :error="form.errors.turn"
+/>
 
-                    <label class="flex flex-col gap-1">
-                        <span class="text-xs text-ink-muted">Source *</span>
-                        <select
-                            v-model="form.source_name"
-                            name="source_name"
-                            required
-                            class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm text-ink"
-                        >
-                            <option value="">Select source</option>
-                            <option
-                                v-for="source in props.write.sources"
-                                :key="source"
-                                :value="source"
-                            >
-                                {{ source }}
-                            </option>
-                        </select>
-                        <p v-if="form.errors.source_name" class="text-xs text-risk">{{ form.errors.source_name }}</p>
-                    </label>
+<BaseSelect
+  v-model="form.source_name"
+  name="source_name"
+  label="Source *"
+  required
+  :options="[{ value: '', label: 'Select source' }, ...props.write.sources.map(s => ({ value: s, label: s }))]"
+  :error="form.errors.source_name"
+/>
 
-                    <label class="flex flex-col gap-1">
-                        <span class="text-xs text-ink-muted">Detail</span>
-                        <input
-                            v-model="form.choice_label"
-                            type="text"
-                            name="choice_label"
-                            placeholder="e.g., Blue Speed ★★★, Pink Mile ★★"
-                            class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm text-ink"
-                        />
-                    </label>
+<BaseInput
+  v-model="form.choice_label"
+  type="text"
+  name="choice_label"
+  label="Detail"
+  placeholder="e.g., Blue Speed â˜…â˜…â˜…, Pink Mile â˜…â˜…"
+  :error="form.errors.choice_label"
+/>
                 </div>
 
                 <div class="mt-3 grid grid-cols-1 gap-3">
-                    <label class="flex flex-col gap-1">
-                        <span class="text-xs text-ink-muted">Notes</span>
-                        <textarea
-                            v-model="form.origin_note"
-                            name="origin_note"
-                            rows="2"
-                            placeholder="Any additional context…"
-                            class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm text-ink resize-none"
-                        />
-                    </label>
+<BaseTextarea
+  v-model="form.origin_note"
+  name="origin_note"
+  label="Notes"
+  rows="2"
+  placeholder="Any additional contextâ€¦"
+  :error="form.errors.origin_note"
+/>
                 </div>
 
                 <div class="mt-3 flex flex-wrap items-center gap-2">
@@ -496,7 +470,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
         </section>
 
         <div class="mt-4 max-w-sm">
-            <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised">
+            <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">
                 Back to Cockpit
             </a>
         </div>

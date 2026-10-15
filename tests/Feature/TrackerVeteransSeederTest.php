@@ -148,6 +148,27 @@ it('leaves every Legacy diagram empty and notes the gap instead of inventing anc
     }
 });
 
+it('writes the exact ancestry sentence the library screen splits back off', function (): void {
+    // Two owners hold this sentence: this seeder appends it to every imported career, and
+    // `resources/js/domain/veteranNote.ts` takes it back off so the library can state it once above the
+    // list instead of once per card (Phase 8.1). A silent rewording in either place leaves the screen
+    // printing the whole stored note on every card again, which is the copy defect the split fixes, and
+    // neither suite would notice alone: this one asserts the data, the browser case renders the screen.
+    $this->seed(TrackerVeteransSeeder::class);
+
+    $source = file_get_contents(__DIR__.'/../../resources/js/domain/veteranNote.ts');
+    expect($source)->not->toBeFalse();
+
+    expect(preg_match("/export const VETERAN_ANCESTRY_NOTE =\s*'([^']+)';/u", (string) $source, $matches))
+        ->toBe(1, 'veteranNote.ts no longer declares VETERAN_ANCESTRY_NOTE as a plain string literal');
+
+    expect($matches[1])->not->toBe('');
+
+    foreach (Veteran::all() as $veteran) {
+        expect($veteran->notes)->toEndWith($matches[1]);
+    }
+});
+
 it('is idempotent: re-running the seeder adds and changes nothing', function (): void {
     $this->seed(TrackerVeteransSeeder::class);
 

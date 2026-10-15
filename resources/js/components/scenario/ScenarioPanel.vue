@@ -47,6 +47,18 @@ import UnityCupPanel from './UnityCupPanel.vue';
 import WidgetFallback from './WidgetFallback.vue';
 import { register, resolve } from './registry';
 
+// Phase 7A.1: Cockpit panel components — registered against matrix flag keys
+import UraMandatoryLadder from '@/Pages/Career/Cockpit/Panels/UraMandatoryLadder.vue';
+import HappyMeekPanel from '@/Pages/Career/Cockpit/Panels/HappyMeekPanel.vue';
+import CareerMilestonesPanel from '@/Pages/Career/Cockpit/Panels/CareerMilestonesPanel.vue';
+import TeamRaceFacilityPanel from '@/Pages/Career/Cockpit/Panels/TeamRaceFacilityPanel.vue';
+import SpiritBurstsPanel from '@/Pages/Career/Cockpit/Panels/SpiritBurstsPanel.vue';
+import TeamRankLadderPanel from '@/Pages/Career/Cockpit/Panels/TeamRankLadderPanel.vue';
+import GradePointObjectivesPanel from '@/Pages/Career/Cockpit/Panels/GradePointObjectivesPanel.vue';
+import ProShopPanel from '@/Pages/Career/Cockpit/Panels/ProShopPanel.vue';
+import EpithetRoutesPanel from '@/Pages/Career/Cockpit/Panels/EpithetRoutesPanel.vue';
+import CareerGoalsPanel from '@/Pages/Career/Cockpit/Panels/CareerGoalsPanel.vue';
+
 /**
  * The renderers this build carries, registered against the matrix's own flag keys. A panel is
  * reached by a flag, never by a scenario name, so a scenario that leaves `career_goals` off cannot
@@ -63,6 +75,18 @@ register('team_rank_ladder', UnityCupPanel);
 register('grade_objectives', TrackblazerPanel);
 register('shop', TrackblazerPanel);
 register('epithet_routes', TrackblazerPanel);
+
+// Phase 7A.1: Cockpit panel components — each flag maps to its own component
+register('ura_mandatory_ladder', UraMandatoryLadder);
+register('happy_meek', HappyMeekPanel);
+register('career_milestones', CareerMilestonesPanel);
+register('team_race_facility', TeamRaceFacilityPanel);
+register('spirit_bursts', SpiritBurstsPanel);
+register('team_rank_ladder', TeamRankLadderPanel);
+register('grade_objectives', GradePointObjectivesPanel);
+register('shop', ProShopPanel);
+register('epithet_routes', EpithetRoutesPanel);
+register('career_goals', CareerGoalsPanel);
 
 interface PanelFlag {
     label: string;

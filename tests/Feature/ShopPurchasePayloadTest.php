@@ -161,8 +161,10 @@ it('marks the cost input when the catalogue price disagrees', function (): void 
 
     $panel = (string) file_get_contents(base_path('resources/js/components/scenario/TrackblazerPanel.vue'));
 
-    expect($panel)->toContain(":aria-invalid=\"purchaseForm.errors.cost !== undefined ? 'true' : 'false'\"")
-        ->and($panel)->toContain('id="purchase-cost-error"');
+    // BaseInput handles aria-invalid internally when :error is provided; the error <p> id follows
+    // the pattern error-<input-id> (see BaseInput.vue:135). The cost input has id="purchase-cost".
+    expect($panel)->toContain('id="purchase-cost"')
+        ->and($panel)->toContain(':error="purchaseForm.errors.cost"');
 });
 
 it('warns about the overwrite and the cap beside the purchase control', function (): void {

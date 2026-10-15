@@ -61,6 +61,12 @@ class PreferenceController extends Controller
                 'language' => isset($settings['language']) && is_string($settings['language'])
                     ? $settings['language']
                     : null,
+                'dashboard_layout' => isset($settings['dashboard_layout']) && is_string($settings['dashboard_layout'])
+                    ? $settings['dashboard_layout']
+                    : null,
+                'dashboard_hidden_cards' => isset($settings['dashboard_hidden_cards']) && is_array($settings['dashboard_hidden_cards'])
+                    ? $settings['dashboard_hidden_cards']
+                    : null,
             ],
             // The Default-scenario control reads the matrix as a whole — one option per entry the
             // config composes — and never branches on one of them (D-240, gate G-33).
@@ -81,6 +87,9 @@ class PreferenceController extends Controller
             ),
             'exportUrl' => route('preferences.export'),
             'backupUrl' => route('preferences.backup'),
+            // DL.14: the Wide Bento gate, so the Settings radio is disabled (and the writer guards)
+            // while the DESIGN.md:210-221 ruling is outstanding.
+            'wideBentoEnabled' => (bool) config('dashboard.wide_bento_enabled'),
         ]);
     }
 
@@ -114,6 +123,13 @@ class PreferenceController extends Controller
                 $settings['stat_target_defaults'],
                 static fn (mixed $value): bool => $value !== null,
             );
+        }
+
+        // DL.12/DL.14: the disabled radio is authoritative. A `wide_bento` that reaches the writer
+        // while the flag is off (a stale row, a hand-written request) is stored as `bento`, never
+        // as a layout the Trainer cannot select.
+        if (($settings['dashboard_layout'] ?? null) === 'wide_bento' && ! config('dashboard.wide_bento_enabled')) {
+            $settings['dashboard_layout'] = 'bento';
         }
 
         if ($settings === []) {

@@ -10,6 +10,13 @@ declare module '@inertiajs/core' {
         flash: {
             status: string | null;
         };
+        preferences: {
+            settings: Record<string, unknown> | null;
+        };
+        dashboard: {
+            /** `config('dashboard.wide_bento_enabled')`: false until the DESIGN.md ruling lands. */
+            wide_bento_enabled: boolean;
+        };
     }
 }
 

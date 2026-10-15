@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '../../../layouts/AppLayout.vue';
+import { BaseCheckbox, BaseInput, BaseTextarea } from '../../../components/Form';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, reactive } from 'vue';
 
@@ -116,24 +117,28 @@ const submit = (): void => {
                 <h2 id="snapshot-scenario-heading" class="text-lg font-semibold text-ink-strong">Scenario</h2>
                 <label class="mt-3 flex flex-col gap-1">
                     <span class="text-xs font-medium text-ink">Scenario *</span>
-                    <select v-model="form.scenario" name="scenario" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                        <option value="">Choose a scenario</option>
-                        <option v-for="(label, key) in props.scenarios" :key="key" :value="key">{{ label }}</option>
-                    </select>
+                    <BaseSelect
+                      v-model="form.scenario"
+                      name="scenario"
+                      :options="[{ value: '', label: 'Choose a scenario' }, ...Object.keys(props.scenarios).map(key => ({ value: key, label: props.scenarios[key] }))]"
+                      required
+                      :error="form.errors.scenario"
+                    />
                     <span v-if="form.errors.scenario" class="text-xs text-risk">{{ form.errors.scenario }}</span>
-                </label>
+                  </label>
             </section>
 
             <section aria-labelledby="snapshot-trainee-heading" class="rounded-md border border-rule bg-raised p-4">
                 <h2 id="snapshot-trainee-heading" class="text-lg font-semibold text-ink-strong">Trainee</h2>
                 <label class="mt-3 flex flex-col gap-1">
                     <span class="text-xs font-medium text-ink">Trainee *</span>
-                    <select v-model="form.umamusume_id" name="umamusume_id" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                        <option value="">Choose a trainee</option>
-                        <option v-for="trainee in props.trainees" :key="trainee.id" :value="String(trainee.id)">
-                            {{ trainee.name }}
-                        </option>
-                    </select>
+                    <BaseSelect
+                      v-model="form.umamusume_id"
+                      name="umamusume_id"
+                      :options="[{ value: '', label: 'Choose a trainee' }, ...props.trainees.map(trainee => ({ value: String(trainee.id), label: trainee.name }))]"
+                      required
+                      :error="form.errors.umamusume_id"
+                    />
                     <span v-if="form.errors.umamusume_id" class="text-xs text-risk">{{ form.errors.umamusume_id }}</span>
                 </label>
             </section>
@@ -147,24 +152,33 @@ const submit = (): void => {
                 <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-ink">Year *</span>
-                        <select v-model="form.career_year" name="career_year" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                            <option value="">Year</option>
-                            <option v-for="year in props.years" :key="year.value" :value="String(year.value)">{{ year.label }}</option>
-                        </select>
+                        <BaseSelect
+                          v-model="form.career_year"
+                          name="career_year"
+                          :options="[{ value: '', label: 'Year' }, ...props.years.map(year => ({ value: String(year.value), label: year.label }))]"
+                          required
+                          :error="form.errors.career_year"
+                        />
                     </label>
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-ink">Month *</span>
-                        <select v-model="form.career_month" name="career_month" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                            <option value="">Month</option>
-                            <option v-for="month in 12" :key="month" :value="String(month)">{{ month }}</option>
-                        </select>
+                        <BaseSelect
+                          v-model="form.career_month"
+                          name="career_month"
+                          :options="[...Array(12).keys()].map(month => ({ value: String(month + 1), label: String(month + 1) }))"
+                          required
+                          :error="form.errors.career_month"
+                        />
                     </label>
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-ink">Half *</span>
-                        <select v-model="form.career_phase" name="career_phase" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                            <option value="">Half</option>
-                            <option v-for="phase in props.phases" :key="phase.value" :value="phase.value">{{ phase.label }}</option>
-                        </select>
+                        <BaseSelect
+                          v-model="form.career_phase"
+                          name="career_phase"
+                          :options="[{ value: '', label: 'Half' }, ...props.phases.map(phase => ({ value: phase.value, label: phase.label }))]"
+                          required
+                          :error="form.errors.career_phase"
+                        />
                     </label>
                 </div>
                 <span v-if="form.errors.career_year || form.errors.career_month || form.errors.career_phase" class="mt-2 block text-xs text-risk">
@@ -184,51 +198,61 @@ const submit = (): void => {
                          name the whole block ("Speed I don't know this value") and left the checkbox
                          unnamed. Each control now owns its label text. -->
                     <div v-for="field in STAT_FIELDS" :key="field.key" class="flex flex-col gap-1">
-                        <label class="text-xs font-medium text-ink" :for="`snapshot-${field.key}`">{{ field.label }}</label>
-                        <input
+                        <BaseInput
                             :id="`snapshot-${field.key}`"
-                            v-model="form[field.key]"
-                            type="number" :name="field.key" min="0" :disabled="unknown[field.key]"
-                            class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink disabled:opacity-60"
-                        >
-                        <span class="flex items-center gap-1.5 text-[0.7rem] text-ink-muted">
-                            <input
-                                :id="`snapshot-unknown-${field.key}`"
-                                type="checkbox" :checked="unknown[field.key]"
-                                @change="toggleUnknown(field.key, ($event.target as HTMLInputElement).checked)"
-                            >
-                            <label :for="`snapshot-unknown-${field.key}`">I don't know this value</label>
-                        </span>
-                        <span v-if="form.errors[field.key]" class="text-xs text-risk">{{ form.errors[field.key] }}</span>
+                            v-model.number="form[field.key]"
+                            type="number"
+                            :name="field.key"
+                            min="0"
+                            :disabled="unknown[field.key]"
+                            :error="form.errors[field.key]"
+                            label="{{ field.label }}"
+                        />
+                        <BaseCheckbox
+                            :id="`snapshot-unknown-${field.key}`"
+                            :model-value="unknown[field.key]"
+                            :aria-describedby="`snapshot-${field.key}`"
+                            @update:model-value="(v) => toggleUnknown(field.key, v)"
+                            label="I don't know this value"
+                            :disabled="form.errors[field.key]"
+                        />
                     </div>
                 </div>
                 <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <div v-for="field in META_FIELDS" :key="field.key" class="flex flex-col gap-1">
-                        <label class="text-xs font-medium text-ink" :for="`snapshot-${field.key}`">{{ field.label }}</label>
-                        <input
+                        <BaseInput
                             :id="`snapshot-${field.key}`"
-                            v-model="form[field.key]"
-                            type="number" :name="field.key" min="0" :disabled="unknown[field.key]"
-                            class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink disabled:opacity-60"
-                        >
-                        <span class="flex items-center gap-1.5 text-[0.7rem] text-ink-muted">
-                            <input
-                                :id="`snapshot-unknown-${field.key}`"
-                                type="checkbox" :checked="unknown[field.key]"
-                                @change="toggleUnknown(field.key, ($event.target as HTMLInputElement).checked)"
-                            >
-                            <label :for="`snapshot-unknown-${field.key}`">I don't know this value</label>
-                        </span>
-                        <span v-if="form.errors[field.key]" class="text-xs text-risk">{{ form.errors[field.key] }}</span>
+                            v-model.number="form[field.key]"
+                            type="number"
+                            :name="field.key"
+                            min="0"
+                            :disabled="unknown[field.key]"
+                            :error="form.errors[field.key]"
+                            label="{{ field.label }}"
+                        />
+                        <BaseCheckbox
+                            :id="`snapshot-unknown-${field.key}`"
+                            :model-value="unknown[field.key]"
+                            :aria-describedby="`snapshot-${field.key}`"
+                            @update:model-value="(v) => toggleUnknown(field.key, v)"
+                            label="I don't know this value"
+                            :disabled="form.errors[field.key]"
+                        />
                     </div>
-                </div>
-            </section>
+                    </div>
+                </section>
 
             <section aria-labelledby="snapshot-notes-heading" class="rounded-md border border-rule bg-raised p-4">
                 <h2 id="snapshot-notes-heading" class="text-lg font-semibold text-ink-strong">Notes</h2>
                 <label class="mt-3 flex flex-col gap-1">
                     <span class="text-xs font-medium text-ink">Anything worth remembering about this career</span>
-                    <textarea v-model="form.notes" name="notes" rows="2" maxlength="5000" class="rounded-md border border-rule bg-raised px-2 py-1.5 text-ink" />
+                    <BaseTextarea
+                      v-model="form.notes"
+                      name="notes"
+                      rows="2"
+                      maxlength="5000"
+                      :error="form.errors.notes"
+                    />
                     <span v-if="form.errors.notes" class="text-xs text-risk">{{ form.errors.notes }}</span>
                 </label>
             </section>
@@ -240,21 +264,27 @@ const submit = (): void => {
                     it: re-entering them here would give the same fact two writers.
                 </p>
                 <div class="mt-3 flex flex-wrap gap-3">
-                    <a href="/legacy" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised">Legacy Lab</a>
-                    <a href="/support-cards" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised">Support Cards</a>
+                    <a href="/legacy" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">Legacy Lab</a>
+                    <a href="/support-cards" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">Support Cards</a>
                 </div>
             </section>
 
             <div class="flex flex-wrap items-center gap-3">
-                <button
+                <BaseButton
                     type="submit"
+                    variant="primary"
                     :disabled="form.processing"
-                    class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome disabled:opacity-60"
                 >
                     {{ form.processing ? 'Reading back…' : 'Review snapshot' }}
-                </button>
+                </BaseButton>
                 <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Reading the snapshot back…</p>
-                <a href="/career/snapshot" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised">Back</a>
+                <BaseButton
+                    type="button"
+                    variant="secondary"
+                    @click="() => router.visit('/career/snapshot')"
+                >
+                    Back
+                </BaseButton>
             </div>
         </form>
     </AppLayout>

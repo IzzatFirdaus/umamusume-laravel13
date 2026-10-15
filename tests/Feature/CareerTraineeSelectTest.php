@@ -61,6 +61,25 @@ it('renders all ten aptitude letters the catalogue holds, index for index (D8)',
             ]));
 });
 
+it('sends the ten aptitude axes under the key names the badge reads', function (): void {
+    // The roster card binds each badge's letter by the axis object's own key. The controller sends
+    // `value` (ADR-0004's element order), and the template read `key` for a while, so every badge
+    // rendered the absence words while the columns held letters. This pins the prop's naming so a
+    // rename fails here instead of on a screen.
+    rosterTrainee('Key Contract Trainee', ['turf' => 'A']);
+
+    $this->get('/career/setup/trainee')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('aptitudeAxes', 10)
+            ->where('aptitudeAxes.0.value', 'turf')
+            ->where('aptitudeAxes.0.label', 'Turf')
+            ->where('aptitudeAxes.0.axis', 'surface')
+            ->where('aptitudeAxes.9.value', 'end_closer')
+            ->where('aptitudeAxes.9.label', 'End closer')
+            ->where('aptitudeAxes.9.axis', 'style'));
+});
+
 it('names the stored trainee even when she is not in the roster shown (D5)', function (): void {
     // The readout resolved the name from the paginated, filtered list, so a Trainer who searched,
     // selected, and came back to an unfiltered page saw `N/A` beside a flash saying the trainee was

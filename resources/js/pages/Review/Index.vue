@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
 import CandidateForm from '../../components/review/CandidateForm.vue';
+import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
+import StatusPill from '../../components/StatusPill.vue';
+import SuggestionHint from '../../components/review/SuggestionHint.vue';
+import Pagination from '../../components/Pagination.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
 interface Candidate {
@@ -26,14 +30,27 @@ defineProps<{
     aliasLanguages: { value: string; label: string }[];
     neverFetched: boolean;
 }>();
+
+function pillFor(tier: string): { label: string; variant: 'warning' | 'neutral' } {
+    return tier === 'Fuzzy'
+        ? { label: 'Fuzzy match', variant: 'warning' }
+        : { label: 'No match', variant: 'neutral' };
+}
+
+function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unknown'; title: string } {
+    return tier === 'Fuzzy'
+        ? { state: 'estimated', title: `Fuzzy match from ${sourceKey}` }
+        : { state: 'unknown', title: `No match from ${sourceKey}` };
+}
 </script>
 
 <template>
     <AppLayout>
         <Head title="Review queue" />
+        <template #eyebrow>Review</template>
         <template #title>Review queue</template>
 
-        <h2 class="text-2xl font-semibold text-ink-strong">Match review queue</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Match review queue</h2>
         <p class="mt-1 text-sm text-ink-muted">
             Fuzzy and unmatched fetch results land here. The engine never merges them without your
             decision.
@@ -42,67 +59,71 @@ defineProps<{
         <!-- Two different absences. A queue someone has worked through is empty for a reason, and a
              database nobody has ever fetched has never had anything to review; telling a Trainer to run
              the fetch when they cleared six candidates an hour ago is the wrong instruction (R-27). -->
-        <p
-            v-if="candidates.data.length === 0 && neverFetched"
-            class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
-        >
+         <p
+             v-if="candidates.data.length === 0 && neverFetched"
+             class="mt-8 rounded-md border border-dashed border-rule bg-panel p-6 text-sm text-ink-muted"
+         >
             Nothing pending. This database has never been fetched, so there is nothing here yet. Run
             <code>php artisan uma:fetch</code> to populate.
         </p>
         <p
-            v-else-if="candidates.data.length === 0"
-            class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
-        >
+             v-else-if="candidates.data.length === 0"
+             class="mt-8 rounded-md border border-dashed border-rule bg-panel p-6 text-sm text-ink-muted"
+         >
             Nothing pending. Every match the engine could not decide has had your verdict. The rows it
             promoted are on the <Link href="/database">Database screens</Link>.
         </p>
 
         <template v-else>
-            <ul class="mt-6 space-y-4">
+            <p class="mt-4 text-sm text-ink-muted">
+                {{ candidates.data.length }} of {{ candidates.total }} items to resolve.
+            </p>
+
+            <ul class="mt-3 space-y-3">
                 <li
-                    v-for="candidate in candidates.data"
+                    v-for="(candidate, index) in candidates.data"
                     :key="candidate.id"
-                    class="rounded-md border border-rule bg-raised p-4 text-sm"
+                    class="rounded-md border border-rule bg-panel p-4 text-sm"
                 >
-                    <div class="flex items-baseline justify-between">
-                        <span class="font-medium text-ink-strong">{{ candidate.proposed_name }}</span>
-                        <span class="text-xs text-ink-muted">
-                            {{ candidate.match_tier_label }} · {{ candidate.source_key }} ·
-                            {{ candidate.created_at }}
-                        </span>
+                    <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="font-medium text-ink-strong">{{ candidate.proposed_name }}</span>
+                            <StatusPill
+                                :label="pillFor(candidate.match_tier).label"
+                                :variant="pillFor(candidate.match_tier).variant"
+                                size="sm"
+                            />
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <ProvenanceBadge
+                                :state="badgeFor(candidate.match_tier, candidate.source_key).state"
+                                :title="badgeFor(candidate.match_tier, candidate.source_key).title"
+                            />
+                            <time class="text-xs text-ink-muted" :datetime="candidate.created_at">{{ candidate.created_at }}</time>
+                        </div>
                     </div>
                     <p v-if="candidate.proposed_name_ja" lang="ja" class="text-ink-muted">
                         {{ candidate.proposed_name_ja }}
                     </p>
-                    <p v-if="candidate.suggestion" class="text-ink-muted">
-                        <!-- The merge target field starts prefilled with this row's id, so the id prints
-                             beside the name: a prefilled value a Trainer cannot check is a value they can
-                             only trust. The form is what writes the id; nothing here reads it back. -->
-                        Suggestion: {{ candidate.suggestion }}
-                        <span v-if="candidate.suggested_umamusume_id !== null" class="font-mono text-xs tabular-nums">id {{ candidate.suggested_umamusume_id }}</span>
+                    <SuggestionHint
+                        v-if="candidate.suggestion"
+                        :suggestion="candidate.suggestion"
+                        :umamusume-id="candidate.suggested_umamusume_id"
+                        :source-key="candidate.source_key"
+                    />
+                    <p v-else class="text-xs text-ink-muted">
+                        No suggestion: the source name does not fuzzy-match any trainee.
                     </p>
 
-                    <CandidateForm :candidate="candidate" :alias-languages="aliasLanguages" />
+                    <CandidateForm
+                        :candidate="candidate"
+                        :alias-languages="aliasLanguages"
+                        :accented="index === 0"
+                    />
                 </li>
             </ul>
 
-            <nav
-                v-if="candidates.links.length > 3"
-                aria-label="Pagination"
-                class="mt-4 flex flex-wrap gap-2 text-sm"
-            >
-                <template v-for="(link, index) in candidates.links" :key="index">
-                    <a
-                        v-if="link.url"
-                        :href="link.url"
-                        :aria-current="link.active ? 'page' : undefined"
-                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised"
-                        :class="link.active ? 'bg-raised font-bold text-ink-strong' : ''"
-                        v-html="link.label"
-                    />
-                    <span v-else class="inline-flex min-h-11 items-center px-3 text-ink-muted" v-html="link.label" />
-                </template>
-            </nav>
+            <Pagination :links="candidates.links" />
         </template>
     </AppLayout>
 </template>
