@@ -83,11 +83,13 @@ Homestead.yaml
 /.windsurf/
 /skills-lock.json
 /kilo.json
+/crush.json
 /.github/
 
 # Local-only artifacts (this app is never deployed; PRD NFR-1)
 /research-scratch/
 /.scratch-uma/
+/.scratch-merge-preserve/
 /testing
 /database/*.sqlite*
 *.sql
@@ -117,6 +119,9 @@ docs/vibe_images/
 tools/tmp_*
 tools/rebuild-db.*
 tools/force-db-rebuild.py
+/temp.json
+/preflight.php
+/storage/sqlite_test.php
 
 # Python cache for tools
 tools/__pycache__/
