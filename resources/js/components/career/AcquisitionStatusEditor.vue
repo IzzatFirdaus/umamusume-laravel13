@@ -164,7 +164,7 @@ function save(): void {
 
             <button
                 type="button"
-                class="enamel mt-4 inline-flex min-h-11 items-center rounded-full bg-chrome px-5 font-bold text-on-chrome disabled:opacity-60"
+                class="mt-4 inline-flex min-h-11 items-center rounded-md bg-primary-action px-5 font-bold text-on-primary-action disabled:opacity-60"
                 :disabled="touched.length === 0 || form.processing"
                 @click="save"
             >

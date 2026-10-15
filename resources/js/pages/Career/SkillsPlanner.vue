@@ -338,7 +338,7 @@ const coverageConstants = computed(() =>
                 type="submit"
                 :aria-describedby="form.hasErrors ? 'skills-order-error' : undefined"
                 :disabled="form.processing"
-                class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-5 text-sm font-bold text-on-chrome disabled:opacity-60"
+                class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-5 text-sm font-bold text-on-primary-action disabled:opacity-60"
             >
                 {{ form.processing ? 'Saving…' : 'Save order' }}
             </button>

@@ -220,7 +220,7 @@ const incompleteData = computed(
 
             <a
                 :href="recommended?.action_url"
-                class="mt-2 inline-flex min-h-11 items-center rounded-full bg-chrome px-5 text-sm font-bold text-on-chrome"
+                class="mt-2 inline-flex min-h-11 items-center rounded-md bg-primary-action px-5 text-sm font-bold text-on-primary-action"
             >
                 Go to {{ recommended?.action }}
             </a>

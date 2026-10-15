@@ -687,7 +687,7 @@ const hasAnyNode = computed(() =>
 <div class="mt-5 flex flex-wrap items-center gap-3">
                  <BaseButton
                      type="button"
-                     variant="enamel"
+                     variant="primary"
                      :disabled="form.processing"
                      @click="requestConfirm"
                  >
@@ -732,7 +732,7 @@ const hasAnyNode = computed(() =>
                     </BaseButton>
                     <BaseButton
                         type="button"
-                        variant="enamel"
+                        variant="primary"
                         :disabled="form.processing"
                         @click="submit"
                     >

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="group-title">
+  <title id="group-title">Group</title>
+  <defs>
+    <linearGradient id="group-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4FD98A"/>
+      <stop offset="1" stop-color="#26B864"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="96" height="96" rx="22" fill="url(#group-bg)"/>
+  <g fill="#B8F2CF" opacity="0.85">
+    <circle cx="23" cy="43" r="11"/>
+    <path d="M7 82 C7 67 14 59 23 59 C30 59 35 63 37 70 L37 82 Z"/>
+    <circle cx="77" cy="43" r="11"/>
+    <path d="M93 82 C93 67 86 59 77 59 C70 59 65 63 63 70 L63 82 Z"/>
+  </g>
+  <g fill="#FFFFFF" stroke="#2EC06C" stroke-width="3" paint-order="stroke">
+    <path d="M27 86 C27 71 37 63 50 63 C63 63 73 71 73 86 Z"/>
+    <circle cx="50" cy="40" r="18"/>
+  </g>
+  <g fill="#2EC06C">
+    <circle cx="43.5" cy="37" r="2.6"/>
+    <circle cx="56.5" cy="37" r="2.6"/>
+  </g>
+  <path d="M42 45 Q50 52 58 45" fill="none" stroke="#2EC06C" stroke-width="3" stroke-linecap="round"/>
+</svg>

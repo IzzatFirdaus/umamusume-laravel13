@@ -50,7 +50,7 @@ const statusVariant = (status: string): 'info' | 'success' | 'warning' | 'neutra
             </a>
             <a
                 href="/career/setup/scenario"
-                class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome"
+                class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 text-sm font-bold text-on-primary-action"
             >
                 New run
             </a>
@@ -109,7 +109,7 @@ const statusVariant = (status: string): 'info' | 'success' | 'warning' | 'neutra
                     <div v-if="run.status_label === 'Active'" class="w-full mt-2 lg:mt-0 lg:w-48 shrink-0">
                         <div class="h-2 w-full overflow-hidden rounded-md bg-sunken" aria-hidden="true">
                             <span
-                                class="block h-full bg-lime"
+                                class="block h-full bg-chrome"
                                 style="width: 45%"
                             ></span>
                         </div>

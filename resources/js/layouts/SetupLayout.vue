@@ -22,8 +22,22 @@
  */
 import AppLayout from './AppLayout.vue';
 import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { useLayout } from '../composables/useLayout';
 
 const props = defineProps<{ step: number; visited?: number[]; saved?: number[] }>();
+
+// The wizard honours the same width preference as the shell, so its wide steps (the deck's
+// master/detail, the scenario matrix) get the wide screen the Trainer asked for. `container-type:
+// inline-size` is what lets an inner step lay itself out off the wrapper's resolved width instead
+// of the viewport, so the sidebar collapse never re-breaks a step. The `AppLayout` `main` carries
+// the same measure; this wrapper re-states it so the step grid inside is the thing that fills.
+const { mode } = useLayout();
+const wrapperClass = computed(() => {
+    const panel = mode.value === 'compact' ? 'max-w-3xl' : mode.value === 'wide' ? 'max-w-shell-wide' : 'max-w-6xl';
+
+    return `${panel} mx-auto w-full`;
+});
 
 const steps = [
     { label: 'Scenario', to: '/career/setup/scenario' },
@@ -89,6 +103,8 @@ const isNotStarted = (index: number): boolean =>
             </ol>
         </nav>
 
-        <slot />
+        <div :class="wrapperClass" class="@container">
+            <slot />
+        </div>
     </AppLayout>
 </template>

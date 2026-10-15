@@ -1915,7 +1915,7 @@ component, `components/career/ObjectiveRow.vue`. One query feeds both readers �
   `tests/Feature/CockpitObjectivesTest.php` proves it by writing a different value to the row and asserting
   the printed figure moves.*
 - ***The badge is `calculated` on every row**, because a state is a comparison and the provenance table bars
-  `confirmed` from anything the tool compared (`docs/proposals/provenance-and-absence-contracts.md` §1). The `title` names
+  `confirmed` from anything the tool compared (`docs/research-scratch/PLANS-AND-BRIEFS.md` §"provenance-and-absence-contracts.md" §1). The `title` names
   both operands.*
 - ***`consequence` is always null today** — no source states what changes when an obligation is missed — and
   the row renders nothing for it rather than inventing a sentence.*
@@ -3428,7 +3428,7 @@ left.
     `TrainingCard.vue` the Energy cost badge is `:234`, the deck tally badge is `:242` and the
     target-deficit badge is `:251`; `:233` is the Energy cost **span** carrying `costTitle`, which is the
     row this entry's first sentence means. The proposal-side counterpart, carrying the vocabulary table and
-    the presentation options, is `docs/proposals/provenance-and-absence-contracts.md`.*
+    the presentation options, is `docs/research-scratch/PLANS-AND-BRIEFS.md` §"provenance-and-absence-contracts.md".*
 
     *Ruled 2026-10-09 (owner), appended; the entry above stands as written. The axis is per surface class
     and is now defined in `DESIGN.md` §5: reading-versus-derivation on the Trainer Advisor's numbers,

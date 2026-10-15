@@ -33,7 +33,7 @@ import { Head } from '@inertiajs/vue3';
             <div class="mt-5 flex flex-wrap items-center gap-3">
                 <a
                     href="/career/snapshot/setup"
-                    class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome"
+                    class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 text-sm font-bold text-on-primary-action"
                 >
                     Enter the snapshot
                 </a>

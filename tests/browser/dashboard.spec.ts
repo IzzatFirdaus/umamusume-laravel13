@@ -62,21 +62,35 @@ test('states the empty career in words a Trainer can act on', async ({ page }) =
     // design-2.0 §29: what is missing, why it matters, what to do. The brief's own sentence is the
     // first line; the second says what a career is for, so the panel is not just a refusal.
     await expect(page.getByText(EMPTY_CAREER)).toBeVisible();
-    await expect(page.getByText(/A career keeps your turns, Energy and race record/)).toBeVisible();
+    await expect(page.getByText(/Start a run to track turns, Energy and race record/)).toBeVisible();
     await expect(page.getByRole('link', { name: 'Start a new training run' })).toBeVisible();
 
-    // The snapshot door is the other way in, and it now sits outside both career states (R2-04).
-    await expect(page.getByRole('link', { name: 'Import an existing career' })).toBeVisible();
+    // The snapshot door is the other way in. It now has two faces: the empty state's own ghost
+    // button (asserted on the next line) and the Quick Actions paragraph link that has carried it
+    // since R2-04. The unscoped role query would resolve to both, so this one reads the card.
+    await expect(
+        page.getByRole('region', { name: 'ACTIVE CAREER' }).getByRole('link', { name: 'Import an existing career' }),
+    ).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Import an existing career' })).toHaveCount(2);
 
     // Paradox of the Active User (plan §13): no onboarding wall. The rest of the page is usable on
     // first load, so the quick actions and the data panels are present with no career at all.
     const quickActions = page.getByRole('navigation', { name: 'Quick actions' });
-    for (const label of ['New Career', 'Legacy Lab', 'Support Cards']) {
+    // The card now carries only destinations the sidebar does not, so the sweep names those.
+    for (const label of ['Review queue', 'Open settings']) {
         await expect(quickActions.getByRole('link', { name: label })).toBeVisible();
     }
+    // `New Career` and the two sidebar destinations are gone at the source, in
+    // `DashboardController::quickActions()`: with no career live, Active Career's own primary is the
+    // only start-a-career door on the screen (Hick, Occam).
+    await expect(quickActions.getByRole('link', { name: 'New Career' })).toHaveCount(0);
+
+    // Von Restorff: one filled primary on the screen, and in this state it is the career door.
+    // Scoped to `main`, because the shell's own chrome carries no button variant.
+    await expect(page.locator('#main [data-variant="primary"]')).toHaveCount(1);
 
     // The two panels with no source name the absence rather than rendering an empty box.
-    await expect(page.getByText('No Veterans recorded yet.')).toBeVisible();
+    await expect(page.getByText('No veterans yet.')).toBeVisible();
     await expect(page.getByText('Recent builds: none yet.')).toBeVisible();
 });
 
@@ -109,9 +123,11 @@ test('sizes the dashboard controls to the 44px contract', async ({ page }) => {
     // `legacy.spec.ts` run, repeated here because this screen's controls are new.
     const targets = [
         page.getByRole('link', { name: 'Start a new training run' }),
-        page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'New Career' }),
-        page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'Legacy Lab' }),
-        page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'Support Cards' }),
+        // "New Career" is not in this list on purpose: with no career live, Quick Actions drops it so
+        // the screen offers one start-a-career door rather than two, and the sweep below measures the
+        // doors that remain.
+        page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'Review queue' }),
+        page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'Open settings' }),
         // The panel's door is the Veteran library now: the panel lists the library's rows and its
         // empty state names the Result screen's Save Veteran as the filing step.
         page.getByRole('link', { name: 'Open the Veteran library' }),
@@ -192,7 +208,7 @@ test('names the multi-career count only when a second career is live', async ({ 
     const notice = page.getByRole('region', { name: 'ACTIVE CAREER' }).getByText(/careers are active/);
     await expect(notice).toBeVisible();
     // `route()` hands the page an absolute URL, so the assertion is the destination, not the origin.
-    await expect(notice.getByRole('link', { name: 'Open Careers' })).toHaveAttribute('href', /\/training-runs$/);
+    await expect(notice.getByRole('link', { name: /^View all careers/ })).toHaveAttribute('href', /\/training-runs$/);
     await expect(page.getByRole('region', { name: 'ACTIVE CAREER' }).getByText(TRAINEE)).toBeVisible();
 });
 
@@ -239,7 +255,8 @@ test('announces a visit in flight and takes over the failure state', async ({ pa
         await route.continue();
     });
 
-    await page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'New Career' }).click();
+    // The empty-career primary is the door to that route now; Quick Actions no longer repeats it.
+    await page.getByRole('link', { name: 'Start a new training run' }).click();
     // The shell's flash region is always mounted (WCAG 4.1.3), so the assertion targets the region
     // that is saying something, not the only one.
     await expect(page.getByRole('status').filter({ hasText: 'Loading…' })).toHaveText('Loading…');
@@ -252,11 +269,11 @@ test('announces a visit in flight and takes over the failure state', async ({ pa
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
 
-    await page.route('**/support-cards', (route) =>
+    await page.route('**/review', (route) =>
         route.fulfill({ status: 200, contentType: 'text/html', body: '<html><body>not an Inertia response</body></html>' }),
     );
 
-    await page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'Support Cards' }).click();
+    await page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'Review queue' }).click();
     await expect(page.getByRole('alert')).toContainText('That page could not be loaded');
 });
 
@@ -266,7 +283,7 @@ test('honours the dashboard layout preference: bento by default, focused single-
 
     // Default is bento: the grid carries the bento layout and the four always-present regions show.
     const grid = page.locator('[data-layout]');
-    await expect(grid).toHaveAttribute('data-layout', 'bento');
+    await expect(grid).toHaveAttribute('data-layout', 'standard');
     for (const name of ['ACTIVE CAREER', 'QUICK ACTIONS', 'RECENT VETERANS', 'DATA STATUS']) {
         await expect(page.getByRole('region', { name })).toBeVisible();
     }
@@ -275,47 +292,221 @@ test('honours the dashboard layout preference: bento by default, focused single-
     // max-w-3xl (DL.1, DL.4).
     await page.goto('/preferences');
     await page.locator('#app > *').first().waitFor();
-    await page.getByRole('radio', { name: 'Focused' }).check();
+    await page.getByRole('radio', { name: 'Compact' }).check();
     await page.getByRole('button', { name: 'Save preferences' }).click();
     await expect(page.getByRole('status')).toHaveText('Preferences saved.');
 
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
     const focused = page.locator('[data-layout]');
-    await expect(focused).toHaveAttribute('data-layout', 'focused');
+    await expect(focused).toHaveAttribute('data-layout', 'compact');
     await expect(focused).toHaveClass(/grid-cols-1/);
     await expect(focused).toHaveClass(/max-w-3xl/);
 
     // Reset to Bento so the suite leaves the shared store as it found it.
     await page.goto('/preferences');
     await page.locator('#app > *').first().waitFor();
-    await page.getByRole('radio', { name: 'Bento', exact: true }).check();
+    await page.getByRole('radio', { name: 'Standard', exact: true }).check();
     await page.getByRole('button', { name: 'Save preferences' }).click();
     await expect(page.getByRole('status')).toHaveText('Preferences saved.');
 
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
-    await expect(page.locator('[data-layout]')).toHaveAttribute('data-layout', 'bento');
+    await expect(page.locator('[data-layout]')).toHaveAttribute('data-layout', 'standard');
 });
 
-test('renders wide bento at max-w-7xl when selected', async ({ page }) => {
+test('renders the wide shell when Wide is selected', async ({ page }) => {
     await page.goto('/preferences');
     await page.locator('#app > *').first().waitFor();
-    await page.getByRole('radio', { name: 'Wide Bento' }).check();
+    await page.getByRole('radio', { name: 'Wide', exact: true }).check();
     await page.getByRole('button', { name: 'Save preferences' }).click();
     await expect(page.getByRole('status')).toHaveText('Preferences saved.');
 
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
     const wide = page.locator('[data-layout]');
-    await expect(wide).toHaveAttribute('data-layout', 'wide_bento');
-    await expect(wide).toHaveClass(/max-w-7xl/);
+    await expect(wide).toHaveAttribute('data-layout', 'wide');
     await expect(wide).toHaveClass(/grid-cols-12/);
+    // The grid self-caps at the standard measure even in a wide shell, because four cards spread
+    // across 1536px leave a taller band of empty page beneath them than they fill.
+    await expect(wide).toHaveClass(/max-w-6xl/);
+    await expect(page.locator('#main')).toHaveClass(/max-w-shell-wide/);
 
-    // Reset to Bento so the suite leaves the shared store as it found it.
+    // Reset to Standard so the suite leaves the shared store as it found it.
     await page.goto('/preferences');
     await page.locator('#app > *').first().waitFor();
-    await page.getByRole('radio', { name: 'Bento', exact: true }).check();
+    await page.getByRole('radio', { name: 'Standard', exact: true }).check();
     await page.getByRole('button', { name: 'Save preferences' }).click();
     await expect(page.getByRole('status')).toHaveText('Preferences saved.');
+});
+
+/*
+ * The shell measure, the bento shape and the per-card void at 1920 (DESIGN.md §2.3, owner amendment
+ * 2026-10-15). Each width band is written as a band rather than a `>=` floor on purpose: a `>=` also
+ * passes when the cap fails to compile and `main` runs uncapped to the full 1,664px column, which is
+ * the defect the rule exists to prevent. Compact is measured on `#main`: with the rename the shell
+ * itself carries the 3xl cap, so `main` and the grid are both 768px.
+ */
+test('measures the three shell widths, the bento shape and the card voids at a 1920 viewport', async ({ page }, testInfo) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    const main = page.locator('#main');
+
+    async function mainWidth(): Promise<number> {
+        const box = await main.boundingBox();
+
+        return box?.width ?? 0;
+    }
+
+    /*
+     * The void inside each region: the distance from a card's last child to its own content-box
+     * bottom. This is the "no stretched box" measure. A grid that equalises a row by stretching the
+     * shorter cards, or a `min-h-*` that stretches them to the shell, both show up here before they
+     * show up in a page-height number, because the defect is a border around empty space rather than
+     * a short page.
+     */
+    async function maxCardVoid(): Promise<number> {
+        return page.evaluate(() => {
+            const cards = [...document.querySelectorAll('[data-dashboard-root] > [role="region"]')];
+
+            return Math.max(
+                ...cards.map((c) => {
+                    const kids = [...c.children];
+                    const last = kids[kids.length - 1];
+
+                    if (last === undefined) {
+                        return 0;
+                    }
+
+                    const contentBottom =
+                        c.getBoundingClientRect().bottom - Number.parseFloat(getComputedStyle(c).paddingBottom);
+
+                    return Math.round(contentBottom - last.getBoundingClientRect().bottom);
+                }),
+            );
+        });
+    }
+
+    async function rootHeight(): Promise<number> {
+        return page.evaluate(() => (document.querySelector('[data-dashboard-root]') as HTMLElement | null)?.offsetHeight ?? 0);
+    }
+
+    /** The first region's width as a percentage of the grid: `col-span-8` of 12 is 66. */
+    async function firstCardShare(): Promise<number> {
+        return page.evaluate(() => {
+            const grid = document.querySelector('[data-dashboard-root]');
+            const first = document.querySelector('[data-dashboard-root] > [role="region"]');
+
+            if (grid === null || first === null) {
+                return 0;
+            }
+
+            return Math.round((first.getBoundingClientRect().width / grid.getBoundingClientRect().width) * 100);
+        });
+    }
+
+    /** The tallest `dl` stat cell inside a named region, in px. */
+    async function tallestCell(heading: string): Promise<number> {
+        return page.evaluate((name) => {
+            const cards = [...document.querySelectorAll('[data-dashboard-root] > [role="region"]')];
+            const card = cards.find((c) => (c.querySelector('h2, h3')?.textContent ?? '').trim() === name);
+            const cells = card === undefined ? [] : [...card.querySelectorAll('dl')];
+
+            return cells.length === 0 ? 0 : Math.max(...cells.map((d) => Math.round(d.getBoundingClientRect().height)));
+        }, heading);
+    }
+
+    // Standard is the default the suite's scratch database carries.
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+    await expect(main).toHaveClass(/max-w-6xl/);
+    const standard = await mainWidth();
+    expect(standard).toBeGreaterThanOrEqual(1100);
+    expect(standard).toBeLessThanOrEqual(1200);
+    // The bento shape, not a single-column stack: 12 tracks, first region eight of them.
+    await expect(page.locator('[data-dashboard-root]')).toHaveClass(/xl:grid-cols-12/);
+    expect(await firstCardShare()).toBeGreaterThanOrEqual(55);
+    expect(await firstCardShare()).toBeLessThanOrEqual(70);
+    expect(await maxCardVoid()).toBeLessThanOrEqual(24);
+    expect(await tallestCell('Data Status')).toBeGreaterThanOrEqual(88);
+    // No Active Career stat-cell assertion here: this screen's career strip is `v-if` on an active
+    // run and the suite's scratch database holds none, so a check on it would skip on every run.
+    // `names the active career and resumes it from the keyboard` owns the with-career state.
+    await page.screenshot({ path: testInfo.outputPath('dashboard-standard-1920.png'), fullPage: true });
+
+    await page.goto('/preferences');
+    await page.locator('#app > *').first().waitFor();
+    await page.getByRole('radio', { name: 'Wide', exact: true }).check();
+    await page.getByRole('button', { name: 'Save preferences' }).click();
+    await expect(page.getByRole('status')).toHaveText('Preferences saved.');
+
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+    const wide = await mainWidth();
+    expect(wide).toBeGreaterThanOrEqual(1450);
+    expect(await firstCardShare()).toBeGreaterThanOrEqual(55);
+    expect(await firstCardShare()).toBeLessThanOrEqual(70);
+    expect(await maxCardVoid()).toBeLessThanOrEqual(24);
+    expect(await tallestCell('Data Status')).toBeGreaterThanOrEqual(88);
+    await page.screenshot({ path: testInfo.outputPath('dashboard-wide-1920.png'), fullPage: true });
+
+    await page.goto('/preferences');
+    await page.locator('#app > *').first().waitFor();
+    await page.getByRole('radio', { name: 'Compact' }).check();
+    await page.getByRole('button', { name: 'Save preferences' }).click();
+    await expect(page.getByRole('status')).toHaveText('Preferences saved.');
+
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+    const compact = await mainWidth();
+    expect(compact).toBeGreaterThanOrEqual(700);
+    expect(compact).toBeLessThanOrEqual(850);
+    // Compact is a single column, so it scrolls when the content asks for more than the shell
+    // offers (835px with no career, 1063px with one). The bar is that the stack stays content-sized
+    // and untrimmed, not that it fits a 1080px viewport, which it cannot without hiding a region.
+    expect(await rootHeight()).toBeLessThanOrEqual(1100);
+    expect(await maxCardVoid()).toBeLessThanOrEqual(24);
+    await page.screenshot({ path: testInfo.outputPath('dashboard-compact-1920.png'), fullPage: true });
+
+    // Reset to Standard so the suite leaves the shared store as it found it.
+    await page.goto('/preferences');
+    await page.locator('#app > *').first().waitFor();
+    await page.getByRole('radio', { name: 'Standard', exact: true }).check();
+    await page.getByRole('button', { name: 'Save preferences' }).click();
+    await expect(page.getByRole('status')).toHaveText('Preferences saved.');
+});
+
+test('one filled primary button in the empty-career state', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.locator('[data-variant="primary"]:visible')).toHaveCount(1);
+});
+
+test('no card encloses more than 24px of void', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+    const offenders = await page.evaluate(() =>
+        Array.from(document.querySelectorAll('[data-card]')).map((card) => {
+            const last = card.lastElementChild as HTMLElement | null;
+            if (!last) return { id: card.getAttribute('data-card'), void: 0 };
+            const bottom = last.offsetTop + last.offsetHeight;
+            const pad = parseFloat(getComputedStyle(card).paddingBottom);
+
+            return { id: card.getAttribute('data-card'), void: card.clientHeight - pad - bottom };
+        }).filter((c) => c.void > 24)
+    );
+    expect(offenders).toEqual([]);
+});
+
+test('no stat value overflows its tile', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+    const offenders = await page.evaluate(() =>
+        Array.from(document.querySelectorAll('[data-stat-tile]')).map((tile) => {
+            const value = tile.querySelector('[data-stat-value]') as HTMLElement | null;
+            if (!value) return null;
+
+            return value.scrollWidth > value.clientWidth ? tile.textContent?.trim() : null;
+        }).filter(Boolean)
+    );
+    expect(offenders).toEqual([]);
 });

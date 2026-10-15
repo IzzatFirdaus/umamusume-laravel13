@@ -1,0 +1,13 @@
+diff --git a/resources/js/pages/Career/Cockpit.vue b/resources/js/pages/Career/Cockpit.vue
+index 74e4e33..ed07991 100644
+--- a/resources/js/pages/Career/Cockpit.vue
++++ b/resources/js/pages/Career/Cockpit.vue
+@@ -846,7 +846,7 @@ const jumpToShop = (): void => {
+                             />
+                             <button
+                                 type="submit"
+-                                class="enamel inline-flex min-h-11 items-center justify-center rounded-full bg-chrome px-4 font-semibold text-on-chrome disabled:opacity-60 md:col-span-3"
++                                class="inline-flex min-h-11 items-center justify-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action disabled:opacity-60 md:col-span-3"
+                                 :disabled="correctionForm.processing"
+                             >
+                                 {{ correctionForm.processing ? 'Saving…' : 'Save correction' }}

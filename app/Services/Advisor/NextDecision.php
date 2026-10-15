@@ -33,8 +33,8 @@ use App\Services\ScenarioCaps;
  * fired is decided from the run's own state — whether Energy and a `build_target` exist — not by
  * matching the engine's prose.
  *
- * **Two of the four provenance states are legal here.** Ruling 1c (`provenance-and-absence-contracts.md`
- * §9) scopes the advisor axis to the relationship between a figure and its inputs: `confirmed` for a
+ * **Two of the four provenance states are legal here.** Ruling 1c (`PLANS-AND-BRIEFS.md`
+ * §"provenance-and-absence-contracts.md" §9) scopes the advisor axis to the relationship between a figure and its inputs: `confirmed` for a
  * declared constant printed as read, `calculated` for this tool's arithmetic over readings. `estimated`
  * on this axis is the opt-in modelled figure `ADR-0001` §3 describes, which is built nowhere, and
  * `unknown` beside an absence was retired by owner ruling 2a.

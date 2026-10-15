@@ -158,6 +158,8 @@ and the corpus-transcription caveat above holds. Replacing those two stubs is th
 | Chrome field | `--color-brand-chrome` | `#2255FF` | `#1A3FCC` | `on-chrome on brand-chrome` (text ≥ 4.5:1) |
 | Chrome ink | `--color-on-brand-chrome` | `#FFFFFF` | `#FFFFFF` | — |
 | Chrome accent stripe | `--color-brand-accent` | `#FF77CC` | `#CC5FA8` | `brand-accent on brand-chrome` (non-text ≥ 1.2:1) |
+| Primary action | `--color-primary-action` / `--color-on-primary-action` | `#2255FF` / `#FFFFFF` | `#1A3FCC` / `#FFFFFF` | aliases `--color-brand-chrome`; the one filled action on a screen, so it inherits that pair and owes no new G-18 row |
+| Positive status | `--color-status-positive` / `--color-status-positive-ink` | `#BBDD11` / `#0D0C0F` | `#8FBF09` / `#0D0C0F` | the status pill; a status role, never an action colour |
 | Brand accent (violet) | `--color-brand-accent-ink` | `#8877FF` | `#9F8FFF` | `brand-accent-ink on page` (text ≥ 4.5:1) |
 | Brand accent soft (chip bg) | `--color-brand-accent-soft` | `#EEEBFF` | `#2A2640` | `brand-accent-ink on brand-accent-soft` (text ≥ 4.5:1) |
 | Status positive | `--color-status-positive` | `#BBDD11` | `#8FBF09` | `status-positive-ink on status-positive` (text ≥ 4.5:1) |
@@ -165,7 +167,7 @@ and the corpus-transcription caveat above holds. Replacing those two stubs is th
 | Status caution | `--color-status-caution` | `#FFE9A8` | `#8A6F1A` | `status-caution-ink on status-caution` (text ≥ 4.5:1) |
 | Status caution ink | `--color-status-caution-ink` | `#6A4A00` | `#F4E4B0` | — |
 
-> **Two guards bind this amendment.** (a) The brand chrome lives on the **top bar only** — not on buttons, cards, or the sidebar. The top bar's accent stripe is a **thin 2px rule at the bar's bottom edge**, not a gradient. (b) The status-positive lime is **not** an action colour: `--color-green` (the action lime) and `--color-status-positive` (the status lime) are distinct roles with distinct values. A status pill and a primary button never render the same fill. §2.1's existing "Green is action and affordability only, never 'good'" rule is amended to admit positive status; the action role is unchanged.
+> **Two guards bind this amendment.** (a) The brand chrome lives on the **top bar** and, amended 2026-10-15, on the primary action fill through the `--color-primary-action` alias; it is not a card or sidebar surface. The top bar's accent stripe is a **thin 2px rule at the bar's bottom edge**, not a gradient. (b) The status-positive lime is **not** an action colour: `--color-status-positive` (the status lime) is a status role, and the action fill is blue. A status pill and a primary button never render the same fill. Amended 2026-10-15: the action role is no longer `--color-green`, so the clause above reading "the action role is unchanged" is superseded, as is §2.1's pre-2026-10-15 sentence making green the action colour.
 
 Status badges (release status is the catalog's load-bearing signal) render through
 `--color-green` / `--color-sp` / `--color-pick` and their ink partners rather than
@@ -281,7 +283,7 @@ external fonts (offline constraint + C-8 dependency gate).
 >
 > **Why the proposal closed rather than shipped.** Four reasons, recorded so a later pass does not re-open the question on the same evidence. (a) The 2026-10-14 size amendment already carries the tier: the `h1` at 30px against section headers at 18px is a 12px step, double the previous 6px gap, and it reads as a tier without a face. (b) §7's offline constraint binds: a bundled face is a second asset to version and load, for a page title whose content is Latin and whose character is carried by weight. (c) C-8 approval is a permanent governance cost — `docs/governance/C-8-approval.md` would need to exist and stay valid — for an aesthetic gain the size amendment already delivers. (d) The HLF reference the proposal cited renders its `h1` at heavy weight from a system-adjacent sans; what reads as display in the reference is size and weight, not typeface identity, and this amendment follows the reference rather than inventing a face for it.
 >
-> **What reads as the app's visual voice, since it is not the face.** `frontend-fidelity-2026-10-13.md` §2.1 lists "no display voice" as one of its wireframe tells. What clears the tell is the header convention (eyebrow + `h1` + one-line subtitle), the accent budget (one action lime per screen), the chip and badge vocabulary, and the sub-cell density — all of which ship in Track 1 slices without a font. The tier system carries the hierarchy; the face is redundant to it.
+> **What reads as the app's visual voice, since it is not the face.** `frontend-fidelity-2026-10-13.md` §2.1 lists "no display voice" as one of its wireframe tells. What clears the tell is the header convention (eyebrow + `h1` + one-line subtitle), the accent budget (one action per screen — the blue `--color-primary-action`; amended 2026-10-15 from lime), the chip and badge vocabulary, and the sub-cell density — all of which ship in Track 1 slices without a font. The tier system carries the hierarchy; the face is redundant to it.
 
 ### 2.3 Spacing and layout
 
@@ -305,6 +307,20 @@ external fonts (offline constraint + C-8 dependency gate).
 > The reason: the Dashboard's bento grid carries five regions; at 1920+ the 5xl shell leaves a disproportionate right margin. The wider shell is a display optimisation for wide monitors, not a change to the shell's default or its mobile behaviour. Below 1280px the width collapses to the same breakpoints the current bento uses.
 >
 > Enforcement: `PreferenceControllerTest` pins the flag → preference → render chain; the Dashboard's browser spec asserts 5xl at flag=false, 7xl at flag=true. The wide shell does **not** appear as a default in this bullet's opening sentence; it appears as a conditional fourth option.
+>
+> **Amended 2026-10-15 (wide-screen measure, owner instruction): the two Dashboard shell widths above move, and the wide one moves again.** The text above stands as written on the day it was signed; this supersedes its numbers.
+>
+> Bento's shell default is now `max-w-6xl` (1152px) rather than `max-w-5xl` (1024px), and the user-selectable wide shell is 1536px rather than 1280px. Focused is unchanged: its own `max-w-3xl` grid is what makes it narrow, and the shell around it stays at the ratified 5xl. Because the measure lives on `main` in `AppLayout.vue`, the 6xl default reaches every screen that layout renders, not only the Dashboard; the 1536px step stays Dashboard-only, since it needs the `dashboard` prop the other screens do not carry.
+>
+> The wide shell is carried by a new token, `--container-shell-wide: 96rem` in `resources/css/app.css`, because Tailwind v4's container scale stops at `--container-7xl` (1280px) and this section's own rule forbids an arbitrary value. `max-w-screen-2xl` is not available in v4 at all: it compiles to no CSS, which would leave `main` uncapped and the page edge-to-edge.
+>
+> Two corrections to the bullets above, from the shipped code: the stored value is `dashboard_layout = 'wide_bento'`, not `'wide'`; and the Dashboard's grid no longer carries a page-level `max-w-*`, because a cap on the grid re-caps the widened shell back to its own value.
+>
+> Enforcement: `dashboard.spec.ts` asserts the shell class and measures `#main`'s bounding box at a 1920 viewport in three bands (bento ~1152, wide ~1536, focused grid ~768 with `#main` at 1024). Bands, not `>=` floors, so a cap that fails to compile and runs uncapped to the full 1,664px column fails the spec.
+>
+> **Amended 2026-10-15 (vocabulary rename and vertical fill): the sentence above about `'wide_bento'` is superseded, and it flipped back.** The stored values are now `compact` / `standard` / `wide`, with `resources/js/composables/useLayout.ts` mapping the legacy `focused` / `bento` / `wide_bento` in one place, so the original `'wide'` in this block's first paragraph is the current truth again. Compact now carries its own shell cap (`max-w-3xl` on `main`, 768px), which is why the enforcement line's `#main at 1024` no longer describes it. Vertically, the Dashboard grid carries `min-h-full`: `main` already stretches to the viewport, and a grid's default `align-content: stretch` gives the leftover to both auto rows, so the regions end at the shell's content box instead of mid-screen. Measured at 1920 × 1080 the column `main` offers is 950px (viewport less the 82px banner and `main`'s own 48px padding) and the grid fills all 950. A `>= 1000` fill floor is therefore unreachable on this shell without `h-screen`, and the spec measures the fill against the column instead.
+>
+> **Amended 2026-10-15 (same day, vertical fill withdrawn): the fill above is reverted and it was the wrong move.** `min-h-full` stretched every region to the shell's height, so each card became a border around its own content with 200-250px of empty space below it. A bordered box that is mostly empty reads as a broken panel; a page with a bottom margin reads as a finished page, so the margin is the lesser defect. The grid is now `items-start` with `gap-6`: every region keeps its own content height, no card carries more than 6px of internal void, and the shorter cards in a row no longer inflate to their tallest sibling. Standard and wide end at 577px and 541px of the 950px column. Filling the rest with content rather than boxes was measured and does not work at this density: the career stat cells are 70px and the Data Status KPI tiles 106px, so the largest available increase returns about 24px of a 373px gap. Closing that gap needs regions this screen does not have, which is a content decision and not a layout one.
 - **768px is the supported minimum (amended 2026-09-29, KI-25), and the floor above
   is narrower than it read.** "No overflow" was measured and is false below 768px for
   exactly two surfaces: the race calendar and the turn log are wide tables whose content
@@ -721,7 +737,7 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
   nothing here re-badges a figure.
 
 - **The four trust labels carry two axes, and the axis is set by surface class** (owner ruling 2026-10-09,
-  recorded in `docs/proposals/provenance-and-absence-contracts.md` §9). On the Trainer Advisor's surfaces the
+  recorded in `docs/research-scratch/PLANS-AND-BRIEFS.md` §"provenance-and-absence-contracts.md" §9). On the Trainer Advisor's surfaces the
   state describes how a figure relates to its inputs: `Confirmed` is a reading taken as-is from a named
   owner — a source-published value, a declared constant, or a value the Trainer entered — and `Calculated`
   is this tool's own arithmetic over readings, deterministic, with the arithmetic stated beside it. On the

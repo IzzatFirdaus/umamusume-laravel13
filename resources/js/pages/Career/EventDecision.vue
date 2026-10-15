@@ -22,6 +22,7 @@ import EventCard from '../../components/career/EventCard.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
+import { BaseInput, BaseRadio, BaseSelect, BaseTextarea } from '../../components/Form';
 
 interface RunSection {
     id: number;
@@ -429,7 +430,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                 <button
                     id="event-submit"
                     type="submit"
-                    class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 font-semibold text-on-chrome disabled:opacity-60 disabled:cursor-wait"
+                    class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action disabled:opacity-60 disabled:cursor-wait"
                     :disabled="form.processing"
                 >
                     {{ form.processing ? 'Recording…' : 'Record choice' }}

@@ -184,7 +184,7 @@ const doorClass =
         </section>
 
         <div class="mt-4 flex flex-wrap gap-2">
-            <a :href="props.runUrl" :class="`enamel ${doorClass} bg-chrome font-semibold text-on-chrome`">
+            <a :href="props.runUrl" :class="`${doorClass} bg-primary-action font-semibold text-on-primary-action`">
                 Open the Cockpit
             </a>
             <a v-if="props.veteran.builder_url" :href="props.veteran.builder_url" :class="doorClass">

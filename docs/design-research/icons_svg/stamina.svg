@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="stamina-title">
+  <title id="stamina-title">Stamina</title>
+  <defs>
+    <linearGradient id="stamina-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FC8273"/>
+      <stop offset="1" stop-color="#F05B4F"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="96" height="96" rx="22" fill="url(#stamina-bg)"/>
+  <path fill="#FFFFFF" d="M50 79 C45 74.5 18 58 18 39.5 C18 30 25.5 23.5 34.5 23.5 C41.5 23.5 47 27.5 50 33 C53 27.5 58.5 23.5 65.5 23.5 C74.5 23.5 82 30 82 39.5 C82 58 55 74.5 50 79 Z"/>
+</svg>

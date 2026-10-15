@@ -1,0 +1,112 @@
+{
+  "$schema": "https://charm.land/crush.json",
+  "providers": {
+    "anthropic": {
+      "type": "anthropic",
+      "api_key": "$ANTHROPIC_API_KEY"
+    },
+    "openai": {
+      "type": "openai",
+      "api_key": "$OPENAI_API_KEY"
+    }
+  },
+  "models": {
+    "large": {
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "max_tokens": 16384
+    },
+    "small": {
+      "model": "anthropic/claude-haiku-4-5-20251001"
+    }
+  },
+  "options": {
+    "request_timeout": 120
+  },
+  "mcp": {
+    "laravel-boost": {
+      "type": "stdio",
+      "command": "C:\\Users\\exatf\\AppData\\Local\\Programs\\PHP\\current\\php.exe",
+      "args": ["artisan", "boost:mcp"],
+      "timeout": 120,
+      "disabled": false
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "cmd.exe",
+      "args": ["/c", "npx", "-y", "@upstash/context7-mcp"],
+      "timeout": 180,
+      "disabled": true,
+      "env": {
+        "CONTEXT7_API_KEY": "ctx7sk-1cd1581b-9cb2-4516-a833-5478eec59290"
+      }
+    },
+    "firecrawl": {
+      "type": "stdio",
+      "command": "cmd.exe",
+      "args": ["/c", "npx", "-y", "firecrawl-mcp"],
+      "timeout": 180,
+      "disabled": true,
+      "env": {
+        "FIRECRAWL_API_KEY": "fc-3daa684db8a843029bc947742ea9347c"
+      }
+    },
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "cmd.exe",
+      "args": ["/c", "npx", "-y", "chrome-devtools-mcp"],
+      "timeout": 180,
+      "disabled": true
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "cmd.exe",
+      "args": ["/c", "npx", "-y", "@playwright/mcp"],
+      "timeout": 180,
+      "disabled": true
+    },
+    "sequentialthinking": {
+      "type": "stdio",
+      "command": "cmd.exe",
+      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "timeout": 180,
+      "disabled": true
+    },
+    "tavily": {
+      "type": "stdio",
+      "command": "cmd.exe",
+      "args": ["/c", "npx", "-y", "tavily-mcp"],
+      "timeout": 180,
+      "disabled": true,
+      "env": {
+        "TAVILY_API_KEY": "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"
+      }
+    },
+    "filesystem": {
+      "type": "stdio",
+      "command": "cmd.exe",
+      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "D:\\Projects\\umamusume-laravel13"],
+      "timeout": 180,
+      "disabled": false
+    },
+    "git": {
+      "type": "stdio",
+      "command": "cmd.exe",
+      "args": ["/c", "npx", "-y", "@cyanheads/git-mcp-server"],
+      "timeout": 180,
+      "disabled": true,
+      "env": {
+        "GIT_BASE_DIR": "D:\\Projects\\umamusume-laravel13"
+      }
+    },
+    "memory": {
+      "type": "stdio",
+      "command": "cmd.exe",
+      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-memory"],
+      "timeout": 180,
+      "disabled": false,
+      "env": {
+        "MEMORY_FILE_PATH": "C:/Users/exatf/.memory/memory.json"
+      }
+    }
+  }
+}

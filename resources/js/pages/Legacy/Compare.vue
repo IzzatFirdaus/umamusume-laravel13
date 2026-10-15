@@ -207,7 +207,7 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
             <button
                 type="submit"
                 :disabled="loading"
-                class="enamel mt-3 inline-flex min-h-11 items-center rounded-full bg-chrome px-4 font-semibold text-on-chrome disabled:opacity-60"
+                class="mt-3 inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action disabled:opacity-60"
             >
                 {{ loading ? 'Loading…' : 'Compare' }}
             </button>

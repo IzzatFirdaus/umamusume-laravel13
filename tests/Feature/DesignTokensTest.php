@@ -262,9 +262,13 @@ it('counts every colour token the static theme declares', function (): void {
     // `SupportTypeMark.vue` carries no hex of its own: mark-ink, mark-pal,
     // mark-group-soft, mark-group-line. They fill a glyph, not a text/background
     // pair, so no G-18 contract row is owed for the four.
+    //
+    // 2026-10-15: 79 -> 81. The primary action fill split from the chrome role it aliased:
+    // `--color-primary-action` and `--color-on-primary-action` are declared as aliases of the
+    // brand-chrome pair, so both resolve in both themes with no dark re-declaration of their own.
     $tokens = themeStaticColorTokens();
 
-    expect($tokens)->toHaveCount(79)
+    expect($tokens)->toHaveCount(81)
         ->and($tokens)->toContain('--color-goal')
         ->and($tokens)->toContain('--color-goal-line');
 });
@@ -375,13 +379,12 @@ function g18ContractPairs(): array
         // is removed (addendum prohibition 1).
         'on-brand-chrome on brand-chrome' => ['foreground' => 'on-brand-chrome', 'background' => 'brand-chrome', 'text' => true],
         'brand-accent-ink on page' => ['foreground' => 'brand-accent-ink', 'background' => 'page', 'text' => true],
+        'brand-accent-ink on raised' => ['foreground' => 'brand-accent-ink', 'background' => 'raised', 'text' => true],
+        'brand-accent-ink on sunken' => ['foreground' => 'brand-accent-ink', 'background' => 'sunken', 'text' => true],
         'brand-accent-ink on brand-accent-soft' => ['foreground' => 'brand-accent-ink', 'background' => 'brand-accent-soft', 'text' => true],
-        'on-brand-chrome on brand-accent' => ['foreground' => 'on-brand-chrome', 'background' => 'brand-accent', 'text' => false],
         'status-positive-ink on status-positive' => ['foreground' => 'status-positive-ink', 'background' => 'status-positive', 'text' => true],
         'status-caution-ink on status-caution' => ['foreground' => 'status-caution-ink', 'background' => 'status-caution', 'text' => true],
-        'ink-strong on status-caution' => ['foreground' => 'ink-strong', 'background' => 'status-caution', 'text' => true],
         'ink-muted on brand-accent-soft' => ['foreground' => 'ink-muted', 'background' => 'brand-accent-soft', 'text' => true],
-        'on-brand-chrome on status-positive' => ['foreground' => 'on-brand-chrome', 'background' => 'status-positive', 'text' => true],
         'ink-strong on brand-accent-soft' => ['foreground' => 'ink-strong', 'background' => 'brand-accent-soft', 'text' => true],
     ];
 }
@@ -528,7 +531,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         $page = visit('/umamusume');
         $names = themeStaticColorTokens();
 
-        expect($names)->toHaveCount(79);
+        expect($names)->toHaveCount(81);
 
         foreach (['light', 'dark'] as $theme) {
             /** @var array<string, array{raw: string, resolved: string}> $resolved */
@@ -573,7 +576,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         $pairs = g18ContractPairs();
         $badges = g18GradeBadgeTokens();
 
-        expect($pairs)->toHaveCount(32)
+        expect($pairs)->toHaveCount(31)
             ->and($badges)->toHaveCount(9)
             ->and(array_keys($pairs))->toBe([
                 'ink on panel', 'ink on raised', 'ink-muted on sunken', 'ink-muted on raised', 'ink-muted on panel',
@@ -582,10 +585,10 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
                 'on-pick on pick', 'on-pick on green', 'up on panel', 'down on raised',
                 'goal on raised', 'goal-line on raised', 'green-deep on sunken', 'rule on page',
                 'on-brand-chrome on brand-chrome', 'brand-accent-ink on page',
-                'brand-accent-ink on brand-accent-soft', 'on-brand-chrome on brand-accent',
+                'brand-accent-ink on raised', 'brand-accent-ink on sunken',
+                'brand-accent-ink on brand-accent-soft',
                 'status-positive-ink on status-positive', 'status-caution-ink on status-caution',
-                'ink-strong on status-caution', 'ink-muted on brand-accent-soft',
-                'on-brand-chrome on status-positive', 'ink-strong on brand-accent-soft',
+                'ink-muted on brand-accent-soft', 'ink-strong on brand-accent-soft',
             ]);
 
         $roles = collect($pairs)

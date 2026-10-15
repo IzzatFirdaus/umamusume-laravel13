@@ -1738,7 +1738,7 @@ behaviour and not this app's to change; it does not make `cancel` a usable event
 `cancel` (`types/types.d.ts:204-208`) but 2.3.28 never fires it, so a listener keyed on it would be a check that
 cannot fail; and it does not touch KI-76, which is a server-side defect with its own remedy choice.
 
-### KI-81 The Legacy Lab's parent pick never reached the payload, so choosing a parent saved a null pick and the Inheritance Event rendered its empty state - FILED 2026-10-09 (number reserved at `docs/proposals/provenance-and-absence-contracts.md:441`), CLOSED 2026-10-09
+### KI-81 The Legacy Lab's parent pick never reached the payload, so choosing a parent saved a null pick and the Inheritance Event rendered its empty state - FILED 2026-10-09 (number reserved at `docs/research-scratch/PLANS-AND-BRIEFS.md` §"provenance-and-absence-contracts.md", approval table; was source line 441 on 2026-10-09), CLOSED 2026-10-09
 
 **Closed 2026-10-09.** The fix is on `HEAD` at `45e7a26` ("fix(legacy): return the parent pick through the controlled select the builder reads"), which replaced the internal ref `v-model` with a `modelValue` prop emit on `AncestryNode.vue` so the parent pick reaches `Builder.vue:242`. `tests/Feature/AncestryNodePickerTest.php` (and the SFC-level `tests/browser/ancestry-node-picker.spec.ts`) pin the emit on click, the emit on a keyboard arrow, and the prop write reflected back into the select; `vendor/bin/pest --filter=AncestryNodePicker` reads green on this tree. What closure does not cover: the full choose-a-parent-then-visit-`/inheritance` path is still blocked by KI-69's fixture contract and KI-80's scratch-database sharing, so the Legacy Lab is component-tested and tree-pinned rather than browser-gated end to end.
 
@@ -1769,7 +1769,7 @@ by that slice and not fixed by it. It is a second, independent defect on the **s
 addressed: KI-71 corrected that row's `scenario_key` from `grand_concert` to `our_grand_concert` at
 `480b711`, which made the row belong to the scenario, and this entry records that the row's **title**
 still does not. Filed as KI-82 rather than KI-81 because KI-81 is already reserved in
-`docs/proposals/provenance-and-absence-contracts.md:441` for the Legacy Lab picker defect, which that
+`docs/research-scratch/PLANS-AND-BRIEFS.md` §"provenance-and-absence-contracts.md", approval table, for the Legacy Lab picker defect, which that
 package owns; the gap is deliberate and this entry does not claim 81.
 
 The row's `title` is the dataset's `name_en`, mapped verbatim by
@@ -2679,7 +2679,7 @@ shared worktree. It does not re-measure `AGENTS.md`'s §3 documentation map agai
 
 ### KI-99 The Legacy Lab builder's confirm dropped every recorded rank letter and grandparent detail on a routine save, and the write boundary could pair an empty grandparent's Spark list against the other grandparent's Sparks - FILED 2026-10-13 (remaining-screens UI audit fix pass, Slice 1.1), FIXED IN TREE, NOT LANDED
 
-**Status: FIXED IN TREE, NOT LANDED.** Found by the remaining-screens UI audit (`docs/proposals/remaining-screens-ui-audit-2026-10-13.md` finding F-E1) and fixed in the same pass. Held on **O-1** with the other unlanded fixes: master is unpushed, and register discipline closes an entry only when the fix is on `origin/master`.
+**Status: FIXED IN TREE, NOT LANDED.** Found by the remaining-screens UI audit (`docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" finding F-E1) and fixed in the same pass. Held on **O-1** with the other unlanded fixes: master is unpushed, and register discipline closes an entry only when the fix is on `origin/master`.
 
 Two defects, one column. The builder (`Legacy/Builder.vue`) was a narrower second copy of the wizard's ancestry editor: it never passed `rank_label` to `AncestryNode`, so a run whose `legacy_selection` carried a recorded letter rank printed "Rank not recorded" (`AncestryNode.vue:77`'s default), and its form re-posted only `legacy_id`, `rank`, `is_guest`, ancestor names and the parent's own Sparks. `StoreLegacySelectionRequest::payload()` maps every unposted key to null and `LegacyController::update()` replaces the `legacy_selection` column whole, so **confirming from this screen silently dropped `rank_letter`, `ancestors_rank_letters`, `ancestors_rank` and `ancestors_sparks`** - the same run rendered `Rank B+` from the wizard's step and `Rank not recorded` from the Lab, and a save erased what the second reading named. The wizard's own screen was not the source: it posts every key.
 

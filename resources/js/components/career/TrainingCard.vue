@@ -289,7 +289,7 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
         <div class="mt-4 flex flex-wrap items-center gap-2">
             <button
                 type="button"
-                class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome"
+                class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 text-sm font-bold text-on-primary-action"
                 :aria-pressed="props.chosen"
                 @click="emit('train')"
             >

@@ -281,7 +281,7 @@ const folds = computed<boolean>(
                     <div class="flex flex-wrap items-center gap-3">
                         <button
                             type="submit"
-                            class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-5 text-sm font-bold text-on-chrome disabled:opacity-60"
+                            class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-5 text-sm font-bold text-on-primary-action disabled:opacity-60"
                             :disabled="form.processing"
                         >
                             {{ form.processing ? 'Entering…' : 'Enter Race' }}

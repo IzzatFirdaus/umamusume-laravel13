@@ -378,7 +378,7 @@ function save(): void {
                         rows="4"
                         :maxlength="props.limits.max_notes_length"
                         label="What you want to remember about this career"
-                        hint="Free text, up to {{ props.limits.max_notes_length }} characters. Printed on the library's detail screen exactly as you write it."
+                        :hint="`Free text, up to ${props.limits.max_notes_length} characters. Printed on the library's detail screen exactly as you write it.`"
                         :error="form.errors.notes"
                     />
 

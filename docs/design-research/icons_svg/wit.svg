@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="wit-title">
+  <title id="wit-title">Wit</title>
+  <defs>
+    <linearGradient id="wit-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#30CB93"/>
+      <stop offset="1" stop-color="#1AAE77"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="96" height="96" rx="22" fill="url(#wit-bg)"/>
+  <path fill="#FFFFFF" d="M26 47 L26 70 C38 77 56 77 66 71 L66 51 L48 57 Z"/>
+  <path fill="#FFFFFF" stroke="#1FB57E" stroke-width="3" stroke-linejoin="round" d="M13 38 L52 25 L88 37 L49 51 Z"/>
+  <path fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" d="M50 38 L77 43 L77 62"/>
+  <rect x="72" y="61" width="10" height="18" rx="3.5" fill="#FFFFFF"/>
+</svg>

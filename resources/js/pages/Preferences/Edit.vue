@@ -43,13 +43,9 @@ const form = useForm({
             props.statOrder.map((stat) => [stat, props.settings.stat_target_defaults?.[stat] ?? '']),
         ),
         language: props.settings.language ?? 'en',
-        // A stored `wide_bento` with the flag off is not a selectable value: the disabled radio is
-        // authoritative, so the form falls back to `bento` rather than re-submitting a layout the
-        // Trainer cannot choose (DL.12/DL.14).
-        dashboard_layout:
-            props.settings.dashboard_layout === 'wide_bento' && !props.wideBentoEnabled
-                ? 'bento'
-                : (props.settings.dashboard_layout ?? 'bento'),
+        // The form seeds from whatever the read map normalised: canonical values pass through, and
+        // an unset row falls back to `standard`, the default the radios now carry.
+        dashboard_layout: props.settings.dashboard_layout ?? 'standard',
         dashboard_hidden_cards: props.settings.dashboard_hidden_cards ?? [],
     },
 });
@@ -59,7 +55,6 @@ const form = useForm({
 // on submit so the store never receives "show" semantics it does not authorise.
 const DASHBOARD_CARDS: ReadonlyArray<{ id: string; label: string }> = [
     { id: 'active_career', label: 'Active Career' },
-    { id: 'next_best_action', label: 'Next Best Action' },
     { id: 'quick_actions', label: 'Quick Actions' },
     { id: 'recent_veterans', label: 'Recent Veterans' },
     { id: 'data_status', label: 'Data Status' },
@@ -111,9 +106,9 @@ function commitReset(): void {
     }
 
     resetArmed.value = false;
-    form.settings.dashboard_layout = 'bento';
+    form.settings.dashboard_layout = 'standard';
     shownCards.value = DASHBOARD_CARDS.map((card) => card.id);
-    resetStatus.value = 'Dashboard layout reset to defaults.';
+    resetStatus.value = 'Layout width reset to defaults.';
     submit();
 }
 
@@ -375,21 +370,23 @@ function runBackup(): void {
                     Pre-selects the scenario on the new-career screen, until a career is chosen.
                 </p>
 
-                <!-- Dashboard layout (PLAN 6B.14): three radios, one per layout. Wide Bento is gated
-                     until the design ruling lands, so it renders disabled with a reason channel. -->
+                <!-- Layout width (PLAN 6B.14): three radios, one per shell measure. The labels
+                     use 'Compact / Standard / Wide' (the shell's three widths in grow order);
+                     a third card on this screen, "Show on Dashboard", was the form's choice but
+                     is no longer the only thing the radios control. -->
                 <fieldset class="space-y-2">
-                    <legend class="text-lg font-semibold text-ink-strong">Dashboard layout</legend>
+                    <legend class="text-lg font-semibold text-ink-strong">Layout width</legend>
                     <p class="text-xs text-ink-muted">
-                        How the four dashboard regions arrange themselves above the fold.
+                        How much horizontal space pages use. Compact is best for forms; Wide is best for tables and grids.
                     </p>
 
                     <BaseRadio
                         v-model="form.settings.dashboard_layout"
                         :id="controlId('settings.dashboard_layout')"
                         name="settings[dashboard_layout]"
-                        label="Bento"
-                        value="bento"
-                        hint="Cards arranged in a grid. Best for 1280-1600px screens."
+                        label="Standard"
+                        value="standard"
+                        hint="The default shell width. Best for 1280-1600px screens."
                         :aria-describedby="describedBy('settings.dashboard_layout')"
                     />
 
@@ -397,19 +394,18 @@ function runBackup(): void {
                         v-model="form.settings.dashboard_layout"
                         :id="controlId('settings.dashboard_layout_wide')"
                         name="settings[dashboard_layout]"
-                        label="Wide Bento"
-                        value="wide_bento"
+                        label="Wide"
+                        value="wide"
                         hint="Same grid, wider. Uses more of very wide screens."
-                        :disabled="!props.wideBentoEnabled"
                     />
 
                     <BaseRadio
                         v-model="form.settings.dashboard_layout"
                         :id="controlId('settings.dashboard_layout_focused')"
                         name="settings[dashboard_layout]"
-                        label="Focused"
-                        value="focused"
-                        hint="Single column, centred. Best for reading-oriented work."
+                        label="Compact"
+                        value="compact"
+                        hint="Single column, 768px reading measure. Best for forms and long copy."
                         :aria-describedby="describedBy('settings.dashboard_layout')"
                     />
                 </fieldset>
@@ -629,14 +625,11 @@ function runBackup(): void {
             </p>
 
             <!-- The one accented primary on the screen (plan 6B.12); the tab strip's gold underline
-                 is the selection state, not a second action accent. -->
-            <button
-                type="submit"
-                :disabled="form.processing"
-                class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome disabled:opacity-60 transition-colors duration-150 ease-out"
-            >
+                 is the selection state, not a second action accent. Rendered through BaseButton so
+                 the browser gate can read `data-variant="primary"` off the committed element. -->
+            <BaseButton type="submit" variant="primary" :disabled="form.processing">
                 {{ form.processing ? 'Saving…' : 'Save preferences' }}
-            </button>
+            </BaseButton>
             <p class="text-xs text-ink-muted">Saves every tab in one write.</p>
         </form>
     </AppLayout>

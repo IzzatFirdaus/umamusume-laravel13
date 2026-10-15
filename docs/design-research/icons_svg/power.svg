@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="power-title">
+  <title id="power-title">Power</title>
+  <defs>
+    <linearGradient id="power-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFA834"/>
+      <stop offset="1" stop-color="#F7820C"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="96" height="96" rx="22" fill="url(#power-bg)"/>
+  <path fill="#FFFFFF" d="M20 86 L33 40 C34.5 32 38 25.5 46 23.5 L56.5 20.5 C61 19.5 63.5 22.5 62.5 26.5 L60.5 34.5 C59.5 37.5 56.5 39 53 39 L48.5 39.5 L44 58 C47.5 55.5 51 54 55 53.5 C61.5 52.5 67.5 53 73 56 C80.5 60 84.5 67 84.5 75 L84.5 86 Z"/>
+  <path fill="none" stroke="#F7820C" stroke-width="2.5" stroke-linecap="round" d="M58 57 C55.5 61 56 67 61 71"/>
+</svg>

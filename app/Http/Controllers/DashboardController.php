@@ -268,10 +268,15 @@ class DashboardController extends Controller
      */
     private function quickActions(): array
     {
+        // Every destination here is one the sidebar does not carry. The three this replaced (New
+        // Career, Legacy Lab, Support Cards) all sit in the primary nav, so the card repeated a
+        // path the Trainer already has a click for; "New Career" is now the Active Career card's
+        // own primary action in the empty state.
         return [
-            ['label' => 'New Career', 'to' => route('career.scenario')],
-            ['label' => 'Legacy Lab', 'to' => route('legacy.index')],
-            ['label' => 'Support Cards', 'to' => route('support-cards.index')],
+            ['label' => 'Import a historical run', 'to' => route('runs.import')],
+            ['label' => 'Review queue', 'to' => route('review.index')],
+            ['label' => 'Open settings', 'to' => route('preferences.edit')],
+            ['label' => 'Database hub', 'to' => route('database.index')],
         ];
     }
 

@@ -14,6 +14,7 @@ import SparkChip from '../SparkChip.vue';
 import BaseSelect from '../Form/BaseSelect.vue';
 import BaseInput from '../Form/BaseInput.vue';
 import BaseButton from '../Form/BaseButton.vue';
+import BaseCheckbox from '../Form/BaseCheckbox.vue';
 import { computed, ref } from 'vue';
 
 interface Skill {

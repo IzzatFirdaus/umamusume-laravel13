@@ -1,0 +1,377 @@
+{
+  "metadata": {
+    "generated_at": "2026-10-15",
+    "task_date": "2026-10-15",
+    "reference_anchor": "UMAMUSUME_REFERENCE.md dated 2026-09-27, SCENARIO-PUBLISHER-REFERENCES.md dated 2026-10-09",
+    "fields_filled": 8,
+    "scenarios": 4,
+    "matrix_cells": 32,
+    "cells_already_filled": 8,
+    "cells_filled_by_this_artifact": 24,
+    "purpose": "Sourced values for the 8 N/A fields on the Scenario Select, Run Detail, and Training Detail surfaces across all four [Global] scenarios, plus per-training-type tables for expected gains, energy cost, and risk."
+  },
+  "scenarios": {
+    "ura_finale": {
+      "label": "URA Finale",
+      "ruleset_version": {
+        "value": "2026-07-01",
+        "source": "UMAMUSUME_REFERENCE.md §2.2.1, SCENARIO-PUBLISHER-REFERENCES.md line 982, docs/URA-Finale-plan.md line 16",
+        "server": "Global",
+        "detail": "July 1, 2026 rework raised caps from 1200 to 1400 in all five stats, added Happy Meek duels, and granted +200 per-stat cap bonus. Config records cap_bonus at [200,200,200,200,200]."
+      },
+      "rule_family": {
+        "value": "repetition",
+        "source": "config/scenarios.php:163, SCENARIO-PUBLISHER-REFERENCES.md §4.7 lines 1981-1982, docs/URA-Finale-plan.md line 49",
+        "server": "Global",
+        "detail": "Facility level rises by repetition: 4 uses of the same discipline raises it by 1 level, max Lv5. Camp selections do not count toward level-up."
+      },
+      "recommended_use": {
+        "value": "Its guide names it the baseline for learning training, mood, energy and race timing before moving to scenarios with extra systems.",
+        "source": "config/scenarios.php:147, docs/scenarios/01-ura-finale.md:14",
+        "server": "Global"
+      },
+      "planning_focus": {
+        "value": null,
+        "reason": "No repo master names a planning focus for this scenario. Searched: docs/URA-Finale-plan.md, docs/scenarios/01-ura-finale.md, docs/UMAMUSUME_REFERENCE.md."
+      },
+      "expected_gains": {
+        "Lv1": {
+          "Speed": { "primary": "+10 Speed", "secondary": "+5 Power", "skill_points": 2 },
+          "Stamina": { "primary": "+9 Stamina", "secondary": "+4 Guts", "skill_points": 2 },
+          "Power": { "primary": "+8 Power", "secondary": "+5 Stamina", "skill_points": 2 },
+          "Guts": { "primary": "+8 Guts", "secondary": "+4 Speed, +4 Power", "skill_points": 2 },
+          "Wit": { "primary": "+9 Wit", "secondary": "+2 Speed", "skill_points": 4, "energy_refund": 5 }
+        },
+        "level_up_rule": "4 uses per level, max Lv5. Camp selections do not count.",
+        "source": "SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1854-1874 (GameWith 257432)",
+        "server": "JP",
+        "global_note": "The 2026-07-01 Global rework raised stat caps and added Happy Meek duels but did not alter base training gains or energy costs per any source in this repository. JP values remain the only published figures."
+      },
+      "energy_cost": {
+        "Lv1": { "Speed": -21, "Stamina": -19, "Power": -20, "Guts": -22, "Wit": 0 },
+        "Lv5": { "Speed": -27, "Stamina": -25, "Power": -26, "Guts": -28, "Wit": 0 },
+        "range_in_config": [17, 28],
+        "range_source": "config/advisor.php session_cost (UMAMUSUME_REFERENCE.md §1.1.6, GameWith 2023-02-25, stale)",
+        "source": "SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1854-1874 (GameWith 257432)",
+        "server": "JP",
+        "global_note": "Wit refunds +5 Energy at every level in every scenario. The other four disciplines cost Energy that rises with level."
+      },
+      "risk": {
+        "value": null,
+        "reason": "No publisher states a ranked discipline-level risk table. The failure outcome ranges are global across all scenarios (section 1.5 of the training-mechanics extraction).",
+        "failure_outcomes": {
+          "primary_stat_range": "-5 to -10",
+          "secondary_stat_range": "0 or -10 x2 (two random stats)",
+          "energy_delta": "0 or +10",
+          "motivation_delta": "-1 tier",
+          "variants": 2
+        },
+        "source": "SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470 (GameWith 257432)",
+        "server": "JP"
+      },
+      "team_rank": null
+    },
+    "unity_cup": {
+      "label": "Unity Cup",
+      "ruleset_version": {
+        "value": "2026-07-01",
+        "source": "UMAMUSUME_REFERENCE.md §2.2.2, docs/scenarios/02-unity-cup.md:28, SCENARIO-PUBLISHER-REFERENCES.md line 568",
+        "server": "Global",
+        "detail": "July 1, 2026 rework raised caps (1200→1300 per stat, Wit to 1800), added Extreme Spirit Bursts, removed the Energy cost on Special Training, and changed Spirit Burst hints to use the card's own hint pool."
+      },
+      "rule_family": {
+        "value": "team_rank",
+        "source": "config/scenarios.php:284, docs/scenarios/02-unity-cup.md:123, SCENARIO-PUBLISHER-REFERENCES.md line 1093",
+        "server": "Global",
+        "detail": "Facility level is tied to the team's overall stat rank, not by repetition. Team stat rank ranges from G through S+."
+      },
+      "recommended_use": {
+        "value": null,
+        "reason": "No repo master names a recommended use for this scenario. Searched: docs/scenarios/, docs/Unity-Cup-plan.md §2, docs/UMAMUSUME_REFERENCE.md.",
+        "source": "config/scenarios.php:388"
+      },
+      "planning_focus": {
+        "value": "Wit carries the scenario's own cap bonus; team rank and Spirit Burst counts decide the exclusive-skill payout.",
+        "source": "config/scenarios.php:390",
+        "server": "Global"
+      },
+      "expected_gains": {
+        "Lv1": {
+          "Speed": { "primary": "+8 Speed", "secondary": "+4 Power", "skill_points": 4 },
+          "Stamina": { "primary": "+8 Stamina", "secondary": "+6 Guts", "skill_points": 4 },
+          "Power": { "primary": "+9 Power", "secondary": "+4 Stamina", "skill_points": 4 },
+          "Guts": { "primary": "+6 Guts", "secondary": "+3 Speed, +3 Power", "skill_points": 4 },
+          "Wit": { "primary": "+6 Wit", "secondary": "+2 Speed", "skill_points": 5, "energy_refund": 5 }
+        },
+        "team_training": {
+          "Speed": { "primary": "2 flames = +2 primary / +1 secondary / 3 SP; 5 flames = +10 / +5 / 7 SP" },
+          "Stamina": { "primary": "2 flames = +2 / +1 / 3 SP; 5 flames = +10 / +5 / 7 SP" },
+          "Power": { "primary": "2 flames = +2 / +1 / 3 SP; 5 flames = +10 / +5 / 7 SP" },
+          "Guts": { "primary": "5 flames = +10 Guts / +3 Speed / +3 Power / 7 SP" },
+          "Wit": { "primary": "5 flames = +6 Wit / +2 Speed / 6 SP" }
+        },
+        "extreme_burst_bonus": "Scenario-linked cards add +5 to all stats and +3 to SP on normal Bursts; +5/+5 on Extreme.",
+        "source": "SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1880-1884 (GameWith 257432 Aoharu table) + docs/scenarios/02-unity-cup.md:87-106 (GameTora post-rework)",
+        "server": "JP + Global(rework)",
+        "global_note": "Global SP payouts for Unity Cup match URA Finale (+2 SP on Energy disciplines) after the 2026-07-01 rework, not the JP +4 values. The base stat gains are unchanged."
+      },
+      "energy_cost": {
+        "Lv1": { "Speed": -19, "Stamina": -17, "Power": -18, "Guts": -20, "Wit": 0 },
+        "Lv5": { "Speed": -25, "Stamina": -23, "Power": -24, "Guts": -26, "Wit": 0 },
+        "special_training_penalty_removed": "The post-2026-07-01 rework removed the extra Energy cost on Special Training.",
+        "source": "SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1876-1884 (GameWith 257432 Aoharu table) + docs/scenarios/02-unity-cup.md:105",
+        "server": "JP + Global(rework)"
+      },
+      "risk": {
+        "value": null,
+        "reason": "No publisher states a ranked discipline-level risk table. The failure outcome ranges are global across all scenarios (section 1.5 of the training-mechanics extraction).",
+        "failure_outcomes": {
+          "primary_stat_range": "-5 to -10",
+          "secondary_stat_range": "0 or -10 x2 (two random stats)",
+          "energy_delta": "0 or +10",
+          "motivation_delta": "-1 tier",
+          "variants": 2,
+          "esb_note": "Extreme Spirit Burst sets failure chance to 0% on the facility holding the active Burst, per Game8/scenarios/02-unity-cup.md:113-119."
+        },
+        "source": "SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470 (GameWith 257432) + docs/scenarios/02-unity-cup.md:113-119",
+        "server": "JP + Global(rework)"
+      },
+      "team_rank": {
+        "value": {
+          "G to F": 1,
+          "E to D": 2,
+          "C to B": 3,
+          "A": 4,
+          "S": 5,
+          "S+": 5
+        },
+        "source": "docs/scenarios/02-unity-cup.md:125-131, SCENARIO-PUBLISHER-REFERENCES.md line 1093, Unity-Cup-plan.md line 202",
+        "server": "Global",
+        "detail": "F/G = Lv1, E/D = Lv2, C/B = Lv3, A = Lv4, S =Lv5. S+ grants the second 'It's On!' hint but does not raise facility level beyond Lv5."
+      }
+    },
+    "trackblazer": {
+      "label": "Trackblazer",
+      "ruleset_version": {
+        "value": "2026-03-12",
+        "source": "UMAMUSUME_REFERENCE.md §2.2.3, SCENARIO-PUBLISHER-REFERENCES.md line 339, docs/Trackblazer-plan.md line 56",
+        "server": "Global",
+        "detail": "March 12, 2026 Global launch as the third permanent scenario. No subsequent rework documented in any source in this repository."
+      },
+      "rule_family": {
+        "value": "repetition_plus_purchases",
+        "source": "config/scenarios.php:421, SCENARIO-PUBLISHER-REFERENCES.md line 509-510, docs/Trackblazer-plan.md line 59",
+        "server": "Global",
+        "detail": "Facility level rises by repetition (4 uses per level, max Lv5), and Training Application items (150 coins each) can permanently raise facility level by +1, stacking on top of natural use-based leveling."
+      },
+      "recommended_use": {
+        "value": null,
+        "reason": "No repo master names a recommended use for this scenario. Searched: docs/scenarios/, docs/Trackblazer-plan.md §2, docs/UMAMUSUME_REFERENCE.md.",
+        "source": "config/scenarios.php:405"
+      },
+      "planning_focus": {
+        "value": null,
+        "reason": "No planning focus is named for this scenario in any repo master. The plan's central question is 'Race, train, or rest this turn, and does it keep me alive at the next Grade Point checkpoint?' but no source uses 'planning focus' terminology.",
+        "source": "docs/Trackblazer-plan.md line 23, SCENARIO-PUBLISHER-REFERENCES.md line 1277"
+      },
+      "expected_gains": {
+        "Lv1": {
+          "Speed": { "primary": "+8 Speed", "secondary": "+4 Power", "skill_points": 2 },
+          "Stamina": { "primary": "+8 Stamina", "secondary": "+6 Guts", "skill_points": 2 },
+          "Power": { "primary": "+9 Power", "secondary": "+4 Stamina", "skill_points": 2 },
+          "Guts": { "primary": "+6 Guts", "secondary": "+3 Speed, +3 Power", "skill_points": 2 },
+          "Wit": { "primary": "+6 Wit", "secondary": "+2 Speed", "skill_points": 2, "energy_refund": 5 }
+        },
+        "level_up_rule": "4 uses per level, max Lv5. Camp selections do not count. Facility level can also be raised by Training Application items (150 coins each).",
+        "source": "SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1880-1884 (GameWith 257432 Climax table) + SCENARIO-PUBLISHER-REFERENCES.md line 509-510",
+        "server": "JP",
+        "global_note": "Climax (JP) maps to Trackblazer on Global. JP values are the only published figures; Global launched with these values and no subsequent rework was documented in sources in this repository."
+      },
+      "energy_cost": {
+        "Lv1": { "Speed": -19, "Stamina": -17, "Power": -18, "Guts": -20, "Wit": 0 },
+        "Lv5": { "Speed": -25, "Stamina": -23, "Power": -24, "Guts": -26, "Wit": 0 },
+        "source": "SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1888-1894 (GameWith 257432 Climax table)",
+        "server": "JP"
+      },
+      "risk": {
+        "value": null,
+        "reason": "No publisher states a ranked discipline-level risk table. The failure outcome ranges are global across all scenarios.",
+        "failure_outcomes": {
+          "primary_stat_range": "-5 to -10",
+          "secondary_stat_range": "0 or -10 x2 (two random stats)",
+          "energy_delta": "0 or +10",
+          "motivation_delta": "-1 tier",
+          "variants": 2,
+          "race_fatigue_note": "Trackblazer also imposes Race Fatigue: 3+ races in a row (higher chance at 4) can lower Mood and apply Skin Outbreak; racing 4 in a row can also decrease stats."
+        },
+        "source": "SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470 + SCENARIO-PUBLISHER-REFERENCES.md line 1226",
+        "server": "JP + Global"
+      },
+      "team_rank": null
+    },
+    "our_grand_concert": {
+      "label": "Our Grand Concert",
+      "ruleset_version": {
+        "value": "2026-07-22",
+        "source": "UMAMUSUME_REFERENCE.md §2.2.4, docs/scenarios/07-grand-concert.md:37, Our-Grand-Concert-plan.md note on notice 899",
+        "server": "Global",
+        "detail": "July 22, 2026 Global launch. The performance track was extracted from Game8 and GameTora on 2026-10-05 (primary read). No subsequent rework documented."
+      },
+      "rule_family": {
+        "value": "repetition",
+        "source": "config/scenarios.php:771, Our-Grand-Concert-plan.md Slice 3, SCENARIO-PUBLISHER-REFERENCES.md line 2509",
+        "server": "Global",
+        "detail": "Facilities start at Level 1 and level up every 4 times you use them, max Level 5 — same rule as URA. GameTora line 2509 confirms this for Grand Live."
+      },
+      "recommended_use": {
+        "value": null,
+        "reason": "No repo master names a recommended use for this scenario. Searched: docs/scenarios/, docs/Our-Grand-Concert-plan.md, docs/UMAMUSUME_REFERENCE.md.",
+        "source": "config/scenarios.php:728"
+      },
+      "planning_focus": {
+        "value": null,
+        "reason": "No planning focus is named for this scenario in any repo master. No publisher uses 'planning focus' terminology; the scenario's own loop is described as 'train → lessons → songs → lives'.",
+        "source": "docs/scenarios/07-grand-concert.md:58-95, Our-Grand-Concert-plan.md"
+      },
+      "expected_gains": {
+        "Lv1": {
+          "Speed": { "primary": "+8 Speed", "secondary": "+4 Power", "skill_points": 4, "performance": "Dance/Visuals/Composure (random type, 200 each)" },
+          "Stamina": { "primary": "+8 Stamina", "secondary": "+6 Guts", "skill_points": 4, "performance": "Dance/Visuals/Composure (random type, 200 each)" },
+          "Power": { "primary": "+9 Power", "secondary": "+4 Stamina", "skill_points": 4, "performance": "Dance/Visuals/Composure (random type, 200 each)" },
+          "Guts": { "primary": "+6 Guts", "secondary": "+3 Speed, +3 Power", "skill_points": 4, "performance": "Dance/Visuals/Composure (random type, 200 each)" },
+          "Wit": { "primary": "+6 Wit", "secondary": "+2 Speed", "skill_points": 5, "performance": "Dance/Visuals/Composure (random type, 200 each)", "energy_refund": 5 }
+        },
+        "performance_gain": {
+          "start": "200 each (Dance, Passion, Vocals, Visuals, Composure)",
+          "lesson_cost": "No Lesson cost curve is published",
+          "song_cost": "No Song cost curve is published (see docs/scenarios/07-grand-concert.md:205)",
+          "friendship_training": "Pays two Performance types where ordinary training pays one",
+          "source": "docs/scenarios/07-grand-concert.md:64-70, SCENARIO-PUBLISHER-REFERENCES.md §3 lines 2176-2180"
+        },
+        "source": "SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1896-1904 (GameWith 257432 Grand Live table) + docs/scenarios/07-grand-concert.md:64-70",
+        "server": "JP",
+        "global_note": "Grand Live (JP) maps to Our Grand Concert on Global. The Performance gain values (200 each at start, +50 per concert) come from GameTora. No cost curves for Lessons or Songs are published; these remain UNVERIFIED per docs/scenarios/07-grand-concert.md:205."
+      },
+      "energy_cost": {
+        "Lv1": { "Speed": -19, "Stamina": -20, "Power": -20, "Guts": -20, "Wit": 0 },
+        "Lv5": { "Speed": -25, "Stamina": -26, "Power": -26, "Guts": -26, "Wit": 0 },
+        "source": "SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1898-1904 (GameWith 257432 Grand Live table)",
+        "server": "JP"
+      },
+      "risk": {
+        "value": null,
+        "reason": "No publisher states a ranked discipline-level risk table. The failure outcome ranges are global across all scenarios.",
+        "failure_outcomes": {
+          "primary_stat_range": "-5 to -10",
+          "secondary_stat_range": "0 or -10 x2 (two random stats)",
+          "energy_delta": "0 or +10",
+          "motivation_delta": "-1 tier",
+          "variants": 2
+        },
+        "source": "SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470",
+        "server": "JP"
+      },
+      "team_rank": null
+    }
+  },
+  "training_tables": {
+    "ura_finale": {
+      "source_label": "SCENARIO-PUBLISHER-REFERENCES.md §4.4 (GameWith 257432, URA table)",
+      "server": "JP",
+      "disciplines": ["Speed", "Stamina", "Power", "Guts", "Wit"],
+      "per_level": {
+        "Speed": { "Lv1": { "primary": 10, "secondary": 5, "energy": -21, "skill_points": 2 }, "Lv2": { "primary": 11, "secondary": 5, "energy": -22, "skill_points": 2 }, "Lv3": { "primary": 12, "secondary": 5, "energy": -23, "skill_points": 2 }, "Lv4": { "primary": 13, "secondary": 6, "energy": -25, "skill_points": 2 }, "Lv5": { "primary": 14, "secondary": 7, "energy": -27, "skill_points": 2 } },
+        "Stamina": { "Lv1": { "primary": 9, "secondary": 4, "energy": -19, "skill_points": 2 }, "Lv2": { "primary": 10, "secondary": 4, "energy": -20, "skill_points": 2 }, "Lv3": { "primary": 11, "secondary": 4, "energy": -21, "skill_points": 2 }, "Lv4": { "primary": 12, "secondary": 5, "energy": -23, "skill_points": 2 }, "Lv5": { "primary": 13, "secondary": 6, "energy": -25, "skill_points": 2 } },
+        "Power": { "Lv1": { "primary": 8, "secondary": 5, "energy": -20, "skill_points": 2 }, "Lv2": { "primary": 9, "secondary": 5, "energy": -21, "skill_points": 2 }, "Lv3": { "primary": 10, "secondary": 5, "energy": -22, "skill_points": 2 }, "Lv4": { "primary": 11, "secondary": 6, "energy": -24, "skill_points": 2 }, "Lv5": { "primary": 12, "secondary": 7, "energy": -26, "skill_points": 2 } },
+        "Guts": { "Lv1": { "primary": 8, "secondary_a": 4, "secondary_b": 4, "energy": -22, "skill_points": 2 }, "Lv2": { "primary": 9, "secondary_a": 4, "secondary_b": 4, "energy": -23, "skill_points": 2 }, "Lv3": { "primary": 10, "secondary_a": 4, "secondary_b": 4, "energy": -24, "skill_points": 2 }, "Lv4": { "primary": 11, "secondary_a": 5, "secondary_b": 4, "energy": -26, "skill_points": 2 }, "Lv5": { "primary": 12, "secondary_a": 5, "secondary_b": 5, "energy": -28, "skill_points": 2 } },
+        "Wit": { "Lv1": { "primary": 9, "secondary": 2, "energy": 5, "skill_points": 4 }, "Lv2": { "primary": 10, "secondary": 2, "energy": 5, "skill_points": 4 }, "Lv3": { "primary": 11, "secondary": 2, "energy": 5, "skill_points": 4 }, "Lv4": { "primary": 12, "secondary": 3, "skill_points": 4 }, "Lv5": { "primary": 13, "secondary": 4, "skill_points": 4 } }
+      }
+    },
+    "unity_cup": {
+      "source_label": "SCENARIO-PUBLISHER-REFERENCES.md §4.4 (GameWith 257432, Aoharu table) + docs/scenarios/02-unity-cup.md (GameTora post-rework)",
+      "server": "JP + Global(rework)",
+      "disciplines": ["Speed", "Stamina", "Power", "Guts", "Wit"],
+      "per_level": {
+        "Speed": { "Lv1": { "primary": 8, "secondary": 4, "energy": -19, "skill_points": 4 }, "Lv2": { "primary": 9, "secondary": 4, "energy": -20, "skill_points": 4 }, "Lv3": { "primary": 10, "secondary": 4, "energy": -21, "skill_points": 4 }, "Lv4": { "primary": 11, "secondary": 5, "energy": -23, "skill_points": 4 }, "Lv5": { "primary": 12, "secondary": 6, "energy": -25, "skill_points": 4 } },
+        "Stamina": { "Lv1": { "primary": 8, "secondary": 6, "energy": -17, "skill_points": 4 }, "Lv2": { "primary": 9, "secondary": 6, "energy": -18, "skill_points": 4 }, "Lv3": { "primary": 10, "secondary": 6, "energy": -19, "skill_points": 4 }, "Lv4": { "primary": 11, "secondary": 7, "energy": -21, "skill_points": 4 }, "Lv5": { "primary": 13, "secondary": 8, "energy": -23, "skill_points": 4 } },
+        "Power": { "Lv1": { "primary": 9, "secondary": 4, "energy": -18, "skill_points": 4 }, "Lv2": { "primary": 10, "secondary": 4, "energy": -19, "skill_points": 4 }, "Lv3": { "primary": 11, "secondary": 4, "energy": -20, "skill_points": 4 }, "Lv4": { "primary": 12, "secondary": 5, "energy": -22, "skill_points": 4 }, "Lv5": { "primary": 13, "secondary": 5, "energy": -24, "skill_points": 4 } },
+        "Guts": { "Lv1": { "primary": 6, "secondary_a": 3, "secondary_b": 3, "energy": -20, "skill_points": 4 }, "Lv2": { "primary": 7, "secondary_a": 3, "secondary_b": 3, "energy": -21, "skill_points": 4 }, "Lv3": { "primary": 8, "secondary_a": 3, "secondary_b": 3, "energy": -22, "skill_points": 4 }, "Lv4": { "primary": 9, "secondary_a": 4, "secondary_b": 3, "energy": -24, "skill_points": 4 }, "Lv5": { "primary": 10, "secondary_a": 4, "secondary_b": 4, "energy": -26, "skill_points": 4 } },
+        "Wit": { "Lv1": { "primary": 6, "secondary": 2, "energy": 5, "skill_points": 5 }, "Lv2": { "primary": 7, "secondary": 2, "energy": 5, "skill_points": 5 }, "Lv3": { "primary": 8, "secondary": 2, "energy": 5, "skill_points": 5 }, "Lv4": { "primary": 9, "secondary": 3, "energy": 5, "skill_points": 5 }, "Lv5": { "primary": 10, "secondary": 4, "energy": 5, "skill_points": 5 } }
+      },
+      "sp_payout_note": "Global SP payouts for Unity Cup match URA Finale (+2 SP on Energy disciplines) after the 2026-07-01 rework, not the JP +4 values."
+    },
+    "trackblazer": {
+      "source_label": "SCENARIO-PUBLISHER-REFERENCES.md §4.4 (GameWith 257432, Climax table)",
+      "server": "JP",
+      "disciplines": ["Speed", "Stamina", "Power", "Guts", "Wit"],
+      "per_level": {
+        "Speed": { "Lv1": { "primary": 8, "secondary": 4, "energy": -19, "skill_points": 2 }, "Lv2": { "primary": 9, "secondary": 4, "energy": -20, "skill_points": 2 }, "Lv3": { "primary": 10, "secondary": 4, "energy": -21, "skill_points": 2 }, "Lv4": { "primary": 11, "secondary": 5, "energy": -23, "skill_points": 2 }, "Lv5": { "primary": 12, "secondary": 6, "energy": -25, "skill_points": 2 } },
+        "Stamina": { "Lv1": { "primary": 7, "secondary": 3, "energy": -17, "skill_points": 2 }, "Lv2": { "primary": 8, "secondary": 3, "energy": -18, "skill_points": 2 }, "Lv3": { "primary": 9, "secondary": 3, "energy": -19, "skill_points": 2 }, "Lv4": { "primary": 10, "secondary": 4, "energy": -21, "skill_points": 2 }, "Lv5": { "primary": 11, "secondary": 5, "energy": -23, "skill_points": 2 } },
+        "Power": { "Lv1": { "primary": 6, "secondary": 4, "energy": -18, "skill_points": 2 }, "Lv2": { "primary": 7, "secondary": 4, "energy": -19, "skill_points": 2 }, "Lv3": { "primary": 8, "secondary": 4, "energy": -20, "skill_points": 2 }, "Lv4": { "primary": 9, "secondary": 5, "energy": -22, "skill_points": 2 }, "Lv5": { "primary": 10, "secondary": 6, "energy": -24, "skill_points": 2 } },
+        "Guts": { "Lv1": { "primary": 6, "secondary_a": 3, "secondary_b": 3, "energy": -20, "skill_points": 2 }, "Lv2": { "primary": 7, "secondary_a": 3, "secondary_b": 3, "energy": -21, "skill_points": 2 }, "Lv3": { "primary": 8, "secondary_a": 3, "secondary_b": 3, "energy": -22, "skill_points": 2 }, "Lv4": { "primary": 9, "secondary_a": 4, "secondary_b": 3, "energy": -24, "skill_points": 2 }, "Lv5": { "primary": 10, "secondary_a": 4, "secondary_b": 4, "energy": -26, "skill_points": 2 } },
+        "Wit": { "Lv1": { "primary": 6, "secondary": 2, "energy": 5, "skill_points": 3 }, "Lv2": { "primary": 7, "secondary": 2, "energy": 5, "skill_points": 3 }, "Lv3": { "primary": 8, "secondary": 2, "energy": 5, "skill_points": 3 }, "Lv4": { "primary": 9, "secondary": 3, "energy": 5, "skill_points": 3 }, "Lv5": { "primary": 10, "secondary": 4, "energy": 5, "skill_points": 3 } }
+      }
+    },
+    "our_grand_concert": {
+      "source_label": "SCENARIO-PUBLISHER-REFERENCES.md §4.4 (GameWith 257432, Grand Live table) + docs/scenarios/07-grand-concert.md",
+      "server": "JP",
+      "disciplines": ["Speed", "Stamina", "Power", "Guts", "Wit"],
+      "per_level": {
+        "Speed": { "Lv1": { "primary": 8, "secondary": 4, "energy": -19, "skill_points": 4 }, "Lv2": { "primary": 9, "secondary": 4, "energy": -20, "skill_points": 4 }, "Lv3": { "primary": 10, "secondary": 4, "energy": -21, "skill_points": 4 }, "Lv4": { "primary": 11, "secondary": 5, "energy": -23, "skill_points": 4 }, "Lv5": { "primary": 12, "secondary": 6, "energy": -25, "skill_points": 4 } },
+        "Stamina": { "Lv1": { "primary": 8, "secondary": 6, "energy": -20, "skill_points": 4 }, "Lv2": { "primary": 9, "secondary": 6, "energy": -21, "skill_points": 4 }, "Lv3": { "primary": 10, "secondary": 6, "energy": -22, "skill_points": 4 }, "Lv4": { "primary": 11, "secondary": 7, "energy": -24, "skill_points": 4 }, "Lv5": { "primary": 13, "secondary": 8, "energy": -26, "skill_points": 4 } },
+        "Power": { "Lv1": { "primary": 9, "secondary": 4, "energy": -20, "skill_points": 4 }, "Lv2": { "primary": 10, "secondary": 4, "energy": -21, "skill_points": 4 }, "Lv3": { "primary": 11, "secondary": 4, "energy": -22, "skill_points": 4 }, "Lv4": { "primary": 12, "secondary": 5, "energy": -24, "skill_points": 4 }, "Lv5": { "primary": 13, "secondary": 5, "energy": -26, "skill_points": 4 } },
+        "Guts": { "Lv1": { "primary": 7, "secondary_a": 2, "secondary_b": 2, "energy": -20, "skill_points": 4 }, "Lv2": { "primary": 8, "secondary_a": 2, "secondary_b": 2, "energy": -21, "skill_points": 4 }, "Lv3": { "primary": 9, "secondary_a": 2, "secondary_b": 2, "energy": -22, "skill_points": 4 }, "Lv4": { "primary": 10, "secondary_a": 3, "secondary_b": 2, "energy": -24, "skill_points": 4 }, "Lv5": { "primary": 11, "secondary_a": 3, "secondary_b": 3, "energy": -26, "skill_points": 4 } },
+        "Wit": { "Lv1": { "primary": 6, "secondary": 2, "energy": 5, "skill_points": 5 }, "Lv2": { "primary": 7, "secondary": 2, "energy": 5, "skill_points": 5 }, "Lv3": { "primary": 8, "secondary": 2, "energy": 5, "skill_points": 5 }, "Lv4": { "primary": 9, "secondary": 3, "energy": 5, "skill_points": 5 }, "Lv5": { "primary": 10, "secondary": 4, "energy": 5, "skill_points": 5 } }
+      },
+      "performance_note": "Training also pays Performance (the scenario resource) in addition to stats. GameTora supplies the numbers no official page prints: 200 each at start, +50 per successful concert."
+    }
+  },
+  "failure_outcomes": {
+    "source_label": "SCENARIO-PUBLISHER-REFERENCES.md §1.5 (GameWith 257432)",
+    "server": "JP",
+    "note": "The failure outcome ranges are global across all scenarios that use the standard training loop. No publisher states scenario-specific failure-risk tiers for individual disciplines.",
+    "variants": 2,
+    "variant_1": {
+      "jp_name": "お大事に！ (Take care!)",
+      "top_choice": { "motivation": "-1 tier", "primary_stat": "-5", "condition_chance": "random 練習下手 (Practice Clumsy)" },
+      "bottom_choice": { "motivation": "-1 tier", "primary_stat": "-10", "condition_chance": "random 練習下手 (Practice Clumsy) or 練習上手◯ (Practice Skilled ◯)" }
+    },
+    "variant_2": {
+      "jp_name": "無茶は厳禁！ (Don't overdo it!)",
+      "top_choice": { "energy": "+10", "motivation": "-1 tier", "primary_stat": "-10", "secondary_stats": "two random -10 each", "condition_chance": "random 練習ベタ (Practice Untalented)" },
+      "bottom_choice": { "motivation": "-1 tier", "primary_stat": "-10", "secondary_stats": "two random -10 each", "condition_outcome": "gain 練習ベタ (Practice Untalented), or energy +10 and 練習上手◯ (Practice Skilled ◯)" }
+    },
+    "range_summary": {
+      "primary_stat_loss": "-5 to -10",
+      "secondary_stat_loss": "0 or -10 x 2",
+      "energy_delta": "0 or +10",
+      "motivation_delta": "-1 tier"
+    }
+  },
+  "facility_level_mapping": {
+    "ura_finale": {
+      "value": "repetition",
+      "detail": "Every 4 uses raises facility level by 1, max Lv5. Camp selections do not count.",
+      "source": "SCENARIO-PUBLISHER-REFERENCES.md §4.7 line 1981, config/scenarios.php:163",
+      "server": "JP"
+    },
+    "unity_cup": {
+      "value": "team_rank",
+      "detail": "F/G = Lv1, E/D = Lv2, C/B = Lv3, A = Lv4, S = Lv5, S+ = Lv5 (grants second 'It's On!' hint, no facility level increase)",
+      "source": "docs/scenarios/02-unity-cup.md:125-131, SCENARIO-PUBLISHER-REFERENCES.md line 1093, Unity-Cup-plan.md line 202",
+      "server": "Global"
+    },
+    "trackblazer": {
+      "value": "repetition_plus_purchases",
+      "detail": "4 uses per level, max Lv5. Training Application items (150 coins) can permanently raise facility level by +1.",
+      "source": "SCENARIO-PUBLISHER-REFERENCES.md line 509-510, config/scenarios.php:421",
+      "server": "Global"
+    },
+    "our_grand_concert": {
+      "value": "repetition",
+      "detail": "Same as URA: 4 uses per level, max Lv5.",
+      "source": "config/scenarios.php:771, SCENARIO-PUBLISHER-REFERENCES.md line 2509",
+      "server": "JP"
+    }
+  }
+}

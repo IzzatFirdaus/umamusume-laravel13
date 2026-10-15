@@ -188,7 +188,7 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
         </div>
 
         <!-- Warnings: glyph plus text, never colour alone, and each one links to the step it came from. -->
-        <section v-if="props.contract.warnings.length > 0" class="mt-6" aria-labelledby="warnings-heading">
+        <section v-if="props.contract.warnings.length > 0" class="mx-auto w-full max-w-4xl mt-6" aria-labelledby="warnings-heading">
             <h2 id="warnings-heading" class="text-lg font-semibold text-ink-strong">
                 Warnings
             </h2>
@@ -213,7 +213,7 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
             see.
         </p>
 
-        <section class="mt-6" aria-labelledby="build-heading">
+        <section class="mx-auto w-full max-w-4xl mt-6" aria-labelledby="build-heading">
             <h2 id="build-heading" class="text-lg font-semibold text-ink-strong">Build</h2>
 
             <dl class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-2">
@@ -323,7 +323,7 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
             </dl>
         </section>
 
-        <section class="mt-6" aria-labelledby="deck-heading">
+        <section class="mx-auto w-full max-w-4xl mt-6" aria-labelledby="deck-heading">
             <h2 id="deck-heading" class="text-lg font-semibold text-ink-strong">Support deck</h2>
 
             <div v-if="props.contract.deck === null" class="mt-2 rounded-lg border border-rule bg-panel p-3 text-sm text-ink">
@@ -371,7 +371,7 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
             </template>
         </section>
 
-        <section class="mt-6" aria-labelledby="target-heading">
+        <section class="mx-auto w-full max-w-4xl mt-6" aria-labelledby="target-heading">
             <h2 id="target-heading" class="text-lg font-semibold text-ink-strong">Target</h2>
 
             <dl class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-2">
@@ -416,7 +416,7 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
             </div>
         </section>
 
-        <div class="mt-6 flex flex-wrap items-center gap-3">
+        <div class="mx-auto w-full max-w-4xl mt-6 flex flex-wrap items-center gap-3">
             <!-- One door per earlier step, in step order, and no two doors to the same place: the
                  old row's "Back" and "Edit Deck" both bound the deck route, so the duplicated link
                  is dropped in favour of the name that says what the door does (audit 2026-10-12
@@ -455,7 +455,7 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
 
             <button
                 type="button"
-                class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-5 text-sm font-semibold text-on-chrome disabled:opacity-60"
+                class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-5 text-sm font-semibold text-on-primary-action disabled:opacity-60"
                 :disabled="form.processing"
                 @click="start"
             >

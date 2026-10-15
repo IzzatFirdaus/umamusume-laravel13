@@ -100,8 +100,12 @@ test.describe('Scenario Selection', () => {
         await expect(ruleset).toBeVisible();
         await expect(ruleset).toContainText('N/A');
 
-        // And the two brief fields nobody can source say so instead of carrying invented prose.
-        await expect(card(page, 'URA Finale').getByText('Recommended use').locator('..').getByText('N/A')).toBeVisible();
+        // And the brief's description and recommended use render where a scenario guide sources
+        // them: URA Finale's guide states both, so this card prints them rather than the absence,
+        // and the absence is reserved for a guide that names neither.
+        const use = card(page, 'URA Finale').getByText('Recommended use').locator('..');
+        await expect(use).toContainText('baseline for learning');
+        await expect(use.getByText('N/A')).toHaveCount(0);
     });
 
     test('keeps the ruleset version and the rule family as two separately named facts', async ({ page }) => {
@@ -119,9 +123,15 @@ test.describe('Scenario Selection', () => {
         await expect(unityRuleset).toContainText('N/A');
         await expect(unity.getByText('Rule family', { exact: true }).locator('..').getByText('Team', { exact: true })).toBeVisible();
 
-        // Neither heading is bare `Ruleset` any more, on any card, and no heading repeats.
+        // Neither heading is bare `Ruleset` any more, on any card, and no heading repeats. The row
+        // that carries the family prints the family where the matrix records one and the named
+        // absence where it does not, so a scenario entry holding no ruleset still names the gap
+        // rather than dropping the row.
         await expect(page.getByText('Ruleset', { exact: true })).toHaveCount(0);
-        await expect(card(page, 'Trackblazer').getByText('Rule family', { exact: true })).toHaveCount(0);
+        await expect(card(page, 'Trackblazer').getByText('Rule family', { exact: true })).toHaveCount(1);
+        await expect(
+            card(page, 'Trackblazer').getByText('Rule family', { exact: true }).locator('..').getByText('Not recorded'),
+        ).toHaveCount(1);
     });
 
     test('states the documentation badge when the matrix records no guide', async ({ page }) => {
@@ -210,5 +220,71 @@ test.describe('Scenario Selection', () => {
         await expect(card(page, 'Our Grand Concert')).toBeVisible();
 
         expect(consoleErrors, `console errors: ${consoleErrors.join(' | ')}`).toEqual([]);
+    });
+
+    test('each scenario card carries a sourced summary, not the named absence', async ({ page }) => {
+        await page.goto('/career/setup/scenario');
+        await page.locator('#app > *').first().waitFor();
+
+        const cards = page.locator('[data-scenario-card]');
+        await expect(cards.first()).toBeVisible();
+        const count = await cards.count();
+        expect(count).toBeGreaterThan(0);
+
+        // Every scenario's guide states a summary, so the fallback sentence must appear nowhere. The
+        // earlier form of this case accepted "summary or named absence" and therefore passed while
+        // nothing had landed; this form fails in exactly that state, which is the whole point.
+        await expect(
+            page.getByText('No sourced summary line exists for this scenario in this repository.'),
+        ).toHaveCount(0);
+
+        for (let i = 0; i < count; i++) {
+            const summary = cards.nth(i).locator('[data-field="summary"]');
+
+            await expect(summary).toBeVisible();
+            await expect(summary).not.toHaveText(/^\s*$/);
+        }
+    });
+
+    /*
+     * The two fields the matrix carries unevenly: `description` exists for three of the four guides
+     * and `recommended_use` for one. An absent one is allowed to read `N/A` only when the reason
+     * travels with it, so this asserts the pairing rather than banning the word. A bare `N/A` with no
+     * `title` is the defect: it names a field the Trainer cannot tell "the source says nothing" from
+     * "this tool forgot to wire it".
+     */
+    test('every scenario card metadata field is sourced or carries a reason', async ({ page }) => {
+        await page.goto('/career/setup/scenario');
+        await page.locator('#app > *').first().waitFor();
+
+        const cards = page.locator('[data-scenario-card]');
+        const count = await cards.count();
+        expect(count).toBe(4);
+
+        for (let i = 0; i < count; i++) {
+            const card = cards.nth(i);
+
+            for (const field of ['description', 'recommended_use']) {
+                const cell = card.locator(`[data-field="${field}"]`);
+                await expect(cell, `card ${i} renders no ${field} row`).toHaveCount(1);
+
+                const value = cell.locator('dd').first();
+                // `textContent`, not `innerText`: both rows sit inside the card's collapsed
+                // "Facts and mechanics" disclosure, and a closed disclosure renders no inner text,
+                // which read as an empty field rather than as a hidden one.
+                const text = (await value.textContent())?.trim() ?? '';
+                const reason = await value.getAttribute('title');
+
+                if (text === 'N/A') {
+                    expect(reason, `card ${i} shows a bare N/A for ${field}`).not.toBeNull();
+                    // A reason that does not name where it looked is a restatement of the absence,
+                    // not an account of it, so the search itself has to be in the string.
+                    expect(reason ?? '').toContain('Searched:');
+                    expect(reason ?? '').toContain('docs/');
+                } else {
+                    expect(text.length).toBeGreaterThan(10);
+                }
+            }
+        }
     });
 });

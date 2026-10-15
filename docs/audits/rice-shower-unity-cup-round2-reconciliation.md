@@ -441,7 +441,7 @@ site rather than assumed:
   `components/TeamRacePanel.vue:42` (`entry.title ?? 'a team race with no calendar row'`) — print the reason as
   visible prose, which `DESIGN.md:571-574` says **needs no component** ("A caller that already prints the reason as
   visible prose beside the marker keeps doing that and needs no component"), and
-  `docs/proposals/provenance-and-absence-contracts.md:389-396` already ruled that class conformant as O1. The
+  `docs/research-scratch/PLANS-AND-BRIEFS.md` §"provenance-and-absence-contracts.md", source lines 389-396 already ruled that class conformant as O1. The
   manual's instruction to substitute `N/A` + `title` therefore contradicts `DESIGN.md` and would move a reachable
   sentence into a hover-only attribute, which is the information loss the proposal doc warned against. Not
   converted: the wording call stays the owner's.

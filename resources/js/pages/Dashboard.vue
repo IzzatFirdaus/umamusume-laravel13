@@ -33,6 +33,7 @@ import { LinkButton } from '../components/Form';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useVisitState } from '../composables/useVisitState';
+import { useLayout } from '../composables/useLayout';
 import SubCell from '../components/SubCell.vue';
 import KpiCard from '../components/KpiCard.vue';
 import ArtworkSlot from '../components/ArtworkSlot.vue';
@@ -95,15 +96,10 @@ const props = defineProps<{
 const page = usePage();
 const ruleset = computed(() => page.props.app?.ruleset ?? null);
 
-// Layout preference (PLAN 6B.15): reads `dashboard_layout` and `dashboard_hidden_cards` from the
-// shared preferences prop. Default is `bento` with all cards visible. `wide_bento` falls back to
-// `bento` until the DESIGN.md ruling lands (it is disabled in the Settings UI).
+// Layout width (PLAN 6B.15): the grid shape follows the shell's width choice, read through the same
+// composable `AppLayout` uses so the legacy stored values resolve in exactly one place.
+const { mode: dashboardLayout } = useLayout();
 const savedSettings = computed(() => (page.props.preferences?.settings ?? {}) as Record<string, unknown>);
-const dashboardLayout = computed<'bento' | 'wide_bento' | 'focused'>(() =>
-    ['bento', 'wide_bento', 'focused'].includes(savedSettings.value.dashboard_layout as string)
-        ? (savedSettings.value.dashboard_layout as 'bento' | 'wide_bento' | 'focused')
-        : 'bento',
-);
 const hiddenCards = computed<string[]>(() =>
     Array.isArray(savedSettings.value.dashboard_hidden_cards)
         ? (savedSettings.value.dashboard_hidden_cards as string[])
@@ -114,11 +110,12 @@ function isCardHidden(cardId: string): boolean {
     return hiddenCards.value.includes(cardId);
 }
 
-// The five cards this screen composes. All hidden is a state of its own (DL.5): the grid renders
-// one empty-state card rather than a blank page.
+// The four regions this screen composes. `next_best_action` is gone: its sentence and its button
+// now live inside Active Career, so one career has one door (Hick + Von Restorff, one filled
+// primary per page). All hidden is a state of its own (DL.5): the grid renders one empty-state card
+// rather than a blank page.
 const DASHBOARD_CARD_IDS: ReadonlyArray<string> = [
     'active_career',
-    'next_best_action',
     'quick_actions',
     'recent_veterans',
     'data_status',
@@ -127,29 +124,36 @@ const allCardsHidden = computed<boolean>(() => DASHBOARD_CARD_IDS.every((id) => 
 
 // Grid container class varies by layout preference (PLAN 6B.15).
 const gridClass = computed(() => {
-    if (dashboardLayout.value === 'focused') {
+    if (dashboardLayout.value === 'compact') {
         return 'grid w-full max-w-3xl grid-cols-1 gap-4 mx-auto';
     }
-    // wide_bento uses the wider shell (DESIGN.md §2.3 ruling).
-    if (dashboardLayout.value === 'wide_bento') {
-        return 'grid w-full max-w-7xl grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12 mx-auto';
-    }
-    // bento (default)
-    return 'grid w-full grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12';
+    // Standard and wide share this grid; the only difference is the shell measure AppLayout puts
+    // around it. A page-level max-w here would re-cap the wide shell back to its own value.
+    // `items-start` keeps every region at its own content height. Without it a row stretches each
+    // card to the tallest sibling, so the shorter cards become borders around empty space (Next best
+    // action carried 107px of void that way); with it the leftover stays page margin, which reads as
+    // a finished bento rather than as a panel that failed to fill.
+    // The grid self-caps at the standard measure even inside a wide shell: four cards do not use
+    // 1536px of horizontal room, and two columns spread that wide leave a taller band of empty page
+    // under themselves. The shell still widens for tables and catalogues; this card set does not.
+    return 'grid w-full max-w-6xl mx-auto grid-cols-1 gap-6 items-start md:grid-cols-2 xl:grid-cols-12';
 });
 
 // Card col-span per layout. Focused forces single-column at all breakpoints; bento uses the
 // responsive grid described in PLAN 6B.13.
 function cardSpan(cardId: string): string {
-    if (dashboardLayout.value === 'focused') {
+    if (dashboardLayout.value === 'compact') {
         return '';
     }
+    // Two columns in the brief's 2fr + 1fr ratio, expressed on the existing 12-track grid so no new
+    // token is needed. The DOM stays in reading order (Active Career, Quick Actions, Recent
+    // Veterans, Data Status) and the explicit starts place them, so the tab order matches the
+    // visual order at every width and no row is left with an untiled cell.
     const spans: Record<string, string> = {
-        active_career: 'col-span-1 xl:col-span-8',
-        next_best_action: 'col-span-1 xl:col-span-4',
-        quick_actions: 'col-span-1 xl:col-span-4',
-        recent_veterans: 'col-span-1 xl:col-span-4',
-        data_status: 'col-span-1 md:col-span-2 xl:col-span-4',
+        active_career: 'col-span-1 xl:col-span-8 xl:col-start-1 xl:row-start-1',
+        quick_actions: 'col-span-1 xl:col-span-4 xl:col-start-9 xl:row-start-1',
+        recent_veterans: 'col-span-1 xl:col-span-8 xl:col-start-1 xl:row-start-2',
+        data_status: 'col-span-1 md:col-span-2 xl:col-span-4 xl:col-start-9 xl:row-start-2',
     };
     return spans[cardId] ?? 'col-span-1';
 }
@@ -162,7 +166,7 @@ const cardBase = 'rounded-md border border-rule bg-panel p-4';
 const emptyCardBase = 'rounded-md border border-dashed border-rule bg-raised p-4';
 const subCellStrong = 'font-mono text-xl tabular-nums text-ink-strong';
 const subCellDefault = 'font-mono text-xl tabular-nums';
-const kpiValueClass = 'font-mono text-3xl tabular-nums text-ink-strong';
+const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
 </script>
 
 <template>
@@ -183,14 +187,14 @@ const kpiValueClass = 'font-mono text-3xl tabular-nums text-ink-strong';
 
         <!-- BENTO GRID: four regions packed above the fold at 1920x1080 (PLAN 6B.13).
              Each card carries role="region" with a heading so `getByRole('region')` resolves. -->
-        <div :class="gridClass" :data-layout="dashboardLayout">
+        <div :class="gridClass" data-dashboard-root :data-layout="dashboardLayout">
             <!-- ALL CARDS HIDDEN (DL.5): one empty-state card rather than a blank page. It sits
                  inside the same shell measure as the grid it replaces. -->
             <section
                 v-if="allCardsHidden"
                 role="region"
                 aria-labelledby="dashboard-empty-heading"
-                :class="[emptyCardBase, dashboardLayout === 'focused' ? '' : 'col-span-1 md:col-span-2 xl:col-span-12']"
+                :class="[emptyCardBase, dashboardLayout === 'compact' ? '' : 'col-span-1 md:col-span-2 xl:col-span-12']"
             >
                 <h2 id="dashboard-empty-heading" class="text-lg font-semibold text-ink-strong">
                     No cards are shown on the Dashboard.
@@ -209,7 +213,7 @@ const kpiValueClass = 'font-mono text-3xl tabular-nums text-ink-strong';
                 v-if="props.activeCareer && !isCardHidden('active_career')"
                 role="region"
                 aria-labelledby="active-career-heading"
-                :class="[cardBase, cardSpan('active_career')]"
+                data-card="active_career" :class="[cardBase, cardSpan('active_career')]"
             >
                 <h2 id="active-career-heading" class="text-lg font-semibold text-ink-strong">
                     Active Career
@@ -248,10 +252,10 @@ const kpiValueClass = 'font-mono text-3xl tabular-nums text-ink-strong';
                     </div>
                 </div>
 
-                <!-- Five stat cells compressed into one 4-column strip (Slice 1.1). The duplicate
-                     Team Rank cell is gone: Team Rank now has its own row, read through the model's
-                     one owner (`latestTeamRank()`). -->
-                <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4" role="list" aria-label="Career progress">
+                <!-- Three stat tiles, then progress as its own full-width row: a fourth tile made
+                     the strip three-across at rail widths and the number wrapped. `grid-cols-tiles`
+                     folds the count instead of shrinking a value past its own width. -->
+                <div class="mt-4 grid grid-cols-tiles gap-3" role="list" aria-label="Career progress">
                     <SubCell
                         label="Turn"
                         :value="group(props.activeCareer.turn)"
@@ -269,36 +273,50 @@ const kpiValueClass = 'font-mono text-3xl tabular-nums text-ink-strong';
                         :value-class="subCellDefault"
                         :title="props.activeCareer.team_rank.value === null ? props.activeCareer.team_rank.value_hint : undefined"
                     />
-                    <!-- Progress indicator: Turn N / 24 -->
-                    <SubCell
-                        label="Progress"
-                        :value="`Turn ${props.activeCareer.turn} / 24`"
-                        :value-class="subCellStrong"
-                    />
                 </div>
 
-                <!-- Active Career's Resume button is secondary (neutral), not lime.
-                     The single accent is Next Best Action's button below. -->
+                <!-- Goal-Gradient: the 24-turn run reads as a bar, not only as a fraction. The
+                     element carries the role and the values; the fill is decoration. -->
+                <div class="mt-4">
+                    <p class="text-xs font-medium text-ink-muted">Turn {{ props.activeCareer.turn }} / 24</p>
+                    <div
+                        role="progressbar"
+                        aria-label="Turn progress"
+                        :aria-valuenow="props.activeCareer.turn"
+                        aria-valuemin="0"
+                        aria-valuemax="24"
+                        class="mt-1 h-2 overflow-hidden rounded-pill bg-sunken"
+                    >
+                        <div
+                            class="h-full rounded-pill bg-brand-chrome transition-[width] duration-150 ease-out motion-reduce:transition-none"
+                            :style="{ width: `${Math.min(100, (props.activeCareer.turn / 24) * 100)}%` }"
+                        />
+                    </div>
+                </div>
+
+                <!-- The next-step line, merged here from the deleted Next best action card. It names
+                     no trainee and no scenario: the card already prints both above, and repeating
+                     them made one glance carry the same sentence twice. -->
+                <p class="mt-4 text-sm text-ink">
+                    Resume this career to log its next turn.
+                </p>
+
+                <!-- The page's one filled primary. The outline duplicate is gone. -->
                 <LinkButton
                     :href="props.activeCareer.resume_url"
-                    variant="secondary"
+                    variant="primary"
                     class="mt-4"
                 >
-                    Resume Career
+                    Resume career
                 </LinkButton>
 
-<!-- One career is the ordinary case and renders nothing here: the count speaks only
-                      when a second is live, so the single-run layout is unchanged. The whole notice
-                      wears the pill (Slice 1.3): the count and its handover link are one statement,
-                      and the smallest element carrying "careers are active" must also carry the
-                      Open Careers door the keyboard test reads (`dashboard.spec.ts`'s scoping). -->
-                 <p
-                     v-if="props.activeCareerCount > 0"
-                     class="mt-3 inline-flex flex-wrap items-center gap-x-2 rounded-pill border border-rule bg-sunken px-3 py-1.5 text-sm text-ink"
-                 >
-                     {{ props.activeCareerCount }} career{{ props.activeCareerCount !== 1 ? 's' : '' }} are active{{ props.activeCareerCount > 1 ? '; this screen features the newest' : '' }}.
-                     <Link :href="props.careersUrl" class="underline font-medium text-ink-strong hover:text-ink transition-colors duration-150 ease-out">Open Careers</Link>
-                 </p>
+                <!-- The multi-career notice is muted text with a link, not a pill: a bordered chip
+                     competes with the action above it for the same glance. One career renders
+                     nothing here. -->
+                <p v-if="props.activeCareerCount > 0" class="mt-3 text-sm text-ink-muted">
+                    {{ props.activeCareerCount }} career{{ props.activeCareerCount !== 1 ? 's' : '' }} are active{{ props.activeCareerCount > 1 ? '; this screen features the newest' : '' }}.
+                    <Link :href="props.careersUrl" class="underline font-medium text-ink-strong hover:text-ink transition-colors duration-150 ease-out">View all careers ({{ props.activeCareerCount }})</Link>
+                </p>
             </section>
 
             <!-- EMPTY STATE (col-span-8 on xl) -->
@@ -306,53 +324,44 @@ const kpiValueClass = 'font-mono text-3xl tabular-nums text-ink-strong';
                 v-else-if="!isCardHidden('active_career')"
                 role="region"
                 aria-labelledby="active-career-empty-heading"
-                :class="[emptyCardBase, cardSpan('active_career')]"
+                data-card="active_career" :class="[emptyCardBase, cardSpan('active_career')]"
             >
                 <h2 id="active-career-empty-heading" class="text-lg font-semibold text-ink-strong">
                     Active Career
                 </h2>
                 <p class="mt-2 text-sm text-ink">No active career. Start a new training run.</p>
                 <p class="mt-2 max-w-3xl text-sm text-ink-muted">
-                    A career keeps your turns, Energy and race record in one place, and this screen
-                    resumes it from wherever you left off. Creating one takes a trainee and a scenario,
-                    and nothing here changes until you log your first turn.
+                    Start a run to track turns, Energy and race record in one place.
                 </p>
-                <LinkButton
-                    :href="'/career/setup/scenario'"
-                    variant="secondary"
-                    class="mt-4"
-                >
-                    Start a new training run
-                </LinkButton>
+                <!-- The longer explanation is available but not load-bearing: three lines of prose
+                     above the primary action pushed the action itself down the card. -->
+                <details class="mt-2">
+                    <summary class="cursor-pointer text-sm font-medium text-ink hover:text-ink-strong">
+                        How careers work
+                    </summary>
+                    <p class="mt-2 max-w-3xl text-sm text-ink-muted">
+                        This screen resumes a career from wherever you left off. Creating one takes a
+                        trainee and a scenario, and nothing here changes until you log your first turn.
+                    </p>
+                </details>
+                <!-- One filled primary on the screen. The import door is a ghost beside it, so the
+                     two offers are visibly ranked. -->
+                <div class="mt-4 flex flex-wrap items-center gap-3">
+                    <LinkButton href="/career/setup/scenario" variant="primary">
+                        Start a new training run
+                    </LinkButton>
+                    <LinkButton href="/career/snapshot" variant="ghost">
+                        Import an existing career
+                    </LinkButton>
+                </div>
             </section>
 
-            <!-- NEXT BEST ACTION (col-span-4 on xl) — the only lime-primary on the screen -->
-            <section
-                v-if="props.activeCareer && !isCardHidden('next_best_action')"
-                role="region"
-                aria-labelledby="next-action-heading"
-                :class="[cardBase, cardSpan('next_best_action')]"
-            >
-                <h3 id="next-action-heading" class="text-lg font-semibold text-ink-strong">Next best action</h3>
-<p class="mt-1 text-sm text-ink">
-                     Resume <strong>{{ props.activeCareer.trainee }}</strong> at <strong>{{ props.activeCareer.scenario_label }}</strong>.
-                     <span v-if="props.activeCareer.position_label"> Currently at {{ props.activeCareer.position_label }}.</span>
-                     <span v-else title="No turn has been logged, so this career is not standing anywhere on the calendar yet.">No turn logged yet.</span>
-                 </p>
-                <Link
-                    :href="props.activeCareer.resume_url"
-                    class="enamel mt-3 inline-flex min-h-11 items-center rounded-full bg-action px-4 text-sm font-bold text-on-action"
-                >
-                    Resume Career
-                </Link>
-            </section>
-
-            <!-- QUICK ACTIONS (col-span-4 on xl) -->
+            <!-- QUICK ACTIONS (rail, top) -->
             <section
                 v-show="!isCardHidden('quick_actions')"
                 role="region"
                 aria-labelledby="quick-actions-heading"
-                :class="[cardBase, cardSpan('quick_actions')]"
+                data-card="quick_actions" :class="[cardBase, cardSpan('quick_actions')]"
             >
                 <h2 id="quick-actions-heading" class="text-lg font-semibold text-ink-strong">
                     Quick Actions
@@ -361,21 +370,27 @@ const kpiValueClass = 'font-mono text-3xl tabular-nums text-ink-strong';
                 <!-- Every destination is a live route; a destination whose slice had not
                      landed would be a named absence here rather than a dead link. -->
                 <nav aria-label="Quick actions" class="mt-2">
-                    <ul class="flex flex-wrap gap-3">
+                    <!-- One full-width row per destination: a wrapped row of ghost buttons reads as a
+                         toolbar, and a row is a larger target than a chip (Fitts). -->
+                    <ul class="flex flex-col gap-2">
                         <li v-for="action in props.quickActions" :key="action.to">
-                            <LinkButton :href="action.to" variant="secondary">
+                            <LinkButton :href="action.to" variant="secondary" class="w-full justify-start">
                                 {{ action.label }}
                             </LinkButton>
                         </li>
                     </ul>
                 </nav>
 
-                <!-- The snapshot door lives in Quick Actions so the Trainer who already has a
-                     career to resume sees it (R2-04). -->
                 <p class="mt-3 text-xs text-ink-muted">
-                    Already partway through a career?
+                    Jump to a task the sidebar does not carry.
+                </p>
+                <!-- The snapshot door stays here so the Trainer who already has a career to resume
+                     still sees it (R2-04); it moved out of Active Career, which now owns the
+                     empty-state import instead. Two short lines, not one three-line paragraph. -->
+                <p class="mt-2 text-xs text-ink-muted">
+                    Partway through a career?
                     <Link href="/career/snapshot" class="underline font-medium text-ink">Import an existing career</Link>
-                    instead, and this tool starts from where your client says it stands.
+                    instead.
                 </p>
             </section>
 
@@ -384,18 +399,16 @@ const kpiValueClass = 'font-mono text-3xl tabular-nums text-ink-strong';
                 v-show="!isCardHidden('recent_veterans')"
                 role="region"
                 aria-labelledby="recent-veterans-heading"
-                :class="[cardBase, cardSpan('recent_veterans')]"
+                data-card="recent_veterans" :class="[cardBase, cardSpan('recent_veterans')]"
             >
                 <h2 id="recent-veterans-heading" class="text-lg font-semibold text-ink-strong">
                     Recent Veterans
                 </h2>
 
                 <template v-if="props.recentVeterans.total === 0">
-                    <p class="mt-2 text-sm text-ink">No Veterans recorded yet.</p>
+                    <p class="mt-2 text-sm text-ink">No veterans yet.</p>
                     <p class="mt-2 max-w-3xl text-sm text-ink-muted">
-                        A Veteran is a completed career filed into the library. Nothing is filed there:
-                        a career is saved from its own Result screen, so open one that finished and
-                        choose Save Veteran.
+                        Finish a career and choose Save Veteran on its Result screen.
                     </p>
                     <Link
                         :href="props.recentVeterans.library_url"
@@ -447,7 +460,7 @@ const kpiValueClass = 'font-mono text-3xl tabular-nums text-ink-strong';
                 v-show="!isCardHidden('data_status')"
                 role="region"
                 aria-labelledby="data-status-heading"
-                :class="[cardBase, cardSpan('data_status')]"
+                data-card="data_status" :class="[cardBase, cardSpan('data_status')]"
             >
                 <h2 id="data-status-heading" class="text-lg font-semibold text-ink-strong">
                     Data Status
@@ -483,7 +496,7 @@ const kpiValueClass = 'font-mono text-3xl tabular-nums text-ink-strong';
                 </p>
 
                 <!-- KPI stat cells -->
-                <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div class="mt-4 grid grid-cols-tiles gap-3">
                     <KpiCard label="Trainees" :value="group(props.counts.trainees)" :value-class="kpiValueClass" />
                     <KpiCard label="Skills" :value="group(props.counts.skills)" :value-class="kpiValueClass" />
                     <KpiCard label="Support cards" :value="group(props.counts.supportCards)" :value-class="kpiValueClass" />

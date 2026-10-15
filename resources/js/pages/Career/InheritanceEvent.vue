@@ -30,6 +30,7 @@ import SparkChip from '../../components/legacy/SparkChip.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
+import { BaseInput, BaseSelect, BaseTextarea } from '../../components/Form';
 
 interface RunSection {
     id: number;
@@ -153,7 +154,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
     const base = 'inline-flex items-center justify-center w-5 h-5 text-xs font-mono font-bold rounded-full';
     const classes: Record<Milestone['status'], string> = {
         completed: `${base} bg-green text-on-chrome`,
-        current: `${base} bg-chrome text-on-chrome`,
+        current: `${base} bg-status-positive text-status-positive-ink`,
         upcoming: `${base} border border-rule text-ink-muted bg-raised`,
         missed: `${base} bg-risk text-on-chrome`,
     };
@@ -197,7 +198,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                 <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">
                     Back to Cockpit
                 </a>
-                <a href="/career/setup/legacy" class="inline-flex min-h-11 items-center rounded-md bg-chrome px-3 font-semibold text-on-chrome">
+                <a href="/career/setup/legacy" class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-3 font-semibold text-on-primary-action">
                     Enter Legacy Now
                 </a>
             </div>
@@ -453,7 +454,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                     <button
                         id="inheritance-submit"
                         type="submit"
-                        class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 font-semibold text-on-chrome disabled:opacity-60 disabled:cursor-wait"
+                        class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action disabled:opacity-60 disabled:cursor-wait"
                         :disabled="form.processing"
                     >
                         {{ form.processing ? 'Recording…' : 'Record Event' }}

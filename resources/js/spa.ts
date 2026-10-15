@@ -1,5 +1,6 @@
-import { createApp, h, type DefineComponent } from 'vue';
+import { createApp, defineComponent, h, type DefineComponent } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
+import { useTheme } from './composables/useTheme';
 
 // Glob over nested page dirs, resolved lazily. The reason this is a glob and not a dynamic
 // `import(\`./pages/${name}.vue\`)` is unchanged: a template import matches only a single path segment in
@@ -19,7 +20,17 @@ createInertiaApp({
     progress: false,
     resolve: async (name) => (await pages[`./pages/${name}.vue`]()).default,
     setup({ el, App, props, plugin }) {
-        createApp({ render: () => h(App, props) })
+        // The theme sync lives here rather than in a layout because not every page renders one, and
+        // the Blade shell that carries `data-theme` is never re-rendered by an Inertia visit.
+        const Root = defineComponent({
+            setup() {
+                useTheme();
+
+                return () => h(App, props);
+            },
+        });
+
+        createApp({ render: () => h(Root) })
             .use(plugin)
             .mount(el);
     },

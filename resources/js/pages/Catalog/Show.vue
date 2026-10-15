@@ -410,7 +410,7 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
                      and needs no pending guard. -->
                 <button
                     type="button"
-                    class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome"
+                    class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 text-sm font-bold text-on-primary-action"
                     @click="router.post(props.carry_url)"
                 >
                     New run

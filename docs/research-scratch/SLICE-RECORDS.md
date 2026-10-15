@@ -5159,7 +5159,7 @@ Related: `superpowers:verification-before-completion` (a claim is the command ou
 ## UI-AUDIT-FIX-EXECUTION-2026-10-13 (pass 2: the remaining screens, Phases 1, 3, 4, 5, 6, 7, 8 partial)
 
 **What this pass was.** The 2026-10-13 audit of the 40 page components outside the Cockpit and the setup
-wizard (`docs/proposals/remaining-screens-ui-audit-2026-10-13.md`, 87 findings, 1 P0) was followed by an
+wizard (`docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md", 87 findings, 1 P0) was followed by an
 owner-supplied implementation plan slicing those findings into Phases 0-11. This record covers execution:
 what landed, on what evidence, what is owed, and what the owner's answers still gate.
 

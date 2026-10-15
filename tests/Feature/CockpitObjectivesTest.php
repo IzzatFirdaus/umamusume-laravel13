@@ -21,7 +21,7 @@ use App\Models\Umamusume;
  * it, and one case below asserts that. Inventing it would be execution rule 2's exact prohibition.
  *
  * **The badge is `calculated` on these rows because a state is a comparison, not a reading.** The
- * provenance table (`provenance-and-absence-contracts.md` §1) bars `confirmed` from anything "the tool
+ * provenance table (`PLANS-AND-BRIEFS.md` §"provenance-and-absence-contracts.md" §1) bars `confirmed` from anything "the tool
  * computed, summed, counted, compared or interpolated", and every row here compares a slot position
  * against the run's own position and its recorded races. The `title` names both operands.
  *
