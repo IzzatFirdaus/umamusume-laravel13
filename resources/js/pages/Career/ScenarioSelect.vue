@@ -42,8 +42,6 @@ interface ScenarioCard {
     } | null;
     description: string | null;
     recommended_use: string | null;
-    /** Why an absent field is absent, naming the corpus that was searched. */
-    citations?: Record<string, string>;
 }
 
 const props = defineProps<{
@@ -213,8 +211,8 @@ const optimizesText = (card: ScenarioCard): string | null => {
                                 {{ props.ruleset.value }}
                             </dd>
                         </div>
-                        <SubCell data-field="description" label="Description" :value="card.description ?? 'N/A'" :title="card.description ? undefined : (card.citations?.description ?? `No sourced description line exists for the ${card.label} guide in this repository. Searched: docs/scenarios/, the scenario plan document, and docs/UMAMUSUME_REFERENCE.md.`)" />
-                        <SubCell data-field="recommended_use" label="Recommended use" :value="card.recommended_use ?? 'N/A'" :title="card.recommended_use ? undefined : (card.citations?.recommended_use ?? 'No repo master names a recommended use for this scenario. Searched: docs/scenarios/, the scenario plan document, and docs/UMAMUSUME_REFERENCE.md.')" />
+                        <SubCell data-field="description" label="Description" :value="card.description ?? 'N/A'" :title="card.description ? undefined : `No sourced description line exists for the ${card.label} guide in this repository.`" />
+                        <SubCell data-field="recommended_use" label="Recommended use" :value="card.recommended_use ?? 'N/A'" :title="card.recommended_use ? undefined : 'The scenario guides state no recommended use, and choosing one would be a judgement this tool holds no source for.'" />
                     </div>
 
                     <!-- The scenario's recorded metadata, straight from the matrix. A scenario the matrix

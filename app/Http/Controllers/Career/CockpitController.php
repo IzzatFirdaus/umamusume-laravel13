@@ -270,27 +270,18 @@ class CockpitController extends Controller
      */
     private function headerSection(TrainingRun $run, ?TurnEntry $latest, array $team, ?CareerPosition $position = null): array
     {
-        $turn = $run->turnEntries->count();
-        $positionInYear = $turn < 1 ? null : (($turn - 1) % TrainingRun::TURNS_PER_YEAR) + 1;
-        $year = $turn < 1 ? null : TrainingRun::careerYearForTurn($turn);
-
-        $yearLabel = $year === null ? null : (RaceCatalogSlot::YEARS[$year] ?? (string) $year).' Year';
-        $monthLabel = $positionInYear === null
+        // One turn owner, in one priority order: a position the Trainer named, else the position the
+        // calendar derives from this run's own turn log, else the highest logged turn number. The count
+        // of logged turns is never a turn number - a snapshot logs one entry, at turn 75, and a count
+        // printed it as turn 1 beside a correction form reading Turn 75. `careerPosition()` answers null
+        // for a turn the 72-turn calendar does not model, so year and month render as unrecorded rather
+        // than as Junior Early January.
+        $position ??= $run->careerPosition();
+        $turn = $position?->turnIndex ?? (int) ($latest?->turn ?? 0);
+        $yearLabel = $position?->year->label();
+        $monthLabel = $position === null
             ? null
-            : ($positionInYear % 2 === 1 ? 'Early ' : 'Late ').self::MONTHS[intdiv($positionInYear - 1, 2)];
-
-        // A position the Trainer named outranks the count of turns this tool happens to hold.
-        // `CreateSnapshotRun` writes one entry at the imported turn, so a career entered at Senior
-        // Early October counts one logged turn and would otherwise print as Junior Early January -
-        // the exact misreading `CareerPosition` exists to close. A new career keeps the derivation
-        // above, which is its own turn log and needs no override.
-        $named = $run->hasImportedPosition() ? ($position ?? $run->careerPosition()) : null;
-
-        if ($named !== null) {
-            $turn = $named->turnIndex;
-            $yearLabel = $named->year->label();
-            $monthLabel = $named->phase->value.' '.CareerCalendar::monthLabel($named->month);
-        }
+            : $position->phase->value.' '.CareerCalendar::monthLabel($position->month);
 
         $energy = $latest === null ? ['value' => null, 'text' => null] : $latest->energyReading();
 
@@ -1837,7 +1828,12 @@ class CockpitController extends Controller
                     : null,
             ];
 
-            if (! $recorded && $reached && $turn !== null && $run->status === RunStatus::Active) {
+            // A race alerts only in the career year the run is standing in. `isAtOrBeforeTurn()` is an
+            // ordinal test, so an unrecorded Junior race stays "reached" for the rest of the career and a
+            // Senior-year run would banner its first-year debut every turn. The ladder row keeps its
+            // `missed` state; only the alert is scoped, because the alert claims a race is still due.
+            if (! $recorded && $reached && $turn !== null && $run->status === RunStatus::Active
+                && (int) $slot->year === (int) $next['year']) {
                 $alerts[] = [
                     'level' => 'Critical',
                     'text' => $slot->title.' is due and not recorded',
@@ -1986,8 +1982,16 @@ class CockpitController extends Controller
                 'absence' => $goal->absenceReason(),
             ];
 
-            if ($state !== null && $reached && ! $met && $run->status === RunStatus::Active
-                && ($slot === null || ! $mandatory->contains('id', $slot->id))) {
+            // An objective alerts only when the race has not run at all. A recorded entry whose
+            // placement was never typed in is unproven, not outstanding, and `is due and not met` claims
+            // a door that already closed. Same year scope as the mandatory group above: an ordinal
+            // deadline stays passed for the rest of the career, so a Senior run would banner its
+            // Classic-year objectives every turn.
+            $ranThisRace = $slot !== null && $finished->has((int) $slot->id);
+
+            if ($state !== null && $reached && ! $met && ! $ranThisRace && $run->status === RunStatus::Active
+                && ($slot === null || ! $mandatory->contains('id', $slot->id))
+                && (int) $goal->career_year === (int) $next['year']) {
                 $alerts[] = [
                     'level' => 'Critical',
                     'text' => $race !== null ? $race.' is due and not met' : 'A trainee objective is due and not met',

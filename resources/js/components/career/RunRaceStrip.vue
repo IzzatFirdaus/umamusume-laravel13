@@ -149,7 +149,10 @@ const thisTurn = computed(() => props.strip.this_turn);
         </section>
 
         <section aria-labelledby="race-strip-ahead">
-            <h3 id="race-strip-ahead" class="text-lg font-semibold text-ink-strong">
+            <!-- The mark prints on the rows this trainee's own ladder names (ADR-0026). What a mark means,
+                 and where the whole ladder reads, rides on the heading as a `title` rather than as a
+                 paragraph under the grid: the rows already carry the fact, and the sentence explained them. -->
+            <h3 id="race-strip-ahead" class="text-lg font-semibold text-ink-strong" :title="props.strip.absences.goal">
                 Still to come
             </h3>
 
@@ -176,18 +179,6 @@ const thisTurn = computed(() => props.strip.this_turn);
                     <GoalMark v-if="row.goal !== null" :requirement="row.goal" />
                 </li>
             </ul>
-
-            <!-- The mark prints on the rows this trainee's own ladder names (ADR-0026). The sentence below
-                 says what a mark means and where the whole ladder reads, so an unmarked row is not
-                 mistaken for a race nobody asked of her.
-
-                 A note, not an `N/A`: the value it explains is on the rows above it, so marking it absent
-                 would contradict them. `AbsenceValue.vue` is for a reading the product does not have; the
-                 server still composes this sentence beside the one genuine absence in the same set
-                 (`absences.turn_link`), which stays a disclosure. -->
-            <p class="mt-2 text-xs text-ink-muted">
-                Goal races: {{ props.strip.absences.goal }}
-            </p>
         </section>
     </div>
 </template>

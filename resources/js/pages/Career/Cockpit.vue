@@ -254,6 +254,25 @@ watch(
 const turnSelector = ref<HTMLSelectElement | null>(null);
 
 /*
+ * The three run states. The Cockpit is a decision surface while a career is being played, and a summary
+ * of one that has ended once it has not, so the top of the screen switches on `run.status` and names the
+ * state in the DOM for the specs to read. `Retired` keeps the Completed shape and loses the Result door,
+ * because a retired career has no finished result to open.
+ */
+const runState = computed((): string => props.run.status.toLowerCase());
+const isActive = computed((): boolean => props.run.status === 'Active');
+
+// The summary line reads only stored figures. A stat with no reading is `N/A`, the same marker the rows
+// below it use, and no total turn count is printed because nothing in the props states one.
+const summaryStats = computed((): string =>
+    props.state.stats
+        .map((stat: { label: string; current: number | null }): string =>
+            `${stat.label} ${stat.current === null ? 'N/A' : stat.current.toLocaleString('en-US')}`,
+        )
+        .join(' · '),
+);
+
+/*
  * F2, plan §9.6 ruling 2: arbitrary-turn correction. `?edit_turn=<id>` names the turn the form opens
  * on; the selector navigates that query string with `preserveState` so the disclosure stays open, and
  * the watch below re-syncs the form to the turn the server returned.
@@ -490,6 +509,7 @@ const jumpToShop = (): void => {
             </ul>
         </nav>
 
+        <div :data-run-state="runState" class="contents">
         <CareerHeader
             :trainee="props.run.trainee"
             :trainee-ja="props.run.trainee_ja"
@@ -499,6 +519,31 @@ const jumpToShop = (): void => {
             :trainee-rarity="props.identity.trainee_rarity"
             :potential-level="props.identity.potential_level"
         />
+
+        <!-- The finished career's own summary (Step 5). It reads the header's turn, the run's status and
+             the five stat readings this screen already prints, and names the one door a closed career
+             still has: the Career Result. Nothing here is derived that the props do not carry, so there
+             is no total turn count and no epithet line, because no prop states either. -->
+        <section
+            v-if="!isActive"
+            aria-labelledby="cockpit-summary-heading"
+            class="mt-3 rounded-lg border border-rule bg-panel p-4"
+        >
+            <h2 id="cockpit-summary-heading" class="text-lg font-semibold text-ink-strong">
+                {{ props.run.trainee }} · {{ props.run.scenario_label }}
+            </h2>
+            <p class="mt-1 text-sm text-ink">
+                {{ props.run.status_label }} · Turn {{ props.header.turn }}
+            </p>
+            <p class="mt-1 font-mono text-sm tabular-nums text-ink-strong">{{ summaryStats }}</p>
+            <a
+                v-if="props.run.status === 'Completed'"
+                :href="props.run.result_url"
+                class="mt-3 inline-flex min-h-11 items-center rounded-md border border-rule px-4 font-semibold text-ink-strong underline"
+            >
+                Open the Career Result
+            </a>
+        </section>
 
         <!-- The header edit forms (F2, plan §9.6 ruling 1). Status, scenario and grade-point period
              all write through `runs.update`, the route and validator the 0.1.0 record screen used. A
@@ -545,7 +590,7 @@ const jumpToShop = (): void => {
                 </li>
             </ul>
 
-            <details class="mt-2 rounded-lg border border-rule bg-panel p-4">
+            <details data-region="edit-identity" class="mt-2 rounded-lg border border-rule bg-panel p-4">
                 <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
                     Edit identity
                 </summary>
@@ -706,13 +751,25 @@ const jumpToShop = (): void => {
             </details>
         </section>
 
-        <UnityCupEditor
+        <!-- The team write path rides the same disclosure as the other edit panels. It is `open` while the
+             career is being played, so the Active screen keeps the panel it has always shown, and closed
+             once the career has ended, where it is a setting rather than a decision. -->
+        <details
             v-if="composesTeamPanel && teamState !== null"
-            :action="props.run.update_url"
-            :umamusume-id="props.run.umamusume_id"
-            :status="props.run.status"
-            :team="teamState"
-        />
+            data-region="team-state"
+            :open="isActive"
+            class="mt-3 rounded-lg border border-rule bg-panel p-4"
+        >
+            <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
+                Edit team state
+            </summary>
+            <UnityCupEditor
+                :action="props.run.update_url"
+                :umamusume-id="props.run.umamusume_id"
+                :status="props.run.status"
+                :team="teamState"
+            />
+        </details>
 
         <!-- The spec's order, as CSS only. `order-*` drives the single mobile column; from `md` up the
              explicit row and column placement takes over, so the tablet strip and the desktop
@@ -744,8 +801,8 @@ const jumpToShop = (): void => {
                         />
                     </label>
 
-                    <details class="mt-2 rounded-lg border border-rule bg-panel p-4">
-<summary class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong">
+                    <details data-region="correct-turn" class="mt-2 rounded-lg border border-rule bg-panel p-4">
+                        <summary class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong">
                             Correct turn {{ props.correction.turn }} by hand
                         </summary>
                         <p class="mt-2 text-sm text-ink-muted">
@@ -846,7 +903,7 @@ const jumpToShop = (): void => {
                             />
                             <button
                                 type="submit"
-                                class="enamel inline-flex min-h-11 items-center justify-center rounded-full bg-chrome px-4 font-semibold text-on-chrome disabled:opacity-60 md:col-span-3"
+                                class="inline-flex min-h-11 items-center justify-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action disabled:opacity-60 md:col-span-3"
                                 :disabled="correctionForm.processing"
                             >
                                 {{ correctionForm.processing ? 'Saving…' : 'Save correction' }}
@@ -885,8 +942,19 @@ const jumpToShop = (): void => {
                 </section>
             </div>
 
-            <div class="order-2 min-w-0 md:order-none md:col-start-2 md:row-span-2 md:row-start-2 lg:col-start-3 lg:row-start-1">
-                <AdvisorRail :decision="props.advisor.decision" :race-url="raceDoor" :timeline-url="props.run.timeline_url" />
+            <div data-region="advisor" class="order-2 min-w-0 md:order-none md:col-start-2 md:row-span-2 md:row-start-2 lg:col-start-3 lg:row-start-1">
+                <AdvisorRail v-if="isActive" :decision="props.advisor.decision" :race-url="raceDoor" :timeline-url="props.run.timeline_url" />
+
+                <!-- A career that has ended has no turn being decided, so the advisor's own refusal is not
+                     the answer this region owes. One statement and the one door a finished career still has. -->
+                <section v-else aria-labelledby="career-closed-heading" class="rounded-lg border border-rule bg-panel p-4">
+                    <h2 id="career-closed-heading" class="text-lg font-semibold text-ink-strong">
+                        {{ props.run.status === 'Completed' ? 'This run is complete.' : 'This run is retired.' }}
+                    </h2>
+                    <p class="mt-1 text-sm text-ink">
+                        Nothing is being decided, so nothing is ranked and nothing is refused.
+                    </p>
+                </section>
             </div>
 
             <div class="order-3 min-w-0 md:order-none md:col-start-1 md:row-start-3 lg:col-start-2 lg:row-start-2">
@@ -909,7 +977,16 @@ const jumpToShop = (): void => {
                     </a>
                 </section>
 
-                <ActionGrid :actions="props.actions" />
+                <ActionGrid v-if="isActive" :actions="props.actions" />
+
+                <!-- The actions a finished career still offers are tools rather than decisions, so they sit
+                     below the fold in the same shape as the other settings. -->
+                <details v-else data-region="run-tools" class="mt-3 rounded-lg border border-rule bg-panel p-4">
+                    <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
+                        Run tools
+                    </summary>
+                    <ActionGrid class="mt-3" :actions="props.actions" />
+                </details>
 
                 <!-- Trackblazer's Pro Shop is reachable from the Cockpit's action area (plan §9
                      E4, design-2.0 §28 "The Shop should be quickly accessible from the Career
@@ -945,11 +1022,24 @@ const jumpToShop = (): void => {
                 class="order-5 min-w-0 rounded-lg border border-rule bg-panel p-4 md:order-none md:col-span-2 md:row-start-1 lg:col-span-1 lg:col-start-1 lg:row-span-2 lg:row-start-1"
                 aria-labelledby="career-timeline-heading"
             >
-                <h2 id="career-timeline-heading" class="text-lg font-semibold text-ink-strong">
+                <h2 v-if="isActive" id="career-timeline-heading" class="text-lg font-semibold text-ink-strong">
                     Races in this run
                 </h2>
 
-                <RunRaceStrip :strip="props.raceStrip as never" />
+                <!-- Once the career has ended the race list is history, not a decision, so it collapses
+                     below the fold. The heading id moves onto the `summary` so the section keeps the one
+                     accessible name it has while open. -->
+                <details v-else data-region="races-in-this-run" class="mt-1 rounded-lg border border-rule bg-raised p-4">
+                    <summary
+                        id="career-timeline-heading"
+                        class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong"
+                    >
+                        Races in this run
+                    </summary>
+                    <RunRaceStrip class="mt-2" :strip="props.raceStrip as never" />
+                </details>
+
+                <RunRaceStrip v-if="isActive" :strip="props.raceStrip as never" />
 
                 <p class="mt-3 text-xs text-ink-muted">
                     This region carries the run's own races. Every logged turn, race and event, in order,
@@ -978,7 +1068,7 @@ const jumpToShop = (): void => {
                      Trainer opens it and confirms. `deleteForm` carries no fields — the route is run
                      scoped and the controller deletes the bound row — so the only data that matters
                      is the URL. -->
-                <details class="mt-4">
+                <details data-region="danger-zone" class="mt-4">
                     <summary
                         class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-risk"
                     >
@@ -1003,6 +1093,7 @@ const jumpToShop = (): void => {
                     </form>
                 </details>
             </section>
+        </div>
         </div>
     </CareerLayout>
 </template>

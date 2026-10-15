@@ -84,11 +84,6 @@ return [
         'epithet_routes' => 'Epithet routes',
         'team_rank_ladder' => 'Team Rank ladder',
         'career_goals' => 'Career goals',
-        // Phase 7A.1: URA Finale's four extracted surfaces
-        'ura_mandatory_ladder' => 'Mandatory races',
-        'happy_meek' => 'Happy Meek duel',
-        'career_milestones' => 'Career milestones',
-        'pre_final_review' => 'Pre-final review',
     ],
 
     /*
@@ -163,12 +158,6 @@ return [
                 'epithet_routes' => false,
                 'team_rank_ladder' => false,
                 'career_goals' => true,
-                // Phase 7A.1: the four surfaces UraPanel owned, split into their own flags
-                // so each draws only when its data exists and a fifth scenario can compose them independently.
-                'ura_mandatory_ladder' => true,
-                'happy_meek' => true,
-                'career_milestones' => true,
-                'pre_final_review' => true,
             ],
             'scenario_links' => ['Aoi Kiryuin'],
             'facility_level_source' => 'repetition',
@@ -389,15 +378,6 @@ return [
             'metadata' => [
                 'ruleset' => 'Team',
                 'summary' => 'A team career: facility level follows the team rank, a team race arrives every six months, and Spirit Bursts from teammates grant exclusive skills.',
-                /*
-                 * The card copy drafted in `docs/Unity-Cup-plan.md` §2, verbatim. "Zenith finals" reads
-                 * from that guide's own vocabulary (`docs/scenarios/02-unity-cup.md`), so the line is a
-                 * port and not a new claim.
-                 */
-                'description' => 'Team career. Spirit Bursts, team races, Zenith finals.',
-                'citations' => [
-                    'recommended_use' => 'No repo master names a recommended use for this scenario. Searched: docs/scenarios/, docs/Unity-Cup-plan.md §2, docs/UMAMUSUME_REFERENCE.md.',
-                ],
                 'planning_focus' => 'Wit carries the scenario\'s own cap bonus; team rank and Spirit Burst counts decide the exclusive-skill payout.',
                 'key_mechanics' => [
                     'A team race every six months against one of three NPC teams, strongest to weakest; a loss lowers league rank.',
@@ -412,9 +392,6 @@ return [
             'metadata' => [
                 'summary' => 'Make a New Track, the anniversary scenario whose headline difference is no fixed schedule of mandatory race goals: race timing stays the Trainer\'s own.',
                 'description' => 'Where URA Finale and Unity Cup lock a run into a fixed schedule of mandatory race goals and end the career when too many are missed, Trackblazer publishes no race goals. The guide is marked superseded, so its remaining detail reads from the publisher references.',
-                'citations' => [
-                    'recommended_use' => 'No repo master names a recommended use for this scenario. Searched: docs/scenarios/, docs/Trackblazer-plan.md §2, docs/UMAMUSUME_REFERENCE.md.',
-                ],
             ],
             'live_on_global' => '2026-03-12',
             'cap_bonus' => ['Speed' => 0, 'Stamina' => 700, 'Power' => 0, 'Guts' => 0, 'Wit' => 300],
@@ -735,9 +712,6 @@ return [
             'metadata' => [
                 'summary' => 'The fourth Global scenario, whose vocabulary names Performance and its five types, Promo Concert, Grand Concert, lessons, songs, concert techniques, Live Performance Expectations and Great Success.',
                 'description' => 'Its guide files itself as a boundary document: the vocabulary is official copy from Global notice 905, while the screen-level text and the song list remain unmeasured.',
-                'citations' => [
-                    'recommended_use' => 'No repo master names a recommended use for this scenario. Searched: docs/scenarios/, docs/Our-Grand-Concert-plan.md, docs/UMAMUSUME_REFERENCE.md. The client noun for the scenario resource is Performance, so card copy names no other gauge.',
-                ],
             ],
             // Cygames' notice 899 opens "As of 10:00 p.m., Jul 22, 2026 (UTC)", the same instant the
             // export's start_en decodes to, so this is a dated hour and not only a dated day.

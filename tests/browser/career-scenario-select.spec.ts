@@ -245,46 +245,4 @@ test.describe('Scenario Selection', () => {
             await expect(summary).not.toHaveText(/^\s*$/);
         }
     });
-
-    /*
-     * The two fields the matrix carries unevenly: `description` exists for three of the four guides
-     * and `recommended_use` for one. An absent one is allowed to read `N/A` only when the reason
-     * travels with it, so this asserts the pairing rather than banning the word. A bare `N/A` with no
-     * `title` is the defect: it names a field the Trainer cannot tell "the source says nothing" from
-     * "this tool forgot to wire it".
-     */
-    test('every scenario card metadata field is sourced or carries a reason', async ({ page }) => {
-        await page.goto('/career/setup/scenario');
-        await page.locator('#app > *').first().waitFor();
-
-        const cards = page.locator('[data-scenario-card]');
-        const count = await cards.count();
-        expect(count).toBe(4);
-
-        for (let i = 0; i < count; i++) {
-            const card = cards.nth(i);
-
-            for (const field of ['description', 'recommended_use']) {
-                const cell = card.locator(`[data-field="${field}"]`);
-                await expect(cell, `card ${i} renders no ${field} row`).toHaveCount(1);
-
-                const value = cell.locator('dd').first();
-                // `textContent`, not `innerText`: both rows sit inside the card's collapsed
-                // "Facts and mechanics" disclosure, and a closed disclosure renders no inner text,
-                // which read as an empty field rather than as a hidden one.
-                const text = (await value.textContent())?.trim() ?? '';
-                const reason = await value.getAttribute('title');
-
-                if (text === 'N/A') {
-                    expect(reason, `card ${i} shows a bare N/A for ${field}`).not.toBeNull();
-                    // A reason that does not name where it looked is a restatement of the absence,
-                    // not an account of it, so the search itself has to be in the string.
-                    expect(reason ?? '').toContain('Searched:');
-                    expect(reason ?? '').toContain('docs/');
-                } else {
-                    expect(text.length).toBeGreaterThan(10);
-                }
-            }
-        }
-    });
 });

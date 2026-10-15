@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';
+import { uraCompletedRun } from '../utils/ura-completed-run';
 
 /*
  * Rendered-copy, layout and accessibility evidence for SCREEN-009, the Career Cockpit
@@ -456,4 +457,130 @@ test('passes an axe scan at WCAG A and AA', async ({ page }) => {
     const results = await buildAxe(page).analyze();
 
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
+/*
+ * The three run states and the one turn source (Cockpit pass, 2026-10-15).
+ *
+ * The header used to count this run's logged rows while the correction form read the latest row's own
+ * `turn`, so a career entered mid-course printed turn 1 beside a dropdown reading turn 75. Both cases
+ * below reach the state through the screen's own doors — a recorded turn, then the header's status
+ * editor — rather than through a seeder, so the state under test is one a Trainer can arrive at.
+ *
+ * The URA mandatory ladder's four `Met` rows at Completed are asserted at the prop level in
+ * `CockpitAlertScopeTest` and `UraPanelTest`; this file's wizard walk builds a Unity Cup career, and a
+ * second walk per case is not worth its runtime here.
+ */
+
+/** The career, closed: the header's own status editor is the only door to this state. */
+async function completeCareer(page: import('@playwright/test').Page): Promise<string> {
+    const cockpitUrl = await newCareer(page);
+    const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+
+    // One logged turn first. `correctionSection()` answers null for a run with no turns, so a career that
+    // never logged one renders no correction form at all and the collapse sweep would pass on an absence.
+    await recordTurns(page, runId, 1, { energy: '80', choice: 'training-Speed' });
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await page.locator('details[data-region="edit-identity"] > summary').click();
+    await page.selectOption('details[data-region="edit-identity"] select[name="status"]', 'Completed', WRITE);
+    await page.getByRole('button', { name: 'Change status' }).click();
+    await page.locator('#app > *').first().waitFor();
+
+    return cockpitUrl;
+}
+
+test('reads one turn number in the header and in the correction selector', async ({ page }) => {
+    const cockpitUrl = await newCareer(page);
+    const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+
+    await recordTurns(page, runId, 1, { energy: '80', choice: 'training-Speed' });
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const header = page.locator('[data-field="turn"]');
+    await expect(header).toHaveCount(1);
+    await expect(header).toHaveText('1');
+
+    // The dropdown's own value is a turn id, so the comparison is on the number the screen shows beside
+    // it: the summary of the form that opens on this turn.
+    await expect(page.locator('details[data-region="correct-turn"] > summary')).toContainText('Correct turn 1 by hand');
+});
+
+test('names the run state in the DOM, and only the one that applies', async ({ page }) => {
+    await openCockpit(page);
+
+    await expect(page.locator('[data-run-state="active"]')).toHaveCount(1);
+    await expect(page.locator('[data-run-state="completed"]')).toHaveCount(0);
+
+    const cockpitUrl = await completeCareer(page);
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.locator('[data-run-state="completed"]')).toHaveCount(1);
+    await expect(page.locator('[data-run-state="active"]')).toHaveCount(0);
+
+    // The finished career states itself and the advisor's refusal is gone. The Result door belongs to the
+    // summary card alone: the closed-run region states the fact and does not repeat the door.
+    await expect(page.getByRole('region', { name: 'This run is complete.' })).toHaveCount(1);
+    await expect(page.getByRole('link', { name: 'Open the Career Result' })).toHaveCount(1);
+    await expect(page.getByText('Critical:')).toHaveCount(0);
+});
+
+test('keeps every settings disclosure closed on load for a finished career', async ({ page }) => {
+    const cockpitUrl = await completeCareer(page);
+
+    // Reload rather than read the page the status write left behind: that one was opened to change it.
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    for (const region of ['edit-identity', 'correct-turn', 'team-state', 'danger-zone']) {
+        const details = page.locator(`details[data-region="${region}"]`);
+        await expect(details, region).toHaveCount(1);
+        await expect(details, `${region} must be closed on load`).not.toHaveAttribute('open');
+    }
+});
+
+test('the scenario panels read between the advisor and the scenario strip', async ({ page }) => {
+    await openCockpit(page);
+
+    // Tree order, not visual order: `querySelectorAll` answers in document order, which is the order a
+    // screen reader and a keyboard reach the three regions.
+    const regions = await page.evaluate(() =>
+        Array.from(document.querySelectorAll('[data-region]')).map((el) => el.getAttribute('data-region')),
+    );
+    const advisor = regions.indexOf('advisor');
+    const panels = regions.indexOf('scenario-panels');
+    const scenario = regions.indexOf('scenario');
+
+    expect(advisor).toBeGreaterThanOrEqual(0);
+    expect(panels).toBeGreaterThan(advisor);
+    expect(panels).toBeLessThan(scenario);
+});
+
+test('a completed URA career prints no Critical row', async ({ page }) => {
+    // The seeded career, not a wizard walk: the case is about a finished career whose four mandatory
+    // races are recorded, and the fixture helper runs the repo's own run seeder against the suite's
+    // scratch database.
+    await page.goto(`/training-runs/${uraCompletedRun()}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByRole('heading', { name: 'This run is complete.' })).toBeVisible();
+    await expect(page.getByText('Critical:')).toHaveCount(0);
+});
+
+test('a completed URA career draws its four recorded mandatory races as a ladder', async ({ page }) => {
+    await page.goto(`/training-runs/${uraCompletedRun()}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const rows = page.locator('[data-region="scenario-panels"] [data-ladder-group="Mandatory races"] [data-ladder-row]');
+    await expect(rows).toHaveCount(4);
+
+    // `completed` is this build's state word for a race the run entered, and the ladder prints it as
+    // `Recorded`. The attribute mirrors the payload rather than inventing a second vocabulary for one
+    // fact.
+    for (const row of await rows.all()) {
+        await expect(row).toHaveAttribute('data-state', 'completed');
+    }
 });

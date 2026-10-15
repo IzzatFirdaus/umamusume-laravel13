@@ -172,12 +172,28 @@ const emptyText = computed<string>(() =>
 
 <template>
     <div class="flex flex-col gap-3">
+        <!-- The panels this scenario composes, drawn first. The Cockpit's own reading order is decision,
+             then what the scenario says about it, then the scenario's identity strip below; an OFF flag
+             still draws nothing at all, because the region names the composition, never the absence of a
+             system the scenario does not use. -->
+        <ul v-if="onPanels.length > 0" data-region="scenario-panels" class="flex flex-col gap-3">
+            <li v-for="panel in onPanels" :key="panel.flag">
+                <component
+                    :is="panelRenderer(panel.flag)"
+                    :scenario="props.scenario"
+                    :label="panel.label"
+                    kind="panel"
+                    :name="panel.flag"
+                />
+            </li>
+        </ul>
+
         <!-- The baseline strip: the scenario's own name, whether a guide is held for it, and the
              ruleset version absence. Every scenario carries these three, which is what makes the strip
              the floor a fifth scenario gets for one config entry. The heading says "version" because the
              scenario's own rule family is a different fact, printed under that name on the setup
              wizard's card (R2-05); this strip holds only the version, which no source defines. -->
-        <div class="flex flex-wrap items-baseline gap-2">
+        <div data-region="scenario" class="flex flex-wrap items-baseline gap-2">
             <p class="text-sm font-medium text-ink-strong">{{ props.scenario.label }}</p>
             <ScenarioStatusBadge :documented="props.scenario.documented" />
         </div>
@@ -207,24 +223,10 @@ const emptyText = computed<string>(() =>
             </li>
         </ul>
 
-        <!-- The panels this scenario composes. An OFF flag draws nothing at all: the region names
-             the composition, never the absence of a system the scenario does not use. -->
-        <ul v-if="onPanels.length > 0" class="flex flex-col gap-3">
-            <li v-for="panel in onPanels" :key="panel.flag">
-                <component
-                    :is="panelRenderer(panel.flag)"
-                    :scenario="props.scenario"
-                    :label="panel.label"
-                    kind="panel"
-                    :name="panel.flag"
-                />
-            </li>
-        </ul>
-
         <!-- The baseline strip: the render for a scenario that composes no panel at all (plan §9 E6,
              D-241, gate G-41). It is one branch for every scenario, so a fifth one that leaves every
              flag off reaches it for one config entry and no edit here. -->
-        <div v-else class="flex flex-col gap-3">
+        <div v-if="onPanels.length === 0" class="flex flex-col gap-3">
             <!-- The generic sentence, only where the scenario declares no line of its own: a specific
                  reason beats a generic one, and printing both would say the same thing twice. -->
             <AlertRow

@@ -147,7 +147,6 @@ class ScenarioSelectController extends Controller
                 // guide does not state one, so a null here is a named absence on the page.
                 'description' => $meta['description'] ?? null,
                 'recommended_use' => $meta['recommended_use'] ?? null,
-                'citations' => $meta['citations'] ?? [],
             ];
         }
 
@@ -158,7 +157,7 @@ class ScenarioSelectController extends Controller
      * The card's metadata, read straight from the matrix, or null when the entry holds none.
      *
      * @param  array<string, mixed>  $def
-     * @return array{ruleset: string|null, summary: string|null, planning_focus: string|null, key_mechanics: list<string>, description: string|null, recommended_use: string|null, citations: array<string, string>}|null
+     * @return array{ruleset: string|null, summary: string|null, planning_focus: string|null, key_mechanics: list<string>, description: string|null, recommended_use: string|null}|null
      */
     private function metadata(array $def): ?array
     {
@@ -178,9 +177,6 @@ class ScenarioSelectController extends Controller
             )),
             'description' => isset($metadata['description']) ? (string) $metadata['description'] : null,
             'recommended_use' => isset($metadata['recommended_use']) ? (string) $metadata['recommended_use'] : null,
-            // Where an absent field's absence was established by a search, the search travels with it,
-            // so the page can say what was looked for instead of only that nothing was found.
-            'citations' => (array) ($metadata['citations'] ?? []),
         ];
     }
 

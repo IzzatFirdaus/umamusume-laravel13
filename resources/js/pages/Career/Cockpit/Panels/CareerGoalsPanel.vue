@@ -1,10 +1,14 @@
 <script setup lang="ts">
 /*
- * Our Grand Concert Career Goals panel.
+ * The career goals ladder panel.
  *
- * Registered against the `career_goals` flag (reuses the URA flag key but
- * draws a different panel for the Concert scenario). Draws the career
- * goals with the client's goal ladder pattern: one "next" plus footer.
+ * Registered against the `career_goals` flag, which URA Finale, Unity Cup and Our Grand Concert all
+ * compose. It draws the groups `CockpitController::careerGoalSections()` composes — Trainee goals,
+ * Mandatory races and, for URA, Happy Meek — under the client's goal-ladder pattern: one glyph, the
+ * obligation, its calendar position, and a door to the race picker on the rows that still need one.
+ *
+ * The payload key is `objectives`. An earlier draft of this file read `scenario.goals`, a key no
+ * controller ever sent, so the panel drew nothing at any status for any scenario.
  */
 
 import AlertRow from '../../../../components/scenario/AlertRow.vue';
@@ -85,6 +89,7 @@ const deadlineTitle = (row: GoalRow): string | undefined =>
             :key="group.group"
             class="flex flex-col gap-2"
             :aria-labelledby="headingId(group.group)"
+            :data-ladder-group="group.group"
         >
             <h3
                 :id="headingId(group.group)"
@@ -101,6 +106,8 @@ const deadlineTitle = (row: GoalRow): string | undefined =>
                 <li
                     v-for="row in group.rows"
                     :key="row.label"
+                    data-ladder-row
+                    :data-state="row.state"
                     class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm text-ink"
                 >
                     <span v-if="row.state !== null" aria-hidden="true" class="font-mono">{{ glyph(row.state) }}</span>
