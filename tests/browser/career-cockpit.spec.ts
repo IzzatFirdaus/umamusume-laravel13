@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';
+import { uraCompletedRun } from '../utils/ura-completed-run';
 
 /*
  * Rendered-copy, layout and accessibility evidence for SCREEN-009, the Career Cockpit
@@ -520,12 +521,10 @@ test('names the run state in the DOM, and only the one that applies', async ({ p
     await expect(page.locator('[data-run-state="completed"]')).toHaveCount(1);
     await expect(page.locator('[data-run-state="active"]')).toHaveCount(0);
 
-    // The finished career states itself and offers the Result door; the advisor's refusal is gone. The
-    // door prints twice by design, once in the summary and once in the closed-run region, so the
-    // assertion names the region it means rather than taking `.first()` of an ambiguous locator.
-    const closed = page.getByRole('region', { name: 'This run is complete.' });
-    await expect(closed).toHaveCount(1);
-    await expect(closed.getByRole('link', { name: 'Open the Career Result' })).toBeVisible();
+    // The finished career states itself and the advisor's refusal is gone. The Result door belongs to the
+    // summary card alone: the closed-run region states the fact and does not repeat the door.
+    await expect(page.getByRole('region', { name: 'This run is complete.' })).toHaveCount(1);
+    await expect(page.getByRole('link', { name: 'Open the Career Result' })).toHaveCount(1);
     await expect(page.getByText('Critical:')).toHaveCount(0);
 });
 
@@ -542,3 +541,39 @@ test('keeps every settings disclosure closed on load for a finished career', asy
         await expect(details, `${region} must be closed on load`).not.toHaveAttribute('open');
     }
 });
+
+test('the scenario panels read between the advisor and the scenario strip', async ({ page }) => {
+    await openCockpit(page);
+
+    // Tree order, not visual order: `querySelectorAll` answers in document order, which is the order a
+    // screen reader and a keyboard reach the three regions.
+    const regions = await page.evaluate(() =>
+        Array.from(document.querySelectorAll('[data-region]')).map((el) => el.getAttribute('data-region')),
+    );
+    const advisor = regions.indexOf('advisor');
+    const panels = regions.indexOf('scenario-panels');
+    const scenario = regions.indexOf('scenario');
+
+    expect(advisor).toBeGreaterThanOrEqual(0);
+    expect(panels).toBeGreaterThan(advisor);
+    expect(panels).toBeLessThan(scenario);
+});
+
+test('a completed URA career prints no Critical row', async ({ page }) => {
+    // The seeded career, not a wizard walk: the case is about a finished career whose four mandatory
+    // races are recorded, and the fixture helper runs the repo's own run seeder against the suite's
+    // scratch database.
+    await page.goto(`/training-runs/${uraCompletedRun()}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByRole('heading', { name: 'This run is complete.' })).toBeVisible();
+    await expect(page.getByText('Critical:')).toHaveCount(0);
+});
+
+// The four recorded mandatory rows are asserted on the payload in
+// `tests/Feature/CockpitAlertScopeTest.php`, not here: the `career_goals` flag resolves to
+// `CareerGoalsPanel.vue`, which iterates `scenario.goals` — a key `CockpitController::scenarioSection()`
+// never sends — while `UraPanel.vue`, which reads the `objectives` that are sent, is registered against
+// the same flag earlier and overwritten in the registry Map (`ScenarioPanel.vue:67` then `:89`). So no
+// ladder draws in the panels region today, at any status, and a browser case here would assert a
+// composition the screen does not have.

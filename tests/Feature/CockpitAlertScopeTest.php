@@ -163,6 +163,33 @@ it('does not banner a mandatory race from a career year the run has left behind'
         ->toContain('Tenno Sho (Autumn) is due and not recorded');
 });
 
+it('reads every recorded mandatory race as completed on a finished career', function (): void {
+    // The four-`Met`-rows claim, asserted where the build can actually prove it: on the payload the
+    // panels read. `career_goals` currently resolves to a component that iterates a key the controller
+    // never sends, so no ladder draws on screen at any status — see the note at the foot of
+    // `tests/browser/career-cockpit.spec.ts`.
+    $run = scopedRun(RunStatus::Completed, 67);
+
+    foreach ([['Junior Make Debut', RaceCatalogSlot::YEAR_JUNIOR, 12], ['Finals Qualifier', RaceCatalogSlot::YEAR_SENIOR, 20], ['Finals Semifinal', RaceCatalogSlot::YEAR_SENIOR, 22], ['Finals Final', RaceCatalogSlot::YEAR_SENIOR, 24]] as [$title, $year, $turn]) {
+        $slot = scopedSlot($title, $year, $turn, true);
+        RaceEntry::factory()->create([
+            'training_run_id' => $run->id,
+            'race_catalog_slot_id' => $slot->id,
+            'status' => RaceEntryStatus::Completed,
+            'placement' => 1,
+        ]);
+    }
+
+    /** @var list<array{group: string, rows: list<array<string, mixed>>}> $groups */
+    $groups = $this->get(route('runs.cockpit', $run->fresh()))->assertOk()->inertiaProps('scenario.objectives');
+
+    $mandatory = collect($groups)->firstWhere('group', 'Mandatory races')['rows'];
+
+    expect($mandatory)->toHaveCount(4)
+        ->and(collect($mandatory)->pluck('state')->unique()->all())->toBe(['completed'])
+        ->and(collect($mandatory)->every(fn (array $row): bool => $row['race_url'] === null))->toBeTrue();
+});
+
 it('raises no mandatory-race alert at all on a finished career', function (): void {
     // The nine-alert symptom was reported on a Completed run. A finished career has no turn left to be
     // due in, so the advisor must print nothing whatever the calendar holds.

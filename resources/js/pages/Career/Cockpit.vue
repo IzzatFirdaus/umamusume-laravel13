@@ -942,7 +942,7 @@ const jumpToShop = (): void => {
                 </section>
             </div>
 
-            <div class="order-2 min-w-0 md:order-none md:col-start-2 md:row-span-2 md:row-start-2 lg:col-start-3 lg:row-start-1">
+            <div data-region="advisor" class="order-2 min-w-0 md:order-none md:col-start-2 md:row-span-2 md:row-start-2 lg:col-start-3 lg:row-start-1">
                 <AdvisorRail v-if="isActive" :decision="props.advisor.decision" :race-url="raceDoor" :timeline-url="props.run.timeline_url" />
 
                 <!-- A career that has ended has no turn being decided, so the advisor's own refusal is not
@@ -954,13 +954,6 @@ const jumpToShop = (): void => {
                     <p class="mt-1 text-sm text-ink">
                         Nothing is being decided, so nothing is ranked and nothing is refused.
                     </p>
-                    <a
-                        v-if="props.run.status === 'Completed'"
-                        :href="props.run.result_url"
-                        class="mt-2 inline-flex min-h-11 items-center font-medium text-ink-strong underline"
-                    >
-                        Open the Career Result
-                    </a>
                 </section>
             </div>
 
