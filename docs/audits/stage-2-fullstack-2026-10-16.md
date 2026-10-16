@@ -391,3 +391,75 @@ caller has appeared for its accessors.
 
 No file was removed, no method visibility changed, no enum case deleted. **No gate ran in this section**:
 nothing here is proven by executing the suite.
+
+## 9. §3.9 — tests by layer, 2026-10-16
+
+`.scratch-uma/audit-agent-2026-10-16/phase6.py` over `git ls-files tests`, with the case counts taken
+independently from `grep -c` so the two instruments are separable. **The suite did not run in this pass**;
+every number below is a declaration count, not an execution result, and no claim of a passing suite is made.
+
+### Layers
+
+| Layer | Files | Declared cases |
+|---|---|---|
+| `tests/Feature` | 196 `.php` | 1,919 `test()`/`it()` |
+| `tests/Unit` | 7 `.php` | 41 |
+| `tests/browser` | 54 `.spec.ts` + 13 non-spec files (11 `.ts`, 2 `.html`, incl. `global-setup.ts`) | 386 `test()` |
+| `tests/Fixtures` | 1 `.php` + 4 stored JSON bodies | — |
+| glue | `tests/Pest.php`, `tests/TestCase.php` | — |
+
+`grep -rhoE "^\s*(test|it)\("` gives 1,960 across `Feature` + `Unit` (the 1,919 + 41 split) and 386 across
+the specs: **2,346 declared cases total**. The script's lower figure (2,014) counted only tracked files and
+only cases whose title opens on the same line — a stricter instrument on a smaller set, recorded here so the
+two are not read as a discrepancy.
+
+**The suite is also untracked at the edge:** `tests/browser/layout-width.spec.ts` exists on disk and is not
+in `git ls-files`, and 22 test files carry uncommitted peer edits. A run this pass would have measured the
+working tree, not HEAD.
+
+### Stale-reference sweep
+
+The dispatch for this pass reduced the scope from "every test naming anything absent" to three bounded
+checks. All three are clean, and the two that lit up are instrument artifacts:
+
+- **`route('name')` in a test, for a name the framework does not register: 0.** The sweep excluded
+  `$this->route('param')` (the parameter accessor, §5's bound) and checked the remainder against the
+  `route:list` name set.
+- **`use App\…` / FQCN strings pointing at a nonexistent file: 4 apparent, 0 real.** All four are in
+  `tests/Feature/LessonEvidenceBoundaryTest.php`, where `App\Enums\LessonKind`, `App\Enums\LessonType`,
+  `App\Models\TurnEvents\LessonPayload` and `App\Models\Lesson` appear as **string literals inside
+  `enum_exists()`/`class_exists()` assertions negated at `:39-42`** — the Grand Concert Slice 8 evidence
+  boundary, which pins that those classes do *not* exist. A FQCN regex cannot tell a reference from an
+  absence claim; the file had to be read. **Bound for the next pass: an absence-pinning test is the one
+  place where "references a nonexistent class" is correct behaviour.**
+- **Literal URIs in a test that match no registered route: 1 apparent, 0 real** —
+  `ErrorPageViewsTest.php` requesting `/no-such-page`, a deliberate 404 probe.
+
+So: no stale test file was found. The ten suspects the full audit named were not individually re-checked
+beyond this sweep, and that wider read stays a follow-up.
+
+### Skipped and conditional cases: 6, each with a stated reason
+
+| Site | Mechanism | Stated reason | Consequence |
+|---|---|---|---|
+| `tests/Feature/DesignTokensTest.php:515` | `markTestSkipped` | "Playwright browser driver not installed; skipping D-288/G-18 browser gate." | that design-token gate is inert on a host without the driver |
+| `tests/Feature/SkillAutomationTest.php:12` | `markTestSkipped` | its input `.agents/skills.json` is excluded by `.gitignore:49`, so "a fresh clone or worktree has no registry and these tests would fail for a reason unrelated to the change under test" | the entire `Skill{Registry,Matcher,Executor}` tooling layer is **untested in a fresh worktree** — which is the same condition §8 found four uncalled accessors under |
+| `tests/browser/review.spec.ts:16,38,54,68` | `test.skip(true, …)` | "No pending candidates in the scratch database" (four variants: to name / measure / etc.) | **4 of the 5 tests in that spec are conditional on queue state**; on an empty `/review` queue the surface has no browser coverage at all, and the run still reports green |
+
+No `test.only`, `describe.only` or `->only()` marker exists in `tests/` — checked, nothing silent is narrowing
+a run.
+
+### What §3.9 does not cover
+
+`SCREEN_SPEC.md` state-table coverage per screen, the gate registry's Level-3 evidence, and whether the
+1,960 PHP cases actually pass at this HEAD — the suite was not run here, and by the evidence rule a
+declaration count is not a pass.
+
+**STAGE 2 AT FOUR OF TWELVE — §3.5, §3.1, §3.2 and §3.9 filed. Bound 3 closed against the framework's own
+route table: 86 app named routes, 0 confirmed-dead, 0 non-routed controller methods. The three `Database/*`
+pages are live behind a `renderPage()` parameter and the seed's "genuinely unrouted" row is withdrawn.
+11 frontend literal-path sites enumerated with the 10 route names each one orphans; the single orphan with
+no literal twin is `runs.create`, exercised by 23 test files. §3.2 names 5 uncalled methods and the one
+unexercised command, `db:backup:mysql`, held for the owner with the rest of the MariaDB subsystem. §3.9
+reports 2,346 declared cases, 0 stale references and 6 conditional skips. Nothing fixed, nothing pushed,
+no gate run.**
