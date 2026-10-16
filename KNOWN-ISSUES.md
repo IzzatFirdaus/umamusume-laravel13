@@ -2734,3 +2734,38 @@ explanation of the condition, and a row whose kind is unread stays `Undecoded` e
 This entry files neither the "Place 1st" versus "Place top 1" variant nor the "Earn N fans" versus "Have at
 least N fans" variant; both are wording conflicts inside a class already decoded and are recorded in
 `SCREEN_SPEC.md` §7 by the documentation slice that this instruction excludes.
+
+## KI-104 The Cockpit nested two `Edit team state` disclosures under one label, so the team-editor browser cases hit a strict-mode collision; the fix is written but uncommitted - FILED 2026-10-16 (findings capture pass), FIXED IN TREE, NOT LANDED
+
+Measured 2026-10-16 05:18, from `cockpit-unity-cup-no-crash.png` and `git show HEAD:`.
+
+**Status: fixed uncommitted, so still live at HEAD.** `git show
+HEAD:resources/js/components/career/UnityCupEditor.vue` carries `<details>` at 78, the summary text
+`Edit team state` at 80 and the closing tag at 168; `Cockpit.vue:757-772` wraps the same component in its
+own `<details data-region="team-state">` with the same summary. Two disclosures, one label, nested. The
+05:03 screenshot shows it: an outer `▸ Edit team state` box containing an inner `▸ Edit team state` box.
+
+The uncommitted diff (file mtime 05:11:29) deletes the inner `details`/`summary` pair, makes
+`<form>` the component root and adds the comment at 78-82 explaining that the disclosure belongs to the
+caller. That is the right fix and it is already written, so **no other pass should re-implement it**; the
+outstanding risk is only that it stays uncommitted.
+
+**Proving command.** `git diff HEAD -- resources/js/components/career/UnityCupEditor.vue` (6+/7−) and
+`git show HEAD:resources/js/components/career/UnityCupEditor.vue | sed -n '78,80p;168p'`.
+
+**What closure does not cover.** The two `career-cockpit-forms.spec.ts` strict-mode cases at 161 and 225 were
+not re-run here: the fix is uncommitted, `public/build` is shared and stale-by-KI-101, and rebuilding it
+while a peer works is barred by KI-70. A pass that lands this diff should re-run
+`PLAYWRIGHT_PORT=<own port> PLAYWRIGHT_SCRATCH_DB=<own path> npm run test:browser --
+tests/browser/career-cockpit-forms.spec.ts` after a build on a quiet tree, and `full-career-journey.spec.ts:144`
+addresses the same label and belongs in that sweep.
+
+**Correction, 2026-10-16.** The heading and first paragraph above state that the Cockpit "nested two `Edit team state` disclosures under one label", so the team-editor browser cases hit a strict-mode collision. That cause no longer holds. `7788b03` ("fix(team): remove the inner disclosure from UnityCupEditor") removed the inner `<details>`/`<summary>` pair, and `git grep "Edit team state" HEAD -- resources/js/` now returns one hit, `resources/js/pages/Career/Cockpit.vue:764`, the outer disclosure's summary. There is no second disclosure and no nested-label collision.
+
+The live cause is `Cockpit.vue:760`'s `:open="isActive"` (added by `a787834`, "fix(cockpit): one turn source, year-scoped alerts, three run states"). `isActive` is `props.run.status === 'Active'` (`Cockpit.vue:263`), so a fresh Active career renders `<details data-region="team-state">` already open. The committed spec clicks the `summary` unconditionally (`tests/browser/career-cockpit-forms.spec.ts:165` and `:197` at HEAD), and a `summary` click on an open `<details>` closes it, so the team-editor assertions then run against a collapsed panel. The "nested two disclosures" cause is withdrawn; the surviving cause is the unconditional `summary` click against an auto-opened disclosure.
+
+The fix lives in an uncommitted peer diff, not in this entry's file: it adds `if (!(await editor.evaluate((el) => el instanceof HTMLDetailsElement && el.open)))` before the `summary` click at both spec sites (working-tree lines 167 and 235), so the click is skipped when the disclosure is already open. That diff is not staged by this correction.
+
+Evidence: `.scratch-uma/wizard-locator-2026-10-16/findings.md`; `git grep -n "Edit team state" HEAD -- resources/js/`; `git show HEAD:resources/js/pages/Career/Cockpit.vue | sed -n '755,770p'`; `git grep -n "isActive" -- resources/js/pages/Career/Cockpit.vue`.
+
+**What this correction does not cover.** It does not touch the KI-101, KI-102 and KI-103 entries in the same peer append, and it does not touch the duplicate `### KI-100` heading above this entry; those are the peer's to land. It does not decide whether the peer's open-guard fix should land, and it does not re-run the two `career-cockpit-forms.spec.ts` cases.
