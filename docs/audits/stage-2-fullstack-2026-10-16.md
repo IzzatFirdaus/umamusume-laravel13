@@ -560,3 +560,83 @@ The three migration hits are `2026_09_27_093945` (a comment: "MySQL DDL the gram
 ### What §3.3 does not cover
 
 The MariaDB subsystem's disposition (owner item), the applied-to-dev leg of the KI-60 remediation (whether migrations are applied to the shared dev file as standing practice — owner item), and the correctness of any migration's `down()` beyond its presence. This pass confirmed 62 declarations exist; it did not run a rollback.
+
+## 11. §3.6 — dead config, 2026-10-16
+
+Measured at HEAD `8389da8`, read-only.
+
+### Config file census
+
+17 files under `config/`: `advisor.php`, `app.php`, `auth.php`, `cache.php`, `dashboard.php`, `database-safety.php`, `database.php`, `filesystems.php`, `logging.php`, `mail.php`, `mysql-backup.php`, `queue.php`, `reference.php`, `scenarios.php`, `services.php`, `session.php`, `uma.php`.
+
+Seven are repo-authored (`advisor`, `dashboard`, `database-safety`, `mysql-backup`, `reference`, `scenarios`, `uma`); ten are the Laravel skeleton (`app`, `auth`, `cache`, `database`, `filesystems`, `logging`, `mail`, `queue`, `services`, `session`).
+
+### Per-file key counts
+
+Instrument: every leaf key under each root (read from the booted config repository) cross-referenced against every `config('…')` / `Config::get('…')` literal in the repo's own PHP (`app/`, `routes/`, `config/`, `tests/`, `database/`, `bootstrap/`, `resources/`, `tools/`, `lang/`, `public/`). A key is live if a call names it or a prefix of it. 422 `config(` call sites exist in the app tree (`app/` 212, `tests/` 204, `database/` 5, `tools/` 1); `resources/js/` carries 7 more that are not Laravel config reads.
+
+| Config file | Declared | Live | Dead |
+|---|---|---|---|
+| `config/scenarios.php` | 1006 | 1006 | 0 |
+| `config/reference.php` | 202 | 202 | 0 |
+| `config/uma.php` | 105 | 105 | 0 |
+| `config/advisor.php` | 18 | 18 | 0 |
+| `config/database-safety.php` | 12 | 12 | 0 |
+| `config/mysql-backup.php` | 7 | 7 | 0 |
+| `config/dashboard.php` | 1 | 1 | 0 |
+| **app-owned subtotal** | **1351** | **1351** | **0** |
+| `config/database.php` | 116 | 90 | 26 |
+| `config/app.php` | 88 | 27 | 61 |
+| `config/logging.php` | 57 | 0 | 57 |
+| `config/cache.php` | 39 | 1 | 38 |
+| `config/queue.php` | 38 | 0 | 38 |
+| `config/mail.php` | 31 | 0 | 31 |
+| `config/filesystems.php` | 23 | 0 | 23 |
+| `config/session.php` | 18 | 0 | 18 |
+| `config/auth.php` | 11 | 0 | 11 |
+| `config/services.php` | 7 | 0 | 7 |
+| **framework subtotal** | **428** | **118** | **310** |
+| **total** | **1779** | **1469** | **310** |
+
+### Dead keys, named
+
+**App-owned: none.** Every one of the 1,351 keys under the seven repo-authored roots is reachable from the repo's own PHP. `config/scenarios.php` is the largest single file (1,006 keys) and `config/uma.php` the second (105); both are fully read. The thinnest is `config/mysql-backup.php` (7 keys), read only by `config/database.php:90-96` and `tests/Feature/MariaDbBackupTest.php` — no `app/` code reads it directly.
+
+**Framework skeleton: 310 keys with no reader in the repo's own PHP.** These are Laravel defaults; the "dead" label is the instrument's, not a claim that nothing reads them. Every framework root is consumed by `vendor/laravel/framework`, statically (`config('app.name')`, `config('app.debug')`, `config('app.timezone')`, `config('app.locale')`, `config('session.driver')`, `config('auth.defaults.passwords')`, `config('cache.default')`, `config('logging.default')`, `config('mail.default')`, `config('queue.default')`, `config('database.migrations')`, `config('database.redis')` all appear in `vendor/laravel/framework/src`) and dynamically by name, which a static per-leaf sweep cannot see: `LogManager.php:603` reads `logging.channels.{$name}`, `CacheManager.php:485` reads `cache.stores.{$name}`, `QueueManager.php:415` reads `queue.connections.{$name}`.
+
+The 310, by root:
+
+- **`app` (61)** — `env`, `debug`, `url`, `frontend_url`, `asset_url`, `timezone`, `locale`, `fallback_locale`, `faker_locale`, `cipher`, `key`, `previous_keys`, `maintenance.driver`, `maintenance.store`, and the 47 `app.aliases.*` entries (`App` through `Vite`).
+- **`logging` (57)** — every `logging.channels.*` leaf (`stack`, `single`, `daily`, `monthly`, `slack`, `papertrail`, `stderr`, `syslog`, `errorlog`, `null`, `emergency`, and the repo-added `skill_automation` and `browser`), plus `logging.default` and `logging.deprecations.channel` / `.trace`.
+- **`cache` (38)** — every `cache.stores.*` leaf except `cache.stores.database.connection` (read by `tests/Feature/CatalogCacheRenderTest.php`): `array`, `session`, `database`, `file`, `storage`, `memcached`, `redis`, `dynamodb`, `octane`, `failover` — plus `cache.prefix` and `cache.serializable_classes`.
+- **`queue` (38)** — every `queue.connections.*` leaf (`sync`, `database`, `beanstalkd`, `sqs`, `redis`, `deferred`, `failover`, `background`), plus `queue.batching.*`, `queue.failed.*`, `queue.default`.
+- **`mail` (31)** — every `mail.mailers.*` leaf, `mail.from.address` / `.name`, `mail.markdown.*`, `mail.default`.
+- **`database` (26)** — the 25 `database.redis.*` leaves (`client`, `options.*`, `default.*`, `cache.*`) and `database.migrations.table` / `database.migrations.update_date_on_publish`.
+- **`filesystems` (23)** — every `filesystems.disks.*` leaf (`local`, `public`, `s3`), `filesystems.default`, and one key that is an absolute path (`filesystems.links.<public_path>/storage`), an artifact of `public_path('storage')` used as an array key.
+- **`session` (18)** — `driver`, `lifetime`, `expire_on_close`, `encrypt`, `files`, `connection`, `table`, `store`, `lottery.*`, `cookie`, `path`, `domain`, `secure`, `http_only`, `same_site`, `partitioned`, `serialization`.
+- **`auth` (11)** — `defaults.guard`, `defaults.passwords`, `guards.web.driver` / `.provider`, `providers.users.driver` / `.model`, `passwords.users.*`, `password_timeout`.
+- **`services` (7)** — `postmark.key`, `resend.key`, `ses.key` / `.secret` / `.region`, `slack.notifications.bot_user_oauth_token` / `.channel`.
+
+### `env()` outside `config/`
+
+One match in the whole app tree, and it is a comment:
+
+`tools/debug/test-final-analysis.php:10` — `// The config uses: env('DB_DATABASE', database_path('database.sqlite'))`
+
+No real `env()` call exists outside `config/`: `app/`, `routes/`, `bootstrap/`, `resources/`, `database/`, `lang/`, `public/` and `tests/` are all clean. `AGENTS.md` §7 holds.
+
+### `config()` inside config files
+
+Nine matches, but only seven are calls:
+
+| Site | Read | Kind |
+|---|---|---|
+| `config/database.php:90-96` | `config('mysql-backup.host')` … `.collation` (7 reads) | call — the `mysql_backup` connection mirrors `config/mysql-backup.php` |
+| `config/scenarios.php:48` | `config('advisor')` | comment — prose in a doc block, not a call |
+| `config/uma.php:380` | `config('uma.sources')` | comment — prose in a doc block, not a call |
+
+The only real coupling is `config/database.php` reading `config/mysql-backup.php` for its `mysql_backup` connection. Reported, not judged: one config file reading another's values is the documented Laravel pattern.
+
+### What §3.6 does not cover
+
+Whether any dead key *should* be removed (a slice-level change, not an audit finding), whether the MariaDB config file's contents should be documented or deleted (owner item), and the framework roots' true read-set inside `vendor/` — the instrument scans the repo's own PHP only, so the 310 framework-root keys are reported as unreferenced by this repo, not as unread anywhere.
