@@ -651,3 +651,91 @@ The only real coupling is `config/database.php` reading `config/mysql-backup.php
 ### What §3.6 does not cover
 
 Whether any dead key *should* be removed (a slice-level change, not an audit finding), whether the MariaDB config file's contents should be documented or deleted (owner item), and the framework roots' true read-set inside `vendor/` — the instrument scans the repo's own PHP only, so the 310 framework-root keys are reported as unreferenced by this repo, not as unread anywhere.
+
+## 11. §3.10 — lang/en dead and missing keys, 2026-10-17
+
+Measured at HEAD `e820cdd`, static, read-only.
+
+### Locale directory census
+
+| Question | Answer |
+|---|---|
+| Locale directories under `lang/` | `en` |
+| Total PHP files under `lang/` | 1 |
+| Files under `lang/en/` | 1 (`lang/en/uma.php`, 130 lines) |
+| Any non-`en` locale | none |
+
+Single-locale tree. `lang/en/uma.php` is the only lang file; no `ja`, no `jp`, no vendor-published lang.
+
+### Per-file key counts
+
+| Lang file | Keys declared | Keys read | Dead keys |
+|---|---|---|---|
+| `lang/en/uma.php` | 49 | 27 | 22 |
+
+49 declared leaves: 27 enum-display labels across 8 groups (`release_status` 3, `run_status` 3, `race_entry_status` 4, `skill_acquisition` 3, `alias_language` 3, `match_tier` 4, `card_rarity` 3, `build_purpose` 4) plus a `terms` reference group of 22.
+
+**Reading convention.** The only lang reader in the tree is `HasLabel::label()` (`app/Enums/HasLabel.php:20`), which builds `uma.{Str::snake(class_basename)}.{CaseName}` and calls `trans()`. No `__()`, `trans()`, or `lang()` call anywhere names a lang key literally — every lang key in this tree is reached dynamically through that trait. Nine enums use `HasLabel`: `ReleaseStatus`, `RunStatus`, `RaceEntryStatus`, `SkillAcquisition`, `AliasLanguage`, `MatchTier`, `CardRarity`, `BuildPurpose`, `TraineeGoalType`.
+
+### Dead keys (declared, never read) — 22
+
+All 22 are the `terms` reference group. None is read: the only mention of `uma.terms.*` in the entire tree is a `ponytail:` comment at `Umamusume.php:133` — *"display strings do not belong on a model; read these labels from `uma.terms.style_*`"* — a deferred-slice note, not a read. The group is documented as reference data deliberately not wired into any view (`lang/en/uma.php:78-84`: "this tool has no Scouts, Spark or running-style surface in Phase 1 (PRD §6), so nothing here is wired into a view").
+
+| Key | Value |
+|---|---|
+| `uma.terms.scouts` | Scouts |
+| `uma.terms.pull_currency` | Carats |
+| `uma.terms.inheritance_trait` | Spark |
+| `uma.terms.finished_character` | Veteran Umamusume |
+| `uma.terms.trainee` | Trainee Umamusume |
+| `uma.terms.team_pvp` | Team Trials |
+| `uma.terms.card_speed` | Speed |
+| `uma.terms.card_stamina` | Stamina |
+| `uma.terms.card_power` | Power |
+| `uma.terms.card_guts` | Guts |
+| `uma.terms.card_wit` | Wit |
+| `uma.terms.card_group` | Group |
+| `uma.terms.card_pal` | Pal |
+| `uma.terms.style_front_runner` | Front Runner |
+| `uma.terms.style_pace_chaser` | Pace Chaser |
+| `uma.terms.style_late_surger` | Late Surger |
+| `uma.terms.style_end_closer` | End Closer |
+| `uma.terms.mood_great` | GREAT |
+| `uma.terms.mood_good` | GOOD |
+| `uma.terms.mood_normal` | NORMAL |
+| `uma.terms.mood_bad` | BAD |
+| `uma.terms.mood_awful` | AWFUL |
+
+These 22 are a data reference, not dead config in the §3.6 sense: they are source-cited client vocabulary staged for a surface PRD §6 has not cut. They are reported, not judged.
+
+### Missing keys (called but not declared) — 5
+
+| Enum | Cases | Labeled | Missing |
+|---|---|---|---|
+| `ReleaseStatus` | 3 | 3 | 0 |
+| `RunStatus` | 3 | 3 | 0 |
+| `RaceEntryStatus` | 4 | 4 | 0 |
+| `SkillAcquisition` | 3 | 3 | 0 |
+| `AliasLanguage` | 3 | 3 | 0 |
+| `MatchTier` | 4 | 4 | 0 |
+| `CardRarity` | 3 | 3 | 0 |
+| `BuildPurpose` | 4 | 4 | 0 |
+| **`TraineeGoalType`** | **5** | **0** | **5** |
+
+`TraineeGoalType` uses `HasLabel`, so `HasLabel::label()` builds `uma.trainee_goal_type.{name}` and calls `trans()` — but `lang/en/uma.php` declares no `trainee_goal_type` group. The five keys below are called every time a `TraineeGoalType` case is labelled and resolve to themselves:
+
+- `uma.trainee_goal_type.Placement`
+- `uma.trainee_goal_type.Participate`
+- `uma.trainee_goal_type.Fan`
+- `uma.trainee_goal_type.FinalRound`
+- `uma.trainee_goal_type.Undecoded`
+
+**This one is not silent.** `HasLabel::label()` falls back to `Str::headline($this->name)` when `trans()` returns the key unchanged (`HasLabel.php:22`), so the page prints `Placement`, `Participate`, `Fan`, `Final Round`, `Undecoded` — headline-cased raw case names — rather than the key. The failure is a missing group, not a missing mechanism; no other enum in the tree hits it.
+
+### Enum label coverage — non-HasLabel enums
+
+Seven further enums define their own `label()` and do not read `lang/`: `CareerYear` (hardcoded `match`: "Junior Year", "Classic Year", "Senior Year"), `TurnChoice`, `PerformanceType` (returns `$this->value` verbatim — the client's own word), `SnapshotFieldState`, `EnergyState`, `SpiritBurstState`. `MoodTier`, `CareerPhase`, `RunMode`, `TurnEventType` and `CandidateStatus` have no `label()` at all. None of these ten touches `lang/en/uma.php`, so they contribute no key reads and no missing keys.
+
+### What §3.10 does not cover
+
+Whether the 22 `uma.terms.*` keys should be removed, moved, or wired to a surface (a slice-level change and, for `terms`, a PRD §6 scope question, not an audit finding). Whether a second locale should exist (a product decision). Whether the 5 `trainee_goal_type` labels should be added, and what wording they should carry (the `build_purpose` precedent at `lang/en/uma.php:63-65` shows the wording is a design decision, not a mechanical transform). This section also does not judge `Umamusume.php:133`'s deferred `ponytail:` note.
