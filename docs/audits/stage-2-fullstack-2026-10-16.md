@@ -841,3 +841,101 @@ Gitignored by `storage/app/private/.gitignore:1` (`*`). All six artifacts sit un
 ### What §3.4 does not cover
 
 Whether any source should be added or removed, and whether `gametora-artwork` or `GametoraScenarioParser` should be wired or deleted (product decisions). Whether a parser's output is *correct* against its upstream document — this pass traced structure, not data (a parser-correctness sweep is slice work with fixtures). The fetch-source legality question stays with `AGENTS.md` escalation 5: the `gametora.com` robots.txt and rate-limit question is recorded as formally unanswered in `config/uma.php`'s own comment, and this pass does not settle it. Nor does it re-verify the seed-file bodies themselves, or exercise `uma:fetch` / `uma:reparse` end to end — the trace is static.
+## 13. §3.7 — quality bar's gate inventory, 2026-10-17
+
+Measured at HEAD `608aff3`. **No gate was executed.** This pass inventories; the last-run proof of any gate is a commit message, not a fresh execution, and the tree has no CI (`.github/workflows/` absent), so every "last run" reading below is freshness, not pass/fail.
+
+### The gate sources
+
+| Source | Gates named | Range |
+|---|---|---|
+| `docs/research-scratch/GOVERNANCE.md` §GATE-REGISTRY.md | 10 (C-1..C-8, G-60, G-61) | C-1 to C-8, G-60, G-61 |
+| `AGENTS.md` §9 hand-off sequence | 7 steps | test, pint, phpstan, typecheck, lore ×2, audit |
+| `docs/research-scratch/DESIGN-CORPUS.md` G table | 70 rows | G-1 .. G-59 plus lettered variants (G-15a, G-16b, G-17c …) |
+| `composer.json` scripts | 18 | setup, dev, test, lore, lore-code, docs, docs-adr, lint, fix, typecheck, analyse, + 7 framework hooks |
+| `package.json` scripts | 5 | build, dev, typecheck, test:a11y, test:browser |
+
+The G-series is layered, not duplicated. `GOVERNANCE.md:463-465` states the split: the folded research corpus owns the D-number design rules and the prototype gate series, and the registry "does not restate them; it records where they run and how they bind the shipped app." `AGENTS.md` names **zero** G-numbers — it carries the C-series and the executable sequence only.
+
+**The 70 G-rows are a prototype review checklist, not a runnable gate table.** Every row's "how to check" column is a manual instruction in the imperative — `render the same run header in all four Global scenarios` (G-33), `grep artifacts sourced from wiki tables for Wisdom and Motivation` (G-38), `measure the computed font-family of body, a heading and a numeral` (G-21), `for each screen, read the §10n row matching its scenario` (G-40). None names a command. Eight are executed by `tools/gate.py`; the rest are reviewer-judged, which is the registry's stated design rather than a gap in it.
+
+### Documented vs executable
+
+| Gate | Documented in | Executable | Command |
+|---|---|---|---|
+| C-1 Tests | registry, `AGENTS.md` §9 | yes | `php artisan test --compact` |
+| C-2 Static analysis | registry, `AGENTS.md` §9 | yes | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` |
+| C-3 Style | registry, `AGENTS.md` §9 | yes | `vendor/bin/pint --test --format agent <paths>` |
+| C-4 Lore | registry, `AGENTS.md` §5, §9 | yes | `composer lore`, `composer lore-code` → `tools/lore.php` |
+| C-5 Migrations | registry | manual by approval | `php artisan migrate`; §11 forbids it against the shared dev file |
+| C-6 Floor | registry | grep + diff review | `git grep`; no script, by design |
+| C-7 UI states | registry | reviewer enumeration | none; interpretive per ADR-0007 |
+| C-8 Dependencies | registry, `AGENTS.md` §5 | yes | `composer audit`, `npm audit --omit=dev` |
+| G-60 Retired literals | registry | **partial — registry says so** | reviewer grep; scanner pending (`:590`) |
+| G-61 ADR contract | registry | yes | `python tools/adr-check.py docs/adr` / `composer docs-adr` |
+| G-1, 2, 3, 4, 13, 16, 27, 31, 32 | G table | yes | `tools/gate.py` |
+| G-18 Contrast | G table | yes | `tests/Feature/DesignTokensTest.php` (browser) |
+| Remaining 59 G-rows | G table | **reviewer-judged** | no command exists; the row *is* the check |
+
+**Documented gates with no executable:**
+
+- **59 of the 70 G-rows are reviewer-executed.** Their subject is stated and their pass criterion is stated; only a runner is absent, and the table's design expects that — it is a prototype review sheet. G-18 is the one G-row promoted to an automated test.
+- **G-60's scanner is pending.** The registry's own Gaps table (`:590`) records "G-60 scanner does not yet read a retired-value registry file — G-60 currently reviewer-enforced." Stated, not hidden.
+- **C-6 and C-7** are non-automatable by design, as their registry rows declare. Neither is a gap.
+
+**Executable checks with no documented gate:**
+
+| Executable | Documented? |
+|---|---|
+| `tools/adr-check.py` / `composer docs-adr` | yes — G-61 |
+| `tools/doc_census.py` / `composer docs` | **no gate id** — `AGENTS.md` §10 names the command; no C- or G-number claims it |
+| `tools/md_fence_check.py` | **no gate id** — `AGENTS.md` §10 names it |
+| `tools/roster-crosscheck.php` | **no gate id** — listed in `AGENTS.md` §6 |
+| `tools/check_untracked.py` | **no gate id** — listed in `AGENTS.md` §6 |
+| `tools/gate-preflight.php` | **no gate id** — untracked at HEAD; not in `AGENTS.md` |
+| `tools/dev-logs-pane.php` | no — runtime dev tool, not a gate |
+| `npm run test:a11y` | **no gate id** — `AGENTS.md` §9 names browser gates but not this script |
+| `npm run test:browser` | partly — named under the per-session harness rule (KI-73, KI-80) |
+
+**Six tracked executables enforce rules no gate id claims.** This is the `pint --dirty` shape: the executable bar outruns the documented bar.
+
+### `tools/gate.py` banner under-reporting — confirmed at HEAD
+
+`DESIGN-CORPUS.md`'s note that the banner omits G-27, G-31 and G-32 is **confirmed**. The checks exist; the banner does not name them.
+
+- `gate.py:270-271` — *"Checked: G-1 lore, G-2 forms, G-3 terminology, G-4 tokens, G-13 rendered text, G-16 sample data, D-79 em dash, D-84 emoji."*
+- `gate.py:272` — *"Not machine-checkable (reviewer): G-5, G-6, G-7, G-9, G-11, G-12, G-14, G-15, G-17."*
+- **G-27, G-31, G-32 appear in neither list** while being enforced at `gate.py:211-215` (G-31 run length, G-32 cap value) and `gate.py:242-261` (G-27 inline-script syntax, which self-skips with a printed note when `node` is off PATH at `:256`).
+
+A reader taking the banner as the coverage statement under-counts the scanner by three gates. This is the registry's own Gaps-table failure mode, occurring inside the gate rather than beside it.
+
+### Gate coverage by code path
+
+| Gate | Subject | Fires on | Skips |
+|---|---|---|---|
+| C-2 PHPStan | `app` only (`phpstan.neon` `paths`) | `app/**` | `tests/`, `database/`, `tools/` |
+| Typecheck | `resources/js/**/*.ts`, `tests/browser/**/*.ts`, `tests/utils/**/*.ts` (`tsconfig.json` `include`) | all three | nothing in the TS tree excluded |
+| C-3 Pint | files named on the command line | explicit `<paths>` | `--dirty` banned (KI-75); no whole-tree form in the bar |
+| C-4 Lore | app paths + `docs/` markers | `tools/lore.php`, both modes | `tools/` outside `lore-code`'s path list |
+| G-18 | the two source trees | `DesignTokensTest.php` | skipped without the Playwright driver (`markTestSkipped`) |
+
+**KI-93 is closed.** `tsconfig.json` includes `tests/browser/**/*.ts` and `tests/utils/**/*.ts`; the invisible-`tests/` exclusion is no longer present. Measured from the file, not from the issue's status line.
+
+Two gaps stay visible in the configs themselves. PHPStan reads `app` alone, so `database/migrations/`, `tools/` and `database/seeders/` are outside C-2's subject. And Pint has no whole-tree form in the bar, so PHP outside a hand-off's named paths is ungated by construction — which is what KI-75 had to correct in prose.
+
+### Gate freshness (last-touching commit)
+
+| Gate file | Last touched |
+|---|---|
+| `tools/gate.py` | `a3f0795` — "point design gate at corpus master and align three prototypes' shipped tokens" |
+| `tools/lore.php` | `13b2708` — "drop exclusion deleted file, and mark lines protecting" |
+| `tools/adr-check.py` | `1baa824` — "add contract/index/check machinery and `CURRENT.md`" |
+| `tests/Feature/DesignTokensTest.php` | `04bb402` — "Preserve stranded concurrent-session work before merging cockpit-wt" |
+| `phpstan.neon` | `fda6ff0` — "initialize Laravel 13 application skeleton" |
+| `pint.json` | `fda6ff0` — "initialize Laravel 13 application skeleton" |
+
+Both static-analysis configs are untouched since the skeleton commit while the runners have moved — the expected shape: a threshold config should be stable, a scanner should not be.
+
+### What §3.7 does not cover
+
+Whether any reviewer-executed gate (the 59 G-rows, C-6, C-7, G-60's pending scanner) should be built, automated, or retired — an owner decision, not an audit finding. Whether a gate's pass threshold is correct — a QA ruling; the bar forbids relaxing one to make a check pass. Whether the browser suite's per-session harness (`PLAYWRIGHT_PORT`, `PLAYWRIGHT_SCRATCH_DB`, KI-73 and KI-80) is the right shape — a tooling decision. And whether any gate passes: no gate was executed, so this section is the surface, not the verdict.
