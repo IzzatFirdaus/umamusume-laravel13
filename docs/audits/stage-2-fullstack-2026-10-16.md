@@ -137,3 +137,166 @@ No gate ran beyond what is named above: nothing was executed except the read-onl
 orphan and non-routed-method candidate lists into verdicts.
 
 **STAGE 2 SEED FILED — §3.5 and §3.1 of twelve; 81 named routes (54 live, 15 orphan, 8 api, 3 redirect), 31 controllers (1 untested), `CockpitController` measured at 2,789 lines, 3 unrouted `Database/*` page files, 0 render-without-page defects. No file changed but this one. Nothing committed.**
+
+## 5. Bound 3 closed with `route:list`, 2026-10-16
+
+`php artisan route:list --json` ran at `4e57083`, exit 0, captured to
+`.scratch-uma/audit-agent-2026-10-16/route-list.json` (17,887 bytes), and every §2 and §3 candidate was
+re-verified against it by `.scratch-uma/audit-agent-2026-10-16/{compare.py,stage2c.py,stage2d.py}`
+(output in the sibling `.txt` files). Bound 3 was real: the single-line regex under-counted, and every
+candidate it produced dissolved.
+
+**The framework table.** 92 rows, **89 named**, 3 unnamed. The unnamed three are all framework-injected
+(`_inertia/devtools/entries`, `_inertia/devtools/entries/{id}`, `up`), so the seed's "zero unnamed" survives
+as "the **app** declares zero unnamed routes". Three further named rows are package-owned
+(`storage.local`, `storage.local.upload`, `boost.browser-logs`). **The app's own surface is 86 named routes,
+not 81.**
+
+| Seed | This pass | Cause |
+|---|---|---|
+| 81 named | **86** named | 5 wrapped-chain routes invisible to a one-line regex |
+| 8 `api` | **6** `api.v1.*` | the parser read `routes/api.php:11-16` without the `->name('api.v1.')` group prefix and counted two `web.php` routes in the same bucket |
+| 54 live / 15 orphan / 1 redirect / 2 redirect-only | **60 live / 17 orphan / 3 redirect-only** | the added 11 routes plus 5 new orphans; `runs.show` (seed: `redirect`) now sits with the other two |
+
+The seed's 15-orphan figure also did not sum: the block printed 12 names and a parenthetical "+ 4 API names"
+= 16. Recorded as an arithmetic slip in the seed's own §2, not a measurement change.
+
+**Why the parser missed 15 rows — three mechanisms, not one.**
+
+- **5 wrapped chains**: `legacy.builder`, `legacy.update`, `veterans.show`, `runs.veteran`, `runs.veteran.store`.
+  Each is `Route::verb(...)` followed by `->whereNumber(...)` on the **next** line, so `\](.*?);` — which the
+  scanner applies per `splitlines()` entry — never reaches its semicolon. `routes/web.php:227-232,246-248,258-263`.
+- **6 group-prefixed names**: the `api.v1.*` set. The literal `->name()` in the file is `umamusume.index`; the
+  registered name is `api.v1.umamusume.index`. The parser's four `training-runs.*` / `umamusume.*` rows are
+  **invented names**, and are the only false positives the framework table caught.
+- **3 closures + 1 out-of-`routes/` file**: `boost.browser-logs`, `storage.local`, `storage.local.upload`
+  carry `Closure` actions the `[Cls::class, 'method']` pattern cannot match, and `artwork.show` is bound 2.
+
+### §3.5 verdicts — the 15 orphans, and the 5 the parser never saw
+
+All 12 names the seed listed **are** registered routes and **are** unreferenced by name in `app/`, so each
+orphan verdict stands as a classification. Five more join them: `legacy.update`, `runs.store`,
+`runs.import.store`, `runs.import.preview`, `support-cards.index`.
+
+But "orphan" now has a sharper meaning, and it is not dead code. A literal-path sweep over `resources/js`
+(`.scratch-uma/audit-agent-2026-10-16/phase4.py`) reaches **16 of the 17 by URI**. The single route with
+neither a name reference nor a literal-path mention in `resources/js` is `runs.create` — and it is live
+regardless: `SCREEN_SPEC.md:217` documents it as the transitional create surface, and **23 files under
+`tests/`** drive it by URI (36 `page.goto` sites across the browser suite, 9 `test()->get()` calls in
+`TraineeSelectorTest.php` and `RunCreateSurfaceTest.php`, plus the `DesignTokensTest.php` route fixture). The 6 `api.v1.*` names are unreferenced by design and exercised by four Feature files
+(`ApiV1Test.php`, `ApiV1SupportCardTest.php`, `ApiV1RunIndexPaginationTest.php`,
+`ApiV1ValidationEnvelopeTest.php`). **Confirmed-dead routes: 0 of 86.**
+
+### §3.1 verdicts — non-routed methods: the candidate list was entirely artifact
+
+Re-derived against the framework's own action strings, keyed by **file path** rather than short class name
+(`SupportCardController`, `TrainingRunController` and `UmamusumeController` each exist twice, once under
+`Api/V1/`, and a short-name key silently merges them).
+
+33 files under `app/Http/Controllers/`, one of them the method-less base `Controller.php`, so **32 concrete
+controllers** (the seed said 31) carrying **86 public methods** excluding `__construct`/`__invoke`. All 86
+appear as a route action. The reverse check runs the other way and also returns **0**: no registered action
+points at a method that is not defined.
+
+Each of the seed's six candidates is routed:
+
+| Candidate | Registered as |
+|---|---|
+| `ArtworkAssetController::show` | `artwork.show` `GET artwork/{kind}/{id}` (bound 2) |
+| `LegacyController::builder` | `legacy.builder` `GET legacy/{run}` |
+| `LegacyController::update` | `legacy.update` `PUT legacy/{run}` |
+| `SaveVeteranController::show` | `runs.veteran` `GET training-runs/{run}/veteran` |
+| `SaveVeteranController::store` | `runs.veteran.store` `POST training-runs/{run}/veteran` |
+| `VeteranController::show` | `veterans.show` `GET veterans/{veteran}` |
+
+**Non-routed public controller methods: 0.**
+
+### A bound the seed did not state, found while closing bound 3
+
+Two new instrument bounds came out of the re-run and both are worth keeping:
+
+1. **`route(` is overloaded.** `$this->route('run')` in a Form Request reads a route *parameter*; it is not
+   the URL helper. The first re-run reported `run` and `turn` as "references to unregistered routes"
+   (14 call sites, `app/Http/Requests/StoreBuildTargetRequest.php:122`, `StoreTurnEntryRequest.php:67-68`
+   among them). Excluding `->route(` and `::route(` removed exactly those two rows and **moved no bucket**:
+   every app route name is dotted and every parameter is not, so the artifact could not have inflated `live`.
+2. **`Inertia::render()` is not always a literal.** Three controllers pass the page name through a private
+   `renderPage(string $page, array $props)` helper — `CatalogController.php:78-81`,
+   `SkillController.php:65-68`, `SupportCardController.php:55-58`. A `Inertia::render\('X'` regex therefore
+   saw **42** page names where the real number is **48**, and the §3.1 "**17** not matched to a render string" list
+   was 6 rows too long. This is the mechanism behind the `Database/*` question below.
+
+With that fix, the page cross-check is: **48** distinct page names handed to a render call, **59** `.vue`
+files under `resources/js/pages/`, **11** with no render call, **0** render names with no file. All 11 sit in
+`pages/Career/Cockpit/Panels/` and are child components rather than routed pages. Six are imported by
+`resources/js/components/scenario/ScenarioPanel.vue:50-55`. **Five are not imported or mentioned anywhere in
+`resources/js` except in comments**: `EpithetRoutesPanel.vue`, `GradePointObjectivesPanel.vue`,
+`ProShopPanel.vue`, `SpiritBurstsPanel.vue`, `TeamRankLadderPanel.vue`. `ScenarioPanel.vue:79-89` says why
+two of them are absent — the Phase 7A.1 registrations were removed because a `Map` re-registration shadowed
+the first entry. Files left in place; disposition is an owner question.
+
+## 6. `Database/*` verdict — case (b): the parser missed the declaration, Appendix B was right
+
+The three files are **live surfaces with routes and controllers**; the seed's contradiction was a second
+instance of the same regex bound, and `SCREEN-023 LANDED` in the full audit's Appendix B stands.
+
+| Page file | Route (framework table) | Controller action | Render site |
+|---|---|---|---|
+| `resources/js/pages/Database/Trainees.vue` | `database.trainees` `GET database/trainees` | `CatalogController@databaseIndex` | `app/Http/Controllers/CatalogController.php:72` |
+| `resources/js/pages/Database/Skills.vue` | `database.skills` `GET database/skills` | `SkillController@databaseIndex` | `app/Http/Controllers/SkillController.php:59` |
+| `resources/js/pages/Database/Supports.vue` | `database.supports` `GET database/supports` | `SupportCardController@databaseIndex` | `app/Http/Controllers/SupportCardController.php:49` |
+
+Each call is `$this->renderPage('Database/Trainees', ...)`, which the `Inertia::render` regex cannot see.
+The same indirection accounts for the other three rows the seed listed as unrendered: `Catalog/Index.vue`
+(`CatalogController.php:57`), `Skills/Index.vue` (`SkillController.php:48`) and `SupportCards/Index.vue`
+(`SupportCardController.php:39`). So **6 of the seed's 17** were
+parser blindness and the remaining **11** are the Cockpit panels, which are never routed pages.
+
+The pages are not incidental scaffolding either: `resources/js/pages/Database/Skills.vue:2-8` states its own
+provenance in its header comment — "*The Database hub's Skills area (SCREEN-023, plan §8 D17) ... behind
+`SkillController::databaseIndex`*" — and `CatalogController.php:60-73` explains why the body is shared
+rather than the URL borrowed: "*A redirect was the smaller diff and it is refused by the slice brief,
+because no owner ruling authorises one*". The seed's row "**Genuinely unrouted page files**" (§3.1, line 108) is withdrawn, and with it the closing
+line's "3 unrouted `Database/*` page files".
+No file deleted, no route added.
+
+## 7. Finding: 11 frontend call sites bypass named routes, 2026-10-16
+
+The seed named two. Enumerating the whole pattern (`phase4.py`, confirmed by direct grep) returns **11 call
+sites across 9 files**, and they are the mechanism behind **every** non-API entry in the §3.5 orphan list.
+This contradicts `AGENTS.md` §7's "named routes and `route()` everywhere".
+
+Writes (form submissions) — 11:
+
+| File | Line | Literal path | Named route it bypasses |
+|---|---|---|---|
+| `resources/js/pages/Career/ScenarioSelect.vue` | 78 | `/career/setup/scenario` | `career.scenario.store` |
+| `resources/js/pages/Career/TraineeSelect.vue` | 210 | `/career/setup/trainee` | `career.trainee.store` |
+| `resources/js/pages/Career/TraineeProfile.vue` | 119 | `/career/setup/trainee` | `career.trainee.store` |
+| `resources/js/pages/Career/BuildTarget.vue` | 172 | `/career/setup/target` | `career.target.store` |
+| `resources/js/pages/Career/LegacySelect.vue` | 166 | `/career/setup/legacy` | `career.legacy.store` |
+| `resources/js/pages/Legacy/Builder.vue` | 285 | `` `/legacy/${props.run.id}` `` | `legacy.update` |
+| `resources/js/pages/Preferences/Edit.vue` | 238 | `/preferences` | `preferences.update` |
+| `resources/js/pages/Runs/Create.vue` | 90 | `/training-runs` | `runs.store` |
+| `resources/js/pages/Runs/Import.vue` | 172 | `/training-runs/import` | `runs.import.store` |
+| `resources/js/pages/Runs/Import.vue` | 281 | `/training-runs/import/preview` | `runs.import.preview` |
+| `resources/js/components/review/CandidateForm.vue` | 50 | `` `/review/${props.candidate.id}` `` | `review.resolve` |
+
+Navigation is the same breach at larger scale: **at least 31** `href="/..."` / `router.push("/...")` literals
+(one grep pattern, letter-leading paths only, so `href="/"` roots and other binding forms are excluded)
+across the pages
+(`Dashboard.vue:206,350,353,392`, `SetupLayout.vue`, `Runs/Index.vue:46,52`, the wizard's back-links, and
+the `/veterans`, `/umamusume`, `/support-cards`, `/skills`, `/database`, `/legacy` links). The wizard's own
+step-back links restate the paths its forms post to, so a URI change is a multi-file edit today.
+
+The route names orphaned by this pattern: `career.scenario.store`, `career.trainee.store`,
+`career.target.store`, `career.legacy.store`, `legacy.update`, `preferences.update`, `runs.store`,
+`runs.import.store`, `runs.import.preview`, `review.resolve` — 10 of the 17 §3.5 orphans.
+
+Not fixed: all nine files are page components shared with peer sessions, and this pass's brief says report,
+not repair. Options for the owner, not for an agent to pick: **(a)** replace each literal with a `route()`
+call the server already composes into a prop, which restores the §7 rule and makes the orphan list empty;
+**(b)** keep the literals and drop the now-unused route names, which is weaker — the names are what
+`SCREEN_SPEC.md` and the docs cite, and removing them breaks the citation surface; **(c)** rule that the
+frontend may address URIs literally and amend §7 to say so, which makes today's code legal and the finding
+closed by ruling. The audit takes no position; the choice changes 11 lines or one rule.
