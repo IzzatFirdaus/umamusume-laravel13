@@ -2721,7 +2721,7 @@ Landed 2026-10-07 (slice E1), with its browser gate green. `tests/browser/scenar
 
 ### SCR-CAR-020 — URA panel (SCREEN-014)
 
-`components/scenario/UraPanel.vue`, the first renderer E1's registry resolves. It is reached by the
+`resources/js/pages/Career/Cockpit/Panels/CareerGoalsPanel.vue`, the career_goals panel E1's registry resolves. It is reached by the
 `career_goals` flag in `config/scenarios.php`, so it draws for any scenario whose matrix turns that
 flag on and for none that leaves it off, and it never reads `scenario.label` (gate G-33, `D-240`).
 Plan §9 E2. No route and no write of its own.
@@ -2791,8 +2791,8 @@ Built 2026-10-07 (slice E2). See plan §4's E2 row for the gate inventory.
 `CockpitController::careerGoalSections()` and `happyMeekRows()`, `config/scenarios.php`'s
 `panel_labels.career_goals` and `ura_finale.panels.career_goals`, `RaceCatalogSlot::isAtOrBeforeTurn()`
 / `forScenario()` / `yearLabel()` / `turnNumber()` (all reused, none re-derived), `TrainingRun::nextTurnToPlay()`,
-`components/scenario/{UraPanel,AlertRow}.vue`, `registry.ts` reached by `ScenarioPanel.vue`'s
-`register('career_goals', UraPanel)`. Tests: `tests/Feature/UraPanelTest.php` (7 cases — the flag
+`resources/js/pages/Career/Cockpit/Panels/CareerGoalsPanel.vue, resources/js/components/scenario/AlertRow.vue`, `registry.ts` reached by `ScenarioPanel.vue`'s
+`registerPanel('career_goals', CareerGoalsPanel)`. Tests: `tests/Feature/UraPanelTest.php` (7 cases — the flag
 composed on for URA and off for the other three, the recorded mandatory rows with their states and
 calendar positions, the completed arm, the Critical alert at its turn and the missed arm, the career
 goals absence, the four Happy Meek readings, and no leak into a cockpit whose flag is off) and
