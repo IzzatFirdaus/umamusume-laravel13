@@ -25,6 +25,7 @@ The seed's 15-orphan figure also did not sum in the original (12 named plus a "+
 
 **Stale items in this file's own section 10.** The `uma:backup` command test closed at `23f9d64` (`test(backup): pin uma:backup contract on scratch database`), and dark-ramp >= 3:1 already passes: G-18 measures all 19 text/background pairs plus 9 grade-badge fills in both themes, worst dark 5.48:1. Current figures live at section 5 onward - section 5 supersedes section 3's route, controller and method counts; sections 6-7 supersede the Database/*, literal-path and orphan figures above.
 
+**Forward-note addendum 2, 2026-10-17 — the section-11 collision.** This seed carries two `## 11.` headings: `## 11. §3.6 — dead config` (filed first, by `e820cdd`) and `## 11. §3.10 — lang/en dead and missing keys` (filed second, by `90eb2fc`, when the lang pass numbered itself after the pre-existing §3.6 rather than continuing the counter). Correct order by date and content is unchanged — §3.6 first, §3.10 second; only the printed number collides. A future pass may resolve it two ways, at the owner’s choice: renumber one of the two headings with a stated reason in the commit message, or leave the collision as the seed’s own record of how its append-only history was built. Neither heading was renumbered by the pass that named this — the register’s convention is that numbered headings are never silently renumbered, and a named collision beats a quiet fix.
 ---
 
 ## 1. Method, and the bounds on what it can see
