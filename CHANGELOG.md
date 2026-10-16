@@ -4,7 +4,7 @@ All notable changes to Trainer Desk are documented here. The format follows Keep
 version number follows Semantic Versioning as interpreted for this project in `VERSION.md` and
 `docs/adr/0019-semver-label-tag-and-release-branch.md`.
 
-## A note on the history before 0.1.0
+## A note on the history before 2.0.0
 
 This file starts empty on purpose. The repository's whole history predates it, the first commit landing
 2026-09-27, and no changelog existed before now. Reconstructing a per-change history after the fact would
@@ -51,7 +51,7 @@ none for documentation-only work.
 The documentation suites that guard these files pass: `DocCitationParityTest`, `DocSchemaDriftTest`, and
 `DocCensusResilienceTest`, 8 tests, 20 assertions. The lore gate reports no hits in the files added here.
 
-## [0.1.0] - not released
+## [2.0.0] - not released
 
 No commit is chosen and no tag exists locally or on `origin`. As of `b6fd4e1`, `master` and
 `origin/master` are equal, so the history is already on the remote and only the release decision is

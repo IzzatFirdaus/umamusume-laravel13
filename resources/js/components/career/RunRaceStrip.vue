@@ -4,7 +4,7 @@
  * Cockpit's left column: what this run has already raced, the turn it is deciding, and the
  * obligations still to come.
  *
- * **It is not the race calendar.** `RaceCalendar.vue` is the 0.1.0 catalogue grid and stays the run
+ * **It is not the race calendar.** `RaceCalendar.vue` is the 2.0.0 catalogue grid and stays the run
  * record screen's component; a 20-share column that prints every race the calendar holds is the wall
  * this slice removes. The full option list, the race facts and the fan-gap arithmetic are the Race
  * Decision screen's (`SCR-CAR-013`, D10), so This Turn counts what is offered and links there rather

@@ -130,7 +130,7 @@ Route::post('/training-runs', [TrainingRunController::class, 'store'])->name('ru
 Route::get('/training-runs/import', [TrainingRunController::class, 'importForm'])->name('runs.import');
 Route::post('/training-runs/import', [TrainingRunController::class, 'importStore'])->name('runs.import.store');
 Route::post('/training-runs/import/preview', [TrainingRunController::class, 'importPreview'])->name('runs.import.preview');
-// F2 (plan §9.6): the 0.1.0 record screen is retired. Every write it owned now has a 2.0 owner
+// F2 (plan §9.6): the 2.0.0 record screen is retired. Every write it owned now has a 2.0 owner
 // reachable from the Cockpit, so this GET redirects there. `{run}` still binds, so a missing id 404s.
 // Only this GET is redirected; the write routes below keep their own destinations.
 Route::get('/training-runs/{run}', [TrainingRunController::class, 'redirect'])->name('runs.show');

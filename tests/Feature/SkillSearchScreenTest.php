@@ -383,7 +383,7 @@ it('refuses a facet value the data has no such column for rather than ignoring i
 it('is reachable from the shell nav rather than a run-screen door', function (): void {
     skillScreenImport();
 
-    // G-SK-13: Screen D exists to relieve the catalogue the 0.1.0 run record listed in one select.
+    // G-SK-13: Screen D exists to relieve the catalogue the 2.0.0 run record listed in one select.
     // Owner ruling R-2 (`docs/proposals/frontend-development-plan.md` §9.6 close-out, 2026-10-09)
     // retired that page with `Runs/Show.vue`, and the Cockpit holds no `/skills` door of its own, so
     // the run-scoped half of this assertion is gone. What remains is the shell's own nav item - the one

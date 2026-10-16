@@ -14,7 +14,7 @@ use Inertia\Testing\AssertableInertia as Assert;
  * Pins the frontend-audit findings that survive the F2 cutover, one test per finding.
  *
  * The two F-3 cases ("stops naming a scenario the run never chose") and the F-7 case ("reaches a
- * preview by redirect") were retired with the 0.1.0 record screen: `GET /training-runs/{run}` now
+ * preview by redirect") were retired with the 2.0.0 record screen: `GET /training-runs/{run}` now
  * redirects to the Career Cockpit (F2, plan §9.6), whose scenario absence is the Cockpit's own
  * `run.scenario_label` = 'No scenario set' (asserted in `CareerCockpitTest`), and whose guided
  * preview flow has no 2.0 reproduction (owner ruling on group R-2). The three findings below are

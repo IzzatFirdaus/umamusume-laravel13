@@ -112,7 +112,7 @@ before any merge of that branch.
 | Theme default is Light base + preference resolution, dark opt-in | stored preference → `prefers-color-scheme` → light | 0006 | preference resolver | 0006 §Decision |
 | C-7 loading obligation: browser-native loading satisfies initial render | custom indicator required only for user-initiated async | 0007 | `docs/research-scratch/GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar)" C-7 row + interpretation blockquote | 0007 §Decision |
 | One facet contract for the three filter surfaces | unknown facet refused, `pageSize` honoured and clamped | 0018 | `PageSize`, `FilterContractTest` | 0018 §Decision |
-| The label is `0.1.0` and the release is a pre-release | release must not target `master` | 0019 | — | 0019 §Decision |
+| The label is `2.0.0` and the release is a pre-release | release must not target `master` | 0019 | — | 0019 §Decision |
 | **Owed**: `AGENTS.md` §14/§3 correction from 0019 | the "no changelog or version file" line and the doc table | 0019 | not landed | 0019 §Status |
 
 ## 9. Trainer Desk 2.0 program

@@ -2,7 +2,7 @@
 /*
  * The acquired/skipped status editor (F2, plan §9.6 ruling 5). A table of every skill the run
  * already has a state for, with the status picker inline. Submits through `runs.skills.sync`, the
- * same Form Request the 0.1.0 record screen used: a move of ownership, not a new route.
+ * same Form Request the 2.0.0 record screen used: a move of ownership, not a new route.
  *
  * A skill's acquisition status is distinct from the build-target priority list the rest of the
  * planner edits. The two writes POST to different routes and touch different columns, so neither

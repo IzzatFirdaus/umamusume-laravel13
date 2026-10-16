@@ -1,7 +1,7 @@
 # ADR-0019: A semver label, a tag, and a release branch for a local-only tool
 
 <!-- ADR-CONTRACT
-  decision: proposed — the owner set the version (0.1.0) and the constraint that the release must not target master; the pre-release mechanism, the tag/branch scheme and the AGENTS.md correction await that ruling
+  decision: proposed — the owner set the version (2.0.0) and the constraint that the release must not target master; the pre-release mechanism, the tag/branch scheme and the AGENTS.md correction await that ruling
   code: not built — nothing was tagged and nothing was published; VERSION.md and CHANGELOG.md exist at the root by owner direction
   superseded-by: —
   amended-by: —
@@ -9,7 +9,7 @@
 -->
 
 Status: **Proposed** (drafted 2026-10-04, no owner ruling recorded). The owner set the version number
-(`0.1.0`) and the constraint that the release must not target `master`. The remaining choices — the
+(`2.0.0`) and the constraint that the release must not target `master`. The remaining choices — the
 pre-release mechanism, the tag/branch scheme, and the correction owed to `AGENTS.md` §14 — await that ruling.
 Nothing was tagged and nothing was published while this was written.
 
@@ -20,7 +20,7 @@ development where anything may change and the public API should not be considere
 `1.0.0` the release that *defines* the public API. This codebase has not defined one in a single place, and
 its own decision record is still moving: `ADR-0001` is accepted in part, with its schema section replaced by
 `ADR-0003`; `PRD.md` carries open questions, and `KNOWN-ISSUES.md` carries open entries. `0.y.z` is therefore
-the correct band, and the first release in it is `0.1.0`.
+the correct band, and the first release in it is `2.0.0`.
 
 **The surfaces a version number promises, and only these:** the JSON contract at `/api/v1`, the SQLite schema
 the Trainer's own data lives in, and the displayed vocabulary in `lang/en/uma.php`. Blade component
@@ -29,7 +29,7 @@ minor.
 
 ## Decision
 
-**The label is `0.1.0` and the release is a pre-release.**
+**The label is `2.0.0` and the release is a pre-release.**
 
 - **MAJOR** moves when a migration invalidates existing local Trainer data rather than adding to it, or when
   a `/api/v1` field is removed or renamed.
@@ -38,8 +38,8 @@ minor.
 - **PATCH** moves on fixes: a bug, a copy correction, a dependency patch bump. A dependency upgrade that
   changes nothing a consumer can observe is a PATCH, whatever the constraints themselves do.
 
-**The tag is `0.1.0`, annotated, and the target is `release/0.1.0`.** The branch is created from the commit
-chosen for release and the tag is placed on that commit. Because `release/0.1.0` starts at the same commit
+**The tag is `2.0.0`, annotated, and the target is `release/2.0.0`.** The branch is created from the commit
+chosen for release and the tag is placed on that commit. Because `release/2.0.0` starts at the same commit
 `master` is at, the branch is a pointer, not a fork, and history does not split. `master` fast-forwards to the
 release commit as part of the same operation, so the branch is kept only as the address the tag hangs off.
 
@@ -97,13 +97,13 @@ count left to go stale.
 
 No root file is created by this decision. The release notes are the GitHub Release body.
 
-If `release/0.1.0` is created while another worktree is also open, both point into the same history and
+If `release/2.0.0` is created while another worktree is also open, both point into the same history and
 neither carries the peer's uncommitted work. The order that avoids a stranded version is: land the
-uncommitted work, create `release/0.1.0` from it, tag, then branch the upgrade from the tag.
+uncommitted work, create `release/2.0.0` from it, tag, then branch the upgrade from the tag.
 
 ## Release title and notes as proposed
 
-Title: `Trainer Desk 0.1.0 (pre-release)`. The notes state that it is a pre-release below `1.0.0`; that the
+Title: `Trainer Desk 2.0.0 (pre-release)`. The notes state that it is a pre-release below `1.0.0`; that the
 public API for versioning purposes is the `/api/v1` endpoints, the SQLite schema and the displayed
 vocabulary; that this application runs on loopback and is not deployable; that Trainer data lives in one
 local SQLite file and is not migrated between releases by any automation, so `php artisan uma:backup` is the

@@ -6,7 +6,7 @@ import { recordTurns } from '../utils/record-turns';
 /*
  * Rendered-copy, region-separation and accessibility evidence for D14a, the run-scoped race strip
  * (`SCREEN_SPEC.md` SCR-CAR-011, interim before D14). `RunRaceStripTest` asserts the resolved props;
- * these cases assert what only a browser reaches: that the 0.1.0 catalogue grid is gone from the
+ * these cases assert what only a browser reaches: that the 2.0.0 catalogue grid is gone from the
  * Cockpit's left column, that a race the run already entered is never reprinted as something still to
  * come, that the three regions carry accessible names, and that the strip renders no percentage and no
  * derived distance band.
@@ -63,7 +63,7 @@ test('replaces the catalogue grid with three run-scoped regions', async ({ page 
     await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    // The 0.1.0 calendar is not on this screen any more: its year tabs and its month grid are the
+    // The 2.0.0 calendar is not on this screen any more: its year tabs and its month grid are the
     // give-away, and neither is rendered.
     await expect(page.getByRole('heading', { name: 'Race calendar' })).toHaveCount(0);
     await expect(page.getByRole('link', { name: /Year$/ })).toHaveCount(0);

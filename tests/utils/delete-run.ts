@@ -5,7 +5,7 @@ import { expect, type Page } from '@playwright/test';
  *
  * The run is deleted through `runs.destroy` over HTTP rather than by clicking the run record
  * screen's delete disclosure. The cleanup is not product behaviour, so it has no reason to be
- * coupled to a UI surface: the record screen is the 0.1.0 page being retired (plan §4's F1 row, and the
+ * coupled to a UI surface: the record screen is the 2.0.0 page being retired (plan §4's F1 row, and the
  * write owners that must land first in §9.6),
  * and a teardown that reaches the write through it fails when that page moves, taking every spec
  * that walks it with it and leaving the shared database with a row per abandoned run.

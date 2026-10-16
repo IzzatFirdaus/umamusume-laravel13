@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { deleteRun } from '../utils/delete-run';
 
 /*
- * F1, the career surface cutover: no normal navigation path may open the 0.1.0 run-detail page
+ * F1, the career surface cutover: no normal navigation path may open the 2.0.0 run-detail page
  * (`SCR-RUN-003`), and Dashboard and Careers must converge on the Cockpit (`SCR-CAR-011`).
  *
  * What is asserted here is the state this slice ships: the Careers rows and the Dashboard's Resume
@@ -103,7 +103,7 @@ test('the Cockpit keeps its own 2.0 decision links after the cutover', async ({ 
 test('the Cockpit carries the door to the Career Result', async ({ page }) => {
     await openCareersAndSelectRun(page);
 
-    // D14 ruled a screen reachable only by URL a defect. The Career Result's one door was the 0.1.0
+    // D14 ruled a screen reachable only by URL a defect. The Career Result's one door was the 2.0.0
     // record page's header, so it needed a 2.0 door of its own: the left column, beside the timeline.
     const door = page.getByRole('link', { name: 'Career Result' });
     await expect(door).toBeVisible();

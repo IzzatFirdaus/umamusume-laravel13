@@ -12,7 +12,7 @@ use Inertia\Testing\AssertableInertia as Assert;
  * F1, the career surface cutover: Trainer Desk 2.0 is the canonical career frontend.
  *
  * What this file pins is the selection half of the cutover: every surface that offers a career to
- * open carries the Cockpit's URL, so no normal navigation lands on the 0.1.0 run-detail page. The
+ * open carries the Cockpit's URL, so no normal navigation lands on the 2.0.0 run-detail page. The
  * redirect half (GET /training-runs/{run} itself) is deliberately NOT pinned yet. The owner held it
  * (ruling 2026-10-08), and the reason is not a test count: four writes have no 2.0 owner yet, so the
  * record screen is still the only place a Trainer can reach them (run status, a recorded turn's

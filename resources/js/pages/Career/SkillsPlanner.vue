@@ -361,7 +361,7 @@ const coverageConstants = computed(() =>
         <!-- The acquired/skipped status write (F2, plan §9.6 ruling 5). The build target is a plan;
              the acquisition status is a record of what the run actually has. The two are separate
              writes on separate routes so one cannot overwrite the other. This form POSTs through
-             `runs.skills.sync`, the same Form Request the 0.1.0 record screen used. -->
+             `runs.skills.sync`, the same Form Request the 2.0.0 record screen used. -->
         <!-- Slice 10: the add affordance. The editor below edits rows that already exist; this is
              where a run gains one it has never held, so the write path and the vocabulary stay the
              endpoint's own. -->

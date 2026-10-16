@@ -1,12 +1,12 @@
 # VERSION
 
-Current version: `0.1.0`, pre-release. Tagged `0.1.0`.
+Current version: `2.0.0`, pre-release. Tagged `2.0.0`.
 
 | Field            | Value                         | Measured                                                                      |
 | ---------------- | ----------------------------- | ----------------------------------------------------------------------------- |
-| Version          | `0.1.0`                       | decision recorded in `docs/adr/0019-semver-label-tag-and-release-branch.md`   |
+| Version          | `2.0.0`                       | decision recorded in `docs/adr/0019-semver-label-tag-and-release-branch.md`   |
 | Pre-release      | yes                           | GitHub Release flag, not a semver hyphen identifier                           |
-| Git tags         | `0.1.0`                       | `git tag`, `git ls-remote --tags origin`                                      |
+| Git tags         | `2.0.0`                       | `git tag`, `git ls-remote --tags origin`                                      |
 | Release commit   | not fixed                     | see Release state below                                                       |
 | Framework        | `laravel/framework` 13.32.0   | `composer.lock`, constraint `^13.0`                                           |
 | PHP              | 8.5.8                         | runtime, against `require.php: ^8.3`                                          |
@@ -42,6 +42,6 @@ questions in `PRD.md` are closed, the `/api/v1` response shapes are declared in 
 
 ## Release state
 
-No commit has been chosen for `0.1.0`. The `0.1.0` tag exists; `master` and `origin/master` are equal.
+No commit has been chosen for `2.0.0`. The `2.0.0` tag exists; `master` and `origin/master` are equal.
 Documentation files may be uncommitted. This application runs on loopback and is not deployable.
 `AGENTS.md` §1 and `PRD.md` §6.10 keep it there.

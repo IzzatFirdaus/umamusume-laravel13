@@ -282,7 +282,7 @@ it('shows no strip for a scenario the matrix closes the calendar on, and prints 
             ->where('raceStrip.this_turn', null)
             // One sentence for the whole region, naming the matrix rather than a scenario.
             ->where('raceStrip.notice', fn (string $line): bool => str_contains($line, 'composes no race calendar'))
-            // The 0.1.0 catalogue bundle is gone from the page: the strip replaces it rather than
+            // The 2.0.0 catalogue bundle is gone from the page: the strip replaces it rather than
             // sitting beside it, so no dead payload travels to the browser.
             ->missing('calendar'));
 });
