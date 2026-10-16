@@ -605,7 +605,7 @@ test('the outcome select offers the turn its own branch words, and drops a word 
     await expect(page.locator('#turn-penalty_kind')).toBeVisible();
 
     await page.getByRole('button', { name: /^Recreation/ }).click();
-    expect(await words()).toEqual(['Choose', 'Lifted', 'No Change', 'Fell']);
+    expect(await words()).toEqual(['Choose', 'Lifted', 'No Change']);
 
     // `Poor Rest` is not an outing's word. A select left holding a value outside its own list would show
     // its placeholder while the form still posted the stale one, so the toggle clears it.

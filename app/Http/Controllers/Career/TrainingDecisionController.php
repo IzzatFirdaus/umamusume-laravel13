@@ -545,7 +545,7 @@ class TrainingDecisionController extends Controller
      * `outcomes` is every choice's outcome words keyed by the choice value the form posts, each word
      * carrying whether it names a failure. It rides on the write because the select that offers the words
      * and the request that accepts them must read one list (`TurnChoice::outcomes()`), and because the
-     * penalty field has to appear for `Poor Rest` and `Fell` exactly as it does for `Failure`.
+     * penalty field has to appear for `Poor Rest` exactly as it does for `Failure`.
      *
      * @param  array<string, int|null>  $facilityLevels
      * @return array{action: string, turn: int, moods: list<string>, previous: array<string, int|null>|null, performance: array{enabled: bool, types: list<string>}, extra_choices: list<array{value: string, label: string, note: string, recommended: bool}>, outcomes: array<string, array<string, bool>>}

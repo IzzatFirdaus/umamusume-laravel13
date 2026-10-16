@@ -615,7 +615,7 @@ it('offers each turn choice its own outcome words, with the failure flag beside 
             ->has('write.outcomes', 7)
             ->where('write.outcomes.training-Speed', ['Success' => false, 'Failure' => true])
             ->where('write.outcomes.rest', ['Success' => false, 'Poor Rest' => true])
-            ->where('write.outcomes.mood', ['Lifted' => false, 'No Change' => false, 'Fell' => false]));
+            ->where('write.outcomes.mood', ['Lifted' => false, 'No Change' => false]));
 });
 
 it('accepts the outcome words its choice offers and refuses the ones another choice owns', function (string $choice, string $outcome, bool $accepted): void {
@@ -642,15 +642,13 @@ it('accepts the outcome words its choice offers and refuses the ones another cho
     ['rest', 'Poor Rest', true],
     ['mood', 'Lifted', true],
     ['mood', 'No Change', true],
-    ['mood', 'Fell', true],
     ['training-Speed', 'Success', true],
     ['training-Speed', 'Failure', true],
-    // A word belongs to the turn that owns it. `Success` is not an outing's outcome and `Fell` is not a
-    // training's, which is what keeps the dropdown's list and the boundary's list one list rather than
-    // one flat vocabulary a Rest could answer with an outing's word.
+    // A word belongs to the turn that owns it. `Success` is not an outing's outcome, which is what keeps
+    // the dropdown's list and the boundary's list one list rather than one flat vocabulary a Rest could
+    // answer with an outing's word.
     ['mood', 'Success', false],
     ['rest', 'Lifted', false],
-    ['training-Speed', 'Fell', false],
 ]);
 
 it('writes a failure event for exactly the outcome words that name one', function (string $choice, string $outcome, bool $failed): void {
@@ -676,7 +674,6 @@ it('writes a failure event for exactly the outcome words that name one', functio
     ['rest', 'Poor Rest', true],
     ['mood', 'Lifted', false],
     ['mood', 'No Change', false],
-    ['mood', 'Fell', false],
     ['training-Speed', 'Success', false],
     ['training-Speed', 'Failure', true],
 ]);

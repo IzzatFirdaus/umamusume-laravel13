@@ -53,9 +53,9 @@ enum TurnChoice: string
      * (`docs/research-scratch/DESIGN-CORPUS.md`). Rest's failure branch is the reference's own under-slept
      * tier, `+30 (failure, sometimes with 夜ふかし気味 / Late-Night Feeling)`
      * (`UMAMUSUME_REFERENCE.md` §1.1.5), and `Fell` names a mood direction the sources do not
-     * document as a Recreation failure (Gamerant 2025-07-27; the Japanese action guide states
-     * recreation produces at least one stage of mood-up, not a downward branch), so it flags false
-     * like `Lifted` and `No Change`.
+     * document as a Recreation failure; the Japanese action guide states recreation produces at
+     * least one stage of mood-up, not a downward branch. The word is not part of the recreation outcome
+     * set because no source names it.
      *
      * **No word here is a client string, and none claims a number.** The pair the rail already stores is
      * this application's wording and these are the same kind of word; the client's own vocabulary for a
@@ -69,7 +69,7 @@ enum TurnChoice: string
     {
         return match ($this) {
             self::Rest => ['Success' => false, 'Poor Rest' => true],
-            self::Recreation => ['Lifted' => false, 'No Change' => false, 'Fell' => false],
+            self::Recreation => ['Lifted' => false, 'No Change' => false],
             default => ['Success' => false, 'Failure' => true],
         };
     }
