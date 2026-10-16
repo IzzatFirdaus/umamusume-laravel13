@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Schema;
  * Deliberately narrow, because a guard that fires on honest forward-looking prose
  * gets deleted within a task:
  *
- * - Four named docs, not the repo. `PLAN.md`, `docs/scenarios/**`,
+ * - Four named docs, not the repo. `docs/research-scratch/PROCESS-PLANS.md`, `docs/scenarios/**`,
  *   `docs/UMAMUSUME_REFERENCE.md`, `KNOWN-ISSUES.md` and
  *   `docs/design-research/verification/**` plan later work or record history, so
  *   "this has not landed yet" is correct prose there and asserting against them

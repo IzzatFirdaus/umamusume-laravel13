@@ -211,7 +211,7 @@ an agent may not resolve them silently — this is escalation territory (a desig
 ## 4. The HLF reference set — the high-fidelity target, pattern by pattern
 
 `docs/proposals/HLF_reference/` holds 25 full-page captures of a v0 build (the filenames read
-`ui-improvement-suggestions-v0-build`, page badge `v0.1.0`). It is the concrete, screen-by-screen answer to
+`ui-improvement-suggestions-v0-build`, page badge `v2.0.0`). It is the concrete, screen-by-screen answer to
 "what the frontend could be", and it is the most useful artifact in this directory for the fidelity
 question because it renders the target instead of describing it. It is also, per the owner, still a
 **high-fidelity wireframe**: its data is placeholder, some copy is invented, and it is not bound by the

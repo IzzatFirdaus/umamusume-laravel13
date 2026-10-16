@@ -4,7 +4,7 @@ A local-only Laravel 13 tool for Trainers of the Global English version of *Umam
 
 Product name confirmed 2026-09-27 (PRD OQ-1 closed). Visual system: `DESIGN.md`.
 
-The characters are Umamusume, a humanoid race. Repository text and code never use equine vocabulary for them (lore gate, `CONSTRAINTS.md` C-4).
+The characters are Umamusume, a humanoid race. Repository text and code never use equine vocabulary for them (lore gate, `docs/research-scratch/GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar, C-1 to C-9)" C-4).
 
 ## Overview
 
@@ -126,7 +126,7 @@ Verified against `php artisan route:list`:
 | `/umamusume`, `/umamusume/{slug}`                     | catalog index (release-status filter, normalized search) and detail with aliases, cards, and provenance                                                                                                                  |                                      |
 | `/skills`, `/skills/{skill}`                          | skill search (Screen D) and detail; Global-filtered, paginated                                                                                                                                                           |                                      |
 | `/support-cards`, `/support-cards/{card}`             | support-card catalog (reference data only, no collection state)                                                                                                                                                          |                                      |
-| `/training-runs` (+ `/create`, PUT, DELETE) | Trainer run CRUD. `GET /training-runs/{run}` is a compatibility redirect to the Career Cockpit: `SCR-RUN-003` (the 0.1.0 run-detail page) is retired (F2), so it is not a normal-navigation destination. |                                      |
+| `/training-runs` (+ `/create`, PUT, DELETE) | Trainer run CRUD. `GET /training-runs/{run}` is a compatibility redirect to the Career Cockpit: `SCR-RUN-003` (the 2.0.0 run-detail page) is retired (F2), so it is not a normal-navigation destination. |                                      |
 | `/training-runs/{run}/turns[/{turn}]`                 | per-turn stat logging; stats validate against the run's scenario ceiling (`base_cap` + `cap_bonus`, clamped to `hard_cap`, via `App\Services\ScenarioCaps`; `ADR-0015`). A run with no scenario keeps the 1200 base cap. |                                      |
 | `/training-runs/{run}/skills`                         | skill states Suggested / Acquired / Skipped                                                                                                                                                                              |                                      |
 | `/training-runs/{run}/deck`                           | the six support cards the run was equipped with                                                                                                                                                                          |                                      |
@@ -169,7 +169,7 @@ List shape: `{ "data": [...], "pagination": { "page", "pageSize", "totalItems", 
 | Lore grep                                           | `composer lore` and `composer lore-code` (extended, includes untracked files and Global client terminology); each hit needs a context ruling   |
 | Dependency audit                                    | `composer audit` and `npm audit --omit=dev` (the `Makefile` `audit` target wraps both; make itself is unavailable, KI-4)                       |
 
-Tests use Pest 4, feature-first, with a global `TestCase` + `RefreshDatabase` binding in `tests/Pest.php`. All fetcher/pipeline tests use `Http::fake` against stored bodies in `tests/Fixtures`; no test touches the network. The test database is in-memory SQLite (`phpunit.xml` forces it). The full quality bar, including the no-suppression floor, is `CONSTRAINTS.md`.
+Tests use Pest 4, feature-first, with a global `TestCase` + `RefreshDatabase` binding in `tests/Pest.php`. All fetcher/pipeline tests use `Http::fake` against stored bodies in `tests/Fixtures`; no test touches the network. The test database is in-memory SQLite (`phpunit.xml` forces it). The full quality bar, including the no-suppression floor, is `docs/research-scratch/GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar, C-1 to C-9)".
 
 ## Common Commands
 
@@ -253,7 +253,7 @@ tools/                    lore.php (lore gate), gate.py (design-artifact gate), 
 | `.ai/rules/index.md`                    | Path-scoped repo rules (style, Eloquent, testing)                                                                                     |
 | `PLAN.md`                               | Pointer; the frontend slice plan lives in `docs/research-scratch/PROCESS-PLANS.md`                                                    |
 
-When documents disagree: `CONSTRAINTS.md` bar > gate registry > ADRs > `DESIGN.md` > slice plans; `ARCHITECTURE.md` over its digest; `PRD.md` is product truth.
+When documents disagree: `docs/research-scratch/GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar, C-1 to C-9)" > gate registry > ADRs > `DESIGN.md` > slice plans; `ARCHITECTURE.md` over its digest; `PRD.md` is product truth.
 
 ## Skill Automation Subsystem (separate tooling layer)
 

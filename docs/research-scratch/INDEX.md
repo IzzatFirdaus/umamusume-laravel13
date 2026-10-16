@@ -286,7 +286,7 @@ moved, 13 buckets, the two executor defects fixed first) is the dated status not
 | The Trainer Desk 2.0 G/D/E prompt sets (program prompts that opened the G and D/E slices)                                                                                                                                  | `PROCESS-PLANS.md`, sections `## Trainer-Desk-2.0-G-Prompts.md`, `## Trainer-Docs-2.0-D-Prompts.md`, `## Trainer-Docs-2.0-E-Prompts.md` (Round 14, augment-only; originals deleted Round 15, 2026-10-12)                                                                       |
 | The legacy Umamusume Progress Tracker run records and the URA Finale import record that reads them                                                                                                                           | `TRAINING-RUN-IMPORTS.md` (the Round 14 master), sections `## Umamusume_Progress_Tracker_Runs.md` and `## ura-finale-runs.md`                                                                                       |
 | The Trainer Desk 2.0 design target (visual/interaction spec for the Inertia + Vue rewrite; reference only, not authorization)                                                                                                | `DESIGN-CORPUS.md`, section `## design-2.0.md` (Round 14, augment-only)                                                                                                                                             |
-| The provenance-and-absence contracts proposal (rendered provenance badges, the three axes, the ten owner rulings) and the 2.0 screen-set target (SCREEN-001..024, governance holds)                                          | `PLANS-AND-BRIEFS.md`, sections `## provenance-and-absence-contracts.md` and `## screen-spec-2.0.md` (Round 14, augment-only)                                                                                       |
+| The provenance-and-absence contracts proposal (rendered provenance badges, the three axes, the ten owner rulings) and the 2.0 screen-set target (SCREEN-001..024, governance holds)                                          | `PLANS-AND-BRIEFS.md`, sections `## provenance-and-absence-contracts.md` and `## screen-spec-2.0.md` (Round 14, augment-only; the provenance original was refreshed and deleted Round 16, 2026-10-15, and `screen-spec-2.0.md` stays live) |
 | The external reviewer's repository-grounded UI/UX brief (CONFIRMED/DOCUMENTED/HISTORICAL/INFERRED/PROPOSED labelling, dashboard + cockpit homes, the stat-denominator defect)                                                | `UX-DELIVERABLES.md`, section `## ui-ux-application-context-brief.md` (Round 14, augment-only)                                                                                                                       |
 | The Rice Shower / Unity Cup UX walks: first pass, second pass, resolutions, and the R2-01..R2-20 reconciliation against code                                                                                                 | `AUDIT-AND-VERIFICATION.md`, sections `## rice-shower-unity-cup-ux-walk.md`, `## rice-shower-unity-cup-ux-walk-2.md`, `## rice-shower-unity-cup-ux-walk-resolutions.md`, `## rice-shower-unity-cup-round2-reconciliation.md` (Round 14, augment-only) |
 | The 68-frame `[Global]` client capture note behind the Rice Shower walk: cap readings, run-surface evidence, and the hint-ladder provenance                                                                                 | `RACE-AND-SLICE-RESEARCH.md`, section `## [Rosy_Dreams]Rice_Shower_Unity-Cup.md` (Round 14, augment-only)                                                                                                            |
@@ -352,6 +352,9 @@ documentation for the `UraFinaleRunsSeeder`.
 > **Erratum 2026-10-12.** The Round 14 table above says "(all live, all still in place)". That was true
 > on 2026-10-10. Three of the seventeen sources — the G/D/E prompt sets — were ordered consolidated and
 > deleted by the owner on 2026-10-12; see Round 15 below. The other fourteen remain live and in place.
+>
+> **Erratum 2026-10-15.** A fourth of the seventeen — `docs/proposals/provenance-and-absence-contracts.md`
+> — was refreshed and deleted on 2026-10-15; see Round 16 below. Thirteen of the seventeen remain live.
 
 ### Round 15 (2026-10-12, owner-ordered) — the three Trainer Desk 2.0 prompt sets deleted from `docs/`
 
@@ -377,6 +380,45 @@ standing deliberately: the dated "What closure does not cover" note in `KNOWN-IS
 measurement, and the register's own convention keeps dated provenance verbatim. The four scenario
 implementation plans from Round 14 (`Our-Grand-Concert-plan.md`, `Trackblazer-plan.md`,
 `Unity-Cup-plan.md`, `URA-Finale-plan.md`) remain live in `docs/` and are not part of this round.
+
+### Round 16 (2026-10-15, owner-ordered) — nine `docs/proposals/` files into the masters that own their subject
+
+The owner ordered nine proposal files consolidated and the originals deleted from `docs/proposals/`.
+Eight are markdown (422 to 889 lines) and one is a 17-line plain-text baseline. Seven were embedded
+fresh; `provenance-and-absence-contracts.md` had already been embedded by Round 14, so its section was
+refreshed instead: the source had grown from 839 to 889 lines (§22, the 2026-10-11 Phase G preflight,
+plus a citation repoint inside it), and the stale 839-line body would otherwise have shipped a master
+missing two days of owner rulings.
+
+| Absorbed file                                              | Lines | New home                                                                                      | Recoverable after delete?                                                                                   |
+| ---------------------------------------------------------- | ----- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `docs/proposals/cockpit-ui-audit-2026-10-12.md`            | 422   | `AUDIT-AND-VERIFICATION.md`, section `## cockpit-ui-audit-2026-10-12.md`                      | Yes — tracked and clean at HEAD                                                                             |
+| `docs/proposals/setup-wizard-ui-audit-2026-10-12.md`       | 391   | `AUDIT-AND-VERIFICATION.md`, section `## setup-wizard-ui-audit-2026-10-12.md`                 | Yes — tracked and clean at HEAD                                                                             |
+| `docs/proposals/remaining-screens-ui-audit-2026-10-13.md`  | 646   | `AUDIT-AND-VERIFICATION.md`, section `## remaining-screens-ui-audit-2026-10-13.md`            | Yes — tracked and clean at HEAD                                                                             |
+| `docs/proposals/ux-laws-report-cockpit-wizard-2026-10-13.md` | 228 | `AUDIT-AND-VERIFICATION.md`, section `## ux-laws-report-cockpit-wizard-2026-10-13.md`         | Yes — tracked and clean at HEAD                                                                             |
+| `docs/proposals/screenshot-research-registry-implementation-plan.md` | 417 | `PROCESS-PLANS.md`, section `## screenshot-research-registry-implementation-plan.md` | Yes — tracked and clean at HEAD                                                                             |
+| `docs/proposals/trainee-goals-fullstack-plan-2026-10-13.md` | 621  | `PROCESS-PLANS.md`, section `## trainee-goals-fullstack-plan-2026-10-13.md`                   | **No** — the file was untracked (`??` at delete time); the section is the only copy, per Round 13's E2 precedent |
+| `docs/proposals/trainer-desk-remaining-implementation-plan.md` | 693 | `PROCESS-PLANS.md`, section `## trainer-desk-remaining-implementation-plan.md`              | Yes — tracked and clean at HEAD                                                                             |
+| `docs/proposals/trainer-desk-remaining-baseline.txt`       | 17    | `PROCESS-PLANS.md`, section `## trainer-desk-remaining-baseline.txt` (a fenced text block)     | Yes — tracked and clean at HEAD                                                                             |
+| `docs/proposals/provenance-and-absence-contracts.md`       | 889   | `PLANS-AND-BRIEFS.md`, section `## provenance-and-absence-contracts.md` (refreshed Round 14 embed) | Yes — tracked and clean at HEAD                                                                          |
+
+Verification, per the discipline's line-by-line rule, ran before the delete: every non-blank line of
+each source was found in its section, in order, with one-level heading demotion and fence-aware
+comparison (cockpit 339/339, setup-wizard 310/310, remaining-screens 554/554, ux-laws-report 197/197,
+screenshot-registry 282/282, trainee-goals 505/505, trainer-desk-remaining 541/541, provenance
+754/754, baseline 17/17; 0 missing in each). Live citations were repointed before the delete:
+`docs/proposals/ux-laws-audit-plan-2026-10-13.md` (16 audit and baseline references),
+`docs/proposals/frontend-fidelity-2026-10-13.md` (5), `KNOWN-ISSUES.md` (KI-81's two reservation
+references and the F-E1 finding reference), `SLICE-RECORDS.md` (1), `SCREEN_SPEC.md` (2), `DESIGN.md`
+(1), `app/Services/Advisor/NextDecision.php` (1 docblock line), `tests/Feature/CockpitObjectivesTest.php`
+(1 docblock line), and `docs/audits/rice-shower-unity-cup-round2-reconciliation.md` (the live
+`:389-396` ruling reference). Three classes of reference were left standing deliberately: the dated
+"uncommitted 48-line §22" record in that same reconciliation file; the verbatim embeds' own
+cross-references to their former sibling paths (the tolerated historical class); and the informal
+short names without `.md` (`cockpit-ui-audit`, `setup-wizard-ui-audit`) in the two live proposal
+documents, which are prose, not paths. `docs/proposals/ux-laws-audit-plan-2026-10-13.md` and
+`docs/proposals/frontend-fidelity-2026-10-13.md` were themselves not in the owner's list and stay at
+their own paths.
 
 ### Deliberate exceptions, outside the masters
 

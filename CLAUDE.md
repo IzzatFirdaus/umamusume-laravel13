@@ -18,7 +18,7 @@ agent files under it are local configuration, not repository truth.
 ## 1. Instruction precedence, for Claude specifically
 
 1. The task you were given.
-2. `AGENTS.md`, then `CONSTRAINTS.md` -> `GOVERNANCE.md` §CONSTRAINTS.md for the bar.
+2. `AGENTS.md`, then `docs/research-scratch/GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar, C-1 to C-9)" for the bar.
 3. Accepted ADRs (`docs/adr/`); a `Proposed` ADR is not binding.
 4. `CLAUDE.md` (this file) for Claude-specific practice.
 5. `.ai/rules/index.md` -> the rule files whose globs cover the paths in scope.

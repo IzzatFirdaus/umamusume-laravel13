@@ -14,7 +14,7 @@
 >
 > **What this plan deliberately does not do:** it does not re-run the audits, does not assign new finding
 > IDs, and does not re-open any of the eleven "what a later pass must not do" items in
-> `remaining-screens-ui-audit-2026-10-13.md` §5. It inherits them (restated in §9).
+> `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §5. It inherits them (restated in §9).
 
 ## 0. What governs this plan
 
@@ -32,11 +32,11 @@ conflict is recorded, not resolved silently. Five facts from the existing files 
    `:188-190`, ratified widths at `:197-208`, the wide-table region rule at `:209-224`, motifs at
    `:231-248`, absence/provenance at `:567-624`, motion at `:679-726`, WCAG 2.2 AA floor at `:851-872`).
    A law that is really a contract question is settled by the contract, not by taste.
-3. **The three audits already produced a score card.** `remaining-screens-ui-audit-2026-10-13.md` §1.1
+3. **The three audits already produced a score card.** `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §1.1
    scores eight clusters on impeccable's five dimensions (Accessibility, Performance, Theming,
    Responsive, Implementation Integrity), 104/160; §1.2 counts 1 P0, 26 P1, 31 P2, 29 P3. This plan adds
    a **laws** axis on top of that score card; it does not rescore the clusters.
-4. **The bar cannot see several classes the laws travel on.** `remaining-screens-ui-audit-2026-10-13.md`
+4. **The bar cannot see several classes the laws travel on.** `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md"
    §4 is the list: `npm run typecheck` reads no `.vue` file (§4.1), the copy-hygiene guard sees no
    server-composed string (§4.2), the G-18 contrast contract pins 19 pairs with one `ink-muted` pair
    (§4.3), registers lag the code (§4.4), an unvalidated config→badge index exists (§4.5), and the
@@ -140,7 +140,7 @@ carries the verdict and the spine names the fix.
 
 ### 2.4 Against the instrument findings
 
-`remaining-screens-ui-audit-2026-10-13.md` §4 names six things the quality bar cannot see. Each is a
+`docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §4 names six things the quality bar cannot see. Each is a
 **blind channel a law travels on**, so this plan adds an instrument for it (§4) rather than repeating the
 finding:
 
@@ -155,7 +155,7 @@ finding:
 
 ### 2.5 Against the HLF reference set (the target rendered)
 
-`docs/proposals/HLF_reference/` (25 captures of a v0 build, `v0.1.0`) is the first artifact in the corpus
+`docs/proposals/HLF_reference/` (25 captures of a v0 build, `v2.0.0`) is the first artifact in the corpus
 that **renders** the target rather than describing it, and it is the natural comparison surface for a laws
 verdict: a law that FAILs on the shipped screen but PASSes in the HLF names a concrete, already-drawn fix.
 Its patterns map to the canonical laws as:
@@ -285,7 +285,7 @@ document before they count. The plan treats it as a pilot of the output contract
 
 ### 3.1 Clusters (inherited, unchanged)
 
-The eight clusters are `remaining-screens-ui-audit-2026-10-13.md` §0.1 (A shell/home/errors, B reference
+The eight clusters are `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §0.1 (A shell/home/errors, B reference
 catalogs, C Database hub, D1 run lifecycle, D2 queue/settings, E Legacy/Veterans/deck, F career decisions,
 G record/outcome/snapshot), plus the two surfaces the other audits own: **Cockpit** (`SCR-CAR-011`) and
 **Wizard** (the six `/career/setup/*` steps). Ten units in total. The audit adds no cluster.
@@ -331,7 +331,7 @@ against a screenshot/DOM; `Measure` = a live capture reading (width, height, lin
 - **Automatable now:** 3 (tap-targets), 13 (motion grep), 27 (token/type grep + G-18 browser gate), and the
   accessibility sub-checks under 1.2's Accessibility row (axe, `aria-describedby` association).
 - **Measure (live capture):** 4, 6, 11, 15, 19, 23 — width, control count, accent count, stepper state,
-  timing. These are the rows `remaining-screens-ui-audit-2026-10-13.md` marks `needs measurement`.
+  timing. These are the rows `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" marks `needs measurement`.
 - **Judgement only:** 1, 2, 8, 9, 14, 16, 17, 18, 20, 21, 22, 24, 25, 26. Each must cite a screenshot or a
   `file:line`, never an impression.
 
@@ -341,7 +341,7 @@ against a screenshot/DOM; `Measure` = a live capture reading (width, height, lin
 
 Read each page and its composed components plus the controller that builds its props, as the existing
 audits did. Every claim about rendered appearance that the source cannot settle is marked
-`needs measurement` and names the measurement (the discipline `remaining-screens-ui-audit-2026-10-13.md`
+`needs measurement` and names the measurement (the discipline `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md"
 states at its head, `:14-18`).
 
 ### 4.2 Live browser capture (the measurement instrument)
@@ -437,7 +437,7 @@ existing severities, grouped P0-P3, each with an acceptance criterion.
 
 ## 7. Severity and scoring
 
-Severity is the impeccable scale already in use (`remaining-screens-ui-audit-2026-10-13.md` §1.2): P0
+Severity is the impeccable scale already in use (`docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §1.2): P0
 blocks task completion, causes data loss, or is a serious accessibility failure; P1 materially increases
 confusion, errors, or abandonment; P2 reduces efficiency or scanability; P3 is polish. The plan adds no
 new scale. A law FAIL is not automatically P0: severity is the impact, not the law. The cluster score card
@@ -455,7 +455,7 @@ new scale. A law FAIL is not automatically P0: severity is the impact, not the l
 
 ## 9. What this audit must not do
 
-Inherited verbatim in substance from `remaining-screens-ui-audit-2026-10-13.md` §5, because a law is not a
+Inherited verbatim in substance from `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §5, because a law is not a
 licence to break a ruling:
 
 1. Do not move a colour token to answer a contrast question; propose pair rows and let the gate decide.
@@ -532,7 +532,7 @@ Per `AGENTS.md` §9's cost-aware escalation. Nothing below was run for this plan
 - **Deliverables produced:** this file. No component, token, copy string, gate, spec, or test was changed.
 - **Facts this plan relies on, and their source:** the canonical 27 come from the supplied checklist (§1);
   the existing Laws table is `frontend-development-plan.md:2479-2519`; the findings and severities are
-  `remaining-screens-ui-audit-2026-10-13.md` §1-§3; the instrument limits are its §4; the two other
+  `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §1-§3; the instrument limits are its §4; the two other
   audits own the Cockpit and the wizard; the baseline is `docs/research-scratch/PROCESS-PLANS.md` §"trainer-desk-remaining-baseline.txt"; the live
   capture harness and the 81 screenshots are `.scratch-uma/ux-audit/`; the rendered comparison target is
   the 25 captures in `docs/proposals/HLF_reference/` (§2.5), read in full; the colour evidence in §2.6 is

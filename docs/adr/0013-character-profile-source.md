@@ -41,6 +41,6 @@ and the collision is an owner call — which the owner resolved on 2026-09-30 in
 
 ## Links
 
-- `ADR-0012` Decision 4 (the authority), `PRD.md` A-1, A-7, FR-A-6, `CONSTRAINTS.md` C-4
+- `ADR-0012` Decision 4 (the authority), `PRD.md` A-1, A-7, FR-A-6, `docs/research-scratch/GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar, C-1 to C-9)" C-4
 - `docs/data/2026-09-30-characters-source-probe.md` (the coverage measurements)
 - Full body: `archive/adr/0013-character-profile-source.md`

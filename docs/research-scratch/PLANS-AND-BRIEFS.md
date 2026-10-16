@@ -34,6 +34,11 @@ This document consolidates the following source files verbatim (no summarization
   `## provenance-and-absence-contracts.md` and `## screen-spec-2.0.md`. The first is the reconciliation
   proposal with its ten owner rulings; the second is the 2.0 screen-set target with its governance holds.
   Both stay live at their own paths; nothing was deleted and no citation was repointed.
+- `docs/proposals/provenance-and-absence-contracts.md` refreshed and consolidated 2026-10-15 (Round 16,
+  owner-ordered): the source had grown to 889 lines (§22, the 2026-10-11 Phase G preflight, added after
+  the Round 14 embed), so the section above was re-embedded from the current source, verified line by
+  line (0 missing), and the original was deleted from `docs/proposals/`. Live citations were repointed to
+  this section; `docs/proposals/screen-spec-2.0.md` stays live at its own path.
 
 ---
 
