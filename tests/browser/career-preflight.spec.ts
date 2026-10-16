@@ -41,6 +41,9 @@ async function newDraft(page: import('@playwright/test').Page): Promise<{ traine
     await page.goto('/career/setup/trainee', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     const traineeButton = page.getByRole('button', { name: 'Select Trainee' }).first();
+    // 64fc4b8 made the card's label flip from "Select Trainee" to "Chosen · clear" on selection, so a
+    // name locator re-resolved after the click lands on a different card. Pin the id we clicked.
+    const traineeId = await traineeButton.getAttribute('id');
     // The row's first line is her name, which is what the run screen prints as its heading; capturing it
     // here is what lets the creation case prove the run belongs to the trainee the wizard recorded.
     const traineeName = (await traineeButton.locator('xpath=ancestor::li[1]').innerText())
@@ -48,7 +51,7 @@ async function newDraft(page: import('@playwright/test').Page): Promise<{ traine
         .map((line) => line.trim())
         .filter((line) => line !== '')[0];
     await traineeButton.click();
-    await expect(traineeButton).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator(`#${traineeId}`)).toHaveAttribute('aria-pressed', 'true');
 
     await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();

@@ -55,8 +55,11 @@ async function newCareer(page: import('@playwright/test').Page): Promise<string>
     await page.goto('/career/setup/trainee', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     const traineeButton = page.getByRole('button', { name: 'Select Trainee' }).first();
+    // 64fc4b8 made the card's label flip from "Select Trainee" to "Chosen · clear" on selection, so a
+    // name locator re-resolved after the click lands on a different card. Pin the id we clicked.
+    const traineeId = await traineeButton.getAttribute('id');
     await traineeButton.click();
-    await expect(traineeButton).toHaveAttribute('aria-pressed', 'true', WRITE);
+    await expect(page.locator(`#${traineeId}`)).toHaveAttribute('aria-pressed', 'true', WRITE);
 
     await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();

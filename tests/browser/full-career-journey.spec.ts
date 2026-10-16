@@ -63,8 +63,11 @@ async function walkToPreflight(page: import('@playwright/test').Page): Promise<s
     await page.goto('/career/setup/trainee', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     const traineeButton = page.getByRole('button', { name: 'Select Trainee' }).first();
+    // 64fc4b8 made the card's label flip from "Select Trainee" to "Chosen · clear" on selection, so a
+    // name locator re-resolved after the click lands on a different card. Pin the id we clicked.
+    const traineeId = await traineeButton.getAttribute('id');
     await traineeButton.click();
-    await expect(traineeButton).toHaveAttribute('aria-pressed', 'true', WRITE);
+    await expect(page.locator(`#${traineeId}`)).toHaveAttribute('aria-pressed', 'true', WRITE);
 
     // The chosen trainee's name, read back from the draft rather than assumed: the rest of the
     // journey asserts this exact name on the screens it lands on.
