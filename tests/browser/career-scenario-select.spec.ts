@@ -108,9 +108,12 @@ test.describe('Scenario Selection', () => {
         await expect(use.getByText('N/A')).toHaveCount(0);
     });
 
-    test('keeps the ruleset version and the rule family as two separately named facts', async ({ page }) => {
+    test('keeps the ruleset version, the scenario ruleset date and the rule family as separately named facts', async ({ page }) => {
         // R2-05: the Unity Cup card printed two rows headed `Ruleset`, one `N/A` and one `Team`, which
-        // reads as the card contradicting itself. Each fact keeps its own heading and its own value.
+        // reads as the card contradicting itself. Each fact keeps its own heading and its own value —
+        // and since the 2026-10-15 wiring there are three ruleset-worded rows, each still its own:
+        // the tool-wide version (absent by ruling), the scenario's own ruleset date (sourced), and
+        // the rule family (the matrix's facility_level_source).
         await page.goto('/career/setup/scenario');
         await page.locator('#app > *').first().waitFor();
 
@@ -121,16 +124,46 @@ test.describe('Scenario Selection', () => {
         const unityRuleset = unity.locator('dd').filter({ hasText: /No source defines a Global ruleset version/ }).locator('details');
         await expect(unityRuleset).toBeVisible();
         await expect(unityRuleset).toContainText('N/A');
-        await expect(unity.getByText('Rule family', { exact: true }).locator('..').getByText('Team', { exact: true })).toBeVisible();
+
+        // The scenario's own ruleset date renders its sourced value with a derived launch/rework
+        // word, and the event that dated it rides the `title`; never inside the version row above.
+        const dateRow = unity.getByText('Scenario ruleset date', { exact: true }).locator('..');
+        await expect(dateRow).toContainText('2026-07-01 (rework)');
+        await expect(dateRow.locator('dd')).toHaveAttribute('title', /July 1, 2026 rework raised caps/);
+
+        // The family renders the humanized label, never the snake_case taxonomy key (owner
+        // ruling, 2026-10-16): the row prints the matrix's taxonomy in words, not config.
+        await expect(unity.getByText('Rule family', { exact: true }).locator('..').getByText('Team rank', { exact: true })).toBeVisible();
 
         // Neither heading is bare `Ruleset` any more, on any card, and no heading repeats. The row
         // that carries the family prints the family where the matrix records one and the named
         // absence where it does not, so a scenario entry holding no ruleset still names the gap
-        // rather than dropping the row.
+        // rather than dropping the row. Trackblazer's facts open here because the rows inside a
+        // closed disclosure are in the tree but not visible.
+        await openFacts(page, 'Trackblazer');
         await expect(page.getByText('Ruleset', { exact: true })).toHaveCount(0);
         await expect(card(page, 'Trackblazer').getByText('Rule family', { exact: true })).toHaveCount(1);
         await expect(
-            card(page, 'Trackblazer').getByText('Rule family', { exact: true }).locator('..').getByText('Not recorded'),
+            card(page, 'Trackblazer').getByText('Rule family', { exact: true }).locator('..').getByText('Repetition + purchases', { exact: true }),
+        ).toBeVisible();
+
+        // The 2026-10-16 publisher pass recovered Unity Cup's recommended use and Trackblazer's
+        // planning focus, so those rows print the published line and cite the page it came from in
+        // the `title`. The one cell no publisher names, URA Finale's planning focus, still renders
+        // the research's own recorded search, verbatim. The filter there is scoped to the card's
+        // nested `details` only: with the facts disclosure open, the outer one's text contains the
+        // inner reason too, and an unscoped filter would match both.
+        const unityUse = unity.getByText('Recommended use', { exact: true }).locator('..').locator('dd');
+        await expect(unityUse).toContainText('go-to scenario for building strong, competitive aces');
+        await expect(unityUse).toHaveAttribute('title', /Game8, Unity Cup Update Guide \(archives\/545572\)/);
+
+        const trackFocus = card(page, 'Trackblazer').getByText('Planning focus', { exact: true }).locator('..').locator('dd');
+        await expect(trackFocus).toContainText('Races and the Pro Shop');
+        await expect(trackFocus).toHaveAttribute('title', /archives\/580723/);
+
+        await openFacts(page, 'URA Finale');
+        await expect(
+            card(page, 'URA Finale').locator('details details').filter({ hasText: 'No repo master names a planning focus for this scenario' }),
         ).toHaveCount(1);
     });
 

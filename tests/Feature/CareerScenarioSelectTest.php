@@ -27,13 +27,42 @@ it('renders one card per scenario the matrix composes, each derived from config'
             // A ruleset version is not sourced, so the card carries the absence and its reason.
             ->where('ruleset.value', null)
             ->has('ruleset.title')
-            // The brief's two fields render where a scenario guide sources them and stay a named
-            // absence where it does not, so both ends are pinned: URA Finale's guide states both,
-            // Trackblazer's states a description and no use, and the use stays null there.
+            // The two fields render where a scenario guide sources them and stay a named absence
+            // where it does not, so both ends are pinned: URA Finale and Trackblazer each state a
+            // description and a recommended use.
             ->where('scenarios.0.description', config('scenarios.scenarios.ura_finale.metadata.description'))
             ->where('scenarios.0.recommended_use', config('scenarios.scenarios.ura_finale.metadata.recommended_use'))
             ->where('scenarios.2.description', config('scenarios.scenarios.trackblazer.metadata.description'))
-            ->where('scenarios.2.recommended_use', null));
+            ->where('scenarios.2.recommended_use', config('scenarios.scenarios.trackblazer.metadata.recommended_use'))
+            // The scenario's own ruleset date (2026-10-15 artifact): launch when the date is the
+            // entry's own availability date, rework otherwise. NOT `app.ruleset`, whose null the
+            // `ruleset` prop above still carries.
+            ->where('scenarios.0.ruleset_date.value', '2026-07-01 (rework)')
+            ->where('scenarios.1.ruleset_date.value', '2026-07-01 (rework)')
+            ->where('scenarios.2.ruleset_date.value', '2026-03-12 (launch)')
+            ->where('scenarios.3.ruleset_date.value', '2026-07-22 (launch)')
+            // The rule family is the entry's `facility_level_source`, rendered as the humanized
+            // label the row prints, never the snake_case taxonomy key (owner ruling, 2026-10-16).
+            ->where('scenarios.0.rule_family', 'Repetition')
+            ->where('scenarios.1.rule_family', 'Team rank')
+            ->where('scenarios.2.rule_family', 'Repetition + purchases')
+            ->where('scenarios.3.rule_family', 'Repetition')
+            // Five of the six cells the artifact recorded as searched-and-not-found were recovered by
+            // the 2026-10-16 publisher pass. A recovered cell carries its value and its source and
+            // drops the reason, so the row prints a published line and names where it came from.
+            ->where('scenarios.1.metadata.recommended_use', 'Its guide names it the go-to scenario for building strong, competitive aces, temporarily until Grand Live releases.')
+            ->where('scenarios.1.metadata.recommended_use_source', 'Game8, Unity Cup Update Guide (archives/545572), page updated 2026-07-07')
+            ->where('scenarios.1.metadata.recommended_use_reason', null)
+            ->where('scenarios.2.metadata.planning_focus', 'Its guide has the player focus the training strategy around Races and the Pro Shop to reach the best results.')
+            ->where('scenarios.2.metadata.recommended_use', 'Its guide calls it a more open career with no race goal restrictions.')
+            ->where('scenarios.3.metadata.recommended_use', 'Its guide files it as the main training scenario for four months, with the Speed cap raised by 400.')
+            ->where('scenarios.3.metadata.planning_focus', 'Its guide says to focus on training rather than stacking races.')
+            ->where('scenarios.3.metadata.planning_focus_source', 'Game8, Grand Live (Grand Concert) Scenario Guide (archives/607337), page updated 2026-07-26')
+            // The one cell no publisher names stays an absence, and it carries the recorded search
+            // verbatim, including why the plan document's own §9 hierarchy is not a published focus.
+            ->where('scenarios.0.metadata.planning_focus', null)
+            ->where('scenarios.0.metadata.planning_focus_reason', 'No repo master names a planning focus for this scenario. Searched: docs/URA-Finale-plan.md, docs/scenarios/01-ura-finale.md, docs/UMAMUSUME_REFERENCE.md. The 2026-10-16 publisher pass found none either: Game8\'s URA Finale guide states a scenario comparison and a Summer camp tip, and the plan\'s §9 advisor hierarchy is this tool\'s own decision order, not a published planning focus.')
+            ->where('scenarios.1.metadata.planning_focus', config('scenarios.scenarios.unity_cup.metadata.planning_focus')));
 });
 
 it('marks the steps a session has opened as visited, including one left unsaved', function (): void {
@@ -256,6 +285,29 @@ it('adds a fifth scenario with one config entry and no component edit', function
             ->where('scenarios.4.systems', ['Pro Shop'])
             ->where('scenarios.4.resources', ['Shop Coins'])
             ->where('scenarios.4.documented', null));
+
+    config(['scenarios.scenarios' => $matrix]);
+});
+
+it('word-forms a rule family the display map does not already name', function (): void {
+    /** @var array<string, array<string, mixed>> $matrix */
+    $matrix = config('scenarios.scenarios');
+
+    // The match in `ScenarioSelectController::ruleFamilyLabel()` names the three taxonomy values the
+    // matrix holds today. A scenario entering with a fourth must not reach the card as a snake_case
+    // config key, so the fallback is pinned here rather than left to the map's own coverage.
+    config(['scenarios.scenarios.unseen_family' => [
+        'label' => 'Unseen Family',
+        'cap_bonus' => ['Speed' => 100, 'Stamina' => 100, 'Power' => 100, 'Guts' => 100, 'Wit' => 100],
+        'facility_level_source' => 'some_new_value',
+    ]]);
+
+    $this->get('/career/setup/scenario')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('scenarios', count($matrix) + 1)
+            ->where('scenarios.4.key', 'unseen_family')
+            ->where('scenarios.4.rule_family', 'Some New Value'));
 
     config(['scenarios.scenarios' => $matrix]);
 });

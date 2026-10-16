@@ -9,6 +9,7 @@ use App\Http\Requests\Career\StoreScenarioRequest;
 use App\Models\Preference;
 use App\Services\Career\SetupDraft;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -151,6 +152,18 @@ class ScenarioSelectController extends Controller
                 // guide does not state one, so a null here is a named absence on the page.
                 'description' => $meta['description'] ?? null,
                 'recommended_use' => $meta['recommended_use'] ?? null,
+                // The scenario's rule family, read from the entry's `facility_level_source` — the
+                // matrix fact the 2026-10-15 scenario-field-metadata artifact resolved the field
+                // against. It is a repository-defined taxonomy over that config fact; the report
+                // records that no publisher uses the term. The row renders the humanized label,
+                // never the snake_case key (owner ruling, 2026-10-16).
+                'rule_family' => isset($def['facility_level_source'])
+                    ? $this->ruleFamilyLabel((string) $def['facility_level_source'])
+                    : null,
+                // The scenario's Global ruleset date (launch or rework). NOT `app.ruleset`, which
+                // `ruleset()` below keeps null by ruling; the two are separate facts on separate
+                // rows with separate sources, which is the R2-05 split preserved.
+                'ruleset_date' => $this->rulesetDate($def),
             ];
         }
 
@@ -161,7 +174,7 @@ class ScenarioSelectController extends Controller
      * The card's metadata, read straight from the matrix, or null when the entry holds none.
      *
      * @param  array<string, mixed>  $def
-     * @return array{ruleset: string|null, summary: string|null, planning_focus: string|null, key_mechanics: list<string>, description: string|null, recommended_use: string|null}|null
+     * @return array{summary: string|null, planning_focus: string|null, planning_focus_source: string|null, planning_focus_reason: string|null, key_mechanics: list<string>, description: string|null, recommended_use: string|null, recommended_use_reason: string|null, recommended_use_source: string|null}|null
      */
     private function metadata(array $def): ?array
     {
@@ -172,15 +185,66 @@ class ScenarioSelectController extends Controller
         }
 
         return [
-            'ruleset' => isset($metadata['ruleset']) ? (string) $metadata['ruleset'] : null,
             'summary' => isset($metadata['summary']) ? (string) $metadata['summary'] : null,
             'planning_focus' => isset($metadata['planning_focus']) ? (string) $metadata['planning_focus'] : null,
+            // The 2026-10-15 artifact's recorded searches for the cells no source fills. They ride
+            // the payload so the page's absence carries the research's own reason, verbatim.
+            'recommended_use_reason' => isset($metadata['recommended_use_reason']) ? (string) $metadata['recommended_use_reason'] : null,
+            'planning_focus_reason' => isset($metadata['planning_focus_reason']) ? (string) $metadata['planning_focus_reason'] : null,
+            // Where a cell was recovered from a publisher, the source travels with it so the rendered
+            // value names where it came from (AGENTS.md §5: no fact without provenance).
+            'recommended_use_source' => isset($metadata['recommended_use_source']) ? (string) $metadata['recommended_use_source'] : null,
+            'planning_focus_source' => isset($metadata['planning_focus_source']) ? (string) $metadata['planning_focus_source'] : null,
             'key_mechanics' => array_values(array_map(
                 static fn (mixed $line): string => (string) $line,
                 (array) ($metadata['key_mechanics'] ?? []),
             )),
             'description' => isset($metadata['description']) ? (string) $metadata['description'] : null,
             'recommended_use' => isset($metadata['recommended_use']) ? (string) $metadata['recommended_use'] : null,
+        ];
+    }
+
+    /**
+     * The Rule family row's display label. The taxonomy values are config keys, not user copy,
+     * so the card prints the humanized form and never a snake_case key (owner ruling, 2026-10-16).
+     * A value the map does not name is word-formed rather than printed raw, so a fifth scenario's
+     * own taxonomy value still cannot reach the card as a config key.
+     */
+    private function ruleFamilyLabel(string $key): string
+    {
+        return match ($key) {
+            'repetition' => 'Repetition',
+            'team_rank' => 'Team rank',
+            'repetition_plus_purchases' => 'Repetition + purchases',
+            default => Str::headline($key),
+        };
+    }
+
+    /**
+     * The scenario's own Global ruleset date, from the entry's `ruleset_version`: the dated
+     * instant a source pins the scenario's current numbering to, its launch or its rework. It is
+     * not `app.ruleset` — that key stays null by ruling — and the two must not be merged into one
+     * label, one key or one rendered string.
+     *
+     * @param  array<string, mixed>  $def
+     * @return array{value: string, title: string}|null
+     */
+    private function rulesetDate(array $def): ?array
+    {
+        $version = $def['ruleset_version'] ?? null;
+
+        if (! is_array($version) || ! is_string($version['date'] ?? null)) {
+            return null;
+        }
+
+        // Whether the date is the launch or a later rework is derived from the two sourced dates:
+        // a ruleset date equal to the entry's own `live_on_global` is the launch, anything else is
+        // a rework. The word is the report's own "(re)launch" split, not a new term.
+        $kind = (($def['live_on_global'] ?? null) === $version['date']) ? 'launch' : 'rework';
+
+        return [
+            'value' => $version['date'].' ('.$kind.')',
+            'title' => trim(((string) ($version['event'] ?? '')).' Source: '.(string) ($version['source'] ?? '')),
         ];
     }
 

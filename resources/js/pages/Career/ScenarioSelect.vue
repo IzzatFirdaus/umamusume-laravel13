@@ -37,13 +37,18 @@ interface ScenarioCard {
     loop: string[];
     live_on_global: string | null;
     metadata: {
-        ruleset: string | null;
         summary: string | null;
         planning_focus: string | null;
+        planning_focus_source: string | null;
+        recommended_use_reason: string | null;
+        planning_focus_reason: string | null;
+        recommended_use_source: string | null;
         key_mechanics: string[];
     } | null;
     description: string | null;
     recommended_use: string | null;
+    rule_family: string | null;
+    ruleset_date: { value: string; title: string } | null;
 }
 
 const props = defineProps<{
@@ -100,6 +105,12 @@ const optimizesText = (card: ScenarioCard): string | null => {
         ? `No single stat: +${card.optimizes.bonus} on all five`
         : `${stats} (+${card.optimizes.bonus})`;
 };
+
+// The Rule family row's provenance, as its `title`. The word is this repository's own taxonomy for
+// how the scenario advances its facility level, read from the entry's `facility_level_source`; the
+// 2026-10-15 artifact's report resolves the field against that config fact and states that no
+// publisher uses the term, so the citation is the repository's, not a publisher's.
+const ruleFamilyTitle = 'How this scenario advances its training facility level, read from the entry\'s `facility_level_source` in config/scenarios.php; the repository\'s own taxonomy, which no publisher uses.';
 </script>
 
 <template>
@@ -160,7 +171,7 @@ const optimizesText = (card: ScenarioCard): string | null => {
             and no career can be started until one is added.
         </p>
 
-        <ul v-else class="mt-6 grid list-none grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <ul v-else class="mt-6 grid list-none grid-cols-1 gap-4 @4xl:grid-cols-2 @7xl:grid-cols-4">
             <li
                 v-for="card in props.scenarios"
                 :key="card.key"
@@ -205,6 +216,7 @@ const optimizesText = (card: ScenarioCard): string | null => {
                         <SubCell label="Tracked resources" :value="card.resources.length > 0 ? card.resources.join(', ') : 'None beyond the generic strip'" :title="card.resources.length > 0 ? undefined : 'It composes only the widgets every scenario carries.'" />
                         <SubCell label="Turn loop" :value="card.loop.length > 0 ? card.loop.join(' → ') : 'N/A'" :title="card.loop.length > 0 ? undefined : 'No turn loop steps are recorded for this scenario.'" />
                         <SubCell label="Live on Global" :value="card.live_on_global ?? 'N/A'" :title="card.live_on_global ? undefined : 'No Global availability date is recorded for this scenario.'" />
+                        <SubCell label="Scenario ruleset date" :value="card.ruleset_date?.value ?? 'N/A'" :title="card.ruleset_date?.title ?? 'No source in this repository dates this scenario\'s ruleset.'" />
                         <div class="flex flex-wrap justify-between gap-x-4">
                             <dt class="text-ink-muted">Ruleset version</dt>
                             <dd v-if="props.ruleset.value === null" class="text-ink-muted">
@@ -215,24 +227,31 @@ const optimizesText = (card: ScenarioCard): string | null => {
                             </dd>
                         </div>
                         <SubCell data-field="description" label="Description" :value="card.description ?? 'N/A'" :title="card.description ? undefined : `No sourced description line exists for the ${card.label} guide in this repository.`" />
-                        <SubCell data-field="recommended_use" label="Recommended use" :value="card.recommended_use ?? 'N/A'" :title="card.recommended_use ? undefined : 'The scenario guides state no recommended use, and choosing one would be a judgement this tool holds no source for.'" />
+                        <SubCell data-field="recommended_use" label="Recommended use" :value="card.recommended_use ?? 'N/A'" :title="card.recommended_use ? (card.metadata?.recommended_use_source ?? undefined) : (card.metadata?.recommended_use_reason ?? 'The scenario guides state no recommended use, and choosing one would be a judgement this tool holds no source for.')" />
                     </div>
 
-                    <!-- The scenario's recorded metadata, straight from the matrix. A scenario the matrix
-                         does not describe prints the named absence rather than a sentence invented here. -->
+                    <!-- Not "Ruleset version": the fact grid above carries three ruleset-worded facts,
+                         each on its own row — the tool-wide ruleset *version*, which no source names;
+                         the scenario's own ruleset *date*, its launch or rework; and this row, the
+                         scenario's rule *family*, read from the matrix's `facility_level_source`. One
+                         label for two facts read as a card contradicting itself, which is exactly what
+                         the second audit reported (R2-05). -->
                     <div v-if="card.metadata !== null" class="mt-3 rounded-md border border-rule bg-panel p-3 text-sm">
                         <dl class="space-y-1">
-                            <!-- Not "Ruleset": the fact grid above carries the global ruleset *version*,
-                                 which no source names, and this row carries the scenario's own rule family
-                                 from the matrix. One label for two facts reads as a card contradicting
-                                 itself, which is exactly what the second audit reported (R2-05). -->
-                            <div class="flex flex-wrap justify-between gap-x-4">
+                            <div data-field="rule-family" class="flex flex-wrap justify-between gap-x-4">
                                 <dt class="text-ink-muted">Rule family</dt>
-                                <dd class="text-ink">{{ card.metadata.ruleset ?? 'Not recorded' }}</dd>
+                                <dd class="text-ink" :title="card.rule_family !== null ? ruleFamilyTitle : undefined">{{ card.rule_family ?? 'Not recorded' }}</dd>
                             </div>
                             <div class="flex flex-wrap justify-between gap-x-4">
                                 <dt class="text-ink-muted">Planning focus</dt>
-                                <dd class="text-ink">{{ card.metadata.planning_focus ?? 'Not recorded' }}</dd>
+                                <dd
+                                    v-if="card.metadata.planning_focus !== null"
+                                    class="text-ink"
+                                    :title="card.metadata.planning_focus_source ?? undefined"
+                                >{{ card.metadata.planning_focus }}</dd>
+                                <dd v-else>
+                                    <AbsenceValue compact :reason="card.metadata.planning_focus_reason ?? 'No planning focus is recorded for this scenario in this repository.'" />
+                                </dd>
                             </div>
                         </dl>
                         <details v-if="card.metadata.key_mechanics.length > 0" class="mt-2">

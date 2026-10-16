@@ -7,11 +7,12 @@ use Inertia\Testing\AssertableInertia as Assert;
 /**
  * Scenario card metadata.
  *
- * Unity Cup is the one scenario a source describes in the card's own terms, so its metadata is
- * recorded; the other three carry null, which the page names as "Not recorded" rather than filling
- * with a sentence nobody sourced.
+ * Every scenario the matrix composes carries card metadata a source describes. The cells the
+ * 2026-10-15 artifact recorded as searched-and-not-found carried that recorded search verbatim;
+ * the 2026-10-16 publisher pass recovered five of the six, and each recovered cell now rides the
+ * payload as a value with its source beside it, with its search reason dropped.
  */
-it('records Unity Cup metadata and leaves the other scenarios absent', function (): void {
+it('records the card metadata the matrix holds, with a source beside every recovered cell', function (): void {
     $this->get(route('career.scenario'))
         ->assertOk()
         ->assertInertia(function (Assert $page): void {
@@ -21,13 +22,28 @@ it('records Unity Cup metadata and leaves the other scenarios absent', function 
 
             $unity = $byKey['unity_cup']['metadata'];
 
-            expect($unity['ruleset'])->toBe('Team')
-                ->and($unity['summary'])->toBeString()->not->toBeEmpty()
+            expect($unity['summary'])->toBeString()->not->toBeEmpty()
                 ->and($unity['planning_focus'])->toBeString()->not->toBeEmpty()
                 ->and($unity['key_mechanics'])->not->toBeEmpty()
-                ->and($byKey['ura_finale']['metadata'])->toBeNull()
-                ->and($byKey['trackblazer']['metadata'])->toBeNull()
-                ->and($byKey['our_grand_concert']['metadata'])->toBeNull();
+                ->and($unity['planning_focus_reason'])->toBeNull()
+                // A row that prints a published line cannot also claim nobody named one: the reason
+                // key is gone wherever the value arrived, and the value travels with its source.
+                ->and($unity['recommended_use'])->toBeString()->not->toBeEmpty()
+                ->and($unity['recommended_use_source'])->toBeString()->not->toBeEmpty()
+                ->and($unity['recommended_use_reason'])->toBeNull()
+                ->and($byKey['ura_finale']['metadata']['recommended_use'])->toBeString()->not->toBeEmpty()
+                // The one cell no publisher names keeps both halves of the absence.
+                ->and($byKey['ura_finale']['metadata']['planning_focus'])->toBeNull()
+                ->and($byKey['ura_finale']['metadata']['planning_focus_reason'])->toBeString()->not->toBeEmpty()
+                ->and($byKey['trackblazer']['metadata']['recommended_use'])->toBeString()->not->toBeEmpty()
+                ->and($byKey['trackblazer']['metadata']['planning_focus'])->toBeString()->not->toBeEmpty()
+                ->and($byKey['trackblazer']['metadata']['recommended_use_reason'])->toBeNull()
+                ->and($byKey['trackblazer']['metadata']['planning_focus_reason'])->toBeNull()
+                ->and($byKey['our_grand_concert']['metadata']['recommended_use'])->toBeString()->not->toBeEmpty()
+                ->and($byKey['our_grand_concert']['metadata']['planning_focus'])->toBeString()->not->toBeEmpty()
+                ->and($byKey['our_grand_concert']['metadata']['planning_focus_source'])->toBeString()->not->toBeEmpty()
+                ->and($byKey['our_grand_concert']['metadata']['recommended_use_reason'])->toBeNull()
+                ->and($byKey['our_grand_concert']['metadata']['planning_focus_reason'])->toBeNull();
         });
 });
 
@@ -84,12 +100,15 @@ it('prints each fact on a scenario card under one label, and never one label twi
 
     // The card's own fact grid then its recorded metadata, in the order the template prints them.
     // One entry per fact: a duplicated heading fails this, and so does a pattern that matched nothing.
+    // `Scenario ruleset date` sits between the availability row and the tool-wide version row, which
+    // is the 2026-10-15 wiring's third ruleset-worded fact on its own row.
     expect($labels)->toBe([
         'Optimizes',
         'Systems',
         'Tracked resources',
         'Turn loop',
         'Live on Global',
+        'Scenario ruleset date',
         'Ruleset version',
         'Description',
         'Recommended use',
@@ -97,9 +116,11 @@ it('prints each fact on a scenario card under one label, and never one label twi
         'Planning focus',
     ]);
 
-    // Each of the two keeps its own source: the version row carries the reason for its `N/A` on the
-    // element, and the family row still reads the matrix value rather than a word typed in here.
+    // Each of the three keeps its own source: the version row carries the reason for its `N/A` on
+    // the element, the scenario date row reads the payload the entry's `ruleset_version` builds,
+    // and the family row reads the entry's `facility_level_source` rather than a word typed in here.
     expect($source)
         ->toContain(':title="props.ruleset.title"')
-        ->toMatch('/Rule family<\/dt>.*?card\.metadata\.ruleset/s');
+        ->toMatch('/Rule family<\/dt>.*?card\.rule_family/s')
+        ->toMatch('/Scenario ruleset date.*?card\.ruleset_date/s');
 });

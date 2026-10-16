@@ -145,8 +145,26 @@ return [
                 'summary' => 'The first and most basic career scenario, and the Global launch baseline: three years of turns between training, rest, recreation and racing, with no team system, no shop and no mid-scenario currency on top.',
                 'description' => 'Take a trainee through three in-game years, alternating training, rest, recreation and racing while managing Energy and Mood, so the career ends with strong stats, a good skill set and a completed Unique Skill. Its guide calls it the purest scenario for learning the fundamentals.',
                 'recommended_use' => 'Its guide names it the baseline for learning training, mood, energy and race timing before moving to scenarios with extra systems.',
+                // The 2026-10-15 artifact's recorded search for this cell: the reason an absent value
+                // renders with, verbatim from the research record, never paraphrased on the way through.
+                // The 2026-10-16 publisher pass is appended to it rather than replacing it, and it
+                // records why the plan document's §9 was not used as the value.
+                'planning_focus_reason' => 'No repo master names a planning focus for this scenario. Searched: docs/URA-Finale-plan.md, docs/scenarios/01-ura-finale.md, docs/UMAMUSUME_REFERENCE.md. The 2026-10-16 publisher pass found none either: Game8\'s URA Finale guide states a scenario comparison and a Summer camp tip, and the plan\'s §9 advisor hierarchy is this tool\'s own decision order, not a published planning focus.',
             ],
             'live_on_global' => '2025-06-26',
+            /*
+            | The scenario's Global ruleset date, resolved by the 2026-10-15 scenario-field-metadata
+            | artifact (docs/research-scratch-source/scenario-field-metadata-2026-10-15.json). It is
+            | the dated instant a source pins this scenario's current numbering to — the Global
+            | launch or the rework that rebalanced it — and it is NOT `app.ruleset`: that key stays
+            | null by ruling (HandleInertiaRequests, "no source defines a Global ruleset version"),
+            | and the two facts must not be merged into one label or one value.
+            */
+            'ruleset_version' => [
+                'date' => '2026-07-01',
+                'event' => 'July 1, 2026 rework raised caps from 1200 to 1400 in all five stats, added Happy Meek duels, and granted +200 per-stat cap bonus. Config records cap_bonus at [200,200,200,200,200].',
+                'source' => 'UMAMUSUME_REFERENCE.md §2.2.1, SCENARIO-PUBLISHER-REFERENCES.md line 982, docs/URA-Finale-plan.md line 16',
+            ],
             'cap_bonus' => ['Speed' => 200, 'Stamina' => 200, 'Power' => 200, 'Guts' => 200, 'Wit' => 200],
             'widgets' => ['turn', 'energy', 'fans'],
             'steps' => ['training', 'outcome', 'skill'],
@@ -259,11 +277,92 @@ return [
                 'speed_to_win' => ['approx' => 800, 'phrasing' => 'around 800 Speed, or an A rank'],
                 'stamina_by_distance' => ['Sprint' => 400, 'Mile' => 500, 'Medium' => 600, 'Long' => 700],
             ],
+
+            /*
+            | The published per-level training table, transcribed from the 2026-10-15
+            | scenario-field-metadata artifact (GameWith 257432, consolidated at
+            | docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md §4.4). The keys are the
+            | artifact's own: `primary`, `secondary`, `energy` and `skill_points` per level, with
+            | Guts carrying two secondaries — `secondary_a` feeds Speed, `secondary_b` feeds Power,
+            | the order the artifact's own scenario cells print them in.
+            |
+            | `server` is JP and every figure this table renders on a card carries the JP tag:
+            | no source publishes a Global per-level table (SCENARIO-PUBLISHER-REFERENCES.md
+            | line 34 forbids quoting a JP figure as a Global expectation). The 2026-07-01 rework
+            | did not alter these base figures per any source here, which is the note below.
+            | Wit's `energy` value is the refund, and the artifact's Wit rows state it only at
+            | Lv1 to Lv3; the cost row on a card reads the advisor's own `wit_cost` constant
+            | instead, so no per-level Wit energy figure renders from this table.
+            */
+            'training_tables' => [
+                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1854-1874 (GameWith 257432)',
+                'server' => 'JP',
+                'notes' => [
+                    'The 2026-07-01 Global rework raised stat caps and added Happy Meek duels but did not alter base training gains or energy costs per any source in this repository. JP values remain the only published figures.',
+                ],
+                'per_level' => [
+                    'Speed' => [
+                        'Lv1' => ['primary' => 10, 'secondary' => 5, 'energy' => -21, 'skill_points' => 2],
+                        'Lv2' => ['primary' => 11, 'secondary' => 5, 'energy' => -22, 'skill_points' => 2],
+                        'Lv3' => ['primary' => 12, 'secondary' => 5, 'energy' => -23, 'skill_points' => 2],
+                        'Lv4' => ['primary' => 13, 'secondary' => 6, 'energy' => -25, 'skill_points' => 2],
+                        'Lv5' => ['primary' => 14, 'secondary' => 7, 'energy' => -27, 'skill_points' => 2],
+                    ],
+                    'Stamina' => [
+                        'Lv1' => ['primary' => 9, 'secondary' => 4, 'energy' => -19, 'skill_points' => 2],
+                        'Lv2' => ['primary' => 10, 'secondary' => 4, 'energy' => -20, 'skill_points' => 2],
+                        'Lv3' => ['primary' => 11, 'secondary' => 4, 'energy' => -21, 'skill_points' => 2],
+                        'Lv4' => ['primary' => 12, 'secondary' => 5, 'energy' => -23, 'skill_points' => 2],
+                        'Lv5' => ['primary' => 13, 'secondary' => 6, 'energy' => -25, 'skill_points' => 2],
+                    ],
+                    'Power' => [
+                        'Lv1' => ['primary' => 8, 'secondary' => 5, 'energy' => -20, 'skill_points' => 2],
+                        'Lv2' => ['primary' => 9, 'secondary' => 5, 'energy' => -21, 'skill_points' => 2],
+                        'Lv3' => ['primary' => 10, 'secondary' => 5, 'energy' => -22, 'skill_points' => 2],
+                        'Lv4' => ['primary' => 11, 'secondary' => 6, 'energy' => -24, 'skill_points' => 2],
+                        'Lv5' => ['primary' => 12, 'secondary' => 7, 'energy' => -26, 'skill_points' => 2],
+                    ],
+                    'Guts' => [
+                        'Lv1' => ['primary' => 8, 'secondary_a' => 4, 'secondary_b' => 4, 'energy' => -22, 'skill_points' => 2],
+                        'Lv2' => ['primary' => 9, 'secondary_a' => 4, 'secondary_b' => 4, 'energy' => -23, 'skill_points' => 2],
+                        'Lv3' => ['primary' => 10, 'secondary_a' => 4, 'secondary_b' => 4, 'energy' => -24, 'skill_points' => 2],
+                        'Lv4' => ['primary' => 11, 'secondary_a' => 5, 'secondary_b' => 4, 'energy' => -26, 'skill_points' => 2],
+                        'Lv5' => ['primary' => 12, 'secondary_a' => 5, 'secondary_b' => 5, 'energy' => -28, 'skill_points' => 2],
+                    ],
+                    'Wit' => [
+                        'Lv1' => ['primary' => 9, 'secondary' => 2, 'energy' => 5, 'skill_points' => 4],
+                        'Lv2' => ['primary' => 10, 'secondary' => 2, 'energy' => 5, 'skill_points' => 4],
+                        'Lv3' => ['primary' => 11, 'secondary' => 2, 'energy' => 5, 'skill_points' => 4],
+                        'Lv4' => ['primary' => 12, 'secondary' => 3, 'skill_points' => 4],
+                        'Lv5' => ['primary' => 13, 'secondary' => 4, 'skill_points' => 4],
+                    ],
+                ],
+            ],
+
+            /*
+            | The measured negative the artifact records for a ranked discipline-level risk table,
+            | carried verbatim: the reason is the finding, and the failure-outcome ranges behind it
+            | stay in the artifact rather than on a card, because shipping them was left an owner
+            | decision by the artifact's own report.
+            */
+            'risk_absence' => [
+                'reason' => 'No publisher states a ranked discipline-level risk table. The failure outcome ranges are global across all scenarios (section 1.5 of the training-mechanics extraction).',
+                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470 (GameWith 257432)',
+                'server' => 'JP',
+            ],
         ],
 
         'unity_cup' => [
             'label' => 'Unity Cup',
             'live_on_global' => '2025-11-06',
+            // The scenario's Global ruleset date, from the 2026-10-15 scenario-field-metadata artifact.
+            // It is the rework instant a source pins the numbering to, not `app.ruleset`, which stays
+            // null by ruling; see the ura_finale entry's comment for the full separation rule.
+            'ruleset_version' => [
+                'date' => '2026-07-01',
+                'event' => 'July 1, 2026 rework raised caps (1200→1300 per stat, Wit to 1800), added Extreme Spirit Bursts, removed the Energy cost on Special Training, and changed Spirit Burst hints to use the card\'s own hint pool.',
+                'source' => 'UMAMUSUME_REFERENCE.md §2.2.2, docs/scenarios/02-unity-cup.md:28, SCENARIO-PUBLISHER-REFERENCES.md line 568',
+            ],
             'cap_bonus' => ['Speed' => 100, 'Stamina' => 100, 'Power' => 100, 'Guts' => 100, 'Wit' => 600],
             'widgets' => ['turn', 'energy', 'fans', 'team_rank', 'spirit_bursts'],
             'steps' => ['facility', 'training', 'team_race', 'outcome', 'skill'],
@@ -369,21 +468,88 @@ return [
             'notes' => 'Facility level is a team property, so a level chip must name its cause (D-222). '
                 .'Rank S+ sits above S and grants a second hint rather than a higher facility.',
             /*
-            | The card's own metadata, recorded for Unity Cup alone. Every line below restates a fact
-            | this entry already holds (the team race block, the rank ladder, the burst bands); none is
-            | a new claim, and the other three scenarios carry null because no source in this repository
-            | describes them in these words. `ruleset` names the scenario's rule family, not a version:
-            | no source defines a Global ruleset version, so no version number is invented.
+            | The card's own metadata. Every line below restates a fact this entry already holds (the
+            | team race block, the rank ladder, the burst bands); none is a new claim, and a cell no
+            | source in this repository describes stays null rather than written here. No line here
+            | holds a ruleset: no source defines a Global ruleset version, so no version number is
+            | invented, and the scenario's rule family is read from `facility_level_source` by the
+            | card rather than repeated here as prose.
             */
             'metadata' => [
-                'ruleset' => 'Team',
                 'summary' => 'A team career: facility level follows the team rank, a team race arrives every six months, and Spirit Bursts from teammates grant exclusive skills.',
                 'planning_focus' => 'Wit carries the scenario\'s own cap bonus; team rank and Spirit Burst counts decide the exclusive-skill payout.',
+                // Recovered by the 2026-10-16 fresh publisher search, which replaces the artifact's
+                // recorded search for this cell. The row's `title` prints the source below.
+                'recommended_use' => 'Its guide names it the go-to scenario for building strong, competitive aces, temporarily until Grand Live releases.',
+                'recommended_use_source' => 'Game8, Unity Cup Update Guide (archives/545572), page updated 2026-07-07',
                 'key_mechanics' => [
                     'A team race every six months against one of three NPC teams, strongest to weakest; a loss lowers league rank.',
                     'Facility level is a team property, set by the team rank from G through S (D-222).',
                     'Spirit Bursts from teammates charge and spend, and the burst count sets the exclusive-skill reward band.',
                 ],
+            ],
+            /*
+            | The published per-level training table, transcribed from the 2026-10-15
+            | scenario-field-metadata artifact (GameWith 257432 Aoharu table plus the GameTora
+            | post-rework read). Keys and Guts' secondary split are the artifact's own, as the
+            | ura_finale entry records. `server` is JP plus the rework delta: the stat gains are
+            | JP figures unchanged by the rework, and the one documented Global divergence is the
+            | SP payout, carried in the note below rather than merged into the numbers.
+            */
+            'training_tables' => [
+                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1876-1884 (GameWith 257432 Aoharu table) + docs/scenarios/02-unity-cup.md:87-106 (GameTora post-rework)',
+                'server' => 'JP + Global(rework)',
+                'notes' => [
+                    'Global SP payouts for Unity Cup match URA Finale (+2 SP on Energy disciplines) after the 2026-07-01 rework, not the JP +4 values. The base stat gains are unchanged.',
+                ],
+                'per_level' => [
+                    'Speed' => [
+                        'Lv1' => ['primary' => 8, 'secondary' => 4, 'energy' => -19, 'skill_points' => 4],
+                        'Lv2' => ['primary' => 9, 'secondary' => 4, 'energy' => -20, 'skill_points' => 4],
+                        'Lv3' => ['primary' => 10, 'secondary' => 4, 'energy' => -21, 'skill_points' => 4],
+                        'Lv4' => ['primary' => 11, 'secondary' => 5, 'energy' => -23, 'skill_points' => 4],
+                        'Lv5' => ['primary' => 12, 'secondary' => 6, 'energy' => -25, 'skill_points' => 4],
+                    ],
+                    'Stamina' => [
+                        'Lv1' => ['primary' => 8, 'secondary' => 6, 'energy' => -17, 'skill_points' => 4],
+                        'Lv2' => ['primary' => 9, 'secondary' => 6, 'energy' => -18, 'skill_points' => 4],
+                        'Lv3' => ['primary' => 10, 'secondary' => 6, 'energy' => -19, 'skill_points' => 4],
+                        'Lv4' => ['primary' => 11, 'secondary' => 7, 'energy' => -21, 'skill_points' => 4],
+                        'Lv5' => ['primary' => 13, 'secondary' => 8, 'energy' => -23, 'skill_points' => 4],
+                    ],
+                    'Power' => [
+                        'Lv1' => ['primary' => 9, 'secondary' => 4, 'energy' => -18, 'skill_points' => 4],
+                        'Lv2' => ['primary' => 10, 'secondary' => 4, 'energy' => -19, 'skill_points' => 4],
+                        'Lv3' => ['primary' => 11, 'secondary' => 4, 'energy' => -20, 'skill_points' => 4],
+                        'Lv4' => ['primary' => 12, 'secondary' => 5, 'energy' => -22, 'skill_points' => 4],
+                        'Lv5' => ['primary' => 13, 'secondary' => 5, 'energy' => -24, 'skill_points' => 4],
+                    ],
+                    'Guts' => [
+                        'Lv1' => ['primary' => 6, 'secondary_a' => 3, 'secondary_b' => 3, 'energy' => -20, 'skill_points' => 4],
+                        'Lv2' => ['primary' => 7, 'secondary_a' => 3, 'secondary_b' => 3, 'energy' => -21, 'skill_points' => 4],
+                        'Lv3' => ['primary' => 8, 'secondary_a' => 3, 'secondary_b' => 3, 'energy' => -22, 'skill_points' => 4],
+                        'Lv4' => ['primary' => 9, 'secondary_a' => 4, 'secondary_b' => 3, 'energy' => -24, 'skill_points' => 4],
+                        'Lv5' => ['primary' => 10, 'secondary_a' => 4, 'secondary_b' => 4, 'energy' => -26, 'skill_points' => 4],
+                    ],
+                    'Wit' => [
+                        'Lv1' => ['primary' => 6, 'secondary' => 2, 'energy' => 5, 'skill_points' => 5],
+                        'Lv2' => ['primary' => 7, 'secondary' => 2, 'energy' => 5, 'skill_points' => 5],
+                        'Lv3' => ['primary' => 8, 'secondary' => 2, 'energy' => 5, 'skill_points' => 5],
+                        'Lv4' => ['primary' => 9, 'secondary' => 3, 'energy' => 5, 'skill_points' => 5],
+                        'Lv5' => ['primary' => 10, 'secondary' => 4, 'skill_points' => 5],
+                    ],
+                ],
+            ],
+
+            /*
+            | The measured negative the artifact records for a ranked discipline-level risk table,
+            | carried verbatim, as the ura_finale entry records. The Extreme Spirit Burst note is
+            | the artifact's own scenario-specific addition.
+            */
+            'risk_absence' => [
+                'reason' => 'No publisher states a ranked discipline-level risk table. The failure outcome ranges are global across all scenarios (section 1.5 of the training-mechanics extraction).',
+                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470 (GameWith 257432) + docs/scenarios/02-unity-cup.md:113-119',
+                'server' => 'JP + Global(rework)',
             ],
         ],
 
@@ -392,8 +558,24 @@ return [
             'metadata' => [
                 'summary' => 'Make a New Track, the anniversary scenario whose headline difference is no fixed schedule of mandatory race goals: race timing stays the Trainer\'s own.',
                 'description' => 'Where URA Finale and Unity Cup lock a run into a fixed schedule of mandatory race goals and end the career when too many are missed, Trackblazer publishes no race goals. The guide is marked superseded, so its remaining detail reads from the publisher references.',
+                // Both cells recovered by the 2026-10-16 fresh publisher search from one Game8 sentence
+                // with two clauses: what the scenario is ('a more open career with no race goal
+                // restrictions') and what it asks of the player ('focus their training strategy around
+                // Races and the Pro Shop'). Each row prints the source as its `title`.
+                'recommended_use' => 'Its guide calls it a more open career with no race goal restrictions.',
+                'recommended_use_source' => 'Game8, Trackblazer (Make a New Track) Scenario Guide (archives/580723), page updated 2026-08-25',
+                'planning_focus' => 'Its guide has the player focus the training strategy around Races and the Pro Shop to reach the best results.',
+                'planning_focus_source' => 'Game8, Trackblazer (Make a New Track) Scenario Guide (archives/580723), page updated 2026-08-25',
             ],
             'live_on_global' => '2026-03-12',
+            // The scenario's Global ruleset date, from the 2026-10-15 scenario-field-metadata artifact.
+            // Launch instant here; for URA Finale and Unity Cup it is the rework. Never `app.ruleset`,
+            // which stays null by ruling; see the ura_finale entry's comment.
+            'ruleset_version' => [
+                'date' => '2026-03-12',
+                'event' => 'March 12, 2026 Global launch as the third permanent scenario. No subsequent rework documented in any source in this repository.',
+                'source' => 'UMAMUSUME_REFERENCE.md §2.2.3, SCENARIO-PUBLISHER-REFERENCES.md line 339, docs/Trackblazer-plan.md line 56',
+            ],
             'cap_bonus' => ['Speed' => 0, 'Stamina' => 700, 'Power' => 0, 'Guts' => 0, 'Wit' => 300],
             'widgets' => ['turn', 'energy', 'fans', 'grade_points', 'shop_coins'],
             'steps' => ['training', 'shop', 'outcome', 'skill'],
@@ -705,6 +887,67 @@ return [
             'notes' => 'No mandatory race goals, so the race calendar is absent rather than empty, and no '
                 .'Scenario Link character exists here. Racing is the strategy in this scenario and is '
                 .'discouraged in Unity Cup, so any race advisory must be scenario-gated (D-225).',
+            /*
+            | The published per-level training table, transcribed from the 2026-10-15
+            | scenario-field-metadata artifact (GameWith 257432 Climax table). Keys and Guts'
+            | secondary split are the artifact's own, as the ura_finale entry records. The Climax
+            | table is JP: Global launched Trackblazer with these values and no rework is recorded.
+            */
+            'training_tables' => [
+                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1888-1894 (GameWith 257432 Climax table)',
+                'server' => 'JP',
+                'notes' => [
+                    'Climax (JP) maps to Trackblazer on Global. JP values are the only published figures; Global launched with these values and no subsequent rework was documented in sources in this repository.',
+                ],
+                'per_level' => [
+                    'Speed' => [
+                        'Lv1' => ['primary' => 8, 'secondary' => 4, 'energy' => -19, 'skill_points' => 2],
+                        'Lv2' => ['primary' => 9, 'secondary' => 4, 'energy' => -20, 'skill_points' => 2],
+                        'Lv3' => ['primary' => 10, 'secondary' => 4, 'energy' => -21, 'skill_points' => 2],
+                        'Lv4' => ['primary' => 11, 'secondary' => 5, 'energy' => -23, 'skill_points' => 2],
+                        'Lv5' => ['primary' => 12, 'secondary' => 6, 'energy' => -25, 'skill_points' => 2],
+                    ],
+                    'Stamina' => [
+                        'Lv1' => ['primary' => 7, 'secondary' => 3, 'energy' => -17, 'skill_points' => 2],
+                        'Lv2' => ['primary' => 8, 'secondary' => 3, 'energy' => -18, 'skill_points' => 2],
+                        'Lv3' => ['primary' => 9, 'secondary' => 3, 'energy' => -19, 'skill_points' => 2],
+                        'Lv4' => ['primary' => 10, 'secondary' => 4, 'energy' => -21, 'skill_points' => 2],
+                        'Lv5' => ['primary' => 11, 'secondary' => 5, 'energy' => -23, 'skill_points' => 2],
+                    ],
+                    'Power' => [
+                        'Lv1' => ['primary' => 6, 'secondary' => 4, 'energy' => -18, 'skill_points' => 2],
+                        'Lv2' => ['primary' => 7, 'secondary' => 4, 'energy' => -19, 'skill_points' => 2],
+                        'Lv3' => ['primary' => 8, 'secondary' => 4, 'energy' => -20, 'skill_points' => 2],
+                        'Lv4' => ['primary' => 9, 'secondary' => 5, 'energy' => -22, 'skill_points' => 2],
+                        'Lv5' => ['primary' => 10, 'secondary' => 6, 'energy' => -24, 'skill_points' => 2],
+                    ],
+                    'Guts' => [
+                        'Lv1' => ['primary' => 6, 'secondary_a' => 3, 'secondary_b' => 3, 'energy' => -20, 'skill_points' => 2],
+                        'Lv2' => ['primary' => 7, 'secondary_a' => 3, 'secondary_b' => 3, 'energy' => -21, 'skill_points' => 2],
+                        'Lv3' => ['primary' => 8, 'secondary_a' => 3, 'secondary_b' => 3, 'energy' => -22, 'skill_points' => 2],
+                        'Lv4' => ['primary' => 9, 'secondary_a' => 4, 'secondary_b' => 3, 'energy' => -24, 'skill_points' => 2],
+                        'Lv5' => ['primary' => 10, 'secondary_a' => 4, 'secondary_b' => 4, 'energy' => -26, 'skill_points' => 2],
+                    ],
+                    'Wit' => [
+                        'Lv1' => ['primary' => 6, 'secondary' => 2, 'energy' => 5, 'skill_points' => 3],
+                        'Lv2' => ['primary' => 7, 'secondary' => 2, 'energy' => 5, 'skill_points' => 3],
+                        'Lv3' => ['primary' => 8, 'secondary' => 2, 'energy' => 5, 'skill_points' => 3],
+                        'Lv4' => ['primary' => 9, 'secondary' => 3, 'energy' => 5, 'skill_points' => 3],
+                        'Lv5' => ['primary' => 10, 'secondary' => 4, 'skill_points' => 3],
+                    ],
+                ],
+            ],
+
+            /*
+            | The measured negative the artifact records for a ranked discipline-level risk table,
+            | carried verbatim, as the ura_finale entry records. The Race Fatigue note is the
+            | artifact's own scenario-specific addition.
+            */
+            'risk_absence' => [
+                'reason' => 'No publisher states a ranked discipline-level risk table. The failure outcome ranges are global across all scenarios.',
+                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470 + SCENARIO-PUBLISHER-REFERENCES.md line 1226',
+                'server' => 'JP + Global',
+            ],
         ],
 
         'our_grand_concert' => [
@@ -712,10 +955,26 @@ return [
             'metadata' => [
                 'summary' => 'The fourth Global scenario, whose vocabulary names Performance and its five types, Promo Concert, Grand Concert, lessons, songs, concert techniques, Live Performance Expectations and Great Success.',
                 'description' => 'Its guide files itself as a boundary document: the vocabulary is official copy from Global notice 905, while the screen-level text and the song list remain unmeasured.',
+                // Both cells recovered by the 2026-10-16 fresh publisher search, which replaces the
+                // artifact's recorded searches. 'Grandmasters', the scenario Game8 names as the four
+                // month window's end, is not printed: that scenario is [JP-Only] here (§3), and the
+                // Speed cap clause is the notice-905 framing the guide carries beside it.
+                'recommended_use' => 'Its guide files it as the main training scenario for four months, with the Speed cap raised by 400.',
+                'recommended_use_source' => 'Game8, Grand Live (Grand Concert) Scenario Guide (archives/607337), page updated 2026-07-26',
+                'planning_focus' => 'Its guide says to focus on training rather than stacking races.',
+                'planning_focus_source' => 'Game8, Grand Live (Grand Concert) Scenario Guide (archives/607337), page updated 2026-07-26',
             ],
             // Cygames' notice 899 opens "As of 10:00 p.m., Jul 22, 2026 (UTC)", the same instant the
             // export's start_en decodes to, so this is a dated hour and not only a dated day.
             'live_on_global' => '2026-07-22',
+            // The scenario's Global ruleset date, from the 2026-10-15 scenario-field-metadata artifact.
+            // Launch instant here. Never `app.ruleset`, which stays null by ruling; see the ura_finale
+            // entry's comment.
+            'ruleset_version' => [
+                'date' => '2026-07-22',
+                'event' => 'July 22, 2026 Global launch. The performance track was extracted from Game8 and GameTora on 2026-10-05 (primary read). No subsequent rework documented.',
+                'source' => 'UMAMUSUME_REFERENCE.md §2.2.4, docs/scenarios/07-grand-concert.md:37, Our-Grand-Concert-plan.md note on notice 899',
+            ],
             'cap_bonus' => ['Speed' => 400, 'Stamina' => 100, 'Power' => 100, 'Guts' => 300, 'Wit' => 100],
             'widgets' => ['turn', 'energy', 'fans'],
             'steps' => ['training', 'outcome', 'skill'],
@@ -816,6 +1075,69 @@ return [
                 .'Mechanics sourced 2026-10-05 by a primary read; every panel stays off because the client '
                 .'strings behind them are still third-party renderings, so the strip renders baseline plus the '
                 .'published caps (D-241, gate G-41).',
+
+            /*
+            | The published per-level training table, transcribed from the 2026-10-15
+            | scenario-field-metadata artifact (GameWith 257432 Grand Live table). Keys and Guts'
+            | secondary split are the artifact's own, as the ura_finale entry records. The table is
+            | JP (Grand Live); the Performance values are GameTora's and the cost curves are
+            | unpublished, which the notes state.
+            */
+            'training_tables' => [
+                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1896-1904 (GameWith 257432 Grand Live table) + docs/scenarios/07-grand-concert.md:64-70',
+                'server' => 'JP',
+                'notes' => [
+                    'Grand Live (JP) maps to Our Grand Concert on Global. The Performance gain values (200 each at start, +50 per concert) come from GameTora. No cost curves for Lessons or Songs are published; these remain UNVERIFIED per docs/scenarios/07-grand-concert.md:205.',
+                    'Training also pays Performance (the scenario resource) in addition to stats. GameTora supplies the numbers no official page prints: 200 each at start, +50 per successful concert.',
+                ],
+                'per_level' => [
+                    'Speed' => [
+                        'Lv1' => ['primary' => 8, 'secondary' => 4, 'energy' => -19, 'skill_points' => 4],
+                        'Lv2' => ['primary' => 9, 'secondary' => 4, 'energy' => -20, 'skill_points' => 4],
+                        'Lv3' => ['primary' => 10, 'secondary' => 4, 'energy' => -21, 'skill_points' => 4],
+                        'Lv4' => ['primary' => 11, 'secondary' => 5, 'energy' => -23, 'skill_points' => 4],
+                        'Lv5' => ['primary' => 12, 'secondary' => 6, 'energy' => -25, 'skill_points' => 4],
+                    ],
+                    'Stamina' => [
+                        'Lv1' => ['primary' => 8, 'secondary' => 6, 'energy' => -20, 'skill_points' => 4],
+                        'Lv2' => ['primary' => 9, 'secondary' => 6, 'energy' => -21, 'skill_points' => 4],
+                        'Lv3' => ['primary' => 10, 'secondary' => 6, 'energy' => -22, 'skill_points' => 4],
+                        'Lv4' => ['primary' => 11, 'secondary' => 7, 'energy' => -24, 'skill_points' => 4],
+                        'Lv5' => ['primary' => 13, 'secondary' => 8, 'energy' => -26, 'skill_points' => 4],
+                    ],
+                    'Power' => [
+                        'Lv1' => ['primary' => 9, 'secondary' => 4, 'energy' => -20, 'skill_points' => 4],
+                        'Lv2' => ['primary' => 10, 'secondary' => 4, 'energy' => -21, 'skill_points' => 4],
+                        'Lv3' => ['primary' => 11, 'secondary' => 4, 'energy' => -22, 'skill_points' => 4],
+                        'Lv4' => ['primary' => 12, 'secondary' => 5, 'energy' => -24, 'skill_points' => 4],
+                        'Lv5' => ['primary' => 13, 'secondary' => 5, 'energy' => -26, 'skill_points' => 4],
+                    ],
+                    'Guts' => [
+                        'Lv1' => ['primary' => 7, 'secondary_a' => 2, 'secondary_b' => 2, 'energy' => -20, 'skill_points' => 4],
+                        'Lv2' => ['primary' => 8, 'secondary_a' => 2, 'secondary_b' => 2, 'energy' => -21, 'skill_points' => 4],
+                        'Lv3' => ['primary' => 9, 'secondary_a' => 2, 'secondary_b' => 2, 'energy' => -22, 'skill_points' => 4],
+                        'Lv4' => ['primary' => 10, 'secondary_a' => 3, 'secondary_b' => 2, 'energy' => -24, 'skill_points' => 4],
+                        'Lv5' => ['primary' => 11, 'secondary_a' => 3, 'secondary_b' => 3, 'energy' => -26, 'skill_points' => 4],
+                    ],
+                    'Wit' => [
+                        'Lv1' => ['primary' => 6, 'secondary' => 2, 'energy' => 5, 'skill_points' => 5],
+                        'Lv2' => ['primary' => 7, 'secondary' => 2, 'energy' => 5, 'skill_points' => 5],
+                        'Lv3' => ['primary' => 8, 'secondary' => 2, 'energy' => 5, 'skill_points' => 5],
+                        'Lv4' => ['primary' => 9, 'secondary' => 3, 'energy' => 5, 'skill_points' => 5],
+                        'Lv5' => ['primary' => 10, 'secondary' => 4, 'skill_points' => 5],
+                    ],
+                ],
+            ],
+
+            /*
+            | The measured negative the artifact records for a ranked discipline-level risk table,
+            | carried verbatim, as the ura_finale entry records.
+            */
+            'risk_absence' => [
+                'reason' => 'No publisher states a ranked discipline-level risk table. The failure outcome ranges are global across all scenarios.',
+                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470',
+                'server' => 'JP',
+            ],
         ],
 
     ],
