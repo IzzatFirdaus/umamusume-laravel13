@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 {{--
-    Inertia root template (ADR-0020 §1). Theme resolution matches components/layout.blade.php
-    so the first paint is already correct: a stored preference wins, then the OS, then light.
-    `$theme` is composed server-side by AppServiceProvider for this view.
+    Inertia root template (ADR-0020 §1). The first paint is already correct: a stored
+    preference wins, then the OS, then light. `$theme` is composed server-side by
+    AppServiceProvider for this view.
 --}}
 <html lang="en" @if (! empty($theme)) data-theme="{{ $theme }}" @endif>
 <head>
