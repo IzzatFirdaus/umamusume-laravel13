@@ -48,17 +48,29 @@ async function openUnityCupCockpit(page: import('@playwright/test').Page): Promi
     await openCockpit(page, 'unity_cup');
 }
 
-test('resolves a key no renderer claims to undefined, and returns a component once one is registered', async () => {
-    // The registry seam in isolation. E1 registers nothing, so this is the only place the
-    // registered arm can be asserted today — the first rendered registration arrives with E3.
-    const { register, resolve } = await import('../../resources/js/components/scenario/registry');
+test('keeps a widget key from resolving a panel component, and each map resolves its own kind', async () => {
+    // The registry seam in isolation. The two maps are separate so a config entry that names a
+    // widget exactly like a registered panel flag cannot resolve the panel component against widget
+    // props — the defect `f523dcd` removed from the shell's registrations (F3).
+    const { registerWidget, registerPanel, resolveWidget, resolvePanel } = await import(
+        '../../resources/js/components/scenario/registry'
+    );
 
-    expect(resolve('no_renderer_claims_this_key')).toBeUndefined();
+    expect(resolveWidget('no_renderer_claims_this_key')).toBeUndefined();
+    expect(resolvePanel('no_renderer_claims_this_key')).toBeUndefined();
 
-    const probe = { name: 'Probe', render: (): null => null };
-    register('probe_key', probe);
+    const widgetProbe = { name: 'WidgetProbe', render: (): null => null };
+    const panelProbe = { name: 'PanelProbe', render: (): null => null };
 
-    expect(resolve('probe_key')).toBe(probe);
+    // A widget registered under a key resolves in the widget map only.
+    registerWidget('probe_widget', widgetProbe);
+    expect(resolveWidget('probe_widget')).toBe(widgetProbe);
+    expect(resolvePanel('probe_widget')).toBeUndefined();
+
+    // A panel registered under the same key resolves in the panel map only.
+    registerPanel('probe_widget', panelProbe);
+    expect(resolvePanel('probe_widget')).toBe(panelProbe);
+    expect(resolveWidget('probe_widget')).toBe(widgetProbe);
 });
 
 test('draws a resource the matrix labels through the meter, with the number and a labelled bar', async ({ page }) => {

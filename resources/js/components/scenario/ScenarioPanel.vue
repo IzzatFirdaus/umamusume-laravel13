@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /*
- * The scenario panel shell, `SCR-CAR-019` (SCREEN-014 / 015 / 016, plan §9 E1).
+ * The scenario panel shell, `SCR-CAR-019` (SCREEN-014 / 015 / 016, plan Â§9 E1).
  *
- * **The UI does not know how a scenario works.** The shell draws the §49 shape it is handed and
+ * **The UI does not know how a scenario works.** The shell draws the Â§49 shape it is handed and
  * switches on `panels` flags and `widgets` keys only. It reads no scenario name, holds no
  * per-scenario branch and registers nothing per scenario: a fifth scenario is one
  * `config/scenarios.php` entry and zero edits here (gate G-33, `D-240`). The section it receives
@@ -10,7 +10,7 @@
  * here to branch on even by accident.
  *
  * **The fallback chain lives in one place.** For a widget key:
- * `resolve(key) ?? ResourceMeter ?? WidgetFallback` — E3 and E4 add their own renderers to the
+ * `resolve(key) ?? ResourceMeter ?? WidgetFallback` â€” E3 and E4 add their own renderers to the
  * registration block below, any widget the matrix labels falls to the meter, and anything else is
  * drawn as a labelled notice naming the key. For a panel flag: `resolve(flag) ?? WidgetFallback`.
  * Keeping the chain here is what makes it one behaviour to test rather than one per key.
@@ -18,12 +18,12 @@
  * **The renderer contract, which E2 to E4 write against:**
  *  - a **widget** renderer receives `{ label, value, max, absence, kind: 'widget', name }`. One
  *    widget is one value, so the props are narrow.
- *  - a **panel** renderer receives `{ scenario, label, kind: 'panel', name }` — the whole section,
- *    because a panel composes several widgets and the §49 sections rather than one reading.
+ *  - a **panel** renderer receives `{ scenario, label, kind: 'panel', name }` â€” the whole section,
+ *    because a panel composes several widgets and the Â§49 sections rather than one reading.
  *  - a renderer that cannot draw its key should not register for it; returning nothing would leave
  *    a blank in a region the reader is owed a sentence about.
  *
- * **The baseline strip is the panel region's own empty branch** (plan §9 E6, `D-241`, gate G-41). A
+ * **The baseline strip is the panel region's own empty branch** (plan Â§9 E6, `D-241`, gate G-41). A
  * scenario that leaves every flag off mounts no renderer, and what it draws instead is the strip: its
  * name and documentation state, the published caps as base plus bonus, its own one-line reason its
  * panels are off, and what the advisor does and does not do here. None of that is scenario-specific
@@ -31,7 +31,7 @@
  * payload field, so a fifth scenario reaches the same strip for one config entry (gate G-33).
  *
  * Props are declared locally: TypeScript 7 ships no `lib/typescript.js` for `@vue/compiler-sfc` to
- * load, so an imported type in `defineProps` fails the build (plan §11). The same shape is exported
+ * load, so an imported type in `defineProps` fails the build (plan Â§11). The same shape is exported
  * from `resources/js/types.ts` for the slices that reason about it without declaring props.
  */
 import type { Component } from 'vue';
@@ -44,9 +44,9 @@ import ScenarioStatusBadge from './ScenarioStatusBadge.vue';
 import TrackblazerPanel from './TrackblazerPanel.vue';
 import UnityCupPanel from './UnityCupPanel.vue';
 import WidgetFallback from './WidgetFallback.vue';
-import { register, resolve } from './registry';
+import { registerPanel, resolvePanel, resolveWidget } from './registry';
 
-// Phase 7A.1: Cockpit panel components — registered against matrix flag keys
+// Phase 7A.1: Cockpit panel components â€” registered against matrix flag keys
 import UraMandatoryLadder from '@/Pages/Career/Cockpit/Panels/UraMandatoryLadder.vue';
 import HappyMeekPanel from '@/Pages/Career/Cockpit/Panels/HappyMeekPanel.vue';
 import CareerMilestonesPanel from '@/Pages/Career/Cockpit/Panels/CareerMilestonesPanel.vue';
@@ -59,23 +59,23 @@ import CareerGoalsPanel from '@/Pages/Career/Cockpit/Panels/CareerGoalsPanel.vue
  * reached by a flag, never by a scenario name, so a scenario that leaves `career_goals` off cannot
  * draw URA's rows and a fifth scenario needs one config entry and no edit here (gate G-33).
  */
-// E3 (plan §9.1): the calendar note states where the Cockpit already draws the calendar, and the
+// E3 (plan Â§9.1): the calendar note states where the Cockpit already draws the calendar, and the
 // two Unity-Cup flags share one panel component that draws the region each registration is for.
-register('race_calendar', RaceCalendarNote);
-register('team_race', UnityCupPanel);
-register('team_rank_ladder', UnityCupPanel);
-// E4 (plan §9.4): the Trackblazer renderer draws grade_points, the shop, and the epithet
+registerPanel('race_calendar', RaceCalendarNote);
+registerPanel('team_race', UnityCupPanel);
+registerPanel('team_rank_ladder', UnityCupPanel);
+// E4 (plan Â§9.4): the Trackblazer renderer draws grade_points, the shop, and the epithet
 // checklist from the same component, branched on `props.name`.
-register('grade_objectives', TrackblazerPanel);
-register('shop', TrackblazerPanel);
-register('epithet_routes', TrackblazerPanel);
+registerPanel('grade_objectives', TrackblazerPanel);
+registerPanel('shop', TrackblazerPanel);
+registerPanel('epithet_routes', TrackblazerPanel);
 
-// Phase 7A.1: Cockpit panel components — each flag maps to its own component
-register('ura_mandatory_ladder', UraMandatoryLadder);
-register('happy_meek', HappyMeekPanel);
-register('career_milestones', CareerMilestonesPanel);
-register('pre_final_review', PreFinalReviewPanel);
-register('team_race_facility', TeamRaceFacilityPanel);
+// Phase 7A.1: Cockpit panel components â€” each flag maps to its own component
+registerPanel('ura_mandatory_ladder', UraMandatoryLadder);
+registerPanel('happy_meek', HappyMeekPanel);
+registerPanel('career_milestones', CareerMilestonesPanel);
+registerPanel('pre_final_review', PreFinalReviewPanel);
+registerPanel('team_race_facility', TeamRaceFacilityPanel);
 // The Phase 7A.1 registration of SpiritBurstsPanel against `spirit_bursts` is removed: that key
 // is a WIDGET, not a panel flag, so the panel-shaped component received the widget shape and its
 // template read `props.scenario.alerts` off undefined, crashing every Unity Cup cockpit render
@@ -85,8 +85,8 @@ register('team_race_facility', TeamRaceFacilityPanel);
 // the slice that gives the burst machine a panel flag or a widget-shaped renderer.
 // `team_rank_ladder` is registered by E3's UnityCupPanel above, and that registration is the one
 // that stays: the Phase 7A.1 TeamRankLadderPanel re-registration here shadowed it (a Map's last
-// set wins), and the shadowed renderer draws the team facts card — the run's recorded team name,
-// motto, counters and the rank gauge — while TeamRankLadderPanel itself reads a `scenario.ladder`
+// set wins), and the shadowed renderer draws the team facts card â€” the run's recorded team name,
+// motto, counters and the rank gauge â€” while TeamRankLadderPanel itself reads a `scenario.ladder`
 // key the section does not carry, so it rendered alerts and no ladder at all. Measured 2026-10-16:
 // with the shadow in place a saved team name printed nowhere on the Cockpit, which is what the
 // team-editor browser cases read back. UnityCupPanel is the live surface the Phase G ruling
@@ -101,7 +101,7 @@ register('team_race_facility', TeamRaceFacilityPanel);
 // shadow also drew one fact under two headings. TrackblazerPanel is the renderer whose prop reads
 // exist; its three arms are what the Trackblazer cockpit draws. The components stay on disk for the
 // slice that gives them a section of their own.
-register('career_goals', CareerGoalsPanel);
+registerPanel('career_goals', CareerGoalsPanel);
 
 interface PanelFlag {
     label: string;
@@ -116,8 +116,8 @@ const props = defineProps<{
         version: string | null;
         version_title: string;
         /**
-         * The scenario's own Global ruleset date — its launch or rework instant, sourced per
-         * scenario — or null when no scenario is set. A different fact from `version` above,
+         * The scenario's own Global ruleset date â€” its launch or rework instant, sourced per
+         * scenario â€” or null when no scenario is set. A different fact from `version` above,
          * which stays the null-by-ruling `app.ruleset`; the two render as separate lines and
          * must not merge (the R2-05 split, and the 2026-10-15 wiring's Caveat 1).
          */
@@ -150,7 +150,7 @@ const props = defineProps<{
         } | null;
         finale_absence: string | null;
         /**
-         * The published stat caps the baseline strip draws (plan §9 E6, D-241). `base` and `bonus`
+         * The published stat caps the baseline strip draws (plan Â§9 E6, D-241). `base` and `bonus`
          * travel separately because the matrix forbids collapsing them; `cap` is their sum through
          * `ScenarioCaps`.
          */
@@ -177,14 +177,14 @@ const onPanels = computed<{ flag: string; label: string }[]>(() =>
 
 /**
  * The widget chain. `resolve` first, so a registered renderer always wins; then the meter, but
- * only for a key the matrix labels — a meter needs a name, and inventing one is the failure this
+ * only for a key the matrix labels â€” a meter needs a name, and inventing one is the failure this
  * chain exists to avoid; then the notice that names the key instead.
  */
 const resourceRenderer = (key: string): Component =>
-    resolve(key) ?? (props.scenario.widget_labels[key] !== undefined ? ResourceMeter : WidgetFallback);
+    resolveWidget(key) ?? (props.scenario.widget_labels[key] !== undefined ? ResourceMeter : WidgetFallback);
 
 /** The panel chain. A panel is not a resource, so the meter is not in this one. */
-const panelRenderer = (flag: string): Component => resolve(flag) ?? WidgetFallback;
+const panelRenderer = (flag: string): Component => resolvePanel(flag) ?? WidgetFallback;
 
 const emptyText = computed<string>(() =>
     props.scenario.declared
@@ -228,7 +228,7 @@ const emptyText = computed<string>(() =>
         </p>
 
         <!-- The scenario's own ruleset date: a sourced fact per scenario (its launch or rework
-             instant), carried beside — never inside — the null version line above. Hidden rather
+             instant), carried beside â€” never inside â€” the null version line above. Hidden rather
              than drawn as an absence when no scenario is set: a date that dates nothing is not a
              fact this strip owes a row for. -->
         <p v-if="props.scenario.ruleset_date !== null" class="text-xs text-ink-muted" data-region="scenario-ruleset-date">
@@ -256,7 +256,7 @@ const emptyText = computed<string>(() =>
             </li>
         </ul>
 
-        <!-- The baseline strip: the render for a scenario that composes no panel at all (plan §9 E6,
+        <!-- The baseline strip: the render for a scenario that composes no panel at all (plan Â§9 E6,
              D-241, gate G-41). It is one branch for every scenario, so a fifth one that leaves every
              flag off reaches it for one config entry and no edit here. -->
         <div v-if="onPanels.length === 0" class="flex flex-col gap-3">
@@ -264,7 +264,7 @@ const emptyText = computed<string>(() =>
                  reason beats a generic one, and printing both would say the same thing twice. -->
             <AlertRow
                 v-if="props.scenario.panel_absence === null"
-                glyph="○"
+                glyph="â—‹"
                 :text="emptyText"
                 tone="note"
             />
@@ -282,7 +282,7 @@ const emptyText = computed<string>(() =>
                         title="The date the scenario matrix was last checked against its sources. Nothing here was fetched on it."
                     >Verified {{ props.scenario.caps.verified_at }}</span>
                 </h3>
-                <!-- ADR-0001 §2 puts the constants behind a number wherever the number appears, so the
+                <!-- ADR-0001 Â§2 puts the constants behind a number wherever the number appears, so the
                      matrix this read from is named on the row rather than only in the badge's `title`. -->
                 <p class="text-xs text-ink-muted">{{ props.scenario.caps.source_title }}</p>
 
@@ -310,14 +310,14 @@ const emptyText = computed<string>(() =>
             <!-- The scenario's own reason its panels are off, where its entry declares one. This is an
                  absence, not a figure, so the `AlertRow` owns the whole statement: the owner ruled on
                  2026-10-09 that `ProvenanceBadge` qualifies a displayed value and `AbsenceValue`-shaped
-                 prose owns the claim that no value exists. `DESIGN.md` §4.2 says the same in terms. -->
+                 prose owns the claim that no value exists. `DESIGN.md` Â§4.2 says the same in terms. -->
             <div
                 v-if="props.scenario.panel_absence !== null"
                 class="flex flex-wrap items-start gap-2"
             >
                 <AlertRow
                     class="flex-1"
-                    glyph="○"
+                    glyph="â—‹"
                     :text="props.scenario.panel_absence"
                     :detail="props.scenario.panel_absence_title"
                     tone="note"
@@ -340,7 +340,7 @@ const emptyText = computed<string>(() =>
             </p>
 
             <!-- What the advisor does and does not do here, so the Trainer is not left guessing. -->
-            <AlertRow glyph="○" :text="props.scenario.recommendations_absence" tone="note" />
+            <AlertRow glyph="â—‹" :text="props.scenario.recommendations_absence" tone="note" />
         </div>
     </div>
 </template>
