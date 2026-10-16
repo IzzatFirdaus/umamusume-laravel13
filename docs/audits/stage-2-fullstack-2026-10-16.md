@@ -939,3 +939,98 @@ Both static-analysis configs are untouched since the skeleton commit while the r
 ### What §3.7 does not cover
 
 Whether any reviewer-executed gate (the 59 G-rows, C-6, C-7, G-60's pending scanner) should be built, automated, or retired — an owner decision, not an audit finding. Whether a gate's pass threshold is correct — a QA ruling; the bar forbids relaxing one to make a check pass. Whether the browser suite's per-session harness (`PLAYWRIGHT_PORT`, `PLAYWRIGHT_SCRATCH_DB`, KI-73 and KI-80) is the right shape — a tooling decision. And whether any gate passes: no gate was executed, so this section is the surface, not the verdict.
+## 14. §3.8 — ADR coverage, 2026-10-17
+
+Measured at HEAD `608aff3`, read-only. No ADR was edited and no ruling was made.
+
+### ADR census
+
+29 files in `docs/adr/`: 26 numbered ADRs (`0001`–`0026`) plus `ADR-TEMPLATE.md`, `README.md` (derived index), and `CURRENT.md`.
+
+| Status | Count | Files |
+|---|---|---|
+| Accepted | 16 | 0002, 0003, 0004, 0006, 0007, 0008, 0010, 0012, 0014, 0015, 0017, 0018, 0020, 0021, 0024, 0026 |
+| Accepted in part / ruled in part | 3 | 0001, 0011 ("accepted in part"), 0009 ("RULED IN PART") |
+| Declined | 1 | 0005 (DECLINED for Phase 1; superseded by 0014) |
+| Withdrawn | 1 | 0013 (superseded by 0012 Decision 4) |
+| **Proposed** | **4** | 0019, 0022, 0023, 0025 |
+| Open question (no decision) | 1 | 0016 |
+
+Sixteen plus three plus four plus one plus one plus one is the full set of 26.
+
+`AGENTS.md` §2 names the binding set as `docs/adr/0001`-`0025`; `0026` has since been added and the range in that table line is stale by one.
+
+`docs/adr/CURRENT.md` is a fourth artifact the prompt does not list and that materially changes this picture: a 126-line derived facts file with a `decision`/`code`/`owner` row per fact and a block of **negative rows** ("**Do not** cite 0005 as permission", "**Do not** cite 0016 as permission to build readiness"). It is the tree's own drift-corrected index, and it already carries two of the three findings below.
+
+### Per-ADR decision area and code anchor
+
+| ADR | Decision area | Code anchor | Present |
+|---|---|---|---|
+| 0001 | Energy guidance, no prediction | `app/Enums/EnergyState.php`, `NextDecision.php` | yes |
+| 0002 | Scenario caps exceed validation bound | superseded by 0015 | n/a |
+| 0003 | Consolidated Phase 1 schema | migrations `2026_09_26_162818`, `2026_09_27_153416`, `Adr0003SchemaTest` | yes |
+| 0004 | Aptitude and scenario-cap reference data | `umamusume` aptitude columns | yes |
+| 0005 | Support-card entities | declined; superseded by 0014 | n/a |
+| 0006 | Design authority, theme default | root `DESIGN.md`, preference resolver | yes |
+| 0007 | C-7 loading-state scope | `AGENTS.md` / registry C-7 row | yes |
+| 0008 | Character-card catalog layer | `2026_09_29_120100`, `CharacterCard` | yes |
+| 0009 | Scenario slot seeding | `ScenarioSlotSeeder` | yes (part) |
+| 0010 | Legacy selection payload | `app/Models/Legacy/LegacySelectionPayload.php` | yes |
+| 0011 | Skills reference import | `GametoraSkillsParser`, `StoreSkills` | yes |
+| 0012 | Card detail fields and images | `2026_09_29_182820`, `CharacterCardSchemaTest` | yes |
+| 0013 | Character profile source | withdrawn; `GametoraCharacterProfileParser` ships under 0012 | n/a |
+| 0014 | Support-card entities | `2026_09_30_142618`, `2026_09_30_151945` | yes |
+| 0015 | Per-scenario stat ceiling | `app/Services/ScenarioCaps.php`, `ScenarioCapParityTest` | yes |
+| 0016 | Next-race readiness | not built (by design) | yes |
+| 0017 | Historical run import | `ImportHistoricalRun`, `ImportHistoricalRunRequest` | yes |
+| 0018 | One facet contract | `PageSize`, `FilterContractTest` | yes |
+| 0019 | Semver label, tag, release branch | `VERSION.md` | partial (see drift 3) |
+| 0020 | Trainer Desk 2.0 program | `resources/js/` (59 files), `resources/views/app.blade.php` shell | yes |
+| 0021 | Sourced character artwork | `ArtworkMirror.php`, `ArtworkSlot.vue`, `uma:fetch-art` | yes |
+| 0022 | Veteran tag filter twin | `2026_10_08_180000`, `Veteran::booted()`, `ListVeterans` | yes |
+| 0023 | Deck slot ownership | `2026_10_09_120000`, `DeckSlot::OWNERSHIP`, `DeckSelectController` | yes |
+| 0024 | Energy state exact/band/unknown | `2026_10_09_170000`, `App\Enums\EnergyState` | yes |
+| 0025 | Per-run entered caps | `2026_10_12_140000`, `ValidatesEnteredCaps`, `ScenarioCaps::ENTERED_CAPS` | yes |
+| 0026 | Per-trainee career objectives | `GametoraUraObjectivesParser`, `StoreTraineeGoals`, `trainee_goals` | yes |
+
+Every Accepted ADR's decision area still exists in the tree. No anchor file is missing.
+
+### ADR-to-code drift
+
+**Three findings, all in one shape: an ADR left at `Proposed` while its decision is shipped and running.**
+
+| ADR | Status line | What the code does |
+|---|---|---|
+| **0025** | *Proposed* (2026-10-12, "awaits approval of wording") | Migration `2026_10_12_140000` applied (batch 16, per `CURRENT.md`); `ValidatesEnteredCaps` enforces at four sites; `entered_caps` consumed by `BuildTargetController:75,78`, `CockpitController:360`, `StartCareerRequest:44`, `StoreBuildTargetRequest:38,54` |
+| **0023** | *Proposed* ("**The column is built against draft; owner accepts or rejects it**") | Migration `2026_10_09_120000` shipped; `DeckSlot::OWNERSHIP` and four `DeckSelectController` sites (`:38,66,85,235`) read it |
+| **0022** | *Proposed* ("**Nothing binds until owner records Accepted**") | Migration `2026_10_08_180000` applied; `Veteran::booted()` saving guard and `ListVeterans:65` read `tags_normalized` |
+
+**This is not silent drift.** All three status lines state in their own text that the code was built against a draft and awaits the owner's ruling, and `CURRENT.md` records each as a fact with the shipped migration as its proof (`:35`, `:72`, `:103`). What the audit adds is the count: **three of the four `Proposed` ADRs are shipped, and only 0019 is not.** The shape is a naming-state lag, not an undocumented build — which is exactly what an owner ruling closes in one line each.
+
+**Drift 4 — ADR-0019's owed correction is genuinely still owed.** Its status line says the `AGENTS.md` §14/§3 correction is *owed and not landed*, and `CURRENT.md:116` carries the same as **Owed** with `code: not landed`. Verified against the tree: `VERSION.md` exists and reads `Current version: 2.0.0, pre-release. Tagged 2.0.0.`, while `AGENTS.md` §14 still says "There is no changelog or version file to bump" and `CHANGELOG.md` exists at root. Both sides of the stated obligation are unmet.
+
+**One stale reference, not a drift.** `AGENTS.md` §2's binding-decision row ends at `0025`; `0026` (accepted 2026-10-13, the `trainee_goals` ladder) is on disk. Same class as the KI-60 family: the rule lags the tree.
+
+### Nothing drifted the other way
+
+Two negative checks, both clean, and both load-bearing:
+
+- **ADR-0016 and `PRD.md` §6.11 hold.** 83 keyword hits for `predict|simulation|winChance|win_chance|probability` across `app/`, `resources/js/`, `config/` — every one is either a comment *disclaiming* prediction (`CockpitController.php:663` "**Nothing here predicts.** No readiness band, no win figure, no percentage"; `:1074`) or the inheritance screen's "predicted section", which is a *sourced* Spark count read from a stored `LegacySelectionPayload`, not a computed outcome (`InheritanceEventController.php:21,25,182`). `LegacySelectController.php:32-33` states the boundary and names the `probability` column as `AncestryGraph`'s permanent `N/A`. No prediction engine exists.
+- **ADR-0021's two halves both ship as its `Verification` section describes.** `app/Services/DataPipeline/ArtworkMirror.php` (fetch) and `resources/js/components/ArtworkSlot.vue` (display) both exist; §3.4 measured the fetch half as reaching the network only through `SourceFetcher`.
+
+**ADR-0020's status is accurate.** It is `Accepted` with `superseded-by: —`, and the SPA rewrite it scoped is in the tree (`resources/js/` at 59 files, `app.blade.php` reduced to the shell). The Grand Concert premises the prompt names as superseded are recorded in `docs/proposals/design-2.0.md:24` as *"superseded by tree and recorded in plan's E6 close-out"* — superseded **within the design proposal's own text**, not by ADR-0020. ADR-0020 itself does not claim those premises, so there is nothing to amend in it.
+
+### Decisions in the code with no ADR
+
+**34 of 62 migrations cite neither an `ADR-NNNN` nor a `FR-x`/`US-x` reference.** The naive reading is an `AGENTS.md` §11 breach at scale. It is not, for a reason the tree itself records:
+
+- The 2026-09-26 baseline (9 files: `umamusume`, `umamusume_aliases`, `skills`, `training_runs`, `turn_entries`, `data_sources`, `match_candidates`, `run_skills`, and the framework trio) is the schema **ADR-0003** consolidated, whose contract block names its migrations (`2026_09_26_162818`, `2026_09_27_153416`) and whose body absorbs ADR-0001 and ADR-0002.
+- `AGENTS.md` §17 states the framework trio (`users`, `cache`, `jobs`) is unused Laravel scaffolding.
+
+That leaves **23 migrations** citing no ADR and no PRD reference — the 2026-09-27 to 2026-10-10 incremental column additions (`add_energy_mood_fans_to_turn_entries`, `add_is_manual_to_scenario_races_table`, `add_source_key_to_scenario_slots`, `add_race_catalog_slot_id_to_race_entries`, `add_is_maiden_gated_to_race_catalog_slots`, `add_fan_payouts_to_race_catalog_slots`, `add_trainee_rarity_and_potential_to_training_runs`, `add_growth_rate_to_training_runs`, `add_stat_ceilings_to_training_runs`, `add_team_identity_to_training_runs`, `add_unity_cup_counters_to_training_runs`, `add_choice_and_corrections_to_turn_entries_table`, `add_mode_to_training_runs_table`, `add_facility_levels_to_turn_entries`, the two unique-index additions, and the support-card schema pair). Several are covered by an ADR **in substance but without citing it** — `add_stat_ceilings_to_training_runs` is ADR-0015's work, `add_mode_to_training_runs` is ADR-0020's, `add_energy_mood_fans` is ADR-0003's. The finding is therefore **citation debt, not decision debt**: the decision is recorded, the migration does not point at it. That is a one-line-per-migration fix and is named, not ruled on.
+
+Config and enums were swept for the same shape: `config/uma.php`, `config/scenarios.php` and the 21 `app/Enums/` files carry no ADR-worthy decision that lacks a recorded decision elsewhere — the `terms` map's own docblock and `HasLabel`'s case-name contract are documented in-file.
+
+### What §3.8 does not cover
+
+Whether the three `Proposed`-but-shipped ADRs (0022, 0023, 0025) should be accepted, amended, or their code reverted — an owner ruling, and each status line already reserves itself for it. Whether a migration without an ADR *citation* should get one (a process decision under §11, not a finding about the schema). Whether ADR-0019's pre-release mechanism and tag scheme should be chosen, and whether its owed `AGENTS.md` correction should be made now or at release. And any `Proposed` ADR's readiness for acceptance — 0019 in particular is untouched by this pass beyond the confirmed-unlanded correction.
