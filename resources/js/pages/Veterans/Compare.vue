@@ -288,7 +288,7 @@ watch(orderedColumns, () => {
                     {{ picked.length }} of {{ props.max }} selected
                 </p>
 
-                <ul class="mt-2 grid gap-1 sm:grid-cols-2">
+                <ul class="mt-2 grid gap-1 @3xl:grid-cols-2">
                     <li v-for="option in props.comparable" :key="option.id">
                         <!-- Boolean model mode, not the `modelValue === value` group mode: the group mode
                              has to agree on the id's type on both sides, and a mismatch renders every
@@ -588,7 +588,7 @@ watch(orderedColumns, () => {
             <!-- `Note` moved out of the table: a long-form paragraph does not belong in a comparison cell
                  where it cannot wrap and reads as the same text repeated once per column. Each selected
                  career gets its own note card below the matrix, in the same column order. -->
-            <div v-if="orderedColumns.length > 0" class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div v-if="orderedColumns.length > 0" class="mt-4 grid gap-3 @3xl:grid-cols-2 @5xl:grid-cols-3">
                 <article
                     v-for="column in orderedColumns"
                     :key="`note-${column.id}`"

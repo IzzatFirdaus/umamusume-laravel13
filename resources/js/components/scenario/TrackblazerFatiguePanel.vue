@@ -92,7 +92,7 @@ const chains = computed((): string[] => Object.keys(props.fatigue.table));
 
             <dl
                 v-if="props.fatigue.row !== null && props.fatigue.chain_label !== null"
-                class="grid grid-cols-1 gap-x-3 gap-y-1 rounded-md border border-rule bg-raised p-3 sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)]"
+                class="grid grid-cols-1 gap-x-3 gap-y-1 rounded-md border border-rule bg-raised p-3 @3xl:grid-cols-[minmax(0,12rem)_minmax(0,1fr)]"
             >
                 <!-- Each `dt` is followed by its `dd` and the pairs are the `dl`'s own children: a heading
                      `dt` with no value beside it fails axe's `definition-list` rule, which is why the label

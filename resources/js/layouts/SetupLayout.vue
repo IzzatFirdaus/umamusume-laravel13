@@ -31,12 +31,11 @@ const props = defineProps<{ step: number; visited?: number[]; saved?: number[] }
 // master/detail, the scenario matrix) get the wide screen the Trainer asked for. `container-type:
 // inline-size` is what lets an inner step lay itself out off the wrapper's resolved width instead
 // of the viewport, so the sidebar collapse never re-breaks a step. The `AppLayout` `main` carries
-// the same measure; this wrapper re-states it so the step grid inside is the thing that fills.
-const { mode } = useLayout();
+// the same measure via `useLayout`; this wrapper re-states it so the step grid inside is the thing
+// that fills, and so SetupLayout applies the shared map rather than its own inline one.
+const { mode, layoutWidthClass } = useLayout();
 const wrapperClass = computed(() => {
-    const panel = mode.value === 'compact' ? 'max-w-3xl' : mode.value === 'wide' ? 'max-w-shell-wide' : 'max-w-6xl';
-
-    return `${panel} mx-auto w-full`;
+    return `${layoutWidthClass.value} mx-auto w-full`;
 });
 
 const steps = [
@@ -103,7 +102,7 @@ const isNotStarted = (index: number): boolean =>
             </ol>
         </nav>
 
-        <div :class="wrapperClass" class="@container">
+        <div :class="wrapperClass" class="@container" data-layout-container>
             <slot />
         </div>
     </AppLayout>

@@ -218,7 +218,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
              and the ScenarioCaps ceiling, plus Energy, Mood, Fans and Skill Points. -->
         <section aria-labelledby="event-state-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
             <h2 id="event-state-heading" class="text-lg font-semibold text-ink-strong">Current career state</h2>
-            <dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <dl class="mt-3 grid grid-cols-2 gap-3 @3xl:grid-cols-3 @5xl:grid-cols-5">
                  <div
                      v-for="stat in props.state.stats"
                      :key="stat.key"
@@ -231,7 +231,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                     </dd>
                 </div>
             </dl>
-            <dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <dl class="mt-3 grid grid-cols-2 gap-3 @3xl:grid-cols-4">
                  <div
                      v-for="item in props.state.meta"
                      :key="item.key"
@@ -336,7 +336,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                 </ul>
             </div>
 
-            <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="mt-3 grid grid-cols-1 gap-3 @3xl:grid-cols-2 @5xl:grid-cols-3">
 <BaseSelect
   v-model="form.turn"
   name="turn"
@@ -396,7 +396,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                 </BaseRadio>
             </fieldset>
 
-            <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div class="mt-3 grid grid-cols-1 gap-3 @3xl:grid-cols-2">
 <BaseInput
   v-model="form.choice_label"
   type="text"

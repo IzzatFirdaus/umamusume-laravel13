@@ -140,7 +140,7 @@ const close = async (): Promise<void> => {
                 </button>
 
                 <dl
-                    class="grid grid-cols-1 gap-x-4 gap-y-1 border-t border-rule px-4 py-3 text-sm sm:grid-cols-[9rem_1fr]"
+                    class="grid grid-cols-1 gap-x-4 gap-y-1 border-t border-rule px-4 py-3 text-sm @3xl:grid-cols-[9rem_1fr]"
                 >
                     <dt class="text-ink-muted">JP name</dt>
                     <dd class="text-ink" lang="ja">{{ row.jp_name }}</dd>

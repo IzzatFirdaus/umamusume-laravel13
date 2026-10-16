@@ -216,7 +216,7 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
         <section class="mx-auto w-full max-w-4xl mt-6" aria-labelledby="build-heading">
             <h2 id="build-heading" class="text-lg font-semibold text-ink-strong">Build</h2>
 
-            <dl class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-2">
+            <dl class="mt-2 max-w-3xl grid gap-2 @3xl:grid-cols-2">
                 <div class="rounded-lg border border-rule bg-panel p-3">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Trainee</dt>
                     <dd class="mt-1 text-sm text-ink-strong">
@@ -245,7 +245,7 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
                     </dd>
                 </div>
 
-                <div class="rounded-lg border border-rule bg-panel p-3 sm:col-span-2">
+                <div class="rounded-lg border border-rule bg-panel p-3 @3xl:col-span-2">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Your target</dt>
                     <dd class="mt-1 text-sm text-ink">
                         <template v-if="props.contract.build.target">
@@ -258,7 +258,7 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
                     </dd>
                 </div>
 
-                <div class="rounded-lg border border-rule bg-panel p-3 sm:col-span-2">
+                <div class="rounded-lg border border-rule bg-panel p-3 @3xl:col-span-2">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                         Ancestry
                         <span v-if="props.contract.build.legacy" class="ml-2 normal-case tracking-normal">
@@ -332,7 +332,7 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
             </div>
 
             <template v-else>
-                <ol class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-2">
+                <ol class="mt-2 max-w-3xl grid gap-2 @3xl:grid-cols-2">
                     <li
                         v-for="slot in props.contract.deck.slots"
                         :key="slot.position"
@@ -374,7 +374,7 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
         <section class="mx-auto w-full max-w-4xl mt-6" aria-labelledby="target-heading">
             <h2 id="target-heading" class="text-lg font-semibold text-ink-strong">Target</h2>
 
-            <dl class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-2">
+            <dl class="mt-2 max-w-3xl grid gap-2 @3xl:grid-cols-2">
                 <div v-for="stat in props.contract.target.stats" :key="stat.key" class="rounded-lg border border-rule bg-panel p-3">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ stat.label }}</dt>
                     <dd class="mt-1 font-mono text-sm text-ink-strong">

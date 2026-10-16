@@ -149,7 +149,7 @@ const currentMark = '◉';
                         <span v-if="period.is_current" class="text-xs font-normal text-ink-muted">the period this run reports</span>
                     </p>
 
-                    <dl class="mt-2 grid grid-cols-1 gap-x-3 gap-y-2 sm:grid-cols-[minmax(0,8rem)_minmax(0,1fr)]">
+                    <dl class="mt-2 grid grid-cols-1 gap-x-3 gap-y-2 @3xl:grid-cols-[minmax(0,8rem)_minmax(0,1fr)]">
                         <dt class="text-xs text-ink-muted">Needed</dt>
                         <dd class="flex flex-wrap items-baseline gap-x-2">
                             <ProvenanceBadge v-if="period.needed_badge !== null" :state="period.needed_badge" :title="period.needed_title" />
@@ -211,7 +211,7 @@ const currentMark = '◉';
         <!-- The gate is its own labelled group, not a bare list: the flag row above names the same
              event, so an assertion inside this region has to say which one it means. -->
         <div v-if="props.planning.year_end !== null" role="group" aria-label="Year-end gate">
-            <dl class="grid grid-cols-1 gap-x-3 gap-y-2 rounded-md border border-rule bg-raised p-3 sm:grid-cols-[minmax(0,8rem)_minmax(0,1fr)]">
+            <dl class="grid grid-cols-1 gap-x-3 gap-y-2 rounded-md border border-rule bg-raised p-3 @3xl:grid-cols-[minmax(0,8rem)_minmax(0,1fr)]">
                 <dt class="text-xs text-ink-muted">Assessment</dt>
                 <dd class="text-sm text-ink" :title="props.planning.year_end.timing">
                     {{ props.planning.year_end.gate_label }} · {{ props.planning.year_end.timing }}

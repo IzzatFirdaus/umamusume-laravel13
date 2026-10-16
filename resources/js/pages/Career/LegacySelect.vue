@@ -311,8 +311,8 @@ const ancestorError = (index: number, slot: number): string | undefined =>
             {{ props.roster.length }}. The rest are on the Legacy Lab browse screen.
         </p>
 
-        <ol class="mt-4 max-w-3xl grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
-            <li class="rounded-lg border-2 border-rule bg-panel p-3 lg:col-span-2">
+        <ol class="mt-4 max-w-3xl grid grid-cols-1 items-start gap-6 @5xl:grid-cols-2">
+            <li class="rounded-lg border-2 border-rule bg-panel p-3 @5xl:col-span-2">
                 <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Trainee</p>
                 <div class="mt-1 text-lg font-semibold text-ink-strong">
                     <span v-if="props.graph.trainee.name">{{ props.graph.trainee.name }}</span>

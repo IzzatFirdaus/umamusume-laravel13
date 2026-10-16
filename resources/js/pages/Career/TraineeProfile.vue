@@ -160,7 +160,7 @@ const profile = computed(() => props.trainee.profile);
                 </p>
             </div>
 
-            <dl class="mt-4 grid max-w-3xl grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+            <dl class="mt-4 grid max-w-3xl grid-cols-1 gap-x-6 gap-y-2 text-sm @3xl:grid-cols-2">
                 <div class="flex flex-wrap justify-between gap-x-4">
                     <dt class="text-ink-muted">Availability</dt>
                     <dd class="text-ink">{{ props.trainee.release_status_label }}</dd>
@@ -264,7 +264,7 @@ const profile = computed(() => props.trainee.profile);
                         </span>
                     </h3>
 
-                    <div class="mt-4 grid gap-6 lg:grid-cols-2">
+                    <div class="mt-4 grid gap-6 @5xl:grid-cols-2">
                         <div v-for="list in card.skillLists" :key="list.key">
                             <h4 class="text-lg font-semibold text-ink-strong">{{ list.label }}</h4>
 
@@ -307,7 +307,7 @@ const profile = computed(() => props.trainee.profile);
                 whether each one is met.
             </p>
 
-            <dl class="mt-4 grid max-w-3xl grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+            <dl class="mt-4 grid max-w-3xl grid-cols-1 gap-x-6 gap-y-2 text-sm @3xl:grid-cols-2">
                 <div class="flex flex-wrap justify-between gap-x-4">
                     <dt class="text-ink-muted">Recommended stat distribution</dt>
                     <dd class="text-ink-muted" :title="props.absences.stat_distribution.title">

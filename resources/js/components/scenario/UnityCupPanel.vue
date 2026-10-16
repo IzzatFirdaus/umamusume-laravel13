@@ -171,7 +171,7 @@ const counterSegments = computed((): string[] => {
 
     <!-- The `team_rank_ladder` registration: the Team Panel itself. Team cards sit beside the burst regions
          on desktop and stack above them on mobile, with no horizontal scroll at any width. -->
-    <div v-else-if="isTeamPanel" class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+    <div v-else-if="isTeamPanel" class="grid grid-cols-1 gap-3 @5xl:grid-cols-2">
         <div class="flex flex-col gap-3">
             <!-- The team's own identity (A6.6), drawn only when the Trainer entered one of the four:
                  a run that named no team gets no card rather than four empty rows. -->

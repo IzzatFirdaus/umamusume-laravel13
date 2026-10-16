@@ -100,7 +100,7 @@ const heldTitle = 'Counted from this run\'s recorded purchases, against the cap 
             </li>
         </ul>
 
-        <dl class="grid grid-cols-1 gap-x-3 gap-y-2 rounded-md border border-rule bg-raised p-3 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)]">
+        <dl class="grid grid-cols-1 gap-x-3 gap-y-2 rounded-md border border-rule bg-raised p-3 @3xl:grid-cols-[minmax(0,10rem)_minmax(0,1fr)]">
             <dt class="text-xs text-ink-muted">Inflow from entered races</dt>
             <dd class="flex flex-col gap-1">
                 <span class="flex flex-wrap items-baseline gap-x-2">

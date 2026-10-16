@@ -166,7 +166,7 @@ const submit = (): void => {
                     Where the career stands, as the client spells it. This run starts from here; it does
                     not start from turn 1.
                 </p>
-                <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div class="mt-3 grid grid-cols-1 gap-3 @3xl:grid-cols-3">
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-ink">Year *</span>
                         <BaseSelect
@@ -210,7 +210,7 @@ const submit = (): void => {
                     know this value" when the client does not show it, or leave it blank when you have not
                     filled it in. The review says which of the three each field is.
                 </p>
-                <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                <div class="mt-3 grid grid-cols-2 gap-3 @3xl:grid-cols-3 @5xl:grid-cols-5">
                     <!-- One label per control: a wrapper label here made the number input's accessible
                          name the whole block ("Speed I don't know this value") and left the checkbox
                          unnamed. Each control now owns its label text. -->
@@ -235,7 +235,7 @@ const submit = (): void => {
                         />
                     </div>
                 </div>
-                <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div class="mt-3 grid grid-cols-1 gap-3 @3xl:grid-cols-3">
                     <div v-for="field in META_FIELDS" :key="field.key" class="flex flex-col gap-1">
                         <BaseInput
                             :id="`snapshot-${field.key}`"

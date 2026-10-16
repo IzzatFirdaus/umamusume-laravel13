@@ -76,7 +76,7 @@ const treatment = (state: string): string => {
         </p>
 
         <section aria-labelledby="snapshot-review-heading" class="mt-6 max-w-3xl rounded-md border border-rule bg-panel p-4">
-            <ul class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <ul class="mt-3 grid grid-cols-1 gap-2 @3xl:grid-cols-2">
                 <li
                     v-for="field in props.fields"
                     :key="field.key"

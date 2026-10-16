@@ -15,6 +15,7 @@
  */
 import AppLayout from './AppLayout.vue';
 import { Link } from '@inertiajs/vue3';
+import { useLayout } from '../composables/useLayout';
 
 const props = defineProps<{
     trainee: string;
@@ -22,6 +23,13 @@ const props = defineProps<{
     statusLabel: string;
     runUrl: string;
 }>();
+
+/*
+ * CareerLayout applies the same width class as every other shell, sourced from the shared
+ * `useLayout` map. It wraps AppLayout and carries its own `data-layout-container` so a browser
+ * gate can assert the width without depending on AppLayout's `#main` implementation.
+ */
+const { layoutWidthClass } = useLayout();
 
 const doorClass =
     'inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
@@ -32,23 +40,25 @@ const doorClass =
         <template v-if="$slots.eyebrow" #eyebrow><slot name="eyebrow" /></template>
         <template #title><slot name="title" /></template>
 
-        <section
-            aria-label="Career"
-            class="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-md border border-rule bg-panel px-4 py-2"
-        >
-            <p class="text-sm text-ink">
-                <span class="font-semibold text-ink-strong">{{ props.trainee }}</span>
-                <span aria-hidden="true"> · </span>
-                <span>{{ props.scenarioLabel }}</span>
-                <span aria-hidden="true"> · </span>
-                <span class="text-ink-muted">{{ props.statusLabel }}</span>
-            </p>
-            <div class="flex flex-wrap gap-1">
-                <Link :href="props.runUrl" :class="doorClass">Cockpit</Link>
-                <Link href="/" :class="doorClass">Dashboard</Link>
-            </div>
-        </section>
+        <div :class="[layoutWidthClass, 'mx-auto w-full']" data-layout-container>
+            <section
+                aria-label="Career"
+                class="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-md border border-rule bg-panel px-4 py-2"
+            >
+                <p class="text-sm text-ink">
+                    <span class="font-semibold text-ink-strong">{{ props.trainee }}</span>
+                    <span aria-hidden="true"> · </span>
+                    <span>{{ props.scenarioLabel }}</span>
+                    <span aria-hidden="true"> · </span>
+                    <span class="text-ink-muted">{{ props.statusLabel }}</span>
+                </p>
+                <div class="flex flex-wrap gap-1">
+                    <Link :href="props.runUrl" :class="doorClass">Cockpit</Link>
+                    <Link href="/" :class="doorClass">Dashboard</Link>
+                </div>
+            </section>
 
-        <slot />
+            <slot />
+        </div>
     </AppLayout>
 </template>

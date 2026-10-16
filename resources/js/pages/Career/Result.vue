@@ -145,7 +145,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
             <section aria-labelledby="result-build-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
                 <h2 id="result-build-heading" class="text-lg font-semibold text-ink-strong">Final build</h2>
 
-                <dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                <dl class="mt-3 grid grid-cols-2 gap-3 @3xl:grid-cols-3 @5xl:grid-cols-5">
                     <div v-for="stat in props.build.stats" :key="stat.key" class="rounded-md border border-rule bg-raised p-3">
                         <dt class="text-xs text-ink-muted">{{ stat.label }}</dt>
                         <dd class="mt-0.5 font-mono text-lg tabular-nums text-ink-strong">
@@ -221,7 +221,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
             <section aria-labelledby="result-races-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
                 <h2 id="result-races-heading" class="text-lg font-semibold text-ink-strong">Race history</h2>
 
-                <dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
+                <dl class="mt-3 grid grid-cols-2 gap-3 @3xl:grid-cols-5">
                     <div class="rounded-md border border-rule bg-raised p-3">
                         <dt class="text-xs text-ink-muted">Races completed</dt>
                         <dd class="mt-0.5 font-mono text-lg tabular-nums text-ink-strong">{{ countOf('completed') }}</dd>
@@ -284,7 +284,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                 <p v-if="props.scenario.notice !== null" class="mt-1 text-sm text-ink-muted">{{ props.scenario.notice }}</p>
 
                 <template v-else>
-                    <dl class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <dl class="mt-3 grid grid-cols-1 gap-3 @3xl:grid-cols-2 @5xl:grid-cols-4">
                         <div v-for="period in props.scenario.periods" :key="period.index" class="rounded-md border border-rule bg-raised p-3">
                             <dt class="text-xs text-ink-muted">{{ period.name }}</dt>
                             <dd class="mt-0.5 font-mono text-lg tabular-nums text-ink-strong">

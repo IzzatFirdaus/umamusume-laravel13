@@ -519,3 +519,23 @@ it('enables wide end-to-end with the default flag', function (): void {
 
     expect(Preference::settings()['dashboard_layout'])->toBe('wide');
 });
+
+it('shares the layout width preference as an Inertia prop', function (): void {
+    // The width preference lives in `settings.dashboard_layout`, shared via
+    // `preferences.settings` so every layout can read it through `useLayout`.
+    Preference::putSettings(['dashboard_layout' => 'wide']);
+
+    test()->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('preferences.settings.dashboard_layout', 'wide'));
+});
+
+it('falls back to standard when no layout width is stored', function (): void {
+    // No settings row means `Preference::settings()` returns [], and the middleware still
+    // shares `preferences.settings` as an empty array so the frontend resolves to `standard`.
+    test()->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('preferences.settings', []));
+});

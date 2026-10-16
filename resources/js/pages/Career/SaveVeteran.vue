@@ -201,7 +201,7 @@ function save(): void {
                     Read back from the run. Nothing here is derived, and the library adds your tags and note to it.
                 </p>
 
-                <dl class="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
+                <dl class="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 text-sm @3xl:grid-cols-4">
                     <div>
                         <dt class="text-xs text-ink-muted">Trainee</dt>
                         <dd class="text-ink-strong">
@@ -273,7 +273,7 @@ function save(): void {
                  recommendation `ADR-0020` §3 keeps out of the record screens. -->
             <section aria-labelledby="held-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
                 <h2 id="held-heading" class="text-lg font-semibold text-ink-strong">Not computed</h2>
-                <dl class="mt-2 grid gap-3 text-sm sm:grid-cols-3">
+                <dl class="mt-2 grid gap-3 text-sm @3xl:grid-cols-3">
                     <div v-for="(figure, name) in props.held" :key="name">
                         <dt class="text-xs text-ink-muted">{{ name === 'factor_analysis' ? 'Factor analysis' : name === 'legacy_value' ? 'Legacy value' : 'Best use' }}</dt>
                         <dd class="text-ink-strong">

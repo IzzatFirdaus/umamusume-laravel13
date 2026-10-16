@@ -80,6 +80,7 @@ defineProps<{
         :href="href"
         :aria-label="alt === '' ? (linkLabel ?? undefined) : undefined"
         :class="[size, 'block']"
+        data-artwork-slot
     >
         <img :src="url" :alt="alt" loading="lazy" decoding="async" :class="`${size} rounded-md object-cover`">
     </a>
@@ -90,7 +91,8 @@ defineProps<{
         loading="lazy"
         decoding="async"
         :class="`${size} rounded-md object-cover`"
+        data-artwork-slot
     >
-    <span v-else-if="reserve" :class="[size, 'block']" aria-hidden="true"></span>
+    <span v-else-if="reserve" :class="[size, 'block']" aria-hidden="true" data-artwork-slot></span>
 </template>
 

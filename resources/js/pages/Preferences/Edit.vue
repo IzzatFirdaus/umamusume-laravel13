@@ -386,7 +386,7 @@ function runBackup(): void {
                         name="settings[dashboard_layout]"
                         label="Standard"
                         value="standard"
-                        hint="The default shell width. Best for 1280-1600px screens."
+                        hint="Bento composition. Grouped cards at the default shell width (1152px)."
                         :aria-describedby="describedBy('settings.dashboard_layout')"
                     />
 
@@ -396,7 +396,7 @@ function runBackup(): void {
                         name="settings[dashboard_layout]"
                         label="Wide"
                         value="wide"
-                        hint="Same grid, wider. Uses more of very wide screens."
+                        hint="Wide bento composition. The same grouping at the wider cap (1536px)."
                     />
 
                     <BaseRadio
@@ -405,7 +405,7 @@ function runBackup(): void {
                         name="settings[dashboard_layout]"
                         label="Compact"
                         value="compact"
-                        hint="Single column, 768px reading measure. Best for forms and long copy."
+                        hint="Focused composition. A single reading column, best for forms and long copy."
                         :aria-describedby="describedBy('settings.dashboard_layout')"
                     />
                 </fieldset>

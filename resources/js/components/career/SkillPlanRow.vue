@@ -95,7 +95,7 @@ async function move(delta: number): Promise<void> {
             Conditions as the source states them: <code class="text-ink">{{ props.row.conditions }}</code>
         </p>
 
-        <dl class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-4">
+        <dl class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs @3xl:grid-cols-4">
             <div v-for="cell in props.row.fit" :key="cell.key" class="flex flex-col">
                 <dt class="font-semibold uppercase tracking-wide text-ink-muted">{{ cell.label }}</dt>
                 <dd class="text-ink-strong" :title="cell.title ?? undefined">{{ FIT_WORDS[cell.state] }}</dd>

@@ -321,6 +321,8 @@ external fonts (offline constraint + C-8 dependency gate).
 > **Amended 2026-10-15 (vocabulary rename and vertical fill): the sentence above about `'wide_bento'` is superseded, and it flipped back.** The stored values are now `compact` / `standard` / `wide`, with `resources/js/composables/useLayout.ts` mapping the legacy `focused` / `bento` / `wide_bento` in one place, so the original `'wide'` in this block's first paragraph is the current truth again. Compact now carries its own shell cap (`max-w-3xl` on `main`, 768px), which is why the enforcement line's `#main at 1024` no longer describes it. Vertically, the Dashboard grid carries `min-h-full`: `main` already stretches to the viewport, and a grid's default `align-content: stretch` gives the leftover to both auto rows, so the regions end at the shell's content box instead of mid-screen. Measured at 1920 × 1080 the column `main` offers is 950px (viewport less the 82px banner and `main`'s own 48px padding) and the grid fills all 950. A `>= 1000` fill floor is therefore unreachable on this shell without `h-screen`, and the spec measures the fill against the column instead.
 >
 > **Amended 2026-10-15 (same day, vertical fill withdrawn): the fill above is reverted and it was the wrong move.** `min-h-full` stretched every region to the shell's height, so each card became a border around its own content with 200-250px of empty space below it. A bordered box that is mostly empty reads as a broken panel; a page with a bottom margin reads as a finished page, so the margin is the lesser defect. The grid is now `items-start` with `gap-6`: every region keeps its own content height, no card carries more than 6px of internal void, and the shorter cards in a row no longer inflate to their tallest sibling. Standard and wide end at 577px and 541px of the 950px column. Filling the rest with content rather than boxes was measured and does not work at this density: the career stat cells are 70px and the Data Status KPI tiles 106px, so the largest available increase returns about 24px of a 373px gap. Closing that gap needs regions this screen does not have, which is a content decision and not a layout one.
+>
+> **Erratum 2026-10-16 (owner ruling).** The Dashboard-only scope of the 1536px wide step, ruled in the third amendment above, is superseded. Every screen renders the composition its configured mode names: **standard** renders the bento composition at the 1152px shell; **wide** renders the wide-bento composition at the 1536px shell; **compact** renders the focused composition at the 768px reading measure. The legacy `wide_bento` stored value remains valid and maps to `wide`. The sentence above stands as written on the day it was signed; this replaces its scope, not its record.
 - **768px is the supported minimum (amended 2026-09-29, KI-25), and the floor above
   is narrower than it read.** "No overflow" was measured and is false below 768px for
   exactly two surfaces: the race calendar and the turn log are wide tables whose content
@@ -519,7 +521,7 @@ surface, so the notice is copy over `ink-faint` (3.26:1 light / 4.21:1 dark) as 
 
 **Ported 2026-10-05.** `SCR-CAT-002` now renders through `resources/js/pages/Catalog/Show.vue`; the
 `catalog/show.blade.php` view and its `form-detail` partial are deleted. The withdrawal above stands as
-written for the 0.1.0 view it describes, and the eight-section workspace below is the ported page's shape.
+written for the 2.0.0 view it describes, and the eight-section workspace below is the ported page's shape.
 
 **The trainee page is a workspace for that trainee.** Eight sections, in this order:
 
@@ -1052,7 +1054,7 @@ system owns.
 - **2026-10-05** — Declared the WCAG 2.2 AA conformance target (§12) and shipped its three
   visual-system pieces: a `prefers-reduced-motion` block and `scroll-padding-bottom` for the
   pinned mobile nav in `app.css`, and a `role="banner"` landmark on the shell header. Corrected
-  the §8 sentence that recorded the reduced-motion block as absent. The 0.1.0 Blade and Vue
+  the §8 sentence that recorded the reduced-motion block as absent. The 2.0.0 Blade and Vue
   screens were remediated to the same bar (Japanese names carry `lang="ja"`, the guided-rail
   heading skip is closed, the error-page actions meet the 44px bar, and the ported pages gained
   loading and processing states).

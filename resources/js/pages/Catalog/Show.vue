@@ -163,9 +163,9 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
             <template v-if="!trainee.profile">
                 <dl
                     v-if="trainee.japanese_name"
-                    class="mt-2 grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-rule bg-raised p-4 text-sm md:grid-cols-3"
+                    class="mt-2 grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-rule bg-raised p-4 text-sm @4xl:grid-cols-3"
                 >
-                    <div class="col-span-2 md:col-span-3">
+                    <div class="col-span-2 @4xl:col-span-3">
                         <dt class="text-ink-muted">Japanese name</dt>
                         <dd class="text-ink"><span lang="ja">{{ trainee.japanese_name }}</span></dd>
                     </div>
@@ -178,9 +178,9 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
 
             <dl
                 v-else
-                class="mt-2 grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-rule bg-raised p-4 text-sm md:grid-cols-3"
+                class="mt-2 grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-rule bg-raised p-4 text-sm @4xl:grid-cols-3"
             >
-                <div class="col-span-2 md:col-span-3">
+                <div class="col-span-2 @4xl:col-span-3">
                     <dt class="text-ink-muted">Japanese name</dt>
                     <dd class="text-ink">
                         <span v-if="trainee.japanese_name" lang="ja">{{ trainee.japanese_name }}</span>
@@ -252,7 +252,7 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
             </dl>
         </section>
 
-        <dl class="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-rule bg-raised p-4 text-sm md:grid-cols-4">
+        <dl class="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-rule bg-raised p-4 text-sm @4xl:grid-cols-4">
             <div>
                 <dt class="text-ink-muted">Release status</dt>
                 <dd class="text-ink">{{ trainee.release_status_label }}</dd>

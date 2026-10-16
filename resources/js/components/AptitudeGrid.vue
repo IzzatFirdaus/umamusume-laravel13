@@ -28,7 +28,7 @@ const rows: { label: string; key: string }[][] = [
 </script>
 
 <template>
-    <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-4">
+    <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm @3xl:grid-cols-4">
         <template v-for="(row, index) in rows" :key="index">
             <div
                 v-for="cell in row"

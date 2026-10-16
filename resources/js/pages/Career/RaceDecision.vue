@@ -270,7 +270,7 @@ function submitManual(): void {
                 </p>
 
                 <form
-                    class="mt-3 grid max-w-3xl grid-cols-2 gap-3 text-sm md:grid-cols-3"
+                    class="mt-3 grid max-w-3xl grid-cols-2 gap-3 text-sm @4xl:grid-cols-3"
                     :aria-busy="manualForm.processing"
                     @submit.prevent="submitManual"
                 >
@@ -361,7 +361,7 @@ function submitManual(): void {
                         ref="alertRef"
                         role="alert"
                         tabindex="-1"
-                        class="md:col-span-3 rounded-md border border-risk bg-raised p-2 text-sm text-risk"
+                        class="@4xl:col-span-3 rounded-md border border-risk bg-raised p-2 text-sm text-risk"
                     >
                         <span v-for="(message, key) in manualForm.errors" :key="key" class="block">{{ message }}</span>
                     </p>

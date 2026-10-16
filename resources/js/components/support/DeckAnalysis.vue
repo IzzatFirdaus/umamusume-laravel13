@@ -60,7 +60,7 @@ defineProps<{
                 top level, and never an interpolation for a level this deck holds.
             </p>
 
-            <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <div class="mt-4 grid gap-4 @4xl:grid-cols-2">
                 <section
                     v-for="(category, key) in categories"
                     :key="key"
@@ -130,7 +130,7 @@ defineProps<{
                 </ul>
             </section>
 
-            <div class="mt-5 grid gap-4 md:grid-cols-2">
+            <div class="mt-5 grid gap-4 @4xl:grid-cols-2">
                 <section class="rounded-md border border-rule bg-raised p-3" aria-labelledby="deck-strengths">
                     <h4 id="deck-strengths" class="text-lg font-semibold text-ink-strong">What the deck covers</h4>
                     <ul v-if="strengths.length > 0" class="mt-2 list-disc space-y-1 pl-5 text-sm text-ink-muted">

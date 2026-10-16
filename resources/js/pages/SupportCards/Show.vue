@@ -100,7 +100,7 @@ const skillSections = computed(() => [
             <p v-if="hasJapanese" lang="ja" class="text-sm text-ink-muted">{{ japaneseName }}</p>
         </div>
 
-        <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-rule bg-panel p-4 text-sm md:grid-cols-3">
+        <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-rule bg-panel p-4 text-sm @4xl:grid-cols-3">
             <div>
                 <dt class="text-ink-muted">Rarity</dt>
                 <dd class="flex items-baseline gap-2 text-ink">

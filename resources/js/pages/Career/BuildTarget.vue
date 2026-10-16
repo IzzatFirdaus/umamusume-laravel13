@@ -372,7 +372,7 @@ function removeAt(index: number): void {
             <fieldset class="rounded-lg border border-rule bg-panel p-4">
                 <legend class="px-1 text-lg font-semibold text-ink-strong">What the career is for</legend>
 
-                <div class="grid gap-4 sm:grid-cols-2">
+                <div class="grid gap-4 @3xl:grid-cols-2">
                     <BaseSelect
                         v-model="form.purpose"
                         :id="controlId('purpose')"
@@ -451,7 +451,7 @@ function removeAt(index: number): void {
                 </p>
 
                 <div class="mt-4 space-y-4">
-                    <div v-for="stat in props.statOrder" :key="stat" :data-stat="stat" class="grid gap-3 sm:grid-cols-2">
+                    <div v-for="stat in props.statOrder" :key="stat" :data-stat="stat" class="grid gap-3 @3xl:grid-cols-2">
                         <!-- Target column -->
                         <div class="space-y-1">
                             <BaseInput

@@ -3,6 +3,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import NavGlyph from '../components/NavGlyph.vue';
 import VisitProgressBar from '../components/VisitProgressBar.vue';
+import { useLayout } from '../composables/useLayout';
 
 const page = usePage();
 const appVersion = computed(() => page.props.app?.version ?? null);
@@ -12,17 +13,10 @@ const appVersion = computed(() => page.props.app?.version ?? null);
  * ScalaCaps-pre Rules: `compact` keeps the 768px reading measure, `standard` lands on the 1152px
  * shell, `wide` opens the 1536px shell (`--container-shell-wide`, DESIGN.md §2.3). The choice
  * reaches every AppLayout screen, not only the Dashboard, which is the workstream 1 change: the
- * shell is one renderer, every page inherits it. The Dashboard's own narrow union has its own
- * copy in `useLayout.ts`.
+ * shell is one renderer, every page inherits it. The class map lives in `useLayout.ts` as
+ * `LAYOUT_WIDTH_CLASSES`, so the shell and the wizard share one source of truth.
  */
-const shellMeasure = computed(() => {
-    const settings = page.props?.preferences?.settings as { dashboard_layout?: string } | null;
-    const layout = settings?.dashboard_layout ?? 'standard';
-
-    return layout === 'compact' ? 'max-w-3xl'
-        : layout === 'wide' ? 'max-w-shell-wide'
-        : 'max-w-6xl';
-});
+const { layoutWidthClass } = useLayout();
 const flashStatus = computed(() => page.props.flash?.status ?? null);
 
 // The banner dismisses itself after five seconds and can be dismissed by hand (plan 6B.6).
@@ -371,7 +365,7 @@ const moreIsCurrent = computed(() =>
             </header>
             <!-- The ratified shell measure (DESIGN.md:197-208): the error documents constrain
                  themselves to this width and the product shell now does too. -->
-            <main id="main" :class="['mx-auto w-full flex-1 px-6 py-6 pb-24 md:pb-6', shellMeasure]">
+            <main id="main" data-layout-container class="@container" :class="['mx-auto w-full flex-1 px-6 py-6 pb-24 md:pb-6', layoutWidthClass]">
                 <!-- The flash region is always mounted and carries only its text (WCAG 4.1.3): a live
                      region announces what changes inside it, so a region created in the same tick as its
                      message may never be announced. Empty, it is sr-only and says nothing; the classes

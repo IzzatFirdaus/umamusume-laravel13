@@ -410,7 +410,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                     </ul>
                 </div>
 
-                <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div class="mt-3 grid grid-cols-1 gap-3 @3xl:grid-cols-2 @5xl:grid-cols-3">
 <BaseSelect
   v-model="form.turn"
   name="turn"

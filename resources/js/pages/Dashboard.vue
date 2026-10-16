@@ -150,10 +150,10 @@ function cardSpan(cardId: string): string {
     // Veterans, Data Status) and the explicit starts place them, so the tab order matches the
     // visual order at every width and no row is left with an untiled cell.
     const spans: Record<string, string> = {
-        active_career: 'col-span-1 xl:col-span-8 xl:col-start-1 xl:row-start-1',
-        quick_actions: 'col-span-1 xl:col-span-4 xl:col-start-9 xl:row-start-1',
-        recent_veterans: 'col-span-1 xl:col-span-8 xl:col-start-1 xl:row-start-2',
-        data_status: 'col-span-1 md:col-span-2 xl:col-span-4 xl:col-start-9 xl:row-start-2',
+        active_career: 'col-span-1 xl:col-span-8 @7xl:col-start-1 @7xl:row-start-1',
+        quick_actions: 'col-span-1 xl:col-span-4 @7xl:col-start-9 @7xl:row-start-1',
+        recent_veterans: 'col-span-1 xl:col-span-8 @7xl:col-start-1 @7xl:row-start-2',
+        data_status: 'col-span-1 md:col-span-2 xl:col-span-4 @7xl:col-start-9 @7xl:row-start-2',
     };
     return spans[cardId] ?? 'col-span-1';
 }

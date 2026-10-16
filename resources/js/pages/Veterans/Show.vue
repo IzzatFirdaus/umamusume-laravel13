@@ -56,7 +56,7 @@ const doorClass =
                 The Record
             </h2>
 
-            <dl class="mt-3 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+            <dl class="mt-3 grid gap-x-6 gap-y-3 text-sm @3xl:grid-cols-2">
                 <div>
                     <dt class="text-xs text-ink-muted">Trainee</dt>
                     <dd class="text-ink-strong">
@@ -165,7 +165,7 @@ const doorClass =
                 Lab, which prints the six-node graph; this screen names the parents and leaves the graph
                 to the one surface that renders it.
             </p>
-            <dl class="mt-3 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+            <dl class="mt-3 grid gap-x-6 gap-y-3 text-sm @3xl:grid-cols-2">
                 <div>
                     <dt class="text-xs text-ink-muted">Parent A</dt>
                     <dd class="text-ink-strong">

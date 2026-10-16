@@ -85,7 +85,7 @@ const bonusText = (bonus: number): string => (bonus > 0 ? `+${bonus}` : `${bonus
                     </div>
                 </div>
 
-                <div class="mt-4 grid gap-5 lg:grid-cols-2">
+                <div class="mt-4 grid gap-5 @5xl:grid-cols-2">
                     <div>
                         <h4 class="text-lg font-semibold text-ink-strong">Caps</h4>
 

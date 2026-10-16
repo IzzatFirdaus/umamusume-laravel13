@@ -105,7 +105,7 @@ const kindVisible = (entry: Entry): boolean =>
                 </summary>
 
                 <div class="border-t border-rule p-3 text-sm">
-                    <dl class="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
+                    <dl class="grid grid-cols-1 gap-x-6 gap-y-2 @3xl:grid-cols-2">
                         <div v-if="entry.kind === 'turn'">
                             <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">BEFORE</dt>
                             <dd class="mt-1 font-mono tabular-nums">
