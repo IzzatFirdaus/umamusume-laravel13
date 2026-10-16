@@ -300,3 +300,94 @@ call the server already composes into a prop, which restores the §7 rule and ma
 `SCREEN_SPEC.md` and the docs cite, and removing them breaks the citation surface; **(c)** rule that the
 frontend may address URIs literally and amend §7 to say so, which makes today's code legal and the finding
 closed by ruling. The audit takes no position; the choice changes 11 lines or one rule.
+
+## 8. §3.2 — dead-code inventory, 2026-10-16
+
+`.scratch-uma/audit-agent-2026-10-16/{phase5.py,phase5b.py}`, outputs in the sibling `.txt`. The class
+census searched 2,049 files (docs excluded, so a doc mention cannot mask a missing caller); the
+command-verb census adds `docs/`, `README.md`, `AGENTS.md`, `Makefile`, `composer.json` and
+`package.json`. Line counts below are `wc -l`, not the script's off-by-one.
+
+**One wording correction to §7, which is append-only above:** its last paragraph says "all nine files are
+page components". Nine is the file count; eight are pages and one, `components/review/CandidateForm.vue`,
+is a component.
+
+### Counts in scope: 153 classes
+
+| Directory | Tracked `.php` |
+|---|---|
+| `app/Http/Requests` | 31 |
+| `app/Models` | 31 |
+| `app/Services` | 43 |
+| `app/Actions` | 16 |
+| `app/Enums` | 21 (one of them, `HasLabel.php`, is a **trait**) |
+| `app/Console/Commands` | 8 |
+| `app/Domain` | 3 |
+
+Every Form Request, every Service, every Action and every Model has at least one non-test reference. The
+result is **2 of 153** with none, and both are console commands.
+
+### The two zero-reference classes — and why the instrument cannot decide them
+
+| File | Lines | Verb | Registered | Exercised by |
+|---|---|---|---|---|
+| `app/Console/Commands/MigrateToMariaDb.php` | 84 | `db:backup:mysql` | yes — `php artisan list` line 56 | **nothing in the repository** |
+| `app/Console/Commands/UmaDbGuard.php` | 75 | `uma:db-guard` | yes — `php artisan list` line 191 | `tests/Feature/DatabaseSafetyTest.php:192`, `tests/browser/global-setup.ts:133` |
+
+**Bound:** a command is addressed by its verb, not its class name, so "no file references the class" proves
+nothing for this directory. `php artisan list` (captured to `.scratch-uma/audit-agent-2026-10-16/artisan-list.txt`)
+plus a verb sweep is the instrument that decides, and it splits the two: `uma:db-guard` is live, and the
+class-name silence is an artifact. `bootstrap/app.php:18` registers `routes/console.php` (which holds only
+the `inspire` closure) and there is no `withCommands()` call, so both classes arrive by skeleton
+auto-discovery of `app/Console/Commands` — which the framework list confirms rather than this pass assuming.
+
+`db:backup:mysql` is therefore the one genuinely unexercised command surface: 84 lines whose verb appears
+nowhere outside its own signature line at `MigrateToMariaDb.php:12` — no test, no doc, no `Makefile` target,
+no `composer` script, and there is no CI to run it. The 276-line action it wraps *is* tested
+(`app/Actions/MigrateToMariaDbAction.php`, exercised at `tests/Feature/MariaDbBackupTest.php:22,39,62,85`),
+so the gap is the command wrapper and the `config/mysql-backup.php` (13 lines) it reads. This is the same
+subsystem the doc-drift audit already graded **UNDOCUMENTED-LIVE** at
+`docs/audits/doc-drift-audit-2026-10-16.md:167-168`, with the `AGENTS.md` §1 "SQLite only" conflict recorded
+unresolved at `:194`. **Owner question, held: not deleted, not documented, not wired.**
+
+### Enums: 13 cases with no `Class::Case` reference, and not one of them unreachable
+
+`AliasLanguage::Romanized` · `BuildPurpose::{ChampionsMeeting, ParentFarming, SkillFarming}` ·
+`MoodTier::Awful` · `PerformanceType::Passion` · `SpiritBurstState::NormalBurstSpent` ·
+`TurnChoice::{TrainStamina, TrainPower, TrainGuts}`.
+
+The second instrument asks whether anything hydrates the whole case set, and all six owning enums do:
+`BuildPurpose` 4 hydration sites (`BuildTargetController`, `StoreBuildTargetRequest`), `MoodTier` 4,
+`PerformanceType` 4, `TurnChoice` 6, `AliasLanguage` 3, `SpiritBurstState` 3
+(incl. `app/Models/TurnEvents/SpiritBurstPayload.php`). A case reached through `from()`/`tryFrom()` never
+needs its symbol spelled out, so **no unreachable enum case is claimed**. Two rows deserve the note anyway:
+`PerformanceType::Passion`'s value appears only in `PerformanceFoundationTest.php` and
+`PerformanceTurnInputTest.php` — test-only, no production site produces it; `TurnChoice`'s three training
+cases exist as composed keys (`training-Stamina`, seen in `resources/js/types.ts`), so their absence as
+symbols is by construction. **Instrument bound:** the census treats every file under `app/Enums/` as an
+enum, and `HasLabel.php` is a trait — its "never hydrated" line is a false positive.
+
+### Service and Action method surface: 15 candidates, adjudicated
+
+| Candidate | Verdict | Evidence |
+|---|---|---|
+| `SkillRegistry::all` (`:42`) | **uncalled** | no `->all(` in any file naming `SkillRegistry` |
+| `SkillRegistry::has` (`:63`) | **uncalled** | same |
+| `SkillRegistry::registryPath` (`:78`) | **uncalled** | the only repo hit is the declaration |
+| `SkillRegistry::require` (`:86`) | **uncalled** | no `->require(` or `::require(` site exists anywhere |
+| `SkillExecutor::getLog` (`:135`) | **uncalled** | declaration is the only hit |
+| `SkillExecutor::executePlan` (`:122`) | self-only → visibility | called at `$this->executePlan` inside its own class |
+| `ArtworkMirror::sourceIds` (`:131`) | self-only → visibility | called from a sibling public method in the same class |
+| `DatabaseGuard::{connectionName, isSqlite, sameFile, assertNoConfigurationCache, assertAbsolutePath, assertNotCanonical, assertMatchesExpected}` (7) | self-only → visibility | every site the repo-wide sweep found is `$this->` inside `DatabaseGuard.php`; no external call exists |
+| `Contracts\ScenarioSourceParser::parse` | live, instrument false positive | a contract method invoked through the interface; 17 `->parse(` sites incl. `PipelineRunner` |
+
+So: **5 public methods with no caller anywhere, 9 public methods callable only from inside their own class**
+(a visibility finding, not a dead-code one), and 1 false positive. Four of the five uncalled methods sit on
+one class: `SkillRegistry` exposes 8 non-constructor methods and its users (`ManageSkills.php:54,116,151`,
+`SkillExecutor.php:45`, `SkillMatcher.php:32,95`, `SkillAutomationTest.php:27,28`) use only
+`enabled`, `get`, `count` and `countEnabled`. That the whole `Skill{Registry,Matcher,Executor}` tooling layer
+is also the layer whose test suite self-skips when `.agents/skills.json` is absent (§9) is the reason no
+caller has appeared for its accessors.
+
+No file was removed, no method visibility changed, no enum case deleted. **No gate ran in this section**:
+nothing here is proven by executing the suite.
