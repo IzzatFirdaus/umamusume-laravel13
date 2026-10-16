@@ -268,5 +268,6 @@ if failures:
 
 print(f"GATE PASS: {len(files)} prototype(s), all machine-checkable gates green.")
 print("  Checked: G-1 lore, G-2 forms, G-3 terminology, G-4 tokens, G-13 rendered text,")
-print("           G-16 sample data, D-79 em dash, D-84 emoji.")
+print("           G-16 sample data, G-27 script syntax, G-31 run length, G-32 cap value,")
+print("           D-79 em dash, D-84 emoji.")
 print("  Not machine-checkable (reviewer): G-5 contrast, G-6, G-7, G-9, G-11, G-12, G-14, G-15, G-17.")
