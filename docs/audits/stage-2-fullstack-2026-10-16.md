@@ -4,6 +4,18 @@ Measured 2026-10-16 against `master` @ `6fea7dc` (live main repo `D:/Projects/um
 **Read-only**: one script plus direct greps. Nothing fixed, nothing committed. This is the first two
 sub-audits of the twelve the full audit deferred at §5 — **§3.5 routes and §3.1 controllers only**.
 
+---
+
+**Dated forward note, 2026-10-16.** This file carries two sets of figures. The body below (§1–§4) is the seed as committed at `4e57083`; the appended revision at §5 supersedes its route, controller and method counts, and was landed by `ab1484a` ("close the parser's route bound with `route:list`"). A reader looking for current figures should read the appended revision, not this body.
+
+**Current figures (post-`ab1484a`):** 86 named routes (60 live, 17 orphan, 3 redirect-only), 32 concrete controllers carrying 86 public methods, 0 non-routed public methods, 0 actions pointing at an undefined method. `CockpitController` remains at 2,789 lines.
+
+**Superseded figures (seed body, §1–§4):** 81 named routes (54 live, 15 orphan, 8 api, 3 redirect), 31 controllers (1 untested). These were accurate at `6fea7dc` and are preserved as the record of that read, per the audit file's append-only convention.
+
+The seed's 15-orphan figure also did not sum in the original (12 named plus a "+ 4 API names" parenthetical). The appended revision's 17 replaces it.
+
+---
+
 ## 1. Method, and the bounds on what it can see
 
 A parser walked `routes/web.php` and `routes/api.php`, resolved controller FQCNs through each file's
@@ -463,3 +475,20 @@ no literal twin is `runs.create`, exercised by 23 test files. §3.2 names 5 unca
 unexercised command, `db:backup:mysql`, held for the owner with the rest of the MariaDB subsystem. §3.9
 reports 2,346 declared cases, 0 stale references and 6 conditional skips. Nothing fixed, nothing pushed,
 no gate run.**
+
+## Notes for downstream prompt authors
+
+Added 2026-10-16. Facts for whoever drafts the next commit-agent prompt against `career-cockpit-forms.spec.ts`.
+
+**The browser-spec target is two-axis, not a single pass/fail line.** The prior commit-agent prompt targeted `FULL-SPEC CONFIRMED — 17/17`. That target is unreachable at `HEAD`:
+
+| Instrument | HEAD | working tree |
+|---|---|---|
+| `grep -cE "^[[:space:]]*test\("` | 16 | 17 |
+| the earlier `grep -c "^  test("` | 0 | 0 |
+
+The indented-optional pattern is the corrected instrument; the earlier pattern matched nothing because `test(` calls sit at column 0. At `HEAD` the measured result is **14/16**, with the two reds being the team-editor open-guard cases. The working tree has a 17th case (peer-added, uncommitted) that also runs the cockpit walk and also asserts the Unity Cup bursts widget renders **as a meter**.
+
+**The Spirit-Bursts meter assertion now appears in two spec files, not one.** The committed spec asserts it at `career-cockpit-forms.spec.ts` around the `:79` region. The peer's uncommitted 17th case asserts the same shape. Both assert a widget shape no component emits: `{label}: not recorded + role="img"` is emitted only by `ResourceMeter.vue:35`, used once at `HEAD` for `label="Current Spirit"` at `UnityCupPanel.vue:236`. Whoever resolves the Spirit Bursts question — Option A (component defect), Option B (spec defect), or Option C (both) from the scenario-panel investigation — has to touch both spec files, not one.
+
+**Therefore:** the next commit-agent prompt should target a two-axis count — "team-editor reds classified, Spirit-Bursts reds counted" — not a single `N/N`. A single line invites the reader to treat the Spirit-Bursts assertion as confirmation of the wizard-walk fix. It is not; it is a second red on an unresolved widget-shape question.
