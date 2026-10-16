@@ -410,3 +410,31 @@ it('keeps an old run record out of the new snapshot shape', function (): void {
 
     expect($decision['recorded_action'])->toBeNull();
 });
+
+it('keeps the rest and outing copy on one surface, not the retired rail', function (): void {
+    // The two lines that say what a Rest and a Recreation turn do were the retired guided rail's, and
+    // they were duplicated into the one live surface that offers those turns. The rail's copies are
+    // gone: a second owner is a second thing to keep in step, and nothing has read the rail's since
+    // `runs.show` became a redirect. This is the assertion the cleanup owes — a grep, because the
+    // defect was a string living in two places, not a behaviour.
+    $hits = [];
+
+    foreach (['app', 'resources'] as $dir) {
+        /** @var SplFileInfo $file */
+        foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(base_path($dir))) as $file) {
+            if (! $file->isFile() || ! in_array($file->getExtension(), ['php', 'vue', 'ts'], true)) {
+                continue;
+            }
+
+            $body = (string) file_get_contents($file->getPathname());
+
+            if (str_contains($body, 'Refills Energy. A poor rest') || str_contains($body, 'Lifts Mood, and the outing')) {
+                $hits[] = str_replace('\\', '/', substr($file->getPathname(), strlen(base_path()) + 1));
+            }
+        }
+    }
+
+    sort($hits);
+
+    expect($hits)->toBe(['app/Http/Controllers/Career/TrainingDecisionController.php']);
+});

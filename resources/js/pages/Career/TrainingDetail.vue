@@ -23,7 +23,9 @@
  *
  * The five stat totals are what the client shows after the turn resolves, so the inputs start empty
  * and the previous turn's readings arrive as placeholders only (D-220). A press before they are
- * entered is answered by the field messages the existing request returns.
+ * entered is answered by the field messages the existing request returns. The same holds for the two
+ * turn choices that are not trainings: Rest and Recreation are offered beside the five cards, on the
+ * one record form, and never as cards of their own (`SCREEN_SPEC.md` SCR-CAR-012).
  *
  * The props contract is declared locally: `defineProps<Imported>()` cannot resolve an imported type,
  * because TypeScript 7 ships no `lib/typescript.js` for `@vue/compiler-sfc` to load (plan §11).
@@ -44,6 +46,14 @@ interface Cost {
     confidence: string;
 }
 
+interface PublishedRow {
+    level: number;
+    text: string;
+    server: string;
+    source: string;
+    notes: string[];
+}
+
 interface Option {
     key: string;
     choice: string;
@@ -59,6 +69,12 @@ interface Option {
     cost: Cost;
     supports: { name: string; effects: { effect_id: number; name: string | null; display: string }[] }[];
     scenario_effects: { label: string; value: string }[] | null;
+    published: {
+        gains: PublishedRow | null;
+        gains_absence: string | null;
+        cost: PublishedRow | null;
+        risk_reason: string | null;
+    };
 }
 
 const props = defineProps<{
@@ -83,6 +99,8 @@ const props = defineProps<{
         action: string;
         turn: number;
         moods: string[];
+        extra_choices: { value: string; label: string; note: string; recommended: boolean }[];
+        outcomes: Record<string, Record<string, boolean>>;
         previous: Record<string, number | null> | null;
         performance: { enabled: boolean; types: string[] };
     };
@@ -115,6 +133,57 @@ const positionLabel = computed<string | null>(() => {
 const choice = ref<string | null>(null);
 
 const chosen = computed(() => props.options.find((option) => option.choice === choice.value) ?? null);
+
+/*
+ * Rest and Recreation are turn choices, not training options (SCR-CAR-012), so they get no card and
+ * no figures of a card: no deficit, no cost, no supports. They are held here, beside the five, so the
+ * one record form writes every turn the career takes.
+ */
+const chosenExtra = computed(
+    () => props.write.extra_choices.find((extra) => extra.value === choice.value) ?? null,
+);
+
+const chosenLabel = computed(() => chosen.value?.key ?? chosenExtra.value?.label ?? null);
+
+/*
+ * The one field the chosen action actually moves, marked the way a chosen card is (`border-pick-line`):
+ * Energy for a rest, Mood for an outing, and neither for a training, whose movement is the five totals
+ * above. It is a second signal beside the field's own label, never the only one, and it claims nothing
+ * about magnitude — no source publishes a recovery or an outing figure (`ADR-0001` §3).
+ */
+const emphasizedField = computed<'energy' | 'mood' | null>(() => {
+    if (choice.value === 'rest') {
+        return 'energy';
+    }
+
+    return choice.value === 'mood' ? 'mood' : null;
+});
+
+/*
+ * The outcome words on offer, read off the choice the Trainer is holding. `write.outcomes` is composed
+ * from `TurnChoice::outcomes()`, the one owner, so the select cannot offer a word the request refuses;
+ * the fallback is the pair every other choice offers. Each word carries its own failure flag because the
+ * penalty field belongs to the *failure branch*, not to one magic word: D-205 rules that Rest carries the
+ * same branch treatment as any other choice, so `Poor Rest` opens it exactly as `Failure` does.
+ */
+const outcomeWords = computed<Record<string, boolean>>(
+    () => props.write.outcomes[choice.value ?? ''] ?? { Success: false, Failure: true },
+);
+
+const outcomeOptions = computed(() => [
+    { value: '', label: 'Choose' },
+    ...Object.keys(outcomeWords.value).map((word) => ({ value: word, label: word })),
+]);
+
+const outcomeIsFailure = computed(() => outcomeWords.value[form.outcome] === true);
+
+// A word the new choice does not offer cannot stay selected. A select left holding a value outside its own
+// list shows its placeholder while the form still posts the stale word, so the choice moving clears it.
+watch(choice, () => {
+    if (!(form.outcome in outcomeWords.value)) {
+        form.outcome = '';
+    }
+});
 
 // The chosen card's key figures restated at the form (corpus §35's collapsed view): a Trainer working
 // down here should not need the card above still in view. Only figures the tool holds: the support
@@ -174,11 +243,13 @@ const form = useForm({
     outcome: '',
     penalty_kind: '',
     choice: '',
-    facility_speed: '',
-    facility_stamina: '',
-    facility_power: '',
-    facility_guts: '',
-    facility_wit: '',
+    // The ladder opens on the level this run last read, so the Trainer changes only what moved; a run
+    // that never recorded one opens blank, and a blank stays "not recorded" rather than Level 1.
+    facility_speed: String(props.write.previous?.facility_speed ?? ''),
+    facility_stamina: String(props.write.previous?.facility_stamina ?? ''),
+    facility_power: String(props.write.previous?.facility_power ?? ''),
+    facility_guts: String(props.write.previous?.facility_guts ?? ''),
+    facility_wit: String(props.write.previous?.facility_wit ?? ''),
     failure_rate: '',
     preview_gains: {
         speed: '',
@@ -202,6 +273,35 @@ const placeholder = (name: string): string | undefined =>
     props.write.previous?.[name] === null || props.write.previous?.[name] === undefined
         ? 'no logged turn'
         : String(props.write.previous[name]);
+
+// The press that says what this turn was. The choice is held for the record form rather than re-asked
+// of it (WCAG 3.3.7), and focus moves to the form that now cannot complete without the client's numbers.
+const choose = (value: string): void => {
+    choice.value = value;
+    form.choice = value;
+
+    recordHeading.value?.focus();
+};
+
+/*
+ * The Cockpit's Rest and Recreation entries arrive holding the choice they stand for, so the Trainer
+ * does not pick it again. Rest's public value is the one the row is written under; Recreation's public
+ * word is `recreation` while the row is written under `mood` (`TurnChoice`'s docblock records why), so
+ * the one mapping the address needs lives here rather than on the enum, which carries no URL concern.
+ * Only a value this screen offers is taken from the address; anything else is ignored rather than
+ * posted, because the request would refuse it and the page would read as broken.
+ */
+const choiceFromQuery = (query: string | null): string | null =>
+    query === 'recreation' ? 'mood' : query;
+
+const arrivingChoice = props.write.extra_choices.find(
+    (extra) => extra.value === choiceFromQuery(new URLSearchParams(window.location.search).get('choice')),
+);
+
+if (arrivingChoice !== undefined) {
+    choice.value = arrivingChoice.value;
+    form.choice = arrivingChoice.value;
+}
 
 /*
  * The turn's Energy band, in this page's own words. Corrected 2026-10-11 (G7): this comment used to say
@@ -239,13 +339,6 @@ watch(
 // The record panel's heading. A press that cannot complete puts focus on the panel that holds what is
 // missing rather than firing a write the request is certain to refuse (WCAG 2.4.3).
 const recordHeading = ref<HTMLElement | null>(null);
-
-const train = (option: Option): void => {
-    choice.value = option.choice;
-    form.choice = option.choice;
-
-    recordHeading.value?.focus();
-};
 
 // The Performance observation pair, held outside the form so the posted payload carries the key
 // only when a reading was entered: a turn that observed nothing must not post an empty pair, whose
@@ -342,8 +435,7 @@ const capFor = (label: string): number =>
                 The advisor recommends
                 <span class="font-semibold text-ink-strong">{{ props.advisor.action }}</span>
                 for this turn. It is not one of the five training actions, so no card below carries the
-                marker; record it on the Cockpit.
-                <a :href="props.run.run_url" class="font-medium text-ink-strong underline">Cockpit</a>
+                marker; the record form holds it as its own choice.
             </p>
 
             <p v-else class="mt-1 text-sm text-ink">
@@ -363,7 +455,7 @@ const capFor = (label: string): number =>
         <section aria-labelledby="training-options-heading">
             <h2 id="training-options-heading" class="text-lg font-semibold text-ink-strong">Training options</h2>
 
-            <div class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div class="mt-3 grid grid-cols-1 gap-4 @4xl:grid-cols-2 @7xl:grid-cols-3">
                 <TrainingCard
                     v-for="option in props.options"
                     :key="option.choice"
@@ -372,7 +464,7 @@ const capFor = (label: string): number =>
                     :deck-recorded="props.deck.recorded"
                     :chosen="choice === option.choice"
                     :turn="props.write.turn"
-                    @train="train(option)"
+                    @train="choose(option.choice)"
                 />
             </div>
         </section>
@@ -381,18 +473,42 @@ const capFor = (label: string): number =>
             <h2 id="training-record-heading" ref="recordHeading" tabindex="-1" class="text-lg font-semibold text-ink-strong">Record the turn</h2>
 
             <p class="mt-1 text-sm text-ink">
-                <template v-if="chosen !== null">
-                    Chosen: <span class="font-semibold text-ink-strong">{{ chosen.key }}</span>.
-                    {{ chosenSummary }}
+                <template v-if="chosenLabel !== null">
+                    Chosen: <span class="font-semibold text-ink-strong">{{ chosenLabel }}</span>.
+                    <template v-if="chosen !== null">{{ chosenSummary }}</template>
+                    <template v-else-if="chosenExtra !== null">{{ chosenExtra.note }}</template>
                 </template>
                 <template v-else>
-                    Press <span class="font-semibold text-ink-strong">Train</span> on one card to say which
-                    training this turn was. Nothing is chosen yet.
+                    Press <span class="font-semibold text-ink-strong">Train</span> on one card, or pick
+                    one of the two turn choices below, to say what this turn was. Nothing is chosen yet.
                 </template>
                 Every number below is what the client shows after the turn resolves. This tool does not
                 project them, so an empty field is the honest state and the write refuses a turn that has
                 not been read.
             </p>
+
+            <!-- Rest and Recreation, the two turn choices that are not trainings. They are not cards:
+                 SCR-CAR-012 rules them turn choices, and the five cards are the five. Both keep Energy
+                 and Mood editable, because no source in the corpus publishes a recovery or an outing
+                 figure for the client to be checked against (`ADR-0001` §3). -->
+            <div class="mt-3 flex flex-wrap gap-2">
+                <button
+                    v-for="extra in props.write.extra_choices"
+                    :key="extra.value"
+                    type="button"
+                    :aria-pressed="choice === extra.value"
+                    :class="[
+                        'inline-flex min-h-11 items-center gap-x-2 rounded-md border-2 px-4 text-sm font-bold transition-colors duration-150 ease-out',
+                        choice === extra.value ? 'border-pick-line bg-raised text-ink-strong' : 'border-rule text-ink hover:border-green-line',
+                    ]"
+                    @click="choose(extra.value)"
+                >
+                    {{ extra.label }}
+                    <span v-if="extra.recommended" class="font-bold">
+                        <span aria-hidden="true">★</span> RECOMMENDED
+                    </span>
+                </button>
+            </div>
 
             <div
                 v-if="form.hasErrors"
@@ -407,7 +523,7 @@ const capFor = (label: string): number =>
                 </ul>
             </div>
 
-            <form class="mt-3 grid max-w-3xl grid-cols-2 gap-3 text-sm md:grid-cols-3" @submit.prevent="recordTurn">
+            <form class="mt-3 grid max-w-3xl grid-cols-2 gap-3 text-sm @4xl:grid-cols-3" @submit.prevent="recordTurn">
                 <label class="flex flex-col gap-1">
                     <span class="text-ink-muted">Turn *</span>
                     <BaseInput
@@ -456,7 +572,11 @@ const capFor = (label: string): number =>
                 <!-- Energy as a state, not only a number: a figure when the Trainer read one, a band when
                      the client showed a level, and the named absence when neither. The three stay apart on
                      the screen the way they are kept apart in the store. -->
-                <fieldset class="flex flex-col gap-1">
+                <fieldset
+                    id="turn-energy-field"
+                    class="flex flex-col gap-1 rounded-md"
+                    :class="emphasizedField === 'energy' ? 'border-2 border-pick-line p-2' : ''"
+                >
                     <legend class="text-ink-muted">Energy</legend>
                     <div class="flex flex-wrap gap-3">
                         <BaseRadio
@@ -487,6 +607,7 @@ const capFor = (label: string): number =>
                         v-model="form.energy_band"
                         name="energy_band"
                         :options="energyBands.map(band => ({ value: band.value, label: band.label }))"
+                        aria-label="Energy band"
                         :aria-describedby="describedBy('energy_band')"
                         :error="errorOf('energy_band')"
                     />
@@ -495,7 +616,11 @@ const capFor = (label: string): number =>
                     </p>
                 </fieldset>
 
-                <label class="flex flex-col gap-1">
+                <label
+                    id="turn-mood-field"
+                    class="flex flex-col gap-1 rounded-md"
+                    :class="emphasizedField === 'mood' ? 'border-2 border-pick-line p-2' : ''"
+                >
                     <span class="text-ink-muted">Mood</span>
                     <BaseSelect
                         id="turn-mood"
@@ -513,14 +638,14 @@ const capFor = (label: string): number =>
                         id="turn-outcome"
                         v-model="form.outcome"
                         name="outcome"
-                        :options="[{ value: '', label: 'Choose' }, { value: 'Success', label: 'Success' }, { value: 'Failure', label: 'Failure' }]"
+                        :options="outcomeOptions"
                         required
                         :aria-describedby="describedBy('outcome')"
                         :error="errorOf('outcome')"
                         />
                     </label>
 
-                    <label v-if="form.outcome === 'Failure'" class="flex flex-col gap-1">
+                    <label v-if="outcomeIsFailure" class="flex flex-col gap-1">
                     <span class="text-ink-muted">Penalty kind *</span>
                     <BaseSelect
                         id="turn-penalty_kind"
@@ -572,11 +697,11 @@ const capFor = (label: string): number =>
                      design: a turn logged without reading the ladder records no level, and a zero would
                      claim a facility at its floor. Behind a disclosure because it is five inputs most
                      turns do not need, and a collapsed `details` keeps them out of the tab order. -->
-<details class="rounded-md border border-rule bg-raised p-3 md:col-span-3">
+<details class="rounded-md border border-rule bg-raised p-3 @4xl:col-span-3">
                     <summary class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong">
                         Facility levels this turn
                     </summary>
-                    <div class="mt-2 grid grid-cols-2 gap-3 md:grid-cols-5">
+                    <div class="mt-2 grid grid-cols-2 gap-3 @4xl:grid-cols-5">
                         <label v-for="field in facilityFields" :key="field.name" class="flex flex-col gap-1">
                             <span class="text-ink-muted">{{ field.label }}</span>
                             <BaseInput
@@ -601,12 +726,12 @@ const capFor = (label: string): number =>
                      preview gains. Transcribed, not computed: the tool stores what the Trainer read
                      and never projects an outcome (`ADR-0016`, `PRD.md` §6.11). Optional by design, so
                      a turn logged without reading them stores neither. -->
-                <details class="rounded-md border border-rule bg-raised p-3 md:col-span-3">
+                <details class="rounded-md border border-rule bg-raised p-3 @4xl:col-span-3">
                     <summary class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong">
                         Preview readings
                     </summary>
-                    <div class="mt-2 grid grid-cols-2 gap-3 md:grid-cols-6">
-                        <label class="col-span-2 flex flex-col gap-1 md:col-span-1">
+                    <div class="mt-2 grid grid-cols-2 gap-3 @4xl:grid-cols-6">
+                        <label class="col-span-2 flex flex-col gap-1 @4xl:col-span-1">
                             <span class="text-ink-muted">Failure rate</span>
                             <BaseInput
                                 id="turn-failure_rate"
@@ -640,13 +765,13 @@ const capFor = (label: string): number =>
                 </div>
             </details>
 
-            <div class="flex flex-wrap items-end gap-3 md:col-span-3">
+            <div class="flex flex-wrap items-end gap-3 @4xl:col-span-3">
                     <button
                         type="submit"
                         class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 text-sm font-bold text-on-primary-action disabled:cursor-wait disabled:bg-disabled"
                         :disabled="form.processing"
                     >
-                        {{ form.processing ? 'Sending…' : 'Record this training' }}
+                        {{ form.processing ? 'Sending…' : chosenExtra !== null ? 'Record this turn' : 'Record this training' }}
                     </button>
                     <p class="max-w-3xl text-xs text-ink-muted">
                         The write lands on the Cockpit, where the recorded turn appears in the correction

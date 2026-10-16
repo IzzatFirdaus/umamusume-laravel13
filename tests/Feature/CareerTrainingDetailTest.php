@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\MoodTier;
 use App\Enums\RunStatus;
+use App\Enums\TurnChoice;
+use App\Enums\TurnEventType;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\DeckSlot;
 use App\Models\SupportCard;
@@ -39,6 +41,7 @@ const OPTION_KEYS = [
     'deficit',
     'energy_after',
     'key',
+    'published',
     'reason',
     'recommended',
     'scenario_effects',
@@ -269,6 +272,177 @@ it('carries a Wit deck card onto the Wit card under the client word, not the exp
             ->where('options.0.supports', []));
 });
 
+it('carries the scenario matrix published per-level row keyed to the facility level the turn recorded', function (): void {
+    // Unity Cup with every facility at the Level 3 the turn recorded: the artifact's Speed row
+    // there is +10 Speed, +4 Power, +4 SP, costing E−21. The figures are JP-sourced and the
+    // server tag rides the payload; Unity Cup's one Global divergence rides the notes, which is
+    // the wiring's Caveat 3 made checkable.
+    $run = decisionRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 1, energy: 80);
+    TurnEntry::query()->where('training_run_id', $run->id)->update([
+        'facility_speed' => 3, 'facility_stamina' => 3, 'facility_power' => 3,
+        'facility_guts' => 3, 'facility_wit' => 3,
+    ]);
+
+    $tables = config('scenarios.scenarios.unity_cup.training_tables');
+
+    $this->get(route('runs.training', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('options.0.published', fn ($published): bool => $published['gains']['level'] === 3
+                && $published['gains']['text'] === '+10 Speed, +4 Power, +4 SP'
+                && $published['gains']['server'] === $tables['server']
+                && $published['gains']['source'] === $tables['source']
+                && in_array('Global SP payouts for Unity Cup match URA Finale (+2 SP on Energy disciplines) after the 2026-07-01 rework, not the JP +4 values. The base stat gains are unchanged.', $published['gains']['notes'], true)
+                && $published['cost']['value'] === -21
+                && $published['cost']['text'] === 'E−21'
+                && $published['risk_reason'] === config('scenarios.scenarios.unity_cup.risk_absence.reason'))
+            // Wit renders its gains row but carries no published cost: its rows state a refund,
+            // not a cost, and the advisor's own wit_cost constant governs that row. Its risk row
+            // is the engine's own RiskNotMeasured word, so no published reason rides it.
+            ->where('options.4.published.gains.text', '+8 Wit, +2 Speed, +5 SP')
+            ->where('options.4.published.cost', null)
+            ->where('options.4.published.risk_reason', null));
+});
+
+it('renders the published row as a reasoned absence when the turn recorded no facility level', function (): void {
+    $run = decisionRun(['scenario' => 'ura_finale', 'status' => RunStatus::Active], turns: 1, energy: 80);
+
+    $this->get(route('runs.training', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            // A Level-1 figure shown for an unrecorded level would state a level nobody entered,
+            // so the absence names the missing reading instead of substituting the floor row.
+            ->where('options.0.published.gains', null)
+            ->where('options.0.published.cost', null)
+            ->where('options.0.published.gains_absence', fn (string $absence): bool => str_contains($absence, 'No facility level is recorded'))
+            ->where('options.0.published.risk_reason', config('scenarios.scenarios.ura_finale.risk_absence.reason')));
+
+    // And the reason is the artifact's own per scenario: Trackblazer's recorded search carries
+    // no parenthetical, so the verbatim carriage is per entry, not one shared sentence.
+    $trackblazer = decisionRun(['scenario' => 'trackblazer', 'status' => RunStatus::Active], turns: 1, energy: 80);
+
+    $this->get(route('runs.training', $trackblazer))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('options.0.published.risk_reason', config('scenarios.scenarios.trackblazer.risk_absence.reason')));
+});
+
+it('resolves the published row against the most recent turn that recorded a level, not the latest turn alone', function (): void {
+    // The shape of a real career: turn 6 is the race logged without opening the ladder, turn 5 carries
+    // the reading the client showed. Keying off the newest row printed N/A on all five cards for a run
+    // whose facility levels are known, so each stat walks back on its own.
+    $run = decisionRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 6, energy: 80);
+    TurnEntry::query()->where('training_run_id', $run->id)->where('turn', 5)->update([
+        'facility_speed' => 4, 'facility_stamina' => 4, 'facility_power' => 4,
+        'facility_guts' => 5, 'facility_wit' => 4,
+    ]);
+
+    $this->get(route('runs.training', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            // The level is what the walk-back decides; the row a level selects is pinned for this same
+            // table by the two cases above and the 4-by-5 grid case below.
+            ->where('options.0.published.gains.level', 4)
+            ->where('options.0.published.gains_absence', null)
+            // Guts is the one facility the client showed at 5, and it resolves to its own row.
+            ->where('options.3.published.gains.level', 5)
+            ->where('options.4.published.gains.level', 4)
+            ->where('options.0.published.cost.level', 4));
+});
+
+it('prefills the record form with the facility levels this run last read', function (): void {
+    // The ladder is a state the client keeps showing, so the next turn opens on the last reading and
+    // the Trainer changes only what moved. A stat nobody recorded stays null, which the form renders
+    // as a blank input rather than a level it never saw.
+    $run = decisionRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 2, energy: 80);
+    TurnEntry::query()->where('training_run_id', $run->id)->where('turn', 1)->update([
+        'facility_speed' => 4, 'facility_stamina' => 3,
+    ]);
+
+    $this->get(route('runs.training', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('write.previous.facility_speed', 4)
+            ->where('write.previous.facility_stamina', 3)
+            ->where('write.previous.facility_power', null)
+            ->where('write.previous.facility_guts', null)
+            ->where('write.previous.facility_wit', null));
+});
+
+it('carries no published row and no scenario risk reason when the run declares no scenario', function (): void {
+    $run = decisionRun(['status' => RunStatus::Active], turns: 1, energy: 80);
+
+    $this->get(route('runs.training', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('options.0.published.gains', null)
+            ->where('options.0.published.cost', null)
+            ->where('options.0.published.risk_reason', null)
+            ->where('options.0.published.gains_absence', fn (string $absence): bool => str_contains($absence, 'declares no scenario')));
+});
+
+it('resolves a published row for every discipline on every scenario the matrix composes, keyed to the recorded level', function (): void {
+    // The wiring brief's grid check: 4 scenarios by 5 disciplines, each reading the row its own
+    // recorded facility level names. The expected text is composed here from the same config the
+    // controller reads, so a wrong routing or a wrong level key fails per cell, and the one
+    // per-server divergence note appears only where the matrix records it.
+    foreach (array_keys((array) config('scenarios.scenarios')) as $scenarioKey) {
+        $run = decisionRun(['scenario' => $scenarioKey, 'status' => RunStatus::Active], turns: 1, energy: 80);
+        TurnEntry::query()->where('training_run_id', $run->id)->update([
+            'facility_speed' => 3, 'facility_stamina' => 3, 'facility_power' => 3,
+            'facility_guts' => 3, 'facility_wit' => 3,
+        ]);
+
+        /** @var array<string, mixed> $tables */
+        $tables = config('scenarios.scenarios.'.$scenarioKey.'.training_tables');
+        $routes = ['Speed' => ['Power'], 'Stamina' => ['Guts'], 'Power' => ['Stamina'], 'Guts' => ['Speed', 'Power'], 'Wit' => ['Speed']];
+
+        $this->get(route('runs.training', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('options', function ($options) use ($tables, $routes, $scenarioKey): bool {
+                    foreach ($options as $index => $option) {
+                        $stat = $option['key'];
+                        $row = $tables['per_level'][$stat]['Lv3'];
+
+                        $parts = ['+'.$row['primary'].' '.$stat];
+                        foreach ($routes[$stat] as $i => $route) {
+                            $key = $i === 0 ? (array_key_exists('secondary', $row) ? 'secondary' : 'secondary_a') : 'secondary_b';
+                            $parts[] = '+'.$row[$key].' '.$route;
+                        }
+                        $parts[] = '+'.$row['skill_points'].' SP';
+
+                        if ($option['published']['gains']['text'] !== implode(', ', $parts)
+                            || $option['published']['gains']['level'] !== 3
+                            || $option['published']['gains']['server'] !== $tables['server']
+                            || $option['published']['gains']['source'] !== $tables['source']) {
+                            return false;
+                        }
+
+                        // Wit carries no published cost anywhere; the four Energy disciplines do,
+                        // and Unity Cup's divergence note rides only its own entries.
+                        if ($stat === 'Wit') {
+                            if ($option['published']['cost'] !== null) {
+                                return false;
+                            }
+                        } elseif ($option['published']['cost'] === null
+                            || $option['published']['cost']['value'] !== $row['energy']) {
+                            return false;
+                        }
+
+                        $notes = implode(' ', $option['published']['gains']['notes']);
+                        $hasDivergence = str_contains($notes, 'Global SP payouts for Unity Cup');
+
+                        if ($hasDivergence !== ($scenarioKey === 'unity_cup')) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }));
+    }
+});
+
 it('states the scenario effects from the matrix alone, and names the absence for a run with no scenario', function (): void {
     $unityCup = decisionRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 1, energy: 80);
     $bonus = config('scenarios.scenarios.unity_cup.cap_bonus');
@@ -334,6 +508,73 @@ it('posts the turn through the write the run screen already owns', function (): 
     expect($run->turnEntries()->where('turn', 4)->exists())->toBeTrue();
 });
 
+it('offers Rest and Recreation as turn choices beside the five trainings', function (): void {
+    // `SCREEN_SPEC.md` SCR-CAR-012 rules them turn choices, not training options: they ride on the
+    // write so the one record form covers all seven turns a career takes, and they are never a sixth
+    // and seventh card. Their words are `TurnChoice`'s, which is why Recreation arrives as `mood`,
+    // the value every already-written row is looked up by.
+    $run = decisionRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 3, energy: 80);
+
+    $this->get(route('runs.training', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('write.extra_choices', 2)
+            ->where('write.extra_choices.0.value', 'rest')
+            ->where('write.extra_choices.0.label', 'Rest')
+            ->where('write.extra_choices.0.recommended', false)
+            ->where('write.extra_choices.1.value', 'mood')
+            ->where('write.extra_choices.1.label', 'Recreation')
+            ->where('write.extra_choices.1.recommended', false)
+            // The totals still travel as placeholders only: no source says a rest or an outing leaves
+            // them where they were, so pre-filling them would assert what the corpus is silent on.
+            ->where('write.previous.speed', 600));
+
+    // Below the sourced 50 line the advisor recommends Rest, and the marker moves to that choice.
+    $tired = decisionRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 3, energy: 30);
+
+    $this->get(route('runs.training', $tired))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('advisor.action', 'Rest')
+            ->where('write.extra_choices.0.recommended', true)
+            ->where('write.extra_choices.1.recommended', false));
+});
+
+it('records a Rest turn and a Recreation turn carrying the prior totals', function (string $choice, string $label, string $outcome): void {
+    // The five totals are required whatever the turn was, so a Rest or Recreation row carries the
+    // readings the client still shows. This is the write the page's form posts, unchanged. The outcome
+    // word travels with the choice because `TurnChoice::outcomes()` offers each turn its own pair or
+    // triple (D-205): a rest succeeds or is poor, an outing lifts, holds or falls.
+    $run = decisionRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 3, energy: 80);
+    $prior = $run->turnEntries()->where('turn', 3)->sole();
+
+    $this->post(route('runs.turns.store', $run), [
+        'turn' => 4,
+        'speed' => $prior->speed,
+        'stamina' => $prior->stamina,
+        'power' => $prior->power,
+        'guts' => $prior->guts,
+        'wit' => $prior->wit,
+        'sp' => $prior->sp,
+        'energy' => 100,
+        'mood' => 'GOOD',
+        'fans' => 4000,
+        'choice' => $choice,
+        'outcome' => $outcome,
+    ])->assertRedirect(route('runs.cockpit', $run));
+
+    $entry = $run->turnEntries()->where('turn', 4)->sole();
+
+    expect(TurnChoice::from((string) $entry->choice)->label())->toBe($label)
+        ->and([
+            $entry->speed, $entry->stamina, $entry->power, $entry->guts, $entry->wit,
+        ])->toBe([
+            $prior->speed, $prior->stamina, $prior->power, $prior->guts, $prior->wit,
+        ]);
+})->with([
+    ['rest', 'Rest', 'Success'],
+    ['mood', 'Recreation', 'Lifted'],
+]);
+
 it('refuses a turn the Trainer has not finished entering, naming the fields', function (): void {
     $run = decisionRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 1, energy: 80);
 
@@ -359,3 +600,83 @@ it('is reachable for every run status the tool holds', function (): void {
                 ->where('run.status_label', $status->label()));
     }
 });
+
+it('offers each turn choice its own outcome words, with the failure flag beside each', function (): void {
+    // D-200 gives a choice a success branch and a failure branch unless it can be said it cannot fail,
+    // and D-205 rules that Rest carries the same treatment as any other choice
+    // (`docs/research-scratch/DESIGN-CORPUS.md`). `TurnChoice::outcomes()` is the one place naming the
+    // words: the select reads this map and the Form Request reads the same method, so an offered word
+    // and an accepted word cannot be two lists.
+    $run = decisionRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 1, energy: 80);
+
+    $this->get(route('runs.training', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('write.outcomes', 7)
+            ->where('write.outcomes.training-Speed', ['Success' => false, 'Failure' => true])
+            ->where('write.outcomes.rest', ['Success' => false, 'Poor Rest' => true])
+            ->where('write.outcomes.mood', ['Lifted' => false, 'No Change' => false, 'Fell' => false]));
+});
+
+it('accepts the outcome words its choice offers and refuses the ones another choice owns', function (string $choice, string $outcome, bool $accepted): void {
+    $run = decisionRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 1, energy: 80);
+
+    $post = $this->post(route('runs.turns.store', $run), [
+        'turn' => 2,
+        'speed' => 610, 'stamina' => 600, 'power' => 600, 'guts' => 600, 'wit' => 600,
+        'sp' => 130, 'energy' => 90, 'mood' => 'GOOD', 'fans' => 2000,
+        'choice' => $choice,
+        'outcome' => $outcome,
+        'penalty_kind' => 'mood',
+    ]);
+
+    if ($accepted) {
+        $post->assertSessionHasNoErrors();
+
+        return;
+    }
+
+    $post->assertSessionHasErrors('outcome');
+})->with([
+    ['rest', 'Success', true],
+    ['rest', 'Poor Rest', true],
+    ['mood', 'Lifted', true],
+    ['mood', 'No Change', true],
+    ['mood', 'Fell', true],
+    ['training-Speed', 'Success', true],
+    ['training-Speed', 'Failure', true],
+    // A word belongs to the turn that owns it. `Success` is not an outing's outcome and `Fell` is not a
+    // training's, which is what keeps the dropdown's list and the boundary's list one list rather than
+    // one flat vocabulary a Rest could answer with an outing's word.
+    ['mood', 'Success', false],
+    ['rest', 'Lifted', false],
+    ['training-Speed', 'Fell', false],
+]);
+
+it('writes a failure event for exactly the outcome words that name one', function (string $choice, string $outcome, bool $failed): void {
+    // The event is the whole persistence of an outcome: no column stores the word, and the Timeline's
+    // `×` row and its Failure chip are built from this write (`SCREEN_SPEC.md` SCR-RUN-002: a turn's
+    // outcome lives in `turn_events`). Rest's poor tier is the one the corpus calls a failure
+    // (`UMAMUSUME_REFERENCE.md` §1.1.5, D-201); `Fell` names a mood direction the sources do not
+    // document as a Recreation failure (D-200/D-201/D-205), so it writes no event.
+    $run = decisionRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 1, energy: 80);
+
+    $this->post(route('runs.turns.store', $run), [
+        'turn' => 2,
+        'speed' => 610, 'stamina' => 600, 'power' => 600, 'guts' => 600, 'wit' => 600,
+        'sp' => 130, 'energy' => 90, 'mood' => 'GOOD', 'fans' => 2000,
+        'choice' => $choice,
+        'outcome' => $outcome,
+        'penalty_kind' => $failed ? 'mood' : null,
+    ])->assertSessionHasNoErrors();
+
+    expect($run->turnEvents()->where('event_type', TurnEventType::Failure->value)->exists())->toBe($failed);
+})->with([
+    ['rest', 'Success', false],
+    ['rest', 'Poor Rest', true],
+    ['mood', 'Lifted', false],
+    ['mood', 'No Change', false],
+    ['mood', 'Fell', false],
+    ['training-Speed', 'Success', false],
+    ['training-Speed', 'Failure', true],
+]);

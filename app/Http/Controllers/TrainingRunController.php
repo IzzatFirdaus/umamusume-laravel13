@@ -11,6 +11,7 @@ use App\Enums\PerformanceType;
 use App\Enums\ReleaseStatus;
 use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
+use App\Enums\TurnChoice;
 use App\Enums\TurnEventType;
 use App\Http\Requests\DeckPickerSearchRequest;
 use App\Http\Requests\ImportHistoricalRunRequest;
@@ -69,7 +70,7 @@ class TrainingRunController extends Controller
                     'status_label' => $run->status->label(),
                     'created_date' => $run->created_at->toDateString(),
                     // The Cockpit is the canonical career destination (F1, plan §9's 2.0 line):
-                    // selecting a career from the list must not route through the 0.1.0 run-detail
+                    // selecting a career from the list must not route through the 2.0.0 run-detail
                     // page. `runs.show` stays a compatibility doorway until the redirect ruling.
                     'url' => route('runs.cockpit', $run),
                 ]),
@@ -194,7 +195,7 @@ class TrainingRunController extends Controller
 
     /**
      * The retired record screen's doorway (F2, plan §9.6). `GET /training-runs/{run}` no longer
-     * renders a page: every write the 0.1.0 screen owned now has a 2.0 owner reachable from the
+     * renders a page: every write the 2.0.0 screen owned now has a 2.0 owner reachable from the
      * Cockpit, so the route redirects there. `{run}` still binds, so a missing id 404s before this
      * method runs. `Runs/Show.vue` and the `show()` method were deleted in the same pass.
      */
@@ -503,16 +504,14 @@ class TrainingRunController extends Controller
      * `docs/research-scratch/screenshot-notes/`, and `docs/scenarios/01-ura-finale.md:54` already
      * spells the second one `Recreation`. The flag that used to sit on that row is off.
      *
-     * Neither detail line carries a number. The published rest and outing values are probabilities,
-     * and §2.2 keeps those out of application code; the rest *tier* is worse, because this
-     * repository's own two sources disagree on it. §1.1.5 of `docs/UMAMUSUME_REFERENCE.md` has
-     * "+30 Energy per standard rest" against GameWith 2026-09-25, while §2.1 of
-     * `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` measures the modal rest at +50 with
-     * +30 as the under-slept failure tier, and a post-rework Global table agrees that 50 is the
-     * common case. A Trainer-facing number picked out of that would be a guess wearing the tool's
-     * voice, so the line says what all four sources agree on instead.
+     * The payload is two fields because two are read: `choiceLabel()` takes the `label` and nothing
+     * else consumes this method at all. The `detail` lines it used to carry belonged to the retired
+     * guided rail, which no consumer has read since `runs.show` became a redirect. The two that said
+     * what a rest and an outing do were moved to the one live surface that offers those turns
+     * (`Career\TrainingDecisionController::writeSection()`), which is now their single owner; the
+     * five discipline lines are gone with the rail.
      *
-     * @return list<array<string, mixed>>
+     * @return list<array{key: string, label: string}>
      */
     private function turnChoices(): array
     {
@@ -522,22 +521,11 @@ class TrainingRunController extends Controller
             $choices[] = [
                 'key' => 'training-'.$stat,
                 'label' => $stat,
-                'detail' => $stat === 'Wit'
-                    ? 'Costs no Energy, so it stays available when the bar is low.'
-                    : 'Energy spent and gains made are what you record for this turn.',
             ];
         }
 
-        $choices[] = [
-            'key' => 'rest',
-            'label' => 'Rest',
-            'detail' => 'Refills Energy. A poor rest refills less and can leave a stayed-up-late penalty.',
-        ];
-        $choices[] = [
-            'key' => 'mood',
-            'label' => 'Recreation',
-            'detail' => 'Lifts Mood, and the outing may return a little Energy as well.',
-        ];
+        $choices[] = ['key' => 'rest', 'label' => 'Rest'];
+        $choices[] = ['key' => 'mood', 'label' => 'Recreation'];
 
         return $choices;
     }
@@ -849,7 +837,14 @@ class TrainingRunController extends Controller
                 ->where('event_type', TurnEventType::Failure)
                 ->delete();
 
-            if (($validated['outcome'] ?? null) === 'Failure') {
+            // Which words are a failure is `TurnChoice::outcomes()`'s to say, so the branch that writes the
+            // event and the boundary that accepts the word read one list (D-200, D-201, D-205). A turn with
+            // no choice still fails the way it always did: this path is reached by the record form, which
+            // demands a choice, so the fallback is a refusal to invent one, not a second vocabulary.
+            $turnChoice = TurnChoice::tryFrom((string) ($validated['choice'] ?? ''));
+            $outcomes = $turnChoice === null ? ['Failure' => true] : $turnChoice->outcomes();
+
+            if (($outcomes[(string) ($validated['outcome'] ?? '')] ?? false) === true) {
                 $label = $this->choiceLabel((string) ($validated['choice'] ?? ''));
                 $kind = (string) $validated['penalty_kind'];
                 $previous = $this->previousTurn($run, (int) $entry->turn);

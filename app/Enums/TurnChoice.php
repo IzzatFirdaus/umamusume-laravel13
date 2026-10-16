@@ -42,4 +42,35 @@ enum TurnChoice: string
             self::Recreation => 'Recreation',
         };
     }
+
+    /**
+     * The outcome words this choice offers, and whether each one names a failure.
+     *
+     * **The branch rule is the corpus's, not this enum's.** D-200 gives every choice a success branch and
+     * a failure branch unless it can be stated that the choice cannot fail; D-201 makes a failure a
+     * first-class log entry rather than an error state, naming a mood drop among them; and D-205 rules
+     * that Rest carries the same branch treatment as any other choice
+     * (`docs/research-scratch/DESIGN-CORPUS.md`). Rest's failure branch is the reference's own under-slept
+     * tier, `+30 (failure, sometimes with 夜ふかし気味 / Late-Night Feeling)`
+     * (`UMAMUSUME_REFERENCE.md` §1.1.5), and `Fell` names a mood direction the sources do not
+     * document as a Recreation failure (Gamerant 2025-07-27; the Japanese action guide states
+     * recreation produces at least one stage of mood-up, not a downward branch), so it flags false
+     * like `Lifted` and `No Change`.
+     *
+     * **No word here is a client string, and none claims a number.** The pair the rail already stores is
+     * this application's wording and these are the same kind of word; the client's own vocabulary for a
+     * bad rest is the Late-Night Feeling condition, which is a state the run carries, not an outcome of
+     * the turn. Nothing in the map prices a tier: `ADR-0001` §3 keeps a published figure off a forecast
+     * and this keeps one off a record.
+     *
+     * @return array<string, bool> the outcome word, keyed, against whether it is a failure
+     */
+    public function outcomes(): array
+    {
+        return match ($this) {
+            self::Rest => ['Success' => false, 'Poor Rest' => true],
+            self::Recreation => ['Lifted' => false, 'No Change' => false, 'Fell' => false],
+            default => ['Success' => false, 'Failure' => true],
+        };
+    }
 }

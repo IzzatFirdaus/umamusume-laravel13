@@ -140,17 +140,24 @@ test('shows five cards, the sourced cost, and no projected number anywhere', asy
     }
 
     // The cost prints as the range the constant is, worst first, and names its source in the title.
+    // This fixture records no facility level, so no published per-level row applies and the declared
+    // range is the whole row; the published path is its own case below.
     await expect(page.getByText('E−28 … E−17')).toHaveCount(4);
 
-    // The exclusion evidence, as the two patterns below: the screen prints no projected gain per stat
-    // and no failure percentage, because neither is sourced (AGENTS.md §5).
+    // No projected number prints on this screen state: the fixture records no facility level, so
+    // the scenario matrix's published rows have no level to key to and render as the named absence.
+    // A published base row is not a projection — it is the source's own figure, tagged with its
+    // server — and the case below pins it where a level is recorded.
     await expect(page.locator('main')).not.toContainText(/\+\s?\d+\s?(Speed|Stamina|Power|Guts|Wit)/);
     await expect(page.locator('main')).not.toContainText(/Failure:?\s?\d+(\.\d+)?%/);
     // No em dash in shipped copy: an unrecorded value is `N/A` with a reason.
     await expect(page.locator('main')).not.toContainText('—');
 
     // Wit carries the engine's own word rather than a band computed from Energy it cannot have.
-    await expect(page.getByText('RiskNotMeasured')).toBeVisible();
+    // Risk now lives in the Inspect details panel (progressive disclosure): open it first.
+    const wit = page.getByRole('article').filter({ hasText: /^Wit/ });
+    await wit.getByRole('button', { name: 'Inspect details' }).click();
+    await expect(wit.getByText('RiskNotMeasured')).toBeVisible();
     await expect(page.getByText('E−0')).toBeVisible();
 
     // Exactly one RECOMMENDED marker, on the largest deficit, with the advisor's reason line beside it.
@@ -174,8 +181,10 @@ test('names each exclusion on a disclosure a keyboard and a screen reader reach'
     // The exclusion rides in the summary's accessible name, so a screen reader states it before the
     // Trainer decides whether to open anything. Measured here: Chromium exposes the `<details>` as a
     // group whose name is `N/A , <reason>` and keeps the `<summary>` as the focusable element, so
-    // `getByRole('button')` finds nothing and the summary is the honest anchor.
-    const gains = speed.locator('summary', { hasText: 'No source publishes a per-training stat yield' });
+    // `getByRole('button')` finds nothing and the summary is the honest anchor. This fixture records
+    // no facility level, so the gains row's reason is the per-level table's own absence: the table
+    // has a row for every level, and the missing thing is the level to read it at.
+    const gains = speed.locator('summary', { hasText: 'No facility level is recorded for this training' });
     await expect(gains).toBeVisible();
     await expect(reasonOf(gains)).toBeHidden();
 
@@ -183,7 +192,7 @@ test('names each exclusion on a disclosure a keyboard and a screen reader reach'
     await gains.focus();
     await expect(gains).toBeFocused();
     await page.keyboard.press('Enter');
-    await expect(reasonOf(gains)).toHaveText(/Excluded from the advisor by design/);
+    await expect(reasonOf(gains)).toHaveText(/a Level-1 figure would state a level nobody entered/);
 
     // The modifiers arrive on expansion, and each unsourced one says which rule excluded it.
     await speed.getByRole('button', { name: 'Inspect details' }).click();
@@ -192,6 +201,64 @@ test('names each exclusion on a disclosure a keyboard and a screen reader reach'
     await expect(details.locator('summary', { hasText: 'No source publishes a failure curve' })).toBeVisible();
     await expect(details.locator('summary', { hasText: 'Bond is not stored for a Support Card' })).toBeVisible();
     await expect(details.getByText('Scenario cap')).toBeVisible();
+});
+
+test('renders the scenario matrix published row when the turn records a facility level', async ({ page }) => {
+    const runUrl = await newCareerWithTurn(page);
+
+    // Turn 2, recorded with the facility levels the client's ladder showed, so the published
+    // per-level table has a level to key to. The five inputs sit behind the record form's own
+    // disclosure, which this case opens; the first case's walk leaves them blank on purpose.
+    await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    const speedCard = page.getByRole('article').filter({ hasText: /^Speed/ });
+    await speedCard.getByRole('button', { name: 'Train' }).click();
+
+    await page.locator('input[name="speed"]').fill('700');
+    await page.locator('input[name="stamina"]').fill('600');
+    await page.locator('input[name="power"]').fill('600');
+    await page.locator('input[name="guts"]').fill('600');
+    await page.locator('input[name="wit"]').fill('640');
+    await page.locator('input[name="energy"]').fill('40');
+    await page.locator('select[name="outcome"]').selectOption('Success');
+
+    await page.locator('details').filter({ hasText: 'Facility levels this turn' }).locator('summary').click();
+    for (const stat of ['speed', 'stamina', 'power', 'guts', 'wit']) {
+        await page.locator(`input[name="facility_${stat}"]`).fill('3');
+    }
+
+    await page.getByRole('button', { name: 'Record this training' }).click();
+    await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
+
+    await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // The Unity Cup row for Speed at the recorded Level 3: +10 Speed, +4 Power, +4 SP, with the
+    // artifact's own server tag on every rendered figure (the wiring's Caveat 2 — a JP figure
+    // reaches a Global run only with its tag).
+    await expect(speedCard.getByText('+10 Speed, +4 Power, +4 SP')).toBeVisible();
+    await expect(speedCard.getByText('[JP + Global(rework)]')).toHaveCount(2);
+    // The published Energy figure for the same row, with the declared constant still stated
+    // beneath it, because Energy after computes from the constant and not from this figure.
+    await expect(speedCard.getByText('E−21')).toBeVisible();
+    // Citations, divergence notes, supports count, target deficit, and risk defer to the
+    // Inspect details panel (progressive disclosure): open it before asserting on them.
+    await speedCard.getByRole('button', { name: 'Inspect details' }).click();
+    await expect(speedCard.getByText(/Declared constant: UMAMUSUME_REFERENCE/)).toBeVisible();
+    // Unity Cup's one published Global divergence, visible where the scenario's costs render
+    // (the wiring's Caveat 3): Global pays +2 SP where the JP table prints +4.
+    await expect(speedCard.getByText(/Global SP payouts for Unity Cup match URA Finale/)).toBeVisible();
+    // The risk row's reason is the artifact's measured negative, verbatim.
+    await expect(
+        speedCard.locator('summary', { hasText: 'No publisher states a ranked discipline-level risk table' }),
+    ).toBeVisible();
+
+    // Wit renders its gains row under the same tag, and its Energy row stays the advisor's own
+    // declared constant: the artifact's Wit rows state a refund, not a cost, so no published
+    // cost figure displaces the sourced E−0. The gains row is the Level-3 row the walk recorded.
+    const witCard = page.getByRole('article').filter({ hasText: /^Wit/ });
+    await expect(witCard.getByText('+8 Wit, +2 Speed, +5 SP')).toBeVisible();
+    await expect(witCard.getByText('E−0')).toBeVisible();
 });
 
 test('expands and collapses the details by keyboard, and keeps the tab order with the document', async ({ page }) => {
@@ -349,9 +416,11 @@ test('meets the 44px target floor and the axe A plus AA bar', async ({ page }) =
  * and the third walk found it with no accessible name. It is named the way the Cockpit's own correction
  * form names its band control.
  *
- * A separate case because the screen's whole-page scan is red on a pre-existing `definition-list`
- * violation in `TrainingCard.vue` (a provenance paragraph sits as a direct `dl` child); that defect is not
- * this control's, and the `label` rule is asserted on its own here.
+ * A separate case because the `label` rule needs its own scope: the Energy band select only appears
+ * under the `Band` radio, so the whole-page axe scan above never puts it in the tree. The
+ * definition-list violation that previously made the whole-page scan red in `TrainingCard.vue` is
+ * resolved: provenance now lives in `dt`/`dd` pairs inside the Inspect details panel, where `<p>` is a
+ * valid child of `<dd>`.
  */
 test('the Energy band select carries an accessible name (R3-16)', async ({ page }) => {
     await openTrainingDetail(page);
@@ -417,4 +486,152 @@ test('draws no Performance pair on a scenario that does not compose it', async (
 
     await expect(page.locator('select[name="performance[type]"]')).toHaveCount(0);
     await expect(page.locator('input[name="performance[delta]"]')).toHaveCount(0);
+});
+
+/*
+ * The two turn choices that are not trainings (SCR-CAR-012). The Cockpit's Rest and Recreation entries
+ * arrive here holding the choice, and the one record form writes them, so these cases assert what only a
+ * browser reaches: the arrival preselects, the five totals stay editable with the prior readings as
+ * placeholders, and the press records the turn and lands back on the Cockpit.
+ *
+ * The five totals are asserted `toBeEditable()` and empty on purpose. D-220 keeps an input from arriving
+ * pre-filled, because a filled field asserts the stat did not change, and no source in the corpus states
+ * that a rest or an outing leaves the five totals where they were. The prior readings ride the
+ * placeholder, which is the same shape the five training choices get.
+ */
+
+test('Rest is offered as a choice and records the turn through the same form', async ({ page }) => {
+    const runUrl = await newCareerWithTurn(page);
+
+    await page.goto(`${runUrl}/training?choice=rest`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // The entry arrives holding its choice rather than asking the Trainer to pick it again (WCAG 3.3.7).
+    const rest = page.getByRole('button', { name: /^Rest/ });
+    await expect(rest).toHaveAttribute('aria-pressed', 'true');
+
+    // The five totals are the client's own readings after the turn resolves, so they start empty with
+    // the prior turn's numbers as placeholders: 650 Speed and 600 on the other four.
+    for (const [field, prior] of [
+        ['speed', '650'],
+        ['stamina', '600'],
+        ['power', '600'],
+        ['guts', '600'],
+        ['wit', '600'],
+    ] as const) {
+        const input = page.locator(`input[name="${field}"]`);
+        await expect(input).toBeEditable();
+        await expect(input).toHaveValue('');
+        await expect(input).toHaveAttribute('placeholder', prior);
+    }
+
+    // A non-training choice names the button after the turn rather than after a training.
+    const submit = page.getByRole('button', { name: 'Record this turn' });
+    await expect(submit).toBeVisible();
+
+    await page.locator('input[name="speed"]').fill('650');
+    await page.locator('input[name="stamina"]').fill('600');
+    await page.locator('input[name="power"]').fill('600');
+    await page.locator('input[name="guts"]').fill('600');
+    await page.locator('input[name="wit"]').fill('600');
+    await page.locator('input[name="energy"]').fill('100');
+    await page.locator('select[name="outcome"]').selectOption('Success');
+    await submit.click();
+
+    await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
+    await expect(page.getByText('Turn 2 logged.')).toBeVisible();
+});
+
+test('Recreation is offered as a choice and records the turn through the same form', async ({ page }) => {
+    const runUrl = await newCareerWithTurn(page);
+
+    // The address carries the client's own word; the row it writes keeps `TurnChoice::Recreation`'s
+    // stored literal, which `CareerCockpitTest` pins on the write side.
+    await page.goto(`${runUrl}/training?choice=recreation`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const recreation = page.getByRole('button', { name: /^Recreation/ });
+    await expect(recreation).toHaveAttribute('aria-pressed', 'true');
+
+    for (const [field, prior] of [
+        ['speed', '650'],
+        ['stamina', '600'],
+        ['power', '600'],
+        ['guts', '600'],
+        ['wit', '600'],
+    ] as const) {
+        const input = page.locator(`input[name="${field}"]`);
+        await expect(input).toBeEditable();
+        await expect(input).toHaveValue('');
+        await expect(input).toHaveAttribute('placeholder', prior);
+    }
+
+    const submit = page.getByRole('button', { name: 'Record this turn' });
+    await expect(submit).toBeVisible();
+
+    await page.locator('input[name="speed"]').fill('650');
+    await page.locator('input[name="stamina"]').fill('600');
+    await page.locator('input[name="power"]').fill('600');
+    await page.locator('input[name="guts"]').fill('600');
+    await page.locator('input[name="wit"]').fill('600');
+    await page.locator('input[name="energy"]').fill('58');
+    await page.locator('select[name="mood"]').selectOption('GREAT');
+    // The outing's own branch words, not the training pair: `TurnChoice::outcomes()` offers Recreation
+    // Lifted / No Change / Fell, and `Success` is not one of them.
+    await page.locator('select[name="outcome"]').selectOption('Lifted');
+    await submit.click();
+
+    await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
+    await expect(page.getByText('Turn 2 logged.')).toBeVisible();
+});
+
+test('the outcome select offers the turn its own branch words, and drops a word it no longer owns', async ({ page }) => {
+    // `TurnChoice::outcomes()` is one list read by the request and by this select (D-200, D-205). The
+    // handle is the field's own id, not a name built from a word that changes.
+    const runUrl = await newCareerWithTurn(page);
+    const words = async (): Promise<string[]> => page.locator('#turn-outcome option').allInnerTexts();
+
+    await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.getByRole('article').filter({ hasText: /^Speed/ }).getByRole('button', { name: 'Train' }).click();
+    expect(await words()).toEqual(['Choose', 'Success', 'Failure']);
+
+    await page.goto(`${runUrl}/training?choice=rest`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    expect(await words()).toEqual(['Choose', 'Success', 'Poor Rest']);
+
+    // A poor rest is the turn's failure branch, so it owes a penalty kind exactly as `Failure` does.
+    await page.locator('#turn-outcome').selectOption('Poor Rest');
+    await expect(page.locator('#turn-penalty_kind')).toBeVisible();
+
+    await page.getByRole('button', { name: /^Recreation/ }).click();
+    expect(await words()).toEqual(['Choose', 'Lifted', 'No Change', 'Fell']);
+
+    // `Poor Rest` is not an outing's word. A select left holding a value outside its own list would show
+    // its placeholder while the form still posted the stale one, so the toggle clears it.
+    await expect(page.locator('#turn-outcome')).toHaveValue('');
+    await expect(page.locator('#turn-penalty_kind')).toHaveCount(0);
+});
+
+test('marks the one field the chosen turn moves, and only that one', async ({ page }) => {
+    const runUrl = await newCareerWithTurn(page);
+
+    // A rest moves Energy, so Energy carries the chosen-card border and Mood does not.
+    await page.goto(`${runUrl}/training?choice=rest`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.locator('#turn-energy-field')).toHaveClass(/border-pick-line/);
+    await expect(page.locator('#turn-mood-field')).not.toHaveClass(/border-pick-line/);
+
+    // An outing moves Mood, so the mark moves with it.
+    await page.goto(`${runUrl}/training?choice=recreation`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.locator('#turn-mood-field')).toHaveClass(/border-pick-line/);
+    await expect(page.locator('#turn-energy-field')).not.toHaveClass(/border-pick-line/);
+
+    // A discipline moves the five totals, not either field, so neither carries the mark.
+    await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.getByRole('article').filter({ hasText: /^Speed/ }).getByRole('button', { name: 'Train' }).click();
+    await expect(page.locator('#turn-energy-field')).not.toHaveClass(/border-pick-line/);
+    await expect(page.locator('#turn-mood-field')).not.toHaveClass(/border-pick-line/);
 });

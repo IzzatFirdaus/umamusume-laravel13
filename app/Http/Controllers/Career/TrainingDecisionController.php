@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Career;
 
 use App\Enums\MoodTier;
 use App\Enums\PerformanceType;
+use App\Enums\TurnChoice;
 use App\Http\Controllers\Controller;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\DeckSlot;
@@ -70,12 +71,43 @@ class TrainingDecisionController extends Controller
         ['key' => 'wit_burst_energy_bonus', 'label' => 'Energy a Wit burst returns', 'stats' => ['Wit']],
     ];
 
+    /**
+     * The stat each discipline's secondary gain feeds: the game's own routing, which
+     * `UMAMUSUME_REFERENCE.md` §1.1.1 records as `[Both]` (Game8 and Kamigame agree on the mapping;
+     * only the numbers are JP-measured). Guts feeds two, in the order the 2026-10-15 artifact's own
+     * cells print them, which is why its rows key the pair `secondary_a`/`secondary_b`.
+     *
+     * @var array<string, list<string>>
+     */
+    private const SECONDARY_ROUTES = [
+        'Speed' => ['Power'],
+        'Stamina' => ['Guts'],
+        'Power' => ['Stamina'],
+        'Guts' => ['Speed', 'Power'],
+        'Wit' => ['Speed'],
+    ];
+
+    /**
+     * The training stat to the `turn_entries` column holding its facility level.
+     *
+     * One map for the two readers this page has: the published per-level table and the record form's
+     * pre-fill. Both must state the same level for the same stat, so neither may re-derive it.
+     */
+    private const FACILITY_COLUMNS = [
+        'Speed' => 'facility_speed',
+        'Stamina' => 'facility_stamina',
+        'Power' => 'facility_power',
+        'Guts' => 'facility_guts',
+        'Wit' => 'facility_wit',
+    ];
+
     public function show(TrainingRun $run): Response
     {
         $run->load(['umamusume', 'turnEntries', 'deckSlots.supportCard']);
 
         $advisor = app(TrainerAdvisor::class);
         $latest = $this->statsSource($run);
+        $facilityLevels = $this->facilityLevels($run);
         $advice = $advisor->advise($latest, $run->buildTarget(), $run);
         $target = $run->buildTarget();
         $scenarioKey = $run->hasScenario() ? $run->scenarioKey() : null;
@@ -107,6 +139,7 @@ class TrainingDecisionController extends Controller
                     $constants,
                     $dictionary,
                     $scenarioKey,
+                    $facilityLevels,
                 ),
                 $order,
             ),
@@ -115,7 +148,7 @@ class TrainingDecisionController extends Controller
                 'slots' => $run->deckSlots->count(),
             ],
             'advisor' => $this->advisorSection($advice),
-            'write' => $this->writeSection($run, $latest),
+            'write' => $this->writeSection($run, $latest, $advice, $facilityLevels),
         ]);
     }
 
@@ -151,6 +184,7 @@ class TrainingDecisionController extends Controller
      * @param  array<string, array{value: mixed, source: string, verified_at: string, confidence: string}>  $constants
      * @param  Collection<int, DeckSlot>  $slots
      * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @param  array<string, int|null>  $facilityLevels
      * @return array<string, mixed>
      */
     private function optionSection(
@@ -163,6 +197,7 @@ class TrainingDecisionController extends Controller
         array $constants,
         array $dictionary,
         ?string $scenarioKey,
+        array $facilityLevels,
     ): array {
         $option = $this->adviceOption($advice, $stat);
 
@@ -181,6 +216,10 @@ class TrainingDecisionController extends Controller
             'cost' => $this->costFor($stat, $constants),
             'supports' => $this->supportsFor($stat, $slots, $dictionary),
             'scenario_effects' => $this->scenarioEffectsFor($stat, $scenarioKey),
+            // The published per-level reference figures the scenario matrix carries, keyed to the
+            // facility level this run last recorded for that training. A projected yield for this run
+            // is still absent: the key carries published base rows, never a number computed here.
+            'published' => $this->publishedFor($stat, $scenarioKey, $facilityLevels),
         ];
     }
 
@@ -314,6 +353,161 @@ class TrainingDecisionController extends Controller
     }
 
     /**
+     * The published per-level reference figures this discipline's card may print, read from the
+     * scenario matrix's `training_tables` (the 2026-10-15 scenario-field-metadata artifact,
+     * transcribed into `config/scenarios.php`).
+     *
+     * The level is the most recent one this run recorded for this discipline's facility, which is not
+     * necessarily its newest turn: a race or a rest logs no ladder reading, and the level the client
+     * showed two turns ago is still this turn's level. When no turn records one, the absence is named
+     * rather than a Level-1 figure substituted: a Lv1 row shown for a Lv3 facility is the worse error,
+     * so the card shows the absence instead.
+     *
+     * Every figure is `[JP]`-sourced and the server tag rides the payload: no source publishes a
+     * Global per-level table, and `SCENARIO-PUBLISHER-REFERENCES.md` line 34 forbids quoting a JP
+     * figure as a Global expectation. The tag is the surface's obligation to print, not to strip.
+     *
+     * Wit carries gains but no published cost: its table rows state a refund, not a cost, and the
+     * advisor's own `wit_cost` constant — sourced and current — already governs that row. The risk
+     * reason is the artifact's measured negative, verbatim, and is carried for the four Energy
+     * disciplines only: Wit's card renders the engine's own `RiskNotMeasured` word instead.
+     *
+     * @param  array<string, int|null>  $facilityLevels
+     * @return array{gains: array{level: int, text: string, server: string, source: string, notes: list<string>}|null, gains_absence: string|null, cost: array{level: int, value: int, text: string, server: string, source: string, notes: list<string>}|null, risk_reason: string|null}
+     */
+    private function publishedFor(string $stat, ?string $scenarioKey, array $facilityLevels): array
+    {
+        $riskReason = null;
+
+        if ($scenarioKey !== null && $stat !== 'Wit') {
+            $risk = config('scenarios.scenarios.'.$scenarioKey.'.risk_absence');
+            $riskReason = is_array($risk) && is_string($risk['reason'] ?? null) ? $risk['reason'] : null;
+        }
+
+        if ($scenarioKey === null) {
+            $absence = 'This run declares no scenario, so the published per-scenario training table has no row to read.';
+
+            return ['gains' => null, 'gains_absence' => $absence, 'cost' => null, 'risk_reason' => null];
+        }
+
+        /** @var mixed $tables */
+        $tables = config('scenarios.scenarios.'.$scenarioKey.'.training_tables');
+
+        if (! is_array($tables) || ! is_array($tables['per_level'] ?? null)) {
+            $absence = 'The '.$scenarioKey.' entry of config/scenarios.php records no published training table.';
+
+            return ['gains' => null, 'gains_absence' => $absence, 'cost' => null, 'risk_reason' => $riskReason];
+        }
+
+        $level = $facilityLevels[$stat] ?? null;
+
+        if ($level === null) {
+            $absence = 'No facility level is recorded for this training on any turn this run has logged, so the published per-level table has no row to read; a Level-1 figure would state a level nobody entered.';
+
+            return ['gains' => null, 'gains_absence' => $absence, 'cost' => null, 'risk_reason' => $riskReason];
+        }
+
+        /** @var mixed $row */
+        $row = $tables['per_level'][$stat]['Lv'.$level] ?? null;
+
+        if (! is_array($row)) {
+            $absence = 'The published table states no row for this training at Level '.$level.'.';
+
+            return ['gains' => null, 'gains_absence' => $absence, 'cost' => null, 'risk_reason' => $riskReason];
+        }
+
+        /** @var list<string> $notes */
+        $notes = array_values(array_map(
+            static fn (mixed $note): string => (string) $note,
+            (array) ($tables['notes'] ?? []),
+        ));
+
+        $gains = [
+            'level' => $level,
+            'text' => $this->gainsText($stat, $row),
+            'server' => (string) ($tables['server'] ?? 'JP'),
+            'source' => (string) ($tables['source'] ?? ''),
+            'notes' => $notes,
+        ];
+
+        // Wit's published cost is deliberately absent, absence line included: the Energy row keeps
+        // the advisor's declared constant, which is the artifact's own cost value for Wit anyway.
+        $cost = null;
+
+        if ($stat !== 'Wit' && is_int($row['energy'] ?? null)) {
+            $cost = [
+                'level' => $level,
+                'value' => $row['energy'],
+                'text' => 'E'.strtr((string) $row['energy'], ['-' => "\u{2212}"]),
+                'server' => (string) ($tables['server'] ?? 'JP'),
+                'source' => (string) ($tables['source'] ?? ''),
+                'notes' => $notes,
+            ];
+        }
+
+        return ['gains' => $gains, 'gains_absence' => null, 'cost' => $cost, 'risk_reason' => $riskReason];
+    }
+
+    /**
+     * The published row's gains as the words the card prints: primary, then the discipline's own
+     * secondaries, then Skill Points. The routing is `SECONDARY_ROUTES`'s, and the artifact's own
+     * key names decide which slot a value sits in.
+     *
+     * @param  array<string, mixed>  $row
+     */
+    private function gainsText(string $stat, array $row): string
+    {
+        $parts = ['+'.(string) $row['primary'].' '.$stat];
+
+        foreach (self::SECONDARY_ROUTES[$stat] as $index => $route) {
+            $key = $index === 0
+                ? (array_key_exists('secondary', $row) ? 'secondary' : 'secondary_a')
+                : 'secondary_b';
+
+            if (is_int($row[$key] ?? null)) {
+                $parts[] = '+'.(string) $row[$key].' '.$route;
+            }
+        }
+
+        if (is_int($row['skill_points'] ?? null)) {
+            $parts[] = '+'.(string) $row['skill_points'].' SP';
+        }
+
+        return implode(', ', $parts);
+    }
+
+    /**
+     * The facility level per training, read from the newest turn that recorded one.
+     *
+     * A facility level is a state the client keeps showing, not an event that happens on one turn, and
+     * the latest logged turn is often a race, a rest or a recreation that recorded none. Keying the
+     * published table off that single row lost figures the run had already entered, so each stat walks
+     * back on its own: a turn that read Speed but not Guts lifts only Speed. A stat no turn in the run
+     * records stays null, which the page prints as the named absence rather than as Level 1.
+     *
+     * @return array<string, int|null>
+     */
+    private function facilityLevels(TrainingRun $run): array
+    {
+        /** @var array<string, int|null> $levels */
+        $levels = array_fill_keys(array_keys(self::FACILITY_COLUMNS), null);
+
+        foreach ($run->turnEntries->sortByDesc('turn') as $entry) {
+            foreach (self::FACILITY_COLUMNS as $stat => $column) {
+                if ($levels[$stat] === null && $entry->{$column} !== null) {
+                    $levels[$stat] = (int) $entry->{$column};
+                }
+            }
+
+            if (! in_array(null, $levels, true)) {
+                break;
+            }
+        }
+
+        return $levels;
+    }
+
+    /**
      * C2's answer, flattened to the three fields this screen renders. No score and no numeric
      * confidence, because the contract has no field for either (`ADR-0001` §3).
      *
@@ -340,9 +534,23 @@ class TrainingDecisionController extends Controller
      * arriving pre-filled would assert the stat did not change, which is `D-220`'s rule and the reason
      * the run screen's rail passes it the same way.
      *
-     * @return array{action: string, turn: int, moods: list<string>, previous: array<string, int|null>|null, performance: array{enabled: bool, types: list<string>}}
+     * `extra_choices` are the two turn choices that are not trainings, Rest and Recreation. They ride on
+     * the write rather than on `options` because `SCREEN_SPEC.md` SCR-CAR-012 rules them "turn choices,
+     * not training options", and the five cards are the five. Their words come from `TurnChoice`, and
+     * only the advisor's own action word marks one of them. The notes are the two lines the retired
+     * rail already shipped (`TrainingRunController::turnChoices()`), moved rather than reworded: each
+     * states what the client shows, not what this tool projects, since no source publishes a recovery
+     * or an outing figure (`ADR-0001` §3).
+     *
+     * `outcomes` is every choice's outcome words keyed by the choice value the form posts, each word
+     * carrying whether it names a failure. It rides on the write because the select that offers the words
+     * and the request that accepts them must read one list (`TurnChoice::outcomes()`), and because the
+     * penalty field has to appear for `Poor Rest` and `Fell` exactly as it does for `Failure`.
+     *
+     * @param  array<string, int|null>  $facilityLevels
+     * @return array{action: string, turn: int, moods: list<string>, previous: array<string, int|null>|null, performance: array{enabled: bool, types: list<string>}, extra_choices: list<array{value: string, label: string, note: string, recommended: bool}>, outcomes: array<string, array<string, bool>>}
      */
-    private function writeSection(TrainingRun $run, ?TurnEntry $latest): array
+    private function writeSection(TrainingRun $run, ?TurnEntry $latest, Advice $advice, array $facilityLevels): array
     {
         // The Performance observation pair (Our Grand Concert; the dated rail row in
         // `SCREEN_SPEC.md`). The five client words ride only behind the capability flag, so a
@@ -351,10 +559,25 @@ class TrainingDecisionController extends Controller
         // the corpus publishes none of the rest.
         $acceptsPerformance = $run->acceptsPerformanceObservations();
 
+        $notes = [
+            TurnChoice::Rest->value => 'Refills Energy. A poor rest refills less and can leave a stayed-up-late penalty.',
+            TurnChoice::Recreation->value => 'Lifts Mood, and the outing may return a little Energy as well.',
+        ];
+
         return [
             'action' => route('runs.turns.store', $run),
             'turn' => $run->nextTurnNumber(),
             'moods' => array_column(MoodTier::cases(), 'value'),
+            'extra_choices' => array_map(
+                static fn (TurnChoice $choice): array => [
+                    'value' => $choice->value,
+                    'label' => $choice->label(),
+                    'note' => $notes[$choice->value],
+                    'recommended' => $advice->recommendation?->action === $choice->label(),
+                ],
+                [TurnChoice::Rest, TurnChoice::Recreation],
+            ),
+            'outcomes' => $this->outcomeOptions(),
             'previous' => $latest === null ? null : [
                 'speed' => $latest->speed,
                 'stamina' => $latest->stamina,
@@ -364,6 +587,15 @@ class TrainingDecisionController extends Controller
                 'sp' => $latest->sp,
                 'energy' => $latest->energy,
                 'fans' => $latest->fans,
+                // The facility ladder this run last read, under the record form's own field names, so
+                // the five inputs open on the state the client is still showing rather than on nothing.
+                // The Trainer corrects a level the client has since moved; a blank still means no
+                // reading was taken, and the published row then falls back to the walk above.
+                'facility_speed' => $facilityLevels['Speed'],
+                'facility_stamina' => $facilityLevels['Stamina'],
+                'facility_power' => $facilityLevels['Power'],
+                'facility_guts' => $facilityLevels['Guts'],
+                'facility_wit' => $facilityLevels['Wit'],
             ],
             'performance' => [
                 'enabled' => $acceptsPerformance,
@@ -372,6 +604,26 @@ class TrainingDecisionController extends Controller
                     : [],
             ],
         ];
+    }
+
+    /**
+     * Every choice's outcome words, with the failure flag each one carries, keyed by the stored choice.
+     *
+     * The list is `TurnChoice::outcomes()`'s and this only turns it inside out, so a word the Trainer can
+     * pick and a word the request accepts cannot drift apart. No label is composed here: each word is the
+     * label, which is why the map's keys are what the select prints.
+     *
+     * @return array<string, array<string, bool>>
+     */
+    private function outcomeOptions(): array
+    {
+        $outcomes = [];
+
+        foreach (TurnChoice::cases() as $choice) {
+            $outcomes[$choice->value] = $choice->outcomes();
+        }
+
+        return $outcomes;
     }
 
     /**

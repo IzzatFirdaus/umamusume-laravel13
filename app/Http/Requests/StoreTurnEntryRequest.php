@@ -139,9 +139,9 @@ class StoreTurnEntryRequest extends FormRequest
             // outcome to declare: it writes the row the Trainer typed.
             'stage' => ['nullable', Rule::in(['preview', 'confirm'])],
             'choice' => [Rule::requiredIf(fn (): bool => $staged), 'nullable', Rule::enum(TurnChoice::class)],
-            'outcome' => [Rule::requiredIf(fn (): bool => $staged), 'nullable', Rule::in(['Success', 'Failure'])],
+            'outcome' => [Rule::requiredIf(fn (): bool => $staged), 'nullable', Rule::in(array_keys($this->chosenOutcomes()))],
             'penalty_kind' => [
-                Rule::requiredIf(fn (): bool => $this->input('outcome') === 'Failure'),
+                Rule::requiredIf(fn (): bool => ($this->chosenOutcomes()[(string) $this->input('outcome')] ?? false) === true),
                 'nullable',
                 Rule::in(['energy', 'mood', 'stat']),
             ],
@@ -162,6 +162,22 @@ class StoreTurnEntryRequest extends FormRequest
             // rather than the exception the model raises on save.
             'performance.delta' => ['required_with:performance', 'integer', 'not_in:0'],
         ];
+    }
+
+    /**
+     * The outcome words the turn's own choice offers, with the failure flag each one carries.
+     *
+     * `TurnChoice::outcomes()` is the single owner of that vocabulary, so the boundary that refuses a
+     * word and the payload that fills the select cannot disagree. A `choice` that is absent or refused
+     * falls back to the pair this request has always taken: the Trainer then gets one error, on the
+     * field that is actually wrong, rather than a second one about an outcome nobody named.
+     *
+     * @return array<string, bool>
+     */
+    private function chosenOutcomes(): array
+    {
+        return TurnChoice::tryFrom((string) $this->input('choice'))?->outcomes()
+            ?? ['Success' => false, 'Failure' => true];
     }
 
     /**

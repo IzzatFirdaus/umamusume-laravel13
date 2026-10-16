@@ -11,11 +11,13 @@
  * pins the option payload to a key set that has no home for a projected figure, so this file cannot be
  * handed one.
  *
- * **Three facts in the collapsed card, the modifiers on expansion** (design-2.0 §35, plan §13 under
- * Cognitive Load): the cost, the supports entered, and the deficit against the Trainer's own target.
- * `Progressive disclosure` here is a real `aria-expanded` button over a region that stays in the
- * document with `hidden`, so the tab order is the same whether or not the card is expanded, and a
- * collapsed card keeps its modifiers out of the accessibility tree.
+ * **Five elements in the collapsed card, the modifiers on expansion** (design-2.0 §35):
+ * the stat figure, the server tag, the Confirmed badge, and the two action buttons. Citations,
+ * supports count, target deficit, and risk defer to the Inspect details panel (progressive-
+ * disclosure depth = 2: toggle → panel). `Progressive disclosure` here is a real `aria-expanded`
+ * button over a region that stays in the document with `hidden`, so the tab order is the same
+ * whether or not the card is expanded, and a collapsed card keeps its modifiers out of the
+ * accessibility tree.
  *
  * **Risk is a sourced statement or nothing.** `RiskNotMeasured` is `ADR-0001` §3's own word for Wit,
  * which enters a turn at full Energy; no other card has a published risk rule to cite, so its risk
@@ -43,6 +45,15 @@ interface Effect {
     display: string;
 }
 
+/** One published per-level row, as the scenario matrix's `training_tables` states it. */
+interface PublishedRow {
+    level: number;
+    text: string;
+    server: string;
+    source: string;
+    notes: string[];
+}
+
 const props = defineProps<{
     option: {
         key: string;
@@ -59,6 +70,12 @@ const props = defineProps<{
         cost: Cost;
         supports: { name: string; effects: Effect[] }[];
         scenario_effects: { label: string; value: string }[] | null;
+        published: {
+            gains: PublishedRow | null;
+            gains_absence: string | null;
+            cost: PublishedRow | null;
+            risk_reason: string | null;
+        };
     };
     scenarioLabel: string;
     deckRecorded: boolean;
@@ -87,6 +104,12 @@ const fmt = (n: number): string => n.toLocaleString('en-US');
 
 // The cost prints as a range because the constant is one: it scales with a training level this tool
 // does not track, so a single point would be invented precision (`ADR-0001` §2). Both ends, worst first.
+// When the scenario matrix carries a published per-level row for this discipline, that row's single
+// sourced figure takes the value slot and the declared constant drops to the provenance line — the
+// constant still computes `energy_after`, so it stays visible either way (`ADR-0001` §2), and the
+// governed `session_cost` key itself is untouched by this rendering.
+const publishedCost = computed(() => props.option.published.cost);
+
 const costText = computed(() =>
     props.option.cost.min === props.option.cost.max
         ? `E−${props.option.cost.min}`
@@ -94,6 +117,13 @@ const costText = computed(() =>
 );
 
 const costTitle = computed(() => {
+    const cost = props.option.published.cost;
+
+    if (cost !== null) {
+        return `Published per-level table: ${cost.source}. The level is the most recent one this run recorded for this training (Lv${cost.level}); the declared constant below is what Energy after computes from.`
+            + cost.notes.map((note) => ` ${note}`).join('');
+    }
+
     const stale = props.option.cost.confidence === 'stale'
         ? ' The source behind this range is marked stale.'
         : '';
@@ -101,17 +131,24 @@ const costTitle = computed(() => {
     return `Declared constant: ${props.option.cost.source}, read ${props.option.cost.verified_at}.${stale}`;
 });
 
-// The same three fields the tooltip carries, printed. `ADR-0001` §2 requires the constants behind a derived
-// number to be visible wherever the number appears; a `title` is reachable by mouse only, so on a keyboard or
-// a touch screen the source, its read date and its stale flag were simply absent.
-const costConstants = computed(() => {
-    const parts = [`Declared constant: ${props.option.cost.source}`, `read ${props.option.cost.verified_at}`];
+// The same provenance, printed. `ADR-0001` §2 requires the constants behind a derived number to be
+// visible wherever the number appears; a `title` is reachable by mouse only, so on a keyboard or
+// a touch screen the source, its read date and its stale flag were simply absent. When a published
+// row renders, its own source and level join the line, and the matrix's server tag states which
+// server the figures are from — for Unity Cup the rework's SP divergence rides the notes, which is
+// the wiring's Caveat 3 made visible where the scenario's costs render.
+const costDetail = computed(() => {
+    const declared = `Declared constant: ${props.option.cost.source}, read ${props.option.cost.verified_at}`
+        + (props.option.cost.confidence === 'stale' ? ', source marked stale' : '');
 
-    if (props.option.cost.confidence === 'stale') {
-        parts.push('source marked stale');
+    const cost = props.option.published.cost;
+
+    if (cost === null) {
+        return declared;
     }
 
-    return parts.join(' · ');
+    return `Published table: ${cost.source} · Lv${cost.level}, the level this run last recorded, server ${cost.server}. ${declared}`
+        + cost.notes.map((note) => ` ${note}`).join('');
 });
 
 const energyAfterTitle = computed(() => {
@@ -137,10 +174,33 @@ const energyAfterText = computed(() => {
     return after.min === after.max ? fmt(after.min) : `${fmt(after.min)} to ${fmt(after.max)}`;
 });
 
-const gainsTitle =
-    'No source publishes a per-training stat yield; it turns on support bonds, training level and '
-    + 'facility, none of which this tool models. Excluded from the advisor by design: '
-    + 'PROCESS-PLANS.md trainer-advisor.md §1, ADR-0001 §3.';
+// The published gains row: the scenario matrix's per-level base figures for this discipline, at
+// the facility level this run last recorded. The [JP] tag beside the value is the wiring's
+// Caveat 2: a JP figure presented to a Global run without the tag is the silent promotion the
+// reference guide's deviation log records a prior occurrence of, so the tag never strips.
+const publishedGains = computed(() => props.option.published.gains);
+
+const gainsReason = computed(() => {
+    const gains = props.option.published.gains;
+
+    if (gains === null) {
+        return props.option.published.gains_absence
+            ?? 'No published per-level row applies to this training.';
+    }
+
+    return `Published per-level base gains: ${gains.source}. The level is the most recent one this run recorded for this training (Lv${gains.level}); actual gains also scale with mood, bonds and growth rate, none of which this tool models.`
+        + gains.notes.map((note) => ` ${note}`).join('');
+});
+
+const gainsDetail = computed(() => {
+    const gains = props.option.published.gains;
+
+    if (gains === null) {
+        return null;
+    }
+
+    return `Published table: ${gains.source} · Lv${gains.level}, the level this run last recorded.`;
+});
 
 const failureTitle =
     'No source publishes a failure curve, table or single probability. ADR-0001 §3 keeps a numeric '
@@ -155,6 +215,11 @@ const bondTitle =
 const riskTitle =
     'No sourced rule ranks this option’s risk. The only Energy line any source states is the 50 '
     + 'advisory one, and that describes the turn, not the discipline (ADR-0001 §3).';
+
+// The risk row's reason: the scenario matrix's own measured negative — the 2026-10-15 artifact's
+// reason verbatim — where the run declares a scenario, and the advisor-era statement where it
+// does not. Wit never reaches this row: its card prints the engine's own RiskNotMeasured word.
+const riskReason = computed(() => props.option.published.risk_reason ?? riskTitle);
 
 const witRiskTitle =
     'Wit enters the turn at full Energy, so a band computed from Energy would assert an exemption the '
@@ -212,6 +277,7 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
 
 <template>
     <article
+        :data-discipline="group"
         :class="[
             'flex min-w-0 flex-col rounded-lg border bg-panel p-4',
             props.option.recommended
@@ -235,55 +301,39 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
             <div>
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Expected gains</dt>
                 <dd class="mt-0.5">
-                    <AbsenceValue class="font-mono tabular-nums" :reason="gainsTitle" compact />
+                    <template v-if="publishedGains !== null">
+                        <span :title="gainsReason" class="font-mono tabular-nums text-ink-strong">{{ publishedGains.text }}</span>
+                        <span class="text-xs text-ink-muted"> [{{ publishedGains.server }}]</span>
+                        <ProvenanceBadge state="confirmed" class="ml-1 align-middle" />
+                    </template>
+                    <AbsenceValue v-else class="font-mono tabular-nums" :reason="gainsReason" compact />
                 </dd>
             </div>
 
             <div>
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Energy cost</dt>
                 <dd class="mt-0.5">
-                    <span :title="costTitle" class="font-mono tabular-nums text-ink-strong">{{ costText }}</span>
-                    <ProvenanceBadge state="confirmed" class="ml-1 align-middle" />
-                    <!-- `ADR-0001` §2 requires the constants behind a derived number to be visible wherever the
-                         number appears, and a `title` is reachable by mouse only. The owner ruled the inline form
+                    <template v-if="publishedCost !== null">
+                        <span :title="costTitle" class="font-mono tabular-nums text-ink-strong">{{ publishedCost.text }}</span>
+                        <span class="text-xs text-ink-muted"> [{{ publishedCost.server }}]</span>
+                        <ProvenanceBadge state="confirmed" class="ml-1 align-middle" />
+                    </template>
+                    <template v-else>
+                        <span :title="costTitle" class="font-mono tabular-nums text-ink-strong">{{ costText }}</span>
+                        <ProvenanceBadge state="confirmed" class="ml-1 align-middle" />
+                    </template>
+                    <!-- `ADR-0001` §2 requires the constants behind a derived number to be visible wherever
+                         the number appears, and a `title` is reachable by mouse only. The owner ruled the inline form
                          (2026-10-09); `ScenarioPanel.vue:205-208` and `Dashboard.vue:300-301` already print a
                          visible read date, so this is the shipped idiom extended, not a new one. It stays inside
                          the `dd`: as a sibling of `dt`/`dd` it broke the definition list's content model and axe
                          failed the page on `definition-list` (WCAG 1.3.1). -->
-                    <p class="mt-0.5 text-xs text-ink-muted">{{ costConstants }}</p>
                 </dd>
             </div>
 
-            <div>
-                <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Supports entered for this training</dt>
-                <dd class="mt-0.5">
-                    <span :title="supportsTitle" class="font-mono tabular-nums text-ink-strong">{{ props.option.supports.length }}</span>
-                    <ProvenanceBadge state="confirmed" class="ml-1 align-middle" />
-                </dd>
-            </div>
-
-            <div>
-                <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Target deficit</dt>
-                <dd class="mt-0.5">
-                    <template v-if="showDeficit">
-                        <span :title="deficitTitle" class="font-mono tabular-nums text-ink-strong">{{ deficitText }}</span>
-                        <ProvenanceBadge state="calculated" class="ml-1 align-middle" />
-                    </template>
-                    <AbsenceValue v-else class="font-mono tabular-nums" :reason="deficitTitle" compact />
-                </dd>
-            </div>
-
-            <div>
-                <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Risk</dt>
-                <dd class="mt-0.5">
-                    <span
-                        v-if="props.option.band === 'RiskNotMeasured'"
-                        :title="witRiskTitle"
-                        class="font-mono text-ink-strong"
-                    >RiskNotMeasured</span>
-                    <AbsenceValue v-else class="font-mono" :reason="riskTitle" compact />
-                </dd>
-            </div>
+            <!-- Supports, Target deficit, and Risk defer to the Inspect details panel: the default
+                 card carries the stat figure, its server tag and the Confirmed badge, nothing more
+                 (design-2.0 §35, progressive-disclosure depth = 2). -->
         </dl>
 
         <div class="mt-4 flex flex-wrap items-center gap-2">
@@ -423,14 +473,54 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                             <span class="text-ink">Scenario cap</span>
                             <span :title="capTitle" class="font-mono tabular-nums text-ink-strong">{{ fmt(props.option.cap) }}</span>
                         </p>
-                        <p class="text-xs text-ink-muted">
-                            How much of the deficit one session closes is not sourced, so no progress
-                            figure is drawn. The deficit is the distance to target; the turn that closes it
-                            is the one you record.
-                        </p>
-                    </dd>
-                </div>
-            </dl>
+                         <p class="text-xs text-ink-muted">
+                             How much of the deficit one session closes is not sourced, so no progress
+                             figure is drawn. The deficit is the distance to target; the turn that closes it
+                             is the one you record.
+                         </p>
+                     </dd>
+                 </div>
+
+                 <!-- Sources, Supports count, Target deficit, and Risk: deferred from the default card
+                      to preserve the five-element ceiling (design-2.0 §35). Every value still travels;
+                      only its default placement moves. -->
+                 <div v-if="publishedGains !== null || publishedCost !== null">
+                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Sources</dt>
+                     <dd class="mt-0.5 space-y-0.5 text-xs text-ink-muted">
+                         <p v-if="gainsDetail !== null">{{ gainsDetail }}</p>
+                         <p v-if="costDetail !== null">{{ costDetail }}</p>
+                     </dd>
+                 </div>
+
+                 <div>
+                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Supports count</dt>
+                     <dd class="mt-0.5">
+                         <span :title="supportsTitle" class="font-mono tabular-nums text-ink-strong">{{ props.option.supports.length }}</span>
+                     </dd>
+                 </div>
+
+                 <div>
+                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Target deficit</dt>
+                     <dd class="mt-0.5">
+                         <template v-if="showDeficit">
+                             <span :title="deficitTitle" class="font-mono tabular-nums text-ink-strong">{{ deficitText }}</span>
+                         </template>
+                         <AbsenceValue v-else class="font-mono tabular-nums" :reason="deficitTitle" compact />
+                     </dd>
+                 </div>
+
+                 <div>
+                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Risk</dt>
+                     <dd class="mt-0.5">
+                         <span
+                             v-if="props.option.band === 'RiskNotMeasured'"
+                             :title="witRiskTitle"
+                             class="font-mono text-ink-strong"
+                         >RiskNotMeasured</span>
+                         <AbsenceValue v-else class="font-mono" :reason="riskReason" compact />
+                     </dd>
+                 </div>
+             </dl>
         </div>
     </article>
 </template>
