@@ -1118,3 +1118,51 @@ Five tools carry the absolute machine path `D:\Projects\umamusume-laravel13` or 
 ### What §3.11 does not cover
 
 Whether any tool should be documented, given a gate id, retired, or moved out of `tools/` — product decisions, including the four orphaned one-off families. Whether a gate's pass threshold is correct — a QA ruling. Whether the Makefile should be deleted (KI-4 says it does not run, but its lore targets stay byte-pinned by `LoreGateParityTest` and the file is the registry's `make lore` counterpart). And whether the destructive `rebuild-db`/`force-db-rebuild` shapes should exist at all — §11 territory, an owner call, not an audit ruling.
+
+## 16. §3.12 — legacy Blade, 2026-10-17
+
+Measured at HEAD `5fb1a6b`, static analysis, read-only. No view was rendered and no server was started.
+
+### View census
+
+| Question | Answer |
+|---|---|
+| Files under `resources/views/` | 4 — every one a `.blade.php` |
+| `resources/views/components/` | **absent** (not merely empty) |
+| `resources/views/vendor/` | **absent** |
+| Any other subdir or non-Blade file | none |
+
+`app.blade.php` (27 lines), `errors/404.blade.php` (64), `errors/419.blade.php` (57), `errors/500.blade.php` (54). **`AGENTS.md` §1's "4 Blade files only" statement is exact at this HEAD** — there is no fifth file, so this pass lands the confirming outcome rather than the more valuable naming one.
+
+### Per-view contract
+
+| View | Rendered by | Reached by | Live? |
+|---|---|---|---|
+| `app.blade.php` | the Inertia response contract — every `Inertia::render(...)` in `app/Http/Controllers/` (46 call sites counted) emits through this root template | every page route | **live** — the root of the entire SPA surface (ADR-0020 §1) |
+| `errors/404.blade.php` | framework exception handler maps `NotFoundHttpException` → `errors.404` | any unmatched route + 10 `abort(404)` sites in `app/`/`routes/` | **live** |
+| `errors/419.blade.php` | handler maps `TokenMismatchException` (CSRF) → `errors.419` | any POST with an expired token | **live** |
+| `errors/500.blade.php` | handler maps uncaught exceptions → `errors.500` | any failure in production mode | **live** |
+
+All four are first-paint-themed by design: `AppServiceProvider.php:39` — *"All four root documents are composed: `app` (the Inertia root, ADR-0020 §1) and the [error trio]"* — a server-side `$theme` composer feeds every root document so the stored preference wins before script, matching ADR-0006's resolution order. `app.blade.php` carries the matching `@empty($theme)` inline fallback (`:12-20`) and the `@vite(['resources/css/app.css', 'resources/js/spa.ts'])` + `@inertiaHead` + `@inertia` directive trio — it is a shell, not a page.
+
+Three of the four are additionally rendered directly by tests: `ErrorPageViewsTest` calls `view('errors.419')->render()` at `:42,79,114` and `view('errors.500')->render()` at `:61` (the §3.9 pass already counted `/no-such-page` in that file as a deliberate 404 probe).
+
+### Orphan views
+
+**Zero.** Every file in the census has a framework-resolvable render path, and three of the four also have a direct test caller. No `.blade.php` exists that no `view()`/`View::make()`/exception-handler path reaches.
+
+### Blade components
+
+`resources/views/components/` **does not exist**; `<x-` component tags across all four views: **0**. `AGENTS.md` §13's "empty since slice B1" holds in a stronger form — the directory itself is gone, not empty. Nothing in the tree can render a Blade component because nothing declares one.
+
+### Vendored views
+
+`resources/views/vendor/` **does not exist**. No package view is published-and-overridden in this tree.
+
+### The one residue
+
+`app.blade.php:3`'s comment reads: *"Theme resolution matches `components/layout.blade.php` so the first paint is already correct."* **`components/layout.blade.php` no longer exists** — it left with the components directory at slice B1. The sentence compares the live file's behaviour to a phantom sibling: the stated equivalence was true at writing time and is now unverifiable, while the behaviour it describes (server-composed theme on all four root documents) moved into `AppServiceProvider:39`'s composer block. A comment pointing at a deleted file — not a route reaching a deleted view. Reported; not edited.
+
+### What §3.12 does not cover
+
+Whether any of the four views should be restyled, merged, or split — slice-level work, and all four are live surfaces under the design bar. Whether `app.blade.php:3`'s stale comment should be corrected (a one-line docs change an owner or the errata pass may fold in). Whether error pages should grow a `503` (the `php artisan down` path renders the framework fallback today — absent files were not searched for beyond the four that exist). And whether Blade returns: ADR-0020 §1 lifted Blade only as the Inertia shell and these error pages; this pass confirms that boundary is exactly 27 + 175 lines of Blade and no wider.
