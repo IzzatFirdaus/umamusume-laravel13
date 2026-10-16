@@ -103,6 +103,8 @@ const props = defineProps<{
         inheritance: Absence;
         support_types: Absence;
     };
+    /** `route('career.trainee.store')`, supplied by the server so the page never hard-codes the URL. */
+    action: string;
 }>();
 
 const isSelected = computed(() => props.selected === props.trainee.id);
@@ -113,10 +115,10 @@ const saving = ref(false);
 function choose(): void {
     saving.value = true;
 
-    // Literal URL, as everywhere in this app: no Ziggy, so `router.route()` would throw on click. The PUT
-    // redirects to the roster step, where the stored choice is read back from the session draft, so this
-    // screen never claims a selection from client memory alone.
-    form.put('/career/setup/trainee', {
+    // The write URL is supplied by the server (`career.trainee.store`) so the page never states it as
+    // a literal. The PUT redirects to the roster step, where the stored choice is read back from the
+    // session draft, so this screen never claims a selection from client memory alone.
+    form.put(props.action, {
         preserveScroll: true,
         onFinish: () => {
             saving.value = false;

@@ -156,6 +156,10 @@ class TraineeProfileController extends Controller
             'selected' => $draft['umamusume_id'],
             'scenarioLabel' => SetupDraft::scenarioLabel(),
             'scenarioPending' => $draft['scenario'] === null,
+            // The catalog detail's select action posts to the same store route as the roster. The URL is
+            // supplied server-side the way CareerLayout.vue:11 and UnityCupEditor.vue:20 already receive
+            // URLs. No Ziggy dependency is introduced.
+            'action' => route('career.trainee.store'),
             // The three Build-analysis figures, named with the reason each one is absent. Values are null
             // so the page renders `N/A` with the title rather than a blank or a guess (`AGENTS.md` §5).
             'absences' => [

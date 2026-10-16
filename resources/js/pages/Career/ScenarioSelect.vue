@@ -57,6 +57,8 @@ const props = defineProps<{
     visited: number[];
     selected: string | null;
     ruleset: { value: string | null; title: string };
+    /** `route('career.scenario.store')`, supplied by the server so the page never hard-codes the URL. */
+    action: string;
 }>();
 
 const choosing = ref<string | null>(null);
@@ -68,14 +70,13 @@ function choose(scenario: ScenarioCard): void {
     choosing.value = scenario.key;
     form.scenario = deselect ? null : scenario.key;
 
-    // The URL is literal, as every other page in this app states it: there is no Ziggy dependency
-    // here, so `router.route()` would throw at click time rather than at build time.
-    //
-    // Focus is restored in `onSuccess`, after the new props land, because the component instance
-    // survives a client-side visit: an `onMounted` hook would never re-run, and on a cold page load
-    // it would steal focus from a Trainer who has not acted yet (WCAG 2.4.3 focus order, 3.2.6
-    // consistent help). `nextTick` waits for Vue to repaint with the stored selection.
-    form.put('/career/setup/scenario', {
+    // The write URL is supplied by the server (`career.scenario.store`) so the page never states
+    // it as a literal. Focus is restored in `onSuccess`, after the new props land, because the
+    // component instance survives a client-side visit: an `onMounted` hook would never re-run,
+    // and on a cold page load it would steal focus from a Trainer who has not acted yet
+    // (WCAG 2.4.3 focus order, 3.2.6 consistent help). `nextTick` waits for Vue to repaint with the
+    // stored selection.
+    form.put(props.action, {
         preserveScroll: true,
         onSuccess: () => {
             nextTick(() => {

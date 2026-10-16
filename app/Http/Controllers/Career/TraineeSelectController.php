@@ -127,6 +127,10 @@ class TraineeSelectController extends Controller
                 self::APTITUDE_AXES,
             )],
             'uniqueSkills' => $this->uniqueSkillOptions(),
+            // The step's read and write URLs, supplied server-side the way CareerLayout.vue:11 and
+            // UnityCupEditor.vue:20 already receive URLs. No Ziggy dependency is introduced.
+            'action' => route('career.trainee.store'),
+            'rosterUrl' => route('career.trainee'),
         ]);
     }
 

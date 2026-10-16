@@ -103,7 +103,11 @@ const props = defineProps<{
     /** The ten aptitude axes with the family each belongs to; the controller is their one owner. */
     aptitudeAxes: { value: string; label: string; axis: string }[];
     uniqueSkills: SkillOption[];
-}>();
+    /** `route('career.trainee.store')`, supplied by the server so the page never hard-codes the URL. */
+    action: string;
+    /** `route('career.trainee')`, supplied by the server so the filter never hard-codes the URL. */
+    rosterUrl: string;
+}>()
 
 const page = usePage();
 const errors = computed(() => (page.props.errors as Record<string, string | undefined> | undefined) ?? {});
@@ -163,7 +167,7 @@ const styleAxes = computed(() => props.aptitudeAxes.filter((axis) => axis.axis =
 
 function applyFilters(): void {
     router.get(
-        '/career/setup/trainee',
+        props.rosterUrl,
         {
             search: filterValues.value.search || undefined,
             surface: filterValues.value.surface || undefined,
@@ -203,11 +207,10 @@ function choose(trainee: TraineeRow): void {
     selectForm.umamusume_id = deselect ? null : trainee.id;
     selectForm.character_card_id = deselect ? null : (pickedForm.value[trainee.id] ?? null);
 
-    // Literal URL, as every page here states it: there is no Ziggy in this app, so `router.route()` would
-    // throw at click time rather than at build time. Focus is restored in `onSuccess` after the new props
-    // land, because the component instance survives a client-side visit and `onMounted` would not re-run
-    // (WCAG 2.4.3).
-    selectForm.put('/career/setup/trainee', {
+    // The write URL is supplied by the server (`career.trainee.store`) so the page never states it as
+    // a literal. Focus is restored in `onSuccess` after the new props land, because the component
+    // instance survives a client-side visit and `onMounted` would not re-run (WCAG 2.4.3).
+    selectForm.put(props.action, {
         preserveScroll: true,
         onSuccess: () => {
             nextTick(() => {

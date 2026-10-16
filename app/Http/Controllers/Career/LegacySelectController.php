@@ -130,6 +130,9 @@ class LegacySelectController extends Controller
                 'Skill' => Skill::query()->orderBy('name')->pluck('name')->all(),
             ],
             'notice' => LegacyController::RECORD_ONLY_NOTICE,
+            // The step's write URL, supplied server-side the way CareerLayout.vue:11 and
+            // UnityCupEditor.vue:20 already receive URLs. No Ziggy dependency is introduced.
+            'action' => route('career.legacy.store'),
         ]);
     }
 

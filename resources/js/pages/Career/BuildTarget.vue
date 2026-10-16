@@ -71,6 +71,8 @@ const props = defineProps<{
     styles: string[];
     scenarioLabel: string | null;
     scenarioPending: boolean;
+    /** `route('career.target.store')`, supplied by the server so the page never hard-codes the URL. */
+    action: string;
 }>();
 
 /**
@@ -167,9 +169,9 @@ const errorOf = (key: string): string | undefined => {
 const describedBy = (key: string): string | undefined => (errorOf(key) === undefined ? undefined : errorId(key));
 
 function submit(): void {
-    // The URL is literal, as every page in this app states it: there is no Ziggy dependency here,
-    // so `router.route()` would throw at click time rather than at build time.
-    form.put('/career/setup/target', {
+    // The write URL is supplied by the server (`career.target.store`) so the page never states it as
+    // a literal. There is no Ziggy dependency here.
+    form.put(props.action, {
         preserveScroll: true,
         onError: () => {
             const first = fieldOrder.value.find(

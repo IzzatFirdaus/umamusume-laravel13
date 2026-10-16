@@ -73,6 +73,8 @@ const props = defineProps<{
     rankLetters: string[];
     sparkTargets: { Stat: string[]; Aptitude: string[]; Skill: string[] };
     notice: string;
+    /** `route('career.legacy.store')`, supplied by the server so the page never hard-codes the URL. */
+    action: string;
 }>();
 
 /**
@@ -163,7 +165,7 @@ const saving = (): void => {
                 stars: spark.stars === '' ? null : Number(spark.stars),
             })),
         })),
-    })).put('/career/setup/legacy', {
+    })).put(props.action, {
         preserveScroll: true,
         // Focus returns after the new props land, in `onSuccess` + `nextTick`: the component instance
         // survives a client-side visit so an `onMounted` hook would never re-run, and taking focus on a cold
