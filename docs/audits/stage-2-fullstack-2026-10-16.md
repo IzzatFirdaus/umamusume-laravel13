@@ -494,3 +494,69 @@ The indented-optional pattern is the corrected instrument; the earlier pattern m
 **Therefore:** the next commit-agent prompt should target a two-axis count — "team-editor reds classified, Spirit-Bursts reds counted" — not a single `N/N`. A single line invites the reader to treat the Spirit-Bursts assertion as confirmation of the wizard-walk fix. It is not; it is a second red on an unresolved widget-shape question.
 
 **Windows scratch-writing must be byte-safe.** PowerShell's `Get-Content`, `Out-File` and `Set-Content` mangle non-ASCII characters (`—`, `§`, `–`) when they round-trip through the default encoding — measured on the 2026-10-16 pass, where a `Get-Content` read of `KNOWN-ISSUES.md` showed the `−` in the KI-104 entry as `âˆ’`. Any commit-agent pass that edits a file carrying non-ASCII — the register, the audits, `AGENTS.md`, `SCREEN_SPEC.md` — assembles its scratch output in Python (`open(..., encoding='utf-8')`) or with `System.IO.File::WriteAllText` under explicit UTF-8, and verifies the written bytes with `git hash-object -w` before pointing the index at them.
+
+## 10. §3.3 — schema and migrate:status, 2026-10-16
+
+Measured at HEAD `8389da8`, read-only, against `database/migrations/` and `database/database.sqlite`.
+
+### Migration census
+
+| Question | Answer |
+|---|---|
+| Migration files on disk | 62 |
+| Migrations without a `down()` method | 0 |
+| Newest migration (filename) | `2026_10_13_120000_create_trainee_goals_table.php` |
+| Newest migration (mtime) | 2026-10-13 21:51 |
+
+Every one of the 62 files declares `public function down`. The newest is the trainee-goals table, three days older than this pass.
+
+### Applied-vs-files against the dev database
+
+`php artisan migrate:status` (read-only; nothing applied, nothing rolled back):
+
+| Question | Answer |
+|---|---|
+| Ran rows | 62 |
+| Pending rows | 0 |
+| Migration files on disk | 62 |
+| Discrepancy (files minus ran) | 0 |
+
+**No pending migration on the dev file.** The KI-60 class defect — committed migrations sitting Pending while the in-memory suite passes because `phpunit.xml` forces `DB_DATABASE=:memory:` — is not present today: the dev database's `migrations` table carries all 62 files at Ran. This is the evidence half of the KI-60 remediation; the applied-to-dev leg stays open and is named out of scope below.
+
+### Schema census
+
+32 tables on disk. 23 Eloquent models, one per app table; 8 further classes under `app/Models/` are `final readonly` payload value objects (`Advisor\BuildTargetPayload`, `Legacy\LegacySelectionPayload`, and six `TurnEvents\*Payload`), not table-backed.
+
+| Metric | Value |
+|---|---|
+| Tables on disk | 32 |
+| Table-backed models | 23 |
+| Orphan tables (no model) | 9 |
+| Orphan models (no table) | 0 |
+
+The nine orphan tables are the framework's own, every one expected: `cache`, `cache_locks`, `failed_jobs`, `job_batches`, `jobs`, `migrations`, `password_reset_tokens`, `sessions`, `sqlite_sequence`. `preferences` is model-backed (`Preference`), so it is not among them; `users` carries the framework-default `User` model (`AGENTS.md` §17).
+
+### Model-vs-column cross-reference
+
+Each model's `getFillable()` and `getCasts()` keys were checked against its table's columns (census written from `pragma table_info`).
+
+| Result | Count |
+|---|---|
+| Models with a fillable or cast naming a column absent from the table | 0 |
+
+**Zero discrepancies.** Every fillable attribute and every cast key resolves to a real column. `RunSkill` (a `Pivot`) declares neither. This is the class of defect §3.3 exists to catch, and none is present.
+
+### MariaDB subsystem migration footprint
+
+| Question | Answer |
+|---|---|
+| Migrations referencing MariaDB/MySQL | 3 files — comments and one driver guard only; no MariaDB-specific table or column |
+| Config files declaring MySQL/MariaDB connection details | `config/database.php` (connections `mysql`, `mariadb`, `mysql_backup`) and `config/mysql-backup.php` |
+| Does `MigrateToMariaDb` add migrations? | No — command-only (`db:backup:mysql`), copies rows through `MigrateToMariaDbAction` |
+| Does `UmaDbGuard` add migrations? | No — no `Schema::` or migration reference in the file |
+
+The three migration hits are `2026_09_27_093945` (a comment: "MySQL DDL the grammar discards here"), `2026_09_28_180350` (a comment plus `if (DB::connection()->getDriverName() !== 'mysql')` around a functional index), and `2026_10_01_124051` (a comment on NULLs in unique indexes). None creates MariaDB-only schema. `MigrateToMariaDbAction` uses `Schema::hasTable` only to check its target exists and `migrateTable()` to copy rows; it creates no table and writes no migration file. **The subsystem's migration footprint is zero files** — the subsystem is command, action and config, not schema.
+
+### What §3.3 does not cover
+
+The MariaDB subsystem's disposition (owner item), the applied-to-dev leg of the KI-60 remediation (whether migrations are applied to the shared dev file as standing practice — owner item), and the correctness of any migration's `down()` beyond its presence. This pass confirmed 62 declarations exist; it did not run a rollback.
