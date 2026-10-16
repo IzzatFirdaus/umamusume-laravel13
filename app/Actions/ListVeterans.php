@@ -45,7 +45,9 @@ final class ListVeterans
         $scenario = $filters['scenario'] ?? null;
         $tags = $filters['tags'] ?? [];
 
-        $query = Veteran::query()->with('trainingRun.umamusume');
+        // `characterCard` is the chosen-form frame the row reads first; `umamusume.cards` is the identity
+        // frame its fallback falls back to. Both are loaded so neither path is a query per row.
+        $query = Veteran::query()->with('trainingRun.characterCard', 'trainingRun.umamusume.cards');
 
         if ($trainee !== null) {
             $query->whereHas('trainingRun', fn (Builder $run): Builder => $run->where('umamusume_id', $trainee));

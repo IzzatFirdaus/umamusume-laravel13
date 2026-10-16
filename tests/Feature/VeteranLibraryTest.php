@@ -8,12 +8,16 @@ use App\Actions\ShowVeteran;
 use App\Enums\RaceEntryStatus;
 use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
+use App\Models\CharacterCard;
 use App\Models\RaceEntry;
 use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Models\Veteran;
+use App\Services\DataPipeline\ArtworkMirror;
+use App\Services\Legacy\VeteranRow;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 /*
  * The Veteran library, record-only (PRD FR-G, ADR-0020 §3, under ADR-0010's recording allowance).
@@ -206,4 +210,130 @@ it('removes the Veteran when its run is deleted', function (): void {
     $run->delete();
 
     expect(Veteran::find($veteran->id))->toBeNull();
+});
+
+/*
+ * The row's portrait (`ADR-0021` read half). The Veteran carries no card id of its own - the migration
+ * holds only `training_run_id`, `tags` and `notes` - so the url is resolved through the run's trainee and
+ * composed server-side, exactly as `CatalogController` composes a catalog row's. The two cases below are
+ * the two the component renders differently: a mirrored file becomes an `<img>`, and an absent one becomes
+ * the reserved absence cell rather than a broken-image glyph.
+ */
+
+it('carries a portrait url on the library row when the trainee card is mirrored', function (): void {
+    Storage::fake('local');
+
+    $umamusume = Umamusume::factory()->create(['name' => 'Special Week']);
+    $card = CharacterCard::factory()->debut()->create([
+        'umamusume_id' => $umamusume->id,
+        'card_id' => 100101,
+    ]);
+
+    // The mirror holds the debut form's file, at the path its own card id derives.
+    $mirror = app(ArtworkMirror::class);
+    Storage::disk('local')->put($mirror->storedPath($mirror->relativePath('card_portrait', 100101)), 'BYTES');
+
+    $veteran = Veteran::factory()->create([
+        'training_run_id' => TrainingRun::factory()->create([
+            'umamusume_id' => $umamusume->id,
+            'character_card_id' => $card->id,
+            'status' => RunStatus::Completed,
+        ])->id,
+    ]);
+
+    $row = VeteranRow::from($veteran->load('trainingRun.umamusume.cards'));
+
+    expect($row['portrait_url'])->toBe(route('artwork.show', ['kind' => 'card_portrait', 'id' => 100101]));
+});
+
+it('carries a null portrait url when the trainee card is not mirrored', function (): void {
+    Storage::fake('local');
+
+    $umamusume = Umamusume::factory()->create();
+    CharacterCard::factory()->debut()->create(['umamusume_id' => $umamusume->id, 'card_id' => 100102]);
+
+    $veteran = Veteran::factory()->create([
+        'training_run_id' => TrainingRun::factory()->create([
+            'umamusume_id' => $umamusume->id,
+            'status' => RunStatus::Completed,
+        ])->id,
+    ]);
+
+    $row = VeteranRow::from($veteran->load('trainingRun.umamusume.cards'));
+
+    // A miss is the mirror's normal answer (`ADR-0021` Decision 5): null, and the component renders the
+    // reserved absence cell rather than a frame with nothing behind it.
+    expect($row['portrait_url'])->toBeNull();
+});
+
+it('carries a null portrait url when the trainee has no card recorded', function (): void {
+    Storage::fake('local');
+
+    // The other absent state the brief names: a trainee the catalog holds no card for at all.
+    $umamusume = Umamusume::factory()->create();
+
+    $veteran = Veteran::factory()->create([
+        'training_run_id' => TrainingRun::factory()->create([
+            'umamusume_id' => $umamusume->id,
+            'status' => RunStatus::Completed,
+        ])->id,
+    ]);
+
+    $row = VeteranRow::from($veteran->load('trainingRun.characterCard', 'trainingRun.umamusume.cards'));
+
+    expect($row['portrait_url'])->toBeNull();
+});
+
+it('renders the run\'s chosen costume form rather than the trainee\'s debut', function (): void {
+    Storage::fake('local');
+
+    // The debut is the frame the identity-frame resolution used to return. The run chose a different
+    // costume, and a Veteran is that career read back, so the row must show the form she trained in.
+    $umamusume = Umamusume::factory()->create(['name' => 'Haru Urara']);
+    CharacterCard::factory()->debut()->create(['umamusume_id' => $umamusume->id, 'card_id' => 200101]);
+    $chosen = CharacterCard::factory()->create(['umamusume_id' => $umamusume->id, 'card_id' => 200102]);
+
+    $mirror = app(ArtworkMirror::class);
+    Storage::disk('local')->put($mirror->storedPath($mirror->relativePath('card_portrait', 200101)), 'DEBUT');
+    Storage::disk('local')->put($mirror->storedPath($mirror->relativePath('card_portrait', 200102)), 'CHOSEN');
+
+    $veteran = Veteran::factory()->create([
+        'training_run_id' => TrainingRun::factory()->create([
+            'umamusume_id' => $umamusume->id,
+            'character_card_id' => $chosen->id,
+            'status' => RunStatus::Completed,
+        ])->id,
+    ]);
+
+    $row = VeteranRow::from($veteran->load('trainingRun.characterCard', 'trainingRun.umamusume.cards'));
+
+    // Both files are on disk, so the debut's url here means the identity frame won where the career's own
+    // form should have: the not-assert is what pins the resolution order, not just the outcome.
+    expect($row['portrait_url'])->toBe(route('artwork.show', ['kind' => 'card_portrait', 'id' => 200102]))
+        ->and($row['portrait_url'])->not->toBe(route('artwork.show', ['kind' => 'card_portrait', 'id' => 200101]));
+});
+
+it('falls back to the trainee identity frame when the run recorded no card', function (): void {
+    Storage::fake('local');
+
+    // `character_card_id` is nullable and `TrainingRunFactory` leaves it unset, which is the state a
+    // Trainer reaches by never picking a costume form: the career has no chosen frame of its own.
+    $umamusume = Umamusume::factory()->create(['name' => 'No Form Chosen']);
+    CharacterCard::factory()->debut()->create(['umamusume_id' => $umamusume->id, 'card_id' => 200103]);
+
+    $mirror = app(ArtworkMirror::class);
+    Storage::disk('local')->put($mirror->storedPath($mirror->relativePath('card_portrait', 200103)), 'DEBUT');
+
+    $veteran = Veteran::factory()->create([
+        'training_run_id' => TrainingRun::factory()->create([
+            'umamusume_id' => $umamusume->id,
+            'status' => RunStatus::Completed,
+        ])->id,
+    ]);
+
+    expect($veteran->trainingRun->character_card_id)->toBeNull();
+
+    $row = VeteranRow::from($veteran->load('trainingRun.characterCard', 'trainingRun.umamusume.cards'));
+
+    expect($row['portrait_url'])->toBe(route('artwork.show', ['kind' => 'card_portrait', 'id' => 200103]));
 });

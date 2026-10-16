@@ -106,7 +106,8 @@ class VeteranCompareRequest extends FormRequest
 
         $found = Veteran::query()
             ->with([
-                'trainingRun.umamusume',
+                'trainingRun.characterCard',
+                'trainingRun.umamusume.cards',
                 'trainingRun.turnEntries',
                 'trainingRun.skills',
                 'trainingRun.raceEntries',

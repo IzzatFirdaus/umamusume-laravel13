@@ -16,6 +16,8 @@ interface Props {
         hasSelection: boolean;
         builder_url: string | null;
         veteran_url: string;
+        /** The trainee's loopback portrait url, or null when the mirror holds no file. */
+        portrait_url: string | null;
     };
 }
 
@@ -34,15 +36,14 @@ function statusVariant(status: string): 'info' | 'success' | 'warning' | 'neutra
 </script>
 
 <template>
-    <div class="px-4 py-3 text-sm">
+    <div class="px-4 py-3 text-sm" data-veteran-row>
         <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
             <div class="flex flex-wrap items-baseline gap-3 min-w-0 flex-1">
-                <ArtworkSlot
-                    v-if="props.veteran.trainee"
-                    :url="`/artwork/character_portrait/${props.veteran.id}`"
-                    :alt="props.veteran.trainee"
-                    size="size-10"
-                />
+                <!-- The trainee's identity frame, resolved server-side (`portrait_url`); the row prints her
+                     name in the link beside it, so the image is decorative (`alt=""`, `design-2.0` §42) and
+                     `reserve` holds the cell at one x whether or not the mirror holds the file. Absence
+                     paints nothing: no broken frame, no grey box, no placeholder glyph (`DESIGN.md` §4.7). -->
+                <ArtworkSlot :url="props.veteran.portrait_url" alt="" size="size-12" reserve />
                 <a
                     :href="props.veteran.veteran_url"
                     class="font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out truncate"

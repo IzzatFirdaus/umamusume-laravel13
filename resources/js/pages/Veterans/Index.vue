@@ -20,6 +20,7 @@ interface Veteran {
     hasSelection: boolean;
     builder_url: string | null;
     veteran_url: string;
+    portrait_url: string | null;
 }
 
 interface Absence {

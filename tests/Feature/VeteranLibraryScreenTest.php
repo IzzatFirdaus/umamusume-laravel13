@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 use App\Enums\RunStatus;
+use App\Models\CharacterCard;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\Umamusume;
 use App\Models\Veteran;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 
 /*
@@ -232,4 +234,47 @@ it('offers the builder only on a career that has a Legacy read-back', function (
         ->and($byId[$bare->id]['builder_url'])->toBeNull()
         ->and($byId[$readBack->id]['hasSelection'])->toBeTrue()
         ->and($byId[$readBack->id]['builder_url'])->toBe(route('legacy.builder', $readBack->training_run_id));
+});
+
+/*
+ * The row's portrait (`ADR-0021` read half). The Veteran carries no card id of its own, so the url is
+ * resolved through the run's trainee and composed server-side, exactly as `CatalogController` composes a
+ * catalog row's — `VeteranRow::portraitUrl()` owns the resolution so the list row and the detail header
+ * cannot pick two different forms. These assert the Inertia props, not the rendered DOM: the `<img>` vs
+ * reserved-cell branch lives in `resources/js/components/VeteranRow.vue` and `tests/browser`.
+ */
+
+it('passes the trainee portrait url on a library row when the mirror holds the file', function (): void {
+    Storage::fake('local');
+
+    $trainee = Umamusume::factory()->create(['name' => 'Mirrored Trainee']);
+    CharacterCard::factory()->debut()->create(['umamusume_id' => $trainee->id, 'card_id' => 100101]);
+    Storage::disk('local')->put('artwork/characters/portrait/trainee/256/100101.png', 'PNG');
+
+    veteranScreenFiled($trainee, 'ura_finale', ['Mile']);
+
+    $url = route('artwork.show', ['kind' => 'card_portrait', 'id' => 100101]);
+
+    test()->get(route('veterans.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Veterans/Index')
+            ->where('veterans.data.0.portrait_url', $url));
+});
+
+it('passes a null portrait url when the trainee card is not mirrored', function (): void {
+    Storage::fake('local');
+
+    $trainee = Umamusume::factory()->create(['name' => 'Unmirrored Trainee']);
+    CharacterCard::factory()->debut()->create(['umamusume_id' => $trainee->id, 'card_id' => 100102]);
+
+    veteranScreenFiled($trainee, 'ura_finale', ['Mile']);
+
+    // A null is the mirror's normal partial answer (`ADR-0021` Decision 5): the row renders the reserved
+    // absence cell rather than an `<img>` with nothing behind it.
+    test()->get(route('veterans.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Veterans/Index')
+            ->where('veterans.data.0.portrait_url', null));
 });

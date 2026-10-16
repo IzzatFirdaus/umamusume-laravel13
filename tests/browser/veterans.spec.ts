@@ -299,6 +299,33 @@ test.describe('Veteran cards', () => {
         await expect(header).toContainText('Compare this career');
     });
 
+    test('renders a portrait or the reserved absence cell on every veteran row', async ({ page }) => {
+        // One filed career is enough to have a row to inspect; whether the mirror holds its file decides
+        // which of the component's two states the row shows, and both are accepted here.
+        await openLibraryRow(page, 'Agnes Digital', 'Speed');
+
+        const rows = page.locator('[data-veteran-row]');
+        const count = await rows.count();
+        expect(count).toBeGreaterThan(0);
+
+        for (let i = 0; i < count; i++) {
+            const slot = rows.nth(i).locator('[data-artwork-slot]');
+            await expect(slot).toHaveCount(1);
+
+            // A mirrored file is an `<img>` with a real src, and decorative (`alt=""`) because the row
+            // prints the trainee name in the link beside it (`design-2.0` §42). An absent one is the
+            // reserved cell: it paints nothing and is `aria-hidden`, so there is no broken-image glyph.
+            const isImage = await slot.evaluate((el) => el.tagName.toLowerCase() === 'img');
+
+            if (isImage) {
+                await expect(slot).toHaveAttribute('src', /.+/);
+                await expect(slot).toHaveAttribute('alt', '');
+            } else {
+                await expect(slot).toHaveAttribute('aria-hidden', 'true');
+            }
+        }
+    });
+
     test('collapses the notes that are not in this build by default', async ({ page }) => {
         await page.goto('/veterans');
         await page.locator('#app > *').first().waitFor();
