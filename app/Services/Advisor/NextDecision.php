@@ -142,6 +142,7 @@ final class NextDecision
      *     expected: list<array{text: string, badge: string, title: string}>,
      *     actual: list<array{text: string, badge: string, title: string}>|null,
      *     reconciliation: array{match: bool, note: string}|null,
+     *     recorded_forecast: array<string, mixed>,
      *     recorded_at: string|null,
      *     corrected_from: int|null,
      * }|null
@@ -210,6 +211,49 @@ final class NextDecision
                         .'are readings this tool kept, and nothing here says which was the better turn.',
                 },
             ],
+            // The citation the ruling asked for: what the reference says a turn of the recorded action does,
+            // not what this tool computes. It is labelled on the screen as "Expected (from sources)", and the
+            // distinction is the whole point — this section quotes published figures with their server and
+            // their disagreement, so nothing here is a prediction of the turn the Trainer is about to take.
+            //
+            // Provenance, carried from the paragraph `TrainingRunController::turnChoices()` used to hold
+            // before its unread detail lines were deleted. The published rest and outing values are
+            // probabilities and §2.2 keeps those out of application code. The rest tier is the worse case,
+            // because this repository's own two sources disagree on it: `docs/UMAMUSUME_REFERENCE.md` §1.1.5
+            // carries "+30 Energy per standard rest" against GameWith 2026-09-25, while §2.1 of
+            // `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` measures the modal rest at +50 with
+            // +30 as the under-slept failure tier, and a post-rework Global table agrees 50 is the common
+            // case. A single Trainer-facing number picked out of that would be a guess wearing the tool's
+            // voice, so every branch renders and none is presented as the refill. Recreation's lift is
+            // published without a magnitude, and the section says so rather than supplying one. A discipline
+            // renders a named absence, because no source publishes a per-training yield and `ADR-0001` §3
+            // keeps it that way: the panel does not become the yield table the advisor spec refused to build.
+            'recorded_forecast' => match ($choice) {
+                TurnChoice::Rest => [
+                    'label' => 'Rest',
+                    'kind' => 'reference',
+                    'branches' => [
+                        ['name' => 'Success', 'value' => '+50', 'note' => 'modal'],
+                        ['name' => 'Big success', 'value' => '+70', 'note' => null],
+                        ['name' => 'Poor Rest', 'value' => '+30', 'note' => 'may carry a stayed-up-late penalty'],
+                    ],
+                    'server' => '[JP]',
+                    'source' => 'UMAMUSUME_REFERENCE.md §1.1.5 (GameWith n=3833, Kamigame n=100)',
+                    'disagreement' => 'Sources agree on the shape; the modal value is single-source.',
+                ],
+                TurnChoice::Recreation => [
+                    'label' => 'Recreation',
+                    'kind' => 'reference',
+                    'statement' => 'Lifts Mood; no magnitude published in the reference.',
+                    'server' => '[JP]',
+                    'source' => 'UMAMUSUME_REFERENCE.md §1.1.6',
+                ],
+                default => [
+                    'label' => $choice->label(),
+                    'kind' => 'absence',
+                    'reason' => 'No source publishes a per-training yield for a discipline (ADR-0001 §3).',
+                ],
+            },
             'recorded_at' => $entry->created_at?->toIso8601String(),
             'corrected_from' => $entry->corrected_from,
         ];
@@ -574,13 +618,15 @@ final class NextDecision
     }
 
     /**
-     * Rest has no decision screen of its own yet, so its door is the grid that names it — the rule
-     * `CockpitController::actionSection()` applies to the `rest` entry. No door is a dead link.
+     * Rest's door is the Training screen's record form, holding the choice, which is the rule
+     * `CockpitController::actionSection()` already applies to the `rest` entry: the two surfaces that
+     * offer a Rest turn must not disagree about where it is recorded. No door is a dead link, and none
+     * is a loop back to this screen.
      */
     private function actionUrl(TrainingRun $run, string $action): string
     {
         return $action === TrainerAdvisor::REST
-            ? route('runs.cockpit', $run)
+            ? route('runs.training', ['run' => $run, 'choice' => TurnChoice::Rest->value])
             : route('runs.training', $run);
     }
 

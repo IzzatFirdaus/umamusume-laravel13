@@ -8,6 +8,7 @@ use App\Domain\Career\CareerPosition;
 use App\Enums\RaceEntryStatus;
 use App\Enums\RunStatus;
 use App\Enums\TraineeGoalType;
+use App\Enums\TurnChoice;
 use App\Enums\TurnEventType;
 use App\Http\Controllers\Controller;
 use App\Models\RaceCatalogSlot;
@@ -91,16 +92,26 @@ use Inertia\Response;
 class CockpitController extends Controller
 {
     /**
-     * The seven entries of the action grid, in the spec's order (SCREEN-009 §12), with the reason
-     * each is not yet a link.
+     * The public query value the Recreation entry carries, and the only place this screen names it.
+     *
+     * It is the client's word rather than `TurnChoice::Recreation`'s stored literal (`mood`): the address
+     * a Trainer reads and can bookmark is the word on the button, and the Training screen maps it back to
+     * the literal it writes at its own boundary. The two stay apart on purpose, so neither the enum nor
+     * this URL has to carry the other's concern.
+     */
+    private const RECREATION_QUERY = 'recreation';
+
+    /**
+     * The seven entries of the action grid, in the spec's order (SCREEN-009 §12), with what each one
+     * does today.
      *
      * @var list<array{key: string, label: string, note: string}>
      */
     private const ACTIONS = [
         ['key' => 'training', 'label' => 'Training', 'note' => 'The five training options, and the turn record.'],
         ['key' => 'race', 'label' => 'Race', 'note' => 'Entering a race arrives with the Race decision screen.'],
-        ['key' => 'rest', 'label' => 'Rest', 'note' => 'Rest is a turn choice no 2.0 screen offers yet, and it is not one of the five training options.'],
-        ['key' => 'recreation', 'label' => 'Recreation', 'note' => 'A Recreation screen of its own is not built yet, and no 2.0 screen records the turn it would stand for.'],
+        ['key' => 'rest', 'label' => 'Rest', 'note' => 'Records a Rest turn through the Training screen.'],
+        ['key' => 'recreation', 'label' => 'Recreation', 'note' => 'Records a Recreation turn through the Training screen.'],
         ['key' => 'scenario', 'label' => 'Scenario action', 'note' => 'Scenario actions arrive with the scenario panels.'],
         ['key' => 'event', 'label' => 'Event', 'note' => 'Event choices are recorded at the Event decision screen.'],
         ['key' => 'inheritance', 'label' => 'Inheritance', 'note' => 'Inheritance is recorded at the Inheritance event screen.'],
@@ -201,13 +212,13 @@ class CockpitController extends Controller
                 : 'No scenario set',
             // The cockpit owns the run-identity writes (F2, plan §9.6 ruling 1): status, scenario
             // and grade-point period all POST through `runs.update`, the same route and validator the
-            // 0.1.0 record screen used. The cockpit is the door, so the 2.0 edit URLs ride here.
+            // 2.0.0 record screen used. The cockpit is the door, so the 2.0 edit URLs ride here.
             'run_url' => route('runs.cockpit', $run),
             // The left column's own door to the Career Timeline (SCR-CAR-017): the region shows this
             // run's races, and the timeline is the screen that shows the whole recorded history.
             'timeline_url' => route('runs.timeline', $run),
             // The Career Result (SCR-CAR-018, plan §8 D15). It had no door on any 2.0 screen: the only
-            // link to it sat in the 0.1.0 record page's header, so retiring that page would leave the
+            // link to it sat in the 2.0.0 record page's header, so retiring that page would leave the
             // screen URL-only, which D14 ruled a defect. The result screen answers an unfinished career
             // itself, so the door does not gate on status.
             'result_url' => route('runs.result', $run),
@@ -424,14 +435,14 @@ class CockpitController extends Controller
      * Training, `Rest` marks Rest, and a declined advisor marks none.
      *
      * Every entry links to the screen that owns the action **today** — the Training decision screen for
-     * training (SCREEN-010, D9), the Race decision screen for race (SCREEN-011, D10) and the
-     * Inheritance event screen for inheritance (SCREEN-013, D12) — and the entry's own 2.0 screen is
-     * named in its `note` where that screen has not landed. Recreation, Events and the scenario
-     * actions still land at Phase E, so their entries keep their Phase E `note` and link to the run
-     * record screen. The slice's brief says "otherwise they are named absences"; a grid of seven
-     * unfocusable items would fail this slice's own keyboard-path acceptance and would leave the
-     * Cockpit with no way to act, so the absence is named in the copy and the door is a live route.
-     * No entry is ever a dead link.
+     * training (SCREEN-010, D9) and for the two turn choices that are not trainings, Rest and Recreation,
+     * the Race decision screen for race (SCREEN-011, D10) and the Inheritance event screen for
+     * inheritance (SCREEN-013, D12) — and the entry's own 2.0 screen is named in its `note` where that
+     * screen has not landed. Events and the scenario actions still land at Phase E, so their entries keep
+     * their Phase E `note` and link to the run. The slice's brief says "otherwise they are named
+     * absences"; a grid of seven unfocusable items would fail this slice's own keyboard-path acceptance
+     * and would leave the Cockpit with no way to act, so the absence is named in the copy and the door is
+     * a live route. No entry is ever a dead link, and none is a loop back to this screen.
      *
      * @return list<array{key: string, label: string, href: string, recommended: bool, note: string}>
      */
@@ -451,6 +462,14 @@ class CockpitController extends Controller
                     'training' => route('runs.training', $run),
                     'race' => route('runs.races.decision', $run),
                     'event' => route('runs.events.decision', $run),
+                    // Rest and Recreation are turn choices the Training screen's record form holds, not
+                    // trainings (SCR-CAR-012), so the entry arrives with the choice already picked. Rest's
+                    // public value is the one the row is written under. Recreation's public word is
+                    // `recreation` while its row is written under `mood` (`TurnChoice`'s docblock records
+                    // why), so the screen normalises the address back to the stored literal at its own
+                    // boundary; this controller names no storage key the request does not validate.
+                    'rest' => route('runs.training', ['run' => $run, 'choice' => TurnChoice::Rest->value]),
+                    'recreation' => route('runs.training', ['run' => $run, 'choice' => self::RECREATION_QUERY]),
                     default => route('runs.cockpit', $run),
                 },
                 'recommended' => $action['key'] === $recommended,
@@ -613,7 +632,7 @@ class CockpitController extends Controller
 
     /**
      * The run-scoped race strip (D14a): this run's race history, the turn it is deciding, and the
-     * obligations still to come. It replaces the 0.1.0 catalogue grid in the left column, which was
+     * obligations still to come. It replaces the 2.0.0 catalogue grid in the left column, which was
      * built for the run record screen where the whole calendar is the question (`SCREEN_SPEC.md`
      * SCR-CAR-011 gap 2).
      *
@@ -830,6 +849,25 @@ class CockpitController extends Controller
         $declared = $run->hasScenario();
         $def = $declared ? (array) config('scenarios.scenarios.'.$run->scenarioKey(), []) : [];
 
+        // The scenario's own Global ruleset date (launch or rework), from the entry's
+        // `ruleset_version`. It is NOT `app.ruleset`: the two keys above it — `version` and
+        // `version_title` — stay the null-by-ruling pair, and the two facts travel and render
+        // separately, which is the R2-05 split and the 2026-10-15 wiring's Caveat 1.
+        $rulesetVersion = $def['ruleset_version'] ?? null;
+        $rulesetDate = is_array($rulesetVersion) && is_string($rulesetVersion['date'] ?? null)
+            ? [
+                // Launch when the date is the entry's own availability date, rework otherwise —
+                // the same derived split the wizard's card prints, from the same two config facts.
+                'value' => $rulesetVersion['date'].((($def['live_on_global'] ?? null) === $rulesetVersion['date']) ? ' (launch)' : ' (rework)'),
+                'title' => trim(((string) ($rulesetVersion['event'] ?? '')).' Source: '.(string) ($rulesetVersion['source'] ?? '')),
+            ]
+            : [
+                'value' => null,
+                'title' => $declared
+                    ? 'The scenario\'s entry in config/scenarios.php records no ruleset date.'
+                    : 'No scenario is set for this run, so no scenario ruleset date exists to print.',
+            ];
+
         /** @var array<string, string> $widgetLabels */
         $widgetLabels = (array) config('scenarios.widget_labels', []);
         /** @var array<string, string> $panelLabels */
@@ -882,6 +920,9 @@ class CockpitController extends Controller
             'documented' => ($def['partially_documented'] ?? false) !== true,
             'version' => null,
             'version_title' => 'No source defines a Global ruleset version, so this run stores none to print.',
+            // The scenario's own ruleset date, a different fact from the null version above.
+            'ruleset_date' => $rulesetDate['value'],
+            'ruleset_date_title' => $rulesetDate['title'],
             // Every key the scenario declares, labelled or not: an unlabelled one is what the
             // shell's fallback exists for, and dropping it here would hide the gap instead of
             // drawing it (the plan's "an unrecognised key renders a labelled fallback").

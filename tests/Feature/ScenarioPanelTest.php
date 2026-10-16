@@ -89,6 +89,10 @@ function scenarioSectionKeys(): array
         'documented',
         'version',
         'version_title',
+        // The scenario's own Global ruleset date (launch or rework), from the entry's
+        // `ruleset_version`. A different fact from the null `version` above, on its own strip line.
+        'ruleset_date',
+        'ruleset_date_title',
         'widgets',
         'widget_labels',
         'widget_values',
@@ -143,6 +147,10 @@ it('carries the §49 shape with a label, flag-keyed panels and widget keys, and 
             // is a named absence rather than an invented string.
             ->where('scenario.version', null)
             ->where('scenario.version_title', fn (string $title): bool => str_contains($title, 'ruleset'))
+            // The scenario's own ruleset date: Unity Cup's rework instant, distinct from the
+            // launch date `live_on_global` carries and from the null version above.
+            ->where('scenario.ruleset_date', '2026-07-01 (rework)')
+            ->where('scenario.ruleset_date_title', fn (string $title): bool => str_contains($title, 'rework'))
             // Widgets are string keys; the labels and values are maps keyed by the same keys.
             ->where('scenario.widgets', ['team_rank', 'spirit_bursts'])
             ->where('scenario.widget_labels.team_rank', 'Team Rank')

@@ -546,7 +546,7 @@ const jumpToShop = (): void => {
         </section>
 
         <!-- The header edit forms (F2, plan §9.6 ruling 1). Status, scenario and grade-point period
-             all write through `runs.update`, the route and validator the 0.1.0 record screen used. A
+             all write through `runs.update`, the route and validator the 2.0.0 record screen used. A
              failure comes back with `page.props.errors`, which the page-level alert names. Each form
              carries the sibling fields the request still writes, so editing one cannot blank another. -->
         <section aria-labelledby="cockpit-header-edit" class="mt-2">
@@ -774,8 +774,8 @@ const jumpToShop = (): void => {
         <!-- The spec's order, as CSS only. `order-*` drives the single mobile column; from `md` up the
              explicit row and column placement takes over, so the tablet strip and the desktop
              three-column cockpit are the same DOM. -->
-        <div class="mt-4 grid grid-cols-1 gap-4 md:items-start md:grid-cols-[2fr_1fr] lg:items-start lg:grid-cols-[1fr_2.5fr_1.5fr]">
-            <div class="order-1 min-w-0 md:order-none md:col-start-1 md:row-start-2 lg:col-start-2 lg:row-start-1">
+        <div class="mt-4 grid grid-cols-1 gap-4 md:items-start @4xl:grid-cols-[2fr_1fr] lg:items-start @5xl:grid-cols-[1fr_2.5fr_1.5fr]">
+            <div class="order-1 min-w-0 md:order-none @4xl:col-start-1 @4xl:row-start-2 @5xl:col-start-2 @5xl:row-start-1">
                 <CareerStatePanel
                     :stats="props.state.stats"
                     :meta="props.state.meta"
@@ -823,7 +823,7 @@ const jumpToShop = (): void => {
                             </ul>
                         </div>
 
-                        <form class="mt-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-3" @submit.prevent="saveCorrection">
+                        <form class="mt-3 grid grid-cols-2 gap-3 text-sm @4xl:grid-cols-3" @submit.prevent="saveCorrection">
                             <BaseInput
                               v-model="correctionForm.turn"
                               type="number"
@@ -852,7 +852,7 @@ const jumpToShop = (): void => {
                               label="Skill Points"
                               :error="correctionForm.errors.sp"
                             />
-                            <fieldset class="col-span-2 flex flex-col gap-1 md:col-span-3">
+                            <fieldset class="col-span-2 flex flex-col gap-1 @4xl:col-span-3">
                                 <legend class="text-ink-muted">Energy</legend>
                                 <div class="flex flex-wrap items-center gap-x-4">
                                     <BaseRadio
@@ -903,7 +903,7 @@ const jumpToShop = (): void => {
                             />
                             <button
                                 type="submit"
-                                class="inline-flex min-h-11 items-center justify-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action disabled:opacity-60 md:col-span-3"
+                                class="inline-flex min-h-11 items-center justify-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action disabled:opacity-60 @4xl:col-span-3"
                                 :disabled="correctionForm.processing"
                             >
                                 {{ correctionForm.processing ? 'Saving…' : 'Save correction' }}
@@ -912,7 +912,7 @@ const jumpToShop = (): void => {
                                  one said nothing, so a Trainer could not tell a saved correction from a
                                  dead button (R3-04). `Correction saved.` names which of the three forms
                                  is speaking. -->
-                            <p v-if="correctionForm.recentlySuccessful" class="text-xs text-ink-muted md:col-span-3">
+                            <p v-if="correctionForm.recentlySuccessful" class="text-xs text-ink-muted @4xl:col-span-3">
                                 Correction saved.
                             </p>
                         </form>
@@ -942,7 +942,7 @@ const jumpToShop = (): void => {
                 </section>
             </div>
 
-            <div data-region="advisor" class="order-2 min-w-0 md:order-none md:col-start-2 md:row-span-2 md:row-start-2 lg:col-start-3 lg:row-start-1">
+            <div data-region="advisor" class="order-2 min-w-0 md:order-none @4xl:col-start-2 @4xl:row-span-2 @4xl:row-start-2 @5xl:col-start-3 @5xl:row-start-1">
                 <AdvisorRail v-if="isActive" :decision="props.advisor.decision" :race-url="raceDoor" :timeline-url="props.run.timeline_url" />
 
                 <!-- A career that has ended has no turn being decided, so the advisor's own refusal is not
@@ -957,7 +957,7 @@ const jumpToShop = (): void => {
                 </section>
             </div>
 
-            <div class="order-3 min-w-0 md:order-none md:col-start-1 md:row-start-3 lg:col-start-2 lg:row-start-2">
+            <div class="order-3 min-w-0 md:order-none @4xl:col-start-1 @4xl:row-start-3 @5xl:col-start-2 @5xl:row-start-2">
                 <!-- The empty state names what is missing, why it matters and what to do (plan §10). It
                      sits above the grid rather than replacing it: the grid's own entries are still the
                      doors, and the advisor's refusal is a real state rather than a blank. -->
@@ -1005,7 +1005,7 @@ const jumpToShop = (): void => {
             </div>
 
             <section
-                class="order-4 min-w-0 rounded-lg border border-rule bg-panel p-4 md:order-none md:col-span-2 md:row-start-4 lg:col-span-3 lg:row-start-3"
+                class="order-4 min-w-0 rounded-lg border border-rule bg-panel p-4 md:order-none @4xl:col-span-2 @4xl:row-start-4 @5xl:col-span-3 @5xl:row-start-3"
                 aria-labelledby="career-scenario-heading"
             >
                 <h2 id="career-scenario-heading" class="text-lg font-semibold text-ink-strong">Scenario</h2>
@@ -1019,7 +1019,7 @@ const jumpToShop = (): void => {
             </section>
 
             <section
-                class="order-5 min-w-0 rounded-lg border border-rule bg-panel p-4 md:order-none md:col-span-2 md:row-start-1 lg:col-span-1 lg:col-start-1 lg:row-span-2 lg:row-start-1"
+                class="order-5 min-w-0 rounded-lg border border-rule bg-panel p-4 md:order-none @4xl:col-span-2 @4xl:row-start-1 @5xl:col-span-1 @5xl:col-start-1 @5xl:row-span-2 @5xl:row-start-1"
                 aria-labelledby="career-timeline-heading"
             >
                 <h2 v-if="isActive" id="career-timeline-heading" class="text-lg font-semibold text-ink-strong">
@@ -1053,7 +1053,7 @@ const jumpToShop = (): void => {
                     Career Timeline
                 </a>
 
-                <!-- The Career Result's only other door was the 0.1.0 record page's header, so it sits
+                <!-- The Career Result's only other door was the 2.0.0 record page's header, so it sits
                      beside the timeline door here rather than in the action grid: the grid is the
                      advisor's answer about the next turn, and this is a summary of the career. -->
                 <a

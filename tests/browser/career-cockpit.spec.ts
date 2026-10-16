@@ -319,6 +319,28 @@ test('walks the action grid from the keyboard with a visible focus ring', async 
     await expect(inheritance).toBeInViewport();
 });
 
+test('routes Rest and Recreation to the Training screen holding their choice', async ({ page }) => {
+    await openCockpit(page);
+
+    // SCR-CAR-011 gap 1 says no entry is a dead link; these two used to loop back to this screen. They
+    // are turn choices rather than training options (SCR-CAR-012), and the Training screen's one record
+    // form writes them, so the entry arrives with the choice already picked. Rest's address carries the
+    // value the row is written under; Recreation's carries the client's own word, which the Training
+    // screen normalises back to the stored `mood` literal at its boundary.
+    await expect(page.locator('[data-action="rest"]')).toHaveAttribute(
+        'href',
+        /\/training-runs\/\d+\/training\?choice=rest$/,
+    );
+    await expect(page.locator('[data-action="recreation"]')).toHaveAttribute(
+        'href',
+        /\/training-runs\/\d+\/training\?choice=recreation$/,
+    );
+
+    // The note names the path, not the old absence.
+    await expect(page.locator('[data-action="rest"]')).toContainText('Records a Rest turn through the Training screen.');
+    await expect(page.locator('[data-action="recreation"]')).toContainText('Records a Recreation turn through the Training screen.');
+});
+
 test('quiets transitions when the operating system asks for reduced motion', async ({ page }) => {
     await openCockpit(page);
 

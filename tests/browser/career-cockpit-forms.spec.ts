@@ -160,9 +160,13 @@ test('records the Unity Cup team state through the team editor', async ({ page }
     await openCockpit(page);
 
     // The editor is a disclosure, so its controls have no box until it opens: the sweep runs after the
-    // click, which is the KI-92 lesson.
+    // click, which is the KI-92 lesson. On an Active career the wrapper is open by default
+    // (`:open="isActive"`, the merge's own design), so the click happens only when the panel is
+    // closed — an unconditional toggle would close the panel this case is trying to open.
     const editor = page.locator('details', { has: page.getByText('Edit team state') });
-    await editor.locator('summary').click();
+    if (!(await editor.evaluate((el) => el instanceof HTMLDetailsElement && el.open))) {
+        await editor.locator('summary').click();
+    }
 
     await expectTapTargets(editor.locator('input, button'), 8);
 
@@ -190,11 +194,47 @@ test('records the Unity Cup team state through the team editor', async ({ page }
     await expect(burstsBox).toContainText('11');
 });
 
+test('renders the Unity Cup scenario region without a runtime error, the bursts widget as a meter', async ({ page }) => {
+    // Regression for the cockpit-wt merge's SpiritBurstsPanel registration, removed 2026-10-16:
+    // `spirit_bursts` is a widget key, and the panel-shaped component registered against it
+    // received the widget shape and crashed every Unity Cup Cockpit render on
+    // `props.scenario.alerts`. The assertions are on the rendered page, not on the source, so
+    // re-introducing that registration — or registering any panel-shaped component against a
+    // widget key — reproduces the crash and fails here rather than passing silently.
+    const problems: string[] = [];
+    page.on('console', (message) => {
+        if (message.type() === 'error') {
+            problems.push(message.text());
+        }
+    });
+    page.on('pageerror', (error) => problems.push(error.message));
+
+    await openCockpit(page);
+
+    // The scenario strip renders, including the scenario's own ruleset date line.
+    await expect(page.locator('[data-region="scenario"]').getByText('Unity Cup')).toBeVisible();
+    await expect(page.locator('[data-region="scenario-ruleset-date"]')).toBeVisible();
+
+    // The bursts widget renders as the labelled meter, its own shape: the value is the unrecorded
+    // reading the matrix's widget carries, and the bar names it.
+    await expect(page.getByRole('img', { name: 'Spirit Bursts: not recorded' })).toBeVisible();
+
+    // And the crash the bad registration produced never reaches the console.
+    expect(
+        problems.filter((problem) => /TypeError|Cannot read properties of undefined/.test(problem)),
+        problems.join('\n'),
+    ).toEqual([]);
+});
+
 test('closing the team editor without saving records nothing', async ({ page }) => {
     await openCockpit(page);
 
     const editor = page.locator('details', { has: page.getByText('Edit team state') });
-    await editor.locator('summary').click();
+    // Open only when closed: on an Active career the wrapper is open by default, and an
+    // unconditional first click would close it before the fill.
+    if (!(await editor.evaluate((el) => el instanceof HTMLDetailsElement && el.open))) {
+        await editor.locator('summary').click();
+    }
     await editor.locator('input[name="team_name"]').fill('Blue Bloom');
 
     // Cancel is the disclosure itself: the form submits only from its own button, so closing it

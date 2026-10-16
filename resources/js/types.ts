@@ -164,6 +164,7 @@ export interface RecordedAction {
     expected: { text: string; badge: 'confirmed' | 'calculated'; title: string }[];
     actual: { text: string; badge: 'confirmed' | 'calculated'; title: string }[] | null;
     reconciliation: { match: boolean; note: string } | null;
+    recorded_forecast: Record<string, unknown>;
     recorded_at: string | null;
     corrected_from: number | null;
 }
@@ -218,6 +219,14 @@ export interface ScenarioPanelSection {
     version: string | null;
     /** Why `version` is absent, for the `title`. */
     version_title: string;
+    /**
+     * The scenario's own Global ruleset date — its launch or rework instant, sourced per scenario —
+     * or null when no scenario is set. A different fact from `version` above; the two render as
+     * separate lines and must not merge (the R2-05 split).
+     */
+    ruleset_date: string | null;
+    /** Where that date's event and source are stated, for the `title`. */
+    ruleset_date_title: string;
     /** The scenario's own widget keys, labelled or not. A key with no label falls to the fallback. */
     widgets: string[];
     /** Display names, keyed by widget key. Only the keys the matrix labels appear. */

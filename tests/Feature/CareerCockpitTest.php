@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\MoodTier;
 use App\Enums\RunStatus;
+use App\Enums\TurnChoice;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
@@ -73,7 +74,7 @@ it('renders the cockpit for a run with no logged turn, and names what is missing
             ->where('run.status', 'Active')
             ->where('run.status_label', 'Active')
             ->where('run.run_url', route('runs.cockpit', $run))
-            // F1: the Career Result had no door on a 2.0 screen, only in the 0.1.0 record page's
+            // F1: the Career Result had no door on a 2.0 screen, only in the 2.0.0 record page's
             // header. The left column carries it now, so retiring that page cannot strand the screen.
             ->where('run.result_url', route('runs.result', $run))
             ->where('header.turn', 0)
@@ -188,6 +189,15 @@ it('marks exactly one action as recommended, and none when the advisor declines'
             ->where('actions.4.key', 'scenario')
             ->where('actions.5.key', 'event')
             ->where('actions.6.key', 'inheritance')
+            // No entry is a dead link and none loops back to this screen (SCR-CAR-011, gap 1). Rest and
+            // Recreation arrive at the Training screen holding the choice its record form writes. Rest's
+            // public value is the stored literal; Recreation's public word is `recreation`, and the
+            // Training screen normalises it back to the stored `mood` at its own boundary, which is why
+            // the address and the row disagree here on purpose.
+            ->where('actions.2.href', route('runs.training', ['run' => $run, 'choice' => 'rest']))
+            ->where('actions.2.note', 'Records a Rest turn through the Training screen.')
+            ->where('actions.3.href', route('runs.training', ['run' => $run, 'choice' => 'recreation']))
+            ->where('actions.3.note', 'Records a Recreation turn through the Training screen.')
             // Von Restorff (plan §13): one RECOMMENDED marker, not an accent on every card. Speed is
             // a training action, so the marker sits on the training entry and nowhere else.
             ->where('actions.0.recommended', true)
@@ -207,6 +217,13 @@ it('marks exactly one action as recommended, and none when the advisor declines'
         ->assertInertia(fn (Assert $page) => $page
             ->where('advisor.decision.recommended.action', 'Rest')
             ->where('advisor.decision.priority', 'Recover Energy before the next session.')
+            // Rest's door is the Training screen holding the choice, not a loop back to this screen:
+            // the rule the grid's own `rest` entry already follows (SCR-CAR-011 gap 1), so the two
+            // surfaces that offer a Rest turn cannot disagree about where it is recorded.
+            ->where(
+                'advisor.decision.recommended.action_url',
+                route('runs.training', ['run' => $run, 'choice' => 'rest']),
+            )
             ->where('actions.2.recommended', true)
             ->where('actions.0.recommended', false));
 
@@ -220,6 +237,105 @@ it('marks exactly one action as recommended, and none when the advisor declines'
             ->where('actions', fn (Collection $actions): bool => $actions->every(
                 static fn (array $action): bool => $action['recommended'] === false,
             )));
+});
+
+it('names Recreation in the address by the client word and keeps the canonical literal on the row', function (): void {
+    // The address and the row disagree on purpose. The Recreation entry carries the client's own word,
+    // `recreation`, while the row is written under `TurnChoice::Recreation`'s stored `mood` (the enum's
+    // docblock records why that literal is `mood`), and the Training screen maps one back to the other at
+    // its own boundary. So the public value is asserted here and the stored value is asserted unchanged
+    // beneath it: no enum method exists for a URL concern, and no already-written row is touched.
+    $run = cockpitRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active]);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('actions.3.key', 'recreation')
+            ->where('actions.3.href', route('runs.training', ['run' => $run, 'choice' => 'recreation']))
+            // The address carries the word, never the storage key.
+            ->where('actions.3.href', fn (string $href): bool => ! str_contains($href, 'mood')));
+
+    $this->post(route('runs.turns.store', $run), [
+        'turn' => 1,
+        'speed' => 600, 'stamina' => 600, 'power' => 600, 'guts' => 600, 'wit' => 600,
+        'energy' => 80, 'fans' => 1000, 'sp' => 120,
+        'choice' => TurnChoice::Recreation->value,
+    ])->assertSessionHasNoErrors();
+
+    expect($run->turnEntries()->where('turn', 1)->sole()->choice)->toBe('mood');
+});
+
+it('cites the reference on a recorded Rest turn, with every branch shown and tagged', function (): void {
+    // The 2026-10-16 ruling: the panel's second section is a citation, not a forecast, so every branch the
+    // reference publishes renders and none is collapsed into one number. The sources disagree on the modal
+    // figure, which is exactly why the disagreement line travels with them.
+    $run = cockpitRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 1, energy: 80);
+
+    $this->post(route('runs.turns.store', $run), [
+        'turn' => 2,
+        'speed' => 600, 'stamina' => 600, 'power' => 600, 'guts' => 600, 'wit' => 600,
+        'energy' => 100, 'fans' => 2000, 'sp' => 130,
+        'choice' => 'rest',
+        'outcome' => 'Success',
+    ])->assertSessionHasNoErrors();
+
+    /** @var array<string, mixed> $forecast */
+    $forecast = $this->get(route('runs.cockpit', $run->fresh(['turnEntries'])))
+        ->assertOk()
+        ->inertiaProps('advisor.decision')['recorded_action']['recorded_forecast'];
+
+    expect($forecast['kind'])->toBe('reference')
+        ->and($forecast['label'])->toBe('Rest')
+        ->and(collect($forecast['branches'])->pluck('value')->all())->toBe(['+50', '+70', '+30'])
+        ->and(collect($forecast['branches'])->pluck('note')->all())->toBe(['modal', null, 'may carry a stayed-up-late penalty'])
+        ->and($forecast['server'])->toBe('[JP]')
+        ->and($forecast['source'])->toContain('§1.1.5')
+        ->and($forecast['disagreement'])->toBe('Sources agree on the shape; the modal value is single-source.');
+});
+
+it('states the outing lift without inventing a magnitude', function (): void {
+    $run = cockpitRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 1, energy: 80);
+
+    $this->post(route('runs.turns.store', $run), [
+        'turn' => 2,
+        'speed' => 600, 'stamina' => 600, 'power' => 600, 'guts' => 600, 'wit' => 600,
+        'energy' => 70, 'mood' => 'GREAT', 'fans' => 2000, 'sp' => 130,
+        'choice' => 'mood',
+        'outcome' => 'Lifted',
+    ])->assertSessionHasNoErrors();
+
+    /** @var array<string, mixed> $forecast */
+    $forecast = $this->get(route('runs.cockpit', $run->fresh(['turnEntries'])))
+        ->assertOk()
+        ->inertiaProps('advisor.decision')['recorded_action']['recorded_forecast'];
+
+    expect($forecast['kind'])->toBe('reference')
+        ->and($forecast['statement'])->toBe('Lifts Mood; no magnitude published in the reference.')
+        ->and(array_key_exists('branches', $forecast))->toBeFalse()
+        ->and($forecast['server'])->toBe('[JP]');
+});
+
+it('renders a named absence for a recorded discipline turn, never a yield', function (): void {
+    // `ADR-0001` §3 keeps a per-training yield off the wire, and a citation section does not reopen it:
+    // there is nothing to quote, so the panel says so rather than printing a zero.
+    $run = cockpitRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 1, energy: 80);
+
+    $this->post(route('runs.turns.store', $run), [
+        'turn' => 2,
+        'speed' => 700, 'stamina' => 600, 'power' => 600, 'guts' => 600, 'wit' => 600,
+        'energy' => 62, 'fans' => 2000, 'sp' => 130,
+        'choice' => 'training-Speed',
+        'outcome' => 'Success',
+    ])->assertSessionHasNoErrors();
+
+    /** @var array<string, mixed> $forecast */
+    $forecast = $this->get(route('runs.cockpit', $run->fresh(['turnEntries'])))
+        ->assertOk()
+        ->inertiaProps('advisor.decision')['recorded_action']['recorded_forecast'];
+
+    expect($forecast['kind'])->toBe('absence')
+        ->and($forecast['reason'])->toContain('ADR-0001')
+        ->and(array_key_exists('branches', $forecast))->toBeFalse();
 });
 
 it('reads the scenario widgets from config rather than from a scenario name', function (): void {
@@ -406,7 +522,7 @@ it('names no scenario the run never chose, while the picker still lists every sc
 
 /*
  * The Cockpit header edit forms (F2, plan §9.6 ruling 1) and the manual correction (ruling 2) now own
- * the writes the retired 0.1.0 record screen carried. These cases were ported from the four source
+ * the writes the retired 2.0.0 record screen carried. These cases were ported from the four source
  * suites that tested that screen; only the assertions whose behavior still exists on the Cockpit were
  * carried, and each posts to the same `runs.update` / `runs.turns.*` routes the legacy page used.
  */

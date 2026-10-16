@@ -9,10 +9,9 @@
  * Every entry is a link, and every link is live. The brief says an unlanded action is "a named
  * absence"; seven unfocusable items would fail this slice's own keyboard-path acceptance and leave
  * the Cockpit with no way to act, so each entry links to the screen that records the action today —
- * the run record screen, whose guided rail offers Training, Rest and Recreation as its own turn
- * choices and whose panels record races, events and scenario actions, or the Legacy builder for the
- * ancestry — and the entry's note names the 2.0 screen that will replace it. There is therefore no
- * absent arm to render, which is why the template has none.
+ * the Training decision screen for the five trainings and for Rest and Recreation, which are turn
+ * choices rather than training options (SCR-CAR-012) — and the entry's note names the 2.0 screen that
+ * will replace it. There is therefore no absent arm to render, which is why the template has none.
  */
 import NavGlyph from '../NavGlyph.vue';
 
@@ -58,6 +57,7 @@ const entryClass =
             >
                 <a
                     :href="action.href"
+                    :data-action="action.key"
                     :class="[entryClass, action.recommended ? 'border-2 border-pick-line' : '']"
                 >
                     <span class="flex flex-wrap items-baseline gap-x-2">

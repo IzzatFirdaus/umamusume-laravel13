@@ -89,6 +89,7 @@ interface Decision {
         expected: RecordedRow[];
         actual: RecordedRow[] | null;
         reconciliation: { match: boolean; note: string } | null;
+        recorded_forecast: Record<string, unknown>;
         recorded_at: string | null;
         corrected_from: number | null;
     } | null;
@@ -268,6 +269,7 @@ const incompleteData = computed(
                 :expected="recordedAction.expected"
                 :actual="recordedAction.actual"
                 :reconciliation="recordedAction.reconciliation"
+                :forecast="recordedAction.recorded_forecast"
                 :corrected-from="recordedAction.corrected_from"
                 :timeline-url="props.timelineUrl"
             />

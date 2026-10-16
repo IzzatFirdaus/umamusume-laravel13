@@ -52,11 +52,6 @@ import HappyMeekPanel from '@/Pages/Career/Cockpit/Panels/HappyMeekPanel.vue';
 import CareerMilestonesPanel from '@/Pages/Career/Cockpit/Panels/CareerMilestonesPanel.vue';
 import PreFinalReviewPanel from '@/Pages/Career/Cockpit/Panels/PreFinalReviewPanel.vue';
 import TeamRaceFacilityPanel from '@/Pages/Career/Cockpit/Panels/TeamRaceFacilityPanel.vue';
-import SpiritBurstsPanel from '@/Pages/Career/Cockpit/Panels/SpiritBurstsPanel.vue';
-import TeamRankLadderPanel from '@/Pages/Career/Cockpit/Panels/TeamRankLadderPanel.vue';
-import GradePointObjectivesPanel from '@/Pages/Career/Cockpit/Panels/GradePointObjectivesPanel.vue';
-import ProShopPanel from '@/Pages/Career/Cockpit/Panels/ProShopPanel.vue';
-import EpithetRoutesPanel from '@/Pages/Career/Cockpit/Panels/EpithetRoutesPanel.vue';
 import CareerGoalsPanel from '@/Pages/Career/Cockpit/Panels/CareerGoalsPanel.vue';
 
 /**
@@ -81,11 +76,31 @@ register('happy_meek', HappyMeekPanel);
 register('career_milestones', CareerMilestonesPanel);
 register('pre_final_review', PreFinalReviewPanel);
 register('team_race_facility', TeamRaceFacilityPanel);
-register('spirit_bursts', SpiritBurstsPanel);
-register('team_rank_ladder', TeamRankLadderPanel);
-register('grade_objectives', GradePointObjectivesPanel);
-register('shop', ProShopPanel);
-register('epithet_routes', EpithetRoutesPanel);
+// The Phase 7A.1 registration of SpiritBurstsPanel against `spirit_bursts` is removed: that key
+// is a WIDGET, not a panel flag, so the panel-shaped component received the widget shape and its
+// template read `props.scenario.alerts` off undefined, crashing every Unity Cup cockpit render
+// (measured in the 2026-10-16 browser run, TypeError at render). A renderer that cannot draw its
+// key must not register for it, which is this shell's own contract; the widget falls back to the
+// labelled meter, the shape it rendered before the extraction. The component stays on disk for
+// the slice that gives the burst machine a panel flag or a widget-shaped renderer.
+// `team_rank_ladder` is registered by E3's UnityCupPanel above, and that registration is the one
+// that stays: the Phase 7A.1 TeamRankLadderPanel re-registration here shadowed it (a Map's last
+// set wins), and the shadowed renderer draws the team facts card — the run's recorded team name,
+// motto, counters and the rank gauge — while TeamRankLadderPanel itself reads a `scenario.ladder`
+// key the section does not carry, so it rendered alerts and no ladder at all. Measured 2026-10-16:
+// with the shadow in place a saved team name printed nowhere on the Cockpit, which is what the
+// team-editor browser cases read back. UnityCupPanel is the live surface the Phase G ruling
+// records ("already print in UnityCupPanel.vue:199-228"); the one-fact-once rule is honoured by
+// drawing it once, not by retiring it.
+// The Phase 7A.1 re-registrations of `grade_objectives`, `shop` and `epithet_routes` are removed:
+// they shadowed E4's TrackblazerPanel above (a Map's last set wins), and none of the three reads the
+// section the payload carries. `gradeSection()` nests the objectives under `scenario.grade`, the items
+// under `scenario.shop.catalogue` and the checklist under `scenario.epithet.rows`, while the three
+// components declare `scenario.objectives`, `scenario.shop` as a group list and `scenario.epithets`
+// (plural, a key the section does not hold). The first of those is the career-goals ladder, so the
+// shadow also drew one fact under two headings. TrackblazerPanel is the renderer whose prop reads
+// exist; its three arms are what the Trackblazer cockpit draws. The components stay on disk for the
+// slice that gives them a section of their own.
 register('career_goals', CareerGoalsPanel);
 
 interface PanelFlag {
@@ -100,6 +115,14 @@ const props = defineProps<{
         documented: boolean;
         version: string | null;
         version_title: string;
+        /**
+         * The scenario's own Global ruleset date — its launch or rework instant, sourced per
+         * scenario — or null when no scenario is set. A different fact from `version` above,
+         * which stays the null-by-ruling `app.ruleset`; the two render as separate lines and
+         * must not merge (the R2-05 split, and the 2026-10-15 wiring's Caveat 1).
+         */
+        ruleset_date: string | null;
+        ruleset_date_title: string;
         widgets: string[];
         widget_labels: Record<string, string>;
         widget_values: Record<string, number | string | null>;
@@ -204,11 +227,21 @@ const emptyText = computed<string>(() =>
             {{ props.scenario.version_title }}
         </p>
 
+        <!-- The scenario's own ruleset date: a sourced fact per scenario (its launch or rework
+             instant), carried beside — never inside — the null version line above. Hidden rather
+             than drawn as an absence when no scenario is set: a date that dates nothing is not a
+             fact this strip owes a row for. -->
+        <p v-if="props.scenario.ruleset_date !== null" class="text-xs text-ink-muted" data-region="scenario-ruleset-date">
+            Scenario ruleset date:
+            <span :title="props.scenario.ruleset_date_title">{{ props.scenario.ruleset_date }}</span>.
+            {{ props.scenario.ruleset_date_title }}
+        </p>
+
         <!-- The scenario's own resources, by the same subtraction the header uses: the baseline
              three are the header's figures and are not repeated here. -->
         <ul
             v-if="props.scenario.widgets.length > 0"
-            class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+            class="grid grid-cols-1 gap-3 @3xl:grid-cols-2 @5xl:grid-cols-4"
         >
             <li v-for="key in props.scenario.widgets" :key="key">
                 <component
