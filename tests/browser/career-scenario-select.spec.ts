@@ -150,7 +150,9 @@ test.describe('Scenario Selection', () => {
         await page.goto('/career/setup/scenario');
         await page.locator('#app > *').first().waitFor();
 
-        const trackblazer = card(page, 'Trackblazer').getByRole('button', { name: 'Select Scenario' });
+        // Addressed by its id, not by its label: the button's own text is the thing under test, so a
+        // locator built from it would resolve to nothing the moment the card becomes the selected one.
+        const trackblazer = card(page, 'Trackblazer').locator('#scenario-trackblazer');
 
         // Nothing is pre-pressed on a fresh draft, so the stored state is visible rather than implied.
         await expect(trackblazer).toHaveAttribute('aria-pressed', 'false');
@@ -168,7 +170,7 @@ test.describe('Scenario Selection', () => {
         // restored to the same control (WCAG 2.4.3), which is what the round trip would otherwise lose.
         await expect(page.getByText('Scenario set.')).toBeVisible();
         await expect(trackblazer).toHaveAttribute('aria-pressed', 'true');
-        await expect(card(page, 'Trackblazer').getByText('Selected')).toBeVisible();
+        await expect(trackblazer).toHaveText('Selected · clear');
         await expect(page.getByText('Stored choice:')).toContainText('Trackblazer');
         await expect(trackblazer).toBeFocused();
 
@@ -178,8 +180,30 @@ test.describe('Scenario Selection', () => {
 
         await page.goto('/career/setup/scenario');
         await page.locator('#app > *').first().waitFor();
-        await expect(card(page, 'Trackblazer').getByRole('button', { name: 'Select Scenario' }))
+        await expect(card(page, 'Trackblazer').locator('#scenario-trackblazer'))
             .toHaveAttribute('aria-pressed', 'true');
+        await expect(card(page, 'Trackblazer').locator('#scenario-trackblazer')).toHaveText('Selected · clear');
+    });
+
+    test('a selected scenario can be deselected back to no choice', async ({ page }) => {
+        // The defect this closes: once any scenario was chosen, `Stored choice: N/A` was unreachable,
+        // so a misclick had no way back at step 1 of 6. The same button is the undo.
+        await page.goto('/career/setup/scenario');
+        await page.locator('#app > *').first().waitFor();
+
+        const concert = page.locator('#scenario-our_grand_concert');
+        await expect(concert).toHaveAttribute('aria-pressed', 'false');
+
+        await concert.click();
+        await expect(concert).toHaveAttribute('aria-pressed', 'true');
+        await expect(concert).toHaveText('Selected · clear');
+        await expect(page.locator('[data-field="stored-choice"]')).toContainText('Our Grand Concert');
+
+        await concert.click();
+        await expect(concert).toHaveAttribute('aria-pressed', 'false');
+        await expect(concert).toHaveText('Select Scenario');
+        await expect(page.locator('[data-field="stored-choice"]')).toContainText('N/A');
+        await expect(page.getByText('Scenario cleared.')).toBeVisible();
     });
 
     test('sizes every scenario control to the 44px contract', async ({ page }) => {

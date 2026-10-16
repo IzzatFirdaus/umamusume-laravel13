@@ -9,9 +9,11 @@
  *
  * The selection is a card-button pattern rather than a hidden radio group: a native `<button>` with
  * `aria-pressed` is in the tab order, needs no arrow-key handler to be reachable, and states which
- * card holds the stored choice after the POST round trip. One "Select Scenario" action per card keeps
- * the primary action where the decision is (`design-2.0` §13, Fitts's Law) without a sixth control
- * that does the same thing.
+ * card holds the stored choice after the PUT round trip. One action per card keeps the primary action
+ * where the decision is (`design-2.0` §13, Fitts's Law) without a sixth control that does the same
+ * thing, and that one action is a toggle: the screen renders `Stored choice: N/A`, so "no scenario" is
+ * a state a Trainer can be in, and a state you can enter has to be exitable. The button's own label
+ * says which way the next click goes.
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
@@ -54,11 +56,12 @@ const props = defineProps<{
 
 const choosing = ref<string | null>(null);
 
-const form = useForm<{ scenario: string }>({ scenario: '' });
+const form = useForm<{ scenario: string | null }>({ scenario: null });
 
 function choose(scenario: ScenarioCard): void {
+    const deselect = props.selected === scenario.key;
     choosing.value = scenario.key;
-    form.scenario = scenario.key;
+    form.scenario = deselect ? null : scenario.key;
 
     // The URL is literal, as every other page in this app states it: there is no Ziggy dependency
     // here, so `router.route()` would throw at click time rather than at build time.
@@ -125,7 +128,7 @@ const optimizesText = (card: ScenarioCard): string | null => {
             of asking again.
         </p>
 
-        <p class="mt-3 text-sm text-ink">
+        <p class="mt-3 text-sm text-ink" data-field="stored-choice">
             Stored choice:
             <strong v-if="selectedLabel" class="text-ink-strong">{{ selectedLabel }}</strong>
             <AbsenceValue
@@ -258,16 +261,8 @@ const optimizesText = (card: ScenarioCard): string | null => {
                         :disabled="form.processing"
                         @click="choose(card)"
                     >
-                        Select Scenario
+                        {{ props.selected === card.key ? 'Selected · clear' : 'Select Scenario' }}
                     </button>
-                    <!-- The stored state is a word, and it sits beside the action rather than inside
-                         the card's heading: inside the `<h2>` it would have become part of the
-                         heading's accessible name, so "Trackblazer" would read as
-                         "Trackblazer SELECTED" and the card would stop matching its own name. -->
-                    <span
-                        v-if="props.selected === card.key"
-                        class="text-xs font-bold text-ink-muted"
-                    >Selected</span>
                 </p>
             </li>
         </ul>

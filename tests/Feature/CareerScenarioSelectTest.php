@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Preference;
 use App\Services\Career\SetupDraft;
 use App\Services\ScenarioCaps;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -149,6 +150,62 @@ it('refuses a scenario the matrix does not compose and leaves the draft untouche
     expect(SetupDraft::read()['scenario'])->toBeNull();
 
     $this->put('/career/setup/scenario', [])->assertSessionHasErrors('scenario');
+});
+
+it('clears the stored choice when the scenario is sent as null', function (): void {
+    $this->put('/career/setup/scenario', ['scenario' => 'trackblazer'])->assertRedirect();
+    expect(SetupDraft::read()['scenario'])->toBe('trackblazer')
+        ->and(SetupDraft::saved())->toContain(1);
+
+    $this->put('/career/setup/scenario', ['scenario' => null])
+        ->assertRedirect()
+        ->assertSessionHas('status', 'Scenario cleared.');
+
+    // Stored as null rather than as an empty string, because `saved()` looks for a real value: the
+    // step bar drops step 1 with it, which is the visible half of the undo.
+    expect(SetupDraft::read()['scenario'])->toBeNull()
+        ->and(SetupDraft::saved())->not->toContain(1);
+
+    $this->get('/career/setup/scenario')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('selected', null));
+});
+
+it('refuses a body that omits the scenario key while accepting an explicit null', function (): void {
+    // The guard the old `required` provided and `present` keeps: a request with no key at all is
+    // malformed, while a key present and null is the deliberate clear the case above covers. The two
+    // must stay separate, or the fix loses the refusal it was never meant to remove.
+    $this->put('/career/setup/scenario', [])->assertSessionHasErrors('scenario');
+
+    expect(SetupDraft::scenarioRecorded())->toBeFalse();
+});
+
+it('keeps a cleared scenario cleared even when a default scenario is configured', function (): void {
+    // F3 = 3a. The screen's own empty state is the requirement: an intentional clear outranks the
+    // Trainer's stored default, so `Stored choice` renders the absence rather than the preference.
+    Preference::putSettings(['default_scenario' => 'unity_cup']);
+
+    $this->put('/career/setup/scenario', ['scenario' => 'trackblazer'])->assertRedirect();
+    $this->put('/career/setup/scenario', ['scenario' => null])->assertRedirect();
+
+    $this->get('/career/setup/scenario')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('selected', null));
+
+    expect(SetupDraft::scenarioRecorded())->toBeTrue();
+});
+
+it('lets a configured default supply the scenario for a draft that recorded no choice', function (): void {
+    Preference::putSettings(['default_scenario' => 'unity_cup']);
+
+    $this->get('/career/setup/scenario')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('selected', 'unity_cup'));
+
+    // `show()` writes the visited step into the same bag before it renders, so key presence is not
+    // polluted by that write. This is the case that goes red if `scenarioRecorded()` ever reads a
+    // key some other step put there, and it is why the marker is the key and not a second flag.
+    expect(SetupDraft::scenarioRecorded())->toBeFalse();
 });
 
 it('reads a stale draft key as no scenario rather than as a blank card', function (): void {

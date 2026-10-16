@@ -50,10 +50,10 @@ class ScenarioSelectController extends Controller
             'visited' => SetupDraft::visited(),
             'saved' => SetupDraft::saved(),
             'scenarios' => $this->cards(),
-            // The Trainer's stored default pre-selects nothing when the draft already names a
-            // scenario: a career in progress is what the Trainer chose for it, and a preference
-            // must not stand in for that.
-            'selected' => $draft['scenario'] ?? $this->storedDefault(),
+            // Three states, not two. A draft that has never carried the key may take the Trainer's own
+            // default; a draft that carries it as null was cleared on purpose, and a preference must
+            // not stand in for either a career in progress or a choice just withdrawn.
+            'selected' => $draft['scenario'] ?? (SetupDraft::scenarioRecorded() ? null : $this->storedDefault()),
             'ruleset' => $this->ruleset(),
         ]);
     }
@@ -79,12 +79,16 @@ class ScenarioSelectController extends Controller
 
     public function store(StoreScenarioRequest $request): RedirectResponse
     {
-        SetupDraft::write(['scenario' => $request->validated('scenario')]);
+        $scenario = $request->validated('scenario');
+        SetupDraft::write(['scenario' => $scenario]);
 
         // Back to this step, deliberately: the choice is read from the session on the next render, so
-        // the radio reflects stored state rather than whatever the client still holds in memory. That
-        // round trip is what makes "the selection survives navigation" a claim about the server.
-        return redirect()->route('career.scenario')->with('status', 'Scenario set.');
+        // the card reflects stored state rather than whatever the client still holds in memory. That
+        // round trip is what makes "the selection survives navigation" a claim about the server. A
+        // null write is the clear of it, and it is stored as null rather than as an empty string so
+        // `SetupDraft::saved()` stops counting step 1 as saved.
+        return redirect()->route('career.scenario')
+            ->with('status', $scenario === null ? 'Scenario cleared.' : 'Scenario set.');
     }
 
     /**
