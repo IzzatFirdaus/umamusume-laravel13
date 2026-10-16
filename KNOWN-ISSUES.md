@@ -2924,3 +2924,45 @@ Closure conditions (must all hold):
 
 What closure does not cover: landing KI-98, KI-99; cross-surface domain defects (KI-82, KI-87, KI-91, KI-95); creating active-issues dashboard and register validator; changing playwright.config.ts; resolving O-1. This slice is documentation-and-tooling only.
 
+## KI-106 `1e84b0c` deleted the root stubs and left the citation ratchet red at HEAD, with 270 dead citations and `AGENTS.md` §3 still naming the files - FILED 2026-10-17 (Phase 0 tree-ownership pass), OPEN
+
+**Status: OPEN. Landed red, so every Level 3 run from `1e84b0c` forward carries it.**
+
+**Symptom.** `DocCitationParityTest` holds dead markdown citations at or below the `DOC_CITATION_BASELINE`
+of 708 (`tests/Feature/DocCitationParityTest.php:56`). `1e84b0c` ("docs(reorg): fold root stubs and spent
+plans into the corpora") deleted `CONSTRAINTS.md` and `PLAN.md` and left every citation that routes through
+those names pointing at nothing: `tools/doc_census.py` now reports **980** dead links, and the two most-cited
+targets are the deleted files themselves (161 `CONSTRAINTS.md`, 56 `docs/design-research/CONSTRAINTS.md`,
+48 `docs/design-research/DESIGN.md`, 45 `PLAN.md`, 35 `docs/GATE-REGISTRY.md`, 29 `docs/PRE-MORTEM.md`,
+27 `RAW-FINDINGS.md`, 23 `docs/Our-Grand-Concert-plan.md`). The same commit left `AGENTS.md` §3's
+documentation map describing `CONSTRAINTS.md` as "a pointer to `docs/research-scratch/GOVERNANCE.md`" and
+`PLAN.md` as "a pointer to `docs/research-scratch/PROCESS-PLANS.md`" - rows for files that no longer exist,
+in the file that tells an agent where the quality bar lives.
+
+**Evidence.** Measured on `5bc7e0f`, working tree clean. The census's own top-target list is what attributes
+it: the eight most-cited dead targets are precisely the names `1e84b0c` removed, and they account for 424
+citations between them, against a ratchet overshoot of 272. The 980 reading was taken with `AGENTS.md`
+restored to `HEAD` mid-pass, so the pass's own doc edits are not what moved it past the bar.
+
+**Proving commands.**
+
+```text
+php artisan test --compact tests/Feature/DocCitationParityTest.php   # 1 failed: 980 vs 708
+python tools/doc_census.py | grep -A9 "most-cited dead targets"
+git show --stat 1e84b0c | grep -E "CONSTRAINTS|PLAN.md"              # 21 and 19 deletions
+```
+
+**Two other reds found in the same sweep, pre-existing and unrelated to each other** (recorded here so a
+later pass does not re-attribute them to the current work): `DashboardTest.php:54` expects 3 `quickActions`
+and `DashboardController::quickActions()` has returned 4 since `04bb402`; `CatalogRosterTreeTest.php:234`
+pins the catalog route at 6 queries and the shell now costs 7. Both reproduce alone, so neither is
+order-dependent. `vendor/bin/phpstan analyse` reports 3 findings, all in `CockpitController.php` lines that
+no commit in this range authored (`MONTHS` unused at 120, two `nullsafe.neverNull` at 291) and the plan's
+Phase 6.1 owns them. `vendor/bin/pint --test` flags 5 files, none of them in the `1e84b0c..5bc7e0f` set.
+
+**Closure.** Repoint or withdraw the 270 citations, then re-measure and lower the baseline in the same
+commit, with `AGENTS.md` §3's two rows corrected in the pass that does it. **What closure does not cover:**
+the `DashboardTest` and `CatalogRosterTreeTest` assertions above, which are separate defects that only share
+this entry's discovery pass; the PHPStan findings owned by Phase 6.1; the fence-integrity count the census
+also reports (397 invalid closing fences across 13 files), which `tools/md_fence_check.py` owns.
+
