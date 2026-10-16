@@ -1,0 +1,39 @@
+{
+  "invariant": "cluster_split",
+  "description": "An over-collapsed near-duplicate cluster is reassigned by screen type; the split is auditable and survives a re-inventory.",
+  "targets": {
+    "screen_types": {
+      "required": ["training"],
+      "additional": [],
+      "in_use": ["learn"],
+      "min_verified_per_type": 0
+    },
+    "scenarios": {"required": [], "min_verified_per_scenario": 0},
+    "scenario_aliases": {}
+  },
+  "frames": [
+    {"ref": "2026-01-01 500001", "screen_type": "learn"},
+    {"ref": "2026-01-01 500002", "screen_type": "learn"},
+    {"ref": "2026-01-01 500003", "screen_type": "training"},
+    {"ref": "2026-01-01 500004", "screen_type": null}
+  ],
+  "assignments": [
+    {"ref": "2026-01-01 500001", "to": "learn"},
+    {"ref": "2026-01-01 500002", "to": "learn"},
+    {"ref": "2026-01-01 500003", "to": "training"}
+  ],
+  "expect": {
+    "source_cluster_id": 0,
+    "learn_members": 2,
+    "training_members": 1,
+    "residual_members": 1,
+    "residual_ref": "2026-01-01 500004",
+    "split_events": 3
+  },
+  "reject_cases": [
+    {"name": "frame_outside_cluster", "assignments": [{"ref": "2026-01-01 100002", "to": "learn"}], "expect_rc": 2},
+    {"name": "unknown_frame", "assignments": [{"ref": "2026-01-01 600000", "to": "learn"}], "expect_rc": 2},
+    {"name": "sid_mismatch", "assignments": [{"ref": "2026-01-01 500001", "sid": "wrong-sid", "to": "learn"}], "expect_rc": 2},
+    {"name": "free_text_type", "assignments": [{"ref": "2026-01-01 500001", "to": "free-text-nonsense"}], "expect_rc": 2}
+  ]
+}

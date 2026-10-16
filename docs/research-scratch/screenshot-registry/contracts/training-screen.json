@@ -1,0 +1,96 @@
+{
+ "screen_type": "training-screen",
+ "components": [
+  {
+   "name": "discipline_selector",
+   "label": "Training",
+   "states": ["Speed Lvl 3", "Stamina Lvl 3", "Power Lvl 3", "Guts Lvl 3", "Wit Lvl 3", "MAX"],
+   "values": ["Wit Lvl 3 (Quiz)", "Speed Lvl 3"],
+   "units": "discipline level"
+  },
+  {
+   "name": "stat_row",
+   "label": "Stats",
+   "states": ["D+", "C", "E"],
+   "values": ["Speed 385/1321 D+", "Stamina 443/1319 C", "Power 396/1334 D+", "Guts 468/1307 C", "Wit 208/1800 E"],
+   "units": "current/ceiling grade"
+  },
+  {
+   "name": "stat_gains",
+   "label": "Gains",
+   "states": ["positive"],
+   "values": ["Speed +2", "Stamina +9", "Power +2", "Guts +7", "Wit +2"],
+   "units": "points"
+  },
+  {
+   "name": "energy",
+   "label": "Energy",
+   "states": ["BAD", "GOOD"],
+   "values": ["BAD"],
+   "units": "state"
+  },
+  {
+   "name": "failure_rate",
+   "label": "Failure",
+   "states": ["0%", "2%"],
+   "values": ["0%"],
+   "units": "percent"
+  },
+  {
+   "name": "skill_points",
+   "label": "Skill Pts",
+   "states": ["integer"],
+   "values": ["116", "103", "202"],
+   "units": "points"
+  },
+  {
+   "name": "turn_counter",
+   "label": "turns left",
+   "states": ["turn(s) left", "turn(s) Until the Unity Cup"],
+   "values": ["7 turn(s) left", "1 turn(s) Until the Unity Cup"],
+   "units": "turns"
+  },
+  {
+   "name": "log_panel",
+   "label": "Log",
+   "states": ["character dialogue", "system message"],
+   "values": ["Mihono Bourbon / Rice Shower dialogue", "Guts went up by 5."],
+   "units": "text"
+  },
+  {
+   "name": "goal_panel",
+   "label": "Goal",
+   "states": ["fan target", "placement target", "result-point target"],
+   "values": [
+    "Earn 3000 fans / 1,943 fan(s) to go",
+    "Place top 3 in Mile Ch. / Entry criteria met",
+    "60 Result Pts / Progress After 050 pts"
+   ],
+   "units": "goal text"
+  }
+ ],
+ "observed_interactions": [
+  "Discipline chips (Speed/Stamina/Power/Guts/Wit Lvl 3) are selectable; the selected chip is highlighted and its subtitle (e.g. Quiz for Wit) is shown.",
+  "The right Log panel renders character dialogue and a system-message line during a training turn.",
+  "A MAX tag renders beside a discipline chip when that discipline is capped.",
+  "A Goal panel renders on the training screen with a target (fan count, race placement, or result points) and a progress readout."
+ ],
+ "unresolved_questions": [
+  "Confirm whether the MAX tag marks a per-discipline cap or the run ceiling.",
+  "Confirm whether Failure % is derived from the active discipline only or the whole card.",
+  "Confirm whether the Goal panel and scenario tracker are universal across scenarios or Unity Cup specific."
+ ],
+ "evidence": [
+  {"field": "discipline_selector", "ref": "2026-07-18 001817", "sid": "906b40a9c496"},
+  {"field": "stat_row", "ref": "2026-07-18 001817", "sid": "906b40a9c496"},
+  {"field": "stat_gains", "ref": "2026-07-18 001817", "sid": "906b40a9c496"},
+  {"field": "energy", "ref": "2026-07-18 001817", "sid": "906b40a9c496"},
+  {"field": "failure_rate", "ref": "2026-07-17 221551", "sid": "52f5b238fefc"},
+  {"field": "skill_points", "ref": "2026-07-17 230734", "sid": "65223c30cfce"},
+  {"field": "turn_counter", "ref": "2026-07-18 001817", "sid": "906b40a9c496"},
+  {"field": "log_panel", "ref": "2026-07-18 001817", "sid": "906b40a9c496"},
+  {"field": "goal_panel", "ref": "2026-07-14 200337", "sid": "5fd87d609c69"},
+  {"field": "goal_panel", "ref": "2026-07-14 231517", "sid": "e777372069c5"},
+  {"field": "goal_panel", "ref": "2026-07-15 031458", "sid": "16bc65bf3e3e"}
+ ]
+}

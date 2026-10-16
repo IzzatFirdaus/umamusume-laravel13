@@ -1,0 +1,24 @@
+{
+  "invariant": "resolved_entry_names_existing_intake",
+  "description": "A resolved entry must name an intake_id that exists in the manifest. This fixture resolves an intake that was never recorded.",
+  "targets": {
+    "screen_types": {"required": [], "min_verified_per_type": 0},
+    "scenarios": {"required": ["ura_finale"], "min_verified_per_scenario": 1},
+    "scenario_aliases": {}
+  },
+  "capture_manifest": [
+    {"intake_id": "cccccccc-0000-4000-8000-000000000002",
+     "resolves_intake_id": "cccccccc-0000-4000-8000-does-not-exist",
+     "scenario": "ura_finale", "status": "resolved",
+     "resolution_reason": "corpus now holds enough frames",
+     "verified_frames": ["2026-01-01 900002"],
+     "capture_timestamp": "2026-10-12T00:00:00Z",
+     "operator_context": "test fixture"}
+  ],
+  "frames": [
+    {"ref": "2026-01-01 900002", "sid": "s-900002", "state": "verified",
+     "observations": [{"screen_type": "training", "text": "t", "by": "x"}]}
+  ],
+  "expect_fail": true,
+  "expect_message": "which is not in the manifest"
+}

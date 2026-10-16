@@ -39,10 +39,9 @@
   "frame_count": 25,
   "unique_frame_count": 25,
   "duplicate_ids": [],
-  "log_entries": 22,
+  "log_entries": 25,
   "states": {
-   "verified": 22,
-   "partial": 3
+   "verified": 25
   },
   "unresolved_ids": []
  }

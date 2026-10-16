@@ -1,0 +1,51 @@
+{
+  "invariant": "screen_type_vocabulary",
+  "description": "A screen type must come from required, additional, or the vocabulary already in use. Free text is rejected so the vocabulary cannot drift.",
+  "targets": {
+    "screen_types": {
+      "required": ["training", "skill-selection"],
+      "additional": ["predictions-modal", "shop-popup", "mood-effect-modal"],
+      "in_use": ["team-showdown-confirm"],
+      "min_verified_per_type": 2
+    },
+    "scenarios": {"required": [], "min_verified_per_scenario": 0},
+    "scenario_aliases": {}
+  },
+  "cases": [
+    {
+      "name": "additional_type_is_accepted",
+      "ref": "2026-01-01 950000",
+      "sid": "s-950000",
+      "screen_type": "predictions-modal",
+      "expect_fail": false
+    },
+    {
+      "name": "required_type_is_accepted",
+      "ref": "2026-01-01 950001",
+      "sid": "s-950001",
+      "screen_type": "training",
+      "expect_fail": false
+    },
+    {
+      "name": "existing_vocabulary_type_is_accepted",
+      "ref": "2026-01-01 950002",
+      "sid": "s-950002",
+      "screen_type": "team-showdown-confirm",
+      "expect_fail": false
+    },
+    {
+      "name": "free_text_is_rejected",
+      "ref": "2026-01-01 950003",
+      "sid": "s-950003",
+      "screen_type": "free-text-nonsense",
+      "expect_fail": true
+    },
+    {
+      "name": "near_miss_is_rejected",
+      "ref": "2026-01-01 950004",
+      "sid": "s-950004",
+      "screen_type": "predictions modal",
+      "expect_fail": true
+    }
+  ]
+}

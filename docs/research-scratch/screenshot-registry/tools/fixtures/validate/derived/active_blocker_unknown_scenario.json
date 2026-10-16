@@ -1,0 +1,21 @@
+{
+  "invariant": "active_blocker_names_required_scenario",
+  "description": "An active capture_required entry must name a scenario listed in targets.json:scenarios.required. This fixture blocks a scenario no target tracks.",
+  "targets": {
+    "screen_types": {"required": [], "min_verified_per_type": 0},
+    "scenarios": {"required": ["ura_finale"], "min_verified_per_scenario": 1},
+    "scenario_aliases": {}
+  },
+  "capture_manifest": [
+    {"blocker": "no_game_access", "capture_timestamp": "2026-10-12T00:00:00Z",
+     "intake_id": "bbbbbbbb-0000-4000-8000-000000000001",
+     "missing_states": ["scenario_overview"], "scenario": "a_scenario_nobody_tracks",
+     "status": "capture_required"}
+  ],
+  "frames": [
+    {"ref": "2026-01-01 900003", "sid": "s-900003", "state": "verified",
+     "observations": [{"screen_type": "training", "text": "t", "by": "x"}]}
+  ],
+  "expect_fail": true,
+  "expect_message": "names a scenario absent from"
+}

@@ -1,0 +1,65 @@
+{
+ "screen_type": "race-results",
+ "components": [
+  {
+   "name": "race_header",
+   "label": "race name",
+   "states": ["win", "loss"],
+   "values": ["Satsuki Sho", "G2 Spring Stakes", "G1 Arima Kinen", "G1 Sprinters Stakes"],
+   "units": "grade + race name"
+  },
+  {
+   "name": "course",
+   "label": "course",
+   "states": ["turf", "dirt"],
+   "values": ["Nakayama Turf 2000m (Medium) Right / Inner", "Nakayama Turf 1800m (Mile) Right / Inner Firm", "Nakayama Turf 2500m (Long) Right / Inner Firm"],
+   "units": "venue distance surface direction + going"
+  },
+  {
+   "name": "placement_rows",
+   "label": "Placement",
+   "states": ["1st", "2nd", "3rd", "4th"],
+   "values": ["1st Special Week (RIVAL, No.5)", "2nd Daiwa Scarlet (No.8)", "3rd Narita Brian (No.1)"],
+   "units": "position + trainee + number + margin + points"
+  },
+  {
+   "name": "coach_verdict",
+   "label": "coach",
+   "states": ["win", "close loss", "loss"],
+   "values": ["Victory was this close to being yours, but the results will serve as a good experience for the next race."],
+   "units": "text"
+  },
+  {
+   "name": "career_profile_panel",
+   "label": "Career Profile",
+   "states": ["present"],
+   "values": ["[Rosy Dreams] Rice Shower", "Legacy 1 (B+)", "Legacy 2 (S+/Guest)"],
+   "units": "overlay panel"
+  },
+  {
+   "name": "action_buttons",
+   "label": "buttons",
+   "states": ["Replay", "Try Again", "Next"],
+   "values": ["Replay", "Try Again", "Next"],
+   "units": "controls"
+  }
+ ],
+ "observed_interactions": [
+  "A result frame may render the Career Profile panel as a right-half overlay.",
+  "The Predictions modal appears over the race-entry background (goal + Scheduled Races grid) before the race.",
+  "Result frames carry Replay / Try Again / Next action buttons."
+ ],
+ "unresolved_questions": [
+  "Confirm the exact fields of each placement row (margin, favourite rank, points) across grades.",
+  "Confirm whether the prize tiers and fan-gain row render on every result or only graded races."
+ ],
+ "evidence": [
+  {"field": "race_header", "ref": "2026-07-17 233705", "sid": "c97ed2181a07"},
+  {"field": "course", "ref": "2026-07-17 232828", "sid": "11c463e8ea0b"},
+  {"field": "placement_rows", "ref": "2026-07-15 061006", "sid": "0d1b3aaa96bf"},
+  {"field": "coach_verdict", "ref": "2026-07-15 061006", "sid": "0d1b3aaa96bf"},
+  {"field": "career_profile_panel", "ref": "2026-07-17 233705", "sid": "c97ed2181a07"},
+  {"field": "action_buttons", "ref": "2026-07-15 061006", "sid": "0d1b3aaa96bf"},
+  {"field": "race_header", "ref": "2026-07-14 025344", "sid": "d26bc6b58356"}
+ ]
+}

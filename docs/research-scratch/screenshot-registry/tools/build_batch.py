@@ -66,15 +66,21 @@ def _spread(refs, n):
     return [refs[int(i * step)] for i in range(n)]
 
 
-def build_candidates(inv, limit=25, per_cluster=2, include=None):
+def build_candidates(inv, limit=25, per_cluster=2, include=None, only_clusters=None):
     """Return a deterministic candidate manifest for the next batch.
 
     ``inv`` is the inventory record list. The result is a dict with a
     ``selected`` list (each carrying a ``reason``) and per-selector counts.
+
+    ``only_clusters`` restricts selection to members of those cluster IDs;
+    ``None`` selects from the whole inventory.
     """
     include = list(include or [])
     reviewed = {"verified", "partial"}
     open_states = {"not_reviewed", "documented_unverified"}
+    if only_clusters is not None:
+        only_clusters = {int(c) for c in only_clusters}
+        inv = [r for r in inv if r.get("cluster_index") in only_clusters]
 
     by_ref = {r["ref"]: r for r in inv}
     selected = []
@@ -105,13 +111,16 @@ def build_candidates(inv, limit=25, per_cluster=2, include=None):
         take(ref, "documented_unverified: validate the legacy note")
 
     # 2. One representative per large cluster that is not yet reviewed.
+    #    When clusters are named explicitly, every named cluster qualifies,
+    #    so a caller can target clusters below LARGE_CLUSTER.
+    min_size = 1 if only_clusters is not None else LARGE_CLUSTER
     big_reps = {}
     for r in inv:
         rep = r.get("cluster_rep")
         if not rep:
             continue
         size = r.get("cluster_size") or 0
-        if size >= LARGE_CLUSTER and not _cluster_has_reviewed(inv, rep):
+        if size >= min_size and not _cluster_has_reviewed(inv, rep):
             big_reps.setdefault(rep, r)
     for rep in sorted(big_reps):
         if len(selected) >= limit:
@@ -179,6 +188,7 @@ def main(argv=None):
     p.add_argument("--limit", type=int, default=25, help="target number of frames")
     p.add_argument("--per-cluster", type=int, default=2, help="max frames from one cluster")
     p.add_argument("--include", help="comma-separated refs to force into the batch")
+    p.add_argument("--only-clusters", help="file with one cluster ID per; restrict selection")
     p.add_argument("--out", help="write the manifest here (default: stdout)")
     p.add_argument("--dry-run", action="store_true", help="print only; never write")
     args = p.parse_args(argv)
@@ -188,8 +198,12 @@ def main(argv=None):
         print("error: no inventory; run `inventory` first", file=sys.stderr)
         return 2
     include = [x.strip() for x in (args.include or "").split(",") if x.strip()]
+    only_clusters = None
+    if args.only_clusters:
+        with open(args.only_clusters, encoding="utf-8") as fh:
+            only_clusters = [x.strip() for x in fh if x.strip()]
     manifest = build_candidates(inv, limit=args.limit, per_cluster=args.per_cluster,
-                                include=include)
+                                include=include, only_clusters=only_clusters)
     text = json.dumps(manifest, indent=1, ensure_ascii=False, sort_keys=True) + "\n"
     if args.out and not args.dry_run:
         os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)

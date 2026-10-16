@@ -1,0 +1,45 @@
+{
+  "description": "evidence-edit must hold the lock, write an audit entry, and reject a shape the writer would reject. A surgical edit that bypasses the command is detected by validate.",
+  "base_claim": {
+    "eid": "topic-0001",
+    "claim": "The training screen shows a stat row with current and ceiling values.",
+    "status": "observed",
+    "supports": ["2026-01-01 400000", "2026-01-01 400001"],
+    "independent_supports": [],
+    "scenario": "unity_cup",
+    "topic": "topic",
+    "confidence": "medium",
+    "by": "agent",
+    "date": "2026-10-12",
+    "limits": [],
+    "contradicts": [],
+    "open": []
+  },
+  "cases": [
+    {
+      "name": "valid_edit",
+      "edit": {"--limits": "single frame evidences this"},
+      "reason": "narrow the support to the frame that shows it",
+      "expect_rc": 0,
+      "expect_audit": true,
+      "expect_validate_fail": false
+    },
+    {
+      "name": "rejected_schedule_on_one_frame",
+      "edit": {"--claim": "Mood tiers are five at +20/+10/0/-10/-20 percent.", "--supports": "2026-01-01 400000"},
+      "reason": "attempt a schedule-shaped claim on one frame",
+      "expect_rc": 2,
+      "expect_audit": false,
+      "expect_validate_fail": false
+    },
+    {
+      "name": "surgical_edit_diverges_from_audit",
+      "edit": {"--limits": "written straight to the file"},
+      "reason": "correct the limits through the command",
+      "expect_rc": 0,
+      "expect_audit": true,
+      "surgical_after_audit": true,
+      "expect_validate_fail": true
+    }
+  ]
+}

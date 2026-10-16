@@ -1,6 +1,6 @@
 # Screenshot corpus coverage
 
-Generated `2026-10-11` by `tools/screenshots.py report`. Counts come from `inventory.jsonl` and `notes-index.jsonl`, never from this text.
+Generated `2026-10-13` by `tools/screenshots.py report`. Counts come from `inventory.jsonl` and `notes-index.jsonl`, never from this text.
 
 ## Corpus
 
@@ -21,10 +21,10 @@ Generated `2026-10-11` by `tools/screenshots.py report`. Counts come from `inven
 
 | State | Count | Share |
 | --- | --- | --- |
-| `not_reviewed` | 1023 | 88.3% |
+| `not_reviewed` | 1002 | 86.5% |
 | `documented_unverified` | 0 | 0.0% |
-| `verified` | 132 | 11.4% |
-| `partial` | 4 | 0.3% |
+| `verified` | 157 | 13.5% |
+| `partial` | 0 | 0.0% |
 | `skipped` | 0 | 0.0% |
 | `duplicate_candidate` | 0 | 0.0% |
 | **total** | **1159** | |
@@ -95,7 +95,7 @@ From the canonical `clusters.json` (dHash, Hamming 6, 60-frame rolling window). 
 
 | Cluster | Size | Representative |
 | --- | --- | --- |
-| 725 | 58 | `2026-07-18 001811` |
+| 725 | 45 | `2026-07-17 233344` |
 | 80 | 38 | `2026-07-14 202142` |
 | 66 | 23 | `2026-07-14 194819` |
 | 64 | 17 | `2026-07-14 194531` |
@@ -106,7 +106,7 @@ From the canonical `clusters.json` (dHash, Hamming 6, 60-frame rolling window). 
 | 7 | 10 | `2026-07-14 121144` |
 | 62 | 10 | `2026-07-14 194326` |
 
-Total distinct clusters on this corpus: 750.
+Total distinct clusters on this corpus: 753.
 
 ## Unmatched note references
 
@@ -116,12 +116,12 @@ None.
 
 | Bucket | Count |
 | --- | --- |
-| `not_reviewed` | 1023 |
+| `not_reviewed` | 1002 |
 | `documented_unverified` | 0 |
-| `partial` | 4 |
+| `partial` | 0 |
 | `skipped` | 0 |
 | `duplicate_candidate` | 0 |
-| `verified` | 132 |
+| `verified` | 157 |
 
 The queue is generated, not typed: `tools/screenshots.py queue`.
 

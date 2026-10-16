@@ -1,0 +1,42 @@
+{
+ "id": "B009",
+ "question": "Characterize representatives of the 19 undersampled clusters (0 verified members each).",
+ "ids": [
+  "2026-07-14 125202",
+  "2026-07-14 200337",
+  "2026-07-14 223816",
+  "2026-07-14 231517",
+  "2026-07-14 232236",
+  "2026-07-15 021357",
+  "2026-07-15 022456",
+  "2026-07-15 023221",
+  "2026-07-15 023245",
+  "2026-07-15 023707",
+  "2026-07-15 024545",
+  "2026-07-15 031458",
+  "2026-07-15 042138",
+  "2026-07-15 044441",
+  "2026-07-15 051909",
+  "2026-07-15 153801",
+  "2026-07-15 155912",
+  "2026-07-15 160030",
+  "2026-07-15 160036"
+ ],
+ "why": "coverage-gap listed 19 clusters with no verified member; one representative per cluster records genuine UI variation and removes clusters_undersampled.",
+ "output_schema": "review + evidence per confirmed frame with structured screen_type",
+ "verify": "screenshots.py validate stays clean; coverage-gap reports zero clusters_undersampled",
+ "next": null,
+ "created": "2026-10-12",
+ "results": [],
+ "summary": {
+  "batch": "B009",
+  "frame_count": 19,
+  "unique_frame_count": 19,
+  "duplicate_ids": [],
+  "log_entries": 19,
+  "states": {
+   "verified": 19
+  },
+  "unresolved_ids": []
+ }
+}

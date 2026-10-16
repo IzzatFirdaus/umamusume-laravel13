@@ -63,6 +63,7 @@ INV = os.path.join(REG, "inventory.jsonl")
 NOTES = os.path.join(REG, "notes-index.jsonl")
 EVIDENCE = os.path.join(REG, "evidence.jsonl")
 BATCHES = os.path.join(REG, "batches")
+CAPTURE_MANIFEST = os.path.join(REG, "capture", "manifest.jsonl")
 REFS_INDEX = os.path.join(REG, "refs-index.jsonl")
 DISPOSITIONS = os.path.join(REG, "dispositions.jsonl")
 CLUSTERS = os.path.join(ROOT, "docs", "design-research", "_scratch", "analysis", "color", "clusters.json")
@@ -90,9 +91,46 @@ DISPOSITION_KINDS = [
     "filename_typo",         # the cited name is a typo; resolves_to names the real frame
 ]
 
+# A claim that asserts a complete schedule or table (every tier, or all five
+# values of a row) must not be `observed` on a single supporting frame: one
+# reading cannot establish the whole ladder. Revert it to `inferred`, or narrow
+# the text to the literal frame reading.
+SCHEDULE_RE = re.compile(
+    r"Lv1.*Lv2|five tiers|\+\d+%?/[+\-]?\d+%?/[+\-]?\d+%?/[+\-]?\d+%?/[+\-]?\d+%?")
+
 # Global scenarios the browser reports coverage for. A scenario with no captured
 # frames is reported as `capture_required`, not as an empty search result.
 SCENARIOS = ["URA Finale", "Unity Cup", "Trackblazer", "Our Grand Concert"]
+
+
+def _scenario_aliases():
+    """Reverse alias map from every spelled variant to its canonical slug."""
+    path = os.path.join(REG, "targets.json")
+    if not os.path.exists(path):
+        return {}
+    try:
+        targets = json.load(open(path, encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    out = {}
+    for canonical, variants in (targets.get("scenario_aliases") or {}).items():
+        for v in variants or []:
+            out[v.strip().lower()] = canonical
+    return out
+
+
+def canonical_scenario(value):
+    """Collapse a scenario spelling to its canonical slug.
+
+    Lower-cases, folds spaces and hyphens to underscores, then applies the
+    reverse alias table so `URA Finale`, `Unity-Cup` and `Unity Cup` each land
+    on one slug. An empty value stays empty.
+    """
+    if not value:
+        return value
+    folded = re.sub(r"[\s\-]+", "_", str(value).strip().lower())
+    return _scenario_aliases().get(str(value).strip().lower(), folded)
+
 
 # Fields the inventory pass owns. Everything else in a record is preserved on
 # regeneration, which is what makes review progress survive a re-run.
@@ -421,6 +459,67 @@ def load_signature_names():
     return {s.get("name") for s in load_json(SIGNATURES) if s.get("name")}
 
 
+def _recompute_cluster_fields(rows, only=None):
+    """Rebuild the derived cluster fields from each frame's cluster_index.
+
+    A split changes membership, so every frame in a touched cluster (the
+    source and each destination) needs its rep, size, count and neighbour
+    list rebuilt together; a partial update leaves derived fields that
+    disagree with membership. Clusters outside `only` keep the canonical
+    values the derivation produced.
+    """
+    by_cluster = collections.defaultdict(list)
+    for r in rows:
+        cid = r.get("cluster_index")
+        if cid is not None and (only is None or cid in only):
+            by_cluster[cid].append(r)
+    for members in by_cluster.values():
+        fnames = sorted(r["filename"] for r in members)
+        rep = fnames[0]
+        for r in members:
+            r["cluster_rep"] = rep
+            r["cluster_count"] = len(members)
+            r["cluster_size"] = len(members)
+            r["near_duplicate_cluster"] = [f for f in fnames if f != r["filename"]]
+            r["dhash_matches_cluster"] = None if rep == r["filename"] else True
+
+
+def _cluster_split_overrides():
+    """Cluster reassignments recorded by `cluster-split`, keyed by ref.
+
+    review-log.jsonl is the append-only audit trail; `inventory` replays it so
+    a re-derivation from the canonical clusters.json cannot silently undo a
+    split. The last event for a ref wins.
+    """
+    path = os.path.join(REG, "review-log.jsonl")
+    if not os.path.exists(path):
+        return {}
+    overrides = {}
+    try:
+        for e in read_jsonl(path):
+            if e.get("event") == "cluster_split" and e.get("ref"):
+                overrides[e["ref"]] = e.get("to_cluster")
+    except ValueError:
+        return {}
+    return overrides
+
+
+def _apply_cluster_splits(rows):
+    """Replay recorded cluster splits onto freshly derived cluster fields."""
+    overrides = _cluster_split_overrides()
+    if not overrides:
+        return
+    touched = {c for c in overrides.values() if c is not None}
+    for r in rows:
+        if r.get("ref") in overrides and r.get("cluster_index") is not None:
+            touched.add(r["cluster_index"])
+    for r in rows:
+        to = overrides.get(r.get("ref"))
+        if to is not None:
+            r["cluster_index"] = to
+    _recompute_cluster_fields(rows, touched)
+
+
 def new_record(ref):
     return {
         "schema_version": SCHEMA_VERSION,
@@ -600,6 +699,11 @@ def cmd_inventory(args):
                 rec["exact_duplicate_of"] = refs[0] if refs[0] != ref else None
 
     rows.sort(key=lambda r: r["filename"])
+    # A manual cluster split is registry state, not a canonical-file edit: the
+    # canonical clusters.json is outside this registry's scope and would revert
+    # a hand-edited inventory on the next run. Replay the recorded splits so
+    # the correction is durable without touching that file.
+    _apply_cluster_splits(rows)
     write_jsonl(INV, rows, "filename")
 
     stale = [k for k in old_by_ref if k not in by_ref and k not in used_old]
@@ -838,7 +942,76 @@ def cmd_notes(args):
 
 # ---------------------------------------------------------------- validate
 
+def _obs_screen_types(r):
+    """Screen types named by the frame's latest declaring observation.
+
+    Observations are append-only, so a later review supersedes an earlier one:
+    a frame retyped from `unclassified` to `predictions-modal` reports the new
+    type, not both. Every type on that latest observation is kept, because one
+    observation may legitimately name several.
+    """
+    for o in reversed([o for o in r.get("observations", []) if isinstance(o, dict)]):
+        found = [t.strip() for t in (o.get("screen_type") or "").split(",") if t.strip()]
+        if found:
+            return found
+    return []
+
+
+INVARIANTS = [
+    "inventory_parses",
+    "unique_refs",
+    "frame_on_disk_matches_record",
+    "review_history_matches_log",
+    "verified_requires_observation_and_observer",
+    "observed_support_is_typed",
+    "contract_evidence_is_verified_and_typed",
+    "packet_evidence_is_verified_and_typed",
+    "evidence_backlinks_resolve",
+    "backlink_matches_claim",
+    "scenario_is_canonical",
+    "screen_type_in_vocabulary",
+    "unclassified_has_follow_up",
+    "evidence_edited_matches_audit",
+    "handoff_counts_match_registry",
+    "active_blocker_names_required_scenario",
+    "resolved_entry_names_existing_intake",
+    "review_log_audit_events_have_observer",
+]
+
+
+def _allowed_screen_types():
+    """Screen-type names the registry accepts, or None when none is declared.
+
+    `required` and `additional` come from targets.json; `additional` names a
+    real screen that needs no contract and does not count against
+    `min_verified_per_type`. `in_use` declares the legacy names already present
+    in the data, so the vocabulary is explicit rather than inferred: a name that
+    is not declared is drift and fails validation.
+
+    A registry that declares no vocabulary at all has none to enforce, so the
+    check stays inert rather than rejecting every type in the corpus.
+    """
+    path = os.path.join(REG, "targets.json")
+    if not os.path.exists(path):
+        return None
+    try:
+        st = json.load(open(path, encoding="utf-8")).get("screen_types", {}) or {}
+    except (OSError, ValueError):
+        return None
+    declared = [k for k in ("required", "additional", "in_use") if st.get(k)]
+    if not declared:
+        return None
+    allowed = {"unclassified"}
+    for key in declared:
+        allowed |= set(st.get(key) or [])
+    return allowed
+
+
 def cmd_validate(args):
+    if getattr(args, "list_invariants", False):
+        for name in INVARIANTS:
+            print(name)
+        return 0
     fails, warns = [], []
     try:
         inv = read_jsonl(INV)
@@ -924,8 +1097,8 @@ def cmd_validate(args):
         for e in r.get("evidence", []):
             if not e.get("claim"):
                 fails.append("%s: evidence without a claim" % r["ref"])
-            if e.get("kind") not in ("observed", "inferred"):
-                fails.append("%s: evidence with invalid kind %r" % (r["ref"], e.get("kind")))
+            if e.get("status") not in ("inferred", "observed", "confirmed"):
+                fails.append("%s: evidence with invalid status %r" % (r["ref"], e.get("status")))
             if not e.get("supports"):
                 warns.append("%s: evidence claim with no supporting frame" % r["ref"])
             for t in e.get("supports", []):
@@ -972,8 +1145,6 @@ def cmd_validate(args):
         elif eid in ev_ids:
             fails.append("duplicate eid %s" % eid)
         ev_ids.add(eid)
-        if e.get("kind") not in ("observed", "inferred"):
-            fails.append("%s: invalid kind %r" % (eid, e.get("kind")))
         if not e.get("claim"):
             fails.append("%s: no claim text" % eid)
         if not e.get("supports"):
@@ -983,9 +1154,13 @@ def cmd_validate(args):
         for s in e.get("supports", []):
             if s not in {r["ref"] for r in inv}:
                 fails.append("%s: supports unknown frame %r" % (eid, s))
-        status = e.get("status") or e.get("kind")
+        status = e.get("status")
         if status not in ("inferred", "observed", "confirmed"):
             fails.append("%s: invalid status %r" % (eid, status))
+        if (status == "observed" and len(e.get("supports", [])) == 1
+                and SCHEDULE_RE.search(e.get("claim") or "")):
+            fails.append("%s: a full schedule/table claim needs more than one supporting "
+                         "frame; revert to inferred or narrow the claim" % eid)
         for s in e.get("independent_supports", []):
             if s not in e.get("supports", []):
                 fails.append("%s: independent_supports %s is not in supports" % (eid, s))
@@ -995,12 +1170,178 @@ def cmd_validate(args):
             if len(clusters) < 2:
                 fails.append("%s: a confirmed claim needs >=2 independent capture contexts "
                              "(near-duplicates of one screen do not confirm)" % eid)
+        if status == "observed":
+            for s in e.get("supports", []):
+                if s in by_ref and not _obs_screen_types(by_ref[s]):
+                    fails.append("%s: support %r has no screen_type; a cited frame must be "
+                                 "typed before it can back an observed claim" % (eid, s))
+
+    # A contract may only cite frames the registry has verified and typed.
+    cdir = os.path.join(REG, "contracts")
+    if os.path.isdir(cdir):
+        for name in sorted(os.listdir(cdir)):
+            if not name.endswith(".json"):
+                continue
+            try:
+                contract = json.load(open(os.path.join(cdir, name), encoding="utf-8"))
+            except (OSError, ValueError) as exc:
+                fails.append("contract %s: unreadable (%s)" % (name, exc))
+                continue
+            for e in contract.get("evidence", []):
+                ref = e.get("ref")
+                if ref not in by_ref:
+                    fails.append("contract %s: evidence cites unknown frame %r" % (name, ref))
+                elif by_ref[ref].get("state") != "verified":
+                    fails.append("contract %s: evidence cites unverified frame %s"
+                                 % (name, ref))
+                elif not _obs_screen_types(by_ref[ref]):
+                    fails.append("contract %s: evidence cites frame %s with no screen_type"
+                                 % (name, ref))
+
+    # A packet is a derived artifact: it may only cite verified, typed frames.
+    pdir = os.path.join(REG, "packets")
+    if os.path.isdir(pdir):
+        for name in sorted(os.listdir(pdir)):
+            mpath = os.path.join(pdir, name, "manifest.json")
+            if not os.path.isfile(mpath):
+                continue
+            try:
+                manifest = json.load(open(mpath, encoding="utf-8"))
+            except (OSError, ValueError) as exc:
+                fails.append("packet %s: unreadable manifest (%s)" % (name, exc))
+                continue
+            for f in manifest.get("supporting_frames", []):
+                ref = f.get("ref")
+                if ref not in by_ref:
+                    fails.append("packet %s: cites unknown frame %r" % (name, ref))
+                elif by_ref[ref].get("state") != "verified":
+                    fails.append("packet %s: cites unverified frame %s" % (name, ref))
+                elif not _obs_screen_types(by_ref[ref]):
+                    fails.append("packet %s: cites frame %s with no screen_type"
+                                 % (name, ref))
+
+    # HANDOFF.md is the hand-off contract; its counts must be the live ones.
+    handoff = os.path.join(REG, "HANDOFF.md")
+    if os.path.exists(handoff):
+        try:
+            ho = json.load(open(handoff, encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            fails.append("HANDOFF.md: unreadable (%s)" % exc)
+            ho = None
+        if isinstance(ho, dict):
+            live = collections.Counter(r.get("state") for r in inv)
+            expected = {
+                "total": len(inv),
+                "verified": live.get("verified", 0),
+                "partial": live.get("partial", 0),
+                "documented_unverified": live.get("documented_unverified", 0),
+                "not_reviewed": live.get("not_reviewed", 0),
+            }
+            for k, v in expected.items():
+                if ho.get("counts", {}).get(k) != v:
+                    fails.append("HANDOFF.md counts.%s is %r but the registry holds %r"
+                                 % (k, ho.get("counts", {}).get(k), v))
+
+    # A blocker must name a target the registry actually tracks, and a resolved
+    # entry must point at a blocker that really exists. Superseded history is
+    # exempt: an old blocker may name a scenario since resolved or retired.
+    if os.path.exists(CAPTURE_MANIFEST):
+        entries = read_jsonl(CAPTURE_MANIFEST)
+        required_scenarios = set((json.load(open(os.path.join(REG, "targets.json"),
+                                                 encoding="utf-8"))
+                                  .get("scenarios", {}).get("required", []))
+                                 if os.path.exists(os.path.join(REG, "targets.json"))
+                                 else [])
+        intake_ids = {e.get("intake_id") for e in entries}
+        superseded = {e.get("resolves_intake_id") for e in entries
+                      if e.get("status") == "resolved"}
+        for e in entries:
+            scen = (e.get("scenario") or "").lower().replace(" ", "_")
+            if (e.get("status") == "capture_required"
+                    and e.get("intake_id") not in superseded
+                    and scen not in required_scenarios):
+                fails.append("active capture blocker %r names a scenario absent from "
+                             "targets.json:scenarios.required" % e.get("scenario"))
+            if e.get("status") == "resolved":
+                target = e.get("resolves_intake_id")
+                if target not in intake_ids:
+                    fails.append("capture resolved entry %r names resolves_intake_id %r "
+                                 "which is not in the manifest"
+                                 % (e.get("intake_id"), target))
 
     # Back-links in the inventory must not name a missing evidence id.
     for r in inv:
         for b in r.get("evidence", []):
             if b.get("eid") not in ev_ids:
                 fails.append("%s: back-links unknown eid %r" % (r["ref"], b.get("eid")))
+
+    # One canonical spelling per scenario. A variant form would make every
+    # scenario query depend on a fallback, which is how coverage goes missing.
+    for r in inv:
+        s = r.get("scenario")
+        if s and canonical_scenario(s) != s:
+            fails.append("%s: non-canonical scenario %r (expected %r)"
+                         % (r["ref"], s, canonical_scenario(s)))
+    for e in ev:
+        s = e.get("scenario")
+        if s and canonical_scenario(s) != s:
+            fails.append("%s: non-canonical scenario %r (expected %r)"
+                         % (e.get("eid"), s, canonical_scenario(s)))
+
+    # A screen type must be a name the registry accepts. Free text drifts the
+    # vocabulary until no screen-type query can be trusted.
+    allowed_types = _allowed_screen_types()
+    if allowed_types is not None:
+        for r in inv:
+            for t in _obs_screen_types(r):
+                if t not in allowed_types:
+                    fails.append("%s: screen_type %r is not in the vocabulary "
+                                 "(targets.json screen_types.required, .additional, "
+                                 "or .in_use)" % (r["ref"], t))
+
+    # `unclassified` is a terminal state, not a parking lot: the ambiguity has
+    # to be written down or the frame is silently unqueryable forever.
+    for r in inv:
+        types_ = _obs_screen_types(r)
+        if "unclassified" in types_:
+            follow_ups = [o.get("follow_up_question") for o in r.get("observations", [])
+                          if isinstance(o, dict) and o.get("follow_up_question")]
+            if not follow_ups:
+                fails.append("%s: screen_type unclassified without a follow_up "
+                             "question" % r["ref"])
+
+    # Every logged evidence edit must match the record it claims to have
+    # produced. A mismatch means the file was edited outside `evidence-edit`,
+    # which is exactly the unlogged surgical edit this invariant exists to catch.
+    ev_now = {e.get("eid"): e for e in ev if e.get("eid")}
+    if os.path.exists(os.path.join(REG, "review-log.jsonl")):
+        for row in read_jsonl(os.path.join(REG, "review-log.jsonl")):
+            if row.get("event") != "evidence_edited":
+                continue
+            eid = row.get("eid")
+            current = ev_now.get(eid)
+            if current is None:
+                fails.append("evidence_edited %s: no such claim in evidence.jsonl" % eid)
+                continue
+            for k, v in (row.get("after") or {}).items():
+                if current.get(k) != v:
+                    fails.append("evidence_edited %s: field %r is %r but the audit "
+                                 "entry recorded %r; the claim was edited outside "
+                                 "evidence-edit" % (eid, k, current.get(k), v))
+
+    # A back-link carries a copy of the claim, and evidence.jsonl owns the claim.
+    # Nothing re-syncs the copy automatically, so a claim corrected after its
+    # back-link was written leaves the frame quoting stale text or a stale status.
+    ev_by_id = {e["eid"]: e for e in ev if e.get("eid")}
+    for r in inv:
+        for b in r.get("evidence", []):
+            src = ev_by_id.get(b.get("eid"))
+            if src is None:
+                continue  # unknown eid, already failed above
+            for field in ("claim", "status", "confidence", "supports"):
+                if b.get(field) != src.get(field):
+                    fails.append("%s: back-link %s carries a stale %s; re-sync it from "
+                                 "evidence.jsonl" % (r["ref"], b["eid"], field))
 
     # Reverse citation index: stale if the corpus grew and nobody rebuilt it.
     refs_index = REFS_INDEX
@@ -1051,6 +1392,12 @@ def cmd_validate(args):
             warns.append("review-log.jsonl holds %d entries but records carry %d review_history "
                          "entries; the log is stale" % (len(log_rows), history_total))
         for row in log_rows:
+            if row.get("event"):
+                # An audit event (scenario normalization, evidence edit) is not a
+                # review: it names its own subject and carries no review state.
+                if not row.get("by"):
+                    fails.append("review-log.jsonl audit event without an observer")
+                continue
             if row.get("ref") not in by_ref:
                 warns.append("review-log.jsonl cites unknown frame %r" % row.get("ref"))
             if row.get("state") not in STATES:
@@ -1187,6 +1534,22 @@ def cmd_report(args):
         return 2
 
     st = collections.Counter(r["state"] for r in inv)
+
+    if getattr(args, "json", False):
+        print(json.dumps({
+            "generated": today(),
+            "counts": {
+                "total": len(inv),
+                "verified": st.get("verified", 0),
+                "partial": st.get("partial", 0),
+                "documented_unverified": st.get("documented_unverified", 0),
+                "not_reviewed": st.get("not_reviewed", 0),
+                "skipped": st.get("skipped", 0),
+                "duplicate_candidate": st.get("duplicate_candidate", 0),
+            },
+        }, indent=1, ensure_ascii=False, sort_keys=True))
+        return 0
+
     cats = collections.Counter(r.get("category_from_notes") or "unassigned" for r in inv)
     dims = collections.Counter("%sx%s" % (r.get("width"), r.get("height")) for r in inv)
     unmatched = [n for n in notes if n["match"] == "unresolved"]
@@ -1448,7 +1811,8 @@ def cmd_show(args):
     if args.category:
         rows = [r for r in rows if (r.get("category_from_notes") or "").startswith(args.category)]
     if args.scenario:
-        rows = [r for r in rows if r.get("scenario") == args.scenario]
+        want = canonical_scenario(args.scenario)
+        rows = [r for r in rows if canonical_scenario(r.get("scenario")) == want]
     if args.note:
         rows = [r for r in rows if any(n["note_file"] == args.note for n in r.get("note_refs", []))]
     if args.full:
@@ -1507,7 +1871,7 @@ def cmd_review(args):
                 if getattr(args, "screen_type", None):
                     obs["screen_type"] = args.screen_type
                 if args.scenario:
-                    obs["scenario"] = args.scenario
+                    obs["scenario"] = canonical_scenario(args.scenario)
                 if getattr(args, "career_phase", None):
                     obs["career_phase"] = args.career_phase
                 if getattr(args, "mechanics", None):
@@ -1524,7 +1888,7 @@ def cmd_review(args):
             r["skipped_reason"] = args.reason if args.state == "skipped" else r.get("skipped_reason")
             r["next_action"] = args.next_action
             if args.scenario:
-                r["scenario"] = args.scenario
+                r["scenario"] = canonical_scenario(args.scenario)
             if args.category:
                 r["screen"] = args.category
             if args.questions:
@@ -1627,7 +1991,7 @@ def cmd_evidence(args):
         return 2
 
     eid = "%s-%04d" % (re.sub(r"[^A-Za-z0-9-]", "-", args.id), len(read_jsonl(EVIDENCE)) + 1)
-    status = getattr(args, "status", None) or args.kind
+    status = args.status
     independent = [s.strip() for s in (getattr(args, "independent", None) or "").split(",") if s.strip()]
     bad_indep = [s for s in independent if s not in supports]
     if bad_indep:
@@ -1638,11 +2002,10 @@ def cmd_evidence(args):
         "schema_version": SCHEMA_VERSION,
         "eid": eid,
         "claim": args.claim,
-        "kind": args.kind,
         "status": status,
         "supports": supports,
         "independent_supports": independent,
-        "scenario": args.scenario,
+        "scenario": canonical_scenario(args.scenario),
         "topic": args.topic,
         "confidence": args.confidence,
         "by": args.observer,
@@ -1657,7 +2020,7 @@ def cmd_evidence(args):
         fh.write(json.dumps(rec, ensure_ascii=False, sort_keys=True) + "\n")
     for s in supports:
         by_ref[s].setdefault("evidence", []).append({
-            "eid": eid, "claim": args.claim, "kind": args.kind,
+            "eid": eid, "claim": args.claim,
             "status": status, "supports": supports, "confidence": args.confidence,
         })
     write_jsonl(INV, inv, "filename")
@@ -1670,24 +2033,151 @@ def cmd_evidence_query(args):
     ev = read_jsonl(EVIDENCE)
     rows = ev
     if args.status:
-        rows = [e for e in rows if (e.get("status") or e.get("kind")) == args.status]
+        rows = [e for e in rows if e.get("status") == args.status]
     if args.confidence:
         rows = [e for e in rows if e.get("confidence") == args.confidence]
     if args.scenario:
-        rows = [e for e in rows if e.get("scenario") == args.scenario]
+        want = canonical_scenario(args.scenario)
+        rows = [e for e in rows if canonical_scenario(e.get("scenario")) == want]
     if args.open_only:
         rows = [e for e in rows if e.get("open") or e.get("next_question")]
     if args.json:
         print(json.dumps(rows, indent=1, ensure_ascii=False, sort_keys=True))
         return 0
     for e in rows:
-        st = e.get("status") or e.get("kind")
+        st = e.get("status")
         print("%-28s %-9s %-7s %-10s %s"
               % (e.get("eid"), st, e.get("confidence") or "-",
                  e.get("scenario") or "-", (e.get("claim") or "")[:70]))
         if e.get("open") or e.get("next_question"):
             print("    open: %s" % (e.get("next_question") or "; ".join(e.get("open", []))))
     print("-- %d claim(s)" % len(rows))
+    return 0
+
+
+@_locked
+def cmd_evidence_edit(args):
+    """Correct an existing claim in place, under the lock, with an audit entry.
+
+    `evidence` only ever appends, so a correction would otherwise be a surgical
+    file edit: no lock, no provenance, and invisible to any concurrent reader.
+    This command holds the lock, validates the corrected shape against the same
+    rules the writer applies, writes atomically, and appends one
+    `evidence_edited` row to review-log.jsonl carrying the before and after
+    records plus the reason, so an unlogged edit is detectable by `validate`.
+    """
+    with registry_lock():
+        claims = read_jsonl(EVIDENCE)
+        idx = next((i for i, e in enumerate(claims) if e.get("eid") == args.eid), None)
+        if idx is None:
+            print("error: no claim with eid %r" % args.eid, file=sys.stderr)
+            return 2
+
+        before = dict(claims[idx])
+        after = dict(before)
+
+        if args.claim is not None:
+            after["claim"] = args.claim
+        if args.status is not None:
+            after["status"] = args.status
+        if args.confidence is not None:
+            after["confidence"] = args.confidence
+        if args.scenario is not None:
+            after["scenario"] = canonical_scenario(args.scenario)
+        if args.supports is not None:
+            supports = [s.strip() for s in args.supports.split(",") if s.strip()]
+            inv = read_jsonl(INV)
+            unknown = [s for s in supports if s not in {r["ref"] for r in inv}]
+            if unknown:
+                print("error: unknown supporting frames: %s" % ", ".join(unknown),
+                      file=sys.stderr)
+                return 2
+            after["supports"] = supports
+            if args.independent is None:
+                after["independent_supports"] = []
+        if args.independent is not None:
+            independent = [s.strip() for s in args.independent.split(",") if s.strip()]
+            bad = [s for s in independent if s not in after.get("supports", [])]
+            if bad:
+                print("error: --independent frames must be a subset of --supports: %s"
+                      % ", ".join(bad), file=sys.stderr)
+                return 2
+            after["independent_supports"] = independent
+        if args.contradicts is not None:
+            after["contradicts"] = [x.strip() for x in args.contradicts.split(";") if x.strip()]
+        if args.limits is not None:
+            after["limits"] = [x.strip() for x in args.limits.split(";") if x.strip()]
+        if args.open is not None:
+            after["open"] = [x.strip() for x in args.open.split(";") if x.strip()]
+
+        if after.get("status") not in ("inferred", "observed", "confirmed"):
+            print("error: invalid status %r" % after.get("status"), file=sys.stderr)
+            return 2
+        if not after.get("supports"):
+            print("error: a claim must name at least one supporting frame", file=sys.stderr)
+            return 2
+        if (after.get("status") == "observed"
+                and len(after.get("supports", [])) == 1
+                and SCHEDULE_RE.search(after.get("claim") or "")):
+            print("error: a full schedule/table claim needs more than one supporting "
+                  "frame; revert to inferred or narrow the claim", file=sys.stderr)
+            return 2
+        bad_indep = [s for s in after.get("independent_supports", [])
+                     if s not in after.get("supports", [])]
+        if bad_indep:
+            print("error: independent_supports %s is not in supports"
+                  % ", ".join(bad_indep), file=sys.stderr)
+            return 2
+        if after.get("status") == "confirmed":
+            by_ref = {r["ref"]: r for r in read_jsonl(INV)}
+            clusters = {(by_ref[s].get("cluster_rep") or s)
+                        for s in after.get("supports", []) if s in by_ref}
+            if len(clusters) < 2:
+                print("error: a confirmed claim needs >=2 independent capture contexts",
+                      file=sys.stderr)
+                return 2
+
+        if after == before:
+            print("evidence-edit: %s already matches; nothing to correct" % args.eid)
+            return 0
+
+        claims[idx] = after
+        write_jsonl(EVIDENCE, claims, "eid")
+
+        # Back-links are re-derived from the corrected claim. The rows are
+        # mutated in place through by_ref: re-reading the file here would
+        # produce fresh dicts, so the stale back-link would survive on every
+        # frame that already carried one and validate would fail on a
+        # duplicate eid back-link.
+        by_ref = {r["ref"]: r for r in read_jsonl(INV)}
+        for r in by_ref.values():
+            r["evidence"] = [b for b in r.get("evidence", [])
+                             if b.get("eid") != args.eid]
+        for s in after.get("supports", []):
+            if s in by_ref:
+                by_ref[s].setdefault("evidence", []).append({
+                    "eid": after["eid"], "claim": after["claim"],
+                    "status": after["status"], "supports": after["supports"],
+                    "confidence": after.get("confidence"),
+                })
+        write_jsonl(INV, list(by_ref.values()), "filename")
+
+        stamp = datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%SZ")
+        with open(os.path.join(REG, "review-log.jsonl"), "a",
+                  encoding="utf-8", newline="\n") as fh:
+            fh.write(json.dumps({
+                "event": "evidence_edited",
+                "date": today(),
+                "timestamp": stamp,
+                "eid": args.eid,
+                "before": before,
+                "after": after,
+                "reason": args.reason,
+                "by": args.observer,
+            }, ensure_ascii=False, sort_keys=True) + "\n")
+
+    print("evidence-edit: corrected %s" % args.eid)
     return 0
 
 
@@ -1717,15 +2207,16 @@ def cmd_browse(args):
     if args.confidence:
         frames = [r for r in frames if r.get("confidence") == args.confidence]
     if args.scenario:
-        frames = [r for r in frames if r.get("scenario") == args.scenario]
+        want = canonical_scenario(args.scenario)
+        frames = [r for r in frames if canonical_scenario(r.get("scenario")) == want]
 
     claims = ev
     if args.status:
-        claims = [e for e in claims if (e.get("status") or e.get("kind")) == args.status]
+        claims = [e for e in claims if e.get("status") == args.status]
     if args.confidence:
         claims = [e for e in claims if e.get("confidence") == args.confidence]
     if args.scenario:
-        claims = [e for e in claims if e.get("scenario") == args.scenario]
+        claims = [e for e in claims if canonical_scenario(e.get("scenario")) == want]
 
     reps = {r.get("cluster_rep") for r in frames if r.get("cluster_rep")}
     counts = {
@@ -1738,12 +2229,13 @@ def cmd_browse(args):
 
     gaps = []
     for s in SCENARIOS:
-        tagged = any(r.get("scenario") == s
-                     or any(s.lower() in (o.get("text") or "").lower()
-                            for o in r.get("observations", []))
-                     for r in inv)
+        want = canonical_scenario(s)
+        tagged = any(canonical_scenario(r.get("scenario")) == want for r in inv)
         if not tagged:
             gaps.append(s)
+
+    active_blockers, _resolved = active_capture_blockers()
+    blockers = active_blockers
 
     if args.json:
         print(json.dumps({
@@ -1751,6 +2243,7 @@ def cmd_browse(args):
             "frames": sorted(r["ref"] for r in frames),
             "claims": sorted(e["eid"] for e in claims),
             "capture_required": gaps,
+            "capture_blockers": blockers,
         }, indent=1, ensure_ascii=False, sort_keys=True))
         return 0
 
@@ -1759,11 +2252,18 @@ def cmd_browse(args):
               "claims", "open_questions"):
         L.append("| %s | %d |" % (k, counts[k]))
     L.append("")
-    if gaps:
+    gap_keys = {s.lower().replace(" ", "_"): s for s in gaps}
+    all_keys = sorted(set(gap_keys) | set(blockers))
+    if all_keys:
         L.append("## Capture required")
         L.append("")
-        for s in gaps:
-            L.append("- %s: no captured frames in the corpus" % s)
+        for key in all_keys:
+            name = gap_keys.get(key) or key.replace("_", " ").title()
+            base = ("no captured frames in the corpus" if key in gap_keys
+                    else "additional states not captured")
+            states = blockers.get(key, [])
+            extra = ("; missing states: %s" % ", ".join(states)) if states else ""
+            L.append("- %s: %s%s" % (name, base, extra))
         L.append("")
     L.append("## Frames (%d)" % len(frames))
     for r in sorted(frames, key=lambda x: x["ref"])[:100]:
@@ -1771,9 +2271,101 @@ def cmd_browse(args):
     L.append("")
     L.append("## Claims (%d)" % len(claims))
     for e in claims:
-        L.append("- %s [%s] %s" % (e["eid"], e.get("status") or e.get("kind"), e.get("claim")))
+        L.append("- %s [%s] %s" % (e["eid"], e.get("status"), e.get("claim")))
     print("\n".join(L))
     return 0
+
+
+def active_capture_blockers():
+    """Capture blockers that no later ``resolved`` entry supersedes.
+
+    The manifest is append-only: an original ``capture_required`` entry stays
+    active until a later entry names its ``intake_id`` in ``resolves_intake_id``.
+    Returns ``(active, resolved)`` dicts keyed by the normalized scenario slug.
+    """
+    if not os.path.exists(CAPTURE_MANIFEST):
+        return {}, {}
+    entries = read_jsonl(CAPTURE_MANIFEST)
+    resolved_ids = {e.get("resolves_intake_id") for e in entries
+                    if e.get("status") == "resolved"}
+    active, resolved = {}, {}
+    for e in entries:
+        key = (e.get("scenario") or "").lower().replace(" ", "_")
+        if e.get("status") == "resolved":
+            resolved.setdefault(key, e)
+        elif (e.get("status") == "capture_required"
+                and e.get("intake_id") not in resolved_ids):
+            active[key] = e.get("missing_states", [])
+    return active, resolved
+
+
+def cmd_coverage_gap(args):
+    """Report what the registry does not yet cover, against targets.json.
+
+    Exit 0 when every target is met, 1 while any gap remains.  A gap that
+    game access makes infeasible is closed by amending targets.json only after
+    a matching ``capture_required`` entry exists in capture/manifest.jsonl.
+    """
+    targets_path = os.path.join(REG, "targets.json")
+    if not os.path.exists(targets_path):
+        print("error: targets.json not found; cannot compute coverage gaps", file=sys.stderr)
+        return 2
+    targets = json.load(open(targets_path, encoding="utf-8"))
+    inv = read_jsonl(INV)
+    ev = read_jsonl(EVIDENCE)
+    verified = [r for r in inv if r.get("state") == "verified"]
+
+    def types_of(r):
+        return set(_obs_screen_types(r))
+
+    type_counts = collections.Counter()
+    for r in verified:
+        for t in types_of(r):
+            type_counts[t] += 1
+    st = targets.get("screen_types", {})
+    st_missing = [t for t in st.get("required", [])
+                  if type_counts.get(t, 0) < st.get("min_verified_per_type", 0)]
+
+    cl = targets.get("clusters", {})
+    big = cl.get("min_representatives_for_clusters_over_size", 4)
+    minrep = cl.get("min_representatives", 1)
+    by_cluster = collections.defaultdict(list)
+    for r in inv:
+        cid = r.get("cluster_index")
+        if cid is not None:
+            by_cluster[cid].append(r)
+    undersampled = []
+    for cid, members in sorted(by_cluster.items()):
+        if len(members) >= big:
+            vcount = sum(1 for m in members if m.get("state") == "verified")
+            if vcount < minrep:
+                undersampled.append({"cluster_id": cid, "size": len(members),
+                                     "verified_count": vcount})
+
+    sc = targets.get("scenarios", {})
+    sc_missing = []
+    for s in sc.get("required", []):
+        n = sum(1 for r in verified if canonical_scenario(r.get("scenario")) == s)
+        if n < sc.get("min_verified_per_scenario", 0):
+            sc_missing.append(s)
+
+    eh = targets.get("evidence", {})
+    observed = [e for e in ev if e.get("status") == "observed"]
+    shortfall = {"observed": len(observed), "target": eh.get("min_observed_claims", 0)}
+
+    active_blockers, resolved_blockers = active_capture_blockers()
+    report = {
+        "screen_types_missing": st_missing,
+        "clusters_undersampled": undersampled,
+        "scenarios_missing": sc_missing,
+        "evidence_shortfall": shortfall,
+        "capture_blockers_active": sorted(active_blockers),
+        "capture_blockers_resolved": sorted(resolved_blockers),
+    }
+    print(json.dumps(report, indent=1, ensure_ascii=False, sort_keys=True))
+    unmet = (st_missing or undersampled or sc_missing
+             or shortfall["observed"] < shortfall["target"])
+    return 1 if unmet else 0
 
 
 @_locked
@@ -1986,6 +2578,125 @@ def cmd_disposition(args):
     return 0
 
 
+@_locked
+def cmd_cluster_split(args):
+    """Reassign cluster membership for an over-collapsed near-duplicate cluster.
+
+    The canonical clusters.json groups frames by a rolling-window dHash, so one
+    cluster can lump frames that direct inspection shows are distinct screens.
+    This command records that finding in the registry itself: it rewrites the
+    affected cluster fields in inventory.jsonl atomically and appends one
+    `cluster_split` event per reassigned frame to review-log.jsonl, which
+    `inventory` replays so the split survives a re-derivation.
+
+    An assignment names a frame plus either the screen type it was inspected as
+    (every frame assigned the same type lands in one new cluster) or an
+    explicit new cluster id. A frame the registry has never reviewed is never
+    moved: without an observation there is no evidence for the reassignment,
+    and a cluster membership change is a fact that needs provenance like any
+    other.
+    """
+    try:
+        assignments = load_json(args.assignments)
+    except (OSError, ValueError) as exc:
+        print("error: assignments file unreadable: %s" % exc, file=sys.stderr)
+        return 2
+    if not isinstance(assignments, list) or not assignments:
+        print("error: assignments must be a non-empty JSON list of "
+              "{ref, to} objects", file=sys.stderr)
+        return 2
+    seen = set()
+    for a in assignments:
+        if not isinstance(a, dict) or not a.get("ref") or a.get("to") in (None, ""):
+            print("error: each assignment needs a ref and a non-empty 'to'",
+                  file=sys.stderr)
+            return 2
+        if a["ref"] in seen:
+            print("error: duplicate assignment for %s" % a["ref"], file=sys.stderr)
+            return 2
+        seen.add(a["ref"])
+
+    inv = read_jsonl(INV)
+    by_ref = {r["ref"]: r for r in inv}
+    source = args.cluster
+    member_refs = {r["ref"] for r in inv if r.get("cluster_index") == source}
+    if not member_refs:
+        print("error: no frames carry cluster %r" % source, file=sys.stderr)
+        return 2
+    allowed = _allowed_screen_types()
+    for a in assignments:
+        r = by_ref.get(a["ref"])
+        if r is None:
+            print("error: unknown frame %r" % a["ref"], file=sys.stderr)
+            return 2
+        if a["ref"] not in member_refs:
+            print("error: %s is not in cluster %r" % (a["ref"], source),
+                  file=sys.stderr)
+            return 2
+        if a.get("sid") and a["sid"] != r.get("sid"):
+            print("error: sid mismatch for %s: %r is not %r"
+                  % (a["ref"], a["sid"], r.get("sid")), file=sys.stderr)
+            return 2
+        if not _obs_screen_types(r):
+            print("error: %s carries no observation; an unreviewed frame has "
+                  "no evidence for a reassignment" % a["ref"], file=sys.stderr)
+            return 2
+        if isinstance(a["to"], str) and allowed is not None \
+                and a["to"].strip() not in allowed:
+            print("error: %r is not a declared screen type" % a["to"],
+                  file=sys.stderr)
+            return 2
+
+    max_id = max([r.get("cluster_index") or 0 for r in inv] + [source])
+    type_ids, next_id = {}, max_id + 1
+    plan = []
+    for a in assignments:
+        to = a["to"]
+        if isinstance(to, bool):
+            print("error: 'to' must be a screen type or a cluster id",
+                  file=sys.stderr)
+            return 2
+        if isinstance(to, int):
+            if to == source:
+                print("error: %s already sits in cluster %r" % (a["ref"], source),
+                      file=sys.stderr)
+                return 2
+            new_id = to
+        else:
+            to = str(to).strip()
+            if to not in type_ids:
+                type_ids[to] = next_id
+                next_id += 1
+            new_id = type_ids[to]
+        plan.append((a, new_id))
+
+    touched = {source} | {new_id for _, new_id in plan}
+    for a, new_id in plan:
+        by_ref[a["ref"]]["cluster_index"] = new_id
+    _recompute_cluster_fields(inv, touched)
+    write_jsonl(INV, inv, "filename")
+
+    stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    with open(os.path.join(REG, "review-log.jsonl"), "a",
+              encoding="utf-8", newline="\n") as fh:
+        for a, new_id in plan:
+            fh.write(json.dumps({
+                "event": "cluster_split",
+                "date": today(),
+                "timestamp": stamp,
+                "ref": a["ref"],
+                "sid": by_ref[a["ref"]].get("sid"),
+                "from_cluster": source,
+                "to_cluster": new_id,
+                "to_type": a["to"] if isinstance(a["to"], str) else None,
+                "reason": args.reason,
+                "by": args.observer,
+            }, ensure_ascii=False, sort_keys=True) + "\n")
+    print("cluster-split: %d frame(s) reassigned from cluster %s"
+          % (len(plan), source))
+    return 0
+
+
 def cmd_selftest(args):
     """Delegate to screenshots_selftest.py so the assertions live in one place."""
     mod = os.path.join(os.path.dirname(os.path.abspath(__file__)), "screenshots_selftest.py")
@@ -2013,9 +2724,13 @@ def main(argv=None):
     s.set_defaults(fn=cmd_notes)
 
     s = sub.add_parser("validate", help="check registry integrity")
+    s.add_argument("--list-invariants", action="store_true",
+                   help="print the invariant names and exit without validating")
     s.set_defaults(fn=cmd_validate)
 
     s = sub.add_parser("report", help="write and print COVERAGE.md")
+    s.add_argument("--json", action="store_true",
+                   help="print the counts as JSON instead of writing COVERAGE.md")
     s.set_defaults(fn=cmd_report)
 
     s = sub.add_parser("queue", help="prioritized outstanding work")
@@ -2097,11 +2812,23 @@ def main(argv=None):
     s.add_argument("--list", action="store_true", help="list all dispositions")
     s.set_defaults(fn=cmd_disposition)
 
+    s = sub.add_parser("cluster-split",
+                       help="reassign cluster membership for an over-collapsed cluster")
+    s.add_argument("--cluster", type=int, required=True,
+                   help="source cluster id as recorded in inventory.jsonl")
+    s.add_argument("--assignments", required=True,
+                   help="JSON file: [{ref, to}, ...] where to is a screen type "
+                        "or an explicit new cluster id")
+    s.add_argument("--observer", required=True, help="who inspected the frames")
+    s.add_argument("--reason",
+                   default="cluster over-collapsed: direct inspection shows distinct screens",
+                   help="why the cluster was split")
+    s.set_defaults(fn=cmd_cluster_split)
+
     s = sub.add_parser("evidence", help="append a mechanic claim backed by supporting frames")
     s.add_argument("--id", required=True, help="topic prefix, e.g. mood-effects")
     s.add_argument("--claim", required=True)
     s.add_argument("--supports", required=True, help="comma separated refs")
-    s.add_argument("--kind", required=True, choices=["observed", "inferred"])
     s.add_argument("--scenario")
     s.add_argument("--topic")
     s.add_argument("--confidence", choices=["low", "medium", "high"])
@@ -2110,8 +2837,7 @@ def main(argv=None):
     s.add_argument("--limits", help="semicoloned limits")
     s.add_argument("--contradicts", help="semicoloned contradicted claims")
     s.add_argument("--open", help="semicoloned open questions")
-    s.add_argument("--status", choices=["inferred", "observed", "confirmed"],
-                   help="claim status; defaults to --kind")
+    s.add_argument("--status", required=True, choices=["inferred", "observed", "confirmed"])
     s.add_argument("--independent", help="comma separated supports that are independent capture contexts")
     s.add_argument("--next-question", help="the next verification question")
     s.set_defaults(fn=cmd_evidence)
@@ -2124,6 +2850,22 @@ def main(argv=None):
     s.add_argument("--json", action="store_true")
     s.set_defaults(fn=cmd_evidence_query)
 
+    s = sub.add_parser("evidence-edit",
+                       help="correct an existing claim under the registry lock, with an audit entry")
+    s.add_argument("--eid", required=True, help="the claim to correct")
+    s.add_argument("--claim")
+    s.add_argument("--status", choices=["inferred", "observed", "confirmed"])
+    s.add_argument("--confidence", choices=["low", "medium", "high"])
+    s.add_argument("--supports", help="comma separated refs")
+    s.add_argument("--independent", help="comma separated supports that are independent capture contexts")
+    s.add_argument("--contradicts", help="semicoloned contradicted claims")
+    s.add_argument("--limits", help="semicoloned limits")
+    s.add_argument("--open", help="semicoloned open questions")
+    s.add_argument("--scenario")
+    s.add_argument("--reason", required=True, help="why the correction is needed")
+    s.add_argument("--observer", required=True)
+    s.set_defaults(fn=cmd_evidence_edit)
+
     s = sub.add_parser("browse", help="filter reviewed frames and evidence; Markdown or JSON")
     s.add_argument("--state", nargs="+")
     s.add_argument("--screen-type")
@@ -2134,6 +2876,9 @@ def main(argv=None):
     s.add_argument("--status", choices=["inferred", "observed", "confirmed"])
     s.add_argument("--json", action="store_true")
     s.set_defaults(fn=cmd_browse)
+
+    s = sub.add_parser("coverage-gap", help="report unmet targets from targets.json")
+    s.set_defaults(fn=cmd_coverage_gap)
 
     s = sub.add_parser("selftest", help="assert the tool's invariants on a throwaway corpus")
     s.set_defaults(fn=cmd_selftest)

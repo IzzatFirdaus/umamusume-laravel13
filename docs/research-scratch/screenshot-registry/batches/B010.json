@@ -1,0 +1,34 @@
+{
+ "id": "B010",
+ "question": "What do the eleven undersampled clusters actually show?",
+ "ids": [
+  "2026-07-14 200337",
+  "2026-07-14 231517",
+  "2026-07-14 232236",
+  "2026-07-15 023707",
+  "2026-07-15 023221",
+  "2026-07-15 024545",
+  "2026-07-15 031458",
+  "2026-07-15 044441",
+  "2026-07-15 153801",
+  "2026-07-15 160030",
+  "2026-07-15 160036"
+ ],
+ "why": "coverage-gap named these clusters as having no verified representative",
+ "output_schema": "review + evidence per confirmed frame",
+ "verify": "each cluster has one verified frame with a recorded observation",
+ "next": "close clusters_undersampled in coverage-gap",
+ "created": "2026-10-12",
+ "results": [],
+ "summary": {
+  "batch": "B010",
+  "frame_count": 11,
+  "unique_frame_count": 11,
+  "duplicate_ids": [],
+  "log_entries": 12,
+  "states": {
+   "verified": 11
+  },
+  "unresolved_ids": []
+ }
+}

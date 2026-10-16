@@ -1,0 +1,2 @@
+{"cluster_index": 1, "cluster_rep": "Screenshot 2026-01-01 400000.png", "height": 1080, "note_files": [], "note_refs": [], "observations": [{"screen_type": "skill-selection", "text": "fixture observation for hint discount", "visible_mechanics": ["hint-discount"]}], "ref": "2026-01-01 400000", "sid": "s-a", "state": "verified", "width": 1920}
+{"cluster_index": 2, "cluster_rep": "Screenshot 2026-01-01 400001.png", "height": 1080, "note_files": [], "note_refs": [], "observations": [], "ref": "2026-01-01 400001", "sid": "s-b", "state": "not_reviewed", "width": 1920}

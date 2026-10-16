@@ -1,0 +1,9 @@
+{
+ "screen_type": "hint-discount",
+ "components": [
+  {"name": "chip", "label": "Hint chip", "states": ["Lv1"], "values": ["10%"], "units": "percent"}
+ ],
+ "observed_interactions": [],
+ "unresolved_questions": [],
+ "evidence": [{"field": "chip", "ref": "2026-01-01 400000", "sid": "s-a"}]
+}

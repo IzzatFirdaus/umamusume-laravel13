@@ -1,0 +1,9 @@
+{
+ "screen_type": "fixture-screen",
+ "components": [
+  {"name": "widget", "label": "Widget", "states": ["on", "off"], "values": ["on"], "units": "state"}
+ ],
+ "observed_interactions": ["the widget toggles"],
+ "unresolved_questions": [],
+ "evidence": [{"field": "widget", "ref": "2026-01-01 400000", "sid": "s-a"}]
+}
