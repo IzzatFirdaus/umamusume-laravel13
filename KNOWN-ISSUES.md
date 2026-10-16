@@ -2295,7 +2295,7 @@ caused by that sweep, and not fixed by it.
 `routes/web.php:158` declares `runs.skills.planner` and `SkillsPlannerController::show()` renders it, and
 the screen works: `CareerSkillsPlannerTest` (19 cases) and `SkillSpendCoverageTest` (4 cases) exercise its
 props, its write and its refusal states. Nothing in `app/` or `resources/` generates a link to it. The one
-entry point the shipped tool had was the 0.1.0 record screen's header (`SCREEN_SPEC.md` SCR-CAR-016 still
+entry point the shipped tool had was the 2.0.0 record screen's header (`SCREEN_SPEC.md` SCR-CAR-016 still
 carried that sentence until `380350e`), and `F2` retired that screen behind a redirect while giving the
 Skills planner no successor door: the Cockpit's action grid is documented as deliberately not growing an
 entry for it (`SCREEN_SPEC.md`, SCR-CAR-016: "that grid is the turn's decisions, and skills are
@@ -2735,6 +2735,156 @@ This entry files neither the "Place 1st" versus "Place top 1" variant nor the "E
 least N fans" variant; both are wording conflicts inside a class already decoded and are recorded in
 `SCREEN_SPEC.md` §7 by the documentation slice that this instruction excludes.
 
+## KI-101 The browser harness serves `public/build` without a freshness check, so a Vue change that crashes on first render can pass the browser gate - FILED 2026-10-16 (scenario-field-metadata wiring close-out), OPEN
+
+**Symptom.** `tests/browser/global-setup.ts` boots its server against whatever bundle `public/build`
+currently holds and never compares it against the sources. A Vue change that lands after the last
+`npm run build` is invisible to the whole browser suite: the specs exercise the old bundle and report
+green (or report failures that read as product defects) while the changed code has never run in a browser.
+
+**Evidence.** The cockpit-wt merge (`53e491a`, 2026-10-16 01:44) landed
+`register('spirit_bursts', SpiritBurstsPanel)` in `resources/js/components/scenario/ScenarioPanel.vue`
+against `spirit_bursts` — a widget key, not a panel flag — so the panel-shaped component received the
+widget shape and its template read `props.scenario.alerts` off undefined. Every Unity Cup Cockpit render
+crashed with `TypeError: Cannot read properties of undefined (reading 'alerts')`. The crash was invisible
+to every session's browser gate until the scenario-field-metadata wiring pass (2026-10-16) rebuilt
+`public/build`, whose first Cockpit walk produced the stack recorded in that pass's report, §8. Feature
+tests could not see it: they assert payloads, not renders.
+
+**Proving commands.** With the stale bundle in place and the registration present,
+`PLAYWRIGHT_PORT=8141 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/<session>/browser-8141.sqlite npm run test:browser -- tests/browser/career-cockpit-forms.spec.ts -g "without a runtime error"`
+passes against the old bundle and fails after a rebuild — the bundle, not the tree, decides the outcome.
+`ls -la public/build/manifest.json` next to `git log -1 --format=%ci -- resources/js/` states the
+staleness directly: a manifest older than the newest source file is the condition.
+
+**Smallest fix.** Have `tests/browser/global-setup.ts` refuse to run when the bundle is stale rather than
+rebuild unconditionally: compare `public/build/manifest.json`'s mtime against the newest mtime under
+`resources/js/**`, and abort with a one-line message ("public/build is older than resources/js; run
+npm run build") before any server boots. A rebuild inside the harness would serialise every concurrent
+session behind one Vite build, which is the KI-70 hazard the nothing-that-writes rule exists for; a
+`--fresh-build` opt-in flag is the second option and costs every session the build's wall time, while the
+refusal costs only the session that actually needed the rebuild.
+
+**Who it impacts.** Every session running the browser suite on this shared tree after any Vue change: the
+gate reports the stale bundle's behaviour rather than the working tree's, and a first-render crash lands
+silently.
+
+**What closure does not cover.** Closure is the staleness check landing in `tests/browser/global-setup.ts`
+(a protected path, so an owner-approved edit) and the first green post-check run of the cockpit specs. It
+does not cover the KI-70 tension beyond what the refusal shape already answers, and it does not
+retroactively gate any run made before the check lands — including every green browser line recorded
+against a stale bundle in this file's earlier entries.
+
+## KI-102 `.env.example` cannot be parsed by the repo's own dotenv reader and ships MySQL defaults into a SQLite-only project, so a fresh clone's first boot dies twice - FILED 2026-10-16 (close-out pass, on a prior pass's measurements), OPEN
+
+**Symptom.** A fresh clone follows the standard bring-up — copy `.env.example` to `.env`, then
+`composer install` — and the install dies in `package:discover`, because the first artisan boot parses the
+copied `.env` and the parse throws. A fresh worktree that gets past that dies again at
+`migrate --seed`, on DNS resolution for a database host that does not exist.
+
+**Cause.** Two independent defects in `.env.example`, a file nothing in this repository loads and every
+fresh clone copies:
+
+1. Line 1 is `APP_NAME=Trainer Desk` — an unquoted value containing a space. The repository's own dotenv
+   parser (vlucas/phpdotenv, shipped in `vendor/`) rejects it.
+2. Lines 25-30 declare `DB_CONNECTION=mysql`, `DB_HOST=mysql`, `DB_PORT=3306`, `DB_DATABASE=laravel`,
+   `DB_PASSWORD=password` — a MySQL/Sail default set, in a project that is SQLite-only by contract
+   (`AGENTS.md` §1) and whose own comment above the block ("Local fallback database (used when
+   Docker/Sail is unavailable). Under Sail, DB_CONNECTION=mysql") states the relationship backwards.
+
+**Evidence.** The parse failure reproduces in one line against the vendor copy of the parser, no app boot
+needed: `php -r 'require "vendor/autoload.php"; Dotenv\Dotenv::createImmutable(getcwd(), ".env.example")->load();'`
+→ `Dotenv\Exception\InvalidFileException: Failed to parse dotenv file. Encountered unexpected whitespace at [Trainer Desk].`
+The DNS consequence was measured in a fresh worktree bring-up (a prior pass, recorded in this file's
+session notes as `getaddrinfo for mysql`): `migrate --seed` under the copied defaults cannot resolve the
+host named `mysql`. The file contents themselves are the config-level evidence for both halves.
+
+**Fix options.** Three, in ascending scope: (a) quote the value — `APP_NAME="Trainer Desk"`; (b) replace
+the MySQL default block with the SQLite triple this project actually runs
+(`DB_CONNECTION=sqlite`, `DB_DATABASE=database/database.sqlite`, the rest removed), keeping any Sail note
+as a comment; (c) split the file into `.env.example` (SQLite, parseable) and `.env.mysql.example` for
+anyone who genuinely runs Sail. **Recommendation: (b) alone** — it fixes both the parse surface (nothing
+to quote wrongly) and the DNS death, and (c) manufactures a second file for a deployment path
+(`AGENTS.md` §12: no hosting, no public deploy) this repository does not have. Not implemented here; the
+file is one owner edit and the choice of shape is the owner's.
+
+**Who it impacts.** Every fresh clone, every fresh worktree, every CI bring-up — the first two commands
+of the standard setup both die before any of this repository's own code runs.
+
+**What closure does not cover.** Closure is the owner's chosen shape landing in `.env.example` and one
+clean `cp .env.example .env && composer install` on a machine with no MySQL host. It does not cover the
+Sail/MariaDB question for contributors who run one anyway (that is what option (c) would have named),
+and it does not cover `.env.testing` or `phpunit.xml`, which are separate files with their own
+agreements (`AGENTS.md` §18).
+
+
+## KI-103 `SetupDraft::saved()` reaches six wizard pages and none of them declares the prop, so the saved half of the step bar is dead code and two written rules about it disagree - FILED 2026-10-16 (findings capture pass), OPEN
+
+**Symptom.** The layout that draws the wizard's step bar declares an optional `saved` prop and ORs it
+with `visited` when deciding whether a step reads as done. Six pages bind it, and not one of the six
+declares it in its own `defineProps`, so under `<script setup>` typed props the read is `undefined` and
+the `saved` disjunct can never be true. The marking still looks correct, because `visited` alone drives
+it — which is exactly why nobody noticed: the feature is dead, not visibly broken. The disagreement is
+the real finding, because two records describe opposite rules for the same pixels.
+
+**Evidence.** The consumer declares and uses the prop: `resources/js/layouts/SetupLayout.vue:28` is
+`defineProps<{ step: number; visited?: number[]; saved?: number[] }>()` and `:61` computes
+`props.visited?.includes(n) === true || props.saved?.includes(n) === true`.
+
+Six pages bind the read, and a declaration search across all of `resources/js` for `saved:` or `saved?:`
+returns one hit in a page prop block and it is not any of these six (`SaveVeteran.vue:70`, an unrelated
+`{ tags, notes }` shape):
+
+```
+resources/js/pages/Career/ScenarioSelect.vue:113   :saved="props.saved"
+resources/js/pages/Career/TraineeSelect.vue:222    :saved="props.saved"
+resources/js/pages/Career/BuildTarget.vue:302      :saved="props.saved"
+resources/js/pages/Career/LegacySelect.vue:235     :saved="props.saved"
+resources/js/pages/Career/DeckSelect.vue:229       :saved="props.saved"
+resources/js/pages/Career/Preflight.vue:152        :saved="props.saved"
+```
+
+Step 1's own declaration block, immediately above its read, names four props and no fifth, and the
+controller does send the value (`ScenarioSelectController.php:51`, `'saved' => SetupDraft::saved()`):
+
+```ts
+const props = defineProps<{
+    scenarios: ScenarioCard[];
+    visited: number[];
+    selected: string | null;
+    ruleset: { value: string | null; title: string };
+}>();
+```
+
+`:visited="props.visited"` on the same line is declared and therefore live, which is what makes the
+asymmetry the finding rather than a styling choice. And the two rules that disagree about what the
+marking should mean are `SetupDraft::saved()`'s own docblock, "Only steps with actual saved data show
+'done'" (slice 4.1), against the owner ruling of 2026-10-13 recorded in `SetupDraft::visited()`,
+"'completed' means visited, not written to the draft". The dead prop means the ruling wins by accident
+rather than by decision.
+
+**Why no gate catches it.** `npm run typecheck` is `tsc --noEmit`, which does not type-check SFC
+templates; it exited 0 in the worktree pass with this line present, and it would exit 0 either way. The
+feature test asserts the payload (`saved` reaches the page) and the browser spec asserts rendered step
+marking for *navigation*, not for the saved set, so neither end is covered. This is the same blind spot
+KI-93 recorded for `tests/`, now demonstrated on a prop.
+
+**Smallest fix.** The owner picks one of two, and both are one decision rather than six patches.
+(a) Make the path live: add `saved: number[]` to each of the six pages' `defineProps`, six one-line
+diffs, and then rule which of the two written semantics governs, because the `saved` disjunct would start
+changing pixels that the 2026-10-13 ruling says are decided by `visited`. (b) Delete the dead path: drop
+`saved` from `SetupLayout`'s props and its use at `:61`, drop the six bindings, and retire
+`SetupDraft::saved()` plus the controllers' `saved` payload — the lazier fix, and the one that agrees
+with the standing ruling, which the accident of the missing declaration currently enforces anyway. Take
+(b) only after checking `saved()`'s other callers and the tests that pin it, which this pass did not
+enumerate. Not applied here: all six files are wizard pages, `ScenarioSelect.vue` is peer-modified in the
+shared tree, and the deselect patch still has to be rebased onto that same file.
+
+**Proving command.** `npx vue-tsc --noEmit` on the tree (a tool this repo does not currently install —
+adding it is a dependency decision, not a fix) would flag the undeclared read; until then,
+`grep -c saved resources/js/pages/Career/ScenarioSelect.vue` returning `1` next to a
+`SetupLayout` that declares a `saved` prop is the check.
+
 ## KI-104 The Cockpit nested two `Edit team state` disclosures under one label, so the team-editor browser cases hit a strict-mode collision; the fix is written but uncommitted - FILED 2026-10-16 (findings capture pass), FIXED IN TREE, NOT LANDED
 
 Measured 2026-10-16 05:18, from `cockpit-unity-cup-no-crash.png` and `git show HEAD:`.
@@ -2760,12 +2910,17 @@ while a peer works is barred by KI-70. A pass that lands this diff should re-run
 tests/browser/career-cockpit-forms.spec.ts` after a build on a quiet tree, and `full-career-journey.spec.ts:144`
 addresses the same label and belongs in that sweep.
 
-**Correction, 2026-10-16.** The heading and first paragraph above state that the Cockpit "nested two `Edit team state` disclosures under one label", so the team-editor browser cases hit a strict-mode collision. That cause no longer holds. `7788b03` ("fix(team): remove the inner disclosure from UnityCupEditor") removed the inner `<details>`/`<summary>` pair, and `git grep "Edit team state" HEAD -- resources/js/` now returns one hit, `resources/js/pages/Career/Cockpit.vue:764`, the outer disclosure's summary. There is no second disclosure and no nested-label collision.
+## KI-105 — Workflow guardrails added: session-private artifacts, database readiness, safe staging, failure classification, pre-flight (W0-guardrails) — FILED 2026-10-15, OPEN
 
-The live cause is `Cockpit.vue:760`'s `:open="isActive"` (added by `a787834`, "fix(cockpit): one turn source, year-scoped alerts, three run states"). `isActive` is `props.run.status === 'Active'` (`Cockpit.vue:263`), so a fresh Active career renders `<details data-region="team-state">` already open. The committed spec clicks the `summary` unconditionally (`tests/browser/career-cockpit-forms.spec.ts:165` and `:197` at HEAD), and a `summary` click on an open `<details>` closes it, so the team-editor assertions then run against a collapsed panel. The "nested two disclosures" cause is withdrawn; the surviving cause is the unconditional `summary` click against an auto-opened disclosure.
+Status: OPEN
 
-The fix lives in an uncommitted peer diff, not in this entry's file: it adds `if (!(await editor.evaluate((el) => el instanceof HTMLDetailsElement && el.open)))` before the `summary` click at both spec sites (working-tree lines 167 and 235), so the click is skipped when the disclosure is already open. That diff is not staged by this correction.
+Proves with: AGENTS.md amended with the new subsection under §9 Testing and validation; tools/gate-preflight.php added (reads only, exits non-zero if >2000ms). Pre-flight probe returns 0 on quiet box and intended to exit non-zero under contention (KI-74). Amendment cites KI-60, KI-70, KI-73, KI-74, KI-75, KI-80, KI-84 explicitly.
 
-Evidence: `.scratch-uma/wizard-locator-2026-10-16/findings.md`; `git grep -n "Edit team state" HEAD -- resources/js/`; `git show HEAD:resources/js/pages/Career/Cockpit.vue | sed -n '755,770p'`; `git grep -n "isActive" -- resources/js/pages/Career/Cockpit.vue`.
+Closure conditions (must all hold):
+- AGENTS.md contains the guardrails subsection with the cited KIs.
+- tools/gate-preflight.php exists, is executable/readable, reads only, and exits non-zero above documented threshold (quiet run exit 0 with ms quoted; contention run exit != 0).
+- Owner decision on O-1: settle whether origin/master is closure bar, or name integration branch and redefine closure against it (not resolved by this slice).
+- Owner decision on browser harness isolation: whether playwright.config.ts absorbs port/scratch DB defaults, or AGENTS.md states as convention (not resolved by this slice).
 
-**What this correction does not cover.** It does not touch the KI-101, KI-102 and KI-103 entries in the same peer append, and it does not touch the duplicate `### KI-100` heading above this entry; those are the peer's to land. It does not decide whether the peer's open-guard fix should land, and it does not re-run the two `career-cockpit-forms.spec.ts` cases.
+What closure does not cover: landing KI-98, KI-99; cross-surface domain defects (KI-82, KI-87, KI-91, KI-95); creating active-issues dashboard and register validator; changing playwright.config.ts; resolving O-1. This slice is documentation-and-tooling only.
+
