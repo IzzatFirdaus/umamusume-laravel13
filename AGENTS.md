@@ -326,6 +326,39 @@ failure-attribution step applies verbatim, and a sweep that came back red under
 load is reported void with its counts and the contention readings attached,
 never as a defect list (KI-74).
 
+**Test dispatch.** A Level 1, Level 2 or Level 3 run may be dispatched to a subagent with a defined
+brief rather than launched synchronously and waited on. The subagent's result is admissible only when
+it is measured against a **frozen tree state** — an isolated `git worktree add` at the commit under
+test, never the shared working tree. A run against the shared tree while any session is editing cannot
+be classified: a red result may be the code under test, a peer's uncommitted edit, or the tree moving
+under the bundle mid-run, and none of those is distinguishable from the log alone.
+
+The brief states the target commit, the specs and filters to run, and the required report shape: the
+commit sha and dirty-path count at start and end, each command run, each result, and a classification
+per failure (regression, pre-existing, unrelated, infrastructure, flaky, inconclusive) with the
+focused reproduction already attempted for any case it calls a regression. The main agent keeps editing
+the shared tree; nothing it writes reaches the subagent's run and nothing the subagent writes reaches
+the shared tree — its worktree is retired once the report is read.
+
+The dispatch relaxes nothing in this block. A writing command (a `pint` without `--test`, a `migrate`
+in any form, `npm run build`) is not dispatched while any peer session works, whether in the shared
+tree or in an isolated one whose `node_modules` or `vendor` is a junction into it — verify `LinkType`
+is empty before trusting that install. A dispatched run that comes back red is classified by the
+subagent before anything re-runs, and the classification travels with the report. A broad dispatch is
+pre-flighted exactly as a broad synchronous sweep is: a timed SQLite read, and a contended box voids
+it before it starts (KI-74).
+
+Prompts that direct this work should therefore say **"dispatch a subagent to run X against an isolated
+worktree at HEAD"** rather than "run X", so the run does not block the main agent and its evidence is
+attributable to a commit.
+
+The pattern's precedent is the `verify-commit-pass` dispatch of 2026-10-16: four Feature filters and
+four browser specs run against `23f9d64` on an isolated worktree, whose classification named
+`64fc4b8`'s trainee-label change as the root cause of the 17 failing `career-cockpit-forms` cases. That
+result describes a commit; a synchronous run against the shared tree the same day described a moving
+target. The worktree was retired once its report was read, so the precedent is its report, not a path
+on disk.
+
 **Everything a session writes under `.scratch-uma/` goes in its own
 subdirectory (owner rule, 2026-10-13).** Logs, scratch SQLite databases, dumps,
 probes, and driver scripts all live at `.scratch-uma/<session>/...`, never in
@@ -613,3 +646,4 @@ fails if the logic breaks; a trivial one-liner needs no test.
 | 2026-10-08   | §9 gains the cost-aware escalation policy: Level 1 focused runs during implementation, Level 2 related regression at slice end, Level 3 full verification only at checkpoints; the full suite is a gate, not the feedback loop. Adds failure classification (regression, pre-existing, unrelated, infrastructure, flaky, inconclusive) with focused reproduction, the explicit rule that a full-suite pass may never be claimed unexecuted, and the statement that no level licenses weakening, deleting, or suppressing tests. Repo-agnostic in shape; the existing change-class table and hand-off stay binding as its Level 3. | Agents were burning most of their implementation time rerunning the expensive full and browser suites after small localized edits. The escalation ladder was implicit in §9 ("narrow first") but never written down, so nothing stopped the reflexive broad run or required attributing a broad-run failure before re-running. Concurrent-agent work in this tree also made unrelated failures common, which the classification step now handles explicitly. |
 | 2026-10-12   | §9 gains the background/parallel test-execution rule: a Level 1/Level 2 run may be backgrounded to a session-private `.scratch-uma/<session>/` log, nothing that writes (`pint` without `--test`, `migrate`, `npm run build`) is backgrounded while a peer session works, a red background run is classified before anything re-runs, a broad sweep is pre-flighted with a timed SQLite read, and the browser suite is always session-private. §2's binding-decisions row is corrected to `docs/adr/0001`-`0024`; §6's `resources/js/` counts are corrected to the measured 48 pages and 63 components (2026-10-12). | KI-70 (a shared-worktree file is a collision surface; one session's unbuildable file blocked every peer's browser gate for a day), KI-73 and KI-80 (a leaked `:8127` server and a shared scratch database each take a peer's suite down), KI-74 (a gate run on a contended worktree is void, and a red sweep under load reads as a product regression), KI-75 (`pint --dirty` reformatted another session's uncommitted file). The §2 row still ended at 0018 while 0024 is on disk, and §6's counts were a 2026-10-06 snapshot. |
 | 2026-10-13   | §9's session-private rule is generalized: everything a session writes under `.scratch-uma/` (logs, scratch databases, dumps, probes, driver scripts) goes in `.scratch-uma/<session>/...`, never the root, and both browser-harness examples are repointed from `.scratch-uma/browser-<port>.sqlite` to the session path; the `.scratch-uma` root now holds no files beyond its README and reorganize script. | Owner instruction 2026-10-13 after the root had accumulated 676 loose files (104 scratch SQLite databases, 175 logs, 72 `.exit` sidecars) because every agent wrote there by default (KI-70). The same-day sweep of `.scratch-uma/` moved 635 files into the buckets of `.scratch-uma/reorganize-scratch.ps1`; on the follow-up ruling the 41 citation-pinned evidence files moved to `.scratch-uma/cited/` and all 72 citation references across 13 tracked files were repointed, reversing for this tree the 2026-10-06 hold-in-place ruling recorded in `PROCESS-PLANS.md`. |
+| 2026-10-16   | §9 gains the **test-dispatch** subsection: a run may be dispatched to a subagent rather than launched synchronously, on the condition that it works against a frozen tree state (an isolated `git worktree add` at the commit under test), reports its commit sha and dirty-path counts at start and end, and classifies every failure before anything re-runs. Prompts that direct this work should name dispatch rather than a synchronous command. The existing background-execution rules — session-private log, nothing-that-writes-is-backgrounded, red-runs-classified-before-reruns, KI-74 pre-flight, KI-73/KI-80 browser isolation — are not relaxed. | Synchronous runs against the shared tree blocked the main agent for the full suite duration (up to 30 minutes) and produced inconclusive evidence whenever a peer session was editing: the 19 red browser cases attributed to "peer work" and the six file-level holds all trace to that pattern. The commit agent's `verify-commit-pass` run on 2026-10-16 proved the isolated-worktree dispatch gives a signal attributable to a commit — its only red cases trace to a committed defect (`64fc4b8`'s label flip), not to peer interference. The pattern was already implicitly permitted by the background-execution rule; it is now named and its preconditions stated. |
