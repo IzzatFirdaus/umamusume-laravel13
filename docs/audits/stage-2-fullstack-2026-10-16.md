@@ -1034,3 +1034,87 @@ Config and enums were swept for the same shape: `config/uma.php`, `config/scenar
 ### What §3.8 does not cover
 
 Whether the three `Proposed`-but-shipped ADRs (0022, 0023, 0025) should be accepted, amended, or their code reverted — an owner ruling, and each status line already reserves itself for it. Whether a migration without an ADR *citation* should get one (a process decision under §11, not a finding about the schema). Whether ADR-0019's pre-release mechanism and tag scheme should be chosen, and whether its owed `AGENTS.md` correction should be made now or at release. And any `Proposed` ADR's readiness for acceptance — 0019 in particular is untouched by this pass beyond the confirmed-unlanded correction.
+
+## 15. §3.11 — tools, 2026-10-17
+
+Measured at HEAD `5fb1a6b`, static analysis, read-only. No tool was executed; no `make` (KI-4 — it does not run on this host). Reference counts are from a fixed-string sweep of the tracked tree over `app/ config/ routes/ tests/ database/ bootstrap/ resources/js/ docs/ composer.json package.json Makefile AGENTS.md README.md CLAUDE.md` plus the agent dirs; refs from this audit's own seed are excluded below.
+
+### Directory census
+
+`tools/` holds **31 script and artifact files** on disk: **28 tracked, 1 untracked, 2 gitignored**, plus `tools/__pycache__/` (8 ignored build artifacts).
+
+| Question | Answer |
+|---|---|
+| Files under `tools/` | 31 (28 tracked / 1 untracked / 2 ignored) |
+| Languages | 14 Python, 6 PHP, 7 JavaScript (`.cjs`), 2 JSON, 2 text artifacts |
+| Makefile present | yes — 69 lines, 13 targets |
+| Files under `.ai/` | 15 — all Markdown (guidelines, rules, skills). **Zero runnable scripts.** |
+
+Untracked: `tools/gate-preflight.php` (the KI-74 contention probe dispatches name). Ignored: `tools/rebuild-db.php`, `tools/rebuild-db.py`.
+
+### Per-tool contract
+
+Reachability: ✅ = a composer or npm script invokes it; ➡ = reached through the Pest suite; ⏚ = manual invocation only.
+
+| Tool | Purpose | Caller | Gate id (§3.7) | Documented in | Reach |
+|---|---|---|---|---|---|
+| `lore.php` | C-4 banned-vocabulary sweep, both modes | `composer lore`, `composer lore-code` | **C-4** | registry, `AGENTS.md` | ✅ |
+| `gate.py` | design-artifact gate over `docs/design-research/prototypes/*.html` (3 files) | `python tools/gate.py` | G-1..4, G-13, G-16, D-79/84 (+ G-27/31/32, unlisted) | registry, `AGENTS.md`, README | ⏚ |
+| `adr-check.py` | ADR-set contract (FATAL/INDEX/CONTRACT/DUPE/DRIFT) | `composer docs-adr` | **G-61** | registry | ✅ |
+| `adr-index.py` | derives the `docs/adr/README.md` index table from ADR bodies | manual (README names it) | none | ADR README, PROCESS-PLANS | ⏚ |
+| `adr_rows.py` | shared row-extraction module — `adr-check.py:17` `from adr_rows import numeric_rows` | import only, not an entry point | (rides G-61) | — | n/a |
+| `doc_census.py` | documentation census, successor to the deleted inventory tables | `composer docs` | **none** | `AGENTS.md` §10, README | ✅ |
+| `doc_census_selftest.py` | two-direction check of the census citation resolver | `tests/Feature/DocCitationParityTest.php` | (C-1 via suite) | slice record | ➡ |
+| `md_fence_check.py` | finds closing code-fences carrying an info string | `python tools/md_fence_check.py` | **none** | `AGENTS.md` §10, PROCESS-PLANS, SLICE-RECORDS | ⏚ |
+| `md_fence_check_selftest.py` | fence state-machine check, both directions | **no test file references it** — manual only | none | `AGENTS.md` | ⏚ |
+| `roster-crosscheck.php` | Tier A cross-check of GameTora costume cards against saved Tier A pages; prints verdict rows | `php tools/roster-crosscheck.php` | **none** | `AGENTS.md` §6, README, CATALOG-ROSTER-WORKSTREAM | ⏚ |
+| `check_untracked.py` | lists untracked/dirty Markdown the tracked-only `git grep` passes miss | `python tools/check_untracked.py` | **none** | `AGENTS.md` §6 | ⏚ |
+| `dev-logs-pane.php` | Windows logs pane for `composer dev` (Pail needs `pcntl`, which no Windows PHP build ships) | inside `composer dev` concurrently | not a gate | `AGENTS.md` | ✅ |
+| `gate-preflight.php` | KI-74 box-contention probe — times one indexed `training_runs` read, exit 0/1/2 | dispatch convention (per-session preflight) | **none** — untracked | seed only | ⏚ |
+| `data/gen_calendar.py` | generates the Global career race-calendar tables from the GameTora export | manual | none | `docs/scenarios/09`, CONSOLIDATION-LOG | ⏚ |
+| `data/resync_doc.py` | re-syncs every generated calendar table in the scenario guide | manual, paired with the above | none | same docs | ⏚ |
+| `data/census_output.txt` | census artifact — header states its own provenance ("measured at HEAD `bc42d93`"); no writer references it | **none** — UTF-16LE, tracked | none | none | orphaned |
+| `markdown/` (10 files) | one-off markdown-lint fix/debug family (`.cjs` × 7, JSON artifacts × 2, fence viewer) from the 2026-09-28 review | **zero callers** anywhere | none | none | orphaned |
+| `debug/force-db-rebuild.py` | **destructive** dev-database rebuild, absolute-path target | zero refs, zero docs | none | none | orphaned |
+| `debug/test-final-analysis.php` | one-off `database_path()`/`realpath()` resolution probe | zero refs beyond this audit | none | none | orphaned |
+| `debug/tmp_routes.txt` | empty file (0 bytes), tracked | zero refs | none | none | orphaned |
+| `rebuild-db.php` / `rebuild-db.py` (2) | **destructive** dev-database rebuild pair, absolute-path targets | gitignored; zero refs | none | none | shadow |
+
+### Tools with no gate id — confirmed and extended
+
+§3.7's six (`doc_census.py`, `md_fence_check.py`, `roster-crosscheck.php`, `check_untracked.py`, `gate-preflight.php`, `npm run test:a11y`) are **all confirmed still gate-id-less** at this HEAD. The §3.11 sweep adds six the gate pass did not enumerate: `adr-index.py` (regenerates the index — a consistency action with no id), the two selftests (one wired into C-1, one not), `data/gen_calendar.py` + `data/resync_doc.py` (they write shipped `docs/scenarios/09` tables — generation with no verification id), and `dev-logs-pane.php` only if it is read as anything other than runtime tooling (it is — not a gate by behaviour either).
+
+### Gate-id-versus-behaviour mismatches
+
+1. **`gate.py`'s header over-claims its range and the banner under-reports its set** — the §3.7 banner finding, and its other half: `gate.py:5-6` states the check set is "the machine-checkable gates **G-1..G-17**", but nine of that range are reviewer-only by its own banner (`:272`), while three gates *outside* the range (G-27, G-31, G-32) are enforced at `:211-261` and named in neither header nor banner.
+2. **`gate.py`'s subject is prototypes, not the shipped tree.** `PROTO_DIR = docs/design-research/prototypes` (`:22-23`), globbed `*.html` top-level only — 3 files on disk at HEAD. The G-table's G-31/G-32 rows say "grep **views and JS**"; `gate.py` never reads `resources/` or `app/`. For the shipped tree, those rows remain reviewer instructions with no executable.
+3. **The Makefile's `lint:` target names the banned shape.** It runs `vendor/bin/pint --dirty --format agent`; C-3's registry row reads "the slice's own explicit paths; **never `--dirty`**" and KI-75 closed the incident. Because `make` cannot run on this host (KI-4), the target is a frozen contradiction rather than a live violation — but any Git-Bash user following the Makefile executes what the bar forbids. `migrate:` has the same class of shape: `migrate:fresh --seed`, the C-5 destructive variant, with no approval guard in the target.
+
+### Makefile target-to-equivalent map
+
+13 targets; every one has a composer/npm/artisan equivalent that exists at HEAD — **no dead target** (`uma:backup` names a real command: `UmaBackup.php`).
+
+| Target | Command | Equivalent | Shape check |
+|---|---|---|---|
+| install | composer+npm install | `composer setup` | ok |
+| dev | `composer run dev` | composer `dev` | ok |
+| test | `artisan test --compact` | composer `test` (+typecheck) | ok |
+| lint | `pint --dirty` | composer `lint` = `pint --test` | **forbidden shape** (KI-75) |
+| stan | `phpstan analyse` | composer `analyse` | ok |
+| migrate | `migrate:fresh --seed` | none in scripts | **C-5 destructive variant, unguarded** |
+| seed / fetch / reparse / backup | `db:seed`, `uma:fetch`, `uma:reparse`, `uma:backup` | artisan, live | ok |
+| lore / lore-code | `git grep` stages | composer `lore`, `lore-code` | parity pinned by `LoreGateParityTest` |
+| audit | composer+npm audit | C-8 commands | ok |
+
+The Makefile header comment cites `CONTEXT.md` and root `CONSTRAINTS.md`; **neither exists at HEAD** — both folded (CONSTRAINTS into `GOVERNANCE.md`, whose registry text still cites "root `CONSTRAINTS.md`" at `:453`). The header's own caveat — "Local-only trainer tool. Windows: run through Git Bash." — matches `AGENTS.md` §10's statement that GNU `make` cannot run here; the file survives as reference, and `LoreGateParityTest` keeps its two lore targets byte-honest against `tools/lore.php` from the other side.
+
+### Two artifact findings worth naming
+
+- **`tools/data/census_output.txt` is UTF-16LE** (first bytes `FF FE`, verified; renders as spaced characters under a UTF-8 read). A tracked file committed through a raw PowerShell `>` redirect — exactly the encoding hazard the seed's downstream notes and `8389da8` record. The hazard is not merely documented, it is in the tree.
+- The `tools/markdown/` family (10 tracked files, including a 13,792-line `md-remaining-errors.json` artifact) and `tools/debug/` (3 tracked files, one destructive, one empty) are **finished one-off sweeps left tracked with zero callers**. `debug/force-db-rebuild.py` and the ignored `rebuild-db.php`/`.py` pair write to the dev database by hard-coded absolute path with no guard and no doc — the §11 destructive-action class, sitting in the tree unannounced.
+
+Five tools carry the absolute machine path `D:\Projects\umamusume-laravel13` or its escaped variants in their source (`check_untracked.py`, `force-db-rebuild.py`, `gate-preflight.php`, `rebuild-db.php`, `rebuild-db.py`): path-locked to this box.
+
+### What §3.11 does not cover
+
+Whether any tool should be documented, given a gate id, retired, or moved out of `tools/` — product decisions, including the four orphaned one-off families. Whether a gate's pass threshold is correct — a QA ruling. Whether the Makefile should be deleted (KI-4 says it does not run, but its lore targets stay byte-pinned by `LoreGateParityTest` and the file is the registry's `make lore` counterpart). And whether the destructive `rebuild-db`/`force-db-rebuild` shapes should exist at all — §11 territory, an owner call, not an audit ruling.
