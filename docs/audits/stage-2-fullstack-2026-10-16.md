@@ -14,6 +14,17 @@ sub-audits of the twelve the full audit deferred at §5 — **§3.5 routes and �
 
 The seed's 15-orphan figure also did not sum in the original (12 named plus a "+ 4 API names" parenthetical). The appended revision's 17 replaces it.
 
+
+**Forward-note addendum, 2026-10-17.** Three section-3 verdicts were superseded after section 1-4 was filed at `4e57083`; do not treat the seed body as current on them:
+
+- **section 3's Database/* verdict.** Section 3 named three unrouted page files; section 6 adjudicates them live. Routes register at `routes/web.php:289-291` (`database.trainees`, `database.skills`, `database.supports`), served by `CatalogController@databaseIndex` (`CatalogController.php:72`), `SkillController@databaseIndex` (`SkillController.php:59`), `SupportCardController@databaseIndex` (`SupportCardController.php:49`); all render through `renderPage()`, which the seed's single-line parser could not see.
+
+- **section 3's literal-path count.** Section 3 named two wizard literal sites; section 7 enumerates eleven write sites across nine files. Four files state the literal-URL pattern is deliberate - there is no Ziggy dependency here: `BuildTarget.vue:170`, `ScenarioSelect.vue:66`, `TraineeProfile.vue:116`, `TraineeSelect.vue:206`.
+
+- **section 3's orphan adjudication.** Section 3 named 15 orphan candidates; section 5 adjudicates `runs.create` live regardless (23 test files, `SCREEN_SPEC.md:217`; "Confirmed-dead: 0 of 86"). Its UI link was deliberately retired: `AppLayout.vue:123` points "New Career" at `career.scenario`, not `runs.create`.
+
+**Stale items in this file's own section 10.** The `uma:backup` command test closed at `23f9d64` (`test(backup): pin uma:backup contract on scratch database`), and dark-ramp >= 3:1 already passes: G-18 measures all 19 text/background pairs plus 9 grade-badge fills in both themes, worst dark 5.48:1. Current figures live at section 5 onward - section 5 supersedes section 3's route, controller and method counts; sections 6-7 supersede the Database/*, literal-path and orphan figures above.
+
 ---
 
 ## 1. Method, and the bounds on what it can see
