@@ -16,9 +16,10 @@
  * is the only rarity column and a trainee-level badge would be an aggregate presented as a fact.
  *
  * Selection is the same card-button pattern as step 1: a native `<button>` with `aria-pressed`, in the tab
- * order with no arrow-key handler, stating which row holds the stored choice after the PUT round trip. The
- * row's own profile link is a separate control, because SCREEN-004 exists precisely so a Trainer can read
- * more before committing.
+ * order with no arrow-key handler, stating which row holds the stored choice after the PUT round trip. That
+ * one action is a toggle, and its own label says which way the next click goes; the state word lives inside
+ * the button rather than beside it, so the row never prints it twice. The row's own profile link is a
+ * separate control, because SCREEN-004 exists precisely so a Trainer can read more before committing.
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
@@ -143,8 +144,8 @@ const direction = ref(props.direction);
 const loading = ref(false);
 
 const chosen = ref<number | null>(null);
-const selectForm = useForm<{ umamusume_id: number; character_card_id: number | null }>({
-    umamusume_id: 0,
+const selectForm = useForm<{ umamusume_id: number | null; character_card_id: number | null }>({
+    umamusume_id: null,
     character_card_id: null,
 });
 // Which form the Trainer means for each trainee row, kept per row so browsing the roster does not carry
@@ -194,9 +195,13 @@ function clearFilters(): void {
 }
 
 function choose(trainee: TraineeRow): void {
+    // The row is a toggle, not a radio: this screen already renders `Stored choice: N/A`, so "no trainee"
+    // is a state a Trainer can be in, and a state you can enter has to be exitable. Clicking the chosen
+    // row again sends the explicit null the draft reads as a clear.
+    const deselect = props.selected === trainee.id;
     chosen.value = trainee.id;
-    selectForm.umamusume_id = trainee.id;
-    selectForm.character_card_id = pickedForm.value[trainee.id] ?? null;
+    selectForm.umamusume_id = deselect ? null : trainee.id;
+    selectForm.character_card_id = deselect ? null : (pickedForm.value[trainee.id] ?? null);
 
     // Literal URL, as every page here states it: there is no Ziggy in this app, so `router.route()` would
     // throw at click time rather than at build time. Focus is restored in `onSuccess` after the new props
@@ -259,7 +264,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
             </Link>
         </p>
 
-        <p class="mt-1 text-sm text-ink">
+        <p class="mt-1 text-sm text-ink" data-field="stored-trainee">
             Stored choice:
             <strong v-if="props.selectedName" class="text-ink-strong">{{ props.selectedName }}</strong>
             <AbsenceValue v-else compact reason="No trainee has been chosen in this setup draft yet." />
@@ -444,7 +449,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
                         :disabled="selectForm.processing"
                         @click="choose(trainee)"
                     >
-                        Select Trainee
+                        {{ props.selected === trainee.id ? 'Chosen · clear' : 'Select Trainee' }}
                     </button>
                     <a
                         :href="`/career/setup/trainee/${trainee.id}`"
@@ -452,9 +457,6 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
                     >
                         View Profile
                     </a>
-                    <!-- The stored state is a word beside the action, never inside the row's `<h2>`: in the
-                         heading it would join the accessible name, so her name would stop matching itself. -->
-                    <span v-if="props.selected === trainee.id" class="text-xs font-bold text-ink-muted">Chosen</span>
                 </p>
             </li>
         </ul>

@@ -85,6 +85,31 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(page.getByText('67 trainees match.')).toBeVisible();
     });
 
+    test('a selected trainee can be deselected back to no choice', async ({ page }) => {
+        await page.goto('/career/setup/trainee');
+        await page.locator('#app > *').first().waitFor();
+
+        // The button's own id is read rather than guessed: the costume-form picker on the same card is
+        // `trainee-form-{id}`, so a prefix selector would resolve to two controls at once.
+        const firstButton = page.getByRole('button', { name: 'Select Trainee', exact: true }).first();
+        const buttonId = await firstButton.getAttribute('id');
+        expect(buttonId, 'the row names its own action').toMatch(/^trainee-\d+$/);
+
+        const action = page.locator(`#${buttonId}`);
+        const stored = page.locator('[data-field="stored-trainee"]');
+
+        await action.click();
+        await expect(action).toHaveAttribute('aria-pressed', 'true');
+        await expect(action).toHaveText('Chosen · clear');
+        await expect(stored).not.toContainText('N/A');
+
+        await action.click();
+        await expect(action).toHaveAttribute('aria-pressed', 'false');
+        await expect(action).toHaveText('Select Trainee');
+        await expect(stored).toContainText('N/A');
+        await expect(page.getByText('Trainee cleared.')).toBeVisible();
+    });
+
     test('a trainee who holds more than one costume form is asked which one the career starts on (R3-06)', async ({ page }) => {
         await page.goto('/career/setup/trainee');
         await page.locator('#app > *').first().waitFor();
@@ -140,7 +165,11 @@ test.describe('Trainee Selection and Profile', () => {
         await page.goto('/career/setup/trainee');
         await page.locator('#app > *').first().waitFor();
 
-        const action = card(page, 'Admire Vega').getByRole('button', { name: 'Select Trainee', exact: true });
+        const unnamed = card(page, 'Admire Vega').getByRole('button', { name: 'Select Trainee', exact: true });
+        const actionId = await unnamed.getAttribute('id');
+        // From here the row is addressed by its own id: its label is the thing under test, so a locator
+        // built from "Select Trainee" resolves to nothing once the row becomes the chosen one.
+        const action = page.locator(`#${actionId}`);
 
         await expect(action).toHaveAttribute('aria-pressed', 'false');
         await expect(absence(page, 'No trainee has been chosen in this setup draft yet.')).toContainText('N/A');
@@ -154,7 +183,7 @@ test.describe('Trainee Selection and Profile', () => {
         // would otherwise lose.
         await expect(page.getByText('Trainee set: Admire Vega.')).toBeVisible();
         await expect(action).toHaveAttribute('aria-pressed', 'true');
-        await expect(card(page, 'Admire Vega').getByText('Chosen')).toBeVisible();
+        await expect(action).toHaveText('Chosen · clear');
         await expect(page.getByText('Stored choice:')).toContainText('Admire Vega');
         await expect(action).toBeFocused();
 
@@ -170,8 +199,7 @@ test.describe('Trainee Selection and Profile', () => {
         await page.getByRole('link', { name: 'Back to the roster' }).click();
         await page.waitForURL(/\/career\/setup\/trainee$/);
 
-        await expect(card(page, 'Admire Vega').getByRole('button', { name: 'Select Trainee', exact: true }))
-            .toHaveAttribute('aria-pressed', 'true');
+        await expect(page.locator(`#${actionId}`)).toHaveAttribute('aria-pressed', 'true');
     });
 
     test('renders the same success flash when the card is clicked (R3-31)', async ({ page }) => {

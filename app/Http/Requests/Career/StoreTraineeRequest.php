@@ -15,6 +15,11 @@ use Illuminate\Validation\Rule;
  * draft naming a trainee who is not in the catalog cannot be resolved by the later steps, and the Trainer
  * would only find out at Preflight. An id that exists is enough: this screen lists Global trainees, and a
  * Japan-only trainee's row is a real one that the run screen already knows how to state.
+ *
+ * `present` rather than `required`, with `nullable` beside it: an id that is present and null is the
+ * deliberate clear of the step-2 choice, while a request that omits the key is malformed and still
+ * refuses. `character_card_id` stays plain `nullable` because a single-form trainee has nothing to
+ * choose, so an absent card key is a complete answer rather than a defect.
  */
 class StoreTraineeRequest extends FormRequest
 {
@@ -34,7 +39,7 @@ class StoreTraineeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'umamusume_id' => ['required', 'integer', 'exists:umamusume,id'],
+            'umamusume_id' => ['present', 'nullable', 'integer', 'exists:umamusume,id'],
             /*
              * R3-06: which costume form the career starts on is a choice the Trainer makes at this step, and
              * a form is valid only among the submitted trainee's own. The join is carried in the exists rule
@@ -53,7 +58,7 @@ class StoreTraineeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'umamusume_id.required' => 'Choose a trainee to continue.',
+            'umamusume_id.present' => 'Choose a trainee to continue.',
             'umamusume_id.exists' => 'That trainee is not in this catalog, so the career could not be built on her.',
             'character_card_id.exists' => 'That costume form does not belong to the chosen trainee, so it cannot start her career.',
         ];

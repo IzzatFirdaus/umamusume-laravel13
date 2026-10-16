@@ -136,18 +136,28 @@ class TraineeSelectController extends Controller
      */
     public function store(StoreTraineeRequest $request): RedirectResponse
     {
-        // The form travels with the trainee it belongs to, so re-picking a trainee without naming a form
-        // clears the previous choice rather than leaving a card from the old one on the draft (R3-06).
+        $traineeId = $request->validated('umamusume_id');
         $cardId = $request->validated('character_card_id');
 
+        // A present-and-null id is the deliberate clear of this step. The keys are still written, because
+        // `SetupDraft::traineeRecorded()` reads their presence, and the nulls go through untouched: the
+        // `(int)` cast below would turn a clear into trainee 0.
+        if ($traineeId === null) {
+            SetupDraft::write(['umamusume_id' => null, 'character_card_id' => null]);
+
+            return redirect()->route('career.trainee')->with('status', 'Trainee cleared.');
+        }
+
+        // The form travels with the trainee it belongs to, so re-picking a trainee without naming a form
+        // clears the previous choice rather than leaving a card from the old one on the draft (R3-06).
         SetupDraft::write([
-            'umamusume_id' => (int) $request->validated('umamusume_id'),
+            'umamusume_id' => (int) $traineeId,
             'character_card_id' => $cardId === null ? null : (int) $cardId,
         ]);
 
         // "Chosen", not "Selected", because the state word on the card is the one the wizard's own
         // vocabulary uses, and the message names the trainee rather than an id.
-        $trainee = Umamusume::find((int) $request->validated('umamusume_id'));
+        $trainee = Umamusume::find((int) $traineeId);
 
         return redirect()
             ->route('career.trainee')

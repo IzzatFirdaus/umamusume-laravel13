@@ -40,6 +40,55 @@ function rosterTrainee(string $name, array $letters): Umamusume
     ]);
 }
 
+it('clears the stored trainee when the id is sent as null, and the next render shows no choice', function (): void {
+    $trainee = rosterTrainee('Clear Bridge', ['turf' => 'A']);
+
+    $this->put('/career/setup/trainee', ['umamusume_id' => $trainee->id, 'character_card_id' => null])
+        ->assertRedirect();
+
+    expect(SetupDraft::read()['umamusume_id'])->toBe($trainee->id)
+        ->and(SetupDraft::traineeRecorded())->toBeTrue()
+        ->and(SetupDraft::saved())->toContain(2);
+
+    $this->put('/career/setup/trainee', ['umamusume_id' => null, 'character_card_id' => null])
+        ->assertRedirect()
+        ->assertSessionHas('status', 'Trainee cleared.');
+
+    // Null, not 0: the write path casts to int on the selection branch, and a clear that arrived as 0
+    // would name a trainee who does not exist. `saved()` drops step 2 with it, which is the visible half.
+    expect(SetupDraft::read()['umamusume_id'])->toBeNull()
+        ->and(SetupDraft::characterCardId())->toBeNull()
+        ->and(SetupDraft::traineeRecorded())->toBeTrue()
+        ->and(SetupDraft::saved())->not->toContain(2);
+
+    $this->get(route('career.trainee'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('selected', null)
+            ->where('selectedName', null));
+});
+
+it('refuses a request that carries no trainee key at all', function (): void {
+    // The guard the old `required` provided and `present` keeps. A key present and null is the clear the
+    // case above covers; the two must stay separate or the fix silently drops the malformed refusal.
+    $this->put('/career/setup/trainee', [])->assertSessionHasErrors('umamusume_id');
+
+    expect(SetupDraft::traineeRecorded())->toBeFalse();
+});
+
+it('distinguishes a draft that recorded no choice from one cleared on purpose', function (): void {
+    // There is no default-trainee mechanism in this repository, so nothing in production reads this
+    // distinction yet. It is pinned because the marker is what a future default must not override, and
+    // an accessor no test calls is an unverified claim about the draft's shape.
+    expect(SetupDraft::traineeRecorded())->toBeFalse();
+
+    $this->put('/career/setup/trainee', ['umamusume_id' => null, 'character_card_id' => null])
+        ->assertRedirect();
+
+    expect(SetupDraft::traineeRecorded())->toBeTrue()
+        ->and(SetupDraft::read()['umamusume_id'])->toBeNull();
+});
+
 it('renders all ten aptitude letters the catalogue holds, index for index (D8)', function (): void {
     // D8 was reported as a catalogue/display mismatch: the [Rosy Dreams] Rice Shower scenario document
     // records Mile B, Front A, Late B, while the picker shows C, B, C. The picker is faithful. The

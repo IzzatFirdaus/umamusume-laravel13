@@ -65,6 +65,34 @@ final class SetupDraft
     }
 
     /**
+     * Whether this draft has ever carried a trainee key, including one cleared to null.
+     *
+     * Key presence distinguishes "never chosen" from "explicitly cleared". `umamusume_id` is written only
+     * by a deliberate selection (`TraineeSelectController::store()` or its `carry()` entry point) or an
+     * explicit clear; never write it as a default. Read raw like `buildTarget()`, so `read()`'s pinned
+     * two-key shape above does not change.
+     */
+    public static function traineeRecorded(): bool
+    {
+        return array_key_exists('umamusume_id', self::bag());
+    }
+
+    /**
+     * Whether this draft has ever carried a scenario key, including one cleared to null.
+     *
+     * `read()` always returns both step-1 keys, so it cannot tell "no choice recorded" from
+     * "explicitly cleared", and only the second may let the Default-scenario preference stand in.
+     * Read raw like `buildTarget()` for the same reason: the two-key contract above stays pinned.
+     *
+     * The `scenario` key is written only by an explicit selection or an explicit clear; never write
+     * it as a default.
+     */
+    public static function scenarioRecorded(): bool
+    {
+        return array_key_exists('scenario', self::bag());
+    }
+
+    /**
      * @param  array<string, mixed>  $patch
      * @return array{scenario: string|null, umamusume_id: int|null}
      */

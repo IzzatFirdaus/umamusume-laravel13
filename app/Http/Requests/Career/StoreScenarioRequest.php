@@ -14,6 +14,10 @@ use Illuminate\Validation\Rule;
  * `config/scenarios.php` composes, the same rule `LegacySearchRequest` applies to its `scenario`
  * filter. A key outside the matrix is refused rather than stored, because `SetupDraft::read()` would
  * then silently drop it and the Trainer would believe a choice had been recorded.
+ *
+ * `present` rather than `required`, with `nullable` beside it: a key that is present and null is the
+ * deliberate clear of the step-1 choice, while a request that omits the key is malformed and still
+ * refuses. `ConvertEmptyStringsToNull` turns an empty string into that same clear.
  */
 class StoreScenarioRequest extends FormRequest
 {
@@ -33,7 +37,7 @@ class StoreScenarioRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'scenario' => ['required', 'string', Rule::in(array_keys((array) config('scenarios.scenarios')))],
+            'scenario' => ['present', 'nullable', 'string', Rule::in(array_keys((array) config('scenarios.scenarios')))],
         ];
     }
 
@@ -44,7 +48,7 @@ class StoreScenarioRequest extends FormRequest
     {
         return [
             'scenario.in' => 'That is not one of the Global scenarios this tool composes.',
-            'scenario.required' => 'Choose a scenario to continue.',
+            'scenario.present' => 'Choose a scenario to continue.',
         ];
     }
 }
