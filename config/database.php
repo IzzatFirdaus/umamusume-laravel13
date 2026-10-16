@@ -85,21 +85,6 @@ return [
             ]) : [],
         ],
 
-        'mysql_backup' => [
-            'driver' => 'mariadb',
-            'host' => config('mysql-backup.host'),
-            'port' => config('mysql-backup.port'),
-            'database' => config('mysql-backup.database'),
-            'username' => config('mysql-backup.username'),
-            'password' => config('mysql-backup.password'),
-            'charset' => config('mysql-backup.charset'),
-            'collation' => config('mysql-backup.collation'),
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => 'InnoDB',
-        ],
-
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DB_URL'),
