@@ -133,7 +133,7 @@ class ResultController extends Controller
             $stats[] = [
                 'key' => $stat,
                 'label' => $stat,
-                'current' => $this->currentStat($latest, $stat),
+                'current' => $latest?->statValue($stat),
                 'target' => $target?->targets[$stat] ?? null,
                 'deficit' => $deficits[$stat] ?? null,
                 'deficit_title' => $this->deficitTitle($target !== null, $latest !== null),
@@ -382,28 +382,6 @@ class ResultController extends Controller
                 'reason' => 'retired',
                 'message' => 'This career was retired before it finished, so no result exists to read. The turns and races it did record stay readable on the Career Timeline and the Cockpit.',
             ],
-        };
-    }
-
-    /**
-     * ponytail: the fourth private copy of this matrix-name lookup (Cockpit, TrainingDecision,
-     * EventDecision). The upgrade path D9's copy named — one accessor on `TurnEntry` — is now
-     * overdue and becomes a small refactor slice; it is not this screen's change to make, because
-     * it edits three landed controllers and their tests.
-     */
-    private function currentStat(?TurnEntry $latest, string $stat): ?int
-    {
-        if ($latest === null) {
-            return null;
-        }
-
-        return match ($stat) {
-            'Speed' => $latest->speed,
-            'Stamina' => $latest->stamina,
-            'Power' => $latest->power,
-            'Guts' => $latest->guts,
-            'Wit' => $latest->wit,
-            default => null,
         };
     }
 }

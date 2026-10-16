@@ -115,7 +115,7 @@ class EventDecisionController extends Controller
             $stats[] = [
                 'key' => $stat,
                 'label' => $stat,
-                'current' => $this->currentStat($latest, $stat),
+                'current' => $latest?->statValue($stat),
                 'target' => $target?->targets[$stat] ?? null,
                 'cap' => $caps[$stat],
             ];
@@ -145,22 +145,6 @@ class EventDecisionController extends Controller
         }
 
         return ['stats' => $stats, 'meta' => $meta];
-    }
-
-    private function currentStat(?TurnEntry $latest, string $stat): ?int
-    {
-        if ($latest === null) {
-            return null;
-        }
-
-        return match ($stat) {
-            'Speed' => $latest->speed,
-            'Stamina' => $latest->stamina,
-            'Power' => $latest->power,
-            'Guts' => $latest->guts,
-            'Wit' => $latest->wit,
-            default => null,
-        };
     }
 
     /**

@@ -205,7 +205,7 @@ class TrainingDecisionController extends Controller
             'key' => $stat,
             'choice' => 'training-'.$stat,
             'recommended' => $advice->recommendation?->action === $stat,
-            'current' => $this->currentStat($latest, $stat),
+            'current' => $latest?->statValue($stat),
             'target' => $target?->targets[$stat] ?? null,
             'cap' => $cap,
             'cap_bonus' => $this->capBonus($stat, $scenarioKey),
@@ -713,31 +713,9 @@ class TrainingDecisionController extends Controller
         $stats = [];
 
         foreach ($order as $stat) {
-            $stats[$stat] = $this->currentStat($latest, $stat);
+            $stats[$stat] = $latest?->statValue($stat);
         }
 
         return $stats;
-    }
-
-    /**
-     * ponytail: `CockpitController::currentStat()`'s body, kept private to each controller rather than
-     * extracted for two callers (the third reading of the same map is `TrainerAdvisor::current()`, which
-     * throws rather than returning null). Upgrade path: one accessor on `TurnEntry` when a third career
-     * screen reads a stat by matrix name.
-     */
-    private function currentStat(?TurnEntry $latest, string $stat): ?int
-    {
-        if ($latest === null) {
-            return null;
-        }
-
-        return match ($stat) {
-            'Speed' => $latest->speed,
-            'Stamina' => $latest->stamina,
-            'Power' => $latest->power,
-            'Guts' => $latest->guts,
-            'Wit' => $latest->wit,
-            default => null,
-        };
     }
 }

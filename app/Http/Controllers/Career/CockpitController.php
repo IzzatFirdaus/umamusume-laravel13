@@ -396,7 +396,7 @@ class CockpitController extends Controller
             $stats[] = [
                 'key' => $stat,
                 'label' => $stat,
-                'current' => $this->currentStat($latest, $stat),
+                'current' => $latest?->statValue($stat),
                 'target' => $target?->targets[$stat] ?? null,
                 'cap' => $caps[$stat],
             ];
@@ -2368,7 +2368,7 @@ class CockpitController extends Controller
         $recorded = [];
 
         foreach ($order as $stat) {
-            $value = $this->currentStat($latest, $stat);
+            $value = $latest?->statValue($stat);
             $cap = $caps[$stat] ?? null;
 
             $recorded[] = [
@@ -2383,7 +2383,7 @@ class CockpitController extends Controller
             ];
         }
 
-        $speed = $this->currentStat($latest, 'Speed');
+        $speed = $latest?->statValue('Speed');
         $approx = (int) $targets['speed_to_win']['approx'];
 
         return [
@@ -2769,21 +2769,5 @@ class CockpitController extends Controller
         $baseline = array_values((array) config('scenarios.scenarios.'.config('scenarios.baseline').'.widgets'));
 
         return array_values(array_filter($widgets, static fn (string $widget): bool => ! in_array($widget, $baseline, true)));
-    }
-
-    private function currentStat(?TurnEntry $latest, string $stat): ?int
-    {
-        if ($latest === null) {
-            return null;
-        }
-
-        return match ($stat) {
-            'Speed' => $latest->speed,
-            'Stamina' => $latest->stamina,
-            'Power' => $latest->power,
-            'Guts' => $latest->guts,
-            'Wit' => $latest->wit,
-            default => null,
-        };
     }
 }

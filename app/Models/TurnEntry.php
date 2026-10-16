@@ -111,6 +111,24 @@ class TurnEntry extends Model
         return $rows === [] ? null : $rows;
     }
 
+    /**
+     * One stat column read back by its matrix name ("Speed" … "Wit"), the name the client and the scenario
+     * matrix use. A name the matrix does not carry, or a turn with no such column, returns null rather than a
+     * zero: an absent reading is not a reading of no change (`AGENTS.md` §5). This is the single owner of the
+     * matrix-name lookup the four career controllers each kept a private copy of (F2).
+     */
+    public function statValue(string $matrixKey): ?int
+    {
+        return match ($matrixKey) {
+            'Speed' => $this->speed,
+            'Stamina' => $this->stamina,
+            'Power' => $this->power,
+            'Guts' => $this->guts,
+            'Wit' => $this->wit,
+            default => null,
+        };
+    }
+
     protected function casts(): array
     {
         return [
