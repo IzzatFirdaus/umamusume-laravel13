@@ -11,14 +11,28 @@ dev:
 test:
 	php artisan test --compact
 
+# The bar's shape is `--test` (writes nothing) over the explicit paths the
+# author changed; `--dirty` is banned (KI-75, AGENTS.md §9) because it
+# restyles every file differing from HEAD in one pass, other sessions'
+# uncommitted work included. PATHS is the caller's:
+#   make lint PATHS="app/Services/Advisor/NextDecision.php tests/Feature/CareerAdvisorFinaleTest.php"
+PATHS ?= app config database resources routes tests
 lint:
-	vendor/bin/pint --dirty --format agent
+	vendor/bin/pint --test --format agent $(PATHS)
 
 stan:
 	vendor/bin/phpstan analyse --no-progress
 
+# This is documentation, not a door: `migrate:fresh --seed` drops every
+# table and destroys local Trainer data. AGENTS.md §10 requires a backup
+# (`php artisan uma:backup`) or an empty scratch file first, and explicit
+# owner approval to run it against the shared dev file; the floor rules
+# that a destructive write names the guard that ran (`uma:db-guard`).
+# The registry's KI-60 line is this dev-file discipline's provenance.
 migrate:
-	php artisan migrate:fresh --seed
+	@echo "migrate:fresh --seed is destructive and this target never runs it."
+	@echo "Read AGENTS.md section 10: back up with uma:backup first, or point"
+	@echo "DB_DATABASE at an empty scratch file. Owner approval gates the dev file."
 
 seed:
 	php artisan db:seed
@@ -32,7 +46,8 @@ reparse:
 backup:
 	php artisan uma:backup
 
-# C-4 lore grep (CONTEXT.md CONSTRAINTS.md): violations are hard failures.
+# C-4 lore grep (GOVERNANCE.md "CONSTRAINTS.md (root quality bar, C-1 to C-9)" and §2):
+# violations are hard failures.
 # Words appear inside "damaged"/"stable weather"; each hit needs a context ruling.
 # A line carrying `lore-ignore-line class=<1-4> cite=<rule>` is a ruling already on the
 # page rather than a new hit, so it is filtered here (R51). tools/lore.php applies the
@@ -40,7 +55,7 @@ backup:
 lore:
 	git grep -inE "horse|sire|foal|🏇" -- ':!vendor' ':!node_modules' | grep -v "<!-- lore-ignore-line" || true
 	git grep -inwE "dam|mare|stable" -- ':!vendor' ':!node_modules' | grep -v "<!-- lore-ignore-line" || true
-	# 16 additional patterns from docs/design-research/CONSTRAINTS.md §3.1 (banned vocabulary for characters)
+	# 16 additional patterns from docs/research-scratch/GOVERNANCE.md §2.1 (banned vocabulary for characters)
 	git grep -inwE "stallion|colt|filly|gelding|equine|pony|thoroughbred|breeding|pairing|bloodline|pedigree|lineage|hoof|mane|tail|withers" -- ':!vendor' ':!node_modules' | grep -v "<!-- lore-ignore-line" || true
 
 # Extended gate over shipped code, additive to `lore` rather than a replacement.
