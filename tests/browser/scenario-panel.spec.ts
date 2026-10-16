@@ -71,10 +71,13 @@ test('draws a resource the matrix labels through the meter, with the number and 
     // Team Panel below the strip also prints a "Team Rank" heading, so the exact-text locator that
     // used to be unique now matches two nodes — the meter's name is the collision-proof handle.
     // No column holds either reading yet, so each is `not recorded` rather than a zero (D-220).
-    const bars = section.getByRole('img');
-    await expect(bars.first()).toBeVisible();
-    await expect(bars.first()).toHaveAttribute('aria-label', /Team Rank: not recorded/);
+    // The Team Panel is drawn inside this same region and now carries a meter of its own
+    // (`UnityCupPanel.vue` "Current Spirit"), so document order no longer makes the first bar the
+    // widget strip's Team Rank. Each meter is addressed by its accessible name instead, which is the
+    // handle that cannot collide: the Spirit meter's position in the reading order is the design.
+    await expect(section.getByRole('img', { name: /Team Rank: not recorded/ })).toBeVisible();
     await expect(section.getByRole('img', { name: /Spirit Bursts: not recorded/ })).toBeVisible();
+    await expect(section.getByRole('img', { name: /Current Spirit: not recorded/ })).toBeVisible();
 
     // The baseline three are the header's figures and are not repeated inside the panel.
     await expect(section.getByText('Turn', { exact: true })).toHaveCount(0);

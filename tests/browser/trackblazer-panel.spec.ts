@@ -130,9 +130,12 @@ test('returns a field-bound error when the item is not on the catalogue', async 
 
     // The error is bound to the input by `aria-describedby`; the alert says the write did not
     // land. This is the trust boundary the form exists to enforce (security-and-hardening).
-    await expect(shop.locator('#purchase-item-error')).toContainText(/does not sell that item/i);
+    // `BaseInput.vue` emits the error node as `error-<input id>`, so the field's error is
+    // `#error-purchase-item`, and the same pass gives it `role="alert"` beside the form's own
+    // summary alert — hence the filter, which keeps the claim on the summary line.
+    await expect(shop.locator('#error-purchase-item')).toContainText(/does not sell that item/i);
     await expect(shop.locator('#purchase-item')).toHaveAttribute('aria-invalid', 'true');
-    await expect(shop.getByRole('alert')).toContainText(/not recorded/i);
+    await expect(shop.getByRole('alert').filter({ hasText: /not recorded/i })).toBeVisible();
 });
 
 test('returns a field-bound error when the cost does not match the catalogue', async ({ page }) => {
@@ -150,7 +153,7 @@ test('returns a field-bound error when the cost does not match the catalogue', a
         shop.getByRole('button', { name: 'Record purchase' }).click(),
     ]);
 
-    await expect(shop.locator('#purchase-cost-error')).toContainText(/charges 30 coins/i);
+    await expect(shop.locator('#error-purchase-cost')).toContainText(/charges 30 coins/i);
     await expect(shop.locator('#purchase-cost')).toHaveAttribute('aria-invalid', 'true');
 });
 
@@ -189,6 +192,23 @@ test('renders the epithet checklist with three states, glyph plus word', async (
     const dustRow = epithets.getByRole('listitem').filter({ hasText: 'Eat My Dust' }).first();
     await expect(dustRow.getByText('Unverifiable')).toBeVisible();
     await expect(dustRow.locator('[aria-hidden="true"]')).toHaveText('?');
+});
+
+test('draws all three Trackblazer surfaces on one run, so no registry key is shadowed', async ({ page }) => {
+    // The 2026-10-15 bulk commit re-registered `grade_objectives`, `shop` and `epithet_routes`
+    // against Phase 7A.1 components whose prop reads do not exist on the section the payload carries
+    // (`scenario.objectives` is the career-goals ladder, `scenario.shop` is an object rather than a
+    // group list, `scenario.epithets` is not a key at all). A Map's last set wins, so that shadow
+    // retired the arms below and each of the three regions went missing at once. One case, three
+    // regions: it fails as soon as any key is shadowed again. The bar inside the grade region needs
+    // a reported period and is pinned by the two cases above and the plan case below.
+    const grade = page.getByRole('region', { name: 'Grade Point' });
+    const shop = page.getByRole('region', { name: 'Pro Shop' });
+    const epithets = page.getByRole('region', { name: 'Epithet routes' });
+
+    await expect(grade.getByRole('list', { name: 'Grade Point objectives' })).toBeVisible();
+    await expect(shop.getByRole('list', { name: 'Pro Shop catalogue' })).toBeVisible();
+    await expect(epithets.getByRole('list', { name: 'Epithet routes' })).toBeVisible();
 });
 
 test('prints the points-league finale and the named absence for the unofficial name', async ({ page }) => {
@@ -235,6 +255,14 @@ test('the race plan prints three periods, their published figures and the gap th
 });
 
 test('the plan folds and the year-end gate appears once a period is reported', async ({ page }) => {
+    // The period select is one of the header's identity forms, and F2 (plan §9.6 ruling 1) put them
+    // behind a collapsed disclosure, so the case takes the user's path: open it, then report. The
+    // collapsed default is the design; the disclosure is opened here rather than in the component.
+    const identity = page.locator('details[data-region="edit-identity"]');
+    if (!(await identity.evaluate((el) => (el instanceof HTMLDetailsElement) && el.open))) {
+        await identity.locator('summary').click();
+    }
+
     await page.selectOption('#current_objective_index', '3');
     await page.getByRole('button', { name: 'Report period' }).click();
 
