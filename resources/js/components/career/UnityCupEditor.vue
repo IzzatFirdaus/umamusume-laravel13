@@ -75,12 +75,12 @@ const save = (): void => {
 </script>
 
 <template>
-    <details class="mt-3 rounded-md border border-rule bg-panel p-4">
-        <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
-            Edit team state
-        </summary>
-
-        <form class="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2" @submit.prevent="save">
+    <!-- The disclosure is the caller's, not this component's: the Cockpit wraps this editor in the
+         one `<details>` that owns the gating, the open-while-Active behaviour and the team-state
+         region marker. This component used to carry its own identical `<details>` as well, which
+         rendered a disclosure inside a disclosure under one label — the strict-mode collision the
+         team-editor browser cases caught (fixed 2026-10-16). The form is the component's root. -->
+    <form class="grid grid-cols-1 gap-3 text-sm @3xl:grid-cols-2" @submit.prevent="save">
             <label for="team_name" class="flex flex-col gap-1">
                 <span class="text-ink-muted">Team name</span>
                 <BaseInput
@@ -165,5 +165,4 @@ const save = (): void => {
                 <p v-if="form.recentlySuccessful" class="text-xs text-ink-muted">Saved.</p>
             </div>
         </form>
-    </details>
 </template>
