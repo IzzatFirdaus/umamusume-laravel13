@@ -739,3 +739,105 @@ Seven further enums define their own `label()` and do not read `lang/`: `CareerY
 ### What §3.10 does not cover
 
 Whether the 22 `uma.terms.*` keys should be removed, moved, or wired to a surface (a slice-level change and, for `terms`, a PRD §6 scope question, not an audit finding). Whether a second locale should exist (a product decision). Whether the 5 `trainee_goal_type` labels should be added, and what wording they should carry (the `build_purpose` precedent at `lang/en/uma.php:63-65` shows the wording is a design decision, not a mechanical transform). This section also does not judge `Umamusume.php:133`'s deferred `ponytail:` note.
+## 12. §3.4 — data pipeline, 2026-10-17
+
+Measured at HEAD `e820cdd`, static analysis only. No pipeline command was executed: no `uma:fetch`, no `uma:reparse`, no migration, no network.
+
+### Directory census
+
+| Question | Answer |
+|---|---|
+| Files under `app/Services/DataPipeline/` | 23 |
+| Total lines | 3,138 |
+| Parsers | 9 |
+| Contracts | 9 |
+| Subdirectories | `Contracts/`, `Parsers/` |
+
+Five top-level classes — `PipelineRunner.php`, `SourceFetcher.php`, `CrossReferenceMatcher.php`, `NameNormalizer.php`, `ArtworkMirror.php` — and 9 contracts (`SourceParser` plus eight kind-specific siblings: `RaceCatalogSourceParser`, `SkillSourceParser`, `CharacterCardSourceParser`, `ProfileSourceParser`, `SupportCardSourceParser`, `SupportEffectSourceParser`, `TraineeGoalSourceParser`, `ScenarioSourceParser`).
+
+### Source-to-parser-to-command map
+
+Nine source entries in `config('uma.sources')`.
+
+| Source key | Parser | Command | `seed_file` | Pinned URL / manifest |
+|---|---|---|---|---|
+| `gametora-characters` | `GametoraCharacterParser` | `uma:fetch` / `uma:reparse` | `gametora-characters.e9e9ee6d.json` | pinned |
+| `gametora-character-cards` | `GametoraCharacterCardParser` | `uma:fetch` / `uma:reparse` | `gametora-characters.e9e9ee6d.json` (same body, other grain) | pinned |
+| `gametora-race-catalog` | `GametoraRaceCatalogParser` | `uma:fetch` / `uma:reparse` | `race_instances.json` | pinned + manifest `race_instances` |
+| `gametora-skills` | `GametoraSkillsParser` | `uma:fetch` / `uma:reparse` | `skills.609afe88.json` | pinned + manifest |
+| `gametora-character-profiles` | `GametoraCharacterProfileParser` | `uma:fetch` / `uma:reparse` | `characters.c6676539.json` | pinned + manifest |
+| `gametora-support-cards` | `GametoraSupportCardParser` | `uma:fetch` / `uma:reparse` | `support-cards.88dea522.json` | pinned + manifest |
+| `gametora-support-effects` | `GametoraSupportEffectParser` | `uma:fetch` / `uma:reparse` | `support_effects.ca447e53.json` | pinned + manifest |
+| `gametora-ura-objectives` | `GametoraUraObjectivesParser` | `uma:fetch` / `uma:reparse` | `ura-objectives.ead4bbfe.json` | pinned |
+| `gametora-artwork` | **(none — by design)** | `uma:fetch-art` | none | `https://media.gametora.com/umamusume/` |
+
+Mismatches found:
+
+- **One source entry with no parser: `gametora-artwork`.** This is the documented `ADR-0021` pattern, not a gap: the asset host stays allowlisted without being parsed, and `uma:fetch` steps over any source entry that declares no parser. `config/uma.php` and `AGENTS.md` §8 both state it.
+- **One parser on disk with no source entry: `GametoraScenarioParser`** (implements `ScenarioSourceParser`). It is not wired to any `config('uma.sources')` entry, and its contract `ScenarioSourceParser` is implemented by nothing else. It is **not dead**: two tests exercise it — `GametoraScenarioParserTest.php` (parses a stored body) and `ScenarioCapParityTest.php` (pins `GametoraScenarioParser::BASE_STAT_CAP` against `config('scenarios.base_cap')`, the "two owners agree" mechanism named in its docblock). The scenario capability is carried by the `scenarios` config source rather than by a fetch entry.
+
+No other mismatch: every parser declared on disk is referenced by a source entry, and every source entry that declares a parser names a class that exists.
+
+### Fetcher allowlist verification
+
+| Question | Answer |
+|---|---|
+| `SourceFetcher` call sites | 3 (app) — `UmaFetch.php:23,82`, `ArtworkMirror.php:35,151`, and `config/uma.php` |
+| Hosts allowlisted | 2 — `gametora.com` (20 references across source urls, manifests, bases), `media.gametora.com` (1) |
+| Any outbound HTTP path bypassing `SourceFetcher` | **none** |
+
+The SSRF floor holds. `Http::withHeaders(...)` at `SourceFetcher.php:333` is the only outbound HTTP call in `app/`. Every other I/O call is a local `file_get_contents` — a committed seed body (`ReadsCommittedSource.php:54`, `ScenarioSlotSeeder.php:203`, `UmaImportSupportCards.php:99`, `tools/roster-crosscheck.php`), a fetched snapshot (`HandleInertiaRequests.php:82`), or an uploaded CSV (`ImportHistoricalRunRequest.php:83`). No `GuzzleHttp\Client`, no `curl_`, no raw `new Client`, no `fopen()` to a URL. `ArtworkMirror` reaches the network only through the injected `SourceFetcher` (`ArtworkMirror.php:35,151`).
+
+### Pipeline stage trace
+
+| Stage | Owner | Call sites |
+|---|---|---|
+| fetch | `SourceFetcher::fetch()` / `fetchAsset()` | `UmaFetch.php:82`, `ArtworkMirror.php:151` |
+| snapshot | `SourceFetcher` (`:66-70`, inside fetch) | same two |
+| parse | parser class chosen by `is_a()` in `PipelineRunner::run()` | `UmaFetch.php`, `UmaReparse.php` |
+| normalize | `NameNormalizer` | 12 app refs (`PromoteMatchedRecord`, `StoreSkills`, `CatalogController`, API controller, seeders) |
+| match | `CrossReferenceMatcher` | 3 app (`PipelineRunner`, `MatchCandidate`, `UmamusumeRosterSeeder`) |
+| promote | `PipelineRunner::run()` → `Store*` / `PromoteMatchedRecord` | the 7 `is_a()` branches + fall-through loop |
+| review | `MatchCandidate::updateOrCreate` in `PipelineRunner::run()` | fall-through loop only |
+
+`PipelineRunner::run()` (`PipelineRunner.php:54`) holds the whole back half: seven `is_a()` branches (`RaceCatalogSourceParser:71`, `TraineeGoalSourceParser:97`, `SkillSourceParser:128`, `CharacterCardSourceParser:157`, `ProfileSourceParser:198`, `SupportCardSourceParser:227`, `SupportEffectSourceParser:242`) route reference rows past the match stage to their own writer, and the fall-through loop at `:255-302` matches on `record['name']`, promotes on `MatchTier::Exact`/`Alias`, and files everything else into `match_candidates` for review. Both entry points — `uma:fetch` (network) and `uma:reparse` (snapshot replay) — arrive through this one method. Every stage's data flow is traceable end to end.
+
+### Promote path checks
+
+Eight promote-path actions: `PromoteMatchedRecord`, `StoreCharacterCards`, `StoreCharacterProfiles`, `StoreRaceCatalogSlots`, `StoreSkills`, `StoreSupportCards`, `StoreSupportEffects`, `StoreTraineeGoals`.
+
+| Question | Answer |
+|---|---|
+| Store actions | 8 (7 `Store*` + `PromoteMatchedRecord`) |
+| Any action that does not check `is_manual` | 0 of 8 — with one schema-qualified exception below |
+| Any action that does not write a `data_sources` row | 0 |
+| Any action that does not run inside `DB::transaction` | 0 |
+
+**Both Floor rules hold, with one stated exception.** Seven of the eight actions carry a real runtime `is_manual` guard — `StoreCharacterCards.php:46` selects `['id', 'is_manual']` and `:74-75` skips a manual row, incrementing `skipped`; the other six follow the same shape. The eighth, `StoreSupportEffects`, cannot: `support_effects` has no `is_manual` column (neither `2026_09_30_142618` nor `2026_09_30_151945` adds one), and the action's own docblock states it — *"This table cannot honour the `is_manual` stop sign … inventing a guard for a column that does not exist would be a stub, and adding the column is a schema change owned by the Architect"* (`StoreSupportEffects.php:19-23`). That is a recorded schema gap, not an unrecorded violation. **No Floor breach.**
+
+### Orphan methods
+
+No orphan class in the pipeline. Every top-level class has both application and test references.
+
+| Class | app refs | test refs |
+|---|---|---|
+| `SourceFetcher` | 3 (`UmaFetch`, `ArtworkMirror`, `config/uma.php`) | 5 |
+| `PipelineRunner` | 11 (`UmaFetch`, `UmaReparse`, `UmaImportSupportCards`, `CatalogController`, …) | 8 |
+| `NameNormalizer` | 12 | 5 |
+| `CrossReferenceMatcher` | 3 | 1 (`CrossReferenceMatcherTest`) |
+| `ArtworkMirror` | 10 | 5 |
+
+### Snapshot path verification
+
+| Question | Answer |
+|---|---|
+| Snapshot directory path | `storage/app/private/snapshots/{sourceKey}/{sha256}.html` (`SourceFetcher.php:66-70`) |
+| Files on disk | 6 |
+| Snapshot hash algorithm | **sha256** — `hash('sha256', $body)` (`SourceFetcher.php:66`) |
+| Any code path writing outside the gitignored location | none |
+
+Gitignored by `storage/app/private/.gitignore:1` (`*`). All six artifacts sit under that tree; no snapshot writer resolves a path outside it. `ArtworkMirror` writes artwork under a sibling private path (`storage/app/private/artwork/`), also gitignored, and reaches the network only through `SourceFetcher`.
+
+### What §3.4 does not cover
+
+Whether any source should be added or removed, and whether `gametora-artwork` or `GametoraScenarioParser` should be wired or deleted (product decisions). Whether a parser's output is *correct* against its upstream document — this pass traced structure, not data (a parser-correctness sweep is slice work with fixtures). The fetch-source legality question stays with `AGENTS.md` escalation 5: the `gametora.com` robots.txt and rate-limit question is recorded as formally unanswered in `config/uma.php`'s own comment, and this pass does not settle it. Nor does it re-verify the seed-file bodies themselves, or exercise `uma:fetch` / `uma:reparse` end to end — the trace is static.
