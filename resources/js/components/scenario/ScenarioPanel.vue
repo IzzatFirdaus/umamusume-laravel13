@@ -264,7 +264,7 @@ const emptyText = computed<string>(() =>
                  reason beats a generic one, and printing both would say the same thing twice. -->
             <AlertRow
                 v-if="props.scenario.panel_absence === null"
-                glyph="â—‹"
+                glyph="○"
                 :text="emptyText"
                 tone="note"
             />
@@ -317,7 +317,7 @@ const emptyText = computed<string>(() =>
             >
                 <AlertRow
                     class="flex-1"
-                    glyph="â—‹"
+                    glyph="○"
                     :text="props.scenario.panel_absence"
                     :detail="props.scenario.panel_absence_title"
                     tone="note"
@@ -340,7 +340,7 @@ const emptyText = computed<string>(() =>
             </p>
 
             <!-- What the advisor does and does not do here, so the Trainer is not left guessing. -->
-            <AlertRow glyph="â—‹" :text="props.scenario.recommendations_absence" tone="note" />
+            <AlertRow glyph="○" :text="props.scenario.recommendations_absence" tone="note" />
         </div>
     </div>
 </template>
