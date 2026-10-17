@@ -30,8 +30,9 @@ test('the hub lists the eight areas and no deferred section', async ({ page }) =
     await page.goto('/database', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    // The hub's title is the layout's own h1 (`AppLayout.vue:277` renders the `#title` slot), so the
-    // page does not repeat it as an h2 the way it once did.
+    // The hub's title is the layout's own h1 (`AppLayout.vue` renders the `#title` slot in the banner
+    // band), so the page does not repeat it as an h2 the way it once did. Cited without a line number:
+    // the shell moved under it in plan 1.2 and a line pin ages on the next edit.
     await expect(page.getByRole('heading', { name: 'Database', level: 1 })).toBeVisible();
 
     // Scoped to the hub's own nav: the sidebar carries "Support Cards" and "Skills" as destinations

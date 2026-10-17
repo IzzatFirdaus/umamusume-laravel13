@@ -6,7 +6,15 @@ import VisitProgressBar from '../components/VisitProgressBar.vue';
 import { useLayout } from '../composables/useLayout';
 
 const page = usePage();
-const appVersion = computed(() => page.props.app?.version ?? null);
+
+/*
+ * The bar carries the product name and the collapse control, and nothing else. The build's version
+ * string used to sit on the right, which made an implementation detail the last thing a Trainer read
+ * on every screen; the footer's "Local data · Trainer Desk" line names the build's nature without
+ * printing a number. `page.props.app` still arrives from `HandleInertiaRequests` for any screen that
+ * wants it (the Settings screen reports it among its own facts); the shell just stops spending the
+ * header on it.
+ */
 
 /*
  * The shell measure is read from `Layout width` (the renamed `dashboard_layout` preference). The
@@ -190,6 +198,11 @@ const moreItems = items.filter((item) => !item.inBar);
  * it (design-2.0 §42, "text alternatives for icons"), and the active destination keeps
  * `aria-current="page"` plus a left rule on top of its fill because state may never ride on colour alone.
  *
+ * The control that collapses it lives in the bar, not in this column (plan 1.2): the bar is the one
+ * row present at every width, so the control that resizes the rail belongs beside the product name
+ * rather than inside the thing it resizes. It is hidden below `md`, where the column is hidden too.
+ * The collapsed column keeps a short `TD` mark so the rail does not float without a top edge.
+ *
  * The choice lives in `localStorage`, not in a Preference row. `App\Models\Preference::KEYS` is exactly
  * `theme` and `failure_estimate` because PRD US-11 authorises those two and no more, so a third stored
  * key is a product-scope widening plus a Settings change; a display preference of the shell is not worth
@@ -224,6 +237,14 @@ function toggleRail(): void {
 const linkClass =
     'flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
 const activeClass = 'bg-brand-chrome/10 font-semibold text-brand-chrome';
+// The sidebar's active rule sits on the left edge of the row at every rail width, so the current
+// destination is marked by a shape as well as by a fill and a word colour (WCAG 1.4.1). Stock
+// utilities only: `border-l-4` is the nearest step on the default ramp to the 3px the plan names,
+// and a `[3px]` arbitrary value would trip the arbitrary-value lint that plan slice 1.12 installs.
+// The mobile bar keeps a left rule out: a thick bar inside a 64px-wide bottom slot reads as
+// misalignment rather than as state, and the bar carries `aria-current` and a raised fill instead.
+const activeRailRule = 'border-l-4 border-l-brand-chrome pl-2';
+const activeRailRuleCollapsed = 'border-l-4 border-l-brand-chrome';
 const disabledClass =
     'flex min-h-11 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium text-ink-muted';
 const mobileClass =
@@ -268,28 +289,10 @@ const moreIsCurrent = computed(() =>
                 railCollapsed ? 'w-14' : 'w-64',
             ]"
         >
-            <div class="flex items-center justify-between gap-2 border-b border-rule px-2 py-3">
-                <span :class="[railCollapsed ? 'sr-only' : '', 'text-sm font-bold tracking-wide text-ink-strong']">
-                    TRAINER DESK
-                </span>
-                <button
-                    type="button"
-                    class="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-ink hover:bg-raised hover:text-ink-strong transition-colors duration-150 ease-out"
-                    :aria-expanded="railCollapsed ? 'false' : 'true'"
-                    aria-controls="primary-nav"
-                    :title="railCollapsed ? 'Expand navigation' : undefined"
-                    @click="toggleRail"
-                >
-                    <!-- The accessible name is always the action, and the visible word is a substring of
-                         it (WCAG 2.5.3 Label in Name), so a voice-control user who says "Collapse" is
-                         heard. Collapsed leaves no room for the word, so the mark carries the affordance
-                         and the name still comes from the label. -->
-                    <span class="sr-only">{{ railCollapsed ? 'Expand navigation' : 'Collapse navigation' }}</span>
-                    <span v-if="!railCollapsed" aria-hidden="true">Collapse</span>
-                    <span class="inline-flex shrink-0" aria-hidden="true">
-                        <NavGlyph name="chevron" :class="railCollapsed ? '' : 'rotate-180'" />
-                    </span>
-                </button>
+            <!-- The product name left this column when it moved to the bar. What stays is the
+                 collapsed rail's own label rule, so the rail keeps its top edge and does not float. -->
+            <div v-if="railCollapsed" class="flex items-center justify-center border-b border-rule px-2 py-3 text-xs font-bold tracking-wide text-ink-strong">
+                TD
             </div>
             <nav id="primary-nav" aria-label="Primary" class="flex-1 p-2">
                 <ul class="space-y-1">
@@ -301,7 +304,8 @@ const moreIsCurrent = computed(() =>
                                 linkClass,
                                 railCollapsed ? 'justify-center px-0' : '',
                                 isCurrent(item.to as string) ? activeClass : '',
-                                isCurrent(item.to as string) && railCollapsed ? 'border-l-2 border-l-brand-chrome' : '',
+                                isCurrent(item.to as string) && railCollapsed ? activeRailRuleCollapsed : '',
+                                isCurrent(item.to as string) && !railCollapsed ? activeRailRule : '',
                             ]"
                             :aria-current="isCurrent(item.to as string) ? 'page' : undefined"
                             :title="railCollapsed ? item.label : undefined"
@@ -337,35 +341,73 @@ const moreIsCurrent = computed(() =>
         </aside>
 
         <div class="flex min-w-0 flex-1 flex-col">
-            <header
-                role="banner"
-                class="relative flex items-center justify-between gap-4 bg-brand-chrome px-6 py-2 text-on-brand-chrome"
-            >
-                <div class="flex flex-col gap-1 min-w-0">
-                    <span
-                        class="text-xs font-semibold uppercase tracking-wider text-on-brand-chrome"
+            <!-- The bar is chrome, not a title block: one 48px row, the product name on the left and
+                 the rail control on the right, closed by a 2px accent rule as its only ornament. It
+                 must not carry the page `h1`: DESIGN.md §2.2's owner-signed 2026-10-17 amendment puts
+                 the `h1` in the shell's `#title`, and one bar cannot be both 48px and hold an eyebrow
+                 over a 30px heading. The heading therefore sits immediately below, as its own band on
+                 the page field, which keeps its Critical treatment and keeps the bar's measured height.
+
+                 The build's version string used to sit opposite the heading in the old single-row bar;
+                 it is gone. The footer's "Local data · Trainer Desk" line names the build's nature, and
+                 a number a Trainer cannot act on is not worth a permanent slot in the chrome. -->
+            <header role="banner" class="flex flex-col">
+                <div class="flex h-12 shrink-0 items-center justify-between gap-4 border-b-2 border-brand-chrome bg-panel px-4 text-ink md:px-8">
+                    <span class="truncate text-sm font-semibold tracking-wide text-ink-strong">TRAINER DESK</span>
+                    <!-- Rail control, desktop only. The sidebar is hidden below `md`, where the bottom
+                         bar carries navigation, so a control that only resizes the sidebar has nothing
+                         to act on at that width. The name is always the action and the visible word is
+                         a substring of it (WCAG 2.5.3), exactly as the sidebar's own button was. -->
+                    <button
+                        type="button"
+                        class="hidden min-h-11 shrink-0 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-ink hover:bg-raised hover:text-ink-strong transition-colors duration-150 ease-out md:inline-flex"
+                        :aria-expanded="!railCollapsed"
+                        aria-controls="primary-nav"
+                        :title="railCollapsed ? 'Expand navigation' : undefined"
+                        @click="toggleRail"
+                    >
+                        <span class="sr-only">{{ railCollapsed ? 'Expand navigation' : 'Collapse navigation' }}</span>
+                        <span v-if="!railCollapsed" aria-hidden="true">Collapse</span>
+                        <span class="inline-flex shrink-0" aria-hidden="true">
+                            <NavGlyph name="chevron" :class="railCollapsed ? '' : 'rotate-180'" />
+                        </span>
+                    </button>
+                </div>
+                <div class="flex min-w-0 flex-col border-b border-rule bg-page px-4 py-3 md:px-8">
+                    <p
                         v-if="$slots.eyebrow"
+                        class="text-xs font-semibold uppercase tracking-wider text-ink-muted"
                     >
                         <slot name="eyebrow" />
-                    </span>
-                    <h1 class="text-3xl font-semibold text-on-brand-chrome truncate">
+                    </p>
+                    <h1 class="truncate text-3xl font-semibold text-ink-strong">
                         <slot name="title" />
                     </h1>
                 </div>
-                <span
-                    v-if="appVersion"
-                    class="font-mono text-xs tabular-nums text-on-brand-chrome"
-                    title="Application version"
+            </header>
+                <!-- Rail control, desktop only. The sidebar itself is hidden below `md`, where the
+                     bottom bar carries navigation, so a control that only resizes the sidebar has
+                     nothing to act on at that width. The name is always the action and the visible
+                     word is a substring of it (WCAG 2.5.3), exactly as the sidebar's own button was. -->
+                <button
+                    type="button"
+                    class="hidden min-h-11 shrink-0 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-ink hover:bg-raised hover:text-ink-strong transition-colors duration-150 ease-out md:inline-flex"
+                    :aria-expanded="!railCollapsed"
+                    aria-controls="primary-nav"
+                    :title="railCollapsed ? 'Expand navigation' : undefined"
+                    @click="toggleRail"
                 >
-                    v{{ appVersion }}
-                </span>
-                <span v-else class="text-xs text-on-brand-chrome" title="Application version not recorded">
-                    N/A
-                </span>
+                    <span class="sr-only">{{ railCollapsed ? 'Expand navigation' : 'Collapse navigation' }}</span>
+                    <span v-if="!railCollapsed" aria-hidden="true">Collapse</span>
+                    <span class="inline-flex shrink-0" aria-hidden="true">
+                        <NavGlyph name="chevron" :class="railCollapsed ? '' : 'rotate-180'" />
+                    </span>
+                </button>
             </header>
             <!-- The ratified shell measure (DESIGN.md:197-208): the error documents constrain
-                 themselves to this width and the product shell now does too. -->
-            <main id="main" data-layout-container class="@container" :class="['mx-auto min-w-0 w-full flex-1 px-6 py-6 pb-24 md:pb-6', layoutWidthClass]">
+                 themselves to this width and the product shell now does too. The h1 above is the
+                 shell's, per DESIGN.md §2.2's 2026-10-17 amendment; nothing here repeats it. -->
+            <main id="main" data-layout-container class="@container" :class="['mx-auto min-w-0 w-full max-w-6xl flex-1 px-4 py-6 pb-24 md:px-8 md:pb-6', layoutWidthClass]">
                 <!-- The flash region is always mounted and carries only its text (WCAG 4.1.3): a live
                      region announces what changes inside it, so a region created in the same tick as its
                      message may never be announced. Empty, it is sr-only and says nothing; the classes
