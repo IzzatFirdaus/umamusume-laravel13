@@ -219,8 +219,10 @@ it('loads the tree in a fixed number of queries, not one per trainee', function 
     test()->get('/umamusume')->assertOk()->assertSee('Form Counted 4');
     $log = DB::getQueryLog();
 
-    // Counted separately because the shell owns it: the layout reads the stored theme
-    // once per render, and a page that grew a trainee must not grow a query for it.
+    // Counted separately because the shell owns it: the Blade view reads the stored theme, the
+    // Inertia payload reads it again, and it reads the stored settings the wizard's defaults come
+    // from (`HandleInertiaRequests`). A page that grew a trainee must not grow a query for any of
+    // them, so the tree's own count stays fixed while the shell's three are excluded above.
     $tree = array_values(array_filter(
         $log,
         static fn (array $q): bool => ! str_contains($q['query'], 'from "preferences"'),
@@ -231,7 +233,7 @@ it('loads the tree in a fixed number of queries, not one per trainee', function 
     // each; loading a trainee's forms per row would be 4 more, and 68 trainees on a page
     // would be 68.
     expect($tree)->toHaveCount(4)
-        ->and(count($log))->toBe(6, 'the shell adds two preference queries the tree does not own');
+        ->and(count($log))->toBe(7, 'the shell adds three preference queries the tree does not own: the Blade view theme, the Inertia theme, and the stored settings the wizard reads');
 })->group('perf');
 
 it('reads a trainee badge off the cards the filter let through', function (): void {
