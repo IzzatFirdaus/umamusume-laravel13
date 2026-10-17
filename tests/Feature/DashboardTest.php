@@ -51,10 +51,15 @@ it('renders the dashboard with no active career, an empty Veteran list and the d
             ->where('recentVeterans.total', 0)
             ->where('recentVeterans.limit', 3)
             ->has('recentVeterans.library_url')
-            ->has('quickActions', 3)
-            ->where('quickActions.0.label', 'New Career')
-            ->where('quickActions.1.label', 'Legacy Lab')
-            ->where('quickActions.2.label', 'Support Cards')
+            // Every destination here is one the sidebar does not carry. The three the card used
+            // to show (New Career, Legacy Lab, Support Cards) all sit in the primary nav, so the
+            // card repeated a path the Trainer already had a click for; `quickActions()` replaced
+            // them, and this assertion follows the code rather than the retired design.
+            ->has('quickActions', 4)
+            ->where('quickActions.0.label', 'Import a historical run')
+            ->where('quickActions.1.label', 'Review queue')
+            ->where('quickActions.2.label', 'Open settings')
+            ->where('quickActions.3.label', 'Database hub')
             // The badge's date is a config fact, so it cannot drift from the matrix it describes.
             ->where('dataStatus.label', 'GLOBAL DATA')
             ->where('dataStatus.state', 'Current')
