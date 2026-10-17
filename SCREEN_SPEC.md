@@ -3753,6 +3753,26 @@ left.
     Magnitudes stay a separate question from both — 5 / 25 skill points, the +50 cap rise and the stat increase are
     claims no screen resolves, because no source publishes them at all.
 
+24. **Five panel registrations can never mount from config, and one capability flag asserts an input that
+    is honored on a different surface.** Measured 2026-10-17 (design-contract pass, plan slice 0.11):
+    `ScenarioPanel.vue:74-78` registers renderers for `ura_mandatory_ladder`, `happy_meek`,
+    `career_milestones`, `pre_final_review` and `team_race_facility` (the
+    `resources/js/pages/Career/Cockpit/Panels/` components, landed with the Phase 7A.1 panel extraction),
+    but no scenario's `panels` block in `config/scenarios.php` carries any of those five keys and
+    `panel_labels` (`:79-87`) omits all five, so no run composes any of them: five dead destinations on the
+    config side of a wired surface. The 2026-10-17 owner-check pass described these as *registered without
+    renderers*; that half is now stale, and the pending owner ruling (the execution contract's owner-gated
+    queue item 1) is config-side only - compose keys and labels, or retire the registrations and components. No shipped screen lies today,
+    because the panel map simply never receives the keys. Separately, `config/scenarios.php:1006`'s
+    `performance_input => true` on Our Grand Concert has no Inertia or component consumer, but it is not
+    unconsumed: `TrainingRun::acceptsPerformanceObservations()` (`app/Models/TrainingRun.php:1181`) reads
+    it and `TrainingDecisionController` passes the result to the turn rail, where the performance
+    observation input ships (`LessonEvidenceBoundaryTest` asserts it) - honoring the flag as rail input, per
+    the model's own docblock sentence "A turn-rail input is not a panel", not as a scenario panel. The owner's
+    remaining question (contract queue item 7) is whether that is the ruling's semantics or the config flag promises
+    a panel; this file's surface inventory keeps the panel absent.
+    **Type:** Owner-gated ruling (both halves), not an implementation gap.
+
 ## 8. Source of Truth
 
 | Question                                                      | Authority                                                                                                                                                                                                       | Corroboration                                                                                                                             |
@@ -3811,3 +3831,4 @@ left.
 | 2026-10-17   | Design-contract pass, plan slice 0.9: `SCR-CAR-011` gains the dated note recording the Cockpit's heading ladder as shipped and measured - one `h1` at the owner-signed Critical tier, the seven-anchor `h2` section nav, `h3` card titles - and closing the 2026-10-12 cockpit audit's title-hierarchy findings on that amendment rather than re-deciding them. No state table row, route or component changed. | The contract pass must leave the two documents agreeing on hierarchy before `CareerHeader.vue` and the reference tables are migrated onto shared primitives; this note pins the measured ladder to file:line so a later slice inherits it as state, not opinion. |
 | 2026-10-17   | Design-contract pass, plan slice 0.10: §8 gains the authority row binding the wizard's two semantic channels - step-bar marking (the owner ruling, visit state) and saved data (page copy) - to their owning records and to KI-103's held decision. No state table row, route or workflow changed. | Slice 0.10's topic is not enumerated in the execution contract's Phase 0 validation list, and the supplied plan text is not on this machine (see the batch's ledger); it is reconstructed as the cross-document agreement the other ten slices depend on, and flagged for re-check against the plan when it surfaces. |
 | 2026-10-17   | Design-contract pass, plan slice 0.11: `SCR-CAR-002` gains the dated note binding its `to: null` row to the new `DESIGN.md` §5 unreachable-destination rule (named absence, never a link wearing `aria-disabled`, which does not cancel activation) and recording the `stepAbsent` class-binding defect found at `SetupLayout.vue:97` - reported, not fixed, and not registered because the defect register is a held file. No state table row, route or workflow changed. | The contract's required consistency check says a disabled destination cannot still be activated through an ordinary link; the wizard already renders absent steps as spans, so this records the mechanism as the rule Phase 2's `CareerHeader.vue` and the reference tables inherit, and it names the styling defect the fix must not silently carry forward. |
+| 2026-10-17   | Design-contract pass, slice 0.11 completion: §7-24 records the unreachable destinations this pass found in the config surface - the five panel keys no scenario composes though their renderers landed with Phase 7A.1, and `performance_input`'s server-side consumer on the decision rail - correcting the owner-check pass's "no renderers / no consumers" half against HEAD and keeping both halves flagged as owner-gated rulings, not gaps. No config, route, component or state table changed. | §9's exclusions are evidence to verify, not to trust; the register's §7 is where the repo records such conflicts (AGENTS.md §16). Phase 1+ inherits the current-state picture, and the wiring-or-retire ruling stays the owner's. |
