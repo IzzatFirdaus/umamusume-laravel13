@@ -179,6 +179,25 @@ test.describe('Scenario Selection', () => {
         await expect(page.getByText('PARTIALLY DOCUMENTED')).toHaveCount(0);
     });
 
+    test('renders the facts grid as a run of `<dl>` cells under a plain container', async ({ page }) => {
+        await page.goto('/career/setup/scenario');
+        await page.locator('#app > *').first().waitFor();
+
+        // A-91 (plan slice 1.4). The grid's cells are `SubCell` roots, and `SubCell` is a `<dl>` by its
+        // own markup, so a `role="list"` over them was a critical `aria-required-children` violation.
+        // This is the third site of that shape; the two the audit named were fixed and this one was
+        // missed because a settled scan never enters a collapsed `<details>`. The role is asserted
+        // absent outright rather than merely not `list`, and the cells as `dl` roots rather than by a
+        // count, so the case cannot be satisfied by a different wrong role or broken by the grid
+        // gaining a row.
+        const grid = (await openFacts(page, 'URA Finale')).locator('[aria-label="Facts and mechanics"]');
+
+        await expect(grid, 'one facts container per card').toHaveCount(1);
+        await expect(grid.locator('> dl[data-stat-tile]')).not.toHaveCount(0);
+        await expect(grid.locator('> li')).toHaveCount(0);
+        await expect(grid).toHaveJSProperty('role', '');
+    });
+
     test('selects a scenario by keyboard and keeps it after a round trip', async ({ page }) => {
         await page.goto('/career/setup/scenario');
         await page.locator('#app > *').first().waitFor();

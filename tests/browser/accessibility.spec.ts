@@ -58,4 +58,37 @@ test.describe('Accessibility', () => {
         // document with no progress control in it.
         await expect(page.getByRole('progressbar')).toHaveCount(0);
     });
+
+    /*
+     * A-91 (plan slice 1.4). A `role="list"` container whose children are not `listitem`s is an
+     * `aria-required-children` violation at critical impact. Three surfaces carried one: the
+     * Dashboard's career strip, the wizard's Legacy step, and the scenario step's facts grid. The
+     * first two were fixed by name; the third survived because it sits inside a collapsed
+     * `<details>`, which a settled scan never descends into - axe skips hidden nodes - and no scan
+     * covered the route at all. This case opens one disclosure so the container enters the scanned
+     * tree, and covers all three surfaces.
+     *
+     * The assertion is per-rule rather than page-wide on purpose: the scans above already hold the
+     * whole document clean, and naming the rule makes a reintroduction fail with the rule id in the
+     * message instead of a diff of every violation on the page.
+     */
+    test('no list-role container holds non-list children on the dashboard or the two wizard steps', async ({ page }) => {
+        for (const path of ['/', '/career/setup/scenario', '/career/setup/legacy'] as const) {
+            await page.goto(path);
+            await page.locator('#app > *').first().waitFor();
+
+            if (path === '/career/setup/scenario') {
+                // Every card renders the same facts markup from one template, so opening one puts the
+                // container in the tree; the count is read off what rendered rather than hardcoded.
+                const summaries = page.locator('summary').filter({ hasText: 'Facts and mechanics' });
+                await expect(summaries, 'the step renders a facts disclosure per scenario card').not.toHaveCount(0);
+                await summaries.first().click();
+            }
+
+            const results = await buildAxe(page).analyze();
+            const offenders = results.violations.filter((rule) => rule.id === 'aria-required-children');
+
+            expect(offenders, `${path} - ${JSON.stringify(offenders, null, 2)}`).toEqual([]);
+        }
+    });
 });

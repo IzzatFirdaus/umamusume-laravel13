@@ -211,7 +211,7 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                         Facts and mechanics
                     </summary>
 
-                    <div class="mt-3 space-y-2 text-sm" role="list" aria-label="Facts and mechanics">
+                    <div class="mt-3 space-y-2 text-sm" aria-label="Facts and mechanics">
                         <SubCell label="Optimizes" :value="optimizesText(card) ?? 'N/A'" :title="optimizesText(card) ? undefined : 'This scenario publishes no stat cap bonus.'" />
                         <SubCell label="Systems" :value="card.systems.length > 0 ? card.systems.join(', ') : 'N/A'" :title="card.systems.length > 0 ? undefined : 'Every panel in the matrix is off for this scenario.'" />
                         <SubCell label="Tracked resources" :value="card.resources.length > 0 ? card.resources.join(', ') : 'None beyond the generic strip'" :title="card.resources.length > 0 ? undefined : 'It composes only the widgets every scenario carries.'" />
