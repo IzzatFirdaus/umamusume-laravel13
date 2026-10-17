@@ -182,7 +182,7 @@ const submit = (): void => {
                         <BaseSelect
                           v-model="form.career_month"
                           name="career_month"
-                          :options="[...Array(12).keys()].map(month => ({ value: String(month + 1), label: String(month + 1) }))"
+                          :options="[{ value: '', label: 'Month' }, ...Array.from({ length: 12 }, (_, month) => ({ value: String(month + 1), label: String(month + 1) }))]"
                           required
                           :error="form.errors.career_month"
                         />

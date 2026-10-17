@@ -104,6 +104,19 @@ test.describe('Snapshot setup', () => {
         expect(speed?.height ?? 0, 'the Speed control is not sized to the 44px contract').toBeGreaterThanOrEqual(44);
     });
 
+    test('opens with no career position chosen', async ({ page }) => {
+        await hydrate(page, '/career/snapshot/setup');
+
+        // A-100: the Month select had no empty option while Year and Half did, so a fresh form left it with
+        // no option selected at all (selectedIndex -1, which renders blank and reports '' on submit) rather
+        // than the placeholder its two siblings show. All three controls now name their empty state.
+        for (const [name, label] of [['career_year', 'Year'], ['career_month', 'Month'], ['career_phase', 'Half']] as const) {
+            const select = page.locator(`select[name="${name}"]`);
+            await expect(select, name).toHaveValue('');
+            await expect(select.locator('option:checked'), name).toHaveText(label);
+        }
+    });
+
     test('names the unknown flag beside the field it silences', async ({ page }) => {
         await hydrate(page, '/career/snapshot/setup');
 

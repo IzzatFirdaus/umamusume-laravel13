@@ -3775,6 +3775,17 @@ left.
     a panel; this file's surface inventory keeps the panel absent.
     **Type:** Owner-gated ruling (both halves), not an implementation gap.
 
+25. **The Snapshot screens have no row in this file.** Measured 2026-10-17 (plan slice 1.7):
+    `routes/web.php:107-112` registers `career.snapshot` (`GET /career/snapshot`),
+    `career.snapshot.setup`, `career.snapshot.review` and `career.snapshot.store`, all served by
+    `SnapshotController`, and none of the four appears in §3's screen matrix or in a §4 section -
+    `grep -n "Snapshot" SCREEN_SPEC.md` returns no heading. §1 puts every `routes/web.php` screen in
+    scope, so this is an omission rather than a deliberate exclusion; the routes are already described
+    as "Record an in-progress career in one pass" in the UI/UX context brief's route table. Recorded,
+    not filled: authoring the three screen sections is a documentation pass, so plan slice 1.7's
+    Month-default fix travels without a row to update.
+    **Type:** Documentation Gap.
+
 ## 8. Source of Truth
 
 | Question                                                      | Authority                                                                                                                                                                                                       | Corroboration                                                                                                                             |
@@ -3835,3 +3846,4 @@ left.
 | 2026-10-17   | Design-contract pass, plan slice 0.11: `SCR-CAR-002` gains the dated note binding its `to: null` row to the new `DESIGN.md` §5 unreachable-destination rule (named absence, never a link wearing `aria-disabled`, which does not cancel activation) and recording the `stepAbsent` class-binding defect found at `SetupLayout.vue:97` - reported, not fixed, and not registered because the defect register is a held file. No state table row, route or workflow changed. | The contract's required consistency check says a disabled destination cannot still be activated through an ordinary link; the wizard already renders absent steps as spans, so this records the mechanism as the rule Phase 2's `CareerHeader.vue` and the reference tables inherit, and it names the styling defect the fix must not silently carry forward. |
 | 2026-10-17   | Design-contract pass, slice 0.11 completion: §7-24 records the unreachable destinations this pass found in the config surface - the five panel keys no scenario composes though their renderers landed with Phase 7A.1, and `performance_input`'s server-side consumer on the decision rail - correcting the owner-check pass's "no renderers / no consumers" half against HEAD and keeping both halves flagged as owner-gated rulings, not gaps. No config, route, component or state table changed. | §9's exclusions are evidence to verify, not to trust; the register's §7 is where the repo records such conflicts (AGENTS.md §16). Phase 1+ inherits the current-state picture, and the wiring-or-retire ruling stays the owner's. |
 | 2026-10-17   | Plan slice 1.5 (Phase 1 defect batch): `SCR-VET-001` gains the dated note that the library row header stacks below `sm` and the name link wraps rather than truncating. No §3 row, route or workflow changed. | The 390px row clipped `Daiwa Scarlet` and `Maruzensky` to one or two letters; the code fix is the slice, and this note is the side-effect `AGENTS.md` §15 requires so the spec's row shape matches the shipped row. |
+| 2026-10-17   | Plan slice 1.7 (Phase 1 defect batch): §7 gains item 25, recording that the four Snapshot routes have no `SCR-*` row in this file, so the slice's Month-default fix travels without a row to update. No §3 row or §4 section added. | `AGENTS.md` §15 makes the spec row travel with the screen behavior; the row does not exist, so the omission is recorded where this file records gaps rather than silently skipped. |
