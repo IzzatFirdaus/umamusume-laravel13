@@ -549,6 +549,12 @@ pattern every run-screen panel already uses. The heading is the honest part: a m
 has none" where a heading with an empty body states "this tool has not recorded it", and on sections 3, 4
 and 5 the second sentence is the true one today.
 
+*Dated correction 2026-10-17 (design-contract pass, plan slice 0.1, owner instruction of the same day):
+the `title` that carries the reason here is no longer the channel. §5's reachable-reason rule supersedes
+it: a `title` is reachable with a mouse and by nothing else, so the reason now renders through
+`AbsenceValue`'s disclosure or as visible prose beside the marker. This paragraph stands as the record of
+the shipped idiom, and §5's 2026-10-17 amendment carries the migration inventory.*
+
 **A cell reading *absent* is a hard requirement, not an option** (D-220's rule, applied to a trainee
 rather than to a scenario). **The reason:** the page has existed since Phase 1 and its specification has
 never been revisited, so it under-specifies the one surface every other trainee-facing decision starts
@@ -756,6 +762,27 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
   it left open: `Unknown` survives only as the reference views' source-strength mark, and the four chips
   that sat beside absences were removed as **policy**, not as enforcement of this file's absence rule —
   the rule fixes how an absence renders and is silent on whether a badge may accompany it.
+
+> **Amended 2026-10-17 (design-contract pass, plan slice 0.1, owner instruction): one absence channel and
+> one provenance label per fact.**
+>
+> The bullets above are consolidated as a two-part contract, so a screen cannot carry two competing
+> channels for one fact. Every original sentence is preserved.
+>
+> **(a) One absence channel per component.** The reason behind an absence renders either through
+> `AbsenceValue`'s disclosure (whose summary is the reason's accessible name) or as visible prose beside
+> the marker. A `title`-only reason is the superseded idiom and is migration debt wherever it still
+> ships, not a second sanctioned channel. The 2026-10-17 UX audit's remaining inventory:
+> `AncestryNode.vue:102,118` (finding F-E3, extended) and the Dashboard's `Energy` and `Team Rank` tiles
+> (finding F-B2). Both are Phase 1's to migrate.
+>
+> **(b) One provenance-state label per fact.** `ProvenanceBadge` is the single owner of the state word;
+> a second provenance-shaped label beside it states one fact twice. The shipped case is the review queue,
+> where a row carries both a `StatusPill` ("No match") and a `ProvenanceBadge` ("Unknown") for the same
+> tier fact (2026-10-17 UX audit finding A-96); the fix keeps the badge and drops the pill when the tier
+> is not `Fuzzy`. This is the same defect class the one-fact-once rule closed on the Cockpit's team card
+> on 2026-10-16, and it fixes how many labels render, not which words they use: the 2026-10-09
+> per-surface-class ruling above is unchanged, and no badge is re-worded by this amendment.
 
 ## 6. Lore-sensitive design rules (hard gate)
 
@@ -1116,3 +1143,10 @@ system owns.
 - 2026-09-27 — Light-first owner ruling; lattice/enamel/torn-chip motifs ruled material.
 - **2026-10-15** — Six owner-signed amendments in one pass, unblocking the Track 2 and Dashboard-layout gates. §2.3 gains the overlay-elevation exception (§9.2, drop-shadow only, `--shadow-overlay`); §2.2 gains the display-face approval (§9.3, C-8 for one self-hosted rounded face on Critical only); §1.2 and §1.4 gain the three-role colour ruling and §2.1 gains nine brand/status tokens with G-18 pairs (§9.4); §8 gains the MOTION 2 tier table (§9.5); §2.3 gains `max-w-7xl` as a preference-gated fourth shell width (DL.3); and the 2026-10-14 typography amendment is extended with the colour-and-position tiers (§9.6). Every original sentence is preserved; each amendment names its enforcement; three slices (§10.1–§10.3) are recorded as outside this file's authority. No token moves without its G-18 pair; the enforcement gate is `tests/Feature/DesignTokensTest.php` and the browser axe pass.
     Track 2-C is closed by the same pass: the display-font proposal does not ship, the 2026-10-14 size amendment is the terminal state, and no C-8 dependency is taken for typography.
+- **2026-10-17** — Design-contract pass, plan slice 0.1 (owner execution contract of 2026-10-17): §4.2's
+  `title`-channel wording gains its dated supersession beside it, and §5 gains the two-part amendment —
+  one absence channel per component (`AbsenceValue` or visible prose; a `title`-only reason is migration
+  debt) and one provenance-state label per fact (`ProvenanceBadge` owns the state word; the review
+  queue's pill-plus-badge doubling is the named shipped case). The 2026-10-09 per-surface-class ruling and
+  every original sentence are preserved. No token moves, no shipped string changes in this slice, and no
+  audit finding is closed by the amendment alone.
