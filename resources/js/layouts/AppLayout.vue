@@ -365,7 +365,7 @@ const moreIsCurrent = computed(() =>
             </header>
             <!-- The ratified shell measure (DESIGN.md:197-208): the error documents constrain
                  themselves to this width and the product shell now does too. -->
-            <main id="main" data-layout-container class="@container" :class="['mx-auto w-full flex-1 px-6 py-6 pb-24 md:pb-6', layoutWidthClass]">
+            <main id="main" data-layout-container class="@container" :class="['mx-auto min-w-0 w-full flex-1 px-6 py-6 pb-24 md:pb-6', layoutWidthClass]">
                 <!-- The flash region is always mounted and carries only its text (WCAG 4.1.3): a live
                      region announces what changes inside it, so a region created in the same tick as its
                      message may never be announced. Empty, it is sr-only and says nothing; the classes

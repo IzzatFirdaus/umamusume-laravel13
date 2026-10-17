@@ -104,23 +104,23 @@ const conditions = computed(() => props.skill.condition_groups ?? []);
             <h2 id="mechanics" class="text-lg font-semibold text-ink-strong">Mechanics</h2>
 
             <template v-if="conditions.length > 0">
-                 <div v-for="(group, index) in conditions" :key="index" class="mt-3 rounded-md border border-rule bg-panel p-3 text-sm">
+                 <div v-for="(group, index) in conditions" :key="index" class="mt-3 min-w-0 rounded-md border border-rule bg-panel p-3 text-sm">
                     <h3 v-if="conditions.length > 1" class="text-lg font-semibold text-ink-strong">
                         Activation {{ index + 1 }}
                     </h3>
 
                     <dl class="grid min-w-0 gap-x-6 gap-y-2 @4xl:grid-cols-2">
-                        <div class="@4xl:col-span-2">
+                        <div class="min-w-0 @4xl:col-span-2">
                             <dt class="text-ink-muted">Condition</dt>
                             <dd class="min-w-0 break-words font-mono text-xs text-ink">{{ group.condition ?? 'N/A' }}</dd>
                         </div>
 
-                        <div v-if="group.precondition !== null" class="@4xl:col-span-2">
+                        <div v-if="group.precondition !== null" class="min-w-0 @4xl:col-span-2">
                             <dt class="text-ink-muted">Precondition</dt>
                             <dd class="min-w-0 break-words font-mono text-xs text-ink">{{ group.precondition }}</dd>
                         </div>
 
-                        <div v-if="group.base_time !== null">
+                        <div v-if="group.base_time !== null" class="min-w-0">
                             <dt class="text-ink-muted">Base time</dt>
                             <dd class="text-ink">{{ group.base_time }} ms</dd>
                         </div>
@@ -180,7 +180,7 @@ const conditions = computed(() => props.skill.condition_groups ?? []);
         <h2 class="mt-8 text-lg font-semibold text-ink-strong">Provenance</h2>
         <p v-if="skill.source_url" class="mt-2 text-xs text-ink-muted">
             from
-            <a :href="skill.source_url" class="text-ink-strong underline">{{ skill.source_url }}</a>
+            <a :href="skill.source_url" class="break-all text-ink-strong underline">{{ skill.source_url }}</a>
             <template v-if="skill.fetched_at_display"> · read {{ skill.fetched_at_display }}</template>
         </p>
         <p v-else class="mt-2 text-sm text-ink-muted">No fetched source. This record was seeded or entered by hand.</p>
