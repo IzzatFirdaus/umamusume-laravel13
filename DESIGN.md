@@ -278,6 +278,10 @@ external fonts (offline constraint + C-8 dependency gate).
 > > "One `h1` per page" gains its mechanism, measured on the 2026-10-17 tree: the `h1` is emitted once, by `AppLayout.vue`'s `#title` slot, and `CareerLayout.vue` and `SetupLayout.vue` forward their pages' titles into that slot rather than rendering their own. A page that needs a title-level element below the shell `h1` uses an `h2` region heading, never a second title at the same weight, and content headings begin at `h2` without skipping a level; a card's block title sits at `h3` under its `h2` region (the Cockpit's "Recommendation" block, 2026-10-08, is the recorded precedent).
 > >
 > > The wizard's six steps demonstrated the failure both ways and their fixes are the record: the 2026-10-17 UX audit measured every step with no page heading after the in-body `<h1>` became a styled `<p>` (finding A-102, `0d3a69c`), and `253f957` closed the other direction by deleting the in-body title that duplicated the layout `h1`. The net state on `253f957`: the shell `#title` `h1` alone names each step (`66f2029` moved the six names to the owner-signed Critical tier through that one slot), and the step's content begins with eyebrow, subtitle and card `h2`s below it. The 2026-10-15 Critical-tier table above is unchanged; this amendment fixes where the `h1` lives, not its size or colour.
+>
+> > **Amended 2026-10-17 (design-contract pass, plan slice 0.3, owner instruction): the primary action's Critical-tier membership is weight, position and target size, not ink.**
+> >
+> > The 2026-10-15 tier table places "the primary action" in a row whose colour column reads `text-ink-strong`, and for the one filled action on a screen that cell is superseded: a filled primary carries its own pair, `--color-primary-action` with `--color-on-primary-action`. That pair is not pending: it landed with the 2026-10-15 Track 2-D ruling in `resources/css/app.css:292` (aliased from the brand-chrome pair) and reads 29 `bg-primary-action` consumers across `resources/js` measured on 2026-10-17. What the Critical tier owns for the primary action is its weight, its once-per-screen position under §2.3's structure rule, and the house 44px target; the status lime (`--color-status-positive`) never fills it, exactly as §2.1's guard (b) rules. The 2026-10-17 UX audit measured the one-filled-primary convention holding across all 48 routes (finding X-4). Its "lime primary" phrasing on the Cockpit rows echoes the 2026-10-12 audit's pre-Track-2-D screenshots and is superseded by the landed token, not by a re-style.
 
 - The research package's rounded display-font proposal ("M PLUS Rounded 1s" /
    self-hosted Nunito) stays parked: it needs a C-8 dependency approval and
@@ -1161,3 +1165,8 @@ system owns.
   `h2`, and a page never repeats its title in body copy. The wizard's A-102 lineage (`0d3a69c`'s styled
   `<p>`, `66f2029`'s Critical tier, `253f957`'s duplicate-title deletion) is recorded as the precedent.
   No size, colour or token moves.
+- **2026-10-17** — Design-contract pass, plan slice 0.3: §2.2's Critical-tier row for the primary action
+  is narrowed to weight, position and target size; the filled pair is `--color-primary-action` /
+  `--color-on-primary-action`, recorded as landed (29 consumers) rather than pending, and the status lime
+  stays a non-action role. The audit's "lime primary" Cockpit phrasing is marked superseded by the token
+  landing. No component changes in this slice.
