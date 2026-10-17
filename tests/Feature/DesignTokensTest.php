@@ -274,6 +274,32 @@ it('counts every colour token the static theme declares', function (): void {
 });
 
 /**
+ * The non-colour scale tokens (plan 1.1).
+ *
+ * The count gate above reads `--color-*` only, so the ratified radius scale and the overlay
+ * shadow were declared but unprotected: deleting `--radius-md` left the suite green while every
+ * card lost its corner. Values are quoted from the owner amendment `DESIGN.md` §2.3 signed
+ * 2026-10-14 and from Phase 11.14's shadow, so a drift fails a test instead of a screen.
+ *
+ * No `--text-*` or `--spacing-*` scale is asserted here because none exists and declaring one is
+ * not this slice's to make: `DESIGN.md` §2.2 signs Body `text-sm` (14px) and Critical
+ * `text-3xl` (30px), and §2.3 signs "Tailwind default 0.25rem increments" for spacing. A type or
+ * spacing token at the plan's 16/20/28 would re-litigate a signed amendment, which
+ * `implementation-backlog-2026-10-17.md` §C leaves to the owner.
+ */
+it('declares the ratified radius scale and the overlay shadow in the static theme', function (): void {
+    $block = themeStaticBlock();
+
+    expect($block)
+        ->toContain('--radius-sm: 6px')
+        ->toContain('--radius-md: 10px')
+        ->toContain('--radius-lg: 14px')
+        ->toContain('--radius-xl: 16px')
+        ->toContain('--radius-pill: 999px')
+        ->toContain('--shadow-overlay');
+});
+
+/**
  * Every `--color-*` token the static theme block declares, read from the stylesheet
  * rather than remembered by hand.
  *
@@ -285,6 +311,20 @@ it('counts every colour token the static theme declares', function (): void {
  * @return array<int, string>
  */
 function themeStaticColorTokens(): array
+{
+    preg_match_all('/(--color-[a-z0-9-]+)\s*:/', themeStaticBlock(), $matches);
+
+    return array_values(array_unique($matches[1]));
+}
+
+/**
+ * The `@theme static` block with its comments stripped, read from the stylesheet.
+ *
+ * Shared by the colour count above and the scale-presence case below. Comments are cut
+ * because a rule is often documented in this block by naming the value it rejects, and
+ * prose is not a declaration.
+ */
+function themeStaticBlock(): string
 {
     $css = (string) file_get_contents(base_path('resources/css/app.css'));
     $theme = substr($css, strpos($css, '@theme static'));
@@ -305,11 +345,7 @@ function themeStaticColorTokens(): array
         }
     }
 
-    $block = preg_replace('#/\*.*?\*/#s', '', substr($theme, $open + 1, $end - $open - 1));
-
-    preg_match_all('/(--color-[a-z0-9-]+)\s*:/', (string) $block, $matches);
-
-    return array_values(array_unique($matches[1]));
+    return (string) preg_replace('#/\*.*?\*/#s', '', substr($theme, $open + 1, $end - $open - 1));
 }
 
 /**
