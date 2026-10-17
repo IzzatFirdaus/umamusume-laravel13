@@ -241,7 +241,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
         <!-- Header: eyebrow + large title + subtitle -->
         <header class="mb-4">
             <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 5 of 6</p>
-            <p class="mt-1 text-2xl font-semibold text-ink-strong">Support deck</p>
+            <h1 class="mt-1 text-3xl font-semibold text-ink-strong">Support deck</h1>
             <p class="mt-1 text-sm text-ink-muted">A deck is the six cards equipped before the career starts.</p>
         </header>
 

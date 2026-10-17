@@ -242,7 +242,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
         <!-- Header: eyebrow + large title + subtitle -->
         <header class="mb-4">
             <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 2 of 6</p>
-            <p class="mt-1 text-2xl font-semibold text-ink-strong">Choose a trainee</p>
+            <h1 class="mt-1 text-3xl font-semibold text-ink-strong">Choose a trainee</h1>
             <p class="mt-1 text-sm text-ink-muted">Pick the trainee the career is built on.</p>
         </header>
 

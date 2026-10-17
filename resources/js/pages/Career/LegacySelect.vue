@@ -249,7 +249,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
         <!-- Header: eyebrow + large title + subtitle -->
         <header class="mb-4">
             <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 4 of 6</p>
-            <p class="mt-1 text-2xl font-semibold text-ink-strong">Legacy</p>
+            <h1 class="mt-1 text-3xl font-semibold text-ink-strong">Legacy</h1>
             <p class="mt-1 text-sm text-ink-muted">The two parents this career will be bred from.</p>
         </header>
 

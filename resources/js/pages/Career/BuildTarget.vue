@@ -316,7 +316,7 @@ function removeAt(index: number): void {
         <!-- Header: eyebrow + large title + subtitle -->
         <header class="mb-4">
             <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 3 of 6</p>
-            <p class="mt-1 text-2xl font-semibold text-ink-strong">Your target</p>
+            <h1 class="mt-1 text-3xl font-semibold text-ink-strong">Your target</h1>
             <p class="mt-1 text-sm text-ink-muted">The target is what this career is built to reach.</p>
         </header>
 
