@@ -1,4 +1,4 @@
-# DESIGN.md: Trainer Desk design system
+ # DESIGN.md: Trainer Desk design system
 
 Product name **Trainer Desk**, owner decision 2026-09-27 (closes PRD OQ-1).
 This file is the design contract for the app's visual system. Owner rulings
