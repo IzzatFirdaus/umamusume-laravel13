@@ -16,7 +16,6 @@ use App\Services\PageSize;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -75,7 +74,13 @@ class TraineeSelectController extends Controller
         SetupDraft::markVisited(2);
         $draft = SetupDraft::read();
 
-        $query = Umamusume::query()->with(['cards' => $this->cardScope()]);
+        // Only rows a source document published. `external_ref` is the source's own character id and the
+        // sentinel `StoreTraineeGoals` already reads; a trainee without one came from no document, so
+        // offering her here would start a career on a row the engine never wrote.
+        $query = Umamusume::query()
+            ->whereNotNull('external_ref')
+            ->where('external_ref', '!=', '')
+            ->with(['cards' => $this->cardScope()]);
 
         $this->applySearch($query, $request);
         $this->applyFacets($query, $request);

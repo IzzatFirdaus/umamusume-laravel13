@@ -20,6 +20,9 @@ use Inertia\Testing\AssertableInertia as Assert;
 /**
  * A trainee with the full aptitude set, so a fixture is never accidentally a null-aptitude fixture.
  *
+ * `external_ref` is set because the roster is the published catalog: the controller offers only rows a
+ * source document named, and a factory row with no ref is the shape a stray probe row has.
+ *
  * @param  array<string, string>  $letters
  */
 function rosterTrainee(string $name, array $letters): Umamusume
@@ -27,6 +30,7 @@ function rosterTrainee(string $name, array $letters): Umamusume
     return Umamusume::factory()->create([
         'name' => $name,
         'slug' => strtolower(str_replace(' ', '-', $name)),
+        'external_ref' => 'test:char:'.strtolower(str_replace(' ', '-', $name)),
         'aptitude_turf' => $letters['turf'] ?? null,
         'aptitude_dirt' => $letters['dirt'] ?? null,
         'aptitude_sprint' => $letters['sprint'] ?? null,
@@ -209,11 +213,28 @@ it('sends the trainee card the payload the row prints, at the grain each fact li
 it('states a trainee with no published aptitude as an absence rather than an empty grid', function (): void {
     // The parser writes all ten columns or none, so a null `aptitude_turf` means the whole set is absent
     // and the row carries null rather than ten nulls (D-220).
-    Umamusume::factory()->create(['name' => 'Unmeasured Trainee']);
+    Umamusume::factory()->create(['name' => 'Unmeasured Trainee', 'external_ref' => 'test:char:unmeasured']);
 
     $this->get('/career/setup/trainee')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page->where('trainees.data.0.aptitudes', null));
+});
+
+it('offers no trainee the catalog never published', function (): void {
+    // A-103: a stray probe row in a dev database reached this roster and read as a real trainee. The
+    // roster is the published catalog, so a row with no source ref is not offered, filter or not.
+    rosterTrainee('Published Trainee', ['turf' => 'A']);
+    Umamusume::factory()->create(['name' => 'Form Counted 1', 'slug' => 'form-counted-1']);
+
+    $this->get('/career/setup/trainee')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('trainees.data', 1)
+            ->where('trainees.data.0.name', 'Published Trainee'));
+
+    $this->get('/career/setup/trainee?search=Form Counted')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->has('trainees.data', 0));
 });
 
 it('narrows the roster with each filter it claims to offer', function (): void {

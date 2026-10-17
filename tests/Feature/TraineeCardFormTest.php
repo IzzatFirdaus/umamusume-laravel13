@@ -25,6 +25,7 @@ function formTrainee(string $name, array $titles): Umamusume
     $trainee = Umamusume::factory()->create([
         'name' => $name,
         'slug' => strtolower(str_replace(' ', '-', $name)),
+        'external_ref' => 'test:char:'.strtolower(str_replace(' ', '-', $name)),
     ]);
 
     foreach ($titles as $index => $title) {
