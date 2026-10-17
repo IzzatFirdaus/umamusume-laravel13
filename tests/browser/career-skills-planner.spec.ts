@@ -195,6 +195,21 @@ test('passes an axe scan at WCAG A and AA', async ({ page }) => {
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });
 
+// A-94 (plan 1.3): the condition cells hold engine expressions with no break opportunities, so the
+// planner once pushed the document 104px wide at 390. `break-words min-w-0` is the fix; this measures
+// the geometry rather than trusting the class name.
+test('does not scroll the planner sideways at 390 or 768', async ({ page }) => {
+    await openPlanner(page);
+
+    for (const width of [390, 768]) {
+        await page.setViewportSize({ width, height: 900 });
+        const overflow = await page.evaluate(
+            () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        );
+        expect(overflow, `the skills planner scrolls sideways at ${width}px`).toBeLessThanOrEqual(0);
+    }
+});
+
 test('adds a catalogue skill to a run that holds none (Slice 10)', async ({ page }) => {
     await openPlanner(page);
 

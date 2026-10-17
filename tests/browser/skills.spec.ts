@@ -80,6 +80,26 @@ test('follows a search row to the detail page and states the absences there', as
     await expect(page.getByRole('link', { name: 'Back to skill search' })).toBeVisible();
 });
 
+// A-94 (plan 1.2): the activation condition is an engine expression with no break opportunities, so
+// the `<dd>` holding it once pushed the document 224px wide at 390. `break-words min-w-0` plus the
+// same on the grid items is the fix; this measures the geometry rather than trusting the class name.
+test('does not scroll the detail page sideways at 390 or 768', async ({ page }) => {
+    await page.goto('/skills?search=lookatcurren');
+    await page.locator('#app > *').first().waitFor();
+
+    await page.locator('#skill-results').getByRole('link', { name: '#LookatCurren' }).click();
+    await expect(page).toHaveURL(/\/skills\/\d+$/);
+    await page.locator('#app > *').first().waitFor();
+
+    for (const width of [390, 768]) {
+        await page.setViewportSize({ width, height: 900 });
+        const overflow = await page.evaluate(
+            () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        );
+        expect(overflow, `the skill detail scrolls sideways at ${width}px`).toBeLessThanOrEqual(0);
+    }
+});
+
 test('filters to the unique-class rows and shows the badge on the result', async ({ page }) => {
     await page.goto('/skills?unique=1');
     await page.locator('#app > *').first().waitFor();
