@@ -53,8 +53,8 @@ test.describe('Snapshot entry', () => {
         await expect(page.getByText(/the position you enter becomes the run's own position/)).toBeVisible();
         await expect(page.getByText(/recorded as absent rather than guessed at/)).toBeVisible();
 
-        // One accent on the screen (Von Restorff): the enamel primary is the only accented control.
-        await expect(page.locator('.enamel')).toHaveCount(1);
+        // One accent on the screen (Von Restorff): the primary-action fill is the only accented control.
+        await expect(page.locator('.bg-primary-action')).toHaveCount(1);
 
         await page.getByRole('link', { name: 'Enter the snapshot' }).click();
         await page.waitForURL(/\/career\/snapshot\/setup/, WRITE);
@@ -88,8 +88,8 @@ test.describe('Snapshot setup', () => {
         // Prägnanz: the section headers are the heading tier, never a body-size literal.
         await expect(page.locator('h2.text-base')).toHaveCount(0);
 
-        // One accent per screen: the submit is the only enamel control.
-        await expect(page.locator('.enamel')).toHaveCount(1);
+        // One accent per screen: the submit is the only primary-action control.
+        await expect(page.locator('.bg-primary-action')).toHaveCount(1);
 
         // Each state field's own name reaches its control. An interpolated attribute is a literal in
         // Vue, so this asserts the rendered name rather than the intent: the number input answers to
@@ -154,8 +154,8 @@ test.describe('Snapshot review', () => {
             expect(['known', 'unknown', 'not_provided']).toContain(state);
         }
 
-        // One accent on the screen: the commit is the only enamel control.
-        await expect(page.locator('.enamel')).toHaveCount(1);
+        // One accent on the screen: the commit is the only primary-action control.
+        await expect(page.locator('.bg-primary-action')).toHaveCount(1);
 
         // The way back is present and does not commit anything.
         await expect(page.getByRole('link', { name: 'Edit the snapshot' })).toBeVisible();

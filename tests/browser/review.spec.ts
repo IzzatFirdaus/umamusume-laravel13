@@ -59,7 +59,7 @@ test('every control on the queue meets the 44px floor', async ({ page }) => {
     await expectTapTargets(page.locator('main a, main button, main select, main input'), 4);
 });
 
-test('each card explains itself: count, pill, badge, reason, and one enamel primary', async ({ page }) => {
+test('each card explains itself: count, pill, badge, reason, and one primary-action accent', async ({ page }) => {
     await page.goto('/review');
     await page.locator('#app > *').first().waitFor();
 
@@ -87,8 +87,8 @@ test('each card explains itself: count, pill, badge, reason, and one enamel prim
 
     // 6A.4: exactly one accented primary for the screen, on the topmost card; the other cards'
     // Resolve buttons render secondary.
-    await expect(page.locator('.enamel')).toHaveCount(1);
-    await expect(card.getByRole('button', { name: /^Resolve / })).toHaveClass(/enamel/);
+    await expect(page.locator('.bg-primary-action')).toHaveCount(1);
+    await expect(card.getByRole('button', { name: /^Resolve / })).toHaveClass(/bg-primary-action/);
 
     // 6A.3: the verdict control carries a visible label, not an sr-only one (the aria-label still
     // names the candidate; "Verdict" here is the label's own text content).

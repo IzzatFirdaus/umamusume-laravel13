@@ -84,8 +84,8 @@ test('prints her own ladder, the source wording, and the reason a rung is unread
     await expect(goals).not.toContainText('—');
 
     // X-3, one accented primary per screen: the ladder adds no control, so the "New run" button stays
-    // the only enamel element on the page, as it was before this block rendered rows.
-    await expect(page.locator('.enamel')).toHaveCount(1);
+    // the only primary-action element on the page, as it was before this block rendered rows.
+    await expect(page.locator('.bg-primary-action')).toHaveCount(1);
 });
 
 test('prints the Japanese name in its own language and links the provenance source', async ({ page }) => {
