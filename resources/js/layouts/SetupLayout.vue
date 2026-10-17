@@ -53,6 +53,14 @@ const stepCurrent = 'bg-raised text-ink-strong font-bold';
 const stepCompleted = 'text-ink-strong';
 const stepNotStarted = 'text-ink-muted';
 
+// A named absence reads as a step and is never a link, so this restates `stepLink`'s geometry
+// without its hover and without `text-ink`: a muted, non-focusable row that keeps the 44px line
+// height so the bar does not jump when a step is unbuilt. Not built on top of `stepLink` with a
+// second text colour, because two `text-*` utilities in one class list resolve by stylesheet
+// order rather than by the order they are written.
+const stepAbsent =
+    'flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink-muted';
+
 const leaveLink =
     'inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
 
