@@ -272,6 +272,12 @@ external fonts (offline constraint + C-8 dependency gate).
 > | Metadata | `text-ink-muted` | Beside or below its Body | Labels, hints, timestamps, provenance, row counts |
 >
 > The rule the tiers carry: **weight and colour are monotone across the four tiers** — Critical is the heaviest and strongest, Metadata is the lightest and quietest, and no tier reverses the order. A Metadata element that renders at Body weight is a defect, not a styling choice.
+>
+> > **Amended 2026-10-17 (design-contract pass, plan slice 0.2, owner instruction): the page `h1` is the shell's, and a page never repeats it in body copy.**
+> >
+> > "One `h1` per page" gains its mechanism, measured on the 2026-10-17 tree: the `h1` is emitted once, by `AppLayout.vue`'s `#title` slot, and `CareerLayout.vue` and `SetupLayout.vue` forward their pages' titles into that slot rather than rendering their own. A page that needs a title-level element below the shell `h1` uses an `h2` region heading, never a second title at the same weight, and content headings begin at `h2` without skipping a level; a card's block title sits at `h3` under its `h2` region (the Cockpit's "Recommendation" block, 2026-10-08, is the recorded precedent).
+> >
+> > The wizard's six steps demonstrated the failure both ways and their fixes are the record: the 2026-10-17 UX audit measured every step with no page heading after the in-body `<h1>` became a styled `<p>` (finding A-102, `0d3a69c`), and `253f957` closed the other direction by deleting the in-body title that duplicated the layout `h1`. The net state on `253f957`: the shell `#title` `h1` alone names each step (`66f2029` moved the six names to the owner-signed Critical tier through that one slot), and the step's content begins with eyebrow, subtitle and card `h2`s below it. The 2026-10-15 Critical-tier table above is unchanged; this amendment fixes where the `h1` lives, not its size or colour.
 
 - The research package's rounded display-font proposal ("M PLUS Rounded 1s" /
    self-hosted Nunito) stays parked: it needs a C-8 dependency approval and
@@ -1150,3 +1156,8 @@ system owns.
   queue's pill-plus-badge doubling is the named shipped case). The 2026-10-09 per-surface-class ruling and
   every original sentence are preserved. No token moves, no shipped string changes in this slice, and no
   audit finding is closed by the amendment alone.
+- **2026-10-17** — Design-contract pass, plan slice 0.2: §2.2's tier amendment gains the mechanism for
+  "one `h1` per page" — the shell `#title` slot emits it, layouts forward into it, content begins at
+  `h2`, and a page never repeats its title in body copy. The wizard's A-102 lineage (`0d3a69c`'s styled
+  `<p>`, `66f2029`'s Critical tier, `253f957`'s duplicate-title deletion) is recorded as the precedent.
+  No size, colour or token moves.
