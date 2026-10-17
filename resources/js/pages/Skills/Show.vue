@@ -109,15 +109,15 @@ const conditions = computed(() => props.skill.condition_groups ?? []);
                         Activation {{ index + 1 }}
                     </h3>
 
-                    <dl class="grid gap-x-6 gap-y-2 @4xl:grid-cols-2">
+                    <dl class="grid min-w-0 gap-x-6 gap-y-2 @4xl:grid-cols-2">
                         <div class="@4xl:col-span-2">
                             <dt class="text-ink-muted">Condition</dt>
-                            <dd class="font-mono text-xs text-ink">{{ group.condition ?? 'N/A' }}</dd>
+                            <dd class="min-w-0 break-words font-mono text-xs text-ink">{{ group.condition ?? 'N/A' }}</dd>
                         </div>
 
                         <div v-if="group.precondition !== null" class="@4xl:col-span-2">
                             <dt class="text-ink-muted">Precondition</dt>
-                            <dd class="font-mono text-xs text-ink">{{ group.precondition }}</dd>
+                            <dd class="min-w-0 break-words font-mono text-xs text-ink">{{ group.precondition }}</dd>
                         </div>
 
                         <div v-if="group.base_time !== null">
