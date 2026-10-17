@@ -793,6 +793,21 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
 > is not `Fuzzy`. This is the same defect class the one-fact-once rule closed on the Cockpit's team card
 > on 2026-10-16, and it fixes how many labels render, not which words they use: the 2026-10-09
 > per-surface-class ruling above is unchanged, and no badge is re-worded by this amendment.
+>
+> **Amended 2026-10-17 (design-contract pass, plan slice 0.11, owner instruction): an unreachable
+> destination renders as a named absence, and a disabled control that still activates is a truthfulness
+> defect.** Three rules, all consolidations of shipped behavior rather than new decisions. (a) A control
+> whose destination does not exist is not a link. The wizard's `to: null` step row
+> (`SCR-CAR-002`'s "Unbuilt steps" state) and the Dashboard quick-action rule (`SCR-CAR-001`: "a
+> destination whose slice had not landed would render as a named absence, not a dead link") are the
+> shipped shape: non-focusable text naming the absence in the same sentence voice as an absent value.
+> `aria-disabled` alone is not that shape and never may be used as one, because it announces a state
+> without cancelling activation, and an ordinary link stays clickable. (b) A reachable action the screen
+> forbids renders with a native disabled state or as a named absence with its reason, never as an enabled
+> control whose label promises what the product cannot perform; the `N/A`-not-a-dash rule of §5 applies to
+> affordances as it does to values. (c) An empty state states what is missing, why it matters and what to
+> do (the `design-2.0` §29 voice the shipped screens carry); this amendment binds that voice as the rule
+> every migrated screen inherits, so Phase 3+ does not re-invent it per page.
 
 ## 6. Lore-sensitive design rules (hard gate)
 
@@ -1186,3 +1201,10 @@ system owns.
   user-facing word for a stored run, identifiers keep their names, and the remaining "run" strings are
   named as Phase 5 copy debt. `SCREEN_SPEC.md` §8 gains the matching authority row in the same commit. No
   shipped string changes in this slice.
+- **2026-10-17** — Design-contract pass, plan slice 0.11: §5 gains the unreachable-destination amendment -
+  a missing destination renders as non-focusable named absence (the shipped `to: null` and quick-action
+  shapes), `aria-disabled` is not an acceptable substitute because it does not cancel activation, a
+  forbidden reachable action uses native disabled semantics or a named absence, and the §29 empty-state
+  voice is bound as the rule migrated screens inherit. `SCR-CAR-002` gains the dated note recording the
+  mechanism and the `stepAbsent` defect found in it. Consolidation of shipped behavior; no component
+  changed and no owner ruling moved.
