@@ -76,6 +76,22 @@ function shippedCopyCode(string $source): string
 }
 
 /**
+ * The same comment removal, with each match replaced by the newlines it held rather than deleted.
+ *
+ * `shippedCopyCode()` collapses the line numbering, so a guard built on it reports line 195 for a
+ * defect sitting on line 222 and the reader goes looking in the wrong place. Guards that name a line
+ * use this one; the dash guard keeps the original because it reports files, not lines.
+ */
+function shippedCopyText(string $source): string
+{
+    return (string) preg_replace_callback(
+        ['/\{\{--.*?--\}\}/s', '/<!--.*?-->/s', '#/\*.*?\*/#s', '/^\s*\/\/.*$/m'],
+        static fn (array $m): string => str_repeat("\n", substr_count($m[0], "\n")),
+        $source,
+    );
+}
+
+/**
  * @return array<string, list<int>> file => line numbers holding a rendered dash
  */
 function renderedDashLines(): array
@@ -222,27 +238,16 @@ it('renders N/A rather than a glyph when a run has recorded no value', function 
  * is a character this repository's shipped copy has any reason to carry: the displayed vocabulary
  * is English plus Japanese, and the Japanese reaches the page as kana bytes, not as Latin-1.
  *
- * The sweep reuses the comment-stripping idea of `shippedCopyCode()` rather than reading the raw
- * file, for the same reason the dash guard does: `ScenarioPanel.vue` carries a dozen `Â§` and
- * `â€”` inside its docblock and its HTML comments, which is this repository writing about the rule
- * rather than copy a Trainer sees. Stripping the comment forms is what keeps the guard aimed at
- * rendered text.
- *
- * It does not call `shippedCopyCode()` directly, because that helper deletes the comment blocks and
- * so collapses the line numbering - it would report line 370 for a defect sitting on line 406. Here
- * each match is replaced by the newlines it contained, so the surviving line is the real one.
+ * The sweep strips comment forms the way the dash guard does, for the same reason: `ScenarioPanel.vue`
+ * carries a dozen `Â§` and `â€”` inside its docblock and its HTML comments, which is this repository
+ * writing about the rule rather than copy a Trainer sees. It uses `shippedCopyText()` rather than
+ * `shippedCopyCode()` so the line it reports is the line the defect is on.
  */
 it('ships no double-encoded UTF-8 in rendered copy', function (): void {
     $offenders = [];
 
     foreach (shippedCopySources() as $path => $source) {
-        $visible = (string) preg_replace_callback(
-            ['/\{\{--.*?--\}\}/s', '/<!--.*?-->/s', '#/\*.*?\*/#s', '/^\s*\/\/.*$/m'],
-            static fn (array $m): string => str_repeat("\n", substr_count($m[0], "\n")),
-            $source,
-        );
-
-        foreach (preg_split('/\R/', $visible) ?: [] as $index => $line) {
+        foreach (preg_split('/\R/', shippedCopyText($source)) ?: [] as $index => $line) {
             if (preg_match('/[\x{00C2}\x{00C3}\x{00E2}]/u', $line) === 1) {
                 $offenders[] = $path.':'.($index + 1).': '.trim($line);
             }
@@ -279,4 +284,41 @@ it('sends no double-encoded bytes on the event decision or trainee profile route
     $responses['trainee profile']->assertInertia(fn (Assert $page) => $page
         ->where('trainee.profile.va_ja', '和氣あず未')
         ->where('trainee.profile.va_en', 'Azumi Waki'));
+});
+
+/*
+ * Backlog slice 0.12: a `<dt>`/`<dd>` pair with no `<dl>` parent is invalid HTML and axe's `dlitem`
+ * rule (WCAG 2.2 A 1.3.1). `SubCell.vue` and `KpiCard.vue` both exist to stop this happening by
+ * carrying the `<dl>` in the component, and `ScenarioSelect.vue` had a hand-rolled pair inside a
+ * plain `<div>`.
+ *
+ * The check is a tag-order depth count rather than a parser: comments go through `shippedCopyText()`
+ * first so a `<dt>` written in prose cannot register, and any `<dl` raises the depth and any `</dl`
+ * lowers it, so a `<dt` or `<dd` seen at depth zero has no list to belong to. Nested lists are
+ * themselves invalid, so the counter cannot be fooled by them.
+ */
+it('ships no dt or dd outside a dl in any view or component', function (): void {
+    $offenders = [];
+
+    foreach (shippedCopySources() as $path => $source) {
+        $depth = 0;
+
+        foreach (preg_split('/\R/', shippedCopyText($source)) ?: [] as $index => $line) {
+            $depth += substr_count($line, '<dl');
+            $depth -= substr_count($line, '</dl');
+
+            if ($depth < 0) {
+                $offenders[] = $path.':'.($index + 1).': </dl> with no opening <dl>';
+                $depth = 0;
+
+                continue;
+            }
+
+            if ($depth === 0 && (str_contains($line, '<dt') || str_contains($line, '<dd'))) {
+                $offenders[] = $path.':'.($index + 1).': '.trim($line);
+            }
+        }
+    }
+
+    expect($offenders)->toBe([]);
 });

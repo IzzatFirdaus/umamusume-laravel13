@@ -218,7 +218,7 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                         <SubCell label="Turn loop" :value="card.loop.length > 0 ? card.loop.join(' → ') : 'N/A'" :title="card.loop.length > 0 ? undefined : 'No turn loop steps are recorded for this scenario.'" />
                         <SubCell label="Live on Global" :value="card.live_on_global ?? 'N/A'" :title="card.live_on_global ? undefined : 'No Global availability date is recorded for this scenario.'" />
                         <SubCell label="Scenario ruleset date" :value="card.ruleset_date?.value ?? 'N/A'" :title="card.ruleset_date?.title ?? 'No source in this repository dates this scenario\'s ruleset.'" />
-                        <div class="flex flex-wrap justify-between gap-x-4">
+                        <dl class="flex flex-wrap justify-between gap-x-4">
                             <dt class="text-ink-muted">Ruleset version</dt>
                             <dd v-if="props.ruleset.value === null" class="text-ink-muted">
                                 <AbsenceValue compact :reason="props.ruleset.title" />
@@ -226,7 +226,7 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                             <dd v-else class="font-mono text-ink" :title="props.ruleset.title">
                                 {{ props.ruleset.value }}
                             </dd>
-                        </div>
+                        </dl>
                         <SubCell data-field="description" label="Description" :value="card.description ?? 'N/A'" :title="card.description ? undefined : `No sourced description line exists for the ${card.label} guide in this repository.`" />
                         <SubCell data-field="recommended_use" label="Recommended use" :value="card.recommended_use ?? 'N/A'" :title="card.recommended_use ? (card.metadata?.recommended_use_source ?? undefined) : (card.metadata?.recommended_use_reason ?? 'The scenario guides state no recommended use, and choosing one would be a judgement this tool holds no source for.')" />
                     </div>
