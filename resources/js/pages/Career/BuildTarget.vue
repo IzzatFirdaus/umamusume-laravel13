@@ -313,10 +313,9 @@ function removeAt(index: number): void {
             </Link>
         </nav>
 
-        <!-- Header: eyebrow + large title + subtitle -->
+        <!-- Header: eyebrow + subtitle. The page title is the layout's #title h1. -->
         <header class="mb-4">
             <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 3 of 6</p>
-            <p class="mt-1 text-3xl font-semibold text-ink-strong">Your target</p>
             <p class="mt-1 text-sm text-ink-muted">The target is what this career is built to reach.</p>
         </header>
 
