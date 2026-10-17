@@ -255,7 +255,7 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                 <!-- Three stat tiles, then progress as its own full-width row: a fourth tile made
                      the strip three-across at rail widths and the number wrapped. `grid-cols-tiles`
                      folds the count instead of shrinking a value past its own width. -->
-                <div class="mt-4 grid grid-cols-tiles gap-3" role="list" aria-label="Career progress">
+                <div class="mt-4 grid grid-cols-tiles gap-3" aria-label="Career progress">
                     <SubCell
                         label="Turn"
                         :value="group(props.activeCareer.turn)"

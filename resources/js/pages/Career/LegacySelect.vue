@@ -350,7 +350,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                                 :key="ancestor.slot"
                                  class="rounded-lg border border-rule bg-panel p-3"
                             >
-                                <div class="mt-3 space-y-2" role="list" aria-label="Legacy details">
+                                <div class="mt-3 space-y-2" aria-label="Legacy details">
                                     <label class="block text-xs font-medium text-ink" :for="`ancestor-${parent.slot}-${ancestorIndex}`">
                                         {{ ancestor.slot }}
                                     </label>
