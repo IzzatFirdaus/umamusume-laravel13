@@ -54,19 +54,20 @@ test.describe('Mobile navigation', () => {
         await page.goto('/');
         await page.locator('#app > *').first().waitFor();
 
-        const more = page.getByRole('navigation', { name: 'Bottom navigation' }).getByText('More');
+        const bottom = page.getByRole('navigation', { name: 'Bottom navigation' });
+        const more = bottom.getByText('More');
 
         // Closed by default, and the hidden destinations are not in the tab order while it is shut.
-        await expect(page.getByRole('link', { name: 'Veterans' })).not.toBeVisible();
+        await expect(bottom.getByRole('link', { name: 'Veterans' })).not.toBeVisible();
 
         await more.click();
-        await expect(page.getByRole('link', { name: 'Veterans' })).toBeVisible();
-        await expect(page.getByRole('link', { name: 'Settings' })).toBeVisible();
+        await expect(bottom.getByRole('link', { name: 'Veterans' })).toBeVisible();
+        await expect(bottom.getByRole('link', { name: 'Settings' })).toBeVisible();
 
         // Escape closes the disclosure and puts focus back where the Trainer opened it.
-        await page.getByRole('link', { name: 'Veterans' }).focus();
+        await bottom.getByRole('link', { name: 'Veterans' }).focus();
         await page.keyboard.press('Escape');
-        await expect(page.getByRole('link', { name: 'Veterans' })).not.toBeVisible();
+        await expect(bottom.getByRole('link', { name: 'Veterans' })).not.toBeVisible();
         await expect(more).toBeVisible();
     });
 
