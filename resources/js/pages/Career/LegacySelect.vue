@@ -249,7 +249,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
         <!-- Header: eyebrow + large title + subtitle -->
         <header class="mb-4">
             <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 4 of 6</p>
-            <h1 class="mt-1 text-3xl font-semibold text-ink-strong">Legacy</h1>
+            <p class="mt-1 text-3xl font-semibold text-ink-strong">Legacy</p>
             <p class="mt-1 text-sm text-ink-muted">The two parents this career will be bred from.</p>
         </header>
 
@@ -313,7 +313,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
             {{ props.roster.length }}. The rest are on the Legacy Lab browse screen.
         </p>
 
-        <ol class="mt-4 max-w-3xl grid grid-cols-1 items-start gap-6 @5xl:grid-cols-2">
+        <ol class="mt-4 max-w-3xl grid grid-cols-1 items-start gap-4 @5xl:grid-cols-2">
             <li class="rounded-lg border-2 border-rule bg-panel p-3 @5xl:col-span-2">
                 <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Trainee</p>
                 <div class="mt-1 text-lg font-semibold text-ink-strong">

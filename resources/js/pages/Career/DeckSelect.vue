@@ -241,7 +241,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
         <!-- Header: eyebrow + large title + subtitle -->
         <header class="mb-4">
             <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 5 of 6</p>
-            <h1 class="mt-1 text-3xl font-semibold text-ink-strong">Support deck</h1>
+            <p class="mt-1 text-3xl font-semibold text-ink-strong">Support deck</p>
             <p class="mt-1 text-sm text-ink-muted">A deck is the six cards equipped before the career starts.</p>
         </header>
 
@@ -266,7 +266,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
             {{ form.errors.deck }}
         </p>
 
-        <div class="mt-5 grid max-w-5xl grid-cols-1 gap-6 @5xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <div class="mt-5 grid max-w-5xl grid-cols-1 gap-4 @5xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
             <section aria-labelledby="draft-slots-heading">
                 <h2 id="draft-slots-heading" class="text-lg font-semibold text-ink-strong">The six slots</h2>
 
@@ -362,7 +362,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
 
                  <p
                      v-if="props.picker.options.length === 0"
-                     class="mt-3 rounded-lg border border-dashed border-rule bg-panel p-5 text-sm text-ink-muted"
+                     class="mt-3 rounded-lg border border-dashed border-rule bg-panel p-4 text-sm text-ink-muted"
                  >
                     The support-card catalog holds no row matching that. Run
                     <code>php artisan uma:fetch gametora-support-cards</code> to fill it, or

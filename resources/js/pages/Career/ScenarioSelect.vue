@@ -130,7 +130,7 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
         <!-- Header: eyebrow + large title + subtitle -->
         <header class="mb-4">
             <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 1 of 6</p>
-            <h1 class="mt-1 text-3xl font-semibold text-ink-strong">Choose a scenario</h1>
+            <p class="mt-1 text-3xl font-semibold text-ink-strong">Choose a scenario</p>
             <p class="mt-1 text-sm text-ink-muted">The scenario decides which resources, systems and stat ceilings apply.</p>
         </header>
 
@@ -166,7 +166,7 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
              blank so the screen never shows an empty grid and calls it a choice. -->
         <p
             v-if="props.scenarios.length === 0"
-            class="mt-8 rounded-lg border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
+            class="mt-8 rounded-lg border border-dashed border-rule bg-raised p-4 text-sm text-ink-muted"
         >
             No scenario is composed. `config/scenarios.php` holds none, so there is nothing to choose
             and no career can be started until one is added.
@@ -177,7 +177,7 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                 v-for="card in props.scenarios"
                 :key="card.key"
                 data-scenario-card
-                class="rounded-lg border border-rule bg-panel p-5"
+                class="rounded-lg border border-rule bg-panel p-4"
                 :class="props.selected === card.key ? 'border-2 border-chrome' : ''"
             >
                 <h2 class="flex flex-wrap items-baseline gap-x-3 text-lg font-semibold text-ink-strong">

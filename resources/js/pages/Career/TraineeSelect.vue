@@ -242,7 +242,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
         <!-- Header: eyebrow + large title + subtitle -->
         <header class="mb-4">
             <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 2 of 6</p>
-            <h1 class="mt-1 text-3xl font-semibold text-ink-strong">Choose a trainee</h1>
+            <p class="mt-1 text-3xl font-semibold text-ink-strong">Choose a trainee</p>
             <p class="mt-1 text-sm text-ink-muted">Pick the trainee the career is built on.</p>
         </header>
 
@@ -350,7 +350,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
 
         <p
             v-if="props.trainees.data.length === 0 && !loading"
-            class="mt-8 rounded-lg border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
+            class="mt-8 rounded-lg border border-dashed border-rule bg-raised p-4 text-sm text-ink-muted"
         >
             No trainee matches these filters. The roster is filled by seed data or `php artisan uma:fetch`;
             clearing the filters shows every row the catalog holds.
