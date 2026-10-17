@@ -17,6 +17,7 @@ use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -414,7 +415,7 @@ class TraineeSelectController extends Controller
             return [];
         }
 
-        return Skill::query()
+        return array_values(Skill::query()
             ->availableOnGlobal()
             ->whereIn('export_id', $exportIds)
             ->orderBy('name')
@@ -424,7 +425,7 @@ class TraineeSelectController extends Controller
                 'name' => $skill->name,
             ])
             ->values()
-            ->all();
+            ->all());
     }
 
     /**
@@ -437,11 +438,11 @@ class TraineeSelectController extends Controller
      * here, because a wizard step that let a Trainer start a career on a form no second source has
      * confirmed would be a second opinion on disclosure the catalog already owns.
      *
-     * @return Closure(HasMany<CharacterCard, Umamusume>): void
+     * @return Closure(Relation<*, *, *>): mixed
      */
     private function cardScope(): Closure
     {
-        return static function (HasMany $cards): void {
+        return static function (Relation $cards): void {
             $cards->where('unconfirmed', false)
                 ->orderBy('is_debut_form', 'desc')
                 ->orderBy('global_release_date')

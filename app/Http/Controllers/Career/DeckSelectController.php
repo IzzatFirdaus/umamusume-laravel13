@@ -219,14 +219,11 @@ class DeckSelectController extends Controller
      * are.
      *
      * @param  Collection<int, SupportCard>  $cards
-     * @return list<array{card_name: string, effects: list<array<string, mixed>>}>
+     * @return list<array{card_name: string, effects: list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>}>
      */
     private function analysisInput($cards): array
     {
-        /** @var list<array{card_name: string, effects: list<array<string, mixed>>}> $input */
-        $input = DeckAnalysis::inputFor($cards);
-
-        return $input;
+        return DeckAnalysis::inputFor($cards);
     }
 
     /**

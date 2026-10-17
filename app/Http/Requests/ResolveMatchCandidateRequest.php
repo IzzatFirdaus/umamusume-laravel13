@@ -31,4 +31,26 @@ class ResolveMatchCandidateRequest extends FormRequest
             'alias_language' => ['nullable', Rule::enum(AliasLanguage::class), 'required_if:status,Aliased'],
         ];
     }
+
+    /**
+     * The validated verdict, narrowed to the shape `ResolveMatchCandidate::handle()` reads.
+     *
+     * @return array{status: string, umamusume_id?: int|null, alias_language?: string|null}
+     */
+    public function verdict(): array
+    {
+        $validated = $this->validated();
+
+        $verdict = ['status' => (string) $validated['status']];
+
+        if (array_key_exists('umamusume_id', $validated)) {
+            $verdict['umamusume_id'] = $validated['umamusume_id'] === null ? null : (int) $validated['umamusume_id'];
+        }
+
+        if (array_key_exists('alias_language', $validated)) {
+            $verdict['alias_language'] = $validated['alias_language'] === null ? null : (string) $validated['alias_language'];
+        }
+
+        return $verdict;
+    }
 }

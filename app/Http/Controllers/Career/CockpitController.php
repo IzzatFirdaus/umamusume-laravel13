@@ -621,7 +621,7 @@ class CockpitController extends Controller
         /** @var list<string> $order */
         $order = config('scenarios.objective_priority');
 
-        $rows = collect($rows)
+        $rows = array_values(collect($rows)
             // One composite key: the declared class order first, then the turn the calendar states, and a
             // slot with no turn last within its class rather than at turn zero.
             ->sortBy(fn (array $row): string => sprintf(
@@ -633,7 +633,7 @@ class CockpitController extends Controller
             ))
             ->map(static fn (array $row): array => array_slice($row, 0, 8, true))
             ->values()
-            ->all();
+            ->all());
 
         return $rows;
     }
@@ -971,11 +971,11 @@ class CockpitController extends Controller
             'destroy_action' => route('runs.turns.destroy', [$run, $selected]),
             'turn' => $selected->turn,
             'selected_turn_id' => $selected->id,
-            'turns' => $run->turnEntries
+            'turns' => array_values($run->turnEntries
                 ->sortBy('turn')
                 ->map(static fn (TurnEntry $turn): array => ['id' => $turn->id, 'turn' => $turn->turn])
                 ->values()
-                ->all(),
+                ->all()),
             'values' => [
                 'speed' => $selected->speed,
                 'stamina' => $selected->stamina,

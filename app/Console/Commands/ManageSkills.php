@@ -160,18 +160,18 @@ class ManageSkills extends Command
         $this->line("  <comment>ID:</comment> {$skillId}");
         $this->line("  <comment>Description:</comment> {$skill['description']}");
         $this->line('  <comment>Command:</comment> '.($skill['command'] ?? 'custom'));
-        $this->line('  <comment>Enabled:</comment> '.($skill['enabled'] ? 'Yes' : 'No'));
+        $this->line('  <comment>Enabled:</comment> '.(($skill['enabled'] ?? false) ? 'Yes' : 'No'));
 
         $this->newLine();
         $this->line('  <comment>Triggers:</comment>');
 
-        foreach ($skill['triggers'] as $type => $values) {
+        foreach ($skill['triggers'] ?? [] as $type => $values) {
             if ($values !== []) {
                 $this->line("    {$type}: ".implode(', ', $values));
             }
         }
 
-        if ($skill['dependencies'] !== []) {
+        if (($skill['dependencies'] ?? []) !== []) {
             $this->newLine();
             $this->line('  <comment>Dependencies:</comment> '.implode(', ', $skill['dependencies']));
         }

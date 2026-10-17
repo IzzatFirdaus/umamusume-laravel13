@@ -130,7 +130,7 @@ class SkillExecutor
     }
 
     /**
-     * @return array<int, array{timestamp: string, event: string, skill_id: string, duration_ms: int, status: string, error: string|null}>
+     * @return array<int, array<string, mixed>>
      */
     public function getLog(): array
     {
@@ -184,7 +184,13 @@ class SkillExecutor
         $tokens = [];
         $consumed = [];
 
-        foreach (preg_split('/\s+/', trim($command)) as $token) {
+        $split = preg_split('/\s+/', trim($command));
+
+        if ($split === false) {
+            $split = [];
+        }
+
+        foreach ($split as $token) {
             $resolved = $this->resolveToken($token, $params, $consumed);
 
             if ($resolved !== null) {
@@ -306,7 +312,7 @@ class SkillExecutor
     }
 
     /**
-     * @param  array<int, array{skill: array{id: string, name: string, description: string, triggers: array<string, mixed>, input: array<string, mixed>, output: array<string, mixed>, dependencies: array<int, string>, enabled: bool, command: string}, relevance: float, matched_triggers: array<int, string>}>  $matches
+     * @param  array<int, array{skill: array{triggers?: array<string, mixed>, dependencies?: array<int, string>, enabled?: bool, command?: string, runner?: string, id: string, name: string, description: string, input?: array<string, mixed>, output?: array<string, mixed>}, relevance: float, matched_triggers: list<string>}>  $matches
      */
     private function buildDisclosure(array $matches): string
     {
@@ -343,6 +349,12 @@ class SkillExecutor
             return ['skill_automation' => [], 'logging' => []];
         }
 
-        return json_decode(file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
+        $json = file_get_contents($configPath);
+
+        if ($json === false) {
+            return ['skill_automation' => [], 'logging' => []];
+        }
+
+        return json_decode($json, true, 512, JSON_THROW_ON_ERROR);
     }
 }

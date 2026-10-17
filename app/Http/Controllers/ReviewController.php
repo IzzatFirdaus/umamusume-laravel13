@@ -63,7 +63,7 @@ class ReviewController extends Controller
      */
     public function resolve(ResolveMatchCandidateRequest $request, MatchCandidate $candidate, ResolveMatchCandidate $action): RedirectResponse
     {
-        $action->handle($candidate, $request->validated());
+        $action->handle($candidate, $request->verdict());
 
         return redirect()->route('review.index')->with('status', 'Candidate resolved.');
     }

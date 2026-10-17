@@ -231,7 +231,7 @@ class DashboardController extends Controller
         $page = $veterans->handle([], self::RECENT_VETERANS);
 
         return [
-            'rows' => array_map(fn (Veteran $veteran): array => $this->veteranRow($veteran), $page->items()),
+            'rows' => array_values(array_map(fn (Veteran $veteran): array => $this->veteranRow($veteran), $page->items())),
             'total' => $page->total(),
             'limit' => self::RECENT_VETERANS,
             // The panel is the Veteran library's newest rows, so its door is the library itself and

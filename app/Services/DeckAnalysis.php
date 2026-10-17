@@ -94,13 +94,13 @@ class DeckAnalysis
     {
         $dictionary = SupportCardEffects::dictionary();
 
-        return $cards
+        return array_values($cards
             ->map(static fn (SupportCard $card): array => [
                 'card_name' => $card->displayName(),
                 'effects' => SupportCardEffects::atCap($card, $dictionary),
             ])
             ->values()
-            ->all();
+            ->all());
     }
 
     /**

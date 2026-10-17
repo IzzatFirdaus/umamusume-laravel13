@@ -65,9 +65,10 @@ class StoreTurnEntryRequest extends FormRequest
     public function rules(): array
     {
         $run = $this->route('run');
+        $runModel = $run instanceof TrainingRun ? $run : null;
         $turn = $this->route('turn');
         $staged = $this->input('stage') !== null;
-        $caps = ScenarioCaps::forRun($run instanceof TrainingRun ? $run : null);
+        $caps = ScenarioCaps::forRun($runModel);
 
         return [
             'turn' => [
@@ -75,7 +76,7 @@ class StoreTurnEntryRequest extends FormRequest
                 'integer',
                 'min:1',
                 Rule::unique('turn_entries', 'turn')
-                    ->where(fn ($q) => $q->where('training_run_id', $run?->id))
+                    ->where(fn ($q) => $q->where('training_run_id', $runModel?->id))
                     ->ignore($turn),
             ],
             'speed' => ['required', 'integer', 'between:0,'.$caps['Speed']],

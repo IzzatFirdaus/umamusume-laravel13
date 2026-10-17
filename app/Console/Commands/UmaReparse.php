@@ -31,7 +31,7 @@ class UmaReparse extends Command
     {
         $key = (string) $this->argument('source');
 
-        /** @var array<string, array<string, mixed>> $sources */
+        /** @var array<string, array{url: string, parser: class-string, timezone?: string|null}> $sources */
         $sources = config('uma.sources', []);
 
         if (! isset($sources[$key])) {

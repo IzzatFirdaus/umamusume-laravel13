@@ -570,7 +570,7 @@ class TrainingRun extends Model
             );
         }
 
-        return $cells;
+        return array_values($cells);
     }
 
     /**
@@ -850,14 +850,14 @@ class TrainingRun extends Model
             return [];
         }
 
-        $rows = array_map(
-            static fn (string $year, int $points): array => [
+        $rows = [];
+
+        foreach ($standard as $year => $points) {
+            $rows[] = [
                 'name' => $labels[$year] ?? $year,
-                'required' => $points,
-            ],
-            array_keys($standard),
-            array_values($standard),
-        );
+                'required' => (int) $points,
+            ];
+        }
 
         array_unshift($rows, ['name' => $labels['debut'] ?? 'Debut race', 'required' => 0]);
 
@@ -1321,13 +1321,13 @@ class TrainingRun extends Model
      */
     public function completedRaceTitles(): array
     {
-        return $this->raceEntries
+        return array_values($this->raceEntries
             ->where('status', RaceEntryStatus::Completed)
             ->map(fn (RaceEntry $entry): ?string => $entry->scenarioSlot?->title)
             ->filter()
             ->unique()
             ->values()
-            ->all();
+            ->all());
     }
 
     /**

@@ -166,10 +166,10 @@ class RaceDecisionController extends Controller
             ->mapWithKeys(fn (TraineeGoal $goal): array => [(int) $goal->race_catalog_slot_id => $goal->obligationLine()])
             ->all();
 
-        return $slots
+        return array_values($slots
             ->map(fn (RaceCatalogSlot $slot): array => $this->raceRow($slot, $entries->get($slot->id), $obligations))
             ->values()
-            ->all();
+            ->all());
     }
 
     /**
@@ -322,14 +322,14 @@ class RaceDecisionController extends Controller
             return [];
         }
 
-        return ScenarioSlot::query()
+        return array_values(ScenarioSlot::query()
             ->where('scenario_key', $run->scenarioKey())
             ->where('kind', 'free_race')
             ->orderBy('sort_order')
             ->get()
             ->map(static fn (ScenarioSlot $slot): array => ['id' => $slot->id, 'title' => $slot->title])
             ->values()
-            ->all();
+            ->all());
     }
 
     /**

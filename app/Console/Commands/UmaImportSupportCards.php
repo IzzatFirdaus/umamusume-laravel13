@@ -50,7 +50,7 @@ class UmaImportSupportCards extends Command
 
     public function handle(PipelineRunner $pipeline): int
     {
-        /** @var array<string, array<string, mixed>> $sources */
+        /** @var array<string, array{url: string, parser: class-string, timezone?: string|null, seed_file?: string}> $sources */
         $sources = config('uma.sources', []);
 
         $failed = false;
@@ -72,7 +72,7 @@ class UmaImportSupportCards extends Command
     }
 
     /**
-     * @param  array<string, mixed>  $sourceConfig
+     * @param  array{url: string, parser: class-string, timezone?: string|null, seed_file?: string}  $sourceConfig
      */
     private function importOne(string $key, array $sourceConfig, PipelineRunner $pipeline): bool
     {

@@ -22,6 +22,7 @@ use App\Services\PageSize;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -180,7 +181,7 @@ class CatalogController extends Controller
                 ->when(! $showAllStatus && $statusEnum === null, fn (Builder $q): Builder => $q->where('release_status', ReleaseStatus::GlobalReleased->value))
                 ->when($statusEnum !== null, fn (Builder $q): Builder => $q->where('release_status', $statusEnum->value))
                 ->count(),
-            'askedFor' => $search !== null && $search !== '' ? '"'.$search.'"' : 'these filters',
+            'askedFor' => is_string($search) && $search !== '' ? '"'.$search.'"' : 'these filters',
             'statuses' => collect(ReleaseStatus::cases())
                 ->map(static fn (ReleaseStatus $status): array => ['value' => $status->value, 'label' => $status->label()])
                 ->all(),
@@ -449,14 +450,14 @@ class CatalogController extends Controller
             ->orderBy('source_race_choice')
             ->get();
 
-        $rows = $goals->map(static fn (TraineeGoal $goal): array => [
+        $rows = array_values($goals->map(static fn (TraineeGoal $goal): array => [
             'label' => $goal->obligationLine(),
             'state' => null,
             'year_label' => $goal->yearLabel(),
             'turn' => $goal->turnWithinYear(),
             'race_url' => null,
             'absence' => $goal->absenceReason(),
-        ])->all();
+        ])->all());
 
         return [
             'rows' => $rows,
@@ -674,11 +675,11 @@ class CatalogController extends Controller
      * Debut first, then the Global release date, then the source's own card id as
      * the tiebreak two same-dated forms need to keep the page repeatable.
      *
-     * @return Closure(HasMany<CharacterCard, Umamusume>): void
+     * @return Closure(Relation<*, *, *>): mixed
      */
     private function cardScope(bool $showUnconfirmed): Closure
     {
-        return static function (HasMany $cards) use ($showUnconfirmed): void {
+        return static function (Relation $cards) use ($showUnconfirmed): void {
             if (! $showUnconfirmed) {
                 $cards->where('unconfirmed', false);
             }

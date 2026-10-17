@@ -538,14 +538,14 @@ final class SkillsPlannerController extends Controller
      */
     private function pickerSkills(TrainingRun $run): array
     {
-        return Skill::query()
+        return array_values(Skill::query()
             ->availableOnGlobal()
             ->whereNotIn('id', $run->skills->pluck('id'))
             ->orderBy('name')
             ->get(['id', 'name'])
             ->map(static fn (Skill $skill): array => ['id' => (int) $skill->id, 'name' => (string) $skill->name])
             ->values()
-            ->all();
+            ->all());
     }
 
     /**

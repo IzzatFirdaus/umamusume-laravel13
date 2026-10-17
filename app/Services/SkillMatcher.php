@@ -22,7 +22,7 @@ class SkillMatcher
     /**
      * Find skills matching a task description, ordered by relevance.
      *
-     * @return array<int, array{skill: array{id: string, name: string, description: string, triggers: array{keywords: array<int, string>, file_types: array<int, string>, task_categories: array<int, string>, patterns: array<int, string>}, input: array<string, mixed>, output: array<string, mixed>, dependencies: array<int, string>, enabled: bool, command: string}, relevance: float, matched_triggers: array<int, string>}>
+     * @return array<int, array{skill: array{triggers?: array<string, mixed>, dependencies?: array<int, string>, enabled?: bool, command?: string, runner?: string, id: string, name: string, description: string, input?: array<string, mixed>, output?: array<string, mixed>}, relevance: float, matched_triggers: list<string>}>
      */
     public function find(string $taskDescription, float $threshold = 0.60): array
     {
@@ -79,7 +79,7 @@ class SkillMatcher
     /**
      * Build a topologically-sorted execution plan respecting dependencies.
      *
-     * @param  array<int, array{skill: array{id: string, name: string, description: string, triggers: array<string, mixed>, input: array<string, mixed>, output: array<string, mixed>, dependencies: array<int, string>, enabled: bool, command: string}, relevance: float, matched_triggers: array<int, string>}>  $matches
+     * @param  array<int, array{skill: array{triggers?: array<string, mixed>, dependencies?: array<int, string>, enabled?: bool, command?: string, runner?: string, id: string, name: string, description: string, input?: array<string, mixed>, output?: array<string, mixed>}, relevance: float, matched_triggers: list<string>}>  $matches
      * @return array<int, string> Skill IDs in execution order
      */
     public function plan(array $matches): array
@@ -116,7 +116,7 @@ class SkillMatcher
     /**
      * Summarize matches for user disclosure.
      *
-     * @param  array<int, array{skill: array{id: string, name: string, description: string, triggers: array<string, mixed>, input: array<string, mixed>, output: array<string, mixed>, dependencies: array<int, string>, enabled: bool, command: string}, relevance: float, matched_triggers: array<int, string>}>  $matches
+     * @param  array<int, array{skill: array{triggers?: array<string, mixed>, dependencies?: array<int, string>, enabled?: bool, command?: string, runner?: string, id: string, name: string, description: string, input?: array<string, mixed>, output?: array<string, mixed>}, relevance: float, matched_triggers: list<string>}>  $matches
      * @return array<int, array{id: string, name: string, description: string, relevance: string, triggers: string}>
      */
     public function summarize(array $matches): array

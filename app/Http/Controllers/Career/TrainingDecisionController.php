@@ -284,7 +284,7 @@ class TrainingDecisionController extends Controller
      */
     private function supportsFor(string $stat, Collection $slots, array $dictionary): array
     {
-        return $slots
+        return array_values($slots
             ->filter(static fn (DeckSlot $slot): bool => SupportCard::typeWord($slot->supportCard->type) === $stat)
             ->map(static fn (DeckSlot $slot): array => [
                 'name' => $slot->supportCard->displayName(),
@@ -298,7 +298,7 @@ class TrainingDecisionController extends Controller
                 ),
             ])
             ->values()
-            ->all();
+            ->all());
     }
 
     /**

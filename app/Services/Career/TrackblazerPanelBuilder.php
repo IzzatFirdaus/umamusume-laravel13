@@ -695,7 +695,7 @@ final class TrackblazerPanelBuilder
      */
     private function trackblazerPurchases(TrainingRun $run): array
     {
-        return $run->turnEvents()
+        return array_values($run->turnEvents()
             ->where('event_type', TurnEventType::Scenario->value)
             ->get()
             ->filter(fn (TurnEvent $event): bool => $event->purchasePayload() !== null)
@@ -706,7 +706,7 @@ final class TrackblazerPanelBuilder
                 'turn' => (int) $event->turn,
             ])
             ->values()
-            ->all();
+            ->all());
     }
 
     /**

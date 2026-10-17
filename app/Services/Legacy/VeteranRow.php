@@ -53,7 +53,9 @@ final class VeteranRow
             'trainee_ja' => $run->umamusume->name_ja,
             'scenario_label' => self::scenarioLabel($run),
             'status_label' => $run->status->label(),
-            'tags' => $veteran->tags ?? [],
+            // Filtered to the stored strings the same way the model's own `booted()` guard folds the twin,
+            // so a stray non-string entry cannot widen the list's type or reach a consumer.
+            'tags' => array_values(array_filter($veteran->tags ?? [], 'is_string')),
             'notes' => $veteran->notes,
             'hasSelection' => $payload !== null,
             'builder_url' => $payload === null ? null : route('legacy.builder', $run),

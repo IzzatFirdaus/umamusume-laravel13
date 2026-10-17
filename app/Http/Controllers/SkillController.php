@@ -210,14 +210,14 @@ class SkillController extends Controller
      */
     private function holderRows(Skill $skill, string $column): array
     {
-        return $this->holders($skill, $column)
+        return array_values($this->holders($skill, $column)
             ->map(static fn (Umamusume $holder): array => [
                 'name' => $holder->name,
                 'slug' => $holder->slug,
                 'url' => route('catalog.show', $holder->slug),
             ])
             ->values()
-            ->all();
+            ->all());
     }
 
     /**

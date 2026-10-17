@@ -145,7 +145,7 @@ final readonly class LegacySelectionPayload
     }
 
     /**
-     * @return array{rank: int|null, is_guest: bool, ancestors: list<string|null>, sparks: list<array<string, mixed>>}
+     * @return array{rank: int|null, is_guest: bool, ancestors: list<string|null>, sparks: list<array{kind: string, target: mixed, stars: int|null}>}
      */
     private static function legacy(int|string $index, mixed $legacy): array
     {

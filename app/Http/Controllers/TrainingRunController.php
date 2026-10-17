@@ -285,7 +285,7 @@ class TrainingRunController extends Controller
         // int where a form sends text, so the check is on the cast value rather than on the type.
         $old = $request->old("deck.{$position}.support_card_id");
 
-        if ($old !== null && (string) $old !== '') {
+        if (is_scalar($old) && (string) $old !== '') {
             return (int) $old;
         }
 
@@ -431,7 +431,7 @@ class TrainingRunController extends Controller
      * The six cards the analysis reads, in slot order, with their at-cap effects.
      *
      * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
-     * @return list<array{card_name: string, effects: list<array<string, mixed>>}>
+     * @return list<array{card_name: string, effects: list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>}>
      */
     private function builderAnalysisInput(Request $request, TrainingRun $run, array $dictionary): array
     {
@@ -1092,7 +1092,7 @@ class TrainingRunController extends Controller
         // hash of its own content, so the column always names something the Trainer can point at.
         $source = $request->sourceLabel((string) $validated['csv']);
 
-        $run = $import->handle($validated, $validated['turns'], $source);
+        $run = $import->handle($request->runInput(), $validated['turns'], $source);
 
         return redirect()->route('runs.show', $run)
             ->with('status', 'Imported '.count($validated['turns']).' turns.');
@@ -1138,7 +1138,7 @@ class TrainingRunController extends Controller
     private function importChoices(): array
     {
         return [
-            'trainees' => Umamusume::query()
+            'trainees' => array_values(Umamusume::query()
                 ->where('release_status', ReleaseStatus::GlobalReleased->value)
                 ->orderBy('name')
                 ->orderBy('id')
@@ -1148,7 +1148,7 @@ class TrainingRunController extends Controller
                     'name' => $u->name,
                     'name_ja' => $u->name_ja,
                 ])
-                ->all(),
+                ->all()),
             'scenarios' => $this->scenarioLabels(),
         ];
     }

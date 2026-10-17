@@ -194,7 +194,7 @@ class StoreTrainingRunRequest extends FormRequest
      */
     public static function scenarios(): array
     {
-        return array_keys(config('scenarios.scenarios'));
+        return array_map('strval', array_keys((array) config('scenarios.scenarios')));
     }
 
     /**

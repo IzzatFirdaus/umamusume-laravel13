@@ -129,12 +129,12 @@ final class RaceStripBuilder
             'turn' => $next['turn'],
             'year_label' => RaceCatalogSlot::YEARS[$next['year']] ?? (string) $next['year'],
             'offered' => $offered->count(),
-            'recorded' => $run->raceEntries
+            'recorded' => array_values($run->raceEntries
                 ->filter(fn (RaceEntry $entry): bool => $entry->race_catalog_slot_id !== null
                     && $slotIds->contains($entry->race_catalog_slot_id))
                 ->map(fn (RaceEntry $entry): array => $this->stripRow($entry, $obligations))
                 ->values()
-                ->all(),
+                ->all()),
         ];
 
         $enteredIds = $run->raceEntries->pluck('race_catalog_slot_id')->filter();

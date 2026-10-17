@@ -296,7 +296,7 @@ class LegacyController extends Controller
      */
     private function comparableRuns(): array
     {
-        return TrainingRun::query()
+        return array_values(TrainingRun::query()
             ->whereNotNull('legacy_selection')
             ->with('umamusume')
             ->latest('id')
@@ -306,7 +306,7 @@ class LegacyController extends Controller
                 'id' => $run->id,
                 'label' => $run->umamusume->name.' · run #'.$run->id,
             ])
-            ->all();
+            ->all());
     }
 
     /**
@@ -317,7 +317,7 @@ class LegacyController extends Controller
      */
     private function roster(): array
     {
-        return Veteran::query()
+        return array_values(Veteran::query()
             ->with('trainingRun.umamusume')
             ->latest('id')
             ->get()
@@ -326,7 +326,7 @@ class LegacyController extends Controller
                 'name' => $veteran->trainingRun->umamusume->name,
             ])
             ->values()
-            ->all();
+            ->all());
     }
 
     /**

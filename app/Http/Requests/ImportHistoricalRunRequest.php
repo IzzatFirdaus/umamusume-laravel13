@@ -141,6 +141,39 @@ class ImportHistoricalRunRequest extends StoreTrainingRunRequest
     }
 
     /**
+     * The validated run fields, narrowed to the shape `ImportHistoricalRun::handle()` reads.
+     *
+     * @return array{umamusume_id: int, character_card_id?: int|null, scenario?: string|null, status: string, notes?: string|null, current_objective_index?: int|null}
+     */
+    public function runInput(): array
+    {
+        $validated = $this->validated();
+
+        $run = [
+            'umamusume_id' => (int) $validated['umamusume_id'],
+            'status' => (string) $validated['status'],
+        ];
+
+        if (array_key_exists('character_card_id', $validated)) {
+            $run['character_card_id'] = $validated['character_card_id'] === null ? null : (int) $validated['character_card_id'];
+        }
+
+        if (array_key_exists('scenario', $validated)) {
+            $run['scenario'] = $validated['scenario'] === null ? null : (string) $validated['scenario'];
+        }
+
+        if (array_key_exists('notes', $validated)) {
+            $run['notes'] = $validated['notes'] === null ? null : (string) $validated['notes'];
+        }
+
+        if (array_key_exists('current_objective_index', $validated)) {
+            $run['current_objective_index'] = $validated['current_objective_index'] === null ? null : (int) $validated['current_objective_index'];
+        }
+
+        return $run;
+    }
+
+    /**
      * @return array<string, string>
      */
     public function messages(): array

@@ -147,11 +147,10 @@ final class SetupDraft
      * `TrainingRun::legacySelection()` runs it back through `fromArray()` and refuses an unknown key. A
      * draft that carried one extra convenience field would be a payload the run cannot store.
      *
-     * @return array{legacies: list<array<string, mixed>>, affinity: string|null}|null
+     * @return array<string, mixed>|null
      */
     public static function legacySelection(): ?array
     {
-        /** @var array<string, mixed>|null $selection */
         $selection = self::stored('legacy_selection');
 
         return is_array($selection) ? $selection : null;

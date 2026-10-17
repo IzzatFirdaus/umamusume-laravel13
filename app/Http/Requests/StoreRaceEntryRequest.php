@@ -79,7 +79,7 @@ class StoreRaceEntryRequest extends FormRequest
                 $run = $this->route('run');
                 $turn = TurnEntry::find($value);
 
-                if ($turn === null || ! $run instanceof TrainingRun || $turn->training_run_id !== $run->id) {
+                if (! $turn instanceof TurnEntry || ! $run instanceof TrainingRun || $turn->training_run_id !== $run->id) {
                     $fail('That turn was not logged on this run.');
                 }
             }],
@@ -138,7 +138,7 @@ class StoreRaceEntryRequest extends FormRequest
                     $slot = ScenarioSlot::find($value);
                     $run = $this->route('run');
 
-                    if ($slot === null || ! $run instanceof TrainingRun || $slot->scenario_key !== $run->scenarioKey()) {
+                    if (! $slot instanceof ScenarioSlot || ! $run instanceof TrainingRun || $slot->scenario_key !== $run->scenarioKey()) {
                         $fail('That race is not on this run\'s calendar.');
                     }
                 },

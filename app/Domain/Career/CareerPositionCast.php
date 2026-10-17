@@ -37,7 +37,7 @@ final class CareerPositionCast implements CastsAttributes
         }
 
         if ($value instanceof CareerPosition) {
-            return json_encode($value->toArray());
+            return self::encode($value);
         }
 
         if (! is_array($value)) {
@@ -46,6 +46,24 @@ final class CareerPositionCast implements CastsAttributes
             );
         }
 
-        return json_encode(CareerPosition::fromArray($value)->toArray());
+        return self::encode(CareerPosition::fromArray($value));
+    }
+
+    /**
+     * Encodes the payload, refusing rather than storing `false` when the encoder fails: `json_encode()`
+     * answers `string|false`, and a `false` written to the column would be a silent corruption of the
+     * one shape this cast exists to keep readable.
+     */
+    private static function encode(CareerPosition $position): string
+    {
+        $encoded = json_encode($position->toArray());
+
+        if ($encoded === false) {
+            throw new InvalidArgumentException(
+                'A career position payload could not be encoded as JSON: '.json_last_error_msg().'.',
+            );
+        }
+
+        return $encoded;
     }
 }

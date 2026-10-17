@@ -66,7 +66,7 @@ class UmaFetch extends Command
     }
 
     /**
-     * @param  array<string, mixed>  $sourceConfig
+     * @param  array{parser: class-string, timezone?: string|null}  $sourceConfig
      */
     private function fetchOne(string $key, array $sourceConfig, SourceFetcher $fetcher, PipelineRunner $pipeline): void
     {

@@ -155,7 +155,7 @@ class EventDecisionController extends Controller
      */
     private function eventRows(TrainingRun $run): array
     {
-        return $run->turnEvents
+        return array_values($run->turnEvents
             ->filter(fn (TurnEvent $event): bool => in_array($event->event_type, self::CHOICE_SOURCES, true))
             ->sortByDesc('turn')
             ->map(fn (TurnEvent $event): array => [
@@ -172,7 +172,7 @@ class EventDecisionController extends Controller
                 'outcome_recorded' => $this->outcomeRecorded($event),
             ])
             ->values()
-            ->all();
+            ->all());
     }
 
     /**
@@ -261,11 +261,11 @@ class EventDecisionController extends Controller
     {
         return [
             'action' => route('runs.events.store', $run),
-            'turns' => $run->turnEntries
+            'turns' => array_values($run->turnEntries
                 ->sortBy('turn')
                 ->map(static fn (TurnEntry $turn): array => ['id' => $turn->id, 'turn' => $turn->turn])
                 ->values()
-                ->all(),
+                ->all()),
             'sources' => [
                 ['value' => 'Character', 'label' => 'Character'],
                 ['value' => 'SupportCard', 'label' => 'Support Card'],

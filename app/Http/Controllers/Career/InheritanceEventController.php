@@ -244,7 +244,7 @@ class InheritanceEventController extends Controller
      */
     private function observedEvents(TrainingRun $run): array
     {
-        return $run->turnEvents
+        return array_values($run->turnEvents
             ->filter(fn (TurnEvent $event): bool => $event->event_type === TurnEventType::Inheritance)
             ->sortBy('turn')
             ->map(fn (TurnEvent $event): array => [
@@ -256,7 +256,7 @@ class InheritanceEventController extends Controller
                 'origin_note' => $event->origin_note,
             ])
             ->values()
-            ->all();
+            ->all());
     }
 
     /**
@@ -327,11 +327,11 @@ class InheritanceEventController extends Controller
      */
     private function writeSection(TrainingRun $run): array
     {
-        $turns = $run->turnEntries
+        $turns = array_values($run->turnEntries
             ->sortBy('turn')
             ->map(fn (TurnEntry $turn): array => ['id' => $turn->id, 'turn' => $turn->turn])
             ->values()
-            ->all();
+            ->all());
 
         return [
             'action' => route('runs.inheritance.store', $run),

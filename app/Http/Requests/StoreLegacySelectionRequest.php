@@ -355,7 +355,7 @@ class StoreLegacySelectionRequest extends FormRequest
         // a `?->` here would be dead code rather than defensiveness. The `null` case that does exist
         // is the absent Veteran: a `legacy_id` that no longer resolves, which the `exists` rule
         // catches separately but which must not become a type error on the way there.
-        if ($parent === null) {
+        if (! $parent instanceof Veteran) {
             return;
         }
 

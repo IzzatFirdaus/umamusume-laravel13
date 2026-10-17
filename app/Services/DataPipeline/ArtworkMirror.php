@@ -118,7 +118,7 @@ final class ArtworkMirror
             default => throw new InvalidArgumentException("No catalog column is declared for artwork kind '{$kind}'."),
         };
 
-        return array_map(static fn (mixed $id): int => (int) $id, $ids);
+        return array_values(array_map(static fn (mixed $id): int => (int) $id, $ids));
     }
 
     /**
