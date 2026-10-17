@@ -392,7 +392,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                       v-else
                       class="rounded-full border border-risk px-2 py-0.5 text-xs font-semibold text-risk"
                       title="No recorded outcome was entered for this choice. Choose manually."
-                  >âš  Outcome incomplete</span>
+                  >⚠ Outcome incomplete</span>
                 </BaseRadio>
             </fieldset>
 
@@ -403,7 +403,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
   name="choice_label"
   label="Choice you made *"
   required
-  placeholder="Option A, Encourage, â€¦"
+  placeholder="Option A, Encourage, …"
   :error="form.errors.choice_label"
 />
 

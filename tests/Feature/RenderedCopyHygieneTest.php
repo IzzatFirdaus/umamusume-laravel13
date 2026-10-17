@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Enums\RunStatus;
 use App\Models\TrainingRun;
+use App\Models\Umamusume;
+use App\Models\UmamusumeProfile;
 use Illuminate\Support\Collection;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -208,4 +211,72 @@ it('renders N/A rather than a glyph when a run has recorded no value', function 
         // Four widgets Unity Cup owns, and each unrecorded one prints the glyph: Turn is the only
         // widget with a figure of its own here, and the count the strip shows is the glyph's.
         ->toContain('const recorded = raw !== null && raw !== \'\';');
+});
+
+/*
+ * A-104 / backlog slice 0.7: double-encoded UTF-8 reaching a Trainer.
+ *
+ * The signature is the three lead bytes a UTF-8 sequence turns into when its bytes are read as
+ * CP1252: `…` (E2 80 A6) arrives as `â€¦`, `§` (C2 A7) as `Â§`, `ó` (C3 B3) as `Ã³`. So `Â`, `Ã`
+ * and `â` in a string that is supposed to hold one wide character are the tell, and none of them
+ * is a character this repository's shipped copy has any reason to carry: the displayed vocabulary
+ * is English plus Japanese, and the Japanese reaches the page as kana bytes, not as Latin-1.
+ *
+ * The sweep reuses the comment-stripping idea of `shippedCopyCode()` rather than reading the raw
+ * file, for the same reason the dash guard does: `ScenarioPanel.vue` carries a dozen `Â§` and
+ * `â€”` inside its docblock and its HTML comments, which is this repository writing about the rule
+ * rather than copy a Trainer sees. Stripping the comment forms is what keeps the guard aimed at
+ * rendered text.
+ *
+ * It does not call `shippedCopyCode()` directly, because that helper deletes the comment blocks and
+ * so collapses the line numbering - it would report line 370 for a defect sitting on line 406. Here
+ * each match is replaced by the newlines it contained, so the surviving line is the real one.
+ */
+it('ships no double-encoded UTF-8 in rendered copy', function (): void {
+    $offenders = [];
+
+    foreach (shippedCopySources() as $path => $source) {
+        $visible = (string) preg_replace_callback(
+            ['/\{\{--.*?--\}\}/s', '/<!--.*?-->/s', '#/\*.*?\*/#s', '/^\s*\/\/.*$/m'],
+            static fn (array $m): string => str_repeat("\n", substr_count($m[0], "\n")),
+            $source,
+        );
+
+        foreach (preg_split('/\R/', $visible) ?: [] as $index => $line) {
+            if (preg_match('/[\x{00C2}\x{00C3}\x{00E2}]/u', $line) === 1) {
+                $offenders[] = $path.':'.($index + 1).': '.trim($line);
+            }
+        }
+    }
+
+    expect($offenders)->toBe([]);
+});
+
+it('sends no double-encoded bytes on the event decision or trainee profile routes', function (): void {
+    // The source sweep reads the files; this reads what the framework actually puts on the wire,
+    // which is the half a mangled `§` in a Vue template cannot show. The two routes are the ones
+    // the audit named: the Event decision form and a trainee profile carrying a Japanese voice
+    // actor. The profile factory's own strings are real `[Global]` values, so asserting the kana
+    // survives is asserting the payload round-trips, not that a fixture was typed carefully.
+    $run = TrainingRun::factory()->create([
+        'status' => RunStatus::Active,
+        'umamusume_id' => Umamusume::factory()->state(['name' => 'Rice Shower'])->create()->id,
+    ]);
+
+    $trainee = Umamusume::factory()->state(['name' => 'Admire Vega', 'slug' => 'admire-vega'])->create();
+    UmamusumeProfile::factory()->create(['umamusume_id' => $trainee->id]);
+
+    $responses = [
+        'event decision' => $this->get(route('runs.events.decision', $run)),
+        'trainee profile' => $this->get(route('catalog.show', $trainee->slug)),
+    ];
+
+    foreach ($responses as $label => $response) {
+        $response->assertOk();
+        expect((string) $response->getContent(), $label)->not->toMatch('/[\x{00C2}\x{00C3}\x{00E2}]/u');
+    }
+
+    $responses['trainee profile']->assertInertia(fn (Assert $page) => $page
+        ->where('trainee.profile.va_ja', '和氣あず未')
+        ->where('trainee.profile.va_en', 'Azumi Waki'));
 });

@@ -434,7 +434,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
   type="text"
   name="choice_label"
   label="Detail"
-  placeholder="e.g., Blue Speed â˜…â˜…â˜…, Pink Mile â˜…â˜…"
+  placeholder="e.g., Blue Speed ★★★, Pink Mile ★★"
   :error="form.errors.choice_label"
 />
                 </div>
@@ -445,7 +445,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
   name="origin_note"
   label="Notes"
   rows="2"
-  placeholder="Any additional contextâ€¦"
+  placeholder="Any additional context…"
   :error="form.errors.origin_note"
 />
                 </div>
