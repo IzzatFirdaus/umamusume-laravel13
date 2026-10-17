@@ -46,7 +46,7 @@
             </p>
             <div class="mt-4 flex flex-wrap gap-3 text-sm">
                 <a href="{{ route('runs.index') }}"
-                   class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 font-bold text-on-chrome">
+                   class="inline-flex min-h-11 items-center rounded-full bg-primary-action px-4 font-bold text-on-primary-action">
                     Training runs
                 </a>
                 <a href="{{ route('catalog.index') }}"

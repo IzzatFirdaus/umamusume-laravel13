@@ -114,3 +114,32 @@ it('gives each error page a way back to work', function (): void {
     expect(view('errors.419')->render())->toContain(route('runs.index'))
         ->and(view('errors.500')->render())->toContain(route('runs.index'));
 });
+
+it('fills each error page primary with the app action colour, not the green chrome pair', function (): void {
+    // Backlog slice 0.9. `bg-chrome` is the deep green the 2026-10-15 amendment keeps for the
+    // capsule motif and the progress bar, and `app.css:445-448` states in terms that it is NOT the
+    // action fill — so all three error documents painted their one primary green while every screen
+    // inside the app filled it with `--color-primary-action`. `enamel` rode along as a dead class:
+    // the utility was retired the same day and resolves to nothing.
+    //
+    // The equality is checked against a live app screen rather than against a string constant, so
+    // the case fails if either side drifts. `Runs/Index.vue` is read deliberately: it is a primary
+    // action the app renders, and it is not one of the files another session currently holds.
+    $appPrimary = (string) file_get_contents(base_path('resources/js/pages/Runs/Index.vue'));
+
+    expect($appPrimary)->toContain('bg-primary-action');
+
+    foreach (['404', '419', '500'] as $status) {
+        $source = (string) file_get_contents(base_path("resources/views/errors/{$status}.blade.php"));
+
+        expect($source, "errors/{$status}")
+            ->toContain('bg-primary-action')
+            ->toContain('text-on-primary-action')
+            ->not->toContain('enamel')
+            ->not->toContain('bg-chrome')
+            ->not->toContain('text-on-chrome');
+    }
+
+    // Sourced is not rendered: the class has to survive the view.
+    expect(view('errors.419')->render())->toContain('bg-primary-action');
+});
