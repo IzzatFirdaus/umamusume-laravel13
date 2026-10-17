@@ -121,11 +121,6 @@ class CockpitController extends Controller
         ['key' => 'inheritance', 'label' => 'Inheritance', 'note' => 'Inheritance is recorded at the Inheritance event screen.'],
     ];
 
-    private const MONTHS = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December',
-    ];
-
     /**
      * The four meta values the state panel shows beside the five stats (SCREEN-009 §13).
      *
@@ -343,7 +338,7 @@ class CockpitController extends Controller
         // for a turn the 72-turn calendar does not model, so year and month render as unrecorded rather
         // than as Junior Early January.
         $position ??= $run->careerPosition();
-        $turn = $position?->turnIndex ?? (int) ($latest?->turn ?? 0);
+        $turn = $position === null ? (int) ($latest === null ? 0 : $latest->turn) : $position->turnIndex;
         $yearLabel = $position?->year->label();
         $monthLabel = $position === null
             ? null

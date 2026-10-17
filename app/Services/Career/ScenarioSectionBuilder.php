@@ -34,6 +34,7 @@ final class ScenarioSectionBuilder
     /**
      * The scenario panel's section: the declared scenario's labels, flags, arms and absences.
      *
+     * @param  array<string, mixed>  $team  the team panel's section, built once by `CockpitController::show()` so the header and the panel read one pass
      * @param  array<string, mixed>  $context  `widgets` (list<string>), `milestones` (array), `duel` (array|null), `pre_final` (array|null), as `CockpitController` composes them
      * @return array<string, mixed>
      */
