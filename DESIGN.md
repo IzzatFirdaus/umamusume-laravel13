@@ -829,6 +829,18 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
   captured.
 - Naming: the app is "Trainer Desk"; it does not adopt the game's trademarks
   into the product name.
+- **Amended 2026-10-17 (design-contract pass, plan slice 0.4, owner instruction): the user-facing word
+  for a run is "career", and the identifier vocabulary never renders.** The shipped surfaces already
+  point this way — the sidebar reads Careers, the wizard reads career, and the run's decision surface is
+  the Career Cockpit — while other copy still prints "run" (the runs index's "New run" and run rows, the
+  catalog detail's run section). Those strings are named as copy migration debt for the Phase 5 copy
+  pass, not normalized here, because each is pinned by tests that move with the copy, not before it, and
+  a rename is verified against the rendered result rather than asserted in place. The rule binds copy
+  only: route names (`runs.*`), the table (`training_runs`), controllers, models, tests and every other
+  identifier keep the word they carry, on the same split `D-267` records for Legacy (identifier versus
+  copy). Client vocabulary stays governed by the bullet above; nothing in this amendment licenses a
+  fan-English string or a wiki gloss, and no domain concept is renamed — a run and a career are the same
+  stored object, printed with the one word the product uses for it.
 
 ## 7. Offline and low-bandwidth constraints
 
@@ -1170,3 +1182,7 @@ system owns.
   `--color-on-primary-action`, recorded as landed (29 consumers) rather than pending, and the status lime
   stays a non-action role. The audit's "lime primary" Cockpit phrasing is marked superseded by the token
   landing. No component changes in this slice.
+- **2026-10-17** — Design-contract pass, plan slice 0.4: §6 gains the vocabulary rule — "career" is the
+  user-facing word for a stored run, identifiers keep their names, and the remaining "run" strings are
+  named as Phase 5 copy debt. `SCREEN_SPEC.md` §8 gains the matching authority row in the same commit. No
+  shipped string changes in this slice.
