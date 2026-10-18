@@ -404,8 +404,14 @@ What to run, by class of change:
 
 Hand-off sequence (the bar's own order): targeted tests green -> `php artisan test --compact`
 -> `vendor/bin/pint --test --format agent <paths>` -> `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`
--> `npm run typecheck` -> `composer lore` and `composer lore-code` with a ruling per hit ->
+-> `npm run typecheck` -> `npm run lint:ui` -> `composer lore` and `composer lore-code` with a ruling per hit ->
 `composer audit` and `npm audit --omit=dev` when dependencies changed.
+
+`npm run lint:ui` (plan slice 1.12) fails a Card inside a Card and any new arbitrary Tailwind value
+(`bg-[#…]`, `w-[37px]`). Arbitrary values predate the guard in two files and are listed in
+`tools/ui-lint.mjs`; that list is debt, not a place to add. The identifier and bare-`N/A` rules are
+enforced by `tests/Feature/UiHygieneTest.php`, and the one-`h1`-per-route rule by
+`tests/browser/ui-hygiene.spec.ts`.
 
 **Never `pint --dirty` in this tree (KI-75).** `--dirty` collects every file that differs from
 `HEAD`, and several sessions share one worktree (KI-70, KI-71), so the dirty set is not the slice's own
