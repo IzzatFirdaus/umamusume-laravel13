@@ -241,15 +241,21 @@ it('leaves the run-scoped build target write exactly as it was', function (): vo
     expect($run->fresh()->buildTarget()?->toArray())->toBe(draftTargetPayload());
 });
 
-it('keeps the four trust glyphs in ProvenanceBadge alone', function (): void {
-    $badge = 'resources/js/components/ProvenanceBadge.vue';
-    $badgeSource = (string) file_get_contents(base_path($badge));
+it('keeps the three trust glyphs in ProvenanceMark alone', function (): void {
+    // Retitled with the contract it asserts. Plan 1.7 moved the render from `ProvenanceBadge` to
+    // `ProvenanceMark` and made `confirmed` mark-free: a figure the tool is sure of does not need a
+    // badge, so only the three exception states carry a glyph. `ProvenanceBadge` is now a thin alias,
+    // which is why reading its source for glyphs could never pass again. The test was authored
+    // against the four-glyph badge in `17b793a` and the contract changed underneath it.
+    $mark = 'resources/js/components/ProvenanceMark.vue';
+    $markSource = (string) file_get_contents(base_path($mark));
 
-    // The badge defines all four; the sweep below proves no other source repeats either sweepable
-    // glyph. (`toContain` is not given a message argument here: Pest 4's is variadic, so a message
-    // would be read as a second needle.)
-    foreach (['✓', '∑'] as $glyph) {
-        expect($badgeSource)->toContain($glyph);
+    // Each glyph as the map's own value, not merely "the character appears somewhere in the file":
+    // `?` in particular is a ternary on two neighbouring lines of the same component, so a plain
+    // `toContain('?')` passes even when the glyph has been removed. Asserting the map entry makes the
+    // test able to fail, which is the point of a glyph test.
+    foreach (["glyph: '∑'", "glyph: '~'", "glyph: '?'"] as $entry) {
+        expect($markSource)->toContain($entry);
     }
 
     $others = [];
@@ -261,21 +267,20 @@ it('keeps the four trust glyphs in ProvenanceBadge alone', function (): void {
     foreach ($walk as $file) {
         // Relative, forward-slashed, taken by offset: `str_replace` on both needles at once would
         // rewrite the separators first and leave the absolute prefix standing, which is how an
-        // exclusion keyed on the badge's own path silently stops excluding it.
+        // exclusion keyed on the mark's own path silently stops excluding it.
         $path = str_replace('\\', '/', mb_substr($file->getPathname(), mb_strlen(base_path()) + 1));
 
-        if (preg_match('/(\.vue|\.ts)$/', $file->getFilename()) !== 1 || $path === $badge) {
+        if (preg_match('/(\.vue|\.ts)$/', $file->getFilename()) !== 1 || $path === $mark) {
             continue;
         }
 
         $source = (string) file_get_contents($file->getPathname());
 
-        // The two sweepable glyphs, and only them: `~` is a documented brief quote in two Legacy
-        // comments and `?` is a ternary everywhere, so a raw sweep for either proves nothing.
-        foreach (['✓', '∑'] as $glyph) {
-            if (str_contains($source, $glyph)) {
-                $others[] = "{$path} carries {$glyph}";
-            }
+        // Only `∑` is sweepable as a literal. `~` is a documented brief quote in two Legacy comments
+        // and a common operator, and `?` is a ternary everywhere, so a raw sweep for either proves
+        // nothing about duplication; requiring `∑` alone still catches a second copy of the marks.
+        if (str_contains($source, '∑')) {
+            $others[] = "{$path} carries ∑";
         }
     }
 
