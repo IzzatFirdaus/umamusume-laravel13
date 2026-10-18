@@ -2039,3 +2039,105 @@ Committed as `73f633d feat(wizard): step 1 uses radio cards and a single Continu
 - Decisions landed this dispatch: B (3.2 ChoicesSoFar, already committed as `eb002c5`), C (3.3 radio cards, committed as `73f633d`)
 - Decisions still deferred: 1, 2, 5, 9
 - Next eligible: 3.4 + 3.5 + 3.6 (Phase 3 slices) OR continue Decision 1 citation ratchet
+
+
+## 28. Dispatch 29 — 3.2 ChoicesSoFar, 3.3 radio cards, 2026-10-19
+
+### Precondition (measured)
+
+- `origin/master` `29f8715`, ahead **17** at start, **21** at close. `HEAD:PRD.md` `fcdc8ad`.
+  Staged set empty. **Working tree clean at start** (no peer dirt), which is why 3.2/3.3 were safe to
+  build.
+- Bundle 02:34 against a `resources/js` commit at 02:13: rebuilt before every browser gate.
+- Live guard at start: **9** (8 held + `CareerStatePanel:130`). **DocCitationParity at open: 737.**
+- Todo list created before any file edit, per the new rule; final state quoted below.
+
+### Step A-adjacent — `2ff8c3e` audit (carried from dispatch 28)
+
+`2ff8c3e` is **one commit, not four**: seven files (`AGENTS.md`, `OPEN-QUESTIONS.md`, ADR-0025,
+ADR-0027, `adr/README.md`, `DESIGN-CORPUS.md`, `GOVERNANCE.md`) that were all staged at once. Content
+is coherent, no foreign work inside. **Clean.**
+
+### 3.2 — `eb002c5`, 5 files, +66 −27
+
+`SetupDraft::summary()` returns the three carried choices; `ChoicesSoFar.vue` renders them above the
+step content from `SetupLayout`; the three pages that printed `Stored choice:` now pass `choices` and
+no longer print their own line.
+
+**DESIGN.md §5 check, done before building.** §5's absence vocabulary (an `N/A` carrying a reason,
+reachable by keyboard and screen reader) governs a *record* that does not carry a value. "not chosen"
+is a normal draft state — nothing failed and no source is silent — so the strip renders muted text and
+does not dress it as a disclosure. The reasoning is in the component's docblock.
+
+The target summary is **style · distance**, not the plan's "Speed focus": `BuildPurpose` holds
+StoryClear/ChampionsMeeting/ParentFarming/SkillFarming, and the payload's own axes are style, distance
+and surface. Reporting the real fields rather than the illustrative example.
+
+Failability: with the null fallback emptied, the empty-draft case fails `Expected: 3, Received: 0`;
+restored, 2/2 green.
+
+### 3.3 — `3e8e924` (+163 −87), with the fixes captured as `73f633d`
+
+Cards are a `fieldset` + `legend` with real radio inputs; the card is the radio's label, selection
+carries fill **and** a `✓ Selected` word; the per-card button is gone and one `Save and continue` in
+the `StickyFooter` commits the step; `Compare scenarios` links to `/database/scenarios`; the
+self-referential `← Back to scenario` breadcrumb is removed.
+
+Three spec cases pinned the old button contract and were **rewritten, not deleted**: the count case
+now counts radios, the keyboard case asserts `toBeChecked` and the strip instead of `aria-pressed` and
+`Stored choice:`, and the deselect case became "a chosen scenario can be changed to another without
+leaving the step" — a radio group cannot be emptied, and step 2 needs a scenario, so changing the
+answer is the recoverable form of the misclick the old case protected.
+
+**Three of my own errors, all caught by the spec:**
+
+1. The `card()` helper still queried `listitem`, which no longer exists — 8 cases failed on the helper,
+   not the feature. Now keyed on `data-scenario-card`.
+2. The card label measured **28px**, under the 44px contract, because making the label the hit target
+   shrank it to the heading. Now `min-h-11` and the sweep reads 44.
+3. `getByRole('link', { name: 'Scenario' })` became ambiguous once the strip added a "Scenario:" link;
+   both step-nav assertions are scoped to the navigation.
+
+Failability: with `:checked` forced false, the keyboard case fails `Expected: checked, Received:
+unchecked`; restored, **11/11 green**.
+
+### THE SECOND SWEEP — `73f633d`
+
+The fixes made *after* `3e8e924` (the helper, the 44px label, the scoped locators) showed
+`git status --porcelain -- <paths>` **empty** at the pre-commit check. `git log -S "scenario-radio-"`
+attributes them to `73f633d`, a peer commit that **reused this slice's own message**. Code is correct
+and complete; only authorship is muddled. Detected by the new rule rather than by surprise, which is
+exactly what the rule was for.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `--filter=UiHygiene` | **9**, unchanged: 8 held + `CareerStatePanel:130` |
+| `CareerScenarioSelectTest`/`TraineeSelect`/`BuildTarget` | 49 passed, **1 pre-existing failure**: `keeps the four trust glyphs in ProvenanceBadge alone`, proved failing at HEAD with my edits stashed (the `91a6047` refactor moved the glyphs to `ProvenanceMark`) |
+| `choices-so-far.spec.ts` | 2 passed |
+| `career-scenario-select.spec.ts` | **11 passed** (2.5m) |
+| typecheck / lint:ui / lore / lore-code | clean / clean / 0 / 0 |
+| pint / phpstan | passed / `[OK] No errors` |
+| **DocCitationParity** | **737 → 726**; still red against the 708 baseline |
+| Probe | ran as the rebuild every browser gate needed |
+
+### Batch close
+
+- Ahead **21**; peer landed `73f633d` and `453f820` mid-dispatch.
+- **Todo list at close:** Step 0 completed, Step C completed, Step D completed, Step E completed,
+  Gate and report completed. Nothing cancelled this dispatch.
+- **`098abab` ruling: accepted as-is** (recorded in §27 and restated here). The code is correct and
+  tested, `git log -S` is the recovery mechanism, and reverting would churn 35 citation fixes.
+- **2.3: closed except interactive-control markers**, which stay follow-up by plan item (d).
+- **Phase 3: 3.1, 3.2 and 3.3 landed.** 3.4-3.8 remain.
+- Next: **3.4 + 3.5 + 3.6**, or decision 1 if the owner prefers to close the Phase 1 exit criterion.
+
+### Standing rules, now four
+
+1. Path-scoped commits; quote every gate tail; never `pint --dirty`.
+2. **Commit within minutes of a gate pass** — the window is the sweep risk.
+3. **Pre-commit `git status --porcelain -- <paths>`**; empty means swept or nothing to commit, never
+   a blind commit. This rule fired twice today.
+4. **No PowerShell on source files** — three corruption precedents (`UmaFetch.php:97`, the UTF-16 BOM,
+   four specs mangled `test`→`iesi`). Python with an exact-count check, or hand-edit.
