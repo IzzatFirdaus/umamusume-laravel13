@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>StickyFooter fixture</title>
+        <!--
+            The two declarations the spec measures, written by hand.
+
+            The app's `app.css` cannot be relied on here: it starts with `@import 'tailwindcss'`, and
+            Tailwind v4 generates utilities from `@source` globs resolved against the PROJECT root. This
+            fixture's root is `tests/browser/fixtures`, so those globs match nothing, no utility class
+            is emitted, and `getComputedStyle` reports the browser default for every Tailwind class —
+            which is how a `position: sticky` assertion silently measured `static` in the first run.
+
+            Writing the declarations here keeps the case honest: it asserts that a footer the component
+            marks sticky really is sticky, without importing a build pipeline that this fixture does not
+            run. Tailwind's own compilation is covered by the probe build and by `npm run build`.
+        -->
+        <style>
+            .sticky {
+                position: sticky;
+            }
+
+            .bottom-0 {
+                bottom: 0;
+            }
+
+            .z-10 {
+                z-index: 10;
+            }
+
+            .border-t {
+                border-top: 1px solid #84828c;
+            }
+
+            .mt-6 {
+                margin-top: 1.5rem;
+            }
+
+            .flex {
+                display: flex;
+            }
+
+            .items-center {
+                align-items: center;
+            }
+
+            .justify-between {
+                justify-content: space-between;
+            }
+
+            .gap-3 {
+                gap: 0.75rem;
+            }
+
+            .py-3 {
+                padding-top: 0.75rem;
+                padding-bottom: 0.75rem;
+            }
+
+            .min-h-screen {
+                min-height: 100vh;
+            }
+
+            .sr-only {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border-width: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="sticky-footer-mount"></div>
+        <script type="module" src="./sticky-footer.ts"></script>
+    </body>
+</html>
