@@ -58,7 +58,7 @@ final class ScenarioSectionBuilder
             : [
                 'value' => null,
                 'title' => $declared
-                    ? 'The scenario\'s entry in config/scenarios.php records no ruleset date.'
+                    ? 'No ruleset date is recorded for this scenario.'
                     : 'No scenario is set for this run, so no scenario ruleset date exists to print.',
             ];
 
@@ -211,7 +211,7 @@ final class ScenarioSectionBuilder
             'verified_at' => $verifiedAt,
             'base' => $base,
             'hard_cap' => (int) config('scenarios.hard_cap'),
-            'source_title' => "Published caps from config/scenarios.php, verified {$verifiedAt} against the sources that file names.",
+            'source_title' => "Published caps from the scenario reference, verified {$verifiedAt} against the sources it names.",
             'rows' => $rows,
         ];
     }

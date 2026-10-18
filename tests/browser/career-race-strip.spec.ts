@@ -126,8 +126,11 @@ test('keeps an entered race in the run region and out of the list ahead of it', 
     await expect(recorded.getByText('· Participate in Junior Make Debut')).toBeVisible();
     await expect(recorded.getByText('Entered')).toBeVisible();
     // The turn the race was run on is not tied, so the row says N/A on a disclosure that names the
-    // reason for a keyboard and a screen reader as well as a mouse.
-    const unrecorded = recorded.locator('summary', { hasText: 'KI-17' });
+    // reason for a keyboard and a screen reader as well as a mouse. Located by the sentence the
+    // Trainer now reads: this case used to match on `KI-17`, which meant it was asserting the
+    // repository identifier rather than the reason, and it would have passed a regression that
+    // replaced the sentence with the code back again.
+    const unrecorded = recorded.locator('summary', { hasText: 'The turn was not recorded against this race' });
     await expect(unrecorded).toBeVisible();
     await expect(unrecorded).toContainText('N/A');
 

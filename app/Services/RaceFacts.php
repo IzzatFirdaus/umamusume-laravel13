@@ -61,7 +61,7 @@ final class RaceFacts
                 'win_probability',
                 'Estimated win probability',
                 null,
-                'Held: race prediction is blocked on the requirement data `ADR-0016` measures, which is an open question and not a permission. `PRD.md` §6.11 stands unamended, so this tool computes and prints no win figure.',
+                'Win probability is not held by this tool: the requirement data it would need is an open question rather than a permission, so no win figure is computed or printed.',
             ),
         ];
     }

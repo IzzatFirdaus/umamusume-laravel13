@@ -139,7 +139,7 @@ class StoreLegacySelectionRequest extends FormRequest
         return [
             'legacies.max' => 'A run names at most two Legacies, one per parent slot.',
             'legacies.*.ancestors.max' => 'Each parent names at most two ancestors of her own.',
-            'legacies.*.sparks.*.stars.max' => 'A Spark carries one to three stars; three is the ceiling (REFERENCE §1.5.3).',
+            'legacies.*.sparks.*.stars.max' => 'A Spark carries one to three stars; three is the ceiling.',
             'legacies.*.sparks.*.kind.in' => 'A Spark is Blue, Pink, Green, White or Scenario.',
         ];
     }
@@ -362,7 +362,7 @@ class StoreLegacySelectionRequest extends FormRequest
         if ($parent->trainingRun->umamusume->name === $ownName) {
             $validator->errors()->add(
                 "legacies.{$index}.legacy_id",
-                'A run may not name its own trainee as a parent (REFERENCE §1.5.4).',
+                'A run may not name its own trainee as a parent.',
             );
         }
     }
@@ -412,7 +412,7 @@ class StoreLegacySelectionRequest extends FormRequest
             if (isset($seen[$id])) {
                 $validator->errors()->add(
                     "legacies.{$index}.legacy_id",
-                    'The two parents must be different Umamusume (REFERENCE §1.5.4).',
+                    'The two parents must be different Umamusume.',
                 );
             }
 

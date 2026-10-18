@@ -312,7 +312,7 @@ class ScenarioSelectController extends Controller
     {
         return [
             'value' => null,
-            'title' => 'No source defines a Global ruleset version, so this tool states none (design-2.0 §48).',
+            'title' => 'No source defines a Global ruleset version, so this tool states none.',
         ];
     }
 }

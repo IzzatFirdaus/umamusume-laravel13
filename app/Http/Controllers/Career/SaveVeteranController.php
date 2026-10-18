@@ -174,7 +174,7 @@ class SaveVeteranController extends Controller
             ],
             [
                 'label' => 'A name for the Veteran apart from her trainee',
-                'reason' => 'The library row is a pointer to the career (`ADR-0010`), so it adds tags and a note and never a second identity.',
+                'reason' => 'The library row is a pointer to the career, so it adds tags and a note and never a second identity.',
             ],
             [
                 'label' => 'Favorite, archive, delete',

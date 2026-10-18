@@ -60,12 +60,12 @@ final class RaceStripBuilder
             'run_url' => route('runs.cockpit', $run),
         ];
         $absences = [
-            'turn_link' => 'The Trainer has not tied this race to a logged turn (KI-17), so the turn is not known rather than zero.',
+            'turn_link' => 'The turn was not recorded against this race, so the turn is not known rather than zero.',
             // Retired by ADR-0026: the trainee's own goal ladder is fetched per character. The strip marks
             // an obligation on the row it belongs to and says where the whole ladder reads.
             'goal' => 'A race marked Goal here is one this trainee\'s own ladder asks of her; the full ladder,'
                 .' including the objectives that name no race on this calendar, reads under Trainee goals in'
-                .' the Scenario panel (ADR-0026). A race missing the mark is not a race nobody asked of her.',
+                .' the Scenario panel. A race missing the mark is not a race nobody asked of her.',
         ];
 
         if (! $run->composesPanel('race_calendar')) {

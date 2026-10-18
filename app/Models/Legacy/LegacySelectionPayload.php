@@ -171,7 +171,7 @@ final readonly class LegacySelectionPayload
         if (count($legacy['ancestors']) > self::MAX_ANCESTORS) {
             throw new InvalidArgumentException(
                 'Legacy #'.$index.' names '.count($legacy['ancestors']).' ancestors; the diagram holds '
-                .self::MAX_ANCESTORS.' per parent (REFERENCE §1.5.4).',
+                .self::MAX_ANCESTORS.' per parent.',
             );
         }
 
@@ -456,7 +456,7 @@ final readonly class LegacySelectionPayload
         if ($stars !== null && ($stars < 1 || $stars > self::MAX_SPARK_STARS)) {
             throw new InvalidArgumentException(
                 "{$where} stars [{$stars}] is outside 1 to ".self::MAX_SPARK_STARS
-                .': three is the ceiling, and it rolls rather than being chosen (REFERENCE §1.5.3).',
+                .': three is the ceiling, and it rolls rather than being chosen.',
             );
         }
 
@@ -472,7 +472,7 @@ final readonly class LegacySelectionPayload
         if (! is_string($affinity) || ! in_array($affinity, self::AFFINITY_GRADES, true)) {
             throw new InvalidArgumentException(
                 'An affinity grade is one of '.implode(' ', self::AFFINITY_GRADES)
-                .' or nothing at all (REFERENCE §1.5.4).',
+                .' or nothing at all.',
             );
         }
 

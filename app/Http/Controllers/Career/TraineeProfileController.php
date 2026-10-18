@@ -173,7 +173,7 @@ class TraineeProfileController extends Controller
                 ],
                 'inheritance' => [
                     'value' => null,
-                    'title' => 'Inheritance is computed at the Legacy step from the run\'s own parents, never stored per trainee (ADR-0020 §3).',
+                    'title' => 'Inheritance is computed at the Legacy step from the run\'s own parents and is never stored per trainee.',
                 ],
                 'support_types' => [
                     'value' => null,

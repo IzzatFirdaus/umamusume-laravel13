@@ -518,7 +518,7 @@ final class SkillsPlannerController extends Controller
     {
         foreach (config('uma.skills.gold_prerequisites', []) as $goldPrefix => $whitePrefix) {
             if (str_starts_with($name, (string) $goldPrefix)) {
-                return "The matching {$whitePrefix} skill is its published prerequisite (run report §8.1). Whether learning the gold suppresses or replaces the white in a race is not established, so this planner states the prerequisite and stops.";
+                return "The matching {$whitePrefix} skill is its published prerequisite. Whether learning the gold suppresses or replaces the white in a race is not established, so this planner states the prerequisite and stops.";
             }
         }
 
