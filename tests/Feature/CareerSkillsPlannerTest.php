@@ -223,12 +223,12 @@ final class CareerSkillsPlannerTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->where('groups.1.rows.0.conditions', 'distance_type==3&ground_type==1&running_style==2&phase>=2&weather==3')
-                // Distance and surface: both number maps are sourced in REFERENCE §1.2, so every
-                // evaluated cell, match or mismatch, cites the map's home.
+                // Distance and surface: both number maps are published, so every evaluated cell,
+                // match or mismatch, cites the published map.
                 ->where('groups.1.rows.0.fit.0', fn ($cell): bool => $cell['state'] === 'matches'
-                    && str_contains((string) $cell['title'], 'REFERENCE'))
+                    && str_contains((string) $cell['title'], 'Decoded by the published'))
                 ->where('groups.1.rows.0.fit.1', fn ($cell): bool => $cell['state'] === 'matches'
-                    && str_contains((string) $cell['title'], 'REFERENCE'))
+                    && str_contains((string) $cell['title'], 'Decoded by the published'))
                 // Style: the condition records a number, but no sourced map turns it into the
                 // client's labels, so no comparison is claimed (PRD OQ-5).
                 ->where('groups.1.rows.0.fit.2', fn ($cell): bool => $cell['state'] === 'unrecorded'
@@ -254,7 +254,7 @@ final class CareerSkillsPlannerTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->where('groups.1.rows.0.fit.0', fn ($cell): bool => $cell['state'] === 'mismatch'
-                    && str_contains((string) $cell['title'], 'REFERENCE')));
+                    && str_contains((string) $cell['title'], 'Decoded by the published')));
     }
 
     public function test_keeps_a_priority_the_catalogue_has_no_row_for_and_states_it(): void

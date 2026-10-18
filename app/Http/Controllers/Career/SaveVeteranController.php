@@ -112,15 +112,15 @@ class SaveVeteranController extends Controller
             'held' => [
                 'factor_analysis' => [
                     'value' => null,
-                    'title' => 'Factor analysis is a held computation: `ADR-0020` §3 keeps the library to storing and searching what the Trainer entered, and no table in this repository prices a Spark.',
+                    'title' => 'Factor analysis is a held computation: the library stores and searches what the Trainer entered, and no table in this repository prices a Spark.',
                 ],
                 'legacy_value' => [
                     'value' => null,
-                    'title' => 'A legacy value would be a score over the recorded Sparks, which `ADR-0020` §3 forbids deriving and no column holds.',
+                    'title' => 'A legacy value would be a score over the recorded Sparks, which is a derived result this tool does not compute, and no column holds one.',
                 ],
                 'best_use' => [
                     'value' => null,
-                    'title' => 'A best use is a recommendation, and `ADR-0020` §3 keeps auto-proposed parents and recommended combinations out of every career screen.',
+                    'title' => 'A best use is a recommendation, and auto-proposed parents and recommended combinations stay out of every career screen.',
                 ],
             ],
             'notice' => LegacyController::RECORD_ONLY_NOTICE,
@@ -170,7 +170,7 @@ class SaveVeteranController extends Controller
         return [
             [
                 'label' => 'Factor analysis, a legacy value, a best use',
-                'reason' => 'Held computation under `ADR-0020` §3, and no table in this repository prices a Spark or scores a career.',
+                'reason' => 'Held computation, and no table in this repository prices a Spark or scores a career.',
             ],
             [
                 'label' => 'A name for the Veteran apart from her trainee',

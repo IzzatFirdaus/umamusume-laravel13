@@ -239,9 +239,9 @@ it('refuses a win figure and an expected risk, and names the ADR-0016 blocker', 
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('held.win_probability.label', 'N/A')
-            ->where('held.win_probability.title', fn (string $title): bool => str_contains($title, 'ADR-0016'))
+            ->where('held.win_probability.title', fn (string $title): bool => str_contains($title, 'Held. Race prediction is blocked'))
             ->where('held.expected_risk.label', 'N/A')
-            ->where('held.expected_risk.title', fn (string $title): bool => str_contains($title, 'ADR-0016'))
+            ->where('held.expected_risk.title', fn (string $title): bool => str_contains($title, 'Held. Race prediction is blocked'))
             // No readiness band, no LOW / MEDIUM / HIGH wording and no percentage ships, so the two
             // titles carry no percent sign.
             ->where('held.win_probability.title', fn (string $title): bool => ! str_contains($title, '%'))

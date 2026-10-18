@@ -101,7 +101,7 @@ it('states the three held figures as null with the ruling beside each, and carri
         ->where('held.factor_analysis.value', null)
         ->where('held.legacy_value.value', null)
         ->where('held.best_use.value', null)
-        ->where('held.factor_analysis.title', fn (string $title): bool => str_contains($title, 'ADR-0020'))
+        ->where('held.factor_analysis.title', fn (string $title): bool => str_contains($title, 'held computation'))
         ->where('absences', fn ($absences): bool => count($absences) >= 1));
 
     // The two strings `screen-spec-2.0` §24 asks the screen to print must not appear anywhere in it.

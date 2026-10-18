@@ -424,7 +424,7 @@ class PreflightController extends Controller
                 'key' => 'aptitude_below_target.'.$axis,
                 'title' => 'Your target '.$band.' sits on a Weak aptitude',
                 'detail' => 'Your target is '.$band.'. This trainee\'s '.$axis.' aptitude is '
-                    .strtoupper($letter).', which design-2.0 §17 bands Weak or lower.',
+                    .strtoupper($letter).', which the aptitude band table places in the Weak band or lower.',
                 'href' => route('career.target'),
             ];
         }

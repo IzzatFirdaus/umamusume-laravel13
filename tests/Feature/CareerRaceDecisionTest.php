@@ -149,8 +149,8 @@ it('refuses to state a readiness or a win figure, and names the ADR-0016 blocker
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('readiness.label', 'N/A')
-            ->where('readiness.title', fn (string $title): bool => str_contains($title, 'ADR-0016')
-                && str_contains($title, '6.11'))
+            ->where('readiness.title', fn (string $title): bool => str_contains($title, 'Held. Race prediction is blocked')
+                && str_contains($title, 'No readiness band is computed'))
             // The brief's three thresholds are percentages and the risk indicator is a percentage
             // reading; neither ships. The whole slice carries no percent sign.
             ->where('readiness.title', fn (string $title): bool => ! str_contains($title, '%')));

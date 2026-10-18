@@ -178,7 +178,7 @@ it('warns when the target distance sits on a weak aptitude, and stays quiet at C
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('contract.warnings.0.key', 'aptitude_below_target.distance')
-            ->where('contract.warnings.0.detail', 'Your target is Medium. This trainee\'s distance aptitude is D, which design-2.0 §17 bands Weak or lower.')
+            ->where('contract.warnings.0.detail', 'Your target is Medium. This trainee\'s distance aptitude is D, which the aptitude band table places in the Weak band or lower.')
         );
 
     $better = preflightFixture('C');

@@ -169,7 +169,7 @@ class TraineeProfileController extends Controller
                 ],
                 'stat_distribution' => [
                     'value' => null,
-                    'title' => 'Recommending a stat distribution is a prediction this tool does not make (PRD §6).',
+                    'title' => 'Recommending a stat distribution is a prediction this tool does not make.',
                 ],
                 'inheritance' => [
                     'value' => null,

@@ -216,7 +216,7 @@ class InheritanceEventController extends Controller
             'predicted_sparks' => $predictedSparks,
             'expected_inheritance' => [
                 'label' => 'N/A',
-                'title' => 'Not computed. Inheritance outcome computation is banned by ADR-0020 §3. This tool records what the Trainer enters; it does not derive an outcome.',
+                'title' => 'Not computed. Inheritance outcome computation is banned: this tool records what the Trainer enters and does not derive an outcome.',
             ],
             'star_roll_table' => $starRollTable,
         ];

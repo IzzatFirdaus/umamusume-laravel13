@@ -111,8 +111,7 @@ it('renders the inheritance event page for a run with a legacy configuration', f
             ->has('predicted')
             ->has('predicted.predicted_sparks')
             ->where('predicted.expected_inheritance.label', 'N/A')
-            ->where('predicted.expected_inheritance.title', fn (string $title): bool => str_contains($title, 'ADR-0020')
-                && str_contains($title, 'does not derive'))
+            ->where('predicted.expected_inheritance.title', fn (string $title): bool => str_contains($title, 'does not derive'))
             ->has('predicted.star_roll_table', 3)
             ->where('predicted.star_roll_table.0.stat_range', 'Below 600')
             ->where('predicted.star_roll_table.0.one_star', '~90%')
@@ -241,7 +240,7 @@ it('counts grandparent Sparks in the predicted total (R3-02)', function (): void
             ->where('predicted.predicted_sparks.2.total_count', 1));
 });
 
-it('states the expected inheritance as N/A with the ADR-0020 §3 citation', function (): void {
+it('states the expected inheritance as N/A with the reason, not a register citation', function (): void {
     $run = inheritanceRun(['scenario' => 'unity_cup'], turns: 18);
     $run->update(['legacy_selection' => inheritanceLegacyPayload()]);
 
@@ -249,8 +248,7 @@ it('states the expected inheritance as N/A with the ADR-0020 §3 citation', func
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('predicted.expected_inheritance.label', 'N/A')
-            ->where('predicted.expected_inheritance.title', fn (string $title): bool => str_contains($title, 'ADR-0020') &&
-                str_contains($title, '§3') &&
+            ->where('predicted.expected_inheritance.title', fn (string $title): bool => str_contains($title, 'computation is banned') &&
                 str_contains($title, 'does not derive')
             ));
 });

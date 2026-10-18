@@ -86,7 +86,7 @@ class RacePlannerController extends Controller
      * The reason every figure this screen must not state carries, in one place, so the three refusals
      * on the page cannot drift apart.
      */
-    private const HELD_BLOCKER = 'Held. Race prediction is blocked on the requirement data `ADR-0016` measures, and that decision is an open question rather than a permission: `PRD.md` §6.11 stands unamended.';
+    private const HELD_BLOCKER = 'Held. Race prediction is blocked on requirement data this tool does not hold, and that decision is an open question rather than a permission: the product\'s prediction cut stands unamended.';
 
     public function show(TrainingRun $run): Response
     {

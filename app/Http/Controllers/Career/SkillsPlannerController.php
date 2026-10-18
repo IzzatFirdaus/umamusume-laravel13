@@ -448,13 +448,13 @@ final class SkillsPlannerController extends Controller
                     $wanted = $key === 'distance' ? $target->distance : $target->surface;
 
                     if ($bands === []) {
-                        $title = "This skill's {$key} numbers are outside the map `UMAMUSUME_REFERENCE.md` §1.2 publishes, so no comparison is made.";
+                        $title = "This skill's {$key} numbers are outside the published map, so no comparison is made.";
                     } elseif (in_array($wanted, $bands, true)) {
                         $state = 'matches';
-                        $title = "Decoded by the {$key} map in `UMAMUSUME_REFERENCE.md` §1.2.";
+                        $title = "Decoded by the published {$key} map.";
                     } else {
                         $state = 'mismatch';
-                        $title = "Decoded by the {$key} map in `UMAMUSUME_REFERENCE.md` §1.2.";
+                        $title = "Decoded by the published {$key} map.";
                     }
                 }
             }

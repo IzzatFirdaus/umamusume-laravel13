@@ -394,7 +394,7 @@ class TrainingDecisionController extends Controller
         $tables = config('scenarios.scenarios.'.$scenarioKey.'.training_tables');
 
         if (! is_array($tables) || ! is_array($tables['per_level'] ?? null)) {
-            $absence = 'The '.$scenarioKey.' entry of config/scenarios.php records no published training table.';
+            $absence = 'The '.$scenarioKey.' scenario records no published training table.';
 
             return ['gains' => null, 'gains_absence' => $absence, 'cost' => null, 'risk_reason' => $riskReason];
         }

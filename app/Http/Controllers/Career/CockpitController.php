@@ -5,19 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Career;
 
 use App\Domain\Career\CareerPosition;
-use App\Enums\RaceEntryStatus;
 use App\Enums\RunStatus;
-use App\Enums\TraineeGoalType;
 use App\Enums\TurnChoice;
-use App\Enums\TurnEventType;
 use App\Http\Controllers\Controller;
 use App\Models\RaceCatalogSlot;
-use App\Models\RaceEntry;
 use App\Models\Skill;
-use App\Models\TraineeGoal;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
-use App\Models\TurnEvent;
 use App\Services\Advisor\Advice;
 use App\Services\Advisor\NextDecision;
 use App\Services\Advisor\TrainerAdvisor;
@@ -759,8 +753,8 @@ class CockpitController extends Controller
                 'title' => $title,
                 'figures' => number_format($turf).' Turf / '.number_format($dirt).' Dirt',
                 'figures_badge' => 'confirmed',
-                'figures_title' => 'config/scenarios.php, from docs/scenarios/01-ura-finale.md:80-83 and its '
-                    .'Senior Year event table, corroborated by docs/UMAMUSUME_REFERENCE.md §2.2.1.',
+                'figures_title' => 'From the scenario\'s own settings, transcribed from the URA Finale '
+                    .'scenario guide and its Senior Year event table, corroborated by the reference corpus.',
                 // Dated by month and never by turn: `docs/URA-Finale-plan.md:251` records that no source
                 // publishes the turn offset, so the row states the month and prints no turn.
                 'due_turn' => null,
@@ -805,11 +799,11 @@ class CockpitController extends Controller
             return null;
         }
 
-        $cite = 'config/scenarios.php, from docs/UMAMUSUME_REFERENCE.md §2.2.1.';
+        $cite = 'From the scenario\'s own settings, transcribed from the reference corpus.';
 
         /** @var list<array{label: string, value: string|null, badge: string|null, title: string}> $rules */
         $rules = [
-            ['label' => 'The prompt', 'value' => (string) $duel['options_rule'], 'badge' => 'confirmed', 'title' => 'The options a duel puts in front of the Trainer, from docs/URA-Finale-plan.md:182.'],
+            ['label' => 'The prompt', 'value' => (string) $duel['options_rule'], 'badge' => 'confirmed', 'title' => 'The options a duel puts in front of the Trainer, from the URA Finale plan.'],
             ['label' => 'Win', 'value' => (string) $duel['win']['gains'], 'badge' => 'confirmed', 'title' => 'What a win grants. '.$cite],
             ['label' => 'Win Skill Points', 'value' => number_format((int) $duel['win']['sp']), 'badge' => 'confirmed', 'title' => 'The published win reward. '.$cite],
             ['label' => 'Win hint', 'value' => 'a Racing Spirit hint for the stat dueled', 'badge' => 'confirmed', 'title' => 'The hint is keyed to the stat the duel was fought on. '.$cite],
@@ -886,7 +880,7 @@ class CockpitController extends Controller
         /** @var list<string> $order */
         $order = (array) config('scenarios.stat_order');
         $caps = ScenarioCaps::forRun($run);
-        $cite = 'docs/UMAMUSUME_REFERENCE.md §2.2.1.';
+        $cite = 'From the reference corpus, transcribed into the scenario\'s own settings.';
 
         $recorded = [];
 
@@ -950,6 +944,7 @@ class CockpitController extends Controller
             ],
         ];
     }
+
     /**
      * The manual correction (`design-2.0` §38), opened on the latest logged turn by default and on
      * any logged turn named by `?edit_turn=<id>`. Null when there is no turn to correct.

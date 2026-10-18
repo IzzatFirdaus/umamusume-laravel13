@@ -276,7 +276,7 @@ class RaceDecisionController extends Controller
     {
         return [
             'label' => 'N/A',
-            'title' => 'Held. Race prediction is blocked on the requirement data `ADR-0016` measures, and that decision is an open question rather than a permission: `PRD.md` §6.11 stands unamended. No readiness band is computed here.',
+            'title' => 'Held. Race prediction is blocked on requirement data this tool does not hold, and that decision is an open question rather than a permission: the product\'s prediction cut stands unamended. No readiness band is computed here.',
         ];
     }
 
