@@ -153,15 +153,15 @@ test('says the library holds nothing filed rather than showing a blank list', as
         const widthBefore = (await aside.boundingBox())?.width ?? 0;
 
         // The owner asked for the marks at one width only: the full rail is words, and a mark never sits
-        // beside the word it stands for. Inside the aside the only drawing at full width is the toggle's
-        // own chevron.
-        await expect(aside.locator('svg')).toHaveCount(1);
+        // beside the word it stands for. Plan 1.2 moved the toggle into the 48px product bar, so the
+        // bar's chevron is no longer inside the aside: a full-width rail carries no mark at all.
+        await expect(aside.locator('svg')).toHaveCount(0);
 
         await toggle.press('Enter');
 
-        // Collapsed, each destination carries its mark and the word moves to `sr-only`: ten plus the
-        // chevron.
-        await expect(aside.locator('svg')).toHaveCount(11);
+        // Collapsed, each destination carries its mark and the word moves to `sr-only`: ten, and the
+        // chevron belongs to the bar rather than to the rail.
+        await expect(aside.locator('svg')).toHaveCount(10);
 
         await expect(toggle).toHaveAttribute('aria-expanded', 'false');
         await expect(toggle).toHaveAccessibleName('Expand navigation');
@@ -178,10 +178,11 @@ test('says the library holds nothing filed rather than showing a blank list', as
         }
 
         // The current page still reads as current, and by more than colour: the collapsed active item
-        // carries a left rule as well as its fill.
+        // carries a left rule as well as its fill. `border-l-4` since plan 1.2, which took the nearest
+        // stock step to the 3px the plan named rather than introducing an arbitrary value.
         const current = aside.getByRole('link', { name: 'Dashboard', exact: true });
         await expect(current).toHaveAttribute('aria-current', 'page');
-        expect(((await current.getAttribute('class')) ?? '').split(' ')).toContain('border-l-2');
+        expect(((await current.getAttribute('class')) ?? '').split(' ')).toContain('border-l-4');
 
         // The choice outlives the visit. It lives in the browser, not in a preference row, so a reload
         // must carry it and a fresh context must not.

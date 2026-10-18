@@ -385,25 +385,6 @@ const moreIsCurrent = computed(() =>
                     </h1>
                 </div>
             </header>
-                <!-- Rail control, desktop only. The sidebar itself is hidden below `md`, where the
-                     bottom bar carries navigation, so a control that only resizes the sidebar has
-                     nothing to act on at that width. The name is always the action and the visible
-                     word is a substring of it (WCAG 2.5.3), exactly as the sidebar's own button was. -->
-                <button
-                    type="button"
-                    class="hidden min-h-11 shrink-0 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-ink hover:bg-raised hover:text-ink-strong transition-colors duration-150 ease-out md:inline-flex"
-                    :aria-expanded="!railCollapsed"
-                    aria-controls="primary-nav"
-                    :title="railCollapsed ? 'Expand navigation' : undefined"
-                    @click="toggleRail"
-                >
-                    <span class="sr-only">{{ railCollapsed ? 'Expand navigation' : 'Collapse navigation' }}</span>
-                    <span v-if="!railCollapsed" aria-hidden="true">Collapse</span>
-                    <span class="inline-flex shrink-0" aria-hidden="true">
-                        <NavGlyph name="chevron" :class="railCollapsed ? '' : 'rotate-180'" />
-                    </span>
-                </button>
-            </header>
             <!-- The ratified shell measure (DESIGN.md:197-208): the error documents constrain
                  themselves to this width and the product shell now does too. The h1 above is the
                  shell's, per DESIGN.md §2.2's 2026-10-17 amendment; nothing here repeats it. -->

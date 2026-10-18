@@ -373,10 +373,17 @@ test('gives two careers of one trainee different column headers', async ({ page 
 
     await expect(page.getByRole('heading', { name: '2 careers side by side' })).toBeVisible();
 
-    const headers = (await page.getByRole('columnheader').allTextContents()).map((h) => h.trim());
-    const distinct = [...new Set(headers.filter((h) => h.includes('Agnes Digital')))];
+    // The link text inside each `th`, not the `th`'s whole text: the header also carries the
+    // Japanese name and the scenario as sibling spans, so a whole-cell comparison differs even when
+    // the career name is identical. Asserting the label means the assertion fails if the label is
+    // what regressed, which is the defect this case exists for.
+    const labels = await page
+        .getByRole('columnheader')
+        .locator('a')
+        .allTextContents()
+        .then((all) => all.map((t) => t.trim()).filter((t) => t.includes('Agnes Digital')));
 
-    expect(distinct.length, `column headers must differ: ${JSON.stringify(headers)}`).toBe(2);
-    expect(distinct.some((h) => h.includes('URA Finale'))).toBe(true);
-    expect(distinct.some((h) => h.includes('Unity Cup'))).toBe(true);
+    expect(new Set(labels).size, `column labels must differ: ${JSON.stringify(labels)}`).toBe(2);
+    expect(labels.some((l) => l.includes('URA Finale'))).toBe(true);
+    expect(labels.some((l) => l.includes('Unity Cup'))).toBe(true);
 });

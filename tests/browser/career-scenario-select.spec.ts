@@ -195,7 +195,13 @@ test.describe('Scenario Selection', () => {
         await expect(grid, 'one facts container per card').toHaveCount(1);
         await expect(grid.locator('> dl[data-stat-tile]')).not.toHaveCount(0);
         await expect(grid.locator('> li')).toHaveCount(0);
-        await expect(grid).toHaveJSProperty('role', '');
+        // An absent `role` reads `null` on BOTH the attribute and the `HTMLElement.role` property.
+        // Measured, not assumed: a bare `<div>` reports `getAttribute` null and `.role` null, while
+        // `role="list"` reports `"list"` on both. The assertion this replaced
+        // (`toHaveJSProperty('role', '')`) could never pass, which is why this case read
+        // red-as-stale; the property is never the empty string.
+        await expect(grid).not.toHaveAttribute('role');
+        await expect(grid).toHaveJSProperty('role', null);
     });
 
     test('selects a scenario by keyboard and keeps it after a round trip', async ({ page }) => {
