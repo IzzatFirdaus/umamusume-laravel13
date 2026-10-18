@@ -7,6 +7,7 @@ import { veteranResultClause } from '../domain/veteranNote';
 interface Props {
     veteran: {
         id: number;
+        label: string;
         trainee: string;
         trainee_ja: string | null;
         scenario_label: string;
@@ -51,7 +52,7 @@ function statusVariant(status: string): 'info' | 'success' | 'warning' | 'neutra
                     :href="props.veteran.veteran_url"
                     class="font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out"
                 >
-                    {{ props.veteran.trainee }}
+                    {{ props.veteran.label }}
                 </a>
 
                 <span

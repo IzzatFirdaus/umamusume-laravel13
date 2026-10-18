@@ -346,4 +346,28 @@ test.describe('Veteran cards', () => {
         await expect(details).toHaveAttribute('open', '');
         await expect(page.getByText(/Favorite, archive, delete/)).toBeVisible();
     });
+
+    // Plan slice 0.4. Two careers trained in the same form (Agnes Digital) filed in different
+    // scenarios must not read as the same row. The date alone cannot separate them: both are filed
+    // within the same second by this spec, so the scenario is the part of the label that carries the
+    // difference. The data is created here, not assumed from the seeded library.
+    test('gives two careers of one trainee different row labels', async ({ page }) => {
+        createdRunUrls.push(await fileCareer(page, 'Agnes Digital', null, null, 'ura_finale'));
+        createdRunUrls.push(await fileCareer(page, 'Agnes Digital', null, null, 'unity_cup'));
+
+        await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
+
+        const rows = page.locator('[data-veteran-row]').filter({ hasText: 'Agnes Digital' });
+        await expect(rows).toHaveCount(2);
+
+        const labels: string[] = [];
+        for (const row of await rows.all()) {
+            labels.push((await row.getByRole('link').first().innerText()).trim());
+        }
+
+        expect(new Set(labels).size, `row labels must differ: ${JSON.stringify(labels)}`).toBe(2);
+        expect(labels.some((label) => label.includes('URA Finale'))).toBe(true);
+        expect(labels.some((label) => label.includes('Unity Cup'))).toBe(true);
+    });
 });

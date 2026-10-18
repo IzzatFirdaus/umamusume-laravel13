@@ -24,18 +24,24 @@ const WRITE = { timeout: 60_000 } as const;
  * every career it imported. Filing with that sentence in the note is the only way a browser case can see
  * the library split it back off (`resources/js/domain/veteranNote.ts`), because the filing path itself
  * never writes one.
+ *
+ * `scenario` is optional and defaults to `unity_cup`, the value this helper has always posted. A spec
+ * that needs two careers of the SAME trainee to carry DIFFERENT labels has to vary the scenario, because
+ * the label is `trainee · scenario · date` and two careers filed in the same minute share the date. The
+ * key must be one `config/scenarios.php` declares, since the create request validates against it.
  */
 export async function fileCareer(
     page: Page,
     traineeName: string,
     tag: string | null,
     notes: string | null = null,
+    scenario: string = 'unity_cup',
 ): Promise<string> {
     await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     await page.locator('#trainee-combobox').fill(traineeName);
     await page.keyboard.press('Enter');
-    await page.selectOption('select[name="scenario"]', { value: 'unity_cup' });
+    await page.selectOption('select[name="scenario"]', { value: scenario });
     await page.getByRole('button', { name: 'Create run' }).click();
     await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
 

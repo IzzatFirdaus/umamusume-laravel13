@@ -22,6 +22,7 @@ import { computed, ref } from 'vue';
 interface VeteranRow {
     id: number;
     run_id: number;
+    label: string;
     trainee: string;
     trainee_ja: string | null;
     scenario_label: string;
@@ -169,9 +170,9 @@ function applyFilters(): void {
                 >
                     <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                         <span class="font-semibold text-ink-strong">
-                            <Link :href="veteran.veteran_url" class="hover:underline transition-colors duration-150 ease-out">
-                                {{ veteran.trainee }}
-                            </Link>
+                                <Link :href="veteran.veteran_url" class="hover:underline transition-colors duration-150 ease-out">
+                                    {{ veteran.label }}
+                                </Link>
                             <span
                                 v-if="veteran.trainee_ja"
                                 lang="ja"

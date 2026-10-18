@@ -70,6 +70,7 @@ interface ActiveCareer {
 
 interface VeteranRow {
     id: number;
+    label: string;
     trainee: string;
     trainee_ja: string | null;
     scenario_label: string;
@@ -433,7 +434,7 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                                     size="size-10"
                                 />
                                 <Link :href="veteran.run_url" class="text-sm font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">
-                                    {{ veteran.trainee }}
+                                    {{ veteran.label }}
                                     <span
                                         v-if="veteran.trainee_ja"
                                         lang="ja"

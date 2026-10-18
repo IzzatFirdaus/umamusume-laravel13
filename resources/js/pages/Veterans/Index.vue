@@ -12,6 +12,7 @@ import VeteranRow from '../../components/VeteranRow.vue';
 interface Veteran {
     id: number;
     run_id: number;
+    label: string;
     trainee: string;
     trainee_ja: string | null;
     scenario_label: string;

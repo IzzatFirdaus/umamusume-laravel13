@@ -76,8 +76,13 @@ it('collapses the rail to marks without removing any destination name', function
     // The control itself: a named button that announces its own state and points at the region it
     // controls, at the 44px floor. `aria-expanded` is the state, so a screen reader hears "collapsed"
     // without reading the mark.
+    //
+    // Plan 1.2 moved this button from the sidebar header into the 48px product bar and shortened its
+    // binding to `!railCollapsed`, which is the same state with one negation fewer. The assertion
+    // pins the binding's *shape* rather than a stale spelling, so either form is accepted; the
+    // behaviour the case protects (a named toggle that reports expanded/collapsed) is unchanged.
     expect($layout)->toMatch('/<button[^>]*type="button"[^>]*class="[^"]*min-h-11[^"]*"/')
-        ->and($layout)->toContain(':aria-expanded="railCollapsed ? \'false\' : \'true\'"')
+        ->and($layout)->toMatch('/:aria-expanded="(!railCollapsed|railCollapsed \? \'false\' : \'true\')"/')
         ->and($layout)->toContain('aria-controls="primary-nav"')
         ->and($layout)->toContain('@click="toggleRail"');
 

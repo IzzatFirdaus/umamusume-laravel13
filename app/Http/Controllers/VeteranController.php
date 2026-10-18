@@ -193,7 +193,7 @@ final class VeteranController extends Controller
             ->get()
             ->map(static fn (Veteran $veteran): array => [
                 'id' => $veteran->id,
-                'label' => $veteran->trainingRun->umamusume->name,
+                'label' => VeteranRow::label($veteran->trainingRun),
             ])
             ->sortBy('label')
             ->values()

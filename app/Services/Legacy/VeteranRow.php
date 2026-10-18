@@ -33,7 +33,7 @@ use App\Services\DataPipeline\ArtworkMirror;
 final class VeteranRow
 {
     /**
-     * @return array{id: int, run_id: int, trainee: string, trainee_ja: string|null, scenario_label: string,
+     * @return array{id: int, run_id: int, label: string, trainee: string, trainee_ja: string|null, scenario_label: string,
      *               status_label: string, tags: list<string>, notes: string|null,
      *               hasSelection: bool, builder_url: string|null, veteran_url: string, portrait_url: string|null}
      */
@@ -49,6 +49,7 @@ final class VeteranRow
             // The run's own id, because the Legacy Lab's compare surface takes it: a Veteran is a pointer
             // and the comparison is between runs, not between library rows (`Legacy/Index.vue`).
             'run_id' => $run->id,
+            'label' => self::label($run),
             'trainee' => $run->umamusume->name,
             'trainee_ja' => $run->umamusume->name_ja,
             'scenario_label' => self::scenarioLabel($run),
@@ -109,6 +110,18 @@ final class VeteranRow
             ?? $trainee->cards->first();
 
         return $headerCard === null ? null : $mirror->url('card_portrait', (int) $headerCard->card_id);
+    }
+
+    /**
+     * A human-readable label that disambiguates careers trained in the same form: trainee, scenario and
+     * the date the run started (`A-95`). The date is the only stored start marker; without it the library
+     * can print two identical "Vodka" rows.
+     */
+    public static function label(TrainingRun $run): string
+    {
+        $date = $run->created_at?->format('Y-m-d') ?? 'unknown date';
+
+        return "{$run->umamusume->name} · ".self::scenarioLabel($run)." · {$date}";
     }
 
     /**

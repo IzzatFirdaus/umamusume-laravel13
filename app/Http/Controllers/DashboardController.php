@@ -241,7 +241,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * @return array{id: int, trainee: string, trainee_ja: string|null, scenario_label: string, run_id: int, run_url: string}
+     * @return array{id: int, label: string, trainee: string, trainee_ja: string|null, scenario_label: string, run_id: int, run_url: string}
      */
     private function veteranRow(Veteran $veteran): array
     {
@@ -249,6 +249,7 @@ class DashboardController extends Controller
 
         return [
             'id' => $veteran->id,
+            'label' => "{$run->umamusume->name} · ".$this->scenarioLabel($run).' · '.($run->created_at?->format('Y-m-d') ?? 'unknown date'),
             'trainee' => $run->umamusume->name,
             'trainee_ja' => $run->umamusume->name_ja,
             'scenario_label' => $this->scenarioLabel($run),

@@ -129,7 +129,7 @@ it('refuses a career id that is not in the library', function (): void {
 
 it('offers only the filed careers to the picker, ordered by name', function (): void {
     $listed = compareVeteran('Gold Ship', ['Scenario']);
-    compareVeteran('Icy Pearl', ['Speed']);
+    $filed = compareVeteran('Icy Pearl', ['Speed']);
     $unfiled = TrainingRun::factory()->create(['status' => RunStatus::Completed]);
 
     $this->get(route('veterans.compare', ['veterans' => [$listed->id]]))
@@ -139,7 +139,10 @@ it('offers only the filed careers to the picker, ordered by name', function (): 
             ->has('comparable', 2)
             // `collect()` rather than `array_column()`: Inertia hands a nested value as an array or a
             // Collection depending on its depth, and the assertion should not depend on which.
-            ->where('comparable', fn ($comparable): bool => collect($comparable)->pluck('label')->all() === ['Gold Ship', 'Icy Pearl'])
+            ->where('comparable', fn ($comparable): bool => collect($comparable)->pluck('label')->all() === [
+                'Gold Ship · No scenario set · '.$listed->trainingRun->created_at?->format('Y-m-d'),
+                'Icy Pearl · No scenario set · '.$filed->trainingRun->created_at?->format('Y-m-d'),
+            ])
             ->where('columns.0.veteran_url', route('veterans.show', $listed)));
 
     expect($unfiled->veteran)->toBeNull();

@@ -35,6 +35,7 @@ interface Aptitude {
 interface Column {
     id: number;
     run_id: number;
+    label: string;
     trainee: string;
     trainee_ja: string | null;
     scenario_label: string;
@@ -424,7 +425,7 @@ watch(orderedColumns, () => {
                                 @mouseenter="hoveredColumn = index"
                                 @mouseleave="hoveredColumn = null"
                             >
-                                <a :href="column.veteran_url" class="font-semibold text-ink underline">{{ column.trainee }}</a>
+                                <a :href="column.veteran_url" class="font-semibold text-ink underline">{{ column.label }}</a>
                                 <span v-if="column.trainee_ja" lang="ja" class="block text-xs text-ink-muted">{{ column.trainee_ja }}</span>
                                 <span class="block text-xs text-ink-muted">{{ column.scenario_label }}</span>
                             </th>
@@ -595,7 +596,7 @@ watch(orderedColumns, () => {
                     class="rounded-md border border-rule bg-raised p-3 text-sm"
                 >
                     <header class="mb-1 flex flex-wrap items-baseline gap-2">
-                        <a :href="column.veteran_url" class="font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">{{ column.trainee }}</a>
+                        <a :href="column.veteran_url" class="font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">{{ column.label }}</a>
                         <span v-if="column.trainee_ja" lang="ja" class="text-xs text-ink-muted">{{ column.trainee_ja }}</span>
                     </header>
                     <p v-if="veteranResultClause(column.notes) !== null" class="whitespace-pre-wrap text-ink">{{ veteranResultClause(column.notes) }}</p>

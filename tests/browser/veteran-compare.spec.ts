@@ -347,3 +347,36 @@ test('pins a horizontal scrollbar that stays reachable when the matrix overflows
     await expect(region).toHaveAttribute('tabindex', '0');
     await expect(region).toHaveAttribute('role', 'region');
 });
+
+// Plan slice 0.4. Two careers of one trainee filed in different scenarios must produce column
+// headers a Trainer can tell apart. Both rows are filed in the same second by this spec, so the
+// scenario is the part of the label carrying the difference; the date alone would not separate them.
+// Data is created here rather than assumed from whatever the seeded library holds.
+test('gives two careers of one trainee different column headers', async ({ page }) => {
+    createdRunUrls.push(await fileCareer(page, 'Agnes Digital', null, null, 'ura_finale'));
+    const secondRunUrl = await fileCareer(page, 'Agnes Digital', null, null, 'unity_cup');
+    createdRunUrls.push(secondRunUrl);
+
+    await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await page.getByRole('listitem').filter({ hasText: 'URA Finale' })
+        .getByRole('link', { name: 'Compare this career' })
+        .click();
+    await page.waitForURL(/\/veterans\/compare\?veterans\[\]=\d+/, WRITE);
+
+    // The second pick is addressed by its own label, not by the trainee name: both rows carry the
+    // same name now, and a name query would be ambiguous.
+    await page.getByRole('checkbox', { name: /Unity Cup/ }).check();
+    await page.getByRole('button', { name: 'Compare' }).click();
+    await page.waitForURL(/\/veterans\/compare\?/, WRITE);
+
+    await expect(page.getByRole('heading', { name: '2 careers side by side' })).toBeVisible();
+
+    const headers = (await page.getByRole('columnheader').allTextContents()).map((h) => h.trim());
+    const distinct = [...new Set(headers.filter((h) => h.includes('Agnes Digital')))];
+
+    expect(distinct.length, `column headers must differ: ${JSON.stringify(headers)}`).toBe(2);
+    expect(distinct.some((h) => h.includes('URA Finale'))).toBe(true);
+    expect(distinct.some((h) => h.includes('Unity Cup'))).toBe(true);
+});
