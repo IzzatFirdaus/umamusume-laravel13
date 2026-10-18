@@ -55,6 +55,7 @@ const props = defineProps<{
     scenarios: ScenarioCard[];
     /** The steps this session has opened, the step bar's completed marking reads them. */
     visited: number[];
+    choices: { label: string; value: string | null; url: string | null }[];
     selected: string | null;
     ruleset: { value: string | null; title: string };
     /** `route('career.scenario.store')`, supplied by the server so the page never hard-codes the URL. */
@@ -89,10 +90,6 @@ function choose(scenario: ScenarioCard): void {
     });
 }
 
-const selectedLabel = computed(() =>
-    props.scenarios.find((card) => card.key === props.selected)?.label ?? null,
-);
-
 const optimizesText = (card: ScenarioCard): string | null => {
     if (card.optimizes.kind === 'unknown' || card.optimizes.stats.length === 0) {
         return null;
@@ -115,7 +112,7 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
 </script>
 
 <template>
-    <SetupLayout :step="1" :visited="props.visited" :saved="props.saved">
+    <SetupLayout :step="1" :visited="props.visited" :saved="props.saved" :choices="props.choices">
         <Head title="Choose a scenario" />
         <template #eyebrow>Setup</template>
         <template #title>Choose a scenario</template>
@@ -138,16 +135,6 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
             The scenario decides which resources this tool tracks, which systems it can show, and which
             stat ceilings apply. It is the first choice of six, and the wizard carries it forward instead
             of asking again.
-        </p>
-
-        <p class="mt-3 text-sm text-ink" data-field="stored-choice">
-            Stored choice:
-            <strong v-if="selectedLabel" class="text-ink-strong">{{ selectedLabel }}</strong>
-            <AbsenceValue
-                v-else
-                compact
-                reason="No scenario has been chosen in this setup draft yet."
-            />
         </p>
 
         <p

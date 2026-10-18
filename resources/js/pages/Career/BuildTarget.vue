@@ -47,6 +47,7 @@ interface StoredTarget {
 const props = defineProps<{
     /** The steps this session has opened, the step bar's completed marking reads them. */
     visited: number[];
+    choices: { label: string; value: string | null; url: string | null }[];
     /** The stored payload as entered, or null before one exists. */
     target: StoredTarget | null;
     /** The Trainer's stored stat-target defaults (SCREEN-024), applied only where no target is stored. */
@@ -301,7 +302,7 @@ function removeAt(index: number): void {
 </script>
 
 <template>
-    <SetupLayout :step="3" :visited="props.visited" :saved="props.saved">
+    <SetupLayout :step="3" :visited="props.visited" :saved="props.saved" :choices="props.choices">
         <Head title="Your target" />
         <template #eyebrow>Setup</template>
         <template #title>Your target</template>

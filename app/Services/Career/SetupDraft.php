@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Career;
 
 use App\Models\TrainingRun;
+use App\Models\Umamusume;
 use App\Services\ScenarioCaps;
 
 /**
@@ -265,7 +266,7 @@ final class SetupDraft
         $traineeName = null;
 
         if ($choice['umamusume_id'] !== null) {
-            $traineeName = \App\Models\Umamusume::query()
+            $traineeName = Umamusume::query()
                 ->whereKey($choice['umamusume_id'])
                 ->value('name');
             $traineeName = is_string($traineeName) ? $traineeName : null;
@@ -324,17 +325,17 @@ final class SetupDraft
         }
 
         // Step 3: build target (caps)
-        if (isset($bag['caps']) && is_array($bag['caps']) && !empty($bag['caps'])) {
+        if (isset($bag['caps']) && is_array($bag['caps']) && ! empty($bag['caps'])) {
             $saved[] = 3;
         }
 
         // Step 4: legacy selection
-        if (isset($bag['legacy_selection']) && is_array($bag['legacy_selection']) && !empty($bag['legacy_selection'])) {
+        if (isset($bag['legacy_selection']) && is_array($bag['legacy_selection']) && ! empty($bag['legacy_selection'])) {
             $saved[] = 4;
         }
 
         // Step 5: deck
-        if (isset($bag['deck']) && is_array($bag['deck']) && !empty($bag['deck'])) {
+        if (isset($bag['deck']) && is_array($bag['deck']) && ! empty($bag['deck'])) {
             $saved[] = 5;
         }
 

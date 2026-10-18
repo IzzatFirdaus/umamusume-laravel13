@@ -78,6 +78,7 @@ const props = defineProps<{
     trainees: Paginator<TraineeRow>;
     /** The steps this session has opened, the step bar's completed marking reads them. */
     visited: number[];
+    choices: { label: string; value: string | null; url: string | null }[];
     selected: number | null;
     /** The costume form the draft already names, so a return to this step re-seeds the picker (R3-06). */
     selectedCard: number | null;
@@ -227,7 +228,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
 </script>
 
 <template>
-    <SetupLayout :step="2" :visited="props.visited" :saved="props.saved">
+    <SetupLayout :step="2" :visited="props.visited" :saved="props.saved" :choices="props.choices">
         <Head title="Choose a trainee" />
         <template #eyebrow>Setup</template>
         <template #title>Choose a trainee</template>
@@ -264,12 +265,6 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
             >
                 Change scenario
             </Link>
-        </p>
-
-        <p class="mt-1 text-sm text-ink" data-field="stored-trainee">
-            Stored choice:
-            <strong v-if="props.selectedName" class="text-ink-strong">{{ props.selectedName }}</strong>
-            <AbsenceValue v-else compact reason="No trainee has been chosen in this setup draft yet." />
         </p>
 
         <!-- Filter bar in bordered container -->
