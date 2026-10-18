@@ -50,9 +50,12 @@ test('renders the run list, and says what happens next when it is empty', async 
     await expect(page.getByText(/nothing to list until you start one/)).toBeVisible();
 
     // The empty state still offers both ways in. Import sits beside New career because it creates a run
-    // too, and a Trainer with a finished career in a file has to find it on the same glance.
-    await expect(page.getByRole('link', { name: 'New career' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Import a historical career' })).toBeVisible();
+    // too, and a Trainer with a finished career in a file has to find it on the same glance. Both
+    // locators are scoped to `main`: the nav also carries a "New Career" link, and an unscoped name
+    // match resolves to two elements under strict mode.
+    const main = page.locator('main');
+    await expect(main.getByRole('link', { name: 'New career' })).toBeVisible();
+    await expect(main.getByRole('link', { name: 'Import a historical career' })).toBeVisible();
 });
 
 test('sizes the create form controls to the 44px contract', async ({ page }) => {
