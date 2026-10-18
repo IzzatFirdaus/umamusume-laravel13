@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
 import { BaseInput, BaseSelect, BaseButton } from '../../components/Form';
 import { carriesAncestryNote, VETERAN_ANCESTRY_NOTE, veteranResultClause } from '../../domain/veteranNote';
 import { Head, router, usePage } from '@inertiajs/vue3';
@@ -116,8 +117,9 @@ const hasSharedAncestryNote = computed(() =>
 <template>
     <AppLayout>
         <Head title="Veteran library" />
-        <template #eyebrow>Library</template>
-        <template #title>Veteran library</template>
+        <template #head>
+            <PageHeader eyebrow="Library" title="Veteran library" />
+        </template>
 
         <p
             role="note"

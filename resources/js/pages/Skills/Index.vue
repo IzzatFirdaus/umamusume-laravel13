@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
 import SkillCatalog from '../../components/skills/SkillCatalog.vue';
 import { Head } from '@inertiajs/vue3';
 
@@ -34,8 +35,9 @@ const props = defineProps<{
 <template>
     <AppLayout>
         <Head title="Skill search" />
-        <template #eyebrow>Reference</template>
-        <template #title>Skill search</template>
+        <template #head>
+            <PageHeader eyebrow="Reference" title="Skill search" />
+        </template>
 
         <SkillCatalog
             :skills="props.skills"

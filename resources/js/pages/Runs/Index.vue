@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
 import { Head } from '@inertiajs/vue3';
 import StatusPill from '../../components/StatusPill.vue';
 import SubCell from '../../components/SubCell.vue';
@@ -36,8 +37,9 @@ const statusVariant = (status: string): 'info' | 'success' | 'warning' | 'neutra
 <template>
     <AppLayout>
         <Head title="Training runs" />
-        <template #eyebrow>Overview</template>
-        <template #title>Training runs</template>
+        <template #head>
+            <PageHeader eyebrow="Overview" title="Training runs" />
+        </template>
 
         <!-- Import sits beside New run rather than in a menu: it creates a run too, and a Trainer
              with a finished career in a file has to find it on the same glance. -->

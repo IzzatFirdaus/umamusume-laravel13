@@ -16,6 +16,7 @@
  * inbound click path without adding an eleventh destination to the nav.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
 import SubCell from '../../components/SubCell.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
@@ -33,14 +34,16 @@ const sourceReason: Record<string, string> = {
 <template>
     <AppLayout>
         <Head title="Database" />
-        <template #eyebrow>Data Quality</template>
-        <template #title>Database</template>
+        <template #head>
+            <PageHeader
+                eyebrow="Data Quality"
+                title="Database"
+                description="Reference data this tool fetched, plus the tables transcribed from the reference guide. Reading any of it never touches a run: an area opens the catalog behind it, and nothing here writes."
+            />
+        </template>
 
-        <p class="mt-4 max-w-3xl text-sm text-ink-muted">
-            Reference data this tool fetched, plus the tables transcribed from the reference guide.
-            Reading any of it never touches a run: an area opens the catalog behind it, and nothing
-            here writes.
-        </p>
+        <!-- The reference-data sentence moved into the PageHeader's description, so it is stated
+             once at the top rather than as a loose paragraph that reads as a second title. -->
 
          <nav aria-label="Database areas" class="mt-6">
              <ul class="divide-y divide-rule rounded-md border border-rule bg-panel">

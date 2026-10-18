@@ -29,6 +29,7 @@
  * prop and overrides the grid class and card visibility on mount.
  */
 import AppLayout from '../layouts/AppLayout.vue';
+import PageHeader from '../components/ui/PageHeader.vue';
 import { LinkButton } from '../components/Form';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -173,8 +174,9 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
 <template>
     <AppLayout>
         <Head title="Dashboard" />
-        <template #eyebrow>Overview</template>
-        <template #title>Dashboard</template>
+        <template #head>
+            <PageHeader eyebrow="Overview" title="Dashboard" />
+        </template>
 
         <p v-if="visiting" role="status" class="text-sm text-ink-muted">Loading…</p>
 

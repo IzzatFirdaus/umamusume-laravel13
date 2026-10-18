@@ -373,7 +373,18 @@ const moreIsCurrent = computed(() =>
                         </span>
                     </button>
                 </div>
-                <div class="flex min-w-0 flex-col border-b border-rule bg-page px-4 py-3 md:px-8">
+                <!-- The title band. Pages that render `PageHeader` in `#head` supply their own `h1`
+                     there and leave this band empty, so exactly one `h1` reaches the document; the
+                     band remains for the pages that still fill `#title` and have not adopted the
+                     component yet. Both paths keep the heading in the banner region so the shell's
+                     `role="banner"` landmark still names the page. -->
+                <div v-if="$slots.head" class="border-b border-rule bg-page px-4 py-3 md:px-8">
+                    <slot name="head" />
+                </div>
+                <div
+                    v-else-if="$slots.title"
+                    class="flex min-w-0 flex-col border-b border-rule bg-page px-4 py-3 md:px-8"
+                >
                     <p
                         v-if="$slots.eyebrow"
                         class="text-xs font-semibold uppercase tracking-wider text-ink-muted"
