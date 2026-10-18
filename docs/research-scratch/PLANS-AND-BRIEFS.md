@@ -107,7 +107,7 @@ Verify each and report any that fails rather than working around it.
 - `git branch --show-current` reads the branch the caller named. Run `git status --porcelain` and print the
   output. No uncommitted peer work may sit in: `resources/views/runs/show.blade.php`,
   `resources/views/components/*`, `config/scenarios.php`, `app/Http/Controllers/TrainingRunController.php`,
-  `DESIGN.md`, `docs/design-research/CONSTRAINTS.md`, `tests/Feature/RunViewFrameTest.php`,
+  `DESIGN.md`, `docs/research-scratch/DESIGN-CORPUS.md`, `tests/Feature/RunViewFrameTest.php`,
   `tests/Feature/GuidedTurnOnRunViewTest.php`, `tests/Feature/ScenarioPanelUiTest.php`.
   As of 2026-09-29 a peer session was active in this worktree with an uncommitted edit in
   `resources/views/skills/index.blade.php`; that path is not in scope, but it means the tree is live. Stage
@@ -197,7 +197,7 @@ Every figure below is either a browser read, a computed value from a named token
 
 ##### Why this is first
 
-`docs/design-research/CONSTRAINTS.md` D-40 currently ends with:
+`docs/research-scratch/DESIGN-CORPUS.md` D-40 currently ends with:
 
 > Below 1024px the two regions stack on the narrow axis. The brief does not require mobile and no
 > mobile-first compromise is accepted in exchange for desktop density.
@@ -261,12 +261,12 @@ stop disagreeing by removing the newer one rather than by amending the older.
 
 ### D-30 amendment draft: two entries widen, both catch-ups
 
-**DRAFT, for the owner's pen. `docs/design-research/CONSTRAINTS.md` was not edited by this pass; the paste-ready text is §2 below.**
+**DRAFT, for the owner's pen. `docs/research-scratch/DESIGN-CORPUS.md` was not edited by this pass; the paste-ready text is §2 below.**
 Written 2026-10-01 against HEAD `4e17997`, read-only. This one untracked file was created and no other file was touched.
 
 #### 1. Method note
 
-**Read.** `docs/design-research/CONSTRAINTS.md` §5 (D-30 at `:138`, plus D-31 through D-37 and the D-40 and D-230 amendment paragraphs for voice); `docs/adr/0012-card-detail-fields-and-images.md` (`:7`, `:73`, `:142-145`, `:157-159`, `:243-244`); `docs/adr/0008-character-card-catalog-layer.md` (`:236`, `:439`); `KNOWN-ISSUES.md` (status block `:10-17`, KI-33 `:1516-1573`, KI-35 `:1625-1644`); `docs/design-research/skills-section-phase-b2-2026-10-01.md` (§4.7 `:554-583`, §4.8 `:585-620`, §9.5 `:1089-1109`, §6 items 12-13 at `:898-905`, §10 at `:1136`); `docs/design-research/skills-mechanics-audit-verification-2026-10-01.md` §3.3 (`:82-96`); root `DESIGN.md` §4.2 (`:226-268`, page section 2 at `:246-247`); `DESIGN.md` (section list only, to keep the two `DESIGN.md` files apart); `PRD.md` (A-5 at `:46`); `app/Models/Umamusume.php` (`:31-40`, `:49`), `app/Models/CharacterCard.php` (`:35-36`, `:40`, `:66-67`), `app/Services/DataPipeline/Parsers/GametoraCharacterParser.php` (`:34-45`, `:83`), `app/Services/DataPipeline/Parsers/GametoraCharacterCardParser.php` (`:92-93`); migrations `2026_09_30_073029_...:41-42` and `2026_09_27_090000_...:16-20`.
+**Read.** `docs/research-scratch/DESIGN-CORPUS.md` §5 (D-30 at `:138`, plus D-31 through D-37 and the D-40 and D-230 amendment paragraphs for voice); `docs/adr/0012-card-detail-fields-and-images.md` (`:7`, `:73`, `:142-145`, `:157-159`, `:243-244`); `docs/adr/0008-character-card-catalog-layer.md` (`:236`, `:439`); `KNOWN-ISSUES.md` (status block `:10-17`, KI-33 `:1516-1573`, KI-35 `:1625-1644`); `docs/design-research/skills-section-phase-b2-2026-10-01.md` (§4.7 `:554-583`, §4.8 `:585-620`, §9.5 `:1089-1109`, §6 items 12-13 at `:898-905`, §10 at `:1136`); `docs/design-research/skills-mechanics-audit-verification-2026-10-01.md` §3.3 (`:82-96`); root `DESIGN.md` §4.2 (`:226-268`, page section 2 at `:246-247`); `DESIGN.md` (section list only, to keep the two `DESIGN.md` files apart); `PRD.md` (A-5 at `:46`); `app/Models/Umamusume.php` (`:31-40`, `:49`), `app/Models/CharacterCard.php` (`:35-36`, `:40`, `:66-67`), `app/Services/DataPipeline/Parsers/GametoraCharacterParser.php` (`:34-45`, `:83`), `app/Services/DataPipeline/Parsers/GametoraCharacterCardParser.php` (`:92-93`); migrations `2026_09_30_073029_...:41-42` and `2026_09_27_090000_...:16-20`.
 
 **Ran, all read-only.** `git log -1 dd90330` and `git show --stat dd90330` (2026-09-30, KI-33 storage and pre-populate); `grep` for `skills_innate`, `skills_unique` and `aptitude_` across `app/`, `docs/` and `tests/`; a PDO read of `character_cards` and `umamusume` against `database/database.sqlite`; `php artisan config:show database.default` (sqlite, matching `.env:9-10`); `git status --porcelain` to separate tracked from untracked writers. No mutating git command was run.
 
@@ -316,11 +316,11 @@ Everything else reproduced: the two D-30 entries and their omissions, the migrat
 Owner gate O-2, from Tasks 2, 4 and 5 of the DOC-SYNC plan, now the section PLAN-DOC-SYNC-2026-10-02.md in
 `PROCESS-PLANS.md` (those tasks at lines 1228, 1332 and 1372). **No ruling recorded yet; nothing
 has been changed on either branch of it.** This section is the decision brief; Task 4's chain repair and 41 of
-the census's 505 dead links (22 `docs/GATE-REGISTRY.md` + 19 `docs/PRE-MORTEM.md`) wait on it.
+the census's 505 dead links (22 `docs/research-scratch/GOVERNANCE.md` + 19 `docs/research-scratch/GOVERNANCE.md`) wait on it.
 
 **What is actually missing.** Both paths are dead on a fresh clone: `AGENTS.md:178` ranks
-`docs/GATE-REGISTRY.md` second of five authorities, `AGENTS.md:5` names `docs/PRE-MORTEM.md` as the risk
-record, `AGENTS.md:94` says "see GATE-REGISTRY C-5", and `README.md:18` maps `docs/PRE-MORTEM.md`. Neither
+`docs/research-scratch/GOVERNANCE.md` second of five authorities, `AGENTS.md:5` names `docs/research-scratch/GOVERNANCE.md` as the risk
+record, `AGENTS.md:94` says "see GATE-REGISTRY C-5", and `README.md:18` maps `docs/research-scratch/GOVERNANCE.md`. Neither
 file is on disk. Both are recoverable: `git show 22e5135^:docs/GATE-REGISTRY.md` is 159 lines,
 `git show 22e5135^:docs/PRE-MORTEM.md` is 98 lines.
 
@@ -445,7 +445,7 @@ follows; three are provenance citations inside a dated record or a fenced file.
 
 ## Owner gate O-2 resolved 2026-10-03: repoint, not restore
 
-The owner chose the repoint path: the citations naming `docs/GATE-REGISTRY.md` and `docs/PRE-MORTEM.md` are updated to point at `docs/research-scratch/GOVERNANCE.md` and its absorbed-source sections. The consolidation's absorption stands; the two files are not restored. Two consequences carried forward: `AGENTS.md:178`'s precedence chain no longer names a standalone #2 authority, and any future reader who follows a `GATE-REGISTRY.md` citation arrives inside `GOVERNANCE.md` rather than at a dedicated file.
+The owner chose the repoint path: the citations naming `docs/research-scratch/GOVERNANCE.md` and `docs/research-scratch/GOVERNANCE.md` are updated to point at `docs/research-scratch/GOVERNANCE.md` and its absorbed-source sections. The consolidation's absorption stands; the two files are not restored. Two consequences carried forward: `AGENTS.md:178`'s precedence chain no longer names a standalone #2 authority, and any future reader who follows a `GATE-REGISTRY.md` citation arrives inside `GOVERNANCE.md` rather than at a dedicated file.
 
 ---
 
@@ -862,7 +862,7 @@ wrong: the rows marking the two paths as tracked are at lines 90 and 91 of
 report this pass relayed without re-reading the target, which is the failure mode the relay rule exists to
 stop. Item 1 of this dispatch corrected rows 90 and 91 in place at `f1c18fc`.
 
-Still open on KI-55, and small: the inventory file names `docs/GATE-REGISTRY.md` or `docs/PRE-MORTEM.md` as
+Still open on KI-55, and small: the inventory file names `docs/research-scratch/GOVERNANCE.md` or `docs/research-scratch/GOVERNANCE.md` as
 live paths in thirteen other rows and tables too (counted at `f1c18fc` by grepping both paths and excluding
 the three corrected lines; the line numbers move on every edit, so re-run the grep rather than trusting a
 list here). Those are outside Item 1's stated scope and are recorded rather than edited.
@@ -2973,7 +2973,7 @@ The runtime evidence behind this file is **from 2026-10-08 and predates the D1-D
    `unknown`s are the badge's, and `ADR-0020` §2's `RNG` / `user input` labels would arrive into that
    collision — while `/review` already shows the word **Confirm** to mean "a human resolved this match"
    (`resources/js/components/review/CandidateForm.vue:44`).
-3. `docs/design-research/CONSTRAINTS.md` is absent from this tree — its D-rules (D-20, D-100, D-256) are
+3. `docs/research-scratch/DESIGN-CORPUS.md` is absent from this tree — its D-rules (D-20, D-100, D-256) are
    cited from components and from `ADR-0001` §6, and `AGENTS.md` §17 says folded sources were deleted after
    verification. Any §1 approval should cite the master that now carries those rules, not the deleted file.
 4. **The design-artifact gate is failing, and its cause is only half resolved.** `python tools/gate.py` exits
@@ -3071,7 +3071,7 @@ quote the ruling, name the date, leave the original sentences standing.*
    never in a theme. Ten findings across `screen-a-scenario-v10.html`, `screen-c-event-v1-inline.html` and
    `screen-c-event-v2-preview-column.html`; reproduction command `python tools/gate.py`; closure is the
    hex-to-token repair under the owner's §11 dispensation, and closure does not re-scope the gate.
-3. **`tools/gate.py:6`** cites `docs/design-research/CONSTRAINTS.md` as its rule source; that file no longer
+3. **`tools/gate.py:6`** cites `docs/research-scratch/DESIGN-CORPUS.md` as its rule source; that file no longer
    exists, and the rules live in the `docs/research-scratch/` masters.
 4. **Root `README.md:306`** still calls KI-58 an open defect affecting rendered-prototype checks; after item 1 it
    must point at the new mirror-case entry instead.
@@ -4649,7 +4649,7 @@ Community tags (uma.guide): Must Buy / Skip
 
 ### Purpose
 
-Surface verified Grand Concert state. The evidence hierarchy (`docs/Our-Grand-Concert-plan.md`) determines what is renderable:
+Surface verified Grand Concert state. The evidence hierarchy (`docs/proposals/Our-Grand-Concert-plan.md`) determines what is renderable:
 
 - **Available (Confirmed):** Performance type (Dance, Passion, Vocals, Visuals, Composure) and signed delta as turn observations.
 - **Observed but undocumented:** nothing beyond the above.
@@ -4672,7 +4672,7 @@ Surface verified Grand Concert state. The evidence hierarchy (`docs/Our-Grand-Co
 
 - Starting values, current totals, caps, acquisition formulas, Lesson costs, Song titles, Hype, Live Bonus percentages, Promo Concert scheduling, or any recommendation logic. The panel states the evidence boundary and links to `SCREEN_SPEC.md` §7-19 through §7-23 for the reopen conditions.
 
-Source: `docs/Our-Grand-Concert-plan.md` Slices 1–18, `docs/UMAMUSUME_REFERENCE.md §2.9`.
+Source: `docs/proposals/Our-Grand-Concert-plan.md` Slices 1–18, `docs/UMAMUSUME_REFERENCE.md §2.9`.
 
 ---
 

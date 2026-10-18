@@ -45,7 +45,7 @@ DESIGN.md: Umamusume Trainer Companion design system
 Phase 2 deliverable. Design contract only; no production code was written or modified **at the time of writing (2026-09-27)**. Production components now exist: `stat-band`, `resource-strip`, `guided-step`, `race-calendar`, `grade-point-meter`, `design-preview`, and token-migrated `layout` (see root `DESIGN.md` §3). This line is retained for audit traceability.
 Anchors in this file were measured from `docs/game-screenshots/` (see `RAW-FINDINGS.md` §3.2). Ramps were derived from those anchors by linear-light mixing. Every text/background pair used for real copy was contrast-checked; the numbers are printed in §3.4.
 
-Read the root `CONSTRAINTS.md` first. This file does not relax it. The design-side contract derived from this system lives in `docs/design-research/CONSTRAINTS.md`.
+Read the root `CONSTRAINTS.md` first. This file does not relax it. The design-side contract derived from this system lives in `docs/research-scratch/DESIGN-CORPUS.md`.
 
 ---
 
@@ -1439,7 +1439,7 @@ A reviewer's quick test: squint at the screen. If several hues compete for atten
 
 ### 8. UX architecture
 
-Full layouts, states, and acceptance conditions are specified in `docs/design-research/CONSTRAINTS.md` §4-§7, which is the reviewable contract. This section records the intent behind each.
+Full layouts, states, and acceptance conditions are specified in `docs/research-scratch/DESIGN-CORPUS.md` §4-§7, which is the reviewable contract. This section records the intent behind each.
 
 #### 8.1 Trainer's Dashboard (Screen A)
 
@@ -1790,7 +1790,7 @@ The grep will hit these. They are not violations, and the Guardian's ruling stan
 - `account` in the verb idiom "account for": "the list the template has to account for" (`tests/Feature/ReviewQueueTest.php:62`, ruled 2026-09-28). The bill and login senses are what the ban exists for, and `PRD.md` NFR-1 declares this tool has no account and no auth surface, so neither can appear as product language; "account for" means "cover", which is ordinary English in a code comment.
 - `account` inside Laravel's own shipped queue defaults: `your-account-id`, the AWS SQS env fallback at `config/queue.php:60` (ruled 2026-09-28). `account` and `login` sit in the `lore-code` word list to catch an auth surface being built, which is a scope question for the Planner Domain Specialist and Architect, not a lore question about a framework stub nobody wrote copy for.
 - Japanese source strings and quoted official notices: source data, never a violation in itself
-- `docs/PRE-MORTEM.md` legacy quotations, exempt once each under root C-4
+- `docs/research-scratch/GOVERNANCE.md` legacy quotations, exempt once each under root C-4
 
 #### 3.3 Required forms
 
@@ -1857,7 +1857,7 @@ The UI is a view over the schema, and the schema is fixed by `ARCHITECTURE.md` �
 
 `Umamusume`'s entry gains the ten `aptitude_*` columns (`aptitude_turf`, `aptitude_dirt`, `aptitude_sprint`, `aptitude_mile`, `aptitude_medium`, `aptitude_long`, `aptitude_front_runner`, `aptitude_pace_chaser`, `aptitude_late_surger`, `aptitude_end_closer`), permitted for one use: **the trainee detail page's aptitude section**, section 2 of the eight-section page as root `DESIGN.md` §4.2 fixes it, each cell letter and word.
 
-Neither clause authorises a schema change, a migration, or a new surface: both name columns the tables already carry (`2026_09_30_073029_add_skill_lists_to_character_cards_table` added the two lists; `2026_09_27_090000_add_aptitude_grades_to_umamusume_table` added the ten grades). Nothing here reaches a skill's contents, the awakening and event arrays, which stay unrecorded, or aptitude grades at card grain, which stay out (`ADR-0012`). The amendment is a catch-up rather than a new ruling: `ADR-0012`'s Decision 1 row already counts the card at fourteen columns ("fourteen now that `dd90330` added `skills_innate` and `skills_unique`"), and the aptitude letters have been parsed, populated and rendered since `555b0cb` shipped `x-aptitude-grid`. The drafted source for this text is `PLANS-AND-BRIEFS.md` §"d-30-amendment-draft-2026-10-01.md" §2, landed here with its stale `docs/design-research/CONSTRAINTS.md` citation corrected to this file, which is where §5 lives since the corpus consolidation.
+Neither clause authorises a schema change, a migration, or a new surface: both name columns the tables already carry (`2026_09_30_073029_add_skill_lists_to_character_cards_table` added the two lists; `2026_09_27_090000_add_aptitude_grades_to_umamusume_table` added the ten grades). Nothing here reaches a skill's contents, the awakening and event arrays, which stay unrecorded, or aptitude grades at card grain, which stay out (`ADR-0012`). The amendment is a catch-up rather than a new ruling: `ADR-0012`'s Decision 1 row already counts the card at fourteen columns ("fourteen now that `dd90330` added `skills_innate` and `skills_unique`"), and the aptitude letters have been parsed, populated and rendered since `555b0cb` shipped `x-aptitude-grid`. The drafted source for this text is `PLANS-AND-BRIEFS.md` §"d-30-amendment-draft-2026-10-01.md" §2, landed here with its stale `docs/research-scratch/DESIGN-CORPUS.md` citation corrected to this file, which is where §5 lives since the corpus consolidation.
 
 **Amended 2026-10-03 (support-card catalog slice). Two tables join the list; one for columns other surfaces were already rendering, the other for two columns nothing rendered before.**
 
@@ -3814,7 +3814,7 @@ Also newly required by the URA material and not in ADR-0003: **NPC friendship st
 
 ### Design rules this generates
 
-Recorded in `docs/design-research/CONSTRAINTS.md` as D-220 to D-229.
+Recorded in `docs/research-scratch/DESIGN-CORPUS.md` as D-220 to D-229.
 
 ---
 
@@ -5604,7 +5604,7 @@ The trust vocabulary (`ADR-0020` §2) must render consistently: a recommendation
 
 #### Evidence Hierarchy Applied to Design
 
-The Grand Concert plan's evidence hierarchy (`docs/Our-Grand-Concert-plan.md`) governs what the UI must and must not depict:
+The Grand Concert plan's evidence hierarchy (`docs/proposals/Our-Grand-Concert-plan.md`) governs what the UI must and must not depict:
 
 1. **Authoritative and verified** — safe to render with a Confirmed badge.
 2. **Observed but undocumented** — may appear only where the observation itself is trustworthy, labelled Calculated.

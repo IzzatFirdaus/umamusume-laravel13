@@ -102,7 +102,7 @@ card references resolves against `skills`, so the detail page can join rather th
 - `tests/Feature/CharacterCardSchemaTest.php`, `tests/Feature/UmamusumeProfileSchemaTest.php`,
   `tests/Feature/StoreCharacterProfilesTest.php`, `tests/Feature/DocSchemaDriftTest.php`
 - `docs/data/2026-09-30-characters-source-probe.md` (the profile coverage measurements)
-- `config/uma.php`; `docs/design-research/CONSTRAINTS.md` D-30
+- `config/uma.php`; `docs/research-scratch/DESIGN-CORPUS.md` D-30
 
 ## Ledger
 

@@ -1848,7 +1848,7 @@ any deeper sense — they remain standalone research artefacts with their own `:
 with that fence in writing on 2026-10-09. It does not restore KI-58's dead guard: `gate.py` still warns
 only below 40 allowlisted hexes and the shipped theme yields 92, so a thin future theme still passes
 silently. It does not touch the two other register items this pass found in the same file set: `gate.py:6`
-cited a `docs/design-research/CONSTRAINTS.md` that no longer exists (repointed to
+cited a `docs/research-scratch/DESIGN-CORPUS.md` that no longer exists (repointed to
 `docs/research-scratch/DESIGN-CORPUS.md` in the same working pass), and `README.md:306` still describes
 KI-58 as an open defect. Closure is the commit that lands these three files plus the gate exit 0 it
 produces; it does not cover the other artefacts under `superseded/`, which the gate does not scan.
@@ -2210,18 +2210,18 @@ specs fail in setup — until half one lands, no spec can reach a finished caree
 KI-82's and KI-87's cockpit claims still lack. And it does not touch KI-84's staged deletions or KI-69's
 class-3 fixture contract, both separate.
 
-### KI-89 `FinaleVocabularyTest.php`'s docblock cites `docs/Our-Grand-Concert-plan.md` §9 E8, a section no document in the tree defines - FILED 2026-10-09 (Grand Concert closing pass), CLOSED 2026-10-09
+### KI-89 `FinaleVocabularyTest.php`'s docblock cites `docs/proposals/Our-Grand-Concert-plan.md` §9 E8, a section no document in the tree defines - FILED 2026-10-09 (Grand Concert closing pass), CLOSED 2026-10-09
 
 **Status: CLOSED 2026-10-09.** A documentation defect, small and real: a test's own docblock pointed a reader at a section
 that did not exist, so the citation could not be followed and the provenance the test stated for itself could not
 be checked.
 
 **What the citation says.** `tests/Feature/FinaleVocabularyTest.php:16` opens the file with *"Slice 23, the
-finale's payload vocabulary (`docs/Our-Grand-Concert-plan.md` §9 E8)."*
+finale's payload vocabulary (`docs/proposals/Our-Grand-Concert-plan.md` §9 E8)."*
 
 **Why it cannot resolve, in two independent directions.**
 
-- **The named file carries no §9.** `docs/Our-Grand-Concert-plan.md`, landed at `5f3f6e0`, is structured as
+- **The named file carries no §9.** `docs/proposals/Our-Grand-Concert-plan.md`, landed at `5f3f6e0`, is structured as
   `# Phase A` through `# Phase F` with `## Slice 1` through `## Slice 24` beneath them, plus four unnumbered
   top-level sections (`# Global Out-of-Scope Rules`, `# Repository Safety Constraints`, `# Slice Completion
   Contract`, `# Current Status`). There is no `## 9`, so there is no §9 for an E8 to sit in.
@@ -2649,8 +2649,8 @@ tracked, present files as dead:
 **Evidence that this is a false positive and not a re-ruled record.** Every one of the 127 hits the two rules
 remove names a tracked markdown file that exists at the natural relative path, and all 27 distinct bare names the
 widened rule resolves match exactly one tracked file, so nothing resolved by accident. The genuinely absent targets
-stay dead where they must: `docs/design-research/CONSTRAINTS.md` is still counted 61 times, `RAW-FINDINGS.md`,
-`SKILLS-GAPS.md`, `docs/GATE-REGISTRY.md` and `docs/PRE-MORTEM.md` all still count, because no tracked markdown
+stay dead where they must: `docs/research-scratch/DESIGN-CORPUS.md` is still counted 61 times, `RAW-FINDINGS.md`,
+`SKILLS-GAPS.md`, `docs/research-scratch/GOVERNANCE.md` and `docs/research-scratch/GOVERNANCE.md` all still count, because no tracked markdown
 carries those names. Measured with the corrected resolver: 556 at `ee93b38` (the commit that set the bar, whose own
 measurement therefore carried ~152 false positives), 642 at `f6f393f`, 657 in this worktree before this entry was
 written. This entry's own lines name 8 absent targets as evidence, records the gate tolerates by design, so the
@@ -2932,9 +2932,9 @@ What closure does not cover: landing KI-98, KI-99; cross-surface domain defects 
 of 708 (`tests/Feature/DocCitationParityTest.php:56`). `1e84b0c` ("docs(reorg): fold root stubs and spent
 plans into the corpora") deleted `CONSTRAINTS.md` and `PLAN.md` and left every citation that routes through
 those names pointing at nothing: `tools/doc_census.py` now reports **980** dead links, and the two most-cited
-targets are the deleted files themselves (161 `CONSTRAINTS.md`, 56 `docs/design-research/CONSTRAINTS.md`,
-48 `DESIGN.md`, 45 `PLAN.md`, 35 `docs/GATE-REGISTRY.md`, 29 `docs/PRE-MORTEM.md`,
-27 `RAW-FINDINGS.md`, 23 `docs/Our-Grand-Concert-plan.md`). The same commit left `AGENTS.md` §3's
+targets are the deleted files themselves (161 `CONSTRAINTS.md`, 56 `docs/research-scratch/DESIGN-CORPUS.md`,
+48 `DESIGN.md`, 45 `PLAN.md`, 35 `docs/research-scratch/GOVERNANCE.md`, 29 `docs/research-scratch/GOVERNANCE.md`,
+27 `RAW-FINDINGS.md`, 23 `docs/proposals/Our-Grand-Concert-plan.md`). The same commit left `AGENTS.md` §3's
 documentation map describing `CONSTRAINTS.md` as "a pointer to `docs/research-scratch/GOVERNANCE.md`" and
 `PLAN.md` as "a pointer to `docs/research-scratch/PROCESS-PLANS.md`" - rows for files that no longer exist,
 in the file that tells an agent where the quality bar lives.

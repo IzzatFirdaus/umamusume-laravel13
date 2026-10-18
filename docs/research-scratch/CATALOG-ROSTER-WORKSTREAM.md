@@ -137,7 +137,7 @@ stack. Line numbers inside the plan are hints the plan's own hints-not-anchors b
 
 ### Global Constraints
 
-Every task satisfies all of these. Exact values, verbatim from `CONSTRAINTS.md`, `AGENTS.md` and `docs/design-research/CONSTRAINTS.md`:
+Every task satisfies all of these. Exact values, verbatim from `CONSTRAINTS.md`, `AGENTS.md` and `docs/research-scratch/DESIGN-CORPUS.md`:
 
 - **C-1** All Pest tests pass; every behavior change ships a test. There is **no coverage percentage gate** in this repo.
 - **C-2** PHPStan level 6 (Larastan), **zero errors**: `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`.
@@ -434,8 +434,8 @@ that asserts a Japanese name seeded it directly, so nothing caught it."
 - Modify: `PRD.md` (FR-A gains item 6 after A-5, FR-C-1 is amended, US-1's acceptance cell is extended â€” the three `PRD.md` requirement ids, since those line numbers were already wrong for FR-C-1)
 - Modify: `ARCHITECTURE.md` (Â§3 table inventory, and the "Support-card entities: proposed, not built" section)
 - Modify: `ARCHITECTURE-ESSENTIALS.md`
-- Modify: `docs/design-research/CONSTRAINTS.md` (the D-30 entry in Â§5, named by rule id because Â§5's line count moves)
-- Modify: `docs/SOURCE-OF-TRUTH.md` (Â§5 note: which fields were A-confirmed, and when)
+- Modify: `docs/research-scratch/DESIGN-CORPUS.md` (the D-30 entry in Â§5, named by rule id because Â§5's line count moves)
+- Modify: `docs/research-scratch/GOVERNANCE.md` (Â§5 note: which fields were A-confirmed, and when)
 
 **Interfaces:**
 
@@ -487,7 +487,7 @@ Add `character_cards` to the Â§3 table inventory with its columns, and `extern
 
 - [ ] **Step 4: Amend D-30**
 
-In `docs/design-research/CONSTRAINTS.md` Â§5, extend the D-30 "Render only what exists" permitted-surface sentence with:
+In `docs/research-scratch/DESIGN-CORPUS.md` Â§5, extend the D-30 "Render only what exists" permitted-surface sentence with:
 
 ```text
 `CharacterCard` (card_id, title, rarity, global_release_date, is_debut_form,
@@ -4234,7 +4234,7 @@ exactly.
 
 ### 3. Sources and tier
 
-GameTora `character-cards` is the machine-readable source, Tier B. `docs/SOURCE-OF-TRUTH.md` Â§5
+GameTora `character-cards` is the machine-readable source, Tier B. `docs/research-scratch/GOVERNANCE.md` Â§5
 records the rule `ADR-0008` restates: a Tier B field needs a Tier A witness before it becomes app
 data, and `character_cards.unconfirmed` is the column that carries an un-witnessed row.
 
@@ -4493,7 +4493,7 @@ Scratch file deleted. Shared `database/database.sqlite` re-verified after: 135 t
 - `docs/frontend-review/` does not exist and was not created.
 - `KNOWN-ISSUES.md` gained four entries (KI-38 to KI-41) and nothing else in it was rewritten.
 - `docs/scenarios/**`, `docs/UMAMUSUME_REFERENCE.md`, `PLAN.md`, `Makefile` and
-  `docs/GATE-REGISTRY.md` were not modified.
+  `docs/research-scratch/GOVERNANCE.md` were not modified.
 - No support-card surface exists or was implied. `ADR-0005` remains declined by R37.
 - **No images, and no trainee detail-page fields.** `KI-33` (a trainee's own innate and unique
   skills are published by the source and stored nowhere) and `KI-35` (the detail page is a metadata
@@ -4525,7 +4525,7 @@ that day, not what they say now: banner cycles move, and a card listed `N/A` tod
 the next time the page is edited. Read it as a snapshot with the same standing as the engine's
 dated snapshot policy (`ADR-0003` Amendment R3), and re-run before relying on any row.
 
-It exists because of one line in `docs/SOURCE-OF-TRUTH.md` Â§5: *"A Tier B dataset (GameTora) needs
+It exists because of one line in `docs/research-scratch/GOVERNANCE.md` Â§5: *"A Tier B dataset (GameTora) needs
 A- or S-tier confirmation before a claim becomes app data."* Every card in
 `character_cards` comes from a Tier B export, so the title, the Global date and the rarity a
 Trainer reads on screen are Tier B claims until a Tier A page attests them. The owner ruled the
@@ -5014,7 +5014,7 @@ Against the real database the same statement with no manual rows in the list is 
 ### Standing
 
 GameTora is **Tier B**; `umamusu.wiki` and Game8 are **Tier A**, per the ladder in
-`docs/SOURCE-OF-TRUTH.md` Â§5:142-148 and the registry in `docs/UMAMUSUME_REFERENCE.md` Â§8 â€” and Tier
+`docs/research-scratch/GOVERNANCE.md` Â§5:142-148 and the registry in `docs/UMAMUSUME_REFERENCE.md` Â§8 â€” and Tier
 A is not infallible, which that same section records (`umamusu.wiki` has misassigned Grand Masters
 bonus entries before, against two JP guides that agreed). Â§5:152 is the rule this file satisfies: a
 Tier B claim becomes app data only on A- or S-tier confirmation.

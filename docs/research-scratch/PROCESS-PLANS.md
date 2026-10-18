@@ -60,7 +60,7 @@ here raises a threshold to make a gate pass.
 
 **Round 14 (2026-10-10, augment-only):** the four scenario implementation plans and the three Trainer
 Desk 2.0 prompt sets, all live documents that remain in place, embedded verbatim as their own sections:
-`docs/Our-Grand-Concert-plan.md` (1145 lines), `docs/Trackblazer-plan.md` (583), `docs/Unity-Cup-plan.md`
+`docs/proposals/Our-Grand-Concert-plan.md` (1145 lines), `docs/Trackblazer-plan.md` (583), `docs/Unity-Cup-plan.md`
 (561), `docs/URA-Finale-plan.md` (381), `docs/Trainer-Desk-2.0-G-Prompts.md` (1046),
 `docs/Trainer-Docs-2.0-D-Prompts.md` (542), `docs/Trainer-Docs-2.0-E-Prompts.md` (230). Each section is
 the canonical reading copy while the source stays the live working file; nothing was deleted and no
@@ -93,7 +93,7 @@ implementation plans above remain live and in place; only the three prompt sets 
 **Tech Stack:** Python 3.12 stdlib (`python`, not `python3`, on this box), `git -c core.quotepath=false`, `composer lore`, Pest via `php artisan test --compact`.
 
 **Tool:** `research-scratch/scripts/reorg_scratch.py`, created 2026-10-01 and verified three ways: classifier self-test 7/7; `--scan` reporting 53 candidates, 44 movable, 9 held; and the rewrite path dry-run against a synthetic mapping for `research-scratch/data/json/character-cards.json`, which found 6 citing files, refused `KNOWN-ISSUES.md` at the guard, and classified the 8 hit lines in the first three files as LIVE 3 / RECORD 2 / UNKNOWN 3, editing nothing. No move has been performed.
-**Spec:** this file. The evidence it argues from is `docs/research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md` §10-§11 and `docs/GATE-REGISTRY.md` G-60.
+**Spec:** this file. The evidence it argues from is `docs/research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md` §10-§11 and `docs/research-scratch/GOVERNANCE.md` G-60.
 
 #### Global Constraints
 
@@ -320,7 +320,7 @@ Expected: identical to baseline. `composer lore` cannot gain hits from a `docs/`
 #### Task 6: Close-out and handoff
 
 - [ ] **Step 1: Spot-check five citations** chosen from the ledger, one per bucket, by opening the target path and confirming it resolves.
-- [ ] **Step 2: Update `docs/SOURCE-OF-TRUTH.md`** only if the inventory's §10 item 4 header work is authorized; otherwise note in the report that the derived doc still carries no regeneration stamp and the reorg did not add one.
+- [ ] **Step 2: Update `docs/research-scratch/GOVERNANCE.md`** only if the inventory's §10 item 4 header work is authorized; otherwise note in the report that the derived doc still carries no regeneration stamp and the reorg did not add one.
 - [ ] **Step 3: Report** with: HEAD sha, moves applied, LIVE/RECORD/UNKNOWN counts, gate outputs, files left held and why.
 - [ ] **Step 4: Commit only on authorization**, by explicit path, one commit for the rewrite.
 
@@ -535,7 +535,7 @@ v1.0 recorded 98 hits / 55 exempt. v1.1 measured 181 hits / 55 exempt. Exempt he
 | G-SK-13        | Medium                                                | Skill picker on run screen   | Lives inside KI-33 (`KNOWN-ISSUES.md:1585,:1618`), not its own entry; four-band picker unbuilt; 623 available skills                                                                                                               |
 | Phase B2       | Medium                                                | Skill facts on read rows     | Design drafted (`SKILLS-MECHANICS.md:3383-3386`); storage decision outstanding (Data Engineer / Architect)                                                                                                                         |
 | D-31           | Low                                                   | Design-corpus clause         | `DESIGN-CORPUS.md:1806` still describes the 0..1200 bound as a live defect though ADR-0015 landed                                                                                                                                  |
-| Doc drift      | Low                                                   | Referenced docs absent       | `docs/GATE-REGISTRY.md` and `docs/PRE-MORTEM.md` are both cited by `agents.md` but absent from the tree                                                                                                                            |
+| Doc drift      | Low                                                   | Referenced docs absent       | `docs/research-scratch/GOVERNANCE.md` and `docs/research-scratch/GOVERNANCE.md` are both cited by `agents.md` but absent from the tree                                                                                                                            |
 
 #### 1.3 Skills available
 
@@ -640,7 +640,7 @@ this is the second surface.
 - KI-53 / KI-54: fixture tracked at HEAD, tree clean, 11-red no longer reproduces; record the failed reproduction
 - The unguarded `withTierLabelsFileAbsent()` helper (`ScenarioSlotSeederResilienceTest.php:102` renames with no `file_exists` guard) is **fixed in this sweep**, not filed: the fix is a one-line `file_exists` guard, which is smaller than the paperwork for a new KI and keeps the sweep's blast radius honest. This is the one code change WS-1 makes outside its view file; the blast radius at the workstream head says so.
 - KI-45: headline superseded by `8b17703` (`config/uma.php:138-145`); append a dated correction naming the commit, keep the entry open on the remaining gap (141/296 NULL `scenario_slots.tier`)
-- Doc drift: file one KI naming the two absent docs (`docs/GATE-REGISTRY.md`, `docs/PRE-MORTEM.md`), both still cited by `agents.md`
+- Doc drift: file one KI naming the two absent docs (`docs/research-scratch/GOVERNANCE.md`, `docs/research-scratch/GOVERNANCE.md`), both still cited by `agents.md`
 
 **Acceptance:**
 
@@ -799,7 +799,7 @@ Tasks 3.2 and 3.3 used to sit in a separate "M3 doc corrections" milestone. They
 
 - File: `docs/research-scratch/DESIGN-CORPUS.md`, section "CONSTRAINTS.md" §5, D-30 entry (`:1805`)
 - Add `skills_innate` and `skills_unique` to `CharacterCard`'s permitted render list, and the ten `aptitude_*` columns to `Umamusume`'s
-- Use the amendment text drafted in `PLANS-AND-BRIEFS.md` §"d-30-amendment-draft-2026-10-01.md" §2; the draft's own §1 cites `docs/design-research/CONSTRAINTS.md`, which no longer exists in the tree, so fix that citation when landing
+- Use the amendment text drafted in `PLANS-AND-BRIEFS.md` §"d-30-amendment-draft-2026-10-01.md" §2; the draft's own §1 cites `docs/research-scratch/DESIGN-CORPUS.md`, which no longer exists in the tree, so fix that citation when landing
 
 **Acceptance:**
 
@@ -1070,7 +1070,7 @@ The Lore Guardian row is not a formality on WS-1 or WS-4. WS-1's acceptance is a
 
 ### 5. Gates & Verification
 
-Gate locations: C-1..C-9 live in root `CONSTRAINTS.md`; G-*and D-* gates live in the `DESIGN-CORPUS.md` gate table (~`:2558-2615`). `docs/GATE-REGISTRY.md`, which `agents.md` still cites as the gate runner reference, is absent from the tree; the register sweep (Task 1.3) files this.
+Gate locations: C-1..C-9 live in root `CONSTRAINTS.md`; G-*and D-* gates live in the `DESIGN-CORPUS.md` gate table (~`:2558-2615`). `docs/research-scratch/GOVERNANCE.md`, which `agents.md` still cites as the gate runner reference, is absent from the tree; the register sweep (Task 1.3) files this.
 
 #### 5.1 The gate sequence, defined once
 
@@ -1168,7 +1168,7 @@ Before closing each milestone:
 | Control sizing rule        | `docs/research-scratch/DESIGN-CORPUS.md`          | "DESIGN.md" §6.14, `:904`                                        |
 | Design rules (D-numbers)   | `DESIGN-CORPUS.md`                                | "CONSTRAINTS.md" §5, §6, §10                                     |
 | Gate table (G-*, D-*)      | `DESIGN-CORPUS.md`                                | ~`:2558-2615`                                                    |
-| Gate structure (C-*)       | `CONSTRAINTS.md` (root)                           | C-1..C-9; note `docs/GATE-REGISTRY.md` is absent from the tree   |
+| Gate structure (C-*)       | `CONSTRAINTS.md` (root)                           | C-1..C-9; note `docs/research-scratch/GOVERNANCE.md` is absent from the tree   |
 | Register                   | `KNOWN-ISSUES.md` (root)                          | per KI number                                                    |
 | Frontend plan              | `PLAN.md`                                         | Slice exit criteria, open decisions                              |
 | Architecture               | `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`   | §3 schema, §7 frontend                                           |
@@ -1291,8 +1291,8 @@ Documentation–Register Synchronization Execution Plan
 | A-1    | The register's **own status block is stale and self-declares as authoritative**. `KNOWN-ISSUES.md:10` asserts "35 filed, 24 closed, 11 open" (2026-09-30). The file now holds 54 entries; `:28-29` states "The three numbers in this block are the authoritative counts; a heading grep is indicative only."                                                                                                                                                                                                                                                                                                                                                                                                                                              | 54 headings vs 35 claimed; KI-46..KI-54 filed 2026-10-01, KI-37 and KI-47 closed 2026-10-01, all after the block   | **Blocker**                    |
 | A-2    | **Seven OPEN entries describe a state the tree no longer has.** KI-32 (fix shipped `ed71741`: `resources/css/app.css:219` light, `:229` dark), KI-48 (fix shipped `79d5f6f`, errata in `ARCHITECTURE-ESSENTIALS.md:36` and `ARCHITECTURE.md:158`), KI-49 and KI-51 (all nine `database/seeders/data/*.json` bodies and the seeder code tracked at `8b17703` / `30b3a08`), KI-53 and KI-54 (fixture tracked, no `.held-aside`, tree clean, the 11-red state no longer reproduces), KI-45 (headline "no offline population path" superseded by `8b17703`: `'seed_file' => 'race_instances.json'` at `config/uma.php:138-145`).                                                                                                                              | 20 entries carry OPEN in a heading without CLOSED/RESOLVED; 7 of them are wrong                                    | **Blocker**                    |
 | A-3    | **A doc already asserts what the register denies.** `docs/research-scratch/RACE-AND-SLICE-RESEARCH.md:843` calls KI-48 "the one finding this slice was told to fix — done in §3" while the register keeps KI-48 OPEN. Two sources of truth disagree in public.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | `RACE-AND-SLICE-RESEARCH.md:843` vs `KNOWN-ISSUES.md:2362`                                                         | **Major**                      |
-| A-4    | **The documentation precedence chain points at files that do not exist.** `AGENTS.md:178` ranks `docs/GATE-REGISTRY.md` second of five authorities; `AGENTS.md:5` names `docs/PRE-MORTEM.md` as the risk record; `AGENTS.md:94` says "see GATE-REGISTRY C-5"; `README.md:18` maps `docs/PRE-MORTEM.md`. Neither file is on disk. Both are recoverable at `22e5135^` (13 and 6 commits touch them).                                                                                                                                                                                                                                                                                                                                                        | `git show 22e5135^:docs/GATE-REGISTRY.md` succeeds                                                                 | **Blocker**                    |
-| A-5    | **512 dead markdown links**, concentrated on sources the consolidation absorbed without repointing the readers: `docs/design-research/CONSTRAINTS.md` 56, `DESIGN.md` 42, `docs/GATE-REGISTRY.md` 22, `RAW-FINDINGS.md` 20, `docs/PRE-MORTEM.md` 19, `SKILLS-GAPS.md` 19, `docs/SOURCE-OF-TRUTH.md` 17, `docs/design-research/SKILLS-GAPS.md` 11. 38 files carry citations into `design-research/`, `deprecated/`, `requests/`, `data/`, `flows/`, `frontend-review/`. Densest citing files: `CATALOG-ROSTER-WORKSTREAM.md` 57, `SKILLS-MECHANICS.md` 44, `SLICE-RECORDS.md` 29, `KNOWN-ISSUES.md` 26.                                                                                                                               | `python tools/doc_census.py`                                                                                       | **Major**                      |
+| A-4    | **The documentation precedence chain points at files that do not exist.** `AGENTS.md:178` ranks `docs/research-scratch/GOVERNANCE.md` second of five authorities; `AGENTS.md:5` names `docs/research-scratch/GOVERNANCE.md` as the risk record; `AGENTS.md:94` says "see GATE-REGISTRY C-5"; `README.md:18` maps `docs/research-scratch/GOVERNANCE.md`. Neither file is on disk. Both are recoverable at `22e5135^` (13 and 6 commits touch them).                                                                                                                                                                                                                                                                                                                                                        | `git show 22e5135^:docs/GATE-REGISTRY.md` succeeds                                                                 | **Blocker**                    |
+| A-5    | **512 dead markdown links**, concentrated on sources the consolidation absorbed without repointing the readers: `docs/research-scratch/DESIGN-CORPUS.md` 56, `DESIGN.md` 42, `docs/research-scratch/GOVERNANCE.md` 22, `RAW-FINDINGS.md` 20, `docs/research-scratch/GOVERNANCE.md` 19, `SKILLS-GAPS.md` 19, `docs/research-scratch/GOVERNANCE.md` 17, `docs/design-research/SKILLS-GAPS.md` 11. 38 files carry citations into `design-research/`, `deprecated/`, `requests/`, `data/`, `flows/`, `frontend-review/`. Densest citing files: `CATALOG-ROSTER-WORKSTREAM.md` 57, `SKILLS-MECHANICS.md` 44, `SLICE-RECORDS.md` 29, `KNOWN-ISSUES.md` 26.                                                                                                                               | `python tools/doc_census.py`                                                                                       | **Major**                      |
 | A-6    | **The repoint targets are already known, not guessed.** `docs/research-scratch/INDEX.md` records which master absorbed which source, and the section headings exist: `DESIGN-CORPUS.md:18` `## DESIGN.md`, `:1665` `## CONSTRAINTS.md`; `GOVERNANCE.md:16` `## SOURCE-OF-TRUTH.md`; `SKILLS-MECHANICS.md:2410` `## skills-section-phase-b2-2026-10-01.md`. Only Round 3 repointed its citations (`SCENARIO-PUBLISHER-REFERENCES.md`: 26 inbound); Round 1 and 2 masters sit at 1 inbound each.                                                                                                                                                                                                                                                            | `INDEX.md` tables; census inbound counts                                                                           | **Major**                      |
 | A-7    | **The dead-link check exists but gates nothing.** `tools/doc_census.py:54` computes `dead_links()` and prints only the first 20 (`:112`), and no composer script or test invokes it. `composer.json:56` registers `lore` the same way a `docs` script could be registered. Citation rot is therefore invisible after it lands.                                                                                                                                                                                                                                                                                                                                                                                                                            | `grep -n census composer.json` returns nothing                                                                     | **Major** (prevention)         |
 | A-8    | **Two KI ids are cited as entries and are not.** `KI-34` (8 citations) is a deliberate reservation with no entry (`KNOWN-ISSUES.md:21-24`); `KI-16` (6 citations) is a renumbering hole the register itself admits: "a genuine renumbering hole, KI-30's pre-merge number" (`:23`). 51 distinct ids are cited outside the register against 54 entries.                                                                                                                                                                                                                                                                                                                                                                                                    | set difference of cited ids vs heading ids                                                                         | **Major**                      |
@@ -1480,7 +1480,7 @@ When documents disagree: `CONSTRAINTS.md` (the bar) > the gate table in
 > `DESIGN.md` > slice plans (`PLAN.md`).
 ```text
 
-Under the restore branch, leave the chain intact and confirm `docs/GATE-REGISTRY.md` now exists.
+Under the restore branch, leave the chain intact and confirm `docs/research-scratch/GOVERNANCE.md` now exists.
 
 - [ ] **Step 2: Fix the same two paths everywhere they appear as instructions, not history.** Read each hit and classify it as a pointer a reader follows (fix) or a provenance line (leave):
 
@@ -1531,13 +1531,13 @@ python tools/doc_census.py 2>&1 | sed -n '/most-cited dead targets/,$p'
 
 | Cited path                                                   | Hits       | Repoint to                                                                                       |
 | ------------------------------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------ |
-| `docs/design-research/CONSTRAINTS.md`                        | 56         | `docs/research-scratch/DESIGN-CORPUS.md` §`CONSTRAINTS.md` (`:1665`)                             |
+| `docs/research-scratch/DESIGN-CORPUS.md`                        | 56         | `docs/research-scratch/DESIGN-CORPUS.md` §`CONSTRAINTS.md` (`:1665`)                             |
 | `DESIGN.md`                             | 42         | `docs/research-scratch/DESIGN-CORPUS.md` §`DESIGN.md` (`:18`); the 44px control rule is `:904`   |
-| `docs/GATE-REGISTRY.md`                                      | 22         | per Task 2                                                                                       |
+| `docs/research-scratch/GOVERNANCE.md`                                      | 22         | per Task 2                                                                                       |
 | `RAW-FINDINGS.md`                                            | 20         | `docs/research-scratch/DESIGN-CORPUS.md` §`RAW-FINDINGS.md`                                      |
-| `docs/PRE-MORTEM.md`                                         | 19         | per Task 2                                                                                       |
+| `docs/research-scratch/GOVERNANCE.md`                                         | 19         | per Task 2                                                                                       |
 | `SKILLS-GAPS.md` (+ `docs/design-research/SKILLS-GAPS.md`)   | 19 + 11    | `docs/research-scratch/SKILLS-MECHANICS.md` §`SKILLS-GAPS.md`                                    |
-| `docs/SOURCE-OF-TRUTH.md`                                    | 17         | `docs/research-scratch/GOVERNANCE.md` §`SOURCE-OF-TRUTH.md` (`:16`)                              |
+| `docs/research-scratch/GOVERNANCE.md`                                    | 17         | `docs/research-scratch/GOVERNANCE.md` §`SOURCE-OF-TRUTH.md` (`:16`)                              |
 | `docs/design-research/verification/slice-*.md`               | 15 files   | `docs/research-scratch/SLICE-RECORDS.md` §`slice-NN-YYYY-MM-DD.md`                               |
 
 - [ ] **Step 4: Work the densest citing files first, one file per commit** — **NOT STARTED as a bulk pass**; the register (10 refs) resolved by convention rather than by edit for the same dated-record reason. Remaining: SKILLS-MECHANICS 34, DESIGN-CORPUS 25, CONSOLIDATION-LOG 12, SLICE-RECORDS 12, CATALOG-ROSTER 12, plus ~24 lighter files; PRODUCT.md is machine-generated and excluded, docs/UMAMUSUME_REFERENCE.md was peer-dirty during this pass., in this order: `CATALOG-ROSTER-WORKSTREAM.md` (57), `SKILLS-MECHANICS.md` (44), `SLICE-RECORDS.md` (29), `KNOWN-ISSUES.md` (26), `RACE-AND-SLICE-RESEARCH.md` (18), `GOVERNANCE.md` (16), `docs/adr/0008*` (16), `DESIGN-CORPUS.md` (15), `PROCESS-PLANS.md` (14), `PLAN.md` (11), `PLANS-AND-BRIEFS.md` (10).
@@ -1715,7 +1715,7 @@ python tools/doc_census.py 2>&1 | grep -E 'tracked markdown|dead markdown links'
 | Gate      | Question                                                                                                                             | Blocks                                                 |
 | --------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
 | **O-1**   | Push local master (17 ahead, includes all of `docs/research-scratch/`) before register closures land?                                | Task 3's closure lines; every KI closure in the repo   |
-| **O-2**   | Restore `docs/GATE-REGISTRY.md` + `docs/PRE-MORTEM.md` from `22e5135^`, or repoint the 41 citations into `GOVERNANCE.md` sections?   | Tasks 4 and 5                                          |
+| **O-2**   | Restore `docs/research-scratch/GOVERNANCE.md` + `docs/research-scratch/GOVERNANCE.md` from `22e5135^`, or repoint the 41 citations into `GOVERNANCE.md` sections?   | Tasks 4 and 5                                          |
 | **O-3**   | Promote durable files out of the gitignored root `research-scratch/`, or declare every citation into it scratch-only?                | Task 8, and it decides whether A-10 can happen again   |
 
 ### Out of scope
@@ -2460,7 +2460,7 @@ record, and it says no.
 | `DESIGN.md`                | 3            | "no production code" → timestamped + component list          |
 | `resources/views/components/layout.blade.php`   | 3-10         | "until table lands" → composer reads table                   |
 | `DESIGN.md` (root)                              | 165-180      | Component inventory updated with token-migrated components   |
-| `docs/design-research/CONSTRAINTS.md`           | 900 (G-21)   | Ruling B5 exemption recorded                                 |
+| `docs/research-scratch/DESIGN-CORPUS.md`           | 900 (G-21)   | Ruling B5 exemption recorded                                 |
 | `KNOWN-ISSUES.md`                               | 158          | KI-6 closed as decision                                      |
 | `PLAN.md`                                       | header       | Slice exit criteria added                                    |
 
@@ -2745,7 +2745,7 @@ The directory contains ~150 files mixed at root level with 4 subdirectories (`p1
 
 ## Our-Grand-Concert-plan.md
 
-> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/Our-Grand-Concert-plan.md` (1145 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/proposals/Our-Grand-Concert-plan.md` (1145 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
 
 ## Our Grand Concert — Incremental Implementation Roadmap
 
@@ -5582,7 +5582,7 @@ Read the following in order, recording any missing or contradictory authority in
    - `docs/URA-Finale-plan.md`
    - `docs/Unity-Cup-plan.md`
    - `docs/Trackblazer-plan.md`
-   - `docs/Our-Grand-Concert-plan.md`
+   - `docs/proposals/Our-Grand-Concert-plan.md`
 9. The specific source documents, services, controllers, models, routes, Form Requests, and components identified in the individual G specification.
 
 Do not assume that a file, section, key, route, model column, or test exists because it appears in the prompt. Verify it.
@@ -6394,7 +6394,7 @@ Stop after the three surfaces land. Do not begin G7 until the boundary is report
 - `constraint-driven-development` — re-run every gate against the full Phase G tree.
 - `browser-testing-with-devtools` — full cross-scenario walkthrough at 1280/768/320 with reduced motion and 200% zoom.
 
-**Source reading:** `docs/Our-Grand-Concert-plan.md` Slice 23 and Slice 24; `frontend-development-plan.md` §9a FD-5, §10, §12, §13; all G1–G6 slice plans.
+**Source reading:** `docs/proposals/Our-Grand-Concert-plan.md` Slice 23 and Slice 24; `frontend-development-plan.md` §9a FD-5, §10, §12, §13; all G1–G6 slice plans.
 
 #### The audit must produce evidence rows, not a checklist
 

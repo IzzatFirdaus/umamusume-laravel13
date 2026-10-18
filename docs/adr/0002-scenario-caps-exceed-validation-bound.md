@@ -21,7 +21,7 @@ record a real run.** A Unity Cup Trainer reaching Wit 1350 was refused by a P0 f
 Trackblazer Trainer at Stamina 1350. This was not a display problem; the bound itself was wrong, for every
 Global player who crossed 1200 since the 2026-07-01 rework.
 
-An earlier revision of `docs/design-research/CONSTRAINTS.md` D-31 instructed the UI to display `/1200` and
+An earlier revision of `docs/research-scratch/DESIGN-CORPUS.md` D-31 instructed the UI to display `/1200` and
 never imply a wider ceiling. That instruction was withdrawn: it dressed a schema limitation as a design
 decision and would have made the defect look intentional.
 
@@ -67,7 +67,7 @@ is asserted by `tests/Feature/ScenarioCapParityTest.php`; it is not restated her
 - `PRD.md` FR-C-1, FR-C-2, FR-A-4, US-3, §6.9; `CLAUDE.md` Planner Domain Rules 5, 6
 - `config/scenarios.php` (`base_cap`, `cap_bonus`, `hard_cap`); `App\Services\ScenarioCaps`
 - `docs/UMAMUSUME_REFERENCE.md` §1.3.4, §1.5, §1.6.1; `DESIGN.md` §6.5
-- `docs/design-research/CONSTRAINTS.md` D-31, D-160..D-165, G-15a..c
+- `docs/research-scratch/DESIGN-CORPUS.md` D-31, D-160..D-165, G-15a..c
 
 ## Ledger
 

@@ -14,7 +14,7 @@ This master file embeds the complete text of all 7 Group B source files from `do
 
 Internal headings have been demoted by one level. Large files are split into numbered `####` subsections preserving original numbering. All tables, code blocks, blockquotes, checkboxes, checklists, and erratum notes are preserved verbatim.
 
-**Dating note (2026-10-09):** The seven source files listed above were embedded verbatim and then removed from the tree when this master was committed at `ccc864c` ("docs: consolidate scenario publisher guides into research-scratch and remove originals"). The embedded text is the only durable copy; the original `docs/design-research/` paths no longer resolve. The design rules cited from `docs/design-research/CONSTRAINTS.md` and `DESIGN.md` by this audit survive in `docs/research-scratch/DESIGN-CORPUS.md` §`CONSTRAINTS.md` and §`DESIGN.md` respectively; see `tools/gate.py:6-9` for the repointing that made that master the design gate's source of truth on 2026-10-09.
+**Dating note (2026-10-09):** The seven source files listed above were embedded verbatim and then removed from the tree when this master was committed at `ccc864c` ("docs: consolidate scenario publisher guides into research-scratch and remove originals"). The embedded text is the only durable copy; the original `docs/design-research/` paths no longer resolve. The design rules cited from `docs/research-scratch/DESIGN-CORPUS.md` and `DESIGN.md` by this audit survive in `docs/research-scratch/DESIGN-CORPUS.md` §`CONSTRAINTS.md` and §`DESIGN.md` respectively; see `tools/gate.py:6-9` for the repointing that made that master the design gate's source of truth on 2026-10-09.
 
 ---
 
@@ -843,7 +843,7 @@ Every working-tree-sensitive claim in this report was verified with `git show HE
 
 ### 7. Not covered, deliberately
 
-- Off-limits files were not audit targets and were not edited: `docs/scenarios/**`, `docs/UMAMUSUME_REFERENCE.md`, `PLAN.md`, `Makefile`, `docs/GATE-REGISTRY.md`, `docs/SOURCE-OF-TRUTH.md`, `PRD.md` (their content enters below only through register citations).
+- Off-limits files were not audit targets and were not edited: `docs/scenarios/**`, `docs/UMAMUSUME_REFERENCE.md`, `PLAN.md`, `Makefile`, `docs/research-scratch/GOVERNANCE.md`, `docs/research-scratch/GOVERNANCE.md`, `PRD.md` (their content enters below only through register citations).
 - Read-only audit: no live network, no database writes, the test suite was not executed. Claims are source and register citations; where a number is quoted it is quoted from its register with the register named.
 - No new rulings were made; §4 is routing. The owner decisions pending are exactly the rows in §4, and each already has an owner on record.
 
@@ -942,7 +942,7 @@ pass's call, and nothing there was edited. For set boundaries: KI-26 and KI-29 (
   card's permitted render fields; `DocSchemaDriftTest` still pins only `training_runs`. The register itself
   filed this as an open item ("That doc gap is the next register pass's business"), and the audit's section 4
   does not carry it.
-- **Files.** `ARCHITECTURE.md` section 3; `ARCHITECTURE-ESSENTIALS.md` (the digest); `docs/design-research/CONSTRAINTS.md`
+- **Files.** `ARCHITECTURE.md` section 3; `ARCHITECTURE-ESSENTIALS.md` (the digest); `docs/research-scratch/DESIGN-CORPUS.md`
   D-30; `tests/Feature/DocSchemaDriftTest.php`.
 - **Missing.** The register-pass amendments themselves. Architect for section 3 and the digest. D-30 is the
   owner's pen, because the permitted-render list is a ruling record rather than a doc chore; whoever lands the
@@ -1695,12 +1695,12 @@ footnote: **`is_unique` 294** is the code rule (rarity 3/4/5) while the card joi
   §2.2 `:849`, §2.3 `:863`, Conflict Log rows 12, 16, 43, 44, 45, 46, §8.4 `:2083`.
 - `docs/design-research/MECHANICS-TRANSLATION-TRIAGE.md` — rulings this file must not reopen: §1
   terminology, §3 out-of-scope, §4 `:88`, §7.2 `:172`/`:182`.
-- `docs/design-research/CONSTRAINTS.md` — D-20 (no unverified strings in UI copy), D-30 (render only what
+- `docs/research-scratch/DESIGN-CORPUS.md` — D-20 (no unverified strings in UI copy), D-30 (render only what
   exists), D-44 (planned vs actual in one view), D-62..D-65 (skill search), D-192, D-210 (the ten names),
   D-223, D-224, D-229, D-253, G-16, G-49.
 - `DESIGN.md` §6.11 (skill row), §8.4 (Screen D), §3 (sparkle = `is_unique` only).
 - `docs/design-research/RACE-CALENDAR-GAPS.md` — the sibling register this file follows.
-- `docs/SOURCE-OF-TRUTH.md` §3 (Spark / Inspiration / Legacies; `Hint Lvl N, NN% OFF`), §4.1 (supersedence
+- `docs/research-scratch/GOVERNANCE.md` §3 (Spark / Inspiration / Legacies; `Hint Lvl N, NN% OFF`), §4.1 (supersedence
   and the JP-only import filter), §5 (tier ladder: a `[B]` dataset needs `[A]`/`[S]` confirmation).
 - `PRD.md` §4 C-3 `:58`, FR-D `:62-64`, NFR-3 `:73`, §6 item 9 `:91`.
 - `docs/adr/0005` (support cards declined, R37), `0009` (committed client export precedent, Option A),
@@ -2496,7 +2496,7 @@ Read in full:
 - `docs/design-research/skills-mechanics-audit-2026-10-01.md` (109 lines, untracked), added by the first
   steer. Its §3 mechanic matrix and §5 Findings A, B, C were each checked against the source before being
   used; where my reading differs from the audit's, §12 item P-10 says so.
-- `docs/design-research/CONSTRAINTS.md` D-30 (the permitted render surface, §5 "Data-model binding") and
+- `docs/research-scratch/DESIGN-CORPUS.md` D-30 (the permitted render surface, §5 "Data-model binding") and
   the `KNOWN-ISSUES.md` status block that routes the D-30 gap to a future register pass.
 - `database/seeders/SkillSeeder.php` (whole file) and `git show HEAD:database/seeders/DatabaseSeeder.php`,
   which reaches `SkillSeeder` at its line 15. This is the basis of the picker's empty state in §4.9.
@@ -3436,7 +3436,7 @@ review's list is now stale in three places and those are marked.
 | `docs/design-research/skills-mechanics-audit-2026-10-01.md`                                                                                                                                                             | **`??`, untracked**          | Named nowhere in the original dispatch and read because the first steer added it. Its awakening and event findings are cited in §4.7 and §9 and were checked against the parser before use. Its Finding A's third claim is qualified in §9.2 and P-11.   |
 | `resources/views/catalog/show.blade.php`                                                                                                                                                                                | clean at HEAD                | Q5's target and the home of the stale sentence at `:225-229`. Read only. The fence names it explicitly, and §9.4's copy is a draft awaiting the owner.                                                                                                   |
 | `resources/views/components/guided-step.blade.php`, `race-panel.blade.php`, `epithet-checklist.blade.php`, `race-calendar.blade.php`, `team-rank-gauge.blade.php`, `spirit-burst-roster.blade.php`                      | clean                        | Cited for convention (`h-11`, the absence vocabulary) or excluded by G-SK-11 and the race findings. No change proposed to any of them.                                                                                                                   |
-| `docs/design-research/CONSTRAINTS.md`, root `DESIGN.md`                                                                                                                                                                 | clean                        | Read for D-30, D-220 and §4.2. Both are design records this dispatch may not amend, and §4.8 plus §9.5 ask the owner to.                                                                                                                                 |
+| `docs/research-scratch/DESIGN-CORPUS.md`, root `DESIGN.md`                                                                                                                                                                 | clean                        | Read for D-30, D-220 and §4.2. Both are design records this dispatch may not amend, and §4.8 plus §9.5 ask the owner to.                                                                                                                                 |
 
 No file in this table was modified by this proposal. The only write is this document.
 

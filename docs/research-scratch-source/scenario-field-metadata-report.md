@@ -43,7 +43,7 @@ The eight fields the surfaces ask for are `ruleset_version`, `recommended_use`, 
 | URA Finale | RESOLVED | "Its guide names it the baseline for learning training, mood, energy and race timing before moving to scenarios with extra systems." (`config/scenarios.php:147`, `docs/scenarios/01-ura-finale.md:14`) |
 | Unity Cup | N/A | No repo master names a recommended use. Searched: `docs/scenarios/`, `docs/Unity-Cup-plan.md` §2, `docs/UMAMUSUME_REFERENCE.md`. (`config/scenarios.php:388`) |
 | Trackblazer | N/A | No repo master names a recommended use. Searched: `docs/scenarios/`, `docs/Trackblazer-plan.md` §2, `docs/UMAMUSUME_REFERENCE.md`. (`config/scenarios.php:405`) |
-| Our Grand Concert | N/A | No repo master names a recommended use. Searched: `docs/scenarios/`, `docs/Our-Grand-Concert-plan.md`, `docs/UMAMUSUME_REFERENCE.md`. (`config/scenarios.php:728`) |
+| Our Grand Concert | N/A | No repo master names a recommended use. Searched: `docs/scenarios/`, `docs/proposals/Our-Grand-Concert-plan.md`, `docs/UMAMUSUME_REFERENCE.md`. (`config/scenarios.php:728`) |
 
 **Why the three stay N/A.** The guides describe each scenario's mechanics and its strategy, but none states a "who is this for" sentence the way the URA Finale guide does. The Trackblazer Game8 page prints an F2P-friendly observation (`SCENARIO-PUBLISHER-REFERENCES.md` line 1285) and the Grand Concert pages print PvP-build observations (line 2183-2185), but an observation about a build audience is not a recommended-use line, and lifting one into that field would be the invented fact `AGENTS.md` §5 forbids. They remain named absences with the search recorded.
 
@@ -155,7 +155,7 @@ Not applicable to the other three scenarios: URA Finale (`facility_level_source`
 | URA Finale guide | `docs/scenarios/01-ura-finale.md` | baseline framing, facility repetition, recommended-use line |
 | Unity Cup guide | `docs/scenarios/02-unity-cup.md` | team rank ladder, Spirit Burst tables, post-rework deltas, SP payout note |
 | Grand Concert guide | `docs/scenarios/07-grand-concert.md` | Performance loop, launch date, level-4 facility rule |
-| Scenario plans | `docs/URA-Finale-plan.md`, `docs/Unity-Cup-plan.md`, `docs/Trackblazer-plan.md`, `docs/Our-Grand-Concert-plan.md` | central question per scenario, facility-level sourcing, planning-focus candidates |
+| Scenario plans | `docs/URA-Finale-plan.md`, `docs/Unity-Cup-plan.md`, `docs/Trackblazer-plan.md`, `docs/proposals/Our-Grand-Concert-plan.md` | central question per scenario, facility-level sourcing, planning-focus candidates |
 | Config matrix | `config/scenarios.php`, `config/advisor.php` | `facility_level_source`, existing metadata, advisor constants and their staleness |
 | Surfaces | `resources/js/pages/Career/ScenarioSelect.vue`, `resources/js/components/career/TrainingCard.vue` | which fields the cards print and how an absent one is named |
 | Advisor engine | `app/Services/Advisor/TrainerAdvisor.php`, `AdvisorOption.php` | `RiskNotMeasured`, energy-after ranges |

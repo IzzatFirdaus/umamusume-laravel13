@@ -290,8 +290,8 @@ rewritten because §11 says a dated claim that proves wrong is corrected by appe
    tried in only three directories, so `code-style.md` (tracked at `.ai/rules/`) and the `docs/proposals/`,
    `docs/scenarios/`, `docs/audits/` and `screenshot-notes/` names all read dead. 127 of the 784 are that, each one
    a tracked file that exists, and all 27 distinct bare names resolve to exactly one tracked file. The genuinely
-   absent targets stay counted: `docs/design-research/CONSTRAINTS.md` still 61, and `RAW-FINDINGS.md`,
-   `SKILLS-GAPS.md`, `docs/GATE-REGISTRY.md` and `docs/PRE-MORTEM.md` all still dead.
+   absent targets stay counted: `docs/research-scratch/DESIGN-CORPUS.md` still 61, and `RAW-FINDINGS.md`,
+   `SKILLS-GAPS.md`, `docs/research-scratch/GOVERNANCE.md` and `docs/research-scratch/GOVERNANCE.md` all still dead.
 
 Both reds are now closed and the ratchet bar was not touched: `DOC_CITATION_BASELINE` still reads 708 and its
 pinning case still asserts 708.

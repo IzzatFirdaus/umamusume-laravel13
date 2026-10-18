@@ -20,8 +20,8 @@ truth for the candidate list, the cross-reference map, and the protected-file ch
 > record (its adjacency list `research-scratch/docinv_xref.json` shows all fourteen masters at 0 inbound,
 > because they did not exist on 2026-09-30), so it cannot cross-check `INDEX.md`'s absorption claims. What
 > it does carry is each absorbed source's reader pressure at map time — `CONSTRAINTS.md` 45 + 30 across its
-> two spellings, `DESIGN.md` 41 + 21, `docs/GATE-REGISTRY.md` 12, `docs/PRE-MORTEM.md` 11,
-> `docs/SOURCE-OF-TRUTH.md` 10 — which matches the census's post-consolidation dead-link densities and is
+> two spellings, `DESIGN.md` 41 + 21, `docs/research-scratch/GOVERNANCE.md` 12, `docs/research-scratch/GOVERNANCE.md` 11,
+> `docs/research-scratch/GOVERNANCE.md` 10 — which matches the census's post-consolidation dead-link densities and is
 > the baseline the citation repointing works from. §7's rot scan (391 line-citations: 155 resolvable, 19
 > stale, 33 broken) used a different method than the current census and its counts are not comparable to
 > the 512 dead links now recorded; §10's candidate list has since been executed as Rounds 1–4; §11's
@@ -61,7 +61,7 @@ the prior round deleted.
 
 ### Priority task 1 - twin-name collision (CONSTRAINTS.md / DESIGN.md) - SKIPPED
 
-- The prior round **deleted and embedded** `docs/design-research/CONSTRAINTS.md` (973 lines)
+- The prior round **deleted and embedded** `docs/research-scratch/DESIGN-CORPUS.md` (973 lines)
   and `DESIGN.md` (1,640 lines) into
   `docs/research-scratch/DESIGN-CORPUS.md` (sources 1 and 2). It did **not** "move them to
   research-scratch as standalone files" as this task specifies. Doing that now would put a
@@ -75,7 +75,7 @@ the prior round deleted.
 
 ### Gate-blocking dangling citation fixed
 
-- `tests/Feature/DocSchemaDriftTest.php` read `docs/design-research/CONSTRAINTS.md` as one of
+- `tests/Feature/DocSchemaDriftTest.php` read `docs/research-scratch/DESIGN-CORPUS.md` as one of
   four governance docs and **failed** (`the drift guard reads this doc and it is not there`)
   once the prior round deleted it. Repointed that list entry to
   `docs/research-scratch/DESIGN-CORPUS.md` (which embeds the same CONSTRAINTS text, so the
@@ -114,13 +114,13 @@ the prior round deleted.
 The prior uncommitted round left several inbound citations pointing at deleted files, which
 fails gates that this run did **not** author:
 
-- `tests/Feature/DocSchemaDriftTest.php:74` reads `docs/design-research/CONSTRAINTS.md` as a
+- `tests/Feature/DocSchemaDriftTest.php:74` reads `docs/research-scratch/DESIGN-CORPUS.md` as a
   governance doc and its guard (line 175) **fails when a listed doc is absent**. That is a
   pre-existing break from the prior round, not from task 5.
 - `AGENTS.md`, `README.md`, `ARCHITECTURE*.md`, `Makefile`, `tools/lore.php`,
   `tools/gate.py`, `tools/roster-crosscheck.php`, and several tests still cite deleted
-  round-1/round-2 files (`docs/PRE-MORTEM.md`, `docs/GATE-REGISTRY.md`,
-  `docs/SOURCE-OF-TRUTH.md`, `docs/design-research/*`). Repointing these touches the quality
+  round-1/round-2 files (`docs/research-scratch/GOVERNANCE.md`, `docs/research-scratch/GOVERNANCE.md`,
+  `docs/research-scratch/GOVERNANCE.md`, `docs/design-research/*`). Repointing these touches the quality
   bar and gate tooling; deferred to the owner pending the Do-Not-Touch list.
 
 ## Census, added 2026-10-02
@@ -137,16 +137,16 @@ in git).
 Measured at the sha this commit lands on: 72 tracked markdown files, 16 masters totalling 28,351
 lines, 23 documented files outside the masters excluding `docs/adr/` and `.ai/**`, and 495 dead
 links, of which 488 are GONE and 7 UNTRACKED. The most-cited dead targets are
-`docs/design-research/CONSTRAINTS.md` (53), `DESIGN.md` (40),
-`docs/GATE-REGISTRY.md` (20), `RAW-FINDINGS.md` (19), `SKILLS-GAPS.md` (18),
-`docs/PRE-MORTEM.md` (17) and `docs/SOURCE-OF-TRUTH.md` (16). Most of those mentions are
+`docs/research-scratch/DESIGN-CORPUS.md` (53), `DESIGN.md` (40),
+`docs/research-scratch/GOVERNANCE.md` (20), `RAW-FINDINGS.md` (19), `SKILLS-GAPS.md` (18),
+`docs/research-scratch/GOVERNANCE.md` (17) and `docs/research-scratch/GOVERNANCE.md` (16). Most of those mentions are
 historical citations inside masters naming the sources they absorbed, which are records and must
 not be repointed. The live ones are in `AGENTS.md`, `README.md`, `ARCHITECTURE*.md`, `Makefile`,
 `tools/lore.php`, `tools/gate.py` and `tools/roster-crosscheck.php`, and they are the owner's
 decision, unchanged from the section above.
 
 Correction to the section above, forward-looking rather than by deletion. It states that
-`tests/Feature/DocSchemaDriftTest.php:74` reads `docs/design-research/CONSTRAINTS.md` and that its
+`tests/Feature/DocSchemaDriftTest.php:74` reads `docs/research-scratch/DESIGN-CORPUS.md` and that its
 absence fails a gate. That was true when written. The test's governance list now reads
 `docs/research-scratch/DESIGN-CORPUS.md`, and `php artisan test --compact
 tests/Feature/DocSchemaDriftTest.php` returns 5 passed (12 assertions). The deferred item is

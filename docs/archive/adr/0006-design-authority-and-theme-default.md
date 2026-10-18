@@ -5,7 +5,7 @@ Date: 2026-09-27
 Deciders: product owner (ruling 2026-09-27), pre-dev agent (drafting)
 Supersedes: sprint-authorization ruling "dark-first is the app contract" (2026-09-27 same-day)
 Related: root `DESIGN.md` §2.1, `DESIGN.md` §1 and §3.7,
-`docs/design-research/CONSTRAINTS.md` D-100 and D-104, `docs/adr/0002`, `docs/adr/0004`, `CONSTRAINTS.md` C-7
+`docs/research-scratch/DESIGN-CORPUS.md` D-100 and D-104, `docs/adr/0002`, `docs/adr/0004`, `CONSTRAINTS.md` C-7
 
 ## Context
 

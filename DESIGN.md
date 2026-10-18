@@ -948,7 +948,7 @@ the MOTION dial stays 1 and no `transition-*` utility was added.
   `DESIGN.md`): measured ramps, contrast tables,
   cap-stack rendering spec (§6.21), and the light theme that is now the app default.
 - `docs/research-scratch/DESIGN-CORPUS.md` section "CONSTRAINTS.md" (formerly
-  `docs/design-research/CONSTRAINTS.md`): the research-phase design rules
+  `docs/research-scratch/DESIGN-CORPUS.md`): the research-phase design rules
   (D-numbers) this file cites (D-12, D-20, D-101).
 - Proposed values in this file (scale numbers, the mono stack) need owner sign-off before
   they become tokens. The Announced-cyan proposal is now a shipped pair — `--color-sp` for

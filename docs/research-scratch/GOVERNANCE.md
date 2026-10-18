@@ -4,9 +4,9 @@
 
 This master file is compiled from 7 source files, embedded verbatim with headings demoted by one level:
 
-1. `docs/SOURCE-OF-TRUTH.md`
-2. `docs/GATE-REGISTRY.md`
-3. `docs/PRE-MORTEM.md`
+1. `docs/research-scratch/GOVERNANCE.md`
+2. `docs/research-scratch/GOVERNANCE.md`
+3. `docs/research-scratch/GOVERNANCE.md`
 4. `docs/deprecated/frontend-review/2026-09-28/README.md`
 5. `docs/deprecated/frontend-review/2026-09-28/DECISIONS-NEEDED.md`
 6. `docs/deprecated/frontend-review/2026-09-28/RESOLUTIONS.md`
@@ -14,7 +14,7 @@ This master file is compiled from 7 source files, embedded verbatim with heading
    section "CONSTRAINTS.md (root quality bar, C-1 to C-9)" at the end of this file)
 
 **Dating note (2026-10-09):** This master cites several `docs/design-research/` paths that were consolidated and
-removed when this master was committed. The design rules from `docs/design-research/CONSTRAINTS.md` now live in
+removed when this master was committed. The design rules from `docs/research-scratch/DESIGN-CORPUS.md` now live in
 `docs/research-scratch/DESIGN-CORPUS.md` §"CONSTRAINTS.md"; the token system from `DESIGN.md`
 now lives in §"DESIGN.md". These citations are dated records of where the source evidence sat at measurement time
 and are not actionable on disk.
@@ -131,7 +131,7 @@ Plus animal framing: `stallion`, `colt`, `filly`, `gelding`, `equine`, `pony`, `
 - `mare` inside `nightmare` <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 - `tail` inside `detail`, `retail`, `curtail` <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 - Japanese source strings & quoted official notices (source data)
-- `docs/PRE-MORTEM.md` legacy quotations (exempt once each under root C-4)
+- `docs/research-scratch/GOVERNANCE.md` legacy quotations (exempt once each under root C-4)
 
 #### 2.3 Required Forms
 
@@ -405,8 +405,8 @@ The skill registry lives at **`.agents/skills/skills.json`** (not `SKILL.md`).
 | System design          | `ARCHITECTURE.md` (authoritative), `ARCHITECTURE-ESSENTIALS.md` (digest)                                                                                      |
 | Mechanics reference    | `docs/UMAMUSUME_REFERENCE.md` (8 sections, 46 conflict rows)                                                                                                  |
 | Scenario guides        | `docs/scenarios/01`–`08` (07=stub, 08=JP-Only)                                                                                                                |
-| Design system          | `DESIGN.md` (root), `docs/design-research/CONSTRAINTS.md` (UI contract)                                                                  |
-| Quality bar            | `CONSTRAINTS.md` (root), `docs/design-research/CONSTRAINTS.md` (additive)                                                                                     |
+| Design system          | `DESIGN.md` (root), `docs/research-scratch/DESIGN-CORPUS.md` (UI contract)                                                                  |
+| Quality bar            | `CONSTRAINTS.md` (root), `docs/research-scratch/DESIGN-CORPUS.md` (additive)                                                                                     |
 | Agent roles            | `AGENTS.md`                                                                                                                                                   |
 | Lore rules             | `CLAUDE.md` (top section), `CONSTRAINTS.md` C-4                                                                                                               |
 | Skill registry         | `.agents/skills/skills.json` (machine), `SKILL.md` (human summary)                                                                                            |
@@ -455,12 +455,12 @@ Slice plans such as `PLAN.md` may add slice-specific exit criteria but cannot
 override C-1 through C-8 or G-60. Precedence for gate questions:
 
 1. `CONSTRAINTS.md` (the bar; never relaxed to pass a check)
-2. `docs/GATE-REGISTRY.md` (this file: how each gate is run, evidence, exceptions)
+2. `docs/research-scratch/GOVERNANCE.md` (this file: how each gate is run, evidence, exceptions)
 3. ADRs (`docs/adr/`)
 4. Root `DESIGN.md`
 5. Slice plans (`PLAN.md`, phase docs)
 
-The research corpus `docs/design-research/CONSTRAINTS.md` owns the D-number design
+The research corpus `docs/research-scratch/DESIGN-CORPUS.md` owns the D-number design
 rules and the prototype gate series (G-1..G-17, G-18, G-21, G-40). This registry
 does not restate them; it records where they run and how they bind the shipped app.
 
@@ -492,7 +492,7 @@ Evidence | Exceptions | Owner | Status
   `resources/`, `config/`, routes, database, tests, shipped prototypes.
 - **Ignored (historical) paths:** `docs/adr/**`,
   `docs/design-research/MECHANICS-TRANSLATION-TRIAGE.md`,
-  `docs/PRE-MORTEM.md`, `docs/design-research/_scratch/**`, `.kilo/**`, `vendor/`,
+  `docs/research-scratch/GOVERNANCE.md`, `docs/design-research/_scratch/**`, `.kilo/**`, `vendor/`,
   `node_modules/`. These record what changed and why; quoting a retired value to
   retire it is correct ADR hygiene (precedent: `ADR-0001` §6 RESOLVED block).
 - **Supersede blocks:** if a retired literal must appear in an active file, it is
@@ -585,7 +585,7 @@ answering it.
 | Gap                                                                                                                    | Consequence                                                                                                                                                                                                                                                                                            | Fix owner                                                                                                                  |
 | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
 | `make lore` uses `git grep` on tracked files: blind to untracked copy                                                  | fresh, unstaged copy is unswept by the repo-wide pass; `lore-code` reads untracked but only inside app paths, so an unsaved `docs/` edit is unseen by both                                                                                                                                             | Pre-Dev (registry tells reviewers to sweep dirty files; KI-4 closed 2026-09-28 for the runner, not for this scope split)   |
-| `make lore` vocabulary: 23 words over three greps (`ee97869`), while client-string terminology stays gate.py's scope   | two vocabularies exist; both `make lore` and `composer lore` read one list, and `LoreGateParityTest` fails if the Makefile and `tools/lore.php` drift                                                                                                                                                  | Pre-Dev: point both at `docs/design-research/CONSTRAINTS.md` §3.1                                                          |
+| `make lore` vocabulary: 23 words over three greps (`ee97869`), while client-string terminology stays gate.py's scope   | two vocabularies exist; both `make lore` and `composer lore` read one list, and `LoreGateParityTest` fails if the Makefile and `tools/lore.php` drift                                                                                                                                                  | Pre-Dev: point both at `docs/research-scratch/DESIGN-CORPUS.md` §3.1                                                          |
 | The shipped-Blade dash check lives in the Pest suite, not in `tools/gate.py`                                           | `composer test` fails on an en or em dash in any `.blade.php` under `resources/views` (`RenderedCopyHygieneTest`, which strips the three comment forms prose hides in); running `gate.py` alone still checks D-79 only in prototype HTML, so a scan-by-gate.py pass is not proof the Blade sweep ran   | Pre-Dev: fold the view sweep into `gate.py` or cite the test wherever the scanner is the only gate                         |
 | G-60 scanner does not yet read a retired-value registry file                                                           | G-60 currently reviewer-enforced                                                                                                                                                                                                                                                                       | Pre-Dev at next ADR amendment cycle                                                                                        |
 | C-7 loading-state enforcement is interpretive                                                                          | per ADR-0007 clause 2; review checks the state enumeration                                                                                                                                                                                                                                             | Frontend                                                                                                                   |
@@ -1476,7 +1476,7 @@ The quality bar for this repository, written as a contract. Agents: read this be
 Grep, case-insensitive: `horse`, `horses`, `sire`, `dam`, `mare`, `foal`, `🏇`, plus animal framing of characters.
 
 - Context check required before calling a hit a violation: "dam" inside "damaged", "stable" as an adjective, etc. The grep proposes; the Lore Guardian decides (AGENTS.md).
-- `docs/PRE-MORTEM.md` quotes legacy violations as elimination evidence, once each; those lines are exempt. No new violation may enter anywhere else.
+- `docs/research-scratch/GOVERNANCE.md` quotes legacy violations as elimination evidence, once each; those lines are exempt. No new violation may enter anywhere else.
 - `composer lore` excludes `vendor/`, `node_modules/`, and the pre-mortem evidence file.
 - **Identifier and mechanics exemption.** The list governs **player-facing copy and character framing**, and nothing else. It does not apply to: dataset and export keys (`intelligence` for Wit, `friend` for Pal, `scenarios.json` field names); localisation-mapping strings quoted as client evidence ("Intelligence Limit Up", "Runner's Tricks ◎"); or a **distinct mechanic** that merely shares a word — "Bad Conditions", the "condition correction" in the failure formula, and a "condition" item effect are mechanics, not Mood synonyms. Renaming an identifier to satisfy the list breaks the ingest join; that is a worse failure than an ugly key.
 - **Verbatim names are a third category**, between our own copy and a stray noun. A quoted skill, race, card or title string that contains a banned term stays as **source data** and is barred from **promotion into UI copy** — see the Air Messiah ruling in `docs/UMAMUSUME_REFERENCE.md` §2.7 and the `[Global]` "Cleat" case there. Editing the data to satisfy the style rule corrupts the corpus; the guard goes on the display path.
@@ -1484,17 +1484,17 @@ Grep, case-insensitive: `horse`, `horses`, `sire`, `dam`, `mare`, `foal`, `🏇`
 
 ### D-20 and D-268 rulings (re-homed 2026-10-18)
 
-The following rulings were previously recorded in `docs/design-research/CONSTRAINTS.md` (now deleted) and scattered across research notes. They are re-homed here per owner decision 2026-10-18. Original text is preserved above per AGENTS.md §11.
+The following rulings were previously recorded in `docs/research-scratch/DESIGN-CORPUS.md` (now deleted) and scattered across research notes. They are re-homed here per owner decision 2026-10-18. Original text is preserved above per AGENTS.md §11.
 
 **D-20. Never invent a client string.** If a label is needed and no Global string is on record, use a plain descriptive phrase and record the gap. `UMAMUSUME_REFERENCE.md` marks its own unverified items with `❌ UNVERIFIED`; a design artifact must not silently promote one into UI copy. This rule is general and stands. Its mood-tier instance is **resolved, not relaxed**: the client's own Mood Effect panel (owner-supplied capture, 2026-09-27) prints `GREAT` / `GOOD` / `NORMAL` / `BAD` / `AWFUL`, so those five are evidenced client strings and §6.17 of `DESIGN.md` now uses them as UI copy. The strings this rule still blocks are every label the corpus has not captured from the client itself, the outing action's button text among them.
 
-Source: `docs/research-scratch/DESIGN-CORPUS.md:1840-1841` (originally `docs/design-research/CONSTRAINTS.md` §3.1).
+Source: `docs/research-scratch/DESIGN-CORPUS.md:1840-1841` (originally `docs/research-scratch/DESIGN-CORPUS.md` §3.1).
 
 **D-268. The screen has more state than the schema can hold.** Legacy Select shows, per Legacy: the chosen Umamusume, its rank, whether it is a Guest, its own two ancestors, and a Spark list with per-Spark kind, target and star rank, plus an affinity value for the pairing. The `training_runs` record holds two character ids. Phase 4's provenance requirement is therefore **not met by the existing columns**, and closing it is a schema proposal on the `ADR-0003` pattern, most likely a typed json payload keyed to the run rather than a wide table of nullable columns. Documenting the screen without stating this would imply the data can be persisted today.
 
 Closed as a schema question 2026-09-29 (Slice 15, `ADR-0010`), and it is still open as a screen. `training_runs.legacy_selection` is now one nullable json column read through `App\Models\Legacy\LegacySelectionPayload`, holding exactly the state enumerated above, with the two `inheritance_parent_*_id` foreign keys left where they are. Three things this does **not** do: it builds no Legacy Select UI (D-260 still governs where a control may appear once one exists); it computes nothing from the payload, which is the half PRD §6 non-goal 3 keeps banned; and it stores one affinity grade for the chosen pair rather than the per-link grades §1.5.4 actually grades, so a screen that shows the four deeper links of the diagram needs the column revisited. `ancestors` holds names, not ids, because the Umamusume two steps back are frequently absent from the local catalogue.
 
-Source: `docs/research-scratch/DESIGN-CORPUS.md:2501-2503` (originally `docs/design-research/CONSTRAINTS.md` §10q).
+Source: `docs/research-scratch/DESIGN-CORPUS.md:2501-2503` (originally `docs/research-scratch/DESIGN-CORPUS.md` §10q).
 
 ### Verification sequence before any hand-off
 

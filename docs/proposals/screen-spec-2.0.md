@@ -1267,7 +1267,7 @@ Community tags (uma.guide): Must Buy / Skip
 
 ## Purpose
 
-Surface verified Grand Concert state. The evidence hierarchy (`docs/Our-Grand-Concert-plan.md`) determines what is renderable:
+Surface verified Grand Concert state. The evidence hierarchy (`docs/proposals/Our-Grand-Concert-plan.md`) determines what is renderable:
 
 - **Available (Confirmed):** Performance type (Dance, Passion, Vocals, Visuals, Composure) and signed delta as turn observations.
 - **Observed but undocumented:** nothing beyond the above.
@@ -1290,7 +1290,7 @@ Surface verified Grand Concert state. The evidence hierarchy (`docs/Our-Grand-Co
 
 - Starting values, current totals, caps, acquisition formulas, Lesson costs, Song titles, Hype, Live Bonus percentages, Promo Concert scheduling, or any recommendation logic. The panel states the evidence boundary and links to `SCREEN_SPEC.md` §7-19 through §7-23 for the reopen conditions.
 
-Source: `docs/Our-Grand-Concert-plan.md` Slices 1–18, `docs/UMAMUSUME_REFERENCE.md §2.9`.
+Source: `docs/proposals/Our-Grand-Concert-plan.md` Slices 1–18, `docs/UMAMUSUME_REFERENCE.md §2.9`.
 
 ---
 

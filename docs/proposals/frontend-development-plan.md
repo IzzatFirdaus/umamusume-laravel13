@@ -2274,7 +2274,7 @@ These constraints matter because the design and screen specifications already de
 
 ---
 
-## 9b. Grand Concert Implementation Principle (from `docs/Our-Grand-Concert-plan.md`)
+## 9b. Grand Concert Implementation Principle (from `docs/proposals/Our-Grand-Concert-plan.md`)
 
 Our Grand Concert is implemented as a sequence of narrow, independently verifiable slices. This principle extends to all scenario work:
 
@@ -2297,7 +2297,7 @@ This hierarchy is binding for all three scenarios. Grand Concert's blocked slice
 
 | Phase | Slices | Status summary | Reference |
 | ------- | -------- | ---------------- | ----------- |
-| A — Performance | 1–7 | COMPLETE (observations recorded, no totals derived) | `docs/Our-Grand-Concert-plan.md` |
+| A — Performance | 1–7 | COMPLETE (observations recorded, no totals derived) | `docs/proposals/Our-Grand-Concert-plan.md` |
 | B — Lessons | 8–10 | Slices 9–10 BLOCKED BY EVIDENCE | §§494–575, 783–808 |
 | C — Songs | 11–13 | All BLOCKED BY EVIDENCE (23 Song titles unverified) | §§494–575, 783–808 |
 | D — Live systems | 14–18 | Live Bonuses & Promo Concerts BLOCKED BY EVIDENCE | §§577–781 |

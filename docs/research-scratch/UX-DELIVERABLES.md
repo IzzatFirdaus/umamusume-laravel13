@@ -49,7 +49,7 @@ stays in place; nothing was deleted and no citation was repointed.
 ## Part 1: UMAMUSUME: PRETTY DERBY — COMPREHENSIVE UX DELIVERABLES
 
 > **NOT MERGED — TRIAGED 2026-09-27.** This file is retained for reference, not adopted as a source of
-> values. Its numbers are governed by `docs/design-research/CONSTRAINTS.md` **D-283** (a design write-up
+> values. Its numbers are governed by `docs/research-scratch/DESIGN-CORPUS.md` **D-283** (a design write-up
 > supplies patterns, never values or copy), and the item-by-item audit is in
 > `docs/design-research/MECHANICS-TRANSLATION-TRIAGE.md` **§7**. Read that before seeding anything here:
 > roughly forty figures do not trace to any capture or dataset, this document's own vocabulary

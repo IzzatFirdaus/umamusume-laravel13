@@ -77,7 +77,7 @@ not evidence. Neither bug was visible until a known-present file was reported ab
 | INTENTIONAL | 85 | **No.** `storage/` backups and snapshots, `.scratch-uma/` cited evidence, `test-results/`, `public/build/`, plus `SECURITY.md` and `config/inertia.php` — both of which `AGENTS.md` §12 and §18 state do **not** exist |
 | PREFIX-RELATIVE | 210 | **No.** Instrument artifact: `Support/Builder.vue` resolves under `resources/js/pages/`. The cite is short, not wrong |
 | BASENAME-MISSING | 1,030 | **Candidate.** A bare filename found nowhere — `CONSTRAINTS.md` (201×), `PLAN.md` (58×), `StatBand.vue` (17×), `welcome.blade.php` (16×), `UraPanel.vue` (10×) |
-| GENUINE | 1,707 | **Candidate.** A full path from a known root that is absent — `docs/design-research/CONSTRAINTS.md` (73×), `docs/GATE-REGISTRY.md` (56×), `resources/views/runs/show.blade.php` (27×) |
+| GENUINE | 1,707 | **Candidate.** A full path from a known root that is absent — `docs/research-scratch/DESIGN-CORPUS.md` (73×), `docs/research-scratch/GOVERNANCE.md` (56×), `resources/views/runs/show.blade.php` (27×) |
 
 **2,737 candidate rows across the two real buckets.** Distinct-token counts were not tallied; the rows are
 dominated by a few dozen names cited repeatedly, which is why the verified findings in §4 are stated per token,
@@ -96,11 +96,11 @@ Every row below was **verified by direct existence check this pass**, not inferr
 | `PLAN.md` | `AGENTS.md:91` | 58 | Same: ` D PLAN.md` |
 | `tailwind.config.js` | `ARCHITECTURE.md:20`, `DESIGN.md:878` | 9 | Absent. Tailwind v4 is CSS-first, so the file was correctly removed — the citation was not updated |
 | `resources/views/runs/show.blade.php` | `SCREEN_SPEC.md:455` | 27 | Absent. Also `catalog/show.blade.php` (15×), `welcome.blade.php` (10×), `components/layout.blade.php` (8×), `runs/create.blade.php` (10×) — **`AGENTS.md` §1 says "4 Blade files only"** and §13 calls `resources/views/components/` empty since B1, yet the spec corpus still names five retired Blade views as live surfaces |
-| `docs/GATE-REGISTRY.md` | `KNOWN-ISSUES.md:2653` | 56 | Absent. `AGENTS.md` §2 and §3 name the gate registry as a **section of** `docs/research-scratch/GOVERNANCE.md` (which **is** present), not a root file. Cited by its retired path |
-| `docs/PRE-MORTEM.md` | `KNOWN-ISSUES.md:2653` | 43 | Same folding |
-| `docs/SOURCE-OF-TRUTH.md` | `docs/UMAMUSUME_REFERENCE.md:145` | 31 | Absent; cited as a live master |
+| `docs/research-scratch/GOVERNANCE.md` | `KNOWN-ISSUES.md:2653` | 56 | Absent. `AGENTS.md` §2 and §3 name the gate registry as a **section of** `docs/research-scratch/GOVERNANCE.md` (which **is** present), not a root file. Cited by its retired path |
+| `docs/research-scratch/GOVERNANCE.md` | `KNOWN-ISSUES.md:2653` | 43 | Same folding |
+| `docs/research-scratch/GOVERNANCE.md` | `docs/UMAMUSUME_REFERENCE.md:145` | 31 | Absent; cited as a live master |
 | `DESIGN.md` | `DESIGN.md:30`, `:884` | 57 | Absent. `DESIGN.md` cites a predecessor of itself at a path that no longer exists |
-| `docs/design-research/CONSTRAINTS.md` | `DESIGN.md:887` | 73 | Same — the single most-cited absent path in the corpus |
+| `docs/research-scratch/DESIGN-CORPUS.md` | `DESIGN.md:887` | 73 | Same — the single most-cited absent path in the corpus |
 | `resources/js/pages/Runs/Show.vue` | `KNOWN-ISSUES.md:2172` | 47 (38 + 9) | Absent. `KNOWN-ISSUES.md` itself uses the past tense ("which owned the equivalent forms") — the cite is historical, the path is dead |
 | `resources/js/trainee-combobox.ts` | `AUDIT-AND-VERIFICATION.md:918` | 19 | Absent |
 | `resources/js/app.ts` / `app.js` | `frontend-development-plan.md:291`, `AUDIT-AND-VERIFICATION.md:629` | 20 | Both absent. `AGENTS.md` §6 names `resources/js/spa.ts` as the entry; the plan cites the pre-2.0 entry |
@@ -109,7 +109,7 @@ Every row below was **verified by direct existence check this pass**, not inferr
 | `App\Actions\UpsertCharacterCard` | `CATALOG-ROSTER-WORKSTREAM.md:2016` | 1 class | Absent. The only genuine absent class in the corpus |
 | `route('run')` | `frontend-development-plan.md:1249` | 1 route | Absent against the 85 parsed route names. Either a prose abbreviation or a stale name |
 
-**Four scenario guides are in the same state as `CONSTRAINTS.md`** — `docs/Our-Grand-Concert-plan.md` (22×),
+**Four scenario guides are in the same state as `CONSTRAINTS.md`** — `docs/proposals/Our-Grand-Concert-plan.md` (22×),
 `docs/Trackblazer-plan.md` (12×), `docs/URA-Finale-plan.md` (10×), `docs/Unity-Cup-plan.md` (10×) are all
 **tracked and deleted uncommitted** (`git status` ` D`), and `config/scenarios.php` prose plus the metadata
 reports cite them by path. A peer is mid-move; until it lands, 54 citations read as drift that may in fact be a
@@ -225,7 +225,7 @@ not in the cites.** Four of the five scenario-driven components `AGENTS.md` §7 
 exist; §1 declares the Blade surface down to four files while `SCREEN_SPEC.md` and `DESIGN.md` still name five
 retired views as live; §3's documentation map lists `CONSTRAINTS.md` and `PLAN.md`, both tracked and deleted
 uncommitted, cited 259 times between them; and the folded masters the corpus still cites by their pre-folding root
-paths — `docs/GATE-REGISTRY.md`, `docs/PRE-MORTEM.md`, `docs/SOURCE-OF-TRUTH.md`,
+paths — `docs/research-scratch/GOVERNANCE.md`, `docs/research-scratch/GOVERNANCE.md`, `docs/research-scratch/GOVERNANCE.md`,
 `docs/design-research/{DESIGN,CONSTRAINTS}.md` — account for ~260 rows against `AGENTS.md` §17's own rule to cite
 the master and its anchor instead. Add two claimed-but-absent test files, a spec that undercounts its own screen by
 11 and 8 cases, and one Report claiming a request class that has never existed. None of this is fabrication; it is

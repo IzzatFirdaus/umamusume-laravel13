@@ -55,7 +55,7 @@ C-7's loading obligation is interpreted as follows, without weakening the gate:
 ### Negative
 
 - The gate is no longer greppable as "contains a loading element"; review must judge which
-  interactions are async. `docs/GATE-REGISTRY.md` records it as a Review-type check.
+  interactions are async. `docs/research-scratch/GOVERNANCE.md` records it as a Review-type check.
 
 ### Risks
 
@@ -70,7 +70,7 @@ clause 2, and the KI list tracks that work item separately.
 
 ## Verification
 
-Binary review check, registered as G-C7 in `docs/GATE-REGISTRY.md`: for each data view, the
+Binary review check, registered as G-C7 in `docs/research-scratch/GOVERNANCE.md`: for each data view, the
 four states are enumerated with the clause number that applies (1 for initial render, 2 for
 each user-initiated async action); absence of a custom indicator is only a pass when no
 async action exists on the page.

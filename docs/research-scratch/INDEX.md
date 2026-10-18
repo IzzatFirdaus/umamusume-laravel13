@@ -321,7 +321,7 @@ and the URA Finale import record that reads them.
 
 | Source file (all live, all still in place)                        | Lines | New home                                                                                         |
 | ----------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------------ |
-| `docs/Our-Grand-Concert-plan.md`                                  | 1,145 | `PROCESS-PLANS.md`, section `## Our-Grand-Concert-plan.md`                                       |
+| `docs/proposals/Our-Grand-Concert-plan.md`                                  | 1,145 | `PROCESS-PLANS.md`, section `## Our-Grand-Concert-plan.md`                                       |
 | `docs/Trackblazer-plan.md`                                        | 583   | `PROCESS-PLANS.md`, section `## Trackblazer-plan.md`                                             |
 | `docs/Unity-Cup-plan.md`                                          | 561   | `PROCESS-PLANS.md`, section `## Unity-Cup-plan.md`                                               |
 | `docs/URA-Finale-plan.md`                                         | 381   | `PROCESS-PLANS.md`, section `## URA-Finale-plan.md`                                              |

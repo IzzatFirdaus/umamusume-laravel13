@@ -56,7 +56,7 @@ The Umamusume are a humanoid race. They are never described with equine vocabula
 
 Three things a `make lore` run will report here and the reason none is a violation, recorded rather than left for the next person to rediscover:
 
-1. This policy paragraph and the audit at 5.5 name the patterns in order to forbid them, which is what `docs/PRE-MORTEM.md` already does for legacy evidence under the C-4 exemption.
+1. This policy paragraph and the audit at 5.5 name the patterns in order to forbid them, which is what `docs/research-scratch/GOVERNANCE.md` already does for legacy evidence under the C-4 exemption.
 2. Ordinary English and real unit names contain banned substrings: "desired" and the Umamusume named `Red Desire` both contain one of the four-letter patterns, as does "damaged" and the Italian support-card epithet "La dama perfetta". These are substrings, not vocabulary choices.
 3. Four em dashes sit inside verbatim skill names copied from the game's own data, for example `Victory belongs to me—Strelitzia! ☆`. Editing a proper noun to satisfy a style rule would corrupt the data it documents.
 
@@ -6113,7 +6113,7 @@ of three kinds, none of them a violation:
 
 | Kind                                                     | Where                                                                                                                                          | Why it is not a violation                                                                           |
 | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Naming the ban in order to forbid it                     | the lore policy section, and 5.5 above                                                                                                         | Same purpose as the `docs/PRE-MORTEM.md` lines already exempted under C-4 as elimination evidence   |
+| Naming the ban in order to forbid it                     | the lore policy section, and 5.5 above                                                                                                         | Same purpose as the `docs/research-scratch/GOVERNANCE.md` lines already exempted under C-4 as elimination evidence   |
 | Banned substrings inside ordinary words and real names   | "desired" in skill-planning prose, the Umamusume named `Red Desire` and its URL slug, "damaged", the support-card epithet "La dama perfetta"   | A substring is not a vocabulary choice, and the names are the data                                  |
 | Four em dashes inside verbatim skill names               | three roster table rows                                                                                                                        | Quoted product strings. Rewriting them to satisfy a style rule would falsify the reference          |
 

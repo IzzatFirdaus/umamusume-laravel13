@@ -101,7 +101,7 @@ specification does not yet acknowledge.
 | 2      | `84faed8`   | `KNOWN-ISSUES.md`                       | KI-33 (+ R-2 and R-5 sub-findings), KI-35, KI-36, KI-37, status block   |
 | 3      | `bcd8abe`   | `DESIGN.md`                             | §4.2 rewrite, both stale clauses as one dated withdrawal                |
 | 4      | `da8d6c5`   | `docs/design-research/SKILLS-GAPS.md`   | G-SK-13's two stale clauses                                             |
-| 5      | `d0422ce`   | `docs/design-research/CONSTRAINTS.md`   | D-289                                                                   |
+| 5      | `d0422ce`   | `docs/research-scratch/DESIGN-CORPUS.md`   | D-289                                                                   |
 
 **Step 4 landed as an edit, not a no-op — and that was checked, not assumed.** The sequencing brief warned
 that the peer's `edb03d5` *may* have already incorporated the two G-SK-13 wording diffs. Reading the entry

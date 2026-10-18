@@ -198,7 +198,7 @@ ruling to fetch live answers `AGENTS.md` escalation 5 for a re-fetch of that sam
 an approval of a new host. Second, the export body is gitignored and nothing under `app/` reads it, which
 is why the figures above are cited from dated measurements rather than re-runnable from a tracked file.
 
-One citation here is knowingly second-hand: `docs/SOURCE-OF-TRUTH.md` is where §5 lives, but that file is
+One citation here is knowingly second-hand: `docs/research-scratch/GOVERNANCE.md` is where §5 lives, but that file is
 **not tracked**, so neither its line numbers nor its wording can be checked from here. The rule is quoted
 from `docs/scenarios/09-global-race-calendar.md`, which cites §5 by name, and from the source registry at
 `docs/UMAMUSUME_REFERENCE.md`. Whoever owns `SOURCE-OF-TRUTH.md` should confirm the wording.

@@ -240,7 +240,7 @@ The trust vocabulary (`ADR-0020` §2) must render consistently: a recommendation
 
 ### Evidence Hierarchy Applied to Design
 
-The Grand Concert plan's evidence hierarchy (`docs/Our-Grand-Concert-plan.md`) governs what the UI must and must not depict:
+The Grand Concert plan's evidence hierarchy (`docs/proposals/Our-Grand-Concert-plan.md`) governs what the UI must and must not depict:
 
 1. **Authoritative and verified** — safe to render with a Confirmed badge.
 2. **Observed but undocumented** — may appear only where the observation itself is trustworthy, labelled Calculated.

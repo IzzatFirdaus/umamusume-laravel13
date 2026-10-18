@@ -98,5 +98,5 @@ deferred per §6.11" — a requirement this repository currently satisfies, and 
 - `PRD.md` §6.11 and US-10; `ADR-0001` (the partial carve-out, unchanged), `ADR-0009` (slot seeding),
   `ADR-0003` (race tracking), `ADR-0020` (reaffirms this hold)
 - `config/scenarios.php` (`grade_objectives`, `grade_point_by_grade`, `grade_banding`)
-- `docs/UMAMUSUME_REFERENCE.md` §1.2.6 and §1.3; `docs/design-research/CONSTRAINTS.md` D-153
+- `docs/UMAMUSUME_REFERENCE.md` §1.2.6 and §1.3; `docs/research-scratch/DESIGN-CORPUS.md` D-153
 - `docs/design-research/verification/slice-15-2026-09-29.md` §2 (R75); KI-45

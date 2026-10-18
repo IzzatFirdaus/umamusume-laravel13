@@ -127,7 +127,7 @@ sample content, which is the part that is currently blocked. Options 2 and 3 bot
   `support-cards.json` and `support_effects.json` are new parser + fixture pairs under FR-B's rule set,
   and neither has a display-name ambiguity the way character cards do, so the `ScenarioSourceParser`
   shape (no cross-reference) fits better than the matching pipeline.
-- `docs/design-research/CONSTRAINTS.md` gains rules D-277 to D-282 and gate G-58, and
+- `docs/research-scratch/DESIGN-CORPUS.md` gains rules D-277 to D-282 and gate G-58, and
   `DESIGN.md` §6.0b and §6.5b gain the measured glyph set, the deck-editor anatomy
   and the card-detail anatomy. Those are already applied in this change, because they document the
   client rather than the app, and they hold under all three options above.

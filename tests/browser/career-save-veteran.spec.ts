@@ -143,7 +143,7 @@ test('states the five absent stats once, not five times', async ({ page }) => {
     // `AbsenceValue` is absent from the page in general.
     await openSaveVeteran(page, 'Mejiro McQueen', true);
 
-    const sentence = page.getByText(/^Not recorded: Speed, Stamina, Power, Guts, Wit\.$/);
+    const sentence = page.getByText('Not recorded: Speed, Stamina, Power, Guts, Wit.', { exact: true });
     await expect(sentence).toHaveCount(1);
 
     // The five per-field markers for those same stats are gone.

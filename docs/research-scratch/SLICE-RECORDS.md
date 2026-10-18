@@ -1050,7 +1050,7 @@ Equal, which is what `LoreGateParityTest` enforces. Counts are prints, not disti
 matching two of the three greps prints twice. Two of the 133 come from this file: Â§1 and Â§6 both
 name the pattern `withers` while describing the mutation that proves the parity guard, so the <!-- lore-ignore-line class=4 cite=GATE-REGISTRY.md#C-4 -->
 record is a permanent self-hit like every other rules file â€” allowed class 4 in
-`docs/GATE-REGISTRY.md`, which carries the composition rather than a total for exactly that
+`docs/research-scratch/GOVERNANCE.md`, which carries the composition rather than a total for exactly that
 reason. The 4 `lore-code` hits are the pre-existing adjudicated ones (Laravel's SQS example URL,
 the three documented `Good-Luck Charm` lines).
 
@@ -1514,9 +1514,9 @@ Tip at the start: `586e65f` on `master`, `origin/master` at `e88bb7b`.
 Confirmed with `git ls-remote origin master` before (`e88bb7bâ€¦`) and after (`586e65fâ€¦`).
 
 `composer lore-code` reports 6 hits. Four were already classified (allowable classes 1-4 in
-`docs/GATE-REGISTRY.md`); two arrived with the concurrent session's review-queue files. Ruled
+`docs/research-scratch/GOVERNANCE.md`); two arrived with the concurrent session's review-queue files. Ruled
 here, per C-4's "the grep proposes, the Guardian decides", and written into the lore dictionary at
-`docs/design-research/CONSTRAINTS.md` Â§3.2 in `b81df3f`:
+`docs/research-scratch/DESIGN-CORPUS.md` Â§3.2 in `b81df3f`:
 
 | Hit                                                                                       | Matched word | Ruling                                                                                                                                                                                                                                                                                                                                                                    |                                                             |
 | ----------------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
@@ -1530,7 +1530,7 @@ dictionary was open, because the C-4 bar is *zero unexplained hits*, not zero hi
 | ------------------------------------------------------------------------------ | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `config/queue.php:60` `'prefix' => env('SQS_PREFIX', 'â€¦/your-account-id')`   | `account`      | **Allowed: framework-shipped default.** Laravel's own SQS stub, not copy written for this product, and it cannot become an auth surface from inside a queue config.   |
 
-The same commit corrected the C-4 row in `docs/GATE-REGISTRY.md`, which said "three allowed hit
+The same commit corrected the C-4 row in `docs/research-scratch/GOVERNANCE.md`, which said "three allowed hit
 classes" while the block it points at had carried four since the scanner self-hit class was added.
 
 Nothing on either side was a violation, so no KI was filed and none of the peer's files were
@@ -1640,7 +1640,7 @@ pair as if it were still live): D-286 says a correction propagates to every copy
 
 | #     | Amendment                                                                                                                                                                                                                                         | Where                                            |
 | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| a     | D-40 restated as region lifetimes, citing `UX Behavior Specification:136-141`; the desktop axis is explicitly not the rule, which retires Slice 5's deviation instead of burying it                                                               | `docs/design-research/CONSTRAINTS.md` Â§6 D-40   |
+| a     | D-40 restated as region lifetimes, citing `UX Behavior Specification:136-141`; the desktop axis is explicitly not the rule, which retires Slice 5's deviation instead of burying it                                                               | `docs/research-scratch/DESIGN-CORPUS.md` Â§6 D-40   |
 | b     | The "never radio inputs" clause reversed: the rail's choices are banner buttons that are also real radios, which is what KI-14 fixed                                                                                                              | `docs/design-research/DESIGN.md:1338`            |
 | c     | Controller inventory added, because a path scope naming `RunController.php` describes a file that has never existed here                                                                                                                          | `PLAN.md` Â§Controller Inventory                 |
 | d     | Livewire moved from open question to **DECIDED no**, carrying slice-5 Â§4's numbers (0.047/0.076 baseline, 0.071/0.091 preview, 72,562 bytes) and a reopen criterion that lists the seven things a reopen owes                                    | `PLAN.md` Â§Open Decisions                       |
@@ -1668,7 +1668,7 @@ CONSTRAINTS order, on the tree this slice leaves behind:
 | New tests            | `vendor/bin/pest tests/Feature/MoodPillTest.php tests/Feature/TokenPairHygieneTest.php`   | 10 passed (40 assertions)                                                                                                                                                                                                                                                                                                                                                                                                |
 | Format               | `vendor/bin/pint --dirty --format agent`                                                  | `{"result":"passed"}`                                                                                                                                                                                                                                                                                                                                                                                                    |
 | Static               | `vendor/bin/phpstan analyse --no-progress`                                                | `[OK] No errors` (level 6)                                                                                                                                                                                                                                                                                                                                                                                               |
-| Lore, repo-wide      | `composer lore`                                                                           | 140 hits: 137 on the tree this slice started from, plus three that are this record and PLAN naming the two adjudicated words (`slice-6-2026-09-28.md:26-27`, `PLAN.md:211`). Naming a banned word to rule on it is allowed class 1 in `docs/GATE-REGISTRY.md`. The count prints match lines, not distinct lines, and moves whenever a rules file quotes a word, so it is a measurement of this day, never a threshold.   |
+| Lore, repo-wide      | `composer lore`                                                                           | 140 hits: 137 on the tree this slice started from, plus three that are this record and PLAN naming the two adjudicated words (`slice-6-2026-09-28.md:26-27`, `PLAN.md:211`). Naming a banned word to rule on it is allowed class 1 in `docs/research-scratch/GOVERNANCE.md`. The count prints match lines, not distinct lines, and moves whenever a rules file quotes a word, so it is a measurement of this day, never a threshold.   |
 | Lore, app paths      | `composer lore-code`                                                                      | 6 hits, all adjudicated in Â§1                                                                                                                                                                                                                                                                                                                                                                                           |
 | Gate family          | `python tools/gate.py`                                                                    | `GATE PASS: 3 prototype(s), all machine-checkable gates green`                                                                                                                                                                                                                                                                                                                                                           |
 | Build                | `npm run build`                                                                           | 57.37 kB CSS (was 56.83), 52.25 kB JS                                                                                                                                                                                                                                                                                                                                                                                    |
@@ -1892,7 +1892,7 @@ No UI was added: the payload has no reader yet, which is what the task asked for
 | Format               | `vendor/bin/pint --format agent app database tests resources`                                                    | `{"tool":"pint","result":"passed"}`                                                                                       |
 | Static               | `vendor/bin/phpstan analyse --no-progress`                                                                       | `[OK] No errors` (level 6)                                                                                                |
 | Lore, repo-wide      | `composer lore`                                                                                                  | `lore-docs: 140 hit(s)`, unchanged from Slice 6's corrected figure; all in allowed classes 1-4                            |
-| Lore, app paths      | `composer lore-code`                                                                                             | `lore-code: 6 hit(s)`, all six adjudicated in `docs/design-research/CONSTRAINTS.md` Â§3.2                                 |
+| Lore, app paths      | `composer lore-code`                                                                                             | `lore-code: 6 hit(s)`, all six adjudicated in `docs/research-scratch/DESIGN-CORPUS.md` Â§3.2                                 |
 | Gate family          | `python tools/gate.py`                                                                                           | `GATE PASS: 3 prototype(s), all machine-checkable gates green.`                                                           |
 | Build                | `npm run build`                                                                                                  | `app-Qssk6Sd5.css 57.37 kB`, `app-LFSC9J26.js 52.25 kB`, both hashes identical to Slice 6's build                         |
 | Declared vs pruned   | `git diff HEAD~8..HEAD --stat -- resources/css resources/js`                                                     | empty: this slice touched no CSS or JS, so the token set did not move and the count test (60 declared) needed no change   |
@@ -2272,11 +2272,11 @@ No KI was closed that was not already fixed, and none was reopened.
 
 **Design.** A comment on the line it exempts, in exactly the form
 `<!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->`: the literal, then `class=` taking one of
-the four allowed-hit classes from `docs/GATE-REGISTRY.md`, then `cite=` naming the rule the line
+the four allowed-hit classes from `docs/research-scratch/GOVERNANCE.md`, then `cite=` naming the rule the line
 answers to. Line-scoped,
 not file- or block-scoped: one marked row exempts that row and nothing else, and deleting the comment
 restores the hit. `class=` takes a number from the four allowed-hit classes already in
-`docs/GATE-REGISTRY.md`; `cite=` names the rule the line answers to. The comment opener is part of the
+`docs/research-scratch/GOVERNANCE.md`; `cite=` names the rule the line answers to. The comment opener is part of the
 needle in both runners, so a heading or sentence that merely names the mechanism is not mistaken for a
 directive.
 
@@ -2310,7 +2310,7 @@ fails the moment a recipe drops the pipe.
 
 **Applied to 41 ruling-table lines in 10 `docs/` files**: the Â§3.1 vocabulary table (10 rows) and the
 Â§3.2 allowed-sense list (5) plus D-73, D-74, D-78, the NFR-6 artifact rule and the Legacies
-terminology row in `docs/design-research/CONSTRAINTS.md` (20 total); the two C-4 class rows in
+terminology row in `docs/research-scratch/DESIGN-CORPUS.md` (20 total); the two C-4 class rows in
 `GATE-REGISTRY.md`; the hit-itemization rows in the slice-3 (2), slice-5 (3), slice-6 (2) and slice-9
 (3) records; the rule lines in `flows/create-run-and-legacy-select.md` (3),
 `requests/game-mechanics-condition-labels.md` (1) and the frontend-review grep report (2); the JP-only
@@ -2336,7 +2336,7 @@ explain it. A gate whose own documentation trips it is the gate working; a gate 
 to ignore its documentation would not have been a gate.
 
 **Re-baseline.** `lore-docs` 147 â†’ 98, with 49 exempt prints (41 lines, eight of them matching two of
-the three greps). Recorded in `docs/GATE-REGISTRY.md` as the marker section's own measurement, with
+the three greps). Recorded in `docs/research-scratch/GOVERNANCE.md` as the marker section's own measurement, with
 the reading history 131 â†’ 132 â†’ 133 â†’ 137 â†’ 140 â†’ 144 â†’ 147 cited to the line that measured each one.
 It is still a measurement of a day, not a threshold; what changed is that adding a new itemization row
 to a rules table no longer moves it.
@@ -4510,7 +4510,7 @@ pushing.
 
 **Post-push state of the shared tree, recorded because it is not clean and is not mine.** The peer still
 holds uncommitted edits to `PRD.md`, `app/Models/Skill.php`, `config/uma.php`, `database/seeders/SkillSeeder.php`,
-`resources/views/runs/show.blade.php`, `docs/design-research/CONSTRAINTS.md`, the pipeline classes, and its
+`resources/views/runs/show.blade.php`, `docs/research-scratch/DESIGN-CORPUS.md`, the pipeline classes, and its
 own new parser, action, migration, ADR-0011 and tests. The three `docs/scenarios/*.md` remain peer-dirty.
 None was staged, committed or reverted by this slice, with the one exception disclosed in Â§7.1:
 `pint --dirty` reformatted three of its files.
@@ -4561,7 +4561,7 @@ silently â€” which is R70's rule, not a new one. Of the nine, two are this 
 | Commit                            | Guarded paths                                                                                                                                                                                         | What was read                                                                                                                     |
 | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `aa5b05c`                         | a `skills` migration, `config/uma.php`, `Parsers/GametoraSkillsParser`, `Contracts/SkillSourceParser`, `PipelineRunner`, `SourceFetcher`, `app/Actions/StoreSkills`, `app/Models/Skill`, `ADR-0011`   | the migration whole, the new source block whole, the `Skill` model diff                                                           |
-| `f71a10e`                         | `database/seeders/SkillSeeder.php`, `docs/design-research/CONSTRAINTS.md`                                                                                                                             | the seeder diff â€” it retires `Traightaways` and re-names three rows from `name_en`                                              |
+| `f71a10e`                         | `database/seeders/SkillSeeder.php`, `docs/research-scratch/DESIGN-CORPUS.md`                                                                                                                             | the seeder diff â€” it retires `Traightaways` and re-names three rows from `name_en`                                              |
 | `a9fe18c`                         | `KNOWN-ISSUES.md`, `docs/design-research/SKILLS-GAPS.md`                                                                                                                                              | the gap register's headings and **G-SK-5 in full**, which names `legacy_selection` as a dependency of another session's surface   |
 | `83086b0`                         | tests only                                                                                                                                                                                            | file list                                                                                                                         |
 | `c3bdda3`, `acab4d8`, `7eadf45`   | `docs/design-research/SKILLS-GAPS.md`                                                                                                                                                                 | commit messages and the G-SK-17 diff                                                                                              |
