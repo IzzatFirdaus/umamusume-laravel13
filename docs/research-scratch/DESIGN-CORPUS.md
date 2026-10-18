@@ -4746,7 +4746,7 @@ specification whose section numbering stops well before 6.14, while `DESIGN.md` 
 lines) was absorbed into this corpus as `§"DESIGN.md"` and carries the full design-system numbering including
 §6.14. Neither basename is tracked at `docs/design-research/` any more, so a reader following a bare citation
 that means the design-system half lands nowhere. The same ambiguity applies to `CONSTRAINTS.md` (root gate
-table vs `§"CONSTRAINTS.md"` at `:1665`) and to `RAW-FINDINGS.md`, `SKILLS-GAPS.md` and `SOURCE-OF-TRUTH.md`,
+table vs `§"CONSTRAINTS.md"` at `:1665`) and to `RAW-FINDINGS.md`, `SKILLS-GAPS.md` and `docs/research-scratch/GOVERNANCE.md`,
 each of which is absorbed into exactly one master under a section heading of its own name.
 
 Not applied retroactively: the corpus's own provenance lines name the source files they absorbed, and those

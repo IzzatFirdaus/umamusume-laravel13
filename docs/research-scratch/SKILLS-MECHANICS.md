@@ -1001,7 +1001,7 @@ is a nullable json column. What survives from the warning is the scope note it w
 stores per-Legacy Spark kind, target and star rank plus an affinity grade, and **G-SK-5 is scoped against
 it** — the skill join is still missing, and G-SK-22 is the same question from the other side.
 `docs/scenarios/03-trackblazer.md` remains superseded and untouched, per its own rule
-(`SOURCE-OF-TRUTH.md` §4.1).
+(`docs/research-scratch/GOVERNANCE.md` §4.1).
 
 **The shape to look for, because four entries in this repository are the same defect wearing different
 clothes.** *A tool reports success against a target that is not the thing the claim is about, and the report
@@ -1162,7 +1162,7 @@ extracted, so the name is all this repo has.
 #### 4.3 Other scenarios
 
 `07-grand-concert.md` is a Known-Gap Stub and `08-grand-masters-jp-only.md` is `[JP-Only]`; per
-`SOURCE-OF-TRUTH.md` §4.1 the latter must not be imported into app data, config, or UI copy. Neither may
+`docs/research-scratch/GOVERNANCE.md` §4.1 the latter must not be imported into app data, config, or UI copy. Neither may
 be used to fill a skill surface.
 
 **Status of the first file changed 2026-10-05, and the second half of that sentence is why it matters here.**
@@ -1466,7 +1466,7 @@ idempotence covers this source too.
   `id / name / status / turnAcquired`. Widening a published shape is its own decision, not a side effect
   of the import.
 - **G-SK-16 — neither English description field in the skills document is client text, and the gate proves
-  it twice over.** `SOURCE-OF-TRUTH.md` §3 pins the stat as Stamina, the second stat as Wit and the gauge
+  it twice over.** `docs/research-scratch/GOVERNANCE.md` §3 pins the stat as Stamina, the second stat as Wit and the gauge
   word as Mood. Run the gate's own code-mode patterns over the document (measured 2026-09-29 while auditing
   Screen D, because `DESIGN.md` §6.11 puts a description in the skill row):
   `desc_en` matches **189** times, 172 of them `endurance`; `endesc` matches **72** times, 52 `wisdom` and
@@ -1532,7 +1532,7 @@ idempotence covers this source too.
 - **G-SK-20 — §6.11's description has no client string behind it, and the vocabulary is the proof.** See
   G-SK-16 for the measurement: `desc_en` fails the terminology table 189 times (172 of them `endurance`) and
   `endesc` fails it 72 times (52 `wisdom`, 16 `motivation`), so neither field is `[Global]` prose, and the
-  one that *looks* most like game copy is precisely the one that contradicts `SOURCE-OF-TRUTH.md` §3.
+  one that *looks* most like game copy is precisely the one that contradicts `docs/research-scratch/GOVERNANCE.md` §3.
   **The rule this entry exists to keep:** no description column may be added until a client-string source for
   descriptions exists — an in-client capture, not a re-read of the export. A future pass should not reach for
   `desc_en` because it reads better than `endesc`; that is D-20's failure mode with a flattering example.

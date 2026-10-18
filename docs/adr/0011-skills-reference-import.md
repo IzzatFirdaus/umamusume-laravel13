@@ -42,7 +42,7 @@ why a pinned hash is the wrong mechanism — a stale hash answers `200` with sta
 
 **2. Global filtering happens at read, not at write.** Every row imports, carrying the server flag the
 source states; the `[Global]` subset is what every Trainer-facing surface selects. Deleting JP-only rows at
-import would destroy the audit trail, and `SOURCE-OF-TRUTH.md` §4.1's import filter is about *surfaces*, not
+import would destroy the audit trail, and `docs/research-scratch/GOVERNANCE.md` §4.1's import filter is about *surfaces*, not
 storage. Cross-checked against the card document: evolved skills are absent from `[Global]` even for
 characters who are on it, which is a conflict row reproduced mechanically from two documents.
 

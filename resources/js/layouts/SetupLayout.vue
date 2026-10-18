@@ -21,11 +21,21 @@
  * of its own screen needs it, and because a named absence is the honest answer rather than a dead link.
  */
 import AppLayout from './AppLayout.vue';
+import ChoicesSoFar from '../components/career/ChoicesSoFar.vue';
 import { Link } from '@inertiajs/vue3';
 import { computed, onMounted, nextTick } from 'vue';
 import { useLayout } from '../composables/useLayout';
 
-const props = defineProps<{ step: number; visited?: number[]; saved?: number[] }>();
+const props = defineProps<{
+    step: number;
+    visited?: number[];
+    saved?: number[];
+    /**
+     * The three carried choices, from `SetupDraft::summary()`. Optional so a wizard step that has not
+     * adopted the strip renders exactly as before rather than showing an empty bar.
+     */
+    choices?: { label: string; value: string | null; url: string | null }[];
+}>();
 
 // The wizard honours the same width preference as the shell, so its wide steps (the deck's
 // master/detail, the scenario matrix) get the wide screen the Trainer asked for. `container-type:
@@ -157,6 +167,14 @@ onMounted(async () => {
         </nav>
 
         <div :class="wrapperClass" class="@container" data-layout-container>
+            <!--
+              What the Trainer has already decided, above the step they are on. The three steps that
+              landed first each printed their own "Stored choice:" line, so a Trainer on step 4 could
+              see step 1's answer but not step 2's; this states all three on every step. Renders only
+              when a page supplies `choices`, so a step that has not adopted it is unchanged.
+            -->
+            <ChoicesSoFar v-if="props.choices" :choices="props.choices" />
+
             <slot />
 
             <!--

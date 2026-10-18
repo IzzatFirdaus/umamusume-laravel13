@@ -49,6 +49,7 @@ class ScenarioSelectController extends Controller
 
         return Inertia::render('Career/ScenarioSelect', [
             'visited' => SetupDraft::visited(),
+            'choices' => SetupDraft::summary(),
             'saved' => SetupDraft::saved(),
             'scenarios' => $this->cards(),
             // Three states, not two. A draft that has never carried the key may take the Trainer's own

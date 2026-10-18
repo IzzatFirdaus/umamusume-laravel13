@@ -452,7 +452,7 @@ Follow the shape of `docs/adr/0004-aptitude-and-scenario-cap-reference-data.md`,
 - **Consequences** â€” A trainee's `release_status` still derives from her debut card (the `release_status` ternary in `GametoraCharacterParser::parse()`, fed by that method's `$globalDebut` line; the `:77-79` / `:68` numbers this line carried, and the `GametoraCharacterParser.php:87-97` before them, stand here only as the drift record â€” Task 6's extraction `db8603c` moved the debut loop into `debutForms()`, so those numbers now name `return $records;` and the `debutForms()` docblock rather than the derivation, and one of them was already a line short before it), and the parser still emits **one record per `char_id` across the whole export**, measured 2026-09-29 at 135 records: 68 `GlobalReleased`, 67 `JapanOnly`. That is required by `PRD.md` US-2 (P0), whose acceptance text is "new JP releases appear with a JapanOnly or GlobalAnnounced flag instead of silently missing"; the card table is Global-only while the character feed is not, and the promotion verdict is where the two scopes meet. Measured the same day for all 68 Global trainees: the JP-earliest card, the Global-earliest card and the parser's debut are the same card, there are no date ties, and no trainee is tagged `JapanOnly` while owning a Global card. That measurement is what makes `where('release_status', GlobalReleased)->has('cards')` a safe roster filter. Record both measurements with their date, per the repo's dated-snapshot convention: they were true on 2026-09-29 and a later roster move can falsify them.
 - **What is deliberately not stored** â€” per-card JP release dates, and the `aptitude`, `base_stats`, `four_star_stats`, `five_star_stats`, `stat_bonus`, `skills_*` families, plus the 163 cards with no `release_en`. Cite `PRD.md` Â§6 non-goals 6, 9 and 11 as still binding.
 - **Not the support-card database** â€” state explicitly that this is the costume-card table and `PRD.md` Â§6.9 with `ADR-0005` declined (R37) still forbids `support_cards`, `user_support_cards` and `deck_slots`. `ARCHITECTURE.md`'s "Support-card entities: proposed, not built" section warns exactly this confusion, so the ADR must name the difference rather than leave it inferred.
-- **Provenance** â€” GameTora is Tier B; `SOURCE-OF-TRUTH.md` Â§5:152 needs Tier A confirmation before a Tier B field becomes app data. Name `umamusu.wiki` and Game8, and the cross-check file Task 8 produces.
+- **Provenance** â€” GameTora is Tier B; `docs/research-scratch/GOVERNANCE.md` Â§5:152 needs Tier A confirmation before a Tier B field becomes app data. Name `umamusu.wiki` and Game8, and the cross-check file Task 8 produces.
 
 - [ ] **Step 2: Amend `PRD.md`**
 
@@ -2042,7 +2042,7 @@ cards too, and a re-fetch cannot clear a cross-check verdict it did not write."
 
 ### Task 8: Tier A cross-check of all 107 cards
 
-`SOURCE-OF-TRUTH.md` Â§5:152 â€” "A Tier B dataset (GameTora) needs A- or S-tier confirmation before a claim becomes app data." The owner ruled **all 107**, not a spot-check. This task produces the evidence file Task 9 reads when it sets `character_cards.unconfirmed`.
+`docs/research-scratch/GOVERNANCE.md` Â§5:152 â€” "A Tier B dataset (GameTora) needs A- or S-tier confirmation before a claim becomes app data." The owner ruled **all 107**, not a spot-check. This task produces the evidence file Task 9 reads when it sets `character_cards.unconfirmed`.
 
 Owner assumption, ruled 2026-09-29, and it is definitional rather than open: `unconfirmed` answers "do two independent sources attest that THIS card exists, with this title, date and rarity?" That is a property of the card, keyed on `card_id`, and never of the trainee it happens to be attached to. This task's cross-check file lists cards by `card_id` and metadata and records no trainee association, so a card that re-parents - the behaviour Task 7's addendum pins - keeps its verdict, because the verdict was never about the association. Do not invalidate `unconfirmed` on an ownership change, and do not key a verdict on `(card_id, umamusume_id)`: that discards correct human work every time the source fixes its own char-ref mapping, which is precisely when nobody wants to re-cross-check.
 
@@ -2138,7 +2138,7 @@ Expect real conflicts. Each becomes a row in the file's conflict-log section, ne
 - the full 107-row table from Step 3;
 - counts by verdict, with the arithmetic visible (`two-source-confirmed + single-source + conflict + unwitnessed = 107`);
 - the conflict log;
-- a closing line that GameTora is Tier B and these two are Tier A per `SOURCE-OF-TRUTH.md` Â§5:142-148, and that the file is a **dated observation**, matching the repo's dated-snapshot policy â€” a later reader needs to know what day this was true, because banner cycles move.
+- a closing line that GameTora is Tier B and these two are Tier A per `docs/research-scratch/GOVERNANCE.md` Â§5:142-148, and that the file is a **dated observation**, matching the repo's dated-snapshot policy â€” a later reader needs to know what day this was true, because banner cycles move.
 
 - [ ] **Step 6: Sanity-check the totals before committing**
 

@@ -231,6 +231,78 @@ final class SetupDraft
     }
 
     /**
+     * The three choices the wizard carries forward, for the strip that states them on every step.
+     *
+     * One entry per choice, always present, so a caller renders three fixed positions rather than
+     * testing for missing keys. `value` is null when the choice has not been made, which the strip
+     * renders as "not chosen"; `url` is the step that makes the choice, so a filled entry links to
+     * where it can be changed.
+     *
+     * **The values are the labels the pages already show, not raw keys.** A scenario is named by the
+     * same `label` its card carries, and the target by the style and distance the Trainer picked,
+     * because the strip is a reminder rather than a second place to learn the schema. The trainee's
+     * name comes from the same row the run will reference.
+     *
+     * **A null is "not chosen", not an absence.** This is a draft state, not a record missing a
+     * value: nothing failed and no source is silent. DESIGN.md section 5's absence vocabulary (an
+     * `N/A` carrying a reason) governs values the record does not carry, so it does not apply here,
+     * and the strip says "not chosen" in muted text rather than presenting a disclosure.
+     *
+     * @return list<array{label: string, value: string|null, url: string|null}>
+     */
+    public static function summary(): array
+    {
+        $choice = self::read();
+
+        $scenarioLabel = null;
+
+        if ($choice['scenario'] !== null) {
+            $scenario = (array) config('scenarios.scenarios.'.$choice['scenario'], []);
+            $label = $scenario['label'] ?? null;
+            $scenarioLabel = is_string($label) && $label !== '' ? $label : (string) $choice['scenario'];
+        }
+
+        $traineeName = null;
+
+        if ($choice['umamusume_id'] !== null) {
+            $traineeName = \App\Models\Umamusume::query()
+                ->whereKey($choice['umamusume_id'])
+                ->value('name');
+            $traineeName = is_string($traineeName) ? $traineeName : null;
+        }
+
+        $target = self::buildTarget();
+        $targetSummary = null;
+
+        if (is_array($target)) {
+            $parts = array_filter([
+                is_string($target['style'] ?? null) ? $target['style'] : null,
+                is_string($target['distance'] ?? null) ? $target['distance'] : null,
+            ], is_string(...));
+
+            $targetSummary = $parts === [] ? null : implode(' · ', $parts);
+        }
+
+        return [
+            [
+                'label' => 'Scenario',
+                'value' => $scenarioLabel,
+                'url' => $scenarioLabel === null ? null : '/career/setup/scenario',
+            ],
+            [
+                'label' => 'Trainee',
+                'value' => $traineeName,
+                'url' => $traineeName === null ? null : '/career/setup/trainee',
+            ],
+            [
+                'label' => 'Target',
+                'value' => $targetSummary,
+                'url' => $targetSummary === null ? null : '/career/setup/target',
+            ],
+        ];
+    }
+
+    /**
      * The steps that have data stored in the draft (slice 4.1 three-state fix).
      * Only steps with actual saved data show "done".
      *
