@@ -1610,3 +1610,102 @@ Pint / PHPStan / typecheck / probe: not applicable (doc-only).
 - Decisions still deferred: 1, 2, 5, 9.
 - Ledger path correction landed.
 - Next eligible: citation ratchet dispatch (decision 1) OR 2.5 + 3.1 + 3.2 (Phase 2 close / Phase 3 open) if owner prefers.
+
+
+## 26. Dispatch 27 — 2.3 (partial), 2.4, 3.1, 2026-10-18/19
+
+### Precondition (measured)
+
+- `origin/master` `29f8715`, ahead **4** at start, **12** at close. `HEAD:PRD.md` `22f48ab` at start,
+  `fcdc8ad` at close. Staged set empty at start; the peer staged seven doc files mid-dispatch and
+  committed them itself, so the set was empty again at close. No bare commit was used.
+- Live guard at start: **13** (8 held `NextDecision` + 5 bare-N/A), matching §24.
+- Bundle at start: `public/build` 23:15 against a `resources/js` commit at 00:01. **Stale**, and it was
+  rebuilt before every browser gate below.
+
+### 2.3 (partial) — `343f194`, 2 files, +32 −4
+
+The five bare-N/A resolved into **one fix and three false positives**, which is the reverse of what the
+count implied.
+
+| Marker | Verdict |
+|---|---|
+| `CareerStatePanel:130` | **Real, and a BUG per this slice's hard stop.** An unrecorded stat prints N/A with no reason anywhere in the codebase. The panel has a `targetCaption` for the absent denominator and nothing for an absent `current`. Not invented. |
+| `TrackblazerRoutePlanner:184` | **Real.** The badge beside it renders only when the badge itself is present, so the reason vanished in exactly the case the marker appeared. Now binds `period.floor_title`, the reason the builder already owns. |
+| `UnityCupTournamentReadiness:84, :90` | **False positive.** The reason sentence is on the following line. |
+| `UnityCupTeamBoard:80` | **False positive.** One sentence under the whole table, which is the design's own preferred shape. |
+
+The guard now accepts a visible interpolation of the data's own `*_title`/`*_reason` binding, in the
+local window or between the hit and the end of the block. A bare `{{ }}` does not satisfy it.
+
+**AbsenceValue reduction deferred, with the count the prompt asked for: 91 mentions across 25 files**
+(`TrainingCard` 11, `Preflight` 13, `CareerHeader` 6, `Compare` 5+3, …). That is its own slice.
+
+**Two of my own errors, both caught:** I first attached `floor_title` to the *plan* absence at :164,
+which is a different field — a mis-attributed reason is worse than none — and reverted it; and the first
+guard widening still missed `UnityCupTeamBoard` because its sentence sits past any local window.
+
+### 2.4 — `4f7ebb8` (+26 −26) and `7a1055c` (+6 −3)
+
+The nav was **already renamed** in an earlier slice (`New Career`, `Careers`). This finished the
+stragglers: the Careers list h1 and document title, `New run`, the dashboard's
+`Start a new training run`, and `Import a historical run` on three surfaces. Renaming the last one on
+the Runs index alone left the import page heading and the dashboard quick action disagreeing with the
+link that leads to them, so all three now agree. Identifiers untouched.
+
+**A PowerShell loop corrupted four spec files** (`test` → `iesi`, `this` → `iis`). Caught by grepping
+the result, restored from HEAD, redone with exact-match edits. This is the Batch C class of failure and
+it is now the second time this ledger records it: **never batch-edit test files with a string-replace
+loop.**
+
+**One genuine regression found by the browser gate:** renaming the page action made it share an
+accessible name with the nav's `New Career` link, so an unscoped `getByRole` hit two elements and strict
+mode failed. Both locators are now scoped to `main`, which is stronger, not weaker.
+
+**Failability:** the direct red (revert the heading, watch the locator fail) **could not be completed** —
+another session's pest runs held the CPU and the harness `webServer` timed out at its 60 s ceiling three
+times. Recorded as contended rather than claimed. The strict-mode finding is the evidence that the case
+is label-sensitive.
+
+### 3.1 — `238d91c`, 2 files, +110 −1
+
+`SetupLayout` already composed `AppLayout` and owned the step bar. Added:
+
+- **Focus**: the page's `h1` takes `tabindex="-1"` and focus on each step load. The heading is not
+  moved, per this slice's hard stop (1.3's landed divergence stands).
+- **Title**: the page's own `<Head title>` wins; the shell fills one only when a step ships without it.
+  A first version overwrote it and the two raced.
+- **#actions slot** for a step that wants the shell to place its action bar. `StickyFooter` must be the
+  root of its own containing block, so nothing is wrapped retroactively.
+
+**Failability proven:** with `heading.focus()` removed, `toBeFocused` fails with
+`unexpected value "inactive"`; restored, **6/6 green**.
+
+**A third self-inflicted bug, caught by the spec:** the selector was `#head h1, #title h1`, but those
+are slot NAMES, not element ids, so it matched nothing. The spec reported it as a missing `tabindex`,
+which is exactly the specificity worth having.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `--filter=UiHygiene` | **13 -> 9**: 8 held + `CareerStatePanel:130` (the reported bug) |
+| Affected feature tests | 94 passed (1337 assertions); 17 passed (286) for 2.4 |
+| `runs.spec.ts` | 13 passed (1.9m) |
+| `setup-shell.spec.ts` | 6 passed (37.1s), plus the falsifiability red |
+| pint / phpstan / typecheck / lint:ui / lore | passed / `[OK]` / clean / clean / 0 & 0 |
+| Probe | ran as the rebuild every browser gate needed; bundle at close **01:41** |
+
+### Batch close
+
+- Ahead **12**; `origin/master` `29f8715` unmoved; peer landed 4 doc commits (`2ff8c3e`, `1b0940e`,
+  `bd54301`, `a1db210`). `HEAD:PRD.md` `22f48ab` -> `fcdc8ad`: NFR-20 gained a gating decision on the
+  four user-facing checks. No copy requirement changed; this slice's renames and the shell are
+  unaffected.
+- Peer dirty at close: the UI brief, and the backlog.
+- **2.1 unchanged: done except the two held files.**
+- Phase 2: **2.3 partial** (the `CareerStatePanel` reason is an owner decision; the AbsenceValue
+  reduction is its own slice), **2.4 done**, 2.5 pending.
+- Phase 3: **3.1 done**; 3.2-3.8 remain.
+- Next: **2.3's AbsenceValue reduction** (91 mentions, needs its own slice) or **3.2 + 3.3**, which the
+  `#actions` slot was built to serve.
