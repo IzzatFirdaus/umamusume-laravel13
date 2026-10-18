@@ -17,7 +17,7 @@ This document consolidates the following source files verbatim (no summarization
   sibling 2.0 documents `docs/proposals/design-2.0.md` and `docs/proposals/screen-spec-2.0.md` stayed in
   `docs/proposals/`, so the 2.0 spec set is now split across two locations. That split is the cost of the
   fold and it is recorded rather than hidden.
-- `.scratch-uma/REORGANIZATION_PLAN.md` (71 lines), added 2026-10-06 as the section
+- `docs/design-research/_scratch/REORGANIZATION_PLAN.md` (71 lines), added 2026-10-06 as the section
   `## REORGANIZATION_PLAN.md` at the end of this file: a second scratch-tree reorganization plan, this one
   for `.scratch-uma/` itself. It is the same class as the 2026-10-01 plan above and belongs beside it, with
   one conflict recorded rather than resolved: the 2026-10-01 plan's §0 table rules `.scratch-uma/`
@@ -60,8 +60,8 @@ here raises a threshold to make a gate pass.
 
 **Round 14 (2026-10-10, augment-only):** the four scenario implementation plans and the three Trainer
 Desk 2.0 prompt sets, all live documents that remain in place, embedded verbatim as their own sections:
-`docs/proposals/Our-Grand-Concert-plan.md` (1145 lines), `docs/Trackblazer-plan.md` (583), `docs/Unity-Cup-plan.md`
-(561), `docs/URA-Finale-plan.md` (381), `docs/Trainer-Desk-2.0-G-Prompts.md` (1046),
+`docs/proposals/Our-Grand-Concert-plan.md` (1145 lines), `docs/proposals/Trackblazer-plan.md` (583), `docs/proposals/Unity-Cup-plan.md`
+(561), `docs/proposals/URA-Finale-plan.md` (381), `docs/Trainer-Desk-2.0-G-Prompts.md` (1046),
 `docs/Trainer-Docs-2.0-D-Prompts.md` (542), `docs/Trainer-Docs-2.0-E-Prompts.md` (230). Each section is
 the canonical reading copy while the source stays the live working file; nothing was deleted and no
 citation was repointed.
@@ -3897,7 +3897,7 @@ It means implementing everything the project's authoritative evidence supports, 
 
 ## Trackblazer-plan.md
 
-> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/Trackblazer-plan.md` (583 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/proposals/Trackblazer-plan.md` (583 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
 
 ## Trackblazer — Implementation Plan
 
@@ -4487,7 +4487,7 @@ The Grand Concert write-up uses GameTora's wording (Hype, Mental, Vocal and Visu
 
 ## Unity-Cup-plan.md
 
-> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/Unity-Cup-plan.md` (561 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/proposals/Unity-Cup-plan.md` (561 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
 
 ## Unity Cup Plan
 
@@ -5055,7 +5055,7 @@ An "Implemented and verified" feature can still rest on an incorrect understandi
 
 ## URA-Finale-plan.md
 
-> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/URA-Finale-plan.md` (381 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/proposals/URA-Finale-plan.md` (381 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
 
 ## URA Finale Plan
 
@@ -5579,9 +5579,9 @@ Read the following in order, recording any missing or contradictory authority in
 6. `config/scenarios.php` — inspect actual configuration keys and structures.
 7. `SCREEN_SPEC.md` and `DESIGN.md`.
 8. The relevant scenario plans:
-   - `docs/URA-Finale-plan.md`
-   - `docs/Unity-Cup-plan.md`
-   - `docs/Trackblazer-plan.md`
+   - `docs/proposals/URA-Finale-plan.md`
+   - `docs/proposals/Unity-Cup-plan.md`
+   - `docs/proposals/Trackblazer-plan.md`
    - `docs/proposals/Our-Grand-Concert-plan.md`
 9. The specific source documents, services, controllers, models, routes, Form Requests, and components identified in the individual G specification.
 
@@ -6143,7 +6143,7 @@ Stop after FD-3 and FD-4 land. Do not begin G3–G6 until the contract extension
 - `frontend-ui-engineering` — the Duel Panel is a modal with focus trap, Escape, and focus return.
 - `antislop-copywriting` — `N/A` titles name the reason precisely.
 
-**Source reading:** `docs/URA-Finale-plan.md` §8, §13, and §11; `screen-spec-2.0.md` §18; `design-2.0.md` §26, §29, §31; `config/scenarios.php` `ura_finale`; `docs/scenarios/01-ura-finale.md` §77–84; `resources/js/components/scenario/UraPanel.vue`.
+**Source reading:** `docs/proposals/URA-Finale-plan.md` §8, §13, and §11; `screen-spec-2.0.md` §18; `design-2.0.md` §26, §29, §31; `config/scenarios.php` `ura_finale`; `docs/scenarios/01-ura-finale.md` §77–84; `resources/js/components/scenario/UraPanel.vue`.
 
 #### Evidence gate
 
@@ -6155,11 +6155,11 @@ Before implementation:
 
 #### Build
 
-**Happy Meek Duel Panel.** Triggered by a recorded duel appearance. Content: the three duel options (only if the recorded turn carries them; otherwise the selected stat only), the Racing Spirit hint tied to each outcome (names from `docs/URA-Finale-plan.md` §8's table), the win-chance icon glyph only (no percentage, no band), the duel count (`n / 6 wins`), and the escalation reward (`Past My Limits`, 200+ SP). The enhanced-spark rate is `N/A` with a title. Focus trap, Escape, focus return.
+**Happy Meek Duel Panel.** Triggered by a recorded duel appearance. Content: the three duel options (only if the recorded turn carries them; otherwise the selected stat only), the Racing Spirit hint tied to each outcome (names from `docs/proposals/URA-Finale-plan.md` §8's table), the win-chance icon glyph only (no percentage, no band), the duel count (`n / 6 wins`), and the escalation reward (`Past My Limits`, 200+ SP). The enhanced-spark rate is `N/A` with a title. Focus trap, Escape, focus return.
 
 **Career Milestone Tracker.** An `<ol>` with glyph plus text (`●` completed, `◉` current, `○` upcoming, `×` missed). Milestones from the recorded calendar and the config's fan-gate thresholds. Each milestone shows label, due turn, state, consequence (when the source states one), and a link to the decision screen that addresses it.
 
-**Pre-Final Review.** A section of the milestone tracker that appears within a config-declared pre-final window. Content: recorded strengths (stats above the finale's distance floor), known deficits, unresolved requirements. The distance floors come from `docs/URA-Finale-plan.md` §3; they are read from config or recorded Trainer entries, not hard-coded.
+**Pre-Final Review.** A section of the milestone tracker that appears within a config-declared pre-final window. Content: recorded strengths (stats above the finale's distance floor), known deficits, unresolved requirements. The distance floors come from `docs/proposals/URA-Finale-plan.md` §3; they are read from config or recorded Trainer entries, not hard-coded.
 
 #### Tests
 
@@ -6194,13 +6194,13 @@ Stop after the three surfaces land. Do not proceed to G4 until the duel-appearan
 
 **Add-on skills:**
 
-- `source-driven-development` — every field traces to `docs/Unity-Cup-plan.md`, `docs/scenarios/02-unity-cup.md`, `SCENARIO-PUBLISHER-REFERENCES.md` §7, or a recorded run column. The plan's §14 exclusions are the exclusion list.
+- `source-driven-development` — every field traces to `docs/proposals/Unity-Cup-plan.md`, `docs/scenarios/02-unity-cup.md`, `SCENARIO-PUBLISHER-REFERENCES.md` §7, or a recorded run column. The plan's §14 exclusions are the exclusion list.
 - `doubt-driven-development` — the dual-value readout is the central abstraction; every number on both sides must trace. Rank thresholds are unpublished (plan §14 item 1); burst payout split is unpublished (item 2).
 - `frontend-ui-engineering` — the Team Board is a `<table>` with row-level keyboard reach.
 - `antislop-layoutmobile` — the Team Board stacks by column at 320px.
 - `performance-optimization` — eager-load team data; the board reads on every Cockpit render.
 
-**Source reading:** `docs/Unity-Cup-plan.md` §1, §6, §8, §8a, §9, §10, §11, §12, §14; `screen-spec-2.0.md` §19; `design-2.0.md` §27, §15, §45; `frontend-development-plan.md` §9a FD-5, §9 E3, §9.1; `config/scenarios.php` `unity_cup` (`spirit_burst_bands`, `burst_payout_timing`); `resources/js/components/scenario/UnityCupPanel.vue`; `TrainingRun::latestTeamRank()`, `spiritBurstRoster()`, `raceEntries()`.
+**Source reading:** `docs/proposals/Unity-Cup-plan.md` §1, §6, §8, §8a, §9, §10, §11, §12, §14; `screen-spec-2.0.md` §19; `design-2.0.md` §27, §15, §45; `frontend-development-plan.md` §9a FD-5, §9 E3, §9.1; `config/scenarios.php` `unity_cup` (`spirit_burst_bands`, `burst_payout_timing`); `resources/js/components/scenario/UnityCupPanel.vue`; `TrainingRun::latestTeamRank()`, `spiritBurstRoster()`, `raceEntries()`.
 
 #### Evidence gate
 
@@ -6238,7 +6238,7 @@ Four surfaces land with their tests. The dual-value readout contract migration i
 #### Owner questions
 
 1. Team member writes: supported or read-only? If read-only, the board says so.
-2. Rank thresholds: unpublished (`docs/Unity-Cup-plan.md` §14 item 1). Read from run; do not project.
+2. Rank thresholds: unpublished (`docs/proposals/Unity-Cup-plan.md` §14 item 1). Read from run; do not project.
 3. Dual-value readout shape: two columns or combined line? Report candidates.
 
 #### Explicit stop
@@ -6257,13 +6257,13 @@ Stop after the four surfaces land and the contract migration is reported. Do not
 
 **Add-on skills:**
 
-- `source-driven-development` — every field traces to `docs/Trackblazer-plan.md`, `SCENARIO-PUBLISHER-REFERENCES.md`, `docs/scenarios/03-trackblazer.md`, `config/scenarios.php` `trackblazer`, or a recorded run column. The plan's §15 exclusions are the exclusion list.
+- `source-driven-development` — every field traces to `docs/proposals/Trackblazer-plan.md`, `SCENARIO-PUBLISHER-REFERENCES.md`, `docs/scenarios/03-trackblazer.md`, `config/scenarios.php` `trackblazer`, or a recorded run column. The plan's §15 exclusions are the exclusion list.
 - `doubt-driven-development` — the fatigue table's caveats must be visible in the panel itself, not only in the source.
 - `frontend-ui-engineering` — the Route Planner is an aligned property list; the Race Calendar Panel is an `<ol>` grouped by period.
 - `antislop-copywriting` — flags worded exactly ("5 consecutive races planned in Classic spring (fatigue risk)").
 - `performance-optimization` — one eager-loaded query per period.
 
-**Source reading:** `docs/Trackblazer-plan.md` §1, §3, §6, §7, §8, §10, §12, §15, §17, §18; `screen-spec-2.0.md` §20; `design-2.0.md` §28, §21, §45; `config/scenarios.php` `trackblazer`; `resources/js/components/scenario/TrackblazerPanel.vue`; `docs/scenarios/03-trackblazer.md`.
+**Source reading:** `docs/proposals/Trackblazer-plan.md` §1, §3, §6, §7, §8, §10, §12, §15, §17, §18; `screen-spec-2.0.md` §20; `design-2.0.md` §28, §21, §45; `config/scenarios.php` `trackblazer`; `resources/js/components/scenario/TrackblazerPanel.vue`; `docs/scenarios/03-trackblazer.md`.
 
 #### Evidence gate
 
@@ -6332,14 +6332,14 @@ Stop after the three surfaces land. Do not begin G6 until G5's provenance table 
 - `antislop-copywriting` — item rows as exact labelled values. Community tags visibly separate from game rules.
 - `antislop-layoutmobile` — the drawer at 320px takes the full width; items stack.
 
-**Source reading:** `docs/Trackblazer-plan.md` §11, §12, §19; `screen-spec-2.0.md` §20; `design-2.0.md` §28, §32, §45; `config/scenarios.php` `trackblazer.shop` and its `verified_at`; `resources/js/components/scenario/TrackblazerPanel.vue`; `runs.purchases.store`.
+**Source reading:** `docs/proposals/Trackblazer-plan.md` §11, §12, §19; `screen-spec-2.0.md` §20; `design-2.0.md` §28, §32, §45; `config/scenarios.php` `trackblazer.shop` and its `verified_at`; `resources/js/components/scenario/TrackblazerPanel.vue`; `runs.purchases.store`.
 
 #### Evidence gate
 
 Before implementation, prove the following boundary:
 
 - **Game rules** — sourced from `SCENARIO-PUBLISHER-REFERENCES.md` and marked `Confirmed`.
-- **Community guidance** — sourced from uma.guide (`docs/Trackblazer-plan.md` §11) and marked `Community`.
+- **Community guidance** — sourced from uma.guide (`docs/proposals/Trackblazer-plan.md` §11) and marked `Community`.
 - **Calculations** — derived by this tool from entered data and marked `Calculated`.
 - **Recorded balances** — entered or stored and marked `Confirmed`.
 
@@ -8091,7 +8091,7 @@ Each preserves the original sentence and appends a dated correction, per §11:
 | `SCREEN_SPEC.md` | SCR-CAR-020 / SCR-CAR-021 goal rows from named absence to real module; `:843`, `:1572`, `:2020-2024`, `:2725-2728`, `:480-482` (O-12); the §7 conflict rows for the three items below |
 | `docs/proposals/frontend-development-plan.md` | `:1182`, `:1676-1677`, `:1690-1691`, `:1773-1775` |
 | `docs/research-scratch/PROCESS-PLANS.md` | `:743`, and the two unchecked KI-35 boxes at `:782`/`:1029` |
-| `docs/Umamusume_Progress_Tracker_Runs.md` | a note that the 17 hand-kept run sheets are now checkable against the sourced ladder, and remain the owner's record, never a data source |
+| `docs/imports/Umamusume_Progress_Tracker_Runs.md` | a note that the 17 hand-kept run sheets are now checkable against the sourced ladder, and remain the owner's record, never a data source |
 | `docs/proposals/URA-Finale-plan.md` | `:59`'s wrong citation (`01:77-84` is the fans section, not a goal ladder) and `:66`'s stale `config/scenarios.php` line reference |
 
 #### 8.4 Conflicts recorded, not resolved

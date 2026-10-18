@@ -1,6 +1,6 @@
 # URA Finale runs import (tracker runs 1, 2, 3, 4, 11, 14, 15, 16)
 
-Source: `docs/Umamusume_Progress_Tracker_Runs.md`. Eight career runs were imported into
+Source: `docs/imports/Umamusume_Progress_Tracker_Runs.md`. Eight career runs were imported into
 `training_runs` through `UraFinaleRunsSeeder` (standalone, not part of `DatabaseSeeder`).
 
 ## How to run

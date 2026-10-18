@@ -2637,7 +2637,7 @@ target, and the rise was not in the corpus's prose. Two resolver gaps in `tools/
 tracked, present files as dead:
 
 1. A ref containing a slash was tried only as written and under `docs/`, never beside the citing file. So
-   `docs/DESIGN.md` inside `jev-inspect/CHANGELOG.md` counted dead while the tracked `jev-inspect/docs/DESIGN.md`
+   `jev-inspect/docs/DESIGN.md` inside `jev-inspect/CHANGELOG.md` counted dead while the tracked `jev-inspect/docs/DESIGN.md`
    sat next to it - Markdown's own relative-link rule, unimplemented.
 2. A bare name was tried in three directories (`docs/`, `docs/research-scratch/`, beside the citing file), so the
    corpus's shorthand broke for every docs area added after those three were chosen. `AGENTS.md:54` telling a

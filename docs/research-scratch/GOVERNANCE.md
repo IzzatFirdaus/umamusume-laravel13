@@ -7,7 +7,7 @@ This master file is compiled from 7 source files, embedded verbatim with heading
 1. `docs/research-scratch/GOVERNANCE.md`
 2. `docs/research-scratch/GOVERNANCE.md`
 3. `docs/research-scratch/GOVERNANCE.md`
-4. `docs/deprecated/frontend-review/2026-09-28/README.md`
+4. `docs/research-scratch/screenshot-registry/README.md`
 5. `docs/deprecated/frontend-review/2026-09-28/DECISIONS-NEEDED.md`
 6. `docs/deprecated/frontend-review/2026-09-28/RESOLUTIONS.md`
 7. `CONSTRAINTS.md` (root quality bar C-1 to C-9, 48 lines, added 2026-10-03 in Round 8; see the

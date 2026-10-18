@@ -29,9 +29,9 @@ The eight fields the surfaces ask for are `ruleset_version`, `recommended_use`, 
 
 | Scenario | Value | Global change | Source |
 | -------- | ----- | ------------- | ------ |
-| URA Finale | `2026-07-01` | Caps 1200 → 1400 in all five stats, Happy Meek duels added, +200 per-stat cap bonus | `UMAMUSUME_REFERENCE.md` §2.2.1, `SCENARIO-PUBLISHER-REFERENCES.md` line 982, `docs/URA-Finale-plan.md` line 16, `config/scenarios.php:114,150` |
+| URA Finale | `2026-07-01` | Caps 1200 → 1400 in all five stats, Happy Meek duels added, +200 per-stat cap bonus | `UMAMUSUME_REFERENCE.md` §2.2.1, `SCENARIO-PUBLISHER-REFERENCES.md` line 982, `docs/proposals/URA-Finale-plan.md` line 16, `config/scenarios.php:114,150` |
 | Unity Cup | `2026-07-01` | Caps 1200 → 1300 (Wit 1800), Extreme Spirit Bursts added, Special Training Energy cost removed, Burst hints from the card's own pool | `UMAMUSUME_REFERENCE.md` §2.2.2, `docs/scenarios/02-unity-cup.md:28`, `SCENARIO-PUBLISHER-REFERENCES.md` line 568 |
-| Trackblazer | `2026-03-12` | Launch version, no subsequent rework recorded | `UMAMUSUME_REFERENCE.md` §2.2.3, `SCENARIO-PUBLISHER-REFERENCES.md` line 339, `docs/Trackblazer-plan.md` line 56 |
+| Trackblazer | `2026-03-12` | Launch version, no subsequent rework recorded | `UMAMUSUME_REFERENCE.md` §2.2.3, `SCENARIO-PUBLISHER-REFERENCES.md` line 339, `docs/proposals/Trackblazer-plan.md` line 56 |
 | Our Grand Concert | `2026-07-22` | Launch version (notice 899, "As of 10:00 p.m., Jul 22, 2026 (UTC)"), no subsequent rework recorded | `UMAMUSUME_REFERENCE.md` §2.2.4, `docs/scenarios/07-grand-concert.md:37` |
 
 **Caution that governs this field.** `config/scenarios.php:375-376` states "no source defines a Global ruleset version, so no version number is invented." The value recorded here is the **scenario's Global (re)launch date**, not a client-stated version string. It is the dated instant a source pins the scenario's current numbering to, and the artifact labels it as a date for that reason. The UI's own `Ruleset version` row (`ScenarioSelect.vue:207-215`) reads a **different** field (`app.ruleset`) that is `null` by ruling; the two must not be merged into one label. Do not present the dates above as a ruleset version the client prints.
@@ -41,8 +41,8 @@ The eight fields the surfaces ask for are `ruleset_version`, `recommended_use`, 
 | Scenario | Status | Value or reason |
 | -------- | ------ | --------------- |
 | URA Finale | RESOLVED | "Its guide names it the baseline for learning training, mood, energy and race timing before moving to scenarios with extra systems." (`config/scenarios.php:147`, `docs/scenarios/01-ura-finale.md:14`) |
-| Unity Cup | N/A | No repo master names a recommended use. Searched: `docs/scenarios/`, `docs/Unity-Cup-plan.md` §2, `docs/UMAMUSUME_REFERENCE.md`. (`config/scenarios.php:388`) |
-| Trackblazer | N/A | No repo master names a recommended use. Searched: `docs/scenarios/`, `docs/Trackblazer-plan.md` §2, `docs/UMAMUSUME_REFERENCE.md`. (`config/scenarios.php:405`) |
+| Unity Cup | N/A | No repo master names a recommended use. Searched: `docs/scenarios/`, `docs/proposals/Unity-Cup-plan.md` §2, `docs/UMAMUSUME_REFERENCE.md`. (`config/scenarios.php:388`) |
+| Trackblazer | N/A | No repo master names a recommended use. Searched: `docs/scenarios/`, `docs/proposals/Trackblazer-plan.md` §2, `docs/UMAMUSUME_REFERENCE.md`. (`config/scenarios.php:405`) |
 | Our Grand Concert | N/A | No repo master names a recommended use. Searched: `docs/scenarios/`, `docs/proposals/Our-Grand-Concert-plan.md`, `docs/UMAMUSUME_REFERENCE.md`. (`config/scenarios.php:728`) |
 
 **Why the three stay N/A.** The guides describe each scenario's mechanics and its strategy, but none states a "who is this for" sentence the way the URA Finale guide does. The Trackblazer Game8 page prints an F2P-friendly observation (`SCENARIO-PUBLISHER-REFERENCES.md` line 1285) and the Grand Concert pages print PvP-build observations (line 2183-2185), but an observation about a build audience is not a recommended-use line, and lifting one into that field would be the invented fact `AGENTS.md` §5 forbids. They remain named absences with the search recorded.
@@ -62,9 +62,9 @@ Our own label for the mechanism that advances facility level, read straight from
 
 | Scenario | Status | Value or reason |
 | -------- | ------ | --------------- |
-| URA Finale | N/A | No repo master names a planning focus. Searched: `docs/URA-Finale-plan.md`, `docs/scenarios/01-ura-finale.md`, `docs/UMAMUSUME_REFERENCE.md`. |
+| URA Finale | N/A | No repo master names a planning focus. Searched: `docs/proposals/URA-Finale-plan.md`, `docs/scenarios/01-ura-finale.md`, `docs/UMAMUSUME_REFERENCE.md`. |
 | Unity Cup | RESOLVED | "Wit carries the scenario's own cap bonus; team rank and Spirit Burst counts decide the exclusive-skill payout." (`config/scenarios.php:390`) |
-| Trackblazer | N/A | No planning focus is named. The plan's central question is "Race, train, or rest this turn, and does it keep me alive at the next Grade Point checkpoint?" (`docs/Trackblazer-plan.md` line 23), but no source calls it a planning focus. |
+| Trackblazer | N/A | No planning focus is named. The plan's central question is "Race, train, or rest this turn, and does it keep me alive at the next Grade Point checkpoint?" (`docs/proposals/Trackblazer-plan.md` line 23), but no source calls it a planning focus. |
 | Our Grand Concert | N/A | No planning focus is named. No publisher uses the term; the scenario's loop is described as "train → lessons → songs → lives" (`docs/scenarios/07-grand-concert.md:58-95`). |
 
 ### 5. `expected_gains` — RESOLVED per discipline (JP values, Global caveat)
@@ -140,7 +140,7 @@ The Run Detail team block shows five stat grades, all `N/A` today (audit line 39
 | S | 5 |
 | S+ | 5 (second "It's On!" hint; no further level) |
 
-Sources: `docs/scenarios/02-unity-cup.md:125-131`, `SCENARIO-PUBLISHER-REFERENCES.md` line 1093, `docs/Unity-Cup-plan.md` line 202. Tagged `[Global]`. The post-2026-07-01 rework added S+ above the previous S ceiling; older guidance treating S as the top of the ladder is incomplete.
+Sources: `docs/scenarios/02-unity-cup.md:125-131`, `SCENARIO-PUBLISHER-REFERENCES.md` line 1093, `docs/proposals/Unity-Cup-plan.md` line 202. Tagged `[Global]`. The post-2026-07-01 rework added S+ above the previous S ceiling; older guidance treating S as the top of the ladder is incomplete.
 
 Not applicable to the other three scenarios: URA Finale (`facility_level_source` `repetition`), Trackblazer (`repetition_plus_purchases`) and Our Grand Concert (`repetition`) carry no team layer.
 
@@ -155,7 +155,7 @@ Not applicable to the other three scenarios: URA Finale (`facility_level_source`
 | URA Finale guide | `docs/scenarios/01-ura-finale.md` | baseline framing, facility repetition, recommended-use line |
 | Unity Cup guide | `docs/scenarios/02-unity-cup.md` | team rank ladder, Spirit Burst tables, post-rework deltas, SP payout note |
 | Grand Concert guide | `docs/scenarios/07-grand-concert.md` | Performance loop, launch date, level-4 facility rule |
-| Scenario plans | `docs/URA-Finale-plan.md`, `docs/Unity-Cup-plan.md`, `docs/Trackblazer-plan.md`, `docs/proposals/Our-Grand-Concert-plan.md` | central question per scenario, facility-level sourcing, planning-focus candidates |
+| Scenario plans | `docs/proposals/URA-Finale-plan.md`, `docs/proposals/Unity-Cup-plan.md`, `docs/proposals/Trackblazer-plan.md`, `docs/proposals/Our-Grand-Concert-plan.md` | central question per scenario, facility-level sourcing, planning-focus candidates |
 | Config matrix | `config/scenarios.php`, `config/advisor.php` | `facility_level_source`, existing metadata, advisor constants and their staleness |
 | Surfaces | `resources/js/pages/Career/ScenarioSelect.vue`, `resources/js/components/career/TrainingCard.vue` | which fields the cards print and how an absent one is named |
 | Advisor engine | `app/Services/Advisor/TrainerAdvisor.php`, `AdvisorOption.php` | `RiskNotMeasured`, energy-after ranges |

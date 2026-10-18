@@ -9,14 +9,14 @@ This is an augment pass, not a consolidation.
 
 Sources embedded verbatim:
 
-- `docs/Umamusume_Progress_Tracker_Runs.md`
+- `docs/imports/Umamusume_Progress_Tracker_Runs.md`
 - `docs/imports/ura-finale-runs.md`
 
 ---
 
 ## Umamusume_Progress_Tracker_Runs.md
 
-> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/Umamusume_Progress_Tracker_Runs.md` (2521 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/imports/Umamusume_Progress_Tracker_Runs.md` (2521 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
 
 ## Umamusume Progress Tracker — Non-Empty Runs
 
@@ -2548,7 +2548,7 @@ Medium      A
 
 ## URA Finale runs import (tracker runs 1, 2, 3, 4, 11, 14, 15, 16)
 
-Source: `docs/Umamusume_Progress_Tracker_Runs.md`. Eight career runs were imported into
+Source: `docs/imports/Umamusume_Progress_Tracker_Runs.md`. Eight career runs were imported into
 `training_runs` through `UraFinaleRunsSeeder` (standalone, not part of `DatabaseSeeder`).
 
 ### How to run

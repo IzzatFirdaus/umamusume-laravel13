@@ -3,7 +3,7 @@
 **Read-only.** No tracked file modified, nothing fixed, no `.md` edited. HEAD `e845887`, live main repo
 `D:/Projects/umamusume-laravel13`.
 
-**Path deviation, stated up front.** The dispatch names `docs/research-scratch-source/doc-drift-audit-2026-10-16.md`.
+**Path deviation, stated up front.** The dispatch names `docs/audits/doc-drift-audit-2026-10-16.md`.
 That directory is, by the owner's ruling of 2026-10-16, for knowledge gathered from and about *Umamusume Pretty
 Derby* only. This is a repository audit, so it lives here in `docs/audits/`, beside `full-audit-2026-10-16.md` and
 the `rice-shower-unity-cup-*` documents. Recorded rather than silently overridden.
@@ -110,7 +110,7 @@ Every row below was **verified by direct existence check this pass**, not inferr
 | `route('run')` | `frontend-development-plan.md:1249` | 1 route | Absent against the 85 parsed route names. Either a prose abbreviation or a stale name |
 
 **Four scenario guides are in the same state as `CONSTRAINTS.md`** — `docs/proposals/Our-Grand-Concert-plan.md` (22×),
-`docs/Trackblazer-plan.md` (12×), `docs/URA-Finale-plan.md` (10×), `docs/Unity-Cup-plan.md` (10×) are all
+`docs/proposals/Trackblazer-plan.md` (12×), `docs/proposals/URA-Finale-plan.md` (10×), `docs/proposals/Unity-Cup-plan.md` (10×) are all
 **tracked and deleted uncommitted** (`git status` ` D`), and `config/scenarios.php` prose plus the metadata
 reports cite them by path. A peer is mid-move; until it lands, 54 citations read as drift that may in fact be a
 relocation.

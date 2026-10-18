@@ -259,7 +259,7 @@ Two cautions:
 
 ### 2.9 Against the 2026-10-13 live-capture laws pass (`UX-AUDIT-REPORT.md`)
 
-A first **partial laws pass** already exists: `.scratch-uma/ux-audit/UX-AUDIT-REPORT.md` (2026-10-13),
+A first **partial laws pass** already exists: `docs/audits/UX-AUDIT-REPORT.md` (2026-10-13),
 framework "Laws of UX (lawsofux.com)", produced from the same session-private harness this plan adopts in
 §4.2 (21 screens × 4 widths, 81 captures). It is the plan's output contract (§1.5, §6) already prototyped:
 a summary, per-screen findings tables with a law column and P0-P3 severity, cross-page findings, and a
@@ -545,7 +545,7 @@ Per `AGENTS.md` §9's cost-aware escalation. Nothing below was run for this plan
   `UX-DELIVERABLES.md:1729-2182` (the Nielsen-style heuristic evaluation) and `DESIGN-CORPUS.md:4091-4098,
   5614-5622, 6503, 6538`. `docs/research-scratch-source/` was scanned and holds **no** UX-law material (0
   markdown files; raw scrapes, game JSON, a screenshot inventory and build scripts), so nothing was drawn
-  from it beyond the merge-tool provenance of `UX-DELIVERABLES.md`; `.scratch-uma/ux-audit/UX-AUDIT-REPORT.md`
+  from it beyond the merge-tool provenance of `UX-DELIVERABLES.md`; `docs/audits/UX-AUDIT-REPORT.md`
   (2026-10-13) is a first partial laws pass, reconciled in §2.9 with a durability caveat, and
   `.scratch-uma/ui-audit-2026-10-13/rubric.md` supplies the cluster-audit cognitive-load checklist.
 - **Not delivered, stated plainly:** no law verdict was produced here; this is the plan that says how to
