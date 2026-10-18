@@ -233,12 +233,8 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
         <template #eyebrow>Setup</template>
         <template #title>Choose a trainee</template>
 
-        <!-- Back breadcrumb -->
-        <nav class="mt-4 mb-2" aria-label="Breadcrumb">
-            <Link href="/career/setup/trainee" class="inline-flex min-h-11 items-center text-sm font-medium text-brand-accent-ink hover:underline transition-colors duration-150 ease-out" aria-label="Back to trainee step">
-                ← Back to trainee
-            </Link>
-        </nav>
+        <!-- No breadcrumb: "← Back to trainee" pointed at this same URL. The step bar above lists all
+             six steps, and the carried-choices strip states the scenario, so nothing is lost. -->
 
         <!-- Header: eyebrow + subtitle. The page title is the layout's #title h1. -->
         <header class="mb-4">
@@ -251,21 +247,8 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
             profile screen behind each row states what is known about her before committing.
         </p>
 
-        <p class="mt-3 text-sm text-ink">
-            Scenario:
-            <strong v-if="props.scenarioLabel" class="text-ink-strong">{{ props.scenarioLabel }}</strong>
-            <AbsenceValue
-                v-else
-                compact
-                reason="No scenario has been chosen in this setup draft yet. Set it on step 1."
-            />
-            <Link
-                href="/career/setup/scenario"
-                class="ml-3 inline-flex min-h-11 items-center rounded-md px-2 text-sm text-ink underline"
-            >
-                Change scenario
-            </Link>
-        </p>
+        <!-- The scenario is stated once, by the carried-choices strip above (slice 3.2). This page
+             used to repeat it here with its own "Change scenario" link; the strip's entry is that link. -->
 
         <!-- Filter bar in bordered container -->
         <div class="mt-5 rounded-md border border-rule bg-raised p-4">
