@@ -22,7 +22,7 @@
  */
 import AppLayout from './AppLayout.vue';
 import { Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, onMounted, nextTick } from 'vue';
 import { useLayout } from '../composables/useLayout';
 
 const props = defineProps<{ step: number; visited?: number[]; saved?: number[] }>();
@@ -68,6 +68,52 @@ const isCompleted = (index: number): boolean =>
     (props.visited?.includes(index + 1) === true || props.saved?.includes(index + 1) === true) && index + 1 !== props.step;
 const isNotStarted = (index: number): boolean =>
     !isCompleted(index) && index + 1 !== props.step;
+
+/*
+ * Focus and document title, on every step load.
+ *
+ * A wizard re-renders the same shell with new content, so nothing tells a keyboard or screen-reader
+ * user that the step changed: the URL moved, the headings did not. Two things fix that without
+ * touching the shell.
+ *
+ *  - The step's `h1` takes focus. It is NOT moved: since 1.3 the heading sits in the shell's title
+ *    band, and the shell decides whether that band is `#head` or `#title`. This finds whichever `h1`
+ *    the page rendered, gives it `tabindex="-1"` so a heading can take programmatic focus, and focuses
+ *    it. The attribute is added here rather than in `AppLayout` so the shell keeps owning position and
+ *    this layout owns the wizard's own focus policy.
+ *  - `document.title` becomes the step's title. The step label is the honest subject: a Trainer with
+ *    six setup tabs open needs to tell them apart from the tab strip.
+ *
+ * `nextTick` because the h1 is rendered by the parent's `#title` slot, which is not in the DOM at
+ * this component's own mount.
+ */
+onMounted(async () => {
+    await nextTick();
+
+    // The shell renders the heading in its banner, but `#head` and `#title` are slot NAMES, not
+    // element ids: the first version queried `#head h1, #title h1` and matched nothing, which the
+    // spec caught as a missing tabindex rather than a missing heading. The heading is simply the
+    // page's one `h1`, which is the property `page-header.spec.ts` already guarantees on every
+    // pilot page.
+    const heading = document.querySelector<HTMLElement>('main h1, h1');
+
+    if (heading === null) {
+        return;
+    }
+
+    heading.setAttribute('tabindex', '-1');
+    heading.focus({ preventScroll: true });
+
+    const label = steps[props.step - 1]?.label ?? heading.textContent?.trim() ?? '';
+
+    // The step pages set their own `<Head title>` ("Choose a scenario"), which is more specific than
+    // this layout's step label ("Scenario"). A first version overwrote it on mount and the two
+    // raced, so a run would sometimes show the page's name and sometimes the shell's. The page wins:
+    // this only fills the title when a step ships without one, and the tab never goes unnamed.
+    if (document.title.trim() === '' && label !== '') {
+        document.title = `${label} · Setup · Trainer Desk`;
+    }
+});
 </script>
 
 <template>
@@ -112,6 +158,15 @@ const isNotStarted = (index: number): boolean =>
 
         <div :class="wrapperClass" class="@container" data-layout-container>
             <slot />
+
+            <!--
+              The action bar, when a step wants the shell to own it. The steps that landed before
+              this slice render `StickyFooter` themselves (it has to be the root element of whatever
+              holds it, so wrapping one here would break its own sticky range); a step from 3.2 onward
+              can fill `#actions` instead and the shell places it at the foot of the step content.
+              Empty for every current step, so nothing renders and nothing moves.
+            -->
+            <slot name="actions" />
         </div>
     </AppLayout>
 </template>
