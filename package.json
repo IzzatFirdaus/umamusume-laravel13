@@ -3,12 +3,12 @@
     "private": true,
     "type": "module",
     "scripts": {
-    "build": "vite build",
-    "dev": "vite",
-    "typecheck": "tsc --noEmit",
-    "lint:ui": "node tools/ui-lint.mjs",
-    "test:a11y": "playwright test accessibility.spec.ts",
-    "test:browser": "playwright test"
+        "build": "vite build",
+        "dev": "vite",
+        "typecheck": "tsc --noEmit",
+        "lint:ui": "node tools/ui-lint.mjs",
+        "test:a11y": "playwright test accessibility.spec.ts",
+        "test:browser": "playwright test"
     },
     "devDependencies": {
         "@axe-core/playwright": "^4.13.0",
