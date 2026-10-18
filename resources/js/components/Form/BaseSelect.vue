@@ -9,7 +9,12 @@ interface Option {
 
 interface Props {
     modelValue: string | number | null;
-    id: string;
+    /**
+     * Optional because most call sites pass only `name`, and the two are the same value. A select
+     * that omits both still needs a stable id for its label, so `name` is the fallback and `id` is
+     * the override. Required-when-present: an `id` that is passed is used verbatim.
+     */
+    id?: string;
     name: string;
     label?: string;
     options: Option[];
@@ -33,7 +38,7 @@ const emit = defineEmits<{
     focus: [event: FocusEvent];
 }>();
 
-const selectId = props.id;
+const selectId = props.id ?? props.name;
 const labelId = props.labelId ?? `${selectId}-label`;
 const describedBy = computed(() => {
     // When there's an error, return ONLY the error ID to match the old inline behavior
