@@ -8,6 +8,7 @@
  * Props are flattened from `TimelineController::buildEntries()`; `valueOf` exposes them read-only
  * because the same row is also reached from the parent filter.
  */
+import StatusBadge from '../ui/StatusBadge.vue';
 
 interface Stats {
     speed: number | null;
@@ -97,11 +98,15 @@ const kindVisible = (entry: Entry): boolean =>
                     <span class="rounded-md bg-pick px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-on-pick">{{ entry.kind_label }}</span>
                     <span class="font-mono tabular-nums text-xs text-ink-muted">Turn {{ entry.turn }}</span>
                     <span class="font-medium text-ink-strong">{{ entry.action_label }}</span>
-                    <span
+                    <!-- Plan 1.6: "Updated" is an exception marker, so it is StatusBadge's rather
+                         than a hand-rolled outline. The reason moves to the pill's own title, which
+                         is where a correction id belongs rather than in visible copy. -->
+                    <StatusBadge
                         v-if="entry.corrected"
-                        class="rounded-full border border-risk px-2 py-0.5 text-xs font-semibold text-risk"
+                        state="unconfirmed"
+                        label="Updated"
                         :title="`Correction ${entry.correction_id}: row was updated.`"
-                    >Updated</span>
+                    />
                 </summary>
 
                 <div class="border-t border-rule p-3 text-sm">

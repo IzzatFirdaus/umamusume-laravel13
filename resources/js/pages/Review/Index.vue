@@ -3,6 +3,7 @@ import AppLayout from '../../layouts/AppLayout.vue';
 import CandidateForm from '../../components/review/CandidateForm.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import StatusPill from '../../components/StatusPill.vue';
+import StatusBadge from '../../components/ui/StatusBadge.vue';
 import SuggestionHint from '../../components/review/SuggestionHint.vue';
 import Pagination from '../../components/Pagination.vue';
 import { Head, Link } from '@inertiajs/vue3';
@@ -88,7 +89,18 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                     <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                         <div class="flex flex-wrap items-center gap-2">
                             <span class="font-medium text-ink-strong">{{ candidate.proposed_name }}</span>
+                            <!-- Plan 1.6: the match verdict is an exception when it is not a match,
+                                 and StatusBadge is the component that says so in one worded pill.
+                                 "Fuzzy match" stays a StatusPill because it is a softer warning
+                                 rather than an absence; "No match" is the absence, and it is
+                                 StatusBadge's `unknown` case. -->
+                            <StatusBadge
+                                v-if="candidate.match_tier !== 'Fuzzy'"
+                                state="unknown"
+                                label="No match"
+                            />
                             <StatusPill
+                                v-else
                                 :label="pillFor(candidate.match_tier).label"
                                 :variant="pillFor(candidate.match_tier).variant"
                                 size="sm"
