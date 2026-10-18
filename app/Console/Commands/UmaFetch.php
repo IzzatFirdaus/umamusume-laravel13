@@ -94,7 +94,7 @@ class UmaFetch extends Command
             }
 
             if ($fetched['manifest_fallback']) {
-                $this->warn("  Manifest unavailable for '{$key}'; using the pinned URL, whose document may be stale (KI-24).");
+                $this->warn("  Manifest unavailable for '{$key}'; using the pinned URL, whose document may be stale.");
             }
 
             // Provenance records the URL actually fetched, not the one declared. For a

@@ -135,15 +135,15 @@ const conditions = computed(() => props.skill.condition_groups ?? []);
 
                 <p class="mt-2 text-xs text-ink-muted">
                     The expressions and effect codes above are the source's own engine data, not client
-                    labels. The description is not recorded: no client-string source for it exists
-                    (`ADR-0011`, G-SK-20), and no awakening threshold is kept either.
+                    labels. The description is not recorded: no client-string source for it exists,
+                    and no awakening threshold is kept either.
                 </p>
             </template>
 
             <p v-else class="mt-2 text-sm text-ink-muted">
                 Activation conditions, effect values and distance or style qualifiers are not
-                recorded. This tool's skills source stores no description it may render, which
-                `ADR-0011` records, and no awakening thresholds are kept.
+                recorded. This tool's skills source stores no description it may render, and no
+                awakening thresholds are kept.
             </p>
         </section>
 

@@ -205,7 +205,7 @@ final class AncestryGraph
                 // Named on the element itself rather than only in the page's copy, so the reason
                 // travels with the value and cannot be lost by a reader that only sees the table.
                 'title' => 'This tool holds no sourced star-roll table, so it states no chance for a Spark. '
-                    .'The published odds are a wiki pair flagged stale in REFERENCE §1.5.3.',
+                    .'The published odds are a wiki pair flagged stale.',
             ],
         ];
     }

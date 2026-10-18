@@ -228,7 +228,7 @@ final class VeteranController extends Controller
         return [
             [
                 'label' => 'Inheritance usefulness and a compatibility calculation',
-                'reason' => 'Held computation under `ADR-0020` §3: the library stores and compares what was entered and derives no outcome, and no table in this repository prices a parent combination.',
+                'reason' => 'Held computation: the library stores and compares what was entered and derives no outcome, and no table in this repository prices a parent combination.',
             ],
             [
                 'label' => 'A factor comparison',

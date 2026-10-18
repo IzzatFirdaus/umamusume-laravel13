@@ -178,12 +178,32 @@ it('never ships a repository identifier to a Trainer', function (): void {
     $patterns = shippedIdentifierPatterns();
     $violations = [];
 
+    /*
+     * Rulings where a `.php` path is the correct reading rather than a citation.
+     *
+     * `DatabaseGuard::assertNoConfigurationCache()` throws to an OPERATOR running a harness, not to a
+     * Trainer: the message's whole value is naming the file whose existence is the fault. Line 233 is
+     * the `file_exists()` probe itself. Rewriting either would degrade a diagnostic to save a rule
+     * that was written about copy. Keyed on file and line so an edit that moves the string falls back
+     * into the scan.
+     */
+    $machinePathRulings = [
+        'app/Services/DatabaseSafety/DatabaseGuard.php:233',
+        'app/Services/DatabaseSafety/DatabaseGuard.php:238',
+    ];
+
     foreach (glob(base_path('app/{,*/,*/*/,*/*/*/}*.php'), GLOB_BRACE) ?: [] as $file) {
         $relative = str_replace(base_path().DIRECTORY_SEPARATOR, '', $file);
 
         foreach (shippedPhpLines((string) file_get_contents($file)) as $entry) {
+            $lineKey = $relative.':'.$entry['line'];
+
             foreach ($patterns as $what => $pattern) {
                 if (preg_match($pattern, $entry['text']) === 1) {
+                    if ($what === 'a source-file path' && in_array($lineKey, $machinePathRulings, true)) {
+                        continue;
+                    }
+
                     $violations[] = sprintf('%s:%d carries %s', $relative, $entry['line'], $what);
                 }
             }
