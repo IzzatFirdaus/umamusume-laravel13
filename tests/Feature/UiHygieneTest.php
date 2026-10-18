@@ -36,6 +36,11 @@ declare(strict_types=1);
  * which no file here does; but a docblock opener inside a string (`'/**'`) would confuse it. Instead
  * this walks line by line and tracks block state, which is what the file actually needs.
  *
+ * Trailing comments are handled too: `return true; // local-only tool (ARCHITECTURE §8)` is a comment,
+ * and the first version only skipped lines that BEGAN with `//`, so every inline trailing comment
+ * counted as shipped copy. Stripping happens outside string literals only, so a `//` inside a URL or
+ * a message string is left alone.
+ *
  * @return array<int, array{line: int, text: string}>
  */
 function shippedPhpLines(string $source): array
@@ -60,14 +65,55 @@ function shippedPhpLines(string $source): array
             continue;
         }
 
-        if (str_starts_with($trimmed, '//')) {
+        if (str_starts_with($trimmed, '//') || str_starts_with($trimmed, '*')) {
             continue;
         }
 
-        $out[] = ['line' => $index + 1, 'text' => $line];
+        $out[] = ['line' => $index + 1, 'text' => stripTrailingPhpComment($line)];
     }
 
     return $out;
+}
+
+/**
+ * Removes a trailing `//` comment, ignoring a `//` that sits inside a quoted string.
+ *
+ * A URL such as `https://example.test` must survive, so the scan tracks whether it is inside single
+ * or double quotes before it treats `//` as the start of a comment.
+ */
+function stripTrailingPhpComment(string $line): string
+{
+    $inSingle = false;
+    $inDouble = false;
+    $length = strlen($line);
+
+    for ($i = 0; $i < $length; $i++) {
+        $char = $line[$i];
+
+        if ($char === '\\') {
+            $i++;
+
+            continue;
+        }
+
+        if ($char === "'" && ! $inDouble) {
+            $inSingle = ! $inSingle;
+
+            continue;
+        }
+
+        if ($char === '"' && ! $inSingle) {
+            $inDouble = ! $inDouble;
+
+            continue;
+        }
+
+        if (! $inSingle && ! $inDouble && $char === '/' && ($line[$i + 1] ?? '') === '/') {
+            return substr($line, 0, $i);
+        }
+    }
+
+    return $line;
 }
 
 /**
@@ -119,7 +165,10 @@ function shippedIdentifierPatterns(): array
         'a goal identifier' => '/\bG-\d+\b/',
         'a known-issue identifier' => '/\bKI-\d+/',
         'a docs path' => '#\bdocs/#',
-        'a source-file path' => '/\b\w+\.(php|json)\b/',
+        // `.php` only. `.json` was in the first version and matched `base_path('.agents/skills.json')`,
+        // which is a real data file the product reads rather than a source reference a Trainer should
+        // never see. A `.php` path has no such legitimate reading.
+        'a source-file path' => '/\b[\w\/\\\\]+\.php\b/',
         'a section reference' => '/§\d/',
     ];
 }
