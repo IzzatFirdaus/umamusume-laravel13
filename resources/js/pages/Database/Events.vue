@@ -36,7 +36,7 @@ interface EventRow {
 const props = defineProps<{
     rows: EventRow[];
     recheck: { text: string; url: string };
-    source: { section: string; anchor: string; doc: string };
+    source: { section: string; anchor: string };
     totalCount: number;
 }>();
 
@@ -74,7 +74,6 @@ const close = async (): Promise<void> => {
         <SourceNote
             :section="props.source.section"
             :anchor="props.source.anchor"
-            :doc="props.source.doc"
             :recheck="props.recheck"
         />
 

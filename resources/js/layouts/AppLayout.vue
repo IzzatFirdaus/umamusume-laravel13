@@ -336,7 +336,11 @@ const moreIsCurrent = computed(() =>
                 </ul>
             </nav>
             <div class="border-t border-rule px-2 py-3 text-xs text-ink-muted">
-                <span :class="railCollapsed ? 'sr-only' : ''">Local data · Trainer Desk</span>
+                <Link
+                    href="/database/sources"
+                    class="inline-flex min-h-11 items-center underline"
+                    :class="railCollapsed ? 'sr-only' : ''"
+                >Data sources</Link>
             </div>
         </aside>
 

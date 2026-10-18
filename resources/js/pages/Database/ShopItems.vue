@@ -44,7 +44,7 @@ interface ScenarioItem {
 const props = defineProps<{
     rows: ShopRow[];
     scenarioShop: { label: string; rotation_turns: number; items: ScenarioItem[] };
-    source: { section: string; anchor: string; doc: string };
+    source: { section: string; anchor: string };
     totalCount: number;
     // The controller sends it (DatabaseController's shopItems), and the SourceNote under the table
     // renders it: without the declaration the re-check pointer this area's siblings all carry was
@@ -83,7 +83,6 @@ const close = async (): Promise<void> => {
         <SourceNote
             :section="props.source.section"
             :anchor="props.source.anchor"
-            :doc="props.source.doc"
             :recheck="props.recheck"
         />
 

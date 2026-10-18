@@ -323,14 +323,7 @@ function configIdentifierDebt(): array
     return [
         // config/advisor.php
         'config/advisor.php:34', 'config/advisor.php:42', 'config/advisor.php:49', 'config/advisor.php:56',
-        // config/reference.php
-        'config/reference.php:43', 'config/reference.php:52', 'config/reference.php:56',
-        'config/reference.php:150', 'config/reference.php:164', 'config/reference.php:182',
-        'config/reference.php:191', 'config/reference.php:200', 'config/reference.php:209',
-        'config/reference.php:218', 'config/reference.php:227', 'config/reference.php:236',
-        'config/reference.php:245', 'config/reference.php:262', 'config/reference.php:277',
-        'config/reference.php:286', 'config/reference.php:295', 'config/reference.php:304',
-        'config/reference.php:313', 'config/reference.php:322',
+        // config/reference.php: cleared by slice 2.2, when the provenance moved to /database/sources.
         // config/scenarios.php (held)
         'config/scenarios.php:152', 'config/scenarios.php:166', 'config/scenarios.php:298',
         'config/scenarios.php:350', 'config/scenarios.php:364', 'config/scenarios.php:468',

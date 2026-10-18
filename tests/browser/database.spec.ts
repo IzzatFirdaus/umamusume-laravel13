@@ -68,13 +68,36 @@ test('the Events view renders the recurring types with glyph-and-word provenance
     // aria-hidden and toHaveText would read it (KI-70's class of failure). The unverified row is the
     // one `unknown` badge on this page, so exactly one is expected.
     await expect(page.getByRole('img', { name: /^Unknown/ }).first()).toBeVisible();
-    expect(await page.getByRole('img', { name: /^Confirmed/ }).count()).toBeGreaterThan(0);
+    // `confirmed` is a figure the tool is sure of, and it deliberately carries no mark: the
+    // vocabulary marks only the three exception states. This assertion used to look for a Confirmed
+    // badge and had been failing since that ruling landed.
+    expect(await page.getByRole('img', { name: /^Confirmed/ }).count()).toBe(0);
 
     // No colour-only state: the server tag is bracketed text, so it reads without styling.
     await expect(page.getByText('[JP]').first()).toBeVisible();
     await expect(page.getByText('[Global]').first()).toBeVisible();
 });
 
+test('the Data sources page lists every dataset and names no repository path', async ({ page }) => {
+    await page.goto('/database/sources', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByRole('heading', { name: 'Data sources', level: 1 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Fetched', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Transcribed', level: 2 })).toBeVisible();
+
+    // A transcribed dataset is named by subject, and the page carries no section number or file path.
+    await expect(page.getByText('Recurring event types').first()).toBeVisible();
+    await expect(page.getByText('Spark categories').first()).toBeVisible();
+    await expect(page.locator('body')).not.toContainText('UMAMUSUME_REFERENCE');
+    await expect(page.locator('body')).not.toContainText('§');
+
+    // The reference views link here rather than printing the guide's path.
+    await page.goto('/database/events', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.locator('body')).not.toContainText('UMAMUSUME_REFERENCE');
+    await expect(page.getByRole('link', { name: 'Where this dataset comes from' })).toBeVisible();
+});
 test('the Events drawer opens on a row and returns focus to it on close', async ({ page }) => {
     await page.goto('/database/events', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();

@@ -296,3 +296,6 @@ Route::get('/database/scenarios', [DatabaseController::class, 'scenarios'])->nam
 Route::get('/database/events', [DatabaseController::class, 'events'])->name('database.events');
 Route::get('/database/shop-items', [DatabaseController::class, 'shopItems'])->name('database.shop-items');
 Route::get('/database/sparks', [DatabaseController::class, 'sparks'])->name('database.sparks');
+// Where every dataset comes from, in one place. The reference views link here instead of printing a
+// source path and a section number a Trainer cannot open (slice 2.2).
+Route::get('/database/sources', [DatabaseController::class, 'sources'])->name('database.sources');

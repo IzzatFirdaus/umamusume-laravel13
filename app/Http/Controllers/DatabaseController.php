@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\RaceCatalogSlot;
 use App\Services\PageSize;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -204,7 +205,6 @@ class DatabaseController extends Controller
             'source' => [
                 'section' => (string) ($events['source']['section'] ?? ''),
                 'anchor' => (string) ($events['source']['anchor'] ?? ''),
-                'doc' => (string) config('reference.source_doc'),
             ],
             'totalCount' => count($rows),
         ]);
@@ -264,7 +264,6 @@ class DatabaseController extends Controller
             'source' => [
                 'section' => (string) ($shop['source']['section'] ?? ''),
                 'anchor' => (string) ($shop['source']['anchor'] ?? ''),
-                'doc' => (string) config('reference.source_doc'),
             ],
             'totalCount' => count($rows),
         ]);
@@ -321,9 +320,73 @@ class DatabaseController extends Controller
             'source' => [
                 'section' => (string) ($sparks['source']['section'] ?? ''),
                 'anchor' => (string) ($sparks['source']['anchor'] ?? ''),
-                'doc' => (string) config('reference.source_doc'),
             ],
             'totalCount' => count($categories),
+        ]);
+    }
+
+    /**
+     * Where every dataset this tool prints comes from, in one place.
+     *
+     * Every reference view used to carry its own "Transcribed from `docs/...` §x.y" line, which named
+     * a file and a section number the Trainer does not hold. One page answers the same question for
+     * all of them: a fetched dataset names its URL, a transcribed one names the guide and the date
+     * the guide was anchored, and every row says what re-checking it costs.
+     *
+     * Two arms, because the two kinds of dataset age differently. A fetch's freshness is a recorded
+     * timestamp (`data_sources.fetched_at`, the newest row this tool holds). A transcription's
+     * freshness is the guide's own anchor date, which `config/reference.php` already carries per
+     * dataset: the date the transcribing pass read the document, not a claim that the document has
+     * not moved since.
+     *
+     * No count and no status chip. A dataset that has never been fetched says so in words rather
+     * than showing a zero or an empty date, because "no fetch recorded" and "fetched long ago" are
+     * different facts and only one of them is a problem.
+     */
+    public function sources(): Response
+    {
+        $lastFetched = DB::table('data_sources')->max('fetched_at');
+
+        $fetched = [];
+
+        foreach ((array) config('uma.sources', []) as $key => $source) {
+            if (! is_array($source) || ! isset($source['url'])) {
+                continue;
+            }
+
+            $fetched[] = [
+                'name' => (string) $key,
+                'url' => (string) $source['url'],
+                'fetched_at' => $lastFetched === null ? null : (string) $lastFetched,
+                'note' => 'Fetched by the ingest pipeline from the publisher\'s own document. The newest '
+                    .'recorded fetch across every dataset is the date beside this row.',
+            ];
+        }
+
+        $transcribed = [];
+
+        foreach ((array) config('reference', []) as $key => $dataset) {
+            if (! is_array($dataset) || ! isset($dataset['source']['anchor'])) {
+                continue;
+            }
+
+            // The config's `section` reads "§4.4 Recurring event types": the words after the number
+            // are the dataset's own name, and the number is the part a Trainer cannot use.
+            $section = (string) ($dataset['source']['section'] ?? '');
+            $name = preg_replace('/^§[\d.]+\s*/u', '', $section) ?? $section;
+
+            $transcribed[] = [
+                'name' => $name === '' ? (string) $key : $name,
+                'url' => (string) ($dataset['recheck']['url'] ?? ''),
+                'anchored_at' => (string) $dataset['source']['anchor'],
+                'note' => (string) ($dataset['recheck']['text'] ?? ''),
+            ];
+        }
+
+        return Inertia::render('Database/Sources', [
+            'docName' => 'the reference guide',
+            'fetched' => $fetched,
+            'transcribed' => $transcribed,
         ]);
     }
 

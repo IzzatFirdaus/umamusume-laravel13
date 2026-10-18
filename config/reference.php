@@ -40,7 +40,7 @@ declare(strict_types=1);
 
 return [
 
-    'source_doc' => 'docs/UMAMUSUME_REFERENCE.md',
+    'source_doc' => 'the reference guide',
 
     /*
     | The Events view: the recurring event types from §4.4. Cadence is the doc's own reading
@@ -49,11 +49,11 @@ return [
     */
     'events' => [
         'source' => [
-            'section' => '§4.4 Recurring event types',
+            'section' => 'Recurring event types',
             'anchor' => '2026-10-02',
         ],
         'recheck' => [
-            'text' => 'Official news index for each server, then diff the date columns of the local event exports. The full procedure is the reference guide §4.4 "How to re-check" line.',
+            'text' => 'Official news index for each server, then diff the date columns of the local event exports. The full procedure is the reference guide\'s own how-to-recheck line.',
             'url' => 'https://umamusume.jp/news/?t=game',
         ],
         'rows' => [
@@ -147,7 +147,7 @@ return [
     */
     'shop_items' => [
         'source' => [
-            'section' => '§1.6.10 Consumables, and where each is actually spent',
+            'section' => 'Consumables, and where each is actually spent',
             'anchor' => '2026-09-27',
         ],
         'recheck' => [
@@ -161,7 +161,7 @@ return [
                 'spend_site' => 'Career',
                 'kind' => 'consumable',
                 'state' => 'confirmed',
-                'source_title' => 'Client effect string, from the reference guide §1.6.10 item list.',
+                'source_title' => 'Client effect string, from the reference guide\'s item list.',
                 'detail' => 'Retries a missed mandatory placing, and a lost Unity Cup team race since the 2026-07-01 rework. Also paid as a league-selection participation reward.',
             ],
             [
@@ -179,7 +179,7 @@ return [
                 'spend_site' => 'Team Trials and Daily Races',
                 'kind' => 'consumable',
                 'state' => 'confirmed',
-                'source_title' => 'Client effect string and spend site, from the reference guide §1.6.10.',
+                'source_title' => 'Client effect string and spend site, from the reference guide.',
                 'detail' => 'One of the four items guides routinely place in Champions Meeting, which publishes no such item path.',
             ],
             [
@@ -188,7 +188,7 @@ return [
                 'spend_site' => 'Team Trials and Daily Races',
                 'kind' => 'consumable',
                 'state' => 'confirmed',
-                'source_title' => 'Client effect strings and spend site, from the reference guide §1.6.10.',
+                'source_title' => 'Client effect strings and spend site, from the reference guide.',
                 'detail' => 'Choosing Rain makes Soft-or-Heavy footing near-mandatory, so the weather and the footing are one decision rather than two.',
             ],
             [
@@ -197,7 +197,7 @@ return [
                 'spend_site' => 'Team Trials and Daily Races',
                 'kind' => 'consumable',
                 'state' => 'confirmed',
-                'source_title' => 'Client effect strings and spend site, from the reference guide §1.6.10.',
+                'source_title' => 'Client effect strings and spend site, from the reference guide.',
                 'detail' => 'Gate position is separate from the slow-start penalty mechanics.',
             ],
             [
@@ -206,7 +206,7 @@ return [
                 'spend_site' => 'Before a run, on the deck screen',
                 'kind' => 'consumable',
                 'state' => 'confirmed',
-                'source_title' => 'Client effect string; the four tiers and their costs are in the reference guide §1.4.4.',
+                'source_title' => 'Client effect string; the four tiers and their costs are in the reference guide.',
                 'detail' => 'Book of Hints, Rare Book of Hints, Textbook of Hints and Rare Textbook of Hints. Costs on an unenhanced card to Lv3 are 12 / 6 / 30 of the three materials.',
             ],
             [
@@ -215,7 +215,7 @@ return [
                 'spend_site' => 'Card leveling',
                 'kind' => 'consumable',
                 'state' => 'confirmed',
-                'source_title' => 'Client effect string; Global only, from the reference guide §1.6.10.',
+                'source_title' => 'Client effect string; Global only, from the reference guide.',
                 'detail' => 'The JP client replaced this model on 2025-10-07, so the item path is a Global-only surface.',
             ],
             [
@@ -224,7 +224,7 @@ return [
                 'spend_site' => 'Racing Carnival shop',
                 'kind' => 'consumable',
                 'state' => 'confirmed',
-                'source_title' => 'Client effect string; the Carnival prices are from a guide, in the reference guide §1.6.5.',
+                'source_title' => 'Client effect string; the Carnival prices are from a guide held in the reference guide.',
                 'detail' => 'The Racing Carnival shop prices Rainbow Crystal Shards at 30,000 Carnival Pts and Gold at 15,000, with Scout and Support tickets at 6,000.',
             ],
             [
@@ -233,7 +233,7 @@ return [
                 'spend_site' => 'Cleat Exchange',
                 'kind' => 'currency',
                 'state' => 'confirmed',
-                'source_title' => 'Client name and exchange, from the reference guide §1.6.10.',
+                'source_title' => 'Client name and exchange, from the reference guide.',
                 'detail' => 'One duplicate SSR support card converts to 10 Rainbow Cleats. Spent on Scout Tickets, the SR+ Guaranteed Make Debut ticket, Dream Glimmer and Winner\'s Sashes. A currency, not a training buff.',
             ],
             [
@@ -242,7 +242,7 @@ return [
                 'spend_site' => 'Statue Exchange',
                 'kind' => 'currency',
                 'state' => 'confirmed',
-                'source_title' => 'Client name and exchange, from the reference guide §1.6.10.',
+                'source_title' => 'Client name and exchange, from the reference guide.',
                 'detail' => 'Exchanged on an escalating rate, 650 Star Pieces to max a trainee. The client states statues cannot unlock an unscouted Trainee, and they grant no buff.',
             ],
         ],
@@ -259,7 +259,7 @@ return [
     */
     'sparks' => [
         'source' => [
-            'section' => '§1.5.2',
+            'section' => 'Spark categories',
             'anchor' => '2026-09-27',
         ],
         'recheck' => [
@@ -274,7 +274,7 @@ return [
                 'effect' => 'One stat up +5, +12, or +21 at career start for 1, 2, or 3 stars.',
                 'records' => 5,
                 'state' => 'confirmed',
-                'source_title' => 'Category and effect from the reference guide §1.5.2; the record count is the guide\'s own count.',
+                'source_title' => 'Category and effect from the reference guide; the record count is the guide\'s own count.',
             ],
             [
                 'category' => 'Aptitude',
@@ -283,7 +283,7 @@ return [
                 'effect' => 'Track, distance or strategy: 1 star is +1 grade, 4 is +2, 7 is +3, 10 to 18 is +4.',
                 'records' => 10,
                 'state' => 'confirmed',
-                'source_title' => 'Category and effect from the reference guide §1.5.2; the record count is the guide\'s own count.',
+                'source_title' => 'Category and effect from the reference guide; the record count is the guide\'s own count.',
             ],
             [
                 'category' => 'Unique skill',
@@ -292,7 +292,7 @@ return [
                 'effect' => "Carries one character's own unique skill as 1 to 3 hint levels.",
                 'records' => 268,
                 'state' => 'confirmed',
-                'source_title' => 'Category and effect from the reference guide §1.5.2; the record count is the guide\'s own count.',
+                'source_title' => 'Category and effect from the reference guide; the record count is the guide\'s own count.',
             ],
             [
                 'category' => 'Skill',
@@ -301,7 +301,7 @@ return [
                 'effect' => 'A mid-run hint of level +1 to +5, or a small stat top-up if the skill is already learned.',
                 'records' => 452,
                 'state' => 'confirmed',
-                'source_title' => 'Category and effect from the reference guide §1.5.2; the record count is the guide\'s own count.',
+                'source_title' => 'Category and effect from the reference guide; the record count is the guide\'s own count.',
             ],
             [
                 'category' => 'Competition',
@@ -310,7 +310,7 @@ return [
                 'effect' => 'From top-grade (G1) wins; 3, 6, or 9 stat per event, sometimes a hint.',
                 'records' => 37,
                 'state' => 'confirmed',
-                'source_title' => 'Category and effect from the reference guide §1.5.2; the record count is the guide\'s own count.',
+                'source_title' => 'Category and effect from the reference guide; the record count is the guide\'s own count.',
             ],
             [
                 'category' => 'Scenario',
@@ -319,7 +319,7 @@ return [
                 'effect' => "From clearing a scenario's final conditions; about 10 to 30 per stat, over 200 when stacked.",
                 'records' => 34,
                 'state' => 'confirmed',
-                'source_title' => 'Category and effect from the reference guide §1.5.2; the record count is the guide\'s own count.',
+                'source_title' => 'Category and effect from the reference guide; the record count is the guide\'s own count.',
             ],
         ],
         'roll_odds' => [

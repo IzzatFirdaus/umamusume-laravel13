@@ -57,8 +57,8 @@ it('validates the config → badge index for reference views', function (): void
         expect($validStates)->toContain($category['state'] ?? null);
     }
 });
- 
- it('renders the Trainees area with the shared catalog list', function (): void {
+
+it('renders the Trainees area with the shared catalog list', function (): void {
     $this->get('/database/trainees')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
@@ -158,7 +158,11 @@ it('renders the Events reference view with the ten recurring types', function ()
             ->where('rows.5.state', 'unknown')
             ->has('recheck.url')
             ->has('recheck.text')
-            ->where('source.doc', 'docs/UMAMUSUME_REFERENCE.md')
+            // The provenance row names a dataset and a date; it no longer ships the guide's file path
+            // (slice 2.2 moved that to /database/sources).
+            ->where('source.section', 'Recurring event types')
+            ->where('source.anchor', '2026-10-02')
+            ->missing('source.doc')
             ->where('totalCount', 10));
 });
 
@@ -211,4 +215,35 @@ it('sums the Spark category counts to the guide total', function (): void {
 
                 return true;
             }));
+});
+
+it('renders the Data sources page with one row per dataset', function (): void {
+    $this->get('/database/sources')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Database/Sources')
+            ->has('fetched')
+            ->has('transcribed')
+            // A fetched dataset names its URL, never a repository path.
+            ->where('fetched.0.name', 'gametora-characters')
+            ->where('fetched.0.url', fn (string $url): bool => str_starts_with($url, 'https://'))
+            ->where('fetched.0.fetched_at', null)
+            // A transcribed dataset is named by its subject, not by a section number.
+            ->where('transcribed', function (Collection $rows): bool {
+                $names = $rows->pluck('name')->all();
+
+                expect($names)->toContain('Recurring event types');
+                expect($names)->toContain('Spark categories');
+                expect(collect($names)->every(fn (string $n): bool => ! str_contains($n, '§')))->toBeTrue();
+
+                return true;
+            }));
+});
+
+it('keeps the guide path off every reference view it used to ship on', function (): void {
+    foreach (['/database/events', '/database/shop-items', '/database/sparks'] as $url) {
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->missing('source.doc'));
+    }
 });
