@@ -55,24 +55,37 @@ test('a badge re-rendered in place tracks the new state name, glyph and word', a
     await page.goto(`${base}provenance-badge.html`);
 
     const badge = page.locator('#badge-mount [role="img"]');
-    await expect(badge).toHaveAttribute('aria-label', 'Confirmed');
+    await expect(badge).toHaveAttribute('aria-label', 'Unknown');
     // `\s*` between the spans: Vue condenses the template's whitespace, so the glyph and the word
     // sit adjacent in textContent with no guaranteed separator.
-    await expect(badge).toHaveText(/^✓\s*Confirmed$/);
+    await expect(badge).toHaveText(/^\?\s*Unknown$/);
 
     // Marks the live node: every flip below must be observed on this same element.
     await badge.evaluate((el) => {
         (el as unknown as { __ki62?: number }).__ki62 = 1;
     });
 
-    await page.evaluate(() => window.__setBadgeState('unknown'));
-    await expect(badge).toHaveAttribute('aria-label', 'Unknown');
-    await expect(badge).toHaveText(/^\?\s*Unknown$/);
-    await expect(badge).not.toHaveText(/^✓\s*Confirmed$/);
+    await page.evaluate(() => window.__setBadgeState('estimated'));
+    await expect(badge).toHaveAttribute('aria-label', 'Estimated');
+    await expect(badge).toHaveText(/^~\s*Estimated$/);
 
     await page.evaluate(() => window.__setBadgeState('calculated'));
     await expect(badge).toHaveAttribute('aria-label', 'Calculated');
     await expect(badge).toHaveText(/^∑\s*Calculated$/);
 
+    // The same node carried every state that draws a mark: not a remount, but a live re-render.
+    // This is the KI-62 regression the case was written for, asserted before the round trip through
+    // `confirmed` legitimately destroys the node.
     expect(await badge.evaluate((el) => (el as unknown as { __ki62?: number }).__ki62)).toBe(1);
+
+    // Plan 1.7: `confirmed` draws nothing at all, and drawing nothing is the state's whole meaning.
+    // Vue drops the subtree rather than hiding it, so the marked node is gone here by design; the
+    // marker cannot survive this step and must not be asserted across it.
+    await page.evaluate(() => window.__setBadgeState('confirmed'));
+    await expect(page.locator('#badge-mount [role="img"]')).toHaveCount(0);
+
+    // And back: a fresh node, because the previous one was destroyed. That is still the live prop
+    // reaching the render rather than a value frozen at the first mount, which is what KI-62 was.
+    await page.evaluate(() => window.__setBadgeState('unknown'));
+    await expect(page.locator('#badge-mount [role="img"]')).toHaveAttribute('aria-label', 'Unknown');
 });

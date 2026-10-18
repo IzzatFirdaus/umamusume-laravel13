@@ -344,10 +344,6 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                 <h2 id="inheritance-observed-heading" class="text-lg font-semibold text-ink-strong">
                     Observed Outcomes
                 </h2>
-                <ProvenanceBadge
-                    state="confirmed"
-                    title="Entered by the Trainer. Always Confirmed because the Trainer recorded it."
-                />
             </header>
 
             <p class="mt-2 text-sm text-ink-muted">
@@ -374,7 +370,6 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                         </span>
                         <span v-else class="text-sm text-ink-muted">No detail recorded</span>
                         <span class="flex-1"></span>
-                        <ProvenanceBadge state="confirmed" title="Entered by the Trainer." />
                     </div>
                     <p v-if="event.origin_note" class="mt-1 text-xs text-ink-muted">{{ event.origin_note }}</p>
                     <p v-if="event.deltas" class="mt-1 text-xs font-mono text-ink-muted">

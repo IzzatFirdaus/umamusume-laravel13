@@ -455,7 +455,6 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
                 <li v-for="source in provenance" :key="source.url" class="text-ink">
                     <a :href="source.url" class="text-ink-strong underline">{{ source.url }}</a>
                     <span class="text-ink-muted"> · {{ source.source_key }} · fetched {{ source.fetched_at_display }}</span>
-                    <ProvenanceBadge state="confirmed" title="Fetched source" class="ml-2" />
                 </li>
             </ul>
             <p class="mt-2 text-xs text-ink-muted">

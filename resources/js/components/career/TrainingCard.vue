@@ -304,7 +304,6 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                     <template v-if="publishedGains !== null">
                         <span :title="gainsReason" class="font-mono tabular-nums text-ink-strong">{{ publishedGains.text }}</span>
                         <span class="text-xs text-ink-muted"> [{{ publishedGains.server }}]</span>
-                        <ProvenanceBadge state="confirmed" class="ml-1 align-middle" />
                     </template>
                     <AbsenceValue v-else class="font-mono tabular-nums" :reason="gainsReason" compact />
                 </dd>
@@ -316,11 +315,9 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                     <template v-if="publishedCost !== null">
                         <span :title="costTitle" class="font-mono tabular-nums text-ink-strong">{{ publishedCost.text }}</span>
                         <span class="text-xs text-ink-muted"> [{{ publishedCost.server }}]</span>
-                        <ProvenanceBadge state="confirmed" class="ml-1 align-middle" />
                     </template>
                     <template v-else>
                         <span :title="costTitle" class="font-mono tabular-nums text-ink-strong">{{ costText }}</span>
-                        <ProvenanceBadge state="confirmed" class="ml-1 align-middle" />
                     </template>
                     <!-- `ADR-0001` §2 requires the constants behind a derived number to be visible wherever
                          the number appears, and a `title` is reachable by mouse only. The owner ruled the inline form

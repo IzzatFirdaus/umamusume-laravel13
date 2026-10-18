@@ -84,7 +84,6 @@ const heldTitle = 'Counted from this run\'s recorded purchases, against the cap 
                     <span class="text-sm font-semibold text-ink-strong">{{ item.name }}</span>
                     <span class="font-mono text-xs tabular-nums text-ink">
                         {{ item.held }} of {{ item.cap }}
-                        <ProvenanceBadge state="confirmed" :title="heldTitle" />
                     </span>
                 </div>
 

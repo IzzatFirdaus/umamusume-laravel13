@@ -276,7 +276,6 @@ const emptyText = computed<string>(() =>
             <section v-if="props.scenario.declared" class="flex flex-col gap-2">
                 <h3 class="flex flex-wrap items-baseline gap-2 text-lg font-semibold text-ink-strong">
                     Published stat caps
-                    <ProvenanceBadge state="confirmed" :title="props.scenario.caps.source_title" />
                     <span
                         class="text-xs font-normal normal-case tracking-normal"
                         title="The date the scenario matrix was last checked against its sources. Nothing here was fetched on it."

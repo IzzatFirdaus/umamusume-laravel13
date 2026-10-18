@@ -79,10 +79,6 @@ defineProps<{
                         <li v-for="effect in category.effects" :key="effect.effect_id">
                             <p class="text-sm font-semibold text-ink">
                                 {{ effect.name ?? `[Unverified] effect ${effect.effect_id}` }}
-                                <ProvenanceBadge
-                                    state="confirmed"
-                                    title="Each figure below is one card's own highest stated anchor, as the source publishes it."
-                                />
                             </p>
 
                             <!-- Each card's own figure, with the card it came from. The value is printed
