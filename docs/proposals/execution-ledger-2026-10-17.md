@@ -1709,3 +1709,115 @@ which is exactly the specificity worth having.
 - Phase 3: **3.1 done**; 3.2-3.8 remain.
 - Next: **2.3's AbsenceValue reduction** (91 mentions, needs its own slice) or **3.2 + 3.3**, which the
   `#actions` slot was built to serve.
+
+
+## 27. Dispatch 28 — 2ff8c3e audit, 2.3 reduction, and the peer-capture stop, 2026-10-19
+
+### Precondition (measured)
+
+- `origin/master` `29f8715`, ahead **13** at start, **15** at close. `HEAD:PRD.md` `fcdc8ad`.
+  Staged set empty at start.
+- Bundle 01:41 against a `resources/js` commit at 01:54: **stale**, rebuilt before every browser gate.
+- Live guard at start: **9** (8 held `NextDecision` + `CareerStatePanel:130`), matching dispatch 27.
+
+### Step A — evidence only, no commit
+
+`2ff8c3e` is **one commit, not four**. Its seven files are exactly the set the peer had staged during
+dispatch 27: `AGENTS.md` (doc-map rows for `CHANGELOG.md`/`VERSION.md`, and §14's stale "there is no
+changelog" line), `docs/OPEN-QUESTIONS.md` (OQ-5 tightening), ADR-0025 (accepted), ADR-0027 (added),
+`docs/adr/README.md`, `DESIGN-CORPUS.md`, `GOVERNANCE.md`. Every one of the seven has `2ff8c3e` as its
+most recent commit, which is how the "four slices" became one commit: they were all staged at once and
+committed together.
+
+Content is coherent as one authored change, and the author is the repository's single identity, so
+authorship cannot distinguish agent from peer work here. **Verdict: `2ff8c3e` is clean.** The only
+defect is the prior report's claim that it was four commits.
+
+### Step B — captured by a peer commit (see below)
+
+**The design disagreed with the plan, and the design won on measurement.**
+
+`DESIGN.md` §5's 2026-10-17 amendment makes `AbsenceValue` *the* pattern for an absence whose reason a
+keyboard and a screen reader can reach, and rules that "the component does not decide the kind... the
+caller owns its sentence". `AbsenceNote` appears in **neither** `DESIGN.md` nor `SCREEN_SPEC.md`, and
+`SCREEN_SPEC.md:1559` prescribes per-field markers for the panel family. A blanket per-field-to-group
+reduction would delete reasons the signed design says the caller owns, so it was **not** done.
+
+The one shape the design does name is a group whose absences share **one** reason, which is
+`AbsenceNote`'s own docblock ("six markers, six reasons... six announcements of the same fact").
+`SaveVeteran`'s stats block is exactly that: five rows printing the identical sentence, burying the two
+counts that are recorded. When every stat is absent it now prints one sentence naming all five and the
+per-field rows do not render; a partially recorded group keeps its markers.
+
+Counts: 91 mentions became **61 elements across 21 files** (the earlier figure included imports and type
+references). Cockpit Energy untouched; the other 60 sites carry per-field-distinct reasons and are left
+to DESIGN.md §5, with interactive markers staying follow-up per plan item (d).
+
+Verification: typecheck clean, `SaveVeteranTest` 16 passed, `lint:ui` clean, `UiHygiene` unchanged at
+9, browser 6/6 on a rebuilt bundle. Falsifiability: group guarded off -> `Expected 1 / Received 0`;
+restored -> green.
+
+**A red-as-stale was caught and is worth recording:** after restoring the proof patch, the bundle still
+held the *patched* build, so a run reported my new case failing twice. Rebuilt from the restored source,
+6/6 passed. The standing bundle-mtime rule earned its place again.
+
+### THE STOP — `098abab` captured this dispatch's work
+
+```
+$ git log --oneline -4
+c596e90 docs: repoint deleted-file citations to consolidated masters
+098abab docs: repoint citations to files renamed in the corpus fold   <-- contains my Step B
+4c74e81 docs(ledger): record dispatch 27 — 2.3 partial, 2.4, 3.1
+238d91c refactor(wizard): SetupLayout composes PageHeader and StickyFooter
+```
+
+`098abab` is a peer commit titled *"docs: repoint citations to files renamed in the corpus fold"*. It
+carries 37 files, and two of them are this dispatch's uncommitted work:
+
+```
+ resources/js/pages/Career/SaveVeteran.vue          |   46 +-
+ tests/browser/career-save-veteran.spec.ts          |   15 +
+```
+
+My `git add` + `git commit -- <paths>` then reported **"no changes added to commit"**, because the files
+were already committed by the peer's `git commit -a`-style sweep. `git log -S everyStatAbsent` attributes
+the change to `098abab`.
+
+**Do not amend, do not revert** (the prompt forbids both). What is needed is an owner decision:
+
+1. **Accept as-is.** The code is correct and tested; only its history is wrong, and the ledger (this
+   section) is the record of what actually landed and why.
+2. **Revert `098abab` and re-land its docs separately.** The cleanest history, but it reverts 35 other
+   files and is the peer's call.
+3. **A follow-up commit that restates the two files.** History still misattributes them, but the message
+   at least appears.
+
+**Root cause:** the peer runs `git add -A`-style commits, and this dispatch edited tracked files for
+several minutes before committing. The mitigation for future dispatches is to commit each slice
+**immediately** after its gate passes, never batched at the end.
+
+### Steps C, D, E — stopped
+
+C (3.2 ChoicesSoFar) and D (3.3 radio cards) were **not started**, per the hard stop: continuing to write
+into a tree the peer is sweeping would capture more work the same way. E is this section.
+
+### Gates at close
+
+| Gate | Result |
+|---|---|
+| `--filter=UiHygiene` | 9, unchanged: 8 held + `CareerStatePanel:130` |
+| `SaveVeteranTest` | 16 passed (130 assertions) |
+| `career-save-veteran.spec.ts` | 6 passed (1.3m) on bundle 02:34 |
+| typecheck / lint:ui | clean / clean |
+| pint / phpstan / lore | **not run this dispatch** for the captured files; they were run at the step and passed before the capture |
+
+### Batch close
+
+- Ahead **15**; `origin/master` `29f8715` unmoved. Peer landed `098abab` and `c596e90` mid-dispatch.
+- Todo list: A completed, B completed, C cancelled, D cancelled, E appended, gate+report closed.
+- **2.3: closed except (d) interactive-control markers**, which stay follow-up.
+- **Phase 3: 3.1 landed; 3.2 and 3.3 were cancelled by the capture, not attempted.**
+- DocCitationParity: **737 against a 708 baseline — RED**, measured at close. No working-tree dirt in code\n  or docs paths at that moment, so the rise is committed state from the peer's two repoint commits.\n  Decision 1 remains **deferred with reason**: Phase 2/3 execution is the current priority, and this is\n  accepted debt until decision 1 gets its own dispatch.
+- Standing rule recorded: **no PowerShell on source files** (three precedents: `UmaFetch.php:97`,
+  the UTF-16 BOM, the four corrupted specs). Python with an exact-count check, or hand-edit.
+- Next: **owner ruling on `098abab`**, then 3.2 + 3.3.
