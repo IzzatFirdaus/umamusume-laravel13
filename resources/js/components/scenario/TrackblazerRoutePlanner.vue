@@ -181,7 +181,7 @@ const currentMark = '◉';
                             <span v-if="period.floor_second !== null" class="font-mono text-sm tabular-nums text-ink">
                                 {{ period.floor_second }} / {{ period.floor_third }}
                             </span>
-                            <span v-else class="text-sm text-ink-muted">N/A</span>
+                            <span v-else class="text-sm text-ink-muted" :title="period.floor_title">N/A</span>
                         </dd>
                     </dl>
                 </li>

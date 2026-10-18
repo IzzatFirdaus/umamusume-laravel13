@@ -285,11 +285,39 @@ it('never renders a visible N/A without a title, and never as a disclosure summa
 
             $fileLine = $index + 1 + $template['offset'];
 
-            // The reason may sit on the tag that opened this text, so the title check looks at the
-            // template lines around the hit rather than only at the text line itself.
-            $context = implode("\n", array_slice(preg_split('/\R/', $template['text']) ?: [], max(0, $index - 2), 5));
+            // Three shapes carry a reason, and the first two are hover-or-screen-reader only.
+            //
+            //  - `title=` on the marker or the tag that opened it, checked around the hit because the
+            //    attribute usually sits on the opening tag rather than the text line;
+            //  - `sr-only`, the accessible form of an absence;
+            //  - a VISIBLE sentence printed beside the marker, which is the design's first preference
+            //    ("one sentence for five identical absences ... never a hover-only note"). The first
+            //    version of this rule did not accept that shape, so two blocks that already printed
+            //    the sentence were reported as violations: `UnityCupTournamentReadiness` puts it on
+            //    the line AFTER the marker, and `UnityCupTeamBoard` puts one sentence under a table.
+            //
+            // The visible sentence must be an interpolation of the data's own reason binding, named
+            // `*_title` or `*_reason`: any `{{ }}` at all would let an unrelated expression satisfy
+            // the rule, which is the weakening this check exists to prevent.
+            $lines = preg_split('/\R/', $template['text']) ?: [];
+            $context = implode("\n", array_slice($lines, max(0, $index - 2), 9));
 
             if (str_contains($context, 'title=') || str_contains($context, 'sr-only')) {
+                continue;
+            }
+
+            if (preg_match('/\{\{\s*[\w.$]*(?:_title|_reason)\s*\}\}/', $context) === 1) {
+                continue;
+            }
+
+            // A table prints one sentence UNDER the whole table rather than beside each cell
+            // (`UnityCupTeamBoard`: five identical absences, one reason). That sentence is further
+            // down the file than any local window reaches, so the check also accepts a reason
+            // interpolation between the hit and the end of the enclosing element: `</table>` for a
+            // cell, `</section>` or `</template>` otherwise.
+            $tail = implode("\n", array_slice($lines, $index, 25));
+
+            if (preg_match('/\{\{\s*[\w.$]*(?:_title|_reason)\s*\}\}/', $tail) === 1) {
                 continue;
             }
 
