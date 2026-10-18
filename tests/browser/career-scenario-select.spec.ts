@@ -56,8 +56,9 @@ test.describe('Scenario Selection', () => {
             await expect(card(page, label)).toBeVisible();
         }
 
-        // Four cards, and no more: the count is the matrix, not a hardcoded shape.
-        await expect(page.getByRole('button', { name: 'Select Scenario' })).toHaveCount(CARDS.length);
+        // Four radios, and no more: the count is the matrix, not a hardcoded shape. The card IS the
+        // radio's label since 3.3, so the input count and the card count are the same question.
+        await expect(page.getByRole('radio')).toHaveCount(CARDS.length);
 
         // The step position is announced, and the unbuilt steps are named absences rather than links.
         await expect(page.getByRole('link', { name: 'Scenario' })).toHaveAttribute('aria-current', 'step');
@@ -208,28 +209,28 @@ test.describe('Scenario Selection', () => {
         await page.goto('/career/setup/scenario');
         await page.locator('#app > *').first().waitFor();
 
-        // Addressed by its id, not by its label: the button's own text is the thing under test, so a
+        // Addressed by its id, not by its label: the card's own text is the thing under test, so a
         // locator built from it would resolve to nothing the moment the card becomes the selected one.
-        const trackblazer = card(page, 'Trackblazer').locator('#scenario-trackblazer');
+        const trackblazer = card(page, 'Trackblazer').locator('#scenario-radio-trackblazer');
 
-        // Nothing is pre-pressed on a fresh draft, so the stored state is visible rather than implied.
-        await expect(trackblazer).toHaveAttribute('aria-pressed', 'false');
-        // Addressed by its reason: `N/A` appears once per absent field on every card and a text
-        // search for it is ambiguous by construction, but the AbsenceValue disclosure is the one
-        // element whose accessible name is the reason (DESIGN.md §5.6). The stored-choice absence
-        // lives in the page header, not in any card.
-        await expect(page.locator('details').filter({ hasText: 'No scenario has been chosen in this setup draft yet.' })).toContainText('N/A');
+        // Nothing is checked on a fresh draft, so the stored state is visible rather than implied.
+        await expect(trackblazer).not.toBeChecked();
+
+        // The strip states the three carried choices, and says the scenario is unmade. This replaced
+        // the per-step "Stored choice:" line in 3.2, so the assertion moved with it.
+        await expect(page.locator('[data-field="choices-so-far"]')).toContainText('Scenario:');
+        await expect(page.locator('[data-field="choices-so-far"]').getByText('not chosen')).toHaveCount(3);
 
         await trackblazer.focus();
         await expect(trackblazer).toBeFocused();
-        await page.keyboard.press('Enter');
+        await page.keyboard.press('Space');
 
-        // The PUT re-renders from the session, so "Selected" is read off stored state. Focus is
+        // The PUT re-renders from the session, so the checked state is read off stored state. Focus is
         // restored to the same control (WCAG 2.4.3), which is what the round trip would otherwise lose.
         await expect(page.getByText('Scenario set.')).toBeVisible();
-        await expect(trackblazer).toHaveAttribute('aria-pressed', 'true');
-        await expect(trackblazer).toHaveText('Selected · clear');
-        await expect(page.getByText('Stored choice:')).toContainText('Trackblazer');
+        await expect(trackblazer).toBeChecked();
+        await expect(page.getByText('✓ Selected')).toBeVisible();
+        await expect(page.locator('[data-field="choices-so-far"]')).toContainText('Trackblazer');
         await expect(trackblazer).toBeFocused();
 
         // And it survives leaving the wizard entirely, which a client-only selection would not.
@@ -238,40 +239,64 @@ test.describe('Scenario Selection', () => {
 
         await page.goto('/career/setup/scenario');
         await page.locator('#app > *').first().waitFor();
-        await expect(card(page, 'Trackblazer').locator('#scenario-trackblazer'))
-            .toHaveAttribute('aria-pressed', 'true');
-        await expect(card(page, 'Trackblazer').locator('#scenario-trackblazer')).toHaveText('Selected · clear');
+        await expect(card(page, 'Trackblazer').locator('#scenario-radio-trackblazer')).toBeChecked();
     });
 
-    test('a selected scenario can be deselected back to no choice', async ({ page }) => {
-        // The defect this closes: once any scenario was chosen, `Stored choice: N/A` was unreachable,
-        // so a misclick had no way back at step 1 of 6. The same button is the undo.
+    test('choosing a card does not navigate, and the footer action commits the step', async ({ page }) => {
+        // The 3.3 contract: a radio records the choice, one footer button advances. The old per-card
+        // button navigated on click, which meant a misclick both changed the answer and left the page.
         await page.goto('/career/setup/scenario');
         await page.locator('#app > *').first().waitFor();
 
-        const concert = page.locator('#scenario-our_grand_concert');
-        await expect(concert).toHaveAttribute('aria-pressed', 'false');
+        await card(page, 'Our Grand Concert').getByRole('radio').check();
 
-        await concert.click();
-        await expect(concert).toHaveAttribute('aria-pressed', 'true');
-        await expect(concert).toHaveText('Selected · clear');
-        await expect(page.locator('[data-field="stored-choice"]')).toContainText('Our Grand Concert');
+        // Still on step 1: selecting is not the same decision as continuing.
+        await expect(page).toHaveURL(/\/career\/setup\/scenario$/);
+        await expect(card(page, 'Our Grand Concert').getByRole('radio')).toBeChecked();
 
-        await concert.click();
-        await expect(concert).toHaveAttribute('aria-pressed', 'false');
-        await expect(concert).toHaveText('Select Scenario');
-        await expect(page.locator('[data-field="stored-choice"]')).toContainText('N/A');
-        await expect(page.getByText('Scenario cleared.')).toBeVisible();
+        await page.getByRole('button', { name: 'Save and continue' }).click();
+        await page.waitForURL(/\/career\/setup\/trainee$/);
+    });
+
+    test('a chosen scenario can be changed to another without leaving the step', async ({ page }) => {
+        // The concern the old deselect case protected is a misclick with no way back. A radio group
+        // answers it differently from a toggle: choosing another card replaces the first, in place,
+        // with no navigation, so the correction costs one click and never a round trip to a cleared
+        // state. A group that cannot be emptied is the right shape here: the next step needs a
+        // scenario, so "no scenario" is not a state the wizard should be able to sit in after step 1.
+        await page.goto('/career/setup/scenario');
+        await page.locator('#app > *').first().waitFor();
+
+        const concert = page.locator('#scenario-radio-our_grand_concert');
+        const trackblazer = page.locator('#scenario-radio-trackblazer');
+
+        await concert.check();
+        await expect(concert).toBeChecked();
+        await expect(page.locator('[data-field="choices-so-far"]')).toContainText('Our Grand Concert');
+
+        await trackblazer.check();
+        await expect(trackblazer).toBeChecked();
+        await expect(concert).not.toBeChecked();
+        await expect(page.locator('[data-field="choices-so-far"]')).toContainText('Trackblazer');
+
+        // Still on the step: changing the answer is not the same as committing it.
+        await expect(page).toHaveURL(/\/career\/setup\/scenario$/);
     });
 
     test('sizes every scenario control to the 44px contract', async ({ page }) => {
         await page.goto('/career/setup/scenario');
         await page.locator('#app > *').first().waitFor();
 
+        // The card is the radio's label since 3.3, so the hit target is the label, not a per-card
+        // button. Each label is measured rather than the 16px input inside it.
         for (const label of CARDS) {
-            const box = await card(page, label).getByRole('button', { name: 'Select Scenario' }).boundingBox();
-            expect(box?.height ?? 0, `${label}'s action is not sized to 44px`).toBeGreaterThanOrEqual(44);
+            const box = await card(page, label).locator('label').first().boundingBox();
+            expect(box?.height ?? 0, `${label}'s card is not sized to 44px`).toBeGreaterThanOrEqual(44);
         }
+
+        // The one action that advances the step, and the one that leaves it.
+        const save = await page.getByRole('button', { name: 'Save and continue' }).boundingBox();
+        expect(save?.height ?? 0, 'Save and continue is not sized to 44px').toBeGreaterThanOrEqual(44);
 
         const leave = await page.getByRole('link', { name: 'Leave setup' }).boundingBox();
         expect(leave?.height ?? 0, 'Leave setup is not sized to 44px').toBeGreaterThanOrEqual(44);

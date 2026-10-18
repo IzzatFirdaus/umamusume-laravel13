@@ -18,7 +18,8 @@
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import SubCell from '../../components/SubCell.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import StickyFooter from '../../components/ui/StickyFooter.vue';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref } from 'vue';
 
 interface Optimizes {
@@ -67,27 +68,42 @@ const choosing = ref<string | null>(null);
 const form = useForm<{ scenario: string | null }>({ scenario: null });
 
 function choose(scenario: ScenarioCard): void {
-    const deselect = props.selected === scenario.key;
     choosing.value = scenario.key;
-    form.scenario = deselect ? null : scenario.key;
+    form.scenario = scenario.key;
 
     // The write URL is supplied by the server (`career.scenario.store`) so the page never states
     // it as a literal. Focus is restored in `onSuccess`, after the new props land, because the
     // component instance survives a client-side visit: an `onMounted` hook would never re-run,
     // and on a cold page load it would steal focus from a Trainer who has not acted yet
     // (WCAG 2.4.3 focus order, 3.2.6 consistent help). `nextTick` waits for Vue to repaint with the
-    // stored selection.
+    // stored selection. The target is the radio now that the card IS the radio's label: the old
+    // per-card button no longer exists, and a focus restore aimed at a removed id silently did nothing.
     form.put(props.action, {
         preserveScroll: true,
         onSuccess: () => {
             nextTick(() => {
-                document.getElementById(`scenario-${scenario.key}`)?.focus();
+                document.getElementById(`scenario-radio-${scenario.key}`)?.focus();
             });
         },
         onFinish: () => {
             choosing.value = null;
         },
     });
+}
+
+/**
+ * Commit the step and move on.
+ *
+ * A radio group holds the choice; this is the one action that advances. It is disabled until a card
+ * is selected, because the next step needs a scenario to compose against and a Continue that lands on
+ * a page with nothing to show is worse than a disabled button that says why.
+ */
+function continueStep(): void {
+    if (props.selected === null) {
+        return;
+    }
+
+    router.visit('/career/setup/trainee');
 }
 
 const optimizesText = (card: ScenarioCard): string | null => {
@@ -117,12 +133,9 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
         <template #eyebrow>Setup</template>
         <template #title>Choose a scenario</template>
 
-        <!-- Back breadcrumb -->
-        <nav class="mt-4 mb-2" aria-label="Breadcrumb">
-            <Link href="/career/setup/scenario" class="inline-flex min-h-11 items-center text-sm font-medium text-brand-accent-ink hover:underline transition-colors duration-150 ease-out" aria-label="Back to scenario step">
-                ← Back to scenario
-            </Link>
-        </nav>
+        <!-- No breadcrumb. This page is step 1 of the wizard, and the "← Back to scenario" link it
+             used to carry pointed at this same URL: a control that navigates to the page it is on.
+             The step bar above already lists all six steps, so nothing is lost by removing it. -->
 
         <!-- Header: eyebrow + subtitle. The page title is the layout's #title h1, so repeating it
              here printed it twice at the same weight. -->
@@ -159,27 +172,59 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
             and no career can be started until one is added.
         </p>
 
-        <ul v-else class="mt-6 grid list-none grid-cols-1 gap-4 @4xl:grid-cols-2 @7xl:grid-cols-4">
-            <li
-                v-for="card in props.scenarios"
-                :key="card.key"
-                data-scenario-card
-                class="rounded-lg border border-rule bg-panel p-4"
-                :class="props.selected === card.key ? 'border-2 border-chrome' : ''"
-            >
-                <h2 class="flex flex-wrap items-baseline gap-x-3 text-lg font-semibold text-ink-strong">
-                    {{ card.label }}
-                    <!-- Glyph and word, so the documentation state is never carried by colour or by the
-                         dot alone (WCAG 1.4.1). -->
-                    <span
-                        v-if="card.documented === false"
-                        class="inline-flex items-center gap-1 rounded-full bg-sunken px-2 py-0.5 text-xs font-bold text-ink-strong"
-                        title="The matrix records no mechanics guide for this scenario, so only baseline tracking is available."
-                    >
-                        <span aria-hidden="true">◐</span>
-                        PARTIALLY DOCUMENTED
-                    </span>
-                </h2>
+        <!--
+          A real radio group, not a row of toggle buttons. The choice is one of four and only one can
+          hold, which is what a radio group means to a screen reader and to a keyboard: arrow keys move
+          within it, and the group announces itself as a single question. The card is the radio's
+          label, so the whole card is the hit target while the input stays the thing that holds state.
+
+          Selection is carried by fill AND a check glyph, never fill alone (WCAG 1.4.1). Choosing a
+          card does not navigate: the Trainer may change their mind, and the single Continue button in
+          the footer is what commits the step.
+        -->
+        <fieldset v-else class="mt-6">
+            <legend class="text-sm font-semibold text-ink-strong">Which scenario is this career in?</legend>
+
+            <div class="mt-3 grid grid-cols-1 gap-4 @4xl:grid-cols-2 @7xl:grid-cols-4">
+                <div
+                    v-for="card in props.scenarios"
+                    :key="card.key"
+                    data-scenario-card
+                    class="relative rounded-lg border border-rule bg-panel p-4"
+                    :class="props.selected === card.key ? 'border-2 border-chrome' : ''"
+                >
+                <label :for="`scenario-radio-${card.key}`" class="block cursor-pointer">
+                    <h2 class="flex flex-wrap items-baseline gap-x-3 text-lg font-semibold text-ink-strong">
+                        <input
+                            :id="`scenario-radio-${card.key}`"
+                            type="radio"
+                            name="scenario"
+                            class="mt-1 h-4 w-4 shrink-0 accent-chrome"
+                            :value="card.key"
+                            :checked="props.selected === card.key"
+                            :aria-describedby="form.errors.scenario ? 'scenario-error' : undefined"
+                            :disabled="form.processing"
+                            @change="choose(card)"
+                        >
+                        {{ card.label }}
+                        <!-- Glyph and word, so the documentation state is never carried by colour or by the
+                             dot alone (WCAG 1.4.1). -->
+                        <span
+                            v-if="card.documented === false"
+                            class="inline-flex items-center gap-1 rounded-full bg-sunken px-2 py-0.5 text-xs font-bold text-ink-strong"
+                            title="The matrix records no mechanics guide for this scenario, so only baseline tracking is available."
+                        >
+                            <span aria-hidden="true">◐</span>
+                            PARTIALLY DOCUMENTED
+                        </span>
+                    </h2>
+                </label>
+
+                <!-- The selected card states its state in words as well as in the input, so a
+                     sighted reader who cannot see the accent colour still knows which card holds. -->
+                <p v-if="props.selected === card.key" class="mt-1 text-xs font-semibold text-ink-strong">
+                    <span aria-hidden="true">✓</span> Selected
+                </p>
 
                 <!-- The option-card grammar (Hick's Law, ux-laws §3.2 row 4): the choice reads from a
                      name, a status word and one subtitle, and the eight-row fact grid with the matrix's
@@ -252,26 +297,32 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                         </details>
                     </div>
                 </details>
+                </div>
+            </div>
+        </fieldset>
 
-                <p class="mt-4 flex flex-wrap items-center gap-3">
-                    <button
-                        :id="`scenario-${card.key}`"
-                        type="button"
-                        :class="[
-                            'inline-flex min-h-11 items-center rounded-md px-4 text-sm font-bold disabled:cursor-wait disabled:bg-disabled',
-                            props.selected === card.key
-                                ? 'bg-chrome text-on-chrome'
-                                : 'border border-rule bg-raised text-ink hover:bg-sunken transition-colors duration-150 ease-out'
-                        ]"
-                        :aria-pressed="props.selected === card.key ? 'true' : 'false'"
-                        :aria-describedby="form.errors.scenario ? 'scenario-error' : undefined"
-                        :disabled="form.processing"
-                        @click="choose(card)"
-                    >
-                        {{ props.selected === card.key ? 'Selected · clear' : 'Select Scenario' }}
-                    </button>
-                </p>
-            </li>
-        </ul>
+        <!--
+          One action for the step, in the footer. Selecting a card records the choice; Continue commits
+          the step and moves on. The per-card "Select Scenario" button made the same decision twice and
+          left the way forward to the step bar, which is navigation rather than a commit.
+        -->
+        <StickyFooter>
+            <template #left>
+                <Link
+                    href="/database/scenarios"
+                    class="inline-flex min-h-11 items-center text-sm font-medium text-ink underline"
+                >Compare scenarios</Link>
+            </template>
+            <template #right>
+                <button
+                    type="submit"
+                    class="inline-flex min-h-11 items-center rounded-md bg-chrome px-4 text-sm font-bold text-on-chrome disabled:cursor-wait disabled:bg-disabled"
+                    :disabled="props.selected === null || form.processing"
+                    @click="continueStep"
+                >
+                    Save and continue
+                </button>
+            </template>
+        </StickyFooter>
     </SetupLayout>
 </template>
