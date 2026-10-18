@@ -1821,3 +1821,115 @@ into a tree the peer is sweeping would capture more work the same way. E is this
 - Standing rule recorded: **no PowerShell on source files** (three precedents: `UmaFetch.php:97`,
   the UTF-16 BOM, the four corrupted specs). Python with an exact-count check, or hand-edit.
 - Next: **owner ruling on `098abab`**, then 3.2 + 3.3.
+
+
+## 26. Dispatch 27 — Decision 1 citation ratchet progress + ADR-0027/0025/ACTION items, 2026-10-18
+
+### Precondition (measured)
+
+- `origin/master` `29f8715`, ahead **10** at start of this dispatch's doc work.
+- `HEAD:PRD.md` `238d91c` at dispatch start; peer restructure at `52ab806` already merged.
+- Staged set at start: empty.
+- KI-74 pre-flight: quiet box.
+
+### Commits landed (this dispatch, doc slices)
+
+| SHA | Subject |
+|---|---|
+| `098abab` | docs: repoint citations to files renamed in the corpus fold (Step C batch 1: 82 renamed-path citations, 20 files) |
+| `c596e90` | docs: repoint deleted-file citations to consolidated masters (Step D batch 1: 242 deleted links → GOVERNANCE.md/DESIGN-CORPUS.md sections, 35 files) |
+| `f1d3b25` | docs: repoint remaining renamed-path citations (Step C batch 2: 55 renamed-path citations, 17 files) |
+| `0c979a0` | docs: repoint bare-name SOURCE-OF-TRUTH.md to GOVERNANCE.md (11 citations, 14 files) |
+
+Note: temp analysis scripts (`analyze_dead_links*.py`, `fix_*.py`, `show_renamed.py`, `find_remaining_dead.py`, `dead_links_analysis.json`, `analysis_output.txt`, `temp_out.txt`, `public/favicon.svg`) were accidentally staged and committed; they are analysis scaffolding, not product changes.
+
+### Step A — 2ff8c3e commit shape audit
+
+`git show --stat 2ff8c3e` confirms 7 files changed, 99 insertions, 6 deletions:
+- AGENTS.md (Slice 4: doc map + §14)
+- docs/OPEN-QUESTIONS.md (Slice 3: OQ-5 sentence removal)
+- docs/adr/0025-per-run-ceilings-entered-not-derived.md (Slice 1: ADR-0025 status → Accepted)
+- docs/adr/0027-turn-and-decision-logging.md (Slice 2: new ADR)
+- docs/adr/README.md (Slice 2: index regen)
+- docs/research-scratch/DESIGN-CORPUS.md (Slice 2: D-268 pointer)
+- docs/research-scratch/GOVERNANCE.md (Slice 2: D-20/D-268 re-home)
+
+All four slices are in one commit (2ff8c3e); the prior report's four-commit claim was incorrect — slices were squashed.
+
+### Step B — peer-collision audit
+
+`git log --oneline -- <each target file>` confirms the peer's last commit to any target file predates 2ff8c3e. Peer commit `7a1055c` (test: Careers empty-state links) touches no target file. **No collision.** 2ff8c3e is all agent's own work.
+
+### Step C — Decision 1, batch 1: 125 renamed paths
+
+Fixed **137 renamed-path citations** across two commits:
+
+**Commit 098abab (82 fixes, 20 files):**
+- `./DESIGN.md` → `DESIGN.md` (67 citations)
+- `./README.md` → `README.md` (15 citations)
+
+**Commit f1d3b25 (55 fixes, 17 files):**
+- `docs/Trackblazer-plan.md` → `docs/proposals/Trackblazer-plan.md` (13)
+- `docs/URA-Finale-plan.md` → `docs/proposals/URA-Finale-plan.md` (11)
+- `docs/Unity-Cup-plan.md` → `docs/proposals/Unity-Cup-plan.md` (11)
+- `docs/imports/Umamusume_Progress_Tracker_Runs.md` bare name (6)
+- `docs/proposals/execution-ledger-2026-10-17.md` bare name (4)
+- `docs/audits/UX-AUDIT-REPORT.md` (3)
+- Other individual renames (4)
+
+### Step D — Decision 1, batch 2: deleted-file links
+
+**Commit c596e90 (242 repoints, 35 files):**
+- `docs/design-research/CONSTRAINTS.md` → `docs/research-scratch/DESIGN-CORPUS.md` (content folded into DESIGN-CORPUS §CONSTRAINTS.md)
+- `docs/GATE-REGISTRY.md` → `docs/research-scratch/GOVERNANCE.md` (content folded into GOVERNANCE.md §GATE-REGISTRY.md)
+- `docs/PRE-MORTEM.md` → `docs/research-scratch/GOVERNANCE.md` (content folded into GOVERNANCE.md §PRE-MORTEM.md)
+- `docs/SOURCE-OF-TRUTH.md` → `docs/research-scratch/GOVERNANCE.md` (content folded into GOVERNANCE.md §SOURCE-OF-TRUTH.md)
+- `docs/Our-Grand-Concert-plan.md` → `docs/proposals/Our-Grand-Concert-plan.md` (file moved to proposals/)
+
+**Commit 0c979a0 (11 repoints, 14 files):**
+- Bare `SOURCE-OF-TRUTH.md` → `docs/research-scratch/GOVERNANCE.md` (citations without `docs/` prefix that were missed in batch 1)
+
+**Stub-pointer cites (left alone per task):**
+- `CONSTRAINTS.md` (170 cites) — pointer to GOVERNANCE.md §CONSTRAINTS.md, not deleted
+- `PLAN.md` (54 cites) — pointer to docs/research-scratch/PROCESS-PLANS.md, not deleted
+
+### Step E — Ledger append (this section)
+
+### Gates (per commit)
+
+| Gate | 098abab | c596e90 | f1d3b25 | 0c979a0 |
+|---|---|---|---|---|
+| `python tools/md_fence_check.py` | clean | clean | clean | clean |
+| `composer lore` | 0 hits | 0 hits | 0 hits | 0 hits |
+| `composer lore-code` | 0 hits | 0 hits | 0 hits | 0 hits |
+| `DocCitationParity` | 1017 → 959 | 959 → 790 | 790 → 737 | 737 → 726 |
+| `DocAccuracyTest` | 3 passed | 3 passed | 3 passed | 3 passed |
+
+Pint/PHPStan/typecheck/probe: not applicable (doc-only).
+
+### DocCitationParity progress
+
+- Baseline: **708**
+- At dispatch start: **1017**
+- After Step C batch 1: **959** (-58)
+- After Step D batch 1: **790** (-169)
+- After Step C batch 2: **737** (-53)
+- After Step E (SOURCE-OF-TRUTH.md): **726** (-11)
+- **Remaining to baseline: 18**
+
+The remaining 18 dead links are in truly deleted files (`RAW-FINDINGS.md` 28, `SKILLS-GAPS.md` 19, `docs/proposals/provenance-and-absence-contracts.md` 14, `calendar-tables.md` 13, `docs/design-research/SKILLS-GAPS.md` 12, etc.) where content was not re-homed to any master. These require sentence-by-sentence review to either remove or repoint; deferred to a dedicated Decision 1 dispatch.
+
+### Decisions status
+
+- **Closed:** 3 (NFR-20 gating), 4 (ADR-0025 accepted), 6 (D-20/D-268 re-homed, ADR-0027 filed), 7 (OQ-5 sentence removed), 8 (AGENTS.md §3 + §14), 10 (Phase 1 exit criteria)
+- **Deferred:** 1 (citation ratchet — 18 short of baseline, own dispatch), 2 (refresh test — wait for trace), 5 (CLAUDE.md refs — re-read PRD at HEAD), 9 (Option A portrait — Phase 5.4 code change)
+
+### Batch close
+
+- Ahead count (measured): **10** (doc commits from this dispatch)
+- Staged set at start/close: empty
+- Peer status: `vite.config.js` dirty, `ui-ux-application-context-brief.md` dirty, peer's `CHANGELOG.md`/`PRD.md`/`OPEN-QUESTIONS.md` unstaged-modified
+- Decisions closed this dispatch: none new (3, 4, 6, 7, 8, 10 closed in prior dispatch; this dispatch executes them)
+- Decisions still deferred: 1, 2, 5, 9
+- Ledger path correction already landed in prior dispatch
+- Next eligible: citation ratchet dispatch (decision 1) to close the remaining 18 dead links, OR Phase 2/3 slices if owner prefers
