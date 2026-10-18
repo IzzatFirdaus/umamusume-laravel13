@@ -282,3 +282,135 @@ it('never renders a visible N/A without a title, and never as a disclosure summa
         implode("\n  ", $violations),
     ));
 });
+
+/*
+ * Config display strings.
+ *
+ * `config/scenarios.php` composes strings a page prints, and the `app/**` scan above never reads it:
+ * the guard covered controllers and services but not the file several of them read their copy from.
+ * The gap was found on 2026-10-18 by reading `planning_focus_reason` (three `docs/` paths and a `§9`)
+ * by hand while the guard reported those paths clean. Same pattern set, same shipped-lines rule.
+ *
+ * The allowlist below is the pre-existing debt this first scan found: 38 shipped identifiers in
+ * `config/reference.php`, `config/scenarios.php` and `config/advisor.php`, measured on 2026-10-18.
+ * They are listed rather than fixed because two of the three files are held and the third's copy is
+ * a page's own work. Each entry is debt, not a precedent: a guard that fails on the tree as it stands
+ * is a guard the next dispatch turns off (`tools/ui-lint.mjs` records the same ruling for its own
+ * arbitrary-value list). Removing an entry is a welcome change; adding one is not.
+ */
+function configIdentifierDebt(): array
+{
+    return [
+        // config/advisor.php
+        'config/advisor.php:34', 'config/advisor.php:42', 'config/advisor.php:49', 'config/advisor.php:56',
+        // config/reference.php
+        'config/reference.php:43', 'config/reference.php:52', 'config/reference.php:56',
+        'config/reference.php:150', 'config/reference.php:164', 'config/reference.php:182',
+        'config/reference.php:191', 'config/reference.php:200', 'config/reference.php:209',
+        'config/reference.php:218', 'config/reference.php:227', 'config/reference.php:236',
+        'config/reference.php:245', 'config/reference.php:262', 'config/reference.php:277',
+        'config/reference.php:286', 'config/reference.php:295', 'config/reference.php:304',
+        'config/reference.php:313', 'config/reference.php:322',
+        // config/scenarios.php (held)
+        'config/scenarios.php:152', 'config/scenarios.php:166', 'config/scenarios.php:298',
+        'config/scenarios.php:350', 'config/scenarios.php:364', 'config/scenarios.php:468',
+        'config/scenarios.php:487', 'config/scenarios.php:500', 'config/scenarios.php:551',
+        'config/scenarios.php:577', 'config/scenarios.php:765', 'config/scenarios.php:772',
+        'config/scenarios.php:825', 'config/scenarios.php:889', 'config/scenarios.php:897',
+        'config/scenarios.php:948', 'config/scenarios.php:976', 'config/scenarios.php:1072',
+        'config/scenarios.php:1073', 'config/scenarios.php:1077', 'config/scenarios.php:1087',
+        'config/scenarios.php:1090', 'config/scenarios.php:1138',
+    ];
+}
+
+it('never ships a repository identifier from a config display string', function (): void {
+    $patterns = shippedIdentifierPatterns();
+    $debt = configIdentifierDebt();
+    $violations = [];
+
+    foreach (glob(base_path('config/*.php')) ?: [] as $file) {
+        $relative = str_replace(base_path().DIRECTORY_SEPARATOR, '', $file);
+
+        foreach (shippedPhpLines((string) file_get_contents($file)) as $entry) {
+            foreach ($patterns as $what => $pattern) {
+                if (preg_match($pattern, $entry['text']) === 1) {
+                    if (in_array(sprintf('%s:%d', $relative, $entry['line']), $debt, true)) {
+                        continue;
+                    }
+
+                    $violations[] = sprintf('%s:%d carries %s', $relative, $entry['line'], $what);
+                }
+            }
+        }
+    }
+
+    expect($violations)->toBe([], sprintf(
+        "Repository identifiers reached a config display string:\n  %s",
+        implode("\n  ", $violations),
+    ));
+});
+
+/*
+ * Defect-fingerprint locators.
+ *
+ * A test that finds an element by the identifier the copy is supposed to hide proves the defect
+ * rather than the fix: it passes while the identifier ships, and fails the moment the copy is
+ * corrected. Six such pins were found and repaired between 2.1a and 2.1d, each by hand, because no
+ * guard looked for them. This one does.
+ *
+ * The marker check is deliberately narrow: a browser spec's `hasText`/`getByText` and a Pest
+ * `assertSee`/`assertDontSee`/`->where` that carry an identifier INSIDE a quoted string. A comment
+ * naming the identifier is fine and is skipped, because that is where the ruling lives.
+ */
+it('never locates a test by a repository identifier', function (): void {
+    $identifier = '(?:ADR-\d+|\bD-\d{2,3}\b|\bG-\d+\b|KI-\d+|\bOQ-\d+\b|§\d)';
+
+    $specs = base_path('tests/browser');
+    $tests = base_path('tests/Feature');
+
+    $locator = '~(?:hasText|getByText|assertSee|assertDontSee)\s*\(\s*[\'"][^\'"]*'.$identifier.'[^\'"]*[\'"]~u';
+    $where = '~->where\s*\(\s*[\'"][^\'"]*[\'"]\s*,\s*[\'"][^\'"]*'.$identifier.'[^\'"]*[\'"]~u';
+
+    $violations = [];
+
+    $walk = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($specs, FilesystemIterator::SKIP_DOTS),
+    );
+
+    foreach ($walk as $file) {
+        if (! $file->isFile() || ! str_ends_with($file->getFilename(), '.spec.ts')) {
+            continue;
+        }
+
+        $relative = str_replace(base_path().DIRECTORY_SEPARATOR, '', $file->getPathname());
+        $lines = preg_split('/\R/', (string) file_get_contents($file->getPathname())) ?: [];
+
+        foreach ($lines as $index => $line) {
+            $trimmed = ltrim($line);
+
+            // A comment naming the identifier is where the ruling lives, not a locator.
+            if (str_starts_with($trimmed, '//') || str_starts_with($trimmed, '*') || str_starts_with($trimmed, '/*')) {
+                continue;
+            }
+
+            if (preg_match($locator, $line) === 1) {
+                $violations[] = sprintf('%s:%d locates an element by a repository identifier', $relative, $index + 1);
+            }
+        }
+    }
+
+    foreach (glob($tests.'/*.php') ?: [] as $file) {
+        $relative = str_replace(base_path().DIRECTORY_SEPARATOR, '', $file);
+
+        foreach (shippedPhpLines((string) file_get_contents($file)) as $entry) {
+            if (preg_match($locator, $entry['text']) === 1 || preg_match($where, $entry['text']) === 1) {
+                $violations[] = sprintf('%s:%d pins a repository identifier in an assertion', $relative, $entry['line']);
+            }
+        }
+    }
+
+    expect($violations)->toBe([], sprintf(
+        "Tests locate elements by identifiers the copy must hide:\n  %s",
+        implode("\n  ", $violations),
+    ));
+});

@@ -170,8 +170,11 @@ test('shows predicted and observed sections visually separated with badges', asy
     // Predicted has Estimated badge
     await expect(page.getByText('Estimated', { exact: true })).toBeVisible();
 
-    // Observed has Confirmed badge
-    await expect(page.getByText('Confirmed', { exact: true })).toBeVisible();
+    // Observed is a Confirmed record, and a confirmed figure deliberately carries no badge: the
+    // provenance vocabulary marks only the three exception states. Asserting the absence is the
+    // current contract; the earlier assertion here looked for a "Confirmed" word that no longer
+    // renders.
+    await expect(page.getByText('Confirmed', { exact: true })).toHaveCount(0);
 
     // No computed total anywhere - the expected inheritance shows N/A
     await expect(page.getByText('Expected Inheritance')).toBeVisible();
@@ -244,7 +247,6 @@ test('observed form records an inheritance event with keyboard entry', async ({ 
     // The event appears in the observed list
     await expect(page.getByText('Career Start', { exact: true })).toBeVisible();
     await expect(page.getByText('Blue Speed ★★★, Pink Medium ★★')).toBeVisible();
-    await expect(page.getByText('Confirmed').first()).toBeVisible();
 });
 
 test('sizes the inheritance event controls to the 44px contract', async ({ page }) => {
