@@ -164,6 +164,7 @@ function shippedIdentifierPatterns(): array
         'a decision identifier' => '/\bD-\d{2,3}\b/',
         'a goal identifier' => '/\bG-\d+\b/',
         'a known-issue identifier' => '/\bKI-\d+/',
+        'an open-question identifier' => '/\bOQ-\d+\b/',
         'a docs path' => '#\bdocs/#',
         // `.php` only. `.json` was in the first version and matched `base_path('.agents/skills.json')`,
         // which is a real data file the product reads rather than a source reference a Trainer should

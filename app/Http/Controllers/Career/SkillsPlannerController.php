@@ -461,7 +461,7 @@ final class SkillsPlannerController extends Controller
 
             if ($key === 'style') {
                 $title = $stylesRecorded
-                    ? 'The condition records a style number, but no source maps the numbers to the client\'s style labels (PRD OQ-5), so no comparison is made.'
+                    ? 'The condition records a style number, but no source maps the numbers to the client\'s style labels, so no comparison is made.'
                     : 'No condition on this skill names a running style.';
             }
 

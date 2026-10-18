@@ -230,9 +230,9 @@ final class CareerSkillsPlannerTest extends TestCase
                 ->where('groups.1.rows.0.fit.1', fn ($cell): bool => $cell['state'] === 'matches'
                     && str_contains((string) $cell['title'], 'Decoded by the published'))
                 // Style: the condition records a number, but no sourced map turns it into the
-                // client's labels, so no comparison is claimed (PRD OQ-5).
+                // client's labels, so no comparison is claimed.
                 ->where('groups.1.rows.0.fit.2', fn ($cell): bool => $cell['state'] === 'unrecorded'
-                    && str_contains((string) $cell['title'], 'OQ-5'))
+                    && str_contains((string) $cell['title'], 'no source maps the numbers'))
                 ->where('groups.1.rows.0.fit', fn (Collection $fit): bool => $fit->pluck('key')->all() === [
                     'distance', 'surface', 'style', 'course', 'weather', 'ground', 'phase',
                 ])

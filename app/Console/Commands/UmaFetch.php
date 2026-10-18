@@ -26,7 +26,7 @@ class UmaFetch extends Command
         $sources = config('uma.sources', []);
 
         if ($sources === []) {
-            $this->error('No sources declared in config("uma.sources"). See PRD OQ-2.');
+            $this->error('No sources declared in config("uma.sources").');
 
             return self::FAILURE;
         }
