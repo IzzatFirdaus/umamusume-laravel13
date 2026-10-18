@@ -70,7 +70,6 @@ const form = useForm<{ scenario: string | null }>({ scenario: null });
 function choose(scenario: ScenarioCard): void {
     choosing.value = scenario.key;
     form.scenario = scenario.key;
-
     // The write URL is supplied by the server (`career.scenario.store`) so the page never states
     // it as a literal. Focus is restored in `onSuccess`, after the new props land, because the
     // component instance survives a client-side visit: an `onMounted` hook would never re-run,
@@ -89,6 +88,26 @@ function choose(scenario: ScenarioCard): void {
             choosing.value = null;
         },
     });
+}
+
+/**
+ * Move the selection to the previous scenario card (arrow-left/arrow-up).
+ * Wraps from the first card to the last.
+ */
+function prevCard(): void {
+    const index = props.scenarios.findIndex((c) => c.key === props.selected);
+    const next = index <= 0 ? props.scenarios.length - 1 : index - 1;
+    choose(props.scenarios[next]);
+}
+
+/**
+ * Move the selection to the next scenario card (arrow-right/arrow-down).
+ * Wraps from the last card to the first.
+ */
+function nextCard(): void {
+    const index = props.scenarios.findIndex((c) => c.key === props.selected);
+    const next = index >= props.scenarios.length - 1 ? 0 : index + 1;
+    choose(props.scenarios[next]);
 }
 
 /**
@@ -193,18 +212,26 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                     class="relative rounded-lg border border-rule bg-panel p-4"
                     :class="props.selected === card.key ? 'border-2 border-chrome' : ''"
                 >
-                <label :for="`scenario-radio-${card.key}`" class="block cursor-pointer">
+                <label
+                    :for="`scenario-radio-${card.key}`"
+                    class="flex min-h-11 cursor-pointer items-start gap-2"
+                >
                     <h2 class="flex flex-wrap items-baseline gap-x-3 text-lg font-semibold text-ink-strong">
-                        <input
+<input
                             :id="`scenario-radio-${card.key}`"
                             type="radio"
                             name="scenario"
                             class="mt-1 h-4 w-4 shrink-0 accent-chrome"
                             :value="card.key"
                             :checked="props.selected === card.key"
+                            :aria-checked="props.selected === card.key"
                             :aria-describedby="form.errors.scenario ? 'scenario-error' : undefined"
                             :disabled="form.processing"
                             @change="choose(card)"
+                            @keydown.arrow.left="prevCard"
+                            @keydown.arrow.right="nextCard"
+                            @keydown.arrow.up="prevCard"
+                            @keydown.arrow.down="nextCard"
                         >
                         {{ card.label }}
                         <!-- Glyph and word, so the documentation state is never carried by colour or by the

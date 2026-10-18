@@ -4,8 +4,8 @@ import { test, expect } from '@playwright/test';
  * Rendered-copy, state and accessibility evidence for SCREEN-002, Scenario Selection
  * (ADR-0020 §1; plan §8 D2). `CareerScenarioSelectTest` asserts the resolved props and the session
  * draft; these assert what the browser shows and what only a browser can reach: the card copy, the
- * `aria-pressed` state after a real POST round trip, the keyboard path, the 44px sweep, 320px reflow
- * and a clean console.
+ * radio group's checked state after a real PUT round trip, the keyboard path, the 44px sweep, 320px
+ * reflow and a clean console.
  *
  * This spec writes no database row. The selection lands in the session draft, which is the point of
  * the mechanism: unlike the run-creating specs it leaves the shared scratch database exactly as it
@@ -18,9 +18,15 @@ import { test, expect } from '@playwright/test';
 
 const CARDS = ['URA Finale', 'Unity Cup', 'Trackblazer', 'Our Grand Concert'];
 
-/** The card that names the scenario in its heading, not anywhere in its body. */
+/**
+ * The card that names the scenario in its heading, not anywhere in its body.
+ *
+ * Addressed through `data-scenario-card` rather than a list role: since 3.3 the cards are a radio
+ * group inside a `fieldset`, not a `<ul>` of `<li>`s, so a `listitem` query resolves to nothing. The
+ * data attribute is the card's own marker and survives the element change.
+ */
 function card(page: import('@playwright/test').Page, label: string) {
-    return page.getByRole('listitem').filter({ has: page.getByRole('heading', { name: label, exact: true }) });
+    return page.locator('[data-scenario-card]').filter({ has: page.getByRole('heading', { name: label, exact: true }) });
 }
 
 /**
@@ -61,7 +67,7 @@ test.describe('Scenario Selection', () => {
         await expect(page.getByRole('radio')).toHaveCount(CARDS.length);
 
         // The step position is announced, and the unbuilt steps are named absences rather than links.
-        await expect(page.getByRole('link', { name: 'Scenario' })).toHaveAttribute('aria-current', 'step');
+        await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByRole('link', { name: 'Scenario' })).toHaveAttribute('aria-current', 'step');
         await expect(page.getByText('Step 1 of 6').first()).toBeVisible();
 
         // Scoped to the step nav: a page-body phrase like "not built" would otherwise be counted as an
@@ -301,7 +307,7 @@ test.describe('Scenario Selection', () => {
         const leave = await page.getByRole('link', { name: 'Leave setup' }).boundingBox();
         expect(leave?.height ?? 0, 'Leave setup is not sized to 44px').toBeGreaterThanOrEqual(44);
 
-        const stepLink = await page.getByRole('link', { name: 'Scenario' }).boundingBox();
+        const stepLink = await page.getByRole('navigation', { name: 'Setup steps' }).getByRole('link', { name: 'Scenario' }).boundingBox();
         expect(stepLink?.height ?? 0, 'the step link is not sized to 44px').toBeGreaterThanOrEqual(44);
     });
 
