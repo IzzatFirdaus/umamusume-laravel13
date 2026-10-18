@@ -359,6 +359,12 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
   render, important routes stay within their query ceiling, and no page request triggers background work.
   Existing Phase A–E tests stay green.
 
+  **Gating decision (2026-10-18, owner ruling):** items 1–4 (navigation resolves, failed navigation clears
+  loading state, artwork miss does not block render, query ceiling holds) are required gates for Phase 1.
+  Items 5 and 6 (no page request triggers background work; loading/error state termination) are acknowledged
+  as known gaps. Browser tests run developer-locally only; the repository has no CI (`.github/workflows/`
+  absent), so their results are not continuously verified.
+
 ## 6. Non-Goals (eliminated legacy features)
 
 Explicitly not built, with the legacy feature they replace. The numbering is load-bearing: `AGENTS.md`,
