@@ -408,7 +408,7 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                                          id rather than a word this tool invented (D-20). -->
                                     <span class="text-ink">{{ effect.name ?? `Effect ${effect.effect_id}` }}</span>
                                     <span
-                                        title="The anchor the source states at the card's highest listed level; nothing between levels is interpolated (D-256)."
+                                        title="The anchor the source states at the card's highest listed level; nothing between levels is interpolated."
                                         class="font-mono tabular-nums text-ink-strong"
                                     >{{ effect.display }}</span>
                                 </li>

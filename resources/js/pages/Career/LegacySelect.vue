@@ -510,7 +510,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                                />
                             <p class="mt-1 text-xs text-ink-muted">
                                 Blank stays N/A. Unbounded on purpose: the sources give no ceiling on a
-                                Legacy's own star count (`ADR-0010`).
+                                Legacy's own star count.
                             </p>
 
                             <BaseCheckbox
@@ -615,7 +615,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                  name="affinity"
                  :options="[{ value: '', label: 'Not recorded' }, ...props.affinityGrades.map(grade => ({ value: grade, label: grade }))]"
                />
-            <p class="mt-1 text-xs text-ink-muted" title="REFERENCE §1.5.4 grades each link; this records the pair's own grade as read.">
+            <p class="mt-1 text-xs text-ink-muted" title="The published reference grades each link; this records the pair's own grade as read.">
                 The grade you read for the pair, not a score. This tool does not price it.
             </p>
             <p v-if="form.errors.affinity" class="mt-1 text-xs text-risk">{{ form.errors.affinity }}</p>

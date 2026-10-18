@@ -177,7 +177,7 @@ final class TrackblazerPanelBuilder
                 'needed_title' => 'The standard track in config(\'scenarios.scenarios.trackblazer.grade_objectives\'), '
                     .'transcribed from docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 84-89 '
                     .'and 342-349. Only the standard track is printed: no column says which trainee belongs '
-                    .'on the dirt-leaning or limited-turf-range one, which is KI-15.',
+                    .'on the dirt-leaning or limited-turf-range one.',
                 'is_current' => $current === $index,
                 'plan' => $plan === null ? null : number_format($plan),
                 'plan_badge' => $plan === null ? null : 'calculated',

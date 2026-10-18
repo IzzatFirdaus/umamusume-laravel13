@@ -533,10 +533,8 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                 <p class="text-xs text-ink-muted">
                     Targets shown are the
                     <span class="font-semibold text-ink">standard</span>
-                    track. Which trainee belongs on the dirt-leaning or limited-turf-range track
-                    is not sourced, and
-                    <span class="font-mono text-ink">KI-15</span>
-                    carries the disagreement.
+                    track. No source says which trainee belongs on the dirt-leaning or
+                    limited-turf-range track, and the published sources disagree about it.
                 </p>
 
                 <!--

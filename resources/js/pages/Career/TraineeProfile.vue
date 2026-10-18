@@ -304,7 +304,7 @@ const profile = computed(() => props.trainee.profile);
             <p class="mt-1 max-w-3xl text-sm text-ink-muted">
                 The brief's four remaining figures are not stored anywhere in this catalog. They are printed
                 as absences with their reasons rather than filled by a guess. This page carries no career-goal
-                section by design: the trainee's own objectives are fetched per character (`ADR-0026`) and
+                section by design: the trainee's own objectives are fetched per character and
                 read under Trainee goals in the Cockpit's Scenario panel, where the run's race record decides
                 whether each one is met.
             </p>

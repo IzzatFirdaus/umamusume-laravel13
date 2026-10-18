@@ -269,7 +269,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                                 </td>
                                 <td class="py-2 text-ink-muted">
                                     <span v-if="race.turn !== null" class="font-mono tabular-nums">{{ race.turn }}</span>
-                                    <span v-else title="This race was not tied to a logged turn (KI-17).">N/A</span>
+                                    <span v-else title="The turn was not recorded against this race, so the turn is not known rather than zero.">N/A</span>
                                 </td>
                             </tr>
                         </tbody>

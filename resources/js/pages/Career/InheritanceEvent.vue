@@ -180,8 +180,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
         <p class="max-w-3xl text-sm text-ink-muted">
             Track the three inheritance moments in this career. The Predicted section shows the Sparks
             carried by the chosen parents and grandparents. The Observed section records what actually
-            fired in the game. No inheritance outcome is computed - this tool does not derive a result
-            (ADR-0020 §3).
+            fired in the game. No inheritance outcome is computed - this tool does not derive a result.
         </p>
 
         <!-- Empty state when no legacy selection exists -->
@@ -215,7 +214,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                     Inheritance Milestones
                 </h2>
                 <p class="mt-1 text-sm text-ink-muted">
-                    Three fixed moments (REFERENCE §1.5.1): career start, Classic Early April, Senior Early April.
+                    Three fixed moments: career start, Classic Early April, Senior Early April.
                     Glyphs: ● completed · ◉ current · ○ upcoming · × missed
                 </p>
 
@@ -294,7 +293,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                     </span>
                 </p>
                 <p class="mt-1 text-xs text-ink-muted">
-                    Inheritance outcome computation is banned (ADR-0020 §3). This tool records what the
+                    Inheritance outcome computation is banned. This tool records what the
                     Trainer enters; it does not derive an outcome.
                 </p>
             </div>
@@ -305,8 +304,8 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                     Sourced Star-Roll Probabilities (Estimated)
                 </p>
                 <p class="mt-1 text-xs text-ink-muted">
-                    From UMAMUSUME_REFERENCE.md §1.5.3 (Game8 guide 2026-08-24). Probabilities, not guarantees.
-                    Shown as Estimated; never summed into a single number.
+                    Transcribed from a Game8 guide dated 2026-08-24, which states probabilities rather than
+                    guarantees. Shown as Estimated; never summed into a single number.
                 </p>
                 <div class="mt-2 overflow-x-auto" role="region" tabindex="0" aria-label="Sourced star-roll probabilities">
                     <table class="w-full text-sm text-ink" role="table">

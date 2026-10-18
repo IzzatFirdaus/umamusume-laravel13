@@ -111,7 +111,7 @@ const optimizesText = (card: ScenarioCard): string | null => {
 // how the scenario advances its facility level, read from the entry's `facility_level_source`; the
 // 2026-10-15 artifact's report resolves the field against that config fact and states that no
 // publisher uses the term, so the citation is the repository's, not a publisher's.
-const ruleFamilyTitle = 'How this scenario advances its training facility level, read from the entry\'s `facility_level_source` in config/scenarios.php; the repository\'s own taxonomy, which no publisher uses.';
+const ruleFamilyTitle = 'How this scenario advances its training facility level, read from the entry\'s own rule field; the repository\'s own taxonomy, which no publisher uses.';
 </script>
 
 <template>
@@ -168,7 +168,7 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
             v-if="props.scenarios.length === 0"
             class="mt-8 rounded-lg border border-dashed border-rule bg-raised p-4 text-sm text-ink-muted"
         >
-            No scenario is composed. `config/scenarios.php` holds none, so there is nothing to choose
+            No scenario is composed. The scenario settings hold none, so there is nothing to choose
             and no career can be started until one is added.
         </p>
 

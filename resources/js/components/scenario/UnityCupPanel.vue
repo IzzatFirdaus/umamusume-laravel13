@@ -250,7 +250,7 @@ const counterSegments = computed((): string[] => {
                     class="mt-1"
                     glyph="○"
                     text="Recommended timing and projected benefit are not built."
-                    detail="Both are advice this build holds (ADR-0020 §3): the trigger rule is recorded (a burst fires on the next Special Training once a teammate's gauge is full), but what to do about it and what it would yield are not computed here."
+                    detail="Both are advice this build holds: the trigger rule is recorded (a burst fires on the next Special Training once a teammate's gauge is full), but what to do about it and what it would yield are not computed here."
                     tone="note"
                 />
             </div>
@@ -267,7 +267,7 @@ const counterSegments = computed((): string[] => {
                     <CapsuleHeader title="Burst count bands" />
                     <ProvenanceBadge
                         state="estimated"
-                        title="Transcribed from the scenario guide's post-rework table, which rests on one publisher where two report different Skill Point figures, and the guide's own line that Extreme Bursts count toward the total is a live disagreement (run report §7.4, §8.2)."
+                        title="Transcribed from the scenario guide's post-rework table, which rests on one publisher where two report different Skill Point figures, and the guide's own line that Extreme Bursts count toward the total is a live disagreement."
                     />
                 </div>
                 <table class="w-full text-sm">
@@ -301,7 +301,7 @@ const counterSegments = computed((): string[] => {
                     class="mt-2"
                     glyph="⚠"
                     text="Three parts of this table are publisher conflicts, not settled facts: whether Extreme Bursts count toward the total, the Skill Point figures, and the month of the payout event."
-                    detail="gametora counts the bursts combined and pays 10/20/30/40 SP; umamusu.wiki's criteria never say whether Extremes increment, and two other publishers report 15/15/20/20 with no stat component; the payout is dated late November where those publishers print the first half. The client's own Team Info count is the tiebreaker (run report §7.4, §8.2)."
+                    detail="gametora counts the bursts combined and pays 10/20/30/40 SP; umamusu.wiki's criteria never say whether Extremes increment, and two other publishers report 15/15/20/20 with no stat component; the payout is dated late November where those publishers print the first half. The client's own Team Info count is the tiebreaker."
                     tone="note"
                 />
                 <p class="mt-2 text-xs text-ink-muted">
