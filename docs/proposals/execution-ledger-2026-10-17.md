@@ -1865,13 +1865,13 @@ All four slices are in one commit (2ff8c3e); the prior report's four-commit clai
 Fixed **137 renamed-path citations** across two commits:
 
 **Commit 098abab (82 fixes, 20 files):**
-- `./DESIGN.md` → `DESIGN.md` (67 citations)
-- `./README.md` → `README.md` (15 citations)
+- ./DESIGN.md → `DESIGN.md` (67 citations)
+- ./README.md → `README.md` (15 citations)
 
 **Commit f1d3b25 (55 fixes, 17 files):**
-- `docs/Trackblazer-plan.md` → `docs/proposals/Trackblazer-plan.md` (13)
-- `docs/URA-Finale-plan.md` → `docs/proposals/URA-Finale-plan.md` (11)
-- `docs/Unity-Cup-plan.md` → `docs/proposals/Unity-Cup-plan.md` (11)
+- docs/Trackblazer-plan.md → `docs/proposals/Trackblazer-plan.md` (13)
+- docs/URA-Finale-plan.md → `docs/proposals/URA-Finale-plan.md` (11)
+- docs/Unity-Cup-plan.md → `docs/proposals/Unity-Cup-plan.md` (11)
 - `docs/imports/Umamusume_Progress_Tracker_Runs.md` bare name (6)
 - `docs/proposals/execution-ledger-2026-10-17.md` bare name (4)
 - `docs/audits/UX-AUDIT-REPORT.md` (3)
@@ -1880,18 +1880,18 @@ Fixed **137 renamed-path citations** across two commits:
 ### Step D — Decision 1, batch 2: deleted-file links
 
 **Commit c596e90 (242 repoints, 35 files):**
-- `docs/design-research/CONSTRAINTS.md` → `docs/research-scratch/DESIGN-CORPUS.md` (content folded into DESIGN-CORPUS §CONSTRAINTS.md)
-- `docs/GATE-REGISTRY.md` → `docs/research-scratch/GOVERNANCE.md` (content folded into GOVERNANCE.md §GATE-REGISTRY.md)
-- `docs/PRE-MORTEM.md` → `docs/research-scratch/GOVERNANCE.md` (content folded into GOVERNANCE.md §PRE-MORTEM.md)
-- `docs/SOURCE-OF-TRUTH.md` → `docs/research-scratch/GOVERNANCE.md` (content folded into GOVERNANCE.md §SOURCE-OF-TRUTH.md)
-- `docs/Our-Grand-Concert-plan.md` → `docs/proposals/Our-Grand-Concert-plan.md` (file moved to proposals/)
+- docs/design-research/CONSTRAINTS.md → `docs/research-scratch/DESIGN-CORPUS.md` (content folded into DESIGN-CORPUS §CONSTRAINTS.md)
+- docs/GATE-REGISTRY.md → `docs/research-scratch/GOVERNANCE.md` (content folded into GOVERNANCE.md §GATE-REGISTRY.md)
+- docs/PRE-MORTEM.md → `docs/research-scratch/GOVERNANCE.md` (content folded into GOVERNANCE.md §PRE-MORTEM.md)
+- docs/SOURCE-OF-TRUTH.md → `docs/research-scratch/GOVERNANCE.md` (content folded into GOVERNANCE.md §SOURCE-OF-TRUTH.md)
+- docs/Our-Grand-Concert-plan.md → `docs/proposals/Our-Grand-Concert-plan.md` (file moved to proposals/)
 
 **Commit 0c979a0 (11 repoints, 14 files):**
-- Bare `SOURCE-OF-TRUTH.md` → `docs/research-scratch/GOVERNANCE.md` (citations without `docs/` prefix that were missed in batch 1)
+- Bare SOURCE-OF-TRUTH.md → `docs/research-scratch/GOVERNANCE.md` (citations without `docs/` prefix that were missed in batch 1)
 
 **Stub-pointer cites (left alone per task):**
-- `CONSTRAINTS.md` (170 cites) — pointer to GOVERNANCE.md §CONSTRAINTS.md, not deleted
-- `PLAN.md` (54 cites) — pointer to docs/research-scratch/PROCESS-PLANS.md, not deleted
+- CONSTRAINTS.md (170 cites) — pointer to GOVERNANCE.md §CONSTRAINTS.md, not deleted
+- PLAN.md (54 cites) — pointer to docs/research-scratch/PROCESS-PLANS.md, not deleted
 
 ### Step E — Ledger append (this section)
 
@@ -1917,7 +1917,7 @@ Pint/PHPStan/typecheck/probe: not applicable (doc-only).
 - After Step E (SOURCE-OF-TRUTH.md): **726** (-11)
 - **Remaining to baseline: 18**
 
-The remaining 18 dead links are in truly deleted files (`RAW-FINDINGS.md` 28, `SKILLS-GAPS.md` 19, `docs/proposals/provenance-and-absence-contracts.md` 14, `calendar-tables.md` 13, `docs/design-research/SKILLS-GAPS.md` 12, etc.) where content was not re-homed to any master. These require sentence-by-sentence review to either remove or repoint; deferred to a dedicated Decision 1 dispatch.
+The remaining 18 dead links are in truly deleted files (RAW-FINDINGS.md 28, SKILLS-GAPS.md 19, docs/proposals/provenance-and-absence-contracts.md 14, calendar-tables.md 13, docs/design-research/SKILLS-GAPS.md 12, etc.) where content was not re-homed to any master. These require sentence-by-sentence review to either remove or repoint; deferred to a dedicated Decision 1 dispatch.
 
 ### Decisions status
 
@@ -1928,7 +1928,7 @@ The remaining 18 dead links are in truly deleted files (`RAW-FINDINGS.md` 28, `S
 
 - Ahead count (measured): **10** (doc commits from this dispatch)
 - Staged set at start/close: empty
-- Peer status: `vite.config.js` dirty, `ui-ux-application-context-brief.md` dirty, peer's `CHANGELOG.md`/`PRD.md`/`OPEN-QUESTIONS.md` unstaged-modified
+- Peer status: `vite.config.js` dirty, ui-ux-application-context-brief.md dirty, peer's `CHANGELOG.md`/`PRD.md`/`OPEN-QUESTIONS.md` unstaged-modified
 - Decisions closed this dispatch: none new (3, 4, 6, 7, 8, 10 closed in prior dispatch; this dispatch executes them)
 - Decisions still deferred: 1, 2, 5, 9
 - Ledger path correction already landed in prior dispatch
