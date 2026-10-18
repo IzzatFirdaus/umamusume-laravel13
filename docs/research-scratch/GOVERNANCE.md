@@ -1482,6 +1482,20 @@ Grep, case-insensitive: `horse`, `horses`, `sire`, `dam`, `mare`, `foal`, `🏇`
 - **Verbatim names are a third category**, between our own copy and a stray noun. A quoted skill, race, card or title string that contains a banned term stays as **source data** and is barred from **promotion into UI copy** — see the Air Messiah ruling in `docs/UMAMUSUME_REFERENCE.md` §2.7 and the `[Global]` "Cleat" case there. Editing the data to satisfy the style rule corrupts the corpus; the guard goes on the display path.
 - **The grep is a floor, not the rule.** `composer lore` sweeps 23 banned words over three greps and `lore-code` adds the Global client terminology, but only inside app directories. Neither reaches `muzzle`, `rider`, `bit`, `flock`, `pack`, or the framing phrases ("your horse", "the animal"), and neither reads intent, which is why `dam` in "damaged" and `stable` in "stable growth" arrive as hits and are ruled on by hand. The wider dictionary lives in `docs/research-scratch/DESIGN-CORPUS.md` section "CONSTRAINTS.md" §3.1 (D-20); a human read is the control for anything the greps cannot see.
 
+### D-20 and D-268 rulings (re-homed 2026-10-18)
+
+The following rulings were previously recorded in `docs/design-research/CONSTRAINTS.md` (now deleted) and scattered across research notes. They are re-homed here per owner decision 2026-10-18. Original text is preserved above per AGENTS.md §11.
+
+**D-20. Never invent a client string.** If a label is needed and no Global string is on record, use a plain descriptive phrase and record the gap. `UMAMUSUME_REFERENCE.md` marks its own unverified items with `❌ UNVERIFIED`; a design artifact must not silently promote one into UI copy. This rule is general and stands. Its mood-tier instance is **resolved, not relaxed**: the client's own Mood Effect panel (owner-supplied capture, 2026-09-27) prints `GREAT` / `GOOD` / `NORMAL` / `BAD` / `AWFUL`, so those five are evidenced client strings and §6.17 of `DESIGN.md` now uses them as UI copy. The strings this rule still blocks are every label the corpus has not captured from the client itself, the outing action's button text among them.
+
+Source: `docs/research-scratch/DESIGN-CORPUS.md:1840-1841` (originally `docs/design-research/CONSTRAINTS.md` §3.1).
+
+**D-268. The screen has more state than the schema can hold.** Legacy Select shows, per Legacy: the chosen Umamusume, its rank, whether it is a Guest, its own two ancestors, and a Spark list with per-Spark kind, target and star rank, plus an affinity value for the pairing. The `training_runs` record holds two character ids. Phase 4's provenance requirement is therefore **not met by the existing columns**, and closing it is a schema proposal on the `ADR-0003` pattern, most likely a typed json payload keyed to the run rather than a wide table of nullable columns. Documenting the screen without stating this would imply the data can be persisted today.
+
+Closed as a schema question 2026-09-29 (Slice 15, `ADR-0010`), and it is still open as a screen. `training_runs.legacy_selection` is now one nullable json column read through `App\Models\Legacy\LegacySelectionPayload`, holding exactly the state enumerated above, with the two `inheritance_parent_*_id` foreign keys left where they are. Three things this does **not** do: it builds no Legacy Select UI (D-260 still governs where a control may appear once one exists); it computes nothing from the payload, which is the half PRD §6 non-goal 3 keeps banned; and it stores one affinity grade for the chosen pair rather than the per-link grades §1.5.4 actually grades, so a screen that shows the four deeper links of the diagram needs the column revisited. `ancestors` holds names, not ids, because the Umamusume two steps back are frequently absent from the local catalogue.
+
+Source: `docs/research-scratch/DESIGN-CORPUS.md:2501-2503` (originally `docs/design-research/CONSTRAINTS.md` §10q).
+
 ### Verification sequence before any hand-off
 
 1. `php artisan migrate:fresh --seed`

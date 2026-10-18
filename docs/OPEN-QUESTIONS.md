@@ -41,8 +41,7 @@ carrying a condition string on 100% of rows.
 
 Answered, in the negative: this is **not** `best_for` and must not be built as such. No source carries a
 recommendation (GameTora's 30 keys include no usage, role, target or priority field; Game8's list is
-`Tier / Skill / Points` with use cases inline in prose) and no requirement cites one. The 2026-10-01 record
-stated this as "`PRD.md` having zero occurrences of `best_for`, "best for" or `recommend`". Measured 2026-10-18
+`Tier / Skill / Points` with use cases inline in prose) and no requirement cites one. Measured 2026-10-18
 against the file as it stood before this restructure, `best_for` and "best for" occur nowhere except as the
 terms named in that sentence, while `recommend` occurs three times, in the US-14 / FR-F / §6.11 lines
 `ADR-0020` authorized on 2026-10-04 — after the measurement. The load-bearing half of the claim therefore

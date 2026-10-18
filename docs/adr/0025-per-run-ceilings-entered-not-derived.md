@@ -1,14 +1,14 @@
 # ADR-0025: A run's per-stat ceilings are entered facts, not a composition
 
 <!-- ADR-CONTRACT
-  decision: proposed — the owner's ruling is recorded and not in question ("store entered caps, derive nothing"); what awaits approval is the wording that records it
+  decision: accepted (2026-10-18) — the owner has approved the wording; migration and tests are built. The decision is now binding per PRD requirements US-3, C-1, C-2.
   code: built — migration 2026_10_12_140000_add_entered_caps_to_training_runs_table (ran, batch 16); ScenarioCaps::ENTERED_CAPS; tests/Feature/EnteredStatCapsTest.php
   superseded-by: —
   amended-by: 0015 (adds an override on top of its per-stat, per-scenario ceiling), 0004 (does not reopen its cap reference data), 0002 (does not reopen its bound)
   open: the run report's §1.2 gap stays open — this decision records the client's figures, it does not explain them
 -->
 
-Status: **Proposed** — drafted 2026-10-12 for the owner's review of this text. The owner's ruling is recorded
+Status: **Accepted (2026-10-18)** — the owner has approved the wording; migration and tests are built. The decision is now binding per PRD requirements US-3, C-1, C-2.
 and not in question ("store entered caps, derive nothing"); what awaits approval is the wording that records
 it. Amends `ADR-0015`'s read path; does not reopen `ADR-0002` or `ADR-0004`.
 

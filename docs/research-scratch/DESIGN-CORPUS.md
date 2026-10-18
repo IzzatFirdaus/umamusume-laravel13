@@ -1839,6 +1839,8 @@ UI labels must use the Global English client's words, not the JP client's and no
 
 **D-20. Never invent a client string.** If a label is needed and no Global string is on record, use a plain descriptive phrase and record the gap. `UMAMUSUME_REFERENCE.md` marks its own unverified items with `❌ UNVERIFIED`; a design artifact must not silently promote one into UI copy. This rule is general and stands. Its mood-tier instance is **resolved, not relaxed**: the client's own Mood Effect panel (owner-supplied capture, 2026-09-27) prints `GREAT` / `GOOD` / `NORMAL` / `BAD` / `AWFUL`, so those five are evidenced client strings and §6.17 of `DESIGN.md` now uses them as UI copy. The strings this rule still blocks are every label the corpus has not captured from the client itself, the outing action's button text among them.
 
+*(moved to GOVERNANCE.md §"D-20 and D-268 rulings (re-homed 2026-10-18)" on 2026-10-18; original text preserved above per AGENTS.md §11.)*
+
 **D-21. Do not key on fan-translation strings.** Some community English names carry banned vocabulary that the official Global label does not (the reference doc's Rainbow Cleat case). Official Global text wins.
 
 ---
@@ -2501,6 +2503,8 @@ anatomy in `DESIGN.md` §6.27.
 **D-268. The screen has more state than the schema can hold.** Legacy Select shows, per Legacy: the chosen Umamusume, its rank, whether it is a Guest, its own two ancestors, and a Spark list with per-Spark kind, target and star rank, plus an affinity value for the pairing. The `training_runs` record holds two character ids. Phase 4's provenance requirement is therefore **not met by the existing columns**, and closing it is a schema proposal on the `ADR-0003` pattern, most likely a typed json payload keyed to the run rather than a wide table of nullable columns. Documenting the screen without stating this would imply the data can be persisted today.
 
 **Closed as a schema question 2026-09-29 (Slice 15, `ADR-0010`), and it is still open as a screen.** `training_runs.legacy_selection` is now one nullable json column read through `App\Models\Legacy\LegacySelectionPayload`, holding exactly the state enumerated above, with the two `inheritance_parent_*_id` foreign keys left where they are. Three things this does **not** do, so a reader of the paragraph above does not infer them: it builds no Legacy Select UI (D-260 still governs where a control may appear once one exists); it computes nothing from the payload, which is the half PRD §6 non-goal 3 keeps banned; and it stores one affinity grade for the chosen pair rather than the per-link grades §1.5.4 actually grades, so a screen that shows the four deeper links of the diagram needs the column revisited. `ancestors` holds names, not ids, because the Umamusume two steps back are frequently absent from the local catalogue.
+
+*(moved to GOVERNANCE.md §"D-20 and D-268 rulings (re-homed 2026-10-18)" on 2026-10-18; original text preserved above per AGENTS.md §11.)*
 
 ### 10r. Run Completion state rules
 
