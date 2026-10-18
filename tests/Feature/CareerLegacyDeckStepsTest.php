@@ -266,7 +266,7 @@ it('refuses an unknown parent, a half-filled node and an off-dictionary Spark, l
             array_merge(draftLegacyPayload()['legacies'][0], ['legacy_id' => $fixture['parents'][0]]),
             array_merge(draftLegacyPayload()['legacies'][1], ['legacy_id' => $fixture['parents'][0]]),
         ],
-    ]))->assertSessionHasErrors(['legacies.1.legacy_id' => 'The two parents must be different Umamusume (REFERENCE §1.5.4).']);
+    ]))->assertSessionHasErrors(['legacies.1.legacy_id' => 'The two parents must be different Umamusume.']);
 
     $ownRow = Veteran::factory()->create(['training_run_id' => TrainingRun::factory()->create(['umamusume_id' => $fixture['trainee']->id])->id]);
 
@@ -275,7 +275,7 @@ it('refuses an unknown parent, a half-filled node and an off-dictionary Spark, l
             array_merge(draftLegacyPayload()['legacies'][0], ['legacy_id' => $ownRow->id]),
             draftLegacyPayload()['legacies'][1],
         ],
-    ]))->assertSessionHasErrors(['legacies.0.legacy_id' => 'A run may not name its own trainee as a parent (REFERENCE §1.5.4).']);
+    ]))->assertSessionHasErrors(['legacies.0.legacy_id' => 'A run may not name its own trainee as a parent.']);
 
     expect(SetupDraft::legacySelection())->toBeNull();
 });

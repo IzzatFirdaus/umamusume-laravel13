@@ -112,15 +112,21 @@ test('names the held figures as held, and prints no recommendation anywhere', as
 
     await expect(page.getByRole('heading', { name: 'Not computed' })).toBeVisible();
 
-    // Each held figure is `N/A` carrying the ruling that keeps it that way. The pair is addressed through
+    // Each held figure is `N/A` carrying the reason that keeps it that way. The pair is addressed through
     // the `dt` element rather than `getByRole('term')`, which did not resolve for a `dt` inside the `div`
-    // wrapper this definition list uses, and the ruling now rides on the disclosure's accessible name
-    // rather than a `title` only a mouse could read.
+    // wrapper this definition list uses, and the reason now rides on the disclosure's accessible name
+    // rather than a `title` only a mouse could read. Each figure is located by its own reason, not by a
+    // register identifier.
+    const reasons: Record<string, RegExp> = {
+        'Factor analysis': /held computation/,
+        'Legacy value': /does not compute/,
+        'Best use': /recommendation/,
+    };
     for (const label of ['Factor analysis', 'Legacy value', 'Best use']) {
         const cell = page.locator('dt', { hasText: label }).locator('xpath=following-sibling::dd[1]');
-        const ruling = cell.locator('summary', { hasText: 'ADR-0020' });
+        const ruling = cell.locator('summary');
         await expect(ruling).toContainText('N/A');
-        await expect(ruling.locator('xpath=following-sibling::span')).toHaveText(/ADR-0020/);
+        await expect(ruling.locator('xpath=following-sibling::span')).toHaveText(reasons[label]);
     }
 
     // The brief's own recommendation wording must not appear, in any element or attribute.

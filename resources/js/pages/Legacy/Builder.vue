@@ -442,7 +442,7 @@ const hasAnyNode = computed(() =>
                                          v-model="form.legacies[index].ancestors_rank[ancestorIndex]"
                                          type="number"
                                          min="0"
-                                         hint="Blank stays N/A. Unbounded on purpose: the sources give no ceiling on a Legacy's own star count (ADR-0010)."
+                                         hint="Blank stays N/A. Unbounded on purpose: the sources give no ceiling on a Legacy's own star count."
                                      />
 
                                     <!-- The grandparent's own Sparks, the same record the wizard step edits.
@@ -538,11 +538,11 @@ const hasAnyNode = computed(() =>
                                      v-model="form.legacies[index].rank"
                                      type="number"
                                      min="0"
-                                     hint="Blank stays N/A. Unbounded on purpose: the sources give no ceiling on a Legacy's own star count (ADR-0010)."
+                                     hint="Blank stays N/A. Unbounded on purpose: the sources give no ceiling on a Legacy's own star count."
                                  />
                                  <p class="mt-1 text-xs text-ink-muted">
                                      Blank stays N/A. Unbounded on purpose: the sources give no ceiling
-                                     on a Legacy's own star count (ADR-0010).
+                                     on a Legacy's own star count.
                                  </p>
 
                                 <!-- The letter rank the client prints beside the star count, the same
@@ -670,7 +670,7 @@ const hasAnyNode = computed(() =>
                      name="affinity"
                      :options="[{ value: '', label: 'Not recorded' }, ...affinityGrades.map(grade => ({ value: grade, label: grade }))]"
                  />
-                 <p class="mt-1 text-xs text-ink-muted" title="REFERENCE §1.5.4 grades each link; this records the pair's own grade as read.">
+                 <p class="mt-1 text-xs text-ink-muted" title="The published reference grades each link; this records the pair's own grade as read.">
                      The grade you read for the pair, not a score. This tool does not price it.
                  </p>
                  <p v-if="form.errors.affinity" class="mt-1 text-xs text-risk">{{ form.errors.affinity }}</p>

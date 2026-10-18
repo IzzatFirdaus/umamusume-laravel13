@@ -176,7 +176,7 @@ test('shows predicted and observed sections visually separated with badges', asy
     // No computed total anywhere - the expected inheritance shows N/A
     await expect(page.getByText('Expected Inheritance')).toBeVisible();
     await expect(page.getByText('N/A').first()).toBeVisible();
-    await expect(page.getByText('N/A').first()).toHaveAttribute('title', /ADR-0020/);
+    await expect(page.getByText('N/A').first()).toHaveAttribute('title', /Not computed/);
     await expect(page.getByText('N/A').first()).toHaveAttribute('title', /does not derive/);
 
     // The star-roll table is present

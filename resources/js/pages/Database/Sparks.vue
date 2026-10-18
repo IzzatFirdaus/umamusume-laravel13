@@ -105,12 +105,12 @@ const close = async (): Promise<void> => {
                 No Spark categories are sourced
             </h3>
             <p class="mt-2 text-sm text-ink-muted">
-                The reference guide's §1.5.2 table is what this view prints, and it is empty here.
+                The reference guide's table of Spark categories is what this view prints, and it is empty here.
                 Without it there is no way to tell a stat spark from a competition one, or to size the
                 odds a parent faces.
             </p>
             <p class="mt-2 text-sm text-ink">
-                Re-read the guide's §1.5.2 categories against the local export.
+                Re-read the guide's Spark categories against the local export.
             </p>
         </section>
 

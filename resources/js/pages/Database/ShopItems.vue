@@ -102,7 +102,7 @@ const close = async (): Promise<void> => {
                 way to tell a Career item from a Team Trials one.
             </p>
             <p class="mt-2 text-sm text-ink">
-                Client strings are in the reference guide §1.6.10; the
+                Client strings are in the reference guide's shop-item table; the
                 {{ props.scenarioShop.label }} Pro Shop below is read from the scenario config and renders
                 either way.
             </p>
@@ -165,8 +165,7 @@ const close = async (): Promise<void> => {
             </h3>
 
             <p class="mt-2 max-w-3xl text-sm text-ink-muted">
-                The item class this scenario sells, read from
-                <code class="font-mono text-xs">config/scenarios.php</code>. The rotation runs
+                The item class this scenario sells, read from the scenario's own config. The rotation runs
                 {{ props.scenarioShop.rotation_turns }} turns; which items are on offer in a given
                 rotation is not modelled, so this is the catalogue and not a live lineup.
             </p>

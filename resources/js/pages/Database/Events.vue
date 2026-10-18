@@ -89,12 +89,12 @@ const close = async (): Promise<void> => {
                 No recurring event types are sourced
             </h3>
             <p class="mt-2 text-sm text-ink-muted">
-                The reference guide's §4.4 table is what this view prints, and it is empty here. Without
-                it there is no cadence to plan around and no way to tell a monthly event from a
-                seasonal one.
+                The reference guide's table of recurring event types is what this view prints, and it is
+                empty here. Without it there is no cadence plan to read around and no way to tell a
+                monthly event from a seasonal one.
             </p>
             <p class="mt-2 text-sm text-ink">
-                Re-read the guide's §4.4 table, or the event exports its cadence column is computed from.
+                Re-read the guide's event-type table, or the event exports its cadence column is computed from.
             </p>
         </section>
 

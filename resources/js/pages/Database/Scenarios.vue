@@ -50,8 +50,8 @@ const bonusText = (bonus: number): string => (bonus > 0 ? `+${bonus}` : `${bonus
         <h2 class="text-lg font-semibold text-ink-strong">Scenario matrix</h2>
 
         <p class="mt-4 max-w-3xl text-sm text-ink-muted">
-            The composition matrix in <code class="font-mono text-xs">config/scenarios.php</code>, printed
-            as it is. Caps are the base plus a per-stat bonus, and the base is
+            The scenario's composition matrix, printed as it is. Caps are the base plus a per-stat
+            bonus, and the base is
             {{ props.baseCap }}. Verified {{ props.verifiedAt }} against the GameTora
             <code class="font-mono text-xs">scenarios.json</code> field <code class="font-mono text-xs">stats</code>
             and the Global prose sources the config header names.

@@ -307,7 +307,8 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
 
         <template v-else>
             <p class="mt-2 text-xs text-ink-muted">
-                Objectives and card images are not recorded for this form; ADR-0012 records why.
+                Objectives and card images are not recorded for this form: objectives are held
+                per trainee rather than per form, and this form has no stored image.
             </p>
 
             <FormTabs
