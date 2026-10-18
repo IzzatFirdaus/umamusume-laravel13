@@ -2141,3 +2141,66 @@ exactly what the rule was for.
    a blind commit. This rule fired twice today.
 4. **No PowerShell on source files** — three corruption precedents (`UmaFetch.php:97`, the UTF-16 BOM,
    four specs mangled `test`→`iesi`). Python with an exact-count check, or hand-edit.
+
+
+## 29. Dispatch 30 — trust-glyph attribution, 3.4 partial, 2026-10-19
+
+### Step 0 findings
+
+- `origin/master` `29f8715`, ahead **25** at start, **27** at close. `HEAD:PRD.md` `fcdc8ad`.
+  Working tree had only the peer's untracked Python scratch scripts; staged set empty.
+- **All six expected slices are ABSENT**: 3.4 (`step 2 is a filterable DataTable`), 3.5 (`step 3 is a
+  stat table`), 3.6 (`step 4 draws the tree`), 3.7 (`step 5 uses per-slot pickers`), 3.8 (`preflight
+  is a checklist`), 2.5 (`one helper sentence per group`). Verified by `git log --grep` on each exact
+  subject. The newest feature commit was still 3.3 (`73f633d`).
+- **Consequence:** three prompts were queued (3.4-3.6, then 3.7-3.8 + 2.5, then Phase 4). Their own
+  hard stops say the wizard slices come first and Phase 4 is deferred while they are open. **Phase 4 was
+  not started.**
+- Guard: **9** (8 held + `CareerStatePanel:130`), unchanged. DocCitationParity: **726**, unchanged.
+- Bundle 04:21 against a `resources/js` commit at 04:25: stale, but no browser gate ran this dispatch.
+
+### Trust-glyph test — `de7dccb`, 1 file, +22 −17
+
+**Attribution:** `git log -S "keeps the four trust glyphs" -- tests/` -> `17b793a`, which authored the
+test when `ProvenanceBadge` owned four glyphs. Plan 1.7 moved the render to `ProvenanceMark` and made
+`confirmed` mark-free, so the badge is now a thin alias with no glyphs at all: the test could not pass
+again, and its failure had been carried across four dispatches as "pre-existing".
+
+Rewritten to the current contract: three exception glyphs, owned by `ProvenanceMark`, with the same
+sweep the original had (no second copy elsewhere in `resources/js`).
+
+**A proof that was not good enough, caught by its own result:** swapping `unknown`'s glyph to `x` did
+NOT red the test, because the assertion was `toContain('?')` and `?` is a ternary on two adjacent lines
+of the same component. The assertion was strengthened to the map entry (`glyph: '?'`); re-run, it fails
+on the third assertion. Restored, 1 passed (4 assertions). A test that cannot fail is not a test, and
+this one could not.
+
+### 3.4 partial — `1c59be8`, 1 file, +4 −21
+
+Removed `TraineeSelect.vue`'s self-referential "← Back to trainee" breadcrumb (it pointed at its own
+URL) and its second per-step "Scenario: ... Change scenario" line, which slice 3.2's strip replaced.
+Both were named in this slice. Gates: typecheck clean, `lint:ui` clean, pint passed, guard 9,
+`CareerTraineeSelectTest` **21 passed (445 assertions)**.
+
+**NOT done, and the reason:** the 25-card → DataTable rebuild, the filter bar and the profile page's
+restructure are a 22KB/18KB page pair with their own browser suite. I did not have the budget to build
+and verify them honestly, and a half-built table with no passing browser case is worse than the cards
+that work today. Recorded as open, not as done.
+
+### Batch close
+
+- Ahead **27**. Peer landed `413d83c` and `453f820` (both ledger/citation docs) this window.
+- **Todo list at close:** Step 0 completed; trust-glyph fix completed; "complete missing wizard slices"
+  remains **in-progress and blocked on budget**, not cancelled; ledger and gate+report completed for
+  what landed.
+- **Phase 2:** 2.1a-e, 2.2, 2.3, 2.4 closed. **2.5 open** (non-wizard remainder plus the wizard helper
+  cleanup 3.4-3.6 were meant to carry).
+- **Phase 3:** 3.1, 3.2, 3.3 closed. **3.4 partial**; **3.5, 3.6, 3.7, 3.8 NOT STARTED.**
+- **Phase 4:** **not opened**, correctly, per the ordering hard stop.
+- Next: **3.4** (finish), then 3.5, 3.6, then 3.7, 3.8, then 2.5's remainder. Phase 4 after that.
+
+### Rule note recorded
+
+The `ProvenanceBadge`/`ProvenanceMark` pair is a live hazard: 16 files still import `ProvenanceBadge`,
+which is now an alias, and any test or reader that inspects it will find no glyphs and conclude the
+trust vocabulary is missing. Worth a follow-up to finish the rename.
