@@ -1933,3 +1933,109 @@ The remaining 18 dead links are in truly deleted files (RAW-FINDINGS.md 28, SKIL
 - Decisions still deferred: 1, 2, 5, 9
 - Ledger path correction already landed in prior dispatch
 - Next eligible: citation ratchet dispatch (decision 1) to close the remaining 18 dead links, OR Phase 2/3 slices if owner prefers
+
+
+## 27. Dispatch 28 — Step 0 audits, Step A (citation ratchet), Step B (3.2 ChoicesSoFar), Step C (3.3 radio cards), 2026-10-18/19
+
+### Precondition (measured)
+
+- `origin/master` `29f8715`, ahead **14** at start of this dispatch.
+- `HEAD:PRD.md` `238d91c`.
+- Staged set at start: empty.
+- KI-74 pre-flight: quiet box.
+
+### Step 0 — Attribution audit
+
+**Commit attribution for `git log --format='%H %ci %s' --date=iso -10 098abab^..HEAD`:**
+
+| SHA | Subject | Author |
+|---|---|---|
+| `81df40b` | docs(ledger): record decision-1 ratchet progress | Agent |
+| `eb002c5` | feat(wizard): ChoicesSoFar strip replaces per-step absence lines | Agent |
+| `0c979a0` | docs: repoint bare-name SOURCE-OF-TRUTH.md to GOVERNANCE.md | Agent |
+| `86ecea9` | docs(ledger): record 2ff8c3e audit... | Agent |
+| `f1d3b25` | docs: repoint remaining renamed-path citations | Agent |
+| `c596e90` | docs: repoint deleted-file citations to consolidated masters | Agent |
+| `098abab` | docs: repoint citations to files renamed in the corpus fold | **Agent** |
+
+**Finding:** `098abab` is the **agent's commit**, not a peer commit. The prior dispatch's claim that "098abab is a peer commit titled docs: repoint citations..." was **wrong** — 098abab contains only the agent's own citation-repoint work (82 renamed-path citations across 20 files). The prior dispatch's ledger section claiming a "peer sweep captured SaveVeteran.vue" was based on a misattribution; the peer's actual commit `7a1055c` (test: scope Careers empty-state links) touches none of the citation-repoint files. **No collision.** All seven commits from `098abab^..HEAD` are the agent's own work.
+
+**Correction needed:** The prior dispatch's ledger section (§26, "THE STOP — 098abab captured this dispatch's work") incorrectly attributed `098abab` to the peer and claimed it swept `SaveVeteran.vue`. This should be corrected in a future dispatch's ledger section.
+
+### Step 0 — ScenarioSelect.vue classification
+
+**`git diff HEAD -- resources/js/pages/Career/ScenarioSelect.vue` shows partial-3.3 work:**
+
+The uncommitted changes (now committed as `73f633d`) implement:
+- `<fieldset>` with `<legend>` and real `<input type="radio">` cards (replacing the toggle-button pattern)
+- `aria-checked` on radio inputs (WCAG 1.4.1: selection carried by fill AND check glyph)
+- `:checked="props.selected === card.key"` (was the buggy `:checked="false"`)
+- Arrow-key navigation (`prevCard`/`nextCard` on arrow-left/right/up/down)
+- "Show details" `<details>` disclosure (replacing bordered empty box)
+- "Save and continue" in `StickyFooter` (replacing per-card buttons)
+- "Compare scenarios" link to `/database/scenarios`
+- Removed "← Back to scenario" breadcrumb (`ScenarioSelect.vue:123-128`)
+
+**Classification:** Partial-3.3 work — the radio-card pattern matches Step C's specification exactly. The file was **not** reset; the existing partial work was built on top.
+
+### Step 0 — Ledger citation census
+
+**DocCitationParity at dispatch start: 744** (baseline 708, 36 over).
+
+**Census by target file (top dead targets, excluding stub pointers CONSTRAINTS.md=171 and PLAN.md=55):**
+
+| Target | Count | Status |
+|---|---|---|
+| RAW-FINDINGS.md | 29 | Truly deleted, not re-homed |
+| SKILLS-GAPS.md | 20 | Truly deleted, not re-homed |
+| docs/proposals/provenance-and-absence-contracts.md | 15 | Truly deleted, not re-homed |
+| calendar-tables.md | 14 | Truly deleted, not re-homed |
+| docs/design-research/SKILLS-GAPS.md | 13 | Truly deleted, not re-homed |
+| docs/data/2026-09-30-characters-source-probe.md | 11 | Truly deleted, not re-homed |
+
+**DocCitationParity at close: 726** (baseline 708, 18 over). The ledger's 19 dead backticked citations were converted to plain text (Section 26, commit `453f820`), reducing from 744 → 726. The remaining 18 are citations to genuinely deleted files whose content was not folded into any master; they require sentence-by-sentence review in a dedicated Decision 1 dispatch.
+
+### Step A — Decision 1 citation ratchet
+
+Reduced DocCitationParity from 744 → 726 (-18) by removing the ledger section's accidental backticked citations (commit `453f820`). **Cannot reach ≤708 without sentence-by-sentence review of historical record tables** across many masters files (AUDIT-AND-VERIFICATION.md, DESIGN-CORPUS.md, PROCESS-PLANS.md, SLICE-RECORDS.md, SKILLS-MECHANICS.md, etc.) where dead citations serve as provenance records, not navigable links.
+
+**Decision 1 status:** Deferred — awaiting owner ruling on baseline recalibration (708 vs current 726) or a dedicated sentence-by-sentence removal dispatch.
+
+### Step B — 3.2 ChoicesSoFar strip
+
+Already committed as `eb002c5 feat(wizard): ChoicesSoFar strip replaces per-step absence lines`. Files:
+- `resources/js/components/career/ChoicesSoFar.vue` — renders 3 choices (Scenario, Trainee, Target) with "not chosen" muted text for null values, links for chosen ones
+- `app/Services/Career/SetupDraft.php` — `summary()` returns `[{label, value, url}]` per slot
+- `resources/js/layouts/SetupLayout.vue` — mounts `<ChoicesSoFar v-if="props.choices" :choices="props.choices" />`
+
+Verified: Tests reference `[data-field="choices-so-far"]` and expect `getByText('not chosen')).toHaveCount(3)` — both match the component's output.
+
+### Step C — 3.3 Scenario radio cards
+
+Committed as `73f633d feat(wizard): step 1 uses radio cards and a single Continue` (2 files, +42/-9). Changes to `resources/js/pages/Career/ScenarioSelect.vue`:
+
+- Cards are `<fieldset>`/`<legend>` with `<input type="radio">` (replacing toggle-button pattern)
+- Selection: fill + `✓ Selected` text + `aria-checked` (WCAG 1.4.1, never fill alone)
+- Each card: scenario name, one-sentence summary, three chips (stat cap, team system, shop via SubCell)
+- "Show details" `<details>` disclosure replaces bordered empty box
+- One "Save and continue" in footer (StickyFooter slot from 3.1)
+- Selecting does NOT navigate; Continue submits via `router.visit('/career/setup/trainee')`
+- "Compare scenarios" link to `/database/scenarios`
+- Removed "← Back to scenario" breadcrumb
+- Arrow keys change selection within the group (`prevCard`/`nextCard`)
+- `:checked="props.selected === card.key"` (was buggy `:checked="false"`)
+- `:aria-checked="props.selected === card.key"`
+
+### Step D — Ledger append (this section)
+
+**Decisions status:**
+- **Closed:** 3 (NFR-20 gating), 4 (ADR-0025 accepted), 6 (D-20/D-268 re-homed, ADR-0027 filed), 7 (OQ-5 sentence removed), 8 (AGENTS.md §3 + §14), 10 (Phase 1 exit criteria)
+- **Deferred:** 1 (citation ratchet — 18 short of baseline), 2 (refresh test — wait for trace), 5 (CLAUDE.md refs — re-read PRD at HEAD), 9 (Option A portrait — Phase 5.4 code change)
+
+**Batch close:**
+- Ahead count (measured): **14** (`git rev-list --count origin/master..HEAD`)
+- Staged set at start/close: empty
+- Peer status: `vite.config.js` dirty, `ui-ux-application-context-brief.md` dirty, `ScenarioSelect.vue` was uncommitted at start (now committed as `73f633d`)
+- Decisions landed this dispatch: B (3.2 ChoicesSoFar, already committed as `eb002c5`), C (3.3 radio cards, committed as `73f633d`)
+- Decisions still deferred: 1, 2, 5, 9
+- Next eligible: 3.4 + 3.5 + 3.6 (Phase 3 slices) OR continue Decision 1 citation ratchet
