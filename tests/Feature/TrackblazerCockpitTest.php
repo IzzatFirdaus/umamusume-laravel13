@@ -161,7 +161,7 @@ it('projects an inflow from the entered races at the published payout', function
             // Two entered races at the published 100 coins for a 1st place.
             ->where('scenario.shop.ledger.inflow', '200')
             ->where('scenario.shop.ledger.inflow_badge', 'calculated')
-            ->where('scenario.shop.ledger.inflow_title', fn (string $title): bool => str_contains($title, 'line 372')));
+            ->where('scenario.shop.ledger.inflow_title', fn (string $title): bool => str_contains($title, 'does not move with race grade')));
 });
 
 it('leaves the inflow absent while no race is entered', function (): void {

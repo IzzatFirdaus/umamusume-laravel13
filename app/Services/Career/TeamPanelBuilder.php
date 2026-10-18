@@ -584,8 +584,7 @@ final class TeamPanelBuilder
             'rows' => $rows,
             'badge' => 'confirmed',
             'source_title' => 'The five categories and the number fielded in each come from '
-                .'config/scenarios.php, transcribed from docs/scenarios/02-unity-cup.md:149 and '
-                .'SCENARIO-PUBLISHER-REFERENCES.md:1028.',
+                .'a guide transcribed into the scenario\'s own settings.',
             'absence_title' => 'No column records who this run fields in any category, so every row '
                 .'states the ask with no reading beside it and no coverage state is claimed.',
         ];
@@ -631,8 +630,8 @@ final class TeamPanelBuilder
             'category_count' => count((array) ($race['categories'] ?? [])),
             'clear_all_reward' => isset($race['clear_all_reward']) ? (string) $race['clear_all_reward'] : null,
             'badge' => 'confirmed',
-            'source_title' => 'config/scenarios.php, from docs/scenarios/02-unity-cup.md:149-153 and '
-                .'SCENARIO-PUBLISHER-REFERENCES.md:658, :1028.',
+            'source_title' => 'The cadence and the reward come from the scenario\'s own settings, '
+                .'transcribed from the scenario guides.',
             'projection' => null,
             'projection_title' => 'No source says how strong each opponent team is. The guides name which '
                 .'teams to avoid before a rank is high enough and stop there, so no side of any team race '

@@ -147,13 +147,11 @@ final class TrackblazerPanelBuilder
 
         $floorTitle = 'The two figures a plan still pays at the placements this row names: the total '
             .$secondLabel.' ('.$secondModifier.'% of a win) and the total at '.$thirdLabel.' ('
-            .$thirdModifier.'% of a win). Both are arithmetic on the published modifiers in '
-            .'config(\'scenarios.scenarios.trackblazer.grade_point_placement_modifiers\'), which is '
-            .'uma.guide\'s table at docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 104-112 '
-            .'(the page the master dates 2026-04-29). It is a lower bound at a stated placement, not a '
+            .$thirdModifier.'% of a win). Both are arithmetic on the published placement modifiers, '
+            .'transcribed from uma.guide. It is a lower bound at a stated placement, not a '
             .'guess at a result, and no earned total in this tool reads these modifiers: the other '
-            .'publisher in the same master names no ratio (line 355), which is why '
-            .'`RaceEntry::gradePointsFor()` still prices a 1st place alone.';
+            .'publisher names no ratio, which is why '
+            .'a 1st place is still what a race is priced at.';
 
         $current = $run->current_objective_index;
 
@@ -174,9 +172,8 @@ final class TrackblazerPanelBuilder
                 'name' => (string) $objective['name'],
                 'needed' => number_format((int) $objective['required']),
                 'needed_badge' => 'confirmed',
-                'needed_title' => 'The standard track in config(\'scenarios.scenarios.trackblazer.grade_objectives\'), '
-                    .'transcribed from docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 84-89 '
-                    .'and 342-349. Only the standard track is printed: no column says which trainee belongs '
+                'needed_title' => 'The standard track in the scenario\'s own grade objectives, '
+                    .'transcribed from uma.guide. Only the standard track is printed: no column says which trainee belongs '
                     .'on the dirt-leaning or limited-turf-range one.',
                 'is_current' => $current === $index,
                 'plan' => $plan === null ? null : number_format($plan),
@@ -185,8 +182,7 @@ final class TrackblazerPanelBuilder
                     ? 'No race is entered against this period yet, so there is no plan to total. The Trainer '
                         .'enters a race from the Race Decision screen and names the period it is for.'
                     : 'The sum of the entered races attributed to this period, each at what a 1st place pays '
-                        .'for its grade in config(\'scenarios.scenarios.trackblazer.grade_point_by_grade\') '
-                        .'(docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 94-102). A race that has '
+                        .'for its grade in the published per-grade table. A race that has '
                         .'already been run is history, not plan, and is left out.',
                 'uncounted' => $uncounted[$index] ?? 0,
                 'uncounted_reason' => ($uncounted[$index] ?? 0) > 0
@@ -223,9 +219,8 @@ final class TrackblazerPanelBuilder
                 'timing' => (string) $gate['timing'],
                 'fans_needed' => number_format($needed),
                 'fans_needed_badge' => 'confirmed',
-                'fans_needed_title' => 'The fan figure two publishers in this master agree on: '
-                    .'docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 306-310 (uma.guide) and the '
-                    .'GameWith row at line 1235 both print 5,000, 60,000 and 120,000 at the three assessments.',
+                'fans_needed_title' => 'The fan figure two publishers agree on: both print 5,000, 60,000 '
+                    .'and 120,000 at the three assessments.',
                 'fans_recorded' => $fans === null ? null : number_format((int) $fans),
                 'fans_recorded_badge' => $fans === null ? null : 'confirmed',
                 'fans_recorded_title' => $fans === null
@@ -248,8 +243,8 @@ final class TrackblazerPanelBuilder
                 'bond_title' => 'The Director\'s bond level has no column: `turn_events` stores an unattributed '
                     .'bond delta with no starting value, so this run\'s bond reading cannot be taken and the '
                     .'comparison is not printed. The two figures above are both published and neither settles '
-                    .'the other: docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 306-310 against '
-                    .'the GameWith row at 1235, which docs/Trackblazer-plan.md:361 rules only as single-source.',
+                    .'the other: they come from different publishers, and the GameWith figure is '
+                    .'single-source.',
             ];
         }
 
@@ -287,7 +282,7 @@ final class TrackblazerPanelBuilder
             'badge' => 'confirmed',
             'title' => 'They appear on their own: '
                 .(string) ($rivals['first_offered'] ?? 'not recorded in this corpus')
-                .' and at random after that (docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md line 194). '
+                .' and at random after that. '
                 .'A plan that listed one would be a plan for something the client has not offered, so no row '
                 .'of this surface claims a rival race.',
         ];
@@ -443,21 +438,20 @@ final class TrackblazerPanelBuilder
                     'grade_points_title' => $gradePointsWin === null
                         ? 'No published Grade Point value prices this grade, so no figure is printed for it. '
                             .'A race with no tier is common: the catalogue keeps a grade only where a source '
-                            .'corroborated it per row (R75).'
-                        : 'What a 1st place at this grade pays, from '
-                            .'config(\'scenarios.scenarios.trackblazer.grade_point_by_grade\'), transcribed from '
-                            .'docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 94-102 and 357-363.',
+                            .'corroborated it per row.'
+                        : 'What a 1st place at this grade pays, from the published per-grade table, '
+                            .'transcribed from uma.guide.',
                     'coins_win' => $firstCoin === null ? null : number_format($firstCoin),
                     'coins_badge' => $firstCoin === null ? null : 'confirmed',
-                    'coins_title' => 'Shop Coins are paid by placement alone: the same master says at line 372 '
+                    'coins_title' => 'Shop Coins are paid by placement alone: the same guide says '
                         .'that a Pre-OP win and a G1 win both pay 100 for 1st place, so this figure does not '
-                        .'move with the grade above. The plan\'s illustrative §17 rows print different coin '
+                        .'move with the grade above. An earlier illustrative plan printed different coin '
                         .'figures per grade; the published table wins.',
                     'skip_consequence' => $consequence,
                     'skip_badge' => 'calculated',
                     'skip_title' => 'The published figures a race that is not run cannot pay, added to this row. '
                         .'"Up to" is because a 1st place is the only placement the grade table prices: '
-                        .'what a 4th place would have paid is the gap KI-10 leaves open.',
+                        .'what a 4th place would have paid is not stated by any source.',
                 ];
             })
             ->values()
@@ -524,9 +518,8 @@ final class TrackblazerPanelBuilder
             'row' => $label === null ? null : ($odds[$label] ?? null),
             'row_title' => $label === null
                 ? 'No chain, so no row. The table prints in full below rather than one column being guessed at.'
-                : 'The row this publisher labels '.$label.'. Odds are published only by uma.guide '
-                    .'(docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 231-236, a page the master '
-                    .'dates 2026-04-29); the other Trackblazer section in the same master names no odds, so '
+                : 'The row this publisher labels '.$label.'. Odds are published only by uma.guide; '
+                    .'the other Trackblazer section from the same publisher names no odds, so '
                     .'one source is not two.',
             'table' => $odds,
             'caveats' => array_values((array) ($fatigue['caveats'] ?? [])),
@@ -670,9 +663,8 @@ final class TrackblazerPanelBuilder
                 ? 'No race is entered for this run yet, so there is nothing to project an inflow from. The '
                     .'plan above shows the races the Trainer has entered.'
                 : 'The races this run has entered, each at the published 1st-place payout of '
-                    .number_format($coinWin).' coins from config(\'scenarios.scenarios.trackblazer.'
-                    .'shop_coins_by_placement\'), which the master says does not move with race grade '
-                    .'(docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md line 372). A projection from '
+                    .number_format($coinWin).' coins from the per-placement coin table, which the '
+                    .'published guide says does not move with race grade. A projection from '
                     .'the entered plan, not a promise: it assumes every one of them is won.',
             'reserve' => $reserve === [] ? null : [
                 'label' => (string) ($reserve['label'] ?? ''),

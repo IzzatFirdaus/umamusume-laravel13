@@ -228,7 +228,7 @@ final class ScenarioSectionBuilder
             return null;
         }
 
-        return 'No published client name. "Twinkle Star Climax" is §7 conflict row 31 of the reference guide, marked UNVERIFIED, so the export label "Trackblazer" stands until the guide publishes a client string.';
+        return 'No published client name. "Twinkle Star Climax" is an unverified entry in the reference guide, so the export label "Trackblazer" stands until the guide publishes a client string.';
     }
 
     /**
