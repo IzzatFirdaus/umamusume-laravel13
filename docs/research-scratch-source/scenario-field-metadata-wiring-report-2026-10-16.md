@@ -89,7 +89,7 @@ The `rule_family` question the brief flagged is answered by the artifact's own r
 
 ## 7. Open questions for the owner
 
-1. **The lifecycle wording** above — confirm the promote-and-pointer shape and whether `docs/research-scratch-source/README.md` (if the directory should carry one) is the right pointer location.
+1. **The lifecycle wording** above — confirm the promote-and-pointer shape and whether `README.md` (if the directory should carry one) is the right pointer location.
 2. **`app.ruleset` and `session_cost`** — still governed, still untouched. The artifact now carries exactly the values those keys would want (the rework dates; the per-discipline cost tables that supersede the stale 2023-02-25 range). If you want either key populated or narrowed, that is a written ruling; the surfaces render the artifact's values without it.
 3. **`rule_family` is repository-defined** (the report states it; the wiring cites the repo). The Unity Cup card now prints `team_rank` where it printed `Team` — config's `metadata.ruleset` key still holds `Team` but nothing reads it any more. If you want the humanized word kept on the card, say so and the row mapping changes back; if `metadata.ruleset` should be deleted from the matrix, that is a config edit I did not make unilaterally.
 4. **The three unrecovered `recommended_use` and `planning_focus` values** — they render as the artifact's recorded searches. A fresh search pass may or may not find a sourced line; the current state is honest without one, and the searches are recorded verbatim for a future pass to pick up.

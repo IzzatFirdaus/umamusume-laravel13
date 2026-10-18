@@ -4,7 +4,7 @@ Status: **ACCEPTED** — Option 2 (Light base + preference resolution, dark opt-
 Date: 2026-09-27
 Deciders: product owner (ruling 2026-09-27), pre-dev agent (drafting)
 Supersedes: sprint-authorization ruling "dark-first is the app contract" (2026-09-27 same-day)
-Related: root `DESIGN.md` §2.1, `docs/design-research/DESIGN.md` §1 and §3.7,
+Related: root `DESIGN.md` §2.1, `DESIGN.md` §1 and §3.7,
 `docs/design-research/CONSTRAINTS.md` D-100 and D-104, `docs/adr/0002`, `docs/adr/0004`, `CONSTRAINTS.md` C-7
 
 ## Context
@@ -14,7 +14,7 @@ theme. The evidence, in order of arrival:
 
 1. Owner ruling (interview, 2026-09-27, earlier): "Theme: Dark mode default." Root `DESIGN.md`
    was created dark-first and promoted the research package's measured raceboard dark anchors.
-2. The documentation audit flagged the collision with `docs/design-research/DESIGN.md` §3.7
+2. The documentation audit flagged the collision with `DESIGN.md` §3.7
    ("Light is the default and stays the default", D-100).
 3. Sprint authorization (this session) ruled: root `DESIGN.md` is the single source of truth,
    dark-first is the app contract, and research §3.7 gets a `> [!SUPERSEDED]` annotation.
@@ -31,7 +31,7 @@ accessible on dark, muted greens on light; see research §3.4/§3.7).
 ## Decision
 
 1. **Authority split.** Root `DESIGN.md` is the single source of truth for the app's visual
-   contract (what ships). `docs/design-research/DESIGN.md` is the research artifact: measured
+   contract (what ships). `DESIGN.md` is the research artifact: measured
    anchors, ramps, and contrast math that the root file cites. Neither rewrites the other's
    body; a superseded claim is annotated with a `> [!SUPERSEDED]` blockquote naming the
    overriding document, never edited in place (research history stays intact, D5).
@@ -54,7 +54,7 @@ accessible on dark, muted greens on light; see research §3.4/§3.7).
 3. **Annotation application.** The `> [!SUPERSEDED]` blockquote applies to the sprint-authorization
    ruling (the "dark-first is the app contract" line), not to research §3.7.
    Root `DESIGN.md` §2.1 stays as-is (light base, owner ruling 2026-09-27).
-   Research `docs/design-research/DESIGN.md` §3.7 stays as-is (measured light anchors, intact).
+   Research `DESIGN.md` §3.7 stays as-is (measured light anchors, intact).
 
    **Closing statement:** "Light is the base palette. Dark is a measured opt-in via preference
    resolution. This matches the client's high-key visual language and serves eye-strain concerns

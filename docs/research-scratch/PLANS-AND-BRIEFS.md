@@ -266,7 +266,7 @@ Written 2026-10-01 against HEAD `4e17997`, read-only. This one untracked file wa
 
 #### 1. Method note
 
-**Read.** `docs/design-research/CONSTRAINTS.md` §5 (D-30 at `:138`, plus D-31 through D-37 and the D-40 and D-230 amendment paragraphs for voice); `docs/adr/0012-card-detail-fields-and-images.md` (`:7`, `:73`, `:142-145`, `:157-159`, `:243-244`); `docs/adr/0008-character-card-catalog-layer.md` (`:236`, `:439`); `KNOWN-ISSUES.md` (status block `:10-17`, KI-33 `:1516-1573`, KI-35 `:1625-1644`); `docs/design-research/skills-section-phase-b2-2026-10-01.md` (§4.7 `:554-583`, §4.8 `:585-620`, §9.5 `:1089-1109`, §6 items 12-13 at `:898-905`, §10 at `:1136`); `docs/design-research/skills-mechanics-audit-verification-2026-10-01.md` §3.3 (`:82-96`); root `DESIGN.md` §4.2 (`:226-268`, page section 2 at `:246-247`); `docs/design-research/DESIGN.md` (section list only, to keep the two `DESIGN.md` files apart); `PRD.md` (A-5 at `:46`); `app/Models/Umamusume.php` (`:31-40`, `:49`), `app/Models/CharacterCard.php` (`:35-36`, `:40`, `:66-67`), `app/Services/DataPipeline/Parsers/GametoraCharacterParser.php` (`:34-45`, `:83`), `app/Services/DataPipeline/Parsers/GametoraCharacterCardParser.php` (`:92-93`); migrations `2026_09_30_073029_...:41-42` and `2026_09_27_090000_...:16-20`.
+**Read.** `docs/design-research/CONSTRAINTS.md` §5 (D-30 at `:138`, plus D-31 through D-37 and the D-40 and D-230 amendment paragraphs for voice); `docs/adr/0012-card-detail-fields-and-images.md` (`:7`, `:73`, `:142-145`, `:157-159`, `:243-244`); `docs/adr/0008-character-card-catalog-layer.md` (`:236`, `:439`); `KNOWN-ISSUES.md` (status block `:10-17`, KI-33 `:1516-1573`, KI-35 `:1625-1644`); `docs/design-research/skills-section-phase-b2-2026-10-01.md` (§4.7 `:554-583`, §4.8 `:585-620`, §9.5 `:1089-1109`, §6 items 12-13 at `:898-905`, §10 at `:1136`); `docs/design-research/skills-mechanics-audit-verification-2026-10-01.md` §3.3 (`:82-96`); root `DESIGN.md` §4.2 (`:226-268`, page section 2 at `:246-247`); `DESIGN.md` (section list only, to keep the two `DESIGN.md` files apart); `PRD.md` (A-5 at `:46`); `app/Models/Umamusume.php` (`:31-40`, `:49`), `app/Models/CharacterCard.php` (`:35-36`, `:40`, `:66-67`), `app/Services/DataPipeline/Parsers/GametoraCharacterParser.php` (`:34-45`, `:83`), `app/Services/DataPipeline/Parsers/GametoraCharacterCardParser.php` (`:92-93`); migrations `2026_09_30_073029_...:41-42` and `2026_09_27_090000_...:16-20`.
 
 **Ran, all read-only.** `git log -1 dd90330` and `git show --stat dd90330` (2026-09-30, KI-33 storage and pre-populate); `grep` for `skills_innate`, `skills_unique` and `aptitude_` across `app/`, `docs/` and `tests/`; a PDO read of `character_cards` and `umamusume` against `database/database.sqlite`; `php artisan config:show database.default` (sqlite, matching `.env:9-10`); `git status --porcelain` to separate tracked from untracked writers. No mutating git command was run.
 
@@ -2980,7 +2980,7 @@ The runtime evidence behind this file is **from 2026-10-08 and predates the D1-D
    1 with ten `[G-4 raw hex]` findings across `screen-a-scenario-v10.html`, `screen-c-event-v1-inline.html`
    and `screen-c-event-v2-preview-column.html` — **tracked** prototypes, clean in the tree, committed at
    `e0e043c` (2026-09-27); reproduced identically on 2026-10-09. `KNOWN-ISSUES.md` KI-58 (still **OPEN**,
-   filed 2026-10-03) describes the instrument fault: the loader read a `docs/design-research/DESIGN.md` that
+   filed 2026-10-03) describes the instrument fault: the loader read a `DESIGN.md` that
    the re-baseline folded and deleted, and the "few tokens" guard could not fire because the second leg alone
    cleared the threshold. That fix has landed — `7d8b62a` (2026-10-08) points `load_token_hexes()` at
    `resources/css/app.css` — and KI-58's three reproducer hexes (`#B45309`, `#0667B0`, `#6E6459`) are legal
@@ -3066,7 +3066,7 @@ quote the ruling, name the date, leave the original sentences standing.*
    reproducer hexes (`#B45309`, `#0667B0`, `#6E6459`) are legal today. What remains is the mirror case,
    filed separately; the register text above is preserved as written.*"
 2. **New mirror-case entry**, naming the four hexes and the three tracked prototypes: `#7A7067` and
-   `#106F9F` were token values in the deleted `docs/design-research/DESIGN.md` at `e0e043c`; `#C5A558` and
+   `#106F9F` were token values in the deleted `DESIGN.md` at `e0e043c`; `#C5A558` and
    `#FDF7EF` appear only in the gitignored `docs/design-research/_scratch/analysis/tokens/tokens.json` and
    never in a theme. Ten findings across `screen-a-scenario-v10.html`, `screen-c-event-v1-inline.html` and
    `screen-c-event-v2-preview-column.html`; reproduction command `python tools/gate.py`; closure is the

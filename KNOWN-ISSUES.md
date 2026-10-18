@@ -116,7 +116,7 @@ stating the second representative is `Screenshot 2026-07-17 235511.png`, and a s
 
 ### KI-58 `tools/gate.py`'s hex allowlist lost its document leg silently when the design master was folded, and the guard for that condition cannot fire - FILED 2026-10-03 (Phase A closure pass, from the priors pass finding), CLOSED 2026-10-09 at `7d8b62a`, note below
 
-`tools/gate.py:94` reads `docs/design-research/DESIGN.md` as leg one of `load_token_hexes()`. The
+`tools/gate.py:94` reads `DESIGN.md` as leg one of `load_token_hexes()`. The
 re-baseline folded that document into `docs/research-scratch/DESIGN-CORPUS.md` and deleted it, and
 `tools/gate.py:95-96` handles a missing document by returning an empty set with no report. The
 guard at `tools/gate.py:120-121` was written to catch exactly this and cannot fire, because leg
@@ -2933,7 +2933,7 @@ of 708 (`tests/Feature/DocCitationParityTest.php:56`). `1e84b0c` ("docs(reorg): 
 plans into the corpora") deleted `CONSTRAINTS.md` and `PLAN.md` and left every citation that routes through
 those names pointing at nothing: `tools/doc_census.py` now reports **980** dead links, and the two most-cited
 targets are the deleted files themselves (161 `CONSTRAINTS.md`, 56 `docs/design-research/CONSTRAINTS.md`,
-48 `docs/design-research/DESIGN.md`, 45 `PLAN.md`, 35 `docs/GATE-REGISTRY.md`, 29 `docs/PRE-MORTEM.md`,
+48 `DESIGN.md`, 45 `PLAN.md`, 35 `docs/GATE-REGISTRY.md`, 29 `docs/PRE-MORTEM.md`,
 27 `RAW-FINDINGS.md`, 23 `docs/Our-Grand-Concert-plan.md`). The same commit left `AGENTS.md` §3's
 documentation map describing `CONSTRAINTS.md` as "a pointer to `docs/research-scratch/GOVERNANCE.md`" and
 `PLAN.md` as "a pointer to `docs/research-scratch/PROCESS-PLANS.md`" - rows for files that no longer exist,

@@ -540,7 +540,7 @@ Per `AGENTS.md` §9's cost-aware escalation. Nothing below was run for this plan
   11 site captures, via `.scratch-uma/ux-audit/palette-extract.ps1` and `palette-accents.ps1`); the
   game-client conventions in §2.7 are from `docs/research-scratch/screenshot-notes/00`-`06`,
   `screenshot-notes-extras/` and `screenshot-registry/` (all citations verified against source), and §4.6's
-  evidence rules are `screenshot-registry/README.md` and `FINAL_REPORT.md`; the prior UX-law and heuristic
+  evidence rules are `README.md` and `FINAL_REPORT.md`; the prior UX-law and heuristic
   material reconciled in §2.8 is `AUDIT-AND-VERIFICATION.md:4284-4293` (the only driven law table),
   `UX-DELIVERABLES.md:1729-2182` (the Nielsen-style heuristic evaluation) and `DESIGN-CORPUS.md:4091-4098,
   5614-5622, 6503, 6538`. `docs/research-scratch-source/` was scanned and holds **no** UX-law material (0

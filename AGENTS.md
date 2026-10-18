@@ -370,8 +370,8 @@ The root holds only directories (the sweep buckets from
 `.scratch-uma/reorganize-scratch.ps1` such as `data/`, `logs/`, `scripts/`, each
 session's own subdirectory, and `cited/`, which holds the citation-pinned
 evidence files because tracked documents cite their exact paths as dated
-evidence), plus `.scratch-uma/README.md` and
-`.scratch-uma/reorganize-scratch.ps1`. `.scratch-uma/README.md` records the
+evidence), plus `README.md` and
+`.scratch-uma/reorganize-scratch.ps1`. `README.md` records the
 layout and the sweep command. Root paths in older proving commands predate these
 moves; do not copy them as templates.
 

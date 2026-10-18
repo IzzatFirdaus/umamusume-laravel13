@@ -99,7 +99,7 @@ Every row below was **verified by direct existence check this pass**, not inferr
 | `docs/GATE-REGISTRY.md` | `KNOWN-ISSUES.md:2653` | 56 | Absent. `AGENTS.md` §2 and §3 name the gate registry as a **section of** `docs/research-scratch/GOVERNANCE.md` (which **is** present), not a root file. Cited by its retired path |
 | `docs/PRE-MORTEM.md` | `KNOWN-ISSUES.md:2653` | 43 | Same folding |
 | `docs/SOURCE-OF-TRUTH.md` | `docs/UMAMUSUME_REFERENCE.md:145` | 31 | Absent; cited as a live master |
-| `docs/design-research/DESIGN.md` | `DESIGN.md:30`, `:884` | 57 | Absent. `DESIGN.md` cites a predecessor of itself at a path that no longer exists |
+| `DESIGN.md` | `DESIGN.md:30`, `:884` | 57 | Absent. `DESIGN.md` cites a predecessor of itself at a path that no longer exists |
 | `docs/design-research/CONSTRAINTS.md` | `DESIGN.md:887` | 73 | Same — the single most-cited absent path in the corpus |
 | `resources/js/pages/Runs/Show.vue` | `KNOWN-ISSUES.md:2172` | 47 (38 + 9) | Absent. `KNOWN-ISSUES.md` itself uses the past tense ("which owned the equivalent forms") — the cite is historical, the path is dead |
 | `resources/js/trainee-combobox.ts` | `AUDIT-AND-VERIFICATION.md:918` | 19 | Absent |
@@ -285,19 +285,19 @@ not swept), 3,035 absent, 92 undocumented surfaces; report at docs/audits/doc-dr
 One correction. Original text preserved above per `AGENTS.md` §11 — the erratum quotes the claim it supersedes,
 states the correction, then names the evidence.
 
-**E-10 — §4.1's "cites a predecessor of itself" row is overstated.** Original, the `docs/design-research/DESIGN.md`
+**E-10 — §4.1's "cites a predecessor of itself" row is overstated.** Original, the `DESIGN.md`
 row in §4.1: *"Absent. `DESIGN.md` cites a predecessor of itself at a path that no longer exists."* Correction:
 **both cites carry the word `formerly`**, so they are labelled historical pointers, not live references to a
 missing file. `DESIGN.md:30` reads "the consolidated research package, **formerly**
-`docs/design-research/DESIGN.md`" and `:884` reads "**formerly** `docs/design-research/DESIGN.md`". The path is
+`DESIGN.md`" and `:884` reads "**formerly** `DESIGN.md`". The path is
 indeed gone, but a reader is told so at the point of the cite. The row's *count* (57 rows against that token)
 stands; its *characterisation* as drift does not. This is the same class as the D-12 withdrawal filed in
 `full-audit-2026-10-16.md` — a citation that names a missing file is not automatically drift when the sentence
 itself marks it as superseded.
 
-Verified: `sed -n '28,32p' DESIGN.md` → "consolidated research package, formerly `docs/design-research/DESIGN.md`";
+Verified: `sed -n '28,32p' DESIGN.md` → "consolidated research package, formerly `DESIGN.md`";
 `sed -n '882,886p' DESIGN.md` → "`docs/research-scratch/DESIGN-CORPUS.md` section \"DESIGN.md\" (formerly
-`docs/design-research/DESIGN.md`): measured ramps, contrast tables,".
+`DESIGN.md`): measured ramps, contrast tables,".
 
 **Anchor note.** This audit was measured at `e845887`; the tree has since advanced to `23f9d64` (`cbb7df8` merged
 `feature/screenshot-registry`, plus four follow-up commits). The erratum is filed against the later tree; the

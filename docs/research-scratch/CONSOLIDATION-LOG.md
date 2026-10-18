@@ -62,7 +62,7 @@ the prior round deleted.
 ### Priority task 1 - twin-name collision (CONSTRAINTS.md / DESIGN.md) - SKIPPED
 
 - The prior round **deleted and embedded** `docs/design-research/CONSTRAINTS.md` (973 lines)
-  and `docs/design-research/DESIGN.md` (1,640 lines) into
+  and `DESIGN.md` (1,640 lines) into
   `docs/research-scratch/DESIGN-CORPUS.md` (sources 1 and 2). It did **not** "move them to
   research-scratch as standalone files" as this task specifies. Doing that now would put a
   second copy of the same content alongside the master.
@@ -137,7 +137,7 @@ in git).
 Measured at the sha this commit lands on: 72 tracked markdown files, 16 masters totalling 28,351
 lines, 23 documented files outside the masters excluding `docs/adr/` and `.ai/**`, and 495 dead
 links, of which 488 are GONE and 7 UNTRACKED. The most-cited dead targets are
-`docs/design-research/CONSTRAINTS.md` (53), `docs/design-research/DESIGN.md` (40),
+`docs/design-research/CONSTRAINTS.md` (53), `DESIGN.md` (40),
 `docs/GATE-REGISTRY.md` (20), `RAW-FINDINGS.md` (19), `SKILLS-GAPS.md` (18),
 `docs/PRE-MORTEM.md` (17) and `docs/SOURCE-OF-TRUTH.md` (16). Most of those mentions are
 historical citations inside masters naming the sources they absorbed, which are records and must

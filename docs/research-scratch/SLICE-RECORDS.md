@@ -1687,7 +1687,7 @@ nothing was allowed to fail.
 
 ### 6. Deviations and things that did not happen, stated
 
-- **The mood pill departs from `docs/design-research/DESIGN.md` Â§3.4's tint-and-border rule, on
+- **The mood pill departs from `DESIGN.md` Â§3.4's tint-and-border rule, on
   purpose.** That section said a mood pill is a pale fill with a saturated 2px border, and it said
   the system "knowingly departs from the client's flat saturated pill". Building to that drawing
   made the tiers a whisper: the 12 %-of-white fills land at `#FFEBF2`, `#FDF0E7`, `#F4F3F1`,
@@ -2318,7 +2318,7 @@ warning rows in `scenarios/08` (3).
 
 **Left counted on purpose**, and the reason: the 20 `docs/UMAMUSUME_REFERENCE.md` lines and the
 scenario guide rows that quote client and wiki vocabulary as source data (class 3, not self-reference);
-five `design-research/DESIGN.md` lines plus D-186 and D-268 in `CONSTRAINTS.md`, where a banned word
+five `DESIGN.md` lines plus D-186 and D-268 in `CONSTRAINTS.md`, where a banned word
 is ordinary English ("the orange and red tail on fuller gauges", "one pairing") and the standing <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 answer is reword-or-rule, which is what Slice 5 did with the same three words; three
 `_scratch` patch scripts holding quoted doc text; ADR-0005's adjective `stable`; and one PNG that <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.2 -->
@@ -3752,7 +3752,7 @@ Idempotent. Against Slice 12's `G1 34 / OP 118 / null 144`: **118 tiers restored
 
 ### 3. T2 â€” the quiet-edge exception (R74)
 
-Recorded in `docs/design-research/DESIGN.md` Â§3.4 as a rule with three conditions: the selected member
+Recorded in `DESIGN.md` Â§3.4 as a rule with three conditions: the selected member
 clears 3:1 on its own edge, the pair is 3:1 apart, and the state is announced programmatically. Cites
 both precedents (Slice 2 lock cells; Slice 13 disclosure at 1.22 light / 1.37 dark, against a selected
 border of 5.89 / 10.57 and a 4.83 pair difference) and states that a boundary which is the *only*

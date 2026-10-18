@@ -24,7 +24,7 @@ This document consolidates the following source files verbatim (no summarization
 - The five mood tier **words** are measured client strings and are settled:
   `app/Enums/MoodTier.php` (GREAT/GOOD/NORMAL/BAD/AWFUL as verbatim `[Global]`
   values, commit `a7cabc0`). This request does **not** re-ask them.
-- Pill **colours**: `docs/design-research/DESIGN.md` §3.7's evidence note records
+- Pill **colours**: `DESIGN.md` §3.7's evidence note records
   `mood-peak` and `mood-good` as measured; the three lower pills' colours are not.
 - Owner ruling (2026-09-28, R-5 in the sprint authorization): UI must not present
   verified-looking colours for unverified tiers.

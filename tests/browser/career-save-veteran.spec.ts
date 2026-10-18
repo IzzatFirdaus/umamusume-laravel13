@@ -135,6 +135,21 @@ test('names the held figures as held, and prints no recommendation anywhere', as
     expect(await page.locator('body').innerText()).not.toContain('Best used for');
 });
 
+test('states the five absent stats once, not five times', async ({ page }) => {
+    // A career with no logged turn recorded none of the five stats, which is the one group whose
+    // absence shares a single reason. The group gets ONE sentence naming all five, and the per-field
+    // markers are not rendered, because five copies of the same sentence bury the two counts that are
+    // recorded. A partially recorded group keeps its per-field markers, so nothing here asserts that
+    // `AbsenceValue` is absent from the page in general.
+    await openSaveVeteran(page, 'Mejiro McQueen', true);
+
+    const sentence = page.getByText(/^Not recorded: Speed, Stamina, Power, Guts, Wit\.$/);
+    await expect(sentence).toHaveCount(1);
+
+    // The five per-field markers for those same stats are gone.
+    await expect(page.getByText('This run logged no turn, so it recorded no value for this stat.')).toHaveCount(0);
+});
+
 test('refuses a career that has not finished, with the door rather than a dead form', async ({ page }) => {
     await openSaveVeteran(page, 'Mejiro McQueen', false);
 

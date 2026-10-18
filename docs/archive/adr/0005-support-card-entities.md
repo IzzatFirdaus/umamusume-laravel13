@@ -18,7 +18,7 @@ Date: 2026-09-27, status set 2026-09-28
 Deciders: product owner (decision outstanding), implementing agent (draft)
 Relates to: `ADR-0003` (Phase 1 schema expansion), `ADR-0004` (reference data with provenance),
 `PRD.md` §6.9 and §7, `UMAMUSUME_REFERENCE.md` §1.4.1, §1.4.2, §1.4.5, §1.4.7,
-`docs/design-research/DESIGN.md` §6.0b, §6.5b
+`DESIGN.md` §6.0b, §6.5b
 
 ## Problem
 
@@ -117,7 +117,7 @@ recommended split, and it is the reason the two domains are separated above rath
 3. **Nothing.** Keep §6.9 whole, leave §1.4.7 as reference documentation only, and let the design
    package keep specifying the components without data behind them.
 
-Option 1 is recommended: the deck-composition UI in `docs/design-research/DESIGN.md` §6.5b is already
+Option 1 is recommended: the deck-composition UI in `DESIGN.md` §6.5b is already
 specified, and the reference tables are what let it render real names and real effect values instead of
 sample content, which is the part that is currently blocked. Options 2 and 3 both leave that blocked.
 
@@ -128,7 +128,7 @@ sample content, which is the part that is currently blocked. Options 2 and 3 bot
   and neither has a display-name ambiguity the way character cards do, so the `ScenarioSourceParser`
   shape (no cross-reference) fits better than the matching pipeline.
 - `docs/design-research/CONSTRAINTS.md` gains rules D-277 to D-282 and gate G-58, and
-  `docs/design-research/DESIGN.md` §6.0b and §6.5b gain the measured glyph set, the deck-editor anatomy
+  `DESIGN.md` §6.0b and §6.5b gain the measured glyph set, the deck-editor anatomy
   and the card-detail anatomy. Those are already applied in this change, because they document the
   client rather than the app, and they hold under all three options above.
 - `ARCHITECTURE.md` §3 gains a "Proposed, not built" subsection pointing here. It is deliberately

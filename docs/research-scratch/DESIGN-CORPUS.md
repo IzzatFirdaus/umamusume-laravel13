@@ -2775,7 +2775,7 @@ owner C-8 decision.**
 The brief cites `DESIGN.md` §3.5 (tokens), §4.1/§4.2 (type), §6.x, §8.x, §11 (open questions).
 Root `DESIGN.md` is 317 lines and its only headings are 1, 2, 2.1, 2.2, 2.3, 3, 4, 4.1–4.6. There
 is **no §3.5, no §11, and §4.1 means "Catalog index", not a type scale.** Those sections exist in
-`docs/design-research/DESIGN.md` (1540 lines). So "DESIGN.md wins" silently imports the research
+`DESIGN.md` (1540 lines). So "DESIGN.md wins" silently imports the research
 package as the authority while root `DESIGN.md` — the file at the cited path — contradicts it on
 fonts, radius, shadows and theme direction. Every citation in the brief should be re-qualified to
 one file or the other before a single component is built.
@@ -2893,7 +2893,7 @@ no schema, and its `lang/en/uma.php` is the file §13's terminology belongs in �
   finding's file and line but did not re-measure the rest.
 - Whether `FRONTEND-SPEC-DIVERGENCE.md` audits *this* brief or an earlier draft of it. Its §1.6
   argues about Nunito, which this brief never mentions — likely a different revision.
-- `docs/design-research/DESIGN.md` and `CONSTRAINTS.md` are dirty; every citation into them
+- `DESIGN.md` and `CONSTRAINTS.md` are dirty; every citation into them
   describes the working tree, not any commit.
 
 ---
@@ -2903,7 +2903,7 @@ no schema, and its `lang/en/uma.php` is the file §13's terminology belongs in �
 1. **Font (B1).** Confirm root `DESIGN.md` §2.2 stands (system stack, no font dependency) and order
    §4.2/§20.3 deleted from the brief — or grant C-8 approval and say so in writing.
 2. **Which DESIGN.md is authoritative (B2).** Re-point every citation in the brief, or state that
-   `docs/design-research/DESIGN.md` outranks root `DESIGN.md` on tokens and type.
+   `DESIGN.md` outranks root `DESIGN.md` on tokens and type.
 3. **Schema sequence (B3).** Land the ADR-0003 migration (Energy, Fans, `turn_events`,
    `scenario_slots`) as its own change before building §6.7/§7.1/§7.2 on top of it.
 4. **Screen scope (B6).** Confirm whether catalog, catalog detail, review queue and export stay in
@@ -4742,7 +4742,7 @@ convention and name `DESIGN.md §6.14` for the 44px control rule that lives at `
 left exactly as filed, and this convention is the correction forward that KI-52 asks for.
 
 The reason the bare form is ambiguous is measured, not assumed: root `DESIGN.md` is a 394-line surface
-specification whose section numbering stops well before 6.14, while `docs/design-research/DESIGN.md` (1,640
+specification whose section numbering stops well before 6.14, while `DESIGN.md` (1,640
 lines) was absorbed into this corpus as `§"DESIGN.md"` and carries the full design-system numbering including
 §6.14. Neither basename is tracked at `docs/design-research/` any more, so a reader following a bare citation
 that means the design-system half lands nowhere. The same ambiguity applies to `CONSTRAINTS.md` (root gate
@@ -4971,11 +4971,11 @@ panels. Both figures are correct and measure different things: 10 manifest-groun
 #### 2.1 The gate's first input leg is dead
 
 `tools/gate.py` builds its hex allowlist from two sources. Leg one reads a design document:
-`tools/gate.py:94` points at `docs/design-research/DESIGN.md`, extracts hexes from fenced CSS
+`tools/gate.py:94` points at `DESIGN.md`, extracts hexes from fenced CSS
 blocks and the 3.1, 3.6 and 3.7 tables (`tools/gate.py:97-107`). Leg two reads this file:
 `tools/gate.py:108-111` loads `tokens.json` and takes every `ramps` value.
 
-Leg one is dead. `docs/design-research/DESIGN.md` was folded into `docs/research-scratch/DESIGN-CORPUS.md`
+Leg one is dead. `DESIGN.md` was folded into `docs/research-scratch/DESIGN-CORPUS.md`
 and deleted during the re-baseline; `INDEX.md:190` records the fold and names the line count
 verified. `tools/gate.py:95-96` handles a missing document by returning an empty set silently. The
 guard at `tools/gate.py:120-121` was written to catch exactly this and does not fire, because

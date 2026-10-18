@@ -23,6 +23,7 @@
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
+import AbsenceNote from '../../components/ui/AbsenceNote.vue';
 import SparkChip from '../../components/legacy/SparkChip.vue';
 import { BaseButton, BaseInput, BaseTextarea } from '../../components/Form';
 import { Head, Link, useForm } from '@inertiajs/vue3';
@@ -97,6 +98,13 @@ const statLabels: { key: string; label: string }[] = [
     { key: 'Guts', label: 'Guts' },
     { key: 'Wit', label: 'Wit' },
 ];
+
+// True when no stat was recorded, which is the only case where all five markers share one reason.
+// A partially recorded group keeps its per-field markers: the sentence "Not recorded: Speed, Wit"
+// names what is missing, which is the correspondence the mixed case needs.
+const everyStatAbsent = computed((): boolean =>
+    statLabels.every((stat) => props.stats[stat.key] === null),
+);
 
 function isSelected(tag: string): boolean {
     return form.tags.includes(tag);
@@ -224,18 +232,34 @@ function save(): void {
                         <dt class="text-xs text-ink-muted">Races entered</dt>
                         <dd class="text-ink-strong">{{ props.counts.races }}</dd>
                     </div>
-                    <div v-for="stat in statLabels" :key="stat.key">
-                        <dt class="text-xs text-ink-muted">{{ stat.label }}</dt>
-                        <dd class="text-ink-strong">
-                            <template v-if="props.stats[stat.key] !== null">{{ props.stats[stat.key] }}</template>
-                            <AbsenceValue
-                                v-else
-                                reason="This run logged no turn, so it recorded no value for this stat."
-                                compact
-                            />
-                        </dd>
-                    </div>
+                    <template v-if="!everyStatAbsent">
+                        <div v-for="stat in statLabels" :key="stat.key">
+                            <dt class="text-xs text-ink-muted">{{ stat.label }}</dt>
+                            <dd class="text-ink-strong">
+                                <template v-if="props.stats[stat.key] !== null">{{ props.stats[stat.key] }}</template>
+                                <AbsenceValue
+                                    v-else
+                                    reason="This run logged no turn, so it recorded no value for this stat."
+                                    compact
+                                />
+                            </dd>
+                        </div>
+                    </template>
                 </dl>
+
+                <!--
+                  Five stats, one reason. A run that logged no turn recorded none of them, so the five
+                  markers above would repeat the same sentence five times and bury the two counts that
+                  ARE recorded. When every stat is absent the sentence is printed once here instead,
+                  which is what `AbsenceNote` exists for; when any stat IS recorded the rows keep their
+                  own markers, because a mixed group needs per-field correspondence rather than a
+                  single sentence that would not say which figures are missing.
+                -->
+                <AbsenceNote
+                    v-if="everyStatAbsent"
+                    class="mt-2"
+                    :labels="statLabels.map((stat) => stat.label)"
+                />
 
                 <h3 class="mt-4 text-lg font-semibold text-ink-strong">Sparks it carries</h3>
                 <p v-if="props.graph.parents.length === 0" class="mt-1 text-sm text-ink-muted" role="status">

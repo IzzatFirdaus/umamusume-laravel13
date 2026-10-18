@@ -14,7 +14,7 @@ This master file embeds the complete text of all 7 Group B source files from `do
 
 Internal headings have been demoted by one level. Large files are split into numbered `####` subsections preserving original numbering. All tables, code blocks, blockquotes, checkboxes, checklists, and erratum notes are preserved verbatim.
 
-**Dating note (2026-10-09):** The seven source files listed above were embedded verbatim and then removed from the tree when this master was committed at `ccc864c` ("docs: consolidate scenario publisher guides into research-scratch and remove originals"). The embedded text is the only durable copy; the original `docs/design-research/` paths no longer resolve. The design rules cited from `docs/design-research/CONSTRAINTS.md` and `docs/design-research/DESIGN.md` by this audit survive in `docs/research-scratch/DESIGN-CORPUS.md` §`CONSTRAINTS.md` and §`DESIGN.md` respectively; see `tools/gate.py:6-9` for the repointing that made that master the design gate's source of truth on 2026-10-09.
+**Dating note (2026-10-09):** The seven source files listed above were embedded verbatim and then removed from the tree when this master was committed at `ccc864c` ("docs: consolidate scenario publisher guides into research-scratch and remove originals"). The embedded text is the only durable copy; the original `docs/design-research/` paths no longer resolve. The design rules cited from `docs/design-research/CONSTRAINTS.md` and `DESIGN.md` by this audit survive in `docs/research-scratch/DESIGN-CORPUS.md` §`CONSTRAINTS.md` and §`DESIGN.md` respectively; see `tools/gate.py:6-9` for the repointing that made that master the design gate's source of truth on 2026-10-09.
 
 ---
 
@@ -929,7 +929,7 @@ pass's call, and nothing there was edited. For set boundaries: KI-26 and KI-29 (
   pass and absent from the audit's section 4. Precedent: `5ff7aca` sized Screen D's identical readings to 44
   with no token change.
 - **Files.** `resources/views/runs/show.blade.php` (the guided-turn block, the skills editor, the race form);
-  `docs/design-research/DESIGN.md` section 6.14 (`:849`); the density question at
+  `DESIGN.md` section 6.14 (`:849`); the density question at
   `docs/design-research/CONSTRAINTS.md:171`.
 - **Missing.** The height raise plus the density decision it is tied to. It is not a phone-width item: a
   control below its specified height fails at 1280px exactly as it fails at 390px.
@@ -1698,7 +1698,7 @@ footnote: **`is_unique` 294** is the code rule (rarity 3/4/5) while the card joi
 - `docs/design-research/CONSTRAINTS.md` — D-20 (no unverified strings in UI copy), D-30 (render only what
   exists), D-44 (planned vs actual in one view), D-62..D-65 (skill search), D-192, D-210 (the ten names),
   D-223, D-224, D-229, D-253, G-16, G-49.
-- `docs/design-research/DESIGN.md` §6.11 (skill row), §8.4 (Screen D), §3 (sparkle = `is_unique` only).
+- `DESIGN.md` §6.11 (skill row), §8.4 (Screen D), §3 (sparkle = `is_unique` only).
 - `docs/design-research/RACE-CALENDAR-GAPS.md` — the sibling register this file follows.
 - `docs/SOURCE-OF-TRUTH.md` §3 (Spark / Inspiration / Legacies; `Hint Lvl N, NN% OFF`), §4.1 (supersedence
   and the JP-only import filter), §5 (tier ladder: a `[B]` dataset needs `[A]`/`[S]` confirmation).
@@ -2503,7 +2503,7 @@ Read in full:
 - `docs/design-research/skill-facts-2026-10-01.md` (715 lines): the Provenance warning, Method, the
   coverage table with its canaries, the token and code lists, and the worked example at export id
   `201241`. The 623-row table itself was sampled, not read line by line.
-- `docs/design-research/DESIGN.md` §6.11 (Skill row), §6.14 (Form field), §6.16 (Advisory and
+- `DESIGN.md` §6.11 (Skill row), §6.14 (Form field), §6.16 (Advisory and
   recommendation row), §6.18 (Empty, loading, error), §6.5 (Stat band), §8.4 (Skill search), §10
   (Accessibility).
 - `KNOWN-ISSUES.md`: the KI-33 heading and its closure, the "One open end, and it is not this entry's"
@@ -2800,7 +2800,7 @@ The governing sentence, which the row must be able to say when asked: the absenc
 absence it is. Under a kept heading, "not yet recorded" is permitted; a silent blank is not (root
 `DESIGN.md` §4.2, "Catalog detail", as rewritten 2026-09-29, and D-220). Note the file qualifier, and see
 §12 item P-10: this repository has **two** files named `DESIGN.md`, and §6.11, §6.14, §6.16, §6.18, §8.4
-and §10 live in `docs/design-research/DESIGN.md` while the trainee page's section list and its absence rule
+and §10 live in `DESIGN.md` while the trainee page's section list and its absence rule
 live in the root one.
 
 #### 3.5 Accessibility story
@@ -3251,7 +3251,7 @@ predicate rule do.**
 
 #### 5.1 What is actually established
 
-The spec, quoted from `docs/design-research/DESIGN.md` §6.14 (Form field): input `raised` fill, 1px
+The spec, quoted from `DESIGN.md` §6.14 (Form field): input `raised` fill, 1px
 `--color-rule`, radius 8, **height 44**. Same section, last bullet: number inputs get steppers, matching
 §6.11's cost stepper, "so the tool's two numeric idioms are one idiom". §10 (Accessibility) independently:
 "Target size: 44px minimum on anything clickable."
@@ -3427,7 +3427,7 @@ review's list is now stale in three places and those are marked.
 | `KNOWN-ISSUES.md`                                                                                                                                                                                                       | `M`                          | Contended register. Nothing here proposes an entry; §6 item 7 defers even the erratum wording.                                                                                                                                                           |
 | `docs/design-research/skills-section-review-2026-10-01.md`                                                                                                                                                              | **`??`, untracked**          | **The review's own §Final report says "Files modified 1"; it is not committed.** Anyone citing it cites a file that a clean checkout does not have.                                                                                                      |
 | `docs/design-research/SKILLS-GAPS.md`                                                                                                                                                                                   | clean                        | G-SK-19 and G-SK-20 govern Q1. Read, do not amend.                                                                                                                                                                                                       |
-| `docs/design-research/DESIGN.md`                                                                                                                                                                                        | clean                        | Read, not changed, per this dispatch's fence.                                                                                                                                                                                                            |
+| `DESIGN.md`                                                                                                                                                                                        | clean                        | Read, not changed, per this dispatch's fence.                                                                                                                                                                                                            |
 | `resources/js/trainee-combobox.ts`, `resources/views/runs/create.blade.php`                                                                                                                                             | clean                        | Q2's prerequisite and its pattern. Untouched by this proposal; the refactor is a future slice.                                                                                                                                                           |
 | `docs/scenarios/03-trackblazer.md`                                                                                                                                                                                      | clean                        | Standing exclusion.                                                                                                                                                                                                                                      |
 | `docs/deprecated/**`, `docs/frontend-review/**`, slice deliverables, the consolidation doc                                                                                                                              | excluded                     | Fence exclusions, unchanged.                                                                                                                                                                                                                             |
@@ -3779,7 +3779,7 @@ phrasing, because the count is what a fix gets sized by.
 
 **P-5. The dispatch conflated two different `DESIGN.md` files, and "§2.3" is the tell.** It asks for
 "`DESIGN.md` §6.14 (form field spec), §2.3 (screen structure), §6.5 (stat band markers)" from
-`docs/design-research/DESIGN.md`. §6.14 and §6.5 are correct there. There is no §2.3 in that file: its §2 is
+`DESIGN.md`. §6.14 and §6.5 are correct there. There is no §2.3 in that file: its §2 is
 "Principles" with no numbered subsections, and its only `2.3` is a row number in §12's review log at `:1621`.
 But the root `DESIGN.md` **does** have a §2.3, and it is "Spacing and layout", not screen structure. So the
 citation resolves in neither file to the thing described. The nearest shipped statement of a single primary
@@ -3790,7 +3790,7 @@ and it should be re-anchored wherever it is cited. See P-10, which is the larger
 **P-10. There are two `DESIGN.md` files with different structures, and this dispatch's citations could not
 resolve until they were distinguished.** `DESIGN.md` at the repository root (27,675 bytes) is the **surface
 specification**: §4 "Surface specifications" with §4.1 catalog index, §4.2 catalog detail, §4.4 run detail.
-`docs/design-research/DESIGN.md` (152,232 bytes) is the **design system**: §6 component anatomy, §8 UX
+`DESIGN.md` (152,232 bytes) is the **design system**: §6 component anatomy, §8 UX
 architecture, §10 accessibility. The dispatch's context list names the second path but its §2.3 pointer
 only exists in the first, and §9 of this proposal depends on the first (§4.2's eight sections and its
 two-form absence rule) while §3 through §5 depend on the second. Every citation in this document is

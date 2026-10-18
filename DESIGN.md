@@ -27,7 +27,7 @@ tactical-athletic language, dial ENERGY 1 / RHYTHM 1 / MOTION 1.
 speed and buys nothing. R-31.)
 
 Relationship to `docs/research-scratch/DESIGN-CORPUS.md` section "DESIGN.md" (the
-consolidated research package, formerly `docs/design-research/DESIGN.md`): that document is the
+consolidated research package, formerly `DESIGN.md`): that document is the
 screenshot-anchored research package (measured color ramps, contrast tables,
 cap-stack rendering spec §6.21). This file does not re-derive it. **Amended
 2026-09-27:** the app default is now the research package's measured **light**
@@ -945,7 +945,7 @@ the MOTION dial stays 1 and no `transition-*` utility was added.
   `var()` silently inherits instead of failing, and a contrast check then reports
   a pass on a token that is not in the stylesheet (research `CONSTRAINTS.md` D-288).
 - `docs/research-scratch/DESIGN-CORPUS.md` section "DESIGN.md" (formerly
-  `docs/design-research/DESIGN.md`): measured ramps, contrast tables,
+  `DESIGN.md`): measured ramps, contrast tables,
   cap-stack rendering spec (§6.21), and the light theme that is now the app default.
 - `docs/research-scratch/DESIGN-CORPUS.md` section "CONSTRAINTS.md" (formerly
   `docs/design-research/CONSTRAINTS.md`): the research-phase design rules

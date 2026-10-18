@@ -15,7 +15,7 @@ This master file is compiled from 7 source files, embedded verbatim with heading
 
 **Dating note (2026-10-09):** This master cites several `docs/design-research/` paths that were consolidated and
 removed when this master was committed. The design rules from `docs/design-research/CONSTRAINTS.md` now live in
-`docs/research-scratch/DESIGN-CORPUS.md` §"CONSTRAINTS.md"; the token system from `docs/design-research/DESIGN.md`
+`docs/research-scratch/DESIGN-CORPUS.md` §"CONSTRAINTS.md"; the token system from `DESIGN.md`
 now lives in §"DESIGN.md". These citations are dated records of where the source evidence sat at measurement time
 and are not actionable on disk.
 
@@ -405,7 +405,7 @@ The skill registry lives at **`.agents/skills/skills.json`** (not `SKILL.md`).
 | System design          | `ARCHITECTURE.md` (authoritative), `ARCHITECTURE-ESSENTIALS.md` (digest)                                                                                      |
 | Mechanics reference    | `docs/UMAMUSUME_REFERENCE.md` (8 sections, 46 conflict rows)                                                                                                  |
 | Scenario guides        | `docs/scenarios/01`–`08` (07=stub, 08=JP-Only)                                                                                                                |
-| Design system          | `docs/design-research/DESIGN.md` (root), `docs/design-research/CONSTRAINTS.md` (UI contract)                                                                  |
+| Design system          | `DESIGN.md` (root), `docs/design-research/CONSTRAINTS.md` (UI contract)                                                                  |
 | Quality bar            | `CONSTRAINTS.md` (root), `docs/design-research/CONSTRAINTS.md` (additive)                                                                                     |
 | Agent roles            | `AGENTS.md`                                                                                                                                                   |
 | Lore rules             | `CLAUDE.md` (top section), `CONSTRAINTS.md` C-4                                                                                                               |
@@ -573,7 +573,7 @@ warning in `scenarios/08`.
 
 What stays counted, on purpose: the 20 `docs/UMAMUSUME_REFERENCE.md` lines and the
 `docs/scenarios/*` guide rows that quote client and wiki vocabulary as source data; five
-`design-research/DESIGN.md` prose lines and the D-186 and D-268 lines in
+`DESIGN.md` prose lines and the D-186 and D-268 lines in
 `design-research/CONSTRAINTS.md`, where a banned word is used as ordinary English rather than to
 name the ban; three `design-research/_scratch` patch scripts holding quoted doc text; ADR-0005's
 adjective use; and one PNG that matches as a binary file and cannot carry a comment. Those are
