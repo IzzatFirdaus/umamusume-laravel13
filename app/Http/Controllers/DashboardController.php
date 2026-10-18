@@ -274,7 +274,7 @@ class DashboardController extends Controller
         // path the Trainer already has a click for; "New Career" is now the Active Career card's
         // own primary action in the empty state.
         return [
-            ['label' => 'Import a historical run', 'to' => route('runs.import')],
+            ['label' => 'Import a historical career', 'to' => route('runs.import')],
             ['label' => 'Review queue', 'to' => route('review.index')],
             ['label' => 'Open settings', 'to' => route('preferences.edit')],
             ['label' => 'Database hub', 'to' => route('database.index')],

@@ -42,17 +42,17 @@ test('renders the run list, and says what happens next when it is empty', async 
     await page.goto('/training-runs');
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByRole('heading', { name: 'Training runs', level: 1 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Careers', level: 1 })).toBeVisible();
 
     // An empty list is a real state, not a failure, so it names what happens next rather than
     // reading as "no data".
     await expect(page.getByText('No runs yet')).toBeVisible();
     await expect(page.getByText(/nothing to list until you start one/)).toBeVisible();
 
-    // The empty state still offers both ways in. Import sits beside New run because it creates a run
+    // The empty state still offers both ways in. Import sits beside New career because it creates a run
     // too, and a Trainer with a finished career in a file has to find it on the same glance.
-    await expect(page.getByRole('link', { name: 'New run' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Import a historical run' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'New career' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Import a historical career' })).toBeVisible();
 });
 
 test('sizes the create form controls to the 44px contract', async ({ page }) => {

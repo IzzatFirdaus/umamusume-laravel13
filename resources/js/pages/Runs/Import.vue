@@ -183,8 +183,8 @@ function confirmImport(): void {
 
 <template>
     <AppLayout>
-        <Head title="Import a historical run" />
-        <template #title>Import a historical run</template>
+        <Head title="Import a historical career" />
+        <template #title>Import a historical career</template>
 
         <p class="mt-2 max-w-3xl text-sm text-ink-muted">
             For a run you already finished. Paste or choose the CSV this app exports, and the turns come in

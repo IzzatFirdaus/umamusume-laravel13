@@ -332,7 +332,7 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                 <h2 id="active-career-empty-heading" class="text-lg font-semibold text-ink-strong">
                     Active Career
                 </h2>
-                <p class="mt-2 text-sm text-ink">No active career. Start a new training run.</p>
+                <p class="mt-2 text-sm text-ink">No active career. Start a new career.</p>
                 <p class="mt-2 max-w-3xl text-sm text-ink-muted">
                     Start a run to track turns, Energy and race record in one place.
                 </p>
@@ -351,7 +351,7 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                      two offers are visibly ranked. -->
                 <div class="mt-4 flex flex-wrap items-center gap-3">
                     <LinkButton href="/career/setup/scenario" variant="primary">
-                        Start a new training run
+                        Start a new career
                     </LinkButton>
                     <LinkButton href="/career/snapshot" variant="ghost">
                         Import an existing career

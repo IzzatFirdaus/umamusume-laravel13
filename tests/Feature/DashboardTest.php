@@ -56,7 +56,7 @@ it('renders the dashboard with no active career, an empty Veteran list and the d
             // card repeated a path the Trainer already had a click for; `quickActions()` replaced
             // them, and this assertion follows the code rather than the retired design.
             ->has('quickActions', 4)
-            ->where('quickActions.0.label', 'Import a historical run')
+            ->where('quickActions.0.label', 'Import a historical career')
             ->where('quickActions.1.label', 'Review queue')
             ->where('quickActions.2.label', 'Open settings')
             ->where('quickActions.3.label', 'Database hub')

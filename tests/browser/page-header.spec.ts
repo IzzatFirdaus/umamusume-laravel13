@@ -21,7 +21,7 @@ import { test, expect } from '@playwright/test';
 
 const PILOTS: { url: string; title: string; eyebrow: string }[] = [
     { url: '/', title: 'Dashboard', eyebrow: 'Overview' },
-    { url: '/training-runs', title: 'Training runs', eyebrow: 'Overview' },
+    { url: '/training-runs', title: 'Careers', eyebrow: 'Overview' },
     { url: '/skills', title: 'Skill search', eyebrow: 'Reference' },
     { url: '/veterans', title: 'Veteran library', eyebrow: 'Library' },
     { url: '/database', title: 'Database', eyebrow: 'Data Quality' },

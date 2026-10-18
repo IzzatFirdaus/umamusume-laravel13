@@ -12,7 +12,7 @@ test('carries the selected trainee from the catalog into the wizard', async ({ p
     await page.goto('/umamusume/special-week');
     await page.locator('#app > *').first().waitFor();
 
-    await page.getByRole('button', { name: 'New run' }).click();
+    await page.getByRole('button', { name: 'New career' }).click();
     await page.waitForURL(/\/career\/setup\/scenario$/);
 
     // The carried choice reads back on the trainee step: the same stored-choice line a Trainer who

@@ -44,7 +44,7 @@ test('states the column list the export writes, so the paste target is checkable
     await page.goto('/training-runs/import');
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByRole('heading', { name: 'Import a historical run', level: 1 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Import a historical career', level: 1 })).toBeVisible();
     await expect(page.getByText(/nothing is created until you confirm/)).toBeVisible();
 
     // The hint is the request's own HEADERS joined for reading, and the placeholder the same list joined

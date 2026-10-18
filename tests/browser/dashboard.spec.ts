@@ -28,7 +28,7 @@ import { deleteRun } from '../utils/delete-run';
 
 const TRAINEE = 'Agnes Digital';
 const TRAINEE_JA = 'アグネスデジタル';
-const EMPTY_CAREER = 'No active career. Start a new training run.';
+const EMPTY_CAREER = 'No active career. Start a new career.';
 
 const createdRunUrls: string[] = [];
 
@@ -63,7 +63,7 @@ test('states the empty career in words a Trainer can act on', async ({ page }) =
     // first line; the second says what a career is for, so the panel is not just a refusal.
     await expect(page.getByText(EMPTY_CAREER)).toBeVisible();
     await expect(page.getByText(/Start a run to track turns, Energy and race record/)).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Start a new training run' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Start a new career' })).toBeVisible();
 
     // The snapshot door is the other way in. It now has two faces: the empty state's own ghost
     // button (asserted on the next line) and the Quick Actions paragraph link that has carried it
@@ -122,7 +122,7 @@ test('sizes the dashboard controls to the 44px contract', async ({ page }) => {
     // WCAG 2.2 SC 2.5.8, floor 44px (plan §12.1). The same sweep `skills.spec.ts` and
     // `legacy.spec.ts` run, repeated here because this screen's controls are new.
     const targets = [
-        page.getByRole('link', { name: 'Start a new training run' }),
+        page.getByRole('link', { name: 'Start a new career' }),
         // "New Career" is not in this list on purpose: with no career live, Quick Actions drops it so
         // the screen offers one start-a-career door rather than two, and the sweep below measures the
         // doors that remain.
@@ -237,7 +237,7 @@ test('reflows at 320px, logs no console error, and renders under reduced motion'
     // WCAG 2.3.3 / the plan's §12 reduced-motion path: the screen is fully usable with the OS
     // preference set. The MOTION dial is 1, so this asserts the page renders and its primary action
     // is reachable rather than that a specific animation was suppressed.
-    await expect(page.getByRole('link', { name: 'Start a new training run' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Start a new career' })).toBeVisible();
     await expect(page.getByRole('navigation', { name: 'Quick actions' })).toBeVisible();
 
     expect(consoleErrors, `console errors: ${consoleErrors.join(' | ')}`).toEqual([]);
@@ -256,7 +256,7 @@ test('announces a visit in flight and takes over the failure state', async ({ pa
     });
 
     // The empty-career primary is the door to that route now; Quick Actions no longer repeats it.
-    await page.getByRole('link', { name: 'Start a new training run' }).click();
+    await page.getByRole('link', { name: 'Start a new career' }).click();
     // The shell's flash region is always mounted (WCAG 4.1.3), so the assertion targets the region
     // that is saying something, not the only one.
     await expect(page.getByRole('status').filter({ hasText: 'Loading…' })).toHaveText('Loading…');

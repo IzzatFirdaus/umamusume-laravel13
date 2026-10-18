@@ -36,25 +36,25 @@ const statusVariant = (status: string): 'info' | 'success' | 'warning' | 'neutra
 
 <template>
     <AppLayout>
-        <Head title="Training runs" />
+        <Head title="Careers" />
         <template #head>
-            <PageHeader eyebrow="Overview" title="Training runs" />
+            <PageHeader eyebrow="Overview" title="Careers" />
         </template>
 
-        <!-- Import sits beside New run rather than in a menu: it creates a run too, and a Trainer
+        <!-- Import sits beside New career rather than in a menu: it creates a run too, and a Trainer
              with a finished career in a file has to find it on the same glance. -->
         <div class="flex flex-wrap items-center gap-3">
             <a
                 href="/training-runs/import"
                 class="inline-flex min-h-11 items-center text-sm text-ink-muted hover:underline transition-colors duration-150 ease-out"
             >
-                Import a historical run
+                Import a historical career
             </a>
             <a
                 href="/career/setup/scenario"
                 class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 text-sm font-bold text-on-primary-action"
             >
-                New run
+                New career
             </a>
         </div>
 

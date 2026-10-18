@@ -94,8 +94,8 @@ function submit(): void {
 
 <template>
     <AppLayout>
-        <Head title="New training run" />
-        <template #title>New training run</template>
+        <Head title="New career" />
+        <template #title>New career</template>
 
         <form
             class="mt-6 max-w-lg space-y-4 rounded-md border border-rule bg-raised p-4 text-sm"
