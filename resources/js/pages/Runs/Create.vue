@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
 import TraineeCombobox from '../../components/TraineeCombobox.vue';
-import { BaseInput, BaseSelect, BaseTextarea } from '../../components/Form';
+import { BaseInput, BaseTextarea } from '../../components/Form';
+import Select from '../../components/ui/Select.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -129,7 +130,7 @@ function submit(): void {
             <!-- A select over the composition matrix, because the request validates `scenario` against
                  its keys: free text here could only ever produce a rejected submission. Leaving it empty
                  is a real option and renders the baseline strip. -->
-            <BaseSelect
+            <Select
                 :model-value="form.scenario"
                 id="create-scenario"
                 name="scenario"
@@ -139,11 +140,11 @@ function submit(): void {
                 @update:model-value="(v: string | number | null) => (form.scenario = String(v ?? ''))"
             />
 
-            <BaseSelect
+            <Select
                 :model-value="form.status"
                 id="create-status"
                 name="status"
-                label="Status *"
+                label="Status"
                 :options="statusOptions"
                 required
                 :error="form.errors.status"
@@ -154,7 +155,7 @@ function submit(): void {
                  page already reads them back (the inheritance row, the Grade Point period in the meter,
                  the shop panel's countdown). All four are nullable, so leaving one empty keeps the shape
                  a run had before this block existed. -->
-            <BaseSelect
+            <Select
                 :model-value="form.inheritance_parent_a_id"
                 id="create-inheritance_parent_a_id"
                 name="inheritance_parent_a_id"
@@ -164,7 +165,7 @@ function submit(): void {
                 @update:model-value="(v: string | number | null) => (form.inheritance_parent_a_id = String(v ?? ''))"
             />
 
-            <BaseSelect
+            <Select
                 :model-value="form.inheritance_parent_b_id"
                 id="create-inheritance_parent_b_id"
                 name="inheritance_parent_b_id"
