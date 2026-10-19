@@ -415,6 +415,12 @@ Hand-off sequence (the bar's own order): targeted tests green -> `php artisan te
 -> `npm run typecheck` -> `npm run lint:ui` -> `composer lore` and `composer lore-code` with a ruling per hit ->
 `composer audit` and `npm audit --omit=dev` when dependencies changed.
 
+**The lore gate is advisory.** `tools/lore.php` is report-only and always exits 0, so the
+gate does not fail a change on its own. The obligation is that the gate ran, that the
+hand-off quotes the hit count and its delta from the baseline, and that every hit carries a
+ruling. The baseline on this tree is 477 hits and 75 exempt lines in docs mode and 182 hits
+in code mode.
+
 `npm run lint:ui` (plan slice 1.12) fails a Card inside a Card and any new arbitrary Tailwind value
 (`bg-[#…]`, `w-[37px]`). Arbitrary values predate the guard in two files and are listed in
 `tools/ui-lint.mjs`; that list is debt, not a place to add. The identifier and bare-`N/A` rules are
