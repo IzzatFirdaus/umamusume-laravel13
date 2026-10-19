@@ -4033,7 +4033,7 @@ Where (2) and (1) disagree, this brief reports the disagreement rather than sile
 | `docs/audits/rice-shower-unity-cup-round2-reconciliation.md` | R2-01..R2-15 classification vs code | HISTORICAL evidence (in-flight) |
 | `docs/UMAMUSUME_REFERENCE.md` | source-cited mechanics corpus | Reference (not a spec) |
 
-**Not authoritative / do not cite as a spec:** `docs/deprecated/**` (retired legacy PDFs; display text must never be copied), `PRODUCT.md` and `SKILL.md` (generator-owned), and the `docs/design-research/` prototypes.
+**Not authoritative / do not cite as a spec:** `docs/deprecated/**` (retired legacy PDFs; display text must never be copied), `PRODUCT.md` (generator-owned), and the `docs/design-research/` prototypes.
 
 #### 2.4 Code map (CONFIRMED)
 
