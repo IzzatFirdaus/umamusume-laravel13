@@ -2891,3 +2891,11 @@ four private walks are NOT re-pointed, and no career-header spec was written. No
   extends the existing component, the build changes shape and Section 12's SCREEN-009 contract has to
   be re-read first. Then 4.2, whose Step 0 must check whether CareerStatePanel.vue:130's
   N/A-without-title bug survives the Cockpit rewrite or closes with it.
+
+*Erratum, same day (2026-10-19, dispatch 37 close): the sentence above records
+`git rev-list --count origin/master..HEAD = 16` and `lists 16 entries`. Both numbers are the count
+measured immediately BEFORE this section's own commit landed, which is how they were written. The
+ahead count at close, measured after it, is 17 - the 15 the dispatch opened with plus this
+dispatch's two commits (beb92cc, 729e798, this section). The original sentence is preserved above;
+the corrected figures are 17 and 17. Count still equals list length, so the precondition holds; only
+the recorded figure was off by one.*
