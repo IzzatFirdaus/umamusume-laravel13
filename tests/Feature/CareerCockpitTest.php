@@ -13,6 +13,22 @@ use App\Models\Umamusume;
 use Illuminate\Support\Collection;
 use Inertia\Testing\AssertableInertia as Assert;
 
+it('ties the absent stat marker to the reason the panel already owns', function (): void {
+    // The generic rule is `UiHygieneTest`'s, and it is the guard that found this: a visible N/A whose
+    // element carries no reason. The panel already PRINTED the sentence on the row below
+    // (`{{ currentHint(stat) }}`), but the guard can only see a `title`, an `sr-only` twin, or a
+    // forward `*_title`/`*_reason` interpolation, and a function call is none of those. So the marker
+    // now carries the same reason from the same owner rather than a second copy of the prose.
+    $source = (string) file_get_contents(base_path('resources/js/components/career/CareerStatePanel.vue'));
+
+    expect($source)->toContain('<span v-if="stat.current === null" :title="currentHint(stat)">N/A</span>')
+        // One owner for the sentence: the reason is a function, not a literal typed into the template.
+        ->and($source)->toContain("'No turn has recorded this stat yet.'")
+        ->and(substr_count($source, 'No turn has recorded this stat yet.'))->toBe(1)
+        // And the visible sentence stays: a hover-only reason is the shape DESIGN.md §5 rules out.
+        ->and($source)->toContain('{{ currentHint(stat) }}');
+});
+
 /*
  * SCREEN-009, the Career Cockpit (plan §8 D8). The props are asserted here; the rendered copy, the
  * three breakpoints, the keyboard path through the action grid and the reduced-motion check live in
@@ -289,7 +305,11 @@ it('cites the reference on a recorded Rest turn, with every branch shown and tag
         ->and(collect($forecast['branches'])->pluck('value')->all())->toBe(['+50', '+70', '+30'])
         ->and(collect($forecast['branches'])->pluck('note')->all())->toBe(['modal', null, 'may carry a stayed-up-late penalty'])
         ->and($forecast['server'])->toBe('[JP]')
-        ->and($forecast['source'])->toContain('§1.1.5')
+        // The provenance names the publisher and the sample sizes, never the repository section the
+        // figures were read from: a Trainer cannot open a section reference, and `UiHygieneTest`
+        // forbids one reaching shipped copy.
+        ->and($forecast['source'])->toContain('GameWith')
+        ->and($forecast['source'])->not->toContain('UMAMUSUME_REFERENCE')
         ->and($forecast['disagreement'])->toBe('Sources agree on the shape; the modal value is single-source.');
 });
 
@@ -334,7 +354,11 @@ it('renders a named absence for a recorded discipline turn, never a yield', func
         ->inertiaProps('advisor.decision')['recorded_action']['recorded_forecast'];
 
     expect($forecast['kind'])->toBe('absence')
-        ->and($forecast['reason'])->toContain('ADR-0001')
+        // The refusal states itself; the citation that used to ride along in the sentence is gone,
+        // because a reason sentence that only makes sense with an ADR number attached is not a reason
+        // a Trainer can read.
+        ->and($forecast['reason'])->toContain('No source publishes a per-training yield for a discipline')
+        ->and($forecast['reason'])->not->toContain('ADR-')
         ->and(array_key_exists('branches', $forecast))->toBeFalse();
 });
 

@@ -127,7 +127,12 @@ const denominator = (stat: Stat): number | null =>
                         <span v-if="growthFor(stat) !== null" class="ml-1 text-xs font-normal text-ink-muted">+{{ growthFor(stat) }}%</span>
                     </span>
                     <div class="flex items-baseline gap-1 font-mono text-sm tabular-nums text-ink-strong">
-                        <span v-if="stat.current === null">N/A</span>
+                        <!-- The marker carries the same reason the visible sentence below the bar
+                             prints, from its one owner (`currentHint`), so the cell explains itself on
+                             hover and for a screen reader as well as for a reader of the row. The
+                             sentence stays: a reason reachable only by hover is the shape DESIGN.md §5
+                             rules out, and this is the pair rather than a swap. -->
+                        <span v-if="stat.current === null" :title="currentHint(stat)">N/A</span>
                         <span v-else>{{ group(stat.current) }}</span>
                         <template v-if="denominator(stat) !== null">
                             <span class="text-ink-muted">/</span>
