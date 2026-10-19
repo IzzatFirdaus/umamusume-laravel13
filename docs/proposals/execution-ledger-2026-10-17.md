@@ -3871,3 +3871,104 @@ the other real piece. The rename is two lines - CareerHeader has exactly one imp
     3. Cherry-pick 4.2 (and then 4.3 / 4.4) whenever they should reach master.
 - Next eligible: 4.2, then 4.3 and 4.4, then 4.5 and 4.6, plus the 2.5 remainder (the peer-dirty
   LegacySelect.vue wrapper sites).
+
+## 44. Dispatch 43 - 4.2/4.3/4.4 not started; the Section adoption has a landmark conflict, 2026-10-20
+
+### Step 0 measurements
+
+- Worktree: HEAD 132cee8, clean, `git status --porcelain` empty. The four cherry-picked commits are on
+  master under their new SHAs and were verified: c7b6424 (StatusPill import), 186a489 (nav
+  reachability), c963f64 (the eight walk repairs), ed9e97f (the tab-order case). Their subjects match
+  the worktree originals, so there is no master/worktree divergence to report.
+- Scout re-verification at this HEAD, against Section 42:
+    <details> in Cockpit.vue        7   (as recorded)
+    bg-primary-action in Cockpit.vue 1  (as recorded)
+    data-region=advisor             1   (as recorded)
+    capsule|lattice                 0   (as recorded)
+    ui/Section importers anywhere   0   (as recorded)
+    components/ui/Section.vue       EXISTS - so the primitive 4.2 adopts is real, unlike StatBand.vue
+    components/StatBand.vue         ABSENT (as recorded; the ScenarioCaps hardening stays a no-op)
+    CareerHeader references         1 import (Cockpit.vue:28), 1 usage (:517), and 1 prose mention in
+                                    CareerSectionNav.vue:7 that the rename makes stale and must fix
+  ONE DELTA, and it is a grep artefact rather than a change: `sticky` reports 3 hits, not the 1
+  Section 42 recorded. Two of the three are COMMENTS (Cockpit.vue:505 and :996); the only sticky CLASS
+  is still the single 'On this page' nav at :508. Section 42's finding holds and the build plan is
+  unchanged.
+- Peer-dirty check on every 4.2/4.3/4.4 target (Cockpit.vue, TrainingDetail.vue, RaceDecision.vue,
+  RacePlanner.vue, CareerHeader.vue, CareerStatePanel.vue, ActionGrid.vue, AdvisorRail.vue,
+  TrainingCard.vue, RaceTable.vue): ALL CLEAN in the main tree. Nothing is peer-active, so the eventual
+  cherry-pick of these slices has no peer claim to dodge.
+- Worktree bundle: manifest 2026-10-20 01:49:42 against a resources/js commit of 02:26:02, so it reads
+  STALE by the mtime rule and a worktree rebuild is owed BEFORE any browser gate. Noted rather than
+  done, because no browser gate was reached (below). Master's public/build was not touched.
+
+### The finding that changes 4.2's shape: Section cannot carry a label
+
+4.2 says to replace Cockpit's section headers with `Section` (1.4). Read at the primitive, that does
+not survive contact with the page. Measured:
+
+- Cockpit.vue has FIVE of its own `<h2>` headers, and every one carries an `id` that is referred to by
+  exactly one `aria-labelledby` on the `<section>` around it: cockpit-summary-heading,
+  career-closed-heading, career-empty-heading, career-scenario-heading, career-timeline-heading. Each
+  id is therefore the accessible NAME of a landmark region, not decoration.
+- `components/ui/Section.vue` renders its own `<section class="mt-8">` with NO `aria-labelledby` and no
+  `id` on the heading it renders; its only aria wiring is `aria-describedby` for an optional
+  description. It takes `title`, `description` and `level` and nothing else.
+- So substituting `Section` for those five headers would silently drop five landmark names and delete
+  five referenced ids. Two of the names are asserted by name in the browser suite today ('Scenario' and
+  'No turn recorded yet' in career-cockpit.spec.ts), so at least those two would fail outright, and the
+  rest would be an accessibility regression that no test would catch.
+- Corroboration that this is a real primitive gap rather than a local habit: NO file in the repository
+  imports `Section.vue` at all. Its first use would have been this substitution.
+
+The three ways out, and the one 4.2 should take once ruled on:
+
+  1. Extend `Section` with an optional `id`: put it on the rendered heading and use it as the
+     `aria-labelledby` of its own `<section>`. Adoption then preserves every landmark name, and the
+     primitive gains the one thing adoption needs. This is the recommended shape, and it is a change to
+     a shared primitive, so it wants the operator's word rather than a slice's.
+  2. Keep the five labelled `<section aria-labelledby>` elements and adopt `Section` only where a
+     header is NOT a landmark. There is no such header on this page, so this option does nothing today.
+  3. Drop Section adoption from 4.2 and record the gap here.
+
+### 4.2, 4.3 and 4.4 - NOT STARTED, and why
+
+BLOCKED-ON-BUDGET for all three. This dispatch reached its close with the remaining budget short of
+what a slice needs, and each slice is large: 4.2 is a new sticky component plus Cockpit integration
+plus the rename plus five or six browser cases plus three failability proofs plus the full walk-set run;
+4.3 and 4.4 are each comparable and 4.4 also introduces a `RaceTable` primitive. Starting any of them
+and stopping at the source change would be the partial slice the dispatcher forbids, and it would land
+on top of the very walk set the last three dispatches spent their budget repairing.
+
+4.2 additionally carries BLOCKED-ON-PRIMITIVE-CONTRACT for its Section half, from the finding above: it
+cannot be completed as written without either dropping five landmarks or changing a shared primitive.
+That one is not a budget problem, and it does not go away with more time.
+
+No code was changed this dispatch, so nothing is partial and nothing is carried forward half-done. What
+it contributes is the measurement that makes 4.2 finishable in one pass next time, and the ruling 4.2's
+Section half needs.
+
+### Close
+
+- Deferred ledger commits, untouched: 47488f0, 68ffe6f, 132cee8. All three edit this file, which the
+  peer still holds with a live append in the main tree.
+- KI-70 side effect: still OWED. master's public/build at 03:39:17 was built from a peer-dirty source
+  tree and reflects the peer's uncommitted BuildTarget.vue, DeckSelect.vue and LegacySelect.vue. A
+  quiet-tree rebuild on peer-clear closes it.
+- DocCitationParity: this section is the dispatch's only markdown edit, and the gate was measured in
+  the MAIN tree before the append: 2 passed (5 assertions), and the census reads 651 (650 GONE, 1
+  UNTRACKED) - well below the 708 baseline, because the peer has been clearing citations through this
+  stretch (711 -> 703 -> 692 -> 651 measured across the dispatches). No rise is possible from this
+  section, and the gate is green rather than merely not-risen.
+- Worktree bundle: still stale at 01:49:42; the rebuild task is in the operator list above.
+- Peer status in the main tree: unchanged and untouched.
+- Operator action list:
+    1. Rule on the `Section` `id` extension (option 1 above is the recommendation). Until then 4.2's
+       Section half has no faithful implementation.
+    2. When the peer commits the ledger append, cherry-pick 47488f0, then 68ffe6f, then 132cee8, then
+       this section.
+    3. When the peer commits the three Vue files, run ONE quiet-tree dispatch to rebuild public/build on
+       master and re-run the walk set - that closes the KI-70 side effect.
+    4. Rebuild the worktree bundle before the next browser gate: it reads stale at 01:49:42.
+- Next eligible: 4.2 (sticky summary strip, the rename, and Section once ruled on), then 4.3 and 4.4,
+  then 4.5 and 4.6, plus the 2.5 remainder.
