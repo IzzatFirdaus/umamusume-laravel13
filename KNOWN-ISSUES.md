@@ -3079,6 +3079,30 @@ grep patterns as expected.
 
 **Ref:** Prior dispatch Step 5; current dispatch Step 1g.
 
+**Correction (2026-10-20, Phase 8.8 residual close-out):** two facts in this entry are wrong as filed, and
+both are load-bearing.
+
+First, the committed versions are not clean UTF-8. The blob at HEAD is UTF-16LE with a byte order mark - the
+first bytes are FF FE 23 00 20 00 45 00 - 528,880 bytes carrying 270,501 NUL bytes. The same is true of
+4db04fd, 33d0017, f278cd6, 6b625ed and every earlier commit, back to a1db210, which is the first commit that
+touched this path. The encoding is not one commit's accident; it has been the file's stored form since the
+file was created.
+
+Second, the first commit to write this path is a1db210, not bd9e2e5.
+
+The consequence is larger than the entry states. tools/doc_census.py reads the file with encoding="utf-8" and
+errors="replace", so in a clean checkout the UTF-16LE ledger yields no readable citation at all: the census
+sees 0 of the 48 distinct backticked .md references it actually carries, and 7 of those 48 are dead -
+code-style.md, eloquent.md, frontend-fidelity-2026-10-13.md, implementation-backlog-2026-10-17.md,
+testing-standards.md, ui-ux-application-context-brief.md, and the
+.scratch-uma/dispatch-2026-10-17/implementation-backlog.md that the peer's own working-tree edit already
+unbackticks. The gate therefore reports a count that is a lower bound in a second, independent way, and the
+peer's planned re-encode will expose those 7 the moment it lands, raising the count by about 7 against a 708
+bar.
+
+The fix is unchanged: the peer re-encodes as UTF-8 without a BOM and commits. Repointing those 7 before the
+re-encode is cheaper than after it.
+
 ### KI-109 `analysis_output.txt` and `base_veteran.vue` are UTF-16LE with BOM and NUL - FILED 2026-10-20 (citation-fix batch close-out), OPEN, OWNER DECISION REQUIRED
 
 **Status: OPEN.** Both files are UTF-16LE with byte order mark (first bytes `FF FE`) and contain NUL
