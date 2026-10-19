@@ -16,6 +16,118 @@ The shared-index hazard, the external-push pattern, the DESIGN.md:1 peer edit co
 
 ---
 
+## Status as of 2026-10-20
+
+This block supersedes the "What changed from the previous version" section above without deleting it. HEAD is `38a0a28`; `origin/master` is `b0b3ec9` (65 commits ahead of origin/master; no push performed this dispatch).
+
+- Phase 0: complete except 0.1 (deferred-owner, KI-103).
+- Phase 1: complete except 1.1-palette (deferred-owner, Track 2), 1.1-type-scale (blocked-owner — plan's 12/14/16/20/28 vs signed DESIGN.md §2.2's 12/14/18/30), 1.9b (retired), 1.9c-A (retired), 1.9c-B (moved to 4.2), 1.9d (withdrawn), 1.10-Stepper (deferred-owner).
+- Phase 2: complete.
+- Phase 3: complete.
+- Phase 4: 4.1 landed; 4.2–4.6 pending.
+- Phase 5–8: pending.
+- The ledger at `docs/proposals/execution-ledger-2026-10-17.md` is the source of truth for what has landed; this plan is the source of truth for what remains. Where they disagree, the ledger wins.
+- Three deferred cherry-picks wait on peer's ledger append; four commits already on master under new SHAs (c7b6424, 186a489, c963f64, ed9e97f).
+- KI-70 side effect: master's public/build at 2026-10-20 03:39:17 reflects peer-dirty source; quiet-tree rebuild owed.
+
+### Per-slice status as of 2026-10-20
+
+0.1 deferred-owner (KI-103) — unchanged
+0.2 07ca152 + ce6cb9d (+b6a160b, 0899ef8)
+0.3 8dc73f2 + 469eb13
+0.4a 74cabb2
+0.4b fab7091
+0.5 acfb65f
+0.6a b90e114
+0.6b c2de34b
+0.7 b2e7317
+0.8 already-satisfied (dispatch 7, no commit; the query param is `slot` not `deck_slot`)
+0.9 d1a0e1b
+0.10 253f957
+0.11 9c56bba
+0.12 dfef6c7
+0.13 3e2bada
+0.14 aee7a3a
+1.1a 0ca8c1a (radius + shadow guard)
+1.1b deferred-owner (palette, Track 2)
+1.1c blocked-owner (type scale contradicts signed DESIGN.md §2.2)
+1.2 ca8e47f, fixed 3e2bada
+1.3 457237a
+1.4 7e61e31
+1.5 d63c0a6
+1.6 ab1557f
+1.7 91a6047
+1.8 b69c648 + 648d3ec
+1.9a 0bbd821
+1.9b retired (premise-failed)
+1.9c-A retired
+1.9c-B moved to 4.2
+1.9d withdrawn
+1.10a 66e31d4 (StickyFooter)
+1.10b deferred-owner (Stepper, KI-103)
+1.11 9015bf6
+1.12 fda6ebd + be77389 + 652a033
+2.1a dd5ee6a
+2.1b 12c47db
+2.1c d84fa36
+2.1d 29f8715
+2.1e aaf2fe6
+2.1f 844aebf + 360f7ee
+2.2 553b5f3
+2.3a 343f194
+2.3b partial (AbsenceValue breadth deferred)
+2.4 4f7ebb8 + 7a1055c
+2.5 555fd3e
+2.5w folded into 3.4–3.6
+3.1 238d91c (stepper NOT included — deferred-owner; the shell composes PageHeader + StickyFooter + actions slot only)
+3.2 eb002c5
+3.3 3e8e924
+3.4 1c59be8 + bb94035 + 1fe9c1d + 2e87837
+3.5 6c9d099 (peer)
+3.6 bbc1814 (peer)
+3.7 5f2bfde
+3.8 4096b11 + follow-ups
+4.1 8a1f167 + c7b6424 + 186a489
+4.2 pending (Section id extension approved; two commits)
+4.3–4.6 pending
+5.1–5.5 pending
+6.1–6.4 pending
+7.1–7.6 landed via peer (`44a7b13`, `d95da07`, `5d26b49` + `e2889ff`, `c3583f0` + `d21fcc1` + `3a1ba9b`, `8e51b9f`, `d8fb234`) — verify-first when reached
+7.7–7.15 pending
+8.1–8.8 pending
+
+---
+
+## Cross-phase slices added during execution
+
+BaseSelect a11y (`a51a47c`), Snapshot wrapper a11y (`beb92cc`), test hygiene (`4777c81`), walk repairs (`2341f75`→`c963f64`, `b8b0def`→`ed9e97f`), Section id extension (pending 4.2), retired-`Confirmed` cases reported not fixed (`grand-concert-panel.spec.ts:86`, `trackblazer-panel.spec.ts:384`).
+
+## Operator action list (as of 2026-10-20)
+
+1. Commit the peer ledger append → cherry-pick 47488f0, 68ffe6f, 132cee8, a09ea94.
+2. Commit the three Vue files → quiet-tree rebuild `public/build`.
+3. Cherry-pick Phase 4 commits when ready.
+4. Rule on the type scale.
+
+## Document 1 ↔ Document 2 numbering
+
+See the mapping table in the current status doc.
+
+---
+
+**Path corrections (dated 2026-10-20):**
+- "frontend-design-2026-10-13.md §6" is a nonexistent path. The file is `frontend-fidelity-2026-10-13.md`. (Erratum: original sentence preserved above.)
+- The .scratch-uma ledger path in the final paragraph: ledger now lives at `docs/proposals/execution-ledger-2026-10-17.md` (tracked) after the file move. (Erratum: original sentence preserved above.)
+
+---
+
+**Batch-limit paragraph update (dated 2026-10-20):** Phase 0/3–7 = 3, Phase 2/8 = 5, Phase 1 = one primitive per dispatch — still correct, but "at most three slices" now adds: unless the slice's premise check reveals the slice is already-satisfied, in which case take the next slice in order without consuming a batch slot.
+
+", "old_string">
+The shared-index hazard, the external-push pattern, the DESIGN.md:1 peer edit conflict, and the batch limits are now explicit. Without them the prompt would produce the same drift the prior dispatches produced.
+
+---
+
 Every step below changes code, markup, styles or tests. None is a documentation, report or summary step.
 
 **Working rules for the whole project**
