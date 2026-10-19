@@ -102,6 +102,7 @@ neither stub is a root document any more.
 | `docs/UMAMUSUME_REFERENCE.md`                                          | source-cited mechanics corpus, eight sections, dated live-ops snapshots                                                                                                                                 | a write-up that cites this repo is not a second source    |
 | `docs/scenarios/01`, `02`, `03`, `07`, `08`, `09`                                               | per-scenario playing guides (`07` is the sourced guide for the fourth `[Global]` scenario, with its in-scenario client vocabulary still `❌ UNVERIFIED`; `08` is `[JP-Only]` and must not be imported)  | shipped copy                                              |
 | `PRODUCT.md`                                               | generated tooling artifacts                                                                                                                                                                             | hand edits; the generator wins                            |
+| `coverage.md`                                                          | the location classes the skill-registry scanner cannot reach, each with the command that re-derives it; its figures are host-local, so re-derive before quoting                                         | a shared snapshot of the host's installed skills          |
 | `docs/deprecated/`                                                     | retired legacy PDFs                                                                                                                                                                                     | not a source, not a spec; never copy their display text   |
 
 ## 4. Roles and escalation
@@ -560,7 +561,7 @@ No security document exists; the model is `ARCHITECTURE.md` §8.
 - Deleting or skipping a test needs owner approval and a stated reason in the commit.
 - `CHANGELOG.md` and `VERSION.md` are tracked files; `CHANGELOG.md` is updated by the Docs Writer on significant landings, and `VERSION.md` is updated by the Architect on phase exits.
 - Tracked root documents: `AGENTS.md`, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`,
-`CHANGELOG.md`, `CLAUDE.md`, `DESIGN.md`, `KNOWN-ISSUES.md`, `MCP_SETUP.md`, `PRD.md`,
+`CHANGELOG.md`, `CLAUDE.md`, `coverage.md`, `DESIGN.md`, `KNOWN-ISSUES.md`, `MCP_SETUP.md`, `PRD.md`,
 `PRODUCT.md`, `README.md`, `SCREEN_SPEC.md`, `SKILL_REGISTRY.md`, `VERSION.md`. The set is closed; a new
 root document is not added, and the masters under `docs/research-scratch/` are indexed by
 `docs/research-scratch/INDEX.md`.
