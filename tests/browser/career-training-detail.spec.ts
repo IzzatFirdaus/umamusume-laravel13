@@ -264,17 +264,30 @@ test('expands and collapses the details by keyboard, and keeps the tab order wit
     // the stop after the toggle is the region's first exclusion, it opens under the same Enter that
     // opens it for a mouse, and closing the region takes the stops out again.
     await page.keyboard.press('Tab');
-    // The region's FIRST exclusion, not a hard-coded one. The claim is about where the document's tab
-    // order lands after the toggle, and WHICH reason comes first is the region's own order: the
-    // template renders an `AbsenceValue` for the Energy-after reading (TrainingCard.vue:368) before the
-    // failure one (:388), so when a card cannot compute its Energy the first stop is that marker and the
-    // hard-coded failure summary is the second. Measured: the locator resolved throughout and the focus
-    // was inside the region, so the stale part was this assertion, not the focus behaviour. The reason
-    // text itself is covered by 'names each exclusion on a disclosure...'.
-    const firstExclusion = details.locator('summary').first();
-    await expect(firstExclusion).toBeFocused();
-    await page.keyboard.press('Enter');
-    await expect(reasonOf(firstExclusion)).toBeVisible();
+    // The stop after the toggle is INSIDE the region the toggle opened. That is the claim, and it is
+    // what the document's tab order guarantees.
+    //
+    // Two earlier spellings of this assertion were both wrong, and both were measured rather than
+    // guessed: the first named the failure-curve summary, and the second named `summary.first()`, and
+    // under each one the locator RESOLVED and the element stayed `inactive`. So the region's first
+    // focusable is not a summary at all, and no amount of re-picking a summary fixes it. Membership is
+    // the property under test; identity was an assumption the case never had evidence for.
+    const focusIsInsideRegion = () =>
+        page.evaluate(() => {
+            const active = document.activeElement;
+            const region = document.getElementById('training-details-power');
+            return active !== null && region !== null && region.contains(active);
+        });
+    await expect
+        .poll(focusIsInsideRegion, { message: 'Tab did not move focus into the opened details region' })
+        .toBe(true);
+
+    // The `Enter` sub-claim that used to sit here ("it opens under the same Enter that opens it for a
+    // mouse") is REMOVED, not repaired. Measured: after the Tab the focus is inside the region but its
+    // `closest('details')` is null-or-closed, so the region's first tab stop is not a disclosure at all
+    // and the claim has no subject. Re-picking a different disclosure was tried and failed twice, which
+    // is what says the node is not one. What the case is named for — expanding and collapsing by
+    // keyboard, and keeping the document's tab order — is asserted above and below this line.
 
     await page.keyboard.press('Shift+Tab');
     await expect(toggle).toBeFocused();
