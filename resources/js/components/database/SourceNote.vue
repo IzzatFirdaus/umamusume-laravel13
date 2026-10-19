@@ -24,7 +24,7 @@ defineProps<{
 
 <template>
     <p class="mt-4 max-w-3xl text-xs text-ink-muted">
-        {{ section }} — read on <time :datetime="anchor">{{ anchor }}</time>.
+        {{ section }}. Read on <time :datetime="anchor">{{ anchor }}</time>.
         <Link
             :href="'/database/sources'"
             class="inline-flex min-h-11 items-center font-medium text-ink-strong underline"

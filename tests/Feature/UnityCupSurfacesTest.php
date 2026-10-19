@@ -211,7 +211,10 @@ it('boards the five team race categories with the published ask and no invented 
         // No column records who this run fields, so no row gets a count and none gets a state.
         ->and(array_column($rows, 'fielded'))->toBe([null, null, null, null, null])
         ->and($coverage['badge'])->toBe('confirmed')
-        ->and($coverage['source_title'])->toContain('02-unity-cup.md:149')
+        // `91a6047` retired the `02-unity-cup.md:149` citation from shipped copy (a repository
+        // identifier in front of a Trainer is what `UiHygieneTest` forbids); the sentence that ships
+        // names the guide in words instead.
+        ->and($coverage['source_title'])->toContain('a guide transcribed into the scenario\'s own settings')
         ->and($coverage['absence_title'])->toContain('No column records who this run fields');
 });
 
@@ -235,7 +238,9 @@ it('reads the published team race shape and refuses an opponent-projection claim
         ->and($tournament['category_count'])->toBe(5)
         ->and($tournament['clear_all_reward'])->toBe('an increase to all stats, sized by performance')
         ->and($tournament['badge'])->toBe('confirmed')
-        ->and($tournament['source_title'])->toContain('SCENARIO-PUBLISHER-REFERENCES')
+        // Same retirement as the coverage row above: the shipped sentence names the scenario guides
+        // rather than the `SCENARIO-PUBLISHER-REFERENCES` key.
+        ->and($tournament['source_title'])->toContain('transcribed from the scenario guides')
         // The one line the slice asks for, and the only answer the corpus supports.
         ->and($tournament['projection'])->toBeNull()
         ->and($tournament['projection_title'])->toContain('No source says how strong each opponent team is')

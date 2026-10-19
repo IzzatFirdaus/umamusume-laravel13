@@ -96,7 +96,11 @@ it('cites where the caps come from rather than printing numbers with no provenan
     $this->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('scenario.caps.source_title', fn (string $title): bool => str_contains($title, 'config/scenarios.php'))
+            // The provenance sentence names where the caps come from in a Trainer's words. It no
+            // longer carries a repository path: `91a6047` moved the path-bearing half to
+            // `ProvenanceMark`, because `UiHygieneTest` forbids a repository identifier reaching
+            // shipped copy. The pin follows the sentence that ships.
+            ->where('scenario.caps.source_title', fn (string $title): bool => str_contains($title, 'Published caps from the scenario reference'))
         );
 });
 

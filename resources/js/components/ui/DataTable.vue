@@ -146,9 +146,11 @@ const captionId = `datatable-caption-${useId()}`;
                             :value="row[column.key]"
                         />
                         <template v-else-if="isMissing(row[column.key])">
-                            <!-- The dash is decorative to a screen reader; the words carry the fact. -->
-                            <span aria-hidden="true">–</span>
-                            <span class="sr-only">Not recorded</span>
+                            <!-- DESIGN.md §5's N/A-not-a-dash rule: an unrecorded cell prints the
+                                 word with the reason on the title, never a dash glyph. The word is
+                                 real copy, so the screen reader reads it and no `sr-only` twin is
+                                 needed beside it. -->
+                            <span title="Not recorded">N/A</span>
                         </template>
                         <a
                             v-else-if="columnIndex === 0 && rowHref && rowHref(row) !== null"

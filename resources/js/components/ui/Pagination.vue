@@ -45,7 +45,7 @@ const hasNext = (pages: number, page: number): boolean => page < pages;
         <!-- One polite status rather than three separate spans: a page change should be announced once,
              and `aria-live` on each fragment would read the reader three numbers in three sentences. -->
         <p class="text-ink-muted" role="status">
-            Showing {{ from }}–{{ to }} of {{ total }} {{ noun }}
+            Showing {{ from }} to {{ to }} of {{ total }} {{ noun }}
             <span class="ml-2">Page {{ page }} of {{ pages }}</span>
         </p>
 
