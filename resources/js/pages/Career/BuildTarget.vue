@@ -204,6 +204,15 @@ const entered = (stat: string): number | null => {
 };
 
 /** Integer percent of the stat's cap, clamped to the bar's length. Display arithmetic, nothing more. */
+const hasAnyValue = computed(() => {
+    return props.statOrder.some((stat) => entered(stat) !== null) ||
+        form.purpose !== '' ||
+        form.distance !== '' ||
+        form.surface !== '' ||
+        form.style !== '' ||
+        form.skill_priorities.length > 0;
+});
+
 const percent = (stat: string): number => {
     const value = entered(stat);
     const ceiling = cap(stat);
@@ -325,7 +334,7 @@ function removeAt(index: number): void {
             as one object, and it lives in this setup draft until Preflight creates the run.
         </p>
 
-        <section aria-labelledby="target-summary-heading" class="mt-3 rounded-lg border border-rule bg-panel p-4">
+        <section v-if="hasAnyValue" aria-labelledby="target-summary-heading" class="mt-3 rounded-lg border border-rule bg-panel p-4">
             <h2 id="target-summary-heading" class="text-lg font-semibold text-ink-strong">Summary</h2>
             <p class="mt-2 text-sm text-ink">
                 {{ summary }}
@@ -473,26 +482,35 @@ function removeAt(index: number): void {
                             <span class="text-xs text-ink-muted" :title="capTitle(stat)">Cap {{ cap(stat) }}</span>
 
                             <span class="flex flex-wrap items-center gap-2">
-                                <span class="h-2 w-36 overflow-hidden rounded-md bg-sunken" aria-hidden="true">
-                                    <span
-                                        class="block h-full bg-chrome"
-                                        :data-fill="percent(stat)"
-                                        :style="{ width: `${percent(stat)}%` }"
-                                    ></span>
+                                <span v-if="entered(stat) !== null" class="flex flex-wrap items-center gap-2">
+                                    <span class="h-2 w-36 overflow-hidden rounded-md bg-sunken" aria-hidden="true">
+                                        <span
+                                            class="block h-full bg-chrome"
+                                            :data-fill="percent(stat)"
+                                            :style="{ width: `${percent(stat)}%` }"
+                                        ></span>
+                                    </span>
+                                    <span class="font-mono text-xs text-ink tabular-nums">{{ enteredLabel(stat) }}</span>
                                 </span>
                                 <AbsenceValue
-                                    v-if="entered(stat) === null"
+                                    v-else
                                     compact
                                     class="font-mono"
                                     reason="No target entered for this stat yet."
                                 />
-                                <span v-else class="font-mono text-xs text-ink tabular-nums">{{ enteredLabel(stat) }}</span>
                             </span>
                         </div>
 
                         <!-- Ceiling column (only for stats that have an enterable ceiling) -->
                         <div v-if="props.capStats.includes(stat)" class="space-y-1">
+                            <AbsenceValue
+                                v-if="stat === 'Wit'"
+                                compact
+                                class="font-mono"
+                                reason="Wit ceiling is not set by the scenario matrix."
+                            />
                             <BaseInput
+                                v-else
                                 v-model="form[capColumn(stat)]"
                                 :id="controlId(capColumn(stat))"
                                 type="number"
