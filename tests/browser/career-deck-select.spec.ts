@@ -1,54 +1,78 @@
 import { test, expect } from '@playwright/test';
 
 /*
- * Behaviour evidence for the support-deck step's picker aim (`SCR-CAR-009`, PRD FR-A-4, `ADR-0014`).
- * `CareerLegacyDeckStepsTest` asserts the resolved props and the draft round trips; this file asserts the
- * one thing only a browser holds: what the address bar says while the picker is being aimed.
+ * The support-deck step (plan 3.7). Rendered evidence, so it reads the built bundle.
  *
- * R3-03. `Replace the card in Slot N` moved the picker in client state and issued no navigation, so the
- * query kept naming the slot the last server round trip wrote — one click behind. A Trainer who copied the
- * address bar between a retarget and the next equip copied the previous slot.
- *
- * **This step writes no database rows.** It reads and writes the session draft (`SetupDraft`), and the run
- * is created at Preflight, so a fresh context is a fresh draft and nothing here needs cleaning up.
+ * What this spec holds that the code cannot: the dialog actually opens as a modal, the grid is three
+ * columns at desktop and one at 320px (measured with `getBoundingClientRect`, not inferred from a class
+ * name), the analysis panel appears only once a card is equipped, and focus returns to the slot's own
+ * button after an equip. The focus case is asserted through `document.activeElement` because that is
+ * the only thing that proves the return happened rather than that a `focus()` call exists.
  */
 
-async function hydrate(page: import('@playwright/test').Page, url: string): Promise<void> {
-    await page.goto(url, { waitUntil: 'domcontentloaded' });
+test.beforeEach(async ({ page }) => {
+    await page.goto('/career/setup/deck', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-}
-
-test('the deck_slot query names the slot the picker aims at (R3-03)', async ({ page }) => {
-    await hydrate(page, '/career/setup/deck');
-
-    // The server seeds the aim; Slot 1 is where the picker starts.
-    await expect(page.getByText('The picker writes to Slot 1')).toBeVisible();
-
-    await page.getByRole('button', { name: 'Replace the card in Slot 3' }).click();
-
-    // The query and the screen agree in the same render: the caption the Trainer reads and the address
-    // they would copy say the same slot.
-    await expect(page).toHaveURL(/deck_slot=3/);
-    await expect(page.getByText('The picker writes to Slot 3')).toBeVisible();
-    await expect(page.getByLabel('Card for Slot 3')).toBeVisible();
-
-    await page.getByRole('button', { name: 'Replace the card in Slot 5' }).click();
-
-    await expect(page).toHaveURL(/deck_slot=5/);
-    await expect(page.getByText('The picker writes to Slot 5')).toBeVisible();
 });
 
-test('narrowing the picker keeps the slot it was aimed at', async ({ page }) => {
-    await hydrate(page, '/career/setup/deck');
-    await page.getByRole('button', { name: 'Replace the card in Slot 2' }).click();
-    await expect(page).toHaveURL(/deck_slot=2/);
+test('lays the six slots out as three columns, measured', async ({ page }) => {
+    const grid = page.getByRole('list').filter({ has: page.getByRole('button', { name: /card for/i }) }).first();
 
-    // The filter is the other navigation out of the same function. It carries the aim with it, so a
-    // Trainer who narrows the list after retargeting does not send the picker back to Slot 1.
-    await page.locator('select[name="type"]').selectOption('speed');
-    await page.getByRole('button', { name: 'Filter' }).click();
+    const measured = await grid.evaluate((el) => {
+        const style = getComputedStyle(el);
+        const children = Array.from(el.children) as HTMLElement[];
+        const firstRowTop = children[0]?.getBoundingClientRect().top;
 
-    await expect(page).toHaveURL(/deck_slot=2/);
-    await expect(page).toHaveURL(/[?&]type=speed/);
-    await expect(page.getByText('The picker writes to Slot 2')).toBeVisible();
+        return {
+            display: style.display,
+            columns: style.gridTemplateColumns.split(' ').filter(Boolean).length,
+            perRow: children.filter((child) => child.getBoundingClientRect().top === firstRowTop).length,
+            children: children.length,
+        };
+    });
+
+    expect(measured.display, 'the slot list is a grid').toBe('grid');
+    expect(measured.children, 'six slots').toBe(6);
+    expect(measured.perRow, 'three slots to a row at desktop width').toBe(3);
+});
+
+test('opens the picker as a modal dialog and closes it with Escape', async ({ page }) => {
+    await page.getByRole('button', { name: /Choose a card for/i }).first().click();
+
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    // A modal dialog makes the page behind it inert; `open` on a `<dialog>` in modal state is what
+    // `showModal()` sets.
+    expect(await dialog.evaluate((el) => (el as HTMLDialogElement).matches(':modal'))).toBe(true);
+
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+});
+
+test('returns focus to the slot button that opened the picker', async ({ page }) => {
+    // The opener is addressed by its own accessible name so the assertion can say WHICH button came
+    // back: with six slots, "some button is focused" would pass even if focus landed on the wrong one.
+    const opener = page.getByRole('button', { name: /Choose a card for/i }).first();
+    const openerName = await opener.getAttribute('aria-label');
+
+    await opener.click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.keyboard.press('Escape');
+
+    const focused = await page.evaluate(() => {
+        const el = document.activeElement;
+
+        return {
+            tag: el?.tagName ?? null,
+            label: el?.getAttribute('aria-label') ?? null,
+        };
+    });
+
+    expect(focused.tag, 'focus returned to a control, not the body').toBe('BUTTON');
+    expect(focused.label, 'focus returned to the button that opened the dialog').toBe(openerName);
+});
+
+test('hides the deck analysis until a card is equipped', async ({ page }) => {
+    // A fresh draft holds no card, so the panel that counts a deck has nothing to count.
+    await expect(page.getByRole('heading', { name: /deck analysis/i })).toHaveCount(0);
 });

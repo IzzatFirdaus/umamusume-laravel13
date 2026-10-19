@@ -24,6 +24,7 @@
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import DeckAnalysis from '../../components/support/DeckAnalysis.vue';
 import SupportSlot from '../../components/support/SupportSlot.vue';
+import CardPicker from '../../components/support/CardPicker.vue';
 import SupportTypeMark from '../../components/support/SupportTypeMark.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import { BaseInput, BaseSelect, BaseButton } from '../../components/Form';
@@ -117,6 +118,7 @@ const form = useForm({
 
 /** Which slot the equip buttons write to. Server-seeded, then moved in place so a Replace is one keystroke. */
 const filling = ref(props.picker.fillingSlot);
+const picker = ref<InstanceType<typeof CardPicker> | null>(null);
 
 const type = ref(props.picker.type ?? '');
 const search = ref(props.picker.query ?? '');
@@ -134,6 +136,9 @@ const fillingLabel = (): string =>
 
 /** The card the picker's target slot currently holds, or null when the slot is empty. */
 const fillingSlotCard = computed(() => props.slots.find((slot) => slot.position === filling.value)?.card ?? null);
+
+/** How many slots hold a card, counted from the server's own slot list. */
+const equippedCount = computed(() => props.slots.filter((slot) => slot.card !== null).length);
 
 /**
  * A refusal names the slot in the words the slot already carries on this screen. The validation key is a
@@ -164,12 +169,13 @@ function filter(retarget = false): void {
         },
         {
             preserveScroll: true,
+            // A retarget refreshes the picker's options under an open dialog, so the component has to
+            // survive the visit. A filter the Trainer submitted has no dialog open and keeps the
+            // ordinary remount.
+            preserveState: retarget,
             // One entry per retarget would bury the step in history; the URL is stating which slot the
             // picker aims at, not recording a new place.
             replace: retarget,
-            onFinish: () => {
-                void nextTick(() => document.getElementById('deck-pick')?.focus());
-            },
         },
     );
 }
@@ -190,16 +196,26 @@ function save(after?: number): void {
     });
 }
 
-function equip(ownership: 'OWNED' | 'RENTED'): void {
-    const picked = document.getElementById('deck-pick') as HTMLSelectElement | null;
-    const cardId = picked?.value ?? '';
+/**
+ * Equip a card chosen in the dialog.
+ *
+ * The dialog's own Equip button names the card it equips, so there is no `<select>` to read back: the
+ * id arrives with the event. Ownership is the slot's existing flag where one is set, and Owned where
+ * the Trainer has not said yet, because the slot needs an answer to save and the toggle beside it can
+ * still change it afterwards.
+ */
+function equipCard(cardId: number): void {
+    const ownership = form.deck[filling.value]?.ownership || 'OWNED';
 
-    if (cardId === '') {
-        return;
-    }
-
-    form.deck[filling.value] = { support_card_id: cardId, ownership };
+    form.deck[filling.value] = { support_card_id: String(cardId), ownership };
     save();
+}
+
+/** Apply the dialog's filter through the page's one navigation, so the URL states it like the panel did. */
+function applyPickerFilter(filters: { type: string; query: string }): void {
+    type.value = filters.type;
+    search.value = filters.query;
+    filter();
 }
 
 /** A clear is a write of its own: the slot returns to its named empty text and the flag to `N/A`. */
@@ -213,9 +229,17 @@ function clearSlot(): void {
  * address bar between a Replace and the next equip was copying the slot the last server round trip wrote,
  * one behind the screen (R3-03). One navigation serves both, so the focus move the filter does is shared.
  */
-function replace(position: number): void {
+function replace(position: number, opener: Event): void {
     filling.value = position;
     form.deck_slot = position;
+
+    // Open first, in the click's own tick. Opening after the retarget visit was measured not to work:
+    // the visit remounts this component, the dialog ref resets, and `showModal()` ran on a detached
+    // element (`open: false` in the DOM dump). The dialog owns the focus return, which is why the
+    // opener element is handed over rather than a ref.
+    picker.value?.open(opener, { type: props.picker.type, query: props.picker.query });
+
+    // Then retarget, keeping the component alive so the dialog above survives the round trip.
     filter(true);
 }
 
@@ -265,7 +289,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
             {{ form.errors.deck }}
         </p>
 
-        <div class="mt-5 grid max-w-5xl grid-cols-1 gap-4 @5xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <div class="mt-5 max-w-5xl">
             <section aria-labelledby="draft-slots-heading">
                 <h2 id="draft-slots-heading" class="text-lg font-semibold text-ink-strong">The six slots</h2>
 
@@ -274,7 +298,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                     gap the Trainer can still fill.
                 </p>
 
-                <ul class="mt-3 space-y-2">
+                <ul class="mt-3 grid list-none grid-cols-1 gap-4 @3xl:grid-cols-2 @4xl:grid-cols-3">
                     <SupportSlot
                         v-for="slot in props.slots"
                         :key="slot.position"
@@ -288,6 +312,17 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                         @ownership="setOwnership"
                     />
                 </ul>
+
+                <CardPicker
+                    ref="picker"
+                    :slot-label="fillingLabel()"
+                    :options="props.picker.options"
+                    :types="props.types"
+                    :type="props.picker.type"
+                    :query="props.picker.query"
+                    @equip="equipCard"
+                    @filter="applyPickerFilter"
+                />
 
                  <p
                      v-if="form.errors.deck && !form.processing"
@@ -318,113 +353,16 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                 </form>
             </section>
 
-            <section aria-labelledby="draft-pick-heading">
-                <h2 id="draft-pick-heading" class="text-lg font-semibold text-ink-strong">Choose a card</h2>
-
-                <p class="mt-1 text-sm text-ink-muted">
-                    The picker writes to {{ fillingLabel() }}. Say which it is as you equip it: a card you own
-                    or one you rented.
-                </p>
-
-                <p class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
-                    <span class="text-xs font-semibold uppercase tracking-wide">The seven support types</span>
-                    <span v-for="kind in props.types" :key="kind.key" class="inline-flex items-center gap-1">
-                        <SupportTypeMark :type="kind.key" :label="kind.label" />
-                    </span>
-                </p>
-
-                <div class="mt-3 rounded-lg border border-rule bg-panel p-3">
-                    <form class="flex flex-wrap items-end gap-3 text-sm" @submit.prevent="filter()">
-                        <BaseSelect
-                            v-model="type"
-                            id="deck-filter-type"
-                            name="type"
-                            label="Type"
-                            :options="[{ value: '', label: 'All' }, ...props.types.map(k => ({ value: k.key, label: k.label }))]"
-                        />
-                        <BaseInput
-                            v-model="search"
-                            id="deck-filter-search"
-                            name="q"
-                            type="search"
-                            label="Name contains"
-                        />
-                        <BaseButton type="submit" variant="secondary">Filter</BaseButton>
-                    </form>
-                </div>
-
-                <p v-if="props.picker.type || props.picker.query" class="mt-2 text-xs text-ink-muted">
-                    {{ props.picker.options.length }} card{{ props.picker.options.length === 1 ? '' : 's' }}
-                    match {{ props.picker.type ? props.types.find((kind) => kind.key === props.picker.type)?.label : 'any type' }}<template
-                        v-if="props.picker.query"> and a name containing {{ props.picker.query }}</template>.
-                </p>
-
-                 <p
-                     v-if="props.picker.options.length === 0"
-                     class="mt-3 rounded-lg border border-dashed border-rule bg-panel p-4 text-sm text-ink-muted"
-                 >
-                    The support-card catalog holds no row matching that. Run
-                    <code>php artisan uma:fetch gametora-support-cards</code> to fill it, or
-                    <code>php artisan uma:reparse gametora-support-cards</code> if a fetch says the document
-                    is unchanged. A card you expect and cannot find is a gap in the fetched data, not a
-                    mistake in the filter.
-                </p>
-
-                <div
-                    v-else
-                    role="group"
-                    :aria-label="`Card for Slot ${filling}`"
-                    class="mt-3 flex flex-wrap items-end gap-3"
-                >
-                    <!-- The group states which slot the picker aims at, one-based, and says whether that slot
-                         currently holds a card. `fillingLabel()` returns the server's descriptive label
-                         ("Slot 3 · Friends"), which is why the group carries the bare `Card for Slot 3` name
-                         the retarget contract names. -->
-                    <BaseSelect
-                        id="deck-pick"
-                        :label="fillingLabel()"
-                        :options="[{ value: '', label: 'Not equipped' }, ...props.picker.options.map(c => ({ value: String(c.id), label: c.label }))]"
-                    />
-
-                    <!-- Three named writes, one per outcome, each stating the slot it targets. A single
-                         assignment select would name the outcome without naming the slot, and the slot is
-                         the thing the picker was just retargeted to. -->
-                    <BaseButton type="button" variant="secondary" @click="equip('OWNED')">
-                        Equip owned to {{ fillingLabel() }}
-                        <span class="sr-only"> the card selected in the picker</span>
-                    </BaseButton>
-
-                    <BaseButton type="button" variant="secondary" @click="equip('RENTED')">
-                        Equip rented to {{ fillingLabel() }}
-                        <span class="sr-only"> the card selected in the picker</span>
-                    </BaseButton>
-
-                    <BaseButton type="button" variant="secondary" @click="clearSlot()">
-                        Set {{ fillingLabel() }} to not equipped
-                    </BaseButton>
-
-                    <p
-                        v-if="!fillingSlotCard"
-                        class="basis-full text-xs text-ink-muted"
-                    >
-                        Slot {{ filling }} holds no card yet. Equipping here fills it; the slot stays empty
-                        until you save.
-                    </p>
-                </div>
-
-                <ul class="mt-2 space-y-1">
-                    <li
-                        v-for="(message, field) in fieldErrors"
-                        :key="field"
-                        class="text-sm text-risk"
-                    >
-                        {{ errorLabel(field) }}: {{ message }}
-                    </li>
-                </ul>
-            </section>
         </div>
 
+        <!--
+          Hidden until at least one card is equipped (plan 3.7). The panel counts what the deck covers,
+          so an empty draft would render six zeroes and a list of gaps, which reads as a verdict on a
+          deck the Trainer has not built yet. `equippedCount` reads the same draft the analysis does,
+          so the panel appears the moment the first card lands and never contradicts it.
+        -->
         <DeckAnalysis
+            v-if="equippedCount > 0"
             :covered="props.analysis.covered"
             :categories="props.analysis.categories"
             :uncategorised="props.analysis.uncategorised"

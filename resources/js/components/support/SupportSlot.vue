@@ -70,7 +70,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     /** The Trainer asked to replace this slot's card. The page turns it into a query-string change. */
-    (event: 'replace', position: number): void;
+    (event: 'replace', position: number, opener: Event): void;
     (event: 'ownership', position: number, ownership: 'OWNED' | 'RENTED'): void;
 }>();
 
@@ -112,7 +112,7 @@ function focusRow(): void {
             <!-- An empty slot is a deliberate statement a Trainer makes, so it reads as a statement
                  rather than as a blank control: the card is not equipped, and here is where to put it. -->
             <p v-if="!card" class="text-ink-muted">
-                Not equipped.
+                Empty.
             </p>
 
             <template v-else>
@@ -197,10 +197,11 @@ function focusRow(): void {
             <button
                 type="button"
                 class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
-                @click="emit('replace', position)"
+                :aria-label="card ? `Replace the card in ${label}` : `Choose a card for ${label}`"
+                @click="emit('replace', position, $event)"
             >
-                Replace
-                <span class="sr-only"> the card in {{ label }}</span>
+                {{ card ? 'Replace' : 'Choose a card' }}
+                <span class="sr-only"> in {{ label }}</span>
             </button>
         </div>
 
