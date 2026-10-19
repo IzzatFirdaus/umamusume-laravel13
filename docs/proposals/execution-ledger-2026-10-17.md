@@ -2798,3 +2798,96 @@ the four specs with private walks stay red and are reported here rather than fix
   the shared tree; CHANGELOG.md modified and SKILL.md deleted by tooling. None touched.
 - Next eligible: 4.1 (CareerHeader). Its Step 0 re-points the four stale private walks through
   start-career.ts's walkWizard/startCareer before any browser gate can be trusted on the wizard.
+## 36. Dispatch 37 - 4.1 blocked on a name collision; Snapshot wrapper a11y landed, 2026-10-19
+
+### Step 0 measurements
+
+- Open: HEAD f5ea2f6, origin/master b0b3ec9, ahead 15, merge-base clean; count equals list length.
+- Peer-work audit: no new peer commit since f5ea2f6. mtimes: CareerLayout.vue 2026-10-16, BaseTextarea
+  2026-10-15, BaseSelect 2026-10-18, Snapshot/Setup.vue 2026-10-19 21:03 (this session's own 2.5
+  edit). None inside 30 minutes of open, so nothing was skipped on staleness.
+- CareerLayout Section A pre-flight PASSED: git status --porcelain is empty for the file and its last
+  three commits (7877160, 63d1cdd, d251f7f) carry no in-flight slice naming it.
+- Bundle: manifest 2026-10-19 19:04:47 against a resources/js tip of 22:00:33. STALE, and the tree
+  holds peer-dirty Vue (BuildTarget.vue, DeckSelect.vue, LegacySelect.vue), so the build is blocked
+  and the browser branch is the stale one: no app-page case can run against a bundle that predates
+  the change under test.
+- Guards at open: UiHygiene 2 failed / 2 passed, 9 identifiers (NextDecision.php 8, CareerStatePanel
+  vue:130 1); DocCitationParity 711, unchanged from Section 35's close.
+
+### Step A - 4.1 BLOCKED-ON-NAME-COLLISION (not implemented)
+
+4.1 names a NEW resources/js/components/career/CareerHeader.vue. That path is already a tracked,
+committed, LIVE component with a different contract, so the slice cannot be built as written without
+either clobbering it or silently renaming a plan-named file. Evidence, measured:
+
+- resources/js/components/career/CareerHeader.vue:81 is `<section aria-labelledby="career-header-heading">`
+  and its body is a `<dl>` of Scenario / Year / Month / Turn / Energy per SCREEN-009 Section 12. It has
+  no nav, no tab row and no aria-current. Its props are trainee, traineeJa, header, countdown, cardTitle,
+  traineeRarity, potentialLevel - none of which is a tab or a section key.
+- It is imported and rendered by resources/js/pages/Career/Cockpit.vue:28 and :513, so it is live code
+  rather than an unused stub. Committed history: a787834, 0700187, 26a2b41 (latest 2026-10-16).
+- The tab strip 4.1 asks for does not exist anywhere: git grep for 'Career sections' over resources/js
+  returns nothing, so the nav is genuinely unbuilt.
+- The name was read at HEAD before any edit; git status --porcelain for the file is empty, so no peer
+  holds it dirty and this is a plan/tree mismatch, not a race.
+
+Why this is a stop rather than an inference: the two readings need different files. Reading one says
+extend the live Cockpit identity card with a career-wide nav, which would put page-to-page navigation
+inside a screen-scoped card that CareerLayout cannot mount. Reading two says build the layout-level
+tab strip under a name that does not collide, which changes a plan-named artifact. Neither is safely
+inferable, so the owner picks (see the dispatch report for the question). 4.1 is recorded as
+`4.1: BLOCKED-ON-NAME-COLLISION on resources/js/components/career/CareerHeader.vue:81` and the
+remaining 4.1 work is untouched: CareerLayout is NOT edited, the two pilots are NOT re-pointed, the
+four private walks are NOT re-pointed, and no career-header spec was written. Nothing partial landed.
+
+### Step B - landed (beb92cc, 5 files, +72/-38)
+
+- Snapshot/Setup.vue: Month, Half and Notes lose their outer label wrappers and pass the label as a
+  prop. The file now holds NO label element, which is the guard's strongest form.
+- BaseTextarea.vue: no label prop was needed (it already had one). It DID need maxlength declared and
+  bound. Measured: with a label the root element is the label, so the undeclared maxlength the Notes
+  field relied on would have fallen through onto the wrapper and the textarea would have stopped
+  enforcing its 5000-character limit - a regression the wrapper removal would have introduced.
+- Tests: BaseSelectAccessibleNameTest gains the Month/Half/Notes assertions, the no-label-element
+  count and a maxlength-binding case; the base-select fixture mounts a labelled BaseTextarea and
+  base-select.spec.ts asserts its accessible name and that maxlength lands on the control.
+- Measured falsification: reintroducing the outer label on Month reds the site guard (1 failed,
+  '1 is identical to 0'); restoring it is green (1 passed, 15 assertions). base-select.spec.ts is
+  3 passed, a genuine runtime check that needs no app bundle.
+
+### Skipped wrapper sites
+
+- Career/LegacySelect.vue (the two Kind pickers) remains peer-dirty and is still skipped. Its banner
+  and both wrappers stay; BaseSelectAccessibleNameTest pins the incompleteness as a tripwire, and the
+  case reds the day the file clears and is fixed, which is what makes that slice update the guard.
+
+### Gates
+
+- phpstan [OK] No errors; npm run typecheck exit 0; npm run lint:ui clean; pint passed on the one
+  changed PHP test (own path only - the tree carries peer-dirty PHP).
+- lore exit 0 at 476 hit(s)/75 exempt, lore-code exit 0 at 182. The 476 is one above Section 35's 475
+  and is peer documentation (GOVERNANCE.md is dirty); this dispatch edited no markdown until this
+  section.
+- DocCitationParity: 711 at open and 711 at close, measured before and after this append. Unchanged,
+  so no rise; the baseline 708 gate stays red as the pre-existing rise Section 34 assigned to a
+  citations dispatch.
+- Affected feature tests: SnapshotReviewTest, SnapshotEntryTest, CreateSnapshotRunTest,
+  SnapshotCockpitTest and BaseSelectAccessibleNameTest -> 21 passed (192 assertions).
+
+### Close
+
+- Ahead count at close: origin/master b0b3ec9, git rev-list --count origin/master..HEAD = 16, and
+  git log --oneline origin/master..HEAD lists 16 entries (count equals list length).
+- Bundle mtime at close: 2026-10-19 19:04:47 against a resources/js tip of 22:00:33 (stale).
+- Peer status at close: no new peer commit; BuildTarget.vue, DeckSelect.vue and LegacySelect.vue
+  remain uncommitted, and CHANGELOG.md, CLAUDE.md and GOVERNANCE.md are modified by tooling. None
+  touched.
+- Held browser cases: career-header url-unchanged - NOT WRITTEN, because Step A did not land and a
+  spec against a component that does not exist would be a false green. It is not silently absent; it
+  is blocked upstream of the bundle question.
+- Next eligible: 4.1 once the name collision is ruled on. If the owner renames the new component,
+  4.1's remaining work is CareerLayout adoption plus two pilots plus four walk re-points; if the owner
+  extends the existing component, the build changes shape and Section 12's SCREEN-009 contract has to
+  be re-read first. Then 4.2, whose Step 0 must check whether CareerStatePanel.vue:130's
+  N/A-without-title bug survives the Cockpit rewrite or closes with it.
