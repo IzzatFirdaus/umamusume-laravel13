@@ -1,85 +1,46 @@
 #!/usr/bin/env python
 """Enumerate all dead markdown links and classify as renamed vs deleted."""
 
-import io
 import os
-import re
-import subprocess
 import sys
-import json
 
+# The census is the one resolver. This script used to carry its own copy, and the copy
+# disagreed with the tool: it had no catalogue exclusion, so it counted the paths listed in
+# the catalogue files as dead links, and it read the working tree while the census measured
+# a ref. Two numbers for one question, and the wrong one was the louder.
 REPO = os.path.dirname(os.path.abspath(__file__))
-MASTERS_DIR = "docs/research-scratch"
-EXEMPT_PREFIXES = (".ai/", "docs/adr/")
+sys.path.insert(0, os.path.join(REPO, "tools"))
+import doc_census as dc  # noqa: E402
 
-def git(*args):
-    return subprocess.run(["git", "-c", "core.quotepath=false", *args], cwd=REPO,
-                          capture_output=True, text=True, encoding="utf-8", errors="replace").stdout
-
-def md_files():
-    return [p for p in git("ls-files", "--", "*.md").splitlines() if p.strip()]
-
-def dead_links():
-    bad = []
-    unreadable = []
-    listing = set(git("ls-files").splitlines())
-    tracked_md_names = {os.path.basename(p) for p in listing if p.endswith(".md")}
-    for f in md_files():
-        near = os.path.dirname(f)
-        try:
-            text = io.open(os.path.join(REPO, f), encoding="utf-8", errors="replace").read()
-        except OSError:
-            unreadable.append(f)
-            continue
-        for n, line in enumerate(text.split("\n"), 1):
-            for ref in re.findall(r"`((?:[\w./&-]+/)?[\w.-]+\.md)`", line):
-                cand = ref.replace("\\", "/").lstrip("/")
-                tries = [cand]
-                if "/" not in cand:
-                    tries += [f"docs/{cand}", f"{MASTERS_DIR}/{cand}",
-                              f"{near}/{cand}" if near else cand]
-                else:
-                    tries += [f"docs/{cand}", f"{near}/{cand}" if near else cand]
-                if any(t in listing for t in tries):
-                    continue
-                if "/" not in cand and cand in tracked_md_names:
-                    continue
-                target = next((t for t in tries if os.path.exists(os.path.join(REPO, t))), None)
-                bad.append((f, n, ref, "UNTRACKED" if target else "GONE"))
-    return bad, unreadable
 
 def main():
-    files = md_files()
-    dead, unreadable = dead_links()
-    
-    # Get all existing md files for rename matching
-    existing_md = set()
-    for root, dirs, fs in os.walk('.'):
-        dirs[:] = [d for d in fs if d not in ['.git', 'node_modules', 'vendor', 'storage', '.scratch-uma']]
-        for f in fs:
-            if f.endswith('.md'):
-                path = os.path.join(root, f).replace('./', '').replace('\\', '/')
-                existing_md.add(path)
-    
+    files = dc.md_files()
+    dead, unreadable = dc.dead_links()
+
+    # The files that exist, from the same subject the dead links were measured against, so a
+    # rename is looked for in the tree the citation was read from rather than in whatever
+    # happens to be on this machine.
+    existing_md = {p for p in dc.subject_paths() if p.endswith(".md")}
+
     stub_pointers = {'CONSTRAINTS.md', 'PLAN.md'}
-    
+
     renamed = []
     deleted = []
     stub_cites = []
-    
+
     for f, n, ref, kind in dead:
         target = ref.strip()
-        
+
         if target in stub_pointers:
             stub_cites.append((f, n, ref, kind))
             continue
-        
+
         found_as_is = target in existing_md or target + '.md' in existing_md
-        
+
         if not found_as_is:
             target_filename = os.path.basename(target)
             matches = [p for p in existing_md if os.path.basename(p) == target_filename]
-            
+
             if matches:
                 renamed.append((f, n, ref, kind, matches[0]))
             else:
