@@ -14,7 +14,7 @@ The characters are Umamusume, a humanoid race. Repository text and code never us
 
 ## Current Status
 
-Phase 1 of `PRD.md`, substantially implemented and in active development (no release tags; local deliverable only). The catalog, fetch engine, review queue, training-run domain, support-card deck surface, import/export, and the read-only `/api/v1` are built and covered by the Pest suite. Feature status and non-goals are authoritative in `PRD.md` §6; open decisions are tracked there (§7) and in `docs/adr/` (notably `ADR-0016`, next-race readiness, is an open question).
+Phase 1 of `PRD.md`, substantially implemented and in active development (one release tag, `0.1.0`; the current label `2.0.0` is untagged, see `VERSION.md`; local deliverable only). The catalog, fetch engine, review queue, training-run domain, support-card deck surface, import/export, and the read-only `/api/v1` are built and covered by the Pest suite. Feature status and non-goals are authoritative in `PRD.md` §6; open decisions are tracked there (§7) and in `docs/adr/` (notably `ADR-0016`, next-race readiness, is an open question).
 
 ## Technology Stack
 
@@ -162,7 +162,7 @@ List shape: `{ "data": [...], "pagination": { "page", "pageSize", "totalItems", 
 | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | Full pipeline (config:clear, TS typecheck, suite)   | `composer test`                                                                                                                                |
 | Tests                                               | `php artisan test --compact` (narrowest first: `--filter=Name`, or a file path via `vendor/bin/pest`)                                          |
-| Style check / fix                                   | `composer lint` / `vendor/bin/pint --dirty --format agent`                                                                                     |
+| Style check / fix                                   | `composer lint` / `vendor/bin/pint --test --format agent <paths>` (never `--dirty`, KI-75)                                                                                     |
 | Static analysis                                     | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` (level 6; `composer analyse` omits the flag and can OOM a 128M CLI default)       |
 | TS type check                                       | `npm run typecheck`                                                                                                                            |
 | Accessibility                                       | `npm run test:a11y` (Playwright + `@axe-core/playwright`, WCAG 2.1 AA ruleset)                                                                 |
@@ -225,7 +225,7 @@ app/Services/             ScenarioCaps (per-stat ceilings), SupportCardEffects (
 config/uma.php            fetch allowlist, politeness, thresholds; config/scenarios.php scenario layout data
 database/                 migrations, factories for every model, seeders, seeders/data (committed source bodies)
 resources/views/          Blade: `app.blade.php` (the Inertia shell) and `errors/{404,419,500}.blade.php`; `resources/views/components/` is empty since slice B1
-resources/js/             Inertia + Vue 3 + TypeScript: `spa.ts`, `bootstrap.ts`, `types.ts`, `pages/**/*.vue` (54), `components/**/*.vue` (58), `layouts/`
+resources/js/             Inertia + Vue 3 + TypeScript: `spa.ts`, `bootstrap.ts`, `types.ts`, `pages/**/*.vue` (60), `components/**/*.vue` (97), `layouts/`
 routes/                   web.php, api.php (named routes throughout)
 tests/                    Pest: Feature (100+ files) + Unit; tests/Fixtures stored bodies
 docs/                     adr/, scenarios/, UMAMUSUME_REFERENCE.md, research-scratch/ (governance masters)
@@ -242,16 +242,17 @@ tools/                    lore.php (lore gate), gate.py (design-artifact gate), 
 | `ARCHITECTURE-ESSENTIALS.md`            | Token-efficient digest of the above (ARCHITECTURE.md wins on conflict)                                                                |
 | `DESIGN.md`                             | Visual system contract: theme, tokens, components                                                                                     |
 | `SCREEN_SPEC.md`                        | Screen and workflow specifications                                                                                                    |
-| `CONSTRAINTS.md`                        | Pointer; the binding quality bar (C-1 to C-9) lives in `docs/research-scratch/GOVERNANCE.md`                                          |
-| `docs/research-scratch/GOVERNANCE.md`   | Gate registry, pre-mortem risk record, consolidated design/governance masters                                                         |
+| `docs/research-scratch/GOVERNANCE.md`   | The binding quality bar (C-1 to C-9) as its CONSTRAINTS.md section, plus the gate registry, pre-mortem risk record, and the consolidated design/governance masters |
 | `AGENTS.md`                             | Agent roles, escalation paths, practical build notes                                                                                  |
 | `CLAUDE.md`                             | Coding rules for assistants                                                                                                           |
-| `KNOWN-ISSUES.md`                       | Pointer; defect register KI-01..KI-98 under `docs/research-scratch/AUDIT-AND-VERIFICATION.md`. New entries append to the root file.   |
-| `docs/adr/README.md`                    | ADR index (`ADR-0001` to `ADR-0025`; 0025 is Proposed) with the errata convention                                                                       |
+| `KNOWN-ISSUES.md`                       | Pointer; defect register KI-01..KI-56 under `docs/research-scratch/AUDIT-AND-VERIFICATION.md`. New entries append to the root file.   |
+| `docs/adr/README.md`                    | ADR index (`ADR-0001` to `ADR-0027`; 0027 is Proposed) with the errata convention                                                                       |
+| `MCP_SETUP.md`                         | MCP client configuration: where each client reads its servers, and the host gotchas that make a correct-looking config fail silently     |
+| `docs/proposals/execution-ledger-2026-10-17.md` | The append-only dispatch ledger: one numbered section per dispatch, with the gates run, the decisions taken and what was deferred |
 | `docs/UMAMUSUME_REFERENCE.md`           | Source-cited mechanics reference; live-ops claims are dated snapshots                                                                 |
 | `docs/scenarios/`                       | Per-scenario playing guides                                                                                                           |
 | `.ai/rules/index.md`                    | Path-scoped repo rules (style, Eloquent, testing)                                                                                     |
-| `PLAN.md`                               | Pointer; the frontend slice plan lives in `docs/research-scratch/PROCESS-PLANS.md`                                                    |
+| `docs/research-scratch/PROCESS-PLANS.md` | The slice plan and the phase records; the root PLAN.md pointer it replaced is gone                                                   |
 
 When documents disagree: `docs/research-scratch/GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar, C-1 to C-9)" > gate registry > ADRs > `DESIGN.md` > slice plans; `ARCHITECTURE.md` over its digest; `PRD.md` is product truth.
 
@@ -265,7 +266,7 @@ No dedicated `CONTRIBUTING.md` exists. Actual practice, from `AGENTS.md` and the
 
 - Behavior changes start with a failing Pest test (`php artisan make:test --pest {Name}`); models come from factories.
 - Form Requests for all validation, thin controllers, logic in Actions/Services, named routes, API Resources for JSON, `declare(strict_types=1)` and explicit types everywhere, `#[Fillable]`/`#[Hidden]` attributes, `casts()` as a method.
-- Before hand-off: targeted tests green, `vendor/bin/pint --dirty --format agent`, PHPStan level 6 clean, `composer lore-code` clean (every grep hit needs a context ruling; the verdict is blocking).
+- Before hand-off: targeted tests green, `vendor/bin/pint --test --format agent <paths>` (never `--dirty`, KI-75), PHPStan level 6 clean, `composer lore-code` clean (every grep hit needs a context ruling; the verdict is blocking).
 - Schema or pipeline changes need a migration, a PRD citation (FR-x / US-x), and a decision recorded as an ADR with a dated erratum rather than a silent rewrite.
 - Scope changes never happen silently: `PRD.md` §6 non-goals are owner territory (`AGENTS.md` escalation paths).
 
@@ -303,7 +304,7 @@ Evidence-backed current state, distinct from the PRD non-goals in §6:
 - Fetch scheduling is manual; the scheduler default is open (PRD OQ-3).
 - Aptitude letters and per-scenario caps are engine-owned facts (`ADR-0004`); growth rates and base stats are not implemented (PRD OQ-4 scope).
 - The framework-default `users` table and `User` model exist but are unused.
-- The live defect register is `KNOWN-ISSUES.md` -> `docs/research-scratch/AUDIT-AND-VERIFICATION.md` (KI-01..KI-98); `tools/gate.py`'s hex allowlist defect (KI-58) closed on 2026-10-09 at `7d8b62a`, and the live item on the same gate is its mirror case, KI-83, where three tracked prototypes render four raw hexes the shipped theme no longer declares.
+- The live defect register is `KNOWN-ISSUES.md` -> `docs/research-scratch/AUDIT-AND-VERIFICATION.md` (KI-01..KI-56 in the master, KI-57..KI-106 in the root file); `tools/gate.py`'s hex allowlist defect (KI-58) closed on 2026-10-09 at `7d8b62a`, and the live item on the same gate is its mirror case, KI-83, where three tracked prototypes render four raw hexes the shipped theme no longer declares.
 
 ## License
 

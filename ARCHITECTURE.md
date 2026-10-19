@@ -41,7 +41,7 @@ flowchart LR
         subgraph API["/api/v1 (P2, read-only)"]
             RES[API Resources]
         end
-        CMD[artisan uma:fetch / uma:review / uma:backup]
+        CMD[artisan uma:fetch / uma:reparse / uma:backup]
         WORKER[queue worker (database driver)]
         subgraph Engine["Data-fetching engine (app/Services/DataPipeline)"]
             FETCH[SourceFetcher] --> SNAP[(storage/app/private/snapshots)]
@@ -395,7 +395,7 @@ tests/
 
 ## 10. Testing Strategy
 
-Pest 4, feature-first (repo test rules). HTTP faked (`Http::fake`) for all fetcher tests: no test touches the network. SQLite in-memory for tests (existing `phpunit.xml`). The pipeline is testable end-to-end: fake source body → snapshot → parse → match → assert promoted rows, review rows, `is_manual` protection, and idempotent re-run. Unicode edge cases are unit tests on `NameNormalizer` (full-width katakana, ・, prolonged sound mark). See `testing-best-practices` skill before writing any test.
+Pest 4, feature-first (repo test rules). HTTP faked (`Http::fake`) for all fetcher tests: no test touches the network. SQLite in-memory for tests (existing `phpunit.xml`). The pipeline is testable end-to-end: fake source body → snapshot → parse → match → assert promoted rows, review rows, `is_manual` protection, and idempotent re-run. Unicode edge cases are unit tests on `NameNormalizer` (full-width katakana, ・, prolonged sound mark). See `testing-best-practices` skill before writing any test. The suite spans five areas: `tests/Feature` (198 feature tests), `tests/Unit` (8), `tests/browser` (71 Playwright specs, run via `npm run test:browser`, session-private), `tests/Fixtures` (stored source bodies) and `tests/utils` (shared Playwright helpers). The browser specs run developer-locally only; the repository has no CI.
 
 ## 11. Source Citations
 
