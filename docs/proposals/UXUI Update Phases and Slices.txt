@@ -1,6 +1,9 @@
 UXUI Update Phases and Slices
 ============================
 
+This file is intentionally `.txt` — outside gate coverage (md_fence_check,
+doc_census, lore); working notes only.
+
 This is a map, not a plan-of-record. The plan-of-record is
 docs/proposals/trainer-desk-implementation-plan-2026-10-17.md; the ledger is
 docs/proposals/execution-ledger-2026-10-17.md. Where they disagree, the ledger wins.
