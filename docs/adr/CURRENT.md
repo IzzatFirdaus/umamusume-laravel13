@@ -91,7 +91,7 @@ before any merge of that branch.
 | The card's stat arrays are stored on the card | `base_stats`, `four_star_stats`, `five_star_stats`, `stat_bonus` (json) | 0012 | `CharacterCardSchemaTest` (guards the shipped list) | 0012 §Decision 1 |
 | The profile block is a sibling `umamusume_profiles` table | `height`/`three_sizes_b`/`_h`/`_w`, not `height_cm` etc. | 0012 Decision 4 | migration `2026_09_29_182820_create_umamusume_profiles_table` | 0012 §Decision 4 |
 | The profile field list is an allowlist | `rl`, `sex`, `race` are never stored, never rendered | 0012, 0013 | `GametoraCharacterProfileParser`; `StoreCharacterProfiles` | 0012 §Decision 4 |
-| `va_en` is the romanisation of `va_ja` | one performer in two scripts, not a dub cast | 0013 | `docs/data/2026-09-30-characters-source-probe.md` | 0013 §Consequences |
+| `va_en` is the romanisation of `va_ja` | one performer in two scripts, not a dub cast | 0013 | docs/data/2026-09-30-characters-source-probe.md | 0013 §Consequences |
 | **Do not** cite 0013 as authority | 0013 is withdrawn; 0012 Decision 4 is the authority | 0012 | — | 0012 §Decision 4 blockquote |
 | **Do not** read the stat arrays for anything but display | §6.11 forbids a prediction engine; storage is not the thing forbidden | 0012 | — | 0012 §use-side constraint |
 
