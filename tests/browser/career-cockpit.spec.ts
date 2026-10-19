@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';
+import { startCareer } from '../utils/start-career';
 import { uraCompletedRun } from '../utils/ura-completed-run';
 
 /*
@@ -47,49 +48,12 @@ test.afterEach(async ({ page }) => {
 const WRITE = { timeout: 60_000 } as const;
 
 async function newCareer(page: import('@playwright/test').Page): Promise<string> {
-    await page.goto('/career/setup/scenario', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.locator('#scenario-unity_cup').click();
-    await expect(page.locator('#scenario-unity_cup')).toHaveAttribute('aria-pressed', 'true', WRITE);
-
-    await page.goto('/career/setup/trainee', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    const traineeButton = page.getByRole('button', { name: 'Select Trainee' }).first();
-    // 64fc4b8 made the card's label flip from "Select Trainee" to "Chosen · clear" on selection, so a
-    // name locator re-resolved after the click lands on a different card. Pin the id we clicked.
-    const traineeId = await traineeButton.getAttribute('id');
-    await traineeButton.click();
-    await expect(page.locator(`#${traineeId}`)).toHaveAttribute('aria-pressed', 'true', WRITE);
-
-    await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.selectOption('select[name="purpose"]', 'StoryClear');
-    await page.selectOption('select[name="distance"]', 'Medium');
-    await page.selectOption('select[name="surface"]', 'Turf');
-    await page.selectOption('select[name="style"]', 'Pace Chaser');
-
-    for (const stat of ['Speed', 'Stamina', 'Power', 'Guts', 'Wit']) {
-        await page.locator(`input[name="targets[${stat}]"]`).fill('800');
-    }
-
-    await page.getByRole('button', { name: 'Save target' }).click();
-    await page.locator('#app > *').first().waitFor();
-
-    await page.goto('/career/setup/deck', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.locator('#deck-pick').selectOption({ index: 1 });
-    await page.getByRole('button', { name: /^Equip owned to/ }).first().click();
-    await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped', WRITE);
-
-    await page.goto('/career/setup/preflight', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.getByRole('button', { name: 'Start Career' }).click();
-    // `Start Career` lands on the Cockpit, not the run record screen (SCR-CAR-010 redirects to
-    // `runs.cockpit`), so this waits for the Cockpit and remembers the *record* URL: the cleanup
-    // addresses the run by the id in that path, which is the plainest form of it.
-    await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
-
-    createdRunUrls.push(page.url().replace(/\/cockpit$/, ''));
+    // One walk, owned by `tests/utils/start-career.ts` (slice 4.1). The private copy this function
+    // used to carry named controls three rebuilds had retired — `#scenario-unity_cup` with
+    // `aria-pressed`, a card labelled "Select Trainee", `#deck-pick` and "Equip owned to", and
+    // "Start Career" — so every spec with a copy was red. The helper waits on server-driven state,
+    // and it leaves the browser on the Cockpit, which is the URL this function returns.
+    createdRunUrls.push(await startCareer(page, 'unity_cup'));
 
     return page.url();
 }

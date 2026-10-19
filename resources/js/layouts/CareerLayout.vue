@@ -14,7 +14,7 @@
  * `h1` and the document outline stays one document wide.
  */
 import AppLayout from './AppLayout.vue';
-import { Link } from '@inertiajs/vue3';
+import CareerSectionNav from '../components/career/CareerSectionNav.vue';
 import { useLayout } from '../composables/useLayout';
 
 const props = defineProps<{
@@ -22,6 +22,16 @@ const props = defineProps<{
     scenarioLabel: string;
     statusLabel: string;
     runUrl: string;
+    /**
+     * The remaining identity facts the section nav prints, added by slice 4.1. Optional so the eight
+     * callers that predate the nav keep rendering exactly as they did: an absent `current` simply
+     * marks no tab live, and an absent `status` leaves every section reachable, which is the safe
+     * default because a tab wrongly disabled hides a live screen.
+     */
+    traineeJa?: string | null;
+    status?: string;
+    position?: string | null;
+    current?: string;
 }>();
 
 /*
@@ -30,33 +40,35 @@ const props = defineProps<{
  * gate can assert the width without depending on AppLayout's `#main` implementation.
  */
 const { layoutWidthClass } = useLayout();
-
-const doorClass =
-    'inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
 </script>
 
 <template>
     <AppLayout>
-        <template v-if="$slots.eyebrow" #eyebrow><slot name="eyebrow" /></template>
-        <template #title><slot name="title" /></template>
+        <!--
+          A page that supplies its own whole title band does so through `#head`, the same either/or the
+          wizard shell documents (3.8): the band renders `#head` or `#title`, never both, so exactly one
+          `h1` reaches the document. `#title` stays for the pages that still fill the band themselves.
+        -->
+        <template v-if="$slots.head" #head><slot name="head" /></template>
+        <template v-if="$slots.eyebrow && !$slots.head" #eyebrow><slot name="eyebrow" /></template>
+        <template v-if="!$slots.head" #title><slot name="title" /></template>
 
         <div :class="[layoutWidthClass, 'mx-auto w-full']" data-layout-container>
-            <section
-                aria-label="Career"
-                class="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-md border border-rule bg-panel px-4 py-2"
-            >
-                <p class="text-sm text-ink">
-                    <span class="font-semibold text-ink-strong">{{ props.trainee }}</span>
-                    <span aria-hidden="true"> · </span>
-                    <span>{{ props.scenarioLabel }}</span>
-                    <span aria-hidden="true"> · </span>
-                    <span class="text-ink-muted">{{ props.statusLabel }}</span>
-                </p>
-                <div class="flex flex-wrap gap-1">
-                    <Link :href="props.runUrl" :class="doorClass">Cockpit</Link>
-                    <Link href="/" :class="doorClass">Dashboard</Link>
-                </div>
-            </section>
+            <!--
+              The run's identity and its nine sections, from one place. This replaced the older
+              "Cockpit / Dashboard" door pair (slice 4.1): the global navigation still carries the
+              Dashboard, and a per-screen pair of doors is the drift the nav exists to remove.
+            -->
+            <CareerSectionNav
+                :trainee="props.trainee"
+                :trainee-ja="props.traineeJa"
+                :scenario-label="props.scenarioLabel"
+                :status-label="props.statusLabel"
+                :status="props.status"
+                :position="props.position"
+                :run-url="props.runUrl"
+                :current="props.current"
+            />
 
             <slot />
         </div>

@@ -4,6 +4,7 @@ import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';
 import { expectTapTargets } from '../utils/tap-targets';
 import { openIdentityDisclosure } from '../utils/identity-disclosure';
+import { startCareer } from '../utils/start-career';
 
 /*
  * The Cockpit's write controls (F2, plan §9.6 rulings 1, 2 and 4): the three header edit forms (status,
@@ -36,46 +37,10 @@ const WRITE = { timeout: 60_000 } as const;
 
 /** One career, built by the wizard's own steps, ending on the Cockpit. Returns the Cockpit URL. */
 async function newCareer(page: import('@playwright/test').Page, scenarioId = 'unity_cup'): Promise<string> {
-    await page.goto('/career/setup/scenario', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.locator(`#scenario-${scenarioId}`).click();
-    await expect(page.locator(`#scenario-${scenarioId}`)).toHaveAttribute('aria-pressed', 'true', WRITE);
-
-    await page.goto('/career/setup/trainee', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    const traineeButton = page.getByRole('button', { name: 'Select Trainee' }).first();
-    // 64fc4b8 made the card's label flip from "Select Trainee" to "Chosen · clear" on selection, so a
-    // name locator re-resolved after the click lands on a different card. Pin the id we clicked.
-    const traineeId = await traineeButton.getAttribute('id');
-    await traineeButton.click();
-    await expect(page.locator(`#${traineeId}`)).toHaveAttribute('aria-pressed', 'true', WRITE);
-
-    await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.selectOption('select[name="purpose"]', 'StoryClear');
-    await page.selectOption('select[name="distance"]', 'Medium');
-    await page.selectOption('select[name="surface"]', 'Turf');
-    await page.selectOption('select[name="style"]', 'Pace Chaser');
-
-    for (const stat of ['Speed', 'Stamina', 'Power', 'Guts', 'Wit']) {
-        await page.locator(`input[name="targets[${stat}]"]`).fill('800');
-    }
-
-    await page.getByRole('button', { name: 'Save target' }).click();
-    await page.locator('#app > *').first().waitFor();
-
-    await page.goto('/career/setup/deck', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.locator('#deck-pick').selectOption({ index: 1 });
-    await page.getByRole('button', { name: /^Equip owned to/ }).first().click();
-    await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped', WRITE);
-
-    await page.goto('/career/setup/preflight', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.getByRole('button', { name: 'Start Career' }).click();
-    await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
-
-    createdRunUrls.push(page.url().replace(/\/cockpit$/, ''));
+    // The shared walk (slice 4.1). The private copy it replaced still named `#scenario-<id>` with
+    // `aria-pressed`, a card labelled "Select Trainee", `#deck-pick` with "Equip owned to", and
+    // "Start Career" — all retired by later rebuilds.
+    createdRunUrls.push(await startCareer(page, scenarioId));
 
     return page.url();
 }

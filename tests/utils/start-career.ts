@@ -37,12 +37,24 @@ const WRITE = { timeout: 60_000 } as const;
 /**
  * Walk the six steps as far as the draft, without creating anything.
  *
+ * Returns the trainee name the draft holds, read back from the step rather than assumed: the
+ * journey spec asserts that exact name on the screens it later lands on, and a walk that swallowed it
+ * would force every caller to re-implement the same read.
+ *
  * `scenario` names the scenario card to pick; `unity_cup` is the one the seeded scratch database
- * carries a full rule set for. The ancestry step is left alone, which is the state a fresh install
- * meets (the seeded database holds no Veterans). Exported separately from `startCareer` because the
- * Preflight spec needs the draft itself: a career that has been started has spent it.
+ * carries a full rule set for. The ancestry step is not filled — the seeded database holds no
+ * Veterans — but `options.onLegacy` still hands the caller the page when it needs to assert the step
+ * itself, which is how the journey keeps its own assertions without owning a second walk.
+ *
+ * Dated note 2026-10-19 (slice 4.1): `onLegacy` and the returned name are the two additive interface
+ * changes the four stale private walks needed. The walks agreed on everything else, so they now call
+ * this helper and the copies are gone.
  */
-export async function walkWizard(page: Page, scenario = 'unity_cup'): Promise<void> {
+export async function walkWizard(
+    page: Page,
+    scenario = 'unity_cup',
+    options: { onLegacy?: (page: Page) => Promise<void> } = {},
+): Promise<string> {
     await page.goto('/career/setup/scenario', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     await page.locator(`#scenario-radio-${scenario}`).click();
@@ -53,6 +65,16 @@ export async function walkWizard(page: Page, scenario = 'unity_cup'): Promise<vo
     const traineeButton = page.locator('button[id^="trainee-"]').first();
     await traineeButton.click();
     await expect(traineeButton).toHaveAttribute('aria-pressed', 'true', WRITE);
+
+    // The chosen trainee's name, read back from the draft rather than assumed.
+    await page.getByText('Stored choice:').first().waitFor();
+    const traineeName = (
+        await page
+            .locator('p', { has: page.getByText('Stored choice:') })
+            .locator('strong')
+            .first()
+            .textContent()
+    )?.trim() ?? '';
 
     await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
@@ -67,6 +89,12 @@ export async function walkWizard(page: Page, scenario = 'unity_cup'): Promise<vo
 
     await page.getByRole('button', { name: 'Save target' }).click();
     await page.locator('#app > *').first().waitFor();
+
+    if (options.onLegacy) {
+        await page.goto('/career/setup/legacy', { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
+        await options.onLegacy(page);
+    }
 
     await page.goto('/career/setup/deck', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
@@ -83,23 +111,28 @@ export async function walkWizard(page: Page, scenario = 'unity_cup'): Promise<vo
     );
     await page.getByRole('button', { name: 'Save deck' }).click();
     await page.locator('#app > *').first().waitFor();
+
+    return traineeName;
 }
 
 /**
  * Walk the six steps and press `Start career`.
  *
  * Returns the run's RECORD URL rather than the Cockpit the write lands on, because cleanup addresses
- * the run by the id in that path.
+ * the run by the id in that path. The browser is LEFT on the Cockpit, so a caller that needs the
+ * Cockpit URL uses `page.url()`; a caller that needs the record URL uses the return value.
  */
-export async function startCareer(page: Page, scenario = 'unity_cup'): Promise<string> {
-    await walkWizard(page, scenario);
+export async function startCareer(
+    page: Page,
+    scenario = 'unity_cup',
+    options: { onLegacy?: (page: Page) => Promise<void> } = {},
+): Promise<string> {
+    await walkWizard(page, scenario, options);
 
     await page.goto('/career/setup/preflight', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
+    // The completable-start case: `aria-disabled` is `false` once the scenario and the trainee are in.
     await page.getByRole('button', { name: 'Start career' }).click();
-    // `Start career` lands on the Cockpit, not the run record screen (SCR-CAR-010 redirects to
-    // `runs.cockpit`), so this waits for the Cockpit and returns the *record* URL: cleanup
-    // addresses the run by the id in that path, which is the plainest form of it.
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
 
     return page.url().replace(/\/cockpit$/, '');

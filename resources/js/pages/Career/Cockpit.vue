@@ -483,9 +483,13 @@ const jumpToShop = (): void => {
 <template>
     <CareerLayout
         :trainee="props.run.trainee"
+        :trainee-ja="props.run.trainee_ja"
         :scenario-label="props.run.scenario_label"
         :status-label="props.run.status_label"
+        :status="props.run.status"
+        :position="props.header.turn === 0 ? null : `Turn ${props.header.turn}`"
         :run-url="props.run.run_url"
+        current="cockpit"
     >
         <Head :title="`Career: ${props.run.trainee}`" />
         <template #eyebrow>Cockpit</template>

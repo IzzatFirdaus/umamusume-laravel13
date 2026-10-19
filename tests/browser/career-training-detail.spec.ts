@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
+import { startCareer } from '../utils/start-career';
 
 /*
  * Rendered-copy and accessibility evidence for SCREEN-010, the Training Decision detail
@@ -49,46 +50,9 @@ test.afterEach(async ({ page }) => {
 const WRITE = { timeout: 60_000 } as const;
 
 async function newCareerWithTurn(page: import('@playwright/test').Page, scenarioId = 'unity_cup'): Promise<string> {
-    await page.goto('/career/setup/scenario', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.locator(`#scenario-${scenarioId}`).click();
-    await expect(page.locator(`#scenario-${scenarioId}`)).toHaveAttribute('aria-pressed', 'true', WRITE);
-
-    await page.goto('/career/setup/trainee', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    const traineeButton = page.getByRole('button', { name: 'Select Trainee' }).first();
-    // 64fc4b8 made the card's label flip from "Select Trainee" to "Chosen · clear" on selection, so a
-    // name locator re-resolved after the click lands on a different card. Pin the id we clicked.
-    const traineeId = await traineeButton.getAttribute('id');
-    await traineeButton.click();
-    await expect(page.locator(`#${traineeId}`)).toHaveAttribute('aria-pressed', 'true', WRITE);
-
-    await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.selectOption('select[name="purpose"]', 'StoryClear');
-    await page.selectOption('select[name="distance"]', 'Medium');
-    await page.selectOption('select[name="surface"]', 'Turf');
-    await page.selectOption('select[name="style"]', 'Pace Chaser');
-
-    for (const stat of ['Speed', 'Stamina', 'Power', 'Guts', 'Wit']) {
-        await page.locator(`input[name="targets[${stat}]"]`).fill('800');
-    }
-
-    await page.getByRole('button', { name: 'Save target' }).click();
-    await page.locator('#app > *').first().waitFor();
-
-    await page.goto('/career/setup/deck', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.locator('#deck-pick').selectOption({ index: 1 });
-    await page.getByRole('button', { name: /^Equip owned to/ }).first().click();
-    await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped', WRITE);
-
-    await page.goto('/career/setup/preflight', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.getByRole('button', { name: 'Start Career' }).click();
-    await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
-
-    const runUrl = page.url().replace(/\/cockpit$/, '');
+    // The shared walk (slice 4.1) plus the turn this spec's subject needs logged. The walk's own copy
+    // of the wizard still named retired controls, so it was red before this.
+    const runUrl = await startCareer(page, scenarioId);
     createdRunUrls.push(runUrl);
 
     // Turn 1, logged through Training Detail (Fix A): the numbers a Trainer reads off the client.

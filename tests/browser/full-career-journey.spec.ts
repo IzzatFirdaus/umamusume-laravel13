@@ -3,6 +3,7 @@ import { DatabaseSync } from 'node:sqlite';
 import path from 'node:path';
 import { deleteRun } from '../utils/delete-run';
 import { openIdentityDisclosure } from '../utils/identity-disclosure';
+import { walkWizard } from '../utils/start-career';
 
 /*
  * The complete new-career journey (Slice 6.1): one deterministic walk from the wizard's first step
@@ -53,60 +54,21 @@ function scratchRunCount(): number {
     }
 }
 
-/** The wizard's first five steps, ending at Preflight, without starting the career. */
+/**
+ * The wizard's first five steps, ending at Preflight, without starting the career.
+ *
+ * The shared walk (slice 4.1), plus the two assertions only this journey makes: the ancestry step is
+ * visited and named, and the trainee's own name comes back so the later screens can be checked against
+ * it. `onLegacy` is the additive hook the helper grew for exactly this — the alternative was a second
+ * private copy of the walk, which is what four specs carried and what had gone stale.
+ */
 async function walkToPreflight(page: import('@playwright/test').Page): Promise<string> {
-    await page.goto('/career/setup/scenario', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.locator('#scenario-unity_cup').click();
-    await expect(page.locator('#scenario-unity_cup')).toHaveAttribute('aria-pressed', 'true', WRITE);
-
-    await page.goto('/career/setup/trainee', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    const traineeButton = page.getByRole('button', { name: 'Select Trainee' }).first();
-    // 64fc4b8 made the card's label flip from "Select Trainee" to "Chosen · clear" on selection, so a
-    // name locator re-resolved after the click lands on a different card. Pin the id we clicked.
-    const traineeId = await traineeButton.getAttribute('id');
-    await traineeButton.click();
-    await expect(page.locator(`#${traineeId}`)).toHaveAttribute('aria-pressed', 'true', WRITE);
-
-    // The chosen trainee's name, read back from the draft rather than assumed: the rest of the
-    // journey asserts this exact name on the screens it lands on.
-    await page.getByText('Stored choice:').waitFor();
-    const traineeName = await page
-        .locator('p', { has: page.getByText('Stored choice:') })
-        .locator('strong')
-        .textContent();
-
-    expect(traineeName?.trim() ?? '', 'the draft names no trainee after the pick').not.toBe('');
-
-    await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.selectOption('select[name="purpose"]', 'StoryClear');
-    await page.selectOption('select[name="distance"]', 'Medium');
-    await page.selectOption('select[name="surface"]', 'Turf');
-    await page.selectOption('select[name="style"]', 'Pace Chaser');
-
-    for (const stat of ['Speed', 'Stamina', 'Power', 'Guts', 'Wit']) {
-        await page.locator(`input[name="targets[${stat}]"]`).fill('800');
-    }
-
-    await page.getByRole('button', { name: 'Save target' }).click();
-    await page.locator('#app > *').first().waitFor();
-
-    // The ancestry step is visited, not filled: the Legacy Lab records ancestry, and a walk that
-    // never inherited from anything must still be able to pass through it.
-    await page.goto('/career/setup/legacy', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await expect(page.getByRole('heading', { name: 'Legacy', level: 1 })).toBeVisible();
-    await expect(page.getByText('Step 4 of 6').first()).toBeVisible();
-
-    await page.goto('/career/setup/deck', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.locator('#deck-pick').selectOption({ index: 1 });
-    await page.getByRole('button', { name: /^Equip owned to/ }).first().click();
-    await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped', WRITE);
-
-    return traineeName?.trim() ?? '';
+    return walkWizard(page, 'unity_cup', {
+        onLegacy: async (step) => {
+            await expect(step.getByRole('heading', { name: 'Legacy', level: 1 })).toBeVisible();
+            await expect(step.getByText('Step 4 of 6').first()).toBeVisible();
+        },
+    });
 }
 
 test('walks the whole career from the wizard to a filed Veteran', async ({ page }) => {
@@ -123,7 +85,7 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
 
     await page.goto('/career/setup/preflight', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await page.getByRole('button', { name: 'Start Career' }).click();
+    await page.getByRole('button', { name: 'Start career' }).click();
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
 
     // And Preflight is the run's birth: exactly one row more than the walk started with.

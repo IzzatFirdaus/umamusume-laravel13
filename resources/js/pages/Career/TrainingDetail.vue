@@ -375,9 +375,13 @@ const capFor = (label: string): number =>
 <template>
     <CareerLayout
         :trainee="props.run.trainee"
+        :trainee-ja="props.run.trainee_ja"
         :scenario-label="props.run.scenario_label"
         :status-label="props.run.status_label"
+        :status="props.run.status"
+        :position="props.positionLabel"
         :run-url="props.run.run_url"
+        current="training"
     >
         <Head :title="`Training decision: ${props.run.trainee}`" />
         <template #title>Training decision</template>
@@ -390,9 +394,6 @@ const capFor = (label: string): number =>
         <p class="mb-4 flex flex-wrap items-baseline gap-x-2 text-sm text-ink-muted">
             <span>The five training actions, as this run can state them.</span>
             <span v-if="props.run.trainee_ja !== null" lang="ja">{{ props.run.trainee_ja }}</span>
-            <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center font-medium text-ink-strong underline">
-                Career Cockpit
-            </a>
         </p>
 
         <p v-if="positionLabel !== null" class="mb-4 text-sm text-ink-muted">
