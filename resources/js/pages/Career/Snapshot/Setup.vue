@@ -169,26 +169,22 @@ const submit = (): void => {
                       required
                       :error="form.errors.career_year"
                     />
-                    <label class="flex flex-col gap-1">
-                        <span class="text-xs font-medium text-ink">Month *</span>
-                        <BaseSelect
-                          v-model="form.career_month"
-                          name="career_month"
-                          :options="[{ value: '', label: 'Month' }, ...Array.from({ length: 12 }, (_, month) => ({ value: String(month + 1), label: String(month + 1) }))]"
-                          required
-                          :error="form.errors.career_month"
-                        />
-                    </label>
-                    <label class="flex flex-col gap-1">
-                        <span class="text-xs font-medium text-ink">Half *</span>
-                        <BaseSelect
-                          v-model="form.career_phase"
-                          name="career_phase"
-                          :options="[{ value: '', label: 'Half' }, ...props.phases.map(phase => ({ value: phase.value, label: phase.label }))]"
-                          required
-                          :error="form.errors.career_phase"
-                        />
-                    </label>
+                    <BaseSelect
+                      v-model="form.career_month"
+                      name="career_month"
+                      label="Month *"
+                      :options="[{ value: '', label: 'Month' }, ...Array.from({ length: 12 }, (_, month) => ({ value: String(month + 1), label: String(month + 1) }))]"
+                      required
+                      :error="form.errors.career_month"
+                    />
+                    <BaseSelect
+                      v-model="form.career_phase"
+                      name="career_phase"
+                      label="Half *"
+                      :options="[{ value: '', label: 'Half' }, ...props.phases.map(phase => ({ value: phase.value, label: phase.label }))]"
+                      required
+                      :error="form.errors.career_phase"
+                    />
                 </div>
                 <span v-if="form.errors.career_year || form.errors.career_month || form.errors.career_phase" class="mt-2 block text-xs text-risk">
                     {{ form.errors.career_year || form.errors.career_month || form.errors.career_phase }}
@@ -253,17 +249,15 @@ const submit = (): void => {
 
             <section aria-labelledby="snapshot-notes-heading" class="rounded-md border border-rule bg-raised p-4">
                 <h2 id="snapshot-notes-heading" class="text-lg font-semibold text-ink-strong">Notes</h2>
-                <label class="mt-3 flex flex-col gap-1">
-                    <span class="text-xs font-medium text-ink">Anything worth remembering about this career</span>
-                    <BaseTextarea
-                      v-model="form.notes"
-                      name="notes"
-                      rows="2"
-                      maxlength="5000"
-                      :error="form.errors.notes"
-                    />
-                    <span v-if="form.errors.notes" class="text-xs text-risk">{{ form.errors.notes }}</span>
-                </label>
+                <BaseTextarea
+                  id="snapshot-notes"
+                  v-model="form.notes"
+                  name="notes"
+                  label="Anything worth remembering about this career"
+                  rows="2"
+                  maxlength="5000"
+                  :error="form.errors.notes"
+                />
             </section>
 
             <section aria-labelledby="snapshot-later-heading" class="rounded-md border border-dashed border-rule bg-raised p-4">

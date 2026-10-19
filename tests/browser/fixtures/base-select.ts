@@ -1,5 +1,6 @@
 import { createApp, h } from 'vue';
 import BaseSelect from '../../../resources/js/components/Form/BaseSelect.vue';
+import BaseTextarea from '../../../resources/js/components/Form/BaseTextarea.vue';
 
 /*
  * The A-101 contract, mounted. A control the caller marks required must expose that state to
@@ -46,6 +47,15 @@ createApp({
                 name: 'bare_optional',
                 modelValue: '',
                 options,
+            }),
+            // The `label`-prop contract of the sibling primitive, so the two are asserted by the same
+            // rule rather than only by reading BaseTextarea's template.
+            h(BaseTextarea, {
+                id: 'labelled-notes',
+                name: 'notes',
+                modelValue: '',
+                label: 'Notes',
+                maxlength: '5000',
             }),
         ]),
 }).mount('#select-mount');

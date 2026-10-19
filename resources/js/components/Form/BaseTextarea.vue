@@ -13,6 +13,11 @@ interface Props {
     readonly?: boolean;
     rows?: number;
     cols?: number;
+    /**
+     * Declared rather than left to attribute fallthrough: with a `label` the root element is the
+     * `<label>`, so an undeclared `maxlength` lands on the wrapper and the textarea stops enforcing it.
+     */
+    maxlength?: number | string;
     ariaDescribedby?: string;
     error?: string;
 }
@@ -61,6 +66,7 @@ function onFocus(event: FocusEvent): void {
             :readonly="readonly"
             :rows="rows ?? 4"
             :cols="cols"
+            :maxlength="maxlength"
             :aria-describedby="describedBy"
             :aria-invalid="error !== undefined"
             @input="onInput"
@@ -80,6 +86,7 @@ function onFocus(event: FocusEvent): void {
         :readonly="readonly"
         :rows="rows ?? 4"
         :cols="cols"
+        :maxlength="maxlength"
         :aria-describedby="describedBy"
         :aria-invalid="error !== undefined"
         @input="onInput"

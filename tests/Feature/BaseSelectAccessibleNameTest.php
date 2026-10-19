@@ -28,16 +28,16 @@ it('passes the label in as a prop at every fixed site, with no outer label left 
     expect($raceCard)->toContain('label="Turn this race was run on (optional)"')
         ->and($raceCard)->not->toContain('<label v-if="props.entry.turns.length > 0"');
 
-    // Snapshot: Scenario and Trainee each carried a wrapper label. The marker is the label text
-    // rather than the wrapper class, because the Notes field (a `BaseTextarea`, a different
-    // component with its own contract) still carries that class and is not part of this pass.
+    // Snapshot: Scenario, Trainee and Year lost their wrappers in the 2.5 batch, and this pass takes
+    // Month, Half and the Notes textarea. The file now holds NO `<label>` element at all, which is the
+    // strongest form of the guard: every control in it owns its name through its component.
     expect($snapshot)->toContain('label="Scenario *"')
         ->and($snapshot)->toContain('label="Trainee *"')
         ->and($snapshot)->toContain('label="Year *"')
-        ->and($snapshot)->not->toContain('>Scenario *</span>')
-        ->and($snapshot)->not->toContain('>Trainee *</span>')
-        // Year's wrapper is gone while its siblings (Month, Half) still carry theirs.
-        ->and($snapshot)->not->toContain('>Year *</span>');
+        ->and($snapshot)->toContain('label="Month *"')
+        ->and($snapshot)->toContain('label="Half *"')
+        ->and($snapshot)->toContain('label="Anything worth remembering about this career"')
+        ->and(substr_count($snapshot, '<label'))->toBe(0);
 
     // Cockpit: Rarity and the correction-turn picker each carried an explicit `for`.
     expect($cockpit)->toContain('label="Rarity"')
@@ -48,6 +48,17 @@ it('passes the label in as a prop at every fixed site, with no outer label left 
     // TrainingDetail: the Performance type picker.
     expect($training)->toContain('label="Performance type"')
         ->and($training)->not->toContain('>Performance type</span>');
+});
+
+it('declares maxlength on BaseTextarea so the label branch keeps enforcing it', function (): void {
+    // Measured, not assumed: with a `label` the root element is the `<label>`, so an UNDECLARED
+    // `maxlength` falls through onto the wrapper and the textarea stops enforcing it. Declaring it and
+    // binding it on both branches is what keeps the Notes field's 5000-character limit honest.
+    $source = (string) file_get_contents(base_path('resources/js/components/Form/BaseTextarea.vue'));
+
+    expect($source)->toContain('maxlength?: number | string;')
+        // One declaration plus one binding per template branch.
+        ->and(substr_count($source, ':maxlength="maxlength"'))->toBe(2);
 });
 
 it('records the peer-held sites as still carrying the wrapper, so a later slice flips this', function (): void {

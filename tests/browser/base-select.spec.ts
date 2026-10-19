@@ -86,3 +86,15 @@ test('a labelled select takes its accessible name from the label prop, exactly o
     await expect(page.getByRole('combobox', { name: 'Required field Required field' })).toHaveCount(0);
     await expect(page.getByRole('combobox', { name: 'Optional field Optional field' })).toHaveCount(0);
 });
+
+test('a labelled textarea takes its accessible name from the label prop too', async ({ page }) => {
+    await page.goto(`${base}base-select.html`);
+
+    // The sibling primitive carries the same contract (`BaseTextarea` renders `<label :for>` around the
+    // control when it is given a label), which is what the Snapshot Notes field now relies on.
+    await expect(page.getByRole('textbox', { name: 'Notes', exact: true })).toHaveCount(1);
+    // And the label branch still binds `maxlength` onto the CONTROL, not the wrapper: with a label the
+    // root element is the `<label>`, so an undeclared prop would fall through onto it and the textarea
+    // would stop enforcing the limit.
+    await expect(page.locator('#labelled-notes')).toHaveAttribute('maxlength', '5000');
+});
