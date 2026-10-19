@@ -81,7 +81,7 @@ The name matters, and it is borrowed: an external mechanics write-up calls this 
 
 **P5. Colour never alone.** The client already pairs every state colour with a word (`GREAT`, `Scheduled`, `Hint Lvl 2`). We keep that, which happens to also be the accessibility requirement. A state must be legible to a Trainer who cannot distinguish the hues.
 
-**P6. Deterministic and explainable.** Every number rendered must be traceable to entered turns (`CLAUDE.md` Planner Domain Rules 4 and 5). The UI never shows a figure it cannot point at, no implied recommendations, no simulated forecasts (PRD §6.11).
+**P6. Deterministic and explainable.** Every number rendered must be traceable to entered turns (`PRD.md` FR-C; `ARCHITECTURE.md` §3). The UI never shows a figure it cannot point at, no implied recommendations, no simulated forecasts (PRD §6.11).
 
 ---
 
@@ -1757,7 +1757,7 @@ Status: contract for review. No production UI code exists yet, so nothing here h
 
 Non-negotiable, blocking, and owned by the Lore Guardian role in `AGENTS.md`. A single confirmed violation fails the change. The grep proposes; the Guardian decides.
 
-This section names the banned patterns in order to forbid them, which is the same practice the root `CONSTRAINTS.md` C-4 list and `CLAUDE.md` Banned Patterns already use. It adds no new vocabulary choice; it adds a dictionary. `make lore` will report hits here, and the Guardian's ruling on these lines is the same as on the root file's own list.
+This section names the banned patterns in order to forbid them, which is the same practice the root `CONSTRAINTS.md` C-4 list and `AGENTS.md` §5 already use. It adds no new vocabulary choice; it adds a dictionary. `make lore` will report hits here, and the Guardian's ruling on these lines is the same as on the root file's own list.
 
 #### 3.1 Banned vocabulary for characters
 
@@ -1869,7 +1869,7 @@ Neither clause authorises a schema change, a migration, or a new surface: both n
 
 Nothing here authorises a schema change beyond the migration that landed with this slice (`2026_10_02_205802_add_hint_and_event_skill_lists_to_support_cards_table`; the rest of the two tables came with `2026_09_30_142618` and `2026_09_30_151945`). Nothing reaches card artwork, the limit-break economy, hint-level accumulation, friendship-trigger arithmetic, runtime effect-value computation, or any collection surface, all of which `ADR-0014` leaves out. No tier label renders on either page, which `ADR-0014` holds pending a current Global source, and both pages assert the word does not appear. The drafted source for this text is `PLANS-AND-BRIEFS.md` §"D-30 widening proposal, 2026-10-03: the support-card catalog surface", ratified as written on 2026-10-03. Like the entry above it, this widens a list; it does not relax the rule for any column that has not been asked and answered the same way.
 
-**D-31. The 0..1200 validation bound is a defect, and the UI must stop hiding it.** `PRD.md` FR-C-2 and `CLAUDE.md` Planner Rule 6 fix stat input at 0..1200, but every live scenario caps higher: Ura Finale 1400 across the board, Unity Cup Wit 1800, Trackblazer Stamina 1900, Our Grand Concert Speed 1600 (`UMAMUSUME_REFERENCE.md` §1.3.4). **A real run cannot be recorded.** P0 US-3 therefore fails on legitimate gameplay data, and this is a product blocker, not a display question.
+**D-31. The 0..1200 validation bound is a defect, and the UI must stop hiding it.** `PRD.md` FR-C-2 and `ARCHITECTURE.md` §3 fix stat input at 0..1200, but every live scenario caps higher: Ura Finale 1400 across the board, Unity Cup Wit 1800, Trackblazer Stamina 1900, Our Grand Concert Speed 1600 (`UMAMUSUME_REFERENCE.md` §1.3.4). **A real run cannot be recorded.** P0 US-3 therefore fails on legitimate gameplay data, and this is a product blocker, not a display question.
 
 An earlier revision of this rule told the UI to "show `/1200`" and never imply a wider ceiling. That was wrong: it dressed a schema limitation up as a design decision and would have made the tool look internally consistent while being unable to hold the thing it exists to track. Withdrawn.
 
@@ -1976,7 +1976,7 @@ Beyond the general `antislop` / `antislop-ui` gates, these are the specific ways
 
 **D-78. Do not design the cut features.** No support-card manager, no event calendar, no race planner, no breeding view. PRD §6. <!-- lore-ignore-line class=1 cite=D-78 -->
 
-**D-79. No AI copy voice.** No "unleash", "seamless", "effortless", "level up your game", no exclamation-mark CTAs, no em dash in prose (`CLAUDE.md` Banned Patterns).
+**D-79. No AI copy voice.** No "unleash", "seamless", "effortless", "level up your game", no exclamation-mark CTAs, no em dash in prose (`AGENTS.md` §5 "Copy").
 
 **D-80. Every screen earns its elements.** A stat, chip, or card that does not change what a Trainer knows comes out.
 

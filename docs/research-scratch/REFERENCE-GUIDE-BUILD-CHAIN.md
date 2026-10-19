@@ -6247,6 +6247,6 @@ Checked and rejected, so the non-findings are auditable.
 
 ### Verdict
 
-Do not ship. The lore gate passes and the mechanical table check is clean, but the roster mis-tags 61 `[JP]`-only cards as `[Both]` and then certifies that zero rows disagree, Section 2 contradicts Sections 1.2, 1.3 and 1.7 and the conflict log's own ruling on the strategy labels, eleven of the fourteen pointers into the Source Conflict Log land on unrelated rows, and of the eight findings in group G, five state a figure that the cited export does not contain and three cite a file or field that does not hold the data.
+Do not ship. The lore gate ran, its report quoting the hit count and its delta from the baseline with a ruling on every hit, and the mechanical table check is clean, but the roster mis-tags 61 `[JP]`-only cards as `[Both]` and then certifies that zero rows disagree, Section 2 contradicts Sections 1.2, 1.3 and 1.7 and the conflict log's own ruling on the strategy labels, eleven of the fourteen pointers into the Source Conflict Log land on unrelated rows, and of the eight findings in group G, five state a figure that the cited export does not contain and three cite a file or field that does not hold the data.
 
 Findings: BLOCKING 3, MAJOR 11, MINOR 10, total 24.

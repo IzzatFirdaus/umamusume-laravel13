@@ -91,3 +91,11 @@ is asserted by `tests/Feature/ScenarioCapParityTest.php`; it is not restated her
   recorded because the approval previously lived only in session notes. Implementation state was separate:
   `ADR-0004` landed the cap table, but the validation change edited `PRD.md` FR-C-2 and US-3 wording, which
   was the owner's to write; `ADR-0015` later closed it.
+- 2026-10-20 · **citations repointed, decision unchanged** — the Context and Links lines above cite
+  `CLAUDE.md` Planner Rule 6 and `CLAUDE.md` Planner Domain Rules 5, 6. `CLAUDE.md` carried no such
+  sections after `228011e` (2026-10-04), which rewrote it; the lines above are preserved as written.
+  Rule 6, the 0..1200 bound in `StoreTurnEntryRequest`, is recorded in `ARCHITECTURE.md` §3, which
+  carries the old rule verbatim with its `[rev 0.2 — repo #4]` tag and a dated erratum for the bound
+  correction. Rule 5, that every number rendered traces to entered turns, is stated in
+  `docs/research-scratch/DESIGN-CORPUS.md` P6 and required by `PRD.md` FR-C. **What this ADR decided
+  is unchanged:** option B, the stored bound widens to 0..2000 sourced from the game's own `hard_caps`.

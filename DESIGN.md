@@ -521,12 +521,16 @@ rules).~~
 
 **Withdrawn 2026-09-29, and the page is not at fault.** `catalog/show.blade.php` implements all three
 lines faithfully. The specification under-designed the surface: it names three items for a page a Trainer
-opens to decide *which trainee to run*, and it converted `CLAUDE.md:23`'s storage rule — "no sentinel
+opens to decide *which trainee to run*, and it converted the storage rule — "no sentinel
 **dates** for 'unreleased' (use nullable date + `release_status`)" — into display copy, which is where the
 word "Unknown" on this page comes from. No other surface in the tool uses it. Its "amber notice" is
 likewise unimplementable: the token set has no caution chrome and `pick` measures 1.60:1 on the raised
 surface, so the notice is copy over `ink-faint` (3.26:1 light / 4.21:1 dark) as the view's own comment at
 `:33-38` records.
+
+**Erratum 2026-10-20.** The sentence above read `CLAUDE.md:23`'s storage rule. That is where the rule
+was written on 2026-09-29; it now sits in `ARCHITECTURE.md` §3, and `CLAUDE.md` has not held a storage
+rule since `228011e` (2026-10-04).
 
 **Ported 2026-10-05.** `SCR-CAT-002` now renders through `resources/js/pages/Catalog/Show.vue`; the
 `catalog/show.blade.php` view and its `form-detail` partial are deleted. The withdrawal above stands as
