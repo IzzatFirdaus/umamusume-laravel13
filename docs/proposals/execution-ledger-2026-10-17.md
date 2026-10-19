@@ -2899,3 +2899,95 @@ ahead count at close, measured after it, is 17 - the 15 the dispatch opened with
 dispatch's two commits (beb92cc, 729e798, this section). The original sentence is preserved above;
 the corrected figures are 17 and 17. Count still equals list length, so the precondition holds; only
 the recorded figure was off by one.*
+## 37. Dispatch 37 continued - 4.1 landed under an owner-ruled name, 2026-10-19
+
+**This section supersedes Section 36's `4.1 BLOCKED-ON-NAME-COLLISION`.** The blocker was real and
+the evidence in Section 36 stands; what changed is that the owner ruled on it. Section 36 is left
+as written because it records the state at that moment, and the append-only rule is not suspended
+for a section that has been overtaken.
+
+### The ruling
+
+`resources/js/components/career/CareerHeader.vue` stays exactly as it is - the Cockpit's identity and
+position card - and the layout-level strip was built under a name that describes its job:
+`resources/js/components/career/CareerSectionNav.vue`. The spec follows the component
+(`tests/browser/career-section-nav.spec.ts`) rather than the plan's `career-header.spec.ts`, because a
+spec named after a component that does not exist is the drift the ruling was meant to avoid.
+
+### Step A - landed (8a1f167, 11 files, +444/-212)
+
+- `CareerSectionNav.vue` (new): the run identity strip (trainee, Japanese name when it differs,
+  scenario, status pill, position) and nine sections as one tab row.
+- `CareerLayout.vue` (the Section A held file this slice names): mounts the nav, forwards the new
+  optional props, and replaces the older Cockpit/Dashboard door pair. It also gains the `#head`
+  passthrough the wizard shell documents (3.8), so a career page can supply a whole title band
+  without a second h1. The eight non-pilot callers are untouched: the new props are optional, an
+  absent `current` marks no tab live, and an absent `status` leaves every section reachable, which is
+  the safe default because a tab wrongly disabled hides a live screen.
+- Pilots: `Cockpit.vue` and `TrainingDetail.vue` mark their own tab and pass the run status; the
+  inline "Career cockpit" link on TrainingDetail, which duplicated the Cockpit tab, is deleted.
+  Nothing was piloted on a page 4.4-4.6 will rewrite.
+
+### Deviations, measured
+
+1. The status pill is `StatusPill`, not the `StatusBadge` the plan named. `StatusBadge`'s runtime
+   `KNOWN` set is `estimated | unknown | unconfirmed` and its own docblock says an unrecognised state
+   renders NOTHING, so a run status would have rendered no pill at all. `StatusPill` takes an
+   arbitrary label plus a variant.
+2. The unreachable section is a `<span role="link" aria-disabled="true" tabindex="0" title=...>`
+   with no `href` and no click handler, per DESIGN.md Section 5's 2026-10-17 amendment. It is not a
+   `<Link>` and there is no click guard, because the rule is that the element cannot activate at all.
+
+### Walk re-pointing - 4 of 4, verified by read
+
+`career-cockpit.spec.ts`, `career-cockpit-forms.spec.ts`, `career-training-detail.spec.ts` and
+`full-career-journey.spec.ts` drop their private wizard walks. All four still named controls three
+rebuilds had retired: `#scenario-<id>` with `aria-pressed`, a card labelled "Select Trainee",
+`#deck-pick` with "Equip owned to", and "Start Career". The helper grew exactly the two interface
+changes the callers needed:
+
+- `walkWizard(page, scenario, options?)` now RETURNS the trainee name it reads from the draft, which
+  the journey asserts against later screens. It is read, not assumed, and the read is `strong` inside
+  the "Stored choice:" row.
+- `options.onLegacy` hands the caller the ancestry page mid-walk, so the journey keeps its own two
+  assertions there without a second copy of the walk. Counting the trade honestly: the hook is more
+  interface than a private walk, and it buys one walk for four specs.
+
+Runtime verification of the four re-points is `blocked-on-stale-bundle` (below), so they are
+verified-by-read only. This is weaker than a green run and is recorded as such rather than claimed.
+
+### Browser disposition - STALE, so the load-bearing case is skipped
+
+- Bundle mtime 2026-10-19 19:04:47 against a resources/js tip of 22:16 (the Step A commit). The tree
+  holds peer-dirty Vue (BuildTarget.vue, DeckSelect.vue, LegacySelect.vue), so the rebuild is withheld
+(KI-70) and no app-page browser gate can run against a bundle that predates the component under test.
+- `career-section-nav.spec.ts` is written in full. Its URL-unchanged case (click, Enter and Space all
+  leave `page.url()` alone) is `test.skip`'d with the reason `blocked-on-stale-bundle; eligible when
+  the tree is quiet`, and is recorded here under held browser cases, so it is not silently absent.
+  The same applies to the completed-career Result case; the identity-strip, span-structure and
+  door-pair cases are written and could not run either.
+- Held browser cases: career-section-nav url-unchanged and completed-career-Result - eligible when the
+  tree is quiet. Source-verified today, runtime-unverified.
+- `CareerSectionNavTest` is what does run. It pins the structure the rule is about: the disabled
+  branch is a `<span>` with role/aria-disabled/tabindex/title and NO `href` and NO click handler, one
+  `aria-current` site, the nine labels, the layout's adoption with the door pair gone, both pilots,
+  and that the existing Cockpit card is untouched. Measured falsification: turning the disabled span
+  into a Link reds it (1 failed); restoring it is green (4 passed, 32 assertions).
+
+### Gates
+
+- pint passed (own path only - the tree carries peer-dirty PHP); phpstan [OK] No errors; npm run
+  typecheck exit 0; npm run lint:ui clean.
+- Affected feature tests: CareerCockpitTest, CareerTrainingDetailTest, CareerSectionNavTest,
+  CockpitRunIdentityTest and CockpitAlertScopeTest -> 90 passed (1160 assertions).
+- DocCitationParity: census 711 at open and 711 before this append.
+- Step B (beb92cc) landed before the ruling and is unaffected by it; Section 36 carries its detail.
+
+### Close
+
+- Ahead count at close, measured after this commit: origin/master b0b3ec9, count 20, list 20.
+- Peer status at close: no new peer commit; the same three peer-dirty Vue files and the tool-owned
+  CHANGELOG.md / CLAUDE.md / GOVERNANCE.md / SKILL.md. None touched.
+- Next eligible: 4.2 (Cockpit layout, ScenarioCaps hardening, the `config/advisor.php` findings). Its
+  Step 0 must check whether `CareerStatePanel.vue:130`'s N/A-without-title bug survives the Cockpit
+  rewrite or closes with it - that is one of the two identifiers UiHygieneTest still reports.
