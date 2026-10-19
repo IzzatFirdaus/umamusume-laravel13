@@ -46,6 +46,7 @@ Homestead.yaml
 # AI agent tooling (personal configs and installed skill payloads)
 /.mcp.json
 /.claude
+CLAUDE.local.md
 /.agents
 /.cursor
 /.grok
