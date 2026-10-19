@@ -183,19 +183,18 @@ verifies a change that is not verified locally.
 Two diagnostics, which report where the dead targets are rather than gating on them:
 
 - `python tools/doc_census.py` - prints the citation census and exits 0 whatever it finds. GONE is a
-  citation to a file that is absent from disk; UNTRACKED is a citation to a file that is on disk but
-  not in git, which works locally and breaks on a fresh clone.
+  citation to a file that is absent from the measured subject; UNTRACKED is a citation to a file that is
+  on disk but not in git, which works locally and breaks on a fresh clone, and which the working-tree
+  view alone reports.
 - `python tools/md_fence_check.py <files>` - fenced-code sanity for Markdown.
 
 Constitution greps: `composer lore` and `composer lore-code` - both must exit 0.
 
-**The census count is host-local; the gate number is the committed one.** `tools/doc_census.py` takes
-its file list from `git ls-files` but reads each file's content from disk, and it decides GONE against
-UNTRACKED by asking whether the target exists on disk. It therefore labels its output "measured at
-HEAD" while measuring the working tree: a tracked file's uncommitted edits are counted, and a citation
-to a path that exists on disk but is not tracked reads UNTRACKED here and GONE in a clean checkout. In a
-shared tree the local count and the committed count differ, and the two must not be compared until every
-working-tree edit is committed or stashed. The census is what says which files hold the dead targets;
+**The census measures a git ref, so its number is reproducible.** `tools/doc_census.py` measures `HEAD` by
+default and prints the subject it measured on its first line, so a number is never quoted without it.
+`python tools/doc_census.py --working-tree` measures the working tree instead, which is the view that
+shows what your own uncommitted edits do to the count. In a shared tree the two differ, and the
+difference is the other sessions' work. The census is what says which files hold the dead targets;
 `tests/Feature/DocCitationParityTest.php` is the gate, and its number is the one that must pass.
 
 ## Common Commands
