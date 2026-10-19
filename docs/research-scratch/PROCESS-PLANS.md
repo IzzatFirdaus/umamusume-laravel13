@@ -1276,7 +1276,7 @@ Documentation–Register Synchronization Execution Plan
 - Living documents may be edited in place: `PLAN.md`, `README.md`, `AGENTS.md`, `docs/research-scratch/INDEX.md`, `docs/research-scratch/PLANS-AND-BRIEFS.md`, `docs/research-scratch/PROCESS-PLANS.md`, and this plan.
 - Dated records may not: `KNOWN-ISSUES.md` entries, `docs/research-scratch/SLICE-RECORDS.md` sections, `docs/adr/*` (errata appended only), `docs/UMAMUSUME_REFERENCE.md`.
 - Do not renumber sections in `docs/research-scratch/*`. Other files cite `§` anchors into them.
-- Lore gate is blocking: no equine vocabulary for the characters, no em dashes in shipped UI copy, absence renders as `N/A` plus a `title` or as named copy, never as an em dash or "Unknown".
+- Lore gate is advisory; the ban is binding: no equine vocabulary for the characters, no em dashes in shipped UI copy, absence renders as `N/A` plus a `title` or as named copy, never as an em dash or "Unknown".
 - `python` only. `python3` is not on PATH on this host (`which python3` returns nothing; `python` is 3.12).
 - Do not use `make` (KI-4). Run `composer` scripts or the underlying command.
 - Shared worktree: stage named paths only; `git status --short` before every commit; never commit while a gate is running.

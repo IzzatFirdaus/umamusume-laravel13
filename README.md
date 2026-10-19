@@ -293,7 +293,7 @@ No dedicated `CONTRIBUTING.md` exists. Actual practice, from `AGENTS.md` and the
 
 - Behavior changes start with a failing Pest test (`php artisan make:test --pest {Name}`); models come from factories.
 - Form Requests for all validation, thin controllers, logic in Actions/Services, named routes, API Resources for JSON, `declare(strict_types=1)` and explicit types everywhere, `#[Fillable]`/`#[Hidden]` attributes, `casts()` as a method.
-- Before hand-off: targeted tests green, `vendor/bin/pint --test --format agent <paths>` (never `--dirty`, KI-75), PHPStan level 6 clean, `composer lore-code` clean (every grep hit needs a context ruling; the verdict is blocking).
+- Before hand-off: targeted tests green, `vendor/bin/pint --test --format agent <paths>` (never `--dirty`, KI-75), PHPStan level 6 clean, `composer lore-code` run (it is report-only and always exits 0; the hand-off quotes the hit count and its delta from the baseline, and every hit carries a context ruling).
 - Schema or pipeline changes need a migration, a PRD citation (FR-x / US-x), and a decision recorded as an ADR with a dated erratum rather than a silent rewrite.
 - Scope changes never happen silently: `PRD.md` §6 non-goals are owner territory (`AGENTS.md` escalation paths).
 
