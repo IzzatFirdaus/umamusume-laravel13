@@ -23,8 +23,21 @@ withDefaults(
         description?: string;
         /** Heading level. 2 by default, the level a page's shell `h1` leaves free. */
         level?: 2 | 3 | 4;
+        /**
+         * Optional landmark id. When it is passed, the rendered heading carries the `id` and the
+         * section references it through `aria-labelledby`, so the region has an accessible NAME and is
+         * exposed as a landmark. When it is absent, the section is not a landmark — which is what this
+         * component did before this prop existed, so no existing consumer changes.
+         *
+         * It exists because adoption without it is a REGRESSION, not a style choice: a page whose
+         * sections are already `<section aria-labelledby="X">` loses the landmark the moment it swaps
+         * in a component that cannot carry `X`. Measured on the Career Cockpit, where all five section
+         * headers each backed exactly one `aria-labelledby` and two of the names are asserted by name in
+         * the browser suite.
+         */
+        id?: string;
     }>(),
-    { description: undefined, level: 2 },
+    { description: undefined, level: 2, id: undefined },
 );
 
 // The description is associated with the region by `aria-describedby`, so it is read as part of the
@@ -34,9 +47,14 @@ const descriptionId = `section-desc-${useId()}`;
 </script>
 
 <template>
-    <section class="mt-8" :aria-describedby="description ? descriptionId : undefined">
+    <section
+        class="mt-8"
+        :aria-labelledby="id"
+        :aria-describedby="description ? descriptionId : undefined"
+    >
         <component
             :is="`h${level}`"
+            :id="id"
             class="text-lg font-semibold text-ink-strong"
         >
             {{ title }}
