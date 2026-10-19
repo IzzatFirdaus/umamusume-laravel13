@@ -17,6 +17,13 @@ export interface DataTableColumn {
     sortable?: boolean;
     /** Tabular figures for numbers, so columns line up. */
     mono?: boolean;
+    /**
+     * A column whose content is not needed on a narrow screen. Hidden below 40rem, where a table
+     * of four columns cannot fit a phone without scrolling the page sideways (WCAG 1.4.10). The
+     * data is still in the row and still reachable through the row this column sits on, so this
+     * is a presentation choice rather than dropping a fact.
+     */
+    secondary?: boolean;
 }
 
 /** The direction a sortable column reports through `aria-sort`. */

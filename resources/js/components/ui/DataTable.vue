@@ -82,7 +82,7 @@ const captionId = `datatable-caption-${useId()}`;
         role="region"
         tabindex="0"
         :aria-label="caption"
-        class="w-full overflow-x-auto rounded-md border border-rule focus:outline-2 focus:outline-offset-2"
+        class="w-full min-w-0 overflow-x-auto rounded-md border border-rule focus:outline-2 focus:outline-offset-2"
     >
         <table :aria-labelledby="captionId" class="w-full border-collapse text-sm">
             <!-- The caption names the table and is sr-only, because the page above it already shows
@@ -98,7 +98,8 @@ const captionId = `datatable-caption-${useId()}`;
                         scope="col"
                         :aria-sort="ariaSort(column)"
                         :class="[
-                            'bg-sunken px-3 py-2 text-xs font-semibold text-ink-strong',
+                            'bg-sunken px-2 py-2 text-xs font-semibold text-ink-strong @2xl:px-3',
+                            column.secondary ? 'hidden @2xl:table-cell' : '',
                             alignClass(column),
                         ]"
                     >
@@ -125,12 +126,26 @@ const captionId = `datatable-caption-${useId()}`;
                         v-for="(column, columnIndex) in columns"
                         :key="column.key"
                         :class="[
-                            'px-3 py-2 align-top text-ink',
+                            'px-2 py-2 align-top text-ink @2xl:px-3',
+                            column.secondary ? 'hidden @2xl:table-cell' : '',
                             alignClass(column),
                             monoClass(column),
                         ]"
                     >
-                        <template v-if="isMissing(row[column.key])">
+                        <!--
+                             A page may render a cell itself, keyed on the column. This branch comes
+                             BEFORE the missing-value check: a slot-filled column's row value is often
+                             absent (there is no `select` field on a trainee row), and testing for
+                             `isMissing` first printed the dash and never reached the slot, which is how
+                             a table of slot-filled cells rendered as a column of dashes.
+                        -->
+                        <slot
+                            v-if="$slots[`cell-${column.key}`]"
+                            :name="`cell-${column.key}`"
+                            :row="row"
+                            :value="row[column.key]"
+                        />
+                        <template v-else-if="isMissing(row[column.key])">
                             <!-- The dash is decorative to a screen reader; the words carry the fact. -->
                             <span aria-hidden="true">–</span>
                             <span class="sr-only">Not recorded</span>
@@ -142,19 +157,6 @@ const captionId = `datatable-caption-${useId()}`;
                         >
                             {{ row[column.key] }}
                         </a>
-                        <!--
-                             A page may render a cell itself, keyed on the column. The default stays
-                             the plain text of the row value, so the primitive keeps working untouched for
-                             a column that needs nothing special. Added when step 2 of the wizard needed a
-                             portrait, chips and a radio in one grid: a hand-rolled `<table>` there would
-                             have been the second table implementation this component exists to prevent.
-                        -->
-                        <slot
-                            v-else-if="$slots[`cell-${column.key}`]"
-                            :name="`cell-${column.key}`"
-                            :row="row"
-                            :value="row[column.key]"
-                        />
                         <template v-else>{{ row[column.key] }}</template>
                     </td>
                 </tr>

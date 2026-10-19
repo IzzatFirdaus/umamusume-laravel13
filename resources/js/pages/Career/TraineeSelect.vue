@@ -176,7 +176,7 @@ const primaryAxes = computed(() => props.aptitudeAxes.filter((axis) => axis.axis
 const traineeColumns: DataTableColumn[] = [
     { key: 'trainee', label: 'Trainee' },
     { key: 'aptitudes', label: 'Aptitudes' },
-    { key: 'forms', label: 'Forms' },
+    { key: 'forms', label: 'Forms', secondary: true },
     { key: 'select', label: 'Choose' },
 ];
 
