@@ -2683,3 +2683,118 @@ the four specs with private walks stay red and are reported here rather than fix
 - KNOWN-ISSUES.md lives at the repo root; register entries are KI-101..KI-104, no renumbering.
 - Refresh spec filename wrong in plan (fixed in KI-101 text).
 - Census baseline premise "708/708 green" already breached before dispatch opened.
+## 35. Dispatch 36 - 2.5 copy, BaseSelect a11y, test hygiene, 2026-10-19
+
+### Step 0 measurements
+
+- Open: HEAD 71f7f92, origin/master b0b3ec9, ahead 9, merge-base clean. 2.5 and the BaseSelect
+  sweep were unclaimed: Builder.vue, RaceCard.vue, Review/Index.vue, BaseSelect.vue and the eight
+  call sites were all clean at open.
+- Peer-work audit (mtime): no file in the blast radius was modified inside 30 minutes of open, so
+  nothing was skipped on staleness. Two files were skipped on dirtiness instead, below.
+- Em-dash audit: three shipped offenders, not the three the plan named. SourceNote.vue holds an em
+  dash in its provenance row (line 27 of resources/js/components/database/SourceNote.vue - the plan
+  said components/ui/). DataTable.vue holds an EN dash in its unrecorded-cell glyph (line 150) and
+  Pagination.vue an EN dash in the range (line 48). The hits in RaceCard.vue:128,
+  Legacy/Builder.vue:21 and Pagination.vue:6-10 are comments or docblocks and are not shipped copy
+  - note only, no action.
+- RenderedCopyHygieneTest scans source with comments stripped (shippedCopyCode), then matches
+  U+2013/U+2014. So the guard IS the right place for this class and the fix is per-site in source.
+- Test-pin attribution: commit 91a6047 (refactor(components): ProvenanceMark renders the exception
+  only) retired the repository identifiers from shipped copy, because UiHygieneTest forbids a
+  repository identifier reaching a Trainer. The pins still asserted config/scenarios.php,
+  02-unity-cup.md:149 and SCENARIO-PUBLISHER-REFERENCES; the live sentences are in
+  ScenarioSectionBuilder.php:214 and TeamPanelBuilder.php:586,633.
+- BaseSelect acceptance: defineProps already declares id?: string and label?: string, and the
+  labelled branch emits its own label for= plus aria-labelledby. No primitive change was needed.
+- Preflight state table: SCREEN_SPEC.md:1800-1801 and the 2026-10-19 note at :1821 already describe
+  the aria-disabled plus click-guard behaviour and the focus move. No follow-up owed, SCREEN_SPEC.md
+  untouched by this dispatch.
+- Bundle mtime at open 2026-10-19 19:04:47 against a resources/js tip that is now 21:37:28. Stale,
+  and the tree holds peer-dirty Vue, so it cannot be rebuilt (KI-70). See Gates.
+
+### Landed
+
+- 555fd3e chore(copy): one helper sentence per group on non-wizard screens (14 files, +114/-88).
+  Builder.vue folds the per-field rank hints (two sentences repeated per parent and per ancestor)
+  into one sentence per group and drops the hint-plus-paragraph pairs. RaceCard stops printing the
+  distance-band caveat under every card and RacePlanList prints it once above the races.
+  Review/Index explains the no-suggestion case once above the list. The record-only banner now ships
+  once, on the Builder, as a collapsed details popover; Legacy browse, Legacy compare, the three
+  Veteran screens and Save Veteran drop it. New CopyDensityTest guards all four claims.
+- a51a47c fix(a11y): BaseSelect usages lose the outer label (6 files, +127/-64). Seven sites pass
+  the label as a prop: RaceCard's turn picker, Snapshot's Scenario, Trainee and Year, Cockpit's
+  Rarity and correction-turn pickers, TrainingDetail's Performance type. New
+  BaseSelectAccessibleNameTest guards the sites; base-select.spec.ts gains the accessible-name case.
+- 4777c81 test(hygiene): fix em-dash copy and stale source_title pins (5 files, +19/-8). The three
+  dashes go, DataTable's unrecorded cell prints N/A with the reason on the title per DESIGN.md
+  Section 5, and the two test files assert the sentences that ship.
+
+### Deviations, stated
+
+1. The plan's Step A file list is four files, but task 5 says to enumerate the record-only banner
+   and delete it everywhere but the Builder. Six more templates render it, so they are in the
+   commit. The banner consumers are exactly the files LegacyController and VeteranController pass
+   notice to; Result.vue and RunRaceStrip render a different notice prop and are untouched.
+2. Snapshot's Month (line 182 then) and Half (line 192 then) pickers are the same wrapper defect and
+   are NOT in the ten-site list, so they were left as-is rather than silently swept. They are a
+   follow-up, not a fix, and BaseSelectAccessibleNameTest asserts the Year marker only for that
+   reason.
+3. Snapshot's Notes field still wraps a BaseTextarea in a label. That is a different component with
+   its own contract and is out of this pass; the guard checks the label TEXT, not the wrapper class,
+   so it does not mistake the two.
+4. Career/LegacySelect.vue is peer-dirty (mtime 2026-10-19 19:16) and is skipped in BOTH slices. Its
+   record-only banner and its two wrapper-label selects stay. BaseSelectAccessibleNameTest pins that
+   incompleteness as a tripwire so it cannot be mistaken for a complete sweep.
+5. TraineeSelect.vue:406 was verified as already fixed rather than re-applied.
+
+### 3.8 acknowledgments
+
+- The aria-disabled plus click guard is the right deviation from native disabled: a disabled control
+  dispatches no click, so the focus-the-first-missing-row behaviour would be unreachable. SCREEN_SPEC
+  Section 4 already documents it, so no follow-up is owed.
+- coverage-reduced: preflight-refusal-browser-case. The browser case that asserted the server
+  refusal alert was removed because the guard makes the alert unreachable from the UI. The server
+  refusal is covered by CareerPreflightTest's three cases and the guard behaviour by the rebuilt
+  career-preflight.spec.ts. A future hygiene slice should add the tab-to-disabled-Start case, where
+  aria-describedby points at the reason.
+- Server refusal path is now orphaned by the UI guard but stays as defence in depth; CareerPreflight
+  covers it. Recorded for a future refactor decision, not changed.
+- Private walks forward debt: career-cockpit.spec.ts, career-cockpit-forms.spec.ts,
+  career-training-detail.spec.ts and full-career-journey.spec.ts each still carry a stale private
+  wizard walk. 4.1's Step 0 must re-point them through tests/utils/start-career.ts, which now exports
+  walkWizard(page, scenario) for the draft and startCareer(page, scenario) for the created run.
+  start-career.ts is the consolidation target; its interface is stable as of 3.8.
+
+### Gates
+
+- Per-slice: pint passed (own paths only - the tree carries peer-dirty PHP); phpstan [OK] No errors;
+  npm run typecheck exit 0; npm run lint:ui clean; npm run build NOT run (stale + peer-dirty, KI-70).
+- lore exit 0 at 475 hit(s)/75 exempt, lore-code exit 0 at 182 hit(s). The 475 is two above the 473
+  Section 33 recorded and is peer documentation, not this dispatch; this dispatch edited no markdown
+  until this section.
+- DocCitationParity: 718 at open, 711 at close, and the 7 is the PEER's, not this dispatch's: peer
+  c26bb72 (docs: close the 10 dead citations introduced between 708 and 718) landed mid-dispatch.
+  Baseline const is 708, so the gate is RED at HEAD for the pre-existing rise; this dispatch adds
+  nothing and Section 34 already assigns the 718-to-708 repair to a citations dispatch.
+- Failability, measured: reintroducing one hint in Builder.vue red CopyDensityTest (1 failed,
+  1 identical to 0); reintroducing a wrapper span in Snapshot/Setup.vue red the BaseSelect site
+  guard (1 failed); reintroducing one em dash in SourceNote.vue red RenderedCopyHygieneTest
+  (1 failed, 7 passed). Each was restored and re-run green.
+- Browser: base-select.spec.ts 2 passed (component fixture, own Vite server, no app bundle needed).
+  career-preflight.spec.ts and setup-shell.spec.ts stay green from 3.8 but were not run this
+  dispatch. The app-page browser cases for 2.5's RaceCard and the BaseSelect sites were NOT run:
+  the bundle is stale and the tree holds peer-dirty Vue, so a rebuild is withheld (KI-70). That is a
+  named gap, not a pass.
+- Full suite: see the close block.
+
+### Close
+
+- Ahead count at close: origin/master b0b3ec9, git rev-list --count origin/master..HEAD = 14, and
+  git log --oneline origin/master..HEAD lists 14 entries (count equals list length).
+- Peer commits landed during this dispatch: 22b31fe (Section 34, docs-only D1-D5) and c26bb72 (close
+  the 10 dead citations). Both are documentation; neither touches this dispatch's paths.
+- Peer status at close: BuildTarget.vue, DeckSelect.vue and LegacySelect.vue remain uncommitted in
+  the shared tree; CHANGELOG.md modified and SKILL.md deleted by tooling. None touched.
+- Next eligible: 4.1 (CareerHeader). Its Step 0 re-points the four stale private walks through
+  start-career.ts's walkWizard/startCareer before any browser gate can be trusted on the wizard.
