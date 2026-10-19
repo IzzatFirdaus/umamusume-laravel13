@@ -238,7 +238,7 @@ final class NextDecision
                         ['name' => 'Poor Rest', 'value' => '+30', 'note' => 'may carry a stayed-up-late penalty'],
                     ],
                     'server' => '[JP]',
-                    'source' => 'UMAMUSUME_REFERENCE.md §1.1.5 (GameWith n=3833, Kamigame n=100)',
+                    'source' => 'GameWith (n=3833), Kamigame (n=100)',
                     'disagreement' => 'Sources agree on the shape; the modal value is single-source.',
                 ],
                 TurnChoice::Recreation => [
@@ -246,12 +246,12 @@ final class NextDecision
                     'kind' => 'reference',
                     'statement' => 'Lifts Mood; no magnitude published in the reference.',
                     'server' => '[JP]',
-                    'source' => 'UMAMUSUME_REFERENCE.md §1.1.6',
+                    'source' => 'GameWith',
                 ],
                 default => [
                     'label' => $choice->label(),
                     'kind' => 'absence',
-                    'reason' => 'No source publishes a per-training yield for a discipline (ADR-0001 §3).',
+                    'reason' => 'No source publishes a per-training yield for a discipline.',
                 ],
             },
             'recorded_at' => $entry->created_at?->toIso8601String(),
@@ -399,7 +399,7 @@ final class NextDecision
                     .' below the '.$option->action.' cap of '.number_format($cap),
                 'badge' => 'calculated',
                 'title' => 'The cap is read through ScenarioCaps::forRun(), the same call the header\'s '
-                    .'stat bars make (ADR-0015), less the '.$option->action.' figure of this run\'s latest '
+                    .'stat bars make, less the '.$option->action.' figure of this run\'s latest '
                     .'turn entry. Both inputs are recorded or published figures; this is room under a cap, '
                     .'not a gain the session is promised.',
             ];
@@ -426,7 +426,7 @@ final class NextDecision
                     : 'Team rank '.$rank.', facility level '.$level,
                 'badge' => 'calculated',
                 'title' => 'The letter is the one this run last reported. The level maps it through '
-                    .'config/scenarios.php team_rank_ladder by TrainingRun::facilityLevel(), which does the '
+                    .'the scenario\'s own rank ladder by TrainingRun::facilityLevel(), which does the '
                     .'lookup rather than storing a second copy of it.',
             ];
         }
@@ -502,7 +502,7 @@ final class NextDecision
                 'badge' => 'calculated',
                 'title' => 'Counted from the end of the career grid (YEAR_SENIOR x TURNS_PER_YEAR) '
                     .'against the turn this run would play next. Where the run stands, not a recommendation '
-                    .'about the finale itself (ADR-0020 §3).',
+                    .'about the finale itself.',
             ];
         }
 

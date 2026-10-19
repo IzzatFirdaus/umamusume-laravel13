@@ -178,7 +178,12 @@ it('prints the constant a figure rests on with its source, its read date and its
     // suggestion displays the date behind it. A title is mouse-only, so the date must be in the text
     // (owner ruling 5a). session_cost is the stale one, read 2023-02-25.
     expect($joined)->toContain('2023-02-25')
-        ->and($joined)->toContain('UMAMUSUME_REFERENCE.md')
+        // The source is named the way a Trainer can act on it — the publisher — and never as a
+        // repository path they cannot open. This assertion used to REQUIRE `UMAMUSUME_REFERENCE.md`,
+        // which pinned the identifier into shipped copy and was the reason the guard had to be told
+        // about it rather than the other way round.
+        ->and($joined)->toContain('GameWith')
+        ->and($joined)->not->toContain('UMAMUSUME_REFERENCE')
         ->and($joined)->toContain('Marked stale')
         ->and($joined)->toContain('The advisory line is Energy 50, read as-is from a named source.')
         // The config key a figure came from is a developer handle, so it belongs in the title.
@@ -404,4 +409,52 @@ it('keeps recommended and refusal mutually exclusive in every case', function ()
         // tell the Trainer the tool both ranked and could not rank.
         expect($hasRecommendation xor $hasRefusal)->toBeTrue();
     }
+});
+
+it('carries no repository identifier anywhere in the shipped advice payload', function (): void {
+    $run = nextDecisionRun('unity_cup', 12, 80, DECISION_SHORT_TARGETS);
+
+    /** @var array<string, mixed> $decision */
+    $decision = $this->get(route('runs.cockpit', $run))->assertOk()->inertiaProps('advisor.decision');
+
+    // JSON_UNESCAPED_UNICODE, and that is load-bearing rather than tidy: plain `json_encode` escapes a
+    // `§` to `\u00a7`, so the section-reference pattern below could never match and the case would pass
+    // however many identifiers shipped. The first draft of this case had exactly that hole, and the
+    // failability proof is what found it.
+    $shipped = json_encode($decision, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+
+    // The pattern list `UiHygieneTest` owns, applied to the PAYLOAD rather than to the source file.
+    // The two disagree in exactly the case this slice fixed: the guard reads a file, and a string can
+    // be assembled from `config/advisor.php` and never appear as an identifier in the file that
+    // composes it. An identifier that reaches a Trainer reaches them here, whatever file it came from.
+    $patterns = [
+        'an ADR citation' => '/\bADR-\d+/',
+        'a known-issue identifier' => '/\bKI-\d+/',
+        'a decision identifier' => '/\bD-\d{3}\b/',
+        'a goal identifier' => '/\bG-\d+\b/',
+        'an open-question identifier' => '/\bOQ-\d+/',
+        'a section reference' => '/§\d/u',
+        'a document path' => '/UMAMUSUME_REFERENCE|\.md\b/',
+        'a source-file path' => '/\.php\b/',
+    ];
+
+    foreach ($patterns as $what => $pattern) {
+        expect(preg_match($pattern, $shipped))->toBe(0, "the advisor payload carries {$what}");
+    }
+});
+
+it('names the publisher and the read date, and never a document path', function (): void {
+    $run = nextDecisionRun('unity_cup', 12, 80, DECISION_SHORT_TARGETS);
+
+    /** @var array{why: list<array{text: string}>} $decision */
+    $decision = $this->get(route('runs.cockpit', $run))->assertOk()->inertiaProps('advisor.decision');
+
+    $joined = implode("\n", array_column($decision['why'], 'text'));
+
+    // The ` Source: …` suffix still appends (the provenance requirement is unchanged), and what it
+    // appends is the publisher plus the date, not a document a Trainer would have to go and find.
+    expect($joined)->toContain(' Source: ')
+        ->and($joined)->toContain('read ')
+        ->and($joined)->not->toContain('UMAMUSUME_REFERENCE')
+        ->and($joined)->not->toContain('docs/');
 });

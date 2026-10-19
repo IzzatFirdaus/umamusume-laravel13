@@ -31,7 +31,7 @@ return [
     'constants' => [
         'rest_recovery' => [
             'value' => 30,
-            'source' => 'UMAMUSUME_REFERENCE.md §1.1.5 (GameWith, 2026-09-25)',
+            'source' => 'GameWith, 2026-09-25',
             'verified_at' => '2026-09-25',
             'confidence' => 'current',
         ],
@@ -39,21 +39,21 @@ return [
         'session_cost' => [
             // [low, high]: the ends of the range, low first, which is the order a surface prints.
             'value' => [17, 28],
-            'source' => 'UMAMUSUME_REFERENCE.md §1.1.6 (GameWith, 2023-02-25)',
+            'source' => 'GameWith, 2023-02-25',
             'verified_at' => '2023-02-25',
             'confidence' => 'stale',
         ],
 
         'wit_cost' => [
             'value' => 0,
-            'source' => 'UMAMUSUME_REFERENCE.md §1.1.1 (Game8, 2026-09-10)',
+            'source' => 'Game8, 2026-09-10',
             'verified_at' => '2026-09-10',
             'confidence' => 'current',
         ],
 
         'advisory_threshold' => [
             'value' => 50,
-            'source' => 'UMAMUSUME_REFERENCE.md §1.1.5 (qualitative only)',
+            'source' => 'qualitative only',
             'verified_at' => '2026-09-25',
             'confidence' => 'current',
         ],
