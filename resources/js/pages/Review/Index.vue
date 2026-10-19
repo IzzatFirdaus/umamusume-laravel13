@@ -79,6 +79,9 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
             <p class="mt-4 text-sm text-ink-muted">
                 {{ candidates.data.length }} of {{ candidates.total }} items to resolve.
             </p>
+            <p class="mt-2 text-xs text-ink-muted">
+                No suggestion means the source name does not fuzzy-match any trainee.
+            </p>
 
             <ul class="mt-3 space-y-3">
                 <li
@@ -123,9 +126,6 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                         :umamusume-id="candidate.suggested_umamusume_id"
                         :source-key="candidate.source_key"
                     />
-                    <p v-else class="text-xs text-ink-muted">
-                        No suggestion: the source name does not fuzzy-match any trainee.
-                    </p>
 
                     <CandidateForm
                         :candidate="candidate"

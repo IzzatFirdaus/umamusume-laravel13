@@ -88,21 +88,6 @@ function applyFilters(): void {
 
         <h2 class="text-lg font-semibold text-ink-strong">Veteran library</h2>
 
-        <!--
-            The record-only banner, on every Legacy screen, as glyph plus text (the prompt's
-            requirement). The glyph is `aria-hidden` and the sentence carries the whole meaning, so the
-            banner is one statement to a screen reader rather than two. `role="note"` is the right
-            role for a standing caveat that is not an alert: it interrupts nothing and never takes
-            focus, and nothing about it is conditional on a write having failed.
-        -->
-        <p
-            role="note"
-            class="mt-3 flex items-start gap-2 rounded-md border border-rule bg-sunken px-3 py-2 text-sm text-ink"
-        >
-            <span aria-hidden="true" class="font-mono font-bold text-ink-strong">i</span>
-            <span>{{ notice }}</span>
-        </p>
-
         <form class="mt-4 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
             <BaseSelect
                 v-model="trainee"

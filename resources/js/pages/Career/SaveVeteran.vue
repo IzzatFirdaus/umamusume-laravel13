@@ -184,8 +184,6 @@ function save(): void {
             This screen did not load. Nothing was saved; try again.
         </p>
 
-        <p class="text-sm text-ink-muted">{{ props.notice }}</p>
-
         <!-- A career that has not finished cannot be filed. The refusal names the status it actually holds
              and the two doors that lead onward, rather than showing a form whose save button would only fail. -->
         <section

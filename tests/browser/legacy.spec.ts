@@ -88,17 +88,13 @@ async function createActiveRun(page: import('@playwright/test').Page, traineeNam
 }
 
 test.describe('Legacy Lab browse', () => {
-    test('carries the record-only banner and states the empty library in words', async ({ page }) => {
+    test('states the empty library in words and carries no record-only banner', async ({ page }) => {
         await page.goto('/legacy', { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
-        // The banner is a `role="note"` standing caveat with a decorative glyph, so a screen reader
-        // hears the sentence once and the glyph is never read as content.
-        const notice = page.getByRole('note');
-        // `toContainText`, not `toHaveText`: Playwright reads `textContent`, which includes the
-        // `aria-hidden` glyph, so an exact-match assertion on the whole banner was comparing against
-        // the decorative character as well. The sentence still has to appear in full.
-        await expect(notice).toContainText(RECORD_ONLY_NOTICE);
+        // Plan 2.5: the record-only banner lives once, on the builder, as a help popover. The browse
+        // surface does not repeat it.
+        await expect(page.getByText(RECORD_ONLY_NOTICE)).toHaveCount(0);
 
         // design-2.0 §29: the empty state says what is missing, why it matters and what to do. The
         // seeded scratch database holds no Veterans, so this is the state a Trainer meets first.
@@ -156,7 +152,10 @@ test.describe('Legacy Lab builder', () => {
         await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
-        await expect(page.getByRole('note')).toContainText(RECORD_ONLY_NOTICE);
+        // The record-only statement ships once, here, as a collapsed help popover rather than a
+        // banner (plan 2.5): the summary names it, the notice sits inside the details.
+        await expect(page.locator('details summary')).toContainText('What this screen records');
+        await expect(page.locator('details')).toContainText(RECORD_ONLY_NOTICE);
 
         // The six nodes, in the client's order (REFERENCE §1.5.4): the trainee, then Parent A with
         // her own two, then Parent B with hers. They are list items, not a picture, so the count is
@@ -242,8 +241,6 @@ test.describe('Legacy Lab builder', () => {
         // The write lands on the compare surface for the same run, which is the "now what does this
         // look like" answer to a confirmation.
         await page.waitForURL(/\/legacy\/compare/, { waitUntil: 'domcontentloaded' });
-        await expect(page.getByRole('note')).toContainText(RECORD_ONLY_NOTICE);
-
         // The recorded values read back as stored, and the row structure is the alignment
         // design-2.0 §46 asks for.
         const table = page.getByRole('table');

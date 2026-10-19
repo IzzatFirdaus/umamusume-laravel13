@@ -67,6 +67,10 @@ function atLimit(id: number): boolean {
     <section :aria-labelledby="headingId" class="mt-4">
         <h2 :id="headingId" class="text-lg font-semibold text-ink-strong">{{ props.group.label }}</h2>
         <p class="mt-1 text-sm text-ink-muted">{{ props.group.definition }}</p>
+        <p class="mt-1 text-xs text-ink-muted">
+            Band names are the export's own. The corpus disagrees at the 1400 m line, so the band is
+            printed as the export states it and no band is derived from a metre count.
+        </p>
 
         <p
             v-if="props.group.empty !== null"

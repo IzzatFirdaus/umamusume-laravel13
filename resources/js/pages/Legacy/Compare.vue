@@ -157,14 +157,6 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
 
         <h2 class="text-lg font-semibold text-ink-strong">Compare recorded selections</h2>
 
-        <p
-            role="note"
-            class="mt-3 flex items-start gap-2 rounded-md border border-rule bg-sunken px-3 py-2 text-sm text-ink"
-        >
-            <span aria-hidden="true" class="font-mono font-bold text-ink-strong">i</span>
-            <span>{{ notice }}</span>
-        </p>
-
         <form class="mt-4" @submit.prevent="compare">
             <p class="text-sm font-medium text-ink">
                 Choose up to {{ maxRuns }} runs that have a Legacy selection recorded

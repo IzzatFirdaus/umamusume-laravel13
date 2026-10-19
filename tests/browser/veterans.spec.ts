@@ -95,7 +95,9 @@ test('says the library holds nothing filed rather than showing a blank list', as
         await page.locator('#app > *').first().waitFor();
 
         await expect(page.getByRole('heading', { name: 'Veteran library', exact: true }).first()).toBeVisible();
-        await expect(page.getByText('Record only.')).toBeVisible();
+        // Plan 2.5: the record-only statement lives once, on the builder, as a help popover. The
+        // library does not repeat it.
+        await expect(page.getByText('Record only.')).toHaveCount(0);
         await expect(page.getByText('The library holds no Veterans yet.')).toBeVisible();
         // The reason and the door, not an empty box. Save Veteran landed with D16's write half, so the
         // empty library is "nothing filed yet" with a route to filing rather than a wait for a slice.

@@ -264,14 +264,6 @@ watch(orderedColumns, () => {
 
         <p v-if="loading" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
 
-        <p
-            role="note"
-            class="mt-3 flex items-start gap-2 rounded-md border border-rule bg-sunken px-3 py-2 text-sm text-ink"
-        >
-            <span aria-hidden="true" class="font-mono font-bold text-ink-strong">i</span>
-            <span>{{ props.notice }}</span>
-        </p>
-
         <fieldset class="mt-4 rounded-md border border-rule bg-panel p-4">
             <legend class="text-lg font-semibold text-ink-strong">Choose up to {{ props.max }}</legend>
             <p id="picker-help" class="text-xs text-ink-muted">

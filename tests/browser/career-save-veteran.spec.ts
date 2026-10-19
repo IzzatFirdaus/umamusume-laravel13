@@ -79,9 +79,10 @@ async function openSaveVeteran(
 test('files a career from the keyboard and the library reads the same tags back', async ({ page }) => {
     await openSaveVeteran(page);
 
-    // The heading and the record-only contract, before any control.
+    // The heading, before any control. Plan 2.5: the record-only statement lives once, on the
+    // Legacy builder, as a help popover; this screen no longer repeats it.
     await expect(page.getByRole('heading', { name: 'Save Veteran' })).toBeVisible();
-    await expect(page.getByText('Record only.')).toBeVisible();
+    await expect(page.getByText('Record only.')).toHaveCount(0);
 
     // A suggestion toggled by keyboard: focus, Enter, and the state is announced as well as shown.
     const speed = page.getByRole('button', { name: /^Speed/ });

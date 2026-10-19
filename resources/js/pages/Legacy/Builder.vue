@@ -309,13 +309,13 @@ const hasAnyNode = computed(() =>
             Run #{{ run.id }} · {{ run.scenario_label }} · {{ run.status_label }}
         </p>
 
-        <p
-            role="note"
-            class="mt-3 flex items-start gap-2 rounded-md border border-rule bg-sunken px-3 py-2 text-sm text-ink"
-        >
-            <span aria-hidden="true" class="font-mono font-bold text-ink-strong">i</span>
-            <span>{{ notice }}</span>
-        </p>
+        <details class="mt-3 rounded-md border border-rule bg-sunken px-3 py-2 text-sm text-ink">
+            <summary class="flex cursor-pointer items-start gap-2">
+                <span aria-hidden="true" class="font-mono font-bold text-ink-strong">i</span>
+                <span>What this screen records</span>
+            </summary>
+            <p class="mt-2">{{ notice }}</p>
+        </details>
 
         <!-- The disclosure about what is and is not saved. An assignment is in memory until Confirm,
              and saying so on the page is the difference between a Trainer who trusts the button and
@@ -389,6 +389,11 @@ const hasAnyNode = computed(() =>
                                     <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                                         {{ ancestor.slot }}
                                     </p>
+                                    <p class="mt-2 text-xs text-ink-muted">
+                                        Stored by name; leave blank if you have not recorded one. Ranks are
+                                        unbounded and blank stays not recorded.
+                                    </p>
+
 <label class="mt-1 block text-xs font-medium text-ink" :for="`ancestor-${parent.slot}-${ancestorIndex}`">
                                          {{ ancestor.slot }}
                                      </label>
@@ -400,7 +405,6 @@ const hasAnyNode = computed(() =>
                                          autocomplete="off"
                                          :aria-describedby="ancestorError(index, ancestorIndex) ? `ancestor-${parent.slot}-${ancestorIndex}-error` : undefined"
                                          :error="ancestorError(index, ancestorIndex)"
-                                         hint="An ancestor is stored by name. Leave it blank if you have not recorded one."
                                      />
                                      <p
                                          v-if="ancestorError(index, ancestorIndex)"
@@ -428,7 +432,6 @@ const hasAnyNode = computed(() =>
                                          type="text"
                                          list="known-rank-letters"
                                          autocomplete="off"
-                                         hint="The letter the client shows, from its own set. Blank stays not recorded."
                                      />
 
                                      <label
@@ -442,7 +445,6 @@ const hasAnyNode = computed(() =>
                                          v-model="form.legacies[index].ancestors_rank[ancestorIndex]"
                                          type="number"
                                          min="0"
-                                         hint="Blank stays N/A. Unbounded on purpose: the sources give no ceiling on a Legacy's own star count."
                                      />
 
                                     <!-- The grandparent's own Sparks, the same record the wizard step edits.
@@ -529,8 +531,12 @@ const hasAnyNode = computed(() =>
                                 <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                                     {{ parent.label }} as you read her
                                 </p>
+                                <p class="mt-2 text-xs text-ink-muted">
+                                    Own rank is unbounded and blank stays not recorded. The letter is the
+                                    client's own rank letter set.
+                                </p>
 
-<label class="mt-2 block text-xs font-medium text-ink" :for="`rank-${parent.slot}`">
+                                <label class="mt-3 block text-xs font-medium text-ink" :for="`rank-${parent.slot}`">
                                      Own rank
                                  </label>
                                  <BaseInput
@@ -538,19 +544,14 @@ const hasAnyNode = computed(() =>
                                      v-model="form.legacies[index].rank"
                                      type="number"
                                      min="0"
-                                     hint="Blank stays N/A. Unbounded on purpose: the sources give no ceiling on a Legacy's own star count."
                                  />
-                                 <p class="mt-1 text-xs text-ink-muted">
-                                     Blank stays N/A. Unbounded on purpose: the sources give no ceiling
-                                     on a Legacy's own star count.
-                                 </p>
 
                                 <!-- The letter rank the client prints beside the star count, the same
                                      field the wizard step edits against the same request. It sits after
                                      the star count here because the Builder's browser spec pins
                                      `Own rank` to the star count input; the wizard's order is letters
                                      first, and this screen does not reorder what a spec holds. -->
-<label class="mt-3 block text-xs font-medium text-ink" :for="`rank-letter-${parent.slot}`">
+                                <label class="mt-3 block text-xs font-medium text-ink" :for="`rank-letter-${parent.slot}`">
                                      Own rank (letters)
                                  </label>
                                  <BaseInput
@@ -560,7 +561,6 @@ const hasAnyNode = computed(() =>
                                      list="known-rank-letters"
                                      autocomplete="off"
                                      :error="fieldError(index, 'rank_letter')"
-                                     hint="The letter the client shows, from its own set. Blank stays not recorded."
                                  />
                                  <p
                                      v-if="fieldError(index, 'rank_letter')"
@@ -568,9 +568,6 @@ const hasAnyNode = computed(() =>
                                      class="mt-1 text-xs text-risk"
                                  >
                                      {{ fieldError(index, 'rank_letter') }}
-                                 </p>
-                                 <p class="mt-1 text-xs text-ink-muted">
-                                     The letter the client shows, from its own set. Blank stays not recorded.
                                  </p>
 
                                 <label class="mt-3 flex min-h-11 items-center gap-2">
