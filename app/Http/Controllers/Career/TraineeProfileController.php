@@ -160,24 +160,13 @@ class TraineeProfileController extends Controller
             // supplied server-side the way CareerLayout.vue:11 and UnityCupEditor.vue:20 already receive
             // URLs. No Ziggy dependency is introduced.
             'action' => route('career.trainee.store'),
-            // The three Build-analysis figures, named with the reason each one is absent. Values are null
-            // so the page renders `N/A` with the title rather than a blank or a guess (`AGENTS.md` §5).
+            // The one absence this page still prints, named with its reason. The other three
+            // (stat distribution, useful inheritance, useful support types) left with the Build
+            // analysis section in slice 3.4: that section was deleted, so its payload went with it.
             'absences' => [
                 'version' => [
                     'value' => null,
                     'title' => 'No column records a version for a trainee, and app.ruleset is null by ruling.',
-                ],
-                'stat_distribution' => [
-                    'value' => null,
-                    'title' => 'Recommending a stat distribution is a prediction this tool does not make.',
-                ],
-                'inheritance' => [
-                    'value' => null,
-                    'title' => 'Inheritance is computed at the Legacy step from the run\'s own parents and is never stored per trainee.',
-                ],
-                'support_types' => [
-                    'value' => null,
-                    'title' => 'support_cards carries no umamusume_id by ruling, so no stored link names a useful support type for her.',
                 ],
             ],
         ]);

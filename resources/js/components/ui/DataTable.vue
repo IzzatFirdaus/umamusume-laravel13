@@ -142,6 +142,19 @@ const captionId = `datatable-caption-${useId()}`;
                         >
                             {{ row[column.key] }}
                         </a>
+                        <!--
+                             A page may render a cell itself, keyed on the column. The default stays
+                             the plain text of the row value, so the primitive keeps working untouched for
+                             a column that needs nothing special. Added when step 2 of the wizard needed a
+                             portrait, chips and a radio in one grid: a hand-rolled `<table>` there would
+                             have been the second table implementation this component exists to prevent.
+                        -->
+                        <slot
+                            v-else-if="$slots[`cell-${column.key}`]"
+                            :name="`cell-${column.key}`"
+                            :row="row"
+                            :value="row[column.key]"
+                        />
                         <template v-else>{{ row[column.key] }}</template>
                     </td>
                 </tr>

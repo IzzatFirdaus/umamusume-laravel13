@@ -99,9 +99,6 @@ const props = defineProps<{
     scenarioPending: boolean;
     absences: {
         version: Absence;
-        stat_distribution: Absence;
-        inheritance: Absence;
-        support_types: Absence;
     };
     /** `route('career.trainee.store')`, supplied by the server so the page never hard-codes the URL. */
     action: string;
@@ -298,44 +295,16 @@ const profile = computed(() => props.trainee.profile);
             </ul>
         </section>
 
-        <section class="mt-8" aria-labelledby="build-analysis">
-            <h2 id="build-analysis" class="text-lg font-semibold text-ink-strong">Build analysis</h2>
-
-            <p class="mt-1 max-w-3xl text-sm text-ink-muted">
-                The brief's four remaining figures are not stored anywhere in this catalog. They are printed
-                as absences with their reasons rather than filled by a guess. This page carries no career-goal
-                section by design: the trainee's own objectives are fetched per character and
-                read under Trainee goals in the Cockpit's Scenario panel, where the run's race record decides
-                whether each one is met.
-            </p>
-
-            <dl class="mt-4 grid max-w-3xl grid-cols-1 gap-x-6 gap-y-2 text-sm @3xl:grid-cols-2">
-                <div class="flex flex-wrap justify-between gap-x-4">
-                    <dt class="text-ink-muted">Recommended stat distribution</dt>
-                    <dd class="text-ink-muted" :title="props.absences.stat_distribution.title">
-                        {{ props.absences.stat_distribution.value ?? 'N/A' }}
-                    </dd>
-                </div>
-                <div class="flex flex-wrap justify-between gap-x-4">
-                    <dt class="text-ink-muted">Useful inheritance</dt>
-                    <dd class="text-ink-muted" :title="props.absences.inheritance.title">
-                        {{ props.absences.inheritance.value ?? 'N/A' }}
-                    </dd>
-                </div>
-                <div class="flex flex-wrap justify-between gap-x-4">
-                    <dt class="text-ink-muted">Useful support types</dt>
-                    <dd class="text-ink-muted" :title="props.absences.support_types.title">
-                        {{ props.absences.support_types.value ?? 'N/A' }}
-                    </dd>
-                </div>
-                <div class="flex flex-wrap justify-between gap-x-4">
-                    <dt class="text-ink-muted">Distance and running style</dt>
-                    <!-- The one figure the brief asks for that the schema can answer, answered as what it
-                         actually is: the letters above, read as aptitude. -->
-                    <dd class="text-ink">Stated as aptitude above</dd>
-                </div>
-            </dl>
-        </section>
+        <!-- The "Build analysis" section stood here and was deleted in slice 3.4. Its four figures
+             were three absences plus "stated as aptitude above", which this page already says one
+             section up, and a recommendation panel on a selection screen reads as advice about the
+             trainee rather than a fact about her. The one durable sentence it carried is kept, because
+             it answers "why is there no goal ladder here" rather than restating a missing number. -->
+        <p class="mt-6 max-w-3xl text-xs text-ink-muted">
+            This page carries no career-goal section by design: the trainee's own objectives are
+            fetched per character and read under Trainee goals in the Cockpit's Scenario panel, where
+            the run's race record decides whether each one is met.
+        </p>
 
         <p class="mt-8 flex flex-wrap items-center gap-3">
             <button

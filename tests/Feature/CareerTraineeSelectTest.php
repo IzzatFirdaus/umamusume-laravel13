@@ -497,7 +497,7 @@ it('counts a skill id that resolves to no Global skill instead of dropping it si
             ->where('forms.0.skillLists.2.unresolved', 1));
 });
 
-it('names every profile absence the brief asks for and omits the sections the schema cannot fill', function (): void {
+it('names the one profile absence left after the Build analysis section was deleted', function (): void {
     $trainee = rosterTrainee('Silence Suzuka', ['turf' => 'A']);
 
     $this->get('/career/setup/trainee/'.$trainee->id)
@@ -506,12 +506,12 @@ it('names every profile absence the brief asks for and omits the sections the sc
             // Each named absence carries its reason as a title, so the screen states the gap in words.
             ->where('absences.version.value', null)
             ->has('absences.version.title')
-            ->where('absences.stat_distribution.value', null)
-            ->has('absences.stat_distribution.title')
-            ->where('absences.inheritance.value', null)
-            ->has('absences.inheritance.title')
-            ->where('absences.support_types.value', null)
-            ->has('absences.support_types.title')
+            // Slice 3.4 deleted the Build analysis section, and its three figures left with it: each
+            // was an absence the page no longer prints. The keys are gone rather than kept as dead
+            // payload, so this asserts their absence instead of their shape.
+            ->missing('absences.stat_distribution')
+            ->missing('absences.inheritance')
+            ->missing('absences.support_types')
             // Career goals is omitted entirely: `trainee_goals` has never been migrated, and the filing is
             // reserved as KI-34. A key here would be a heading waiting for data that does not exist.
             ->missing('goals')
@@ -550,4 +550,25 @@ it('keeps every scenario name out of the step-2 components', function (): void {
             expect($source)->not->toContain((string) $key, "{$path} hardcodes the scenario key {$key}");
         }
     }
+});
+
+it('renders the roster as a table whose cells are slot-filled, not a card list', function (): void {
+    // Slice 3.4 replaced 25 stacked cards with one `DataTable`. The page is a Vue component, so the
+    // rendered shape is asserted in the browser spec; what a Feature test can hold is the
+    // DATA the table is fed and the contract the columns rely on. `trainees.data` must be a list of
+    // rows carrying the four keys the template's cell slots read, because a slot that names a key the
+    // payload does not carry renders an empty cell rather than failing.
+    rosterTrainee('Silence Suzuka', ['turf' => 'A']);
+
+    $this->get('/career/setup/trainee')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('trainees.data')
+            ->has('trainees.data.0.id')
+            ->has('trainees.data.0.name')
+            ->has('trainees.data.0.name_ja')
+            ->has('trainees.data.0.artworkURL')
+            ->has('trainees.data.0.aptitudes')
+            ->has('trainees.data.0.form_count')
+            ->has('trainees.data.0.forms'));
 });
