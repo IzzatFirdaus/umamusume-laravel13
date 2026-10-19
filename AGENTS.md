@@ -557,6 +557,10 @@ No security document exists; the model is `ARCHITECTURE.md` §8.
 - Keep a change logically grouped: one slice per commit series, with the report and the
   verification output in the hand-off. The branch of record is `master`; there is no CI to
   catch a partial landing.
+- `git commit <path>` guards the index, not the working tree: it commits that path's
+  working-tree content, so another session's uncommitted lines in the same file land in the
+  commit with yours. Name every path on the command line to keep the index clean, and skip
+  a file or stage only your own hunk when the working tree carries another session's work.
 - Never commit `vendor/`, `node_modules/`, `storage/` snapshots or backups, `.env`, or
   `public/build/`.
 - Deleting or skipping a test needs owner approval and a stated reason in the commit.
