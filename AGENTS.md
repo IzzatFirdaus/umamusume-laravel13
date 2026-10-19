@@ -131,7 +131,7 @@ Escalation paths (mirrored in `GOVERNANCE.md` §13):
 
 ## 5. Non-negotiables
 
-**Lore gate (advisory gate, binding ban, every role).** The characters are Umamusume, a humanoid race. The
+**Lore gate (advisory; ban binding; every role).** The characters are Umamusume, a humanoid race. The
 banned character vocabulary and banned framing are defined in the bar's C-4 section and
 implemented by `tools/lore.php` (`composer lore`, `composer lore-code`) and the `Makefile`
 targets. Rules that matter in practice:

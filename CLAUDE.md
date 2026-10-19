@@ -36,6 +36,8 @@ guidance suggests it.
 
 This repository's `AGENTS.md` is not read natively by Claude Code, because a root `CLAUDE.md` satisfies the project-instructions check, so the line-3 instruction to read `AGENTS.md` is the mechanism by which the contract is reached.
 
+The discretionary read is deliberate: the `@AGENTS.md` import was priced at 14,043 tokens per session for `AGENTS.md` at 679 lines and declined, and the trigger to revisit is an actual miss, which is a session acting without the contract recorded in `KNOWN-ISSUES.md`.
+
 ## 2. Required reading before a substantial change
 
 | Change                                         | Read first                                                                                                                                                                                                                |
