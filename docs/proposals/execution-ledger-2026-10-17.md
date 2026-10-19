@@ -165,7 +165,7 @@ The plan of record for Batch 3+ anchors at `74cabb2` and names Batch 3 as `1.2`,
 
 Started from HEAD `469eb13`, `origin/master` `6690d15`, ahead 11. Peer still holds the same eight uncommitted files (last write 21:09), so **0.4's duplicate-name half and 0.13 stay blocked** per the plan's own "if the peer's tree is dirty, do not start".
 
-Required-reading location correction: the instruction names `frontend-design-2026-10-13.md`. **No such file exists anywhere in the tree.** The document it means is `docs/proposals/frontend-fidelity-2026-10-13.md` (its §2.3/§2.4 carry the Track 1 / Track 2 split and the "Track 2 D" colour-amendment rule the deferred-owner palette ruling cites). Reported, not substituted silently.
+Required-reading location correction: the instruction names frontend-design-2026-10-13.md. **No such file exists anywhere in the tree.** The document it means is `docs/proposals/frontend-fidelity-2026-10-13.md` (its §2.3/§2.4 carry the Track 1 / Track 2 split and the "Track 2 D" colour-amendment rule the deferred-owner palette ruling cites). Reported, not substituted silently.
 
 ### Slice landed
 
@@ -218,7 +218,7 @@ Execution order is `0.4 (blocked) → 0.6 (landed) → 0.7 → 0.8 → 0.9 → 0
 
 ## 10. Dispatch 5 — backlog slice 0.7 (encoding), landed 2026-10-17 23:33 as `b2e7317`
 
-Backlog read from its real location: `docs/proposals/implementation-backlog-2026-10-17.md`. The path the dispatch names (`.scratch-uma/dispatch-2026-10-17/implementation-backlog.md`) **does not exist**; the file is untracked in `docs/proposals/`. Same correction as the `frontend-design-2026-10-13.md` one in §9 — the backlog itself now records that second case at its line 22-25.
+Backlog read from its real location: `docs/proposals/implementation-backlog-2026-10-17.md`. The path the dispatch names (`.scratch-uma/dispatch-2026-10-17/implementation-backlog.md`) **does not exist**; the file is untracked in `docs/proposals/`. Same correction as the frontend-design-2026-10-13.md one in §9 — the backlog itself now records that second case at its line 22-25.
 
 Premise check: HEAD `c2de34b`, `origin/master` `6690d15`, ahead 12. Peer holds the same eight files, last write **21:10:55** (≈2h quiet, still dirty). Neither of this slice's target components was peer-dirty.
 
@@ -3236,3 +3236,101 @@ consistent with the census's own per-target summary today.
   under a scratch directory outside the repository, one scratch clone of HEAD, and the scratch
   census outputs. The worktrees were removed and git's worktree list pruned, so no reference to
   them remains in the repository.
+## 40. Dispatch 39 - the identifier guard cleared, 9 findings to 0, 2026-10-19
+
+### Step 0 measurements
+
+- Open: HEAD 6b625ed, origin/master b0b3ec9, ahead 21, merge-base clean, count equals list length.
+  HEAD:PRD.md = a1ecbe8b27eb085b766c8a10044cca10ae3c0c0f. Nothing staged.
+- Peer-dirty check on every named file: `git status --porcelain` for
+  app/Services/Advisor/NextDecision.php, config/advisor.php,
+  resources/js/components/career/CareerStatePanel.vue, app/Services/Advisor/ and config/ is EMPTY.
+  No portion was skipped as peer-dirty.
+- The nine findings, classified. Eight are shipped strings in NextDecision.php: :241 and :249 carry
+  a section reference inside a `source`, :254 carries an ADR citation AND a section reference in an
+  absence reason, :402 an ADR citation in a title, :429 a source-file path in a title, and :505 an
+  ADR citation and a section reference in a title. The ninth is CareerStatePanel.vue:130, a visible
+  N/A whose element carries no reason. None is a docblock: `UiHygieneTest` strips comments before it
+  scans, so every one of the nine reaches shipped copy.
+- The guard, read rather than assumed (UiHygieneTest:160-178 and :288-322): it accepts a `title=` or
+  an `sr-only` in a nine-line window around the marker, or a VISIBLE interpolation named `*_title` or
+  `*_reason` in that window or in the 25 lines AFTER it. It looks forward, never back.
+- config/advisor.php carries four `source` strings, and they DO ship: NextDecision.php:564 composes
+  `' Source: '.$constant['source'].', read '.$constant['verified_at']` into Trainer-facing text. So
+  the four are shipped findings that UiHygieneTest could not see, because the guard reads a FILE and
+  this string is assembled across two of them from a config value.
+
+### Step A - landed (844aebf, 3 files, +64/-11)
+
+Section A exception, as the dispatch required it stated:
+
+> section A exception: slice clears NextDecision.php:241,249,254,402,429,505 - 8 identifier findings;
+> the file is named by this slice scope, and its in-flight status is verified clean above.
+
+- NextDecision.php: the two `source` strings name the publisher and the sample sizes instead of the
+  repository document (`GameWith (n=3833), Kamigame (n=100)`, `GameWith`); three parentheticals go
+  because each sentence already owns its reason without them; and `config/scenarios.php
+  team_rank_ladder` becomes `the scenario's own rank ladder`, which is the fact the path was standing
+  in for.
+- config/advisor.php: the four constants name the publisher and the read date. The fourth -
+  `advisory_threshold` - reads `qualitative only`, because that is what the source itself said and
+  naming a publisher there would have been an invention; the other three had one to keep.
+- A bonus that is worth recording: the removed strings also carried double-encoded UTF-8 (a section
+  mark stored as its CP1252 misreading), so both files lost that class of defect with the same edit.
+
+### Step B - landed (360f7ee, 2 files, +32/-3)
+
+- CareerStatePanel.vue: the absent marker now carries `:title="currentHint(stat)"`. The reason the
+  fix had to find was already ON the row: line 148 prints `currentHint(stat)`, whose absent branch
+  returns `No turn has recorded this stat yet.` The guard could not see it because a function call is
+  not a `*_title`/`*_reason` interpolation, so the marker takes the same value from the same owner
+  rather than a second copy of the prose. The visible sentence STAYS: a hover-only reason is the shape
+  DESIGN.md Section 5 rules out, so this is a pair rather than a swap. No new prose was written.
+
+### Guard, open 9 and close 0
+
+- `php artisan test --compact --filter=UiHygiene`: 2 failed / 2 passed with 9 identifiers at open;
+  4 passed at close. The eight NextDecision and advisor findings cleared in 844aebf, the ninth in
+  360f7ee.
+
+### Two test defects found by the failability proofs, and fixed
+
+1. **The suite pinned the defect it was testing.** NextDecisionTest asserted the shipped text
+   CONTAINED `UMAMUSUME_REFERENCE.md`, so the test and the guard disagreed about what correct looked
+   like. Two more of the same were found by running the affected tests: CareerCockpitTest asserted
+   `§1.1.5` on the Rest forecast source and `ADR-0001` on the discipline-turn reason. All three now
+   assert the publisher or the reason sentence and forbid the identifier.
+2. **The first draft of the payload case could never fail.** Plain `json_encode` escapes a section
+   mark to its `\u` form, so a section-reference pattern could not match however many identifiers
+   shipped, and the first failability attempt confirmed it by passing under a patch. `JSON_UNESCAPED_UNICODE`
+   plus a document-path pattern fixed the case, and the proof was then redone twice with
+   PAYLOAD-REACHABLE patches: an ADR citation in the constant title reds it, and a document path in
+   session_cost's source reds it. Recorded because the failure mode - a guard that passes for the
+   wrong reason - is exactly what the cannot-fail-test rule exists to catch, and it was caught by
+   running the proof rather than by reading the assertion.
+
+### DocCitationParity - the long-red gate is now GREEN
+
+Not planned, and measured rather than hoped: removing the document-path strings took the census
+711 to 703, which is below the 708 baseline the gate asserts, so DocCitationParityTest went from red
+(red since Section 29) to 2 passed. Peer commit 33d0017 then reconciled the gate state and repointed
+machine-local citations, and the census now reads 692 (688 GONE, 4 UNTRACKED). The gate is green at
+692 with the baseline unchanged.
+
+### Close
+
+- Ahead count at close: origin/master b0b3ec9, count 25, list 25 (measured after this commit).
+- Peer commits landed during this dispatch: 33d0017 (docs(citations), reconcile the DocCitationParity
+  gate state and repoint machine-local citations) and 24d4e87 (docs(version), refresh the Phase 1
+  exit criteria). Both documentation; neither touches this dispatch paths.
+- Peer status at close: BuildTarget.vue, DeckSelect.vue and LegacySelect.vue are STILL uncommitted.
+  The 4.x block is UNCHANGED, and this is the FIFTH consecutive dispatch with browser cases
+  blocked-on-stale-bundle. The bundle is 2026-10-19 19:04:47 against a resources/js tip of 23:10, and
+  the three files have not been written since 19:16:21.
+- This slice needed no browser case: its changes are a config value, a service string and one Vue
+  template attribute, all covered by Feature and source-scan cases. browser: not run, and correctly
+  so rather than because of the block.
+- Next eligible: 4.2, 4.3, 4.4, and they remain blocked the same way. Step 0 of 4.2 must re-check
+  StatBand.vue (absent since peer b30906a) and whether the peer cockpit cutover already did the
+  sticky/rail/accordion work. If the three files do not clear, the honest answer to what next is
+  waiting on that peer, not starting unverifiable layout work.
