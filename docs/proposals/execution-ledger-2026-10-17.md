@@ -4239,3 +4239,152 @@ primary and adopting a section whose name lives on a summary.
 - Next eligible: 4.2 once those two rulings land, then 4.3 and 4.4, then 4.5 and 4.6, plus the 2.5
   remainder. The walk-set baseline run was NOT completed this dispatch (the premise conflicts were
   found first), so it remains owed at the start of the next one.
+
+## 48. Dispatch 46 - 4.2's adoption landed; stickiness blocked on the container, 2026-10-20
+
+### Step 0 measurements
+
+- Worktree HEAD 2f6c88b, `git status --porcelain` EMPTY.
+- Peer's ledger append: STILL DIRTY, so the STOP-and-cherry-pick branch did not fire. No cherry-pick
+  was attempted.
+- Bundle fresh at 05:09:35 against a resources/js tip of 04:51:45, so no rebuild was owed at the start.
+- `tests/browser/section.spec.ts`: 4 passed (40.8s), which is Section 46 Rule 1 in practice - the
+  primitive was re-verified with no app bundle involved at all.
+- Feature baseline in the MAIN tree: UiHygiene 4 passed (guard 0); DocCitationParity 2 passed.
+- Baseline walk set: 56 passed (9.4m), exit 0. That is the acceptance target this dispatch measured
+  against, and it was green before anything changed.
+- The five pairings verified. Four are as Section 45 recorded. The fifth is the dual shape Section 47
+  found, and Ruling 1 keeps it hand-rolled in both states.
+- Sensitive layout cases named: 'lays out at 1280, 768 and 320 without a horizontal scroll' (:240),
+  the 320px rail overflow (:145/:149), and the objectives-strip scroll case.
+
+### Step A - 920a499, 5 files, +278/-29
+
+Ruling 1 applied: `cockpit-summary-heading`, `career-closed-heading`, `career-empty-heading` and
+`career-scenario-heading` adopt `Section` with the new `id` prop; `career-timeline-heading` is NOT
+adopted and keeps both of its shapes, because its id moves onto a `<summary>` inside a `<details>` once
+the career ends and `Section` can never render a `<summary>`.
+
+Ruling 2 applied: the strip (`StatSummary.vue`) carries NO filled primary. The rail keeps its CTA
+(`NextDecision.vue` untouched) and the strip offers an OUTLINE affordance that scrolls to and focuses
+the rail; with no recommendation it prints "No recommendation. See the advisor."
+
+The rename landed: `CareerHeader.vue` -> `CockpitIdentityCard.vue`, import and usage updated, and
+`grep -rn CareerHeader resources/js/` reports ZERO. Reaching zero needed a decision the dispatch did not
+anticipate: the instruction to 'update the stale prose mention' and the instruction that the grep reads
+zero are in tension if the prose names the old component. The prose now describes the rename WITHOUT
+printing the retired string, and says why: a source scan for it is an assertion the tree keeps, and one
+occurrence would pass a reader while failing the grep.
+
+Five landmark names preserved, and each case asserts the shape that is stable for THAT pairing:
+'Scenario', 'No turn recorded yet' and 'Races in this run' by name; the two dynamic-titled ones
+structurally (the section still references the id and the element carrying it still exists). The two
+ids that also back the wayfinder anchors still carry them, so the anchors resolve.
+
+### THE STICKINESS BLOCKER - measured, and the assertion was not faked
+
+The sticky summary is the one part of 4.2 that did NOT land, and it failed in a way worth recording.
+
+Written as `position: sticky` at `top-0`, the strip computed `position: sticky` (probe: the computed
+style reads `sticky`, `top: 0px`) AND drifted with the page by exactly the scroll distance - 100px at
+a 100px scroll. So the property was applied and inert.
+
+The probe then walked the ancestry:
+
+    MAIN  .@container ...   containerType=inline-size   overflow=visible   contain=none
+    (every other ancestor)  containerType=normal        overflow=visible   contain=none
+
+No ancestor is a scroll container, and `main` carries `container-type: inline-size`. The sticky
+containing block therefore moves with the page, which is why the element cannot stick.
+
+The consequence for testing is the important part: removing the `sticky` class would NOT have changed
+the outcome, so a stickiness assertion could not fail for the reason it claimed. The dispatcher's hard
+stop covers exactly this - 'the assertion is not testing stickiness' - so the assertion was REMOVED
+rather than weakened, and the class is ABSENT rather than present-and-inert so the source does not
+claim a behaviour the page does not have. The case that replaced it asserts what is true: the strip
+renders the header values and the absence wording, and carries no primary.
+
+This is BLOCKED-ON-CONTAINMENT, and it is not 4.2's alone: the same `main` wraps the "On this page"
+wayfinder nav, whose docblock has always claimed `md:sticky`. On this evidence that claim is likely
+false as well, and no case has ever tested it. Verifying it, and then deciding whether the fix belongs
+to the container or to the sticky elements, is its own small slice and is recorded as owed.
+
+### The regression cycle my own first attempt caused, and what caught it
+
+The first version of the strip was committed nowhere, and it broke four existing cases:
+
+1. Three layout cases went red at 320px - 'the cockpit scrolls sideways', 'the objectives strip scrolls
+   sideways', 'the rail overflows horizontally'. Cause: the strip copied the wayfinder's `-mx-6`/`px-6`
+   pair, which widens the box past its container. Fixed by dropping both; only `mb-3 border-b bg-page
+   py-2` remains.
+2. `career-section-nav` went red with a strict-mode violation: `getByRole('region', { name: 'Career' })`
+   resolved to TWO elements, because the name match is a substring and my strip was
+   `aria-label="Career summary"`. Fixed by naming it `Run summary` - the strip summarises the RUN, and
+   the name no longer collides with the nav's own landmark.
+
+Both were caught by guards that already existed, which is the argument for keeping them. Section 45
+predicted the rhythm risk and it materialised as horizontal overflow rather than as spacing; the
+prediction was right about where the risk was and wrong about its mechanism.
+
+### Failability - three proofs, not four
+
+Each red on the revert and each restored from a ONE-TIME snapshot:
+
+  revert ONE Section adoption (scenario)  -> landmark case reds   (Expected 1, Received 0)
+  strip carries a filled primary          -> per-state case reds  (Expected 0, Received 1)
+  retired name reintroduced into a comment-> rename case reds     (survivor list names the file)
+
+The fourth the dispatch asked for - remove `position: sticky` -> the scroll case reds - is IMPOSSIBLE
+here, because stickiness is inert (above). It is not skipped silently; there is no stickiness assertion
+left to make fail.
+
+Section 46 Rule 2, REFINED and worth keeping as written: the rule says the backup comes from
+`git show HEAD:<file>` ONCE. That is right when the state under test is committed, and WRONG here,
+because at failability time HEAD still holds the PRE-adoption file and restoring from it would have
+discarded the very work being proven. The rule's actual requirement is an IMMUTABLE source taken ONCE:
+`git show HEAD:<file>` when committed, a one-time snapshot with an existence guard when not. Both halves
+of that were exercised this dispatch.
+
+### Measured, not assumed: the per-state primary count
+
+The dispatch expected the recommendation-bearing fixture to render exactly ONE `bg-primary-action`.
+Measured: TWO elements carry the class - the rail's `Go to <action>` CTA, and the correction form's
+`Save correction` submit button, which is in the DOM (inside a closed `<details>`, so its innerText is
+empty) whenever `props.correction` is not null. The fresh career renders ZERO.
+
+So the case asserts the invariant that is TRUE and is the one Ruling 2 actually states: the STRIP
+carries none, and the rail's CTA exists. Asserting 'exactly 1' would have been asserting a premise the
+page contradicts. The count-with-labels is logged by the case so the next reader sees the two.
+
+A smaller lesson from the same case: the source-level rename assertion first used `toBe([])`, which
+compares identity, so it FAILED on a perfectly clean tree while reporting a message that reads like a
+survivor list. `toEqual([])` is the assertion. Caught only by running it.
+
+And one copy note: Ruling 2's suggested wording contained an em dash. `RenderedCopyHygieneTest` bans
+the em and en dash in shipped copy, so the strip ships "No recommendation. See the advisor."
+
+### Steps B (4.3) and C (4.4) - DEFERRED
+
+Step A plus two full walk runs (9.4m baseline, 9.2m after) plus the failability cycle consumed this
+batch, which is the shape the dispatcher allows. Neither slice was started, so neither is partial.
+
+### Close
+
+- Walk set after Step A: 60 passed (9.2m), exit 0 - the 56-case baseline plus the four new cases.
+- Static gates: typecheck exit 0, `lint:ui` clean, and the bundle rebuilt to 06:30:17 AFTER the
+  failability patches, because two of those proofs had rebuilt the bundle from patched source.
+- Decision 1: still closed (census 651 against the 708 baseline).
+- KI-70 side effect: STILL OWED. Master's public/build at 03:39:17 reflects peer-dirty source.
+- Deferred cherry-picks, untouched: 47488f0, 68ffe6f, 132cee8, a09ea94, ca5be34, ee8fec1, dd1ac20,
+  plus 920a499 and this section. The four on master under new SHAs (6f91420, 782069b, 2341f75,
+  b8b0def) must not be re-picked.
+- Peer status in the main tree: unchanged and untouched.
+- Operator action list:
+    1. Rule on the containment: fix `container-type` on `main`, or move the sticky elements, or accept
+       that nothing on this screen can be sticky. This also settles whether the wayfinder's documented
+       `md:sticky` has ever worked.
+    2. When the peer commits the ledger append, cherry-pick the deferred list in order.
+    3. When the peer commits the three Vue files, one quiet-tree dispatch rebuilds public/build on
+       master and re-runs the walk set, closing KI-70.
+- Next eligible: 4.3 and 4.4 (deferred, not blocked on anything but budget), then the containment
+  slice, then 4.5 and 4.6, plus the 2.5 remainder.
