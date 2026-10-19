@@ -2567,3 +2567,88 @@ named per slot ("Choose a card for {slot}" / "Replace the card in {slot}").
   edit before this append, and the rise arrived with the peer's `a1ba99c`.
 - **3.7 complete with browser green.** 3.8 pending. 2.5 remainder pending.
 - Next: **3.8 (Preflight), then 2.5's remainder**, then the BaseSelect outer-label defect (10 sites).
+## 33. Dispatch 34 - 3.8 Preflight landed, 2026-10-19
+
+### Step 0 measurements
+
+- Open: HEAD bd9e2e5, origin/master b0b3ec9, ahead 4, working tree clean. Preflight.vue and
+  StartCareerRequest.php both clean, so 3.8 was unclaimed.
+- Session note: the first command failed with "SetNamedSecurityInfoW failed (Win32 5):
+  grantWrite" on the workspace root; the DSH Windows ACL diagnostic repaired it (WRITE_OWNER
+  granted on the root, verified, 1 grant, 0 refusals) and the original command then ran.
+  Recorded so a red first command in a future session has this cause and this fix.
+- DocCitationParity at open: 718 (baseline 708). The slice's only markdown edit is SCREEN_SPEC.md
+  and it adds only .vue citations, which the census does not count; re-measured 718 after the edit.
+
+### What landed (4096b11, 8 files)
+
+- pages/Career/Preflight.vue: retitled "Review and start" and rebuilt as a five-row checklist
+  (state glyph plus a screen-reader word, step name, one-line summary or "Not entered", one Edit
+  door per row). The Warnings section, the Build / Support deck / Target detail blocks, the
+  self-referential "Back to preflight" link and the second row of five Edit buttons are deleted.
+  The heading carries the count ("1 step needs attention" / "N steps need attention") with
+  role="status". "Start career" is the only primary.
+- layouts/SetupLayout.vue: passes a step's head slot through to AppLayout and leaves title empty
+  when head is supplied, so a wizard step can adopt PageHeader with exactly one h1.
+- Career/PreflightController.php: the success flash "Career started for {name}" replaces
+  "Run created.".
+- SCREEN_SPEC.md: held-file exception stated in the commit body. The registry row and the
+  SCR-CAR-010 section are renamed, the state table is rewritten, and a 2026-10-19 dated note
+  records the checklist and its guard.
+
+### Deviations, stated
+
+1. The button carries aria-disabled plus a click guard, not disabled. A disabled control dispatches
+   no click at all, so the plan's focus-the-first-missing-row-on-an-attempted-press is unreachable
+   behind it. The browser case clicks with force and asserts the focus lands; the disabled-state and
+   the focus cases both red on removal.
+2. Five rows, not six: step 6 is the page itself, so it is not a row. "One checklist row per step"
+   is read as the five entered steps.
+3. The plan's "seven duplicate Edit buttons" is five in this tree (the edit row plus the
+   self-referential back link); both are deleted.
+4. StartCareerRequest.php untouched: the disable is client-side and the server already refuses a
+   missing scenario or trainee, so no request change was needed.
+5. The browser case that asserted the server refusal alert is gone: the completeness guard makes the
+   alert unreachable from the UI, and that refusal contract stays covered by CareerPreflightTest's
+   three refusal cases.
+
+### Peer breakage found, and the repair
+
+The whole career-start browser path was red at HEAD, not just Preflight. Step 1 became a radio group
+(3e8e924 "step 1 uses radio cards and a single Continue"), step 2's per-card action became
+trainee-<id> labelled "Select", and step 5 became the CardPicker dialog (3.7).
+tests/utils/start-career.ts and career-preflight.spec.ts both still named the old controls, and
+start-career.ts had no importer until this slice, so career-cockpit.spec.ts,
+career-cockpit-forms.spec.ts, career-training-detail.spec.ts and full-career-journey.spec.ts each
+carry their own stale private walk and were red on their own. This slice re-pointed the shared walk
+and split it into walkWizard (draft, no write) and startCareer, so the Preflight spec can assert the
+checklist without starting a career. Only the shared helper and career-preflight.spec.ts were touched;
+the four specs with private walks stay red and are reported here rather than fixed, per
+"fix failures from this plan only".
+
+### Gates
+
+- CareerPreflightTest: 14 passed (196 assertions).
+- Related feature groups: RulesetVersionVocabularyTest 2, CareerLegacyDeckStepsTest 14,
+  SupportDeckBuilderTest 26, GrandparentRanksTest 4, TraineeCardFormTest 4, EnteredStatCapsTest 11,
+  CatalogStartCareerTest 4.
+- browser (session-private port 8179): career-preflight.spec.ts + setup-shell.spec.ts = 11 passed.
+- typecheck clean; lint:ui clean; pint passed; phpstan [OK] No errors; npm run build success;
+  git diff --check clean; composer lore 473 hits / 75 exempt, composer lore-code 182 hits, no new
+  hit in the lines this slice added.
+- Full suite: 8 failed / 1922 passed. All 8 are pre-existing or out of scope, none from this slice
+  after the em-dash fix below.
+  - RenderedCopyHygieneTest: this slice's Preflight.vue carried an em dash in the row separator
+    (one new offender); fixed in 4096b11. The remaining offenders are committed at HEAD -
+    SourceNote.vue:14, DataTable.vue:116, Pagination.vue:34 (pre-existing).
+  - DocCitationParityTest: 718 vs 708 (pre-existing, section 32).
+  - UiHygieneTest x2: NextDecision.php 8 identifiers (held residual) and CareerStatePanel.vue:130
+    a visible N/A without a title (pre-existing).
+  - CareerBuildTargetTest: reads BuildTarget.vue, which a peer has uncommitted-dirty (modified
+    19:16 during this session); not attributable, not run in isolation.
+  - GrandConcertPanelTest and UnityCupSurfacesTest x2: source_title expectations on the
+    Cockpit / unity-cup props (pre-existing).
+
+### Batch close
+
+- 3.8 complete. Next: 2.5 remainder, then the BaseSelect outer-label defect (ten sites).
