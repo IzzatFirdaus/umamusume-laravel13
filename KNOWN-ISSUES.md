@@ -3149,6 +3149,18 @@ origin: hold until owner identifies. Recommended: (i) — both names suggest tra
 
 **Ref:** Prior dispatch Step 4; current dispatch Step 1e and 1f.
 
+**Correction (2026-10-20, dated erratum, append-only):** the "owner or orphaned"
+question is resolved per file. `analysis_output.txt` (276 bytes, first bytes
+`FF FE 54 00`, 137 NULs) was added by `098abab` — the agent-lineage D-268
+re-home — so it is a **tracked agent artifact**, not scratch; the entry's
+recommendation to `git rm --cached` it is wrong. `base_veteran.vue` (43,302
+bytes, first bytes `FF FE 3C 00`, 21,646 NULs) was added by `b30906a` (the
+peer's cockpit cutover), so it is peer-owned; disposition is the peer's call.
+Neither file is currently read by either gate — the risk is future, when a
+citation resolves into either file. No `git rm --cached` without owner review.
+See §42 in `docs/proposals/execution-ledger-2026-10-17.md` for byte-exact
+evidence.
+
 ### KI-110 `doc_census.py` reads working tree, not committed ref - FILED 2026-10-20 (citation-fix batch close-out), ACCEPTED LIMITATION
 
 **Status: ACCEPTED LIMITATION (documented).** `doc_census.py` reads files from disk, not from git. Its
