@@ -2697,6 +2697,15 @@ own header, and repointing them is still Task 5 of the `PROCESS-PLANS.md` sectio
 shared worktree. It does not re-measure `AGENTS.md`'s §3 documentation map against the new resolver, and it leaves
 `composer docs`' other sections (master line counts, inbound citation counts) exactly as they were.
 
+
+**Erratum 2026-10-19 (Phase 8 documentation pass):** the status banner above reads FIXED IN TREE,
+NOT LANDED, and that is now out of date. The resolver fix this entry describes landed in `c9fcc51`
+(2026-10-12, "fix(docs): close the citation resolver's two false-positive classes"), which is in the
+tree. The two false-positive classes are closed. What the entry leaves open is the UNTRACKED class it
+names below - commit the target, or withdraw the pointer - and that class is counted by the gate by
+design, not excluded: the gate compares the whole dead-citation count against the 708 baseline, and
+GONE and UNTRACKED are two labels on the same total. The reconciliation of the three reported gate
+counts is the ledger's Section 39.
 ### KI-99 The Legacy Lab builder's confirm dropped every recorded rank letter and grandparent detail on a routine save, and the write boundary could pair an empty grandparent's Spark list against the other grandparent's Sparks - FILED 2026-10-13 (remaining-screens UI audit fix pass, Slice 1.1), FIXED IN TREE, NOT LANDED
 
 **Status: FIXED IN TREE, NOT LANDED.** Found by the remaining-screens UI audit (`docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" finding F-E1) and fixed in the same pass. Held on **O-1** with the other unlanded fixes: master is unpushed, and register discipline closes an entry only when the fix is on `origin/master`.
