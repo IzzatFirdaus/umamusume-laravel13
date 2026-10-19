@@ -2478,3 +2478,92 @@ Append-only, verified with `git diff --ignore-cr-at-eol HEAD~1 HEAD -- docs/prop
 - Decision 9: still deferred (Phase 5.4 code change).
 - Next eligible: 3.7 (Step 5: Deck), 3.8, then 2.5 remainder.
 
+
+
+## 32. Dispatch 33 — 3.7 Support deck landed, 2026-10-19
+
+### Step 0 measurements (quoted)
+
+```
+git rev-list --count origin/master..HEAD   ->  15
+list length                                ->  15
+```
+
+They match. `HEAD:PRD.md` `fcdc8ad`, staged set empty, ancestry exit 0. Bundle 14:21 against a 14:31
+JS commit that touched only the spec, so effectively fresh; rebuilt before every browser run.
+Guard **9**. DocCitationParity **709** at open.
+
+### Peer-work audit
+
+The peer's ten commits in this window are documentation: dead-citation removals (`ff0febc`, `6010f19`,
+`22774d5`, `89ce94e`, `b0b3ec9`), two ledger entries (`ac9b257`, `a1ba99c`) and temp-script removal.
+**3.5 (`6c9d099`) and 3.6 (`bbc1814`) carry browser/feature coverage**: `career-build-target` and
+`career-legacy` specs exist, so no coverage debt was incurred there.
+
+`DeckSelect.vue` and `Preflight.vue` were both last written **17 Oct 17:08/17:09**, clean, so 3.7 and
+3.8 were unclaimed. Peer-active files at 14:46 were `BuildTarget.vue` (12:02) and `LegacySelect.vue`
+(12:24).
+
+### The two follow-up audits the prompt asked for
+
+- **`@2xl` usage: 4 occurrences, all in `DataTable.vue`**, with 3 `@container` declarations. The
+  container-query misuse from dispatch 31 stayed contained to the file it was fixed in.
+- **`<BaseSelect` call sites: 75. Ten wrap it in an outer `<label>`**, which leaves the select without
+  an accessible name exactly as the trainee page did: `RaceCard.vue:260`, `Setup.vue:137,152,172`,
+  `Cockpit.vue:670,795`, `LegacySelect.vue:412,536`, `TraineeSelect.vue:406`, `TrainingDetail.vue:673`.
+  **Not fixed here** (out of scope, and two of those files are peer-active). This is a real
+  cross-cutting a11y defect and needs its own slice.
+
+### Native-dialog pattern, read rather than assumed
+
+`RaceCard.vue` and `UraDuelPanel.vue` both: hold the element in a `ref`; open with `showModal()`, which
+supplies the focus trap, the inert background and Escape-to-close; carry ONE `@close` handler that
+returns focus to an `opener` ref, so Escape, the Cancel button and a programmatic close all share it;
+and have no close-guard. **The one adaptation 3.7 needed:** the deck has six openers, so the opener
+element is captured at open time rather than bound once at mount.
+
+### 3.7 — `5f2bfde`, 4 files, +269 −159. Browser **4/4 green**
+
+New `CardPicker.vue` renders the catalog as a native modal; `DeckSelect` is a 3×2 grid of slots; the
+always-visible picker column is gone; `SupportSlot`'s empty state reads "Empty." and its action is
+named per slot ("Choose a card for {slot}" / "Replace the card in {slot}").
+
+**Three defects found by measurement, not by reading:**
+
+1. **`@6xl:grid-cols-3` never matched.** Measured the grid at **960px with two columns**; `6xl` needs
+   about 1152. Moved to `@4xl`, re-measured: **three columns at 309px each**.
+2. **The dialog never opened.** Measured `open: false, modal: false` after the click. Cause:
+   `replace()` ran the Inertia retarget *before* `showModal()`, the visit remounted the component, and
+   the dialog ref pointed at a detached element. The dialog now opens in the click's own tick and the
+   retarget runs with `preserveState`, re-measured: **`open: true, modal: true, visible: true`**.
+3. **The first "button in the list" was the ownership toggle, not the opener**, so the diagnostic was
+   clicking the wrong control. Locators now address the opener by its per-slot name.
+
+**Failability, and one proof that failed honestly:**
+
+- Analysis gate removed -> `Expected: 0, Received: 1`, red. Restored, green.
+- Focus return removed -> **the case still passed.** The browser restores focus to the opener when a
+  modal `dialog` closes, so the explicit `focus()` is redundant and the assertion could not fail on its
+  removal. Per the cannot-fail rule this is recorded rather than papered over: the case asserts the
+  *behaviour* (focus is on the same opener by accessible name) and that behaviour is real and
+  user-visible, but the assertion cannot distinguish our code from the platform's. The explicit
+  `focus()` is kept because it states the intent and covers a non-modal future.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `career-deck-select.spec.ts` | **4 passed (22.6s)** |
+| `CareerLegacyDeckStepsTest` + `SupportDeckBuilderTest` | **40 passed (654 assertions)** |
+| `--filter=UiHygiene` | **9** |
+| typecheck / lint:ui / pint / PHPStan | clean / clean / passed / `[OK] No errors` |
+
+### Batch close
+
+- Ahead **3** at close: the peer pushed `b0b3ec9` and added `a1ba99c`, `4617fac` while this dispatch ran.
+- Todo list: Step 0 completed, Step A completed, Step D this section. **Steps B (3.8) and C (2.5) did
+  not start** because 3.7 consumed the batch, which the prompt's load-bearing rule allows explicitly.
+- DocCitationParity **718** at close, up 9 from the open. **Not mine**: this dispatch made no `.md`
+  edit before this append, and the rise arrived with the peer's `a1ba99c`.
+- **3.7 complete with browser green.** 3.8 pending. 2.5 remainder pending.
+- Next: **3.8 (Preflight), then 2.5's remainder**, then the BaseSelect outer-label defect (10 sites).
