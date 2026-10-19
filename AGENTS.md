@@ -131,7 +131,7 @@ Escalation paths (mirrored in `GOVERNANCE.md` §13):
 
 ## 5. Non-negotiables
 
-**Lore gate (blocking, every role).** The characters are Umamusume, a humanoid race. The
+**Lore gate (advisory gate, binding ban, every role).** The characters are Umamusume, a humanoid race. The
 banned character vocabulary and banned framing are defined in the bar's C-4 section and
 implemented by `tools/lore.php` (`composer lore`, `composer lore-code`) and the `Makefile`
 targets. Rules that matter in practice:
@@ -641,7 +641,7 @@ Do not invent a requirement. When the repository does not settle a question:
   to the dev server's `/__inertia_ssr`, which nothing answers: the request blocks until PHP's
   `max_execution_time` fatals it. `.env.example` sets `INERTIA_SSR_ENABLED=false` with the reason;
   keep that set, or publish `config/inertia.php` with a short `INERTIA_SSR_TIMEOUT`.
-- The lore gate is blocking and easy to trip by accident, including inside this file: the
+- The lore gate is advisory and easy to trip by accident, including inside this file: the
   banned word families are not written out in `AGENTS.md` on purpose. Read the pattern
   list in `tools/lore.php` when a ruling is needed.
 

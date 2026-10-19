@@ -202,12 +202,12 @@ session reaches for most often.
   API keys on this host. Never copy a key into a source file, a doc, a fixture, a log line,
   or your report (`AGENTS.md` §12 "Security and privacy" lists the tracked-file rule and
   `.env.example`).
-- **Lore gate**: advisory. The gate is report-only and always exits 0; the obligation is that
-  it ran, that the report quotes the hit count and its delta from the baseline, and that every
-  hit carries a ruling. The baseline on this tree is 477 hits and 75 exempt lines in docs mode
-  and 182 hits in code mode. Do not type the banned character vocabulary into any artifact
-  (`AGENTS.md` §5 "Non-negotiables" owns the rules, §18 "Known traps" owns the pattern list, and
-  §15 "Definition of done" requires the gate to have run).
+- **Lore gate**: advisory. The obligation is that it ran, that the report quotes the hit
+  count and its delta from the baseline, and that every hit carries a ruling. `AGENTS.md` §9
+  "Testing and validation" carries the mechanism and the baseline. Do not type the banned
+  character vocabulary into any artifact (`AGENTS.md` §5 "Non-negotiables" owns the rules, §18
+  "Known traps" owns the pattern list, and §15 "Definition of done" requires the gate to
+  have run).
 - **The dev SQLite file** holds real Trainer data. It is untracked, not disposable
   (`AGENTS.md` §10 "Commands", Destructive; §9 "Testing and validation").
 
