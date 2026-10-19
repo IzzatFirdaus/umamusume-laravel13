@@ -153,9 +153,10 @@ targets. Rules that matter in practice:
 **The Floor (never, in any change).** No new suppressions (`@phpstan-ignore`, `eslint-disable`,
 `@ts-ignore`, `# noqa`), no stub bodies (`not implemented`, empty `catch {}`, TODO
 placeholders), no deleted or skipped test without owner approval and a stated reason, no
-engine write to a row with `is_manual = true`, no fact stored without provenance, no fetch
-URL outside the `config('uma.sources')` allowlist, no business logic in a controller, no
-inline `$request->validate()`.
+engine write to a row with `is_manual = true`, no fact stored without provenance, no
+matching on display strings (match on the normalized `match_key`), no fetch URL outside the
+`config('uma.sources')` allowlist, no business logic in a controller, no inline
+`$request->validate()`.
 
 **Copy.** No em dashes in shipped copy. A value a run has not recorded renders as `N/A`
 with a `title`, never a default and never a dash. No AI buzzwords, no fabricated claims,
