@@ -3159,11 +3159,11 @@ REORGANIZATION_PLAN.md 1, Rice_Shower_Unity-Cup.md 1.
 
 **What is left.** `docs/proposals/frontend-development-plan.md` holds 6 invalid closers and 4 unclosed
 blocks. `docs/UMAMUSUME_REFERENCE.md` holds 6 unclosed blocks and no invalid closer. Both carry another
-session's uncommitted work, so neither was touched. The first is the structural case the class produces:
-the block opened at its line 921 is still the open block when three later fences are reported against it,
-so stripping the tags there is not enough on its own and a bare closer has to be added.
+session's uncommitted work, so neither was touched. Both are reachable by the same mechanical rule: 3
+closers in `UMAMUSUME_REFERENCE.md` (lines 133, 2683, 2691) and 2 in `frontend-development-plan.md` (lines
+576, 921) were simulated against the real checker, and each reaches zero findings with no other change.
 
 **Fix path (future doc dispatch, once the peer work in those two files is landed).** Strip the info string
-from each closing fence and leave the fence bare; where a tagged line was an opener rather than a closer,
-add a bare closer after the block instead of removing the tag. Re-run the checker on the file until it
-reports zero findings for it, then tree-wide until it exits 0.
+from each closing fence and leave the fence bare. The class is entirely mechanical: no file needed a closer
+added, and no tagged line turned out to be an opener rather than a closer. Re-run the checker on the file
+until it reports zero findings for it, then tree-wide until it exits 0.
