@@ -120,7 +120,10 @@ test('walks the recorded-action card through its three states', async ({ page })
     // The state is a word, never a mark: `CareerBuildTargetTest` keeps the trust glyphs inside
     // `ProvenanceBadge.vue` alone, and the card must not read as a provenance statement.
     await expect(card.getByRole('img', { name: /^Calculated/ }).first()).toBeVisible();
-    await expect(card.getByRole('img', { name: /^Confirmed/ }).first()).toBeVisible();
+    // `confirmed` renders NOTHING — `ProvenanceMark` deliberately omits it from its mark map, because a
+    // figure the tool is sure of does not need a badge (plan 1.7, `91a6047`). This assertion waited for
+    // the retired badge long after it was deleted, and it had never run here to notice.
+    await expect(card.getByRole('img', { name: /^Confirmed/ })).toHaveCount(0);
 
     // The card is the slot, not the history: the door goes to the Timeline, which owns the whole list.
     const door = card.getByRole('link', { name: 'Every action this run took' });
@@ -178,13 +181,18 @@ test('names every absent value and refuses to rank until Energy is entered', asy
     await expect(advisorRegion.getByRole('heading', { name: 'Recommended action' })).toHaveCount(0);
 
     // Seven entries, and no RECOMMENDED marker at all while the advisor declines.
-    await expect(page.getByRole('link', { name: /^Training/ })).toBeVisible();
-    await expect(page.getByRole('link', { name: /^Inheritance/ })).toBeVisible();
+    //
+    // Scoped to the Actions region (slice 4.1): the section nav renders real `Training`, `Events` and
+    // `Race` links, so a page-scoped `/^Training/` matches the nav's own tab as well as the grid's
+    // entry, and Playwright refuses the ambiguity. The `actions` locator moved up here so the two
+    // entries below and the marker assertion share it.
+    const actions = page.getByRole('region', { name: 'Actions' });
+    await expect(actions.getByRole('link', { name: /^Training/ })).toBeVisible();
+    await expect(actions.getByRole('link', { name: /^Inheritance/ })).toBeVisible();
     // Scoped to the Actions region the way the ranked case below is, and for the same reason:
     // `getByText` matches case-insensitively as a substring, and since Phase E the word also occurs
     // in panel prose naming a held field ("Recommended timing and projected benefit are not built",
     // Unity Cup's SCREEN-015 absence). The claim here is about the grid's marker, not about the word.
-    const actions = page.getByRole('region', { name: 'Actions' });
     await expect(actions.getByText('RECOMMENDED')).toHaveCount(0);
 });
 
@@ -333,20 +341,25 @@ test('sizes the cockpit controls to the 44px contract', async ({ page }) => {
     await openCockpit(page);
 
     // WCAG 2.2 SC 2.5.8, floor 44px (plan §12.1). The same sweep `dashboard.spec.ts` runs.
-    // The grid entries are scoped to the Actions region: the section nav (audit 2026-10-12 §3.6)
-    // adds a "Races in this run" link whose name also starts with "Race".
+    // Every grid entry is scoped to the Actions region: the section nav renders real `Training`,
+    // `Events` and `Race` links, so a page-scoped `/^Training/`, `/^Event/` or `/^Race/` matches a nav
+    // tab as well as the grid entry and Playwright refuses the ambiguity. Only the entries were
+    // scoped before; the rest of the grid's own links are scoped here too, which is the same fix.
     const actions = page.getByRole('region', { name: 'Actions' });
+    const sectionNav = page.getByRole('navigation', { name: 'Career sections' });
     const targets = [
         actions.getByRole('link', { name: /^Training/ }),
         actions.getByRole('link', { name: /^Race/ }),
-        page.getByRole('link', { name: /^Rest/ }),
-        page.getByRole('link', { name: /^Recreation/ }),
-        page.getByRole('link', { name: /^Scenario action/ }),
-        page.getByRole('link', { name: /^Event/ }),
-        page.getByRole('link', { name: /^Inheritance/ }),
-        // `exact`, because `getByRole`'s name match is a case-insensitive substring: the career bar's
-        // door is `Cockpit` and the race strip's own door reads `Go to the Cockpit`.
-        page.getByRole('link', { name: 'Cockpit', exact: true }),
+        actions.getByRole('link', { name: /^Rest/ }),
+        actions.getByRole('link', { name: /^Recreation/ }),
+        actions.getByRole('link', { name: /^Scenario action/ }),
+        actions.getByRole('link', { name: /^Event/ }),
+        actions.getByRole('link', { name: /^Inheritance/ }),
+        // The career bar's `Cockpit`/`Dashboard` door pair was replaced by the section nav (slice 4.1),
+        // so the Cockpit entry is the nav's OWN tab now and is scoped to it, and the Dashboard entry is
+        // the shell's own nav. Both are controls a Trainer uses, so both stay in the sweep; only their
+        // scope changed.
+        sectionNav.getByRole('link', { name: 'Cockpit', exact: true }),
         page.getByRole('link', { name: 'Dashboard' }).first(),
         page.getByRole('link', { name: 'Record the first turn through Training' }),
     ];
@@ -408,16 +421,18 @@ test('records Energy through the cockpit correction and then marks one action', 
     await expect(
         advisorRegion.getByRole('img', { name: /^Calculated/ }).first(),
     ).toBeVisible();
-    // Three constants back the ranked answer (the advisory line, the session cost, Wit's cost), so the
-    // Confirmed locator resolves to more than one node and `.first()` is the strict-mode requirement.
-    await expect(
-        advisorRegion.getByRole('img', { name: /^Confirmed/ }).first(),
-    ).toBeVisible();
-    await expect(advisorRegion.getByRole('img', { name: /^Confirmed/ })).toHaveCount(3);
+    // Three constants back the ranked answer (the advisory line, the session cost, Wit's cost), and all
+    // three are `confirmed`, which renders NO mark at all — `ProvenanceMark` omits it from its mark map
+    // because a figure the tool is sure of does not need a badge (plan 1.7, `91a6047`). The retired
+    // assertion asked for three `Confirmed` badges; the mark that must exist here is the `Calculated`
+    // one asserted above, and the exception states below it.
+    await expect(advisorRegion.getByRole('img', { name: /^Confirmed/ })).toHaveCount(0);
     // The constant a figure rests on prints its source and read date visibly, not only in a tooltip
-    // (ADR-0001 §2 and §7, owner ruling 5a). The source string carries a section anchor between the
-    // file name and the date, so the pattern allows it rather than pinning one spelling.
-    await expect(advisorRegion.getByText(/Source: UMAMUSUME_REFERENCE\.md.+read 20\d\d-\d\d-\d\d/).first()).toBeVisible();
+    // (ADR-0001 §2 and §7, owner ruling 5a). The source names the PUBLISHER: `844aebf` removed the
+    // `UMAMUSUME_REFERENCE.md §…` document path from `config/advisor.php`, because a path a Trainer
+    // cannot open is not provenance. This pattern was still pinned to the retired path.
+    await expect(advisorRegion.getByText(/Source: .+read 20\d\d-\d\d-\d\d/).first()).toBeVisible();
+    await expect(advisorRegion.getByText(/UMAMUSUME_REFERENCE/)).toHaveCount(0);
     await expect(advisorRegion.getByRole('heading', { name: 'What would change this' })).toBeVisible();
 
     // The Trainer's own button, not an automatic execution, and named for the action it goes to.

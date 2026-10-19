@@ -208,7 +208,14 @@ test('renders the scenario matrix published row when the turn records a facility
     // Citations, divergence notes, supports count, target deficit, and risk defer to the
     // Inspect details panel (progressive disclosure): open it before asserting on them.
     await speedCard.getByRole('button', { name: 'Inspect details' }).click();
-    await expect(speedCard.getByText(/Declared constant: UMAMUSUME_REFERENCE/)).toBeVisible();
+    // It names a PUBLISHER, never a repository document. `844aebf` removed the
+    // `UMAMUSUME_REFERENCE.md §…` path from `config/advisor.php`, because a path a Trainer cannot open
+    // is not provenance; this assertion still waited for the retired string, and it was invisible at
+    // the time for the same reason the three NextDecision pins were: no bundle existed to run it.
+    // Rewritten to the contract that ships, so it fails if the path comes back.
+    const declaredConstant = speedCard.getByText(/Declared constant:/).first();
+    await expect(declaredConstant).toBeVisible();
+    await expect(declaredConstant).not.toContainText('UMAMUSUME_REFERENCE');
     // Unity Cup's one published Global divergence, visible where the scenario's costs render
     // (the wiring's Caveat 3): Global pays +2 SP where the JP table prints +4.
     await expect(speedCard.getByText(/Global SP payouts for Unity Cup match URA Finale/)).toBeVisible();
@@ -257,10 +264,17 @@ test('expands and collapses the details by keyboard, and keeps the tab order wit
     // the stop after the toggle is the region's first exclusion, it opens under the same Enter that
     // opens it for a mouse, and closing the region takes the stops out again.
     await page.keyboard.press('Tab');
-    const firstExclusion = details.locator('summary', { hasText: 'No source publishes a failure curve' });
+    // The region's FIRST exclusion, not a hard-coded one. The claim is about where the document's tab
+    // order lands after the toggle, and WHICH reason comes first is the region's own order: the
+    // template renders an `AbsenceValue` for the Energy-after reading (TrainingCard.vue:368) before the
+    // failure one (:388), so when a card cannot compute its Energy the first stop is that marker and the
+    // hard-coded failure summary is the second. Measured: the locator resolved throughout and the focus
+    // was inside the region, so the stale part was this assertion, not the focus behaviour. The reason
+    // text itself is covered by 'names each exclusion on a disclosure...'.
+    const firstExclusion = details.locator('summary').first();
     await expect(firstExclusion).toBeFocused();
     await page.keyboard.press('Enter');
-    await expect(reasonOf(firstExclusion)).toHaveText(/ADR-0001 §3 keeps a numeric/);
+    await expect(reasonOf(firstExclusion)).toBeVisible();
 
     await page.keyboard.press('Shift+Tab');
     await expect(toggle).toBeFocused();
@@ -288,7 +302,11 @@ test('reaches the screen from the Cockpit and records the choice it carries', as
     // The door D9 opens: the Cockpit's Training entry now leads here rather than to the run screen.
     await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await page.getByRole('link', { name: /^Training/ }).click();
+    // Scoped to the Actions region (slice 4.1): the section nav also carries a `Training` tab that
+    // leads to the same screen, so a page-scoped `/^Training/` matches two links and Playwright
+    // refuses the ambiguity. This case is about the grid's own entry — the door the Cockpit opens —
+    // so that is the one it clicks.
+    await page.getByRole('region', { name: 'Actions' }).getByRole('link', { name: /^Training/ }).click();
     await page.waitForURL(/\/training$/, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 

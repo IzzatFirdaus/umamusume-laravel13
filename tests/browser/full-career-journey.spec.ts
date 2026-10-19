@@ -107,7 +107,12 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     ).toBeVisible();
 
     const teamEditor = page.locator('details', { has: page.getByText('Edit team state') });
-    await teamEditor.locator('summary').click();
+    // The panel is `open` while the career is active — Cockpit.vue sets `:open="isActive"`, because the
+    // panel the Active screen has always shown stays shown and only closes once the career has ended.
+    // The journey used to click the summary first, which TOGGLED IT CLOSED and left the input hidden, so
+    // the fill sat at its 300s budget waiting for an element that could never become visible. Asserting
+    // the contract instead of toggling it is what makes the next line possible.
+    await expect(teamEditor).toHaveAttribute('open', '');
     await teamEditor.locator('input[name="team_name"]').fill('Blue Bloom');
     await teamEditor.locator('input[name="spirit_bursts_count"]').fill('6');
     await teamEditor.getByRole('button', { name: 'Save team state' }).click();
