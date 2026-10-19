@@ -4134,3 +4134,108 @@ Step 0 premise, and the next dispatch verifies each by reading the current Cockp
   is no longer the blocker); the KI-70 side effect on master's public/build at 03:39:17 is still owed;
   and the peer-ledger-blocked cherry-picks are 47488f0, 68ffe6f, 132cee8, a09ea94, ca5be34, plus this
   section. 6f91420, 782069b, 2341f75 and b8b0def are on master under new SHAs and must not be re-picked.
+
+## 47. Dispatch 45 - 4.2's adoption hit two measured premise conflicts; 4.x held, 2026-10-20
+
+### Step 0 measurements
+
+- Worktree HEAD dd1ac20, `git status --porcelain` EMPTY.
+- Peer's ledger append: STILL DIRTY (` M docs/proposals/execution-ledger-2026-10-17.md`), so the
+  STOP-and-cherry-pick branch did not fire and 4.x proceeded. No cherry-pick was attempted.
+- Worktree bundle rebuilt twice: it read stale at 04:31:25 against a resources/js tip of 04:51:45, so
+  `npm run build` ran to exit 0 and the manifest is now 05:09:35. Master's public/build was not touched.
+- The five pairings re-verified by reading Cockpit.vue at this HEAD. Three of them are as Section 45
+  described; TWO are not, and both change the plan. See below.
+
+### Finding 1 - `career-timeline-heading` is not adoptable by Section as written
+
+Section 45 called it a static title with grid classes and `v-if="isActive"`. Reading it shows a
+second shape that no summary recorded, and the file itself documents it:
+
+    <h2 v-if="isActive" id="career-timeline-heading" ...>Races in this run</h2>
+    <!-- Once the career has ended the race list is history, not a decision, so it collapses below the
+         fold. The heading id moves onto the `summary` so the section keeps the one accessible name it
+         has while open. -->
+    <details v-else data-region="races-in-this-run" ...>
+        <summary id="career-timeline-heading" ...>Races in this run</summary>
+        <RunRaceStrip ... />
+    </details>
+
+So the id does NOT live on a heading in both states: it moves onto a `<summary>` inside a `<details>`
+once the career ends. `Section` renders a `<section>` plus a heading and can never produce a
+`<summary>`, so adopting this pairing would either drop the ended-career shape's accessible name or
+force the disclosure out of the Section. It is a restructure, not a substitution, and the choice is a
+design decision rather than something to improvise inside an adoption commit.
+
+The other four are as planned, with their own constraints noted for the next pass:
+
+  cockpit-summary-heading   DYNAMIC title, `v-if="!isActive"`, `mt-3`
+  career-closed-heading     DYNAMIC title, `v-else`, carries a `<p>` into the slot
+  career-empty-heading      static title, `v-if="empty"`, carries a `<p>`, `mb-3`
+  career-scenario-heading   static title, grid classes
+
+And an anchor coupling Section 45 did not record: the ids `career-scenario-heading` and
+`career-timeline-heading` ALSO back the in-page wayfinder's anchors (`Cockpit.vue:167-168`,
+`{ href: '#career-scenario-heading' }` and `{ href: '#career-timeline-heading' }`), so the id must stay
+on the element the anchor scrolls to. The new `id` prop puts it on the heading, which satisfies the
+active shape of both; it cannot satisfy the ended shape of the timeline one, per above.
+
+### Finding 2 - the primary-count baseline is 0, not 1, and the recommendation is not on the page
+
+Measured with a temporary probe spec (written, run, then DELETED; the tree is clean):
+
+    PROBE-PRIMARY-COUNT=0          a freshly-started career with no logged turn renders ZERO
+                                   `bg-primary-action` elements
+    PROBE-LANDMARK=Scenario -> 1   resolves today
+    PROBE-LANDMARK=No turn recorded yet -> 1   resolves today
+    PROBE-LANDMARK=Summary -> 0    correct: that heading's title is dynamic
+    PROBE-CORRECTION-OPEN=absent   the correction disclosure is not rendered for this run
+
+Two consequences, both of which the 4.2 plan assumes otherwise:
+
+1. The recommendation IS a primary, and it is rendered by `NextDecision.vue:222-227`
+   (`<a :href="recommended?.action_url" class="... bg-primary-action ...">Go to ...</a>`) INSIDE the
+   Advisor rail, and only when the advisor recommends. The existing suite proves that state exists: it
+   queries `region 'Advisor'` plus `link /^Go to /` in career-cockpit.spec.ts:103 and :439. So the
+   invariant 'the count stays exactly 1' is true only in a RECOMMENDATION-BEARING state, and the new
+   assertion must use that fixture rather than the base one. Asserting 1 on the base fixture would fail
+   at 0 and the failure would look like a strip bug.
+2. The plan's 'move the existing recommendation into the strip; delete the old render location' means
+   editing `NextDecision.vue`, which is NOT in 4.2's file list, and removing the CTA from the rail
+   where it currently sits beside the reasoning that justifies it. That is a UX and component-contract
+   change, not a relocation inside one page.
+
+### 4.2, 4.3 and 4.4 - NOT STARTED
+
+4.2 is BLOCKED-ON-PREMISE-CONFLICT (Findings 1 and 2) and BLOCKED-ON-BUDGET. 4.3 and 4.4 are
+BLOCKED-ON-BUDGET. The dispatch's own rule applies: each slice lands source plus browser case plus
+failability, or names a specific blocker. Two of the three named here are specific, and neither is
+about scheduling.
+
+No source was changed, so nothing is partial. The two findings above are what a full-budget dispatch
+would otherwise have discovered mid-edit, after writing a strip against a page that renders no
+primary and adopting a section whose name lives on a summary.
+
+### Close
+
+- Worktree: dd1ac20 plus this section; clean. The temporary probe is deleted (verified: `git status
+  --porcelain` clean before this append except the ledger itself).
+- Bundle: 05:09:35 in the worktree, fresh for the next gate. Master's public/build is still 03:39:17
+  and still reflects peer-dirty source (KI-70 owed).
+- Decision 1: still closed (census 651 against the 708 baseline).
+- Deferred cherry-picks unchanged and untouched: 47488f0, 68ffe6f, 132cee8, a09ea94, ca5be34,
+  ee8fec1, dd1ac20, plus this section. The four on master under new SHAs (6f91420, 782069b, 2341f75,
+  b8b0def) must not be re-picked.
+- Peer status in the main tree: unchanged and untouched.
+- Operator action list:
+    1. Rule on the timeline pairing: keep the ended-career disclosure outside `Section` (adopt only the
+       active shape) or leave that pairing hand-rolled. Four of the five are adoptable either way.
+    2. Rule on where the recommendation lives: leave the CTA in the rail and let the strip show the
+       same recommendation WITHOUT a filled class (count stays 1), or move it into the strip and demote
+       the rail's CTA. Both keep one primary; they differ in where the reasoning sits relative to it.
+    3. When the peer commits the ledger append, cherry-pick the deferred list in order.
+    4. When the peer commits the three Vue files, one quiet-tree dispatch rebuilds public/build on
+       master and re-runs the walk set, closing KI-70.
+- Next eligible: 4.2 once those two rulings land, then 4.3 and 4.4, then 4.5 and 4.6, plus the 2.5
+  remainder. The walk-set baseline run was NOT completed this dispatch (the premise conflicts were
+  found first), so it remains owed at the start of the next one.
