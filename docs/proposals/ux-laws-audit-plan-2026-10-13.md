@@ -273,7 +273,7 @@ prioritized remediation plan.
 - **Its findings corroborate the three audits independently** — the stepper "done" P0 (`SetupLayout.vue:45-46`),
   the Preflight duplication, the undifferentiated `N/A`, and the advisor track's missing width floor — a fourth
   confirmation alongside `setup-wizard-ui-audit` §2.2 and the cockpit audit.
-- **The cluster-audit rubric already encodes a cognitive-load checklist** (`.scratch-uma/ui-audit-2026-10-13/rubric.md`:
+- **The cluster-audit rubric already encodes a cognitive-load checklist** (.scratch-uma/ui-audit-2026-10-13/rubric.md:
   single focus, chunking ≤ 4, grouping, one thing at a time, ≤ 4 options at a decision point, no memory bridge,
   progressive disclosure) — the instrument for the Miller / Hick's / Choice Overload / Cognitive Load rows.
 
@@ -547,7 +547,7 @@ Per `AGENTS.md` §9's cost-aware escalation. Nothing below was run for this plan
   markdown files; raw scrapes, game JSON, a screenshot inventory and build scripts), so nothing was drawn
   from it beyond the merge-tool provenance of `UX-DELIVERABLES.md`; `docs/audits/UX-AUDIT-REPORT.md`
   (2026-10-13) is a first partial laws pass, reconciled in §2.9 with a durability caveat, and
-  `.scratch-uma/ui-audit-2026-10-13/rubric.md` supplies the cluster-audit cognitive-load checklist.
+  .scratch-uma/ui-audit-2026-10-13/rubric.md supplies the cluster-audit cognitive-load checklist.
 - **Not delivered, stated plainly:** no law verdict was produced here; this is the plan that says how to
   produce them. No browser measurement, no contrast arithmetic, no suite run, no lore gate. The HLF was
   read as reference; nothing in it was implemented or copied.

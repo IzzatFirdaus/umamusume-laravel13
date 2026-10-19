@@ -3100,3 +3100,139 @@ section contributes is the two decisions pre-made, the premise correction, and t
   Step 0 must re-check StatBand.vue (absent) and whether the peer's cockpit cutover already did the
   sticky/rail/accordion work, so the slice does not redo it. Then 4.3, 4.4, then 4.5 + 4.6. The 2.5
   remainder is the peer-dirty LegacySelect.vue wrappers, still the peer's to land.
+
+## 39. Dispatch 39 - Phase 8.0: the DocCitationParity gate-state reconciliation, 2026-10-19
+
+### The contradiction, as reported
+
+Three reports, one gate, three numbers. The gate is `tests/Feature/DocCitationParityTest.php`:
+`DOC_CITATION_BASELINE = 708` (line 44), the assertion `toBeLessThanOrEqual` (line 56), and the
+count read from `python tools/doc_census.py` (line 47). The census prints
+`dead markdown links: N (G GONE, U UNTRACKED)`; N is the number the gate compares, and N is G + U.
+
+| Report | Claimed | What that report's own commit actually measures |
+|---|---|---|
+| Section 29 batch close, Step C | 708, green, 2 passed / 5 assertions | 718 |
+| Sections 30 to 34 | 718, red | 718 |
+| This dispatch, at open | 711, red | 711 in this working tree |
+
+### The counting rule, in one line
+
+The test compares N, the total dead-citation count `tools/doc_census.py` prints, which is GONE
+(cited and absent from disk) plus UNTRACKED (on disk, not in git). Both are counted. There is no
+filter between the census and the assertion.
+
+### (a) is ruled out: the counting method did not change
+
+`git log --oneline tests/Feature/DocCitationParityTest.php` returns three commits, the newest
+`c9fcc51` (2026-10-12). All three reports are 2026-10-19, so no commit touched the gate between
+them. `tools/doc_census.py` last changed its resolver in the same `c9fcc51`; the only later touch
+(`8e026fd`, 2026-10-13) added a fence report to `main()` and left `dead_links()` alone.
+
+### (b) is ruled out: one metric, one tool
+
+`tools/doc_census.py` takes no arguments and has no modes (`Usage: python tools/doc_census.py`),
+and the Pest gate is its only consumer of the number. 708, 711 and 718 are the same metric, read
+from the same tool, in all three reports.
+
+### (c) is the answer: the state moved, and the commits are named
+
+Measured with `git worktree add --detach` at each commit and `python tools/doc_census.py` inside
+the worktree, so each number is that commit's own tree and not a working tree:
+
+| Commit | Time | Census |
+|---|---|---|
+| `a1ba99c^` | 15:22 | 708 (705 GONE, 3 UNTRACKED) |
+| `a1ba99c` | 15:22 | 718 (715 GONE, 3 UNTRACKED) |
+| `bd9e2e5` .. `555fd3e` | 15:42 to 20:58, six commits | 718 |
+| `c26bb72` | 20:59 | 708 (705 GONE, 3 UNTRACKED) |
+| `6b625ed` | 22:20, HEAD at open | 708 (705 GONE, 3 UNTRACKED) |
+
+### The Section 29 report was true as measured and wrong as landed
+
+Section 29 measured 708 in the working tree, after its own eighteen citation removals and before
+its own ledger append. It then appended Section 29. That append touched exactly one file, this
+ledger, and the ten backticked paths its prose introduced put the committed state at 718. The
+"708 (baseline 708), 2 passed, 5 assertions)" line is a true record of a measurement; it is not a
+record of the commit that measurement produced. Sections 30 onward measured 718 and were right to.
+
+The peer commit `c26bb72` (2026-10-19 20:59, "docs: close the 10 dead citations introduced
+between 708 and 718") closed exactly those ten and returned the committed state to 708. That is
+the 718-to-708 repair Section 34 assigned to a citations dispatch, landed by the peer.
+
+### The finding: the gate's number is host-local, not commit-local
+
+This is the part no single report could see, because each one measured a different tree.
+
+`tools/doc_census.py` reads the files from disk and classifies a citation as UNTRACKED when its
+target exists on disk but is not in `git ls-files`. So the same commit measures 708 in a fresh
+clone and 711 in this shared working tree. Of the 11 that differ, 3 are another session's
+uncommitted markdown, and 8 are the host-local ignored directories (`.scratch-uma/`, `.copilot/`,
+`.qoder/`) that exist on this machine and in no clone, so the same refs read GONE in a clone and
+UNTRACKED here.
+
+Consequence for this ledger: a "DocCitationParity: N" line records a tree, not a commit, unless
+it names the tree. Every line here that does not name one is a working-tree reading, including
+the 718 lines in Sections 30 to 34 and the 711 lines in Sections 35 to 38.
+
+### What this dispatch changed, and why the gate is green again
+
+Seven machine-local paths and three case-mismatched pointers were repointed. Sentence text is
+unchanged in every case; only link formatting or path casing moved.
+
+- `docs/audits/full-audit-2026-10-16.md`, `docs/proposals/ux-laws-audit-plan-2026-10-13.md`,
+  `docs/research-scratch/PROCESS-PLANS.md` and
+  `docs/research-scratch/screenshot-notes/PHASE-B-REPORT.md`: seven citations to `.scratch-uma/`,
+  `.copilot/` and `.qoder/` paths lost their backticks. Those are gitignored tool directories on
+  this host and in no clone, so the links resolve for nobody.
+- `docs/research-scratch/PROCESS-PLANS.md`: three citations that spelled the root agent file in
+  lower case are now `AGENTS.md`.
+  The file is tracked and present; the census compares against git's index, which is
+  case-sensitive, while the filesystem is not, so a lowercase pointer read as UNTRACKED here and
+  as GONE on any case-sensitive filesystem. The pointer was mis-cased.
+
+The three UNTRACKED that remain in this working tree are another session's uncommitted
+`CHANGELOG.md` and `docs/research-scratch/GOVERNANCE.md` edits, which cite two untracked files;
+they are not this dispatch's to touch. The fourth is this ledger's own line 58, which cites an
+owner-check report under `.scratch-uma/`; the ledger is append-only, so it stays.
+
+### KI-98: the gate and the register agree
+
+`KNOWN-ISSUES.md` KI-98 was checked, because the dispatch asked whether the gate counts UNTRACKED
+while KI-98 treats untracked files as tolerated. It does not. KI-98's own proving commands
+record `dead markdown links: 665 (642 GONE, 23 UNTRACKED)` with the gate passing: UNTRACKED has
+always been counted, and the gate passed because the TOTAL was under the bar, not because the
+untracked lines were excluded. The "tolerated" language belongs to the gate's own header, where
+it covers GONE provenance lines inside masters. KI-98 also states the remedy for the untracked
+class - commit the target, or withdraw the pointer - which is what the repointing above does.
+
+The one stale line in KI-98 is its status banner, "FIXED IN TREE, NOT LANDED": the resolver fix
+is `c9fcc51`, committed on 2026-10-12 and in the tree since. KI-98's body is right about the
+resolver; only the status banner and the register's summary row are out of date. KI-98's other
+open claim, that the remaining 636 GONE lines are mostly provenance records inside masters, is
+consistent with the census's own per-target summary today.
+
+### Carried forward, not acted on
+
+- `docs/research-scratch/PROCESS-PLANS.md` lines 538 and 643 record that two absent documents
+  are "cited by AGENTS.md but absent from the tree". One of them,
+  `docs/research-scratch/GOVERNANCE.md`, is tracked and present today, so that dated claim is now
+  false. It is a dated claim in a master, so the repair is a dated erratum, not a rewrite, and
+  it belongs to the stale-reference sweep rather than to this slice.
+- A-11 in the same master registers the untracked-citation class as a live Major finding with a
+  pending owner gate (O-3). The repointing above executes only the "withdraw the pointer" half,
+  which adds nothing to git and changes no decision. The other half, committing the targets,
+  still needs the owner.
+
+### Close
+
+- DocCitationParity: 711 at open, 703 at close, against a 708 bar. Repointing took it to 706; the
+  three case corrections took it to 703; this append adds none.
+- DocAccuracyTest: 3 passed, 80 assertions, exit 0.
+- Ahead count at close: origin/master b0b3ec9, count 21 before this dispatch's commit.
+- Peer status at close: unchanged since the open. This dispatch touched no peer-dirty file; the
+  three UNTRACKED above are the peer's and were left alone.
+- Temp artifacts created by this dispatch and deleted before the close: the detached worktrees
+  under a scratch directory outside the repository, one scratch clone of HEAD, and the scratch
+  census outputs. The worktrees were removed and git's worktree list pruned, so no reference to
+  them remains in the repository.

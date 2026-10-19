@@ -144,7 +144,7 @@ All five registered worktrees plus the main tree resolve `--git-common-dir` to
   `scripts/`. This is a **desktop-packaging branch that `AGENTS.md` §12 does not contemplate** (loopback-only,
   no deploy path) and it is unmerged.
 - **td-cockpit** — ownership provenanced to session **a430** (referenced only in
-  `.scratch-uma/a430/h14-prompt.md`, `shots*.mjs`, `wt-spec*.log`; zero references in any tracked file).
+  .scratch-uma/a430/h14-prompt.md, `shots*.mjs`, `wt-spec*.log`; zero references in any tracked file).
   Top level holds `README.md`, `SCREEN_SPEC.md`, `SKILL.md`, `VERSION.md`, `tsconfig.json`,
   `vite.config.js`, `node_modules` (**a symlink to the main tree's**), and `public/`, `resources/`, `routes/`,
   `storage/`, `test-results/`, `tests/`, `tools/`, `vendor/`. **Absent: `app/`, `bootstrap/`, `config/`,
