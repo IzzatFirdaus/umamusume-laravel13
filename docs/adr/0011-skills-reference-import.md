@@ -16,7 +16,7 @@ percentage**.
 
 `skills` held ten rows of names. `SkillSeeder` said cost, type and uniqueness "arrive with the fetch
 engine", and no fetch engine for skills was ever built: `config/uma.php` declared two sources and `Parsers/`
-held three parsers, none of them skills. The skills audit pass (`SKILLS-GAPS.md`) found the GameTora skills
+held three parsers, none of them skills. The skills audit pass (SKILLS-GAPS.md) found the GameTora skills
 document and measured it before writing a column against it.
 
 **Three findings changed the shape of this decision**, and each one overturned what the brief assumed:
@@ -107,5 +107,5 @@ of the schema until a screen needs them.
   `ADR-0010` (the Spark target this makes resolvable), `ADR-0012`, `ADR-0018`
 - `GametoraSkillsParser`; `tests/Feature/GametoraSkillsParserTest.php`,
   `tests/Feature/SkillSearchScreenTest.php`, `tests/Feature/EpithetRewardNamesTest.php`
-- `docs/design-research/SKILLS-GAPS.md`; `docs/UMAMUSUME_REFERENCE.md` §1.2.6, §2.7
+- docs/design-research/SKILLS-GAPS.md; docs/UMAMUSUME_REFERENCE.md §1.2.6, §2.7
 - `CONSTRAINTS.md` C-4, D-20, D-30, D-210; KI-5, KI-23, KI-24

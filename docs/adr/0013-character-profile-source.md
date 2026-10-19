@@ -18,7 +18,7 @@ collision in `ADR-0012`'s favour. The full body is preserved at
 ## What was absorbed, and what was moot
 
 - **Field inventory, coverage table and the `rl`/`sex`/`race` allowlist obligation** move into `ADR-0012`
-  Decision 4 and `docs/data/2026-09-30-characters-source-probe.md`.
+  Decision 4 and docs/data/2026-09-30-characters-source-probe.md.
 - **The schema decision is moot.** Master's `2026_09_29_182820_create_umamusume_profiles_table.php` landed
   first; this branch's `2026_09_30_120000_…` migration and its `height_cm`/`bust_cm`/`waist_cm`/`hip_cm`
   columns are not what shipped — master stores `height`/`three_sizes_b`/`_h`/`_w`.
@@ -42,5 +42,5 @@ and the collision is an owner call — which the owner resolved on 2026-09-30 in
 ## Links
 
 - `ADR-0012` Decision 4 (the authority), `PRD.md` A-1, A-7, FR-A-6, `docs/research-scratch/GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar, C-1 to C-9)" C-4
-- `docs/data/2026-09-30-characters-source-probe.md` (the coverage measurements)
+- docs/data/2026-09-30-characters-source-probe.md (the coverage measurements)
 - Full body: `archive/adr/0013-character-profile-source.md`

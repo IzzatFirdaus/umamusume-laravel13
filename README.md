@@ -271,7 +271,7 @@ No dedicated `CONTRIBUTING.md` exists. Actual practice, from `AGENTS.md` and the
 
 ## Security
 
-No `SECURITY.md` exists; the model is documented in `ARCHITECTURE.md` §8:
+No security document exists; the model is documented in `ARCHITECTURE.md` §8:
 
 - No auth surface, no multi-user support, no public deploy. Serve on loopback only.
 - Fetched pages are untrusted input: parsed as data, never rendered unescaped (Blade auto-escape, no `{!! !!}` on source data), URLs found in bodies never followed (config allowlist only).

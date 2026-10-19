@@ -2934,7 +2934,7 @@ plans into the corpora") deleted `CONSTRAINTS.md` and `PLAN.md` and left every c
 those names pointing at nothing: `tools/doc_census.py` now reports **980** dead links, and the two most-cited
 targets are the deleted files themselves (161 `CONSTRAINTS.md`, 56 `docs/research-scratch/DESIGN-CORPUS.md`,
 48 `DESIGN.md`, 45 `PLAN.md`, 35 `docs/research-scratch/GOVERNANCE.md`, 29 `docs/research-scratch/GOVERNANCE.md`,
-27 `RAW-FINDINGS.md`, 23 `docs/proposals/Our-Grand-Concert-plan.md`). The same commit left `AGENTS.md` §3's
+27 RAW-FINDINGS.md, 23 `docs/proposals/Our-Grand-Concert-plan.md`). The same commit left `AGENTS.md` §3's
 documentation map describing `CONSTRAINTS.md` as "a pointer to `docs/research-scratch/GOVERNANCE.md`" and
 `PLAN.md` as "a pointer to `docs/research-scratch/PROCESS-PLANS.md`" - rows for files that no longer exist,
 in the file that tells an agent where the quality bar lives.
