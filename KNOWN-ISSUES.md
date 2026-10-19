@@ -3059,3 +3059,55 @@ working tree, because the rewrite is now committed. Both residuals survive that 
 reports GONE CLAUDE.md:12 -> CONSTRAINTS.md and GONE CLAUDE.md:247 -> CLAUDE.local.md. The entry stays
 OPEN and the fix is still owed by the peer, who owns the file. The dispatch ledger's Section 41 carries
 the pre-rewrite line number.
+
+### KI-108 `docs/proposals/execution-ledger-2026-10-17.md` contains NUL bytes in the working tree - FILED 2026-10-20 (citation-fix batch close-out), OPEN, PEER-OWNED
+
+**Status: OPEN, peer-owned.** `docs/proposals/execution-ledger-2026-10-17.md` carries approximately 6571
+NUL bytes in the working tree. All committed versions (HEAD, bd9e2e5, 4db04fd) are clean UTF-8; the NULs
+exist only in the peer's uncommitted edits (git status: ` M`).
+
+**Origin:** peer session's in-flight work. Not introduced by `bd9e2e5` — that commit is clean at its own
+tree. The file was first written by `bd9e2e5` ("docs(ledger): land 3.7; record primitive-contract
+findings", 89 insertions) and is tracked.
+
+**Gate impact:** `doc_census.py` reads the ledger with `errors="replace"`, so NULs are silently replaced —
+the file contributes to the census count but its NUL content is not visible to either gate. `lore.php`
+uses `git grep`, which treats the file as text and can read it, but NUL-containing lines may not match
+grep patterns as expected.
+
+**Fix:** peer re-encodes as UTF-8 without BOM and commits. No agent action while the file is peer-dirty.
+
+**Ref:** Prior dispatch Step 5; current dispatch Step 1g.
+
+### KI-109 `analysis_output.txt` and `base_veteran.vue` are UTF-16LE with BOM and NUL - FILED 2026-10-20 (citation-fix batch close-out), OPEN, OWNER DECISION REQUIRED
+
+**Status: OPEN.** Both files are UTF-16LE with byte order mark (first bytes `FF FE`) and contain NUL
+bytes. git treats both as binary: `git diff --stat` and `git grep` return no matches for either.
+
+**Gate impact:** `lore.php` uses `git grep`, so both files are silently skipped. `doc_census.py` only
+scans `.md`, so neither is read by the census. Neither file is a citation target today; the impact is
+future — any citation that points into either file will be counted as a dead link because git cannot
+see the content.
+
+**Fix path:** (i) if the files are diagnostic output with no ongoing value: `git rm --cached` + add to
+`.gitignore`; (ii) if they are real source: re-encode as UTF-8 and check them in; (iii) if unknown
+origin: hold until owner identifies. Recommended: (i) — both names suggest transient analysis artifacts.
+
+**Ref:** Prior dispatch Step 4; current dispatch Step 1e and 1f.
+
+### KI-110 `doc_census.py` reads working tree, not committed ref - FILED 2026-10-20 (citation-fix batch close-out), ACCEPTED LIMITATION
+
+**Status: ACCEPTED LIMITATION (documented).** `doc_census.py` reads files from disk, not from git. Its
+count includes uncommitted edits (peer sessions' in-flight changes) and any file present on disk but
+not yet `git add`ed. Different working trees at the same HEAD produce different counts.
+
+**Gate relationship:** the Pest gate (`DocCitationParity`) reads the same census. The gate is
+authoritative only when the working tree equals the committed tree (i.e. no peer-dirty state). The
+current count of 648 measures a working tree where the ledger is NUL-corrupted by peer edits — neither
+this number nor the prior dispatch's 657 reflects a clean committed state.
+
+**Documented at:** `AGENTS.md` line 190 (tools/ inventory), `README.md` lines 192-198
+("The census count is host-local; the gate number is the committed one.").
+
+**Fix path (future code dispatch):** read from a git ref instead of disk. Deferred — code change, out of
+doc scope.
