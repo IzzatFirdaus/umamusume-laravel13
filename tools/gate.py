@@ -2,7 +2,7 @@
 
 Note for the Lore Guardian: this checker names the banned patterns in order to
 grep for them, which is the same practice the root CONSTRAINTS.md C-4 list and
-CLAUDE.md Banned Patterns already use. It adds no new vocabulary choice. Checks rendered text of the standalone prototypes against
+AGENTS.md §5 already use. It adds no new vocabulary choice. Checks rendered text of the standalone prototypes against
 the machine-checkable gates G-1..G-17, whose binding text now lives in
 docs/research-scratch/DESIGN-CORPUS.md (the master that absorbed
 docs/design-research/CONSTRAINTS.md when that file was folded, per AGENTS.md
@@ -204,7 +204,7 @@ for path in files:
         for m in re.finditer(pat, text, flags=re.I):
             add("G-13 text defect", name, f"{pat} matched {m.group(0)!r}")
 
-    # em dash in prose (CLAUDE.md banned copy)
+    # em dash in prose (AGENTS.md §5 Copy)
     if "—" in text:
         add("copy", name, "em dash present in visible text")
 

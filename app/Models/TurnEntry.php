@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * One Trainer-entered turn of stats; the sole input to all run math (PRD
- * FR-C-2, CLAUDE.md planner rule: deterministic over entered turns).
+ * FR-C-2, DESIGN-CORPUS.md P6: deterministic over entered turns).
  *
  * Energy, mood and fans are end-of-turn totals, not deltas, matching the five
  * stat columns (ADR-0003). All three are nullable because runs logged before

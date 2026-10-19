@@ -67,7 +67,7 @@ use JsonException;
  * **Dates are calendar dates and are not converted.** `release` and `release_en` are `Y-m-d` strings in
  * this document, not the epochs the scenario document publishes, so there is no zone to resolve and no
  * arithmetic to do; a `Y-m-d` that fails its pattern is stored as null rather than coerced, per
- * CLAUDE.md Planner rule 3 (date-only stays date-only).
+ * GOVERNANCE.md §2 (date-only stays date-only).
  */
 final class GametoraSupportCardParser implements SupportCardSourceParser
 {

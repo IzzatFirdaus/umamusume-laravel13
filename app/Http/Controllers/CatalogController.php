@@ -43,7 +43,7 @@ class CatalogController extends Controller
      * Paginated roster tree, filterable by `status` (ReleaseStatus), `search` and
      * `show_unconfirmed`. Search compares a normalized term against the normalized match
      * key, the aliases and the card titles — the last two folded to the term's shape at
-     * comparison time, see `normalizedColumn()` (matching rule, CLAUDE.md). A Trainer
+     * comparison time, see `normalizedColumn()` (matching rule, AGENTS.md §5 The Floor). A Trainer
      * searching a card must land on the trainee who owns it, so the card clause selects
      * the *parent* row. An unknown `status` is refused by CatalogSearchRequest and the
      * Trainer lands back on the canonical catalog with the field named; `status=all` is
