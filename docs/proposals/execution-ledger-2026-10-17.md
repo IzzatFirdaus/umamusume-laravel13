@@ -3404,3 +3404,152 @@ with only `README.md` and `ARCHITECTURE.md`. `CLAUDE.md` remains uncommitted pee
   with the peer's uncommitted edits. Bar 708.
 - composer lore and composer lore-code: exit 0.
 - Ahead of origin/master at close: 30, behind 0.
+## 41. Dispatch 39 - Phase 8.8 close-out, 2026-10-20
+
+### 8.8.1 verification pastes
+
+- **8.8.1a ahead count:** 31 at dispatch open, as reported. The 31 are 7 from the Phase 8 batch and 24
+  from earlier dispatches, of which 3 (`844aebf`, `360f7ee`, `f278cd6`) landed inside the prior
+  dispatch's window and interleaved with this batch's commits. `origin/master` did not move (`b0b3ec9`);
+  behind 0. The peer added `8e30714` during this dispatch, so the count is 35 at close and 36 once this
+  section lands.
+- **8.8.1b census:** 666 (656 GONE, 10 UNTRACKED) in the working tree at HEAD `4db04fd`, as reported.
+- **8.8.1c section numbering:** sections 35 to 38 were landed by the peer between dispatches and 39 by
+  this batch, so the prior plan's "35 is next free" was out of date. Two sections now carry the number
+  40: the peer's at line 3307 and this batch's at line 3405. The collision happened because the peer
+  appended its own Section 40 (commit `f278cd6`) between this batch's Section 39 and Section 40.
+  Section 41 is the next free number and is used here; neither Section 40 is renumbered, because the
+  ledger is append-only. The ledger already carried duplicate numbers for 26, 27 and 29 before this
+  dispatch, so this is the fourth collision of a pattern that predates Phase 8.
+- **8.8.1d VERSION.md:** `git tag` lists `0.1.0` only; no `2.0.0` tag exists locally or on the remote.
+  VERSION.md at HEAD states that the current label `2.0.0` is pre-release and untagged and that the only
+  tag is `0.1.0`, so the false "tagged 2.0.0" claim is gone. The version label itself stays `2.0.0`,
+  per the semver-label ADR, so the file does not say `0.1.x` and was not made to.
+- **8.8.1e PROCESS-PLANS.md:** `docs/research-scratch/PROCESS-PLANS.md`, tracked, not gitignored, not
+  peer-dirty, 108 invalid closing fences. Copies also exist under `.kilo/worktrees/` and `.scratch-uma/`,
+  which are local scratch outside the tracked set. Accepted cost: pre-existing, not in Phase 8 scope, not
+  fixed.
+- **8.8.1f gate state at dispatch open:** DocCitationParity 2 passed (5 assertions), exit 0, count 666
+  against a 708 bar; DocAccuracyTest 3 passed (80 assertions), exit 0; `tools/doc_census.py` exit 0. No
+  hard stop.
+- **8.8.1g peer CLAUDE.md residuals:** lines 12 and 248 of `CLAUDE.md` carry the two backticked dead
+  references. Lines 10 and 21 name the same file as a section title inside a quoted string, which the
+  census does not count. The residuals were recorded only in Section 40, an audit trail, and not in
+  `KNOWN-ISSUES.md`.
+
+### 8.8.2 result: documented in README.md
+
+The host-local census behaviour now lives in README.md's Testing and Quality Gates section, as a
+Documentation gates subsection, and not only in this ledger. The mechanism was read out of the tool
+rather than inferred: `tools/doc_census.py` takes its file list from `git ls-files`, reads each file's
+content from disk, and decides GONE against UNTRACKED by asking whether the target exists on disk. It
+labels its output "measured at HEAD" while measuring the working tree, and its `main()` returns 0
+whatever it finds, so it is a diagnostic and not a gate.
+
+AGENTS.md was the dispatch's first choice for an agent-facing copy. It was peer-dirty at dispatch open -
+the peer was renaming SKILL.md to `SKILL_REGISTRY.md` - and became clean mid-dispatch when the peer
+committed `8e30714`. The copy was still not added there: the slice's acceptance is met by the README
+testing section, and adding a second copy after the hard stop fired would have expanded scope. Recorded
+here rather than silently skipped.
+
+There is no CI: `.github/workflows/` is absent, so the subsection says "run before pushing" and does not
+claim CI runs the gates. The dispatched commit subject said "authoritative CI gate"; it was not used,
+because it would assert a CI that does not exist.
+
+### 8.8.3 result: KI-107 added
+
+KI-105 and KI-106 were already taken, so the entry took the next free number. `KNOWN-ISSUES.md` now
+carries the two peer CLAUDE.md residuals with the command that proves them, and a dated status
+correction ahead of the first KI heading recording 57 headings, KI-57 through KI-107. The two targets
+are written plain, not in backticks, so the entry adds no dead citation.
+
+### 8.8.4 result: verified, no file created
+
+- Data model: covered. ARCHITECTURE.md section 3 carries the schema and the models, against the real
+  migrations.
+- Testing: covered. README.md's Testing and Quality Gates section and ARCHITECTURE.md section 10.
+- Held-file and append-only rules: covered. README.md's documentation map names the ledger as
+  append-only; AGENTS.md section 11 owns the protected list.
+- Commit convention and the peer-dirty skip rule: **not** covered in README.md or ARCHITECTURE.md. The
+  commit convention existed only in AGENTS.md section 14, which a reader of README's Contribution
+  section would not find, and the peer-dirty skip rule was in neither. Both are now in README.md's
+  Contribution section, with the convention measured rather than assumed.
+
+CONTRIBUTING.md, docs/testing.md and docs/data-model.md were not created. The root document set is
+closed (AGENTS.md section 3), so no new root file is available, and the content went into the files that
+already own it. The plan's assumption that three new files were needed was wrong.
+
+### 8.8.1b arithmetic: 657 against 690
+
+The census reads the working tree, so the local count carries the peer's uncommitted edits. The
+committed tree, measured in a clean worktree at `e31c7f6`, is **690 (690 GONE, 0 UNTRACKED)**; the
+working tree at the same commit read **657 (656 GONE, 1 UNTRACKED)**. The peer's uncommitted work
+resolves 34 GONE references and adds 1 UNTRACKED, so the local count sits 33 below the committed one.
+The two numbers are not to be compared without committing or stashing every working-tree edit.
+
+### 8.8.1e accepted cost
+
+`docs/research-scratch/PROCESS-PLANS.md` has 108 invalid closing fences: pre-existing, tracked, not
+peer-dirty, not in Phase 8 scope, not fixed.
+
+### Gate state before and after
+
+DocCitationParity: 666 (656 GONE, 10 UNTRACKED) exit 0 at dispatch open -> 657 (656 GONE, 1 UNTRACKED)
+exit 0 at close, against a 708 bar. The fall is the peer's `8e30714`, which tracked nine of the
+untracked targets. DocAccuracyTest: 3 passed / 80 assertions / 0 risky / exit 0, unchanged.
+md_fence_check: 0 invalid on every file this dispatch touched. The committed state measured 690 in a
+clean worktree at `e31c7f6`; this section adds no dead citation, so the committed state is unchanged by
+it.
+
+### Ahead count
+
+31 at dispatch open -> 36 at close: 4 commits from this dispatch (`aad948f`, `e31c7f6`, `a557dab` and
+this section) and 1 from the peer (`8e30714`). Behind 0. Not pushed.
+
+### Peer status at close
+
+Peer-dirty and untouched: `CLAUDE.md`, `SCREEN_SPEC.md`, `docs/UMAMUSUME_REFERENCE.md`,
+`docs/adr/0016-next-race-readiness-open-question.md`, five files under `docs/audits/`, this ledger,
+`docs/proposals/frontend-development-plan.md`, `docs/proposals/implementation-backlog-2026-10-17.md`, one
+`docs/research-scratch-source/` file, two `docs/scenarios/` files, and three `.vue` files. Untracked:
+`.worktrees/`, `all_dead_citations.txt`, `dead_HEAD.txt`, `dead_analysis.py`, `dead_b0b3ec9.txt`,
+`tools/list_dead.py`. `append_ledger.py` remains tracked, unreferenced and untouched; its disposition is
+an owner decision.
+
+Two commits in this dispatch had to be reset and re-landed, because the peer staged `CLAUDE.md` while
+they were being made and the staged file was swept into the commit. Both were reset with
+`git reset --soft`, the peer's file was unstaged, and the slice was re-committed with an explicit
+pathspec so that only the intended file was recorded. No peer content is in any commit of this batch.
+
+This ledger was itself peer-dirty at dispatch open, with a one-line change - an unbackticked scratch path
+in section 9 - that was byte-identical across two dispatches, so the peer was not actively writing it.
+That line was stashed before this section was appended, the section was committed with an explicit
+pathspec, and the peer's line was restored afterwards, unchanged and still uncommitted. The dispatch's
+hard stop names the ledger, so this is stated plainly rather than left implicit: the peer's edit was
+preserved, not committed, and not overwritten.
+
+### Decisions closed this dispatch
+
+None new. The ten-decision batch closed earlier; this dispatch carried Phase 8 residual work only.
+Decision 2, the refresh test, remains blocked on the owner trace classification, and its register entry
+is unchanged.
+
+### Phase 8 status
+
+CLOSED. All seven closure conditions are met: DocCitationParity exits 0 with the count under the bar;
+DocAccuracyTest is 3 passed / 80 assertions / 0 risky; the host-local census is documented in README's
+testing section; the peer CLAUDE.md residuals are in `KNOWN-ISSUES.md` as KI-107; the three-file
+reduction is verified, with the one uncovered area now covered in README's Contribution section; this
+section is appended and proven append-only; and the peer files are untouched.
+
+One residual is recorded rather than hidden: the census is still host-local by construction, so the
+committed number and the local number differ in a shared tree. Fixing it is a code change and is
+deferred to a code dispatch.
+
+### Next eligible
+
+A code dispatch for 4.2, 4.3 and 4.4, which the ledger records as blocked the same way: step 0 of 4.2
+must re-check StatBand.vue, absent since the peer's `b30906a`, and whether the peer cockpit cutover
+already did the sticky, rail and accordion work. If those files do not clear, the honest answer is to
+wait on the peer rather than start unverifiable layout work. The dispatched note that the next eligible
+is Phase 3.7 is stale: 3.7 landed in section 32 and 3.8 in section 33.
