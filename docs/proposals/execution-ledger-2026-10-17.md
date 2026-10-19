@@ -4069,3 +4069,68 @@ proofs.
        whenever they should reach master.
 - Next eligible: 4.2's adoption (commit 2) with the pairings and the rhythm risk above already
   measured, then 4.3 and 4.4, then 4.5 and 4.6, plus the 2.5 remainder.
+
+## 46. Two standing rules promoted from incidents, 2026-10-20
+
+Both were learned inside the last two dispatches and both are rule-shaped, so they are recorded as
+RULES rather than as incident notes. The next dispatch inherits them as premises.
+
+### Rule 1 - a fixture-mounted spec is the DEFAULT for a primitive test
+
+A test for a primitive or a component mounts it in a fixture on its own Vite server
+(`configFile: false`, an in-spec `createServer`, an html + ts pair under `tests/browser/fixtures/`). It
+reads no `public/build`, so it needs no app bundle and is immune to the KI-70 block that has held the
+page-walk specs for six dispatches. A page-walk spec is the EXCEPTION, for behaviour that only exists
+inside the running app.
+
+Evidence: `tests/browser/section.spec.ts` (ca5be34) ran 4 passed with `public/build` completely out of
+the picture, including a case whose subject is SLOT CONTENT - a scope `base-select.spec.ts` had not
+covered. `base-select.spec.ts` is the precedent; this is the proof that it generalises.
+
+What it changes in practice: a primitive can be finished and verified while the shared tree is dirty,
+which is the state the tree has been in for most of this arc. Waiting for a peer to clear is no longer
+a precondition for primitive work.
+
+### Rule 2 - a failability script takes its backup ONCE, from git, never from a re-copied working copy
+
+A failability script that patches a file must obtain the original from `git show HEAD:<file>` (or an
+equivalent immutable source), not by copying the working file at the start of each patch call. A
+backup-of-a-backup sequence silently restores the PATCHED state and then "proves" a failability that
+never occurred.
+
+The incident, recorded because it nearly shipped: on this dispatch the patch script re-copied the file
+to its backup on each call, so the second call backed up an already-patched `Section.vue`. The restore
+left the component missing `aria-labelledby`. The new spec caught it immediately - 3 failed, 1 passed -
+the attribute was re-applied, and the spec returned to 4 passed. So the discipline held, but it held by
+ACCIDENT, because a spec happened to run after the bad restore. The rule replaces the accident.
+
+Its class, named so it is recognisable next time: a bulk operation that undoes work it cannot see.
+Distinct from the PowerShell parsing/encoding class (which corrupts on the way in) and from the
+commit-window class (where a peer sweeps paths). This one corrupts on the way BACK, and its signature
+is a restore that is green when it should be identical and red when it should be restored.
+
+### Consequence for the next dispatch - 4.2's adoption premise
+
+Rule 1 does not apply to 4.2's adoption: adopting `Section` across five page sections is page behaviour,
+so it lands against the walk set in the worktree. Section 45's two measured risks therefore stay the
+Step 0 premise, and the next dispatch verifies each by reading the current Cockpit.vue before it edits:
+
+1. The five `<section aria-labelledby>` / `<h2 id>` pairings, and which kind each title is:
+   cockpit-summary-heading and career-closed-heading are DYNAMIC; career-closed-heading and
+   career-empty-heading carry a `<p>` that must stay inside the Section slot; career-scenario-heading
+   and career-timeline-heading carry grid-placement classes.
+2. `Section.vue` renders `class="mt-8"` and takes no `class` prop, so an external class MERGES with it.
+   The five are spaced `mt-3`, `mb-3` or nothing today, so adoption normalises the vertical rhythm.
+   That is what the primitive intends, and it is still a visible change: decide per section whether
+   `mt-8` is the right spacing there or whether the surrounding layout needs the adjustment instead,
+   and check the result against the existing layout cases ('lays out at 1280, 768 and 320').
+
+### Close
+
+- No code changed in this section; it records rules and a premise. DocCitationParity measured in the
+  MAIN tree before the append: 2 passed, census 651 against the 708 baseline.
+- Worktree HEAD before this section: ee8fec1, clean.
+- Outstanding states, unchanged: 4.2's adoption plus 4.3 and 4.4 are BLOCKED-ON-BUDGET (the primitive
+  is no longer the blocker); the KI-70 side effect on master's public/build at 03:39:17 is still owed;
+  and the peer-ledger-blocked cherry-picks are 47488f0, 68ffe6f, 132cee8, a09ea94, ca5be34, plus this
+  section. 6f91420, 782069b, 2341f75 and b8b0def are on master under new SHAs and must not be re-picked.
