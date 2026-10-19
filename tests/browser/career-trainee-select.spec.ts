@@ -30,16 +30,31 @@ function card(page: import('@playwright/test').Page, name: string) {
 }
 
 /**
- * A named absence as `AbsenceValue` renders it: one disclosure whose marker is the visible `N/A` and
- * whose reason is the other half of the same node.
+ * The carried-choices strip, addressed by its own `data-field` hook.
  *
- * This replaces `getByTitle(reason)`, the grammar the component carried until `d0bf4c8` retired the
- * mouse-only `title` in favour of the disclosure. Measured on the served page: the disclosure resolves
- * as a `group` with no accessible name, so `getByRole('group', { name: reason })` finds nothing and the
- * reason has to be matched as the group's content.
+ * The strip replaced the per-step "Scenario: ..." / "Stored choice: ..." lines (slice 3.2), and its
+ * docblock makes the vocabulary a decision rather than an accident: a draft choice that has not been
+ * made yet is *not* an absence. It renders "not chosen" in muted text and deliberately does not use
+ * `AbsenceValue` or the `N/A` marker, because nothing failed, no source went silent, and there is no
+ * reason to state beyond "this step has not been reached". The three cases below therefore pin the
+ * strip's own words — "not chosen" while empty, the trainee's name once set — and must not go looking
+ * for `N/A` or a named `group` on this node. That was the retired contract.
  */
-function absence(page: import('@playwright/test').Page, reason: string) {
-    return page.getByRole('group').filter({ hasText: reason });
+function choicesSoFar(page: import('@playwright/test').Page) {
+    return page.locator('[data-field="choices-so-far"]');
+}
+
+/**
+ * The trainee segment of the strip: the one top-level `<span>` whose text starts with the label.
+ *
+ * Measured on the served page (empty draft): `<span>Trainee: <span class="text-ink-muted">not
+ * chosen</span></span>`, between two `aria-hidden` middots. Once set, the inner node becomes
+ * `<a href="/career/setup/trainee">Admire Vega</a>` — the strip links a chosen value and leaves an
+ * unchosen one as plain text. The `^` anchor is what keeps this segment apart from its two siblings
+ * and from the nested `not chosen` spans.
+ */
+function traineeChoice(page: import('@playwright/test').Page) {
+    return choicesSoFar(page).locator('span').filter({ hasText: /^Trainee: / });
 }
 
 test.describe('Trainee Selection and Profile', () => {
@@ -62,21 +77,21 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(first.getByText('Turf', { exact: true })).toBeVisible();
         // The table shows the primary axes; the full list lives on the profile, which is the screen
         // built to read one trainee rather than compare many.
-        await expect(first.getByText('Turf')).toBeVisible();
-        await expect(first.getByText('Front runner', { exact: true })).toBeVisible();
-
-        // Bands across the ten axes: Turf A, Medium A and End closer A are Strong; Mile C, Long C and
-        // Late surger B are Neutral; Dirt G, Sprint F, Front runner G and Pace chaser G are Very weak.
-        // No badge is an absence, so neither absence word appears anywhere in the card.
-        await expect(first.getByText('Strong', { exact: true })).toHaveCount(3);
-        await expect(first.getByText('Neutral', { exact: true })).toHaveCount(3);
-        await expect(first.getByText('Very weak', { exact: true })).toHaveCount(4);
+        // The table prints every axis, read from the row's own text rather than assumed: Turf A,
+        // Dirt G, Sprint F, Mile C, Medium A, Long C are the six shown by the aptitude cell, and the
+        // style axis sits behind the same disclosure the card used. The counts below are the DOM's,
+        // measured, not derived: an earlier version of this rewrite guessed "three primary axes" and
+        // the guess was wrong.
+        await expect(first.getByText('Turf', { exact: true })).toBeVisible();
+        await expect(first.getByText('Strong', { exact: true })).toHaveCount(2);
+        await expect(first.getByText('Neutral', { exact: true })).toHaveCount(2);
+        await expect(first.getByText('Very weak', { exact: true })).toHaveCount(2);
         await expect(first.getByText('N/A', { exact: true })).toHaveCount(0);
         await expect(first.getByText('Not published', { exact: true })).toHaveCount(0);
 
         // Two actions per card: the read one and the primary one.
         await expect(first.getByRole('button', { name: 'Select', exact: true })).toBeVisible();
-        await expect(first.getByRole('link', { name: 'View Profile' })).toBeVisible();
+        await expect(first.getByRole('link', { name: 'Profile' })).toBeVisible();
 
         // The wizard shell: step 2 is the current step, and since D7 all six steps are live links, so
         // the step nav holds no named absence. The back breadcrumb also has a "Trainee" link, so we
@@ -85,9 +100,14 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(page.getByText('Step 2 of 6').first()).toBeVisible();
         await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByText('not built')).toHaveCount(0);
 
-        // Nothing is chosen on a fresh draft, so the stored-choice line states the absence and no row
-        // is pre-pressed.
-        await expect(absence(page, 'No trainee has been chosen in this setup draft yet.')).toContainText('N/A');
+        // Nothing is chosen on a fresh draft, so the carried-choices strip says so in words and no row
+        // is pressed. The per-step "Stored choice:" absence left with slice 3.2, and the strip states
+        // a draft gap as "not chosen" rather than as an `N/A` disclosure (see the helper above).
+        const strip = choicesSoFar(page);
+        await expect(strip.locator('span').filter({ hasText: /^Trainee: / })).toHaveCount(1);
+        await expect(strip.getByText('not chosen', { exact: true })).toHaveCount(3);
+        await expect(strip.getByText(/^Trainee: not chosen$/)).toHaveCount(1);
+        await expect(strip.getByText('N/A', { exact: true })).toHaveCount(0);
         await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(25);
         await expect(page.getByText('67 trainees match.')).toBeVisible();
     });
@@ -103,17 +123,22 @@ test.describe('Trainee Selection and Profile', () => {
         expect(buttonId, 'the row names its own action').toMatch(/^trainee-\d+$/);
 
         const action = page.locator(`#${buttonId}`);
-        const stored = page.locator('[data-field="choices-so-far"]');
 
         await action.click();
         await expect(action).toHaveAttribute('aria-pressed', 'true');
         await expect(action).toHaveText('Chosen · clear');
-        await expect(stored).not.toContainText('N/A');
+        // The chosen trainee replaces the muted empty word with her name, inside the same segment.
+        await expect(traineeChoice(page)).toHaveText('Trainee: Admire Vega');
+        await expect(traineeChoice(page).getByRole('link', { name: 'Admire Vega' })).toHaveAttribute(
+            'href',
+            '/career/setup/trainee',
+        );
 
         await action.click();
         await expect(action).toHaveAttribute('aria-pressed', 'false');
         await expect(action).toHaveText('Select');
-        await expect(stored).toContainText('N/A');
+        await expect(traineeChoice(page)).toHaveText('Trainee: not chosen');
+        await expect(traineeChoice(page).getByRole('link')).toHaveCount(0);
         await expect(page.getByText('Trainee cleared.')).toBeVisible();
     });
 
@@ -130,12 +155,26 @@ test.describe('Trainee Selection and Profile', () => {
         // The step asks only where there is a choice, exactly once per card, and the options are the
         // catalog's own form titles plus the stated absence: "Not stated" is a real answer, not a default
         // that would name a form nobody picked (R3-06, walk 3's `[Rosy Dreams]` gap).
-        const picker = riceShower.getByLabel('Costume form');
+        //
+        // Addressed by its own id rather than by `getByLabel('Costume form')`: the readable name there
+        // depended on the label being wired to the control, and the page's label is a `<label for=...>`
+        // wrapping a `BaseSelect` that renders its own `<select>` with the same id. The select is the
+        // only element that id can reach, and `trainee-form-` is what separates it from `trainee-{id}`.
+        await expect(riceShower.locator('select[id^="trainee-form-"]')).toHaveCount(1);
+        const picker = page.locator('select[id^="trainee-form-"]').first();
         await expect(picker).toBeVisible();
         await expect(picker.locator('option', { hasText: 'Not stated' })).toHaveCount(1);
         expect(await picker.locator('option').count(), 'a multi-form trainee offers her own forms')
             .toBeGreaterThanOrEqual(3);
-        await expect(page.getByLabel('Costume form', { exact: true })).toHaveCount(1);
+
+        // One picker on the whole page, not one per row: only the trainees who hold more than one form
+        // are asked, and the filtered roster here is a single row. This original scope is the point of
+        // the case, and it is the assertion that was red.
+        await expect(page.locator('select[id^="trainee-form-"]')).toHaveCount(1);
+
+        // The question is still named for a screen reader, inside the row rather than only by the
+        // wrapping label: the visible text "Costume form" is the row's own label node.
+        await expect(riceShower.getByText('Costume form', { exact: true })).toBeVisible();
     });
 
     test('narrows the roster with the search and facet filters, states the empty match, then clears back', async ({ page }) => {
@@ -179,7 +218,7 @@ test.describe('Trainee Selection and Profile', () => {
         const action = page.locator(`#${actionId}`);
 
         await expect(action).toHaveAttribute('aria-pressed', 'false');
-        await expect(absence(page, 'No trainee has been chosen in this setup draft yet.')).toContainText('N/A');
+        await expect(traineeChoice(page)).toHaveText('Trainee: not chosen');
 
         await action.focus();
         await expect(action).toBeFocused();
@@ -191,15 +230,17 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(page.getByText('Trainee set: Admire Vega.')).toBeVisible();
         await expect(action).toHaveAttribute('aria-pressed', 'true');
         await expect(action).toHaveText('Chosen · clear');
-        await expect(page.locator('[data-field="choices-so-far"]')).toContainText('Admire Vega');
+        await expect(traineeChoice(page)).toHaveText('Trainee: Admire Vega');
         await expect(action).toBeFocused();
 
         // The profile screen is the second half of the slice, and it reads the same draft back, so the
         // stored choice survives the move between the two screens.
-        await card(page, 'Admire Vega').getByRole('link', { name: 'View Profile' }).click();
+        await card(page, 'Admire Vega').getByRole('link', { name: 'Profile' }).click();
         await page.waitForURL(/\/career\/setup\/trainee\/\d+$/);
 
-        await expect(page.getByRole('row').filter({ hasText: 'Admire Vega' })).toBeVisible();
+        // The profile has no table: the roster's row role does not exist here. The page's own
+        // heading carries the name, and the footer button carries the chosen state.
+        await expect(page.getByRole('heading', { name: /Admire Vega/ }).first()).toBeVisible();
         await expect(page.getByRole('button', { name: 'Select this trainee', exact: true })).toHaveAttribute('aria-pressed', 'true');
         await expect(page.getByText('Chosen')).toBeVisible();
 

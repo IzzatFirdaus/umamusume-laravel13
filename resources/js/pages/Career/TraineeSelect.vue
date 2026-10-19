@@ -176,7 +176,7 @@ const primaryAxes = computed(() => props.aptitudeAxes.filter((axis) => axis.axis
 const traineeColumns: DataTableColumn[] = [
     { key: 'trainee', label: 'Trainee' },
     { key: 'aptitudes', label: 'Aptitudes' },
-    { key: 'forms', label: 'Forms', secondary: true },
+    { key: 'forms', label: 'Forms' },
     { key: 'select', label: 'Choose' },
 ];
 
@@ -399,18 +399,19 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
                 <span class="whitespace-nowrap">{{ row.form_count }} {{ formCountLabel(row.form_count) }}</span>
                 <!-- R3-06: the costume form is asked only where there is a choice to make. One row
                      states a fact, and "Not stated" stays a real answer rather than a default. -->
-                <label
+                <!-- `BaseSelect` owns its own `<label>` and derives the select's `aria-labelledby` from
+                     the id it is given, so wrapping it in a second `<label>` broke the association: the
+                     select had no accessible name at all. The label is passed IN rather than wrapped
+                     around, which is the component's contract. -->
+                <BaseSelect
                     v-if="row.forms.length > 1"
-                    class="mt-1 flex flex-col gap-1 text-xs"
-                    :for="`trainee-form-${row.id}`"
-                >
-                    <span class="text-ink-muted">Costume form</span>
-                    <BaseSelect
-                        :id="`trainee-form-${row.id}`"
-                        v-model="pickedForm[row.id]"
-                        :options="[{ value: null, label: 'Not stated' }, ...row.forms.map((card: { id: number; title: string; is_debut_form: boolean }) => ({ value: card.id, label: `${card.title}${card.is_debut_form ? ' (debut form)' : ''}` }))]"
-                    />
-                </label>
+                    class="mt-1"
+                    :id="`trainee-form-${row.id}`"
+                    name="character_card_id"
+                    label="Costume form"
+                    v-model="pickedForm[row.id]"
+                    :options="[{ value: null, label: 'Not stated' }, ...row.forms.map((card: { id: number; title: string; is_debut_form: boolean }) => ({ value: card.id, label: `${card.title}${card.is_debut_form ? ' (debut form)' : ''}` }))]"
+                />
             </template>
 
             <template #cell-select="{ row }">
