@@ -312,8 +312,8 @@ const ancestorError = (index: number, slot: number): string | undefined =>
             {{ props.roster.length }}. The rest are on the Legacy Lab browse screen.
         </p>
 
-        <ol class="mt-4 max-w-3xl grid grid-cols-1 items-start gap-4 @5xl:grid-cols-2">
-            <li class="rounded-lg border-2 border-rule bg-panel p-3 @5xl:col-span-2">
+        <ol class="mt-4 max-w-5xl grid grid-cols-1 items-start gap-4 @5xl:grid-cols-3">
+            <li class="rounded-lg border-2 border-rule bg-panel p-3 @5xl:col-span-1">
                 <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Trainee</p>
                 <div class="mt-1 text-lg font-semibold text-ink-strong">
                     <span v-if="props.graph.trainee.name">{{ props.graph.trainee.name }}</span>
@@ -513,10 +513,10 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                                 Legacy's own star count.
                             </p>
 
-                            <BaseCheckbox
+                                     <BaseCheckbox
                                       :id="`is-guest-${parent.slot}`"
                                       v-model="form.legacies[index].is_guest"
-                                      name="is_guest"
+                                      :name="`legacies.${index}.is_guest`"
                                       label="Rented for the run"
                                     />
 
@@ -607,19 +607,22 @@ const ancestorError = (index: number, slot: number): string | undefined =>
             <option v-for="letter in props.rankLetters" :key="letter" :value="letter" />
         </datalist>
 
-        <div class="mt-4 max-w-sm">
-            <label class="block text-xs font-medium text-ink" for="affinity">Affinity for the pair</label>
-             <BaseSelect
-                 id="affinity"
-                 v-model="form.affinity"
-                 name="affinity"
-                 :options="[{ value: '', label: 'Not recorded' }, ...props.affinityGrades.map(grade => ({ value: grade, label: grade }))]"
-               />
-            <p class="mt-1 text-xs text-ink-muted" title="The published reference grades each link; this records the pair's own grade as read.">
-                The grade you read for the pair, not a score. This tool does not price it.
-            </p>
-            <p v-if="form.errors.affinity" class="mt-1 text-xs text-risk">{{ form.errors.affinity }}</p>
-        </div>
+        <fieldset class="mt-4 max-w-sm rounded-lg border border-rule bg-panel p-3">
+            <legend class="text-xs font-semibold uppercase tracking-wide text-ink-muted px-1">Pair</legend>
+            <div class="mt-2">
+                <label class="block text-xs font-medium text-ink" for="affinity">Affinity</label>
+                 <BaseSelect
+                     id="affinity"
+                     v-model="form.affinity"
+                     name="affinity"
+                     :options="[{ value: '', label: 'Not recorded' }, ...props.affinityGrades.map(grade => ({ value: grade, label: grade }))]"
+                   />
+                <p class="mt-1 text-xs text-ink-muted" title="The published reference grades each link; this records the pair's own grade as read.">
+                    The grade you read for the pair, not a score. This tool does not price it.
+                </p>
+                <p v-if="form.errors.affinity" class="mt-1 text-xs text-risk">{{ form.errors.affinity }}</p>
+            </div>
+        </fieldset>
 
         <p
             v-if="form.errors.legacies"
