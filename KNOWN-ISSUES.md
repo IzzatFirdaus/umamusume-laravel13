@@ -3103,6 +3103,36 @@ bar.
 The fix is unchanged: the peer re-encodes as UTF-8 without a BOM and commits. Repointing those 7 before the
 re-encode is cheaper than after it.
 
+**Correction (2026-10-20, later the same day, Phase 8.8 residual close-out):** the correction filed above is
+wrong on its measurements, and is withdrawn on those points. It was written from a PowerShell redirection,
+which in Windows PowerShell 5.1 transcodes to UTF-16LE and writes a byte order mark; the "UTF-16LE with
+BOM", "528,880 bytes" and "270,501 NUL bytes" were artifacts of that redirection, not properties of the file.
+Re-measured byte-exactly through git cat-file, the blob at HEAD is 263,999 bytes, starts 23 20 45 78,
+carries no byte order mark, and holds 6,571 NUL bytes.
+
+The NULs are real, and they are committed. They enter at ac9b257 ("docs(ledger): close decision 1 and 3.2/3.3,
+record Step 0 audits"), which is an ancestor of origin/master and therefore already pushed, and they are
+present in every commit since, including every commit of this batch. They are absent from a1db210, which is
+the first commit to write this path - the one point the correction above got right, and the reason this
+entry's own "first written by bd9e2e5" is also wrong.
+
+The census consequence is the opposite of what the correction above claims. tools/doc_census.py reads the file
+with encoding utf-8 and errors replace, and a NUL is a valid codepoint, so the file decodes and the census
+sees 47 of the 47 distinct backticked .md references the ledger carries. Six of them are dead -
+code-style.md, eloquent.md, frontend-fidelity-2026-10-13.md, implementation-backlog-2026-10-17.md,
+testing-standards.md and ui-ux-application-context-brief.md - and all six are counted. The gate is not
+under-reporting on this file, and the count is not a lower bound because of the encoding. A byte-exact scan
+of all 167 tracked .md files at HEAD finds no byte order mark in any of them and NUL bytes in this one file
+only, so the exposure is contained to the ledger.
+
+What the corruption does cost is the file's own integrity: it is not clean UTF-8, tools/lore.php reads with
+git grep and can be unreliable over embedded NULs, and any tool that rewrites the file risks dropping or
+duplicating content. The fix is a re-encode commit. No agent has made one, and the file is peer-dirty.
+
+One further correction to the record. In this repository the author and committer identity is the configured
+IzzatFirdaus <extremerazr@gmail.com> for every commit, this agent's and every other session's, so the commit
+metadata carries no attribution signal at all. Attribution has to come from the session transcript, never
+from the commit metadata.
 ### KI-109 `analysis_output.txt` and `base_veteran.vue` are UTF-16LE with BOM and NUL - FILED 2026-10-20 (citation-fix batch close-out), OPEN, OWNER DECISION REQUIRED
 
 **Status: OPEN.** Both files are UTF-16LE with byte order mark (first bytes `FF FE`) and contain NUL
