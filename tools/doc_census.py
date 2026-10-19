@@ -5,7 +5,13 @@ Every number the pre-consolidation inventory hand-counted went stale the moment 
 moved. This prints the same facts from `git` on demand so nobody has to trust a dated table
 again. Run it against the tree you are on and cite the sha it prints.
 
-Usage: python tools/doc_census.py
+The subject of the measurement is a git ref, HEAD by default, because a count with no fixed
+subject can be moved by anyone mid-edit: the same HEAD read from two machines gives two
+numbers when either carries uncommitted work. `--working-tree` measures the machine instead,
+which is what a developer wants to see when they ask what their own uncommitted edit does to
+the count.
+
+Usage: python tools/doc_census.py [--working-tree]
 """
 
 import io
@@ -41,8 +47,57 @@ def git(*args):
                           capture_output=True, text=True, encoding="utf-8", errors="replace").stdout
 
 
-def md_files():
-    return [p for p in git("ls-files", "--", "*.md").splitlines() if p.strip()]
+# What a census run measures. A git ref by default, because a count with no fixed subject can
+# be moved by anyone mid-edit: the same HEAD read from two machines gives two numbers when
+# either carries uncommitted work, and the pin then measures the machine rather than the
+# repository. The working tree stays available behind `--working-tree`, because a developer
+# wants to see what their own uncommitted edit does to the count.
+DEFAULT_REF = "HEAD"
+
+
+def subject_paths(ref=DEFAULT_REF):
+    """Every tracked path at the subject: a ref's tree, or the index for the working tree."""
+    if ref:
+        return [p for p in git("ls-tree", "-r", "--name-only", ref).splitlines() if p.strip()]
+    return [p for p in git("ls-files").splitlines() if p.strip()]
+
+
+def subject_texts(files, ref=DEFAULT_REF):
+    """The files' contents at the subject: a ref's blobs, or the working tree on disk.
+
+    The ref's blobs are read in one `git cat-file --batch` pass, so measuring a ref costs one
+    subprocess rather than one per file.
+    """
+    if not ref:
+        out = {}
+        for f in files:
+            try:
+                out[f] = io.open(os.path.join(REPO, f), encoding="utf-8", errors="replace").read()
+            except OSError:
+                pass
+        return out
+    if not files:
+        return {}
+    proc = subprocess.run(["git", "cat-file", "--batch"], cwd=REPO,
+                          input=("\n".join(f"{ref}:{f}" for f in files)).encode(),
+                          capture_output=True)
+    out, pos = {}, 0
+    for f in files:
+        nl = proc.stdout.find(b"\n", pos)
+        if nl < 0:
+            break
+        header = proc.stdout[pos:nl].decode("utf-8", "replace").split()
+        if len(header) < 3:
+            break
+        size = int(header[2])
+        start = nl + 1
+        out[f] = proc.stdout[start:start + size].decode("utf-8", "replace")
+        pos = start + size + 1
+    return out
+
+
+def md_files(ref=DEFAULT_REF):
+    return [p for p in subject_paths(ref) if p.endswith(".md")]
 
 
 def by_dir(files):
@@ -52,7 +107,9 @@ def by_dir(files):
     return dict(sorted(counts.items(), key=lambda kv: -kv[1]))
 
 
-def lines_of(rel):
+def lines_of(rel, texts=None):
+    if texts is not None and rel in texts:
+        return len(texts[rel].split("\n"))
     try:
         return len(io.open(os.path.join(REPO, rel), encoding="utf-8", errors="replace").read().split("\n"))
     except OSError:
@@ -68,26 +125,21 @@ def inbound_per_master(masters):
     return out
 
 
-def heads(files, depth=5):
+def heads(texts, depth=5):
     """Map each file to its opening block. The marker sits in the header, where this repo puts the
     other machine-readable stamps (`PRODUCT.md` carries `impeccable:product-schema` on line 3)."""
     out = {}
-    for f in files:
-        try:
-            out[f] = "\n".join(io.open(os.path.join(REPO, f), encoding="utf-8",
-                                       errors="replace").read().split("\n", depth)[:depth])
-        except OSError:
-            out[f] = ""
+    for f, text in texts.items():
+        out[f] = "\n".join(text.split("\n", depth)[:depth])
     return out
 
 
-def catalogues(files=None):
+def catalogues(texts):
     """Tracked markdown that declares itself a catalogue, so its paths are excluded from the count."""
-    files = md_files() if files is None else files
-    return sorted(f for f, head in heads(files).items() if CENSUS_FLAG in head)
+    return sorted(f for f, head in heads(texts).items() if CENSUS_FLAG in head)
 
 
-def dead_links(skipped=None):
+def dead_links(skipped=None, ref=DEFAULT_REF):
     """Backticked .md references that no longer resolve. A deletion without a repoint shows up here.
 
     A bare name is tried as written, under `docs/`, under `docs/research-scratch/`, and beside the
@@ -129,32 +181,43 @@ def dead_links(skipped=None):
 
     Un-backticking a dead path lowers the count too: the resolver only ever sees backticked refs.
 
+    The subject is a git ref by default, and the working tree is `ref=None`. On a ref the
+    resolver asks the ref's tree what it holds, so a file that exists only on this machine
+    reads GONE, which is what a reader of that ref would see; the UNTRACKED class, which is
+    the machine-local nuance, belongs to the working tree alone.
+
     @return tuple[list[tuple[str, int, str, str]], list[str]] the dead links, and the unreadable files
     """
     bad = []
     unreadable = []
-    skip = set(catalogues())
-    listing = set(git("ls-files").splitlines())
+    files = md_files(ref)
+    texts = subject_texts(files, ref)
+    skip = set(catalogues(texts))
+    listing = set(subject_paths(ref))
     tracked_md_names = {os.path.basename(p) for p in listing if p.endswith(".md")}
-    for f in md_files():
+    for f in files:
         if f in skip:
             continue
         near = os.path.dirname(f)
-        try:
-            text = io.open(os.path.join(REPO, f), encoding="utf-8", errors="replace").read()
-        except OSError:
+        text = texts.get(f)
+        if text is None:
             unreadable.append(f)
             continue
-        bad.extend(dead_refs_in_text(f, text, near, listing, tracked_md_names, skipped))
+        bad.extend(dead_refs_in_text(f, text, near, listing, tracked_md_names, skipped,
+                                     disk=not ref))
     return bad, unreadable
 
 
-def dead_refs_in_text(f, text, near, listing, names, skipped=None):
+def dead_refs_in_text(f, text, near, listing, names, skipped=None, disk=True):
     """The dead references in one file's text.
 
     A line carrying `QUOTED_ORIGINAL_FLAG` is not scanned: it quotes the text it corrects, so
     the dead path it names is quoted history rather than an instruction to follow. The skipped
     line is appended to `skipped` when a list is passed, so the caller can report the exclusion.
+
+    `disk` decides the last classification: on the working tree a target that exists here but
+    is not tracked is UNTRACKED, and on a ref there is no such thing, so everything unresolved
+    is GONE.
 
     @return list[tuple[str, int, str, str]] the dead references, as (file, line, ref, kind)
     """
@@ -176,23 +239,44 @@ def dead_refs_in_text(f, text, near, listing, names, skipped=None):
                 continue
             if "/" not in cand and cand in names:
                 continue
-            target = next((t for t in tries if os.path.exists(os.path.join(REPO, t))), None)
-            bad.append((f, n, ref, "UNTRACKED" if target else "GONE"))
+            kind = "GONE"
+            if disk:
+                target = next((t for t in tries if os.path.exists(os.path.join(REPO, t))), None)
+                kind = "UNTRACKED" if target else "GONE"
+            bad.append((f, n, ref, kind))
     return bad
 
 
-def main():
-    files = md_files()
+def main(argv=None):
+    argv = sys.argv[1:] if argv is None else argv
+    # The subject of the measurement. A ref by default, because a count with no fixed subject
+    # can be moved by anyone mid-edit; `--working-tree` measures the machine instead, which is
+    # what a developer wants to see when they ask what their own uncommitted edit does.
+    if "--working-tree" in argv:
+        ref = None
+    else:
+        unknown = [a for a in argv if not a.startswith("--")]
+        if unknown:
+            print(f"unknown argument {unknown[0]!r}; usage: doc_census.py [--working-tree]")
+            return 2
+        ref = DEFAULT_REF
+
+    files = md_files(ref)
+    texts = subject_texts(files, ref)
     sha = git("rev-parse", "--short", "HEAD").strip()
-    print(f"measured at HEAD {sha} on {git('rev-parse','--abbrev-ref','HEAD').strip()}")
+    branch = git("rev-parse", "--abbrev-ref", "HEAD").strip()
+    if ref:
+        print(f"measured at {ref} {sha} on {branch} (the committed tree)")
+    else:
+        print(f"measured at the working tree on {branch} (uncommitted edits included)")
     print(f"tracked markdown: {len(files)}")
 
     masters = sorted(f for f in files if f.startswith(MASTERS_DIR + "/"))
     print(f"\nmasters in {MASTERS_DIR}: {len(masters)}, "
-          f"{sum(max(lines_of(m), 0) for m in masters)} lines")
+          f"{sum(max(lines_of(m, texts), 0) for m in masters)} lines")
     inb = inbound_per_master(masters)
     for m in masters:
-        print(f"  {m.split('/')[-1]:38} {lines_of(m):6} lines  {inb[m]:3} inbound")
+        print(f"  {m.split('/')[-1]:38} {lines_of(m, texts):6} lines  {inb[m]:3} inbound")
 
     outside = [f for f in files if not f.startswith(MASTERS_DIR + "/")
                and not f.startswith(EXEMPT_PREFIXES)]
@@ -202,11 +286,11 @@ def main():
 
     print(f"\noutside masters, excluding docs/adr and .ai: {len(outside)}")
     for f in outside:
-        print(f"  {lines_of(f):6}  {f}")
+        print(f"  {lines_of(f, texts):6}  {f}")
 
     skipped = []
-    dead, unreadable = dead_links(skipped)
-    cats = catalogues(files)
+    dead, unreadable = dead_links(skipped, ref)
+    cats = catalogues(texts)
     print(f"\nMISSING_FILE (tracked, absent from disk: an uncommitted deletion, unscannable here): "
           f"{len(unreadable)}")
     for f in unreadable:
@@ -222,21 +306,21 @@ def main():
     gone = [d for d in dead if d[3] == "GONE"]
     untracked = [d for d in dead if d[3] == "UNTRACKED"]
     print(f"\ndead markdown links: {len(dead)} ({len(gone)} GONE, {len(untracked)} UNTRACKED)")
-    print("  GONE      = cited and absent from disk: an instruction that cannot be followed")
+    print("  GONE      = cited and absent from the subject: an instruction that cannot be followed")
     print("  UNTRACKED = on disk but not in git: works locally, breaks on a fresh clone")
     print("  Most GONE lines are historical citations inside masters naming the sources they")
     print("  absorbed, which are records, not broken links. Read the per-target summary before")
     print("  repointing anything, and repoint only the lines a reader would actually follow.")
-    for f, n, ref, kind in dead[:20]:
-        print(f"  {kind:9} {f}:{n} -> {ref}")
+    for f, n, ref_, kind in dead[:20]:
+        print(f"  {kind:9} {f}:{n} -> {ref_}")
     if len(dead) > 20:
         print(f"  ... {len(dead) - 20} more")
     top = {}
-    for _, _, ref, _ in dead:
-        top[ref] = top.get(ref, 0) + 1
+    for _, _, ref_, _ in dead:
+        top[ref_] = top.get(ref_, 0) + 1
     print("most-cited dead targets:")
-    for ref, c in sorted(top.items(), key=lambda kv: -kv[1])[:8]:
-        print(f"  {c:4}  {ref}")
+    for ref_, c in sorted(top.items(), key=lambda kv: -kv[1])[:8]:
+        print(f"  {c:4}  {ref_}")
 
     print(fence_report(files))
     return 0
@@ -269,7 +353,7 @@ def fence_report(files):
             offenders.append((len(invalid), f))
 
     total = sum(n for n, _ in offenders)
-    lines = [f"\ninvalid closing fences: {total} across {len(offenders)} file(s)"]
+    lines = [f"\ninvalid closing fences (working tree): {total} across {len(offenders)} file(s)"]
     for n, f in sorted(offenders, key=lambda t: -t[0]):
         lines.append(f"  {n:4}  {f}")
     if total:

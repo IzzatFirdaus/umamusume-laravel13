@@ -15,7 +15,11 @@ declare(strict_types=1);
  * still prints and the per-file lines are simply absent.
  */
 it('reports its counts instead of raising when a tracked doc is missing from disk', function (): void {
-    $out = (string) shell_exec('python tools/doc_census.py 2>&1');
+    // `--working-tree` because this test's subject is the working tree: it looks for a tracked
+    // file that is absent from disk. The census measures a ref by default, so asking for the
+    // working tree is what makes this assertion mean what it says, and what keeps the census
+    // reading the file it cannot find instead of reading a blob that is always there.
+    $out = (string) shell_exec('python tools/doc_census.py --working-tree 2>&1');
 
     // The closing summary is the proof the tool finished; the traceback is the failure mode.
     expect($out)->not->toContain('Traceback')

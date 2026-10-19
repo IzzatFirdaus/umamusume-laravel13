@@ -12,7 +12,8 @@ has to hold is that the corpus still exercises each rule, computed from the tree
 pinned to a path. An assertion pinned to a specific file still being cited was spent on
 2026-10-20, when the last backticked citation of `docs/design-research/CONSTRAINTS.md` was
 un-backticked and that target stopped appearing in the dead list at all. A fixture the corpus
-can spend is not a test.
+can spend is not a test. The corpus-level properties are measured at the census's own default
+subject, the ref, so an uncommitted edit on one machine cannot trip them.
 
     python tools/doc_census_selftest.py
     python tools/doc_census_selftest.py tools/.doc_census_head.py   # a candidate resolver to falsify
@@ -22,7 +23,6 @@ marker stops being honoured, or when the corpus stops exercising a rule.
 """
 
 import importlib.util
-import io
 import os
 import re
 import sys
@@ -32,7 +32,7 @@ spec = importlib.util.spec_from_file_location("census_under_test", TARGET)
 census = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(census)
 
-tracked = set(census.git("ls-files").splitlines())
+tracked = set(census.subject_paths(census.DEFAULT_REF))
 dead, _ = census.dead_links()
 dead_refs = {ref for _, _, ref, _ in dead}
 names = {os.path.basename(p) for p in tracked if p.endswith(".md")}
@@ -41,11 +41,10 @@ names = {os.path.basename(p) for p in tracked if p.endswith(".md")}
 def probe(text, listing, names_, near="", f="planted.md"):
     """The resolver's verdict on a text, against a synthetic tracked set.
 
-    The verdict is that the target is dead, not which of the two dead kinds it is: a target
-    that is absent from the synthetic tracked set reads dead whether or not some local file
-    happens to share its name.
+    `disk=False`, so the verdict does not depend on what happens to sit on this machine: a
+    target that resolves nowhere is GONE whether or not some local file shares its name.
     """
-    return census.dead_refs_in_text(f, text, near, set(listing), set(names_))
+    return census.dead_refs_in_text(f, text, near, set(listing), set(names_), disk=False)
 
 
 # 1. A bare name whose tracked file lives in a directory the resolver does not try is still live.
@@ -91,7 +90,7 @@ assert len(unmarked_bad) == 1, f"the unmarked quote stops counting as dead: {unm
 
 skipped = []
 marked_bad = census.dead_refs_in_text("planted.md", marked + "\n", "",
-                                      {"docs/other.md"}, {"other.md"}, skipped)
+                                      {"docs/other.md"}, {"other.md"}, skipped, disk=False)
 assert marked_bad == [], f"a marked quoted original is still counted dead: {marked_bad}"
 assert skipped == [("planted.md", 1)], f"the marked line was not reported as skipped: {skipped}"
 
@@ -99,7 +98,7 @@ assert skipped == [("planted.md", 1)], f"the marked line was not reported as ski
 two_lines = marked + "\nThe next sentence also reads `RAW-FINDINGS.md`.\n"
 skipped = []
 two_bad = census.dead_refs_in_text("planted.md", two_lines, "",
-                                   {"docs/other.md"}, {"other.md"}, skipped)
+                                   {"docs/other.md"}, {"other.md"}, skipped, disk=False)
 assert len(two_bad) == 1, f"the marker skipped a line it does not sit on: {two_bad}"
 assert skipped == [("planted.md", 1)], f"the marker skipped a line it does not sit on: {skipped}"
 
@@ -110,15 +109,11 @@ def cited_refs():
     A coarse statistic rather than a second resolver: it only has to know which kinds of
     citation the corpus still exercises, so the regex is the same shape and nothing else.
     """
-    files = census.md_files()
-    skip = set(census.catalogues(files))
+    texts = census.subject_texts(census.md_files())
+    skip = set(census.catalogues(texts))
     out = set()
-    for f in files:
+    for f, text in texts.items():
         if f in skip:
-            continue
-        try:
-            text = io.open(os.path.join(census.REPO, f), encoding="utf-8", errors="replace").read()
-        except OSError:
             continue
         out.update(re.findall(r"`((?:[\w./&-]+/)?[\w.-]+\.md)`", text))
     return out
