@@ -2652,3 +2652,34 @@ the four specs with private walks stay red and are reported here rather than fix
 ### Batch close
 
 - 3.8 complete. Next: 2.5 remainder, then the BaseSelect outer-label defect (ten sites).
+
+## 34. Dispatch 35 - docs-only batch D1-D5, 2026-10-19
+
+- Open: HEAD bd9e2e5, ahead 4, behind 0, merge-base clean; peer landed 4096b11 + 71f7f92 (3.8, Section 33) mid-batch, no conflict with these files. PRD, AGENTS, OPEN-QUESTIONS, ledger clean at open. Peer-dirty Preflight files untouched.
+
+### Landed
+- a3895c0 docs(prd): D1 - four CLAUDE.md citations fixed: Section 2 lore rules now name AGENTS.md Section 5 and `tools/lore.php`; A-5 drops the "Planner Rule 6" cite (rule removed per ADR-0020); NFR-6 and Section 8 banned-pattern grep now name `tools/lore.php`. The fifth hit (line 371) KEPT: CLAUDE.md is tracked and does cite Section 6 non-goals, so the plan premise "deleted CLAUDE.md" was false for that line.
+- a3895c0 also lands D3: new A-11 records the Decision 9 portrait ruling - every default frame MUST render the character's active form (flagged `is_debut_form` per A-6) else the first form, on catalog index, catalog detail, career profile and pre-run select; an explicit form pick governs its own surface. OQ-6 updated: the inconsistency is resolved by the ruling; the residual divergence (catalog detail with no form param defaults to the first card while the other surfaces prefer the active form) is named as the Phase 5.4 code item A-11 defers to.
+- a2a4282 docs(nfr-20): D2+D4 - root KNOWN-ISSUES.md (the plan's docs/ path premise is stale; KI ids continue, next-free was 101) gains KI-101 refresh test, KI-102 and KI-103 the two acknowledged NFR-20 gap items, KI-104 ADR-0027 still proposed (`docs/adr/0027-turn-and-decision-logging.md` is not accepted, not binding). PRD NFR-20 gains a state line cross-referencing KI-101/102/103. Append-only proved: 19 insertions, 0 deletions.
+- 96e7417 docs(open-questions): D5 sweep caught a live false claim: OQ-5 "Betweener has zero occurrences in client data" - measured false, `database/seeders/data/skills.609afe88.json` carries "Betweener" as the running-style prefix in many Global client strings. Dated erratum appended, original sentence preserved per CLAUDE.md Section 13. Not the sentence decision 7 removed (that was the best_for claim, already gone).
+
+### D2 measurement
+- Plan's spec name `tests/browser/refresh-navigation.spec.ts` never existed in HEAD or history; the refresh case is `tests/browser/navigation-determinism.spec.ts:75`. Ran the file: 3 cases pass, the refresh case FAILS - one reload counts 2 `framenavigated` events against the expected 1. The counter cannot distinguish a full reload from a same-document address change, so case (a) over-count vs case (b) app double-load is NOT decidable from source; ruled case (c): blocked on an owner browser trace. KI-101 records both resolution paths.
+
+### Consistency sweep
+- ADR-0025: file status line reads Accepted (2026-10-18); docs/adr/README index row present; CHANGELOG cites ADR-0025 on 4+ lines. Consistent.
+- D-20 and D-268 rulings live in docs/research-scratch/GOVERNANCE.md (re-homed section); root GOVERNANCE.md has no copies. No duplication.
+- AGENTS.md line endings: `git ls-files --eol` shows i/lf w/crlf attr=eol=lf - the committed blob is pure LF; the worktree CRLF is a local checkout artifact, not ac9b257 damage in history. No repair owed.
+- ac9b257: pushed (ancestor of origin/master), NOT rewritten. Disposition: accepted cost - its whole-file normalization already reset ledger blame once. Append discipline from here: append bytes only and prove it; this ledger is git-detection -text (mixed endings, invalid-UTF-8 regions), so git applies no normalization and the append lands byte-exact.
+
+### Gates
+- DocCitationParity: census 718 before and after this batch; the edits are citation-neutral (temp HEAD-clone A/B: 738 = 738 with and without this batch's PRD). Baseline const is 708, so the gate is RED at HEAD for a pre-existing rise (Section 33 measured 718 again at 3.8 close). This batch adds nothing; a citations dispatch owns the 718-to-708 repair.
+- DocAccuracyTest: `php artisan test --compact --filter=DocAccuracyTest` -> Tests: 3 passed (80 assertions), exit 0, no risky. (An earlier attempt stalled ~13 min on peer DB contention, not the test.)
+- `python tools/md_fence_check.py` on PRD.md, KNOWN-ISSUES.md, docs/OPEN-QUESTIONS.md -> 0 invalid each.
+- `php tools/lore.php` exit 0; `php tools/lore.php code` exit 0.
+
+### Deviations from the plan (recorded, not papered)
+- "Section 30" was stale twice over: Sections 30-33 all exist; next free is 34.
+- KNOWN-ISSUES.md lives at the repo root; register entries are KI-101..KI-104, no renumbering.
+- Refresh spec filename wrong in plan (fixed in KI-101 text).
+- Census baseline premise "708/708 green" already breached before dispatch opened.
