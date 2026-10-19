@@ -6,6 +6,14 @@
 commit that closed it.** KI-38 through KI-56 sit in the same master, further down; this file carries
 KI-57 onward.
 
+**Where the older numbers live.** `KI-1` through `KI-56` are in
+`docs/research-scratch/AUDIT-AND-VERIFICATION.md` ("KNOWN-ISSUES.md (defect register)"), not in this
+file; this file carries `KI-57` onward. Three of the older entries are still OPEN and appear in no
+status block above: `KI-24` (a stale source hash answers 200 with stale content), `KI-25` (the turn
+log's horizontal scroll at phone width) and `KI-27` (`uma:fetch` reports "unchanged since last
+snapshot" against a database it never wrote to). `KI-4` is RESOLVED. The master is authoritative for
+those entries' current status; this line names them, it does not restate them.
+
 **Status (2026-10-06, at `ab53861`):** this file carries KI-57, KI-58, KI-59 and KI-60, and all four are
 OPEN. KI-60's dev-database half was remediated on 2026-10-06 and stays open for its prevention half; the
 entry records which is which. The count is stated as composition rather than a total, because the
