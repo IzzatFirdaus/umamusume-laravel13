@@ -2340,3 +2340,75 @@ working (5 -> 6 passing, runtime 12m -> 2.0m as the table started rendering).
 - Three PowerShell attempts at inline Python failed on quoting before I switched to script files, which
   is the rule this arc already carries. I violated it three times in one dispatch by trying inline
   first; the cost was three wasted calls, no corruption.
+
+
+## 31. Dispatch 32 — 3.4 browser debt closed, 2026-10-19
+
+### Step 0 measurements (quoted)
+
+```
+git rev-list --count origin/master..HEAD   ->  9
+list length                                ->  9
+```
+
+They match. `origin/master` `29f8715`, `HEAD:PRD.md` `fcdc8ad`, staged set empty, ancestry exit 0.
+Bundle **fresh** (manifest 12:43, newest `resources/js` commit 12:51 and `.vue` only at runtime).
+Guard **9**. **DocCitationParity 716** at open, down from 726: the peer's `ff0febc` removed dead
+citations.
+
+### Peer-work audit
+
+The peer's commits in this window are `6c9d099` (3.5, stat table), `bbc1814` (3.6, legacy tree),
+`ac9b257` (ledger), `d09c600` (temp scripts), `ff0febc` (dead citations). So **the peer is landing
+Phase 3 implementation slices, not just documentation.**
+
+Active files at 13:24, by mtime: `BuildTarget.vue` 12:02, `LegacySelect.vue` 12:24, `TraineeSelect.vue`
+12:13 (mine). **`DeckSelect.vue` and `Preflight.vue` both 17 Oct 20:59**: neither 3.7 nor 3.8 is
+peer-active, so both remained available.
+
+### Step A — 3.4 browser debt CLOSED. `2e87837`, 3 files, +85 −43
+
+**`career-trainee-select.spec.ts` is 10/10 green (2.5m).** The debt is gone, not reduced.
+
+Four failures, and behind them **three real defects I had introduced**, each found by measurement:
+
+1. **`@2xl:` never matched.** It is a *container* query, and neither the table which uses it nor
+   `TraineeSelect` declared a `@container`. The forms column was therefore hidden at **every** width
+   (`hiddenCellCount: 25` at 1280px), so the R3-06 costume-form control was unreachable. Adding
+   `@container` to the wrapper did not fix it either, and measurement showed why: the column is
+   required at all widths, so `secondary` was the wrong design. The flag is reverted and the column
+   renders always.
+2. **The costume-form select had no accessible name.** `BaseSelect` owns its own `<label>` and derives
+   `aria-labelledby` from the id; wrapping it in a second `<label :for>` broke the association
+   (`labelledby: null` on all 15 selects). The label is now passed **in**, which is the component's
+   contract.
+3. **My "three primary axes" premise was wrong.** The row prints all ten axes. I pinned band counts
+   derived from an assumption; the DOM showed `Neutral` twice, not once. The assertions now carry the
+   measured counts and say so in the comment.
+
+Stale card-contract pins rewritten: `View Profile` → `Profile`, `AbsenceValue` group → the 3.2 strip's
+`not chosen`, the profile's `row` role → its own heading.
+
+**Failability proven:** renaming `label="Costume form"` to `"Costume picker"` reds the R3-06 case
+(`expect(locator).toBeVisible() failed`); restored, 10/10 green.
+
+Gates: typecheck clean, `CareerTraineeSelectTest` **22 passed (454 assertions)**, pint/PHPStan/lint:ui
+green, guard 9.
+
+### Steps B and C — not started, and why
+
+Step A spent the dispatch. `DeckSelect.vue` was confirmed still the pre-3.7 two-column layout with no
+`<dialog>`, and the native-dialog pattern to follow already exists in `RaceCard.vue` and
+`UraDuelPanel.vue`. That is a page rebuild with its own browser suite: starting it with no budget to
+verify would repeat the "partial" failure this arc has already recorded twice.
+
+### Batch close
+
+- Ahead **10**. Todo list: Step 0 completed, Step A completed, Step B **not started**, Step C **not
+  started**, ledger this section, report completed.
+- **3.4: browser cases green (10/10).** The load-bearing item is met.
+- **3.7 and 3.8: pending, both peer-clear** (mtimes 17 Oct). **2.5 remainder: pending.**
+- DocCitationParity **716** at close, unchanged by this dispatch.
+- Peer commits this window: `6c9d099`, `bbc1814`, `ac9b257`, `d09c600`, `ff0febc`.
+- **Peer current work:** `BuildTarget.vue` (12:02) and `LegacySelect.vue` (12:24), i.e. 3.5/3.6
+  follow-up. Next: **3.7, then 3.8, then 2.5's remainder**.
