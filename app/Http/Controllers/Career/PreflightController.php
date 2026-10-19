@@ -152,8 +152,11 @@ class PreflightController extends Controller
 
         // The Cockpit, not the run record screen (SCREEN-009, `SCR-CAR-011`): a career that has just
         // started lands on the screen it is read from every turn, and the record screen stays one
-        // link away in the career bar. `CareerPreflightTest` pins the destination.
-        return redirect()->route('runs.cockpit', $run)->with('status', 'Run created.');
+        // link away in the career bar. The flash names the trainee the draft recorded, so the one line
+        // that answers the press says whose career now exists rather than that a row was written.
+        // `CareerPreflightTest` pins the destination and the words.
+        return redirect()->route('runs.cockpit', $run)
+            ->with('status', 'Career started for '.$run->umamusume->name);
     }
 
     /**

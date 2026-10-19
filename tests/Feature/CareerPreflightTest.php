@@ -306,6 +306,17 @@ it('creates the run from the draft once, with the deck, the ancestry and the tar
         ->and(session(SetupDraft::SESSION_KEY))->toBeNull();
 });
 
+it('names the trainee in the flash that answers Start career', function (): void {
+    // The one line a Trainer reads after the press. `Run created.` said that a row was written and never
+    // whose career it is, which is the whole of what the write decided.
+    $fixture = preflightFixture();
+    session([SetupDraft::SESSION_KEY => preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'])]);
+
+    test()->put(route('career.preflight.store'))
+        ->assertRedirect()
+        ->assertSessionHas('status', 'Career started for '.$fixture['trainee']->name);
+});
+
 it('refuses a draft whose support card no longer exists, creating nothing', function (): void {
     $fixture = preflightFixture();
     $draft = preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents']);

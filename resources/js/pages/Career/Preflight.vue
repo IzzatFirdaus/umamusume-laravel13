@@ -1,27 +1,35 @@
 <script setup lang="ts">
 /*
- * The career setup wizard's Preflight step, `SCR-CAR-010` (SCREEN-008, PRD FR-A-5, `ADR-0020` §1 and §3).
+ * The career setup wizard's last step, `SCR-CAR-010` (SCREEN-008, PRD FR-A-5, `ADR-0020` §1 and §3).
  * Step 6 of six, and the only step that writes.
  *
  * **Nothing is re-asked.** Every fact on this page is read from the draft the five earlier steps filled and
  * arrives as one `contract` prop, so Back and Edit round trips are lossless by construction: a step opens
  * on the values it stored, not on what the client still held.
  *
- * **The warnings never block.** Each one restates entered data (a section nobody filled, a deck with an
- * empty position, a target band sitting on a Weak aptitude, a skill priority no source in this setup names)
- * and each links to the step that can change it. The Trainer decides; only a server refusal stops the
- * write, and that is a section that no longer validates rather than a judgement about the plan.
+ * **The page is a checklist, not a report.** One row per entered step, each carrying its own state glyph
+ * (entered or missing), the step's name, a one-line summary of what the draft holds or `Not entered`, and
+ * the one Edit door that returns to that step. The earlier revision printed the whole contract again as
+ * four detail blocks and repeated every door in a second row under them; the summary is what a Trainer
+ * reads at the commitment screen, and the detail lives one click away on the step that owns it.
  *
- * **The primary action creates the run.** `Start Career` posts to the wizard's one write, which re-runs
- * every step's own Form Request server-side before it creates anything, so this page's rendering is never
- * the trust boundary. While the write is in flight the button says so, because it is a user-initiated
- * action and its own progress is the only loading state this screen has (ADR-0007).
+ * **`Start career` is the page's only primary, and it is honest about what it needs.** A career needs a
+ * scenario and a trainee, which is exactly what `StartCareerRequest` refuses without, so the button carries
+ * `aria-disabled` and a click guard rather than the `disabled` attribute: a `disabled` control dispatches no
+ * click at all, so the plan's "focus the first missing row on an attempted click" is unreachable behind it.
+ * The reason is printed beside the button whether or not it is pressed.
+ *
+ * **The primary action creates the run.** The write re-runs every step's own Form Request server-side
+ * before it creates anything, so this page's rendering is never the trust boundary. While the write is in
+ * flight the button says so and is truly disabled, because it is a user-initiated action and its own
+ * progress is the only loading state this screen has (ADR-0007).
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
-import DeckAnalysis from '../../components/support/DeckAnalysis.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
+import StickyFooter from '../../components/ui/StickyFooter.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { nextTick, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 
 interface Trainee {
     id: number;
@@ -117,12 +125,28 @@ const props = defineProps<{
             races: { distance: string | null; surface: string | null; style: string | null };
             skills: { names: string[] };
         };
+        /**
+         * The derivable gaps in the entered data. The controller still composes them and
+         * `CareerPreflightTest` still pins each trigger; the checklist states the section-level half
+         * (entered or not) and this page no longer renders the list.
+         */
         warnings: Warning[];
         ruleset: { label: string; title: string };
     };
     edit: Record<'scenario' | 'trainee' | 'target' | 'legacy' | 'deck', string>;
     startAction: string;
 }>();
+
+/** One row of the review checklist: a step, its state, its summary, and its one door back. */
+interface ChecklistRow {
+    key: 'scenario' | 'trainee' | 'target' | 'legacy' | 'deck';
+    label: string;
+    entered: boolean;
+    summary: string;
+    /** The trainee's Japanese name, printed beside her English one where the record carries it. */
+    ja?: string | null;
+    edit: string;
+}
 
 const form = useForm({});
 const alert = ref<HTMLElement | null>(null);
@@ -141,38 +165,142 @@ watch(
     },
 );
 
+const legacySummary = computed((): string => {
+    const legacy = props.contract.build.legacy;
+
+    if (legacy === null) {
+        return 'Not entered';
+    }
+
+    const named = legacy.members.filter((member) => member.name !== null).length;
+    const affinity = legacy.affinity === null ? 'No Affinity grade read' : `Affinity ${legacy.affinity}`;
+
+    return `${affinity} · ${named} of two parents recorded`;
+});
+
+const targetSummary = computed((): string => {
+    const target = props.contract.build.target;
+
+    if (target === null) {
+        return 'Not entered';
+    }
+
+    return `${target.purpose_label} · ${target.surface} ${target.distance} · ${target.style}`;
+});
+
+const rows = computed<ChecklistRow[]>(() => [
+    {
+        key: 'scenario',
+        label: 'Scenario',
+        entered: props.contract.build.scenario !== null,
+        summary: props.contract.build.scenario?.label ?? 'Not entered',
+        edit: props.edit.scenario,
+    },
+    {
+        key: 'trainee',
+        label: 'Trainee',
+        entered: props.contract.build.trainee !== null,
+        summary: props.contract.build.trainee?.name ?? 'Not entered',
+        ja: props.contract.build.trainee?.name_ja ?? null,
+        edit: props.edit.trainee,
+    },
+    {
+        key: 'target',
+        label: 'Your target',
+        entered: props.contract.build.target !== null,
+        summary: targetSummary.value,
+        edit: props.edit.target,
+    },
+    {
+        key: 'legacy',
+        label: 'Legacy',
+        entered: props.contract.build.legacy !== null,
+        summary: legacySummary.value,
+        edit: props.edit.legacy,
+    },
+    {
+        key: 'deck',
+        label: 'Support deck',
+        entered: props.contract.deck !== null,
+        summary: props.contract.deck === null
+            ? 'Not entered'
+            : `${props.contract.deck.equipped} of six positions carry a card`,
+        edit: props.edit.deck,
+    },
+]);
+
+/** The steps the draft has nothing for, in the checklist's own order. */
+const missing = computed<ChecklistRow[]>(() => rows.value.filter((row) => !row.entered));
+
+/**
+ * The heading's count. `role="status"` on it (in the template) is the announcement: the number is the
+ * page's answer to "can I start", and it changes only when the draft does.
+ */
+const attention = computed((): string => {
+    const count = missing.value.length;
+
+    if (count === 0) {
+        return 'All five entered steps are recorded.';
+    }
+
+    return count === 1 ? '1 step needs attention' : `${count} steps need attention`;
+});
+
+/** What `StartCareerRequest` refuses without, and nothing else: a scenario and a trainee. */
+const canStart = computed((): boolean => props.contract.build.scenario !== null && props.contract.build.trainee !== null);
+
+const startBlocker = computed((): string | null => {
+    const absent: string[] = [];
+
+    if (props.contract.build.scenario === null) {
+        absent.push('A scenario');
+    }
+
+    if (props.contract.build.trainee === null) {
+        absent.push('a trainee');
+    }
+
+    if (absent.length === 0) {
+        return null;
+    }
+
+    const list = absent.join(' and ');
+
+    return absent.length === 1
+        ? `${list} is not entered, and a career cannot start without one.`
+        : `${list} are not entered, and a career cannot start without both.`;
+});
+
 const start = (): void => {
+    if (form.processing) {
+        return;
+    }
+
+    if (!canStart.value) {
+        // The first missing row is the first thing to fix, and it is where the press puts focus
+        // (WCAG 2.2, SC 3.3.1: the error's own location, not a message somewhere else on the page).
+        document.getElementById(`preflight-step-${missing.value[0]?.key ?? 'scenario'}`)?.focus();
+
+        return;
+    }
+
     form.put(props.startAction);
 };
-
-const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
 </script>
 
 <template>
     <SetupLayout :step="props.step" :visited="props.visited" :saved="props.saved">
-        <Head title="Career contract" />
-        <template #eyebrow>Setup</template>
-        <template #title>Career contract</template>
+        <Head title="Review and start" />
+        <template #head>
+            <PageHeader
+                eyebrow="Setup · Step 6 of 6"
+                title="Review and start"
+                description="What the five earlier steps recorded, and the one door back to each of them."
+            />
+        </template>
 
-<!-- Back breadcrumb -->
-        <nav class="mt-4 mb-2" aria-label="Breadcrumb">
-            <Link href="/career/setup/preflight" class="inline-flex min-h-11 items-center text-sm font-medium text-brand-accent-ink hover:underline transition-colors duration-150 ease-out" aria-label="Back to preflight step">
-                ← Back to preflight
-            </Link>
-        </nav>
-
-        <!-- Header: eyebrow + subtitle. The page title is the layout's #title h1. -->
-        <header class="mb-4">
-            <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 6 of 6</p>
-            <p class="mt-1 text-sm text-ink-muted">Everything the six steps recorded, in the order you entered it.</p>
-        </header>
-
-        <p class="mt-4 text-sm text-ink-muted">
-            Everything the six steps recorded, in the order you entered it. Nothing here is asked again.
-        </p>
-
-        <!-- The refusal, when the server finds a section that no longer validates. Warnings below never
-             block; this does, and it names the section so the next action is the step that owns it. -->
+        <!-- The refusal, when the server finds a section that no longer validates. Nothing below blocks;
+             this does, and it names the section so the next action is the step that owns it. -->
         <div
             v-if="form.hasErrors"
             ref="alert"
@@ -186,280 +314,80 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
             </ul>
         </div>
 
-        <!-- Warnings: glyph plus text, never colour alone, and each one links to the step it came from. -->
-        <section v-if="props.contract.warnings.length > 0" class="mx-auto w-full max-w-4xl mt-6" aria-labelledby="warnings-heading">
-            <h2 id="warnings-heading" class="text-lg font-semibold text-ink-strong">
-                Warnings
+        <section class="mx-auto w-full max-w-4xl" aria-labelledby="checklist-heading">
+            <h2 id="checklist-heading" class="text-lg font-semibold text-ink-strong">
+                The five entered steps
             </h2>
-            <ul class="mt-2 space-y-2">
+            <p role="status" class="mt-1 text-sm text-ink">{{ attention }}</p>
+
+            <ol class="mt-3 max-w-3xl space-y-2">
                 <li
-                    v-for="warning in props.contract.warnings"
-                    :key="warning.key"
-                    class="flex flex-wrap items-baseline gap-x-2 rounded-lg border border-rule bg-panel p-3 text-sm"
+                    v-for="row in rows"
+                    :id="`preflight-step-${row.key}`"
+                    :key="row.key"
+                    tabindex="-1"
+                    class="rounded-lg border border-rule bg-panel p-3"
                 >
-                    <span aria-hidden="true" class="font-mono font-bold text-goal-line">!</span>
-                    <span class="font-semibold text-ink-strong">{{ warning.title }}.</span>
-                    <span class="text-ink">{{ warning.detail }}</span>
-                </li>
-            </ul>
-        </section>
-
-        <p
-            v-else
-            class="mt-6 rounded-lg border border-rule bg-panel p-3 text-sm text-ink"
-        >
-            No warnings. Every section is filled and nothing in the entered data reads as a gap this tool can
-            see.
-        </p>
-
-        <section class="mx-auto w-full max-w-4xl mt-6" aria-labelledby="build-heading">
-            <h2 id="build-heading" class="text-lg font-semibold text-ink-strong">Build</h2>
-
-            <dl class="mt-2 max-w-3xl grid gap-2 @3xl:grid-cols-2">
-                <div class="rounded-lg border border-rule bg-panel p-3">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Trainee</dt>
-                    <dd class="mt-1 text-sm text-ink-strong">
-                        <template v-if="props.contract.build.trainee">
-                            {{ props.contract.build.trainee.name }}
+                    <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                        <p class="min-w-0 text-sm">
+                            <!-- Glyph plus text, never the glyph alone: the state is a word for a screen
+                                 reader and a shape for everyone else. -->
                             <span
-                                v-if="props.contract.build.trainee.name_ja"
-                                lang="ja"
-                                class="ml-2 text-ink-muted"
-                            >{{ props.contract.build.trainee.name_ja }}</span>
-                        </template>
-                        <AbsenceValue v-else compact reason="No trainee is recorded in this setup yet." />
-                    </dd>
-                </div>
-
-                <div class="rounded-lg border border-rule bg-panel p-3">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Scenario</dt>
-                    <dd class="mt-1 text-sm text-ink-strong">
-                        <template v-if="props.contract.build.scenario">
-                            {{ props.contract.build.scenario.label }}
-                            <span v-if="props.contract.build.scenario.focus" class="ml-2 text-ink-muted">
-                                {{ props.contract.build.scenario.focus }}
-                            </span>
-                        </template>
-                        <AbsenceValue v-else compact reason="No scenario is recorded in this setup yet." />
-                    </dd>
-                </div>
-
-                <div class="rounded-lg border border-rule bg-panel p-3 @3xl:col-span-2">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Your target</dt>
-                    <dd class="mt-1 text-sm text-ink">
-                        <template v-if="props.contract.build.target">
-                            {{ props.contract.build.target.purpose_label }} ·
-                            {{ props.contract.build.target.surface }}
-                            {{ props.contract.build.target.distance }} ·
-                            {{ props.contract.build.target.style }}
-                        </template>
-                        <AbsenceValue v-else compact reason="No build target is recorded in this setup yet." />
-                    </dd>
-                </div>
-
-                <div class="rounded-lg border border-rule bg-panel p-3 @3xl:col-span-2">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                        Ancestry
-                        <span v-if="props.contract.build.legacy" class="ml-2 normal-case tracking-normal">
-                            Affinity
-                            <span v-if="props.contract.build.legacy.affinity">
-                                {{ props.contract.build.legacy.affinity }}
-                            </span>
-                            <AbsenceValue v-else compact reason="No Affinity grade was read for the pair." />
-                        </span>
-                    </dt>
-                    <dd class="mt-1 text-sm text-ink">
-                        <ul v-if="props.contract.build.legacy" class="space-y-2">
-                            <li v-for="member in props.contract.build.legacy.members" :key="member.slot">
-                                <p class="font-medium text-ink-strong">
-                                    {{ member.label }}:
-                                    <span :class="member.name === null ? 'text-ink-muted' : ''">
-                                        {{ memberName(member) }}
-                                    </span>
-                                    <span class="ml-2 text-ink-muted">{{ member.rank_label }}</span>
-                                    <span v-if="member.is_guest" class="ml-2 text-ink-muted">
-                                        Rented from a friend
-                                    </span>
-                                </p>
-                                <ul class="mt-1 space-y-0.5 text-xs text-ink-muted">
-                                    <li v-for="ancestor in member.ancestors" :key="ancestor.slot">
-                                        {{ ancestor.slot }}:
-                                        <AbsenceValue
-                                            v-if="ancestor.name === null"
-                                            compact
-                                            reason="No name was recorded for this ancestor."
-                                        />
-                                        <span v-else>{{ ancestor.name }}</span>
-                                        <!-- The grandparent's own rank, in the parents' words, printed only
-                                             where one was read: four of the six ranks in the source's tree
-                                             sit on these nodes (R3-09). -->
-                                        <span v-if="ancestor.rank_letter" class="ml-1">{{ ancestor.rank_label }}</span>
-                                        <span v-if="ancestor.sparks.length > 0" class="ml-1">
-                                            <span v-for="spark in ancestor.sparks" :key="`${spark.kind}-${spark.target}`" class="mr-1">
-                                                {{ spark.kind_label ?? spark.kind }}
-                                                <span v-if="spark.target">on {{ spark.target }}</span>
-                                                <span v-if="spark.stars !== null">★{{ spark.stars }}</span>
-                                            </span>
-                                        </span>
-                                        <span v-else class="ml-1">{{ ancestor.sparks_label }}</span>
-                                    </li>
-                                </ul>
-                                <p class="text-xs text-ink-muted">
-                                    <template v-if="member.sparks.length > 0">
-                                        <span v-for="spark in member.sparks" :key="`${spark.kind}-${spark.target}`" class="mr-2">
-                                            {{ spark.kind_label ?? spark.kind }}
-                                            <span v-if="spark.target">on {{ spark.target }}</span>
-                                            <span v-if="spark.stars !== null">★{{ spark.stars }}</span>
-                                        </span>
-                                    </template>
-                                    <span v-else title="No Sparks were recorded for this parent.">No Sparks recorded</span>
-                                </p>
-                            </li>
-                        </ul>
-                        <AbsenceValue v-else compact reason="No two-parent ancestry is recorded in this setup yet." />
-                    </dd>
-                </div>
-            </dl>
+                                aria-hidden="true"
+                                class="mr-1 font-mono font-bold"
+                                :class="row.entered ? 'text-goal-line' : 'text-risk'"
+                            >{{ row.entered ? '✓' : '✗' }}</span>
+                            <span class="sr-only">{{ row.entered ? 'Entered' : 'Missing' }}</span>
+                            <span class="font-semibold text-ink-strong">{{ row.label }}</span>
+                            <span class="text-ink"> · {{ row.summary }}</span>
+                            <span v-if="row.ja" lang="ja" class="ml-2 text-ink-muted">{{ row.ja }}</span>
+                        </p>
+                        <Link
+                            :href="row.edit"
+                            :aria-label="`Edit ${row.label}`"
+                            class="inline-flex min-h-11 shrink-0 items-center rounded-md border border-rule px-3 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
+                        >
+                            Edit
+                        </Link>
+                    </div>
+                </li>
+            </ol>
         </section>
 
-        <section class="mx-auto w-full max-w-4xl mt-6" aria-labelledby="deck-heading">
-            <h2 id="deck-heading" class="text-lg font-semibold text-ink-strong">Support deck</h2>
+        <section class="mx-auto w-full max-w-4xl mt-6" aria-labelledby="notes-heading">
+            <h2 id="notes-heading" class="text-lg font-semibold text-ink-strong">Before you start</h2>
 
-            <div v-if="props.contract.deck === null" class="mt-2 rounded-lg border border-rule bg-panel p-3 text-sm text-ink">
-                <AbsenceValue compact reason="No six-slot deck is recorded in this setup yet." />
-                The deck step has not been saved.
-            </div>
-
-            <template v-else>
-                <ol class="mt-2 max-w-3xl grid gap-2 @3xl:grid-cols-2">
-                    <li
-                        v-for="slot in props.contract.deck.slots"
-                        :key="slot.position"
-                        class="rounded-lg border border-rule bg-panel p-3 text-sm"
-                    >
-                        <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                            {{ slot.label }}
-                        </p>
-                        <p class="mt-1 text-ink-strong">
-                            <template v-if="slot.card">{{ slot.card.name }}</template>
-                            <span v-else title="This position carries no card.">Not equipped</span>
-                        </p>
-                        <p v-if="slot.card" class="text-xs text-ink-muted">
-                            {{ slot.card.rarity_word }} · {{ slot.card.type_label }}
-                            <span v-if="slot.ownership === 'OWNED'">· Owned</span>
-                            <span v-else-if="slot.ownership === 'RENTED'">· Rented</span>
-                        </p>
-                    </li>
-                </ol>
-
-                <p class="mt-2 text-sm text-ink-muted">
-                    {{ props.contract.deck.equipped }} of six positions carry a card.
-                </p>
-
-                <!-- The flag is printed above, and `StartCareerRequest::ownershipByPosition()` carries it
-                     onto the slot row this screen creates (`ADR-0023`, D3). Said at the commitment screen
-                     because this page's own promise is "everything the six steps recorded", and a position
-                     left unclassified is the one entered fact that arrives as an absence. -->
-                <p class="mt-2 rounded-md border border-dashed border-rule bg-panel p-3 text-xs text-ink-muted">
-                    The owned or rented flag is in this setup draft, and starting the career writes it onto
-                    each slot's deck row, one value per position. A position holding no card creates no deck
-                    row, and a card whose flag was never chosen is stored as no flag, never as Owned.
-                </p>
-
-                <DeckAnalysis class="mt-3" v-bind="props.contract.deck.analysis" />
-            </template>
-        </section>
-
-        <section class="mx-auto w-full max-w-4xl mt-6" aria-labelledby="target-heading">
-            <h2 id="target-heading" class="text-lg font-semibold text-ink-strong">Target</h2>
-
-            <dl class="mt-2 max-w-3xl grid gap-2 @3xl:grid-cols-2">
-                <div v-for="stat in props.contract.target.stats" :key="stat.key" class="rounded-lg border border-rule bg-panel p-3">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ stat.label }}</dt>
-                    <dd class="mt-1 font-mono text-sm text-ink-strong">
-                        <template v-if="stat.value !== null">{{ stat.value }}</template>
-                        <AbsenceValue v-else compact reason="No target was entered for this stat." />
-                    </dd>
-                </div>
-            </dl>
-
-            <div class="mt-2 text-sm text-ink">
-                Race profile:
-                <template v-if="props.contract.target.races.distance !== null">
-                    {{ props.contract.target.races.distance }}
-                </template>
-                <AbsenceValue v-else compact reason="No distance band was entered." />
-                <span class="text-ink-muted"> · </span>
-                <template v-if="props.contract.target.races.surface !== null">
-                    {{ props.contract.target.races.surface }}
-                </template>
-                <AbsenceValue v-else compact reason="No surface was entered." />
-                <span class="text-ink-muted"> · </span>
-                <template v-if="props.contract.target.races.style !== null">
-                    {{ props.contract.target.races.style }}
-                </template>
-                <AbsenceValue v-else compact reason="No running style was entered." />
-            </div>
-
-            <p class="mt-1 text-sm text-ink">
-                Skill priorities:
-                <template v-if="props.contract.target.skills.names.length > 0">
-                    {{ props.contract.target.skills.names.join(' · ') }}
-                </template>
-                <span v-else title="No skill priorities were entered on the target step.">None entered</span>
+            <!-- The flag is in the checklist's own draft, and `StartCareerRequest::ownershipByPosition()`
+                 carries it onto the slot row this screen creates (`ADR-0023`, D3). Said at the commitment
+                 screen because a position left unclassified is the one entered fact that arrives as an
+                 absence. -->
+            <p class="mt-2 max-w-3xl rounded-md border border-dashed border-rule bg-panel p-3 text-xs text-ink-muted">
+                The owned or rented flag is in this setup draft, and starting the career writes it onto
+                each slot's deck row, one value per position. A position holding no card creates no deck
+                row, and a card whose flag was never chosen is stored as no flag, never as Owned.
             </p>
 
-            <div class="mt-3 text-sm text-ink-muted">
+            <p class="mt-2 text-sm text-ink-muted">
                 Ruleset version:
                 <AbsenceValue compact :reason="props.contract.ruleset.title" />
-            </div>
+            </p>
         </section>
 
-        <div class="mx-auto w-full max-w-4xl mt-6 flex flex-wrap items-center gap-3">
-            <!-- One door per earlier step, in step order, and no two doors to the same place: the
-                 old row's "Back" and "Edit Deck" both bound the deck route, so the duplicated link
-                 is dropped in favour of the name that says what the door does (audit 2026-10-12
-                 §3.8). Every step writes its own draft, so each door opens on the stored values
-                 and the round trip is lossless by construction. -->
-            <Link
-                :href="props.edit.scenario"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
-            >
-                Edit Scenario
-            </Link>
-            <Link
-                :href="props.edit.trainee"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
-            >
-                Edit Trainee
-            </Link>
-            <Link
-                :href="props.edit.target"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
-            >
-                Edit Target
-            </Link>
-            <Link
-                :href="props.edit.legacy"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
-            >
-                Edit Legacy
-            </Link>
-            <Link
-                :href="props.edit.deck"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
-            >
-                Edit Deck
-            </Link>
-
-            <button
-                type="button"
-                class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-5 text-sm font-semibold text-on-primary-action disabled:opacity-60"
-                :disabled="form.processing"
-                @click="start"
-            >
-                {{ form.processing ? 'Starting…' : 'Start Career' }}
-            </button>
-        </div>
+        <StickyFooter>
+            <template #left>
+                <p v-if="startBlocker !== null" class="text-sm text-ink">{{ startBlocker }}</p>
+            </template>
+            <template #right>
+                <button
+                    type="button"
+                    class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-5 text-sm font-semibold text-on-primary-action disabled:opacity-60 aria-disabled:opacity-60"
+                    :disabled="form.processing"
+                    :aria-disabled="!canStart || form.processing"
+                    @click="start"
+                >
+                    {{ form.processing ? 'Starting…' : 'Start career' }}
+                </button>
+            </template>
+        </StickyFooter>
     </SetupLayout>
 </template>

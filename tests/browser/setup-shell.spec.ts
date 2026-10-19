@@ -23,7 +23,7 @@ const STEPS: { url: string; label: string; title: string }[] = [
     { url: '/career/setup/target', label: 'Your target', title: '' },
     { url: '/career/setup/legacy', label: 'Legacy', title: '' },
     { url: '/career/setup/deck', label: 'Support deck', title: '' },
-    { url: '/career/setup/preflight', label: 'Preflight', title: 'Career contract' },
+    { url: '/career/setup/preflight', label: 'Preflight', title: 'Review and start' },
 ];
 
 for (const step of STEPS) {

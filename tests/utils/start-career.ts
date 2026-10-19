@@ -17,33 +17,42 @@ import { expect, type Page } from '@playwright/test';
  * `php -S`, so a step's PUT queues behind whatever else is on the box; `playwright.config.ts`
  * already raised the test budget to 180s for exactly that reason.
  *
- * Coupling to watch: the target step is driven by its current field names (`select[name="purpose"]`,
- * `input[name="targets[Speed]"]`, the "Save target" button). A wizard pass that restructures that
- * step has to move this helper with it.
+ * Dated note 2026-10-19: the walk was re-pointed onto the DOM the wizard actually ships. Three
+ * rebuilds had left it naming controls that no longer exist, and every spec that starts a career
+ * through it was red: step 1's option cards became a radio group whose card IS the label (commit
+ * `3e8e924`), so the control is `#scenario-radio-<key>` and its state is `aria-checked`; step 2's
+ * per-card action is `#trainee-<id>` labelled `Select`; and step 5's always-visible picker column
+ * became the `CardPicker` dialog behind each slot's "Choose a card" opener, with the ownership flag
+ * as a second, separate write. The waits below are all on SERVER-driven state (`aria-checked` and
+ * `aria-pressed` are bound to the props the PUT returns, and the slot's empty state is bound to the
+ * draft), so each one is the round trip's confirmation rather than a client-side repaint.
+ *
+ * Coupling to watch: step 3 is driven by its current field names (`select[name="purpose"]`,
+ * `input[name="targets[Speed]"]`, the "Save target" button) and step 5 by its slot ids and the
+ * dialog's own "Equip" and "Save deck" buttons. A wizard pass that restructures either step has to
+ * move this helper with it.
  */
 const WRITE = { timeout: 60_000 } as const;
 
 /**
- * Walk the six steps and press `Start Career`.
+ * Walk the six steps as far as the draft, without creating anything.
  *
  * `scenario` names the scenario card to pick; `unity_cup` is the one the seeded scratch database
  * carries a full rule set for. The ancestry step is left alone, which is the state a fresh install
- * meets (the seeded database holds no Veterans).
+ * meets (the seeded database holds no Veterans). Exported separately from `startCareer` because the
+ * Preflight spec needs the draft itself: a career that has been started has spent it.
  */
-export async function startCareer(page: Page, scenario = 'unity_cup'): Promise<string> {
+export async function walkWizard(page: Page, scenario = 'unity_cup'): Promise<void> {
     await page.goto('/career/setup/scenario', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await page.locator(`#scenario-${scenario}`).click();
-    await expect(page.locator(`#scenario-${scenario}`)).toHaveAttribute('aria-pressed', 'true', WRITE);
+    await page.locator(`#scenario-radio-${scenario}`).click();
+    await expect(page.locator(`#scenario-radio-${scenario}`)).toHaveAttribute('aria-checked', 'true', WRITE);
 
     await page.goto('/career/setup/trainee', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    const traineeButton = page.getByRole('button', { name: 'Select Trainee' }).first();
-    // 64fc4b8 made the card's label flip from "Select Trainee" to "Chosen · clear" on selection, so a
-    // name locator re-resolved after the click lands on a different card. Pin the id we clicked.
-    const traineeId = await traineeButton.getAttribute('id');
+    const traineeButton = page.locator('button[id^="trainee-"]').first();
     await traineeButton.click();
-    await expect(page.locator(`#${traineeId}`)).toHaveAttribute('aria-pressed', 'true', WRITE);
+    await expect(traineeButton).toHaveAttribute('aria-pressed', 'true', WRITE);
 
     await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
@@ -61,14 +70,34 @@ export async function startCareer(page: Page, scenario = 'unity_cup'): Promise<s
 
     await page.goto('/career/setup/deck', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await page.locator('#deck-pick').selectOption({ index: 1 });
-    await page.getByRole('button', { name: /^Equip owned to/ }).first().click();
-    await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped', WRITE);
+    // One card in position 1, and the flag beside it: `StartCareerRequest` refuses a card-holding
+    // slot whose ownership was never chosen, so a walk that only equipped would stop at Preflight.
+    await page.locator('#deck-slot-1 button[aria-label^="Choose a card"]').click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Equip' }).first().click();
+    await expect(page.locator('#deck-slot-1')).not.toContainText('Empty.', WRITE);
+    await page.locator('#deck-slot-1').getByRole('button', { name: 'Owned' }).click();
+    await expect(page.locator('#deck-slot-1').getByRole('button', { name: 'Owned' })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+        WRITE,
+    );
+    await page.getByRole('button', { name: 'Save deck' }).click();
+    await page.locator('#app > *').first().waitFor();
+}
+
+/**
+ * Walk the six steps and press `Start career`.
+ *
+ * Returns the run's RECORD URL rather than the Cockpit the write lands on, because cleanup addresses
+ * the run by the id in that path.
+ */
+export async function startCareer(page: Page, scenario = 'unity_cup'): Promise<string> {
+    await walkWizard(page, scenario);
 
     await page.goto('/career/setup/preflight', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await page.getByRole('button', { name: 'Start Career' }).click();
-    // `Start Career` lands on the Cockpit, not the run record screen (SCR-CAR-010 redirects to
+    await page.getByRole('button', { name: 'Start career' }).click();
+    // `Start career` lands on the Cockpit, not the run record screen (SCR-CAR-010 redirects to
     // `runs.cockpit`), so this waits for the Cockpit and returns the *record* URL: cleanup
     // addresses the run by the id in that path, which is the plainest form of it.
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });

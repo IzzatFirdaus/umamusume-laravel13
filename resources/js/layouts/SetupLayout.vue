@@ -128,8 +128,13 @@ onMounted(async () => {
 
 <template>
     <AppLayout>
-        <template v-if="$slots.eyebrow" #eyebrow><slot name="eyebrow" /></template>
-        <template #title><slot name="title" /></template>
+        <!-- A step that renders `PageHeader` supplies the whole title band through `#head`, the same
+             contract `AppLayout` documents for its own pages: the band renders `#head` or `#title`,
+             never both, so exactly one `h1` reaches the document. Step 6 adopted it; the `#title` path
+             stays for the five steps that still fill the band. -->
+        <template v-if="$slots.head" #head><slot name="head" /></template>
+        <template v-if="$slots.eyebrow && !$slots.head" #eyebrow><slot name="eyebrow" /></template>
+        <template v-if="!$slots.head" #title><slot name="title" /></template>
 
         <!-- The step list is a labelled nav, and the current step carries `aria-current="step"`, so
              the position is announced rather than carried by the accent alone (WCAG 1.4.1). The visible
