@@ -30,7 +30,11 @@
  */
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import StatusPill from '../ui/StatusPill.vue';
+// `components/StatusPill.vue`, not `components/ui/StatusPill.vue`: the import was wrong since this
+// component landed and `npm run typecheck` did not catch it (a `.vue` specifier resolves for vue-tsc
+// without the file existing), so it took a real bundle build to surface. Verified by the build:
+// `Could not resolve "../ui/StatusPill.vue"`.
+import StatusPill from '../StatusPill.vue';
 
 const props = defineProps<{
     trainee: string;
