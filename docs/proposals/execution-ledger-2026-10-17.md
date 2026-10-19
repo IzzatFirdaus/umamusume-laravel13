@@ -3780,3 +3780,94 @@ the two browser cases.
 - Peer status in the main tree: unchanged and untouched. The ledger append above is why the batch is
   deferred, and the peer's code dirt is why the master build was not attempted.
 - Next eligible: cherry-pick the two clean commits (or the batch once the ledger clears), then 4.2.
+
+## 43. Dispatch 42 - the three safe cherry-picks landed on master, 2026-10-20
+
+### Step 0 - cherry-pick set: 3 of 3 applied, no conflicts
+
+Applied in the order the dispatcher required, from the main tree, index confirmed clean first (no
+peer file staged, so nothing could be swept):
+
+    worktree original   master SHA   subject
+    782069b             186a489      fix(career): the section nav reachability, the walk helper, and
+                                     the un-skipped case            (3 files, +51/-13)
+    2341f75             c963f64      test(walks): repair the eight cases the first real build exposed
+                                                                     (3 files, +66/-28)
+    b8b0def             ed9e97f      test(training): the tab-order case asserts region membership,
+                                     not a node                     (1 file, +24/-11)
+
+Every target path was verified clean before its cherry-pick - CareerSectionNav.vue,
+tests/utils/start-career.ts and all four walk specs. 782069b was checked against c7b6424's import fix
+specifically: it edits the `reachable`/`hasEnded` region and not the import line, which is why the two
+landed side by side with no conflict.
+
+`6f91420` was skipped as instructed: c7b6424 already holds that change on master, and the two diffs
+were compared and are byte-identical. `47488f0` and `68ffe6f` were skipped: both edit this ledger,
+which the peer holds with a live append.
+
+A note for the operator, because it looks like the cherry-picks did not land: `git log dispatch-4x
+--not master` still lists all six. That filter compares commit IDENTITY, not patch identity, and a
+cherry-pick makes a new commit. The three above are on master under the new SHAs; the originals will
+keep appearing until this branch is dropped or rebased. Only `47488f0` and `68ffe6f` are still
+genuinely outstanding.
+
+### Probe build - PASS
+
+    npx vite build --outDir .scratch-umaa/probe --emptyOutDir=false
+    -> exit 0, 2m 28s (Vite 1m 10s), probe manifest written
+    -> public/build/manifest.json UNTOUCHED at 2026-10-20 03:39:17
+
+The outDir override is what made this safe: the real config (plugins, aliases, inputs) ran, and the
+output went to a scratch directory instead of the shipped one. So the three cherry-picks are proven
+not to have broken buildability, and the probe is the seventh consecutive dispatch's answer to the
+`npx vite build --config <isolated probe>` line - no separate probe config is needed, only the outDir
+override. The scratch output was removed afterwards.
+
+### KI-70 SIDE EFFECT - recorded, not repaired
+
+master's public/build at 2026-10-20 03:39:17 was built from a PEER-DIRTY source tree. It reflects the
+peer's uncommitted changes to BuildTarget.vue, DeckSelect.vue and LegacySelect.vue. So browser tests
+run against master's bundle until the peer clears would be testing the peer's work in progress, not
+master's source. A quiet-tree rebuild is OWED once the peer commits. Nothing was rebuilt now and
+public/build was not touched - that is the same discipline that has kept this file out of every
+dispatch's diffs.
+
+### Step A - Feature gates green on the cherry-picked set
+
+    php artisan test --compact --filter="CareerCockpit|CareerTraining"  -> 75 passed (966 assertions)
+    npm run typecheck                                                  -> exit 0
+    composer lore / lore-code                                          -> exit 0, 477 hits / 182 hits
+
+No failure needed attributing. `CareerBuildTargetTest` is the one that would fail for the peer's
+dirty BuildTarget.vue, and it is outside this filter by design.
+
+### Walk set - green in the worktree, NOT run on master
+
+52 of 52 in the worktree at 68ffe6f, proven in Section 42 (nav 4/4 including the load-bearing
+URL-unchanged case; career-training-detail 14/14 after b8b0def). They were NOT re-run on master,
+because master's bundle is the peer-dirty one described above: a green there would be evidence about
+the peer's WIP. The cherry-picks move specs between trees; they do not change what the specs assert.
+
+### Step B - 4.2 PENDING next dispatch
+
+Step A consumed this batch, which is the shape the dispatcher allowed. 4.2 starts from Section 42's
+scout findings, which were measured rather than assumed: `bg-primary-action` already appears exactly
+once; seven `<details>` accordions already exist; the advisor rail is already grid-placed at
+data-region="advisor" (:945); `sticky` appears on one element only, the "On this page" nav (:508), so
+the sticky SUMMARY STRIP is the real remaining work; and no `Section` component is in use, which is
+the other real piece. The rename is two lines - CareerHeader has exactly one importer.
+
+### Close
+
+- Ahead on master: 55 (measured after the peer's 627939a landed on top of ed9e97f).
+- dispatch-4x is ahead of master by 6 commits, but only TWO are outstanding: 47488f0 and 68ffe6f.
+  See the identity-vs-patch note above for why the list shows six.
+- Peer status in the main tree: unchanged and untouched. BuildTarget.vue, DeckSelect.vue,
+  LegacySelect.vue and this ledger are all still dirty; the rest of the docs set is the peer's too.
+- Operator actions, in order:
+    1. When the peer commits the ledger append, cherry-pick 47488f0 and then 68ffe6f.
+    2. When the peer commits the three Vue files, run ONE quiet-tree dispatch to rebuild public/build
+       on master and re-run the walk set. That closes the KI-70 side effect above.
+    3. Cherry-pick 4.2 (and then 4.3 / 4.4) whenever they should reach master.
+- Next eligible: 4.2, then 4.3 and 4.4, then 4.5 and 4.6, plus the 2.5 remainder (the peer-dirty
+  LegacySelect.vue wrapper sites).
