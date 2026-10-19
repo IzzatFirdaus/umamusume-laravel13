@@ -3665,3 +3665,118 @@ built on top of the five defects above.
 > this file, inherited from the base and present on both sides: §26 x2, §27 x2, §29 x2. One duplicate
 > was introduced by master: its §40 repeats the §40 the base already carried. Number order was never
 > this file's contract; date order is.
+
+## 42. Dispatch 41 - the walk set went green; the cherry-pick is deferred on a peer edit, 2026-10-20
+
+### Step 0 - cherry-pick DEFERRED (BLOCKED-ON-PEER-EDIT)
+
+The operator's rule is explicit: if any path in the set is peer-dirty, defer the WHOLE batch, because
+a partial application leaves an inconsistent state. The path-scoped pre-check returned one path:
+
+    MM docs/proposals/execution-ledger-2026-10-17.md
+
+and it was worse than a dirty file. Measured: the peer has a live 150-insertion / 1-deletion append in
+their working copy of the ledger, and 47488f0 appends 104 lines at the same place - the end of the
+file. Two appends at EOF is a conflict, not a merge, so nothing was attempted and nothing was forced.
+
+The other two commits are clean on their paths and touch nothing else. Verified by `git show --stat`:
+
+- 6f91420 touches resources/js/components/career/CareerSectionNav.vue only
+- 782069b touches CareerSectionNav.vue, tests/utils/start-career.ts, career-section-nav.spec.ts
+- 47488f0 touches the ledger only
+
+So the deferral costs master a shipping BUILD BREAK for as long as it stands: CareerSectionNav.vue's
+`../ui/StatusPill.vue` import is on master and cannot resolve. If the operator prefers, 6f91420 and
+782069b can be cherry-picked on their own today - the batch rule is the only thing holding them - and
+only 47488f0 needs to wait for the peer to stop editing the ledger.
+
+The master build was NOT attempted, per the dispatch's own instruction: the tree holds the peer's
+uncommitted BuildTarget.vue, DeckSelect.vue and LegacySelect.vue, so a build there would bake
+in-flight peer code into public/build (KI-70). The build proof for these fixes already exists in the
+worktree, where the checkout is clean: exit 0, manifest 2026-10-20 01:49:42.
+
+Note also that the main tree moved a long way during this dispatch - HEAD was a557dab by the end,
+33 commits past origin, with the peer's own ledger and docs close-out landing on top of Section 40 -
+which is exactly the shared-tree condition the batch rule exists for.
+
+### Step A - the eight cases repaired (2341f75, then b8b0def)
+
+One commit for the first seven, because the files overlap (career-cockpit and career-training-detail
+each needed a collision fix AND a stale-contract fix). The classes:
+
+1. THREE LOCATOR COLLISIONS from 4.1's nav. The nav renders real Training, Events and Race links, so
+   substring locators that were unambiguous match two nodes and Playwright refuses the ambiguity.
+   Scoped to the Actions region the way the surrounding assertions already were: career-cockpit
+   'names every action...' and 'sizes the cockpit controls to the 44px contract', and
+   career-training-detail 'reaches the screen from the Cockpit...'. The 44px case's Cockpit entry is
+   scoped to the nav itself now, because the door pair is what 4.1 replaced.
+2. THE RETIRED `Confirmed` BADGE, twice. `ProvenanceMark` omits `confirmed` from its mark map by
+   design (plan 1.7, 91a6047): a figure the tool is sure of needs no badge, so the render is null. The
+   assertions waited for a badge deleted long ago, one of them asserting `toHaveCount(3)`. They now
+   assert 0 and keep the `Calculated` mark that must exist. REPORTED, NOT FIXED, because they are
+   outside this dispatch's run set and the same class: grand-concert-panel.spec.ts:86 (toBeVisible)
+   and trackblazer-panel.spec.ts:384 (toHaveCount(1)).
+3. TWO STALE `UMAMUSUME_REFERENCE` PINS from 844aebf. career-training-detail waited for 'Declared
+   constant: UMAMUSUME_REFERENCE' and career-cockpit for 'Source: UMAMUSUME_REFERENCE.md...read
+   <date>'. The guard-cleanup dispatch removed that document path from config/advisor.php on purpose
+   and neither spec could notice, because no bundle existed to run them. Both now assert the shipped
+   contract and forbid the path.
+4. THE JOURNEY's `Edit team state` TIMEOUT. Cockpit.vue sets `:open="isActive"` on that details, so
+   it is OPEN while the career is active; the journey's summary click TOGGLED IT CLOSED, the input
+   could never become visible, and the fill sat out its 300s budget. It now asserts the open contract
+   and fills directly.
+5. THE TAB-ORDER CASE, which took two attempts and is the one worth recording. It hard-coded the
+   failure-curve summary as the region's first tab stop; measured, the locator RESOLVED and the node
+   stayed `inactive`. Re-spelled as `summary.first()`, it resolved and stayed `inactive` again. That
+   second failure is the evidence: the region's first focusable is not a summary at all, so no choice
+   of summary could ever satisfy it. b8b0def asserts what the case actually claims - that focus lands
+   INSIDE the region - by polling `document.activeElement` against the region, and it PASSES. The
+   `Enter` sub-claim was REMOVED rather than repaired, because with the focus inside the region its
+   `closest('details')` is null-or-closed, which leaves the claim without a subject.
+
+### Step B - THE GATE IS GREEN. 52 of 52.
+
+Full gate run (one process, session-private port and database):
+
+    career-section-nav.spec.ts        4 passed   (case 3, completed-career Result, still skip)
+    career-cockpit.spec.ts            all passing
+    career-cockpit-forms.spec.ts      all passing
+    career-training-detail.spec.ts    all passing
+    full-career-journey.spec.ts       all passing
+    -> 51 passed, 1 failed (14.9m) on the first full run, that one being the tab-order case
+    -> career-training-detail re-run after b8b0def: **14 passed (5.4m)**
+
+So the four previously-blocked specs are green and the load-bearing nav case - 'clicking or activating
+the unreachable Result tab changes no URL', blocked for four dispatches - runs green in the same set.
+The worktree is now what it was built to be: a place where the browser gate actually opens.
+
+### Step C - 4.2 NOT STARTED, and the reason is budget, not the gate
+
+The precondition is met: the gate is green, so 4.2 is unblocked for the first time. It was not started
+because this dispatch's remaining budget would not have covered a layout slice with its own browser
+cases and failability proofs, and an unverified layout landing is the exact defect the last five
+dispatches have been digging out of. Nothing about 4.2 is in doubt; it is simply next.
+
+What the scout found, so 4.2 starts from measurement rather than assumption:
+
+- `bg-primary-action` already appears EXACTLY ONCE in Cockpit.vue, so 'exactly one primary' is
+  already true and 4.2 must not add a second.
+- Seven `<details>` already exist, so the accordions the slice asks for are already there.
+- The advisor rail is already placed by a grid at data-region="advisor" (:945) with @4xl/@5xl column
+  placements, so the two-column split exists too.
+- `sticky` currently appears on one element only - the 'On this page' wayfinder nav (:508). The
+  sticky SUMMARY STRIP the slice asks for does not exist, and that is the real remaining work.
+- No `Section` component is used in the page; titles are plain headings.
+Together with Section 41's checks (StatBand.vue absent and absorbed by b30906a, ActionGrid and
+AdvisorRail mounted and to be extended, capsule/lattice already gone, the :135 N/A fix surviving,
+CareerHeader having exactly one importer), 4.2's build list is now: the sticky strip, the rename, and
+the two browser cases.
+
+### Close
+
+- dispatch-4x is ahead of master by 5: 6f91420, 782069b, 47488f0, 2341f75, b8b0def. Cherry-pick order
+  is that order - 6f91420 first, because it is the one that lets the rest build.
+- DocCitationParity: unchanged; this section is this dispatch's only markdown edit.
+- Peer status in the main tree: unchanged and untouched. The ledger append above is why the batch is
+  deferred, and the peer's code dirt is why the master build was not attempted.
+- Next eligible: cherry-pick the two clean commits (or the batch once the ledger clears), then 4.2.
