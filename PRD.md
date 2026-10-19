@@ -369,17 +369,30 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
 - NFR-19 **Local observability**: a development-only diagnostic mode can report the current route, the Inertia
   component, request duration, query count and payload size. No telemetry, analytics or user data leaves the
   machine.
-- NFR-20 **Regression protection**: the failure modes above are covered by automated tests — navigation resolves,
-  a failed navigation clears its loading state, a refresh does not loop, an artwork miss does not block a
-  render, important routes stay within their query ceiling, and no page request triggers background work.
-  Existing Phase A–E tests stay green.
+- NFR-20 **Regression protection**: the failure modes above are covered by automated tests. The list
+  below is numbered so that every other document can cite a gap by its number and by its words,
+  and both are stable:
+  1. navigation resolves;
+  2. a failed navigation clears its loading state;
+  3. a refresh does not loop;
+  4. an artwork miss does not block a render;
+  5. an important route stays within its query ceiling;
+  6. no page request triggers background work;
+  7. loading and error states terminate.
+  Existing Phase A-E tests stay green.
 
-  **Gating decision (2026-10-18, owner ruling):** items 1–4 (navigation resolves, failed navigation clears
-  loading state, artwork miss does not block render, query ceiling holds) are required gates for Phase 1.
-  Items 5 and 6 (no page request triggers background work; loading/error state termination) are acknowledged
-  as known gaps. Browser tests run developer-locally only; the repository has no CI (`.github/workflows/`
-  absent), so their results are not continuously verified.
-  State of these items at 2026-10-19: item 3's red case is KNOWN-ISSUES.md KI-101 (blocked on the trace classification), and the item 5 and item 6 gap entries are KI-102 and KI-103.
+  **Gating decision (2026-10-18, owner ruling):** items 1, 2, 4 and 5 (navigation resolves, failed
+  navigation clears loading state, artwork miss does not block render, query ceiling holds) are
+  required gates for Phase 1. Items 6 and 7 (no page request triggers background work; loading and
+  error state termination) are acknowledged as known gaps. Item 3 (a refresh does not loop) is not
+  among the four gates that ruling named; its case is red and is recorded in the register, and
+  whether it joins the required set is the owner's call, not settled by that ruling. Browser tests
+  run developer-locally only; the repository has no CI (`.github/workflows/` absent), so their
+  results are not continuously verified.
+  State of these items at 2026-10-19: item 3's red case is the 2026-10-19 refresh entry in
+  `KNOWN-ISSUES.md` (KI-101, blocked on the trace classification), and the item 6 and item 7 gap
+  entries are the 2026-10-19 background-work entry (KI-102) and the 2026-10-19 loading/error
+  termination entry (KI-103).
 
 ## 6. Non-Goals (eliminated legacy features)
 

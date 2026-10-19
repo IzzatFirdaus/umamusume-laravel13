@@ -90,6 +90,26 @@ Tracked files cite `KNOWN-ISSUES.md` by name, including `PRD.md`,
 delete it, and do not renumber existing entries: the renumbering history (KI-16 left as a hole,
 KI-30 and KI-31 renumbered from KI-16 and KI-17) is what made the old numbers cheap to stop using.
 
+**Status correction (2026-10-19, Phase 8 documentation pass):** the composition above is superseded
+again, and every dated claim above is left standing rather than rewritten. This file now carries 56
+KI headings, KI-57 through KI-106, of which six numbers appear twice. Three facts are recorded here
+because they are cross-references rather than new defects.
+
+- **Six numbers carry two entries each:** KI-70, KI-71, KI-101, KI-102, KI-103 and KI-104. Each has
+  one `##` entry filed 2026-10-16 and one `###` entry filed 2026-10-19. Per the register's
+  convention (the 2026-10-08 block above) timing entries with the same number are reported rather
+  than renumbered, and no existing entry is renumbered here. A bare citation of one of those four
+  2026-10-19 numbers therefore resolves to two entries, and a reader needs the filing date to pick
+  one. `PRD.md` NFR-20 now cites the 2026-10-19 entries by date and by heading.
+- **The 2026-10-19 KI-101 calls the refresh case "a required Phase 1 gate per the 2026-10-18 gating
+  decision". The 2026-10-18 decision names four required gates, and the refresh case is not one of
+  them.** `PRD.md` NFR-20 now says so in the same terms, and this block is the register half of that
+  correction. Whether the refresh case joins the required set is the owner's call, and it is not
+  settled by either document.
+- **NFR-20 now carries an explicit numbering**, and the register's item numbers follow it: item 3 is
+  the refresh case, item 6 is background work, item 7 is loading and error state termination. The
+  2026-10-19 entries KI-101, KI-102 and KI-103 already used those numbers, so no entry's text changed
+  to make this true.
 ### KI-57 The screenshot manifest's Race result row names a frame that does not exist, because its date ellipsis is wrong - FILED 2026-10-03 (Phase A closure pass, screenshot pipeline), CLOSED 2026-10-08
 
 `docs/research-scratch/DESIGN-CORPUS.md` section `## SCREENSHOT-MANIFEST.md`, the Race result/live
