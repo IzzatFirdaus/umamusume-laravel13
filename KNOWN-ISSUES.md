@@ -110,6 +110,13 @@ because they are cross-references rather than new defects.
   the refresh case, item 6 is background work, item 7 is loading and error state termination. The
   2026-10-19 entries KI-101, KI-102 and KI-103 already used those numbers, so no entry's text changed
   to make this true.
+**Status correction (2026-10-20, Phase 8.8 close-out):** the composition above is superseded again, and
+every dated claim above is left standing rather than rewritten. This file now carries 57 KI headings,
+KI-57 through KI-107, of which six numbers still appear twice (KI-70, KI-71, KI-101, KI-102, KI-103 and
+KI-104). KI-107 was filed by the Phase 8.8 close-out for two dead references inside the peer-owned
+`CLAUDE.md`. It is the first entry in this file whose defect sits in a file this batch did not touch, so
+it is recorded rather than fixed, and the fix is the peer's to make. No entry was renumbered.
+
 ### KI-57 The screenshot manifest's Race result row names a frame that does not exist, because its date ellipsis is wrong - FILED 2026-10-03 (Phase A closure pass, screenshot pipeline), CLOSED 2026-10-08
 
 `docs/research-scratch/DESIGN-CORPUS.md` section `## SCREENSHOT-MANIFEST.md`, the Race result/live
@@ -3014,3 +3021,25 @@ also reports (397 invalid closing fences across 13 files), which `tools/md_fence
 ### KI-104 ADR-0027 is proposed, not accepted: turn/decision logging has no binding decision - FILED 2026-10-19 (doc-only batch, Decision 6), PROPOSED
 
 **Status: PROPOSED, not accepted.** Decision 6 filed `docs/adr/0027-turn-and-decision-logging.md`; a proposed ADR is not binding. The ADR is code-only: it describes the turn/decision logging design and its implementation is deferred. Closure: owner acceptance flips the ADR's status, and this entry then records the acceptance commit.
+
+
+### KI-107 Peer CLAUDE.md carries two dead references to files that do not exist - FILED 2026-10-20 (Phase 8.8 close-out), OPEN, PEER-OWNED
+
+**Status: OPEN, peer-owned.** `CLAUDE.md` line 12 cites CONSTRAINTS.md inside backticks, and line 248
+cites CLAUDE.local.md inside backticks. Neither target exists: neither file is on disk, and neither is
+tracked by git. CONSTRAINTS.md was folded into `docs/research-scratch/GOVERNANCE.md` in `1e84b0c`, and
+CLAUDE.local.md is a user-level file this repository has never had.
+
+**Proving command.** `grep -n CONSTRAINTS CLAUDE.md` reports lines 10, 12, 21 and 248. Only lines 12
+and 248 are backticked paths, and so the only two the citation census counts. Lines 10 and 21 name
+CONSTRAINTS.md as a section title inside a quoted string, not as a path, so the census does not count
+them.
+
+**Fix.** The peer resolves both the next time they touch `CLAUDE.md`: repoint the line 12 citation to
+`docs/research-scratch/GOVERNANCE.md`, which is where the quality bar now lives, and drop or reword the
+line 248 sentence, which is an instruction not to create the file. Phase 8 did not fix either, because
+`CLAUDE.md` is peer-dirty and outside the batch's scope.
+
+**What closure does not cover.** This entry records two dead citations in a file this batch did not
+touch. It does not move the citation ratchet, which is Task 5 of the documentation-sync plan, and it is
+not the cause of any gate failure: the count sits under the baseline for other reasons.
