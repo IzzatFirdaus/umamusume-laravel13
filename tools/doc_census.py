@@ -26,6 +26,15 @@ EXEMPT_PREFIXES = (".ai/", "docs/adr/")
 # Every excluded file is printed by main(), so opting out is never invisible.
 CENSUS_FLAG = "<!-- census: content-not-citations -->"
 
+# A line carrying this marker quotes the text it corrects, so the dead path it names is quoted
+# history, not an instruction a reader is asked to follow. The errata doctrine in
+# `docs/research-scratch/PROCESS-PLANS.md` requires a dated correction to preserve the original
+# sentence, which necessarily re-quotes the dead path and so raises the count every time the
+# doctrine is followed. The marker is line-scoped and explicit, like `lore-ignore-line` in
+# `tools/lore.php`: one line opts out, and every skipped line is printed by main(), so an opt-out
+# is never invisible. It is not applied to any file yet.
+QUOTED_ORIGINAL_FLAG = "<!-- census: quoted-original -->"
+
 
 def git(*args):
     return subprocess.run(["git", "-c", "core.quotepath=false", *args], cwd=REPO,
@@ -78,7 +87,7 @@ def catalogues(files=None):
     return sorted(f for f, head in heads(files).items() if CENSUS_FLAG in head)
 
 
-def dead_links():
+def dead_links(skipped=None):
     """Backticked .md references that no longer resolve. A deletion without a repoint shows up here.
 
     A bare name is tried as written, under `docs/`, under `docs/research-scratch/`, and beside the
@@ -118,6 +127,8 @@ def dead_links():
     `DocCitationParityTest`, which only shells out to this script, failed for a cause that was not
     citation rot. A tool whose subject is missing files is not entitled to choke on one.
 
+    Un-backticking a dead path lowers the count too: the resolver only ever sees backticked refs.
+
     @return tuple[list[tuple[str, int, str, str]], list[str]] the dead links, and the unreadable files
     """
     bad = []
@@ -134,22 +145,40 @@ def dead_links():
         except OSError:
             unreadable.append(f)
             continue
-        for n, line in enumerate(text.split("\n"), 1):
-            for ref in re.findall(r"`((?:[\w./&-]+/)?[\w.-]+\.md)`", line):
-                cand = ref.replace("\\", "/").lstrip("/")
-                tries = [cand]
-                if "/" not in cand:
-                    tries += [f"docs/{cand}", f"{MASTERS_DIR}/{cand}",
-                              f"{near}/{cand}" if near else cand]
-                else:
-                    tries += [f"docs/{cand}", f"{near}/{cand}" if near else cand]
-                if any(t in listing for t in tries):
-                    continue
-                if "/" not in cand and cand in tracked_md_names:
-                    continue
-                target = next((t for t in tries if os.path.exists(os.path.join(REPO, t))), None)
-                bad.append((f, n, ref, "UNTRACKED" if target else "GONE"))
+        bad.extend(dead_refs_in_text(f, text, near, listing, tracked_md_names, skipped))
     return bad, unreadable
+
+
+def dead_refs_in_text(f, text, near, listing, names, skipped=None):
+    """The dead references in one file's text.
+
+    A line carrying `QUOTED_ORIGINAL_FLAG` is not scanned: it quotes the text it corrects, so
+    the dead path it names is quoted history rather than an instruction to follow. The skipped
+    line is appended to `skipped` when a list is passed, so the caller can report the exclusion.
+
+    @return list[tuple[str, int, str, str]] the dead references, as (file, line, ref, kind)
+    """
+    bad = []
+    for n, line in enumerate(text.split("\n"), 1):
+        if QUOTED_ORIGINAL_FLAG in line:
+            if skipped is not None:
+                skipped.append((f, n))
+            continue
+        for ref in re.findall(r"`((?:[\w./&-]+/)?[\w.-]+\.md)`", line):
+            cand = ref.replace("\\", "/").lstrip("/")
+            tries = [cand]
+            if "/" not in cand:
+                tries += [f"docs/{cand}", f"{MASTERS_DIR}/{cand}",
+                          f"{near}/{cand}" if near else cand]
+            else:
+                tries += [f"docs/{cand}", f"{near}/{cand}" if near else cand]
+            if any(t in listing for t in tries):
+                continue
+            if "/" not in cand and cand in names:
+                continue
+            target = next((t for t in tries if os.path.exists(os.path.join(REPO, t))), None)
+            bad.append((f, n, ref, "UNTRACKED" if target else "GONE"))
+    return bad
 
 
 def main():
@@ -175,7 +204,8 @@ def main():
     for f in outside:
         print(f"  {lines_of(f):6}  {f}")
 
-    dead, unreadable = dead_links()
+    skipped = []
+    dead, unreadable = dead_links(skipped)
     cats = catalogues(files)
     print(f"\nMISSING_FILE (tracked, absent from disk: an uncommitted deletion, unscannable here): "
           f"{len(unreadable)}")
@@ -184,6 +214,11 @@ def main():
     print(f"\ncatalogue files excluded from the dead-link count ({CENSUS_FLAG}): {len(cats)}")
     for c in cats:
         print(f"  {c}")
+    print(f"\nquoted-original lines excluded from the dead-link count ({QUOTED_ORIGINAL_FLAG}): {len(skipped)}")
+    for f, n in skipped[:20]:
+        print(f"  {f}:{n}")
+    if len(skipped) > 20:
+        print(f"  ... {len(skipped) - 20} more")
     gone = [d for d in dead if d[3] == "GONE"]
     untracked = [d for d in dead if d[3] == "UNTRACKED"]
     print(f"\ndead markdown links: {len(dead)} ({len(gone)} GONE, {len(untracked)} UNTRACKED)")
