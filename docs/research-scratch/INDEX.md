@@ -450,7 +450,7 @@ classified below. A root markdown file not in this table is unconsolidated by de
 | **Authority documents** (full content at root) | `AGENTS.md`, `CLAUDE.md`, `README.md`, `PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`, `DESIGN.md` | Governance, coding rules, onboarding, product truth, system design, visual system |
 | **Pointer stubs** (binding content in masters) | `CONSTRAINTS.md` → `GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar, C-1 to C-9)"; `PLAN.md` → `PROCESS-PLANS.md`; `KNOWN-ISSUES.md` → `AUDIT-AND-VERIFICATION.md` §"KNOWN-ISSUES.md (defect register)" | Root register still the live append target for new KI entries |
 | **Screen behavior** | `SCREEN_SPEC.md` | Per-screen states, workflows, §8 authority table |
-| **Generated tooling artifacts** (do not hand-edit) | `PRODUCT.md` (impeccable plugin), `SKILL.md` (skill registry refresh) | Generator-owned; hand edits lose to regeneration |
+| **Generated tooling artifacts** (do not hand-edit) | `PRODUCT.md` (impeccable plugin) | Generator-owned; hand edits lose to regeneration |
 | **Change/version/setup docs** | `CHANGELOG.md`, `VERSION.md`, `MCP_SETUP.md` | Historical record, version metadata, MCP setup notes |
 
 > **Corrected 2026-10-12.** The prior version of this table listed only ten files and claimed the set was

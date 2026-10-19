@@ -28,7 +28,7 @@ code" reaches the rules one hop later than before and reaches all of them.
 
 ## SOURCE-OF-TRUTH.md
 
-**Governance infrastructure for the Umamusume Trainer Desk repository.** This document consolidates the binding rules from `PRD.md`, `ARCHITECTURE.md`, `CLAUDE.md`, `CONSTRAINTS.md`, `AGENTS.md`, `UMAMUSUME_REFERENCE.md`, and `SKILL.md` into a single source of truth for agents and human developers. Violations are hard failures.
+**Governance infrastructure for the Umamusume Trainer Desk repository.** This document consolidates the binding rules from `PRD.md`, `ARCHITECTURE.md`, `CLAUDE.md`, `CONSTRAINTS.md`, `AGENTS.md`, `UMAMUSUME_REFERENCE.md`, and `SKILL_REGISTRY.md` into a single source of truth for agents and human developers. Violations are hard failures.
 
 > ### Derivation and regeneration trigger
 >
@@ -47,7 +47,7 @@ code" reaches the rules one hop later than before and reaches all of them.
 > | 10. ADR-0002 row | "Validation bound widened to 0..2000" | Accepted as a decision and **not implemented**: `app/Http/Requests/StoreTurnEntryRequest.php:49-50` still validates `between:0,1200` |
 > | 12. Scenario guides | `docs/scenarios/01`–`08` | Nine files. `09-global-race-calendar.md` is 751 lines and is the read path the race grid and picker now use |
 > | 12. Lore rules | `CLAUDE.md` (top section) | `.gitignore:52` ignores `/CLAUDE.md`. A fresh clone has no such file. `AGENTS.md:5` names it as "Coding rules for assistants", and 20 other tracked files cite it, two of them PHP |
-> | 12. Skill registry | `.agents/skills/skills.json` (machine), `SKILL.md` (human summary) | `.agents/` is ignored, and root `SKILL.md` is a hand-counted registry written 2026-09-27 and never updated |
+> | 12. Skill registry | `.agents/skills.json` (machine), `SKILL_REGISTRY.md` (human summary) | `.agents/` is ignored, and root `SKILL_REGISTRY.md` is a hand-maintained pointer |
 > | 12. Migrations | `2026_09_26_162814`–`2026_09_27_121500` | 34 migration files are tracked, running to `2026_09_29_182820_create_umamusume_profiles_table.php` |
 >
 > Section 12's "46 conflict rows" claim about `docs/UMAMUSUME_REFERENCE.md` was not verified by the
@@ -244,11 +244,11 @@ Per `UMAMUSUME_REFERENCE.md` source registry (Section 8, preamble):
 
 ---
 
-### 6. Skill Registry — **SKILL.md POINTER CORRECTED**
+### 6. Skill Registry — **POINTER CORRECTED**
 
-The skill registry lives at **`.agents/skills/skills.json`** (not `SKILL.md`).
+The skill registry's machine half is **`.agents/skills.json`**; the hand-maintained pointer is `SKILL_REGISTRY.md`.
 
-- `SKILL.md` is a human-readable summary; the machine-readable registry is `skills.json`.
+- `SKILL_REGISTRY.md` is a human-readable pointer; the machine-readable file is `.agents/skills.json`.
 - Agents MUST read `skills.json` via the `using-agent-skills` skill (§1.2, §1.4.4 of that skill) to discover and invoke skills.
 - Local project skills at `.agents/skills/` take precedence over global installs when both exist.
 
@@ -409,7 +409,7 @@ The skill registry lives at **`.agents/skills/skills.json`** (not `SKILL.md`).
 | Quality bar            | `CONSTRAINTS.md` (root), `docs/research-scratch/DESIGN-CORPUS.md` (additive)                                                                                     |
 | Agent roles            | `AGENTS.md`                                                                                                                                                   |
 | Lore rules             | `CLAUDE.md` (top section), `CONSTRAINTS.md` C-4                                                                                                               |
-| Skill registry         | `.agents/skills/skills.json` (machine), `SKILL.md` (human summary)                                                                                            |
+| Skill registry         | `.agents/skills.json` (machine), `SKILL_REGISTRY.md` (human summary)                                                                                            |
 | ADRs                   | `docs/adr/0001`–`0006`                                                                                                                                        |
 | Fetch pipeline         | `app/Services/DataPipeline/` (Contracts, Parsers, PipelineRunner, SourceFetcher, CrossReferenceMatcher, NameNormalizer)                                       |
 | Models                 | `app/Models/{Umamusume,UmamusumeAlias,Skill,TrainingRun,TurnEntry,Scenario,DataSource,MatchCandidate,RunSkill,ScenarioRace,RaceEntry,TurnEvent,Preference}`   |

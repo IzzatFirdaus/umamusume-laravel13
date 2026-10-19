@@ -101,7 +101,7 @@ neither stub is a root document any more.
 | `docs/OPEN-QUESTIONS.md`                                               | open-question register for `PRD.md`; one line per question with status, owner, resolution pointer                                                                                                                                                                   | answered-and-remainder narration (that is `CHANGELOG.md`) |
 | `docs/UMAMUSUME_REFERENCE.md`                                          | source-cited mechanics corpus, eight sections, dated live-ops snapshots                                                                                                                                 | a write-up that cites this repo is not a second source    |
 | `docs/scenarios/01`, `02`, `03`, `07`, `08`, `09`                                               | per-scenario playing guides (`07` is the sourced guide for the fourth `[Global]` scenario, with its in-scenario client vocabulary still `❌ UNVERIFIED`; `08` is `[JP-Only]` and must not be imported)  | shipped copy                                              |
-| `PRODUCT.md`, `SKILL.md`                                               | generated tooling artifacts                                                                                                                                                                             | hand edits; the generator wins                            |
+| `PRODUCT.md`                                               | generated tooling artifacts                                                                                                                                                                             | hand edits; the generator wins                            |
 | `docs/deprecated/`                                                     | retired legacy PDFs                                                                                                                                                                                     | not a source, not a spec; never copy their display text   |
 
 ## 4. Roles and escalation
@@ -497,7 +497,7 @@ compare byte counts rather than rendered text.
 - **Snapshots.** Gitignored and keyed on a content hash. A second database asked on the
   same day is told the document is unchanged (KI-27); fill it with
   `php artisan uma:reparse <source>`, which is safe on a populated database.
-- **Generated and protected files.** Do not hand-edit: `PRODUCT.md` and `SKILL.md`
+- **Generated and protected files.** Do not hand-edit: `PRODUCT.md`
   (generator-owned), `composer.lock`, `package-lock.json`, `public/build/`, `vendor/`,
   `node_modules/`, `storage/` (including snapshots and backups),
   `docs/design-research/_scratch/`, `tools/__pycache__/`, and the `docs/design-research/`
@@ -555,7 +555,7 @@ No security document exists; the model is `ARCHITECTURE.md` §8.
 - `CHANGELOG.md` and `VERSION.md` are tracked files; `CHANGELOG.md` is updated by the Docs Writer on significant landings, and `VERSION.md` is updated by the Architect on phase exits.
 - Tracked root documents: `AGENTS.md`, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`,
 `CHANGELOG.md`, `CLAUDE.md`, `DESIGN.md`, `KNOWN-ISSUES.md`, `MCP_SETUP.md`, `PRD.md`,
-`PRODUCT.md`, `README.md`, `SCREEN_SPEC.md`, `SKILL.md`, `VERSION.md`. The set is closed; a new
+`PRODUCT.md`, `README.md`, `SCREEN_SPEC.md`, `SKILL_REGISTRY.md`, `VERSION.md`. The set is closed; a new
 root document is not added, and the masters under `docs/research-scratch/` are indexed by
 `docs/research-scratch/INDEX.md`.
 

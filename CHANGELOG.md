@@ -45,6 +45,18 @@ Entries below are written at the time of the change, not back-filled.
 - Seven `.ai/skills/*/SKILL.md` files gained the trailing newline `code-style.md` §Formatting Standards
   requires. Content is unchanged, and the copies now match `.agents/skills/` byte for byte.
 
+- `SKILL.md` renamed to `SKILL_REGISTRY.md` 2026-10-19 and restructured: frontmatter removed (a
+  repository root is not one of the five skill scopes, so the file never loaded as a skill), body cut
+  to the six-section skeleton (run first, reading the output, coverage gaps, installed/scanned/
+  available, violations and `--repair`, provenance), and the seven-row coverage table moved to
+  `coverage.md`. History moved out with it: the 2026-10-02 and 2026-10-11 rewrite record, the pinned
+  example totals it once carried as warnings (each stale within days of being written - deleted
+  rather than relocated, git history keeps them), and the rebuttal paragraphs against `AGENTS.md` §3
+  and `GOVERNANCE.md` §6, replaced in the file by one provenance line pointing at `AGENTS.md` §2 (the
+  code wins) for the stale generated-file rule. The pairing named there is real: `.agents/skills.json`
+  inventories `php artisan skill:manage` commands, not agent skills, so `GOVERNANCE.md` §6's
+  machine-readable-half pairing is a naming collision (`AGENTS.md` §8, `docs/SKILL_AUTOMATION.md`).
+
 ### Notes on these entries
 
 The four `.ai` entries above are committed, at `cb34264 docs(rules): record the project conventions and
