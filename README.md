@@ -171,6 +171,33 @@ List shape: `{ "data": [...], "pagination": { "page", "pageSize", "totalItems", 
 
 Tests use Pest 4, feature-first, with a global `TestCase` + `RefreshDatabase` binding in `tests/Pest.php`. All fetcher/pipeline tests use `Http::fake` against stored bodies in `tests/Fixtures`; no test touches the network. The test database is in-memory SQLite (`phpunit.xml` forces it). The full quality bar, including the no-suppression floor, is `docs/research-scratch/GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar, C-1 to C-9)".
 
+### Documentation gates
+
+Two gates, to run before pushing. This repository has no CI: `.github/workflows/` is absent, so nothing
+verifies a change that is not verified locally.
+
+- `php artisan test --filter=DocCitationParity` - fails when dead markdown citations exceed 708. The limit is
+  `DOC_CITATION_BASELINE` in `tests/Feature/DocCitationParityTest.php`.
+- `php artisan test --filter=DocAccuracyTest` - must be 3 passed / 80 assertions / 0 risky.
+
+Two diagnostics, which report where the dead targets are rather than gating on them:
+
+- `python tools/doc_census.py` - prints the citation census and exits 0 whatever it finds. GONE is a
+  citation to a file that is absent from disk; UNTRACKED is a citation to a file that is on disk but
+  not in git, which works locally and breaks on a fresh clone.
+- `python tools/md_fence_check.py <files>` - fenced-code sanity for Markdown.
+
+Constitution greps: `composer lore` and `composer lore-code` - both must exit 0.
+
+**The census count is host-local; the gate number is the committed one.** `tools/doc_census.py` takes
+its file list from `git ls-files` but reads each file's content from disk, and it decides GONE against
+UNTRACKED by asking whether the target exists on disk. It therefore labels its output "measured at
+HEAD" while measuring the working tree: a tracked file's uncommitted edits are counted, and a citation
+to a path that exists on disk but is not tracked reads UNTRACKED here and GONE in a clean checkout. In a
+shared tree the local count and the committed count differ, and the two must not be compared until every
+working-tree edit is committed or stashed. The census is what says which files hold the dead targets;
+`tests/Feature/DocCitationParityTest.php` is the gate, and its number is the one that must pass.
+
 ## Common Commands
 
 | Task                              | Command                                                                                             |
