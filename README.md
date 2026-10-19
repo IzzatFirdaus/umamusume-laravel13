@@ -297,6 +297,21 @@ No dedicated `CONTRIBUTING.md` exists. Actual practice, from `AGENTS.md` and the
 - Schema or pipeline changes need a migration, a PRD citation (FR-x / US-x), and a decision recorded as an ADR with a dated erratum rather than a silent rewrite.
 - Scope changes never happen silently: `PRD.md` §6 non-goals are owner territory (`AGENTS.md` escalation paths).
 
+Repository practice that the code does not show:
+
+- **Commit subjects** are `type(scope): summary`: lowercase, imperative, one line. The last 60 commits are
+  39 `docs`, 9 `feat`, 4 `fix`, 4 `test`, 3 `chore` and 1 `refactor`.
+- **Documentation-only changes ship without a test**; a behaviour change ships with one. A doc commit still
+  runs the documentation gates above, and it still carries the lore gate.
+- **`AGENTS.md` §11 owns the protected list, and the root document set is closed.** No new markdown file is
+  created in the repository root; new documentation content goes into a `docs/research-scratch/` master or
+  into `KNOWN-ISSUES.md`, and `PRODUCT.md` is regenerated rather than hand-edited.
+- **`docs/proposals/execution-ledger-2026-10-17.md` is append-only.** One numbered section per dispatch, an
+  earlier section is never edited, and a correction is a new dated section that names what it supersedes.
+- **This tree holds other sessions' uncommitted work.** Do not revert it, reformat it, or commit it. Scope
+  your edits and your tools to your own files, and if a file you need is held by another session, skip it and
+  say so in the report.
+
 ## Security
 
 No security document exists; the model is documented in `ARCHITECTURE.md` §8:
