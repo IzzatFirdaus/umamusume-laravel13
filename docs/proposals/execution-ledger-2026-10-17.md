@@ -3334,3 +3334,73 @@ machine-local citations, and the census now reads 692 (688 GONE, 4 UNTRACKED). T
   StatBand.vue (absent since peer b30906a) and whether the peer cockpit cutover already did the
   sticky/rail/accordion work. If the three files do not clear, the honest answer to what next is
   waiting on that peer, not starting unverifiable layout work.
+## 40. Dispatch 39 - Phase 8 documentation close-out, 2026-10-20
+
+### What landed, one commit per slice
+
+- 8.0 `33d0017` docs(citations): reconcile the DocCitationParity gate state and repoint machine-local citations
+- 8.2 `24d4e87` docs(version): refresh the Phase 1 exit criteria and correct the release state
+- 8.3 `5fb9ed4` docs(agents): name the ledger, drop the folded stubs, and list the tracked root documents
+- 8.4 `07fbc40` docs(nfr-20): number the requirement and align the register's cross-references
+- 8.5 `82521cc` docs(docs): correct stale release, register and testing claims
+- 8.6 `a440e7f` docs(ki): date the KI-98 status banner
+
+### The gate reconciliation, one line
+
+The three reported counts (708 passed, 718 red, 711 red) are one gate on three different trees.
+Section 39 records the answer - (c), with the commits named - and the finding that the census count
+is host-local: it reads files from disk, so the same commit measures 698 in a clean clone and a
+different number in a shared working tree. The committed state is green at 698 against a 708 bar.
+
+### Files deliberately not created (8.5)
+
+The slice plan named three files that do not exist. None was created, because the documentation
+policy closes the root set and routes new content into a master or the register.
+
+- CONTRIBUTING.md: the root set is closed; the contribution practice already lives in `README.md`
+  under its Contribution heading.
+- docs/testing.md: the testing strategy already lives in `ARCHITECTURE.md` under section 10, which
+  this slice extended instead of forking into a new file.
+- docs/data-model.md: the schema already lives in `ARCHITECTURE.md` under section 3.
+
+### Stale-reference sweep (8.6)
+
+- The register's old docs/KNOWN-ISSUES.md path: zero occurrences; the register is already cited at
+  the root. No change.
+- append_ledger.py: exists, tracked, referenced by nothing, a one-shot appender that hard-codes a
+  Section 25 block and would duplicate it if run again. Peer-owned, so it is left alone; the owner
+  decides whether to delete it or move it under tools/.
+- tools/doc_census.py: every reference is a legitimate owner or a dated record. No change.
+- .scratch-uma/: 271 occurrences across 27 tracked files, none a markdown link; all are plain
+  evidence paths into the gitignored scratch tree. The seven that were markdown links were repointed
+  in 8.0.
+- docs/research-scratch/INDEX.md: one tracked master, the Rice Shower Unity Cup capability matrix,
+  is unlisted. It was left unlisted rather than placed into the wrong round table.
+
+### KI-98
+
+Its status banner read FIXED IN TREE, NOT LANDED, which was out of date: the resolver fix landed in
+`c9fcc51` on 2026-10-12. A dated erratum inside the entry records it. The body was already correct,
+and the gate counts UNTRACKED by design, not as an exclusion.
+
+### CLAUDE.md (peer-dirty, not touched)
+
+The peer's rewrite now agrees with `AGENTS.md` on pint. Two residual dead references remain -
+CONSTRAINTS.md at line 12 and CLAUDE.local.md at line 246, both naming files that must not exist -
+and they sit in a peer-dirty file, so they are reported here rather than fixed.
+
+### Hygiene note
+
+8.5's first commit accidentally swept in the peer's staged `CLAUDE.md`; it was reset and re-landed
+with only `README.md` and `ARCHITECTURE.md`. `CLAUDE.md` remains uncommitted peer work.
+
+### Close
+
+- DocCitationParity: 2 passed (5 assertions), exit 0, quoted at every commit.
+- DocAccuracyTest: 3 passed (80 assertions), exit 0.
+- md_fence_check: 0 invalid on every file this dispatch touched, except
+  `docs/research-scratch/PROCESS-PLANS.md`, which keeps its pre-existing 108.
+- Census: 698 in a clean clone of HEAD; 664 to 692 in the working tree across the day, moving only
+  with the peer's uncommitted edits. Bar 708.
+- composer lore and composer lore-code: exit 0.
+- Ahead of origin/master at close: 30, behind 0.
