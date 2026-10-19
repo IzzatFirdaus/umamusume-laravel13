@@ -3051,3 +3051,11 @@ line 248 sentence, which is an instruction not to create the file. Phase 8 did n
 **What closure does not cover.** This entry records two dead citations in a file this batch did not
 touch. It does not move the citation ratchet, which is Task 5 of the documentation-sync plan, and it is
 not the cause of any gate failure: the count sits under the baseline for other reasons.
+
+**Correction (2026-10-20, after the peer's commit `fbaa288`):** this entry was filed against the peer's
+uncommitted rewrite of `CLAUDE.md`, and that rewrite landed after it was filed. Two facts in it are now
+stale. The second residual moved from line 248 to line 247, and `CLAUDE.md` is no longer dirty in the
+working tree, because the rewrite is now committed. Both residuals survive that rewrite: the census
+reports GONE CLAUDE.md:12 -> CONSTRAINTS.md and GONE CLAUDE.md:247 -> CLAUDE.local.md. The entry stays
+OPEN and the fix is still owed by the peer, who owns the file. The dispatch ledger's Section 41 carries
+the pre-rewrite line number.
