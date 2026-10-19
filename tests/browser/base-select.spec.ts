@@ -70,3 +70,19 @@ test('a required select exposes aria-required on both template branches, and an 
     await expect(page.locator('#bare-optional')).not.toHaveAttribute('required');
     await expect(page.locator('#bare-optional')).toHaveAttribute('aria-required', 'false');
 });
+
+test('a labelled select takes its accessible name from the label prop, exactly once', async ({ page }) => {
+    await page.goto(`${base}base-select.html`);
+
+    // Plan 4.x / A-98's contract: a call site passes its label IN as a prop, and BaseSelect owns the
+    // `<label for>` that names the select. `exact` is the assertion, not a convenience: a site that
+    // both passes the prop and wraps the control in its own `<label>` yields the name twice, and an
+    // inexact match would accept that doubled name as a pass.
+    await expect(page.getByRole('combobox', { name: 'Required field', exact: true })).toHaveCount(1);
+    await expect(page.getByRole('combobox', { name: 'Optional field', exact: true })).toHaveCount(1);
+
+    // The doubled name a wrapper label would produce is absent, which is what the exact matches above
+    // depend on.
+    await expect(page.getByRole('combobox', { name: 'Required field Required field' })).toHaveCount(0);
+    await expect(page.getByRole('combobox', { name: 'Optional field Optional field' })).toHaveCount(0);
+});

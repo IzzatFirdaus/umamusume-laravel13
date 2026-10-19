@@ -665,15 +665,13 @@ const jumpToShop = (): void => {
                          facts added; empty stays "not stated" and `0` stays a real growth figure. -->
                     <form @submit.prevent="saveIdentity" class="flex flex-col gap-2">
                         <span class="flex flex-wrap items-end gap-3">
-                            <label for="trainee_rarity" class="flex flex-col gap-1">
-                                <span class="text-xs text-ink-muted">Rarity</span>
-                         <BaseSelect
-                           id="trainee_rarity"
-                           v-model="identityForm.trainee_rarity"
-                           name="trainee_rarity"
-                           :options="[{ value: '', label: 'Not stated' }, ...[1, 2, 3].map(rarity => ({ value: String(rarity), label: '★' + String(rarity) }))]"
-                         />
-                            </label>
+                            <BaseSelect
+                              id="trainee_rarity"
+                              v-model="identityForm.trainee_rarity"
+                              name="trainee_rarity"
+                              label="Rarity"
+                              :options="[{ value: '', label: 'Not stated' }, ...[1, 2, 3].map(rarity => ({ value: String(rarity), label: '★' + String(rarity) }))]"
+                            />
                             <label for="potential_level" class="flex flex-col gap-1">
                                 <span class="text-xs text-ink-muted">Potential Level</span>
                                      <BaseInput
@@ -790,16 +788,14 @@ const jumpToShop = (): void => {
                     <!-- The turn selector (F2, plan §9.6 ruling 2). It sits outside the disclosure so a
                          switch does not close the form; `?edit_turn=<id>` is the same query the run
                          screen and the Timeline's decision link already use. -->
-<label class="flex items-center gap-2 text-sm" for="correction-turn-select">
-                        <span class="text-ink-muted">Correct turn</span>
-                        <BaseSelect
+<BaseSelect
                             id="correction-turn-select"
                             ref="turnSelector"
+                            label="Correct turn"
                             :value="String(props.correction.selected_turn_id)"
                             @update:model-value="switchTurn($event)"
                             :options="props.correction.turns.map(turn => ({ value: String(turn.id), label: 'Turn ' + turn.turn }))"
                         />
-                    </label>
 
                     <details data-region="correct-turn" class="mt-2 rounded-lg border border-rule bg-panel p-4">
                         <summary class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong">

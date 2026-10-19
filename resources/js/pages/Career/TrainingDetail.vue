@@ -668,17 +668,15 @@ const capFor = (label: string): number =>
                      so the delta is a signed integer with no min, no max and no placeholder, and the
                      empty type records nothing for the turn. -->
                 <template v-if="props.write.performance.enabled">
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink-muted">Performance type</span>
-                        <BaseSelect
-                            id="turn-performance-type"
-                            v-model="performanceType"
-                            name="performance[type]"
-                            :options="[{ value: '', label: 'none, nothing to record' }, ...props.write.performance.types.map(word => ({ value: word, label: word }))]"
-                            :aria-describedby="errorOf('performance.type') === undefined ? undefined : 'turn-performance-type-error'"
-                            :error="errorOf('performance.type')"
-                        />
-                    </label>
+                    <BaseSelect
+                        id="turn-performance-type"
+                        v-model="performanceType"
+                        name="performance[type]"
+                        label="Performance type"
+                        :options="[{ value: '', label: 'none, nothing to record' }, ...props.write.performance.types.map(word => ({ value: word, label: word }))]"
+                        :aria-describedby="errorOf('performance.type') === undefined ? undefined : 'turn-performance-type-error'"
+                        :error="errorOf('performance.type')"
+                    />
                     <label class="flex flex-col gap-1">
                         <span class="text-ink-muted">Performance change</span>
                         <BaseInput

@@ -255,14 +255,13 @@ const folds = computed<boolean>(
                 </p>
 
                 <form class="flex flex-col gap-3" @submit.prevent="enter">
-                    <label v-if="props.entry.turns.length > 0" class="flex flex-col gap-1 text-sm">
-                        <span class="font-medium text-ink">Turn this race was run on (optional)</span>
-                        <BaseSelect
-                            v-model="form.turn_entry_id"
-                            name="turn_entry_id"
-                            :options="[{ value: '', label: 'not tied to a turn' }, ...props.entry.turns.map(turn => ({ value: String(turn.id), label: `Turn ${turn.turn}` }))]"
-                        />
-                    </label>
+                    <BaseSelect
+                        v-if="props.entry.turns.length > 0"
+                        v-model="form.turn_entry_id"
+                        name="turn_entry_id"
+                        label="Turn this race was run on (optional)"
+                        :options="[{ value: '', label: 'not tied to a turn' }, ...props.entry.turns.map(turn => ({ value: String(turn.id), label: `Turn ${turn.turn}` }))]"
+                    />
 
                     <!-- Every message the write refused with, not the first alone: the request can
                          refuse the title and the placement together, and fixing one at a time

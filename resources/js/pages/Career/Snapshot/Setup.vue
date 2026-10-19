@@ -132,32 +132,26 @@ const submit = (): void => {
         <form class="mt-6 max-w-3xl space-y-6" @submit.prevent="submit">
             <section aria-labelledby="snapshot-scenario-heading" class="rounded-md border border-rule bg-raised p-4">
                 <h2 id="snapshot-scenario-heading" class="text-lg font-semibold text-ink-strong">Scenario</h2>
-                <label class="mt-3 flex flex-col gap-1">
-                    <span class="text-xs font-medium text-ink">Scenario *</span>
-                    <BaseSelect
-                      v-model="form.scenario"
-                      name="scenario"
-                      :options="[{ value: '', label: 'Choose a scenario' }, ...Object.keys(props.scenarios).map(key => ({ value: key, label: props.scenarios[key] }))]"
-                      required
-                      :error="form.errors.scenario"
-                    />
-                    <span v-if="form.errors.scenario" class="text-xs text-risk">{{ form.errors.scenario }}</span>
-                  </label>
+                <BaseSelect
+                  v-model="form.scenario"
+                  name="scenario"
+                  label="Scenario *"
+                  :options="[{ value: '', label: 'Choose a scenario' }, ...Object.keys(props.scenarios).map(key => ({ value: key, label: props.scenarios[key] }))]"
+                  required
+                  :error="form.errors.scenario"
+                />
             </section>
 
             <section aria-labelledby="snapshot-trainee-heading" class="rounded-md border border-rule bg-raised p-4">
                 <h2 id="snapshot-trainee-heading" class="text-lg font-semibold text-ink-strong">Trainee</h2>
-                <label class="mt-3 flex flex-col gap-1">
-                    <span class="text-xs font-medium text-ink">Trainee *</span>
-                    <BaseSelect
-                      v-model="form.umamusume_id"
-                      name="umamusume_id"
-                      :options="[{ value: '', label: 'Choose a trainee' }, ...props.trainees.map(trainee => ({ value: String(trainee.id), label: trainee.name }))]"
-                      required
-                      :error="form.errors.umamusume_id"
-                    />
-                    <span v-if="form.errors.umamusume_id" class="text-xs text-risk">{{ form.errors.umamusume_id }}</span>
-                </label>
+                <BaseSelect
+                  v-model="form.umamusume_id"
+                  name="umamusume_id"
+                  label="Trainee *"
+                  :options="[{ value: '', label: 'Choose a trainee' }, ...props.trainees.map(trainee => ({ value: String(trainee.id), label: trainee.name }))]"
+                  required
+                  :error="form.errors.umamusume_id"
+                />
             </section>
 
             <section aria-labelledby="snapshot-position-heading" class="rounded-md border border-rule bg-raised p-4">
@@ -167,16 +161,14 @@ const submit = (): void => {
                     not start from turn 1.
                 </p>
                 <div class="mt-3 grid grid-cols-1 gap-3 @3xl:grid-cols-3">
-                    <label class="flex flex-col gap-1">
-                        <span class="text-xs font-medium text-ink">Year *</span>
-                        <BaseSelect
-                          v-model="form.career_year"
-                          name="career_year"
-                          :options="[{ value: '', label: 'Year' }, ...props.years.map(year => ({ value: String(year.value), label: year.label }))]"
-                          required
-                          :error="form.errors.career_year"
-                        />
-                    </label>
+                    <BaseSelect
+                      v-model="form.career_year"
+                      name="career_year"
+                      label="Year *"
+                      :options="[{ value: '', label: 'Year' }, ...props.years.map(year => ({ value: String(year.value), label: year.label }))]"
+                      required
+                      :error="form.errors.career_year"
+                    />
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-medium text-ink">Month *</span>
                         <BaseSelect
