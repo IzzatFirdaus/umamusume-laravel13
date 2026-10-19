@@ -109,8 +109,7 @@ browser contrast gate that is supposed to prove G-18 is `markTestIncomplete` beh
 `class_exists(Browser::class)` guard, and this host has neither `pestphp/pest-plugin-browser`
 nor Playwright installed, so its two tests report *skipped*, not passed. Corpus figures
 in the comments below are transcribed from research-phase measurements whose evidence
-files are absent from the tree (`docs/design-research/verification/slice-6-2026-09-28.md`,
-cited by `app.css`, and `FRONTEND-SPEC-DIVERGENCE.md`, cited by the test, are both
+files are absent from the tree (docs/design-research/verification/slice-6-2026-09-28.md, cited by app.css, and FRONTEND-SPEC-DIVERGENCE.md, cited by the test, are both
 missing; that directory holds four PNGs and nothing else). Treat every ratio in this
 file as **documented, not re-verified here**. Closing that is a gate decision (R-class),
 not a copy fix.
@@ -291,7 +290,7 @@ external fonts (offline constraint + C-8 dependency gate).
 >
 > The Critical tier (`text-3xl font-semibold` per the 2026-10-14 amendment) renders from the system stack named in §2.2's first bullet, at the size and weight that amendment already set. No display face is added; no `@font-face` block ships; no `resources/fonts/` directory is created. C-8 stays unexercised for typography.
 >
-> **Why the proposal closed rather than shipped.** Four reasons, recorded so a later pass does not re-open the question on the same evidence. (a) The 2026-10-14 size amendment already carries the tier: the `h1` at 30px against section headers at 18px is a 12px step, double the previous 6px gap, and it reads as a tier without a face. (b) §7's offline constraint binds: a bundled face is a second asset to version and load, for a page title whose content is Latin and whose character is carried by weight. (c) C-8 approval is a permanent governance cost — `docs/governance/C-8-approval.md` would need to exist and stay valid — for an aesthetic gain the size amendment already delivers. (d) The HLF reference the proposal cited renders its `h1` at heavy weight from a system-adjacent sans; what reads as display in the reference is size and weight, not typeface identity, and this amendment follows the reference rather than inventing a face for it.
+> **Why the proposal closed rather than shipped.** Four reasons, recorded so a later pass does not re-open the question on the same evidence. (a) The 2026-10-14 size amendment already carries the tier: the `h1` at 30px against section headers at 18px is a 12px step, double the previous 6px gap, and it reads as a tier without a face. (b) §7's offline constraint binds: a bundled face is a second asset to version and load, for a page title whose content is Latin and whose character is carried by weight. (c) C-8 approval is a permanent governance cost — would need to exist and stay valid — for an aesthetic gain the size amendment already delivers. (d) The HLF reference the proposal cited renders its `h1` at heavy weight from a system-adjacent sans; what reads as display in the reference is size and weight, not typeface identity, and this amendment follows the reference rather than inventing a face for it.
 >
 > **What reads as the app's visual voice, since it is not the face.** `frontend-fidelity-2026-10-13.md` §2.1 lists "no display voice" as one of its wireframe tells. What clears the tell is the header convention (eyebrow + `h1` + one-line subtitle), the accent budget (one action per screen — the blue `--color-primary-action`; amended 2026-10-15 from lime), the chip and badge vocabulary, and the sub-cell density — all of which ship in Track 1 slices without a font. The tier system carries the hierarchy; the face is redundant to it.
 

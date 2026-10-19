@@ -501,7 +501,7 @@ documentation; run the underlying `composer` script or vendor command instead.
 
 ## 12. Security and privacy
 
-No `SECURITY.md` exists; the model is `ARCHITECTURE.md` §8.
+No security document exists; the model is `ARCHITECTURE.md` §8.
 
 - Bind to loopback. Do not add hosting, exposure, or a public deploy path.
 - `.env`, `.env.*` and every agent-tool config that may hold keys (`.mcp.json`,

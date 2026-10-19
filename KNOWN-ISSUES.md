@@ -1027,7 +1027,7 @@ currently cannot tell which "Landed" rows are in `master` and which are in a dir
 
 **Census.** `git status --porcelain` names 49 untracked paths on this tree, **27** of them career-phase code
 (filtered on `Career`/`career` plus `RunRaceStripTest.php`; this session's own
-`docs/research-scratch/D13-SKILLS-PLANNER-2026-10-07.md` is untracked too and is not in the 27). The
+that file is untracked too and is not in the 27). The
 per-slice shape:
 
 | Slice | Plan §8 status | Untracked files |
@@ -1106,7 +1106,7 @@ The panel itself renders correctly in all seven passing cases, including the 320
 overflow assertion at line 175 passes — no sideways scroll). The 44px failure is a cockpit control
 that predates E1 and sits outside every Phase D slice's scope.
 
-**Proving file.** `test-results/scenario-panel-keeps-the-4-31c62-ckpit-and-reflows-at-320-px-chromium/error-context.md`,
+**Proving file.** the cockpit page snapshot ref `f2e3`,
 page snapshot ref `f2e3`, showing the cockpit shell with control 11 measuring 32px.
 
 **Owner.** The E1 session, when its panel row is next opened. The cockpit control is not in E1's
@@ -2649,8 +2649,8 @@ tracked, present files as dead:
 **Evidence that this is a false positive and not a re-ruled record.** Every one of the 127 hits the two rules
 remove names a tracked markdown file that exists at the natural relative path, and all 27 distinct bare names the
 widened rule resolves match exactly one tracked file, so nothing resolved by accident. The genuinely absent targets
-stay dead where they must: `docs/research-scratch/DESIGN-CORPUS.md` is still counted 61 times, `RAW-FINDINGS.md`,
-`SKILLS-GAPS.md`, `docs/research-scratch/GOVERNANCE.md` and `docs/research-scratch/GOVERNANCE.md` all still count, because no tracked markdown
+stay dead where they must: \`docs/research-scratch/DESIGN-CORPUS.md\` is still counted 61 times, RAW-FINDINGS.md,
+SKILLS-GAPS.md, `docs/research-scratch/GOVERNANCE.md` and `docs/research-scratch/GOVERNANCE.md` all still count, because no tracked markdown
 carries those names. Measured with the corrected resolver: 556 at `ee93b38` (the commit that set the bar, whose own
 measurement therefore carried ~152 false positives), 642 at `f6f393f`, 657 in this worktree before this entry was
 written. This entry's own lines name 8 absent targets as evidence, records the gate tolerates by design, so the
@@ -2672,7 +2672,7 @@ tools/doc_census.py` -> `dead markdown links: 665 (642 GONE, 23 UNTRACKED)`, and
 **What closure does not cover.** It does not lower or raise the 708 bar, and it does not make the remaining 636
 GONE lines correct - most are dated provenance inside masters naming sources they absorbed, tolerated by the gate's
 own header, and repointing them is still Task 5 of the `PROCESS-PLANS.md` section named PLAN-DOC-SYNC-2026-10-02. It does not resolve the
-21 UNTRACKED lines, whose remedy is committing the masters they name (`docs/Trainer-Desk-2.0-G-Prompts.md`,
+21 UNTRACKED lines, whose remedy is committing the masters they name (docs/Trainer-Desk-2.0-G-Prompts.md,
 `docs/research-scratch/TRAINING-RUN-IMPORTS.md`), and those files are another session's in-flight work in this
 shared worktree. It does not re-measure `AGENTS.md`'s §3 documentation map against the new resolver, and it leaves
 `composer docs`' other sections (master line counts, inbound citation counts) exactly as they were.

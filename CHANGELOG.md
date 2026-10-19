@@ -221,7 +221,7 @@ docs/OPEN-QUESTIONS.md. Verbatim:
 > OQ-5 (OPEN 2026-10-01, filed by the Slice 5 Phase A verdict) ... Phase A's verdict was **(c): do not ship a
 > skill recommendation** ... Phase A records the only defensible shape: **derived at read time from
 > `condition_groups`, no new column, no backfill, so it cannot drift from the data it reads**
-> (`docs/design-research/slice-5-phase-a-best-for-2026-10-01.md` §5). Phase A therefore left its counts
+> Phase A therefore left its counts
 > unlabelled on purpose.
 
 Note for the census: the design-research file named in the quote above is named here and is not
