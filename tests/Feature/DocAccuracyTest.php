@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 it('pins every file path named in AGENTS.md §6 repository structure block', function (): void {
     $agents = file_get_contents(base_path('AGENTS.md'));
-    preg_match('/## 6\. Repository structure\s*\n```text\n(.*?)```\n/s', $agents, $block);
+    preg_match('/## 6\. Repository structure\s*?\r?\n```text\r?\n(.*?)```\r?\n/s', $agents, $block);
     $structure = $block[1] ?? '';
     foreach (explode("\n", $structure) as $line) {
         if (preg_match('/^([A-Za-z0-9][A-Za-z0-9_.\/\\-]+?)\s{2,}/', $line, $match)) {
