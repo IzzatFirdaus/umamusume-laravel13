@@ -119,7 +119,7 @@ code" reaches the rules one hop later than before and reaches all of them.
 
 ```text
 horse, horses, sire, dam, mare, foal, 🏇 <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
-```text
+```
 
 Plus animal framing: `stallion`, `colt`, `filly`, `gelding`, `equine`, `pony`, `thoroughbred`, `stable` (as noun for character container), `breeding`, `pairing`, `bloodline`, `pedigree`, `lineage` (of characters), `hoof`, `mane`, `tail`, `withers`, `muzzle`, `jockey`, `rider`, `saddle`, `tack`, `reins`, `bit`, `paddock`, `herd`, `flock`, `pack`, "your horse", "your mount", "the animal", "the girl and her horse". <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 
@@ -491,7 +491,7 @@ does not restate them; it records where they run and how they bind the shipped a
 ```text
 ID | Name | Type (Automated/Review/Manual) | Scope | Command | Pass | Fail |
 Evidence | Exceptions | Owner | Status
-```text
+```
 
 ### Global gates
 
@@ -623,7 +623,7 @@ Forbidden stale copies: docs/design-research/_scratch/gate.py (moved away),
 Data still in provenance: docs/design-research/_scratch/tokens.json (read by
 tools/gate.py as a measured-anchor input; it is data, not tooling)
 Makefile gate targets: lore, lore-code (git grep); tests/lint/stan as before
-```text
+```
 
 ### Changelog
 
@@ -1449,7 +1449,7 @@ $this->post('/training-runs/'.$run->id.'/turns', $payload)
 $html = $this->withSession(['_old_input' => $payload + ['previewed' => '1']])
     ->get(route('runs.show', $run))
     ->getContent();
-```text
+```
 
 Two things that snippet encodes, both easy to get wrong. `followRedirect()` does not exist on
 `TestResponse` in Laravel 13.32, so the redirect target is reached by an explicit second request.

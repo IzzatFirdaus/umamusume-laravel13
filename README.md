@@ -257,7 +257,7 @@ routes/                   web.php, api.php (named routes throughout)
 tests/                    Pest: Feature (100+ files) + Unit; tests/Fixtures stored bodies
 docs/                     adr/, scenarios/, UMAMUSUME_REFERENCE.md, research-scratch/ (governance masters)
 tools/                    lore.php (lore gate), gate.py (design-artifact gate), doc_census.py, roster-crosscheck.php
-```text
+```
 
 ## Documentation Map
 
