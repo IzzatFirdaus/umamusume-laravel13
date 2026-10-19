@@ -176,8 +176,8 @@ Tests use Pest 4, feature-first, with a global `TestCase` + `RefreshDatabase` bi
 Two gates, to run before pushing. This repository has no CI: `.github/workflows/` is absent, so nothing
 verifies a change that is not verified locally.
 
-- `php artisan test --filter=DocCitationParity` - fails when dead markdown citations exceed 708. The limit is
-  `DOC_CITATION_BASELINE` in `tests/Feature/DocCitationParityTest.php`.
+- `php artisan test --filter=DocCitationParity` - fails when dead markdown citations exceed the recorded
+  baseline. The limit is `DOC_CITATION_BASELINE` in `tests/Feature/DocCitationParityTest.php`.
 - `php artisan test --filter=DocAccuracyTest` - must be 3 passed / 80 assertions / 0 risky.
 
 Two diagnostics, which report where the dead targets are rather than gating on them:
