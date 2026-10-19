@@ -3553,3 +3553,115 @@ must re-check StatBand.vue, absent since the peer's `b30906a`, and whether the p
 already did the sticky, rail and accordion work. If those files do not clear, the honest answer is to
 wait on the peer rather than start unverifiable layout work. The dispatched note that the next eligible
 is Phase 3.7 is stale: 3.7 landed in section 32 and 3.8 in section 33.
+
+## 41. Dispatch 40 - the worktree opened the browser gate and found five real defects, 2026-10-20
+
+### Step 0 - boot diagnosis, and the fix was the autoloader
+
+- Worktree: .worktrees/dispatch-4x, branch dispatch-4x, HEAD 5fb9ed4. Clean at creation, so the
+  peer's uncommitted files are structurally out of reach. Dependencies are JUNCTIONS (`mklink /J`):
+  `mklink /D` failed twice with insufficient privilege, and a junction needs none.
+- Measured boot, worktree vs main tree at the same moment:
+    main tree  php artisan --version          0.87s
+    main tree  php artisan route:list --path=up  0.96s
+    worktree   php artisan --version          61.94s   (first call, cold)
+    worktree   php artisan route:list --path=up  17.93s   (cold)
+    worktree   php artisan route:list --path=up   1.57s   (after `composer dump-autoload -o`)
+- So this was NOT host contention and NOT a worktree-local missing config: it was the
+  UN-OPTIMISED AUTOLOADER. A fresh worktree has no classmap, so every boot walked thousands of
+  directories; `composer dump-autoload -o` generated 9058 classes in 9m 23s (one-time) and took boot
+  from 18s cold to 1.6s warm. The main tree was always fast because its classmap already existed.
+- The readiness check therefore passes with no timeout override, and none was landed. Recorded for a
+  future boot-investigation: an un-optimised autoloader is worth 10x on this host, and it is the
+  first thing a new worktree should run.
+- Also recorded as a correction: a fresh worktree needs the gitignored `.env`, `.env.testing` and a
+  canonical `database/database.sqlite`, because `php artisan migrate --seed` runs in playwright's
+  global setup. Section 40 said storage was not needed; it is. The worktree's `.env` uses the
+  relative `database/database.sqlite`, so the main tree's dev database stayed untouched.
+
+### Browser gate - OPEN. Previously-blocked cases now run.
+
+Five specs that had been blocked for four dispatches, each finally run against a fresh bundle:
+
+- career-section-nav.spec.ts -> **4 passed (1.6m)**, including the load-bearing
+  'clicking or activating the unreachable Result tab changes no URL' case. Its un-skip is committed.
+- career-cockpit.spec.ts, career-cockpit-forms.spec.ts, career-training-detail.spec.ts and
+  full-career-journey.spec.ts -> **40 passed, 8 failed (26.0m)**. The failures are diagnosed below
+  and are REAL defects the stale bundle had hidden, not flakiness.
+
+### The five defects the worktree exposed
+
+Three were repaired and committed here, each proven by the nav spec going green:
+
+1. **6f91420 - the bundle could not build.** CareerSectionNav.vue imported `../ui/StatusPill.vue`;
+   StatusPill lives at `components/StatusPill.vue` and there is no `ui/` copy. `npm run typecheck`
+   PASSED on it. Four dispatches reported browser cases blocked-on-stale-bundle and never built it.
+   Lesson: for a `.vue` specifier, typecheck is not a build.
+2. **782069b (part) - the unreachable-tab rule was never implemented.** CareerSectionNav compared the
+   run status to a lower-cased `active`. `App\Enums\RunStatus` is `Active`/`Completed`/`Retired`,
+   capitalised, so the comparison never matched and Result rendered as a plain `<a href>` on every
+   career, including an active one. DESIGN.md Section 5's rule was therefore not implemented AT ALL,
+   and the component's own source guard could not see it because the guard reads structure, not
+   values. The browser run caught it: the disabled tab resolved to `<a href=.../result>`.
+3. **782069b (part) - the shared walk read a stale contract.** `walkWizard` waited on a
+   `Stored choice:` line that 3.1/3.2 had replaced with ChoicesSoFar's strip, then read a `<strong>`
+   where the value renders as a LINK. Both halves were stale when 8a1f167 wrote it and neither had
+   ever executed, because the four walks were verified-by-read only. It now reads the strip's own
+   trainee entry. Fourth case in the same commit: the spec's click on an `aria-disabled` span needed
+   `force: true`, exactly as the Preflight slice recorded.
+
+Two classes remain OPEN, diagnosed but not fixed, because the dispatch's hard stop says to diagnose
+before Step A rather than to paper over:
+
+4. **4.1's nav broke three walk locators (strict-mode collisions).** The nav adds real `Training`,
+   `Events` and `Race` links to the Cockpit, so substring locators that were unambiguous now match
+   two elements:
+     - career-cockpit.spec.ts, 'names every action...' -> `/^Training/` resolved to 2 elements
+     - career-cockpit.spec.ts, 'sizes the controls to the 44px contract' -> `/^Event/` resolved to 2
+     - career-training-detail.spec.ts, 'records the choice it carries' -> `/^Training/` resolved to 2
+   The fix is locator precision (scope to the action grid, or `exact`), not a change to the nav.
+5. **The guard-cleanup dispatch broke a spec it did not run.** career-training-detail.spec.ts,
+   'records a facility level', waits for the shipped text `Declared constant: UMAMUSUME_REFERENCE`,
+   which 844aebf deliberately removed from config/advisor.php. That spec is the same class of stale
+   pin as the three fixed in Section 40 - and it was invisible then for the same reason: no bundle.
+   Three further failures need a look before Step A: two advisor cases waiting on a `Confirmed` img
+   inside a named region that did not resolve (career-cockpit 'records Energy...' and 'walks the
+   record...'), one `toBeFocused` on a failure-curve summary (career-training-detail), and the
+   journey timing out on `Edit team state` -> `input[name="team_name"]` at the 300s budget.
+
+### Gate
+
+Step A did NOT run. The dispatch's hard stop is explicit - any of the four walks still failing after
+boot is under 60s means STOP and diagnose before Step A, because 4.2 would build on a foundation the
+browser just proved cracked. 4.2, 4.3 and 4.4 are therefore NOT STARTED, and nothing speculative was
+built on top of the five defects above.
+
+### Shifted premises, re-checked (all confirmed, Step 0(i)/(j))
+
+- `StatBand.vue` is ABSENT, and `ScenarioCaps::forStat()` has no live caller anywhere - the only
+  mention is a docblock in BuildTarget.vue. So 4.2's ScenarioCaps hardening is recorded as ABSORBED
+  BY PEER b30906a, no action, and no file was invented to give the sub-task a target.
+- `ActionGrid.vue` and `AdvisorRail.vue` exist and are already mounted (Cockpit.vue:946, :980, :988),
+  so 4.2 extends them rather than rebuilding them.
+- The capsule/lattice headers 4.2 asks to delete are already gone from Cockpit.vue (peer b30906a).
+- The CareerStatePanel.vue :130 fix from 360f7ee SURVIVES at line 135.
+- `CareerHeader` has exactly ONE importer (Cockpit.vue:28 import, :517 usage), so option (i)'s rename
+  is a two-line change as predicted.
+
+### Close
+
+- dispatch-4x is ahead of master by 2 commits: 6f91420, 782069b. Cherry-pick in that order, before
+  any 4.x work, because the second depends on the first building at all.
+- Bundle in the worktree: 2026-10-20 01:49:42, fresh, built from a clean checkout.
+- DocCitationParity: unchanged by this dispatch; this section is the only markdown edit.
+- Master and the peer's dirty files were not touched.
+- Next eligible: FIRST repair the two failure classes above (three locator collisions and the stale
+  advisor-text pins), THEN 4.2. The nav's own spec is green, so 4.1 is verifiable now; what is broken
+  is the older specs' precision and one pin the guard-cleanup left behind.
+
+> **Dated note, 2026-10-20.** This section's §41 collides with the §41 above (the peer's Phase 8.8
+> close-out). Both are kept: date order decides reading order, and both are dated 2026-10-20, so landing
+> order decides - master's landed first, this one second via the rebase. Pre-existing duplicate numbers in
+> this file, inherited from the base and present on both sides: §26 x2, §27 x2, §29 x2. One duplicate
+> was introduced by master: its §40 repeats the §40 the base already carried. Number order was never
+> this file's contract; date order is.
