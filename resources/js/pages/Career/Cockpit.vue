@@ -25,10 +25,12 @@
  * page declares its own contract for the same reason.
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
-import CareerHeader from '../../components/career/CareerHeader.vue';
+import CockpitIdentityCard from '../../components/career/CockpitIdentityCard.vue';
+import StatSummary from '../../components/career/StatSummary.vue';
 import CareerStatePanel from '../../components/career/CareerStatePanel.vue';
 import ActionGrid from '../../components/career/ActionGrid.vue';
 import AdvisorRail from '../../components/career/AdvisorRail.vue';
+import Section from '../../components/ui/Section.vue';
 import RunRaceStrip from '../../components/career/RunRaceStrip.vue';
 import ScenarioPanel from '../../components/scenario/ScenarioPanel.vue';
 import UnityCupEditor from '../../components/career/UnityCupEditor.vue';
@@ -500,6 +502,21 @@ const jumpToShop = (): void => {
             That screen did not load. Nothing was saved; try again.
         </p>
 
+        <!-- The condensed read, above the wayfinder so the nav slides beneath it while the page scrolls
+             (the strip is `top-0` with a solid background and a higher z-index). It is a second READING
+             of the header's own facts and never a second primary: the one filled CTA stays in the
+             advisor rail, and the strip's outline affordance moves a Trainer to it. The class a source
+             scan would count is deliberately not printed here, so that a count of filled primaries in
+             this file stays equal to the number the page actually renders. -->
+        <StatSummary
+            :turn="props.header.turn"
+            :energy-text="props.header.energy_text"
+            :mood="props.header.mood"
+            :fans="props.header.fans"
+            :skill-points="props.header.skill_points"
+            :recommended="isActive ? (props.advisor.decision.recommended?.action ?? null) : null"
+        />
+
         <!-- The page's own wayfinder (audit 2026-10-12 §3.6): anchors into the regions the screen
              already names, never tabs - SCREEN_SPEC.md §SCR-CAR-011 forbids hiding a region at a
              breakpoint, and tabs hide panels by definition. Sticky from md up, the same widths the
@@ -514,7 +531,7 @@ const jumpToShop = (): void => {
         </nav>
 
         <div :data-run-state="runState" class="contents">
-        <CareerHeader
+        <CockpitIdentityCard
             :trainee="props.run.trainee"
             :trainee-ja="props.run.trainee_ja"
             :header="props.header"
@@ -528,14 +545,12 @@ const jumpToShop = (): void => {
              the five stat readings this screen already prints, and names the one door a closed career
              still has: the Career Result. Nothing here is derived that the props do not carry, so there
              is no total turn count and no epithet line, because no prop states either. -->
-        <section
+        <Section
             v-if="!isActive"
-            aria-labelledby="cockpit-summary-heading"
-            class="mt-3 rounded-lg border border-rule bg-panel p-4"
+            id="cockpit-summary-heading"
+            :title="`${props.run.trainee} · ${props.run.scenario_label}`"
+            class="rounded-lg border border-rule bg-panel p-4"
         >
-            <h2 id="cockpit-summary-heading" class="text-lg font-semibold text-ink-strong">
-                {{ props.run.trainee }} · {{ props.run.scenario_label }}
-            </h2>
             <p class="mt-1 text-sm text-ink">
                 {{ props.run.status_label }} · Turn {{ props.header.turn }}
             </p>
@@ -547,7 +562,7 @@ const jumpToShop = (): void => {
             >
                 Open the Career Result
             </a>
-        </section>
+        </Section>
 
         <!-- The header edit forms (F2, plan §9.6 ruling 1). Status, scenario and grade-point period
              all write through `runs.update`, the route and validator the 2.0.0 record screen used. A
@@ -947,26 +962,28 @@ const jumpToShop = (): void => {
 
                 <!-- A career that has ended has no turn being decided, so the advisor's own refusal is not
                      the answer this region owes. One statement and the one door a finished career still has. -->
-                <section v-else aria-labelledby="career-closed-heading" class="rounded-lg border border-rule bg-panel p-4">
-                    <h2 id="career-closed-heading" class="text-lg font-semibold text-ink-strong">
-                        {{ props.run.status === 'Completed' ? 'This run is complete.' : 'This run is retired.' }}
-                    </h2>
+                <Section
+                    v-else
+                    id="career-closed-heading"
+                    :title="props.run.status === 'Completed' ? 'This run is complete.' : 'This run is retired.'"
+                    class="rounded-lg border border-rule bg-panel p-4"
+                >
                     <p class="mt-1 text-sm text-ink">
                         Nothing is being decided, so nothing is ranked and nothing is refused.
                     </p>
-                </section>
+                </Section>
             </div>
 
             <div class="order-3 min-w-0 md:order-none @4xl:col-start-1 @4xl:row-start-3 @5xl:col-start-2 @5xl:row-start-2">
                 <!-- The empty state names what is missing, why it matters and what to do (plan §10). It
                      sits above the grid rather than replacing it: the grid's own entries are still the
                      doors, and the advisor's refusal is a real state rather than a blank. -->
-                <section
+                <Section
                     v-if="empty"
-                    aria-labelledby="career-empty-heading"
-                     class="mb-3 rounded-lg border border-dashed border-rule bg-panel p-4"
+                    id="career-empty-heading"
+                    title="No turn recorded yet"
+                    class="mb-3 rounded-lg border border-dashed border-rule bg-panel p-4"
                 >
-                    <h2 id="career-empty-heading" class="text-lg font-semibold text-ink-strong">No turn recorded yet</h2>
                     <p class="mt-1 text-sm text-ink">
                         Energy, Mood, Fans, Skill Points and the five stats are what this screen reads, and
                         none has been entered for this run. Until one turn is recorded the advisor has
@@ -975,7 +992,7 @@ const jumpToShop = (): void => {
                     <a :href="props.run.training_url" class="mt-2 inline-flex min-h-11 items-center font-medium text-ink-strong underline">
                         Record the first turn through Training
                     </a>
-                </section>
+                </Section>
 
                 <ActionGrid v-if="isActive" :actions="props.actions" />
 
@@ -1004,19 +1021,18 @@ const jumpToShop = (): void => {
                 </button>
             </div>
 
-            <section
+            <Section
+                id="career-scenario-heading"
+                title="Scenario"
                 class="order-4 min-w-0 rounded-lg border border-rule bg-panel p-4 md:order-none @4xl:col-span-2 @4xl:row-start-4 @5xl:col-span-3 @5xl:row-start-3"
-                aria-labelledby="career-scenario-heading"
             >
-                <h2 id="career-scenario-heading" class="text-lg font-semibold text-ink-strong">Scenario</h2>
-
                 <!-- The shell switches on the matrix's own flags and widget keys and knows no
                      scenario name (plan §9 E1, gate G-33). The prop's own shape is declared at
                      `components/scenario/ScenarioPanel.vue`; the page forwards it untouched. -->
                 <div class="mt-2">
                     <ScenarioPanel :scenario="props.scenario as never" />
                 </div>
-            </section>
+            </Section>
 
             <section
                 class="order-5 min-w-0 rounded-lg border border-rule bg-panel p-4 md:order-none @4xl:col-span-2 @4xl:row-start-1 @5xl:col-span-1 @5xl:col-start-1 @5xl:row-span-2 @5xl:row-start-1"

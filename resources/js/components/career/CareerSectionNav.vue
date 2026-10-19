@@ -4,11 +4,15 @@
  * one tab row, so a Trainer moves between career screens without each page growing its own
  * "back to the Cockpit" pair.
  *
- * **The name is not the plan's.** 4.1 named `CareerHeader.vue`, but that path is already a live,
- * committed component with a different contract — the Cockpit's own identity and position card
- * (`<dl>` of Scenario / Year / Month / Turn / Energy, per SCREEN-009 §12), imported by
- * `Cockpit.vue`. This is the layout-level strip instead, so it takes the name its job describes.
- * The ruling and the evidence are recorded in the ledger.
+ * **The name is not the plan's.** 4.1 was specified to add a NEW component under the name the plan
+ * used, but that path was already a live, committed component with a different contract — the
+ * Cockpit's own identity and position card (`<dl>` of Scenario / Year / Month / Turn / Energy, per
+ * SCREEN-009 §12), imported by `Cockpit.vue`. This is the layout-level strip instead, so it takes
+ * the name its job describes. Slice 4.2 then renamed that other component to
+ * `CockpitIdentityCard.vue`, which is what its job always described, so the plan's original name no
+ * longer names anything in the tree — deliberately, which is why this prose does not print it either:
+ * a source scan for it is an assertion the tree keeps, and one occurrence would silently pass a
+ * reader while failing the grep. The ruling and the evidence are recorded in the ledger.
  *
  * **An unreachable section is not a link.** DESIGN.md §5's 2026-10-17 amendment: `aria-disabled`
  * announces a state but does not cancel activation, and a `<Link>` navigates regardless of the

@@ -588,3 +588,110 @@ test('a completed URA career draws its four recorded mandatory races as a ladder
         await expect(row).toHaveAttribute('data-state', 'completed');
     }
 });
+
+/*
+ * Slice 4.2's adoption. Three groups, all of them PAGE-WALK cases rather than fixture ones, per Section
+ * 46's Rule 1: a fixture proves the primitive (`section.spec.ts` does), while these prove the ADOPTION -
+ * five landmark names on the real page, a strip that actually sticks, and a primary count that is
+ * per-state rather than a constant.
+ */
+test('keeps every section landmark name after the Section adoption', async ({ page }) => {
+    // Three of the five resolve BY NAME on an active career.
+    await openCockpit(page);
+    await expect(page.getByRole('region', { name: 'No turn recorded yet' })).toHaveCount(1);
+    await expect(page.getByRole('region', { name: 'Scenario', exact: true })).toHaveCount(1);
+    // The fifth pairing is the one Ruling 1 left hand-rolled, so its name is the invariant that proves
+    // the ruling did not cost the section its accessible name.
+    await expect(page.getByRole('region', { name: 'Races in this run' })).toHaveCount(1);
+
+    // The other two titles are DYNAMIC, so the stable invariant is the structural shape: the section
+    // still references the id and the element carrying it still exists. Asserting a name there would be
+    // asserting the payload, not the adoption. Both live on a finished career.
+    await page.goto(`/training-runs/${uraCompletedRun()}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.locator('[aria-labelledby="cockpit-summary-heading"]')).toHaveCount(1);
+    await expect(page.locator('#cockpit-summary-heading')).toHaveCount(1);
+    await expect(page.locator('[aria-labelledby="career-closed-heading"]')).toHaveCount(1);
+    await expect(page.locator('#career-closed-heading')).toHaveCount(1);
+});
+
+test('renders the summary strip with the header values, the affordance and no primary', async ({ page }) => {
+    // This case REPLACES a stickiness assertion that could not be made honestly. Measured: the strip
+    // computes `position: sticky` and still drifts with the page by exactly the scroll distance, because
+    // its ancestor `main` carries `container-type: inline-size` and no ancestor is a scroll container, so
+    // the sticky containing block moves with the page. Removing the `sticky` class would not have changed
+    // that, which is what made the assertion worthless - it could not fail for the reason it claimed.
+    // The same ancestry wraps the "On this page" nav, whose docblock has always claimed `md:sticky`.
+    // Stickiness is therefore BLOCKED-ON-CONTAINMENT and recorded in the ledger rather than asserted.
+    await page.goto(`/training-runs/${uraCompletedRun()}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const strip = page.getByRole('region', { name: 'Run summary' });
+    await expect(strip).toBeVisible();
+
+    // The strip carries the header's own facts and says so in words, including the absences.
+    await expect(strip.getByText(/^Turn \d+/)).toBeVisible();
+    for (const label of ['Energy:', 'Mood:', 'Fans:', 'Skill Points:']) {
+        await expect(strip.getByText(label)).toBeVisible();
+    }
+
+    // It is NOT a second primary and it renders no filled button of its own.
+    await expect(strip.locator('[class*="bg-primary-action"]')).toHaveCount(0);
+
+    // On a finished career the rail recommends nothing, so the strip states that rather than inventing an
+    // action. The outline affordance appears only where a recommendation exists, which the sibling case
+    // measures.
+    await expect(strip.getByText('No recommendation. See the advisor.')).toBeVisible();
+});
+
+test('keeps one primary where the advisor recommends, and none where it does not', async ({ page }) => {
+    // Ruling 2. State one: a fresh career. The advisor has nothing to rank, so the page renders NO
+    // filled primary at all, and the strip says so rather than inventing one.
+    await openCockpit(page);
+    expect(await page.locator('[class*="bg-primary-action"]').count(), 'a fresh career rendered a primary').toBe(0);
+    await expect(
+        page.getByRole('region', { name: 'Run summary' }).getByText('No recommendation. See the advisor.'),
+    ).toBeVisible();
+
+    // State two: a logged turn with Energy, so the rail ranks. The count is MEASURED and reported, then
+    // asserted - it is not assumed to be the one the rail's CTA accounts for.
+    const cockpitUrl = await newCareer(page);
+    const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+    await recordTurns(page, runId, 1, { energy: '80', choice: 'training-Speed' });
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const primaries = page.locator('[class*="bg-primary-action"]');
+    const labels: string[] = [];
+    for (let i = 0; i < (await primaries.count()); i++) {
+        labels.push((await primaries.nth(i).innerText()).replace(/\s+/g, ' ').trim().slice(0, 40));
+    }
+    console.log('ADOPTION-PRIMARY-LABELS=' + JSON.stringify(labels));
+
+    // The strip carries NONE, whatever the rail renders: that is the invariant Ruling 2 states.
+    await expect(
+        page.getByRole('region', { name: 'Run summary' }).locator('[class*="bg-primary-action"]'),
+    ).toHaveCount(0);
+    // And the rail's own recommendation CTA is present, which is what the strip points at.
+    await expect(page.getByRole('region', { name: 'Advisor' }).getByRole('link', { name: /^Go to / })).toHaveCount(1);
+});
+
+test('names no component by the retired name its rename replaced', async () => {
+    // A SOURCE-level check, which is the only honest way to assert a rename: the browser cannot see a
+    // path. Reads the tree rather than a bundle, so it needs no server.
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+
+    const walk = (dir: string): string[] =>
+        fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+            const full = path.join(dir, entry.name);
+            return entry.isDirectory() ? walk(full) : [full];
+        });
+
+    const offenders = walk('resources/js').filter((file) =>
+        fs.readFileSync(file, 'utf8').includes('CareerHeader'),
+    );
+    // `toEqual`, not `toBe`: two empty arrays are not the same OBJECT, and `toBe` would have failed on a
+    // perfectly clean tree while reporting a message that reads like a survivor list. Caught by running it.
+    expect(offenders, `the retired name survives in ${offenders.join(', ')}`).toEqual([]);
+});
