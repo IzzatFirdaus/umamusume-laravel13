@@ -81,7 +81,7 @@ from community wikis to plan ahead. Profile:
   vs actual afterwards.
 
 The Umamusume are a humanoid race of girls; nothing in this product refers to them with equine vocabulary (see
-Lore Rules in CLAUDE.md).
+the lore gate in AGENTS.md §5, enforced by `tools/lore.php`).
 
 ## 3. Core User Stories (prioritized)
 
@@ -120,7 +120,7 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
 - A-5: `Umamusume` stores the ten aptitude letters (turf, dirt, four distance bands, four running styles)
   exactly as the declared source publishes them, in that order. A `Scenario` record stores its five per-stat
   caps, the source's hard cap, both server start dates and provenance. Reference data only: nothing in this
-  requirement computes a race or a training outcome (CLAUDE.md Planner Rule 6). [ADR-0004]
+  requirement computes a race or a training outcome. [ADR-0004]
 - A-6: `CharacterCard` record: the source's own card id (unique), its Umamusume, the `[Global]` client title
   verbatim including its brackets, rarity, Global release date, a debut-form flag derived from the earliest JP
   release among that trainee's cards, and an `unconfirmed` flag. Provenance is inline on the card row:
@@ -195,6 +195,21 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
   other. Nothing here computes whether an objective *can* be met — §6.11 stands, and no surface prints a
   probability, a score or a suggested entry. [**ADR-0026**]
 
+- A-11: Portrait form selection (Decision 9 ruling, recorded 2026-10-18). Every surface that renders a
+   trainee portrait without an explicit Trainer choice — the catalog index header frame, the catalog
+   detail Identity frame, the career trainee profile frame, and the pre-run trainee-select frame — MUST
+   render the trainee's *active form*, the card flagged is_debut_form per **A-6**, and where no card
+   carries the flag, that trainee's *first* form. No surface selects the frame by rarity or any other
+   criterion: the catalog badge keeps naming the top rarity, but the badge and the frame are different
+   answers and may name different cards. Where a surface lets the Trainer choose a form explicitly (the
+   catalog detail's form query parameter), the choice governs; the ruling fixes the default, not the
+   choice. State at the ruling: the index, profile, and select surfaces already resolve the flagged card
+   with the first card as fallback, while the catalog detail's no-parameter default resolves to the first
+   card, so the index and the detail can still show different portraits of the same trainee until that
+   default is consolidated. The consolidation is the Phase 5.4 code item recorded in the execution
+   ledger's deferral list, and this line is the specification it implements. Rationale: the pre-ruling
+   state showed two images of one trainee on adjacent pages; one uniform default makes the screens agree
+   by construction.
 ### FR-B: Data-fetching & cross-reference engine
 
 - B-1: `uma:fetch {source}` console command; sources are declared in `config('uma.sources')`, each with a parser
@@ -308,7 +323,7 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
   (`now()->utc()->format('Ymd-His')`). Trainer data (runs, turns, manual edits) is never deleted or overwritten
   by the engine.
 - NFR-6 **Lore integrity**: zero equine vocabulary for characters in code, data, docs, and UI (enforced by the
-  banned-pattern grep in CLAUDE.md and the Lore Guardian role in AGENTS.md).
+  banned-pattern grep in `tools/lore.php` and the Lore Guardian role in AGENTS.md).
 - NFR-7 **Maintainability**: PHPStan level 6 clean (existing baseline), Pint clean, Pest tests for every domain
   behavior; parsers isolated so a source change touches one class.
 - NFR-8 **Runtime responsiveness and navigation**: Trainer Desk is a local interactive application. Normal
@@ -364,7 +379,6 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
   Items 5 and 6 (no page request triggers background work; loading/error state termination) are acknowledged
   as known gaps. Browser tests run developer-locally only; the repository has no CI (`.github/workflows/`
   absent), so their results are not continuously verified.
-
 ## 6. Non-Goals (eliminated legacy features)
 
 Explicitly not built, with the legacy feature they replace. The numbering is load-bearing: `AGENTS.md`,
@@ -444,12 +458,14 @@ each here:
   display, and on which screens? Answered and built: catalog index (trainee header and costume-form row),
   trainee detail Identity section, support-card index and support-card detail, every slot purely visual. Open
   remainder: the pre-run pick screen (native `<select>` content model), skill icons (needs a `skills.iconid`
-  migration), and the top-rarity-versus-active-form portrait inconsistency between catalog index and detail.
+   migration), and the top-rarity-versus-active-form portrait inconsistency between catalog index and detail
+   is resolved by the 2026-10-18 ruling recorded in **A-11**: every surface defaults to the active form or
+   the first form, and the code consolidation is the Phase 5.4 item A-11 names.
 
 ## 8. Success Criteria (Phase 1 exit)
 
 - US-1..US-3 demonstrably work end-to-end against seeded data (`php artisan test --compact` green, including a
   pipeline test with a faked HTTP source).
 - Migrations, factories, and seeders run clean on a fresh SQLite file.
-- Zero banned-pattern hits (lore grep, see CLAUDE.md) across repo text.
+- Zero banned-pattern hits (lore grep, see `tools/lore.php`) across repo text.
 - PHPStan level 6 clean; Pint clean.
