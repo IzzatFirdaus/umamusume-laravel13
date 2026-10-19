@@ -66,15 +66,22 @@ export async function walkWizard(
     await traineeButton.click();
     await expect(traineeButton).toHaveAttribute('aria-pressed', 'true', WRITE);
 
-    // The chosen trainee's name, read back from the draft rather than assumed.
-    await page.getByText('Stored choice:').first().waitFor();
+    // The chosen trainee's name, read back from the strip the wizard actually renders.
+    //
+    // Dated note 2026-10-20 (isolated worktree, first real run): both halves of this read were wrong
+    // and neither had ever executed. The locator waited on a `Stored choice:` line that 3.1 and 3.2
+    // had already replaced with `ChoicesSoFar`'s `choices-so-far` strip, and the name is the strip's
+    // LINK text (the trainee choice carries a url), not the `<strong>` the retired private walks
+    // looked for. The four walks were verified-by-read only until the worktree built a bundle, so the
+    // stale read shipped in 8a1f167 unchallenged. The strip is the contract; the `a, strong` selector
+    // covers both branches the component has.
+    const strip = page.locator('[data-field="choices-so-far"]');
+    await strip.waitFor();
     const traineeName = (
-        await page
-            .locator('p', { has: page.getByText('Stored choice:') })
-            .locator('strong')
-            .first()
-            .textContent()
+        await strip.locator('span', { hasText: 'Trainee:' }).first().locator('a, strong').first().textContent()
     )?.trim() ?? '';
+
+    expect(traineeName, 'the choices strip names no trainee after the pick').not.toBe('');
 
     await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();

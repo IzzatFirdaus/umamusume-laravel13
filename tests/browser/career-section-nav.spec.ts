@@ -71,15 +71,20 @@ test('a completed career reaches its Result tab', async ({ page }) => {
 });
 
 test('clicking or activating the unreachable Result tab changes no URL', async ({ page }) => {
-    test.skip(true, 'blocked-on-stale-bundle; eligible when the tree is quiet');
-
+    // Un-skipped 2026-10-19: the isolated worktree carries a fresh bundle, so the case this spec was
+    // written for can finally run. It was the load-bearing assertion of slice 4.1 and had been
+    // test.skip'd for a stale-bundle block only, never for a doubt about the behaviour.
     createdRunUrls.push(await startCareer(page, 'unity_cup'));
 
     const result = page.getByRole('navigation', { name: 'Career sections' }).getByRole('link', { name: 'Result', exact: true });
     const before = page.url();
 
-    await result.click();
-    await expect(page).toHaveURL(before);
+    // `force`, and for the same reason the Preflight slice recorded: Playwright's actionability check
+    // reads `aria-disabled="true"` as "not enabled" and would never dispatch the click, so a plain
+    // `click()` times out after 180s without the product having done anything. That guard is a harness
+    // artifact here, not the behaviour under test — the assertion is that activation leaves the URL
+    // alone, which only means something if the click is actually delivered.
+    await result.click({ force: true });
     await expect(page).toHaveURL(before);
 
     await result.focus();

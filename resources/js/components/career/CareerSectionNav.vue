@@ -71,8 +71,34 @@ const TABS: { key: string; label: string; href: (base: string) => string }[] = [
     { key: 'result', label: 'Result', href: (b: string) => `${b}/result` },
 ];
 
-/** Result is the one section a career does not have until it ends. */
-const reachable = (key: string): boolean => (key === 'result' ? props.status !== 'active' : true);
+/**
+ * Result is the one section a career does not have until it ends.
+ *
+ * The values are the MEASURED backing cases of `App\Enums\RunStatus` — `Active`, `Completed`,
+ * `Retired`, capitalised. The first version compared against a lower-cased `active` that does not
+ * exist, so the comparison never matched and Result rendered as a plain link on every career,
+ * including the active one the rule is about. The first real browser run in the isolated worktree
+ * caught it: the disabled tab resolved to `<a href=".../result">`, and DESIGN.md Section 5's rule
+ * that an unreachable destination must not be an anchor was therefore not implemented at all.
+ *
+ * Absent `status` keeps the safe default the prop documents: the caller did not say, and a tab
+ * wrongly disabled hides a live screen, so every section stays reachable. That default is why this
+ * takes the enum string rather than a boolean — a boolean would have to be supplied by all eight
+ * non-pilot callers, and each omission would silently disable Result.
+ */
+const hasEnded = (status: string): boolean => status === 'Completed' || status === 'Retired';
+
+const reachable = (key: string): boolean => {
+    if (key !== 'result') {
+        return true;
+    }
+
+    if (props.status === undefined || props.status === '') {
+        return true;
+    }
+
+    return hasEnded(props.status);
+};
 
 const UNAVAILABLE_TITLE = 'Available when the career is completed';
 
