@@ -3972,3 +3972,100 @@ Section half needs.
     4. Rebuild the worktree bundle before the next browser gate: it reads stale at 01:49:42.
 - Next eligible: 4.2 (sticky summary strip, the rename, and Section once ruled on), then 4.3 and 4.4,
   then 4.5 and 4.6, plus the 2.5 remainder.
+
+## 45. Dispatch 44 - the Section landmark extension landed and verified; 4.2 adoption held, 2026-10-20
+
+### Step 0 measurements
+
+- Worktree HEAD a09ea94, `git status --porcelain` EMPTY.
+- Worktree bundle REBUILT as required, because it read stale (manifest 01:49:42 against a resources/js
+  commit of 02:26:02): `npm run build` -> exit 0, 42s (Vite 33.46s), manifest now 04:31:25. Master's
+  public/build was not touched.
+- The four cherry-picked commits verified on master, subjects matching the worktree originals:
+  c7b6424, 186a489, c963f64, ed9e97f. Nothing was re-cherry-picked.
+- Peer's ledger append: STILL DIRTY (` M docs/proposals/execution-ledger-2026-10-17.md`), so the
+  pre-planned STOP-and-cherry-pick branch did not fire and 4.x proceeded. The four deferred commits
+  stay deferred.
+- Section 42's scout re-verified and unchanged: seven `<details>`, one `bg-primary-action`, one
+  `data-region="advisor"`, zero capsule/lattice, zero `ui/Section` importers, StatBand.vue absent,
+  and CareerHeader with one import (Cockpit.vue:28), one usage (:517) and one prose mention
+  (CareerSectionNav.vue:7).
+- Baseline gates in the MAIN tree, per the bootstrap rule: UiHygiene 4 passed (guard 0);
+  DocCitationParity 2 passed with the census at 651 (650 GONE, 1 UNTRACKED).
+
+### RULING APPLIED - Section gains an optional id (ca5be34, 4 files, +152/-2)
+
+The operator approved the extension the previous dispatch argued for, and it landed as the primitive
+rather than as a wrapper: `Section.vue` takes `id?: string`; when it is passed the rendered heading
+carries the id and the section references it through `aria-labelledby`, so the region has an accessible
+name. Absent, nothing changes - which is exactly what the component did before the prop existed, so no
+existing consumer is affected (measured: ZERO files import Section.vue).
+
+- New `tests/browser/section.spec.ts` with its own fixture, running on a component-level Vite server
+  (`configFile: false`, the `base-select.spec.ts` pattern), so it needs no app bundle and is immune to
+  the KI-70 block. 4 passed (1.1m): the idless shape pins the prior behaviour (no `aria-labelledby`, no
+  heading id, and the section is NOT findable by name); with an id the heading carries it and the
+  region resolves BY NAME; the id follows `level="3"` onto the `<h3>`; and a named section still
+  carries its `description` and its default slot's markup.
+- Failability proven both ways: removing `:aria-labelledby="id"` reds the landmark case (expected 1,
+  received 0) and removing `:id="id"` reds it too (expected region-one, received null). Both restored;
+  4 passed again.
+- A defect in my OWN failability method, recorded because it nearly shipped: the patch script
+  re-copied the file to its backup on each patch call, so the second call backed up an ALREADY-PATCHED
+  file and the restore left `Section.vue` missing `aria-labelledby`. The spec caught it immediately (3
+  failed, 1 passed) and the attribute was re-applied and re-verified. Lesson: a failability script must
+  take its backup ONCE, from a clean tree, not per patch.
+
+### 4.2's ADOPTION, 4.3 AND 4.4 - NOT STARTED, BLOCKED-ON-BUDGET
+
+Commit 1 is the preamble the dispatcher defined; commit 2 is the adoption, and 4.3 and 4.4 each need
+their own component plus browser cases plus failability proofs plus a full walk-set run. The remaining
+budget would not have covered that, and starting it would produce the partial slice the dispatcher
+forbids. So nothing beyond the primitive was touched.
+
+What 4.2's adoption still needs, measured this dispatch so it can be done in one pass:
+
+The five `<section aria-labelledby>` / `<h2 id>` pairings in Cockpit.vue, with the title each renders:
+  1. cockpit-summary-heading - the title is DYNAMIC: `{{ trainee }} · {{ scenario_label }}`; its section
+     carries `v-if="!isActive"` and `mt-3 rounded-lg border border-rule bg-panel p-4`.
+  2. career-closed-heading - DYNAMIC: `status === 'Completed' ? 'This run is complete.' : 'This run is
+     retired.'`, followed by a `<p>` that must stay inside the Section slot.
+  3. career-empty-heading - 'No turn recorded yet', also followed by a `<p>`.
+  4. career-scenario-heading - 'Scenario', with grid placement classes.
+  5. career-timeline-heading - 'Races in this run', with `v-if="isActive"` and grid placement classes.
+
+THE RISK TO PLAN FOR, and it is not the ids: `Section.vue` renders `<section class="mt-8">` and takes
+no `class` prop, so an external `class` falls through and MERGES with `mt-8`. Every one of the five is
+currently spaced differently (`mt-3`, `mb-3`, or nothing), so adoption also normalises the vertical
+rhythm to `mt-8`. That is what the primitive's own docblock intends, but it is a visible change to
+land deliberately and to check against the layout cases ('lays out at 1280, 768 and 320').
+
+The rest of commit 2 is unchanged from the dispatcher's list: the new `StatSummary.vue` sticky strip
+(energy, mood, fans, SP, turn plus the recommendation as the one primary), the rename
+`CareerHeader.vue` -> `CockpitIdentityCard.vue` (import :28, usage :517, and the stale prose mention at
+CareerSectionNav.vue:7), and the extended `career-cockpit.spec.ts` cases with their four failability
+proofs.
+
+### Close
+
+- Worktree: ca5be34, clean. Worktree bundle fresh at 04:31:25.
+- KI-70 side effect: STILL OWED. Master's public/build at 03:39:17 was built from a peer-dirty source
+  tree and reflects the peer's uncommitted BuildTarget.vue, DeckSelect.vue and LegacySelect.vue. One
+  quiet-tree dispatch on peer-clear closes it.
+- Decision 1 (the citation ratchet) is CLOSED by the peer's own cleanup rather than by a dispatch:
+  the census walked 711 -> 703 -> 692 -> 651 across this arc, which is below the 708 baseline, so
+  DocCitationParity is GREEN and no citation dispatch is owed.
+- Deferred ledger commits, untouched and still blocked by the peer's append: 47488f0, 68ffe6f,
+  132cee8, a09ea94, and this section.
+- Master ahead: not re-measured at close; it was 60 at the previous close and nothing this dispatch
+  touched master. Recorded as not re-measured rather than guessed.
+- Peer status in the main tree: unchanged and untouched.
+- Operator action list:
+    1. When the peer commits the ledger append, cherry-pick 47488f0, then 68ffe6f, then 132cee8, then
+       a09ea94, then this section.
+    2. When the peer commits the three Vue files, run ONE quiet-tree dispatch to rebuild public/build
+       on master and re-run the walk set - that closes the KI-70 side effect.
+    3. Cherry-pick ca5be34 (the Section primitive) plus 4.2's adoption commit, then 4.3 and 4.4,
+       whenever they should reach master.
+- Next eligible: 4.2's adoption (commit 2) with the pairings and the rhythm risk above already
+  measured, then 4.3 and 4.4, then 4.5 and 4.6, plus the 2.5 remainder.
