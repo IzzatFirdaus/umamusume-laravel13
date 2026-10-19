@@ -17,7 +17,7 @@ copy display text out of these PDFs into app copy or documentation.
 
 ### `Uma Musume Career Tracker System Documentation.pdf`
 
-> Historical record of the legacy career-tracker app's documentation set, retained for context on what was built and why its systems were cut. Superseded in every extraction-relevant area: roster by `docs/data/2026-09-29-global-roster-crosscheck.md`, skills by ADR-0011, schema by `ARCHITECTURE.md`. Contains legacy display copy that fails the current C-4 lore gate in two places (page-level; see review §3B). Do not reuse its copy. Reviewed 2026-09-30: `docs/deprecated/REVIEW-2026-09-30.md` §3B.
+> Historical record of the legacy career-tracker app's documentation set, retained for context on what was built and why its systems were cut. Superseded in every extraction-relevant area: skills by ADR-0011, schema by `ARCHITECTURE.md`. Contains legacy display copy that fails the current C-4 lore gate in two places (page-level; see review §3B). Do not reuse its copy. Reviewed 2026-09-30: `docs/deprecated/REVIEW-2026-09-30.md` §3B.
 
 ### `Umamusume Progress Tracker.pdf`
 

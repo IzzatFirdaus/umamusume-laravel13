@@ -7,8 +7,7 @@ Forward note (2026-10-01): the same ADR number exists on `archive/profiles-chain
 This ADR was drafted on `feat/umamusume-detail-page` for the same `umamusume_profiles` table that
 `master` had already authorized and landed under `ADR-0012` **Decision 4**. The 2026-09-30 port resolves
 the collision in `ADR-0012`'s favour, and this paragraph is where the pieces go: its **field inventory,
-coverage table and `rl` allowlist obligation move into `ADR-0012` Decision 4 and
-`docs/data/2026-09-30-characters-source-probe.md`**; its **schema decision is moot** because master's
+coverage table and `rl` allowlist obligation move into `ADR-0012` Decision 4`**; its **schema decision is moot** because master's
 `2026_09_29_182820_create_umamusume_profiles_table.php` landed first (this branch's
 `2026_09_30_120000_…` migration and its `height_cm`/`bust_cm`/`waist_cm`/`hip_cm` columns are not what
 shipped — master stores `height`/`three_sizes_b`/`_h`/`_w`); and its **drafted `FR-A-7` text has landed in
@@ -43,7 +42,7 @@ Relates to: `PRD.md` FR-A-1 (the trainee record, which already carries `name_ja`
 FR-A-6 and `ADR-0008` (the card layer whose store action this copies), `US-1` (the detail page's shape),
 `ADR-0003` Amendment R3 (the reference-row provenance rule), `ADR-0004` (aptitude at this same grain),
 `ADR-0012` Decision 2 (images, which this narrows with a measurement), `CONSTRAINTS.md` C-4, and the
-dated measurements in `docs/data/2026-09-30-characters-source-probe.md`.
+dated measurements.
 
 ## Context
 
@@ -52,8 +51,7 @@ about the character herself are nowhere in the database: voice actor, birthday, 
 The sixth item on the user's list, Release date, **is** in the database and does not need this source.
 
 Everything below was measured on 2026-09-30 against `characters.c6676539.json` (163 rows, one per
-character, keyed by `char_id`) before a column was drawn. The probe is recorded in
-`docs/data/2026-09-30-characters-source-probe.md`, including the two curl calls and the fact that no
+character, keyed by `char_id`) before a column was drawn. The probe is recorded, including the two curl calls and the fact that no
 snapshot, database row or config entry was touched to get it.
 
 **Absence in this dataset is the key not being present.** Across all 163 rows no **top-level** value is
@@ -192,8 +190,7 @@ reads as a decision and not as an oversight.
   already romanised — Machico, Lynn — all three fields hold the *identical* string, which no separate
   English cast could produce. So the field with 26 absences is the romanised form of the same credit, and
   a page that shows only `va_ja` renders Japanese script where a Trainer on the Global client expects the
-  romanisation. Measured 2026-09-30 against `characters.c6676539.json`; the eight-row comparison is in
-  `docs/data/2026-09-30-characters-source-probe.md`.
+  romanisation. Measured 2026-09-30 against `characters.c6676539.json`; the eight-row comparison is.
 - The `A-7` text below is owed to `PRD.md`. Until it lands, the PRD understates what the app stores.
 
 ## Rejected
