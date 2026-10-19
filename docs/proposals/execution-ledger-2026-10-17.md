@@ -2991,3 +2991,112 @@ verified-by-read only. This is weaker than a green run and is recorded as such r
 - Next eligible: 4.2 (Cockpit layout, ScenarioCaps hardening, the `config/advisor.php` findings). Its
   Step 0 must check whether `CareerStatePanel.vue:130`'s N/A-without-title bug survives the Cockpit
   rewrite or closes with it - that is one of the two identifiers UiHygieneTest still reports.
+## 38. Dispatch 38 - 4.2/4.3/4.4 NOT STARTED: the bundle stayed blocked and the premises moved, 2026-10-19
+
+### Step 0 measurements
+
+- Open: HEAD dcb005c, origin/master b0b3ec9, ahead 20, merge-base clean, count equals list length.
+  HEAD:PRD.md = a1ecbe8b27eb085b766c8a10044cca10ae3c0c0f. Nothing staged.
+- Guards: UiHygiene 2 failed / 2 passed, 9 identifiers (NextDecision.php 8, CareerStatePanel.vue:130 1).
+  DocCitationParity 711. Both unchanged from Section 37.
+
+### The quiet-tree attempt FAILED - OPERATOR ACTION REQUIRED
+
+`git status --porcelain -- resources/js/ app/ config/` is NOT empty, so the rebuild branch is the
+blocked one. The three files are the SAME three every dispatch has reported, and their mtimes are
+IDENTICAL to the first observation in Section 35:
+
+- resources/js/pages/Career/BuildTarget.vue  - 2026-10-19 19:16:21
+- resources/js/pages/Career/DeckSelect.vue    - 2026-10-19 19:16:21
+- resources/js/pages/Career/LegacySelect.vue  - 2026-10-19 19:16:21
+
+Measured at 22:18, that is 3 hours 2 minutes with no write. So the blocking condition is NOT a live
+edit in progress: a peer left these three files uncommitted at 19:16 and has not touched them since.
+The bundle cannot be rebuilt because of abandoned uncommitted work, not because of a race.
+
+- Manifest mtime 2026-10-19 19:04:47 against a resources/js tip of 22:12:55 (the Section 37 commit).
+  The bundle predates 4.1's own component by three hours.
+- Consecutive dispatches with browser cases blocked: this is the fourth. Sections 35 (2.5 close),
+  36 and 37 (4.1) each reported blocked-on-stale-bundle, and this one repeats it.
+- OPERATOR MESSAGE, stated at the top of the batch close rather than buried: a quiet-tree window is
+  needed. Three files a peer left uncommitted at 19:16 block runtime verification for every
+  browser case across four dispatches. Asking that peer to commit or stash those three files unblocks
+  the entire browser gate immediately, and until then no layout work can be verified by running it.
+- The retry rule was honoured: the tree was re-checked at the end of Step 0 and had not cleared, so
+  there was no window to re-attempt. If it clears mid-dispatch the build runs first.
+
+### Two premises of this dispatch no longer hold
+
+Step 0's audit found the tree has moved under the plan in ways that change 4.2's shape:
+
+1. `resources/js/components/StatBand.vue` DOES NOT EXIST. Its history ends at peer commit b30906a
+   (chore: land peer's cockpit cutover as one coherent unit), so the ScenarioCaps clamp hardening
+   4.2 asks for has no target file - the cutover that landed it removed or absorbed it. Hardening a
+   file that is not there would have been an invented change.
+2. `ActionGrid.vue` and `AdvisorRail.vue` ALREADY EXIST and are ALREADY mounted by Cockpit.vue
+   (lines 946, 980 and 988), so two of 4.2's three "new" components are already built and adopted.
+   `StatSummary.vue` does not exist and is not needed if CareerStatePanel is kept.
+
+### Decision 1 - CareerStatePanel is KEPT, and its :130 is fixed in 4.2
+
+`StatSummary.vue` does not exist, so the "replace it" branch is not what this tree offers. The file
+is live (Cockpit.vue:29 imports it, :781 mounts it) and its markup is the Cockpit's stat grid. So
+Decision 1 takes the KEEP branch: CareerStatePanel.vue keeps its shape and the N/A-without-title bug
+at :130 is fixed in 4.2. Measured: line 130 is `<span v-if="stat.current === null">N/A</span>`, a
+visible absence with no `title`, which is exactly what UiHygieneTest reports. The fix adds the
+reason on the `title`, matching the absence pattern rather than restating it.
+
+### Decision 2 - the naming collision resolves as option (i)
+
+`git mv CareerHeader.vue CockpitIdentityCard.vue`, freeing `CareerHeader.vue` for the plan's name.
+Why (i) and not (ii): the task's own preference is (i) when CareerStatePanel is kept, which Decision 1
+settles, and (ii) would dissolve a live component into another one for no gain. The rename touches
+`Cockpit.vue:28` (the import) and `:517` (the usage), and nothing else - `git grep` showsCareerHeader
+has exactly that one importer, and `CareerSectionNav.vue` is a separate layout-level component.
+Option (iii) was explicitly ruled out by the dispatch and is not taken.
+
+### config/advisor.php - the four findings do NOT close the guard
+
+The four are `'source'` strings in the constant set: `UMAMUSUME_REFERENCE.md §1.1.5`, `§1.1.6`,
+`§1.1.1` and `§1.1.5 (qualitative only)`. They ARE shipped: `NextDecision.php:564` composes
+`' Source: '.$constant['source']` into Trainer-facing text. But fixing config/advisor.php alone does
+NOT close UiHygieneTest, because the eight identifiers the guard reports are literals in
+`app/Services/Advisor/NextDecision.php` (:241, :249, :254, :402, :429, :505), and NextDecision.php is
+a HELD file this dispatch does not name. So the advisor.php rewrite is a real partial step whose
+remaining half needs a slice that names the held file.
+
+### Peer-dirtiness still failing a test for that reason alone
+
+`resources/js/pages/Career/BuildTarget.vue` is still peer-dirty, and `CareerBuildTargetTest` reads
+that file, so it fails for the peer's uncommitted work rather than for anything this dispatch did.
+Recorded, not touched.
+
+### Why 4.2, 4.3 and 4.4 are NOT STARTED rather than partially landed
+
+Three reasons, all measured above, and the honest answer is that starting them would have produced
+the defect the dispatch rules forbid:
+
+1. Every one of the three is a LAYOUT rebuild - sticky strip, two-column rail, accordions, card
+   stacks to tables - and the only verification that means anything for a layout is running it. The
+   bundle is blocked, so a green Feature test would prove the payload and nothing about the thing
+   being changed.
+2. Cockpit.vue's layout is the subject of the peer's own recent cockpit cutover (b30906a, which also
+   removed StatBand.vue). Rebuilding that same page from this side, on top of the peer's in-flight
+   cockpit work, is how two sessions produce one broken screen.
+3. Two of 4.2's inputs are absent or already built (StatBand.vue gone; ActionGrid/AdvisorRail already
+   adopted), so the plan's file list describes a tree that no longer exists.
+
+Nothing was started, so nothing is partial and nothing is carried forward as half-done. What this
+section contributes is the two decisions pre-made, the premise correction, and the blocker.
+
+### Close
+
+- Ahead count at close: origin/master b0b3ec9, count 21, list 21 (this section's own commit included).
+- DocCitationParity: 711 before and after this append; no rise.
+- Peer status at close: unchanged. No new peer commit since f5ea2f6; the same three files, last
+  written 19:16:21.
+- Bundle mtime at close: 2026-10-19 19:04:47 (unchanged).
+- Next eligible: 4.2, but ONLY after the quiet-tree window opens - otherwise it lands unverified. Its
+  Step 0 must re-check StatBand.vue (absent) and whether the peer's cockpit cutover already did the
+  sticky/rail/accordion work, so the slice does not redo it. Then 4.3, 4.4, then 4.5 + 4.6. The 2.5
+  remainder is the peer-dirty LegacySelect.vue wrappers, still the peer's to land.
