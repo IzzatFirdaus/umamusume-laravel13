@@ -53,7 +53,7 @@ exists is exactly:
 
 ```text
 ❌ UNVERIFIED: No current source found.
-```text
+```
 
 ...which is itself useful: it locks neutral tints in as the durable design instead
 of a placeholder awaiting drift.
@@ -72,7 +72,7 @@ correction must propagate to every copy of the literal).
 Use neutral tints for the three unverified mood/condition pills.
 Do not present unverified colours as measured client values anywhere
 (tokens, mockups, prototypes, or shipped CSS).
-```text
+```
 
 ---
 

@@ -225,7 +225,7 @@ Every task satisfies all of these. Exact values, verbatim from `CONSTRAINTS.md`,
 git -C /d/Projects/umamusume-laravel13 branch --show-current
 git -C /d/Projects/umamusume-laravel13 status --porcelain
 git -C /d/Projects/umamusume-laravel13 rev-parse HEAD
-```text
+```
 
 Paste all three outputs verbatim into the slice record. The peer session's modified and untracked files are their work: none of it goes in your commits.
 
@@ -236,7 +236,7 @@ REQUIRED SUB-SKILL: `superpowers:using-git-worktrees`. Run it rather than hand-r
 ```bash
 git -C /d/Projects/umamusume-laravel13 worktree add \
   ../umamusume-laravel13-catalog-roster -b feat/catalog-roster-and-trainee-selector b387e07
-```text
+```
 
 - [ ] **Step 3: Wire the worktree so the gates can run**
 
@@ -250,7 +250,7 @@ cp ../umamusume-laravel13/docs/requests/2026-09-29-catalog-roster-and-trainee-se
    ../umamusume-laravel13/docs/requests/2026-09-29-catalog-roster-and-trainee-selector-plan.md \
    docs/requests/
 ls -l docs/requests/2026-09-29-catalog-roster-and-trainee-selector*.md
-```text
+```
 
 Then provision the gitignored files the suite reads. `git worktree add` checks out **tracked** files only, and `.gitignore`'s AI-agent-tooling block ignores `/.agents` â€” so a fresh worktree has no `.agents/skills.json`, while `SkillRegistry::__construct()` reads exactly `base_path('.agents/skills.json')` and `SkillExecutor::loadConfig()` reads `.agents/config.json`. Without that directory, six of the seven tests in `SkillAutomationTest` fail with `Failed asserting that ... contains 'Route Inspector'`, and none of it has anything to do with this plan.
 
@@ -259,7 +259,7 @@ cp ../umamusume-laravel13/.env .env
 cp -r ../umamusume-laravel13/.agents .agents
 npm ci
 composer install --no-interaction
-```text
+```
 
 Expected: both Markdown files present from the step above; `.agents/skills.json` exists; `npm ci` reports added packages with no `ERESOLVE`; `composer install` completes. Never run `npm audit fix` or `composer update` â€” C-8 forbids dependency movement.
 
@@ -267,14 +267,14 @@ If Step 4 still shows red after this, hunt for another gitignored file the suite
 
 ```bash
 grep -rnE "base_path\('\.[^']+'\)|storage_path\('\.[^']+'\)" app/ | head
-```text
+```
 
 - [ ] **Step 4: Prove the gates are green before you start**
 
 ```bash
 php artisan test --compact
 vendor/bin/phpstan analyse --no-progress --memory-limit=1G
-```text
+```
 
 Expected: both green at `b387e07`. Measured here 2026-09-29: **`6 failed, 2 skipped, 364 passed`** before `.agents` was copied, all six in `SkillAutomationTest`, and PHPStan **`[OK] No errors`** throughout â€” so the red was the provisioning gap in Step 3, not a dirty base. After Step 3's copy the suite must be green; if it is not, name the failing tests and report before writing any code.
 
@@ -287,7 +287,7 @@ Expected: both green at `b387e07`. Measured here 2026-09-29: **`6 failed, 2 skip
 ```bash
 touch database/scratch-catalog.sqlite
 git check-ignore -v database/scratch-catalog.sqlite
-```text
+```
 
 Expected: `check-ignore` prints a matching `.gitignore` rule for `database/*.sqlite`. If it prints nothing, stop: the file would be committable, and a second SQLite file in the repo is not an acceptable outcome.
 
@@ -299,7 +299,7 @@ the approval note over the `gametora-characters` entry in `config/uma.php` recor
 curl -s -o /dev/null -w 'app UA: %{http_code} %{size_download}B\n' \
   -A 'UmamusumeTrainerCompanion/0.2 (personal local tool)' \
   'https://gametora.com/data/umamusume/character-cards.679f7c2e.json'
-```text
+```
 
 Measured 2026-09-29 against this tree: **`app UA: 200 251242B`** â€” the full document, byte-for-byte the size of the snapshot already on disk, so the `679f7c2e` hash in the config has not rotated either. No `Accept` header was needed and an empty UA also returned 200. Tasks 8 and 9 are therefore runnable as written, and `SourceFetcher` needs no header change.
 
@@ -343,13 +343,13 @@ it('reads the Japanese name from the key the export actually publishes', functio
     // stores a null, and the detail page loses the Japanese name US-1 promises.
     expect($record['name_ja'])->toBe('ã‚´ãƒ¼ãƒ«ãƒ‰ã‚·ãƒƒãƒ—');
 });
-```text
+```
 
 - [ ] **Step 2: Run it and watch it fail**
 
 ```bash
 php artisan test --compact tests/Feature/GametoraCharacterParserTest.php
-```text
+```
 
 Expected: FAIL, `Failed asserting that null is identical to 'ã‚´ãƒ¼ãƒ«ãƒ‰ã‚·ãƒƒãƒ—'.` If it passes, stop â€” you are not on `b387e07`.
 
@@ -360,7 +360,7 @@ Replace `parse()`'s `name_ja` line:
 ```php
                 // GameTora publishes `name_jp`; `name_ja` is this app's own column name.
                 'name_ja' => $this->textOrNull($card['name_jp'] ?? null),
-```text
+```
 
 Do **not** write `$card['name_jp'] ?? $card['name_ja'] ?? null`. The fallback chain silently accepts a body that carries neither key, which is how this defect went unnoticed: a null reads as "the source has no Japanese name" instead of "you are reading the wrong key".
 
@@ -380,7 +380,7 @@ Prove each rename happened instead of assuming it:
 ```bash
 grep -c '"name_ja"' tests/Fixtures/gametora-character-cards.sample.json   # expect 0
 grep -c '"name_jp"' tests/Fixtures/gametora-character-cards.sample.json   # expect 4
-```text
+```
 
 If the file's fourth row is a different `card_id` than the table above, read the file and use the name that belongs to the `char_id` actually in that row. Do not invent a fourth name to make the count work.
 
@@ -390,13 +390,13 @@ In `tests/Feature/GametoraCharacterParserTest.php`, extend `it('reads the commit
 
 ```php
         ->and($records[0]['name_ja'])->toBe('ã‚¹ãƒšã‚·ãƒ£ãƒ«ã‚¦ã‚£ãƒ¼ã‚¯')
-```text
+```
 
 - [ ] **Step 6: Run the file green**
 
 ```bash
 php artisan test --compact tests/Feature/GametoraCharacterParserTest.php tests/Feature/FetchPipelineTest.php tests/Feature/CatalogTest.php
-```text
+```
 
 Expected: all pass. `CatalogTest`'s `'shows a detail page with Japanese name and provenance'` test sets `name_ja` explicitly through the factory, so it never exercised the parser and stays green either way â€” which is worth noting in the KI entry as a second reason the defect survived: the catalog test seeded the value instead of fetching it.
 
@@ -420,7 +420,7 @@ GameTora publishes name_jp; the parser read name_ja, so every fetched trainee
 stored a null Japanese name and PRD US-1's detail-page requirement went unmet.
 The sample fixture carried the same wrong key as null, and the one catalog test
 that asserts a Japanese name seeded it directly, so nothing caught it."
-```text
+```
 
 ---
 
@@ -465,21 +465,21 @@ Insert after FR-A-5 in `PRD.md`:
   among that trainee's cards. Only cards carrying a Global release date are stored;
   a trainee with no Global card does not appear in the catalog. A card confirmed by
   the Tier B source alone is stored flagged and hidden unless asked for.
-```text
+```
 
 Append to FR-C-1 in `PRD.md` without disturbing its existing wording:
 
 ```text
 , and since ADR-0008 an optional reference to the `CharacterCard` the run was
 started on. `umamusume_id` remains the required owner of a run.
-```text
+```
 
 Extend the US-1 acceptance cell in `PRD.md`:
 
 ```text
 `GET /umamusume` lists each Global-released trainee with her cards nested; each
 card row shows its client title, rarity and Global release date.
-```text
+```
 
 - [ ] **Step 3: Amend `ARCHITECTURE.md` and its digest**
 
@@ -492,7 +492,7 @@ In `docs/research-scratch/DESIGN-CORPUS.md` Â§5, extend the D-30 "Render only 
 ```text
 `CharacterCard` (card_id, title, rarity, global_release_date, is_debut_form,
 unconfirmed), `TrainingRun` (`character_card_id`)
-```text
+```
 
 Leave D-30's opening sentence untouched â€” this entry is the record of a scope question that was asked and answered, which is the rule's whole purpose.
 
@@ -503,7 +503,7 @@ grep -n "A-6\|ADR-0008" PRD.md
 grep -rn "ADR-0008" docs/adr/ ARCHITECTURE.md ARCHITECTURE-ESSENTIALS.md
 grep -n "character_cards" ARCHITECTURE.md ARCHITECTURE-ESSENTIALS.md docs/design-research/CONSTRAINTS.md
 grep -c "^# ADR-0008" docs/adr/0008-character-card-catalog-layer.md
-```text
+```
 
 Expected: the FR-A-6 line, the digest entries, the D-30 entry, and exactly one ADR claiming number 0008. If a second file claims 0008, stop: the concurrent session took the number.
 
@@ -511,7 +511,7 @@ Expected: the FR-A-6 line, the digest entries, the D-30 entry, and exactly one A
 
 ```bash
 php artisan test --compact tests/Feature/LoreGateParityTest.php tests/Feature/RenderedCopyHygieneTest.php
-```text
+```
 
 Expected: green. `make lore` runs over tracked Markdown in Task 13's sweep; this pair is the fast local check.
 
@@ -527,7 +527,7 @@ a scope question rather than a migration. The owner ruled to build it, including
 a card reference on the run. ADR-0008 records the decision and keeps it clear of
 PRD 6.9 and the declined ADR-0005: this is the costume-card table, not the
 support-card database."
-```text
+```
 
 ---
 
@@ -610,13 +610,13 @@ it('deletes a trainee\'s cards with her', function (): void {
 it('stores the source character link the parser has always emitted', function (): void {
     expect(Schema::hasColumn('umamusume', 'external_ref'))->toBeTrue();
 });
-```text
+```
 
 - [ ] **Step 2: Run it and confirm it fails**
 
 ```bash
 php artisan test --compact tests/Feature/CharacterCardSchemaTest.php
-```text
+```
 
 Expected: FAIL â€” `Class "App\Models\CharacterCard" not found`, and the `external_ref` column assertion false.
 
@@ -629,7 +629,7 @@ php artisan make:model CharacterCard --factory --no-interaction
 php artisan make:enum CardRarity --no-interaction || php artisan make:class Enums/CardRarity --no-interaction
 php artisan make:migration add_external_ref_to_umamusume_table --no-interaction
 php artisan make:migration create_character_cards_table --no-interaction
-```text
+```
 
 If `make:enum` is unavailable in this Laravel version, `make:class` is the fallback and the file must still declare an `enum`. Rename the two generated migrations to the timestamps in the Files block so they order after the existing `2026_09_27_*` set.
 
@@ -667,7 +667,7 @@ return new class extends Migration
         });
     }
 };
-```text
+```
 
 - [ ] **Step 5: Write the card table migration**
 
@@ -737,7 +737,7 @@ return new class extends Migration
         Schema::dropIfExists('character_cards');
     }
 };
-```text
+```
 
 No explicit index on `umamusume_id` beyond the FK: the table holds ~107 rows (measured 2026-09-29) and the catalog reads it in one `whereIn`. Add the index when the roster is a few thousand rows, not before.
 
@@ -768,7 +768,7 @@ enum CardRarity: int
         return str_repeat('â˜…', $this->value);
     }
 }
-```text
+```
 
 - [ ] **Step 7: Add the labels and extend the enum test**
 
@@ -780,7 +780,7 @@ enum CardRarity: int
         'TwoStar' => 'Two stars',
         'ThreeStar' => 'Three stars',
     ],
-```text
+```
 
 Then in `tests/Feature/EnumLabelTest.php`: add `use App\Enums\CardRarity;`, widen the closure parameter type of `it('labels every case of every rendered enum in human words')` to `AliasLanguage|MatchTier|ReleaseStatus|RunStatus|SkillAcquisition|CardRarity`, and append `...CardRarity::cases(),` to that test's `->with()` dataset. This **adds** coverage; deleting or skipping any existing case is a Floor violation.
 
@@ -852,7 +852,7 @@ class CharacterCard extends Model
         ];
     }
 }
-```text
+```
 
 Amendment A1 put five new columns on the migration and only the model's docblock and `#[Fillable]` list absorbed them; two of them also need a cast, which is why they are in the block above. `fetched_at` must be `'datetime'`: without it the attribute returns a string, and Task 11 Step 5's `$card->fetched_at->timezone(config('uma.display_timezone'))->format('M j, Y')` calls `timezone()` on that string. `is_manual` must be `'boolean'` so the store's guard is an explicit truth test rather than a bet on how this driver represents a tinyint. Assert both in `CharacterCardSchemaTest`: a cast nobody asserts on is a cast that silently regresses.
 
@@ -868,7 +868,7 @@ In `app/Models/Umamusume.php`: add `@property string|null $external_ref` and `@p
     {
         return $this->hasMany(CharacterCard::class);
     }
-```text
+```
 
 `HasMany` and `Collection` are already imported there.
 
@@ -941,7 +941,7 @@ class CharacterCardFactory extends Factory
         return $this->state(fn (): array => ['unconfirmed' => false]);
     }
 }
-```text
+```
 
 `#[Fillable]` does not stop a factory writing unlisted columns â€” factories are unguarded â€” so a factory is never proof a column is mass-assignable. Task 5 proves that with `Model::create()`.
 
@@ -952,7 +952,7 @@ php artisan test --compact tests/Feature/CharacterCardSchemaTest.php tests/Featu
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan migrate:fresh --seed --no-interaction
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan migrate:rollback --step=2 --no-interaction
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan migrate --no-interaction
-```text
+```
 
 Expected: tests pass; `migrate:fresh --seed` succeeds **on the scratch file only** (C-5, and GATE-REGISTRY marks the shared dev file destructive); rollback drops both new migrations without error; re-migrating recreates them. Never aim these at `database/database.sqlite`.
 
@@ -996,7 +996,7 @@ rather than trusting this step's own prose that they landed.
 vendor/bin/pint --dirty --format agent
 vendor/bin/phpstan analyse --no-progress --memory-limit=1G
 php artisan test --compact
-```text
+```
 
 Expected: Pint clean, PHPStan zero errors, full suite green.
 
@@ -1014,7 +1014,7 @@ idempotent by identity rather than by name, and attach through the new
 umamusume.external_ref the parser has emitted from the start but nothing stored.
 A card without a Global date is not a row here, and one the Tier B source stands
 alone behind is stored flagged."
-```text
+```
 
 ---
 
@@ -1076,13 +1076,13 @@ it('still creates a run with only a trainee', function (): void {
 
     expect(TrainingRun::first()->character_card_id)->toBeNull();
 });
-```text
+```
 
 - [ ] **Step 2: Run, confirm failure**
 
 ```bash
 php artisan test --compact tests/Feature/CharacterCardSchemaTest.php
-```text
+```
 
 Expected: FAIL on an unknown `character_card_id` column in `training_runs`, and on `characterCard` being undefined.
 
@@ -1126,7 +1126,7 @@ return new class extends Migration
         });
     }
 };
-```text
+```
 
 `umamusume_id` keeps its NOT NULL FK: the card names a form, the trainee still owns the run, and every existing reader (`runs.index`, `runs.show`, the export, `ApiV1`) keeps working untouched.
 
@@ -1142,7 +1142,7 @@ In `app/Models/TrainingRun.php`: append `'character_card_id'` to `TrainingRun`'s
     {
         return $this->belongsTo(CharacterCard::class);
     }
-```text
+```
 
 Add `use Illuminate\Database\Eloquent\Relations\BelongsTo;` if the file does not already import it.
 
@@ -1160,7 +1160,7 @@ In `app/Http/Requests/StoreTrainingRunRequest.php`, immediately after the `umamu
              */
             'character_card_id' => ['nullable', 'integer', Rule::exists('character_cards', 'id')
                 ->where('umamusume_id', $this->input('umamusume_id'))],
-```text
+```
 
 `Rule` is already imported in `StoreTrainingRunRequest`. Add no controller-side check: the Floor bans business logic in controllers, and `TrainingRunController::store()` stays exactly as it is.
 
@@ -1171,7 +1171,7 @@ php artisan test --compact tests/Feature/CharacterCardSchemaTest.php tests/Featu
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan migrate --no-interaction
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan migrate:rollback --step=1 --no-interaction
 vendor/bin/pint --dirty --format agent && vendor/bin/phpstan analyse --no-progress --memory-limit=1G
-```text
+```
 
 Expected: all green â€” including `TrainingRunTest`'s `'creates a run and renders logged turns in order'` test, which posts no `character_card_id`. Its passing is the proof the change is additive.
 
@@ -1183,7 +1183,7 @@ git commit -m "feat(http,schema): let a run name the form it started on
 FR-C-1 as amended by ADR-0008. The column is nullable so a pre-card run is not a
 run with missing data, and the exists rule carries the join to the submitted
 trainee so a mismatched pair never reaches a row."
-```text
+```
 
 ---
 
@@ -1226,7 +1226,7 @@ Use the export's own values, not invented ones (G-16: every name must be a real 
   {"char_id":1127,"card_id":112701,"name_en":"Fenomeno","name_jp":"ãƒ•ã‚§ãƒŽãƒ¼ãƒ¡ãƒŽ","title":"Black Flame of Righteousness","rarity":3,"release":"2025-04-21","release_en":null},
   {"char_id":1127,"card_id":112702,"name_en":"Fenomeno","name_jp":"ãƒ•ã‚§ãƒŽãƒ¼ãƒ¡ãƒŽ","title":"Violet Flame of Fortitude","rarity":3,"release":"2026-08-31","release_en":null}
 ]
-```text
+```
 
 Fenomeno is here twice with no `release_en` on either form, so she must yield **zero** records: the fixture keeps the brief's impossible `Fenomeno` case (erratum E-6) as a permanent guard on the Global-only rule.
 
@@ -1371,13 +1371,13 @@ it('treats a card id as a string or an int without losing its identity', functio
         ->and($records[0]['rarity'])->toBe(2)
         ->and($records[0]['is_debut_form'])->toBeTrue();
 });
-```text
+```
 
 - [ ] **Step 3: Run, confirm failure**
 
 ```bash
 php artisan test --compact tests/Feature/CharacterCardParserTest.php
-```text
+```
 
 Expected: FAIL â€” class `GametoraCharacterCardParser` not found.
 
@@ -1433,7 +1433,7 @@ In `GametoraCharacterParser.php`, replace `parse()`'s inline debut loop with a `
 
         return trim($value);
     }
-```text
+```
 
 Change `parse()`'s inline debut loop to the single `$debutForms = self::debutForms($cards);` call, and its two inline date parses to `self::dateOrNull(...)`. Leave `textOrNull` private: only this class needs it.
 
@@ -1441,7 +1441,7 @@ Change `parse()`'s inline debut loop to the single `$debutForms = self::debutFor
 
 ```bash
 php artisan test --compact tests/Feature/GametoraCharacterParserTest.php tests/Feature/GametoraAptitudeTest.php tests/Feature/FetchPipelineTest.php tests/Feature/CrossReferenceMatcherTest.php
-```text
+```
 
 Expected: all green. That is the refactor's bracket: identical output, one definition.
 
@@ -1469,7 +1469,7 @@ interface CharacterCardSourceParser
      */
     public function parse(string $body): array;
 }
-```text
+```
 
 - [ ] **Step 7: Write the parser**
 
@@ -1558,13 +1558,13 @@ final class GametoraCharacterCardParser implements CharacterCardSourceParser
         return $records;
     }
 }
-```text
+```
 
 - [ ] **Step 8: Run green**
 
 ```bash
 php artisan test --compact tests/Feature/CharacterCardParserTest.php tests/Feature/GametoraCharacterParserTest.php
-```text
+```
 
 Expected: all pass. If the count is not 7, print the records (`dump($records)`, then delete the dump) and compare against the fixture. Do not adjust the assertion to match the output.
 
@@ -1584,7 +1584,7 @@ every card with a Global release date and nothing else, and both parsers now
 share one debut derivation so the catalog and a flagged debut form cannot
 disagree. Fenomeno sits in the fixture with no Global date on either form: she
 must yield nothing, which holds the Global-only rule down with a test."
-```text
+```
 
 ---
 
@@ -1797,7 +1797,7 @@ it('records the declared source in config with its own parser', function (): voi
         ->toBe(GametoraCharacterCardParser::class)
         ->and(config('uma.sources.gametora-character-cards.records'))->toBe('cards');
 });
-```text
+```
 
 `app(PipelineRunner::class)` rather than hand-building it: the container resolves all three constructor arguments, and a test that `new`s its own collaborators is asserting on its own wiring.
 
@@ -1805,7 +1805,7 @@ it('records the declared source in config with its own parser', function (): voi
 
 ```bash
 php artisan test --compact tests/Feature/CharacterCardFetchTest.php
-```text
+```
 
 Expected: FAIL â€” `UpsertCharacterCard` not found, and `uma.sources.gametora-character-cards` null.
 
@@ -1879,7 +1879,7 @@ final class UpsertCharacterCard
         });
     }
 }
-```text
+```
 
 `unconfirmed` is deliberately absent from the second argument: a fetch reports what the source says and must not clear a human cross-check verdict. Task 8 owns that column.
 
@@ -1887,7 +1887,7 @@ final class UpsertCharacterCard
 
 ```bash
 php artisan test --compact tests/Feature/CharacterCardFetchTest.php
-```text
+```
 
 Expected: the action-level tests pass. The runner and config tests still fail; that is Steps 5-7.
 
@@ -1900,7 +1900,7 @@ curl -sS --compressed \
   -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' \
   -H 'Accept: application/json' \
   'https://gametora.com/data/manifests/umamusume.json' | grep -o '"character-cards":"[^"]*"'
-```text
+```
 
 Expected: `"character-cards":"679f7c2e"`, the hash already in the config. If it now differs, use the new hash in **both** source entries and record the date you read it.
 
@@ -1934,7 +1934,7 @@ Add `use App\Services\DataPipeline\Parsers\GametoraCharacterCardParser;` beside 
             'timezone' => 'Asia/Tokyo',
             'records' => 'cards',
         ],
-```text
+```
 
 - [ ] **Step 7: Add the cards branch to the runner**
 
@@ -1944,7 +1944,7 @@ In `app/Services/DataPipeline/PipelineRunner.php`: add `private readonly UpsertC
         if (($sourceConfig['records'] ?? 'umamusume') === 'cards') {
             return $this->runCards($sourceKey, $sourceConfig, $body, $snapshotPath);
         }
-```text
+```
 
 then add the method:
 
@@ -2011,7 +2011,7 @@ then add the method:
 
         return $counts;
     }
-```text
+```
 
 Add imports: `App\Actions\UpsertCharacterCard`, `App\Models\CharacterCard`, `App\Models\Umamusume`, `App\Services\DataPipeline\Contracts\CharacterCardSourceParser`.
 
@@ -2019,7 +2019,7 @@ Add imports: `App\Actions\UpsertCharacterCard`, `App\Models\CharacterCard`, `App
 
 ```bash
 php artisan test --compact tests/Feature/CharacterCardFetchTest.php tests/Feature/FetchPipelineTest.php tests/Feature/CatalogCacheRenderTest.php tests/Feature/ReviewQueueTest.php
-```text
+```
 
 Expected: all pass. The three KI-2 tests are the guard on the `cached()` path this branch's version bump feeds, and `ReviewQueueTest` proves the character path still routes to review untouched.
 
@@ -2036,7 +2036,7 @@ Cards key on the source's own card id and attach through external_ref, so they
 bypass the match stage entirely: FR-B-3's review queue exists because names are
 ambiguous between servers, and a card id is not. An is_manual trainee blocks her
 cards too, and a re-fetch cannot clear a cross-check verdict it did not write."
-```text
+```
 
 ---
 
@@ -2077,13 +2077,13 @@ curl -sS --compressed -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' \
   'https://game8.co/games/Umamusume-Pretty-Derby/archives/535926' \
   -o research-scratch/data/html/game8-characters-2026-09-29.html
 wc -c research-scratch/data/json/character-cards.json research-scratch/data/html/*-2026-09-29.html
-```text
+```
 
 Expected: the JSON around 251 kB with 268 rows, and both HTML files far above 10 kB. Verify the export rather than trusting the size:
 
 ```bash
 php -r '$r=json_decode(file_get_contents("research-scratch/data/json/character-cards.json"),true); printf("rows=%d global=%d trainees=%d\n",count($r),count(array_filter($r,fn($c)=>is_string($c["release_en"]??null))),count(array_unique(array_column(array_filter($r,fn($c)=>is_string($c["release_en"]??null)),"char_id"))));'
-```text
+```
 
 Expected: `rows=268 global=107 trainees=68`. A different number is not a plan bug, it is the roster having moved since 2026-09-29: stop and re-report the counts before anything downstream quotes 68 and 107.
 
@@ -2103,7 +2103,7 @@ Note before you start: `umamusu.wiki` is Tier A but is not infallible â€” a
 
 ```text
 | card_id | GameTora title | Game8 title | umamusu.wiki title | GameTora date | Tier A date | rarity | verdict |
-```text
+```
 
 Classify with this rule and no other judgement:
 
@@ -2115,7 +2115,7 @@ $verdict = match (true) {
 };
 // A date or rarity that disagrees with either witness downgrades the row to
 // 'conflict' regardless of how many pages carry the card at all.
-```text
+```
 
 Compare titles on the bracket-stripped, case-folded form and say so in the file's method note: a wiki that prints `Special Dreamer` and GameTora that prints `[Special Dreamer]` are making the same claim, and comparing raw strings would report 107 false conflicts. Keep the script a dumb formatter: it compares strings, classifies, prints. It fetches nothing and writes nothing to the database.
 
@@ -2145,7 +2145,7 @@ Expect real conflicts. Each becomes a row in the file's conflict-log section, ne
 ```bash
 grep -c '^| ' docs/data/roster-crosscheck-table.md
 grep -c 'two-source-confirmed' docs/data/2026-09-29-global-roster-crosscheck.md
-```text
+```
 
 Expected: the row count equals 107 (plus one header row per table, so adjust by the headers you wrote). If it does not, the fixture or the extraction dropped a card; find it before continuing rather than shipping a short table.
 
@@ -2159,7 +2159,7 @@ git commit -m "docs(data): two-source cross-check of all 107 Global cards
 SOURCE-OF-TRUTH 5:152 will not let a Tier B field become app data on its own
 say-so. Every card, every name, date, rarity and title, against umamusu.wiki and
 Game8, with each disagreement kept as a row rather than resolved by preference."
-```text
+```
 
 ---
 
@@ -2188,7 +2188,7 @@ The load-bearing finding, restated because it is the premise of the owner's ruli
 ls database/database.sqlite 2>/dev/null || echo "absent, as expected for a fresh worktree"
 php artisan migrate --seed --no-interaction
 php artisan tinker --execute 'echo Umamusume::count()." trainees, ".App\Models\Skill::count()." skills, ".App\Models\Scenario::count()." scenarios";'
-```text
+```
 
 Expected: the file is absent before the command; then `2 trainees, 10 skills, ...` â€” the two seeded illustrative rows `UmamusumeSeeder` provides, which is the precondition Step 2's arithmetic depends on. If the count is anything other than `2`, stop and work out why before fetching: every number in Steps 2, 4 and 7 is derived from exactly two rows existing.
 
@@ -2199,7 +2199,7 @@ rm -f database/probe-absent.sqlite
 DB_DATABASE="$PWD/database/probe-absent.sqlite" php artisan migrate --force   # INFO Running migrationsâ€¦ DONE
 ls -l database/probe-absent.sqlite                                            # 225280 bytes, created for us
 rm -f database/probe-absent.sqlite
-```text
+```
 
 Older Laravel errored with "database file does not exist", and a `touch` here is harmless â€” but do not add one on the strength of that older behaviour without re-running the probe, and do not let a reviewer treat its absence as a defect. If a future framework bump makes the connector strict again, this probe is the thing that fails first and the one-line fix is obvious from its output.
 
@@ -2209,7 +2209,7 @@ If the file unexpectedly **does** exist (someone pointed `DB_DATABASE` at an abs
 
 ```bash
 php artisan uma:fetch gametora-characters
-```text
+```
 
 Expected, in shape: `gametora-characters: 2 updated, 0 created, 0 skipped (manual), 133 to review.`
 
@@ -2223,7 +2223,7 @@ If you see `68 to review` instead of 133, the parser gained a filter and US-2 ne
 
 ```bash
 php artisan tinker --execute 'echo Umamusume::whereNotNull("name_ja")->count()." of ".Umamusume::count();'
-```text
+```
 
 Expected: `2 of 2`. Only the two Exact-matched trainees exist at this point; the other 66 arrive in Step 4. This is the early probe that the key fix works on live data at all, on the two rows the fetch could already reach. The full measurement is Step 7's `68 of 68`, which is the number that matters for US-1, and a `0 of 2` here means the parser is still reading `name_ja`.
 
@@ -2262,7 +2262,7 @@ printf("pending %d | global %d | confirmed %d | FAILED %d | trainees %d | still 
     Umamusume::count(), MatchCandidate::where("status", "Pending")->count());
 if ($failed !== []) { echo implode("\n", $failed) . "\n"; }
 '
-```text
+```
 
 Expected: `pending 133 | global 66 | confirmed 66 | FAILED 0 | trainees 68 | still queued 67`.
 
@@ -2356,7 +2356,7 @@ it('leaves a candidate Pending when its verdict throws, so a re-run retries it',
         ->and(App\Models\Umamusume::query()->count())->toBe(0)
         ->and(App\Models\DataSource::query()->count())->toBe(0);
 });
-```text
+```
 
 Run all three, and file **the next free KI** in `KNOWN-ISSUES.md` against the second test, re-derived by the same run-time recipe Task 2 Step 7 uses (KI-25 is the expected number now that trunk holds KI-21 and KI-22 and this branch holds KI-23 and KI-24): nothing in `ResolveMatchCandidate` refuses a verdict on an already-resolved candidate, so a replayed POST to `review.resolve` â€” a back-button double-submit â€” silently forks a catalog row. The review UI hides resolved candidates, so it is not normally reachable, but this plan is the first thing to drive the action at volume. The fix is a one-line guard (no-op or reject when `status !== Pending`) and belongs to a separate slice, not to Task 9; record the deferral here rather than expanding this task's blast radius mid-run.
 
@@ -2368,7 +2368,7 @@ $dupes = App\Models\Umamusume::selectRaw("name, count(*) c")->groupBy("name")->h
 echo $dupes->isEmpty() ? "no duplicated trainee names\n" : $dupes."\n";
 echo "slugs ending in a collision suffix: " . App\Models\Umamusume::where("slug", "like", "%-[0-9]")->count() . "\n";
 '
-```text
+```
 
 Expected: `no duplicated trainee names` and `0` collision-suffixed slugs. Either nonzero means the promotion pass ran twice over overlapping rows; stop, find which names, and rule on it before Step 5 attaches cards to the wrong twin.
 
@@ -2391,7 +2391,7 @@ Umamusume::whereNotNull("name_ja")->get()->each(function ($u) use (&$made) {
 });
 echo "added {$made}, total ".UmamusumeAlias::where('language', 'Japanese')->count();
 '
-```text
+```
 
 Expected: 68 Japanese aliases. Without them the catalog page's **server-side** search cannot find `ã‚¹ãƒšã‚·ãƒ£ãƒ«ã‚¦ã‚£ãƒ¼ã‚¯`, because `match_key` is built from the English name (`specialweek`) and the search `when()` clause in `CatalogController::index()` ORs only `match_key` and `alias`. The selector finds katakana through its own payload; this closes the same capability on the server side, which is what FR-A-3 and US-1 describe. `AliasLanguage::Japanese` is the enum behind the `'Japanese'` string â€” use `AliasLanguage::Japanese->value` if the raw string reads as an untyped claim.
 
@@ -2400,7 +2400,7 @@ Expected: 68 Japanese aliases. Without them the catalog page's **server-side** s
 ```bash
 php artisan uma:fetch gametora-character-cards
 php artisan tinker --execute 'echo CharacterCard::count();'
-```text
+```
 
 Expected: `gametora-character-cards: 0 updated, 107 created, 0 skipped (manual or unresolved), 0 to review.` and `107`. Any nonzero `skipped` means a `char_external_ref` failed to resolve; find which cards before continuing:
 
@@ -2413,7 +2413,7 @@ $missing = array_values(array_filter(
 ));
 echo count($missing)." unresolved char refs";
 '
-```text
+```
 
 Prefer the saved snapshot over a re-downloaded URL for that check â€” `SourceFetcher` wrote it under `storage/app/private/snapshots/gametora-character-cards/<date>/<hash>.html`, and reading the snapshot is what `uma:reparse` exists for. Fetching a second copy inside a verification step makes the step depend on the network.
 
@@ -2435,7 +2435,7 @@ echo "trainees with exactly one debut: ".Umamusume::has("cards")->get()
     ->fn($u) => $u->cards->where("is_debut_form", true)->count() === 1)->count()."\n";
 echo "cards dated after today:   ".CharacterCard::where("global_release_date",">",now()->toDateString())->count()."\n";
 '
-```text
+```
 
 Fill and paste into the slice record:
 
@@ -2462,7 +2462,7 @@ printf("pending %d | resolved %d | rejected %d\n",
     App\Models\MatchCandidate::where("status","Confirmed")->count(),
     App\Models\MatchCandidate::where("status","Rejected")->count());
 '
-```text
+```
 
 Expected: `pending 67 | resolved 66 | rejected 0`.
 
@@ -2484,7 +2484,7 @@ $stored = CharacterCard::pluck("card_id")->all();
 $jpOnly = array_column(array_udiff($rows, $withDate, fn ($r) => $r["card_id"]), "card_id");
 echo "JP-only card ids present in the table: ".count(array_intersect($jpOnly, $stored))."\n";
 '
-```text
+```
 
 Expected: the two counts equal (107 = 107) and the leak count is `0`. Resolve `PLACEHOLDER` to the real snapshot filename with `ls storage/app/private/snapshots/gametora-character-cards/` first; `uma:reparse` reads the same path, so this is the pipeline's own evidence rather than a fresh download. A nonzero leak count is the single most important failure in this plan: it means the Global-only gate is not where everyone thinks it is.
 
@@ -2497,7 +2497,7 @@ CharacterCard::query()->update(["unconfirmed" => false]);
 if ($notConfirmed !== []) { CharacterCard::whereIn("card_id", $notConfirmed)->update(["unconfirmed" => true]); }
 echo "flagged ".CharacterCard::where("unconfirmed", true)->count()." of ".CharacterCard::count();
 '
-```text
+```
 
 Expected: `flagged N of 107`. Put the list of `N` card ids in the slice record alongside the verdict table that produced it. If N is `0`, state which second source confirmed each row â€” "nothing unverified" is a claim needing evidence like any other, and it is the kind of number that gets cited later.
 
@@ -2517,7 +2517,7 @@ way of ResolveMatchCandidate, the same action /review drives, because FR-B-3 let
 only Exact and Alias auto-promote and a name the catalog has never seen is None.
 No bulk-promote command: that would be an uncited class and a button on the
 guarantee that the engine never guesses."
-```text
+```
 
 ---
 
@@ -2672,13 +2672,13 @@ it('keeps the card tree intact through the database cache store', function (): v
     test()->get('/umamusume')->assertOk()->assertSee('[Full-Color Fangirling]');
     test()->get('/umamusume')->assertOk()->assertSee('[Full-Color Fangirling]');
 });
-```text
+```
 
 - [ ] **Step 2: Run, confirm failure**
 
 ```bash
 php artisan test --compact tests/Feature/CatalogRosterTreeTest.php
-```text
+```
 
 Expected: FAIL â€” no card titles in the output, no form counts, and `Japan One` present on the unfiltered default.
 
@@ -2700,7 +2700,7 @@ In `CatalogController::index()`. First the status resolution, replacing the two 
             default => ReleaseStatus::GlobalReleased,
         };
         $showUnconfirmed = $request->query('show_unconfirmed') === '1';
-```text
+```
 
 Then one card scope built once, so the list query and the cached re-read cannot drift:
 
@@ -2728,7 +2728,7 @@ Then one card scope built once, so the list query and the cached re-read cannot 
             });
 
         [$items, $total] = $this->cached($query, $status, $searchKey, $page, $pageSize, $showUnconfirmed)  // [SUPERSEDED: cached() takes no scope arg, it calls cardScope() itself];
-```text
+```
 
 `use Closure;` and `use Illuminate\Database\Eloquent\Relations\HasMany;` as needed for the `$cardScope` parameter type. **[SUPERSEDED SHAPE, corrected 2026-09-29 after the fix rounds - what follows is what actually shipped.]** The briefed `Closure(HasMany): HasMany` is untrue at runtime, because `Relation::__call` forwards `when()` to the query Builder. What shipped is one private `cardScope(bool $showUnconfirmed)` returning `Closure(HasMany<CharacterCard, Umamusume>): void`, consumed by BOTH the list query and the cached re-read, which satisfies the real invariant (the two cannot drift) with honest typing and no suppression. Second, `lower(<col>) like "%<normalized term>%"` can never match a multi-word value: normalize() deletes spaces and hyphens, so "red strife" becomes "redstrife" while the stored title keeps its space, and card titles and aliases have no normalized column of their own. The fix folds the COLUMN at comparison time through `normalizedColumn()`, which nests REPLACE over lower() for exactly the characters `NameNormalizer::FOLDED_CHARACTERS` lists; that list is now the single source, read by normalize() and by the SQL builder alike, because two lists drifting apart is what produced the defect. Third, the bound term is escaped for LIKE metacharacters (percent, underscore, backslash) into one `$like` computed once and passed bound to all three clauses, because normalize() strips separators but not LIKE's own syntax, and unescaped a Trainer typing a percent sign receives the entire catalog. Proven against SQLite rather than by reverting the escape in a working tree: unescaped percent and underscore each match 2 of 2 fixture rows, escaped 0 of 2, and real terms match 1 of 2 either way. Commits `adfc7e9`, `bd0a1e6`, `5297fa2`, `f2c978b`. The durable answer for diacritics and full-width katakana is a stored normalized key beside `title` and `alias`, written by the pipeline the way `match_key` already is; that is a schema change no task here was authorized to make, so it is owed a register entry.
 
@@ -2769,7 +2769,7 @@ In `CatalogController::cached()` both changes are mandatory, or the page renders
 
         return [$items, $total];
     }
-```text
+```
 
 Leave the existing comment block above the re-read intact: `aliases_count` is still deliberately re-queried rather than cached.
 
@@ -2793,7 +2793,7 @@ Create `resources/views/components/rarity-chip.blade.php`:
 --}}
 <span {{ $attributes->merge(['class' => 'font-mono text-xs font-bold text-ink']) }}
     role="img" aria-label="{{ $rarity->label() }}"><span aria-hidden="true">{{ $rarity->stars() }}</span></span>
-```text
+```
 
 No background fill: the row already sits on `bg-raised`, and a chip in its host's own fill reads as nothing. `label()` yields `One star` / `Two stars` / `Three stars` from `lang/en/uma.php`, so no UI string is invented and `EnumLabelTest` covers every one.
 
@@ -2883,7 +2883,7 @@ Replace `catalog/index.blade.php:10-51` â€” the `<x-layout>` body from the 
             {{ $umamusumes->links() }}
         </div>
     @endif
-```text
+```
 
 **Collapse behaviour, decided by row count rather than assumed.** 68 trainees at the existing 25-per-page default is three pages, each showing only its own trainees fully expanded, so **no disclosure control ships**. Nothing on the page needs a click to be readable, and a collapse that is not needed is a keyboard trap for G-11 to catch. `CatalogController::index()` already clamps a `pageSize` query param at 100, so if the fully-expanded page ever outgrows the budget the lever is pagination size, not a widget. Record this reasoning in the slice file: the brief asked for the decision to be made on measurement, so the measurement (68 rows, three pages, 25 each) is the answer.
 
@@ -2893,7 +2893,7 @@ Replace `catalog/index.blade.php:10-51` â€” the `<x-layout>` body from the 
 
 ```bash
 php artisan test --compact tests/Feature/CatalogRosterTreeTest.php tests/Feature/CatalogTest.php tests/Feature/CatalogCacheRenderTest.php tests/Feature/DesignTokensTest.php tests/Feature/RenderedCopyHygieneTest.php tests/Feature/TokenPairHygieneTest.php tests/Feature/FlashBannerTokensTest.php tests/Feature/ApiV1Test.php
-```text
+```
 
 Expected: all green. The specific hazards: exactly 60 colour tokens (`DesignTokensTest`'s `counts every colour token the static theme declares` test); no `dark:` utility and no palette-numbered class; no hex or arbitrary value (G-4); no em or en dash (`RenderedCopyHygieneTest`'s `ships no em dash or en dash in rendered Blade copy` test); `bg-raised` on every shell page; and `DesignTokensTest`'s 30 factory rows that own **no cards**, which is precisely why the `N/A` / "no forms recorded" branch is load-bearing rather than decorative.
 
@@ -2905,7 +2905,7 @@ G-5 and G-47 want every new text/background pair computed. The browser half of `
 
 ```bash
 grep -n -- '--color-ink:\|--color-ink-strong:\|--color-raised:\|--color-page:\|--color-risk:' resources/css/app.css
-```text
+```
 
 For each pair: linearise each sRGB channel `c <= 0.03928 ? c/12.92 : ((c+0.055)/1.055)^2.4` on the 0-1 component, then `L = 0.2126 R + 0.7152 G + 0.0722 B`, then `ratio = (L_lighter + 0.05) / (L_darker + 0.05)`. Record in `DESIGN.md` Â§3.4: `text-ink` on `bg-raised` in light and dark, and `text-risk` on `bg-raised` in light and dark for the unconfirmed warning. `text-ink` on `bg-raised` is an existing measured pair, so the only genuinely new one is `text-risk` â€” that is the line to add, with its two numbers. **Compute them yourself and print the formula, the four hex inputs and the read date next to them.** The three `text-risk` rows already in that section (10.04 light, 4.33 dark-before, 4.77 dark-after, from KI-20) do not reproduce from the very hex values they name under the WCAG formula above: recomputed on 2026-09-29 at `6a7236f` they are 10.89 / 5.51 / 6.22, and no plausible variant formula (no-gamma, simple-average) yields the recorded set either, so the recorded figures were not produced from those inputs. Every one of them still clears 4.5:1 under the correct arithmetic, so no token moves either way, but do not copy the recorded numbers into a new row and do not overwrite the old ones - flag the discrepancy as an open question for KI-20's author. Root cause is unfathomed, not minor: a contract row whose ratio cannot be reproduced from its own inputs is a check that cannot fail for the reason it states.
 
@@ -2923,7 +2923,7 @@ date. The status filter now defaults to Released (Global) with status=all back t
 the unfiltered list, card titles join names in the search scope, and a card the
 Tier B source stands alone behind stays hidden until asked for. Headings sit one
 level below the brief's naming because the page already owns an h1."
-```text
+```
 
 ---
 
@@ -3024,7 +3024,7 @@ it('names each card the source its own row was read from', function (): void {
         ->assertOk()
         ->assertSee('card-199902');
 });
-```text
+```
 
 Add `use App\Models\DataSource;` to the file's imports.
 
@@ -3032,7 +3032,7 @@ Add `use App\Models\DataSource;` to the file's imports.
 
 ```bash
 php artisan test --compact tests/Feature/CatalogRosterTreeTest.php
-```text
+```
 
 Expected: FAIL on the new rows that ask for a forms section and for per-card provenance; the hand-entered one at Step 1's third block already passes, and the earlier ones stay green.
 
@@ -3058,7 +3058,7 @@ Replace `CatalogController::show()`'s body:
         abort_if($umamusume === null, 404);
 
         return view('catalog.show', ['umamusume' => $umamusume, 'showUnconfirmed' => $showUnconfirmed]);
-```text
+```
 
 Keep the existing long comment above the method: this page is deliberately not cached, and that reasoning still holds.
 
@@ -3097,7 +3097,7 @@ In `catalog/show.blade.php`, insert after the `<dl>` grid closes (before the Jap
             @endforeach
         </ul>
     @endif
-```text
+```
 
 - [ ] **Step 5: Name the per-card source, and keep the character list for what it is**
 
@@ -3113,7 +3113,7 @@ In the Step 4 `<li>`, after the `<time>` element and inside the enclosing `<span
                                 read {{ $card->fetched_at->timezone(config('uma.display_timezone'))->format('M j, Y') }}
                             </span>
                         @endif
-```text
+```
 
 Four things here are deliberate. The span carries no styling because it inherits `text-xs text-ink-muted` and the `gap-3` from its parent, so the row grows no second line and no new visual tier. `source_url` rides the `title` attribute so the exact URL is one hover away without shipping a clickable outbound link in a local-only tool; `{{ }}` escapes it, and a URL that arrived from fetched content is untrusted (`AGENTS.md`, Data Engineer). The conversion is `config('uma.display_timezone')`, the same expression the existing Provenance list already uses on its `fetched_at` line, because US-7 makes a raw UTC render a defect; reuse that line rather than inventing a second formatting convention. And `fetched_at` is nullable, so the `@if` skips the span instead of printing an empty date.
 
@@ -3126,7 +3126,7 @@ Then this sentence, after the `</ul>` in the existing `@else` branch of the Prov
             confirmed against the two Tier A sources listed in
             docs/data/2026-09-29-global-roster-crosscheck.md. [CLAUSE REMOVED, not merely reworded: docs/data/ does not exist in this tree because Task 8 is blocked, AND the blanket claim it carried was false on its own terms -- unconfirmed defaults to false with no verdict written onto any row yet, so "every card here was checked" rendered for data nobody had cross-checked. The honest statement is the per-row "Not confirmed by two sources" the page already prints. Do not reintroduce a file_exists() guard: it puts a filesystem stat on a provenance claim and vanishes silently when the file lands.]
         </p>
-```text
+```
 
 The JP and Global debut `<dt>` rows keep their existing markup: after Task 2 Step 3 both carry real dates for fetched rows, and the `N/A` disclosure already in the file covers a trainee with neither. Do not add a new fallback for a case that no longer exists.
 
@@ -3134,7 +3134,7 @@ The JP and Global debut `<dt>` rows keep their existing markup: after Task 2 Ste
 
 ```bash
 php artisan test --compact tests/Feature/CatalogRosterTreeTest.php tests/Feature/CatalogTest.php tests/Feature/DesignTokensTest.php tests/Feature/RenderedCopyHygieneTest.php
-```text
+```
 
 Expected: all green. `CatalogTest`'s `'shows a detail page with Japanese name and provenance'` test creates a `DataSource` with a `https://example.test/...` URL and no `source_key`, and the existing Provenance list [STATED WRONG, corrected 2026-09-29: DataSourceFactory supplies source_key => "test", so a test-created row DOES print a key. The instruction is unchanged and still correct -- the added sentence must not read source_key at all -- but it is not justified by the reason above it. Confirm the test stays green rather than editing it, as briefed.]'s `fetched_at` line already prints that key bare, so the added sentence must not read `source_key` at all; that is why it does not. Confirm the test stays green rather than editing it. The per-card span needs no such tolerance because `CharacterCard::factory()` now sets `fetched_at` (Task 4 Step 11), but it does need the `@if`: a row stored before a fetch stamped it has `fetched_at` null, and `null->timezone()` is a fatal.
 
@@ -3150,7 +3150,7 @@ The seeded-data sentence goes when a row genuinely has a fetched source and stay
 when it does not. Each form shows its client title, stars, debut state and Global
 date, and the provenance line records the Tier B source alongside the Tier A
 witness SOURCE-OF-TRUTH 5:152 asks for."
-```text
+```
 
 ---
 
@@ -3348,7 +3348,7 @@ it('carries the chosen card back to the form when another field fails', function
         ->assertSee('[RUN! RUIN! LAUNCHER!]')
         ->assertSee('not_a_scenario', false);
 });
-```text
+```
 
 `assertSee('not_a_scenario', false)` checks the raw `old('scenario')` value survives in the markup, which is the same mechanism carrying the card selection back.
 
@@ -3356,7 +3356,7 @@ it('carries the chosen card back to the form when another field fails', function
 
 ```bash
 php artisan test --compact tests/Feature/TraineeSelectorTest.php
-```text
+```
 
 Expected: FAIL â€” no `role="combobox"`, no `#trainee-roster`.
 
@@ -3421,7 +3421,7 @@ Replace `TrainingRunController::create()`:
 
         return $card === null ? null : $card->umamusume->name.' Â· '.$card->title;
     }
-```text
+```
 
 Import `App\Enums\ReleaseStatus`, `App\Models\CharacterCard` at the top rather than using fully-qualified names inline, matching the file's existing import block. `umamusumes` becomes the trainee collection so the no-JS `<select>` still iterates over it, Global-only, and **not** card-gated: a trainee with no Global card still appears in the no-JS select, because `character_card_id` is nullable per Task 5 and the rail must stay completable on a database that has no card rows at all -- which is every freshly seeded one, since no seeder writes `character_cards`. **[CORRECTED 2026-09-29, commit `1c44698`.** The briefed "she does not appear" is the FR-A-6 *catalog* rule about trainees whose cards are all JP-only; copying it onto the run form turned a display rule into a precondition for training a trainee, and the review caught it as Critical.] The card filter belongs inside the JSON payload only, so the searchable popup still lists forms; where a trainee has no confirmed form the payload simply carries none, and the native select remains the working control.
 
@@ -3478,7 +3478,7 @@ In `resources/views/runs/create.blade.php`, replace the `Umamusume` `<label>` th
         </label>
 
         <script type="application/json" id="trainee-roster">@json($rosterJson)</script>
-```text
+```
 
 **What the no-script path can and cannot carry.** `old('umamusume_id')` survives a 422 on that path through the select's `@selected()`, which is what makes the trainee sticky without JS. The disabled hidden input does **not** resubmit `character_card_id`, so a scriptless Trainer who failed validation on `scenario` comes back to a run naming the trainee but not the form. That is the honest ceiling for a path with no filtering script, not an oversight: `character_card_id` is nullable and Task 5's rule accepts a submission without it. Say this in the commit message so a later reader does not "fix" it by removing `disabled` and breaking the no-JS submit again.
 
@@ -3845,7 +3845,7 @@ export const initTraineeCombobox = (): void => {
 };
 
 initTraineeCombobox();
-```text
+```
 
 The `(debut)` suffix on the typed-name path is the note the brief asked for; the click and arrow path shows the card alone, which is the state where the card was named explicitly.
 
@@ -3857,14 +3857,14 @@ The `(debut)` suffix on the typed-name path is the note the brief asked for; the
 import './bootstrap';
 import './guided-flow';
 import './trainee-combobox';
-```text
+```
 
 - [ ] **Step 7: Run the tests green**
 
 ```bash
 php artisan test --compact tests/Feature/TraineeSelectorTest.php
 npm run build
-```text
+```
 
 Expected: tests pass and the build emits a manifest including `trainee-combobox`. A Vite error here means the TS is not syntactically valid; fix the module rather than the test.
 
@@ -3872,7 +3872,7 @@ Expected: tests pass and the build emits a manifest including `trainee-combobox`
 
 ```bash
 npx tsc --noEmit -p tsconfig.json
-```text
+```
 
 Expected: zero errors. `tsconfig.json` sets `strict: true` and `noEmit: true` over `resources/js/**/*.ts`, so the new file is inside its include pattern by construction. If `tsc` is not on PATH, this is the one step that may be reported as not run rather than skipped silently.
 
@@ -3903,7 +3903,7 @@ it('names the empty and capped states in words a Trainer reads', function (): vo
     expect($source)->toContain('No trainee or card found.')
         ->and($source)->toContain('keep typing');
 });
-```text
+```
 
 Say plainly in the slice record that these pin the module's shape, not its runtime behaviour: the behaviour is Task 13's browser pass, and an assertion that only reads source text must not be reported as if it proved the filter works.
 
@@ -3912,7 +3912,7 @@ Say plainly in the slice record that these pin the module's shape, not its runti
 ```bash
 php artisan test --compact tests/Feature/TraineeSelectorTest.php tests/Feature/KeyboardPathTest.php tests/Feature/DesignTokensTest.php tests/Feature/FlashBannerTokensTest.php tests/Feature/RenderedCopyHygieneTest.php tests/Feature/TrainingRunTest.php tests/Feature/RunUpdateTest.php
 vendor/bin/pint --dirty --format agent && vendor/bin/phpstan analyse --no-progress --memory-limit=1G
-```text
+```
 
 Expected: all green. On the `KeyboardPathTest` hazard, settled against the file rather than left conditional: `'loads the keyboard module from the entry the browser actually runs'` asserts `expect($entry)->toContain("import './guided-flow';")` in `tests/Feature/KeyboardPathTest.php`, which is a containment check, not an exact import list. Adding `trainee-combobox` to `app.ts` therefore leaves it green untouched, and nothing about that test should be edited. The positive wiring check for the new module is the `wires the module into the entry the browser actually runs` test added in Step 1, which borrows the same reasoning that test records: a module on disk proves nothing about it executing.
 
@@ -3931,7 +3931,7 @@ name, trainee Japanese name and the bracket-stripped card title, so RUN finds
 [RUN! RUIN! LAUNCHER!] under Gold Ship; ten rows visible, grouped by trainee,
 arrows and Escape, and the submission carries the card as well as the trainee.
 Vanilla TypeScript, no dependency added."
-```text
+```
 
 ---
 
@@ -3953,7 +3953,7 @@ Never bind the shared dev file to a port another session may already be using. C
 cp database/database.sqlite database/scratch-catalog.sqlite
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan serve --port=8099 --no-interaction &
 sleep 2 && curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8099/umamusume
-```text
+```
 
 **Guard the copy, because it silently destroys the scratch database.** Task 4 and Task 5 point `migrate` at `database/scratch-catalog.sqlite`, so by this point that file holds a schema with real migrations applied and possibly useful data. The `cp` above overwrites it wholesale â€” fine when Task 9 populated `database/database.sqlite`, and a quiet data loss if anyone reorders the tasks or runs Task 13 alone to re-measure after a UI fix, which is exactly what a re-review pass does. Assert the source is populated first:
 
@@ -3963,7 +3963,7 @@ $count = App\Models\Umamusume::count();
 if ($count !== 68) { fwrite(STDERR, "REFUSING TO COPY: database/database.sqlite holds {$count} trainees, expected 68. Task 9 has not populated it. Not overwriting scratch-catalog.sqlite.\n"); exit(1); }
 echo "source verified: {$count} trainees, ".App\Models\CharacterCard::count()." cards\n";
 '
-```text
+```
 
 Expected: `source verified: 68 trainees, 107 cards`, and only then the `cp`. If it refuses, the sequencing broke â€” fix the sequencing or copy in the other direction, rather than flattening a scratch database that another step depends on.
 
@@ -4008,7 +4008,7 @@ The schema and the query both changed, so re-check the local budget rather than 
 for i in $(seq 1 20); do
   curl -s -o /dev/null -w '%{time_total}\n' http://127.0.0.1:8099/umamusume
 done | sort -n | awk '{a[NR]=$1} END {printf "median %.3fs p95 %.3fs\n", a[int(NR/2)+1], a[int(NR*0.95)]}'
-```text
+```
 
 Expected: median well under **0.200 s**, which is C-6's budget at ~1,000 Umamusume â€” this catalog holds 68, so the honest statement is "under budget at one-fifteenth the reference size, with one eager card load per page of 25 trainees". Record the two numbers and the query count if you can get it. Do not claim the 1,000-row budget is met; claim what was measured.
 
@@ -4024,7 +4024,7 @@ php artisan test --compact
 make lore
 composer audit
 npm audit --omit=dev
-```text
+```
 
 Expected: Pint clean twice; PHPStan zero errors; the full suite green; `make lore` with no unexplained hits; no reachable critical or high from the audits. Report any audit finding rather than silencing it.
 
@@ -4036,7 +4036,7 @@ On the lore gate, the mechanism moved under this plan and now works in its favou
 rm -f database/scratch-catalog.sqlite && touch database/scratch-catalog.sqlite
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan migrate:fresh --seed --no-interaction
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan migrate:rollback --step=3 --no-interaction
-```text
+```
 
 Expected: fresh migrate and seed succeed; three migrations roll back cleanly, proving each `down()`. Delete the scratch file afterwards: `rm -f database/scratch-catalog.sqlite`.
 
@@ -4062,7 +4062,7 @@ git commit -m "docs(slice-10): the roster browser pass, the measured budget, and
 Records the selector behaviour on the real page, the catalog counts against the
 export, the C-6 re-measure the new query shape requires, and every place the
 shipped result differs from the request because the data disagreed with it."
-```text
+```
 
 - [ ] **Step 9: Hand the branch back**
 
@@ -4177,7 +4177,7 @@ remaining commits forward:
 4addcd6 fix(ui,http): the payload reaches every trainee the select offers, and ArrowUp opens on the last row
 79d7f62 docs(plan): remove the card precondition Task 12 shipped from the brief
 1c44698 fix(ui,http): the run form stays completable, and Enter means submit
-```text
+```
 
 The merge was **not** a rebase. `b63e111` is already an ancestor of master through `bc11d9b`, so
 re-basing would have rewritten landed history. `git merge` produced no conflicts: the incoming five
@@ -4429,7 +4429,7 @@ min    = 115.8 ms
 median = 135.4 ms
 p95    = 242.1 ms
 max    = 329.2 ms
-```text
+```
 
 **Median 135.4 ms against C-6's 200 ms budget**, measured on `php artisan serve` â€” a single-worker
 development server with no opcache, which is slower than any deployment this tool has. The honest
@@ -4475,14 +4475,14 @@ migrate:rollback --step=3
   2026_09_29_120200_add_character_card_id_to_training_runs_table   44.90ms DONE
   2026_09_29_120100_create_character_cards_table                     4.05ms DONE
   2026_09_29_120000_add_external_ref_to_umamusume_table            15.68ms DONE
-```text
+```
 
 Re-migrated, then rolled back four to reach `ADR-0011`'s migration, whose `down()` is the only one
 here that drops an index, a unique constraint and nine columns together:
 
 ```text
   2026_09_29_021157_add_reference_fields_to_skills_table            62.80ms DONE
-```text
+```
 
 Scratch file deleted. Shared `database/database.sqlite` re-verified after: 135 trainees, 107 cards.
 
@@ -4560,13 +4560,13 @@ than linked: naive link handling drops everything before it.
 
 ```text
 rows=268 global=107 trainees=68
-```text
+```
 
 over `research-scratch/data/json/character-cards.json`, 251,294 bytes, by
 
 ```bash
 php -r '$r=json_decode(file_get_contents("research-scratch/data/json/character-cards.json"),true); printf("rows=%d global=%d trainees=%d\n",count($r),count(array_filter($r,fn($c)=>is_string($c["release_en"]??null))),count(array_unique(array_column(array_filter($r,fn($c)=>is_string($c["release_en"]??null)),"char_id"))));'
-```text
+```
 
 `global=107` is the population this file cross-checks: **107 cards over 68 trainees**, out of 268
 rows in the export. The remaining 161 rows carry no `release_en`, are `[JP-Only]`, and are out of
@@ -4790,7 +4790,7 @@ Flag list this file hands to the apply step (`single-source` âˆª `conflict`, 
 
 ```text
 100103, 100702, 100802, 100902, 101303, 110001
-```text
+```
 
 Under the brief's literal tier-1-only fold the same body reads
 **92 + 11 + 4 + 0 = 107**, and the flag list grows to those 6 plus the 9 spelling-variant cards
@@ -4802,7 +4802,7 @@ Both lines above are the tool's own, not prose derived by hand:
 ```bash
 php tools/roster-crosscheck.php --max-tier=3 > docs/data/roster-crosscheck-table.md   # 101 + 2 + 4 + 0
 php tools/roster-crosscheck.php --max-tier=1 2>&1 >/dev/null | head -1                # 92 + 11 + 4 + 0
-```text
+```
 
 `--max-tier` is the highest fold a witness may be matched on, so the tier-1 run is the brief's rule
 and the tier-3 run is the one this file's table comes from. `--max-tier` outside 1..3 exits 1 rather
@@ -4922,7 +4922,7 @@ SELECT card_id FROM character_cards WHERE is_manual = 1
 SELECT COUNT(*) FROM character_cards
  WHERE card_id IN (100103, 100702, 100802, 100902, 101303, 110001);      -- expect 6
 SELECT source_url, COUNT(*) FROM character_cards GROUP BY source_url;    -- expect one row: the e9e9ee6d URL under Sources
-```text
+```
 
 The last two are the checks the totals cannot do. A population can be exactly 107 rows and still be
 missing `100902`, because a hash rotation replaces cards as well as adding them â€” `COUNT(*)` agrees
@@ -4946,7 +4946,7 @@ UPDATE character_cards
        updated_at  = CURRENT_TIMESTAMP
  WHERE is_manual = 0
    AND card_id IN (100103, 100702, 100802, 100902, 101303, 110001);
-```text
+```
 
 Expected: **0 flagged â†’ 6 flagged** over 107 rows, `updated_at` moved on those 6 only. The
 `is_manual = 0` term is the FR-B-4 guard: a card the Trainer corrected by hand is hers, and a
@@ -4960,7 +4960,7 @@ UPDATE character_cards
        updated_at  = CURRENT_TIMESTAMP
  WHERE is_manual = 0
    AND card_id IN (100103, 100702, 100802, 100902, 101303, 110001);
-```text
+```
 
 Two properties worth knowing before running it:
 
@@ -4998,7 +4998,7 @@ after re-fetch: cards=107 flagged=5 flagged-and-manual=0
 undo affected=5
 after undo: cards=107 flagged=0 flagged-and-manual=0
 card 100103 left is_manual=true unconfirmed=false
-```text
+```
 
 Read line by line: `before: flagged=0` matches the preflight expectation. `apply affected=5`, not 6,
 because the rehearsal deliberately makes one flagged card `is_manual = 1` first â€” the guard is

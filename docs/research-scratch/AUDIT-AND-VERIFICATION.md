@@ -1161,7 +1161,7 @@ database/migrations/2026_09_29_182820_create_umamusume_profiles_table.php
 tests/Feature/GametoraCharacterProfileParserTest.php
 tests/Feature/StoreCharacterProfilesTest.php
 tests/Feature/UmamusumeProfileSchemaTest.php
-```text
+```
 
 Plus `config/uma.php:209` (`gametora-character-profiles`) and the **frontend render**:
 `resources/views/catalog/show.blade.php` has the whole profile block — Japanese name, voice actor
@@ -1206,7 +1206,7 @@ The `migrations` table's last four rows end at `2026_09_29_120200_add_character_
 ```text
 php artisan tinker --execute '... UmamusumeProfile::count() ...'
 SQLSTATE[HY000]: General error: 1 no such table: umamusume_profiles
-```text
+```
 
 Because `CatalogController.php:167` eager-loads `profile`, `/umamusume/{slug}` cannot render against
 the current dev database. **Pending action: run `php artisan migrate`** (additive, one table). Not run
@@ -1499,7 +1499,7 @@ with the concurrent session's review-queue work were ruled allowed under C-4 and
 resources/views/components/layout.blade.php:7    @vite(['resources/css/app.css', 'resources/js/app.js'])
 public/build/manifest.json keys                  resources/css/app.css, resources/js/app.ts
 vite.config.js input                             resources/js/app.ts
-```text
+```
 
 There is no `resources/js/app.js` on disk and no such manifest key, so `@vite()` throws
 `ViteManifestNotFoundException`. `resources/views/welcome.blade.php:15` gets this right and
@@ -1573,7 +1573,7 @@ storage/logs/laravel.log:
 
 resources/views/catalog/index.blade.php:29
   <a href="{{ route('catalog.show', $umamusume->slug) }}" ...>
-```text
+```
 
 Measured against a running server: `/umamusume` and `/training-runs` both returned 500,
 while a page not using `x-layout` returned 200.
@@ -1600,7 +1600,7 @@ fixed.
 ```text
 resources/views/welcome.blade.php:10   <link rel="preconnect" href="https://fonts.bunny.net">
 resources/views/welcome.blade.php:11   <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" ...>
-```text
+```
 
 `PRD.md` NFR-1 makes this a local-only tool. A remote stylesheet is a network dependency on
 first paint, and it loads `instrument-sans`, a font the app does not bundle.
@@ -1654,7 +1654,7 @@ $ git grep -inw "planned" -- 'config/**' 'resources/**'      # tracked only
 (nothing)
 $ git grep --untracked -inw "planned" -- 'config/**' 'resources/**'
 (found)
-```text
+```
 
 Separately, the `lore` target greps equine vocabulary only. It has no pattern for
 `wisdom` or `motivation`, which are the terms the source wikis use throughout for Wit and
@@ -1709,7 +1709,7 @@ as well as the test. Verified: the test passes and the `lore-code` gate is clean
 ```text
 tests/Feature/TrainingRunTest.php:54   $planned = Skill::factory()->create(['name' => 'Planned Skill']);
 tests/Feature/TrainingRunTest.php:72   ->assertSee('Planned Skill')
-```text
+```
 
 Two problems in one line. `planned` is on the banned terminology list, because the client
 enum is `Suggested`. And the string is invented, so a test asserts that a fabricated catalog
@@ -3455,7 +3455,7 @@ copy of the main file alone:
      (the live database at that moment held 1 row)
 
 after PRAGMA wal_checkpoint(TRUNCATE), the same copy reports 1 row.
-```text
+```
 
 99.8% of the bytes were in the WAL, and the copied main file did not even **declare the table**. The copy
 is not a stale snapshot of the database; it is a different, nearly empty database that opens without
@@ -3496,7 +3496,7 @@ readiness or aptitude comparison needs.
 
 ```text
 grep -rln "race_catalog_slots" database/seeders/ app/Console/Commands/     # → no files
-```text
+```
 
 `uma:fetch` with `GametoraRaceCatalogParser` is the only writer, and the source has no `seed_file` key, so
 `migrate --seed` cannot reproduce it offline. A peer session's fresh `migrate:fresh --seed` produced 296
@@ -3534,7 +3534,7 @@ which fails the provenance floor and Planner Rule 5.
 SELECT COUNT(*) FROM race_catalog_slots;                              -- 0 today
 SELECT COUNT(*) FROM scenario_slots WHERE tier IS NULL;               -- 141 of 296
 SELECT COUNT(*) FROM umamusume WHERE aptitude_turf IS NULL;           -- 0; aptitudes are fine
-```text
+```
 
 **Fix candidates.** Give the race-catalog source a committed `seed_file` and a seeder, which is the narrow
 change and unlocks the whole feature; or add `distance_band` and `surface` to `scenario_slots` at the
@@ -3600,7 +3600,7 @@ run 4 (scenario NULL)
 run 3 (ura_finale)
   forRun()  Speed=1400 …   band()  Speed=1400 …   disagree: NO
 config: base_cap=1200 hard_cap=2000 baseline=ura_finale ura bonus Speed=200
-```text
+```
 
 **Root cause, named.** `ADR-0015` moved both readers onto `App\Services\ScenarioCaps`, and that half worked:
 there is one owner of the arithmetic. It did not make the two readers **call it with the same argument**.
@@ -5493,7 +5493,7 @@ from a fresh run rather than by reading the two claims back.
 ```text
 Tests:    2 skipped, 1222 passed (18275 assertions)
 Duration: 163.19s
-```text
+```
 
 Run twice, at 274.82s and 163.19s, with identical counts both times. A JUnit log of the same run
 records `tests="1224" assertions="18275" errors="0" failures="0" skipped="2"` across 125 test
@@ -5554,7 +5554,7 @@ Domain fingerprint, taken before the landings and again after the gates, identic
 domain-fingerprint 49ad58bbeaf4dc64494b126b7df049453b1e8d985cea86789843e1f824fb6af6
 training_runs 6, turn_entries 1, run_skills 34, deck_slots 6,
 support_cards 559, skills 1910, race_catalog_slots 410
-```text
+```
 
 #### What this baseline does not cover
 

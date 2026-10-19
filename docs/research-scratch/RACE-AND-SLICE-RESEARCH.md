@@ -259,7 +259,7 @@ trainee_goals
 ├── fan_threshold         int nullable — fan goals only. No slot FK: a fan goal is not
 │                         a race and must not be forced into one.
 └── notes, timestamps
-```text
+```
 
 Two kinds, and they are genuinely different: a **race goal** is a specific race with a placement
 requirement; a **fan goal** is a threshold by a deadline and occupies no grid cell.
@@ -444,7 +444,7 @@ Both threads solved the same problem in different tables. This note records whic
 id, scenario_key, kind, slot_label, title, description, month, half, tier,
 fans_needed, is_mandatory, is_maiden_gated, sort_order,
 source_url, snapshot_path, fetched_at, source_timezone, is_manual, timestamps
-```text
+```
 
 It has **no `year`**. `c0a743f` added `source_key`, which makes several goal races legal in one half-month, but a Classic Early-May slot and a Senior Early-May slot remain indistinguishable — and `09` records **14 G1s that recur across Classic and Senior at the identical month and half**. Fourteen races the grid must place in two years with nothing in the row saying which year it is.
 
@@ -458,7 +458,7 @@ It also has **no `distance`, `surface`, `track`, or payout curve**, so the picke
 
 ```text
 'gametora-race-catalog': 0 updated, 410 created, 0 skipped (manual), 0 to review.
-```text
+```
 
 410 rows: Junior 58, Classic 161, Senior 185, finale block 6. That is `docs/scenarios/09-global-race-calendar.md`'s 413 slots minus Prix Niel, Prix Foy (`unreleased_servers: ['en']`) and `final_masters` (`[JP-Only]`, no `start_en`). `scenario_key` is set on exactly 4 rows — `ura_finale`, `unity_cup`, `trackblazer`, `grand_concert` — and null on the other 406, because the scenarios share every monthly slot and differ only at the final. All 410 carry `source_url`, `snapshot_path`, `fetched_at` and `source_timezone`, per ADR-0003 R3.
 
@@ -521,7 +521,7 @@ it('leaves the 422 branch unreachable, because the api has no write', function (
         ->and($routes->filter(fn ($route): bool => ! in_array($route->methods()[0], ['GET', 'HEAD', 'OPTIONS'], true)))
         ->toBeEmpty();
 });
-```text
+```
 
 Two things settled the choice, and only one of them is this test:
 
@@ -712,7 +712,7 @@ gated by running_style==                       646  33.8%   -> of the Global sub
 mention surface==                                0   0.0%
 mention distance                               997  52.2%
   running_style==1  133 rows / ==2  320 / ==3  235 / ==4  141
-```text
+```
 
 The Global subset of 623 **matches ADR-0011's own committed figure** ("on the 623 …"), which corroborates
 the reading of `unreleased` rather than leaving it as my invention. The app's predicate is
@@ -1212,7 +1212,7 @@ grep -n 'energy.*mood.*fans' ARCHITECTURE.md ARCHITECTURE-ESSENTIALS.md   # line
 
 ## confirms this draft's own erratum survived the concurrent edit
 grep -c 'Bound corrected 2026-10-01' ARCHITECTURE-ESSENTIALS.md           # expect 1
-```text
+```
 
 `-i` on the PRD greps is not decoration: the first cut of this draft dropped it, and a case-sensitive grep
 would have reported zero for a document that says "Energy" somewhere. Same reason every phrase check in this
@@ -1363,7 +1363,7 @@ The rename, executed once:
 
 ```text
 git branch -m rescue/profiles-chain archive/profiles-chain
-```text
+```
 
 Lowercase `-m`, so the rename is a move, not a forced overwrite. Verified after the fact rather than assumed
 from a clean exit:
@@ -1385,7 +1385,7 @@ what the number implied:
 ```text
 git branch --contains 8ffab63                ->  archive/profiles-chain   (and nothing else)
 git rev-list archive/profiles-chain --not <every other head and remote> --count  ->  8
-```text
+```
 
 So **the eight commits are unique to this single ref.** No other branch protects them, which means §3.9's
 exposure analysis stands in full — one `git gc --prune=now` while the ref is absent destroys the chain, and
@@ -1561,7 +1561,7 @@ Source tiers used below: **S** = shipped-client data (GameTora `en/*` dumps), **
 {"raceId":2032,"raceName":"Daily Hai Junior Stakes","grade":200,"gradeName":"G2","distance":1600,...,"trackName":"Kyoto",...}
 {"raceId":3059,"raceName":"Artemis Stakes","grade":300,"gradeName":"G3","distance":1600,...,"trackName":"Tokyo",...}
 {"raceId":1022,"raceName":"Asahi Hai Futurity Stakes","grade":100,"gradeName":"G1","distance":1600,...,"trackName":"Hanshin",...}
-```text
+```
 
 - Full code→label map read off all 1,251 parsed race records (count = records at that code):
 
@@ -1687,7 +1687,7 @@ gain=53 Queen Sho                  grade=300  unrel=None      dne=pre_nar       
 gain=54 Zen-Nippon Junior Yushun   grade=100  unrel=None      dne=pre_nar        fans_needed=1000
 gain=56 Prix Foy                   grade=200  unrel=['en']    dne=pre_2_5th_anni fans_needed=2000
 gain=56 Prix Niel                  grade=200  unrel=['en']    dne=pre_2_5th_anni fans_needed=2000
-```text
+```
 
 - So the five dirt races that hit ids 51-54 are **not** the same set as the eleven `pre_nar` races: `Kawasaki Kinen` (41), `Kashiwa Kinen` (43), `Cluster Cup` (10), `Mercury Cup` (10), `Marine Cup` (49), `Sparking Lady Cup` (49), `TCK Jo-o Hai` (9), `Kanto Oaks` (15), `Empress Hai` (15), `Tokyo Hai` (15), `Ladies' Prelude` (13) all reference curve ids Global already ships.
 - Per-server curve counts in the same manifest family: `en/race-fans` = 50 curves (ids 1-50); `ko/race-fans` = 57; `zh_tw/race-fans` = 57; `race-fans` (JP) = 61. So Global is the shortest curve table, and ids 51-54 exist on KO/TW. The most defensible reading is that GameTora's `en/race-fans` dump lags the Global build for the July-2026 additions (or the new races reuse a curve delivered elsewhere), **not** that the five races are absent — because 2.1, 2.2 and the 17/17 fan-gate agreement say they are present. Flag as an unresolved data-side gap; do not use it as availability evidence.
@@ -2651,7 +2651,7 @@ Rice Shower
 └── Legacy 2  Maruzensky [Formula R]  rank UG, flagged Guest
       ├── Daiwa Scarlet [Peak Blue]   rank UG
       └── Taiki Shuttle [Wild Frontier]  rank UG
-```text
+```
 
 | Ancestor                     | Blue            | Pink             | Green unique              | White sparks                                                                                                                                                                                                                                                       |  |
 | ---------------------------- | --------------- | ---------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |  |

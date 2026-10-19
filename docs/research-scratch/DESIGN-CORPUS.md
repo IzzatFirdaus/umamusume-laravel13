@@ -355,7 +355,7 @@ Tailwind v4 is CSS-first in this repo: the theme lives in an `@theme` block in `
   --font-body: "M PLUS Rounded 1s", "Hiragino Maru Gothic ProN", ui-rounded, system-ui, sans-serif;
   --font-numeral: "M PLUS Rounded 1s", ui-rounded, system-ui, sans-serif;
 }
-```text
+```
 
 The `--font-*` values above are a **proposal pending the web study** (RAW-FINDINGS §6) and remain open in §11. No font is added to the project without the dependency approval the root `CONSTRAINTS.md` C-8 requires.
 
@@ -444,7 +444,7 @@ One extra pair makes that possible without branching components. `--color-chrome
   --shadow-lift: 0 2px 0 rgba(0,0,0,.4), 0 6px 18px -6px rgba(0,0,0,.7);
   --shadow-glow: 0 0 0 3px rgba(155,232,58,.32);
 }
-```text
+```
 
 **Dark mode solves the problem light mode could not.** The brand green `#7FCC09` fails as a text background in light mode at 1.99:1, which forced capsule headers onto the deeper `#4E7906` (§6.3). On the dark base it passes as a *fill with near-black ink* at 9.51:1, and as a *foreground* at 9.51:1. So the dark theme renders the client's actual bright lime chrome more faithfully than the light theme does, while clearing AAA. That is a real design argument for the theme, not a concession.
 
@@ -502,7 +502,7 @@ Recommended stack, in order, with the reasoning kept visible:
 
 ```css
 --font-body: "Nunito", "M PLUS Rounded 1s", ui-rounded, "Hiragino Maru Gothic ProN", sans-serif;
-```text
+```
 
 `M PLUS Rounded 1s` sits second so that Japanese glyphs fall through to a face that has them rather than to a platform default, which is what keeps `name` and `name_ja` on the same baseline and x-height. Latin metrics must not shift when a Japanese string is present.
 
@@ -673,7 +673,7 @@ Two families, and they are not interchangeable.
       rgba(255,255,255,0)   34.5% 100%);
   pointer-events: none;
 }
-```text
+```
 
 Rules: the stop is a **split at a single percentage**, not a range, so the edge is hard. The angle is roughly 116 degrees, running from the upper-left corner down toward the lower-right. The sheen covers only the upper-left band, never the whole face and never the bottom edge. It is a fixed 30% white on both themes; on dark it reads as the glass of an indicator lens rather than as a highlight. A vertical `linear-gradient(top, lighter, darker)` is **not** a substitute; that is the generic button and it is the thing being avoided.
 
@@ -717,7 +717,7 @@ The client's training banner is two stacked ribbons, and the lower one carries i
 ```text
 Stamina Lvl 1        <- pale ribbon, the discipline and its level
 Breaststroke         <- saturated ribbon, the activity the facility offers
-```text
+```
 
 A mockup showing only `Stamina Lvl 1` is incomplete. The activity line is where the game tells you *what this turn actually is*. It is **not** evidence that facility layouts differ between scenarios — every frame carrying these names is Unity Cup, so the list shows variation per facility within one scenario (D-187 carried the stronger claim until 2026-09-27; see `SCREENSHOT-MANIFEST.md`).
 
@@ -841,7 +841,7 @@ Badge tokens, both themes. These are the sanctioned hexes; an artifact using a g
   --color-grade-s:  #FBE9BE;                              /* gold          */
   --color-grade-ss: #F6DFAE;                              /* stronger gold */
 }
-```text
+```
 
 ```css
 :root[data-theme="dark"] {
@@ -851,7 +851,7 @@ Badge tokens, both themes. These are the sanctioned hexes; an artifact using a g
   --color-grade-a:  #4A3520; --color-grade-s:  #4A3F22;
   --color-grade-ss: #55481F;
 }
-```text
+```
 
 - grade is **derived** from the value. This section previously said the derivation was
   unsourced and invented an evenly-spaced 150-point banding. **That banding was wrong and is
@@ -870,7 +870,7 @@ Badge tokens, both themes. These are the sanctioned hexes; an artifact using a g
 G 0-49 · G+ 50-99 · F 100-149 · F+ 150-199 · E 200-249 · E+ 250-299
 D 300-349 · D+ 350-399 · C 400-449 · C+ 450-499 · B 500-549 · B+ 550-599
 A 600-649 · A+ 650-699 · S 700-749 · S+ 750-799 · SS 800 and above
-```text
+```
 
   **State the confidence honestly, and note that it has since been partly falsified.** The one
   measured boundary is G+ / F at 100, and the ladder fits the low range: 436 and 442 both
@@ -1002,7 +1002,7 @@ Success
   Stamina  +13      Guts  +4      Skill Points  +2
 Failure
   Mood     -2       Last trained stat and two others  -10      Practice Poor
-```text
+```
 
 - Success block above, failure block below, separated by a hairline. Never merged into one list.
 - Decreases stay blue. `Practice Poor` renders as a status chip, not as red text, because red is reserved for risk (§3.3).
@@ -1126,7 +1126,7 @@ Three values decide every turn a Trainer takes: where the run is, how much Energ
 ```text
 [ 13 turn(s) left ]  Rice Shower · Trainee Umamusume · Unity Cup
                      Energy ▓▓▓▓▓░░░░  42  [Caution]   |   1,943 fans · target 3,000
-```text
+```
 
 | Element     | Behaviour                                                                                                                                      |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1154,7 +1154,7 @@ So the stat band renders the cap as a **stack, not a number**:
 ```text
 Wit  1,340 / 1,800
        1,200 base · +600 scenario · breakthrough not tracked · deck not tracked
-```text
+```
 
 - The denominator is the sum of the terms the tool actually holds, each labelled.
 - **A term the tool cannot observe never renders as zero.** `+0 breakthrough` states a game fact — that this Trainer inherited no ★3 basic-ability Sparks — and the tool has no idea whether it is true, because inherited Sparks are not in the schema. Zero and untracked are different disclosures, and only the first is a number: `+0 breakthrough (no ★3 Sparks entered)` when a Trainer has actually recorded the inheritance, and `breakthrough not tracked` otherwise. The same split applies to the deck term, which is a Phase 1 tool limitation rather than any state of the run. Printing a quiet `+0` is the D-94 failure in numeric form: a figure that looks sourced because it is a digit.
@@ -3511,7 +3511,7 @@ in different places:
 ```text
 git grep -c data-theme HEAD -- resources/views/components/layout.blade.php   -> 1
 git grep -n "View::composer" HEAD -- app/Providers/AppServiceProvider.php    -> no match
-```text
+```
 
 The template that *consumes* `$theme` is committed. The composer that *supplies* it is not on any
 ref — it is inside the concurrent session's uncommitted `AppServiceProvider.php` (+25/−1), and
@@ -3578,7 +3578,7 @@ git grep -n "View::composer" HEAD -- app/Providers/AppServiceProvider.php
 git log --all --oneline -- app/Models/Preference.php \
     database/migrations/2026_09_27_121500_create_preferences_table.php
 git diff --stat -- app/Providers/AppServiceProvider.php
-```text
+```
 
 Line references for the withdrawn claims: `layout.blade.php:10` and `:15`,
 `AppServiceProvider.php` (`View::composer('components.layout', …)`, the matchMedia script in the
@@ -4415,7 +4415,7 @@ Stored as RGB triplets so they compose with alpha; a `--color-category` is then 
 --parts-color-pink  #ff6ecb   --parts-color-rgb-blue #2a5dfa   --parts-color-text-base #4d4d4d
 --color-text-base #4d4d4d   --color-text-gray #141414   --color-gray #d2d2d2
 --color-gray-2 #898989   --color-error #ff0000   --vh 9px (mobile vh JS fallback)
-```text
+```
 
 Derived / scoped, not on `:root`: `--color-category` (per section: `.top-news` → news, `.top-characters`
 → characters, `.top-media` → media; per row: `.news-item.-game` → `rgb(var(--color-rbg-news-game))`) ·
@@ -4521,7 +4521,7 @@ Character cards on `/characters/` carry **93 distinct accent backgrounds**, one 
     <div class="detail-text"><p>Details</p><svg viewBox="0 0 38 42" class="-arrow">…</svg></div>
   </a>
 </li>
-```text
+```
 
 - Date: **`YYYY-MM-DD HH:MM (UTC)`** — hyphen date, space, 24h time, literal `(UTC)` suffix, joined with
   `&nbsp;` so the three parts never wrap apart. Every sampled item ends `22:00 (UTC)`.
@@ -4567,7 +4567,7 @@ Nuxt (`/_nuxt/…`, `data-v-*` scoped attributes), content from microCMS
 --color-blue #2a5dfa   --color-green #69c832   --color-yellow #ffba00   --color-orange #ff9600
 --color-gray #d2d2d2   --color-text-base #4d4d4d   --color-text-gray #141414   --color-error red
 --scroll-bar-width 15px   --vh 9px
-```text
+```
 
 **8 colour tokens vs EN's 22.** No `--color-rgb-*` triplet layer. Category color is injected **inline
 per record**: `<a class="news-card" style="--color-category: #b5d913">`.
@@ -5245,7 +5245,7 @@ Triage of `docs/game-screenshots/` for scenario and screen-type coverage. Genera
 Method and per-screen visual detail live in `RAW-FINDINGS.md`; this file is the coverage index.
 
 ### How this was produced
-```text
+```
 
 **New text:** the same two lines, then two new subsections, then `### How this was produced`.
 
@@ -5321,7 +5321,7 @@ Eight entries. Each carries the value, the source note id, and the frame that no
 Added 2026-10-03 from the Phase B pass. `2026-07-14 025344` shows the trainee "Curren Chan". Every other full-desktop frame noted by that pass shows "[Rosy Dreams] Rice Shower".
 
 **Any stat-curve, cap, or growth-rate read from this section is conditional on excluding `2026-07-14 025344`.** The exclusion has not been performed; it is recorded as a hazard to be carried until a pass can resolve which run each figure belongs to.
-```text
+```
 
 **New text:** a three-bullet breakdown of the `2026-07-14` session, then the exclusion conditioned on the whole session rather than one frame, then a sentence recording that the earlier narrower form left two stat-bearing frames in scope.
 
@@ -5554,7 +5554,7 @@ BEST OPTION
 WHY?
       ↓
 PLAYER DECIDES
-```text
+```
 
 The application never removes player agency.
 
@@ -5735,7 +5735,7 @@ Information  → Blue
 Special      → Purple
 Exceptional  → Gold
 Neutral      → Gray
-```text
+```
 
 Do not use color as the sole indicator.
 
@@ -5745,7 +5745,7 @@ Example:
 ✓ Safe
 ⚠ Risk
 ✕ Failure
-```text
+```
 
 rather than relying only on colored text.
 
@@ -5779,7 +5779,7 @@ Deep navy
 
 Muted
 Slate gray
-```text
+```
 
 Exact values should be implemented as design tokens rather than hardcoded
 throughout the application.
@@ -5800,7 +5800,7 @@ Example:
 --color-danger
 --color-info
 --color-special
-```text
+```
 
 ---
 
@@ -5851,7 +5851,7 @@ Example:
 Speed       1,204
 Stamina       782
 Power       1,091
-```text
+```
 
 Numbers should visually align.
 
@@ -5865,7 +5865,7 @@ Recommended base unit:
 
 ```text
 4px
-```text
+```
 
 Scale:
 
@@ -5880,7 +5880,7 @@ Scale:
 40
 48
 64
-```text
+```
 
 Primary layout spacing should use 16px / 24px / 32px increments.
 
@@ -5896,7 +5896,7 @@ Cards              10px
 Large panels       14px
 Dialogs            16px
 Pills              999px
-```text
+```
 
 Avoid excessively rounded UI.
 
@@ -5935,13 +5935,13 @@ Desktop:
 │               │                                           │
 │               │                                           │
 └───────────────┴───────────────────────────────────────────┘
-```text
+```
 
 Sidebar width:
 
 ```text
 240–280px
-```text
+```
 
 Main content should have a readable maximum width.
 
@@ -5960,7 +5960,7 @@ Speed Training
 +62 Speed
 +25 Power
 3 Supports
-```text
+```
 
 Bad:
 
@@ -6018,7 +6018,7 @@ Example:
 
 ```text
 [ Start Career ]
-```text
+```
 
 ### Secondary
 
@@ -6026,7 +6026,7 @@ Used for alternatives.
 
 ```text
 [ Edit Deck ]
-```text
+```
 
 ### Tertiary
 
@@ -6034,7 +6034,7 @@ Used for low-priority actions.
 
 ```text
 View Details
-```text
+```
 
 ### Destructive
 
@@ -6056,7 +6056,7 @@ Stats should always be represented in two ways:
 Speed
 1,024 / 1,200
 ██████████████░░
-```text
+```
 
 This provides:
 
@@ -6077,7 +6077,7 @@ Stamina
 Power
 Guts
 Wit
-```text
+```
 
 The colors should remain muted.
 
@@ -6094,7 +6094,7 @@ Turf       A
 Medium     A
 Long       B
 Pace       A
-```text
+```
 
 Badge hierarchy:
 
@@ -6103,7 +6103,7 @@ S / A    Strong
 B / C    Neutral
 D / E    Weak
 F / G    Very weak
-```text
+```
 
 Do not communicate aptitude solely through color.
 
@@ -6118,14 +6118,14 @@ Blue      → Stats
 Pink      → Aptitude
 Green     → Unique
 White     → Skills / races / factors
-```text
+```
 
 Display star count prominently.
 
 ```text
 Speed
 ★★★
-```text
+```
 
 Use a consistent star component.
 
@@ -6155,7 +6155,7 @@ This is a signature component.
 │                                               │
 │ Alternative: Train Wit                        │
 └───────────────────────────────────────────────┘
-```text
+```
 
 The recommendation must always expose its reasoning.
 
@@ -6169,13 +6169,13 @@ Use:
 HIGH
 MEDIUM
 LOW
-```text
+```
 
 Do not display false precision such as:
 
 ```text
 Confidence: 97.31%
-```text
+```
 
 unless the underlying model actually supports that precision.
 
@@ -6189,13 +6189,13 @@ Three primary states:
 LOW RISK
 MEDIUM RISK
 HIGH RISK
-```text
+```
 
 Optional fourth:
 
 ```text
 CRITICAL
-```text
+```
 
 Always pair with text.
 
@@ -6219,31 +6219,31 @@ Visual structure:
 ● Senior
 │
 ● Finale
-```text
+```
 
 Current position:
 
 ```text
 ◉
-```text
+```
 
 Completed:
 
 ```text
 ●
-```text
+```
 
 Upcoming:
 
 ```text
 ○
-```text
+```
 
 Missed/failed:
 
 ```text
 ×
-```text
+```
 
 ---
 
@@ -6260,7 +6260,7 @@ Current Decision
 
 Trainer Advisor
    30%
-```text
+```
 
 The middle column always receives the greatest visual emphasis.
 
@@ -6292,13 +6292,13 @@ Available actions should be visually comparable.
 │ +35        │
 │ SAFE       │
 └────────────┘
-```text
+```
 
 The recommended card gets an additional indicator:
 
 ```text
 ★ RECOMMENDED
-```text
+```
 
 ---
 
@@ -6316,7 +6316,7 @@ Unity-specific
 Trackblazer-specific
 +
 Future scenario-specific
-```text
+```
 
 Instead:
 
@@ -6324,7 +6324,7 @@ Instead:
 Career Cockpit
       +
 Scenario Panel
-```text
+```
 
 This allows each scenario to introduce its own mechanics without
 destroying the core layout.
@@ -6383,7 +6383,7 @@ Shop Coins
 Race Calendar
 Shop Inventory
 Rival Alerts
-```text
+```
 
 The Shop should be quickly accessible from the Career Cockpit.
 
@@ -6406,7 +6406,7 @@ Complete your first career to create a Veteran
 that can be used for future inheritance planning.
 
 [Start Career]
-```text
+```
 
 ---
 
@@ -6422,7 +6422,7 @@ For example:
 │ █████████                │
 │ ███████████████          │
 └──────────────────────────┘
-```text
+```
 
 Because the application is local-first, loading should normally be minimal.
 
@@ -6464,7 +6464,7 @@ Examples:
 ```text
 Race Bonus
 ?
-```text
+```
 
 Hover:
 
@@ -6480,13 +6480,13 @@ Default:
 
 ```text
 Moderate density
-```text
+```
 
 Expert mode:
 
 ```text
 High density
-```text
+```
 
 The application should eventually support a density preference.
 
@@ -6514,7 +6514,7 @@ Default:
 Speed +62
 3 Supports
 2% Failure
-```text
+```
 
 Expand:
 
@@ -6533,7 +6533,7 @@ Scenario modifier
 
 Total
 +62
-```text
+```
 
 This keeps the interface readable.
 
@@ -6567,7 +6567,7 @@ Example:
 ✓ Training recorded
 
 [Undo]
-```text
+```
 
 Undo should restore:
 
@@ -6598,7 +6598,7 @@ Mood
 [Great]
 
 [Save Correction]
-```text
+```
 
 This is essential because the application is an assistant rather than a direct
 game integration.
@@ -6619,7 +6619,7 @@ Examples:
 ★ New inheritance candidate found
 
 ⚠ Shop refresh in 1 turn
-```text
+```
 
 Notifications should never interrupt the user's current decision unnecessarily.
 
@@ -6638,7 +6638,7 @@ Two columns:
 ```text
 Main Decision
 Advisor
-```text
+```
 
 Timeline becomes a horizontal strip.
 
@@ -6656,7 +6656,7 @@ Actions
 Scenario
 ↓
 Timeline
-```text
+```
 
 The recommendation remains above secondary information.
 
@@ -6672,7 +6672,7 @@ Career
 Legacy
 Deck
 More
-```text
+```
 
 Do not attempt to shrink the desktop sidebar onto mobile.
 
@@ -6722,13 +6722,13 @@ Default transition duration:
 
 ```text
 150–200ms
-```text
+```
 
 Important state changes may use:
 
 ```text
 250–300ms
-```text
+```
 
 ---
 
@@ -6753,7 +6753,7 @@ Skill Points    Spark
 Shop            Store
 Warning         Triangle
 Recommendation Star
-```text
+```
 
 Do not use emoji as the primary icon system in production.
 
@@ -6810,7 +6810,7 @@ Medium             ★★★           ★★★
 Skill A             ★★           ★★★
 G1 wins             9             12
 Affinity            High          Medium
-```text
+```
 
 Never force the user to compare two separate cards mentally.
 
@@ -6849,7 +6849,7 @@ Unity Cup
 
 Data updated:
 2026-08-14
-```text
+```
 
 If the database and career state use different versions:
 
@@ -6860,7 +6860,7 @@ This career was created using an older
 scenario ruleset.
 
 [Review Changes]
-```text
+```
 
 ---
 
@@ -6875,7 +6875,7 @@ Confirmed
 Calculated
 Estimated
 Unknown
-```text
+```
 
 Never represent an estimate as a fact.
 
@@ -6883,13 +6883,13 @@ Example:
 
 ```text
 Estimated win chance: 82%
-```text
+```
 
 not:
 
 ```text
 Win chance: 82%
-```text
+```
 
 ---
 
@@ -6928,7 +6928,7 @@ The application should feel like:
              │
              ▼
        UPDATED STATE
-```text
+```
 
 The player remains the Trainer.
 
@@ -7009,7 +7009,7 @@ resources/js/
         ├── UraPanel.vue
         ├── UnityCupPanel.vue
         └── TrackblazerPanel.vue
-```text
+```
 
 The two flagship experiences are the **Career Cockpit** ("what should I do on this turn?") and the
 **Legacy Lab** ("how do I start this run?"). Note the Legacy Lab's recommendation/optimization parts are

@@ -190,7 +190,7 @@ BEST OPTION
 WHY?
       ↓
 PLAYER DECIDES
-```text
+```
 
 The application never removes player agency.
 
@@ -371,7 +371,7 @@ Information  → Blue
 Special      → Purple
 Exceptional  → Gold
 Neutral      → Gray
-```text
+```
 
 Do not use color as the sole indicator.
 
@@ -381,7 +381,7 @@ Example:
 ✓ Safe
 ⚠ Risk
 ✕ Failure
-```text
+```
 
 rather than relying only on colored text.
 
@@ -415,7 +415,7 @@ Deep navy
 
 Muted
 Slate gray
-```text
+```
 
 Exact values should be implemented as design tokens rather than hardcoded
 throughout the application.
@@ -436,7 +436,7 @@ Example:
 --color-danger
 --color-info
 --color-special
-```text
+```
 
 ---
 
@@ -487,7 +487,7 @@ Example:
 Speed       1,204
 Stamina       782
 Power       1,091
-```text
+```
 
 Numbers should visually align.
 
@@ -501,7 +501,7 @@ Recommended base unit:
 
 ```text
 4px
-```text
+```
 
 Scale:
 
@@ -516,7 +516,7 @@ Scale:
 40
 48
 64
-```text
+```
 
 Primary layout spacing should use 16px / 24px / 32px increments.
 
@@ -532,7 +532,7 @@ Cards              10px
 Large panels       14px
 Dialogs            16px
 Pills              999px
-```text
+```
 
 Avoid excessively rounded UI.
 
@@ -571,13 +571,13 @@ Desktop:
 │               │                                           │
 │               │                                           │
 └───────────────┴───────────────────────────────────────────┘
-```text
+```
 
 Sidebar width:
 
 ```text
 240–280px
-```text
+```
 
 Main content should have a readable maximum width.
 
@@ -596,7 +596,7 @@ Speed Training
 +62 Speed
 +25 Power
 3 Supports
-```text
+```
 
 Bad:
 
@@ -654,7 +654,7 @@ Example:
 
 ```text
 [ Start Career ]
-```text
+```
 
 ## Secondary
 
@@ -662,7 +662,7 @@ Used for alternatives.
 
 ```text
 [ Edit Deck ]
-```text
+```
 
 ## Tertiary
 
@@ -670,7 +670,7 @@ Used for low-priority actions.
 
 ```text
 View Details
-```text
+```
 
 ## Destructive
 
@@ -692,7 +692,7 @@ Stats should always be represented in two ways:
 Speed
 1,024 / 1,200
 ██████████████░░
-```text
+```
 
 This provides:
 
@@ -713,7 +713,7 @@ Stamina
 Power
 Guts
 Wit
-```text
+```
 
 The colors should remain muted.
 
@@ -730,7 +730,7 @@ Turf       A
 Medium     A
 Long       B
 Pace       A
-```text
+```
 
 Badge hierarchy:
 
@@ -739,7 +739,7 @@ S / A    Strong
 B / C    Neutral
 D / E    Weak
 F / G    Very weak
-```text
+```
 
 Do not communicate aptitude solely through color.
 
@@ -754,14 +754,14 @@ Blue      → Stats
 Pink      → Aptitude
 Green     → Unique
 White     → Skills / races / factors
-```text
+```
 
 Display star count prominently.
 
 ```text
 Speed
 ★★★
-```text
+```
 
 Use a consistent star component.
 
@@ -791,7 +791,7 @@ This is a signature component.
 │                                               │
 │ Alternative: Train Wit                        │
 └───────────────────────────────────────────────┘
-```text
+```
 
 The recommendation must always expose its reasoning.
 
@@ -805,13 +805,13 @@ Use:
 HIGH
 MEDIUM
 LOW
-```text
+```
 
 Do not display false precision such as:
 
 ```text
 Confidence: 97.31%
-```text
+```
 
 unless the underlying model actually supports that precision.
 
@@ -825,13 +825,13 @@ Three primary states:
 LOW RISK
 MEDIUM RISK
 HIGH RISK
-```text
+```
 
 Optional fourth:
 
 ```text
 CRITICAL
-```text
+```
 
 Always pair with text.
 
@@ -855,31 +855,31 @@ Visual structure:
 ● Senior
 │
 ● Finale
-```text
+```
 
 Current position:
 
 ```text
 ◉
-```text
+```
 
 Completed:
 
 ```text
 ●
-```text
+```
 
 Upcoming:
 
 ```text
 ○
-```text
+```
 
 Missed/failed:
 
 ```text
 ×
-```text
+```
 
 ---
 
@@ -896,7 +896,7 @@ Current Decision
 
 Trainer Advisor
    30%
-```text
+```
 
 The middle column always receives the greatest visual emphasis.
 
@@ -928,13 +928,13 @@ Available actions should be visually comparable.
 │ +35        │
 │ SAFE       │
 └────────────┘
-```text
+```
 
 The recommended card gets an additional indicator:
 
 ```text
 ★ RECOMMENDED
-```text
+```
 
 ---
 
@@ -952,7 +952,7 @@ Unity-specific
 Trackblazer-specific
 +
 Future scenario-specific
-```text
+```
 
 Instead:
 
@@ -960,7 +960,7 @@ Instead:
 Career Cockpit
       +
 Scenario Panel
-```text
+```
 
 This allows each scenario to introduce its own mechanics without
 destroying the core layout.
@@ -1019,7 +1019,7 @@ Shop Coins
 Race Calendar
 Shop Inventory
 Rival Alerts
-```text
+```
 
 The Shop should be quickly accessible from the Career Cockpit.
 
@@ -1042,7 +1042,7 @@ Complete your first career to create a Veteran
 that can be used for future inheritance planning.
 
 [Start Career]
-```text
+```
 
 ---
 
@@ -1058,7 +1058,7 @@ For example:
 │ █████████                │
 │ ███████████████          │
 └──────────────────────────┘
-```text
+```
 
 Because the application is local-first, loading should normally be minimal.
 
@@ -1100,7 +1100,7 @@ Examples:
 ```text
 Race Bonus
 ?
-```text
+```
 
 Hover:
 
@@ -1116,13 +1116,13 @@ Default:
 
 ```text
 Moderate density
-```text
+```
 
 Expert mode:
 
 ```text
 High density
-```text
+```
 
 The application should eventually support a density preference.
 
@@ -1150,7 +1150,7 @@ Default:
 Speed +62
 3 Supports
 2% Failure
-```text
+```
 
 Expand:
 
@@ -1169,7 +1169,7 @@ Scenario modifier
 
 Total
 +62
-```text
+```
 
 This keeps the interface readable.
 
@@ -1203,7 +1203,7 @@ Example:
 ✓ Training recorded
 
 [Undo]
-```text
+```
 
 Undo should restore:
 
@@ -1234,7 +1234,7 @@ Mood
 [Great]
 
 [Save Correction]
-```text
+```
 
 This is essential because the application is an assistant rather than a direct
 game integration.
@@ -1255,7 +1255,7 @@ Examples:
 ★ New inheritance candidate found
 
 ⚠ Shop refresh in 1 turn
-```text
+```
 
 Notifications should never interrupt the user's current decision unnecessarily.
 
@@ -1274,7 +1274,7 @@ Two columns:
 ```text
 Main Decision
 Advisor
-```text
+```
 
 Timeline becomes a horizontal strip.
 
@@ -1292,7 +1292,7 @@ Actions
 Scenario
 ↓
 Timeline
-```text
+```
 
 The recommendation remains above secondary information.
 
@@ -1308,7 +1308,7 @@ Career
 Legacy
 Deck
 More
-```text
+```
 
 Do not attempt to shrink the desktop sidebar onto mobile.
 
@@ -1358,13 +1358,13 @@ Default transition duration:
 
 ```text
 150–200ms
-```text
+```
 
 Important state changes may use:
 
 ```text
 250–300ms
-```text
+```
 
 ---
 
@@ -1389,7 +1389,7 @@ Skill Points    Spark
 Shop            Store
 Warning         Triangle
 Recommendation Star
-```text
+```
 
 Do not use emoji as the primary icon system in production.
 
@@ -1446,7 +1446,7 @@ Medium             ★★★           ★★★
 Skill A             ★★           ★★★
 G1 wins             9             12
 Affinity            High          Medium
-```text
+```
 
 Never force the user to compare two separate cards mentally.
 
@@ -1485,7 +1485,7 @@ Unity Cup
 
 Data updated:
 2026-08-14
-```text
+```
 
 If the database and career state use different versions:
 
@@ -1496,7 +1496,7 @@ This career was created using an older
 scenario ruleset.
 
 [Review Changes]
-```text
+```
 
 ---
 
@@ -1511,7 +1511,7 @@ Confirmed
 Calculated
 Estimated
 Unknown
-```text
+```
 
 Never represent an estimate as a fact.
 
@@ -1519,13 +1519,13 @@ Example:
 
 ```text
 Estimated win chance: 82%
-```text
+```
 
 not:
 
 ```text
 Win chance: 82%
-```text
+```
 
 ---
 
@@ -1564,7 +1564,7 @@ The application should feel like:
              │
              ▼
        UPDATED STATE
-```text
+```
 
 The player remains the Trainer.
 
@@ -1645,7 +1645,7 @@ resources/js/
         ├── UraPanel.vue
         ├── UnityCupPanel.vue
         └── TrackblazerPanel.vue
-```text
+```
 
 The two flagship experiences are the **Career Cockpit** ("what should I do on this turn?") and the
 **Legacy Lab** ("how do I start this run?"). Note the Legacy Lab's recommendation/optimization parts are

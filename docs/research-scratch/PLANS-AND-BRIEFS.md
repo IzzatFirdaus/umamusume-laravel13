@@ -436,7 +436,7 @@ the path on disk but not in `git ls-files`, so the citation works on this machin
 # pointer withdrawal (.copilot):
 #   edit docs/SKILL_AUTOMATION.md:29 to drop the citation
 #   NOT run: SKILL_AUTOMATION.md is not in this dispatch's edit scope.
-```text
+```
 
 **What is not at risk:** none of the four `research-scratch/*.md` bodies is cited as an instruction a reader
 follows; three are provenance citations inside a dated record or a fenced file.
@@ -1049,7 +1049,7 @@ call is **out of scope** (escalation 7 territory per `AGENTS.md §4`).
 
 ```php
 public function exists(string $kind, int $id): bool
-```text
+```
 
 Returns `true` when the file is on disk under the mirror's `ROOT.'/'.$relative`,
 `false` otherwise.
@@ -1290,7 +1290,7 @@ declared). Any other `kind` returns 404.
 
 ```php
 public function url(string $kind, int $id): ?string
-```text
+```
 
 Returns `route('artwork.show', ['kind' => $kind, 'id' => $id])` when mirrored;
 `null` otherwise.
@@ -1711,7 +1711,7 @@ it('omits the thumb when not mirrored', function (): void {
 
     $this->get('/support-cards')->assertOk()->assertDontSee('<img', false);
 });
-```text
+```
 
 Wire the slot in the existing header block of both, alongside the title/rarity:
 
@@ -1722,7 +1722,7 @@ Wire the slot in the existing header block of both, alongside the title/rarity:
     :name="$card->displayName()"
     :route-args="['card' => $card->support_id]"
 />
-```text
+```
 
 - [ ] **Step 1 + 2 (running failing tests)** for both files with the appropriate route name.
 - [ ] **Step 3 (minimum edit)** for both files.
@@ -1878,7 +1878,7 @@ Wire the slot in the existing header block of both, alongside the title/rarity:
 - Deviations: <list, or `none`>.
 - Open decisions: <list with named owner, or `none`>.
 - Next slice: Task N+1, deferred reason <if any>.
-```text
+```
 
 ---
 
@@ -3467,7 +3467,7 @@ server: global
 source: gametora_scenario_export
 confidence: verified
 verified_at: 2026-09-27
-```text
+```
 
 **Terminology authority:** Global terminology is authoritative (Scouts, Transfer Requests, Veteran Umamusume, Pal, Wit, Inspiration, Legacies, Sparks). UI always uses Global labels; internal keys separate. JP-only mechanics explicitly excluded (four Global scenarios vs fourteen JP; JP-only features like Independent Training marked unverified for Global).
 
@@ -3624,7 +3624,7 @@ Save Veteran
     │
     ▼
 Veteran / Legacy Library
-```text
+```
 
 ---
 
@@ -3650,7 +3650,7 @@ All screens except the initial setup screens use the Application Shell.
 ├──────────────┴───────────────────────────────────────────┤
 │ Status / Local Data / Version                            │
 └──────────────────────────────────────────────────────────┘
-```text
+```
 
 ### Global navigation
 
@@ -3704,7 +3704,7 @@ Landing screen for returning users.
 │ Recent Veterans                                          │
 │ Recent Builds                                            │
 └──────────────────────────────────────────────────────────┘
-```text
+```
 
 ### Components
 
@@ -3829,7 +3829,7 @@ Select the trainee for the career.
 │                                      │
 │ [View Profile] [Select]              │
 └──────────────────────────────────────┘
-```text
+```
 
 ---
 
@@ -3908,7 +3908,7 @@ Stamina      700
 Power       1000
 Guts         400
 Wit          900
-```text
+```
 
 ### Skill priorities
 
@@ -3953,7 +3953,7 @@ This is a primary feature of the application.
 │                       │                                  │
 │                       │ Inheritance Analysis             │
 └───────────────────────┴──────────────────────────────────┘
-```text
+```
 
 ### Candidate filters
 
@@ -3986,7 +3986,7 @@ Parent A
 Parent B
 ├── Grandparent B1
 └── Grandparent B2
-```text
+```
 
 ### Compatibility analysis
 
@@ -4040,7 +4040,7 @@ Build the six-card support deck.
 │ Bond Potential  █████████░                              │
 │ Scenario Fit    ████████░░                              │
 └──────────────────────────────────────────────────────────┘
-```text
+```
 
 ### Filters
 
@@ -4136,7 +4136,7 @@ This is the application's most important screen.
 ├──────────────┴──────────────────────────────┴───────────────┤
 │ Scenario Panel / Upcoming Events / Race Calendar            │
 └─────────────────────────────────────────────────────────────┘
-```text
+```
 
 ### Header
 
@@ -4203,7 +4203,7 @@ Energy
 Mood
 Fans
 Skill Points
-```text
+```
 
 Stat targets should appear as progress bars.
 
@@ -4327,7 +4327,7 @@ Recommended: Option B
 Reason:
 Energy is currently low and the next
 important race is approaching.
-```text
+```
 
 The user must be able to override the recommendation.
 
@@ -4358,7 +4358,7 @@ Classic April
 
 Senior April
     ○
-```text
+```
 
 ---
 
@@ -4943,7 +4943,7 @@ Display:
 ```text
 Global Ruleset
 Version: YYYY.MM
-```text
+```
 
 Game data and scenario rules must be versioned.
 
@@ -5007,7 +5007,7 @@ Train Wit
 
 Risk:
 Delays Speed target by approximately one turn.
-```text
+```
 
 ---
 
@@ -5078,7 +5078,7 @@ Timeline
 Main Decision Area
 +
 Advisor
-```text
+```
 
 ### Tablet
 
@@ -5098,7 +5098,7 @@ Recommendation
 Action
 Scenario
 Timeline
-```text
+```
 
 Never require horizontal scrolling for primary decisions.
 

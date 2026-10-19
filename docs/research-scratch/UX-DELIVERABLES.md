@@ -1221,7 +1221,7 @@ START: User taps "Career" / "Training" from main menu
 │   └─ CONFIRM: Run begins → Flow 2
 │
 END: Career run initialized
-```text
+```
 
 ---
 
@@ -1293,7 +1293,7 @@ START: Training turn begins
 │       └─ → Next turn
 │
 END: Turn resolved, calendar advances
-```text
+```
 
 ---
 
@@ -1333,7 +1333,7 @@ START: User selects a training facility
 │   └─ Display: "+X Energy recovered" instead of cost
 │
 └─ RESOLVE: Training executes with amplified gains → UM-TRN-003
-```text
+```
 
 ---
 
@@ -1388,7 +1388,7 @@ START: User selects "Race" from action menu
 │   └─ "Continue" → returns to training loop
 │
 END: Race resolved
-```text
+```
 
 ---
 
@@ -1435,7 +1435,7 @@ START: User opens Skill Shop (UM-SKL-001)
 │   └─ Can share set by ID
 │
 END: Skill acquired or browsing continues
-```text
+```
 
 ---
 
@@ -1482,7 +1482,7 @@ START: User completes a career run
 │   └─ Repeat until desired factor set achieved
 │
 END: Factors banked for future runs
-```text
+```
 
 ---
 
@@ -1515,7 +1515,7 @@ START: Calendar reaches July (Classic or Senior year)
 │   └─ Normal training resumes
 │
 END: Summer camp window closed
-```text
+```
 
 ---
 
@@ -1566,7 +1566,7 @@ START: Champions Meeting event window opens
 │   └─ [Global] daily missions pay "<Cup> Entry Tickets" ×2
 │
 END: Champions Meeting edition closed
-```text
+```
 
 ---
 
@@ -1606,7 +1606,7 @@ START: User navigates to Scout/Gacha screen
 │   └─ "Pull Again" / "Go to Deck" options
 │
 END: Pull resolved
-```text
+```
 
 ---
 
@@ -1642,7 +1642,7 @@ START: Every 6 months of career
 │   └─ After 4 team races: Unity Cup Finals vs Team Zenith
 │
 END: Team race cycle complete
-```text
+```
 
 #### 10B: Trackblazer — Special Shop Economy
 
@@ -1687,7 +1687,7 @@ START: After Debut Race
 │   └─ Save ~150 coins for final shop
 │
 END: Trackblazer run complete
-```text
+```
 
 #### 10C: Grand Masters — Three Goddesses System
 
@@ -1722,7 +1722,7 @@ START: Turn 3 of Grand Masters scenario
 │       └─ Activation: ALL cards trigger Friendship Training regardless of bond/type/facility
 │
 END: Goddess activated, bonuses applied
-```text
+```
 
 ---
 
@@ -2340,7 +2340,7 @@ This is the **always-visible frame** during a run. It never scrolls away.
 ```text
 [ 13 turn(s) left ]  Rice Shower · Trainee Umamusume · Unity Cup
                      Energy ▓▓▓▓▓░░░░  42  [Caution]   |   1,943 fans · target 3,000
-```text
+```
 
 This strip is **scenario-composed** (D-220, D-240). The base items (turn, trainee, scenario, Energy, fans) are always present. Scenario-specific items appear only when the scenario has them:
 
@@ -2378,7 +2378,7 @@ This strip is **scenario-composed** (D-220, D-240). The base items (turn, traine
 ```text
 Wit  1,340 / 1,800
      1,200 base · +600 scenario · +0 breakthrough · deck not tracked
-```text
+```
 
 The denominator is the sum of terms the tool actually holds. Each component is labeled. **The disclosure line names what is included and what is not.** (D-162)
 
@@ -2460,7 +2460,7 @@ Step 3: "Any skill event?"
 
 Step 4: "Any note?"
         → Optional free text
-```text
+```
 
 **Critical: no numbered step sidebar.** A vertical 1-2-3-4 rail is a SaaS setup wizard and stops feeling like an in-game event (D-117). The flow carries a single `Step 1 of 3` line with three dots at the foot of the card stack, and nothing else.
 
@@ -2496,7 +2496,7 @@ Each is a **banner button** (DESIGN §6.1):
 
 ```text
 Wit costs 0 Energy and you are at 42. (GameWith 2026-09-25; source data 2023-02-25)
-```text
+```
 
 The advisory **suggests; it never disables, dims, or reorders** the five options (D-155). The Trainer picks; the tool explains.
 
@@ -2528,7 +2528,7 @@ The advisory **suggests; it never disables, dims, or reorders** the five options
 
 ```text
 chargeable → charged → held → normal spent → Extreme chargeable → Extreme spent
-```text
+```
 
 **A spent-normal teammate is not inert.** They are the next Extreme candidate. Any "consumed" treatment (reduced opacity, strikethrough) is a lie on the fifth state.
 
@@ -2671,7 +2671,7 @@ These are explicitly **not user inputs** in this tool:
 [No Run] → [Active] → [Completed] or [Retired]
               ↑
               └── turns logged one at a time
-```text
+```
 
 **States:**
 
@@ -2891,7 +2891,7 @@ TRAINER OPENS TRAINING SCREEN
 └─ 6. Confirm or cancel.
       Confirm → resolve turn → timeline entry appended.
       Cancel → return to training screen, nothing written.
-```text
+```
 
 #### Flow UC-2: Spirit Burst Resolution
 
@@ -2933,7 +2933,7 @@ and the Trainer confirms training on that tile)
 └─ 5. Timeline entry appended.
       Entry shows: which teammate burst, what stats were gained,
       which skill hint was received, Burst count running total.
-```text
+```
 
 #### Flow UC-3: Team Race (every 6 months)
 
@@ -2990,7 +2990,7 @@ TEAM RACE COUNTDOWN REACHES ZERO
 └─ 5. Timeline entry appended.
       Entry shows: opponent team name, per-category results,
       overall result, league rank change, new teammates joined.
-```text
+```
 
 #### Flow UC-4: Team Name Selection (Junior Year, 2nd half September)
 
@@ -3022,7 +3022,7 @@ TEAM NAME EVENT FIRES
 │
 └─ 3. Timeline entry appended.
       Entry shows: team name chosen, linked character.
-```text
+```
 
 #### Flow UC-5: Scenario Skill Ladder
 
@@ -3049,7 +3049,7 @@ TOTAL BURST COUNT IS TRACKED ACROSS THE RUN
 └─ The progress meter's denominator is normal + Extreme combined.
    This changed in the rework. A meter counting only normal
    Bursts would show the wrong progress.
-```text
+```
 
 #### Flow UC-6: Unity Cup Finals
 
@@ -3079,7 +3079,7 @@ AFTER THE 4TH TEAM RACE
 └─ 5. Post-finals:
       URA-style final races proceed (qualifier → semifinal → final).
       Same structure as URA Finale for the last 3 races.
-```text
+```
 
 #### Flow UC-7: Unique Skill Level-Ups (Unity Cup variant)
 
@@ -3096,7 +3096,7 @@ DIFFERENCE: The April level-up has NO bond condition.
 
 The tool must NOT show an Akikawa bond requirement
 in the April gate for Unity Cup runs.
-```text
+```
 
 ---
 
@@ -3115,7 +3115,7 @@ The persistent header strip gains Unity Cup-specific elements.
 │ Team Rank: B  │  Spirit Bursts: 4/13+  │  League Rank: 7            │
 │ Next Team Race: 3 turns                                              │
 └──────────────────────────────────────────────────────────────────────┘
-```text
+```
 
 | Element                    | Source                                             | Rendering rule                                                                                                |
 | -------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
@@ -3144,7 +3144,7 @@ Each facility tab gains two additions over the baseline:
 
 ```text
 Speed Lvl 4 ← Team Rank A
-```text
+```
 
 Not just `Lvl 4`. In URA Finale, the cause is repetition. In Unity Cup, it is always the team rank. A level chip without its cause is misleading (D-222).
 
@@ -3168,7 +3168,7 @@ chargeable ──→ charged ──→ held ──→ normal spent ──→ Ext
    (white)     (filled)   (deliberately              (NOT a dead end;       (final state
                 gauge       untriggered)               purple ring)           for this run)
                 full)
-```text
+```
 
 A "spent" teammate must NEVER render as consumed or resettable. They are one tier spent, one tier pending (D-223).
 
@@ -3192,7 +3192,7 @@ Full-width overlay, triggered when the Team Race countdown reaches zero.
 │                                                              │
 │  [ Confirm Lineup ]    [ Cancel ]                            │
 └──────────────────────────────────────────────────────────────┘
-```text
+```
 
 Circle indicators: ○ = disadvantaged, ● = favored. These are the GAME's own estimates, recorded by the Trainer. The tool does not compute them.
 
@@ -3206,7 +3206,7 @@ A horizontal progress bar in the dashboard, below the resource strip.
 Spirit Burst Progress
 ████████████████░░░░  11 of 13+
 Next reward: Gold hint Lv1, +30 [highest team stat], +30 SP
-```text
+```
 
 The denominator shifts at each threshold (6 → 9 → 12 → 13+). The bar must reflect the CURRENT threshold, not a fixed maximum.
 
@@ -3221,7 +3221,7 @@ Valentine's Gate   60,000 / 40,000 fans   [ reached / not reached ]
 April Gate         70,000 / 60,000 fans   [ reached / not reached ]
                    (no bond requirement in Unity Cup)
 Christmas Gate     120,000 / 80,000 fans  [ reached / not reached ]
-```text
+```
 
 The tool must NOT render an Akikawa bond bar in the April gate for Unity Cup runs. Rendering it would state a requirement that does not exist in this scenario (Akikawa is absent; Riko Kashimoto stands in).
 
@@ -3290,7 +3290,7 @@ THE RUN HAS 4 OBJECTIVES (replacing URA's race goals)
    Over-shooting one deadline cannot fund the next.
    A Grade Point meter that shows a running total
    across periods would state the wrong thing.
-```text
+```
 
 #### Flow TB-2: Grade Point Earning (through racing)
 
@@ -3325,7 +3325,7 @@ TRAINER ENTERS A RACE
 └─ 4. Timeline entry appended.
       Entry shows: race name, grade, placement,
       Grade Points earned, Shop Coins earned.
-```text
+```
 
 #### Flow TB-3: Shop Coins & The Special Shop
 
@@ -3382,7 +3382,7 @@ COINS ARE EARNED THROUGH RACE PLACEMENT
     Unspent coins are worthless.
     Twinkle Star Climax races pay NO coins.
     The final shop before the Climax is the last chance to spend.
-```text
+```
 
 #### Flow TB-4: Epithet Route Tracking
 
@@ -3435,7 +3435,7 @@ Winning every race in a named route grants bonus stats or skill hints.
     Completed routes show the reward received.
     Routes are a LIST, not a grid of equal-sized cards.
     There are dozens of epithets; only a handful are live routes.
-```text
+```
 
 #### Flow TB-5: Rival Races
 
@@ -3466,7 +3466,7 @@ Marked by a red/blue "VS" speech-bubble icon on the race button.
 └─ 5. Timeline entry appended.
       Entry shows: rival name, result (win/draw/loss),
       reward received (hint name or stat gains).
-```text
+```
 
 #### Flow TB-6: Facility Level (Trackblazer variant)
 
@@ -3485,7 +3485,7 @@ The level chip must state its cause:
   Speed Lvl 5 ← 4× repetition + 1 purchased
 
 Not just "Lvl 5." The purchased path is unique to Trackblazer (D-222).
-```text
+```
 
 #### Flow TB-7: Race Fatigue Management
 
@@ -3523,7 +3523,7 @@ CONSECUTIVE RACES INCREASE FATIGUE RISK
     It does NOT recommend whether to race or train.
     It shows the count, the sourced risk table, and the
     Trainer decides. (Planner Rules 1, 4, 5)
-```text
+```
 
 #### Flow TB-8: Twinkle Star Climax (The Finale)
 
@@ -3580,7 +3580,7 @@ This is a 3-RACE POINTS LEAGUE, not a bracket.
       One entry per Climax race: race name, placement, VP earned,
       running VP total.
       Final entry: overall result, total VP, win/loss.
-```text
+```
 
 #### Flow TB-9: Unique Skill Level-Ups (Trackblazer variant)
 
@@ -3605,7 +3605,7 @@ Trackblazer uses an annual "Umamusume of the Year" selection.
 │
 └─ The tool shows BOTH the fan count and the bond level
    as co-requirements. Showing only one would be incomplete.
-```text
+```
 
 ---
 
@@ -3622,7 +3622,7 @@ Trackblazer uses an annual "Umamusume of the Year" selection.
 │ Grade Points: 47 / 30 (current objective)  │  Deadline: 12 turns    │
 │ Shop Coins: 240  │  Shop restocks in: 4 turns                       │
 └──────────────────────────────────────────────────────────────────────┘
-```text
+```
 
 | Element              | Source                                         | Rendering rule                                                                                          |
 | -------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -3649,7 +3649,7 @@ Replaces the Race Calendar panel entirely. There is no calendar in Trackblazer.
 │  Objective 3: +300 GP     locked                             │
 │  Objective 4: +300 GP     locked                             │
 └──────────────────────────────────────────────────────────────┘
-```text
+```
 
 **Critical rendering rules:**
 
@@ -3684,7 +3684,7 @@ A collapsible panel accessible from the dashboard. Not always visible; the Train
 │  ⚠ Multi-turn items cannot be re-used while active.          │
 │  ⚠ Buying a weaker item after a stronger one overwrites it.  │
 └──────────────────────────────────────────────────────────────┘
-```text
+```
 
 **Rendering rules:**
 
@@ -3716,7 +3716,7 @@ A collapsible list panel, not a grid.
 │  Completed:                                                  │
 │  ✓ Sprint Go-Getter (+10 to 2 random stats)                 │
 └──────────────────────────────────────────────────────────────┘
-```text
+```
 
 **Rendering rules:**
 
@@ -3738,7 +3738,7 @@ A badge on the race selection button, not a separate panel.
 │  ⚠ Only 1st place counts as a win.                          │
 │  ⚠ Requires C aptitude or better in Mile.                   │
 └──────────────────────────────────────────────────────────────┘
-```text
+```
 
 **Rendering rules:**
 
@@ -3756,7 +3756,7 @@ A persistent chip in the dashboard, visible only when consecutive-race count ≥
 │  Risk: Mood Down 33% (at 0 Energy) · Skin Outbreak 8%       │
 │  ⚠ Clears after Late December                                │
 └──────────────────────────────────────────────────────────────┘
-```text
+```
 
 **Rendering rules:**
 
@@ -3770,7 +3770,7 @@ A persistent chip in the dashboard, visible only when consecutive-race count ≥
 ```text
 Speed Lvl 5 ← 4× repetition + 1 purchased
 Stamina Lvl 3 ← 3× repetition
-```text
+```
 
 The purchased level is always called out separately. A level chip that does not distinguish earned from purchased levels would hide the fact that Trackblazer is the only scenario where facility level is partly bought (D-222).
 
@@ -3793,7 +3793,7 @@ Replaces the URA-style qualifier → semifinal → final progression.
 │  ⚠ Climax races pay NO Shop Coins.                           │
 │  ⚠ Save Hammers for these races (+10 all stats at base).    │
 └──────────────────────────────────────────────────────────────┘
-```text
+```
 
 **Rendering rules:**
 
@@ -3819,7 +3819,7 @@ Umamusume of the Year — Classic
 Umamusume of the Year — Senior
   Fans: 0 / 120,000  ✗
   Akikawa Bond: 0 / 51  ✗
-```text
+```
 
 **Rendering rules:**
 

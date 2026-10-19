@@ -114,7 +114,7 @@ The request named five directories. Measured inbound citation load from tracked 
 
 ```bash
 git -c core.quotepath=false grep -c -- "<path>" -- ':!research-scratch' | awk -F: '{s+=$NF} END {print s}'
-```text
+```
 
 | Directory                              | Files      | Tracked       | Citing files      | Citing lines   | Disposition       | Why                                                                                                                   |
 | -------------------------------------- | ---------- | ------------- | ----------------- | -------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------- |
@@ -145,7 +145,7 @@ Read this as the plan's central finding: of roughly 600 files in the named direc
 ```bash
 git log --oneline -1
 git rev-list --count <session-start-sha>..HEAD
-```text
+```
 
 Expected: the second number is 0. If it is not, stop and re-run Task 1 later or on an isolated worktree.
 
@@ -153,7 +153,7 @@ Expected: the second number is 0. If it is not, stop and re-run Task 1 later or 
 
 ```bash
 git -c core.quotepath=false status --porcelain --untracked-files=no
-```text
+```
 
 Expected: empty output. Any ` M ` line is someone's uncommitted work in a shared tree. Stop and name the file.
 
@@ -167,7 +167,7 @@ The cost of skipping this gate is not hypothetical. The authorized append to `do
 composer lore
 php artisan test --compact
 vendor/bin/pint --test --format agent
-```text
+```
 
 Expected: `composer lore` prints only hits you have already ruled on (the deprecated-PDF review's §4.1 notes the folder is invisible to both greps); tests green; Pint passed. Paste the three outputs into the run log. If the baseline is not green, do not start Task 3: you could not tell your own damage from a pre-existing break.
 
@@ -175,7 +175,7 @@ Expected: `composer lore` prints only hits you have already ruled on (the deprec
 
 ```bash
 git check-ignore -v research-scratch .scratch-uma
-```text
+```
 
 Expected: `.gitignore:87:/research-scratch/` and `.gitignore:88:/.scratch-uma/`. The tail of `.gitignore` carries the UTF-16/NUL defect in inventory §10 item 9, so trust `check-ignore` over reading the file.
 
@@ -196,7 +196,7 @@ Expected: `.gitignore:87:/research-scratch/` and `.gitignore:88:/.scratch-uma/`.
 
 ```bash
 python research-scratch/scripts/reorg_scratch.py --self-test
-```text
+```
 
 Expected: `self-test: 7/7 classifier cases pass`, exit 0. On any FAIL, fix `classify_line()` first; do not proceed.
 
@@ -204,7 +204,7 @@ Expected: `self-test: 7/7 classifier cases pass`, exit 0. On any FAIL, fix `clas
 
 ```bash
 python research-scratch/scripts/reorg_scratch.py --scan
-```text
+```
 
 Expected at `6227417`: `movable 44 / candidates 53 / refused-paths 0`, printed per file. The nine held names, each held because a tracked document cites its basename: 5 `.py` (`checklinks.py`, `final_measure.py`, `gates.py`, `gen_calendar.py`, `resync_doc.py`) and 4 `.md` (`calendar-tables.md`, `global-race-sources.md`, `scrape-game8-scenarios.md`, `scrape-training-heuristics.md`). Every one reports `cited by 1`.
 
@@ -224,7 +224,7 @@ Bucket arithmetic to check the run against: 26 `.py` = 21 moved + 5 held; 23 `.m
 
 ```bash
 python research-scratch/scripts/reorg_scratch.py --apply
-```text
+```
 
 Expected: 44 `MOVED` lines, a journal at `research-scratch/reorg/journal.json`, no `SKIP`.
 
@@ -232,7 +232,7 @@ Expected: 44 `MOVED` lines, a journal at `research-scratch/reorg/journal.json`, 
 
 ```bash
 git -c core.quotepath=false status --porcelain --untracked-files=no
-```text
+```
 
 Expected: empty. Any output means a refusal pattern failed; stop, run `--rollback`, and report.
 
@@ -241,7 +241,7 @@ Expected: empty. Any output means a refusal pattern failed; stop, run `--rollbac
 ```bash
 find research-scratch -maxdepth 1 -type f | wc -l
 find research-scratch/{scripts,reports,drafts,out} -type f 2>/dev/null | wc -l
-```text
+```
 
 Expected: root loose count drops to the 9 held files; the four buckets sum to 44 plus the tool's own file in `scripts/`.
 
@@ -264,7 +264,7 @@ Expected: root loose count drops to the 9 held files; the four buckets sum to 44
 
 ```bash
 python research-scratch/scripts/reorg_scratch.py --rewrite --dry-run
-```text
+```
 
 Expected: one line per document that mentions a moved path, with its line count, then `files touched N; line verdicts {'LIVE': a, 'RECORD': b, 'UNKNOWN': c}`, then the unresolved-path check.
 
@@ -284,7 +284,7 @@ Expected: one line per document that mentions a moved path, with its line count,
 
 ```bash
 python research-scratch/scripts/reorg_scratch.py --rewrite
-```text
+```
 
 Expected: `EDITED <file>: n line(s)` per file, ledger written to `research-scratch/reorg/rewrite-journal.json` with `applied: true` only on LIVE lines.
 
@@ -293,7 +293,7 @@ Expected: `EDITED <file>: n line(s)` per file, ledger written to `research-scrat
 ```bash
 git diff --stat
 git diff -U0 | grep -E "^[+-]" | grep -v "^[+-][+-]" | head -40
-```text
+```
 
 Expected: changed-line count equals the LIVE count from Task 4, and every `+` line differs from its `-` partner by the path only, never by surrounding prose. A diff that touches more than the path is a bad substitution; revert that file.
 
@@ -301,7 +301,7 @@ Expected: changed-line count equals the LIVE count from Task 4, and every `+` li
 
 ```bash
 python research-scratch/scripts/reorg_scratch.py --rewrite --dry-run
-```text
+```
 
 Expected: the LIVE count is now 0; remaining hits are RECORD and UNKNOWN only, and the ledger names them.
 
@@ -311,7 +311,7 @@ Expected: the LIVE count is now 0; remaining hits are RECORD and UNKNOWN only, a
 composer lore
 php artisan test --compact
 vendor/bin/pint --test --format agent
-```text
+```
 
 Expected: identical to baseline. `composer lore` cannot gain hits from a `docs/` path edit except through vocabulary this plan did not introduce; if it prints something new, that line is yours and you rule on it before continuing.
 
@@ -595,7 +595,7 @@ it('sizes every catalog control to the design contract\'s 44px', function (): vo
         expect($node->getAttribute('class'))->toContain('h-11');
     }
 });
-```text
+```
 
 **Note on the 44px claim:** `h-11` is `2.75rem`. That is 44px only while the root font size is 16px. The browser read in the acceptance list is what proves the contract; the class assertion proves the token was applied, not the rendered height.
 
@@ -616,7 +616,7 @@ KI-29. The catalog index's search field, status filter and submit
 button measured 30/31/32px against the 44px control height in
 DESIGN-CORPUS.md. The run screen took the same fix at c17e63b;
 this is the second surface.
-```text
+```
 
 ##### Task 1.2 - Close KI-32 with the owed measurement
 
@@ -685,7 +685,7 @@ it('does not tell the trainer that skill lists are not stored', function (): voi
         ->assertDontSee('are not stored')
         ->assertDontSee('Skill lists are not stored');
 });
-```text
+```
 
 **Acceptance:**
 
@@ -727,7 +727,7 @@ it('lists her unique and innate skills on her detail page', function (): void {
         ->assertSee('Test Unique Skill')
         ->assertSee('Test Innate Skill A');
 });
-```text
+```
 
 **Acceptance:**
 
@@ -864,7 +864,7 @@ it('builds combobox ids from a caller-supplied prefix', function (): void {
         ->toContain('createCombobox')
         ->toContain('idPrefix');
 });
-```text
+```
 
 - That pin is deliberately weak. It proves the parameter exists, not that two prefixes yield disjoint id sets; the browser pass in Task 4.2 is what proves behaviour. Say so in the task record rather than claiming more coverage than the pin has.
 
@@ -901,7 +901,7 @@ it('carries the four-band payload and the APG contract in skill-combobox.ts', fu
         ->toContain('aria-activedescendant')
         ->toContain('Awakening skills are not recorded yet');
 });
-```text
+```
 
 And a view-shape pin, so the `<select>` removal is checked rather than assumed:
 
@@ -911,7 +911,7 @@ it('renders the skill combobox and no skill select in the run repeater', functio
     expect($html)->toContain('skill-combobox');
     expect($html)->not->toContain('name="skills[0][skill_id]" data-role="native-select"');
 });
-```text
+```
 
 **Acceptance:**
 
@@ -1021,7 +1021,7 @@ M3  WS-4 (4.1, 4.2)  requires 3.1                     |
 M4  WS-5 (5.1)  requires 4.1 IF Option A  <────────────┤
      |                                                  |
 M5  WS-6 (6.1 ratification -> 6.3)  requires 6.2 ──────┘
-```text
+```
 
 | Milestone                         | Workstreams               | Target                                         | Exit criterion (work)                                                                                                                               | Exit criterion (register)                                                                              |
 | --------------------------------- | ------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
@@ -1083,7 +1083,7 @@ composer lore                               # tracked files
 composer lore-code                         # adds untracked files + Global client terms
 npm run typecheck                          # if a TS/CSS file changed
 php artisan test --compact                 # full suite
-```text
+```
 
 Notes that are easy to get wrong:
 
@@ -1187,7 +1187,7 @@ Before any dispatch:
 ```bash
 node "${SKILL_REGISTRY_HOME:-$HOME/.qoder/skills/refresh-skill-registry}/scripts/scan-skills.cjs" --project "$(pwd)" --names
 node "${SKILL_REGISTRY_HOME:-$HOME/.qoder/skills/refresh-skill-registry}/scripts/scan-skills.cjs" --project "$(pwd)" --violations
-```text
+```
 
 The registry lives outside the repo, so the path is machine-specific. Set `SKILL_REGISTRY_HOME` to wherever the scanner actually is on your host rather than editing these two lines; a hardcoded `$HOME/.qoder` path is a path that only works on one machine. If the scanner is absent, record that in the dispatch record and fall back to reading `.agents/skills.json` by hand. Do not skip the step silently.
 
@@ -1324,7 +1324,7 @@ Documentation–Register Synchronization Execution Plan
 ```bash
 sed -n '353,460p' research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md
 grep -nE '^## (7|10|11)\.' research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md
-```text
+```
 
 - [x] **Step 2: Record whether the substituted survey reached the same conclusions.** Diff the inventory's cross-reference map against `docs/research-scratch/INDEX.md`'s absorbed-source tables. Any source the map lists that no master claims is a still-unmerged file, not a repoint target.
 
@@ -1339,7 +1339,7 @@ grep -nE '^## (7|10|11)\.' research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.m
 > (`:353`) was therefore available to the consolidation and was not read. The substituted filesystem
 > survey stands as the record of what was actually merged; what changes is only that the sections said
 > to be unreadable are readable.
-```text
+```
 
 - [x] **Step 4: Commit**
 
@@ -1349,7 +1349,7 @@ git commit -m "docs(consolidation): correct the false absence claim about the go
 
 The inventory was on disk in the gitignored root research-scratch/ folder; the
 history-only probe could not see it. Sections 6/7/10/11 are readable."
-```text
+```
 
 ---
 
@@ -1371,7 +1371,7 @@ history-only probe could not see it. Sections 6/7/10/11 are readable."
 git show 22e5135^:docs/GATE-REGISTRY.md | wc -l
 git show 22e5135^:docs/PRE-MORTEM.md | wc -l
 git show 22e5135^:docs/GATE-REGISTRY.md | grep -cE '^##? C-[0-9]'
-```text
+```
 
 - [x] **Step 2: Put the two options to the owner with their costs.** Append to `PLANS-AND-BRIEFS.md`:
   - **Restore:** `git checkout 22e5135^ -- docs/GATE-REGISTRY.md docs/PRE-MORTEM.md`. Clears 41 citations at once and repairs `AGENTS.md:178`'s precedence chain. Cost: two more files in a corpus that was deliberately consolidated to 16 masters, and `INDEX.md` records them as absorbed into `GOVERNANCE.md` — restoring creates a second copy of content that already has a home.
@@ -1380,7 +1380,7 @@ git show 22e5135^:docs/GATE-REGISTRY.md | grep -cE '^##? C-[0-9]'
 
 ```bash
 grep -nE 'C-5|pre-mortem|§4' docs/research-scratch/GOVERNANCE.md | head
-```text
+```
 
 - [x] **Step 3: Do not act on the recommendation without the owner's written ruling.** Record the choice and the date in the same section.
 
@@ -1389,7 +1389,7 @@ grep -nE 'C-5|pre-mortem|§4' docs/research-scratch/GOVERNANCE.md | head
 ```bash
 git add docs/research-scratch/PLANS-AND-BRIEFS.md
 git commit -m "docs(briefs): put the GATE-REGISTRY and PRE-MORTEM restore-or-repoint choice to the owner"
-```text
+```
 
 ---
 
@@ -1416,7 +1416,7 @@ git ls-files database/seeders/data/ | wc -l          # expect 9, was the KI-49/K
 git ls-files database/seeders/data/ | grep -c 'race-tier-labels'   # expect 1, was KI-53/KI-54
 sed -n '138,145p' config/uma.php                     # seed_file present, was KI-45's headline
 grep -rn 'Schema::hasColumn\|->check(' database/migrations/ | head  # KI-50 still live?
-```text
+```
 
 - [ ] **Step 3: Close the six that are done, in house style.** — **HELD per Step 1 fallback: six Verified/HELD blocks written instead; KI-32 was closed concurrently by the M1 batch and its block reconciled to that heading.** KI-32, KI-48, KI-49, KI-51, KI-53 and KI-54 all describe a defect the tree no longer has. Append to each entry, after its existing body:
 
@@ -1425,7 +1425,7 @@ grep -rn 'Schema::hasColumn\|->check(' database/migrations/ | head  # KI-50 stil
 working tree (`<file:line>`) rather than re-deriving it from the report that filed it. Nothing about the
 original finding is edited: it was correctly filed on 2026-10-01 against a tree that did not yet have the
 fix. What was missing was the closure, and that is a register-lag defect, not a code defect.
-```text
+```
 
 and add `, CLOSED 2026-10-02` to the heading, matching the pattern at `KNOWN-ISSUES.md:1781`.
 
@@ -1441,7 +1441,7 @@ and <K> closed here, all of them on fixes that landed before this pass. The coun
 heading grep: KI-10 and KI-25 each carry both words in one heading and are counted once, in the state
 their body assigns. The block below stays as the record of what this register believed on 2026-09-30;
 it was accurate when written and is now superseded by nineteen entries' worth of work.
-```text
+```
 
 Fill `<N>`, `<M>`, `<K>` from Step 2's verification, not from a grep. Do not delete the superseded block: `:24-29` is the register's own warning that heading greps mislead, and that warning is still load-bearing.
 
@@ -1450,14 +1450,14 @@ Fill `<N>`, `<M>`, `<K>` from Step 2's verification, not from a grep. Do not del
 ```bash
 git diff --stat KNOWN-ISSUES.md            # additions dominate deletions
 git diff KNOWN-ISSUES.md | grep -c '^-[^-]' # expect near zero: removals should be heading edits only
-```text
+```
 
 - [x] **Step 8: Commit**
 
 ```bash
 git add KNOWN-ISSUES.md tests/Feature/ScenarioSlotSeederResilienceTest.php
 git commit -m "docs(register): reconcile seven entries against the tree and file the unguarded fixture helper"
-```text
+```
 
 ---
 
@@ -1478,7 +1478,7 @@ git commit -m "docs(register): reconcile seven entries against the tree and file
 When documents disagree: `CONSTRAINTS.md` (the bar) > the gate table in
 `docs/research-scratch/GOVERNANCE.md` §"GATE-REGISTRY.md" (how each gate runs) > ADRs (`docs/adr/`)
 > `DESIGN.md` > slice plans (`PLAN.md`).
-```text
+```
 
 Under the restore branch, leave the chain intact and confirm `docs/research-scratch/GOVERNANCE.md` now exists.
 
@@ -1486,20 +1486,20 @@ Under the restore branch, leave the chain intact and confirm `docs/research-scra
 
 ```bash
 grep -rn 'GATE-REGISTRY\|PRE-MORTEM' --include='*.md' . | grep -v '^\./research-scratch/'
-```text
+```
 
 - [ ] **Step 3: Verify the chain resolves**
 
 ```bash
 for p in CONSTRAINTS.md docs/GATE-REGISTRY.md docs/adr docs/DESIGN.md PLAN.md; do [ -e "$p" ] && echo "ok   $p" || echo "MISS $p"; done
-```text
+```
 
 - [ ] **Step 4: Commit**
 
 ```bash
 git add AGENTS.md README.md
 git commit -m "docs(agent-map): point the precedence chain at documents that exist"
-```text
+```
 
 ---
 
@@ -1519,13 +1519,13 @@ git commit -m "docs(agent-map): point the precedence chain at documents that exi
 
 ```bash
 python tools/doc_census.py 2>&1 | grep 'dead markdown links' | tee /tmp/dead-baseline.txt
-```text
+```
 
 - [x] **Step 2: Generate the per-target worklist instead of guessing at it.**
 
 ```bash
 python tools/doc_census.py 2>&1 | sed -n '/most-cited dead targets/,$p'
-```text
+```
 
 - [ ] **Step 3: Apply the known absorption map to the eight densest targets.** — **SCOPED DOWN:** the two O-2-gated targets (36 + 32 hits) cannot be repointed until the ruling; the convention fix (Task 6) was chosen over bulk editing because KNOWN-ISSUES.md entries are dated records and may not be edited in place, and most of DESIGN-CORPUS / SKILLS-MECHANICS hits are provenance lines the census overcounts. Measured precisely: 200 actionable refs across 29 files (`python .scratch-uma/cited/task5-worklist.py`). Verified section anchors:
 
@@ -1550,14 +1550,14 @@ python tools/doc_census.py 2>&1 | sed -n '/most-cited dead targets/,$p'
 
 ```bash
 grep -cE 'docs/design-research/CONSTRAINTS\.md' docs/research-scratch/DESIGN-CORPUS.md
-```text
+```
 
 - [ ] **Step 6: Re-measure after each file and confirm the count falls by the expected amount.** On the final pass, record the number Task 7 pins:
 
 ```bash
 python tools/doc_census.py 2>&1 | grep 'dead markdown links' | tee /tmp/dead-post.txt
 composer lore && composer lore-code
-```text
+```
 
 The lore counts move when a citation is rewritten into a section title that carries a banned word; current baseline is 181 hits / 55 exempt and lore-code 42 (measured 2026-10-02 at `e18a032`). Capture the pre-run number per task and compare to it, never to a dated constant.
 
@@ -1566,7 +1566,7 @@ The lore counts move when a citation is rewritten into a section title that carr
 ```bash
 git add docs/research-scratch/CATALOG-ROSTER-WORKSTREAM.md
 git commit -m "docs(research-scratch): repoint CONSTRAINTS and DESIGN citations into DESIGN-CORPUS sections"
-```text
+```
 
 ---
 
@@ -1593,7 +1593,7 @@ git commit -m "docs(research-scratch): repoint CONSTRAINTS and DESIGN citations 
 is cited as `DESIGN-CORPUS.md §"DESIGN.md" §6.14`. Register headings KI-29 and KI-37 predate this and
 name `DESIGN.md §6.14` for a rule that lives at `DESIGN-CORPUS.md:904`; they are left as filed, and this
 convention is the correction forward that KI-52 asks for.
-```text
+```
 
 - [ ] **Step 4: Give the never-cited entries the coverage each one deserves.** Five entries appear nowhere outside the register (KI-31, KI-46, KI-52, KI-53, KI-54), and only one of them needs a doc:
   - KI-52 is handled by Step 3's convention.
@@ -1602,7 +1602,7 @@ convention is the correction forward that KI-52 asks for.
 ```markdown
 | Open | KI-46 | Import error text names the internal array path (`turns.0.speed`) to the Trainer.|
   Registered only in `KNOWN-ISSUES.md`; needs a Form Request message rewrite, not a display patch. |
-```text
+```
 
 - KI-31, KI-53, KI-54 are closed or being closed by Task 3, and a historical defect with no live surface does not need doc echo. Record that reasoning in Task 3's sweep note so the absence reads as a decision rather than an oversight.
 
@@ -1613,13 +1613,13 @@ grep -oE '^## KI-[0-9]+[ab]?' KNOWN-ISSUES.md | sed 's/^## //' | sort -u > /tmp/
 git grep -oE 'KI-[0-9]+[ab]?\b' -- '*.md' | grep -v '^KNOWN-ISSUES\.md:' \
   | sed 's/^[^:]*://' | sort -u > /tmp/c.txt
 comm -13 /tmp/e.txt /tmp/c.txt    # expect: nothing. KI-16 and KI-34 must be gone from /tmp/c.txt
-```text
+```
 
 - [ ] **Step 6: Commit**
 
 ```bash
 git commit -am "docs(citations): resolve the KI-16 and KI-34 id defects and fix the DESIGN.md convention"
-```text
+```
 
 ---
 
@@ -1651,7 +1651,7 @@ it('keeps dead markdown citations from rising above the recorded baseline', func
     // citation is repointed; never raise it to make a failing gate pass.
     expect((int) $m[1])->toBeLessThanOrEqual(DOC_CITATION_BASELINE);
 });
-```text
+```
 
 Define `DOC_CITATION_BASELINE` as an `int` constant at the top of the file, set to the measured number.
 
@@ -1659,13 +1659,13 @@ Define `DOC_CITATION_BASELINE` as an `int` constant at the top of the file, set 
 
 ```bash
 php artisan test --compact --filter=DocCitationParityTest
-```text
+```
 
 - [x] **Step 3: Register the script beside `lore` in `composer.json`.** Existing entries are `"lore": "@php tools/lore.php"` and `"lint": "pint --test"`, so a plain shell command is the correct form here (`@` is only valid for composer's own aliases such as `@php`; there is no `@python`):
 
 ```json
 "docs": "python tools/doc_census.py",
-```text
+```
 
 Verify with `composer docs`. Deliberately **not** mirrored into the `Makefile`: GNU make cannot run on this host (KI-4) and the Makefile targets are documentation, so the `make`/composer parity assertion in `LoreGateParityTest:101-116` is left unextended for `docs`. Record that reason in the test's comment so a later reader does not "fix" the asymmetry by adding a dead target.
 
@@ -1676,7 +1676,7 @@ Verify with `composer docs`. Deliberately **not** mirrored into the `Makefile`: 
 ```bash
 git add tests/Feature/DocCitationParityTest.php composer.json
 git commit -m "feat(docs): ratchet dead citation counts in a Pest gate"
-```text
+```
 
 ---
 
@@ -1700,13 +1700,13 @@ git commit -m "feat(docs): ratchet dead citation counts in a Pest gate"
 ```bash
 git add docs/PLAN-UI-UX-2026-10-02.md docs/PLAN-DOC-SYNC-2026-10-02.md docs/research-scratch/INDEX.md
 git commit -m "docs: register the UI/UX and documentation-sync plans in the index"
-```text
+```
 
 - [x] **Step 4: Verify the census now sees them**
 
 ```bash
 python tools/doc_census.py 2>&1 | grep -E 'tracked markdown|dead markdown links'
-```text
+```
 
 ---
 
@@ -2574,7 +2574,7 @@ deficit_closed    max(0, target - current) for that stat; 0 for Rest; Wit uses i
 energy_after      range from session_cost; rest_recovery for Rest; wit_cost (small recovery) for Wit
 band              Advisory state from CURRENT energy vs advisory_threshold; Wit => RiskNotMeasured
 reason            a string naming the arithmetic ("Wit costs 0 Energy and you are at 42")
-```text
+```
 
 The band is computed from **current** energy against the sourced 50 line (`ADR-0001` §3). It has exactly
 two states — `AtOrAboveAdvisory` / `BelowAdvisory` — because 50 is the only sourced threshold; the
@@ -2716,7 +2716,7 @@ The directory contains ~150 files mixed at root level with 4 subdirectories (`p1
 │   ├── s14/            # Data pipeline (join scripts, game8 extraction)
 │   └── s15/            # Browser testing (sqlite, html, cookies)
 └── temp/               # Temporary/working files (cookies.txt, *.csv, t0-*.txt)
-```text
+```
 
 ### Mapping Rules
 

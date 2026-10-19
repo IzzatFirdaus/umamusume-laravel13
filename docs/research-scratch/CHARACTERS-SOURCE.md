@@ -389,7 +389,7 @@ Re-runnable against the saved body:
 ```bash
 node -e 'const a=require("./research-scratch/data/json/characters.json");
 for(const r of a){if(r.race==="uma"&&r.va_ja&&r.va_en)console.log(`${r.en_name} | ${r.va_ja} | ${r.va_en} | ${r.va_ko} | ${r.va_ja===r.va_en}`);}'
-```text
+```
 
 (An equivalent one-liner in `php -r` works against the same file. The old command here pointed at
 `characters.c6676539.json`; the saved file is `characters.json`.)
@@ -514,7 +514,7 @@ Tests: 1 failed, 11 passed
 
 $ ... # AFTER `race !== 'uma' -> return null`
 Tests: 12 passed (43 assertions)
-```text
+```
 
 The **`va_en` pin** and the **two ported guards** (store-side refused-key drop, all-null coercion) are
 **characterization tests: green by construction against master's already-correct parser/store, red on a
@@ -622,4 +622,4 @@ pint --test: passed                                     # C-3
 lore-code: 8 hit(s)   lore-docs: 116 hit(s), 57 exempt  # == baselines, no new banned-term hit
 tsc --noEmit: exit 0                                    # C-9 (no .ts touched this run)
 ahead=29 behind=0 vs origin/master                      # 8 commits landed, all local
-```text
+```

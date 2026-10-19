@@ -79,7 +79,7 @@ docs/design-research/_scratch/
 │       └── fix_review.py
 └── logs/
     └── triage.err
-```text
+```
 
 ## Mapping Rules
 

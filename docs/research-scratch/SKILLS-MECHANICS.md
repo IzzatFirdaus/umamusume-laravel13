@@ -1909,7 +1909,7 @@ uncommitted work in flight, not a shipped defect.
 
 ```php
 'skills' => Skill::query()->availableOnGlobal()->orderBy('name')->get(['id', ...]),
-```text
+```
 
 `app/Models/Skill.php:80-85` defines the scope: `release_status = GlobalReleased` **and**
 `name_is_client = true`. The docblock at `:72-75` claims this scope is the starting point for "the run
@@ -2213,7 +2213,7 @@ that triple the row grows 12px rather than 8px on the button, which changes the 
 1 failed, 6 passed (69 assertions), 8.28s
   ➜ 214▕     expect(array_filter($errorText))->not->toBe([]);
       tests\Feature\RunSkillRowLabelsTest.php:214
-```text
+```
 
 Everything before `:214` passed, which pins the fault precisely. `:190` proves the error bag holds
 `skills.1.turn_acquired`. `:202-204` prove the `old()` rehydration works for all three controls. What
@@ -2690,20 +2690,20 @@ The row, top line, in reading order:
   [style label]                           only when style-gated, e.g. "Late Surger"
   [derived type word]                     only when the parser derived one
   · N SP    · N/A SP    · turn N          right-aligned, text-ink-muted, text-xs
-```text
+```
 
 Concretely, for export `202451 Top Gear` (from the fact document's own table row):
 
 ```text
 Top Gear  ✦ Unique  Late Surger                    · 180 SP · turn 24
 ▸ When it fires
-```text
+```
 
 and for `200283 Wallflower`:
 
 ```text
 Wallflower                                            · 50 SP
-```text
+```
 
 Sizing and role notes for the implementer, so nothing here needs re-deciding:
 
@@ -2759,7 +2759,7 @@ default state, not by 20 panels.
     base time: 24000
   </p>
 </details>
-```text
+```
 
 Rules the implementer must not vary:
 
@@ -2920,7 +2920,7 @@ One row of the repeater, after the change:
 ```text
 Skill                       Acquisition status        Turn acquired
 [ Top Gear            ▾ ]   [ Acquired            ▾ ]  [ 24        ]
-```text
+```
 
 and the open listbox, four bands, headers as presentation:
 
@@ -2934,7 +2934,7 @@ Already on this run
 Everything else  (598 skills · showing matches, type at least 2 characters)
   1,500,000 CC · 40 SP
   ...
-```text
+```
 
 Design rules:
 
@@ -3131,7 +3131,7 @@ duplicating the caveat:
 No skills are available to choose yet. The catalogue fills with
 `php artisan uma:fetch gametora-skills`. Search the skill catalog
 to see whether that command has run.
-```text
+```
 
 Rules: the placeholder option stays so the form still renders and still submits; the control is not hidden
 and not disabled, because a disabled picker gives the Trainer no way to learn the command; and the
@@ -3563,7 +3563,7 @@ and `skills_event` are still dropped at parse
 (`GametoraCharacterCardParser.php:92-93`): no column, no read path. That is
 why this section shows two groups and not four, and the heading says so in
 Trainer-facing words rather than drawing two empty groups.
-```text
+```
 
 **Visible line, replacing `:226-228`:**
 
@@ -3572,7 +3572,7 @@ Her innate and unique skills below are the lists the source publishes for this
 form. The source also carries awakening and event skill lists; this tool does
 not store them yet, so they are not shown. Card objectives and card images are
 not shown either, and `ADR-0012` records why for both.
-```text
+```
 
 The draft obeys the rules this proposal has been enforcing elsewhere: it names no skill, so nothing in it can
 drift the way `config/scenarios.php:270` drifted. It states each absence as the kind of absence it is, per
@@ -3689,7 +3689,7 @@ Trainee page, skills section        L3 (groups) + L1 (rows)
 Trainee page, aptitudes section     L3 alone, shipped by x-aptitude-grid, with its own absence branch
 Screen D results                    L1 only, exactly as it ships today
 Nowhere                             L4
-```text
+```
 
 `x-skill-row` renders L1 plus the L2 slots handed to it as props. It takes no aptitude prop and no race prop,
 and that is the mechanism, not a convention: a component with no way to receive layer 3 cannot compose it

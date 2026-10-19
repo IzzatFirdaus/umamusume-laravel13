@@ -123,7 +123,7 @@ match_candidates              (review queue for Fuzzy/None matches)
   match_tier string enum-backed (MatchTier: Fuzzy | None),
   status string enum-backed (CandidateStatus: Pending | Confirmed | Aliased | Rejected),
   payload json (full parsed record), created_by_fetch_at datetime, timestamps
-```text
+```
 
 `character_cards` and `umamusume.external_ref` are authorized by
 `docs/adr/0008-character-card-catalog-layer.md` and **are applied**: they landed with
@@ -227,7 +227,7 @@ run_skills                    (pivot with payload)
   turn_acquired unsigned int nullable
   PK(training_run_id, skill_id)
   -- Suggested = planned pre-run; Acquired/Skipped = outcome [rev 0.2 — repo #4]
-```text
+```
 
 Planner-domain boundary [rev 0.2 — repo #4]: repo #4's career-run planner maps onto `training_runs` + `turn_entries` + `run_skills`. Its race-day snapshots, manual race predictions, dual localStorage/account storage, image uploads, and DB-level enum columns are cut (Pre-Mortem §4.1); no new tables are introduced for the planner. Growth-rate/aptitude/base-stat reference data (repo #4 hardcodes it in seeders) is deferred to PRD OQ-4; no columns added now, so no speculative planner subsystem enters the schema.
 
@@ -280,7 +280,7 @@ GET /api/v1/umamusume?status=&search=&page=&pageSize=   -> { data: [Umamusume], 
 GET /api/v1/umamusume/{slug}                            -> { data: Umamusume } (includes aliases, sources)
 GET /api/v1/training-runs?page=                         -> { data: [TrainingRunSummary], pagination }
 GET /api/v1/training-runs/{id}                          -> { data: TrainingRun } (includes turns, skills)
-```text
+```
 
 Error shape (every non-2xx):
 
@@ -391,7 +391,7 @@ storage/app/private/snapshots/   (gitignored)
 tests/
   Feature/            Catalog, TrainingRun, ApiV1, FetchPipeline, CrossReferenceMatcher
   Unit/               NameNormalizer (pure, no framework)
-```text
+```
 
 ## 10. Testing Strategy
 

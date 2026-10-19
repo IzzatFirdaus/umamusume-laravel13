@@ -15,7 +15,7 @@ You don't need to do anything special. Just ask your agent to do something:
 
 ```text
 "Create a blog model with title, content, author_id fields"
-```text
+```
 
 The agent will:
 
@@ -83,7 +83,7 @@ User Task
   → SkillRegistry (loads .agents/skills.json)
   → SkillExecutor (runs php artisan or vendor binaries)
   → storage/logs/skill_automation.log
-```text
+```
 
 ## Override Commands
 
