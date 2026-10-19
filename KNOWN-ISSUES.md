@@ -2966,3 +2966,22 @@ the `DashboardTest` and `CatalogRosterTreeTest` assertions above, which are sepa
 this entry's discovery pass; the PHPStan findings owned by Phase 6.1; the fence-integrity count the census
 also reports (397 invalid closing fences across 13 files), which `tools/md_fence_check.py` owns.
 
+### KI-101 Refresh case counts two navigations for one reload, and the test source cannot say whether the second is a real load - FILED 2026-10-19 (doc-only batch, Decision 2), OPEN, BLOCKED ON OWNER TRACE
+
+**Status: OPEN, blocked on owner trace classification.** NFR-20 item 3 ("a refresh does not loop") is a required Phase 1 gate per the 2026-10-18 gating decision in `PRD.md` NFR-20, and its case is red: `tests/browser/navigation-determinism.spec.ts:75` ("refreshing a route renders it in a single navigation") expects exactly one main-frame `framenavigated` event across one `page.reload()` and received **2** (reproduced 2026-10-19, chromium, KI-69 scratch database, `npx playwright test tests/browser/navigation-determinism.spec.ts --grep "refreshing a route"` -> 1 failed). The counter is the ambiguity: Playwright fires `framenavigated` for full-document navigations **and** for same-document (history) address changes, so N = 2 is not classifiable from the test source alone. Two dispositions: (a) **test-side** — one full reload plus one same-document address change; the fix is to count `performance.getEntriesByType("navigation")` entries with `type` `navigate` or `reload` instead of `framenavigated`; or (b) **app-side** — the reload plus a second full navigation; the fix is to trace the redundant load. Route `/training-runs` is a direct GET (`routes/web.php:125`, no redirect) and the app shell carries no Inertia version-mismatch reload, so neither disposition is proven. A browser trace of one refresh that records each event's navigation type closes the ambiguity; the classification lands here and resolution follows (a) or (b).
+
+**Two corrections to the dispatch text.** (1) The dispatch names the file `tests/browser/refresh-navigation.spec.ts`; no such file exists at HEAD or in history, and the case lives in `tests/browser/navigation-determinism.spec.ts`. (2) The other three cases in the same file (hover prefetch, interrupted prefetch, settled navigation) pass in the same run.
+
+**What closure does not cover.** This entry records the state of a Phase 1 gate; it does not satisfy the gate. Decision 2 closes only when the trace classification lands.
+
+### KI-102 NFR-20 item 5 (no page request triggers background work) has no test - FILED 2026-10-19 (doc-only batch, Decision 3), ACKNOWLEDGED GAP
+
+**Status: ACKNOWLEDGED GAP.** The 2026-10-18 gating decision in `PRD.md` NFR-20 acknowledges items 5 and 6 as known gaps; this entry is the register half of that acknowledgement, so Decision 3's "documented in PRD" and Decision 10's "recorded in KNOWN-ISSUES.md with status" point at the same pair of facts. Item 5 — a page request must not trigger fetch, snapshot, parse, normalize, match, artwork mirroring, import, or other long-running background work — has no automated termination test. Fix path: a browser case that loads a route and asserts no background command is spawned and nothing is written. Deferred to the next test-touching dispatch.
+
+### KI-103 NFR-20 item 6 (loading/error state termination) has no test - FILED 2026-10-19 (doc-only batch, Decision 3), ACKNOWLEDGED GAP
+
+**Status: ACKNOWLEDGED GAP.** Same acknowledgement as KI-102. Item 6 — loading and error states terminate; a failed navigation clears its loading state — has no automated test for the failed-request case. The `navigation-determinism` cases cover prefetch stranding and settled-navigation state, not a request that fails. Fix path: a browser case that fails a held route and asserts the loading state clears and no stranded status text remains. Deferred to the next test-touching dispatch.
+
+### KI-104 ADR-0027 is proposed, not accepted: turn/decision logging has no binding decision - FILED 2026-10-19 (doc-only batch, Decision 6), PROPOSED
+
+**Status: PROPOSED, not accepted.** Decision 6 filed `docs/adr/0027-turn-and-decision-logging.md`; a proposed ADR is not binding. The ADR is code-only: it describes the turn/decision logging design and its implementation is deferred. Closure: owner acceptance flips the ADR's status, and this entry then records the acceptance commit.

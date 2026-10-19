@@ -379,6 +379,8 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
   Items 5 and 6 (no page request triggers background work; loading/error state termination) are acknowledged
   as known gaps. Browser tests run developer-locally only; the repository has no CI (`.github/workflows/`
   absent), so their results are not continuously verified.
+  State of these items at 2026-10-19: item 3's red case is KNOWN-ISSUES.md KI-101 (blocked on the trace classification), and the item 5 and item 6 gap entries are KI-102 and KI-103.
+
 ## 6. Non-Goals (eliminated legacy features)
 
 Explicitly not built, with the legacy feature they replace. The numbering is load-bearing: `AGENTS.md`,
