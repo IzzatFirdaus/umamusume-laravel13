@@ -3135,3 +3135,35 @@ this number nor the prior dispatch's 657 reflects a clean committed state.
 
 **Fix path (future code dispatch):** read from a git ref instead of disk. Deferred — code change, out of
 doc scope.
+
+### KI-111 Markdown closing fences carry info strings, so blocks that should end do not and the prose after them renders as code - FILED 2026-10-20 (fence-class close-out), OPEN
+
+**Status: OPEN, reduced to two files.** A closing fence must be bare. CommonMark 0.31 section 4.5 says the
+line that ends a block is the run of backticks and nothing else, so a fence carrying an info string is
+always an opening. Where one sat where a closer belonged, the block never closed, and every line after it
+rendered as code until the next bare fence. The reader saw something the file did not say.
+
+**Proving command.** `python tools/md_fence_check.py` -> `6 invalid closing fence(s) in 167 file(s)`, exit 1.
+167 is the number of tracked markdown files scanned. 22 of them carried findings before this pass; 2 still
+do. The exit code counts invalid closers only: an unclosed fence is reported for the reader but is not a
+failure, because a block running to the end of a file is legal CommonMark.
+
+**What was fixed.** 20 files were brought to zero findings, all by the same mechanical change: the info
+string was removed from each mis-tagged closing fence and the fence left bare. No other line changed, no
+content was deleted or merged, and no line was re-wrapped. The counts were CATALOG-ROSTER-WORKSTREAM.md 129,
+SLICE-RECORDS.md 85, DESIGN-CORPUS.md 79, design-2.0.md 61, PROCESS-PLANS.md 57, UX-DELIVERABLES.md 49,
+PLANS-AND-BRIEFS.md 23, screen-spec-2.0.md 17, AUDIT-AND-VERIFICATION.md 13, SKILLS-MECHANICS.md 12,
+RACE-AND-SLICE-RESEARCH.md 11, REFERENCE-GUIDE-BUILD-CHAIN.md 6, ARCHITECTURE.md 4, GOVERNANCE.md 4,
+CHARACTERS-SOURCE.md 3, SKILL_AUTOMATION.md 2, DESIGN-AND-MECHANICS-REQUESTS.md 2, README.md 1,
+REORGANIZATION_PLAN.md 1, Rice_Shower_Unity-Cup.md 1.
+
+**What is left.** `docs/proposals/frontend-development-plan.md` holds 6 invalid closers and 4 unclosed
+blocks. `docs/UMAMUSUME_REFERENCE.md` holds 6 unclosed blocks and no invalid closer. Both carry another
+session's uncommitted work, so neither was touched. The first is the structural case the class produces:
+the block opened at its line 921 is still the open block when three later fences are reported against it,
+so stripping the tags there is not enough on its own and a bare closer has to be added.
+
+**Fix path (future doc dispatch, once the peer work in those two files is landed).** Strip the info string
+from each closing fence and leave the fence bare; where a tagged line was an opener rather than a closer,
+add a bare closer after the block instead of removing the tag. Re-run the checker on the file until it
+reports zero findings for it, then tree-wide until it exits 0.
