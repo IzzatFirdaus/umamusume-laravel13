@@ -58,6 +58,7 @@ Remains open, if the question is ever answered yes:
   style numbers those labels sit under were read from the untracked `factors.json` ids 21-24 rather than from
   anything tracked here. The four names in wider circulation ("Runner / Leader / Betweener / Chaser") are not
   the shipped strings, and "Betweener" has zero occurrences in client data.
+  **Erratum 2026-10-19 (doc-only batch, consistency sweep):** the zero-occurrences clause is measured false against the shipped seed data — `database/seeders/data/skills.609afe88.json` carries "Betweener" as the running-style prefix in many Global client `endesc` strings. The first clause (the four circulated names are not the shipped style labels) is unaffected. The owner decides whether this erratum weakens the labelling ruling the claim supported.
 - The only defensible shape is **derived at read time from `condition_groups`, no new column, no backfill**, so
   it cannot drift from the data it reads.
 - A badge on 19.7% of skills must read as absence-of-data on the rest, the same rule the mood and `condition`
