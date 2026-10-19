@@ -46,7 +46,7 @@ code" reaches the rules one hop later than before and reaches all of them.
 > | 10. ADR-0005 row | "Proposed, not built" | **DECLINED for Phase 1**, owner ruling R37, 2026-09-28, in `docs/adr/0005-support-card-entities.md`'s own Status line |
 > | 10. ADR-0002 row | "Validation bound widened to 0..2000" | Accepted as a decision and **not implemented**: `app/Http/Requests/StoreTurnEntryRequest.php:49-50` still validates `between:0,1200` |
 > | 12. Scenario guides | `docs/scenarios/01`–`08` | Nine files. `09-global-race-calendar.md` is 751 lines and is the read path the race grid and picker now use |
-> | 12. Lore rules | `CLAUDE.md` (top section) | `.gitignore:52` ignores `/CLAUDE.md`. A fresh clone has no such file. `AGENTS.md:5` names it as "Coding rules for assistants", and 20 other tracked files cite it, two of them PHP |
+> | 12. Lore rules | `AGENTS.md` §5, `CONSTRAINTS.md` C-4 | The rules live in `AGENTS.md` §5 "Non-negotiables" and in this file's §2 C-4. `CLAUDE.md` held a lore section until `228011e` (2026-10-04) and has not held the rules since |
 > | 12. Skill registry | `.agents/skills.json` (machine), `SKILL_REGISTRY.md` (human summary) | `.agents/` is ignored, and root `SKILL_REGISTRY.md` is a hand-maintained pointer |
 > | 12. Migrations | `2026_09_26_162814`–`2026_09_27_121500` | 34 migration files are tracked, running to `2026_09_29_182820_create_umamusume_profiles_table.php` |
 >
@@ -75,7 +75,7 @@ code" reaches the rules one hop later than before and reaches all of them.
 | **Product name**      | Trainer Desk (owner decision 2026-09-27, closes OQ-1)                                                          |
 | **Target audience**   | Trainers of the Global English version of *Umamusume Pretty Derby*                                             |
 | **Architecture**      | Local-only Laravel 13 tool, SQLite (WAL + busy_timeout), no auth, no SPA, no multi-user                        |
-| **Phase 1 exit**      | US-1..US-3 work end-to-end; migrations/factories/seeders clean; zero lore hits; PHPStan L6 clean; Pint clean   |
+| **Phase 1 exit**      | US-1..US-3 work end-to-end; migrations/factories/seeders clean; the lore gate ran, its report quotes the hit count and its delta from the baseline, and every hit carries a ruling; PHPStan L6 clean; Pint clean |
 
 > **Correction 2026-10-12 (dated, correction forward).** The Architecture row's original sentence
 > "no auth, no SPA, no multi-user" stands above rather than being rewritten. The **SPA clause is
@@ -142,7 +142,7 @@ Plus animal framing: `stallion`, `colt`, `filly`, `gelding`, `equine`, `pony`, `
 - Human user: **Trainer**
 - Sentence case in all UI copy; no decorative emoji in labels/headings/buttons
 
-#### 2.4 Exemptions (Identifier & Mechanics — CLAUDE.md §25–26, CONSTRAINTS.md C-4)
+#### 2.4 Exemptions (Identifier & Mechanics — `GOVERNANCE.md` §2.4, CONSTRAINTS.md C-4)
 
 The banned list governs **player-facing copy and character framing only**. It does NOT apply to:
 
@@ -408,7 +408,7 @@ The skill registry's machine half is **`.agents/skills.json`**; the hand-maintai
 | Design system          | `DESIGN.md` (root), `docs/research-scratch/DESIGN-CORPUS.md` (UI contract)                                                                  |
 | Quality bar            | `CONSTRAINTS.md` (root), `docs/research-scratch/DESIGN-CORPUS.md` (additive)                                                                                     |
 | Agent roles            | `AGENTS.md`                                                                                                                                                   |
-| Lore rules             | `CLAUDE.md` (top section), `CONSTRAINTS.md` C-4                                                                                                               |
+| Lore rules             | `AGENTS.md` §5, `CONSTRAINTS.md` C-4                                                                                                                          |
 | Skill registry         | `.agents/skills.json` (machine), `SKILL_REGISTRY.md` (human summary)                                                                                            |
 | ADRs                   | `docs/adr/0001`–`0006`                                                                                                                                        |
 | Fetch pipeline         | `app/Services/DataPipeline/` (Contracts, Parsers, PipelineRunner, SourceFetcher, CrossReferenceMatcher, NameNormalizer)                                       |
@@ -429,6 +429,28 @@ The skill registry's machine half is **`.agents/skills.json`**; the hand-maintai
 >   gitignored** (`git check-ignore CLAUDE.md` exits 1), so the row stands as written and no
 >   "not present in a fresh clone" note applies. `AGENTS.md` §5 and `GOVERNANCE.md` §2 remain the live
 >   lore authority; the row's citation to `CLAUDE.md` and to `CONSTRAINTS.md` C-4 resolves.
+
+> **Correction 2026-10-20 (dated, correction forward).** The 2026-10-12 sentence stands: "`AGENTS.md`
+> §5 and `GOVERNANCE.md` §2 remain the live lore authority". Three rows have since been restated
+> at the owner they name, and one heading's dead pointer is replaced.
+>
+> - **Lore rules** (the §12 row and the source-of-truth row) read "`CLAUDE.md` (top section),
+>   `CONSTRAINTS.md` C-4" and now read "`AGENTS.md` §5, `CONSTRAINTS.md` C-4". The basis is dated and
+>   provable: `228011e` (2026-10-04) rewrote `CLAUDE.md`, and from that commit its top section has
+>   named the lore gate only as a topic of `AGENTS.md`, never as the section holding the rules. The
+>   2026-10-12 finding that `CLAUDE.md` is tracked and not gitignored still holds; the 2026-10-12
+>   clause that the row's citation "resolves" is superseded for the citation and stands for the
+>   tracked-not-gitignored finding.
+> - **Phase 1 exit** read "zero lore hits" and now reads "the lore gate ran, its report quotes the
+>   hit count and its delta from the baseline, and every hit carries a ruling". The count was never
+>   a criterion the tool could report or fail on: `tools/lore.php` is report-only and always exits
+>   0, so "zero hits" was unsatisfiable rather than strict. The ruling obligation replaces it and
+>   is the obligation `AGENTS.md` §9 states; the baseline figures stay in `AGENTS.md` §9 alone.
+> - **§2.4 Exemptions** read "(Identifier & Mechanics — CLAUDE.md §25–26, CONSTRAINTS.md C-4)" and
+>   now read "(Identifier & Mechanics — `GOVERNANCE.md` §2.4, CONSTRAINTS.md C-4)". `CLAUDE.md`
+>   §25–26 never resolved in any revision: its headings were unnumbered until `228011e` (2026-10-04)
+>   and have been numbered §1–§16 since, so the pointer matches nothing in either era. The
+>   exemptions are owned by this section.
 
 ---
 
@@ -1469,7 +1491,7 @@ The quality bar for this repository, written as a contract. Agents: read this be
 - No engine write to rows with `is_manual = true` (PRD FR-B-4).
 - No fact stored without provenance (AGENTS.md Data Engineer rules).
 - No fetch URL outside `config('uma.sources')` allowlist (SSRF posture, ARCHITECTURE §8).
-- No business logic in controllers; no inline `$request->validate()` (CLAUDE.md Banned Patterns).
+- No business logic in controllers; no inline `$request->validate()` (AGENTS.md §5 "The Floor").
 
 ### Lore banned patterns (C-4)
 
