@@ -2422,14 +2422,14 @@ verify would repeat the "partial" failure this arc has already recorded twice.
 `tests/Feature/DocCitationParityTest.php:44` defines `DOC_CITATION_BASELINE = 708`; line 56 asserts `toBeLessThanOrEqual(DOC_CITATION_BASELINE)`.
 Pre-dispatch count: 726 (> 708, FAILED). Post-dispatch count: 708 (= baseline, PASSED).
 This dispatch closed 18 dead citations by sentence-by-sentence removal (replacing backticked paths with plain text where the target file is genuinely absent, never raising the limit, never touching CONSTRAINTS.md/PLAN.md stubs).
-AGENTS.md:504 — `` `SECURITY.md` `` → "No security document exists".
-CHANGELOG.md:224 — removed backticked citation to `docs/design-research/slice-5-phase-a-best-for-2026-10-01.md`.
-DESIGN.md:112-113 — removed backticked citations to `docs/design-research/verification/slice-6-2026-09-28.md` and `FRONTEND-SPEC-DIVERGENCE.md`.
-DESIGN.md:294 — removed backticked citation to `docs/governance/C-8-approval.md`.
-KNOWN-ISSUES.md — removed backticked citations to `D13-SKILLS-PLANNER-2026-10-07.md`, `RAW-FINDINGS.md`, `SKILLS-GAPS.md`, `docs/Trainer-Desk-2.0-G-Prompts.md`.
+AGENTS.md:504 — SECURITY.md → "No security document exists".
+CHANGELOG.md:224 — removed backticked citation to docs/design-research/slice-5-phase-a-best-for-2026-10-01.md.
+DESIGN.md:112-113 — removed backticked citations to docs/design-research/verification/slice-6-2026-09-28.md and FRONTEND-SPEC-DIVERGENCE.md.
+DESIGN.md:294 — removed backticked citation to docs/governance/C-8-approval.md.
+KNOWN-ISSUES.md — removed backticked citations to D13-SKILLS-PLANNER-2026-10-07.md, RAW-FINDINGS.md, SKILLS-GAPS.md, docs/Trainer-Desk-2.0-G-Prompts.md.
 AGENTS.md:56-58 — converted backticked `code-style.md`, `eloquent.md`, `testing-standards.md`, `SLICE-RECORDS.md` to plain text (config-style names, not file paths).
 AGENTS.md:58 — `SLICE-RECORDS.md` → plain text (document lives at docs/research-scratch/PROCESS-PLANS.md, not at repo root).
-README.md:274 — `` `SECURITY.md` `` → "No security document exists".
+README.md:274 — SECURITY.md → "No security document exists".
 
 **(0b) DocAccuracyTest regression:**
 `php artisan test --compact --filter=DocAccuracyTest` → `3 passed (80 assertions)`, exit 0.
