@@ -142,11 +142,12 @@ class CatalogController extends Controller
                 // rarity, so the two read two different cards deliberately and neither is wrong
                 // (`DESIGN.md` §4.7). The `?? first()` branch is not defensive padding: rows with no
                 // debut flag still get a frame rather than nothing, which is the fallback the detail
-                // page already uses, so the two screens cannot disagree by accident. `url()` resolves
-                // to null when the mirror holds no file and Vue renders no frame. A `card_portrait`
-                // is a trainee portrait keyed on `card_id`, the same kind the detail page points at.
-                $headerCard = $umamusume->cards->first(static fn (CharacterCard $card): bool => $card->is_debut_form)
-                    ?? $umamusume->cards->first();
+                // page already uses, so the two screens cannot disagree by accident. The rule
+                // itself lives on the model (`Umamusume::defaultForm()`), so the two screens read
+                // it from one place rather than each restating it. `url()` resolves to null when
+                // the mirror holds no file and Vue renders no frame. A `card_portrait` is a trainee
+                // portrait keyed on `card_id`, the same kind the detail page points at.
+                $headerCard = $umamusume->defaultForm();
 
                 return [
                     'id' => $umamusume->id,
@@ -307,7 +308,11 @@ class CatalogController extends Controller
         // themselves nullable, which is why the inner `??` is there too. `is_unique` is selected
         // because `SkillRow.vue` draws the Unique pill from it, and the column was never fetched
         // here, so the pill could not render on a trainee page for any card.
-        $card = $activeCard ?? $umamusume->cards->first();
+        //
+        // With no explicit `card` parameter the form in view is her default form, which Decision 9
+        // (A-11) fixes as the card flagged `is_debut_form`; the portrait below reads the same
+        // `$card`, so the picture and the skills under it can never name different forms.
+        $card = $activeCard ?? $umamusume->defaultForm();
 
         $skillLists = [
             ['label' => 'Her unique skills', 'absent' => 'No unique skill recorded for this form.', 'ids' => $card === null ? [] : ($card->skills_unique ?? [])],

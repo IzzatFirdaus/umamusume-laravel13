@@ -39,6 +39,20 @@ test('renders the eight sections in the binding order', async ({ page }) => {
     expect(headings).toEqual(EIGHT_SECTIONS);
 });
 
+// Plan 5.4: the trainee's own fetch history is ONE disclosure. The heading stays on screen so the
+// section is findable, and the summary says how many sources there are before the disclosure is
+// opened, so a reader learns the size of it without opening it.
+test('holds her fetch history in one disclosure', async ({ page }) => {
+    await page.goto('/umamusume/special-week');
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByRole('heading', { name: 'Provenance', level: 2 })).toBeVisible();
+
+    const disclosure = page.locator('#provenance');
+    await expect(disclosure).toHaveCount(1);
+    await expect(disclosure.locator('summary')).toContainText(/\d+ fetched source/);
+});
+
 // Plan 5.4 (Sweep 1): the ten letters printed as one flat grid, so "can she run Long" meant counting
 // letters in a four-column run. Each of the export's three reads now carries its own heading. The
 // headings are `h3` under the section's own `h2`, which is why the case above still sees eight.

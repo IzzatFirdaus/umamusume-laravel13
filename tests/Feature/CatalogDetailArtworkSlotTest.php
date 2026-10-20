@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\CharacterCard;
 use App\Models\Umamusume;
+use App\Services\DataPipeline\ArtworkMirror;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia;
 
@@ -65,4 +66,42 @@ it('passes null for a trainee with no card at all', function (): void {
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->component('Catalog/Show')
             ->where('trainee.artworkURL', null));
+});
+
+/*
+ * Decision 9 (A-11) fixes the default frame: the card flagged `is_debut_form`, or her first form
+ * when no card carries the flag. The rule now lives on the model (`Umamusume::defaultForm()`) and
+ * both the catalog index and the catalog detail read it from there, so the two screens cannot
+ * disagree about which card her portrait is, and a change to the card scope's ordering can no
+ * longer move the picture on one screen and not the other.
+ */
+it('heads the detail with her active form when the Trainer has not chosen one', function (): void {
+    $umamusume = Umamusume::factory()->create(['name' => 'Special Week', 'slug' => 'special-week']);
+    CharacterCard::factory()->create(['umamusume_id' => $umamusume->id, 'card_id' => 100102]);
+    $debut = CharacterCard::factory()->debut()->create([
+        'umamusume_id' => $umamusume->id,
+        'card_id' => 100101,
+    ]);
+
+    $mirror = app(ArtworkMirror::class);
+    Storage::disk('local')->put($mirror->storedPath($mirror->relativePath('card_portrait', 100101)), 'PNG');
+    Storage::disk('local')->put($mirror->storedPath($mirror->relativePath('card_portrait', 100102)), 'PNG');
+
+    $debutUrl = route('artwork.show', ['kind' => 'card_portrait', 'id' => $debut->card_id]);
+    $otherUrl = route('artwork.show', ['kind' => 'card_portrait', 'id' => 100102]);
+
+    // The detail names the active form.
+    $this->get('/umamusume/special-week')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('Catalog/Show')
+            ->where('trainee.artworkURL', $debutUrl));
+
+    // And the index names the same card, so the two screens cannot disagree.
+    $this->get('/umamusume')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('Catalog/Index')
+            ->where('umamusumes.data.0.artworkURL', $debutUrl)
+            ->where('umamusumes.data.0.artworkURL', fn ($value): bool => $value !== $otherUrl));
 });

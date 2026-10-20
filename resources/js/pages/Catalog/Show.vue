@@ -448,20 +448,29 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
         </ul>
 
         <h2 class="mt-8 text-lg font-semibold text-ink-strong">Provenance</h2>
-        <p v-if="provenance.length === 0" class="mt-2 text-sm text-ink-muted">
-            No fetched sources. This record was seeded or entered by hand.
-        </p>
-        <template v-else>
-            <ul class="mt-2 space-y-1 text-sm">
-                <li v-for="source in provenance" :key="source.url" class="text-ink">
-                    <a :href="source.url" class="text-ink-strong underline">{{ source.url }}</a>
-                    <span class="text-ink-muted"> · {{ source.source_key }} · fetched {{ source.fetched_at_display }}</span>
-                </li>
-            </ul>
-            <p class="mt-2 text-xs text-ink-muted">
-                The rows above are this trainee's own fetch history. The profile block and each
-                costume form name the source and the date their own row was read from.
+        <!-- ONE disclosure for the trainee's own fetch history. The heading stays on screen so the
+             section is findable, and the summary says how many sources there are before the
+             disclosure is opened, so a reader learns the size of it without opening it. -->
+        <details id="provenance" class="mt-2">
+            <summary class="cursor-pointer list-item text-sm font-semibold text-ink-strong">
+                {{ provenance.length }} fetched source{{ provenance.length === 1 ? '' : 's' }}
+            </summary>
+
+            <p v-if="provenance.length === 0" class="mt-2 text-sm text-ink-muted">
+                No fetched sources. This record was seeded or entered by hand.
             </p>
-        </template>
+            <template v-else>
+                <ul class="mt-2 space-y-1 text-sm">
+                    <li v-for="source in provenance" :key="source.url" class="text-ink">
+                        <a :href="source.url" class="text-ink-strong underline">{{ source.url }}</a>
+                        <span class="text-ink-muted"> · {{ source.source_key }} · fetched {{ source.fetched_at_display }}</span>
+                    </li>
+                </ul>
+                <p class="mt-2 text-xs text-ink-muted">
+                    The rows above are this trainee's own fetch history. The profile block and each
+                    costume form name the source and the date their own row was read from.
+                </p>
+            </template>
+        </details>
     </AppLayout>
 </template>

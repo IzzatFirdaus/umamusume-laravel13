@@ -83,6 +83,27 @@ class Umamusume extends Model
     }
 
     /**
+     * The trainee's default form: the card flagged `is_debut_form` per A-6, or her first form when
+     * no card carries the flag.
+     *
+     * Decision 9 (A-11) fixes this as the frame every default portrait shows, so the rule lives
+     * here once and the surfaces that show a default frame cannot disagree. The catalog index and
+     * the catalog detail each carried their own copy of it, and the detail's copy was only right
+     * because the card scope happens to order the debut form first: the rule was an accident of
+     * the ordering rather than a statement of it.
+     *
+     * The relation is read as loaded, so a caller that eager-loaded `cards` through
+     * `CatalogController::cardScope()` gets the scoped set and a hidden form moves the frame with
+     * it. A surface that lets the Trainer choose a form explicitly (the catalog detail's `card`
+     * query parameter) governs its own choice; this is the default underneath it.
+     */
+    public function defaultForm(): ?CharacterCard
+    {
+        return $this->cards->first(static fn (CharacterCard $card): bool => $card->is_debut_form)
+            ?? $this->cards->first();
+    }
+
+    /**
      * The profile block, when the `characters` document has been fetched.
      *
      * A `HasOne` and not a `hasOne` behind a nullable join in the view: the row is optional (the
