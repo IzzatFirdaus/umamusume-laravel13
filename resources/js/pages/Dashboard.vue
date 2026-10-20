@@ -316,7 +316,7 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                 <!-- The multi-career notice is muted text with a link, not a pill: a bordered chip
                      competes with the action above it for the same glance. One career renders
                      nothing here. -->
-                <p v-if="props.activeCareerCount > 0" class="mt-3 text-sm text-ink-muted">
+                <p v-if="props.activeCareerCount > 1" class="mt-3 text-sm text-ink-muted">
                     {{ props.activeCareerCount }} career{{ props.activeCareerCount !== 1 ? 's' : '' }} are active{{ props.activeCareerCount > 1 ? '; this screen features the newest' : '' }}.
                     <Link :href="props.careersUrl" class="underline font-medium text-ink-strong hover:text-ink transition-colors duration-150 ease-out">View all careers ({{ props.activeCareerCount }})</Link>
                 </p>

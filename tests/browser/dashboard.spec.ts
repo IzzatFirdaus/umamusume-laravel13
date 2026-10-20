@@ -212,6 +212,26 @@ test('names the multi-career count only when a second career is live', async ({ 
     await expect(page.getByRole('region', { name: 'ACTIVE CAREER' }).getByText(TRAINEE)).toBeVisible();
 });
 
+// The case above cannot see this one: its regex is plural-only (`/careers are active/`), so
+// "1 career are active." matched nothing and it passed for the wrong reason while the notice was
+// still rendering for a single career. This asserts the notice's ABSENCE instead, which is what the
+// section's own comment already claimed ("One career renders nothing here").
+test('renders no multi-career notice while exactly one career is live', async ({ page }) => {
+    await createActiveRun(page, 'unity_cup');
+
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+
+    const card = page.getByRole('region', { name: 'ACTIVE CAREER' });
+
+    // The card still features the one career it has...
+    await expect(card.getByRole('link', { name: 'Resume career' })).toBeVisible();
+
+    // ...and the count-and-link line is not in the DOM at all, rather than reading "1 career are active."
+    await expect(card.getByRole('link', { name: /^View all careers/ })).toHaveCount(0);
+    await expect(card.getByText(/careers? (are|is) active/)).toHaveCount(0);
+});
+
 test('reflows at 320px, logs no console error, and renders under reduced motion', async ({ page }) => {
     const consoleErrors: string[] = [];
     page.on('console', (message) => {
