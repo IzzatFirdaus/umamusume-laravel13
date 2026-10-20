@@ -333,7 +333,7 @@ class ResultController extends Controller
      *
      * The key set is pinned by `CareerResultTest`, so `url` arrives with a test naming it.
      *
-     * @return array{available: bool, reason: string, url: string}
+     * @return array{available: bool, reason: string, url: string, veteran_url: string|null}
      */
     private function saveVeteranSection(TrainingRun $run): array
     {
@@ -347,6 +347,7 @@ class ResultController extends Controller
                     ? 'This career is already in the Veteran library. Saving again rewrites its tags and note rather than filing it a second time.'
                     : 'Adds your own tags and note to this career in the Veteran library. The library stores what you enter and derives nothing from it.'),
             'url' => route('runs.veteran', $run),
+            'veteran_url' => $run->veteran !== null ? route('veterans.show', $run->veteran) : null,
         ];
     }
 

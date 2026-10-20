@@ -75,7 +75,7 @@ const props = defineProps<{
         unassigned: number;
         rewards: string | null;
     };
-    save_veteran: { available: boolean; reason: string; url: string };
+    save_veteran: { available: boolean; reason: string; url: string; veteran_url: string | null };
     ruleset: { value: null; title: string };
     empty: { reason: string; message: string } | null;
 }>();
@@ -351,6 +351,12 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                      open a screen whose save button can only refuse. -->
                 <div v-if="props.save_veteran.available" class="mt-3 flex flex-wrap items-center gap-3">
                     <a
+                        v-if="props.save_veteran.veteran_url !== null"
+                        :href="props.save_veteran.veteran_url"
+                        class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action"
+                    >View veteran</a>
+                    <a
+                        v-else
                         :href="props.save_veteran.url"
                         class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action"
                     >Save Veteran</a>

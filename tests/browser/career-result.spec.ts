@@ -160,3 +160,23 @@ test('passes the axe A + AA scan on a completed career result', async ({ page })
 
     await buildAxe(page).analyze();
 });
+
+test('an already-saved career offers View veteran rather than Save Veteran', async ({ page }) => {
+    await createRun(page);
+    await setStatus(page, 'Completed');
+    const runUrl = createdRunUrls[createdRunUrls.length - 1];
+
+    // File it through the save screen's own form and button.
+    await page.goto(`${runUrl}/veteran`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.getByRole('button', { name: 'Save Veteran', exact: true }).click();
+    await page.waitForURL(/\/veterans\/\d+$/, WRITE);
+
+    await page.goto(`${runUrl}/result`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // Already in the library: the door is the way to read it, not a second Save.
+    const door = page.getByRole('link', { name: 'View veteran' });
+    await expect(door).toBeVisible();
+    await expect(door).toHaveAttribute('href', /\/veterans\/\d+$/);
+});
