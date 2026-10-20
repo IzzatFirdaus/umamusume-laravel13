@@ -8,7 +8,7 @@
  * stays on it rather than being carried to the URL this query was first written for.
  */
 import ArtworkSlot from '../ArtworkSlot.vue';
-import Pagination from '../Pagination.vue';
+import Pagination from '../ui/Pagination.vue';
 import RarityChip from '../RarityChip.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import SparkChip from '../SparkChip.vue';
