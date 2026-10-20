@@ -17,7 +17,7 @@ withDefaults(
     defineProps<{
         id: string;
         modelValue: string | number | null;
-        type?: 'text' | 'email' | 'search' | 'tel' | 'url';
+        type?: 'text' | 'email' | 'search' | 'tel' | 'url' | 'number';
         name?: string;
         describedBy?: string;
         invalid?: boolean;
