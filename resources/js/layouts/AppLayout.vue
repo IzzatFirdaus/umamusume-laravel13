@@ -419,7 +419,7 @@ const moreIsCurrent = computed(() =>
                  deliberate behaviour, so a future containment fix updates that test instead of
                  silently restoring nothing. Making sticky work here is a design decision, not a
                  cleanup. -->
-            <main id="main" data-layout-container class="@container" :class="['mx-auto min-w-0 w-full max-w-6xl flex-1 px-4 py-6 pb-24 md:px-8 md:pb-6', layoutWidthClass]">
+            <main id="main" data-layout-container class="@container" :class="['mx-auto min-w-0 w-full flex-1 px-4 py-6 pb-24 md:px-8 md:pb-6', layoutWidthClass]">
                 <!-- The flash region is always mounted and carries only its text (WCAG 4.1.3): a live
                      region announces what changes inside it, so a region created in the same tick as its
                      message may never be announced. Empty, it is sr-only and says nothing; the classes
