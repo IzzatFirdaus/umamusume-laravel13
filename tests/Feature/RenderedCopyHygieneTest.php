@@ -14,9 +14,9 @@ use Inertia\Testing\AssertableInertia as Assert;
  *
  * KI-7 exists because `tools/gate.py` checks the D-79 em dash only over prototype
  * HTML, so a whole slice of Blade work landed with em dashes in copy that renders
- * (docs/GATE-REGISTRY.md lists that gap). This is the catch the gate did not have:
- * it reads every view file, strips the comment forms a view can hide prose in, and
- * fails on any dash that would reach a Trainer.
+ * (`docs/research-scratch/GOVERNANCE.md` section "GATE-REGISTRY.md" lists that gap). This
+ * is the catch the gate did not have: it reads every view file, strips the comment forms
+ * a view can hide prose in, and fails on any dash that would reach a Trainer.
  *
  * Comments are stripped rather than skipped because they are where the dash is
  * legitimate — this repository's own prose about the rule uses one.

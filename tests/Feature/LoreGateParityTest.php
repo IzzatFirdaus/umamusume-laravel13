@@ -141,7 +141,10 @@ it('prints a hit count, so silence cannot read as a pass', function (string $mod
  * The comment opener is part of the needle, so a heading or a sentence that only names
  * the mechanism is not mistaken for a directive - and the three files that implement or
  * enforce it must spell its name to do so, so they are excluded on the same grounds as
- * class 4 of `docs/GATE-REGISTRY.md`: a gate's own source is a permanent self-hit.
+ * class 4 of the gate registry. That registry is a section of
+ * `docs/research-scratch/GOVERNANCE.md` - "GATE-REGISTRY.md" - and the classes it lists
+ * are in that file's "C-4 allowed hit classes (grep proposes, Guardian decides)" section.
+ * A gate's own source is a permanent self-hit.
  * Nothing else is exempt, and `docs/` files are not in that list: a `docs/` line opening
  * the comment is required to be a well-formed marker.
  *
