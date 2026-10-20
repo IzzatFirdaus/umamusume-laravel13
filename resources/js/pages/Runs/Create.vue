@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
 import TraineeCombobox from '../../components/TraineeCombobox.vue';
-import { BaseInput } from '../../components/Form';
 import FormField from '../../components/ui/FormField.vue';
+import TextInput from '../../components/ui/TextInput.vue';
 import Textarea from '../../components/ui/Textarea.vue';
 import Select from '../../components/ui/Select.vue';
 import { Head, useForm } from '@inertiajs/vue3';
@@ -181,30 +181,50 @@ function submit(): void {
                  the grade_objectives panel is rejected by the request's own closure, so a Trainer who
                  picks period 3 on URA Finals sees the message there rather than the value silently
                  dropped. -->
-            <BaseInput
-                :model-value="form.current_objective_index"
-                type="number"
-                id="create-current_objective_index"
-                name="current_objective_index"
-                label="Current Grade Point period (optional)"
-                min="1"
-                :max="maxObjectiveIndex"
+            <FormField
+                label="Current Grade Point period"
+                :required="false"
                 :error="form.errors.current_objective_index"
                 :hint="`1 to ${maxObjectiveIndex}, tracked in the Grade Point meter on the run page. Only scenarios that compose the Grade Point panel accept a value here.`"
-                @update:model-value="(v: string | number) => (form.current_objective_index = String(v))"
-            />
+                id="create-current_objective_index"
+            >
+                <template #default="{ id, describedBy, invalid, required }">
+                    <TextInput
+                        :id="id"
+                        type="number"
+                        name="current_objective_index"
+                        min="1"
+                        :max="maxObjectiveIndex"
+                        :model-value="form.current_objective_index"
+                        :described-by="describedBy"
+                        :invalid="invalid"
+                        :required="required"
+                        @update:model-value="(v: string) => (form.current_objective_index = String(v))"
+                    />
+                </template>
+            </FormField>
 
-            <BaseInput
-                :model-value="form.shop_resets_in"
-                type="number"
-                id="create-shop_resets_in"
-                name="shop_resets_in"
-                label="Shop resets in (optional)"
-                min="0"
+            <FormField
+                label="Shop resets in"
+                :required="false"
                 :error="form.errors.shop_resets_in"
                 hint="Turns until the shop rotation as you read it. The scenario's own upper bound applies at the model layer."
-                @update:model-value="(v: string | number) => (form.shop_resets_in = String(v))"
-            />
+                id="create-shop_resets_in"
+            >
+                <template #default="{ id, describedBy, invalid, required }">
+                    <TextInput
+                        :id="id"
+                        type="number"
+                        name="shop_resets_in"
+                        min="0"
+                        :model-value="form.shop_resets_in"
+                        :described-by="describedBy"
+                        :invalid="invalid"
+                        :required="required"
+                        @update:model-value="(v: string) => (form.shop_resets_in = String(v))"
+                    />
+                </template>
+            </FormField>
 
             <FormField
                 label="Notes"
