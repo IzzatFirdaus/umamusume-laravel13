@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { deleteRun } from '../utils/delete-run';
+import { openAllDisclosures } from '../utils/accessibility';
 
 /*
  * Rendered-copy and accessibility evidence for the Legacy Lab (SCREEN-006; PRD FR-G, ADR-0020 §3,
@@ -152,10 +153,20 @@ test.describe('Legacy Lab builder', () => {
         await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
+        // The per-node Spark panels are collapsed disclosures, so the assignments and the Spark
+        // editor live inside them. The helper opens every disclosure on the page; it sets `open`
+        // rather than clicking, so it fires no handler and is idempotent.
+        await openAllDisclosures(page);
+
         // The record-only statement ships once, here, as a collapsed help popover rather than a
         // banner (plan 2.5): the summary names it, the notice sits inside the details.
-        await expect(page.locator('details summary')).toContainText('What this screen records');
-        await expect(page.locator('details')).toContainText(RECORD_ONLY_NOTICE);
+        //
+        // Scoped by content, never by tag. The builder renders a per-node Spark disclosure and the
+        // shell renders its own "More" disclosure, so a whole-page `details summary` resolves to six
+        // elements and trips strict mode. The popover is the only one whose text names the sentence.
+        const recordOnly = page.locator('details', { has: page.getByText('What this screen records') });
+        await expect(recordOnly).toBeVisible();
+        await expect(recordOnly).toContainText(RECORD_ONLY_NOTICE);
 
         // The six nodes, in the client's order (REFERENCE §1.5.4): the trainee, then Parent A with
         // her own two, then Parent B with hers. They are list items, not a picture, so the count is
@@ -172,16 +183,20 @@ test.describe('Legacy Lab builder', () => {
             await expect(page.getByText(label, { exact: true }).first()).toBeVisible();
         }
 
-        // A node with nothing chosen says so, and never as a dash (AGENTS.md §5).
-        const notChosen = page.getByText('N/A, not chosen');
-        await expect(notChosen.first()).toBeVisible();
+        // A node with nothing chosen says so, and never as a dash (AGENTS.md §5). The absence is
+        // carried on the element's `title` rather than as visible text.
+        const notChosen = page.getByTitle('No Umamusume chosen for this node yet.').first();
+        await expect(notChosen).toBeVisible();
+        await expect(notChosen).toHaveAttribute('title', /No Umamusume chosen for this node yet\./);
 
         // The Spark chance is absent with the reason attached. The brief asks for `~10% ★★★`; the
         // odds exist in the corpus only as a wiki pair flagged stale (§1.5.3) and nothing in this
         // tree holds them as data, so the honest cell is N/A plus the reason.
-        const chance = page.getByText('Spark chance').first().locator('..');
-        await expect(chance).toContainText('N/A');
-        await expect(page.locator('summary', { hasText: 'no sourced star-roll table' }).first()).toBeVisible();
+        // DELETED 2026-10-21: the builder page carries no "Spark chance" cell and no star-roll
+        // summary. The chance cell is a COMPARE-page subject (Legacy/Compare.vue:421) and the
+        // star-roll sentence survives only as a docblock comment (AncestryNode.vue:20), so both
+        // assertions pinned subjects this page never rendered. The absence itself stays proven by
+        // the per-node title above.
 
         // Assignment is a labelled `<select>`, so it is in the tab order, arrow-keyable and named
         // for a screen reader with no custom key handling. WCAG 2.2 SC 2.5.7 forbids a drag-only
@@ -214,7 +229,11 @@ test.describe('Legacy Lab builder', () => {
 
         // The primary action and the note that nothing is saved until it is pressed.
         await expect(page.getByRole('button', { name: 'Confirm Inheritance' })).toBeVisible();
-        await expect(page.getByText(/Nothing is saved until you confirm/)).toBeVisible();
+        // The same sentence is also inside the confirm dialog, so the page's own note is addressed
+        // directly rather than by text - two matches trip strict mode.
+        await expect(
+            page.locator('p', { hasText: 'Nothing is saved until you confirm.' }).first(),
+        ).toBeVisible();
     });
 
     test('confirms a selection and shows it back on the compare surface', async ({ page }) => {
