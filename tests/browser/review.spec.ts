@@ -99,6 +99,45 @@ test('each card explains itself: count, pill, badge, reason, and one primary-act
     await expect(page.locator('form[aria-busy]')).toHaveCount(0);
 });
 
+test('lists the rows the engine could suggest before the ones it could not', async ({ page }) => {
+    await page.goto('/review');
+    await page.locator('#app > *').first().waitFor();
+
+    const empty = page.getByText('Nothing pending.');
+    if (await empty.isVisible().catch(() => false)) {
+        test.skip(true, 'No pending candidates in the scratch database.');
+    }
+
+    // The seeded queue holds exactly one suggested row, and every seeded row shares one fetch
+    // timestamp, so before the ordering fix the list opened on a row with no suggestion at all.
+    // 6A.1's suggestion-first order is what puts the click-decidable row where the Trainer meets it.
+    await expect(page.locator('main ul > li').first()).toContainText('Suggested id:');
+});
+
+test('gates Resolve on a chosen verdict, and names the reason', async ({ page }) => {
+    await page.goto('/review');
+    await page.locator('#app > *').first().waitFor();
+
+    const empty = page.getByText('Nothing pending.');
+    if (await empty.isVisible().catch(() => false)) {
+        test.skip(true, 'No pending candidates in the scratch database.');
+    }
+
+    const card = page.locator('main ul > li').first();
+    const verdict = card.getByLabel(/^Verdict for /);
+    const resolve = card.getByRole('button', { name: /^Resolve / });
+
+    // The verdict starts unset, so the commit is refused at the control and the card says why.
+    await expect(verdict).toHaveValue('');
+    await expect(resolve).toBeDisabled();
+    await expect(card.getByText('Choose a verdict first.')).toBeVisible();
+
+    // A deliberate pick enables it and retires the reason.
+    await verdict.selectOption('Rejected');
+    await expect(resolve).toBeEnabled();
+    await expect(card.getByText('Choose a verdict first.')).toHaveCount(0);
+});
+
 test('passes an axe scan at WCAG A and AA', async ({ page }) => {
     await page.goto('/review');
     await page.locator('#app > *').first().waitFor();

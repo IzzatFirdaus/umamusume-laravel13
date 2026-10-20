@@ -101,11 +101,14 @@ function submit(): void {
             />
         </div>
 
-        <!-- The visible word stays in the name (WCAG 2.5.3, Label in Name). -->
+        <!-- The visible word stays in the name (WCAG 2.5.3, Label in Name). The verdict gate is the
+             shape `Veterans/Compare.vue` ships: the control is disabled and a sibling line names the
+             reason, so a Trainer meets the requirement rather than a dead button. The request's own
+             required rule still backs it up server-side. -->
         <button
             type="submit"
             :aria-label="`Resolve ${candidate.proposed_name}`"
-            :disabled="form.processing"
+            :disabled="form.processing || form.status === ''"
             class="inline-flex min-h-11 items-center rounded-full px-3 font-semibold transition-colors duration-150 ease-out disabled:opacity-60 disabled:cursor-wait"
             :class="accented
                 ? 'bg-primary-action text-on-primary-action'
@@ -113,5 +116,8 @@ function submit(): void {
         >
             Resolve
         </button>
+        <p v-if="form.status === ''" class="text-xs text-ink-muted">
+            Choose a verdict first.
+        </p>
     </form>
 </template>

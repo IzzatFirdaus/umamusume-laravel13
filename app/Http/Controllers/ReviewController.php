@@ -28,6 +28,11 @@ class ReviewController extends Controller
     {
         $candidates = MatchCandidate::with('suggestedUmamusume')
             ->where('status', CandidateStatus::Pending->value)
+            // Rows the engine could suggest a match for come first: a suggestion is the queue's
+            // cheapest decision, so the ones a Trainer can act on in one click are not buried
+            // behind the ones that need research. Newest-fetch order still breaks the ties inside
+            // each half, so this narrows the queue without reordering either part of it.
+            ->orderByRaw('suggested_umamusume_id IS NULL')
             ->latest('created_by_fetch_at')
             ->paginate(25)
             ->through(fn (MatchCandidate $candidate): array => [
