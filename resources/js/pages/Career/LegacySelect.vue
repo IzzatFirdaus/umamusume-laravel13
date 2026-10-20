@@ -239,12 +239,10 @@ const ancestorError = (index: number, slot: number): string | undefined =>
         <template #eyebrow>Setup</template>
         <template #title>Legacy</template>
 
-        <!-- Back breadcrumb -->
-        <nav class="mt-4 mb-2" aria-label="Breadcrumb">
-            <Link href="/career/setup/legacy" class="inline-flex min-h-11 items-center text-sm font-medium text-brand-accent-ink hover:underline transition-colors duration-150 ease-out" aria-label="Back to legacy step">
-                ← Back to legacy
-            </Link>
-        </nav>
+        <!-- No breadcrumb: "← Back to legacy" pointed at this same URL, and its `Link` was never
+             imported, so it rendered an empty `<nav aria-label="Breadcrumb">` and a resolve warning.
+             The step bar above lists all six steps, so nothing is lost. Steps 1 and 2 carry the same
+             note. -->
 
         <!-- Header: eyebrow + subtitle. The page title is the layout's #title h1. -->
         <header class="mb-4">

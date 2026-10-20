@@ -218,7 +218,7 @@ Execution order is `0.4 (blocked) → 0.6 (landed) → 0.7 → 0.8 → 0.9 → 0
 
 ## 10. Dispatch 5 — backlog slice 0.7 (encoding), landed 2026-10-17 23:33 as `b2e7317`
 
-Backlog read from its real location: `docs/proposals/implementation-backlog-2026-10-17.md`. The path the dispatch names (`.scratch-uma/dispatch-2026-10-17/implementation-backlog.md`) **does not exist**; the file is untracked in `docs/proposals/`. Same correction as the frontend-design-2026-10-13.md one in §9 — the backlog itself now records that second case at its line 22-25.
+Backlog read from its real location: `docs/proposals/implementation-backlog-2026-10-17.md`. The path the dispatch names (.scratch-uma/dispatch-2026-10-17/implementation-backlog.md) **does not exist**; the file is untracked in `docs/proposals/`. Same correction as the frontend-design-2026-10-13.md one in §9 — the backlog itself now records that second case at its line 22-25.
 
 Premise check: HEAD `c2de34b`, `origin/master` `6690d15`, ahead 12. Peer holds the same eight files, last write **21:10:55** (≈2h quiet, still dirty). Neither of this slice's target components was peer-dirty.
 

@@ -316,12 +316,9 @@ function removeAt(index: number): void {
         <template #eyebrow>Setup</template>
         <template #title>Your target</template>
 
-        <!-- Back breadcrumb -->
-        <nav class="mt-4 mb-2" aria-label="Breadcrumb">
-            <Link href="/career/setup/target" class="inline-flex min-h-11 items-center text-sm font-medium text-brand-accent-ink hover:underline transition-colors duration-150 ease-out" aria-label="Back to target step">
-                ← Back to target
-            </Link>
-        </nav>
+        <!-- No breadcrumb: "← Back to target" pointed at this same URL, a control that navigates to the
+             page it is on. The step bar above lists all six steps and the carried-choices strip states
+             the scenario and the trainee, so nothing is lost. Steps 1 and 2 carry the same note. -->
 
         <!-- Header: eyebrow + subtitle. The page title is the layout's #title h1. -->
         <header class="mb-4">
