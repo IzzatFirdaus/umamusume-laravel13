@@ -73,17 +73,17 @@ test('draws the five published caps as a table of base, bonus and cap', async ({
     await expect(section.getByText(/Verified 2026-09-27/)).toBeVisible();
 });
 
-test('names the caps Confirmed and says why the panel is undrawn in a visible line', async ({ page }) => {
+test('names the caps verified and says why the panel is undrawn in a visible line', async ({ page }) => {
     await openGrandConcertCockpit(page);
 
     const section = page.getByRole('region', { name: 'Scenario' });
 
-    // The caps are published, so they carry Confirmed. The undrawn panel is an absence, not a figure,
-    // so the prose line owns the whole statement and no badge accompanies it: the owner ruled on
-    // 2026-10-09 that `ProvenanceBadge` qualifies a displayed value (`DESIGN.md` §4.2). The count is
-    // asserted rather than the visibility, so the chip cannot come back unnoticed, and the reason is
-    // already proven by the `title` check below.
-    await expect(section.getByRole('img', { name: /^Confirmed/ })).toBeVisible();
+    // The caps are published, and what says so is the `Verified {date}` span beside the heading — the
+    // matrix's own verification date, which is the claim the table rests on. This case used to demand
+    // a `role="img"` badge named Confirmed; slice 1.7 retired that, because a badge present on every
+    // published value marks nothing. The undrawn panel is an absence, not a figure, so the prose line
+    // owns that whole statement (`DESIGN.md` §4.2, owner's ruling 2026-10-09).
+    await expect(section.getByText(/Verified \d{4}-\d{2}-\d{2}/)).toBeVisible();
     await expect(section.getByRole('img', { name: /^Unknown/ })).toHaveCount(0);
 
     const sentence = section.getByText(/The mechanics for this scenario are sourced/).first();

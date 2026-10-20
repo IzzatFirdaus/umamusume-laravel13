@@ -176,6 +176,16 @@ const onPanels = computed<{ flag: string; label: string }[]>(() =>
 );
 
 /**
+ * Whether the scenario composes the career-goals ladder.
+ *
+ * That panel is a goal list, not a replacement for the published caps, so the baseline strip still
+ * owes its caps table and its absent-panel line. The gate below used to read `onPanels.length === 0`,
+ * which conflated "composes no panel at all" with "composes no cap-replacing panel" and hid the strip
+ * behind the goals panel — the defect `grand-concert-panel.spec.ts:49` pins.
+ */
+const careerGoalsOn = computed<boolean>(() => props.scenario.panels['career_goals']?.on === true);
+
+/**
  * The widget chain. `resolve` first, so a registered renderer always wins; then the meter, but
  * only for a key the matrix labels â€” a meter needs a name, and inventing one is the failure this
  * chain exists to avoid; then the notice that names the key instead.
@@ -259,7 +269,7 @@ const emptyText = computed<string>(() =>
         <!-- The baseline strip: the render for a scenario that composes no panel at all (plan Â§9 E6,
              D-241, gate G-41). It is one branch for every scenario, so a fifth one that leaves every
              flag off reaches it for one config entry and no edit here. -->
-        <div v-if="onPanels.length === 0" class="flex flex-col gap-3">
+        <div v-if="careerGoalsOn || onPanels.length === 0" class="flex flex-col gap-3">
             <!-- The generic sentence, only where the scenario declares no line of its own: a specific
                  reason beats a generic one, and printing both would say the same thing twice. -->
             <AlertRow
