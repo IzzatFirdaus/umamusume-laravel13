@@ -4656,3 +4656,206 @@ The `containment-mechanism.spec.ts` fixture kept above is the control that slice
     4. Peer commits the three Vue files -> one quiet-tree dispatch rebuilds public/build on master and
        re-runs the walk set, closing KI-70.
 - Next eligible: 4.3 once its two rulings land, then 4.4, then 4.5 and 4.6, plus the queued dispatches.
+## 51. Phase 5.1 close - the range summary is present; sort stays a controller change, 2026-10-20
+
+### Measure
+
+- Territory gate: `resources/js/pages/Database/Races.vue`, `app/Http/Controllers/DatabaseController.php`,
+  `components/Pagination.vue`, `components/ui/Pagination.vue`, `tests/browser/database*.spec.ts`.
+  The peer's dirty set is Career-only; nothing in this area is peer-dirty.
+- `Races.vue:16` - `import Pagination from '../../components/ui/Pagination.vue';` - the canonical
+  primitive, not the duplicate.
+- `Races.vue:179-187` - the pager is bound to the stored range: `:page="props.slots.current_page"`,
+  `:pages="props.slots.last_page"`, `:from="props.slots.from ?? 0"`, `:to="props.slots.to ?? 0"`,
+  `:total="props.slots.total"`, `noun="slots"`, `@navigate="goToPage"`. The canonical `Pagination`
+  renders "Showing X to Y of Z noun" from exactly these bindings.
+
+### Close
+
+- Verdict: the "Showing A to B of N slots" range summary is ALREADY-SATISFIED (landed in a39a3fe5).
+  No code change, no commit.
+- Needs-re-scope, owed to the operator: sortable headers. The controller has no sort whitelist for
+  the races area, and the plan's own instruction for that case is stop, report - a 1c controller
+  change, not a page change.
+- Dropped by ruling: the sticky filter bar (the filter is refused by `DatabaseController::races()`'s
+  own docblock, and `main`'s container makes a page-level sticky bar a no-op); the Gate column (it
+  carries data on 402 of 410 rows, which is the plan's own stop condition); deleting
+  `components/Pagination.vue` (live importers remain - the blast-radius clause applies, and the
+  unification is partial by ruling).
+- The plan's `SELECT COUNT(*) FROM races WHERE gate IS NOT NULL` names a table and a column that
+  do not exist; the page reads `race_catalog_slots` and the Gate column is derived from three
+  booleans.
+
+## 52. Phase 5.2 close - the skills database already shipped, 2026-10-20
+
+### Measure
+
+- Territory gate: `resources/js/pages/Database/Skills.vue`, `resources/js/components/skills/SkillCatalog.vue`,
+  `tests/browser/database*.spec.ts`. Quiet.
+- `SkillCatalog.vue:11,224` - the canonical `ui/Pagination.vue`.
+- `SkillCatalog.vue:12,210` - `ProvenanceBadge` imported and rendered.
+- `SkillCatalog.vue:191` - the Japanese name carries `lang="ja"`.
+- No `sticky` in the component. The index is a card list, not a table, which is the correct host
+  for a row that links to two pages.
+- The detail's raw block is ONE `<details>` inside `section[aria-labelledby="mechanics"]` whose
+  summary names the source's own expressions and codes (c61ef815); the effect chips name the human
+  label where one exists - `effect.name ?? '[Unverified] effect N'`.
+
+### Close
+
+- Verdict: ALREADY-SATISFIED. The remaining asks were either present before the arc
+  (`ProvenanceBadge`, `lang="ja"`, the canonical pager) or landed by c61ef815 (the raw-engine
+  disclosure and the named effects). No code change, no commit.
+- Note: the sweep's "no 'Raw engine data' target" reading is about the index component; the block
+  the plan asked for is on the detail page, and it is there.
+
+## 53. Phase 5.3 close - the support-card catalogue already shipped, 2026-10-20
+
+### Measure
+
+- Territory gate: `resources/js/pages/Database/Supports.vue`,
+  `resources/js/components/support/SupportCardCatalog.vue`, `tests/browser/database*.spec.ts`. Quiet.
+- `SupportCardCatalog.vue:12,234` - `RarityChip` rendered with the rarity's own label and star run.
+- `SupportCardCatalog.vue:13` - `ProvenanceBadge` imported.
+- `SupportCardCatalog.vue:11,256` - the canonical `ui/Pagination.vue`.
+- `SupportCardCatalog.vue:250` - effects named in words, with the source's own id when the
+  dictionary has no row.
+- No `DataTable` and no `<table>`: the card is the right host for a row carrying a portrait, a
+  rarity, two type words and a provenance badge.
+- The card detail's provenance is one disclosure whose summary names the state (0742ece3).
+
+### Close
+
+- Verdict: ALREADY-SATISFIED, except the index `DataTable` claim, which is dropped by the same
+  ruling that governs 5.5 (a migration is a preference; it is not a fix). No code change, no commit.
+- Residual, not owed by this agent: the rarity chip's accessible name is the rarity's own label
+  ("SSR") and the star run beside it is not part of that name, so the plan's
+  `aria-label="SSR, 3 star"` tuple is not what the tree names. The chip's docblock states the
+  contract it holds - the glyph run is the readout, `role="img"` + `aria-label` turns the glyphs
+  into a name - and `tests/browser/catalog.spec.ts:29` pins it as a named glyph run. Changing the
+  name to a tuple is a copy decision with a spec behind it.
+
+## 54. Phase 5.4 close - the portrait rule is stated once; two sub-claims are the owner's, 2026-10-20
+
+### Measure
+
+- Territory gate: `resources/js/pages/Database/Trainees.vue`, `resources/js/pages/Catalog/Show.vue`,
+  `resources/js/components/catalog/TraineeCatalog.vue`, `resources/js/components/AptitudeGrid.vue`,
+  `resources/js/components/catalog/FormDetail.vue`, `tests/browser/catalog*.spec.ts`. Quiet.
+- `TraineeCatalog.vue:200,205` - the costume forms are already collapsed into a `<details>` with a
+  `<summary>` (d01288d2).
+- `AptitudeGrid.vue:2-3` - the letters are grouped in the export's own order - surface, the four
+  distances, the four running styles - each group with its own heading (d01288d2).
+- `app/Models/Umamusume.php` - `defaultForm()` returns the card flagged `is_debut_form` per A-6, or
+  her first form when no card carries the flag; `CatalogController`'s index and detail both read
+  it, so the two screens cannot disagree about which card her frame is (ce89b2be).
+- `DESIGN.md:541` and `SCREEN_SPEC.md:787` both name the status dl's JP debut and Global debut rows
+  as the screen's fields, while the "Release date" row above is built by the controller's
+  `releaseDate()` helper from the same two columns (`global_debut_date ?? jp_debut_date`).
+
+### Close
+
+- Verdict: SATISFIED for the portrait rule, the collapsed costume forms, the grouped aptitudes and
+  `lang="ja"`.
+- Sweep verdict CORRECTED: Decision 9 was not "already satisfied - do not change portrait
+  resolution". The detail's default was `cards->first()`, which was right only because the card
+  scope happens to order `is_debut_form` first; the rule was an accident of the ordering rather
+  than a statement of it. ce89b2be states the rule in one place and pins it with
+  `tests/Feature/CatalogDetailArtworkSlotTest.php`.
+- Sweep verdict CORRECTED: the source disclosure was not "dropped by D-33". D-33
+  (`docs/research-scratch/DESIGN-CORPUS.md:1886`) says "Every engine-sourced fact shows
+  provenance" - it requires the provenance to be shown, and the roster workstream's own note
+  (`CATALOG-ROSTER-WORKSTREAM.md:3106`) is "add no second character-level provenance block".
+  ce89b2be did not collapse the two blocks: `FormDetail.vue:40` still prints the form's own source
+  inline, and what moved is `Catalog/Show.vue`'s own trainee-level fetch history into one
+  disclosure whose summary names the state.
+- Needs-re-scope, owed to the operator: the debut-date shape. The "Release date" row and the two
+  debut rows read the same two stored columns in two shapes, and two documents name the split rows
+  as the screen's fields. Collapsing them means choosing which shape survives, and that is a copy
+  decision, not a gap this agent closes.
+- Needs-re-scope, owed to the operator: the empty runs and aliases sections. The runs section
+  carries the page's primary action, and the aliases heading is one of the eight the
+  binding-order case pins.
+- One finding reported, not fixed: the card scope hides unconfirmed forms, so a trainee whose only
+  `is_debut_form` card is unconfirmed falls back to the first VISIBLE form on both catalogue
+  screens, while the career surfaces, which apply no such filter, keep naming the flagged card.
+  A-11's letter would keep the flagged card. The scope is a Trainer-facing opt-in and the frame is
+  identity - two different facts - and changing which card the identity frame names is a visible
+  change and a ruling.
+
+## 55. Phase 5.5 close - the reference tables stay as they are; the migration was built and withdrawn, 2026-10-20
+
+### Measure
+
+- Territory gate: `resources/js/pages/Database/{Scenarios,ShopItems,Sparks,Events,Index}.vue`,
+  `config/scenarios.php`, `tests/browser/database*.spec.ts`. Quiet.
+- `Scenarios.vue` - one `<section>` per scenario, each carrying its own caps table and panels list.
+  D-240 (`DESIGN-CORPUS.md:2408`, gate G-33) makes scenario composition data the layout reads, not
+  branching the layout contains; a table whose rows are all scenarios and whose columns are their
+  per-scenario stat caps is a cross-scenario matrix, and that is a `config/scenarios.php` change,
+  not a page change.
+- `Index.vue` - a plain `<nav aria-label="Database areas">` over a `<ul>`. The page's own docblock
+  refuses per-area record counts: "No area counts on this page ... a figure here would be one no
+  area corroborates on arrival." The `Card` primitive has 0 consumers.
+- `Events.vue`, `ShopItems.vue`, `Sparks.vue` - hand-rolled row lists whose rows open a
+  `ReferenceDrawer`; `tests/browser/database.spec.ts:135` pins the Events drawer's open-and-return-
+  focus behaviour.
+- `components/ui/DataTable.vue` has 1 consumer (`resources/js/pages/Career/TraineeSelect.vue`);
+  `components/ui/Card.vue` has 0.
+
+### Close
+
+- Verdict: NEEDS-RE-SCOPE, dropped by ruling. The migration was built and then withdrawn, because
+  the measurement showed the affordances it would have cost:
+
+| Target | Affordance the shared primitive would drop |
+|---|---|
+| Scenarios' caps table | `<th scope="row">` row headers, and the per-scenario `<caption>` |
+| Scenarios' panels list | the visible word `off` - the page's own comment states the word stays in the text so the state never rides on colour alone; a tick/dash pair is glyph-only |
+| Sparks' star-roll odds | `min-w-[28rem]` with `<th scope="row">` - the shared region scrolls only if the table is wider than it, and `w-full` wraps instead |
+| Shop / Sparks / Events row lists | the whole-row drawer trigger, the per-row `<dl>`, and the chip row beside the name |
+| Hub | the plain nav the `database.spec.ts` hub case addresses by role |
+
+- A migration that loses a spec-pinned affordance is a preference, not a fix. The plan's own ruling
+  says the same. Nothing lands from this slice; the five files and `tests/browser/database.spec.ts`
+  were restored to ce89b2be.
+- If the operator wants a specific comparison view (a column-wise comparison of Sparks is the
+  example the plan names), it is a targeted change with a proposal first, not a migration.
+
+## 56. Phase 5 close - state against the plan, 2026-10-20
+
+### Close
+
+- Phase 5 slices: 5 (5.1, 5.2, 5.3, 5.4, 5.5).
+- State document: `docs/proposals/phase-5-state-2026-10-20.md`, committed as 38595de, recording
+  per slice the plan's claims, the tree's evidence, the verdict and what the ruling drops.
+- Landed in this arc before the side-agent plan was written: 5.1's range summary (a39a3fe5), 5.2's
+  raw-engine disclosure and named effects (c61ef815), 5.3's provenance disclosure and canonical
+  pager (0742ece3), 5.4's portrait rule and detail disclosure (ce89b2be), and d01288d2's costume
+  forms and grouped aptitudes, which were already on master when the arc began.
+- Dropped by ruling: 5.5 in full; 5.1's sortable headers, sticky filter bar and Gate-column drop;
+  5.3's index `DataTable` and rarity-chip tuple name; 5.4's debut-date shape and the empty
+  runs/aliases collapse.
+- Needs-re-scope, owed to the operator: 5.1's sort whitelist (a controller change); 5.4's
+  debut-date shape; the remainder of the `Pagination` unification (live importers remain - a small
+  ticket, not this arc); 5.3's rarity-chip tuple name.
+- Two sweep verdicts corrected on evidence: 5.4's portrait rule (Section 54) and 5.4's source
+  disclosure (Section 54). The sweep attributed a39a3fe5, c61ef815 and 0742ece3 to the peer; this
+  session's transcript shows they were landed in this same arc, which is the error Rule 1 of this
+  arc exists to prevent.
+- No known reds in this area at ce89b2be. The peer's Career edits stay untouched.
+
+## 57. Phase 6.2 close - the review queue closed by 83e1ad62, 2026-10-20
+
+### Measure
+
+- Territory gate: `resources/js/pages/Review/Index.vue`, `app/Http/Controllers/ReviewController.php`,
+  `tests/browser/review.spec.ts`. Quiet.
+- 83e1ad62 landed the suggestion sort, the verdict-gated resolve and the button name; the card
+  list is the correct host for a per-row verdict form.
+
+### Close
+
+- Verdict: ALREADY-SATISFIED. The `DataTable` claim is dropped by the same ruling that governs
+  5.5: a migration is a preference, and this one would lose the per-row verdict form's affordances.
+  No code change, no commit.

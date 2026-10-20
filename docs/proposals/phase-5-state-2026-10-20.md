@@ -234,3 +234,42 @@ Phase 6.2 (Review) closes on the same measurement: `83e1ad62` landed the suggest
 verdict-gated resolve and the button name, and the card list is the correct host for a per-row
 verdict form, so the `DataTable` claim is dropped by the same ruling. No work; recorded in the
 ledger.
+
+---
+
+## Phase 5 close — 2026-10-20
+
+**Total slices:** 5 (5.1 races, 5.2 skills, 5.3 support cards, 5.4 trainees catalog, 5.5 reference
+tables).
+
+**Landed by this agent, measured as a gap:** the 5.4 portrait rule, stated once on the model and
+pinned by a feature case (`ce89b2be`), and the 5.4 detail's own fetch-history disclosure
+(`ce89b2be`). 5.1's range summary was already present (`a39a3fe5`).
+
+**Already landed before this measurement pass, in this same arc:** 5.2's raw-engine disclosure and
+named effects (`c61ef815`), 5.3's provenance disclosure and canonical pager (`0742ece3`), and
+`d01288d2`'s folded costume forms and grouped aptitudes, which were on `master` before the arc
+began.
+
+**Dropped by ruling:** 5.5 in full (D-240 owns the scenario composition; a migration that drops a
+spec-pinned affordance is a preference, not a fix); 5.1's sortable headers, sticky filter bar and
+Gate-column drop; 5.3's index `DataTable` and rarity-chip tuple name; 5.4's debut-date shape and
+the empty runs/aliases collapse.
+
+**Two sweep verdicts corrected on evidence, against the plan's own close template.** The template
+lists "5.4-source-disclosure" and "5.4-decision-9" as dropped by ruling. Measurement says
+otherwise, and the ledger records why: D-33 requires the provenance to be *shown* and forbids a
+*second* character-level block, and the landed change shows both kinds of provenance where they
+belong; and Decision 9's portrait rule was right only because the card scope happens to order
+`is_debut_form` first, so the rule was an accident of the ordering rather than a statement of it.
+The plan's close template is a checklist, not an oracle — Rule 25 applies to it as it applies to
+the plan.
+
+**Needs-re-scope, awaiting the operator:** 5.1's sort whitelist (a controller change); 5.4's
+debut-date shape (a copy decision between two documented field lists); 5.3's rarity-chip tuple
+name (a copy decision with a spec behind it); the remainder of the `Pagination` unification (live
+importers remain — a small ticket, not this arc); 5.5's comparison views, available as a
+proposal-first targeted change if the operator asks.
+
+**No known reds in this area** at `ce89b2be`. The peer's Career edits were not touched, and
+`grand-concert-panel.spec.ts` stays excluded from any walk here until the 7.11 ruling lands.
