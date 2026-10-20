@@ -294,9 +294,6 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
         </h3>
 
         <p v-if="props.option.reason !== null" class="mt-1 text-sm text-ink">{{ props.option.reason }}</p>
-        <p v-else class="mt-1 text-sm text-ink-muted">
-            <span :title="`The advisor states no reason for this option on this turn: ${props.option.key} has no target deficit to name and no Energy reading to spend.`">Why is in the advisor’s line above the cards.</span>
-        </p>
 
         <dl class="mt-3 space-y-2 text-sm">
             <div>
