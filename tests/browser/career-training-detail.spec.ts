@@ -72,7 +72,7 @@ async function newCareerWithTurn(page: import('@playwright/test').Page, scenario
     await page.locator('input[name="fans"]').fill('120');
     await page.locator('input[name="sp"]').fill('100');
     await page.locator('select[name="outcome"]').selectOption('Success');
-    await page.getByRole('button', { name: 'Record this training' }).click();
+    await page.getByRole('button', { name: /^Record turn \d+$/ }).click();
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
     await expect(page.getByText('Turn 1 logged.')).toBeVisible();
 
@@ -114,7 +114,7 @@ async function newCareerWithNoEnergyAtTarget(page: import('@playwright/test').Pa
     await page.locator('input[name="fans"]').fill('120');
     await page.locator('input[name="sp"]').fill('100');
     await page.locator('select[name="outcome"]').selectOption('Success');
-    await page.getByRole('button', { name: 'Record this training' }).click();
+    await page.getByRole('button', { name: /^Record turn \d+$/ }).click();
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
 
     await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
@@ -175,7 +175,7 @@ test('shows five cards, the sourced cost, and no projected number anywhere', asy
     // form's submit, which is the thing that writes the turn.
     //
     // `exact: true` matters here: Playwright's accessible-name match is a case-insensitive SUBSTRING by
-    // default, so a bare 'Train' would also resolve the submit, which is named `Record this training`.
+    // default, so a bare 'Train' would also resolve the submit, which is named `Record turn {N}`.
     // NOTE: added while master's `public/build` was peer-dirty and stale under KI-70, so this pair has
     // not yet been executed. It is classified untested, not green, until the bundle is rebuilt.
     const trainCtas = page.getByRole('button', { name: 'Train', exact: true });
@@ -183,7 +183,7 @@ test('shows five cards, the sourced cost, and no projected number anywhere', asy
     for (const cta of await trainCtas.all()) {
         await expect(cta).not.toHaveClass(/bg-primary-action/);
     }
-    await expect(page.getByRole('button', { name: /^Record this/ })).toHaveClass(/bg-primary-action/);
+    await expect(page.getByRole('button', { name: /^Record turn \d+$/ })).toHaveClass(/bg-primary-action/);
 });
 
 test('names each exclusion on a disclosure a keyboard and a screen reader reach', async ({ page }) => {
@@ -240,7 +240,7 @@ test('renders the scenario matrix published row when the turn records a facility
         await page.locator(`input[name="facility_${stat}"]`).fill('3');
     }
 
-    await page.getByRole('button', { name: 'Record this training' }).click();
+    await page.getByRole('button', { name: /^Record turn \d+$/ }).click();
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
 
     await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
@@ -401,7 +401,7 @@ test('reaches the screen from the Cockpit and records the choice it carries', as
     await page.locator('input[name="wit"]').fill('640');
     await page.locator('input[name="energy"]').fill('40');
     await page.locator('select[name="outcome"]').selectOption('Success');
-    await page.getByRole('button', { name: 'Record this training' }).click();
+    await page.getByRole('button', { name: /^Record turn \d+$/ }).click();
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
     await expect(page.getByText('Turn 2 logged.')).toBeVisible();
 
@@ -517,7 +517,7 @@ test('draws the Performance pair on a Grand Concert turn and records a turn with
     await page.locator('select[name="outcome"]').selectOption('Success');
     await type.selectOption('Vocals');
     await delta.fill('12');
-    await page.getByRole('button', { name: 'Record this training' }).click();
+    await page.getByRole('button', { name: /^Record turn \d+$/ }).click();
 
     // The write carried the pair to the endpoint that records it: the turn landed, which is the
     // refusal path's own failure mode not having fired.
@@ -570,7 +570,7 @@ test('Rest is offered as a choice and records the turn through the same form', a
     }
 
     // A non-training choice names the button after the turn rather than after a training.
-    const submit = page.getByRole('button', { name: 'Record this turn' });
+    const submit = page.getByRole('button', { name: /^Record turn \d+$/ });
     await expect(submit).toBeVisible();
 
     await page.locator('input[name="speed"]').fill('650');
@@ -610,7 +610,7 @@ test('Recreation is offered as a choice and records the turn through the same fo
         await expect(input).toHaveAttribute('placeholder', prior);
     }
 
-    const submit = page.getByRole('button', { name: 'Record this turn' });
+    const submit = page.getByRole('button', { name: /^Record turn \d+$/ });
     await expect(submit).toBeVisible();
 
     await page.locator('input[name="speed"]').fill('650');

@@ -138,7 +138,7 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     await page.locator('input[name="wit"]').fill('600');
     await page.locator('input[name="energy"]').fill('62');
     await page.locator('select[name="outcome"]').selectOption('Success');
-    await page.getByRole('button', { name: 'Record this training' }).click();
+    await page.getByRole('button', { name: /^Record turn \d+$/ }).click();
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
     await expect(page.getByText('Turn 1 logged.')).toBeVisible();
 

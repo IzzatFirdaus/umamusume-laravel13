@@ -194,7 +194,7 @@ test.describe('Training decision', () => {
         await page.locator('input[name="energy"]').fill('50');
 
         await page.locator('select[name="outcome"]').selectOption('Success');
-        await page.getByRole('button', { name: 'Record this training' }).click();
+        await page.getByRole('button', { name: /^Record turn \d+$/ }).click();
         await page.waitForURL(/\/cockpit$/, WRITE);
 
         // The Cockpit now shows the recorded turn.
