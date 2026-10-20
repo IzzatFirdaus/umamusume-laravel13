@@ -12,6 +12,7 @@ use App\Models\SupportCard;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Models\Veteran;
+use App\Services\Legacy\VeteranRow;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -249,7 +250,7 @@ class DashboardController extends Controller
 
         return [
             'id' => $veteran->id,
-            'label' => "{$run->umamusume->name} · ".$this->scenarioLabel($run).' · '.($run->created_at?->format('Y-m-d') ?? 'unknown date'),
+            'label' => VeteranRow::label($run),
             'trainee' => $run->umamusume->name,
             'trainee_ja' => $run->umamusume->name_ja,
             'scenario_label' => $this->scenarioLabel($run),
