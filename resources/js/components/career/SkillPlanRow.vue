@@ -91,9 +91,16 @@ async function move(delta: number): Promise<void> {
             <template v-if="props.row.recorded.turn !== null"> on turn {{ props.row.recorded.turn }}</template>
         </p>
 
-        <p v-if="props.row.conditions !== null" class="mt-1 min-w-0 break-words text-xs text-ink-muted">
-            Conditions as the source states them: <code class="break-words whitespace-normal text-ink">{{ props.row.conditions }}</code>
-        </p>
+        <!-- The conditions are engine expressions a Trainer reads only when asking what gates a skill,
+             so they sit behind a disclosure rather than in every row's scan line (plan 4.5). The
+             `<code>` keeps the wrap classes that stop a long expression pushing the page sideways
+             (A-94), and the summary keeps the native marker so the open/closed state stays visible. -->
+        <details v-if="props.row.conditions !== null" class="mt-1 min-w-0 text-xs text-ink-muted">
+            <summary class="min-h-11 cursor-pointer">Conditions</summary>
+            <p class="mt-1 break-words">
+                Conditions as the source states them: <code class="break-words whitespace-normal text-ink">{{ props.row.conditions }}</code>
+            </p>
+        </details>
 
         <dl class="mt-2 grid min-w-0 grid-cols-2 gap-x-4 gap-y-1 text-xs @3xl:grid-cols-4">
             <div v-for="cell in props.row.fit" :key="cell.key" class="flex min-w-0 flex-col">

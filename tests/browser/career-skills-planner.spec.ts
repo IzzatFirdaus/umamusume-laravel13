@@ -171,6 +171,36 @@ test('reorders the priority list from the keyboard, announces the new position, 
     await expect(requiredRows.locator('li').first()).not.toContainText(PRIORITIES[0]);
 });
 
+// Plan 4.5: every skill row carries the source's own activation expression, which is a long machine
+// string a Trainer reads only when asking what gates the skill. It sits behind a disclosure so the
+// row's scan line stays the skill's name and price.
+test('folds the source activation conditions behind a disclosure', async ({ page }) => {
+    await openPlanner(page);
+
+    // The priority rows are the ones carrying move buttons; each has its own conditions.
+    const row = page
+        .locator('ol')
+        .filter({ has: page.getByRole('button', { name: /Move / }) })
+        .first()
+        .locator('li')
+        .first();
+    const disclosure = row.locator('details');
+
+    await expect(disclosure).toHaveCount(1);
+    await expect(disclosure.locator('summary')).toHaveText('Conditions');
+
+    // Closed by default: the expression is in the DOM but not rendered.
+    await expect(disclosure).not.toHaveAttribute('open', '');
+    await expect(disclosure.locator('code')).toBeHidden();
+
+    await disclosure.locator('summary').click();
+    await expect(disclosure).toHaveAttribute('open', '');
+    await expect(disclosure.locator('code')).toBeVisible();
+
+    // The engine expression the disclosure was hiding, not a reworded summary of it.
+    await expect(disclosure.locator('code')).toContainText('running_style==');
+});
+
 test('sizes the skills planner controls to the 44px contract', async ({ page }) => {
     await openPlanner(page);
 
