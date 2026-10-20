@@ -55,3 +55,30 @@ zero-run isolation problem: both are "the spec assumes state it did not establis
 
 `Dashboard.vue`, `DashboardController.php`, `ResourceStrip.vue`, `VeteranRow.php`,
 `dashboard.spec.ts` — no file was modified. The tree at `0ec490ff` was already correct.
+
+## 6.3 close — re-scoped to zero remaining (2026-10-21)
+
+The plan's "Legacy Lab merge into tabbed Veterans" was measured against the tree and refuted:
+
+- Legacy Lab is a three-route, four-method surface (`index` / `builder(TrainingRun $run)` /
+  `compare` / `update`) — a run-scoped ancestry editor, not a veteran-library page.
+- `legacy.spec.ts:128` pins the Legacy Lab nav item's existence; removing it would red an existing
+  passing test.
+- Two different Compare surfaces: run-ancestry alignment (`Legacy/Compare.vue`) vs the veteran
+  career matrix (`Veterans/Compare.vue`). Same word, different feature.
+
+Per-change disposition:
+
+- (1) Tab shell: dropped — domain-object mismatch (run vs veteran)
+- (2) Nav removal + redirects: dropped — `legacy.spec.ts:128` asserts the nav item exists
+- (3) Library DataTable: dropped — sweep showed 0 consumers of `ui/DataTable.vue`
+- (4) Newest/Oldest → Select: dropped — `veterans.spec.ts` bans combobox (count 0)
+- (5) Compare fixes: dropped — `7.14b` ruled the current shapes deliberate
+- (6) `veteranRow()` delegation: **landed** (`27f68fd8`)
+
+**One of six landed, five dropped, zero remaining. Phase 6 closes.**
+
+Companion reconciliation: `veterans.spec.ts:74` narrowed from `count(10)` to enumerated
+destinations. The 11th link was a hardcoded "Data sources" footer link (`AppLayout.vue:339`,
+`href="/database/sources"`) inside the aside, next to the ten-item nav loop — not a nav
+destination, but a live desktop link, so the whole-aside count was brittle to any addition.
