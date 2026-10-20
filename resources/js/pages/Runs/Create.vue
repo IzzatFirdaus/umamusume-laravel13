@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
 import TraineeCombobox from '../../components/TraineeCombobox.vue';
-import { BaseInput, BaseTextarea } from '../../components/Form';
+import { BaseInput } from '../../components/Form';
+import FormField from '../../components/ui/FormField.vue';
+import Textarea from '../../components/ui/Textarea.vue';
 import Select from '../../components/ui/Select.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -204,15 +206,25 @@ function submit(): void {
                 @update:model-value="(v: string | number) => (form.shop_resets_in = String(v))"
             />
 
-            <BaseTextarea
-                :model-value="form.notes"
-                id="create-notes"
-                name="notes"
-                label="Notes (optional)"
-                :rows="3"
+            <FormField
+                label="Notes"
+                :required="false"
                 :error="form.errors.notes"
-                @update:model-value="(v: string | number) => (form.notes = String(v))"
-            />
+                id="create-notes"
+            >
+                <template #default="{ id, describedBy, invalid, required }">
+                    <Textarea
+                        :id="id"
+                        name="notes"
+                        :rows="3"
+                        :model-value="form.notes"
+                        :described-by="describedBy"
+                        :invalid="invalid"
+                        :required="required"
+                        @update:model-value="(v: string | number) => (form.notes = String(v))"
+                    />
+                </template>
+            </FormField>
 
             <button
                 type="submit"
