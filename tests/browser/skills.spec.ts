@@ -80,6 +80,36 @@ test('follows a search row to the detail page and states the absences there', as
     await expect(page.getByRole('link', { name: 'Back to skill search' })).toBeVisible();
 });
 
+test('the skill detail holds the engine data in one labelled disclosure', async ({ page }) => {
+    await page.goto('/skills?search=lookatcurren');
+    await page.locator('#app > *').first().waitFor();
+
+    await page.locator('#skill-results').getByRole('link', { name: '#LookatCurren' }).click();
+    await expect(page).toHaveURL(/\/skills\/\d+$/);
+    await page.locator('#app > *').first().waitFor();
+
+    // ONE disclosure for the whole raw block, and its summary states what it holds and whose data
+    // it is, so the reader knows that before opening it.
+    const disclosure = page.locator('section[aria-labelledby="mechanics"] details');
+    await expect(disclosure).toHaveCount(1);
+    await expect(disclosure.locator('summary')).toContainText('Raw engine data');
+    await expect(disclosure.locator('summary')).toContainText('ADR-0011');
+
+    // The ruling that keeps the description absent is on the summary, not only inside the fold.
+    await expect(page.getByText(/ADR-0011/)).toBeVisible();
+});
+
+test('the skill index states the page it is showing', async ({ page }) => {
+    await page.goto('/skills?search=lookatcurren');
+    await page.locator('#app > *').first().waitFor();
+
+    // The canonical pager states the range and the page. The pager it replaced was a set of links
+    // and, on a short list, rendered nothing at all.
+    const status = page.locator('nav[aria-label="Pagination"] [role="status"]');
+    await expect(status).toContainText(/Showing \d+ to \d+ of \d+ skills/);
+    await expect(status).toContainText(/Page 1 of \d+/);
+});
+
 // A-94 (plan 1.2): the activation condition is an engine expression with no break opportunities, so
 // the `<dd>` holding it once pushed the document 224px wide at 390. `break-words min-w-0` plus the
 // same on the grid items is the fix; this measures the geometry rather than trusting the class name.

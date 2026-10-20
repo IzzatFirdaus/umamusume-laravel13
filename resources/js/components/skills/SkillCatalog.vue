@@ -8,7 +8,7 @@
  * URL stays on it.
  */
 import { Link, router, usePage } from '@inertiajs/vue3';
-import Pagination from '../Pagination.vue';
+import Pagination from '../ui/Pagination.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import SparkChip from '../SparkChip.vue';
 import BaseSelect from '../Form/BaseSelect.vue';
@@ -30,7 +30,10 @@ interface Skill {
 
 interface Paginator<T> {
     data: T[];
-    links: { url: string | null; label: string; active: boolean }[];
+    current_page: number;
+    last_page: number;
+    from: number | null;
+    to: number | null;
     total: number;
 }
 
@@ -74,6 +77,27 @@ function applyFilters(): void {
             onFinish: () => {
                 loading.value = false;
             },
+        },
+    );
+}
+
+/**
+ * The canonical pager owns the range, so the page owns the request. The pager it replaces was a set
+ * of Inertia links built from the server's own paginator; this asks for the same list one page
+ * further, carrying the filters the form holds, so a reader who filtered and then paged keeps both.
+ */
+function goToPage(page: number): void {
+    router.get(
+        props.filterPath,
+        {
+            search: search.value || undefined,
+            type: type.value || undefined,
+            unique: unique.value ? 1 : undefined,
+            page,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
         },
     );
 }
@@ -197,7 +221,15 @@ function applyFilters(): void {
             </li>
         </ul>
 
-        <Pagination :links="skills.links" />
+        <Pagination
+            :page="props.skills.current_page"
+            :pages="props.skills.last_page"
+            :from="props.skills.from ?? 0"
+            :to="props.skills.to ?? 0"
+            :total="props.skills.total"
+            noun="skills"
+            @navigate="goToPage"
+        />
     </template>
 
     <p class="mt-6 max-w-3xl text-xs text-ink-muted">

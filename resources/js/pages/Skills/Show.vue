@@ -104,46 +104,60 @@ const conditions = computed(() => props.skill.condition_groups ?? []);
             <h2 id="mechanics" class="text-lg font-semibold text-ink-strong">Mechanics</h2>
 
             <template v-if="conditions.length > 0">
-                 <div v-for="(group, index) in conditions" :key="index" class="mt-3 min-w-0 rounded-md border border-rule bg-panel p-3 text-sm">
-                    <h3 v-if="conditions.length > 1" class="text-lg font-semibold text-ink-strong">
-                        Activation {{ index + 1 }}
-                    </h3>
+                <!--
+                     ONE disclosure for the whole raw block. The activation predicates and the effect
+                     vector are the engine's own expressions and codes, not client copy, and a reader
+                     who does not want them should not have to scroll past them to find that out. The
+                     summary carries the provenance and the label, so the disclosure states what it
+                     holds and whose data it is before it is opened, and the ruling that keeps the
+                     description absent is on screen either way.
+                 -->
+                <details class="mt-3">
+                    <summary class="cursor-pointer list-item text-sm font-semibold text-ink-strong">
+                        Raw engine data — the source's own expressions and codes, not client labels
+                        (ADR-0011)
+                    </summary>
 
-                    <dl class="grid min-w-0 gap-x-6 gap-y-2 @4xl:grid-cols-2">
-                        <div class="min-w-0 @4xl:col-span-2">
-                            <dt class="text-ink-muted">Condition</dt>
-                            <dd class="min-w-0 break-words font-mono text-xs text-ink">{{ group.condition ?? 'N/A' }}</dd>
-                        </div>
+                    <div v-for="(group, index) in conditions" :key="index" class="mt-3 min-w-0 rounded-md border border-rule bg-panel p-3 text-sm">
+                        <h3 v-if="conditions.length > 1" class="text-lg font-semibold text-ink-strong">
+                            Activation {{ index + 1 }}
+                        </h3>
 
-                        <div v-if="group.precondition !== null" class="min-w-0 @4xl:col-span-2">
-                            <dt class="text-ink-muted">Precondition</dt>
-                            <dd class="min-w-0 break-words font-mono text-xs text-ink">{{ group.precondition }}</dd>
-                        </div>
+                        <dl class="grid min-w-0 gap-x-6 gap-y-2 @4xl:grid-cols-2">
+                            <div class="min-w-0 @4xl:col-span-2">
+                                <dt class="text-ink-muted">Condition</dt>
+                                <dd class="min-w-0 break-words font-mono text-xs text-ink">{{ group.condition ?? 'N/A' }}</dd>
+                            </div>
 
-                        <div v-if="group.base_time !== null" class="min-w-0">
-                            <dt class="text-ink-muted">Base time</dt>
-                            <dd class="text-ink">{{ group.base_time }} ms</dd>
-                        </div>
-                    </dl>
+                            <div v-if="group.precondition !== null" class="min-w-0 @4xl:col-span-2">
+                                <dt class="text-ink-muted">Precondition</dt>
+                                <dd class="min-w-0 break-words font-mono text-xs text-ink">{{ group.precondition }}</dd>
+                            </div>
 
-                    <ul v-if="group.effects.length > 0" class="mt-2 flex flex-wrap gap-2 text-xs">
-                        <li v-for="(effect, effectIndex) in group.effects" :key="effectIndex" class="rounded-md bg-sunken px-2 py-1 font-mono text-ink">
-                            effect {{ effect.type }}: {{ effect.value > 0 ? '+' : '' }}{{ effect.value }}
-                        </li>
-                    </ul>
-                </div>
+                            <div v-if="group.base_time !== null" class="min-w-0">
+                                <dt class="text-ink-muted">Base time</dt>
+                                <dd class="text-ink">{{ group.base_time }} ms</dd>
+                            </div>
+                        </dl>
 
-                <p class="mt-2 text-xs text-ink-muted">
-                    The expressions and effect codes above are the source's own engine data, not client
-                    labels. The description is not recorded: no client-string source for it exists,
-                    and no awakening threshold is kept either.
-                </p>
+                        <ul v-if="group.effects.length > 0" class="mt-2 flex flex-wrap gap-2 text-xs">
+                            <li v-for="(effect, effectIndex) in group.effects" :key="effectIndex" class="rounded-md bg-sunken px-2 py-1 font-mono text-ink">
+                                effect {{ effect.type }}: {{ effect.value > 0 ? '+' : '' }}{{ effect.value }}
+                            </li>
+                        </ul>
+                    </div>
+
+                    <p class="mt-2 text-xs text-ink-muted">
+                        The description is not recorded: no client-string source for it exists, and no
+                        awakening threshold is kept either.
+                    </p>
+                </details>
             </template>
 
             <p v-else class="mt-2 text-sm text-ink-muted">
                 Activation conditions, effect values and distance or style qualifiers are not
                 recorded. This tool's skills source stores no description it may render, and no
-                awakening thresholds are kept.
+                awakening thresholds are kept (ADR-0011).
             </p>
         </section>
 
