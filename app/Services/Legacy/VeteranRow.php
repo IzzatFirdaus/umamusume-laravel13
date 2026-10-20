@@ -132,7 +132,7 @@ final class VeteranRow
      */
     public static function scenarioLabel(TrainingRun $run): string
     {
-        if ($run->scenario === null) {
+        if (! filled($run->scenario)) {
             return 'No scenario set';
         }
 
