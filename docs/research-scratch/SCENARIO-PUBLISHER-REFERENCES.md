@@ -1185,6 +1185,287 @@ Result targets and dates:
 - ❌ UNVERIFIED: numeric probability icons for the Elite Team / S+ Team Zenith matchups, and the exact stat line of the printed samples (the Elite Team Reward Sample, S+ Team Zenith Rewards Sample, and the "Sample Updated Unity Cup Scenario Result" are images; alt text is only "Elite-Team-Rewards", "S Plus Zenith Team Rewards", "Sample Unity 2 TM Opera O"). Looked in those blocks on 545572.
 - ❌ UNVERIFIED: a per-round turn count for the team race rounds; the page anchors rounds to months ("After Junior Year Late Dec" and so on), never to a turn number. Looked in the "Unity Cup Team Race Schedules" table on 545572.
 
+#### 6. The team-race guide is a separate page from the scenario-update guide
+
+`545572` is the **scenario-update** guide. The **team-race** guide is a different article: [game8.co
+563652](https://game8.co/games/Umamusume-Pretty-Derby/archives/563652), "How to Win Unity Cup Team Races",
+**last updated November 27, 2025 09:02 PM** — tier `[A]`, ⚠️ STALE on the repo's 90-day rule, and
+**pre-dates the 2026-07-01 rework**, so it describes the pre-rework Unity Cup. Read in full 2026-10-21. The
+two pages are not interchangeable, and a question about team races has to be asked of this one. What it
+prints, quoted:
+
+- Skill inspector: "Your team members will also have **skills** available. Their skills can be seen by
+  **holding their icons in the team menu** and in the races."
+- The same block: "Support Card teammates specifically have their **cards' skills**, so having
+  Sprint-focused cards like **Biko** or Long-centric like **Manhattan Cafe** will work best on these
+  specific tracks. This is especially important, as your Uma can only be in one of five races."
+- Team building: "you can select up to three Umas per race based on **distance** and **track**."
+- Win condition: "Team Races are won by winning in **three tracks** per match."
+- Schedule block, "Exclusive Races That Occur Every Six Months": "Round 1 / After Junior Year Late Dec;
+  Round 2 / After Classic Year Late June; Round 3 / After Classic Year Late Dec; Round 4 / After Senior Year
+  Late June; **Finals / After Senior Year Late Dec**."
+- Team rank: "These ranks are tied to **specific stats** and increase the **facility level** for your Uma's
+  training." The ladder itself is on the sibling page 563657.
+- Also on the page, and pre-rework, so it does not survive the 2026-07-01 update: the placement bonus
+  reading "get the +50 bonus for ranking 5th or above at the final race".
+
+**What this page does not print.** It carries **no venue and no distance for the five finals legs**:
+"Hanshin" does not appear on it, and neither do 2600, 2200 or 1600. Its schedule block is a schedule block.
+The finals' venue-and-distance rotation is therefore **❌ UNVERIFIED** after reading both pages in full on
+2026-10-21, and the first pass's failure to find it in 545572 was a wrong-page extraction rather than a
+correct negative. Rows 1184–1186 above are not wrong to name 545572 for the schedule and for the "Train
+with Teammates" block, both of which that page does carry; the skill-inspector material is only here. The
+same page's **Spirit Burst** material is absent — a search of 545572's full text layer for "holding", "team
+menu" and "skills can be seen" returns zero, so the inspector is documented on 563652 and on no other
+reachable game8.co page.
+
+#### 7. The JP scenario guide — a third carrier, and the tables the EN pages do not print
+
+[game8.jp 395608](https://game8.jp/umamusume/395608), 「【ウマ娘】アオハル杯アップデート情報と攻略｜育成のコツ」,
+**last updated November 27, 2025 22:10 JST** — tier `[A]`, ⚠️ STALE on the repo's 90-day rule, and `[JP]`,
+so every figure it carries is the JP-side one unless a Global page agrees. Read in full 2026-10-21. What it
+prints that the EN pages do not:
+
+- **League-placement bonus** — the ladder the "+50 at rank 5 or above" figure belongs to:
+
+  | チームランキング | 獲得ボーナス    |
+  | ---------------- | --------------- |
+  | 2〜5位           | 全ステータス+50 |
+  | 6〜10位          | 全ステータス+30 |
+  | 11〜15位         | 全ステータス+20 |
+  | 16〜20位         | 全ステータス+10 |
+  | 20〜30位         | ボーナス無し    |
+
+  The EN team-race guide names the same ladder's top band independently — "get the +50 bonus for ranking 5th
+  or above at the final race" (563652). **This is a league-placement ladder, not a team-rank ladder**,
+  which is the distinction `docs/scenarios/02-unity-cup.md:159` had to leave open. **The band's edges are in
+  conflict between publishers and are recorded, not resolved**: gamewith's 2023-01-20 table (see §9) gives
+  the **wider** 1~5位 → +50, 6~9位 → +30, 10~15位 → +20, 16~20位 → +10, 21~30位 → none, against
+  game8.jp's 2〜5位 / 6〜10位 / 11〜15位 / 16〜20位 / 20〜30位. The older table is the wider one at the top,
+  which is the opposite of what an update would do, so the likelier reading is that game8.jp's "2〜5位" is a
+  typo for "1〜5位" — but no source says so, and the client settles it, not the guides.
+- **Training-level ladder**, printed as an image whose alt text reads 【G〜F】【E〜D】【C〜B】【A】【S】 over
+  Lv1 Lv2 Lv3 Lv4 Lv5 — the same rank-to-level correspondence, in the same order, as the gametora table at `:771-781`, and
+  independent of it. Five rungs because it is the JP table, which predates the Global S+ rank.
+- **Burst gain**: 「アオハル魂爆発での能力上昇量は賢さ以外は「+15」の固定数値で、ウマ娘の成長率やサポートの
+  トレーニング効果アップの影響を受けません。また、トレーニングLvにも影響されない」 — a flat +15 for
+  every stat **except Wit**, unaffected by growth rate, support training boosts and training level. Note
+  the tension with the `[Global]` teammate table in `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md` §2.5,
+  which **is** scaled by that member's growth bonus: the two describe different halves of the two-table
+  mechanic, and neither is rewritten to fit the other.
+- **Team race**: "全5レース中で勝ち星の多いチームの勝利" — the match is won on race wins, not a sweep.
+- **Retry after a loss**: 「チームレースで敗北した場合、コンティニューをするか選択できます。目覚まし時計を
+  消費してコンティニューを行うことができ、再度対戦チームを選択し直してチームレースに挑戦できます。また
+  枠番が再抽選され、コンティニューしたレースに限りエースのウマ娘のやる気が1段階アップ」 — an Alarm Clock
+  buys a re-draw of the lane numbers and a re-chosen opponent, and the Ace's mood rises one step.
+- **Team name → gold skill**, and the scenario-link set that gates them: キャロッツ → ノンストップガール,
+  HOP CHEERS (タイキシャトル) → マイルの支配者, ハレノヒランナーズ (マチカネフクキタル) → 千里眼,
+  にんじんぷりん (ハルウララ) → 不屈の心, ブルームス (ライスシャワー) → クールダウン.
+- "トレーニングLvはチームステータスランクに依存しており、練習回数は関係ありません" — the training level
+  follows the team's stat rank and the number of trainings is irrelevant, which is the Unity Cup's
+  structural difference from URA Finale.
+- **Elite-team conditions**: 「1.チームランキングが10位以上 2.チーム総合力がA以上 3.極・アオハル魂爆発の
+  発生回数が1回以上」 — league rank 10 or better, overall team strength A or better, and at least one
+  Extreme Spirit Burst.
+- Also on the page, and this one closes a row: the team member's held skills are read from the team
+  panel — 「チームメンバーの所持スキルは、サポートカードと共通です。育成画面のチームをタップし、
+  チームメンバー情報からキャラの所持スキルを確認することができます」 — the JP gesture is a **tap** on the
+  team followed by the member's skill list, where the EN guide describes **holding** the icon in the team
+  menu. Same affordance, two descriptions, one JP and one EN.
+
+#### 8. The facts the other pages do not carry, and the two that were misattributed
+
+**From game8.co 545572 alone**, read in full 2026-10-21 — numbers the scenario-update guide prints and no
+other page repeats:
+
+- Elite Team reward: "around 20+ each stat".
+- S+ Team Zenith reward: "around 28 each stat, example) and has chance give **Unity Cup plus (+) sparks**";
+  it "can be encountered you **beat Elite Team** in 4th Unity Cup round", and is "indicated by blue instead
+  of red flames" on the pre-race screen.
+- The Elite teams are "indicated by a pink background" and "named after Greek gods" — the page's own
+  examples are Team Aeon and Team Hephaestus.
+- TP: "Reroll Sparks … (note costs 30 TP)" — **30 TP buys one spark re-roll**.
+- The Elite unlock conditions, printed as "Elite Team Unlock Conditions": team rating 10 or higher, overall
+  team rank A or higher, and at least one Extreme Spirit Burst. game8.jp 395608 prints the same three in
+  Japanese, so the condition is corroborated across both servers' guides.
+
+**The pre-rework burst table, and the Wit cell.** gametora's Unity Cup page carries the trainee-share
+table **twice** — the current one, and, under "Before the Update → Pre-Update Spirit Bursts", the
+pre-rework one:
+
+| Training type | Speed | Stamina | Power | Guts | Wit | Skill points |
+| --- | --- | --- | --- | --- | --- | --- |
+| Pre-update Speed | 15 | | 7 | | | |
+| Pre-update Stamina | | 15 | | 7 | | |
+| Pre-update Power | | 7 | 15 | | | |
+| Pre-update Guts | 3 | | 3 | 15 | | |
+| **Pre-update Wit** | **2** | | | | **10** | **5** |
+
+game8.co 545572's "Spirit Burst Stat Bonus" table renders the **pre-update** shape exactly — Wit 10, and
+Skill Points populated only on the Wit row — so that table is a **vintage capture of the pre-rework
+scenario**, not a misprint. The current table at `:717-725` has Wit 15 and 5 Skill Points on every row.
+**The 10-vs-15 difference is a version boundary, not a disagreement**, and it is recorded here so the next
+reader does not re-open it.
+
+**The draw rule for the team-race set.** The Team Trials races are not authored per scenario and not fixed
+per opponent: they are **chosen at random from a fixed set** of races modelled on real ones.
+「チーム競技場のレースは完全ランダムで作成されておらず，ある程度決められたレースのなかからランダムで選ばれて
+います」 — and some of them cannot be run in training ([owadablog.com/team-arena-summary, 2021-05-12](https://owadablog.com/team-arena-summary/),
+tier `[C]`, a 2000-race sample). The Unity Cup races are the same mode — "a set of races similar to the Team
+Trials" (gametora) — so the same rule applies. From the same sample: the five races of a set share one
+season; the race-and-season combination has no relation to the real calendar; the distance bands are ダート
+1600–1800 m, 短距離 1000–1400 m, マイル 1500–1800 m, 中距離 2000–2400 m, 長距離 2500–3600 m, so the dirt leg
+is always a mile; every race is a 12-runner race; the only straight-line race is Niigata 1000 m; and the
+distributions are spring 42.25% / summer 16.25% / autumn 22.75% / winter 18.75%, sunny 59.6% / cloudy 29.9%
+/ rain 9.4% / snow 1.1%, firm 76.5% / slightly heavy 13.35% / heavy 4.75% / bad 5.4%, with 237 of 400 long
+races at 2600 m or under. **Every figure here is JP-era and pre-rework**: the structure is confirmed on
+Global-facing pages, the pool's contents may have changed in the 2026-07-01 rework, and the per-set values
+are client-side.
+
+**TP is two currencies, and RP is a third.** The "what TP governs" row in `docs/UMAMUSUME_REFERENCE.md` is
+narrower than it needs to be. uma.guide's Independent Training guide: "**It takes your TP, and a 50-minute
+countdown begins.**" — TP buys the mode. game8.co 545572: a spark re-roll "costs 30 TP". RP is separate
+again: it is the Team Trials entry ticket, not a TP sink.
+
+**And a correction to a claim made about this file.** A four-way scenario split was proposed for the
+`:978–1297` block. **This file already separates the scenarios**, and its own headings are the evidence:
+`:906` URA Finale (game8.co/536520), `:1002` Unity Cup (545572), `:1273` Trackblazer (580723) and `:2233`
+Our Grand Concert (607337). The rows a split would move — `:1293` through `:1297` — are already inside the
+Trackblazer section. **No row moves, and nothing in this file needed splitting.**
+
+#### 9. Three more Aoharu Hai carriers, read 2026-10-21
+
+**gamewith 287164** (「【ウマ娘】アオハル杯の攻略と育成まとめ｜1/20アップデート実施」, page's own 最終更新
+**2023年1月20日20:59**, tier `[A]`, `[JP]`):
+
+- **League-placement bonus** — the variant that conflicts with game8.jp on the band edges:
+
+  | 順位  | ボーナス値    |
+  | ----- | ------------- |
+  | 1~5位 | 全基礎能力+50 |
+  | 6~9位 | 全基礎能力+30 |
+  | 10~15位 | 全基礎能力+20 |
+  | 16位~20位 | 全基礎能力+10 |
+  | 21位~30位 | ボーナス値なし |
+
+- **Training level ladder**: 評価G~F → トレーニングLv1 · 評価E~D → Lv2 · 評価C~B → Lv3 · 評価A → Lv4 ·
+  評価S → Lv5, and the basis — "トレーニングLvはチームのステータスや総合力に応じて上昇。URAファイナルズであった
+  トレーニング回数では上昇しない".
+- **The 2023-01-20 update's contents**: "イベント/トレーニングで貰えるステ調整", "アオハル魂爆発後に
+  極・アオハル魂爆発が発生", "条件を満たすと3年目夏のチーム戦に強豪出現", "勝利すると最後のチームファースト戦が
+  強化版に", "総合力の上限がS⇒S+に", "チームレースで目覚まし時計が使用可能に", "新スキルの追加はなし" — and, on
+  the Skill-Point change the run report's §2.5 needed, "特にスキルPt上昇量は全体で+2され
+  グランドライブと同じになっている".
+- **S+ event**: 「5種ステータス+10 「アガッてきた！」のヒントLv+1」, and "S到達時にも貰えるためこれでLv2になる".
+- **Elite team**: appears 3年目夏 (Senior Year July) on all three conditions, and beating it strengthens
+  Team First for the December final.
+- **Team rank starts at 30th**, and **friend-type supports cannot enter team races** and are excluded from
+  特訓 and 爆発, while keeping their bond-reduction and outing benefits.
+- **Unique-skill level-up fan thresholds**: バレンタイン (シニア2月前半) 6万 / 4万 · ファン感謝祭 (シニア4月前半)
+  7万 / 6万 · クリスマス (シニア12月前半) 12万 / 8万, the second figure being the dirt column.
+- **Burst count → hint band**: 13回以上 レアLv3 · 10~12回 レアLv1 · 7~9回 ノーマルLv3 · 4~6回 ノーマルLv1 ·
+  0~3回 ヒントなし.
+- **Epithets with numeric conditions**: 伝説の証人 · チームの絆 (アオハル特訓 ≥65) · 個人でもチームでも ·
+  アオハル魂爆発 (≥10) · 切磋琢磨 (特訓 ≥3 simultaneously) · チームの繋がり (特訓 ≥50).
+
+**kamigame 173272260793137375** (「【ウマ娘】アオハル杯トレーニングLvの上げ方と効率的な練習方法」, 最終更新
+**2024/04/12 17:40**, tier `[A]`, `[JP]`):
+
+- **The burst table, with the Wit value explicit** — the mechanic behind the run report's §2.5 closure:
+
+  | トレーニング | アオハル魂爆発 |
+  | --- | --- |
+  | 賢さ以外 | 練習したステータス**+15** |
+  | 賢さ | 賢さ**+10**と回復量上昇 |
+
+- **The training-level ladder, with a band edge that differs from every other carrier**: G〜F → Lv1 ·
+  **F~E** → Lv2 · C〜B → Lv3 · A → Lv4 · S → Lv5. Every other publisher reads the second band as E〜D or
+  D/E; kamigame puts F in level 2 as well, which is most likely a typo for D~E but is printed as it stands.
+- **Base training values, URA against Aoharu** (施設レベル1、やる気普通、成長率なし、練習相手なし): Speed
+  スピード+10・パワー+5 against スピード+8・パワー+4; Stamina スタミナ+9・根性+4 against スタミナ+7・根性+3;
+  Power スタミナ+5・パワー+8 against スタミナ+4・パワー+6; Guts スピード+4・パワー+4・根性+8 against
+  スピード+3・パワー+3・根性+6; Wit スピード+2・賢さ+9 against スピード+2・賢さ+6. The Aoharu column
+  matches gametora's Global column, so it is a second independent carrier for those figures.
+- **Special Training party bonus**: 1人 上昇なし · 2人 +2 (賢さは+1) · 3人 +3 · 4人 +4 · 5人 +5.
+- **Scenario link**: 特訓 +1, 魂爆発 +5. **魂爆発 is once per character per career**, and after a burst that
+  character's gauge no longer rises.
+- **Hint events do not fire on a support when 特訓 triggers on it** — "アオハル特訓が発生したサポートでは、
+  ヒントが発生しない仕様" — so hints come mainly from 特訓 and 魂爆発.
+
+**yoyaku-top10** (「【ウマ娘攻略】アオハル杯決勝で勝つコツを紹介！チーム編成や作戦で差を付けよう！」,
+**2021-09-07 18:30**, tier `[C]`): the equivalence the two JP wikis could not be read for —
+「**アオハル杯のルールとしては基本的にチーム競技場と同じです。**」 — with the shape it implies: three per
+distance over 【短距離・マイル・中距離・長距離・ダート】, up to fifteen, five races, "自チームのウマ娘の誰かが
+1着になれば勝利", and more wins than the opponent taking the match. It also gives the finals' two aces their
+lanes — 「**「ビターグラッセ」は中距離に、「リトルココン」は長距離に出走します。**」 — so the winning lanes
+are sprint, mile and dirt, and the team-name → gold-skill table in full.
+
+**One route to the last open threshold.** The wikiru Team Trials page states the basis in a form that
+matches umareference's framing — per-stat average over the team members — but **its body was not extractable
+from this machine** (overseas-IP shell), so it is recorded here as a lead and not as a citation. A JP source
+printing 平均ステータス 200 / 340 / 510 / 610 would close the last open threshold outright.
+
+#### 10. The one public parameter-derived document, and a scale argument that does not hold
+
+[umamusu.wiki `Game:Mechanics`](https://umamusu.wiki/Game:Mechanics) (page last edited 2026-07-04, tier
+`[A]` for the page) is the only public document derived from the same parameter file the repository's export
+comes from. **Read in full 2026-10-21**, including the later section the first extraction cut off — the
+reachable route is to read from the **Positions** section onward; the extract then terminates mid-"Skill
+Ability", with everything up to and including **Stamina Limit Break** present. Two cautions apply to everything in
+this subsection: the page carries its own disclaimer ("Much of this information is taken from the Japanese
+version of the game; as such, there is no guarantee that the mechanics listed here are the exact version
+that the English version currently has"), and its figures are reverse-engineering, credited to @KuromiAK,
+@umamusu_reveng, @kak_eng and @hoffe_3 — so it is `[A]` as a **page**, and inference as a **method**.
+
+**Small-integer ability IDs — a public answer to the `numeric effect ids` row.**
+
+| From `Game:Mechanics` | Values |
+| --- | --- |
+| Conserved-power modes that **increase** it | **ID 1** Position Keep Pace Down (6.7) · **ID 2** Position Keep Normal Mode (4.2) |
+| Conserved-power modes that **decrease** it | **ID 3** Lead Competition (0.95) · **ID 4** Rushed (0.8) |
+| Skill-ability type IDs | **Speed Up (27, 31, 21, 22)** · **Lane Move Speed Up (28)** |
+| Activity coefficient | **ID 3** Lead competition, 0.98 · **ID 4** Rushed, 0.8 |
+
+The page's own hedge on the first table is worth keeping: "The following is mostly speculation". So the
+IDs are the shape of the answer — small integers with a separate coefficient column — and not the export's
+own label for them.
+
+**And a magnitude argument that does not hold.** The Stamina Limit Break section gives the random factor
+as a table read straight off the parameter file: "TargetSpeedRandomTableChangeProbabilityByPower": 500,
+with the columns
+
+| Table Type | Probability | Strategy |
+| --- | --- | --- |
+| 0 | 500000 | 0.98-1.00 |
+| 1 | 300000 | 0.95-0.98 |
+| 2 | 200000 | 1.00-1.02 |
+
+**500000 + 300000 + 200000 = 1,000,000.** The column is headed *Probability*, so these are **weights**
+(50% / 30% / 20%) and the adjacent *Strategy* column holds the multipliers. 500000 is therefore not a
+decimal encoding of anything, and the repository's own −400000 **cannot be a weight at all**, because
+negatives do not occur in a probability distribution. **The two sets of numbers are different kinds of
+quantity that merely share a digit count.** An earlier argument that the export's 600000 / 400000 / −400000
+might decode as +6 / +4 / −4 on a 100000 scale is **withdrawn**: magnitude similarity is not evidence, and
+the parameter file's own column heading is the disproof. The `SlopePer` scale row and the effect-magnitudes
+row stay **open**, and the export or a `master.mdb` dump is what settles them.
+
+**One more distance break, for the stamina rows.** The same section's distance factor for the Stamina Limit
+Break buff runs "< 2101 m → 0.0x, < 2201 m → 0.5x, < 2401 m → 1.0x, < 2601 m → 1.2x, ≥ 2601 m → 1.5x" — the
+same family of boundary as the repository's contested 2101-versus-2200 stamina threshold, from the parameter
+file rather than a guide. It is recorded here as a datum, not as a ruling on that row.
+
+**The threshold basis, corroborated on a third site.** The mechanism behind the training-level thresholds —
+the per-stat average over the team members — is carried by umareference (2026-08-26), by gamewith's
+「トレーニングLvはチームのステータスや総合力に応じて上昇」, and by a JP wiki page whose **body is not
+extractable from this machine** (overseas-IP shell) but whose indexed snippet states it in the same shape:
+「チームメンバーの各基礎ステータスの平均値が一定以上になるたびに育成イベントが発生し、対応する
+トレーニングLvが上がる」. **That third one is a lead, not a citation.** Its further claim — that the
+current average stat is **displayed on the training screen** — is **not** corroborated by this repository's
+own Unity Cup capture, which shows the facility level, the stat preview and the failure percentage and
+**no team average** (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md` §1.7). So the four numeric cut-points
+stay single-source `[B]`, and the thing that closes them is a capture of the training screen's top-left
+icon or the export itself.
+
 ---
 
 ### Trackblazer (<https://game8.co/games/Umamusume-Pretty-Derby/archives/580723>, last updated August 25, 2026 02:16 AM)

@@ -8625,7 +8625,7 @@ new game fact this repository lacked.
 | E-8 | Trackblazer: 100 Shop Coins for a first place | Verified | `config/scenarios.php` `shop_coins_by_placement` | — |
 | E-9 | Trackblazer Pro Shop consumables | Verified | `config/scenarios.php` `shop_items` (from the publisher master) | One guide's "Worth" ratings travel as `estimated` |
 | E-10 | Trackblazer rivals grant a distance- or style-tied hint | Verified | §2.2.3 | — |
-| E-11 | Trackblazer: a missed deadline is a career fail retried with an Alarm Clock | Verified | §2.2.3 | Which turn a retry resumes on stays ❌ UNVERIFIED |
+| E-11 | Trackblazer: a missed deadline is a career fail retried with an Alarm Clock | Verified | §2.2.3 | Which turn a retry resumes on stays ❌ UNVERIFIED — note 2026-10-21: the "continue" rule game8.jp prints (「目覚まし時計を消費してコンティニュー…枠番が再抽選され、エースのウマ娘のやる気が1段階アップ」) is the **Unity Cup team-race** retry, a different mode, and does not close this row |
 | E-12 | Grand Concert: five Performance types (Dance, Passion, Vocals, Visuals, Composure), cap 200 +50 per successful live | Verified | `docs/scenarios/07`, Global notice 905 | Per-type start values are not published |
 | E-13 | Grand Concert: friendship training pays two types | Verified | `docs/scenarios/07` | — |
 | E-14 | Grand Concert: Lesson menu opens on turn 5; Live Techniques and Songs; two bonus layers | Verified | `docs/scenarios/07` | Screen text unmeasured (0 frames) |

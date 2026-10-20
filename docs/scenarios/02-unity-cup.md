@@ -132,6 +132,8 @@ Unlike URA Finale (where facility level comes from repeating the *same stat* 4 t
 
 This means facility level in Unity Cup is a **team investment problem**, not a personal-repetition problem — you must raise your whole team's collective stat in that category, not just grind your own trainee.
 
+**Two independent publishers carry this ladder.** gametora's table above, and game8.jp's Aoharu Hai guide, which prints the same five rungs as an image whose alt text reads 【G〜F】【E〜D】【C〜B】【A】【S】 over Lv1 Lv2 Lv3 Lv4 Lv5 — the same rank-to-level correspondence, in the same order ([game8.jp 395608, ⚠️ STALE: 2025-11-20](https://game8.jp/umamusume/395608), tier `[A]`, `[JP]`). Five rungs there because it is the JP table, which predates the Global S+ rank. The **numeric** thresholds behind the ladder — the average stat at which each level begins — are published by one source only (umareference.com, 2026-08-26, tier `[B]`) and are **not** independently corroborated.
+
 Raising your **overall Team Power/Rank** (aggregate across all stats) also grants direct stat bonuses on every rank-up, from +2 all stats at F/E rank up to +5 all stats at A/S rank, plus a Hint Level for the "It's On!" skill.
 
 ⚠️ **The rank ladder now extends past S.** The rework added **Team Rank S+** above the previous S ceiling, and it is the second "It's On!" hint source (see that section). Older guidance that treats S as the top of the ladder is incomplete.
@@ -147,16 +149,34 @@ Raising your **overall Team Power/Rank** (aggregate across all stats) also grant
 | Finals    | After Senior Year, Late Dec     |
 
 - Each Team Race is a **set of 5 races**, one per category (Sprint, Mile, Medium, Long, Dirt) — and you field a **sub-team of 3 per category**, structurally the same shape as the Team Trials PvP mode. ⚠️ Earlier drafts of this file said "5-person sub-team"; 3 is the real slot count (and 06 states it as "just like Team Trials").
+- **The five races are drawn, not authored.** The set's courses and distances are **chosen at random from a
+  fixed pool** of real-modelled races: 「チーム競技場のレースは完全ランダムで作成されておらず，ある程度
+  決められたレースのなかからランダムで選ばれています」 ([owadablog.com/team-arena-summary, 2021-05-12](https://owadablog.com/team-arena-summary/),
+  tier `[C]`, a 2000-race sample), and the Unity Cup races are the same mode (gametora: "a set of races
+  similar to the Team Trials"). The five legs of a set share one season; the distance bands are ダート
+  1600–1800 m, 短距離 1000–1400 m, マイル 1500–1800 m, 中距離 2000–2400 m, 長距離 2500–3600 m, so **the dirt
+  leg is always a mile**; every race is a 12-runner race; and the only straight-line race in the pool is
+  Niigata 1000 m. **Consequence:** there is no published table of venues and distances to copy, and the
+  ground for a given set is a per-run value only the client shows. ⚠️ Every figure here is JP-era and
+  pre-rework, so the pool's contents may have changed in the 2026-07-01 rework; the structure is confirmed
+  on Global-facing pages.
 - You race **NPC teams, not other players**: the menu offers **3 opponent teams from strongest to weakest**, and beating a stronger one raises your **league rank** further. Before you commit, the game shows a circle-based win-odds estimate per category — **aim for at least 3 circles overall**, because **losing decreases your league rank**.
 - ⚠️ **New since the rework: a lost Team Race can be retried with an Alarm Clock item.** This was unavailable at scenario launch, so older guidance treats a bad race day as permanent. It is not.
 - Completing all 5 races in a round grants an **all-stat increase**, scaled by performance — winning matters, this isn't just a participation flag. Each round also ends with **new random teammates joining** the roster.
+- **The league-placement bonus ladder.** The bonus a league position pays is published: 2〜5位 全ステータス+50, 6〜10位 全ステータス+30, 11〜15位 全ステータス+20, 16〜20位 全ステータス+10, 20〜30位 ボーナス無し ([game8.jp 395608, ⚠️ STALE: 2025-11-20](https://game8.jp/umamusume/395608), tier `[A]`, `[JP]`). The EN team-race guide names the same ladder's top band independently — "get the +50 bonus for ranking 5th or above at the final race" ([game8.co 563652, ⚠️ STALE: 2025-11-27](https://game8.co/games/Umamusume-Pretty-Derby/archives/563652), tier `[A]`). This is a **league-placement** ladder, not a team-rank ladder, which is the distinction the "+50 at Rank 5+" line below had to leave open. ⚠️ The band's edges are in conflict between publishers and are recorded, not resolved — see the note below.
 - A countdown to the next Team Race (every 6 months) is shown under the standard objective timer.
 - **Do not try to maximize regular (non-team, non-goal) races** during Unity Cup — every turn spent racing is a turn not spent building Spirit Bursts/team rank, which is the mode's real growth engine. Only race outside of team races / trainee goals when it directly serves those goals.
 - Your trainee's own individual **race goals still apply on their normal schedule** (same as URA Finale), including the final URA Finale-style races — failing those enough times still ends your run early, exactly like URA Finale. Unity Cup adds Team Races on top; it does not remove the underlying career race-goal structure. Structurally, 06's framing is the clean one: Unity Cup is **"URA Finals plus a team layer"** — same base schedule, same objective shape, same final 3 races.
 
 ### Beating Team Zenith (Finals)
 
-Team Zenith is the hardest scripted opponent, encountered in the finals **after the 4th Team Race**, under Riko Kashimoto with original characters **Little Cocon** and **Bitter Glasse**. Your overall **Team Rank** buffs your attributes against them, which can let a below-top team win — ⚠️ the pre-rework line here read "up to +50 all stats at Rank 5+", a number keyed to `[JP]`'s numeric rank ladder rather than `[Global]`'s letter ladder (F/G → S → **S+**); treat the "+50" as a `[JP]`-side figure and the letter ladder as the live Global one. Recommended approach for reaching the top ranks in the lead-up races:
+Team Zenith is the hardest scripted opponent, encountered in the finals **after the 4th Team Race**, under Riko Kashimoto with original characters **Little Cocon** and **Bitter Glasse**. Your overall **Team Rank** buffs your attributes against them, which can let a below-top team win — ⚠️ the pre-rework line here read "up to +50 all stats at Rank 5+", a number keyed to `[JP]`'s numeric rank ladder rather than `[Global]`'s letter ladder (F/G → S → **S+**); treat the "+50" as the **2〜5位** band of the league-placement ladder above — which the EN team-race guide also names, so it is not a `[JP]`-only number — and the letter ladder as the live Global one. ⚠️ **The ladder's band edges are printed inconsistently**, and that is
+recorded rather than resolved: game8.jp gives 2〜5位 → +50, 6〜10位 → +30, 11〜15位 → +20, 16〜20位 → +10,
+20〜30位 → none, while gamewith's 2023-01-20 table gives the **wider** 1~5位 → +50, 6~9位 → +30,
+10~15位 → +20, 16~20位 → +10, 21~30位 → none ([gamewith 287164, ⚠️ STALE: 2023-01-20](https://gamewith.jp/uma-musume/article/show/287164),
+tier `[A]`, `[JP]`). The older table is the wider one at the top, which is the opposite of what an update would
+do, so the likelier reading is that game8.jp's "2〜5位" is a typo for "1〜5位" — but no source says so, and
+the client settles it, not the guides. Recommended approach for reaching the top ranks in the lead-up races:
 
 - Win the **top-tier race option** every time except once.
 - Pick the **middle option exactly once** — commonly recommended for the very first race, since it's the safest slot to "spend" your one non-top pick.

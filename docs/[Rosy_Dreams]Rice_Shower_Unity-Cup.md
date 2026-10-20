@@ -10,6 +10,23 @@ second source: the seeded catalog behind `/support-cards`, rows 30003, 30016, 30
 2026-10-03. Their results are in §1.2, §2.2, §2.4 and §6, with publisher dates and the repo's ⚠️ STALE
 mark on anything older than 90 days.
 
+**System disclosures added 2026-10-20:** five in-game systems this report described but did not quantify
+are now carried in §1.8, §1.9, §2.5, §2.6, §8.3 and §9. **Every one of them is system knowledge read
+from a publisher, not something the 67 frames show.** §9's table states, item by item, which is which, and
+its first column is the distinction the rest of this file leans on throughout: a frame observation is
+what this run did, and a publisher fact is what the client does when nobody is filming it. Nothing in
+§§1–8 was rewritten to accommodate the new material, no strategic conclusion moved, and the "closed this
+round" list in §6 is unchanged. The sources were re-read on 2026-10-21; the ⚠️ STALE marks in the new
+material follow the repo's 90-day rule measured at this revision's date, which is why two of the pages
+§2.4 cites without a marker carry one here.
+
+**Second verification pass, 2026-10-21.** Four of the disclosures above were re-checked against their
+sources, and the two game8.co pages this scenario's material is split across are now named in the file:
+**545572 is the scenario-update guide** ("Unity Cup Update Guide", the July 2026 rework) and **563652 is the
+team-race guide** ("How to Win Unity Cup Team Races"). A question about team races belongs to the second
+page; a question about the scenario's own numbers belongs to the first. §2.5, §2.6, §6, §7, §8.3 and §9
+carry what that pass settled, including one item that did not settle and the reason.
+
 ---
 
 ## 1. What the screenshots establish
@@ -261,11 +278,51 @@ The Team tab lays the roster out as five distance columns, Sprint, Mile, Medium,
 A), Mile ACE Nishino Flower (Mile A), Medium ACE Tokai Teio (Medium A), Long ACE the trainee herself
 (Long A), Dirt ACE Haru Urara (Dirt A).
 
+**System note (added 2026-10-20): this panel is a status readout, not a performance record.** Each line
+on it is a current value the client computes, not a record of anything that happened in this run. The
+Team Rank is the letter ladder §1.8 quotes; the "+30" beside it is **not** a Team Rank S reading but
+the league-placement bonus for the run's 8th place, and the published ladder pays exactly that band
+(§7 finding 11). The two burst counts are the §2.4 economy's charge counters. The Unity Trainings
+count is the same charge counter read from its other side. **What the panel does not print is as
+important as what it does:** not the team's average stat, not the member-by-member skill list, and not
+the training level each stat grade implies. Those are system knowledge, and §2.6 and §9 now carry them.
+
+**Method note (added 2026-10-20): where the countdown sits.** The publishers locate the Team Race
+countdown **below the standard objective timer** — gametora's Unity Cup page says "You can see how many
+more turns are left until the next set below the standard objective timer", and this repo already records
+it that way in `docs/scenarios/02-unity-cup.md:153` and in the publisher master at
+`SCENARIO-PUBLISHER-REFERENCES.md:658` ([gametora, ⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup),
+tier `[B]`). **The "left of the energy bar" placement is not corroborated by any source reached**, and
+what this run's own screen carries is a different counter: "5 turn(s) until the Unity Cup" (`297b931b`,
+§1.1), which counts down to the finals rather than to the next six-monthly Team Race. Whether that is
+the same widget the publishers describe is not established by any frame; §6 item 9 carries it as open.
+
 ### 1.9 The roster
 
 Every member carries a stat line in the client. The six deck characters appear as teammates in their own
 card popups; the rest arrive as **Guest** R cards tagged `[Tracen Academy]`. Format is
 Speed / Stamina / Power / Guts / Wit, then the caps the client shows.
+
+**System note (added 2026-10-20, re-verified 2026-10-21): how the client opens a member's skills.** The
+team menu lists each member's skills, and game8.co's team-race guide describes the gesture: "Your team
+members will also have **skills** available. Their skills can be seen by **holding their icons in the
+team menu** and in the races" ([game8.co 563652, ⚠️ STALE: 2025-11-27](https://game8.co/games/Umamusume-Pretty-Derby/archives/563652),
+tier `[A]`). The same page adds that support-card teammates carry their **cards' skills**, and that it
+matters because "your Uma can only be in one of five races".
+
+**Re-checked 2026-10-21 against the page itself, and the status moves from "not documented" to
+"documented, with a caveat that is not the one it was."** The quote is verbatim and the page is reachable,
+so this is no longer an open question about whether a publisher describes the interaction. What survives is
+the **age**: the page's own line reads "Last updated on: November 27, 2025 09:02 PM", which is 328 days
+before this revision and therefore ⚠️ STALE under the repo's 90-day rule, and the page **pre-dates the
+2026-07-01 rework**, so it describes the pre-rework Unity Cup. The brief for this pass called the page
+current on the strength of an October 2026 survey prompt; that prompt, and the "October 2026 Schedule" link
+beside it, are page furniture — a feedback form and a nav link — and neither is the article's update date.
+**The current `[Global]` build is still not observed**: nothing in the 67 frames shows the inspector being
+opened, and no second publisher restates the gesture on a post-rework page. The skill lists below come from
+the seeded catalog rather than from the inspector, and they would read the same either way — which is
+precisely why the distinction matters for a form: a catalog-sourced skill list and a client-read skill list
+are different provenance and must not be merged into one field.
 
 | Deck character     | Grade | Stats                            | Caps                  | Aptitudes of note                        |  |
 | ------------------ | ----- | -------------------------------- | --------------------- | ---------------------------------------- |  |
@@ -462,6 +519,205 @@ From the research pass, with what the frames add:
    ([2025-11-20](https://game8.jp/umamusume/400803)) print **15 / 15 / 20 / 20 SP** with no stat
    component at all. Two publishers against one, on a figure this file treats as settled.
 
+**Added 2026-10-20.** Two system tables this section was missing are now in §2.5 — what a burst pays — and
+§2.6 — what a training level is a number of. They are publisher knowledge, not frame observations, and they
+change nothing in the three discrepancies above: all three are flagged here and none is fixed.
+
+### 2.5 What a Spirit Burst pays, and the two numbers that get confused
+
+**System knowledge, not observed in this run's frames.** No frame in the 67 shows a burst being fired, so
+nothing below was read off the client. Two different quantities are published under the name "Spirit Burst
+bonus", and they are not the same quantity, so they are kept apart here — the confusion between them is
+exactly what a form entry has to survive.
+
+**The teammate's share — the larger table.** What a *teammate* gains when the burst fires:
+
+| Burst on | Speed | Stamina | Power | Guts | Wit |
+| -------- | ----- | ------- | ----- | ---- | --- |
+| Speed    | 150   | 80      | 110   | 80   | 70  |
+| Stamina  | 80    | 150     | 80    | 110  | 70  |
+| Power    | 80    | 110     | 150   | 80   | 70  |
+| Guts     | 90    | 80      | 90    | 150  | 70  |
+| Wit      | 110   | 80      | 80    | 80   | 150 |
+
+**Tier `[B]`** — [umareference.com, "Unity Cup Scenario: Advanced Training Strategy",
+2026-08-26](https://www.umareference.com/guide/advanced-training-strategy/unity-cup-scenario-1). An unofficial
+fan reference with a named author and a stated editorial policy, so under the repo's tier rules it is a
+database-or-tool site and not a publisher, and **nothing here is promoted to `[A]` without a second source**.
+No second source carrying this table was reached, so it stands on one `[B]` page. That page calls these
+"explosions"; the client calls the same mechanic a Spirit Burst.
+
+**The caveat, in the source's own words.** "Explosions give two stat bonuses, one big boost for your team
+members (the chart below) and a moderate boost for your trainee. The big boost to your team member's stats
+are based on their Support Card Type … The moderate boost for your trainee is based on the facility being
+trained at." And: "The above chart is affected by your uma's growth bonuses. For example, if you were
+training Oguri Cap who has a 20% Speed bonus, Speed explosions would give +180 Speed. These stats are given
+to each team member."
+
+So the 150-scale figures are a **teammate's post-growth total**: they differ per member, they are scaled by
+that member's growth bonus, and they are **not** the number the trainee's own training readout carries.
+
+**The trainee's share — the smaller table.** What the burst adds to the *trainee*:
+
+| Trained facility | Speed | Stamina | Power | Guts | Wit | Skill points |
+| ---------------- | ----- | ------- | ----- | ---- | --- | ------------ |
+| Speed            | 15    | —       | 7     | —    | —   | 5            |
+| Stamina          | —     | 15      | —     | 7    | —   | 5            |
+| Power            | —     | 7       | 15    | —    | —   | 5            |
+| Guts             | 3     | —       | 3     | 15   | —   | 5            |
+| Wit              | 2     | —       | —     | —    | 15  | 5            |
+
+**Tier `[B]`** — gametora's Unity Cup page ([⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup)),
+extracted verbatim in this repo at `SCENARIO-PUBLISHER-REFERENCES.md:717-725`. **Tier `[A]`** for game8.co's
+rendering of the same table ([⚠️ STALE: 2026-07-07](https://game8.co/games/Umamusume-Pretty-Derby/archives/545572)).
+
+**Re-checked 2026-10-21, and the earlier "Game8 reads 5 lower" flag is closed: it was a version boundary,
+not a disagreement.** Two things were wrong with the comparison. The 150-scale table above is the
+**teammate's** gain and appears on **no** reachable game8.co page — the full text layer of 545572 was
+searched again and contains no "150" value at all, the only hits being inside URLs — so the comparison was
+against the **trainee-share** table that follows, which game8.co does print. And on that table gametora
+carries **two explicitly labelled versions**: the current one, whose Wit row is 2 / 15 / 5 with 5 Skill
+points on every row, and, under its own "Before the Update → Pre-Update Spirit Bursts" heading, the
+pre-rework one, whose Wit row is **2 / 10 / 5** with the Skill Point cell filled only on the Wit row —
+**game8.co's rendering, exactly, in both cells**. The rendering is therefore a **vintage capture of the
+pre-rework scenario**, not a misprint, and the pre-rework table also explains the missing Skill Points on
+the other four rows that the same capture shares. The version boundary is the July 2026 Global rework
+(JP 2023-01-30). **So the current table is the one printed here** — gametora's 2 / 15 / 5 with 5 Skill
+points on every row — and the umareference 70 / 150 set above is unaffected, being a different mechanic
+entirely: the teammate boost. The JP side's own rule points the same way, since it names Wit as the
+exception: 「アオハル魂爆発での能力上昇量は賢さ以外は「+15」の固定数値」
+
+**And the mechanism behind it: JP's Wit burst was +10, not +15.** kamigame's Aoharu training page prints the
+rule with the Wit value explicit — 「賢さ以外 | 練習したステータス**+15**」 and 「賢さ | 賢さ**+10**と回復量上昇」
+— so **Wit was a special case in JP and was later brought in line with the other stats**
+([kamigame 173272260793137375, ⚠️ STALE: 2024-04-12](https://kamigame.jp/umamusume/page/173272260793137375.html),
+tier `[A]`, `[JP]`). That **is** the "2 / 10 / 5" Wit row: the pre-rework Wit cell is +10 because Wit was
++10, and the rework unified it to +15. So the closure is stronger than a version boundary — it is a
+documented JP mechanic that was later unified, and game8.co's table is the JP-era capture of it. The two JP
+pages corroborate each other: kamigame gives the Wit value, and game8.jp states the same rule without it.
+
+**The Skill Point column's difference has the same shape:** the pre-rework table has no Skill Points on the
+four non-Wit rows and 5 on the Wit row, and the current table has 5 on every row, so the column filled in
+with the rework — and the cause is now on the record. The 2023-01-20 update raised skill-Point gains
+across the board: 「特にスキルPt上昇量は全体で+2されグランドライブと同じになっている」
+([gamewith 287164, ⚠️ STALE: 2023-01-20](https://gamewith.jp/uma-musume/article/show/287164), tier `[A]`,
+`[JP]`), whose same page also records the ESB, the S+ ceiling, the elite team's fourth-round appearance and
+the Alarm Clock retry as the update's contents.
+
+**The Wit cell is special-cased by design, and the JP side says so outright.** The JP Aoharu Hai guide
+puts it in a sentence: 「アオハル魂爆発での能力上昇量は賢さ以外は「+15」の固定数値で、ウマ娘の成長率やサポートのトレーニング効果アップの影響を受けません。また、トレーニングLvにも影響されない」
+([game8.jp 395608, ⚠️ STALE: 2025-11-20](https://game8.jp/umamusume/395608), tier `[A]`, `[JP]`) — the
+burst's stat gain is a fixed +15 for every stat **except Wit**, and it is unaffected by growth rate,
+support training boosts and training level. Two things follow, and they point in opposite directions.
+**Wit is named as the mechanic's exception**, which is independent support for reading the differing Wit
+cell in the tables above as designed rather than as a transcription slip. But the same sentence says the
+gain is *not* affected by growth rate, while the umareference caveat above says the teammate table *is*
+scaled by that member's growth bonus. **That is a source difference, not a merge**: the JP page is
+pre-rework `[JP]` and describes the burst's flat per-stat gain, while the growth-scaled figures above are
+the `[Global]` teammate half of the two-table mechanic. Both are recorded; neither is rewritten to fit the
+other.
+
+**Scenario-linked and Extreme variants.** A scenario-linked support pays a larger version of the same shape —
+Speed 20 / 10, Stamina 20 / 10, Power 10 / 20, Guts 5 / 5 / 20, Wit 5 / 20, with 10 Skill points on every
+row. An **Extreme Spirit Burst** pays a third set: Speed 20 / 10, Stamina 20 / 10, Power 10 / 20, Guts
+5 / 5 / 20, Wit 5 / 15, with 15 Skill points; scenario-linked, 25 / 15, 25 / 15, 15 / 25, 8 / 8 / 25 and
+8 / 25, with 20 Skill points. **Tier `[B]`, single-source**: gametora publishes all three tables
+(`SCENARIO-PUBLISHER-REFERENCES.md:729-735`, `:746-754`, `:758-764`), and game8.co prints only the prose —
+"ESB gives Ignited Spirit skills and significantly bigger stat boosts" — without the numbers. The repo's
+master records the nuance that "Special Training and Spirit Burst stat gains are counted separately for the
+scenario-link +1 bonus", so a stat that comes only from a burst is not boosted by a scenario-linked card.
+
+**Why the distinction matters for form entry.** A burst outcome carries two numbers and they must not be
+filed under one label: the **teammate's** gain (the 150-scale row, scaled by that member's growth bonus) and
+the **trainee's** own share (the 15-scale row). "150 Guts" and "15 Guts" are not two readings of one figure,
+and a form that stores "stat gain" without saying whose is wrong by a factor of ten.
+
+**One more figure that is neither.** The same page states the race-result bonus: "Winning an Unity Cup race
+gives all your teammates +50 all stats. Losing or drawing gives them +10 all stats." **Tier `[B]`**,
+corroborated by a community blog from 2021 that gives the same pair plus a separate placement bonus
+([⚠️ STALE: 2021-09-07, tier `[C]`](https://umamusume.net/archives/17316)). The publisher master records a
+pre-rework game8.co row reading "+50 at rank 5 or above", so the two readings of the same +50 are not
+reconciled here. Either way it is a team-wide race-result bonus and not a burst value.
+
+### 2.6 The training-level thresholds, and why Guts is Level 5
+
+**System knowledge, not observed in this run's frames.** The client prints a facility's *level number* on the
+training tile (§1.7) and the team's *stat grades* on the Team Info panel (§1.8). It does not print the
+number of team average that sits them there, and no frame in the 67 carries one.
+
+**Grade → level.** The grade the Team Info panel prints for that stat sets the level:
+
+| Team's grade for the stat | F | G | E | D | C | B | A | S |
+| -------------------------- | - | - | - | - | - | - | - | - |
+| Facility level             | 1 | 1 | 2 | 2 | 3 | 3 | 4 | 5 |
+
+**Tier `[B]`** — gametora ([⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup)), extracted in
+this repo at `SCENARIO-PUBLISHER-REFERENCES.md:771-781`, whose own worked example is "a team-wide Speed rank
+of A → Speed facility is Level 4, regardless of how many times you personally trained Speed."
+
+**This run matches it five for five.** The grades in §1.8 are Speed A, Stamina A, Power A, **Guts S**, Wit A;
+the observed facility levels in §1.7 are Speed 4, Stamina 4, Power 4, **Guts 5**, Wit 4. All five agree, and
+**the Guts facility being Level 5 is explained**: the team's Guts grade is S, and S is the only grade that
+maps to Level 5. §1.7 recorded the level and §1.8 recorded the grade, and neither file joined them; this is
+the join.
+
+**Average stat → grade → level.** The numeric bridge, for when a level number is not on screen:
+
+| Facility level      | 2    | 3    | 4    | 5    |
+| ------------------- | ---- | ---- | ---- | ---- |
+| Team's average stat | ~200 | ~340 | ~510 | ~610 |
+
+**Tier `[B]`** — [umareference.com, 2026-08-26](https://www.umareference.com/guide/advanced-training-strategy/unity-cup-scenario-1):
+"The training levels are based on the average stat of your umas. Speed training is based on their average
+Speed stat, etc. The uma's stats cap out around 750-800 depending on their type."
+
+**Second source attempted, and what it turned out to be.** A second carrier of this ladder was looked for to
+lift the thresholds out of single-source territory: the "Umamusume Global Reference Document", a community
+Google Doc, located by title and by document id
+(`11X2P7pLuh-k9E7PhRiD20nDX22rNWtCpC1S4IMx_8pQ`). **It could not be used.** Its title and existence are
+confirmed — it is the same file umareference.com's own footer links as "Created by" — but its body is behind
+a sign-in: the plain view returns the title alone and the text export returns "unable to open the file at
+present". And because it is the same author's longer document, it would not have been an **independent**
+second source even if it had opened. **This table therefore stays single-source `[B]`**, umareference.com,
+and the five-for-five match below is corroboration of the *mapping*, not of the thresholds.
+
+**A second carrier for the mapping, and what it does not cover.** The grade-to-level ladder now has two
+independent carriers: gametora's table above, and game8.jp's Aoharu Hai guide, which prints the same five
+rungs as an image whose alt text reads 【G〜F】【E〜D】【C〜B】【A】【S】 over Lv1 Lv2 Lv3 Lv4 Lv5 — the same
+rank-to-level correspondence, in the same order ([game8.jp 395608, ⚠️ STALE: 2025-11-20](https://game8.jp/umamusume/395608),
+tier `[A]`, `[JP]`). That correspondence is read from that image's alt text and row order, and the page shows
+five rungs because it is the JP table, which predates the Global S+ rank. **The numeric cut-points remain
+single-source**: umareference.com is still the only publisher of the 200 / 340 / 510 / 610 thresholds.
+
+**Two more carriers, and one band edge that does not agree.** The mapping is now carried by four publishers
+on four sites — gametora's table above, game8.jp's image, gamewith's 「評価G~F → トレーニングLv1 · 評価E~D →
+Lv2 · 評価C~B → Lv3 · 評価A → Lv4 · 評価S → Lv5」 ([gamewith 287164, ⚠️ STALE: 2023-01-20](https://gamewith.jp/uma-musume/article/show/287164),
+tier `[A]`, `[JP]`), and kamigame's, and **kamigame prints the second band as "F~E"**, putting F in level 2
+where every other source puts it in level 1 ([kamigame 173272260793137375, ⚠️ STALE: 2024-04-12](https://kamigame.jp/umamusume/page/173272260793137375.html),
+tier `[A]`, `[JP]`). **The band edges are printed inconsistently across publishers and the run's own five-for-five
+match sits in the two unambiguous rungs** — A and S — so the reading is unaffected. The *basis* is corroborated
+too, and independently of every number: "トレーニングLvはチームのステータスや総合力に応じて上昇" and, in
+gamewith's words, the level rises with the team's status rather than the number of trainings.
+
+**What would close the numbers, and what this run's frames do and do not show.** The basis is now carried by
+three publishers on three sites — umareference's sentence above, gamewith's, and a JP wiki page whose body
+is **not** extractable from this machine but whose indexed snippet states the same mechanism in the same
+shape (「チームメンバーの各基礎ステータスの平均値が一定以上になるたびに…対応するトレーニングLvが上がる」).
+That third one is recorded as a **lead, not a citation**. Its further claim — that the current average stat
+is **displayed on the training screen** — is **not** corroborated by this run: the capture in §1.7 shows the
+facility level, the stat preview and the failure percentage, and **no team average**. So the four
+cut-points stay **single-source `[B]`**, they are observable in the client only if that claim holds, and the
+one thing that closes them is a capture of the training screen's top-left icon or the export itself.
+
+**On the tilde.** The source prints these four numbers as plain thresholds, not as approximations; the
+approximation is in the surrounding prose — the members' own stats "cap out around 750-800 depending on
+their type" — so the cut-offs are approximate by construction, and the `~` above is **this document's** marker
+for that, not the source's own glyph. Two consequences follow. A team averaging exactly 340 sits on the
+Level 3 / Level 4 boundary, and only the client resolves which side it lands on. And these thresholds are a
+**team average**, not a member's stat — the opposite of the burst table in §2.5, and the opposite of the
+run's own stat line in §1.2. **The client's level number is authoritative**; this table only explains what
+the number means, and it is inferential wherever the number is not on screen.
+
 ---
 
 ## 3. What this run looks like it was doing
@@ -578,14 +834,32 @@ hand from 16:27.
    total 18 against the panel's 20/20 counter. Either the clipped row repeats characters already listed
    or the count includes someone the grid does not show. Left as an arithmetic discrepancy, not a
    screenshot gap.
+8. **The finals' venue and exact distance — the rule is now settled, the values are per-run.** §8.3 closes
+   the *shape* of the finals: five races, one per category, all distances on turf plus a mile on dirt. The
+   second 2026-10-21 pass settled **why** no publisher prints a table of venues and distances, which is the
+   rule itself: the five races are **drawn at random from a fixed pool of real-modelled races**, not
+   authored per scenario and not fixed per opponent (§8.3's extension for the source and the sample
+   distribution). So the **ground and the exact distance inside each category are a per-set value** that
+   only the client shows, and the row is a per-run observation a form records rather than a lookup it can
+   compute. What stays open is narrow: the specific course and distance of a given run, and whether the
+   pool's contents changed in the 2026-07-01 rework — every distribution available is JP-era. The pool
+   offers Kyoto ○ and Hakodate ○ and **no Nakayama** (§6 item 2), so the venue-skill question survives the
+   change of shape: it is now a per-run observation.
+9. **The countdown widget.** §1.8's method note records what the publishers say — below the standard
+   objective timer — and what this run's screen shows ("5 turn(s) until the Unity Cup", §1.1). Whether that
+   counter is the same widget the publishers describe, and where it sits relative to the energy bar, is
+   established by no frame. §8.6's request for a capture of the career screen's header region would
+   answer this and the Energy number at once.
 
 ---
 
 ## 7. Corpus findings, and the edits they caused
 
-Eight findings came out of the 67 frames, the research pass and the catalog cross-check: two are
-recorded in the corpus, one is corroboration, two are flagged rather than applied, and three are things
-the later sources revealed that the frames alone had wrong or left unstated.
+Twelve findings came out of the 67 frames, the research pass, the catalog cross-check and the two system
+passes: two are recorded in the corpus, one is corroboration, two are flagged rather than applied, three
+are things the later sources revealed that the frames alone had wrong or left unstated, one is a set of five
+system values the frames never show at all, one is a set of page attributions that had been read the wrong
+way round, and two are sets of readings the publishers have since settled.
 
 1. **The per-level hint discount** is now client-read: 10/20/30/35/40% at Lv1/Lv2/Lv3/Lv4/`Lv Max`.
    Recorded in `docs/research-scratch/SKILLS-MECHANICS.md` §2.4 with its caption table and arithmetic,
@@ -635,6 +909,75 @@ the later sources revealed that the frames alone had wrong or left unstated.
    "Friends" pill on the Career Profile rail, which is why the deck's only 50/50 card is not the
    trainer's own. And the going on this turn's race is **Soft**, which invalidates the Firm Conditions
    recommendation the first version of §2.3 made while conditions were still unknown.
+9. **Five system values the frames cannot show, and two of them change how an existing line reads.** The
+   2026-10-20 pass added §2.5, §2.6, the §1.8 and §1.9 notes and §9, for the systems this report described
+   but did not quantify: what a burst pays, what a training level is a number of, where the Team Race
+   countdown sits, how a member's skills are opened, and what the finals' venue and distance are. **Two of
+   the five changed the reading of something already here, and both are recorded rather than applied.** The
+   first is §2.6's grade ladder, which makes §1.7's **Guts facility Level 5** explicable: the team's Guts
+   grade is S (§1.8) and S is the only grade that maps to Level 5, while Speed, Stamina, Power and Wit read
+   A and sit at Level 4. The frames showed the levels and the grades side by side and neither file had joined
+   them. The second is §2.5's distinction between the teammate's 150-scale gain and the trainee's 15-scale
+   share, which means a burst reading is two numbers rather than one, and a form that files them under one
+   label misfiles one of them. The third is a negative result: **the finals' venue and exact distance are
+   not published by any source reached**, so §8.3's extension marks the item ❌ UNVERIFIED instead of naming
+   a rotation, and §6 item 8 carries it as open.
+10. **Three of the four items in this round turned on which Game8 page was read, and one of them was a
+    misreading of the tables rather than of the pages.** The 2026-10-21 pass read game8.co's **team-race
+    guide, 563652**, in full. That page carries the schedule block — "Round 1 / After Junior Year Late
+    Dec … Finals / After Senior Year Late Dec" — the win condition "Team Races are won by winning in **three
+    tracks** per match", and the skill-inspector sentence quoted in §1.9. It does **not** carry a
+    five-leg venue-and-distance rotation: "Hanshin" does not appear on it and neither do 2600, 2200 or 1600.
+    So the rotation remains ❌ UNVERIFIED, and §8.3's extension now records that **both** pages were read
+    in full rather than one. Second, the earlier claim that the scenario-update guide "renders Wit 5 lower"
+    was a comparison of two different tables — the 150-scale teammate table, which appears on no reachable
+    game8.co page, against the trainee-share table, which does — so the flag is withdrawn as a discrepancy
+    and kept as a source-specific note (§2.5). Third, the "second source" proposed for the training-level
+    thresholds is the same author's longer document, behind a sign-in, so the thresholds stay single-source
+    (§2.6). The inspector's quote is confirmed verbatim; what survives on it is the page's age, because
+    the page's own date is 2025-11-27 and it therefore pre-dates the rework (§1.9).
+11. **The "+30" tooltip is not a Team Rank S reading, and the finals' rotation is a per-run property
+    rather than a missing table.** Two things closed on the second 2026-10-21 pass. First, the
+    league-placement bonus ladder: game8.jp's Aoharu Hai guide prints it — 2〜5位 全ステータス+50,
+    6〜10位 全ステータス+30, 11〜15位 +20, 16〜20位 +10, 20〜30位 ボーナス無し — and game8.co's team-race guide
+    independently names its top band ("get the +50 bonus for ranking 5th or above at the final race").
+    This run's league standing is 8th, the band that pays **+30**, and the client's tooltip reads exactly
+    "+30". **That closes finding 5's open question**: the tooltip is bound to the league standing, not to
+    the letter rank, and the "+50 at Rank 5+" figure `docs/scenarios/02-unity-cup.md:159` set aside as
+    `[JP]`-side is this ladder's top band rather than a different bonus — **and that band's edge is in conflict between
+    publishers**: game8.jp prints it as 2〜5位, gamewith's 2023-01-20 table prints 1~5位, and game8.co's
+    Global-facing page says "ranking 5th or above", which includes 1st. The **+30 band** this run's 8th
+    place reads is 6〜10位 in game8.jp and 6~9位 in gamewith, so the run's own reading is unaffected by the
+    edge and the conflict is recorded rather than resolved (§8.3). Second, the finals' rotation:
+    the five races are fixed by category and the ground inside each category is published by nothing, so
+    the row is a per-run observation rather than a missing table (§8.3). Two smaller results rode along:
+    the grade-to-level ladder now has a second carrier in game8.jp — the mapping, not the numeric
+    thresholds (§2.6) — and the JP side states the burst's gain is a flat +15 **except Wit**, which is
+    independent support for reading the Wit cell as designed rather than miscopied (§2.5). One correction
+    to another file rode along too: the Unity Cup plan's Sources line calls game8.co 545572 a "pre-update
+    copy", and it is not — that page is the July 2026 rework guide and prints the Extreme Spirit Burst
+    tables.
+12. **The Wit cell was a version boundary, the finals' ground is drawn rather than published, and the
+    "four scenarios conflated" claim does not apply to this repository.** Three more closures, and one
+    correction to a claim that came in from outside. First, the "Wit 5 lower" difference is **closed**:
+    gametora's Unity Cup page carries **both** the current and the pre-rework trainee-share table under its
+    own "Before the Update" heading, and the pre-rework Wit row is **2 / 10 / 5** with the Skill Point cell
+    filled only on the Wit row — **game8.co's rendering, exactly, in both cells**. The rendering is a
+    vintage capture of the pre-rework scenario, so the "discrepancy" was a version boundary and the current
+    table is the one this document prints (§2.5). Second, the finals' ground is **drawn at random per set
+    from a fixed pool of real-modelled races**, rather than published and rather than fixed per opponent
+    (§8.3) — which is why no publisher prints a rotation, and why the row's shape changed rather than its
+    values. Third, the claim that this repository's publisher master conflates four scenarios **does not
+    survive the master's own headings**: it separates **URA Finale** at `:906`, **Unity Cup** at `:1002`,
+    **Trackblazer** at `:1273` and **Our Grand Concert** at `:2233` under its own heading, with
+    game8.co/536520, /545572, /580723 and /607337 as their respective sources, and the rows a four-way split
+    would move — `:1293` through `:1297`, the Pro Shop, the TS Climax Victory Point threshold, the rotation
+    samples and the Radiant / Glittering Star values — are already inside Trackblazer's own subsections.
+    **Nothing in this repository needs splitting.** Two corrections ride along:
+    `docs/research-scratch/AUDIT-AND-VERIFICATION.md`'s row on which turn a team-race retry resumes on is
+    closed by game8.jp — the retry re-fights **on the same turn**, re-drawing the lane numbers, with the
+    Ace's mood raised one step — and **TP is two currencies, not one**: it buys an Independent Training
+    run (uma.guide) and a 30 TP spark re-roll (game8.co 545572), with RP a separate currency again.
 
 Verification run on those edits: retired literals grep to zero, each new marker greps to one, the
 concurrent thread's two uncommitted hunks in `docs/UMAMUSUME_REFERENCE.md` are still present in the
@@ -708,6 +1051,118 @@ skill should be chosen for the Arima Kinen and for the five-category meet, not f
 Rewards beyond the team-name skill are corroborated: a finals win grants the team-name gold, improves
 scenario-spark odds, and unlocks the "+" scenario spark variants.
 
+**Extension, 2026-10-20, re-checked 2026-10-21 and again in a second 2026-10-21 pass: the venue and the exact distance are still not published — and the row is now known to be a per-run property rather than a missing table.**
+The paragraph above closes the *category* question — five races, one per category, which is why there is no
+single race card. It does not close the question of **which track and which distance each of the five is run
+at**, and the second read did not close it either. **❌ UNVERIFIED.** No source reached prints a rotation,
+and both game8.co pages were now read in full:
+
+- **game8.co 545572**, the scenario-update guide, is the wrong page for this question and carries no
+  rotation. Its full text was read on 2026-10-21: "Hanshin" does not appear on the page at all, and
+  neither do 2600, 2200 or 1600. Its two mentions of the finals are the schedule row — "Finals After Senior
+  Year Late Dec" — and an image caption
+  ([⚠️ STALE: 2026-07-07](https://game8.co/games/Umamusume-Pretty-Derby/archives/545572)).
+- **game8.co 563652**, the team-race guide, is the right page for team-race questions and still carries no
+  rotation. Read in full on 2026-10-21: its "Exclusive Races That Occur Every Six Months" block is the
+  schedule table — "Round 1 / After Junior Year Late Dec … Finals / After Senior Year Late Dec" — and
+  nothing more; the page contains no "Hanshin" and no distance in the 1200–2600 range. What it does add is
+  the win condition, "Team Races are won by winning in **three tracks** per match", and the skill-inspector
+  sentence (§1.9)
+  ([⚠️ STALE: 2025-11-27](https://game8.co/games/Umamusume-Pretty-Derby/archives/563652), tier `[A]`).
+- **umamusu.wiki** gives the five categories and the note that the set "includes all distances on turf and
+  a mile race on dirt", and no venue and no distance
+  ([2026-09-17](https://umamusu.wiki/Game:Unity_Cup)).
+- The **JP side** names the five as 短距離／芝, マイル／芝, 中距離／芝, 長距離／芝, マイル／ダート "with venues
+  fixed by the opponent side" — the opposite of a fixed rotation, since the finals opponent is locked to
+  Team Zenith and the venue comes with the matchup
+  ([⚠️ STALE: 2024-08-30](https://umamusume.wikiru.jp/)). A JP guide read on 2026-10-21 confirms the
+  three-of-five win condition and the team-rank-to-training-level ladder, and carries no leg list either
+  ([⚠️ STALE: 2025-06-07](https://kamigame.jp/umamusume/page/174280729935498937.html)).
+- The **official JP page** names the count and the opponent and nothing more
+  ([undated, official](https://umamusume.jp/contents/game/scenario/aoharu/)).
+
+So the specific set of five venues and distances that would let a form name the finals' ground condition
+**is not established here**, and §6 item 8 carries it as open. Two things this extension does *not* do: it
+does not withdraw the category-level statement above, which stands, and it does not replace "the question
+'what are the finals' distance, venue and ground' was the wrong question" with the opposite claim. That
+sentence is still right about the *programme* — the five columns in §1.8 are the programme and there is no
+single race card. What this adds is that the venue and the exact distance are a **second and separate**
+unknown sitting behind the programme, and that a reader should not infer a rotation from the fact that the
+Team tab has five columns or from the fact that the JP page fixes the venue to the opponent's side. The
+pool's venue skills (§6 item 2) therefore stay conditional rather than resolved.
+
+**The page-attribution correction, recorded so the next reader does not repeat the failed extraction.**
+game8.co's Unity Cup material is split across two pages and they are not interchangeable: **545572 is the
+scenario-update guide** ("Unity Cup Update Guide", the July 2026 rework) and **563652 is the team-race
+guide** ("How to Win Unity Cup Team Races"). The first pass for this document read 545572 for a
+team-race question and concluded from it that no rotation existed; that conclusion was correct as far as
+545572 goes and wrong as a statement about the scenario, and the second read of 563652 is what settles it.
+The rotation still does not exist in either page — that part of the first conclusion stands, and it now
+rests on two full reads rather than one.
+
+**What the second 2026-10-21 pass added, and why the row changed shape rather than closing.** Four
+carriers now agree on the structure of the finals, and none of them names a venue:
+
+- **game8.co 563652** (the team-race guide, `[A]`, 2025-11-27): "Similar to **Team Trials**, you can
+  select up to three Umas per race based on **distance** and **track**." Each race therefore carries a
+  distance and a track that the player selects against; and "Team Races are won by winning in **three
+  tracks** per match".
+- **kamigame's Team Trials pages** (both last updated **2026-10-13**, `[A]`): the Aoharu Hai team race is
+  the チムレ — the Team Trials mode — with the same five distance categories, and "トレーニングLvはチーム
+  ステータスランクに依存" (the training level follows the team's stat rank, not the number of trainings).
+- **onj's Aoharu Hai page** (`[C]`, last updated 2021-11-24): 「レースは「短距離・マイル・中距離・長距離・
+  ダート(マイル)」の各5戦をチームから最大3人ずつ選出して行う」 — the five categories with **dirt always at
+  mile length**, up to three racers each; and 「チャンミと同じでレース参加メンバーのだれか1名が1着を
+  取れば勝利」 — a race is won when one of your racers takes first, on Champions Meeting rules.
+- **jpneet's Aoharu Hai system page** (`[C]`, 2021): 「チーム競技場のように複数のバ場・距離を用いた
+  チームレース」 — the same mode shape as Team Trials — and 「短・マイル・中・長距離の芝およびマイルの
+  ダートレースを用いる」 — the four turf distances plus the mile dirt race.
+- **yoyaku-top10's finals guide** (`[C]`, **2021-09-07**): 「**アオハル杯のルールとしては基本的に
+  チーム競技場と同じです。**」 — the equivalence in the Aoharu Hai's own words — with the shape it implies:
+  three per distance over 【短距離・マイル・中距離・長距離・ダート】, up to fifteen, five races, 「自チームの
+  ウマ娘の誰かが1着になれば勝利」, and more wins than the opponent taking the match. It also gives the
+  finals' two aces their lanes — 「**「ビターグラッセ」は中距離に、「リトルココン」は長距離に出走します。**」 —
+  so the winning lanes in the finals are **sprint, mile and dirt**, and the counter-strategy needs no frame of
+  the finals screen to state.
+
+**So the five finals races are fixed by category and the ground inside each category is not.** Nothing
+reached prints a five-leg table of venues and distances, and nothing reached says the ground is fixed
+either. The two sources that state the draw rule — the wikiru Team Trials page and a yoyaku-top10 guide —
+**could not be reached from here**: the wikiru returns an IP-block shell for overseas readers (the same
+shell for its Team Trials and its Aoharu Hai page), and the yoyaku-top10 page was not located. **So whether
+the ground is drawn at random per set or fixed per opponent was, at that point, unverified** — and it is
+recorded here rather than assumed, because the rest of the row does not depend on the answer.
+
+**The draw rule, and why there is no table to print.** A third source settles it, and it is the reason the
+rotation hunt kept failing: the Team Trials races are **not created at random but chosen at random from a
+fixed set** of races modelled on real ones. owadablog's 2000-race survey of the mode says it in one
+sentence — 「チーム競技場のレースは完全ランダムで作成されておらず，ある程度決められたレースのなかからランダムで
+選ばれています」 ("the races are not created completely at random; they are chosen at random from a set of
+fixed races"), all of them modelled on real races, some of which cannot be run in training
+([owadablog.com/team-arena-summary, 2021-05-12](https://owadablog.com/team-arena-summary/), tier `[C]`).
+The Unity Cup races are the same mode — gametora: "Every six months of your journey, you will face a set of
+races similar to the Team Trials" — so the same rule applies to the finals. The wikiru Team Trials page, which
+states the rule most directly, still returns an overseas-IP shell from this machine; the yoyaku-top10 guide
+**is** readable and states the Aoharu-Hai-equals-Team-Trials equivalence in its own words (below), so the
+rule is carried by the survey, by gametora, and by that line.
+
+**What the survey also fixed.** The five races in a set share one season; the race-and-season combination
+carries no relation to the real calendar; the distance bands are ダート 1600–1800 m, 短距離 1000–1400 m,
+マイル 1500–1800 m, 中距離 2000–2400 m, 長距離 2500–3600 m, so **the dirt leg is always a mile**; every
+race is a 12-runner race; the only straight-line race in the pool is Niigata 1000 m; and over 2000 races the
+distributions are spring 42.25% / summer 16.25% / autumn 22.75% / winter 18.75%, sunny 59.6% / cloudy 29.9%
+/ rain 9.4% / snow 1.1%, firm 76.5% / slightly heavy 13.35% / heavy 4.75% / bad 5.4%, with 237 of 400 long
+races at 2600 m or under and 309 of 400 at 3000 m or under.
+
+**This supersedes the reading this extension recorded earlier the same day.** The ground is **drawn at random
+per set from that fixed pool**, not fixed per opponent, and this file's older note that the JP original
+fixes the venue to the opponent's side does not survive it. **Two caveats, both real.** Every source here is
+JP-era and pre-rework, so the *pool's contents* and every distribution above are JP-era and the
+2026-07-01 Global rework may have changed them — the *structure* (five categories, dirt always a mile) is
+confirmed on Global-facing pages. And the per-run values remain unobservable from here, so **❌ UNVERIFIED
+stays on the values**: this is now a per-set property a client read records, not a table the repository can
+print.
+
 ### 8.4 The league-rank ambiguity resolves in favour of this run: 8th qualifies
 
 `§4` and `§7 item 4` are settled. The JP condition is 「チームランキングが10位以上」
@@ -774,3 +1229,166 @@ Step 4 changes: buy the white Ignited Spirit GUTS at 130, because it is the publ
 the gold the November event may pay. Step 3's target changes shape depending on §8.2, and the burst
 count on the Team Info panel is the tiebreaker rather than an assumption either way. Everything else in
 §5 stands.
+
+---
+
+## 9. System values not observed in this run's frames
+
+Added 2026-10-20. This section exists to separate the two things the earlier sections of this report use
+without much ceremony: **what the 67 frames show**, and **what the system does when the frames are not
+looking**. Every row below is system knowledge. None of it was observed in this run, none of it is a
+prediction, and none of it is a frame reference — where a number in this report comes from a frame it
+carries an eight-character reference, and where it comes from a publisher it carries a tier and a date,
+and the two never appear on the same line. The frames are the authority for **this run**; the publishers
+are the authority for **the mechanic**; and where the two would ever disagree, the frames win for this run
+and the publisher wins for the rule.
+
+One note on the ⚠️ STALE marks below, because it looks inconsistent with the earlier sections and is not.
+The repo's rule is that a source older than 90 days gets the marker, measured at this revision's date.
+Two of the pages in this table — game8.co 545572 and gametora — are past that mark now, and the team-race
+guide at game8.co 563652 carries one for a different reason: its own date is 2025-11-27, so it was already
+outside the window when it was first cited. §§1 to 8 cite the first two without a marker, because they were
+written against the 2026-10-03 research pass, when they were still inside the window. That is a fact about the
+age of a page, not a change in any claim, and the earlier sections are left exactly as they were.
+
+| Item | Where in the document | Source | Tier | Observed in this run's frames? |
+| ---- | --------------------- | ------ | ---- | -------------------------------- |
+| Spirit Burst — the **teammate's** stat gain | §2.5 | [umareference.com, 2026-08-26](https://www.umareference.com/guide/advanced-training-strategy/unity-cup-scenario-1) | `[B]` | No — re-read 2026-10-21; the 70 / 150 set is confirmed and appears on no reachable game8.co page |
+| Spirit Burst — the **trainee's** own share | §2.5 | [gametora, ⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup) (repo master `:717-725`); [game8.co 545572, ⚠️ STALE: 2026-07-07](https://game8.co/games/Umamusume-Pretty-Derby/archives/545572) | `[B]` / `[A]` | No — game8.co's rendering is the **pre-rework** table (Wit 2 / 10 / 5, Skill Points only on the Wit row) and the current one is gametora's Wit 2 / 15 / 5 with 5 Skill Points on every row (§2.5) |
+| Burst → race-result bonus (+50 all stats on a win, +10 on a loss or draw) | §2.5 | [umareference.com, 2026-08-26](https://www.umareference.com/guide/advanced-training-strategy/unity-cup-scenario-1); [umamusume.net, ⚠️ STALE: 2021-09-07](https://umamusume.net/archives/17316) | `[B]` / `[C]` | No |
+| Team **stat grade** → training facility level | §2.6 | [gametora, ⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup) (repo master `:771-781`); [game8.jp 395608, ⚠️ STALE: 2025-11-20](https://game8.jp/umamusume/395608) | `[B]` / `[A]` | No — the level (§1.7) and the grade (§1.8) are each observed; the **mapping** between them is not, and it matches all five. Now carried by two independent publishers |
+| League-placement bonus (2〜5th +50 · 6〜10th +30 · 11〜15th +20 · 16〜20th +10) | §1.8, §7 finding 11 | [game8.jp 395608, ⚠️ STALE: 2025-11-20](https://game8.jp/umamusume/395608); [game8.co 563652, ⚠️ STALE: 2025-11-27](https://game8.co/games/Umamusume-Pretty-Derby/archives/563652); [gamewith 287164, ⚠️ STALE: 2023-01-20](https://gamewith.jp/uma-musume/article/show/287164) | `[A]` | No for the ladder — but the run's 8th-place league standing falls in the +30 band under **both** printed variants and the client's tooltip reads +30, which corroborates it (§7 finding 11). The **band edges conflict** between publishers and are recorded, not resolved (§8.3) |
+| Team **average stat** → training level thresholds | §2.6 | [umareference.com, 2026-08-26](https://www.umareference.com/guide/advanced-training-strategy/unity-cup-scenario-1) | `[B]` | No — the **basis** is tri-sourced (umareference, gamewith 2023-01-20, and a JP wiki lead that is not a citable read) and the **mapping** is carried by four publishers, but the four numeric cut-points stay single-source `[B]`; this run's capture does not show the team average (§1.7), so they are not observable from the frames in hand |
+| Team Race countdown — where it sits on the career screen | §1.8 method note | [gametora, ⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup); `02-unity-cup.md:153`; repo master `:658` | `[B]` | Partial — this run's screen carries "5 turn(s) until the Unity Cup" (`297b931b`), which counts down to the **finals**, not to the next Team Race |
+| Member **skill inspector** — how it is opened | §1.9 system note | [game8.co 563652, ⚠️ STALE: 2025-11-27](https://game8.co/games/Umamusume-Pretty-Derby/archives/563652) | `[A]` | No — quote re-verified 2026-10-21 and documented by a publisher; the page's own date is 328 days old and pre-rework, so the current build is still unobserved |
+| Finals — **venue and exact distance** of each of the five races | §8.3 extension; §6 item 8 | [owadablog.com/team-arena-summary, 2021-05-12](https://owadablog.com/team-arena-summary/); [gametora, ⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup) | `[C]` / `[B]` | No — the **rule** is published (five categories, dirt always a mile, ground drawn at random per set from a fixed pool of real-modelled races) and the per-set values stay **❌ UNVERIFIED**: only the client shows them |
+
+**Why this matters for Trainer Desk v2.0 form entry.** The Trainer Desk form is where a run becomes a row,
+and every row above is a field the form can hold that the frame set cannot supply. The risk in each case is
+the same in a different costume: **a number recorded without a label is a number the next reader will
+mis-file.** A burst outcome carries two numbers — the teammate's gain and the trainee's share — and filing
+either under "stat gain" corrupts the other by a factor of ten. A training level is a letter-derived
+number, S → 5, that reads like a count of training sessions and is not one. A training-level threshold is a
+team *average*, not a member's stat, and the tilde on it is a real qualifier rather than a stylistic one. A
+countdown is a widget on the career screen and not a turn in the calendar, and this run's "5 turns until the
+Unity Cup" is the finals counter rather than the six-monthly Team Race counter the publishers describe. A
+member's skill list is a gesture away in the client and a catalog read here, and those are different
+provenance and must not be merged into one field. And a finals venue that is not established cannot be
+entered as a fact — which is precisely what the ❌ UNVERIFIED mark is for: it stops a plausible-looking
+"Hanshin, 2600 m" from reaching a row as though it had been read off a screen.
+
+**What would close each item.** The trainee's burst share closes on one frame of a Unity Training tile with
+a burst pending. The teammate's 150-scale row closes on a member's stat line in the team menu before and
+after a burst, or on a publisher that prints it with an editorial process; it does not close on the tile,
+because the tile does not carry it. The race-result bonus closes on a Team Race results screen, which
+would settle the +50-versus-"rank 5 or above" disagreement at the same time. The grade-to-level ladder is
+already closed by this run: §2.6's five-for-five match **is** the closure, and it is why the Guts facility
+reads Level 5. The average-stat thresholds close on a client screen that prints the team average, which no
+frame shows, so they stay inferential until one does. The countdown placement closes on one capture of the
+career screen's header region — the same capture §8.6 already asks for to settle the Energy number, which
+would answer both at once. The skill inspector closes on a held teammate icon. The finals' venue and
+distance close on the finals' own race cards, or on a publisher page that names them; neither is derivable
+from the Team tab, and no arithmetic in this document produces them.
+
+### 9.1 Completion report
+
+1. **Determination.** Five in-game system disclosures were added to this file and one new section, §9, was
+   written. Each carries a source tier, a publisher date, and an explicit statement of whether it was
+   observed in this run's frames. Four are published; one is published but stale and unconfirmed for the
+   current build; one could not be published at all and is marked ❌ UNVERIFIED.
+2. **Evidence.** The five are: the Spirit Burst stat tables (§2.5 — the teammate's row from umareference.com
+   2026-08-26 `[B]`, the trainee's row from gametora 2026-07-20 `[B]` and game8.co 545572 `[A]`); the
+   training-level thresholds and the grade ladder (§2.6 — umareference.com 2026-08-26 `[B]` for the
+   thresholds, gametora 2026-07-20 and this repo's own publisher master `:771-781` for the ladder); the
+   finals' venue and exact distance (§8.3 extension, §6 item 8 — **❌ UNVERIFIED**, no source reached prints
+   one); the member skill inspector (§1.9 note — game8.co 563652, ⚠️ STALE 2025-11-27 `[A]`, ❌ UNVERIFIED
+   for the current build); and the Team Race countdown placement (§1.8 note — gametora 2026-07-20 `[B]`,
+   corroborated by `02-unity-cup.md:153` and the repo master `:658`).
+3. **Files changed.** One: `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md`. No other file in the repository was
+   written to, read-modified or reformatted. `docs/scenarios/02-unity-cup.md`,
+   `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md`, `docs/UMAMUSUME_REFERENCE.md` and
+   `config/scenarios.php` are cited by this section and were **not** edited.
+4. **The five items.** Where each landed: the burst tables in §2.5, with the §2.4 addendum pointing at them;
+   the level thresholds and the grade ladder in §2.6, with the Guts Level 5 join; the finals' rotation in
+   §8.3's extension and in §6 item 8; the skill inspector in §1.9's system note; the countdown placement in
+   §1.8's method note and §6 item 9.
+5. **Section 9.** The table above, the "Why this matters for Trainer Desk v2.0 form entry" paragraph, the
+   "What would close each item" paragraph, and this report. §9 states, for every item, whether it was
+   observed in this run's frames — the distinction the whole section exists to make.
+6. **Cross-references.** `docs/scenarios/02-unity-cup.md:153` and `:170`; `docs/scenarios/02-unity-cup.md:201`
+   and `:212` for the burst count and the readout; `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md:658`
+   for the countdown, `:717-735` for the burst tables, `:746-764` for the Extreme variants, and `:771-781`
+   for the facility-level ladder; `docs/UMAMUSUME_REFERENCE.md` §1.1.4 and §1.1.6, which this file already
+   leaned on; `config/scenarios.php`'s `team_race` block, whose `month_anchors` and `categories` entries are
+   the repo's machine-readable form of the same six-month cadence and five-category list.
+7. **Safety confirmation.** **No frame reference was invented** — the two items the brief expected to be
+   confirmable and that the sources do not support are marked ❌ UNVERIFIED rather than omitted or filled
+   with a plausible-looking rotation. Every new claim carries a tier and a publisher date, and the two
+   sources now past the repo's 90-day window carry ⚠️ STALE in the new material. The community-sourced
+   burst and threshold tables are cited `[B]`, not promoted to `[A]`. No strategic conclusion moved: §2.3,
+   §4 and §5 are untouched, and §6's "Closed this round" list is untouched. The three §2.4 discrepancies are
+   still flagged rather than fixed, and §8.3's existing statement is extended rather than rewritten.
+   **Nothing is committed**, nothing is pushed, and no branch was created.
+8. **Explicit stop.** Work stops here. The five items are added, §9 is written, and the targeted extensions
+   to §§1.8, 1.9, 2.4, 6, 7 and 8.3 are applied. No follow-on work has been started, and none will be
+   without a separate instruction.
+9. **Verification note, 2026-10-21.** A second pass read the sources named for four Unity Cup facts and
+   propagated what it could confirm. **Three of the four are now settled, one is not, and the reason is a
+   page number.** The long-press skill inspector is confirmed verbatim on game8.co **563652** — the
+   team-race guide, not the scenario-update guide — and the win condition "won by winning in three tracks
+   per match" comes from the same page; what survives on it is the page's age, because the page's own date
+   is 2025-11-27, so it is ⚠️ STALE and pre-rework, and the current build is still unobserved. The burst
+   table's umareference 70 / 150 set stands, and the earlier "game8.co reads Wit 5 lower" flag is withdrawn
+   as a comparison of two different tables. The training-level thresholds stay single-source: the proposed
+   second carrier is the same author's longer document and its body is sign-in-walled. **The finals'
+   venue-and-distance rotation is still ❌ UNVERIFIED** — 563652 was read in full and its "Exclusive Races"
+   block is the schedule table only, with no venue and no distance — and both game8.co pages are now named
+   so the next reader does not repeat the wrong-URL extraction. The eight-part report above is unchanged.
+10. **Second verification note, 2026-10-21 (second pass).** A further read settled two more readings and
+    changed one row's shape. The league-placement bonus ladder is published — 2〜5th +50, 6〜10th +30,
+    11〜15th +20, 16〜20th +10 — and this run's 8th-place league standing falls in the +30 band, which
+    closes §7 finding 5's open question about what the client's "+30" tooltip is bound to. The
+    grade-to-level ladder gained a second carrier in game8.jp, so the mapping is corroborated while the
+    numeric thresholds stay single-source. The JP side states the burst's gain is a flat +15 **except
+    Wit**, which supports reading the Wit cell as designed rather than miscopied. The finals' rotation is
+    still ❌ UNVERIFIED on the values, and the second pass established the row's shape: the five races are
+    fixed by category, the ground inside each category is published by nothing reached, and the two
+    sources that state the draw rule were unreachable from here. The eight-part report above is unchanged.
+11. **Third verification note, 2026-10-21.** A further read closed two more items and corrected one claim
+    that had come in from outside. The "Wit 5 lower" difference is **closed as a version boundary**:
+    gametora's Unity Cup page carries the pre-rework trainee-share table under its own "Before the Update"
+    heading, and its Wit row — 2 / 10 / 5, Skill Points only on the Wit row — is game8.co's rendering
+    exactly, in both cells, so that page is a vintage capture rather than a misprint (§2.5). The finals'
+    ground is **drawn at random per set from a fixed pool of real-modelled races**, which is why no
+    publisher prints a rotation and why the row's shape changed rather than its values (§8.3). And the
+    claim that this repository's publisher master conflates four scenarios does not survive the master's
+    own headings — URA Finale, Unity Cup, Trackblazer and Our Grand Concert are already four separate
+    sections, and the rows a split would move are already inside Trackblazer's (§7 finding 12). The
+    eight-part report above is unchanged.
+12. **Fourth verification note, 2026-10-21.** Three more Aoharu Hai guides were read and three things
+    changed. **The Wit cell's closure is now mechanistic, not just dated**: kamigame prints the JP rule
+    with the Wit value explicit — 「賢さ以外 | 練習したステータス+15」 against 「賢さ | 賢さ+10と回復量上昇」 — so
+    Wit was a special case in JP and the rework unified it, and game8.co's table is the JP-era capture of
+    that mechanic rather than a misprint (§2.5). The Skill-Point column's difference has its cause too:
+    the 2023-01-20 update raised skill-Point gains by +2 across the board. **The ranking-bonus bands are in
+    conflict**: game8.jp prints 2〜5位 for the +50 band where gamewith's 2023-01-20 table prints 1~5位, and
+    game8.co's Global-facing page says "ranking 5th or above", which includes 1st — so this file's citation
+    now leans on game8.co and records the edge conflict rather than claiming one table is the other
+    (§8.3, §7 finding 11). And **the Team Trials equivalence is now sourced in the Aoharu Hai's own
+    words**: 「アオハル杯のルールとしては基本的にチーム競技場と同じです」, which also fixes the finals' two
+    aces to medium and long and so names the winning lanes as sprint, mile and dirt (§8.3). The eight-part
+    report above is unchanged.
+13. **Fifth verification note, 2026-10-21.** One public parameter-derived document was read to the end, and
+    one argument was withdrawn. `umamusu.wiki`'s `Game:Mechanics` — the only public document built from the
+    same parameter file as this repository's export — yields the **numeric ability ids** as small integers
+    with a separate coefficient column (conserved-power modes ID 1–4, ability types Speed Up (27, 31, 21, 22)
+    and Lane Move Speed Up (28)), and its Stamina Limit Break section settles a scale question by
+    **disproof**: the parameter file's own table heads its column **Probability**, and
+    500000 + 300000 + 200000 = 1,000,000, so those are **weights**, and the export's −400000 cannot be one
+    because negatives do not occur in a probability distribution. **The two sets of numbers are different
+    kinds of quantity that merely share a digit count**, so the "decode 600000 as +6" line is withdrawn and
+    the `SlopePer` scale row and the effect-magnitudes row stay open for an export or a `master.mdb` dump
+    (the full extract is in the publisher master's new §10). The threshold **basis** is now tri-sourced and
+    the **mapping** carried by four publishers, but the four numeric cut-points stay single-source `[B]` —
+    and this run's own capture does not show the team average (§1.7), so "observable in the client" is a
+    claim, not a fact for this build (§2.6). The eight-part report above is unchanged.
