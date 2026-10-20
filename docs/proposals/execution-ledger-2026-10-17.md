@@ -4506,3 +4506,153 @@ begun that could not be finished.
        master and re-runs the walk set, closing KI-70.
 - Next eligible: 4.3 and 4.4 (deferred on budget, nothing else blocking them), then 4.5 and 4.6, plus
   the 2.5 remainder.
+
+## 50. Dispatch 48 - the containment mechanism CONFIRMED by fixture; 4.3 blocked on a cited decision, 2026-10-20
+
+### Step 0 measurements
+
+- Worktree HEAD d7d4a44, `git status --porcelain` EMPTY.
+- Peer's ledger append: STILL DIRTY, so the STOP-and-cherry-pick branch did not fire. No cherry-pick.
+- Bundle: stale at 11:46:58 against a resources/js tip of 11:49:15 -> rebuilt to 12:20:59.
+- Baseline walk, EIGHT specs (the seven plus the new mechanism fixture): 63 passed (6.3m), exit 0.
+- Feature baseline in the MAIN tree: UiHygiene 4 passed (guard 0); DocCitationParity 2 passed;
+  `CareerCockpit|CareerTraining|CareerRace` 112 passed (1681 assertions).
+- `containment.spec.ts` shape confirmed: a behaviour case (both the wayfinder and the strip drift
+  >= 190px at a 200px scroll) plus a source case (no `md:sticky` inside a `class=` attribute in
+  `SetupLayout.vue` or `Career/Cockpit.vue`).
+- `StickyFooter.vue` still carries `sticky bottom-0`; untouched, per this slice's rules.
+- Step 0(i) found a gap: Ruling 5's FIX SHAPE was not in the ledger - Section 49 recorded that the file
+  needs a decision, not what the decision was. It is recorded below.
+
+### STEP 0a - THE CONTAINMENT MECHANISM IS CONFIRMED
+
+This was the dispatch's gating question and it was right to ask it. Section 49 concluded that
+`container-type: inline-size` on an ancestor makes `position: sticky` a no-op, from a computed-style
+reading plus an ancestor walk IN THE APP - which is a correlation across many ancestors, not a proof.
+The reviews objected, correctly, that the mechanism was not established.
+
+The controlled fixture (`tests/browser/fixtures/containment.html`, driven by
+`tests/browser/containment-mechanism.spec.ts`) removes every other variable: two containers identical
+but for ONE declaration, each holding a `position: sticky; top: 0` child and a tall spacer, neither
+inside an `overflow` ancestor, both scrolling with the page.
+
+Measured in Chromium:
+
+    FIXTURE-CONTROL-DRIFT=0        parent container-type: normal        -> the child PINS
+    FIXTURE-CONTAINED-DRIFT=200    parent container-type: inline-size   -> drifts the FULL scroll
+    computed: controlSticky=sticky, containedSticky=sticky,
+              controlContainerType=normal, containedContainerType=inline-size
+
+Both children compute `position: sticky`. The ONLY difference between sticking and not sticking is the
+parent's `container-type`. CONCLUSION: **CONFIRMED**. The retirement at 1150825 rests on a real
+mechanism, and Step A was therefore permitted to proceed.
+
+The fixture's assertion is FAILABLE, which is what makes it evidence rather than decoration: removing
+`container-type` from `.contained` flips it (the contained child then sticks and the drift collapses),
+proven by patching the fixture, watching the case RED, and restoring (verified byte-identical to the
+one-time snapshot). Green -> patched -> red -> restored -> green.
+
+Evidence classification: **behavior proven**.
+
+The fixture is KEPT rather than deleted, which the dispatch allowed, because Ruling 5's `StickyFooter`
+fix needs exactly this control: it proposes moving `@container` off `main` onto a child `div`, and this
+fixture is the thing that can show whether that restores stickiness for a sibling.
+
+### 4.3 - NOT STARTED: three measured premise conflicts, one of them an escalation
+
+Reading the target before editing it was the right order, because the slice as specified is largely
+ALREADY IMPLEMENTED and its remaining deltas conflict with tested behaviour and a cited decision:
+
+1. **The placeholders are a decision, not an oversight (D-220).** `TrainingDetail.vue:25` says the
+   previous turn's readings arrive as PLACEHOLDERS ONLY, citing D-220, and D-220 is cited in twenty
+   files across the app as the rule that a value nobody entered is not asserted. 4.3 asks for those same
+   readings as HELPER TEXT instead. That REVERSES a cited decision rather than implementing a slice, so
+   it needs the decision owner's word and the owning document updated. It is not a page edit.
+2. **Which primary stands is undecided, and the page already has two.** Measured:
+   `TrainingCard.vue:339` renders a filled CTA on the card, and `TrainingDetail.vue:770` renders the
+   filled submit. 4.3 says the recommendation is the ONE primary and the cards are secondary - which
+   means demoting the card's CTA AND deciding what happens to the submit, since demoting only the card
+   leaves the page with two primaries and the rule unsatisfied either way. The dispatch names neither.
+3. **The energy control already exists in the shape 4.3 asks for, and it is regression-pinned.**
+   `TrainingDetail.vue:583` already renders `BaseRadio` bound to `energy_state` (exact / band / not
+   recorded) with a conditional band `BaseSelect` at :605, and the browser suite pins the band select's
+   accessible name as case R3-16 (`career-training-detail.spec.ts:420`). Restructuring that control
+   without reading R3-16 first would risk a named regression fix.
+
+Two further items in 4.3 are already DONE, so the slice would be re-implementing them:
+
+  - the per-card Sources disclosure exists (`TrainingCard.vue:481-485`, a deferred-to-disclosure block
+    that names Sources, Supports count, Target deficit and Risk), and
+  - the advisor's recommendation is already named on the page (`recommended` computed at :212, with the
+    no-recommendation branch at :432).
+
+One item is a clean, small change: the repeated "Not ranked" sentence at `TrainingCard.vue:297`.
+Deleting it is a copy edit, and its `title` attribute means the UiHygiene absence rule is the guard to
+check after removal.
+
+So 4.3 is BLOCKED-ON-PREMISE-CONFLICT (items 1 and 2, and item 1 is an escalation) plus
+BLOCKED-ON-BUDGET. No source was changed, so nothing is partial.
+
+Note on the new standing rules: the probe build, the evidence classification, the migration-by-fit
+record and the 44px phrasing are all adopted from this dispatch onward. The screenshot rule is adopted
+too, but with a recorded limitation - this agent cannot view an image directly, so a screenshot review
+must go through the vision bridge (`modlens_read_image`) or be reported as 'captured, not inspected'
+rather than silently claimed.
+
+### 4.4 - DEFERRED
+
+Not started: 4.3 did not land, and the dispatch makes 4.4 conditional on it. Nothing partial.
+
+### 4.4/tray note for whoever takes it, now that the mechanism is CONFIRMED
+
+The compare tray cannot stick under `main`'s containment - confirmed above, not merely asserted - so it
+must be built as a static tray that appears when N >= 1 is selected, with the choice stated in its
+docblock. Ruling 3's precedent applies rather than a `sticky` class that does nothing.
+
+### RULING 5 RECORDED - the StickyFooter fix shape (Step 0(i) gap, now closed)
+
+`StickyFooter.vue` gets a STRUCTURAL fix, not a retirement: its job is the wizard's primary action
+(Back / Save and continue across six steps), and its absence at scroll is a real defect rather than
+dead decoration. The shape: move `@container` OFF `main` and ONTO a child `div` inside `AppLayout.vue`,
+then place `StickyFooter` as a SIBLING of that div, so the footer is outside the containment while the
+`@container` queries its descendants need still resolve against the child. Premise check for that
+slice: measure whether the footer PREDATES the containment (a regression repair) or POSTDATES it (a
+design decision) - its docblock describes a past sticky-range defect, which suggests it once worked. If
+the move proves infeasible, the fallback is retirement. Its own slice, queued after 4.4.
+
+The `containment-mechanism.spec.ts` fixture kept above is the control that slice should start from.
+
+### Queued for future dispatches (recorded here, not attempted)
+
+  - Peer-landed verify pass: 6c9d099 and bbc1814, plus 7.1-7.6, recorded landed with no verify evidence.
+  - Canonical ledger: one row per atomic slice, with phase totals generated from it, replacing the
+    ad-hoc counts in the historical record.
+  - Pull 8.7 (open `<details>` before axe) forward into Phase 1.
+  - Pull the Pagination unification forward from 5.1.
+  - Reconcile the dash conventions (DataTable en-dash, Skills dash, Compare dash) against DESIGN.md
+    section 5's absence policy.
+  - Correct the 44px language in DESIGN.md section 12: the house standard is 44x44 (stricter than WCAG
+    2.2 AA's 24x24 minimum at 2.5.8, matching AAA 2.5.5), not '44px per WCAG 2.2 AA'.
+
+### Close
+
+- Step 0a fixture committed as ed330dd (2 files, +134).
+- Walk tails: 63 passed (6.3m) baseline, eight specs.
+- Probe build: `npm run build` ran to exit 0 at 12:20:59 and its tail is quoted in the report; the
+  outDir-override probe was not run separately this dispatch because the full build was already owed
+  for the stale bundle.
+- DocCitationParity: 2 passed at open and again at close.
+- Decision 1: still closed (census 651 against the 708 baseline).
+- KI-70 side effect: STILL OWED. Master's public/build reflects peer-dirty source.
+- origin/master: still fcbe9bb0; local master 2 ahead. The deferred cherry-picks are unchanged.
+- Deferred cherry-picks, untouched: 47488f0, 68ffe6f, 132cee8, a09ea94, ca5be34, ee8fec1, dd1ac20,
+  2f6c88b, 920a499, d3dad23, 1150825, d7d4a44, ed330dd, plus this section.
+- Peer status in the main tree: unchanged and untouched.
+- Operator action list:
+    1. Rule on the D-220 placeholder reversal and on which of the two primaries stands; both are 4.3's
+       blockers and neither is a page edit.
+    2. StickyFooter fix slice (Ruling 5), queued after 4.4, starting from the kept fixture.
+    3. Peer commits the ledger append -> cherry-pick the deferred list in order.
+    4. Peer commits the three Vue files -> one quiet-tree dispatch rebuilds public/build on master and
+       re-runs the walk set, closing KI-70.
+- Next eligible: 4.3 once its two rulings land, then 4.4, then 4.5 and 4.6, plus the queued dispatches.
