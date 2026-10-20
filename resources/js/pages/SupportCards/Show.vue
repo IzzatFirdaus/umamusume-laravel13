@@ -198,7 +198,16 @@ const skillSections = computed(() => [
         </section>
 
         <h2 class="mt-8 text-lg font-semibold text-ink-strong">Provenance</h2>
-        <p v-if="card.source_url" class="mt-2 text-xs text-ink-muted">
+        <!-- ONE disclosure for the row's own provenance. The heading stays on screen so the section
+             is findable, and the summary names which state the row is in before the disclosure is
+             opened, so a reader learns that without opening it. -->
+        <details id="provenance" class="mt-2">
+            <summary class="cursor-pointer list-item text-sm font-semibold text-ink-strong">
+                <template v-if="card.source_url">Fetched source</template>
+                <template v-else>No fetched source</template>
+            </summary>
+
+            <p v-if="card.source_url" class="mt-2 text-xs text-ink-muted">
             from
             <a :href="card.source_url" class="text-ink-strong underline">{{ card.source_url }}</a>
             <template v-if="card.fetched_at_display"> · read {{ card.fetched_at_display }}</template>
@@ -208,6 +217,7 @@ const skillSections = computed(() => [
                 · <span class="text-ink-strong">Corrected by hand</span>, so the fetch engine leaves it alone
             </template>
         </p>
-        <p v-else class="mt-2 text-sm text-ink-muted">No fetched source. This record was seeded or entered by hand.</p>
+            <p v-else class="mt-2 text-sm text-ink-muted">This record was seeded or entered by hand.</p>
+        </details>
     </AppLayout>
 </template>

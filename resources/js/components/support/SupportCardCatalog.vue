@@ -8,7 +8,7 @@
  * URL stays on it.
  */
 import ArtworkSlot from '../ArtworkSlot.vue';
-import Pagination from '../Pagination.vue';
+import Pagination from '../ui/Pagination.vue';
 import RarityChip from '../RarityChip.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import SparkChip from '../SparkChip.vue';
@@ -39,7 +39,10 @@ interface Card {
 
 interface Paginator<T> {
     data: T[];
-    links: { url: string | null; label: string; active: boolean }[];
+    current_page: number;
+    last_page: number;
+    from: number | null;
+    to: number | null;
     total: number;
 }
 
@@ -87,6 +90,28 @@ function applyFilters(): void {
             onFinish: () => {
                 loading.value = false;
             },
+        },
+    );
+}
+
+/**
+ * The canonical pager owns the range, so the page owns the request. The pager it replaces was a set
+ * of Inertia links built from the server's own paginator; this asks for the same list one page
+ * further, carrying the filters the form holds, so a reader who filtered and then paged keeps both.
+ */
+function goToPage(page: number): void {
+    router.get(
+        props.filterPath,
+        {
+            rarity: rarity.value || undefined,
+            type: type.value || undefined,
+            status: status.value || undefined,
+            sort: sort.value || undefined,
+            page,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
         },
     );
 }
@@ -228,7 +253,15 @@ function applyFilters(): void {
             </li>
         </ul>
 
-        <Pagination :links="cards.links" />
+        <Pagination
+            :page="props.cards.current_page"
+            :pages="props.cards.last_page"
+            :from="props.cards.from ?? 0"
+            :to="props.cards.to ?? 0"
+            :total="props.cards.total"
+            noun="cards"
+            @navigate="goToPage"
+        />
     </template>
 
     <p class="mt-6 max-w-3xl text-xs text-ink-muted">

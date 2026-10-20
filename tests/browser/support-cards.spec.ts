@@ -22,12 +22,17 @@ test('sizes the four pickers and the submit to the 44px contract', async ({ page
     await page.locator('#app > *').first().waitFor();
 
     // KI-29 / DESIGN.md §6.14: the four selects and the submit are 44px tall. The selects are
-    // addressed by name rather than by label: a wrapping label's computed name swallows the option
-    // text, so `getByLabel('Rarity')` also matches the sort picker's "Rarity" option.
+    // addressed by name rather than by label: the sort picker offers a "Rarity" option and a "Type"
+    // option, so a label query for those words is ambiguous. The label is then found through the
+    // `for` association the select carries, because `BaseSelect` renders the label BESIDE the
+    // select: the old `label:has(select[name=...])` selector assumed a wrapping label and matched
+    // nothing, which is why this case was red on the tree before this slice.
     for (const [name, word] of [['rarity', 'Rarity'], ['type', 'Type'], ['status', 'Availability'], ['sort', 'Sort by']]) {
-        await expect(page.locator(`label:has(select[name="${name}"])`)).toContainText(word);
+        const select = page.locator(`select[name="${name}"]`);
+        const id = await select.getAttribute('id');
+        await expect(page.locator(`label[for="${id}"]`)).toContainText(word);
 
-        const box = await page.locator(`select[name="${name}"]`).boundingBox();
+        const box = await select.boundingBox();
         expect(box?.height ?? 0, `${name} is not sized to the 44px contract`).toBeGreaterThanOrEqual(44);
     }
 
@@ -104,8 +109,34 @@ test('renders one card\'s own page with the fields the source states', async ({ 
 
     await expect(page.getByRole('heading', { name: 'Provenance', level: 2 })).toBeVisible();
     // The seeded snapshot URL carries a content hash, so the host and the document name are asserted.
+    // The provenance is ONE disclosure now, so the source is read from inside it.
+    await page.locator('#provenance summary').click();
     await expect(page.getByText(/gametora\.com\/data\/umamusume\/support-cards/)).toBeVisible();
     await expect(page.getByRole('link', { name: 'Back to support cards' })).toBeVisible();
+});
+
+test('holds the row provenance in one disclosure that names its state', async ({ page }) => {
+    await page.goto('/support-cards/1');
+    await page.locator('#app > *').first().waitFor();
+
+    // The heading stays on screen so the section is findable, and the summary says which state the
+    // row is in before the disclosure is opened.
+    await expect(page.getByRole('heading', { name: 'Provenance', level: 2 })).toBeVisible();
+
+    const disclosure = page.locator('#provenance');
+    await expect(disclosure).toHaveCount(1);
+    await expect(disclosure.locator('summary')).toContainText('Fetched source');
+});
+
+test('the support card index states the page it is showing', async ({ page }) => {
+    await page.goto('/support-cards');
+    await page.locator('#app > *').first().waitFor();
+
+    // The canonical pager states the range and the page. The pager it replaced was a set of links
+    // and, on a short list, rendered nothing at all.
+    const status = page.locator('nav[aria-label="Pagination"] [role="status"]');
+    await expect(status).toContainText(/Showing \d+ to \d+ of \d+ cards/);
+    await expect(status).toContainText(/Page 1 of \d+/);
 });
 
 test('counts a hint id it cannot link and names a card with no trainee page', async ({ page }) => {
