@@ -25,19 +25,32 @@ const rows: { label: string; key: string }[][] = [
         { label: 'End Closer', key: 'end_closer' },
     ],
 ];
+
+/**
+ * The three reads the export orders the letters in, one per `rows` entry: the ground she handles,
+ * the distances she runs, and the styles she runs them in. Each gets its own heading, so a reader
+ * asking "can she run Long" finds the distance block instead of counting letters (plan 5.4).
+ *
+ * `h3`: both callers (`Catalog/Show.vue`, `Career/TraineeProfile.vue`) print the grid under their
+ * own `<h2 id="aptitudes">`, so this is the next level down in each.
+ */
+const GROUP_LABELS = ['Surface', 'Distance', 'Style'];
 </script>
 
 <template>
-    <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm @3xl:grid-cols-4">
-        <template v-for="(row, index) in rows" :key="index">
-            <div
-                v-for="cell in row"
-                :key="cell.key"
-                class="flex items-baseline gap-2 border-b border-rule pb-1"
-            >
-                <dt class="text-ink-muted">{{ cell.label }}</dt>
-                <dd class="font-mono font-bold text-ink-strong">{{ aptitudes[cell.key] }}</dd>
-            </div>
-        </template>
-    </dl>
+    <div class="space-y-4">
+        <div v-for="(row, index) in rows" :key="index" class="space-y-1">
+            <h3 class="text-sm font-semibold text-ink-strong">{{ GROUP_LABELS[index] }}</h3>
+            <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm @3xl:grid-cols-4">
+                <div
+                    v-for="cell in row"
+                    :key="cell.key"
+                    class="flex items-baseline gap-2 border-b border-rule pb-1"
+                >
+                    <dt class="text-ink-muted">{{ cell.label }}</dt>
+                    <dd class="font-mono font-bold text-ink-strong">{{ aptitudes[cell.key] }}</dd>
+                </div>
+            </dl>
+        </div>
+    </div>
 </template>

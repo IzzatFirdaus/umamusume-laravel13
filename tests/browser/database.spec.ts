@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { buildAxe } from '../utils/accessibility';
 
 /*
  * Rendered-copy evidence for the Database hub and its five areas (SCREEN-023, plan §8 D17). The props
@@ -51,6 +52,39 @@ test('the hub lists the eight areas and no deferred section', async ({ page }) =
     await expect(areas.getByRole('link', { name: 'Events', exact: true })).toHaveAttribute('href', /\/database\/events$/);
     await expect(areas.getByRole('link', { name: 'Shop Items', exact: true })).toHaveAttribute('href', /\/database\/shop-items$/);
     await expect(areas.getByRole('link', { name: 'Sparks', exact: true })).toHaveAttribute('href', /\/database\/sparks$/);
+});
+
+// Plan 5.4 (Sweep 1): the roster printed every costume form of every trainee, which made a 67-row
+// list unscannable. The trainee's own header stays visible; only the form rows fold, behind a count.
+test('folds each trainee costume-form list behind a disclosure', async ({ page }) => {
+    await page.goto('/database/trainees', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // The trainee row is the `<li>` holding the disclosure; the form rows below it are plain `<li>`s.
+    const trainee = page.locator('li').filter({ has: page.locator('details') }).first();
+    const disclosure = trainee.locator('details');
+
+    await expect(disclosure).toHaveCount(1);
+
+    // The header is a sibling of the disclosure, not a child of it: folding the forms must not hide
+    // her name, which is the list's scanning column.
+    await expect(trainee.locator('h3')).toBeVisible();
+    await expect(trainee.locator('details h3')).toHaveCount(0);
+
+    // Closed by default, and the summary states how many forms are behind it.
+    await expect(disclosure).not.toHaveAttribute('open', '');
+    await expect(disclosure.locator('summary')).toHaveText(/^\d+ forms?$/);
+    await expect(disclosure.locator('h4')).toBeHidden();
+
+    await disclosure.locator('summary').click();
+    await expect(disclosure).toHaveAttribute('open', '');
+    await expect(disclosure.locator('h4').first()).toBeVisible();
+
+    // The disclosure is the new structure on this page, so the scan runs with it open — the state
+    // that exposes the most content. `buildAxe` scopes to `#app`, which is what makes it
+    // deterministic (KI-63).
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });
 
 test('the Events view renders the recurring types with glyph-and-word provenance', async ({ page }) => {

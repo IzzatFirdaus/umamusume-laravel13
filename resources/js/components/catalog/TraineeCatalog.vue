@@ -118,10 +118,15 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                     placeholder="All"
                 />
             </label>
-            <label class="flex items-center gap-2 pb-1.5">
-                <BaseCheckbox v-model="showUnconfirmed" name="show_unconfirmed" value="1" />
-                <span class="text-ink-muted">Show unconfirmed cards</span>
-            </label>
+            <!-- `BaseCheckbox` renders its own `<label>`; wrapping it in a second one is invalid HTML
+                 and broke the implicit-label association, which axe reports as a critical unlabelled
+                 control. The sibling `skills/SkillCatalog.vue` calls it the same way. -->
+            <BaseCheckbox
+                v-model="showUnconfirmed"
+                name="show_unconfirmed"
+                value="1"
+                label="Show unconfirmed cards"
+            />
             <BaseButton type="submit" variant="primary" size="md">
                 Filter
             </BaseButton>
@@ -192,35 +197,45 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                     </span>
                 </h3>
 
-                <ul v-if="trainee.cards.length > 0" class="divide-y divide-rule border-t border-rule">
-                    <li
-                        v-for="card in trainee.cards"
-                        :key="card.id"
-                        class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 py-2"
-                    >
-                        <!-- The form's own portrait, keyed on its card id, at the `size-10` geometry
-                             §45a records for a costume-form row. Grouped with the title for the same
-                             reason the header is: three siblings in a `justify-between` row centre
-                             the middle one. A `div` rather than a `span`, because this group holds an
-                             `h4`, and flow content is not allowed inside a `span`. Decorative like
-                             the header frame: this row prints the form title beside it, and the file
-                             is a trainee portrait, so the name lives in the header, not here. -->
-                        <div class="flex items-center gap-3">
-                            <ArtworkSlot :url="card.artworkURL" alt="" size="size-10" reserve />
-                            <h4 class="text-lg font-semibold text-ink">{{ card.title }}</h4>
-                        </div>
-                        <span class="flex items-baseline gap-3 text-xs text-ink-muted">
-                            <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
-                            <span v-if="card.is_debut_form">debut form</span>
-                            <span v-if="card.unconfirmed" class="font-semibold text-risk">
-                                Not confirmed by two sources
+                <details v-if="trainee.cards.length > 0" class="border-t border-rule">
+                    <!-- The trainee's own header stays visible; only the costume-form rows fold. A
+                         roster of 67 trainees each printing every form made the list unscannable, and
+                         the count is already on the header, so the summary repeats it rather than
+                         naming her a second time. -->
+                    <summary class="min-h-11 cursor-pointer px-4 py-2 text-sm text-ink-muted">
+                        {{ trainee.cards.length }} {{ formCountLabel(trainee.cards.length) }}
+                    </summary>
+
+                    <ul class="divide-y divide-rule">
+                        <li
+                            v-for="card in trainee.cards"
+                            :key="card.id"
+                            class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 py-2"
+                        >
+                            <!-- The form's own portrait, keyed on its card id, at the `size-10` geometry
+                                 §45a records for a costume-form row. Grouped with the title for the same
+                                 reason the header is: three siblings in a `justify-between` row centre
+                                 the middle one. A `div` rather than a `span`, because this group holds an
+                                 `h4`, and flow content is not allowed inside a `span`. Decorative like
+                                 the header frame: this row prints the form title beside it, and the file
+                                 is a trainee portrait, so the name lives in the header, not here. -->
+                            <div class="flex items-center gap-3">
+                                <ArtworkSlot :url="card.artworkURL" alt="" size="size-10" reserve />
+                                <h4 class="text-lg font-semibold text-ink">{{ card.title }}</h4>
+                            </div>
+                            <span class="flex items-baseline gap-3 text-xs text-ink-muted">
+                                <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
+                                <span v-if="card.is_debut_form">debut form</span>
+                                <span v-if="card.unconfirmed" class="font-semibold text-risk">
+                                    Not confirmed by two sources
+                                </span>
+                                <time v-if="card.global_release_date" :datetime="card.global_release_date">
+                                    Released (Global) {{ card.global_release_date_display }}
+                                </time>
                             </span>
-                            <time v-if="card.global_release_date" :datetime="card.global_release_date">
-                                Released (Global) {{ card.global_release_date_display }}
-                            </time>
-                        </span>
-                    </li>
-                </ul>
+                        </li>
+                    </ul>
+                </details>
             </li>
         </ul>
 

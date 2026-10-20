@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { buildAxe } from '../utils/accessibility';
 
 // Rendered-copy evidence for the ported Catalog detail page (SCR-CAT-002, ADR-0020 §1).
 // The server-side tests (CatalogDetailPageTest, CatalogSkillListsTest, CatalogRosterTreeTest)
@@ -36,6 +37,33 @@ test('renders the eight sections in the binding order', async ({ page }) => {
     // checklist uses to sweep them.
     const headings = await page.getByRole('heading', { level: 2 }).allTextContents();
     expect(headings).toEqual(EIGHT_SECTIONS);
+});
+
+// Plan 5.4 (Sweep 1): the ten letters printed as one flat grid, so "can she run Long" meant counting
+// letters in a four-column run. Each of the export's three reads now carries its own heading. The
+// headings are `h3` under the section's own `h2`, which is why the case above still sees eight.
+test('groups the aptitude letters under their own headings', async ({ page }) => {
+    await page.goto('/umamusume/special-week');
+    await page.locator('#app > *').first().waitFor();
+
+    const section = page.locator('section[aria-labelledby="aptitudes"]');
+
+    // The three reads in the export's own order: surface, the four distances, the four styles.
+    await expect(section.getByRole('heading', { level: 3 })).toHaveText(['Surface', 'Distance', 'Style']);
+
+    // A letter belongs to its own group rather than to the flat run: "Long" is a distance, "Turf" is
+    // not, and the grouping is what makes that findable.
+    const grids = section.locator('dl');
+    await expect(grids).toHaveCount(3);
+    await expect(grids.nth(0).getByText('Turf', { exact: true })).toBeVisible();
+    await expect(grids.nth(1).getByText('Long', { exact: true })).toBeVisible();
+    await expect(grids.nth(1).getByText('Turf', { exact: true })).toHaveCount(0);
+
+    // The new `h3` level must not skip: the section's own heading is the `h2` above it, and the
+    // eight-section case above is the assertion that no `h2` moved. `buildAxe` scopes to `#app`
+    // (KI-63).
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });
 
 // ADR-0026's widest-reach half (owner decision 3): the trainee's own objectives, readable before a run
