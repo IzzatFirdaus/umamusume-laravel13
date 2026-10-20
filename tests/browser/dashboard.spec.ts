@@ -406,9 +406,9 @@ test('renders the wide shell when Wide is selected', async ({ page }) => {
     const wide = page.locator('[data-layout]');
     await expect(wide).toHaveAttribute('data-layout', 'wide');
     await expect(wide).toHaveClass(/grid-cols-12/);
-    // The grid self-caps at the standard measure even in a wide shell, because four cards spread
-    // across 1536px leave a taller band of empty page beneath them than they fill.
-    await expect(wide).toHaveClass(/max-w-6xl/);
+    // The grid follows the shell's own cap instead of capping itself at the standard measure: the
+    // shell's `main` is the one that carries the layout width (2026-10-21 operator ruling).
+    await expect(wide).not.toHaveClass(/max-w-6xl/);
     await expect(page.locator('#main')).toHaveClass(/max-w-shell-wide/);
 
     // Reset to Standard so the suite leaves the shared store as it found it.
@@ -522,6 +522,18 @@ test('measures the three shell widths, the bento shape and the card voids at a 1
     await page.locator('#app > *').first().waitFor();
     const wide = await mainWidth();
     expect(wide).toBeGreaterThanOrEqual(1450);
+    // The grid fills the shell's content box, so the two measure the same width. Before the
+    // 2026-10-21 ruling the grid capped itself at the standard measure and sat 320px inside the
+    // wide shell, with the page's right-hand side empty. Measured at 1920 on purpose: at the
+    // default 1280 viewport the shell is narrower than the cap, so the two widths agree either
+    // way and the assertion would pass on the old grid.
+    const gridWidth = await page.locator('[data-dashboard-root]').evaluate((el) => el.getBoundingClientRect().width);
+    const mainContentWidth = await main.evaluate((el) => {
+        const style = getComputedStyle(el);
+
+        return el.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    });
+    expect(Math.abs(gridWidth - mainContentWidth)).toBeLessThanOrEqual(1);
     expect(await firstCardShare()).toBeGreaterThanOrEqual(55);
     expect(await firstCardShare()).toBeLessThanOrEqual(70);
     expect(await maxCardVoid()).toBeLessThanOrEqual(24);

@@ -169,15 +169,15 @@ const gridClass = computed(() => {
         return 'grid w-full max-w-3xl grid-cols-1 gap-4 mx-auto';
     }
     // Standard and wide share this grid; the only difference is the shell measure AppLayout puts
-    // around it. A page-level max-w here would re-cap the wide shell back to its own value.
-    // `items-start` keeps every region at its own content height. Without it a row stretches each
-    // card to the tallest sibling, so the shorter cards become borders around empty space (Next best
-    // action carried 107px of void that way); with it the leftover stays page margin, which reads as
-    // a finished bento rather than as a panel that failed to fill.
-    // The grid self-caps at the standard measure even inside a wide shell: four cards do not use
-    // 1536px of horizontal room, and two columns spread that wide leave a taller band of empty page
-    // under themselves. The shell still widens for tables and catalogues; this card set does not.
-    return 'grid w-full max-w-6xl mx-auto grid-cols-1 gap-6 items-start md:grid-cols-2 xl:grid-cols-12';
+    // around it. `items-start` keeps every region at its own content height. Without it a row
+    // stretches each card to the tallest sibling, so the shorter cards become borders around empty
+    // space (Next best action carried 107px of void that way); with it the leftover stays page
+    // margin, which reads as a finished bento rather than as a panel that failed to fill.
+    // Standard and wide take the shell's own width: the shell's `main` carries `layoutWidthClass`
+    // and caps at `max-w-6xl` for standard and `max-w-shell-wide` for wide, so the grid does not
+    // cap itself a second time and Wide renders at the wide shell's measure (2026-10-21 operator
+    // ruling). Compact keeps its own `max-w-3xl`, which is the cap the shell puts on it there.
+    return 'grid w-full mx-auto grid-cols-1 gap-6 items-start md:grid-cols-2 xl:grid-cols-12';
 });
 
 // Card col-span per layout. Focused forces single-column at all breakpoints; bento uses the
