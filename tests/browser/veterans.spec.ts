@@ -77,8 +77,25 @@ test.describe('Mobile navigation', () => {
 
         const aside = page.locator('aside');
 
-        // Ten live destinations since D16 made the library a screen rather than a placeholder.
-        await expect(aside.getByRole('link')).toHaveCount(10);
+        // Every desktop destination is a live link. The count used to be a ten-item shortcut, but
+        // the aside also carries a "Data sources" footer link to /database/sources, so a bare count
+        // is brittle — it breaks when any destination is added or removed. Enumerate the
+        // destinations that must exist instead.
+        for (const destination of [
+            'Dashboard',
+            'New Career',
+            'Careers',
+            'Legacy Lab',
+            'Veterans',
+            'Support Cards',
+            'Skills',
+            'Review',
+            'Database',
+            'Settings',
+            'Data sources',
+        ]) {
+            await expect(aside.getByRole('link', { name: destination, exact: true })).toBeVisible();
+        }
         await expect(aside.getByRole('link', { name: 'Veterans' })).toHaveAttribute('href', '/veterans');
         await expect(aside.getByRole('link', { name: 'New Career' })).toHaveAttribute(
             'href',
