@@ -214,7 +214,24 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
     <AppLayout>
         <Head title="Dashboard" />
         <template #head>
-            <PageHeader eyebrow="Overview" title="Dashboard" />
+            <PageHeader eyebrow="Overview" title="Dashboard">
+                <!--
+                    Data freshness is a page-level fact, not a card-level one: the Data Status card
+                    carries the live state and the ruleset version, and this line says when the
+                    matrix behind them was last verified. It sits beside the page title, muted, and
+                    it keeps the card's own line about the ruleset a single thing to read.
+                -->
+                <template #actions>
+                    <span v-if="props.dataStatus.verified_at" class="text-xs text-ink-muted">
+                        Verified {{ props.dataStatus.verified_at }} · {{ props.dataStatus.source }}
+                    </span>
+                    <span
+                        v-else
+                        class="text-xs text-ink-muted"
+                        title="No verification date is recorded for the scenario matrix."
+                    >Verified N/A</span>
+                </template>
+            </PageHeader>
         </template>
 
         <p v-if="visiting" role="status" class="text-sm text-ink-muted">Loading…</p>
@@ -538,14 +555,6 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                     <span class="font-semibold text-ink-strong">{{ props.dataStatus.label }}</span>
                     <span aria-hidden="true" class="text-green-deep">●</span>
                     <span class="text-ink">{{ props.dataStatus.state }}</span>
-                    <span v-if="props.dataStatus.verified_at" class="text-xs text-ink-muted">
-                        Verified {{ props.dataStatus.verified_at }} · {{ props.dataStatus.source }}
-                    </span>
-                    <span
-                        v-else
-                        class="text-xs text-ink-muted"
-                        title="No verification date is recorded for the scenario matrix."
-                    >Verified N/A</span>
                 </p>
 
                 <p class="mt-2 text-xs text-ink-muted">

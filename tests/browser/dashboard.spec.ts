@@ -96,7 +96,7 @@ test('states the empty career in words a Trainer can act on', async ({ page }) =
     await expect(page.getByText('Recent builds: none yet.')).toBeVisible();
 });
 
-test('reads the data-status badge, its verification date and the named ruleset', async ({ page }) => {
+test('reads the data-status badge and the named ruleset, and the freshness line on the page header', async ({ page }) => {
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
 
@@ -106,7 +106,10 @@ test('reads the data-status badge, its verification date and the named ruleset',
     // nothing here is shown through colour alone (WCAG 1.4.1).
     await expect(status.getByText('GLOBAL DATA')).toBeVisible();
     await expect(status.getByText('Current', { exact: true })).toBeVisible();
-    await expect(status.getByText('Verified 2026-09-27')).toBeVisible();
+    // The freshness line is page-level now, not card-level (2026-10-21 operator ruling). It is
+    // asserted on the page and asserted absent from the card, so the move is pinned both ways.
+    await expect(page.getByText('Verified 2026-09-27')).toBeVisible();
+    await expect(status.getByText(/Verified/)).toHaveCount(0);
 
     // `app.ruleset` is null, so the row is N/A with its reason on the element rather than a version
     // this tool does not hold (design-2.0 §48). R2-19 heads the row for the fact it prints: the word
