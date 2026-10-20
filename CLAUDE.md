@@ -123,7 +123,7 @@ Reuse is the default in this repository; a second implementation of something th
 ships is a defect.
 
 - Committed components in `resources/js/components/` before writing markup;
-  `resources/views/components/` is empty, and a Blade view component added there is going
+  `resources/views/components/` does not exist, and a Blade view component added there is going
   backwards.
 - `lang/en/uma.php` before writing a displayed string or an enum label.
 - `config/scenarios.php` before naming a scenario anywhere near the layout path.
@@ -205,11 +205,11 @@ session reaches for most often.
   or your report (`AGENTS.md` §12 "Security and privacy" lists the tracked-file rule and
   `.env.example`).
 - **Lore gate**: advisory. The obligation is that it ran, that the report quotes the hit
-  count and its delta from the baseline, and that every hit carries a ruling. `AGENTS.md` §9
-  "Testing and validation" carries the mechanism and the baseline. Do not type the banned
-  character vocabulary into any artifact (`AGENTS.md` §5 "Non-negotiables" owns the rules, §18
-  "Known traps" owns the pattern list, and §15 "Definition of done" requires the gate to
-  have run).
+  count and its delta from the last recorded figure, and that every hit carries a ruling. `AGENTS.md` §9
+  "Testing and validation" carries the mechanism and the last recorded figure. Do not type the banned
+  character vocabulary into any artifact (`AGENTS.md` §5 "Non-negotiables" owns the rules and
+  points at the bar's C-4 section, where the banned vocabulary is defined, and §15
+  "Definition of done" requires the gate to have run).
 - **The dev SQLite file** holds real Trainer data. It is untracked, not disposable
   (`AGENTS.md` §10 "Commands", Destructive; §9 "Testing and validation").
 
@@ -227,7 +227,7 @@ plugin output): regenerate, never hand-edit.
 - Run the gates at each meaningful milestone rather than once at the end, so a break is
   cheap to localize.
 - Slice plans and records live in `docs/research-scratch/PROCESS-PLANS.md` and
-  `SLICE-RECORDS.md`; new slices do not go in the repository root (`AGENTS.md` §3
+  `docs/research-scratch/SLICE-RECORDS.md`; new slices do not go in the repository root (`AGENTS.md` §3
   "Documentation map").
 - Do not silently expand scope. A feature that needs a `PRD.md` §6 "Non-Goals (eliminated
   legacy features)" item lifted, or a new dependency, is an escalation (`AGENTS.md` §4
