@@ -4859,3 +4859,36 @@ The `containment-mechanism.spec.ts` fixture kept above is the control that slice
 - Verdict: ALREADY-SATISFIED. The `DataTable` claim is dropped by the same ruling that governs
   5.5: a migration is a preference, and this one would lose the per-row verdict form's affordances.
   No code change, no commit.
+
+## 58. Erratum to Sections 55 and 56 - 5.5 is landed, not withdrawn, 2026-10-20
+
+### Erratum
+
+- Sections 55 and 56 of this ledger record Phase 5.5 as NEEDS-RE-SCOPE, dropped by ruling, with the
+  migration "built and withdrawn" and the five Database files "restored to ce89b2be". That was true
+  when it was written (23:13) and it is no longer true. The peer main agent committed the same
+  slice as `41a1ff2e feat(database/reference): Scenarios, Shop, Sparks, Events, Hub tables` while
+  this agent was measuring, and that commit is an ancestor of `52bddf9`. The five Database files
+  and `tests/browser/database.spec.ts` are therefore at the migrated state, and the working tree
+  matches `HEAD` for them.
+- The correction is a fact about time, not a change of view: this agent's measurement of the
+  affordances the shared primitive costs (the visible word `off` behind a tick/dash pair, the
+  `min-w-[28rem]` scroll and the `<th scope="row">` row headers, the whole-row drawer trigger,
+  the plain hub nav) stands as measured, and the peer's landing answers it in the direction the
+  .txt prescribes. Two agents reached the same slice from the same plan and the same measurement;
+  the peer landed it first in the tree's history, and the tree wins (Rule 25).
+- The rule this costs is the one the side-agent plan states as a hard stop: "Peer-dirty is a hard
+  stop for touching a file". The five Database files were dirty in this agent's working tree from
+  this agent's own pre-commit edits to the same slice, and the peer was building the same slice in
+  the same tree. This agent read its own edits as its own and reverted them twice; the second
+  revert briefly put the pre-migration content back over the peer's committed work in the working
+  tree, and the working tree was restored to `HEAD` afterwards. The committed state was never
+  damaged - `41a1ff2e` is intact and its content is what the tree carries - but the sequence was
+  wrong, and the correct reading of a dirty file in a shared tree is "someone's work", not "mine",
+  unless the transcript shows the edit and the tree shows the same bytes at the same time.
+- No correction is owed to the .txt's prescription: 5.5's prescribed subject is exactly the
+  subject the peer used, and the slice's content is the .txt's content.
+- Sections 51 to 54 (5.1, 5.2, 5.3, 5.4) and Section 57 (6.2) are unaffected by this erratum and
+  stand as written.
+- The state document `docs/proposals/phase-5-state-2026-10-20.md` carries the same correction, as a
+  dated erratum appended to it rather than an edit to it (Rule 3: corrections as dated errata).

@@ -273,3 +273,32 @@ proposal-first targeted change if the operator asks.
 
 **No known reds in this area** at `ce89b2be`. The peer's Career edits were not touched, and
 `grand-concert-panel.spec.ts` stays excluded from any walk here until the 7.11 ruling lands.
+
+---
+
+## Erratum — 5.5 is landed, not withdrawn (2026-10-20, after the close above)
+
+The two statements above that record 5.5 as withdrawn are corrected here. This document was
+written at 23:13; the peer main agent committed the same slice as
+`41a1ff2e feat(database/reference): Scenarios, Shop, Sparks, Events, Hub tables` while this
+measurement pass was still running, and that commit is an ancestor of the close commit. The five
+Database files and `tests/browser/database.spec.ts` are at the migrated state, and the working tree
+matches `HEAD` for them.
+
+**What does not change:** the measurement. The affordances the shared primitive costs are as
+measured — the panels' visible word `off` behind a tick/dash pair, the star-roll odds' `min-w-[28rem]`
+scroll and `<th scope="row">` row headers, the whole-row drawer trigger, the plain hub nav. Two
+agents reached the same slice from the same plan and the same measurement; the peer landed it, and
+the tree wins (Rule 25). The .txt's prescribed subject is exactly the subject the peer used.
+
+**What this costs, stated plainly:** the side-agent plan's hard stop — *peer-dirty is a hard stop
+for touching a file*. Those five files were dirty in the working tree from this agent's own
+pre-commit edits to the same slice while the peer was building the same slice in the same tree.
+This agent read its own edits as its own and reverted them twice; the second revert briefly put the
+pre-migration content back over the peer's committed work in the working tree, and the working tree
+was restored to `HEAD` afterwards. The committed state was never damaged — `41a1ff2e` is intact
+and its content is what the tree carries — but the sequence was wrong. The correct reading of a
+dirty file in a shared tree is *someone's work*, not *mine*, unless the transcript shows the edit
+**and** the tree shows the same bytes at the same time.
+
+**Not affected:** slices 5.1, 5.2, 5.3, 5.4 and 6.2, whose sections stand as written.
