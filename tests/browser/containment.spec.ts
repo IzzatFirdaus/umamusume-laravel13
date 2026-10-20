@@ -60,6 +60,58 @@ test('the containment keeps the wayfinder and the summary strip from sticking', 
     expect(strip, `the strip drifted ${strip}px, so something made it stick`).toBeGreaterThanOrEqual(190);
 });
 
+test('the wizard footer still sticks, because the step wrapper reaches the scrollport', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/career/setup/scenario', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    /*
+     * The one descendant of `main` that DOES stick, and the case that makes the difference legible.
+     *
+     * `tests/browser/sticky-footer.spec.ts` already pins that `StickyFooter` sticks - but it pins it in
+     * its own Vite fixture, which has no `main`, no `@container` and no container-query ancestor at all.
+     * That is the component's ISOLATED contract: the `position: sticky` in its class attribute is real
+     * and effective. It says nothing about whether the bar survives `main`'s containment, and nothing
+     * pinned that, which is why a proposal to "fix" the bar by wrapping it could have landed without
+     * anything going red.
+     *
+     * The mechanism is GEOMETRY, and it is why the bar survives here at all.
+     *
+     * `SetupLayout.vue:182` gives the wizard step its own `@container` wrapper, and that wrapper is
+     * TALLER than the scrollport, so its box overlaps it. A sticky element can only be pinned while its
+     * containing block gives it somewhere to move: the bar's containing block is that wrapper, which
+     * extends below the viewport, so the browser lifts the bar to the viewport bottom and holds it
+     * there while the page scrolls.
+     *
+     * A wrapper drawn around the bar alone would replace that containing block with one the height of
+     * the bar - 93px, measured, against a 782px wrapper - which sits entirely below the scrollport and
+     * leaves the bar nothing to move across. Measured with that wrapper in place: the bar's drift went
+     * from 0px to the full 200px of the scroll, and its bottom edge finished 48px below the viewport.
+     * So the bar's stickiness is carried by the wrapper being TALL, and `StickyFooter.vue` says the
+     * same thing in its own docblock: the footer is the root element of the component.
+     */
+    const footer = page.locator('footer.sticky').first();
+    await expect(footer).toBeVisible();
+
+    // A sticky bar does not drift: it stays put while the page moves under it.
+    const drift = await driftAfterScrollTo(page, 'footer.sticky', 200);
+    expect(drift, `the footer drifted ${drift}px, so it is not sticking`).toBeLessThanOrEqual(2);
+
+    // And the observable that separates sticking from drifting: the bar's bottom edge sits ON the
+    // viewport bottom, and it is still on screen rather than scrolled past.
+    const rect = await footer.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { top: r.top, bottom: r.bottom };
+    });
+    const viewport = page.viewportSize()!;
+
+    expect(
+        Math.abs(viewport.height - rect.bottom),
+        `the footer's bottom edge is at ${rect.bottom}px, not the viewport bottom ${viewport.height}px`,
+    ).toBeLessThanOrEqual(1);
+    expect(rect.top, 'the footer scrolled away instead of sticking').toBeLessThan(viewport.height);
+});
+
 test('no retired sticky utility survives in a class attribute', async () => {
     /*
      * A SOURCE check, and it is here for a measured reason: the behaviour case above CANNOT test the
