@@ -426,7 +426,7 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                          <li
                              v-for="veteran in props.recentVeterans.rows.slice(0, 3)"
                              :key="veteran.run_id"
-                             class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2"
+                             class="py-2"
                          >
                             <div class="flex items-center gap-3">
                                 <ArtworkSlot
@@ -444,7 +444,6 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                                     >{{ veteran.trainee_ja }}</span>
                                 </Link>
                             </div>
-                            <span class="text-xs text-ink-muted">{{ veteran.scenario_label }}</span>
                         </li>
                     </ul>
 
