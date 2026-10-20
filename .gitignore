@@ -91,6 +91,9 @@ CLAUDE.local.md
 /research-scratch/
 /.scratch-uma/
 /.scratch-merge-preserve/
+# Isolated git worktrees. One is created per parallel dispatch so a peer's uncommitted edits cannot be
+# swept into a commit or baked into a bundle; none of them is history material.
+/.worktrees/
 /testing
 /database/*.sqlite*
 *.sql
