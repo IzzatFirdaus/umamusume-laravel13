@@ -135,6 +135,21 @@ test('shows five cards, the sourced cost, and no projected number anywhere', asy
     // The deficit is the advisor's arithmetic, and the deck count is entered data.
     await expect(stamina.getByText('200').first()).toBeVisible();
     await expect(page.getByText(/of six Support Card slots are recorded/)).toBeVisible();
+
+    // The 2026-10-20 ruling (option A) on which element is the commit: a card CTA is a PRE-SELECTION,
+    // so it renders as the canonical `secondary`, and the screen keeps exactly one FILLED action - the
+    // form's submit, which is the thing that writes the turn.
+    //
+    // `exact: true` matters here: Playwright's accessible-name match is a case-insensitive SUBSTRING by
+    // default, so a bare 'Train' would also resolve the submit, which is named `Record this training`.
+    // NOTE: added while master's `public/build` was peer-dirty and stale under KI-70, so this pair has
+    // not yet been executed. It is classified untested, not green, until the bundle is rebuilt.
+    const trainCtas = page.getByRole('button', { name: 'Train', exact: true });
+    await expect(trainCtas).toHaveCount(5);
+    for (const cta of await trainCtas.all()) {
+        await expect(cta).not.toHaveClass(/bg-primary-action/);
+    }
+    await expect(page.getByRole('button', { name: /^Record this/ })).toHaveClass(/bg-primary-action/);
 });
 
 test('names each exclusion on a disclosure a keyboard and a screen reader reach', async ({ page }) => {

@@ -29,6 +29,7 @@
  */
 import AbsenceValue from '../AbsenceValue.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
+import { buttonClasses } from '../Form/buttonStyles';
 import { computed, ref } from 'vue';
 
 interface Cost {
@@ -294,7 +295,7 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
 
         <p v-if="props.option.reason !== null" class="mt-1 text-sm text-ink">{{ props.option.reason }}</p>
         <p v-else class="mt-1 text-sm text-ink-muted">
-            Not ranked. <span :title="`The advisor states no reason for this option on this turn: ${props.option.key} has no target deficit to name and no Energy reading to spend.`">Why is in the advisor’s line above the cards.</span>
+            <span :title="`The advisor states no reason for this option on this turn: ${props.option.key} has no target deficit to name and no Energy reading to spend.`">Why is in the advisor’s line above the cards.</span>
         </p>
 
         <dl class="mt-3 space-y-2 text-sm">
@@ -334,9 +335,13 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
         </dl>
 
         <div class="mt-4 flex flex-wrap items-center gap-2">
+            <!-- A pre-selection, not a commit: the choice is recorded by the form's submit on
+                 `TrainingDetail.vue`, which is the screen's one filled commit action. The ruling
+                 (2026-10-20, option A) put this on the canonical `secondary`, so the card cannot read
+                 as the thing that writes the turn. -->
             <button
                 type="button"
-                class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 text-sm font-bold text-on-primary-action"
+                :class="buttonClasses('secondary')"
                 :aria-pressed="props.chosen"
                 @click="emit('train')"
             >
