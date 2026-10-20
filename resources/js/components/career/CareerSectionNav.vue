@@ -89,22 +89,39 @@ const TABS: { key: string; label: string; href: (base: string) => string }[] = [
  * wrongly disabled hides a live screen, so every section stays reachable. That default is why this
  * takes the enum string rather than a boolean — a boolean would have to be supplied by all eight
  * non-pilot callers, and each omission would silently disable Result.
+ *
+ * When the status IS known and terminal the default no longer applies, because the caller did say.
+ * Then two tabs invert, symmetrically: `result` becomes live (there is a result to read) and
+ * `training` becomes non-live, because the decision screen is the one a finished career has no turns
+ * left to reach. Everything else stays reachable — cockpit, races, skills, events, legacy, deck and
+ * timeline are all still viewable. The browser suite caught the omission: on a Retired career the
+ * career bar still offered the Training tab as an anchor, which is the decision screen.
  */
 const hasEnded = (status: string): boolean => status === 'Completed' || status === 'Retired';
 
 const reachable = (key: string): boolean => {
-    if (key !== 'result') {
-        return true;
-    }
-
     if (props.status === undefined || props.status === '') {
         return true;
     }
 
-    return hasEnded(props.status);
+    const ended = hasEnded(props.status);
+
+    if (key === 'result') {
+        return ended;
+    }
+
+    if (key === 'training') {
+        return !ended;
+    }
+
+    return true;
 };
 
 const UNAVAILABLE_TITLE = 'Available when the career is completed';
+
+/** The tooltip an unavailable tab carries. The reason differs by which way the tab is unavailable. */
+const unavailableTitle = (key: string): string =>
+    key === 'training' ? 'The career has ended, so no turns are left to decide' : UNAVAILABLE_TITLE;
 
 const TAB =
     'inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
@@ -156,7 +173,7 @@ const showTraineeJa = computed<boolean>(
                         role="link"
                         aria-disabled="true"
                         tabindex="0"
-                        :title="UNAVAILABLE_TITLE"
+                        :title="unavailableTitle(tab.key)"
                         :class="TAB_DISABLED"
                     >
                         {{ tab.label }}

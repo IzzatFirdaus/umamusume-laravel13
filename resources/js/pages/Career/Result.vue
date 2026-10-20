@@ -96,6 +96,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
         :trainee="props.run.trainee"
         :scenario-label="props.run.scenario_label"
         :status-label="props.run.status_label"
+        :status="props.run.status"
         :run-url="props.run.run_url"
     >
         <Head :title="`Career result: ${props.run.trainee}`" />
