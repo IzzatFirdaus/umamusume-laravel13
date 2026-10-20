@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { expectTapTargets } from '../utils/tap-targets';
-import { buildAxe } from '../utils/accessibility';
+import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 
 // Rendered-copy and accessibility evidence for the ported Review queue (SCR-REV-001, F14).
 // The server-side ReviewFormAccessibilityTest asserts the props; here the browser computes the
@@ -142,6 +142,7 @@ test('passes an axe scan at WCAG A and AA', async ({ page }) => {
     await page.goto('/review');
     await page.locator('#app > *').first().waitFor();
 
+    await openAllDisclosures(page);
     const results = await buildAxe(page).analyze();
 
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);

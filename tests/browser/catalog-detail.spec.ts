@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { buildAxe } from '../utils/accessibility';
+import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 
 // Rendered-copy evidence for the ported Catalog detail page (SCR-CAT-002, ADR-0020 §1).
 // The server-side tests (CatalogDetailPageTest, CatalogSkillListsTest, CatalogRosterTreeTest)
@@ -76,6 +76,7 @@ test('groups the aptitude letters under their own headings', async ({ page }) =>
     // The new `h3` level must not skip: the section's own heading is the `h2` above it, and the
     // eight-section case above is the assertion that no `h2` moved. `buildAxe` scopes to `#app`
     // (KI-63).
+    await openAllDisclosures(page);
     const results = await buildAxe(page).analyze();
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });

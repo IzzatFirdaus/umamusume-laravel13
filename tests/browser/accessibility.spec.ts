@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { buildAxe } from '../utils/accessibility';
+import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 
 test.describe('Accessibility', () => {
     test('landing page passes WCAG axe scan', async ({ page }) => {
         await page.goto('/');
         await page.locator('#app > *').first().waitFor();
 
+        await openAllDisclosures(page);
         const results = await buildAxe(page).analyze();
 
         expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
@@ -15,6 +16,7 @@ test.describe('Accessibility', () => {
         await page.goto('/training-runs');
         await page.locator('#app > *').first().waitFor();
 
+        await openAllDisclosures(page);
         const results = await buildAxe(page).analyze();
 
         expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
@@ -48,6 +50,7 @@ test.describe('Accessibility', () => {
 
         // The whole point of the replacement: the page-wide scan that KI-63 could never pass
         // mid-visit is clean, and the invalid role is not in the document at all.
+        await openAllDisclosures(page);
         const results = await buildAxe(page).analyze();
         expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
         await expect(page.locator('[role="bar"]')).toHaveCount(0);
@@ -85,10 +88,52 @@ test.describe('Accessibility', () => {
                 await summaries.first().click();
             }
 
+            await openAllDisclosures(page);
             const results = await buildAxe(page).analyze();
             const offenders = results.violations.filter((rule) => rule.id === 'aria-required-children');
 
             expect(offenders, `${path} - ${JSON.stringify(offenders, null, 2)}`).toEqual([]);
         }
+    });
+
+    /*
+     * The proof that opening the disclosures is load-bearing, and not tidiness.
+     *
+     * axe does not descend into a closed `<details>`, so a violation inside one is invisible to the
+     * scan. A-91 (plan slice 1.4) found a live `aria-required-children` violation at critical
+     * impact that no settled scan had ever seen, because it sat inside a collapsed `<details>` on
+     * the wizard's scenario step. The container below is that shape - a `role="list"` whose children
+     * are not `listitem`s - injected into a closed disclosure so both halves can be asserted: closed,
+     * the scan finds nothing; open, it finds the violation.
+     */
+    test('a violation hidden inside a closed disclosure is caught once the disclosures are open', async ({ page }) => {
+        await page.goto('/');
+        await page.locator('#app > *').first().waitFor();
+
+        await page.evaluate(() => {
+            const details = document.createElement('details');
+            const list = document.createElement('div');
+            list.setAttribute('role', 'list');
+            const child = document.createElement('div');
+            child.textContent = 'not a list item';
+            list.appendChild(child);
+            details.appendChild(list);
+            document.querySelector('#app')?.appendChild(details);
+        });
+
+        // Closed: the violation is inside a hidden node, and axe does not descend into it.
+        const closed = await buildAxe(page).analyze();
+        expect(
+            closed.violations.filter((rule) => rule.id === 'aria-required-children'),
+            'a closed disclosure hides its contents from the scan',
+        ).toEqual([]);
+
+        // Open: the helper opens every disclosure, so the container is in the scanned tree.
+        await openAllDisclosures(page);
+        const open = await buildAxe(page).analyze();
+        expect(
+            open.violations.filter((rule) => rule.id === 'aria-required-children').length,
+            'the opened disclosure puts the violation in front of the scan',
+        ).toBeGreaterThan(0);
     });
 });

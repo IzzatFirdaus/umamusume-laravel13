@@ -19,3 +19,25 @@ export function buildAxe(page: import('@playwright/test').Page) {
         .include('#app')
         .withTags(['wcag2a', 'wcag2aa', 'wcag21aa']);
 }
+
+/*
+ * Open every `<details>` on the page before a scan.
+ *
+ * axe does not descend into a closed disclosure: a `role="list"` whose children are not
+ * `listitem`s, sitting inside a collapsed `<details>`, is invisible to the scan. That is not a
+ * hypothetical - A-91 (plan slice 1.4) found a live `aria-required-children` violation at
+ * critical impact that a settled scan had never seen, because it sat inside a collapsed
+ * `<details>` on the wizard's scenario step, and no scan covered the route at all.
+ *
+ * The property is set rather than the summary clicked: a click fires the summary's own handler,
+ * and a summary is a button on some surfaces. Setting `open` changes only what the disclosure
+ * shows, which is what a scan needs, and it is idempotent, so a scan that runs after a case
+ * already opened a disclosure is unaffected.
+ */
+export async function openAllDisclosures(page: import('@playwright/test').Page): Promise<void> {
+    await page.evaluate(() => {
+        document.querySelectorAll('details').forEach((details) => {
+            (details as HTMLDetailsElement).open = true;
+        });
+    });
+}

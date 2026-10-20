@@ -4892,3 +4892,48 @@ The `containment-mechanism.spec.ts` fixture kept above is the control that slice
   stand as written.
 - The state document `docs/proposals/phase-5-state-2026-10-20.md` carries the same correction, as a
   dated erratum appended to it rather than an edit to it (Rule 3: corrections as dated errata).
+
+## 59. Dispatch 52 - 8.7 lands: every axe scan opens the disclosures first, 2026-10-20
+
+### Measure
+
+- Territory gate: `tests/browser/accessibility.spec.ts`, `tests/utils/accessibility.ts`, and the four
+  other specs in this agent's territory that scan. The peer's dirty set is Career-only; nothing
+  scanned here is peer-dirty.
+- `tests/utils/accessibility.ts` existed and scoped every scan to `#app` with the KI-63 reason
+  stated once, but it carried NO disclosure opening. The plan's pull-forward note - "if 1.12's
+  guards already open disclosures, 8.7 closes as already-satisfied" - was checked and does not
+  apply: nothing opened the disclosures.
+- The practice existed in exactly one place: `accessibility.spec.ts`'s A-91 case opened a single
+  summary by hand, because that case was written to reach a violation the scan could not see.
+- Five specs in this agent's territory scan: `accessibility`, `catalog-detail`, `database`,
+  `review`, `scenario-panel`.
+
+### Apply
+
+- `tests/utils/accessibility.ts` gains `openAllDisclosures(page)`. It sets the `open` property
+  rather than clicking a summary: a click fires the summary's own handler, and a summary is a
+  button on some surfaces. Setting the property changes only what the disclosure shows, which is
+  what a scan needs, and it is idempotent, so a scan that follows a case which already opened a
+  disclosure is unaffected.
+- Every axe scan in this agent's territory now opens the disclosures first - 4 in
+  `accessibility.spec.ts`, 1 each in `catalog-detail`, `database`, `review` and `scenario-panel`.
+- The career specs that also scan are the peer's and are left alone; opening the disclosures
+  there can surface new violations, and that belongs to whoever owns those surfaces.
+
+### Failability
+
+- The proof case injects the A-91 shape - a `role="list"` whose children are not `listitem`s -
+  into a closed disclosure and asserts both halves: closed, the scan finds nothing (axe does not
+  descend into a hidden node); opened, the scan finds the violation.
+- RED proof: with the helper call removed from that case, the case reds - "Expected: > 0,
+  Received: 0" - and the other half still passes. Restored: green. The change is load-bearing
+  rather than tidiness, which is what the plan requires of 8.7.
+
+### Gates
+
+- `npm run typecheck` clean; `npm run lint:ui` clean; `npm run build` exit 0.
+- `npx playwright test` over the five territory specs: 45 passed. Opening the disclosures
+  surfaced NO new violations in this territory, so no slice had to be reopened.
+- Walk note: `grand-concert-panel.spec.ts` stays excluded from every walk here until the 7.11
+  ruling lands.

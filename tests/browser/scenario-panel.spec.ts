@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { buildAxe } from '../utils/accessibility';
+import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { expectTapTargets } from '../utils/tap-targets';
 
@@ -197,5 +197,6 @@ test('keeps the 44px floor across the cockpit and reflows at 320 px', async ({ p
 test('passes the axe A + AA scan with the panel mounted', async ({ page }) => {
     await openUnityCupCockpit(page);
 
+    await openAllDisclosures(page);
     await buildAxe(page).analyze();
 });

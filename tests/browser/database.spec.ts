@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { buildAxe } from '../utils/accessibility';
+import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 
 /*
  * Rendered-copy evidence for the Database hub and its five areas (SCREEN-023, plan §8 D17). The props
@@ -87,6 +87,7 @@ test('folds each trainee costume-form list behind a disclosure', async ({ page }
     // The disclosure is the new structure on this page, so the scan runs with it open — the state
     // that exposes the most content. `buildAxe` scopes to `#app`, which is what makes it
     // deterministic (KI-63).
+    await openAllDisclosures(page);
     const results = await buildAxe(page).analyze();
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });
