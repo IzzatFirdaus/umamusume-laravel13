@@ -229,7 +229,13 @@ test('the race database renders whichever state the catalogue is in', async ({ p
     }
 
     await expect(table).toBeVisible();
-    await expect(page.getByText(/\d+ of \d+ slots/)).toBeVisible();
+
+    // The canonical pager states the range: which slice of the whole this is, and how big the whole
+    // is. The line it replaced said "410 of 410 slots" above a table holding 25 rows, which read as
+    // the whole set rather than one page of it.
+    await expect(page.locator('nav[aria-label="Pagination"] [role="status"]')).toContainText(
+        /Showing \d+ to \d+ of \d+ slots/,
+    );
 
     // Rows carry stored values, and every unstored one is `N/A` with its reason rather than a zero.
     // Measured on this tree's first page: 2 of 25 rows carry no distance, surface or fan gate, and 23
@@ -244,6 +250,26 @@ test('the race database renders whichever state the catalogue is in', async ({ p
 
     // No prediction lives in a reference table: win probability and readiness are held (ADR-0016).
     await expect(table).not.toContainText('%');
+});
+
+test('the race database pager names the range it shows and moves a page', async ({ page }) => {
+    await page.goto('/database/races', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // The offline state has no table and no pager, so there is nothing to drive. KI-69: assert the
+    // shape of whichever state holds, never a disk precondition.
+    if (await page.getByRole('heading', { name: 'The race database is offline' }).isVisible()) {
+        test.skip(true, 'The race catalogue is empty in this database, so there is no pager to drive.');
+    }
+
+    const status = page.locator('nav[aria-label="Pagination"] [role="status"]');
+    await expect(status).toContainText(/Showing \d+ to \d+ of \d+ slots/);
+
+    // The canonical pager is a button pair, not a set of links, so the PAGE owns the request. That is
+    // the behaviour that changed: the pager this replaced was Inertia links, and this one is not.
+    await page.getByRole('button', { name: 'Next' }).click();
+    await expect(status).toContainText(/Page 2 of \d+/);
+    await expect(page).toHaveURL(/[?&]page=2/);
 });
 
 test('the scenario matrix prints config/scenarios.php, verification date and all', async ({ page }) => {

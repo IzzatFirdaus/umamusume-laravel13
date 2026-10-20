@@ -13,8 +13,8 @@
  * by nature. The table still scrolls inside its own container at 320px, never the page.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
-import Pagination from '../../components/Pagination.vue';
-import { Head } from '@inertiajs/vue3';
+import Pagination from '../../components/ui/Pagination.vue';
+import { Head, router } from '@inertiajs/vue3';
 
 interface Slot {
     id: number;
@@ -32,7 +32,10 @@ interface Slot {
 
 interface Paginator<T> {
     data: T[];
-    links: { url: string | null; label: string; active: boolean }[];
+    current_page: number;
+    last_page: number;
+    from: number | null;
+    to: number | null;
     total: number;
 }
 
@@ -47,6 +50,21 @@ const gates = (slot: Slot): string[] =>
         slot.is_maiden_gated ? 'Maiden-gated' : null,
         slot.is_special_race ? 'Special race' : null,
     ].filter((mark): mark is string => mark !== null);
+
+/**
+ * The canonical pager owns the range, so the page owns the request. The pager it replaces was a set
+ * of Inertia links built from the server's own paginator, and those links carried the query string
+ * with them, so this rebuilds the same query with the new page number rather than replacing it.
+ */
+function goToPage(page: number): void {
+    const query = new URLSearchParams(window.location.search);
+    query.set('page', String(page));
+
+    router.get(`${window.location.pathname}?${query.toString()}`, {}, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+}
 </script>
 
 <template>
@@ -85,10 +103,11 @@ const gates = (slot: Slot): string[] =>
         </section>
 
         <template v-else>
-            <p class="mt-6 text-sm text-ink-muted">{{ props.slots.total }} of {{ props.totalCount }} slots</p>
+            <!-- The range and the total live with the pager, under the table: a table that holds one
+                 page of rows cannot say "410 of 410" about itself without misleading the reader. -->
 
             <div
-                 class="mt-2 overflow-x-auto rounded-md border border-rule bg-panel"
+                 class="mt-6 overflow-x-auto rounded-md border border-rule bg-panel"
                 role="region"
                 tabindex="0"
                 aria-label="Race slots, scrollable"
@@ -157,7 +176,15 @@ const gates = (slot: Slot): string[] =>
                 </table>
             </div>
 
-            <Pagination :links="props.slots.links" />
+            <Pagination
+                :page="props.slots.current_page"
+                :pages="props.slots.last_page"
+                :from="props.slots.from ?? 0"
+                :to="props.slots.to ?? 0"
+                :total="props.slots.total"
+                noun="slots"
+                @navigate="goToPage"
+            />
         </template>
     </AppLayout>
 </template>

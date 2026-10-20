@@ -5,8 +5,8 @@ import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import StatusPill from '../../components/StatusPill.vue';
 import StatusBadge from '../../components/ui/StatusBadge.vue';
 import SuggestionHint from '../../components/review/SuggestionHint.vue';
-import Pagination from '../../components/Pagination.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import Pagination from '../../components/ui/Pagination.vue';
+import { Head, Link, router } from '@inertiajs/vue3';
 
 interface Candidate {
     id: number;
@@ -22,15 +22,33 @@ interface Candidate {
 
 interface Paginator<T> {
     data: T[];
-    links: { url: string | null; label: string; active: boolean }[];
+    current_page: number;
+    last_page: number;
+    from: number | null;
+    to: number | null;
     total: number;
 }
 
-defineProps<{
+const props = defineProps<{
     candidates: Paginator<Candidate>;
     aliasLanguages: { value: string; label: string }[];
     neverFetched: boolean;
 }>();
+
+/**
+ * The canonical pager owns the range, so the page owns the request. The pager it replaces was a set
+ * of Inertia links built from the server's own paginator, and those links carried the query string
+ * with them, so this rebuilds the same query with the new page number rather than replacing it.
+ */
+function goToPage(page: number): void {
+    const query = new URLSearchParams(window.location.search);
+    query.set('page', String(page));
+
+    router.get(`${window.location.pathname}?${query.toString()}`, {}, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+}
 
 function pillFor(tier: string): { label: string; variant: 'warning' | 'neutral' } {
     return tier === 'Fuzzy'
@@ -135,7 +153,15 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                 </li>
             </ul>
 
-            <Pagination :links="candidates.links" />
+            <Pagination
+                :page="props.candidates.current_page"
+                :pages="props.candidates.last_page"
+                :from="props.candidates.from ?? 0"
+                :to="props.candidates.to ?? 0"
+                :total="props.candidates.total"
+                noun="candidates"
+                @navigate="goToPage"
+            />
         </template>
     </AppLayout>
 </template>
