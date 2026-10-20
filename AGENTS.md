@@ -426,13 +426,14 @@ hits in code mode. The count moves as the corpus grows, so a rising count is a s
 rule on, not a regression to defend.
 
 **The ruling for `KNOWN-ISSUES.md:3154`.** That line carries a term from the banned
-vocabulary, in the software sense: the phrase naming the D-268 re-home of the agent
-pointer, where the term means the history of the change rather than anything the gate
-polices. It is an allowed sense, and 31 other hits of the same term are already in the
-tree, each carried as a hit with a ruling, so the term is not a new class and the line is
-not a new violation. The register is a root planning file whose prose the gate exists to
-police, so no marker is added to it: `LoreGateParityTest` refuses markers outside `docs/`
-on purpose. The hit stays in the count and carries this ruling.
+vocabulary, and it is class 2: a substring inside an ordinary word or a proper noun, in the
+software sense. The compound names the D-268 re-home of the agent pointer, where the term
+means the history of the change rather than anything the gate polices. 31 other hits of
+the same term are already in the tree, each carried as a hit with a ruling, so the term is
+not a new class and the line is not a new violation. The register is a root planning file
+whose prose the gate exists to police, so no marker is added to it: `LoreGateParityTest`
+refuses markers outside `docs/` on purpose. The hit stays in the count and carries this
+ruling.
 
 `npm run lint:ui` (plan slice 1.12) fails a Card inside a Card and any new arbitrary Tailwind value
 (`bg-[#…]`, `w-[37px]`). Arbitrary values predate the guard in two files and are listed in
