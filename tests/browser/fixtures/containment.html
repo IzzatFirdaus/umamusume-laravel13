@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Containment vs sticky fixture</title>
+        <style>
+            /*
+             * Two containers, identical except for ONE declaration. Both hold a sticky child and a tall
+             * spacer, and both scroll with the PAGE - no ancestor here has `overflow`, so the only
+             * difference between the two sticky children is `container-type` on the parent.
+             */
+            body {
+                margin: 0;
+            }
+
+            .control,
+            .contained {
+                height: 1800px;
+            }
+
+            .contained {
+                /* THE ONE VARIABLE. Remove this line and the two halves become identical. */
+                container-type: inline-size;
+            }
+
+            .sticky-child {
+                position: sticky;
+                top: 0;
+                height: 40px;
+                background: #ffd;
+                border: 1px solid #333;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="control">
+            <div class="sticky-child" id="sticky-control">Sticky A</div>
+        </div>
+        <div class="contained">
+            <div class="sticky-child" id="sticky-contained">Sticky B</div>
+        </div>
+    </body>
+</html>
