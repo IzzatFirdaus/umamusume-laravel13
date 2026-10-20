@@ -4388,3 +4388,121 @@ batch, which is the shape the dispatcher allows. Neither slice was started, so n
        master and re-runs the walk set, closing KI-70.
 - Next eligible: 4.3 and 4.4 (deferred, not blocked on anything but budget), then the containment
   slice, then 4.5 and 4.6, plus the 2.5 remainder.
+
+## 49. Dispatch 47 - the dead sticky claims retired; 4.3 and 4.4 deferred, 2026-10-20
+
+### Step 0 measurements
+
+- Worktree HEAD d3dad23, `git status --porcelain` EMPTY.
+- Peer's ledger append: STILL DIRTY, so the STOP-and-cherry-pick branch did not fire. No cherry-pick.
+- Bundle rebuilt: it read stale at 06:30:17 against a resources/js tip of 06:33:45, so `npm run build`
+  ran to exit 0 and the manifest moved to 11:34:16.
+- Baseline walk set: 60 passed. It took TWO attempts: the first died in 1m37s with 'Timed out waiting
+  60000ms from config.webServer', which a manual boot then disproved - `php artisan serve --port=8299`
+  served `/up` a 200 in about six seconds. So the timeout was transient contention, most likely the
+  port right after a build, and the retry on a different port was green. Recorded because a timeout is
+  not evidence of a broken worktree, and this arc has already mistaken one infrastructure fault for a
+  defect once (the un-optimised autoloader).
+- Feature baseline: UiHygiene 4 passed (guard 0); DocCitationParity 2 passed.
+
+### The containment truth - IS `container-type` load-bearing? YES
+
+This was the dispatch's gating question, so it was measured rather than assumed:
+
+    resources/js/layouts/AppLayout.vue:407   <main id="main" data-layout-container class="@container" ...>
+    resources/js/layouts/SetupLayout.vue:174 <div class="@container" data-layout-container>
+    resources/js/components/ui/DataTable.vue:85  class="@container w-full ..."
+
+and TWENTY-ONE files lay themselves out with the `@2xl:`/`@3xl:`/`@4xl:`/`@5xl:` variants, which only
+resolve against a container ancestor: `AptitudeGrid`, `CareerTimeline`, `RaceCard`, `SkillPlanRow`,
+`UnityCupEditor`, `ScenarioPanel`, `TrackblazerFatiguePanel`, `TrackblazerResourceLedger` and the rest.
+`SetupLayout.vue:41-45` already documents the same measure in prose.
+
+So the STOP branch did NOT apply: the containment is load-bearing, the sticky claims are the dead part,
+and Ruling 3's retirement is the correct slice.
+
+### Step A - 1150825, 4 files, +125/-7
+
+  AppLayout.vue          a docblock on `main` stating the constraint, the consequence, the three retired
+                         claims, and that `@container` must not be removed to make something stick
+  SetupLayout.vue        the wizard step bar loses `md:sticky md:top-0 md:z-10` plus its justifying
+                         sentence
+  Career/Cockpit.vue     the "On this page" wayfinder loses the same three plus the sentence claiming
+                         stickiness
+  containment.spec.ts    NEW - pins the current, deliberate behaviour
+  StatSummary.vue        verify-only: the class was already absent, only its retirement note mentions it
+
+Section A exception stated in the body: AppLayout.vue and SetupLayout.vue are held files, named here for
+removing the dead claims.
+
+### The failability rewrite, which is the real finding of this slice
+
+The first version of `containment.spec.ts` asserted, on the served page, that the wayfinder and the
+strip do NOT stick (they drift by the full scroll distance). The failability proof then reintroduced
+`md:sticky md:top-0` on the wayfinder, rebuilt, and the case STILL PASSED.
+
+That is not a sloppy assertion; it is the constraint itself. Under the containment a sticky class is a
+no-op, so the DOM behaves identically with and without it and NO behaviour assertion can distinguish the
+two. The dispatch's hard stop names exactly this case ('the non-sticky assertion passes on a
+sticky-element reintroduction'), so the spec was rewritten rather than committed as decoration:
+
+- the BEHAVIOUR case stays and keeps its drift measurement, because it is what documents the limitation
+  and it IS failable in the future-fix direction (remove the containment, restore the classes, and it
+  reds), and
+- a SOURCE case was added: the two files' `class="..."` attributes are scanned for `md:sticky`, which
+  reds correctly on reintroduction. It matches inside a class attribute only, because the retirement
+  notes name the utility in prose and a blanket text scan would flag the comments explaining the
+  removal - the same trap the retired component name set in `career-cockpit.spec.ts` one dispatch ago.
+
+Measured, in order: green (2 passed) -> patched -> the source case REDS naming Cockpit.vue -> restored
+(identical to the snapshot) -> green again (2 passed).
+
+Section 46 Rule 2 needed its §48 refinement AGAIN, and the dispatch's own note was the trap: it said to
+back up from `git show HEAD:<file>` because 'the files at HEAD are pre-retirement, so this is the correct
+source' - but pre-retirement is what the patch REPLACES, so restoring from HEAD would have discarded the
+retirement being proven. The immutable source was a one-time snapshot, and its existence guard fired on
+the second patch call, which is precisely the once-only behaviour the rule exists to enforce.
+
+### Two more sticky claims found and NOT fixed
+
+The dispatch said 'any other', so the enumeration was run across the whole app rather than the three
+named files. Two more exist, and neither is in this slice's scope:
+
+1. `resources/js/components/ui/StickyFooter.vue:34` - `sticky bottom-0 z-10`, used by
+   `Career/Preflight.vue:376` and `Career/ScenarioSelect.vue:336`. Both sit inside `main`, so on this
+   evidence the footer does not stick either, and its NAME and docblock are entirely about stickiness
+   (including a past defect where padding shrank its sticky range). Retiring a primitive's whole
+   contract is its own decision, and its docblock's history suggests stickiness may have worked before
+   the containment arrived - which wants a measurement before any change.
+2. `resources/js/pages/Veterans/Compare.vue:619`, `:637`, `:674` - `position: sticky` in a scoped style
+   for the compare matrix, whose own comment calls its wrapper 'the sticky context'. Those cells stick
+   inside the table's own scroll container, which is a DIFFERENT containing block from the viewport, so
+   they are probably still correct. 'Probably' is the honest word: not measured.
+
+### Steps B (4.3) and C (4.4) - DEFERRED
+
+Neither was started. The containment slice plus two baseline attempts (one failed on a server timeout),
+a full baseline walk, the containment walk, and a failability proof that had to be rewritten consumed
+the batch. The dispatch allows this shape explicitly and forbids the partial alternative, so nothing was
+begun that could not be finished.
+
+### Close
+
+- Walk set after Step A: 60 passed before the slice; the seven-spec run including
+  `containment.spec.ts` was launched at close (quote in the dispatch report).
+- Static gates: typecheck exit 0; `lint:ui` clean; bundle rebuilt to 11:46:58 after the failability
+  patch, since that proof had rebuilt from patched source.
+- Decision 1: still closed (census 651 against the 708 baseline).
+- KI-70 side effect: STILL OWED. Master's public/build at 03:39:17 reflects peer-dirty source.
+- Deferred cherry-picks, untouched: 47488f0, 68ffe6f, 132cee8, a09ea94, ca5be34, ee8fec1, dd1ac20,
+  2f6c88b, 920a499, d3dad23, plus 1150825 and this section. The four on master under new SHAs
+  (6f91420, 782069b, 2341f75, b8b0def) must not be re-picked.
+- Peer status in the main tree: unchanged and untouched.
+- Operator action list:
+    1. Rule on `StickyFooter.vue`: retire its sticky contract and rename it, or measure whether it ever
+       worked, or place it outside `main`. It is the last sticky claim in the shell's own tree.
+    2. When the peer commits the ledger append, cherry-pick the deferred list in order.
+    3. When the peer commits the three Vue files, one quiet-tree dispatch rebuilds public/build on
+       master and re-runs the walk set, closing KI-70.
+- Next eligible: 4.3 and 4.4 (deferred on budget, nothing else blocking them), then 4.5 and 4.6, plus
+  the 2.5 remainder.
