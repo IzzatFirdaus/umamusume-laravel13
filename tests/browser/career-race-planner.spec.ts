@@ -64,12 +64,14 @@ test('names each held figure with its reason, and states the next obligation wit
     await expect(page.getByRole('heading', { name: 'Race planner' })).toBeVisible();
 
     // The two figures the brief asks for, named as held: hovering each `N/A` says why, and it names
-    // the decision rather than a number.
+    // the decision rather than a number. The reason is the held-prediction blocker; `1713670f`
+    // reworded it away from the bare `ADR-0016` token, and `CareerRacePlannerTest` pins the
+    // current wording, so this asserts the same truth.
     const held = page.getByRole('region', { name: 'Held figures' });
     await expect(held.getByText('Win probability')).toBeVisible();
     await expect(held.getByText('Expected risk')).toBeVisible();
     for (const term of await held.getByText('N/A').all()) {
-        await expect(term).toHaveAttribute('title', /ADR-0016/);
+        await expect(term).toHaveAttribute('title', /Held\. Race prediction is blocked/);
     }
 
     // Level 1 is a glyph plus the word. The `!`-style mark is aria-hidden, so the alert is located by
@@ -135,6 +137,12 @@ test('compares the selected races side by side, one property per row, by keyboar
     // Nothing is selected, so the comparison says what to do rather than drawing an empty table.
     await expect(page.getByText('Nothing to compare yet', { exact: false })).toBeVisible();
 
+    // The tray is present from the start and states the empty selection, so the region exists
+    // before anything is chosen.
+    const tray = page.getByRole('region', { name: 'Selected races' });
+    await expect(tray).toBeVisible();
+    await expect(tray.getByText('of 4 chosen')).toBeVisible();
+
     // The selection control is a pressed toggle, so the state is exposed rather than implied by colour.
     const first = page.getByRole('button', { name: /^Compare / }).first();
     const second = page.getByRole('button', { name: /^Compare / }).nth(1);
@@ -147,6 +155,16 @@ test('compares the selected races side by side, one property per row, by keyboar
     await second.focus();
     await page.keyboard.press('Enter');
     await expect(second).toHaveAttribute('aria-pressed', 'true');
+
+    // The tray carries the count and the names of the chosen races, so the summary and the
+    // cards cannot disagree about what is selected.
+    await expect(tray.locator('[data-region="compare-tray-count"]')).toHaveText('2 of 4 chosen');
+    await expect(tray.getByRole('listitem')).toHaveCount(2);
+
+    // The name in the tray is the name on the card. The card's control leads with a glyph
+    // ("− Compare Junior Make Debut"), so the glyph and the verb come off before the comparison.
+    const cardName = ((await first.textContent()) ?? '').replace(/^[−+]\s*/, '').replace(/^Compare\s+/, '').trim();
+    await expect(tray.getByRole('listitem').first()).toContainText(cardName);
 
     // The comparison is a real table with a row header per property, not a grid of cards.
     const rewards = page.getByRole('region', { name: 'Selected races, rewards side by side' });
@@ -172,6 +190,70 @@ test('compares the selected races side by side, one property per row, by keyboar
     await first.focus();
     await page.keyboard.press('Enter');
     await expect(first).toHaveAttribute('aria-pressed', 'false');
+});
+
+test('clears the selection from the tray, and the comparison empties with it', async ({ page }) => {
+    await openPlanner(page);
+
+    const tray = page.getByRole('region', { name: 'Selected races' });
+    const clear = tray.getByRole('button', { name: 'Clear selection' });
+
+    // Nothing is chosen, so the action is inert rather than a control that does nothing.
+    await expect(clear).toBeDisabled();
+
+    await page.getByRole('button', { name: /^Compare / }).first().click();
+    await page.getByRole('button', { name: /^Compare / }).nth(1).click();
+
+    await expect(tray.getByRole('listitem')).toHaveCount(2);
+    await expect(clear).toBeEnabled();
+
+    await clear.click();
+
+    // The selection is gone, the summary is back to empty, and the table went with it.
+    await expect(tray.getByRole('listitem')).toHaveCount(0);
+    await expect(tray.locator('[data-region="compare-tray-count"]')).toHaveText('0 of 4 chosen');
+    await expect(clear).toBeDisabled();
+    await expect(page.getByText('Nothing to compare yet', { exact: false })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Selected races, rewards side by side' })).toHaveCount(0);
+
+    // The cards agree: the toggles are released, not just the summary.
+    await expect(page.getByRole('button', { name: /^Compare / }).first()).toHaveAttribute('aria-pressed', 'false');
+});
+
+test('names the properties no chosen race records, once, above each table', async ({ page }) => {
+    await openPlanner(page);
+
+    // One race only: there is no comparison to draw, so no group absence is claimed.
+    await page.getByRole('button', { name: /^Compare / }).first().click();
+    await expect(page.getByText(/^Not recorded: /)).toHaveCount(0);
+
+    await page.getByRole('button', { name: /^Compare / }).nth(1).click();
+
+    // The comparison table prints "N/A" under every column of the rows no race carries, and this
+    // one sentence names those rows above the table.
+    const rewards = page.getByRole('region', { name: 'Selected races, rewards side by side' });
+    await expect(rewards).toBeVisible();
+
+    // The rows are read off the table itself rather than written out here, so the sentence is
+    // checked against the same data it claims to summarise.
+    const absentRows: string[] = [];
+    for (const row of await rewards.getByRole('rowheader').all()) {
+        const label = (await row.innerText()).trim();
+        const cells = await row.locator('xpath=following-sibling::td[1]').all();
+
+        if (cells.length > 0 && (await cells[0].innerText()).trim() === 'N/A') {
+            absentRows.push(label);
+        }
+    }
+
+    expect(absentRows.length).toBeGreaterThan(0);
+    await expect(page.getByText(`Not recorded: ${absentRows.join(', ')}`)).toBeVisible();
+
+    // The alignment group is absent as a whole when the run records no build target, and the
+    // sentence names the three properties it compares.
+    const alignment = page.getByRole('region', { name: 'Selected races against the build target' });
+    await expect(alignment).toBeVisible();
+    await expect(page.getByText('Not recorded: Distance band, Surface, Running style')).toBeVisible();
 });
 
 test('sizes the planner controls to the 44px contract', async ({ page }) => {

@@ -83,9 +83,11 @@ test('names each absent race field with its reason, and refuses a readiness band
     await expect(page.getByRole('heading', { name: 'Junior Make Debut' })).toBeVisible();
 
     // The held figure, named as held: hovering the N/A says why, and it names the decision rather
-    // than a number.
+    // than a number. The reason is the held-prediction blocker; `1713670f` reworded it away from
+    // the bare `ADR-0016` token, and `CareerRacePlannerTest` pins the current wording, so this
+    // asserts the same truth.
     const readiness = page.getByRole('heading', { name: 'Readiness' }).locator('..').getByText('N/A');
-    await expect(readiness).toHaveAttribute('title', /ADR-0016/);
+    await expect(readiness).toHaveAttribute('title', /Held\. Race prediction is blocked/);
 
     // A brief field with no column behind it: the reason travels with the value on a disclosure a
     // keyboard and a screen reader reach, not only on hover.

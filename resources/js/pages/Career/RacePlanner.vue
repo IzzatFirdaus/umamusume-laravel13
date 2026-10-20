@@ -21,6 +21,8 @@ import CareerLayout from '../../layouts/CareerLayout.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import RacePlanList from '../../components/career/RacePlanList.vue';
 import AlertRow from '../../components/scenario/AlertRow.vue';
+import AbsenceNote from '../../components/ui/AbsenceNote.vue';
+import Section from '../../components/ui/Section.vue';
 import { Head } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
@@ -110,6 +112,40 @@ const orderedGroups = computed<Group[]>(() => (props.groups === null ? [] : Obje
 
 function cell(race: Race, key: string, from: 'comparison' | 'alignment'): Cell | undefined {
     return race[from].find((entry) => entry.key === key);
+}
+
+/**
+ * The alignment figures this run has no target for.
+ *
+ * `alignment.recorded` is the controller's own group-level fact: with no build target recorded,
+ * every alignment cell reads "Not recorded" instead of a comparison, so the whole group is
+ * absent and one sentence names it. The labels are the alignment rows' own, so the sentence
+ * says which figures are missing rather than that something is.
+ */
+const alignmentAbsent = computed<string[]>(() =>
+    props.alignment.recorded ? [] : props.alignment.rows.map((row) => row.label),
+);
+
+/**
+ * The comparison figures no chosen race carries.
+ *
+ * A row is absent when every chosen race leaves it null, which is the only sense in which the
+ * table lacks it: one race carrying a figure and another not is a per-cell fact, and that cell
+ * keeps its own "N/A" and its own reason.
+ */
+const comparisonAbsent = computed<string[]>(() => {
+    if (chosen.value.length === 0) {
+        return [];
+    }
+
+    return props.comparison.rows
+        .filter((row) => chosen.value.every((race) => (cell(race, row.key, 'comparison')?.value ?? null) === null))
+        .map((row) => row.label);
+});
+
+/** Empty the selection, so the Trainer can choose again from the top. */
+function clearSelection(): void {
+    selected.value = [];
 }
 </script>
 
@@ -211,6 +247,43 @@ function cell(race: Race, key: string, from: 'comparison' | 'alignment'): Cell |
                     Reward comparison
                 </h2>
 
+                <!--
+                  The tray states the selection once, above the table it fills. It is not sticky:
+                  the plan's "N selected, Compare" tray was written for a layout that could pin
+                  it, and this one cannot (Ruling 5, and `main`'s containment), so it is a static
+                  region carrying the count, the names, and the way to start again. The count and
+                  the names are the same facts the `Compare` control on each card shows, so the
+                  two cannot disagree.
+                -->
+                <Section
+                    id="race-planner-compare-tray"
+                    title="Selected races"
+                    :level="3"
+                    description="The races chosen for comparison, and the way to start again."
+                    class="mt-2"
+                >
+                    <p class="mt-2 text-sm text-ink" data-region="compare-tray-count">
+                        <span class="font-semibold text-ink-strong">{{ chosen.length }}</span>
+                        of {{ LIMIT }} chosen
+                    </p>
+
+                    <ul v-if="chosen.length > 0" class="mt-1 flex flex-col gap-1" aria-label="Chosen races">
+                        <li v-for="race in chosen" :key="race.id" class="text-sm text-ink">
+                            <span class="font-semibold text-ink-strong">{{ race.title }}</span>
+                            <span class="ml-1.5 text-xs text-ink-muted">{{ race.year_label }}</span>
+                        </li>
+                    </ul>
+
+                    <button
+                        type="button"
+                        class="mt-2 inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm font-semibold text-ink disabled:opacity-40"
+                        :disabled="chosen.length === 0"
+                        @click="clearSelection"
+                    >
+                        Clear selection
+                    </button>
+                </Section>
+
                 <p
                     v-if="chosen.length < 2"
                     class="mt-2 max-w-3xl rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink"
@@ -219,6 +292,18 @@ function cell(race: Race, key: string, from: 'comparison' | 'alignment'): Cell |
                     card above and their rewards line up here, one property per row.
                 </p>
                 <template v-else>
+                    <!--
+                      The properties no chosen race carries, named once. Per cell the same fact
+                      would print as an "N/A" under every column of that row, which is the
+                      repetition `AbsenceNote` exists to remove; the cell keeps its own reason in
+                      its title, and this sentence says which rows are the absent ones.
+                    -->
+                    <AbsenceNote
+                        v-if="comparisonAbsent.length > 0"
+                        class="mt-2"
+                        :labels="comparisonAbsent"
+                    />
+
                     <!-- The scroll container carries the focus stop rather than the table, so a screen
                          reader reads a table and 320px can still reach every column (WCAG 1.4.10). -->
                     <div
@@ -274,8 +359,20 @@ function cell(race: Race, key: string, from: 'comparison' | 'alignment'): Cell |
                             title="Derived by comparing the race's own catalogue values with the run's recorded build target."
                         />
                     </h3>
-                    <p class="mt-1 text-sm text-ink-muted">
-                        {{ props.alignment.absence ?? 'Each race against the build target this run records.' }}
+                    <!--
+                      The alignment group's absence, named once. The controller states the fact
+                      (`alignment.absence` is non-null exactly when the run records no build
+                      target) and the row labels are the alignment rows' own, so the sentence says
+                      which properties are the absent ones rather than that something is. The
+                      remedy stays in each cell's title, which already carries it.
+                    -->
+                    <AbsenceNote
+                        v-if="alignmentAbsent.length > 0"
+                        class="mt-1"
+                        :labels="alignmentAbsent"
+                    />
+                    <p v-else class="mt-1 text-sm text-ink-muted">
+                        Each race against the build target this run records.
                     </p>
 
                     <div
