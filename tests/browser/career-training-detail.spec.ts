@@ -720,3 +720,16 @@ test('names no unranked reason before the run has logged a turn', async ({ page 
     await expect(page.locator('dt', { hasText: /^Rank$/ })).toHaveCount(0);
 });
 
+test('names the turn the record button writes', async ({ page }) => {
+    const runUrl = await startCareer(page, 'unity_cup');
+    createdRunUrls.push(runUrl);
+
+    await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // The submit names the turn it will write. Before this it read "Record this training" / "Record
+    // this turn" and never named the number, so a Trainer could not tell which turn the button
+    // addressed.
+    await expect(page.getByRole('button', { name: /^Record turn \d+$/ })).toBeVisible();
+});
+

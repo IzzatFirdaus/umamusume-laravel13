@@ -771,7 +771,7 @@ const capFor = (label: string): number =>
                         class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 text-sm font-bold text-on-primary-action disabled:cursor-wait disabled:bg-disabled"
                         :disabled="form.processing"
                     >
-                        {{ form.processing ? 'Sending…' : chosenExtra !== null ? 'Record this turn' : 'Record this training' }}
+                        {{ form.processing ? 'Sending…' : `Record turn ${props.write.turn}` }}
                     </button>
                     <p class="max-w-3xl text-xs text-ink-muted">
                         The write lands on the Cockpit, where the recorded turn appears in the correction
