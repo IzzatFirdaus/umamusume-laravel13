@@ -82,9 +82,26 @@ const props = defineProps<{
     deckRecorded: boolean;
     chosen: boolean;
     turn: number;
+    /**
+     * Whether the run has a previous turn. The card uses it to decide whether an option with no
+     * advisor reason gets the `Rank` row: in a run that has logged nothing, the screen's own
+     * empty-state paragraph explains the absence once, and repeating it per card is the noise the
+     * 2026-10-20 fragment ruling removed (logged-state only, ruling 3f.1).
+     */
+    hasPreviousTurn: boolean;
 }>();
 
 const emit = defineEmits<{ train: [] }>();
+
+/*
+ * Why this option carries no rank. The wording is the removed fragment's own clause, verbatim from
+ * `958746f^` minus the pointer prefix it began with, so nothing here is newly written copy (ruling
+ * 3f.3). The pointer ("the advisor's line above the cards") is what the ruling deleted, because that
+ * line names the recommended card and never explained a different card's absence.
+ */
+const unrankedReason = computed(
+    () => `${props.option.key} has no target deficit to name and no Energy reading to spend.`,
+);
 
 const open = ref(false);
 
@@ -323,6 +340,16 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                          visible read date, so this is the shipped idiom extended, not a new one. It stays inside
                          the `dd`: as a sibling of `dt`/`dd` it broke the definition list's content model and axe
                          failed the page on `definition-list` (WCAG 1.3.1). -->
+                </dd>
+            </div>
+
+            <!-- The rank, in the same row rhythm as the two rows above: a `<dt>` name and a `<dd>`
+                 carrying the absence through `AbsenceValue`, which is the tree's one owner of "no value,
+                 and why" (ruling 3f.4 - reused, not extended). Logged runs only (ruling 3f.1). -->
+            <div v-if="props.option.reason === null && props.hasPreviousTurn">
+                <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Rank</dt>
+                <dd class="mt-0.5">
+                    <AbsenceValue :reason="unrankedReason" compact />
                 </dd>
             </div>
 

@@ -89,6 +89,40 @@ async function openTrainingDetail(page: import('@playwright/test').Page): Promis
     return runUrl;
 }
 
+/**
+ * A career with one logged turn that carries NO Energy reading and five stats AT the target.
+ *
+ * This is the only reachable state in which an option's `reason` is null WHILE the run has a previous
+ * turn, which is the pair the card's `Rank` row is gated on (2026-10-20 ruling 3f.1). Measured, not
+ * assumed, and the measurement is the reason this fixture exists rather than the spec's own: with an
+ * Energy reading present EVERY option carries a reason (so no row renders), and in the empty state the
+ * reason is null on four cards but there is no previous turn (so the row is correctly absent). The
+ * deleted fragment's wording named both causes, and only both together reach the row.
+ */
+async function newCareerWithNoEnergyAtTarget(page: import('@playwright/test').Page): Promise<string> {
+    const runUrl = await startCareer(page, 'unity_cup');
+    createdRunUrls.push(runUrl);
+
+    await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await page.getByRole('article').filter({ hasText: /^Speed/ }).getByRole('button', { name: 'Train' }).click();
+    for (const field of ['speed', 'stamina', 'power', 'guts', 'wit']) {
+        await page.locator(`input[name="${field}"]`).fill('800');
+    }
+    // Energy is deliberately left unentered: without a reading the advisor has no cost to name either.
+    await page.locator('input[name="fans"]').fill('120');
+    await page.locator('input[name="sp"]').fill('100');
+    await page.locator('select[name="outcome"]').selectOption('Success');
+    await page.getByRole('button', { name: 'Record this training' }).click();
+    await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
+
+    await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    return runUrl;
+}
+
 /** The visible reason of an `AbsenceValue`: the span that follows its summary inside the `details`. */
 const reasonOf = (disclosure: import('@playwright/test').Locator) =>
     disclosure.locator('xpath=following-sibling::span');
@@ -645,3 +679,44 @@ test('marks the one field the chosen turn moves, and only that one', async ({ pa
     await expect(page.locator('#turn-energy-field')).not.toHaveClass(/border-pick-line/);
     await expect(page.locator('#turn-mood-field')).not.toHaveClass(/border-pick-line/);
 });
+
+/*
+ * The unranked reason (2026-10-20 rulings 3f.1-3f.4). The `Rank` row replaces a sentence that was
+ * removed because its visible half pointed at the advisor rail, which names the RECOMMENDED card and so
+ * never explained a different card's absence. The reason itself is real, and it now sits in the card's
+ * own row rhythm through `AbsenceValue`, which is the tree's one owner of "no value, and why".
+ *
+ * Two cases, because the row is gated on a PAIR of conditions and each case pins one half: the reason is
+ * null (logged fixture, no Energy reading, stats at target) and the run has a previous turn. The empty
+ * state has null reasons too, so the second case is what proves the gate, not the reason.
+ */
+test('names the unranked reason in the card body once the run has logged a turn', async ({ page }) => {
+    await newCareerWithNoEnergyAtTarget(page);
+
+    // Four of the five options have neither a target deficit nor an Energy cost to name, so four carry
+    // the row. The fifth (Wit) still has a reason, which is why the count is not five.
+    const rankRows = page.locator('dt', { hasText: /^Rank$/ });
+    await expect(rankRows).toHaveCount(4);
+
+    // The row carries the removed fragment's own clause, verbatim, as an absence with its reason: the
+    // summary is `N/A` and the sentence is the summary's accessible name (and its visible text on open).
+    const firstRow = rankRows.first().locator('xpath=following-sibling::dd');
+    await expect(firstRow.locator('summary')).toContainText('N/A');
+    await expect(firstRow.locator('summary')).toContainText(
+        'has no target deficit to name and no Energy reading to spend',
+    );
+});
+
+test('names no unranked reason before the run has logged a turn', async ({ page }) => {
+    const runUrl = await startCareer(page, 'unity_cup');
+    createdRunUrls.push(runUrl);
+
+    await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // The empty state explains the absence once, in its own paragraph and its own words. The card says
+    // nothing: four of its options have a null reason here too, so only the gate keeps the row away.
+    await expect(page.getByText('No turn recorded yet')).toBeVisible();
+    await expect(page.locator('dt', { hasText: /^Rank$/ })).toHaveCount(0);
+});
+

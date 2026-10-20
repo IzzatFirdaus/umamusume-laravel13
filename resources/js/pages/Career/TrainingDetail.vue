@@ -465,6 +465,7 @@ const capFor = (label: string): number =>
                     :deck-recorded="props.deck.recorded"
                     :chosen="choice === option.choice"
                     :turn="props.write.turn"
+                    :has-previous-turn="props.write.previous !== null"
                     @train="choose(option.choice)"
                 />
             </div>
