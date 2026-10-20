@@ -67,3 +67,20 @@ Phase 8 closes 2026-10-21 with 8.1/8.2/8.4/8.7/8.8 landed or no-op, 8.3 partial,
 8.6's full gate classification unperformed in this pass. Deferred items are tracked with their
 unblocking conditions above. The arc's remaining work is the deferred-owner queue and the new scope
 the docs landing introduced.
+## §3a — Step 9 Feature classification (2026-10-21, HEAD 7667efab)
+
+The Feature suite: **7 failed / 1883 passed** (31414 assertions). build/typecheck/lint:ui green.
+The browser walk (npx playwright test) has not run this pass.
+
+| # | Test > case | Classification | Evidence |
+|---|---|---|---|
+| 1 | CareerBuildTargetTest > "keeps scenario name/target vocabulary out" | arc-caused | `de7dccb6` retired the four-glyph contract; test pins old vocabulary |
+| 2 | CareerResultTest > "offers Save Veteran as a real door with its url" | arc-caused | `ad8dc777` "align surfaces after F2 redirect" changed the door/url copy |
+| 3 | CareerSectionNavTest > "renders an unreachable section as a span" | arc-caused | `1e3c5075` added the training gate; the test's unreachable-section assumption predates it |
+| 4 | CareerSectionNavTest > "leaves the existing Cockpit identity card alone" | arc-caused | `48f2bfeb` renamed CareerHeader.vue -> CockpitIdentityCard.vue; the test still file_get_contents the old path |
+| 5 | RenderedCopyHygieneTest > "no em/en dash in rendered copy" | pre-existing | dash copy drift (`dfef6c7f`, `4777c811`) |
+| 6 | UiHygieneTest > "no repository identifier" | peer-owned | Skills/Show.vue:118,160 ADR citations from `c61ef815` (peer skills) |
+| 7 | UnityCupSurfacesTest > "dual-value readout" | arc/peer-caused | team-figure title no longer contains team_rank_ladder (`d2ff6753`, `4777c811`) |
+
+Step 14 (hidden-red audit) is the fix dispatch for #1-#4 (#5 and #7 need a source-vs-test ruling;
+#6 is peer-owned, report-only).
