@@ -55,7 +55,7 @@ human reading per file, which at 129 files including a 535 KB `SCREEN_SPEC.md` a
    and `routes/web.php:276` says the artwork route is registered in `bootstrap/app.php` outside the `web` group —
    so `artwork.show` was falsely counted absent. Adding `bootstrap/app.php` took the parsed set 84 → **85**.
 2. **`.lstrip(".\\/")` ate the leading dot of dot-directories.** `lstrip` strips *every* leading character in the
-   set, so `.ai/rules/index.md` became `ai/rules/index.md` and every dot-directory cite read ABSENT. Direct check:
+   set, so `.ai/rules/index.md` became ai/rules/index.md and every dot-directory cite read ABSENT. Direct check:
    `.ai/rules/index.md` is **PRESENT**. Fixed → absent-path rows 3,206 → **3,032**.
 
 The lesson is the same one `AGENTS.md` §9 keeps teaching: an instrument that cannot fail, or fails silently, is
@@ -74,7 +74,7 @@ not evidence. Neither bug was visible until a known-present file was reported ab
 
 | Bucket | Rows | Is it a finding? |
 |---|---|---|
-| INTENTIONAL | 85 | **No.** `storage/` backups and snapshots, `.scratch-uma/` cited evidence, `test-results/`, `public/build/`, plus `SECURITY.md` and `config/inertia.php` — both of which `AGENTS.md` §12 and §18 state do **not** exist |
+| INTENTIONAL | 85 | **No.** `storage/` backups and snapshots, `.scratch-uma/` cited evidence, `test-results/`, `public/build/`, plus SECURITY.md and `config/inertia.php` — both of which `AGENTS.md` §12 and §18 state do **not** exist |
 | PREFIX-RELATIVE | 210 | **No.** Instrument artifact: `Support/Builder.vue` resolves under `resources/js/pages/`. The cite is short, not wrong |
 | BASENAME-MISSING | 1,030 | **Candidate.** A bare filename found nowhere — `CONSTRAINTS.md` (201×), `PLAN.md` (58×), `StatBand.vue` (17×), `welcome.blade.php` (16×), `UraPanel.vue` (10×) |
 | GENUINE | 1,707 | **Candidate.** A full path from a known root that is absent — `docs/research-scratch/DESIGN-CORPUS.md` (73×), `docs/research-scratch/GOVERNANCE.md` (56×), `resources/views/runs/show.blade.php` (27×) |
@@ -105,7 +105,7 @@ Every row below was **verified by direct existence check this pass**, not inferr
 | `resources/js/trainee-combobox.ts` | `AUDIT-AND-VERIFICATION.md:918` | 19 | Absent |
 | `resources/js/app.ts` / `app.js` | `frontend-development-plan.md:291`, `AUDIT-AND-VERIFICATION.md:629` | 20 | Both absent. `AGENTS.md` §6 names `resources/js/spa.ts` as the entry; the plan cites the pre-2.0 entry |
 | `tools/screenshots.py` + `screenshots_selftest.py` | `PROCESS-PLANS.md:7333` | 22 | Both absent |
-| `docs/proposals/provenance-and-absence-contracts.md` | `docs/audits/rice-shower-unity-cup-round2-reconciliation.md:1511` | 15 | `D` in the working tree — tracked, deleted uncommitted |
+| docs/proposals/provenance-and-absence-contracts.md | `docs/audits/rice-shower-unity-cup-round2-reconciliation.md:1511` | 15 | `D` in the working tree — tracked, deleted uncommitted |
 | `App\Actions\UpsertCharacterCard` | `CATALOG-ROSTER-WORKSTREAM.md:2016` | 1 class | Absent. The only genuine absent class in the corpus |
 | `route('run')` | `frontend-development-plan.md:1249` | 1 route | Absent against the 85 parsed route names. Either a prose abbreviation or a stale name |
 

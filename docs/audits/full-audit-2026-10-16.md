@@ -507,8 +507,8 @@ re-validated against the current 137-path dirty tree. Stage 3 owns re-validation
 
 Two source-numbering corrections found: the fidelity doc's Track 1 / Track 2 / questions are §5, §6 and §9;
 the ux-laws questions are §10 and its four-law gap §2.1, both as cited. Three consolidated audits
-(`ux-laws-report-cockpit-wizard-2026-10-13.md`, `remaining-screens-ui-audit-2026-10-13.md`,
-`setup-wizard-ui-audit-2026-10-12.md`) are **no longer files** — folded verbatim into
+(ux-laws-report-cockpit-wizard-2026-10-13.md, remaining-screens-ui-audit-2026-10-13.md,
+setup-wizard-ui-audit-2026-10-12.md) are **no longer files** — folded verbatim into
 `docs/research-scratch/AUDIT-AND-VERIFICATION.md` (anchors `:8726`, `:9154`, `:9551`, `:10204`), so all such
 rows cite the master.
 

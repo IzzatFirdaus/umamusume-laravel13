@@ -1107,7 +1107,7 @@ Reachability: ✅ = a composer or npm script invokes it; ➡ = reached through t
 | lore / lore-code | `git grep` stages | composer `lore`, `lore-code` | parity pinned by `LoreGateParityTest` |
 | audit | composer+npm audit | C-8 commands | ok |
 
-The Makefile header comment cites `CONTEXT.md` and root `CONSTRAINTS.md`; **neither exists at HEAD** — both folded (CONSTRAINTS into `GOVERNANCE.md`, whose registry text still cites "root `CONSTRAINTS.md`" at `:453`). The header's own caveat — "Local-only trainer tool. Windows: run through Git Bash." — matches `AGENTS.md` §10's statement that GNU `make` cannot run here; the file survives as reference, and `LoreGateParityTest` keeps its two lore targets byte-honest against `tools/lore.php` from the other side.
+The Makefile header comment cites CONTEXT.md and root `CONSTRAINTS.md`; **neither exists at HEAD** — both folded (CONSTRAINTS into `GOVERNANCE.md`, whose registry text still cites "root `CONSTRAINTS.md`" at `:453`). The header's own caveat — "Local-only trainer tool. Windows: run through Git Bash." — matches `AGENTS.md` §10's statement that GNU `make` cannot run here; the file survives as reference, and `LoreGateParityTest` keeps its two lore targets byte-honest against `tools/lore.php` from the other side.
 
 ### Two artifact findings worth naming
 

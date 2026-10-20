@@ -20,7 +20,7 @@ Document 1's numbering, the plan-1.xx alias appears in brackets.
   touched.
 - The plan-of-record §for the slice being dispatched.
 - `frontend-fidelity-2026-10-13.md` §2.3, §2.4, §6, §7 — the Track 1 / Track 2 split.
-  Note: `frontend-design-2026-10-13.md` is **absent from the tree**; the file the plan
+  Note: frontend-design-2026-10-13.md is **absent from the tree**; the file the plan
   means is `frontend-fidelity-2026-10-13.md`. Reported by an earlier dispatch and
   corrected here.
 
@@ -608,7 +608,7 @@ Per Document 2 §8.1–8.8.
 Paste this into Qoder. It cites the file; it does not repeat the file.
 
 ```
-Read `.scratch-uma/dispatch-2026-10-17/implementation-backlog.md` in full, then read
+Read .scratch-uma/dispatch-2026-10-17/implementation-backlog.md in full, then read
 `docs/proposals/execution-ledger-2026-10-17.md` §8 and §9 for the current state.
 
 Execute exactly one slice: the first slice in the backlog's §E, in phase order, that is
@@ -644,7 +644,7 @@ If the first eligible slice is blocked, skip it and state the skip. Do not subst
 
 If you prefer a single dispatch that also names the concrete first three slices, use this instead of the above block:
 
-> Read `.scratch-uma/dispatch-2026-10-17/implementation-backlog.md` and `docs/proposals/execution-ledger-2026-10-17.md` in full. Then: premise-check per backlog §A, skip anything in §B already satisfied, skip anything in §C or §D, and execute the first three Phase 0 slices in §E (limit 3 per batch). Recommended order for this dispatch: **0.11** (`stepAbsent`), **0.12** (`<dt>/<dd>` without `<dl>`), **0.7** (encoding) — all three are Pest-gated or component-gated and add no red debt. Each is one commit, path-scoped, per its named message. Quote each test tail; append the ledger rows; state blockers; do not touch a held file.
+> Read .scratch-uma/dispatch-2026-10-17/implementation-backlog.md and `docs/proposals/execution-ledger-2026-10-17.md` in full. Then: premise-check per backlog §A, skip anything in §B already satisfied, skip anything in §C or §D, and execute the first three Phase 0 slices in §E (limit 3 per batch). Recommended order for this dispatch: **0.11** (`stepAbsent`), **0.12** (`<dt>/<dd>` without `<dl>`), **0.7** (encoding) — all three are Pest-gated or component-gated and add no red debt. Each is one commit, path-scoped, per its named message. Quote each test tail; append the ledger rows; state blockers; do not touch a held file.
 
 ---
 

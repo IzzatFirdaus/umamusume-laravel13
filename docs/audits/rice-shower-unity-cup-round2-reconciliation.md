@@ -853,7 +853,7 @@ for, and it is why the walk is worth repeating once the bridge and Phase 4 are c
 
 **See the dated correction under the W2 entry itself, above.** It carries the two-commit attribution
 (`5876f64` 17:54, then `6fa0d01` 18:12, the later break masking the earlier one), the 9 insertions / 3
-deletions fact against the plan's "one line", and the reusable `error-context.md` finding. This section records
+deletions fact against the plan's "one line", and the reusable error-context.md finding. This section records
 only what the landing added, so no number is stated twice in this register.
 
 **The repair.** `tests/browser/career-legacy-deck-steps.spec.ts`, 9 insertions and 3 deletions, test-only. The
@@ -1508,7 +1508,7 @@ worktree delta against HEAD empty afterwards.
   calls itself "a second continuous session on the same day as the first pass". That is exactly the kind of
   disagreement the register exists to hold, so it is recorded here and left for its author or the owner to
   resolve, not smoothed over in a docs commit.
-- `docs/proposals/provenance-and-absence-contracts.md` carries an uncommitted **48-line §22, "Phase G preflight,
+- docs/proposals/provenance-and-absence-contracts.md carries an uncommitted **48-line §22, "Phase G preflight,
   executed 2026-10-11, measured at `5d26b49`"**. It was already dirty when this session opened, its subject is
   the G prompt set and §20(h) ownership rather than the UX reconciliation, and its authorship cannot be settled
   from inside this session. The task's own stop condition applies: where a file cannot be shown to belong to this

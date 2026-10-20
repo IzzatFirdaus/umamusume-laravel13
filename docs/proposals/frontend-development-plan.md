@@ -880,7 +880,7 @@ and any `recommendations` that imply prediction rendered as named absences where
 ### 8.1 D1 — Dashboard enrichment (SCREEN-001): slice plan
 
 The two bite-sized Phase D slice plans this section promises are filed here as they were written.
-Embedded 2026-10-06 from `.scratch-uma/D1-dashboard-plan.md`, headings demoted one level.
+Embedded 2026-10-06 from .scratch-uma/D1-dashboard-plan.md, headings demoted one level.
 
 Slice row: plan §8 D1. Depends on C1 (BuildTarget) and C3 (veterans), both landed.
 Authority: landed ADRs > AGENTS.md > plan > design-2.0 / screen-spec-2.0.
@@ -966,7 +966,7 @@ Ruleset line reads the **shared** `app.ruleset` (null) in the component, not a s
 
 ### 8.2 D2 — Scenario Selection + SetupLayout (SCREEN-002): slice plan
 
-Embedded 2026-10-06 from `.scratch-uma/D2-wizard-plan.md`, headings demoted one level. D2 sets the wizard contract D3 to D7 inherit, so its persistence decision is the one a later slice reads first.
+Embedded 2026-10-06 from .scratch-uma/D2-wizard-plan.md, headings demoted one level. D2 sets the wizard contract D3 to D7 inherit, so its persistence decision is the one a later slice reads first.
 
 Depends on: nothing (plan §8). Sets the wizard contract D3–D7 build on.
 
@@ -1108,7 +1108,7 @@ owner applies those edits, the panel's provenance moves with them, not before.
 
 ### 8.4 D3 — Trainee Selection + Trainee Profile (SCREEN-003 / SCREEN-004): slice plan
 
-The third and fourth Phase D bite-sized slice plans, embedded 2026-10-06 from `.scratch-uma/D3-trainee-plan.md`, headings demoted one level. D3 is where the wizard contract actually got set, because at its verification point D2 had not landed; where its text differs from §8.2, this section is the record of what shipped.
+The third and fourth Phase D bite-sized slice plans, embedded 2026-10-06 from .scratch-uma/D3-trainee-plan.md, headings demoted one level. D3 is where the wizard contract actually got set, because at its verification point D2 had not landed; where its text differs from §8.2, this section is the record of what shipped.
 
 Depends on D2, which is **not landed** (`resources/js/pages/Career/` does not exist; only
 `resources/js/layouts/AppLayout.vue`). Verified on 2026-10-06 at `40c91d4`. So D3 carries the
@@ -1240,7 +1240,7 @@ No new package. No migration. No ADR.
 
 ### 8.5 D4 — Build Target + ProvenanceBadge (SCREEN-005): slice plan
 
-The fifth Phase D bite-sized slice plan, embedded 2026-10-06 from `.scratch-uma/D4-build-target-plan.md`, headings demoted one level. Its four open questions and its two un-built conflicts are the items a later slice or the owner reads first.
+The fifth Phase D bite-sized slice plan, embedded 2026-10-06 from .scratch-uma/D4-build-target-plan.md, headings demoted one level. Its four open questions and its two un-built conflicts are the items a later slice or the owner reads first.
 
 Depends on **C1 only**, which is landed (`BuildTargetPayload`, `StoreBuildTargetRequest`,
 `build_target` column, `runs.build-target.update`). D2/D3 are unbuilt, so this slice does **not**
@@ -1647,7 +1647,7 @@ evidence — `UnityCupPanelTest`, `unity-cup-panel.spec.ts`, the `team_race` / `
 "Not built, and why" section's reading — that recording team rank or burst states has no UI write, and
 the capture schema proposal of `SCREEN_SPEC.md` §7-6 stays the owner's — is the half this close-out
 keeps live: no write path exists on this tree, the panel is read-only, and the owner's call on the
-`unity-cup-capture.md` schema proposal is not made by any Phase E slice. The tree state this pass
+unity-cup-capture.md schema proposal is not made by any Phase E slice. The tree state this pass
 measures is the same state the plan's body describes; the close-out is a landing note, not a
 re-description._
 
@@ -1655,7 +1655,7 @@ re-description._
 
 ### 9.2 E2 — URA panel (SCREEN-014): slice plan
 
- Embedded 2026-10-07 from `docs/research-scratch/E2-URA-PANEL-2026-10-07.md`, headings demoted one level.
+ Embedded 2026-10-07 from docs/research-scratch/E2-URA-PANEL-2026-10-07.md, headings demoted one level.
 
  Written before code, per the brief's PLAN PHASE. Read against the tree at the E1 landing (browser gate
  green: `npm run build` exit 0; `scenario-panel.spec.ts` 8 passed).

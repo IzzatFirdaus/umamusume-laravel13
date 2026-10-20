@@ -25,7 +25,7 @@ imported into app data, config, or UI copy until a Global release date exists.
 >    `PRD.md` §6 and the Global-only audience ruling both stand against it.
 > 3. **This is reference material for a possible future phase**, written so that the phase does not
 >    have to re-derive the mechanics or repeat the terminology errors.
-> 4. It is **not** one of the four scenarios `docs/design-research/SCENARIO-DIFFERENCES.md` compares,
+> 4. It is **not** one of the four scenarios `docs/research-scratch/DESIGN-CORPUS.md` compares,
 >    and no scenario-composition rule (D-220 family) should be widened for it yet.
 
 ## Lore framing, for the Guardian
