@@ -333,6 +333,11 @@ function confirmImport(): void {
                     @change="onFile"
                 />
 
+            <!-- The request's own HEADERS joined for reading, while the paste field's placeholder carries
+                 the same list joined for pasting. Restored: `63d1cdd2` dropped this line as a stale change
+                 while `run-import.spec.ts:53` kept asserting it, which left the tree red. -->
+            <span class="font-mono text-xs text-ink-muted">{{ headers.join(', ') }}</span>
+
             <BaseTextarea
                     :model-value="form.csv"
                     id="import-csv"
