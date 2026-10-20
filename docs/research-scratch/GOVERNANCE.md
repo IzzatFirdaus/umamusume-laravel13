@@ -10,7 +10,7 @@ This master file is compiled from 7 source files, embedded verbatim with heading
 4. `docs/research-scratch/screenshot-registry/README.md`
 5. `docs/deprecated/frontend-review/2026-09-28/DECISIONS-NEEDED.md`
 6. `docs/deprecated/frontend-review/2026-09-28/RESOLUTIONS.md`
-7. `CONSTRAINTS.md` (root quality bar C-1 to C-9, 48 lines, added 2026-10-03 in Round 8; see the
+7. `docs/research-scratch/GOVERNANCE.md` (root quality bar C-1 to C-9, 48 lines, added 2026-10-03 in Round 8; see the
    section "CONSTRAINTS.md (root quality bar, C-1 to C-9)" at the end of this file)
 
 **Dating note (2026-10-09):** This master cites several `docs/design-research/` paths that were consolidated and
@@ -19,16 +19,16 @@ removed when this master was committed. The design rules from `docs/research-scr
 now lives in §"DESIGN.md". These citations are dated records of where the source evidence sat at measurement time
 and are not actionable on disk.
 
-**Round 8 (2026-10-03), owner-authorized:** the root `CONSTRAINTS.md` is now a pointer stub whose
+**Round 8 (2026-10-03), owner-authorized:** the root `CONSTRAINTS.md` is now a pointer stub whose <!-- census: quoted-original -->
 binding text is section 7 above. The gate precedence chain is unchanged (R-6 still puts the bar
-first); it resolves through the stub. The `AGENTS.md` line "Read `CONSTRAINTS.md` before writing
+first); it resolves through the stub. The `AGENTS.md` line "Read `CONSTRAINTS.md` before writing <!-- census: quoted-original -->
 code" reaches the rules one hop later than before and reaches all of them.
 
 ---
 
 ## SOURCE-OF-TRUTH.md
 
-**Governance infrastructure for the Umamusume Trainer Desk repository.** This document consolidates the binding rules from `PRD.md`, `ARCHITECTURE.md`, `CLAUDE.md`, `CONSTRAINTS.md`, `AGENTS.md`, `UMAMUSUME_REFERENCE.md`, and `SKILL_REGISTRY.md` into a single source of truth for agents and human developers. Violations are hard failures.
+**Governance infrastructure for the Umamusume Trainer Desk repository.** This document consolidates the binding rules from `PRD.md`, `ARCHITECTURE.md`, `CLAUDE.md`, the root quality bar (this document's section "CONSTRAINTS.md (root quality bar, C-1 to C-9)"), `AGENTS.md`, `UMAMUSUME_REFERENCE.md`, and `SKILL_REGISTRY.md` into a single source of truth for agents and human developers. Violations are hard failures.
 
 > ### Derivation and regeneration trigger
 >
@@ -46,7 +46,7 @@ code" reaches the rules one hop later than before and reaches all of them.
 > | 10. ADR-0005 row | "Proposed, not built" | **DECLINED for Phase 1**, owner ruling R37, 2026-09-28, in `docs/adr/0005-support-card-entities.md`'s own Status line |
 > | 10. ADR-0002 row | "Validation bound widened to 0..2000" | Accepted as a decision and **not implemented**: `app/Http/Requests/StoreTurnEntryRequest.php:49-50` still validates `between:0,1200` |
 > | 12. Scenario guides | `docs/scenarios/01`–`08` | Nine files. `09-global-race-calendar.md` is 751 lines and is the read path the race grid and picker now use |
-> | 12. Lore rules | `AGENTS.md` §5, `CONSTRAINTS.md` C-4 | The rules live in `AGENTS.md` §5 "Non-negotiables" and in this file's §2 C-4. `CLAUDE.md` held a lore section until `228011e` (2026-10-04) and has not held the rules since |
+> | 12. Lore rules | `AGENTS.md` §5, `CONSTRAINTS.md` C-4 | The rules live in `AGENTS.md` §5 "Non-negotiables" and in this file's §2 C-4. `CLAUDE.md` held a lore section until `228011e` (2026-10-04) and has not held the rules since | <!-- census: quoted-original -->
 > | 12. Skill registry | `.agents/skills.json` (machine), `SKILL_REGISTRY.md` (human summary) | `.agents/` is ignored, and root `SKILL_REGISTRY.md` is a hand-maintained pointer |
 > | 12. Migrations | `2026_09_26_162814`–`2026_09_27_121500` | 34 migration files are tracked, running to `2026_09_29_182820_create_umamusume_profiles_table.php` |
 >
@@ -406,9 +406,9 @@ The skill registry's machine half is **`.agents/skills.json`**; the hand-maintai
 | Mechanics reference    | `docs/UMAMUSUME_REFERENCE.md` (8 sections, 46 conflict rows)                                                                                                  |
 | Scenario guides        | `docs/scenarios/01`–`08` (07=stub, 08=JP-Only)                                                                                                                |
 | Design system          | `DESIGN.md` (root), `docs/research-scratch/DESIGN-CORPUS.md` (UI contract)                                                                  |
-| Quality bar            | `CONSTRAINTS.md` (root), `docs/research-scratch/DESIGN-CORPUS.md` (additive)                                                                                     |
+| Quality bar            | this file (root bar), `docs/research-scratch/DESIGN-CORPUS.md` (additive)                                                                                        |
 | Agent roles            | `AGENTS.md`                                                                                                                                                   |
-| Lore rules             | `AGENTS.md` §5, `CONSTRAINTS.md` C-4                                                                                                                          |
+| Lore rules             | `AGENTS.md` §5, this file's §"CONSTRAINTS.md" C-4                                                                                                             |
 | Skill registry         | `.agents/skills.json` (machine), `SKILL_REGISTRY.md` (human summary)                                                                                            |
 | ADRs                   | `docs/adr/0001`–`0006`                                                                                                                                        |
 | Fetch pipeline         | `app/Services/DataPipeline/` (Contracts, Parsers, PipelineRunner, SourceFetcher, CrossReferenceMatcher, NameNormalizer)                                       |
@@ -424,18 +424,18 @@ The skill registry's machine half is **`.agents/skills.json`**; the hand-maintai
 > - **ADRs** read `docs/adr/0001`–`0006`; the tree carries **0001–0024** (see the §10 correction above).
 > - **Migrations** read the range ending `2026_09_27_121500`; `git ls-files database/migrations | wc -l` =
 >   **60** tracked migration files.
-> - **Lore rules** read "`CLAUDE.md` (top section), `CONSTRAINTS.md` C-4". Verified on this tree
+> - **Lore rules** read "`CLAUDE.md` (top section), `CONSTRAINTS.md` C-4". Verified on this tree <!-- census: quoted-original -->
 >   2026-10-12: `CLAUDE.md` **is tracked** (`git ls-files --error-unmatch CLAUDE.md` exits 0) and is **not
 >   gitignored** (`git check-ignore CLAUDE.md` exits 1), so the row stands as written and no
 >   "not present in a fresh clone" note applies. `AGENTS.md` §5 and `GOVERNANCE.md` §2 remain the live
->   lore authority; the row's citation to `CLAUDE.md` and to `CONSTRAINTS.md` C-4 resolves.
+>   lore authority; the row's citation to `CLAUDE.md` and to `CONSTRAINTS.md` C-4 resolves. <!-- census: quoted-original -->
 
 > **Correction 2026-10-20 (dated, correction forward).** The 2026-10-12 sentence stands: "`AGENTS.md`
 > §5 and `GOVERNANCE.md` §2 remain the live lore authority". Three rows have since been restated
 > at the owner they name, and one heading's dead pointer is replaced.
 >
 > - **Lore rules** (the §12 row and the source-of-truth row) read "`CLAUDE.md` (top section),
->   `CONSTRAINTS.md` C-4" and now read "`AGENTS.md` §5, `CONSTRAINTS.md` C-4". The basis is dated and
+>   `CONSTRAINTS.md` C-4" and now read "`AGENTS.md` §5, `CONSTRAINTS.md` C-4". The basis is dated and <!-- census: quoted-original -->
 >   provable: `228011e` (2026-10-04) rewrote `CLAUDE.md`, and from that commit its top section has
 >   named the lore gate only as a topic of `AGENTS.md`, never as the section holding the rules. The
 >   2026-10-12 finding that `CLAUDE.md` is tracked and not gitignored still holds; the 2026-10-12
@@ -472,11 +472,11 @@ The skill registry's machine half is **`.agents/skills.json`**; the hand-maintai
 
 ## GATE-REGISTRY.md
 
-This registry and root `CONSTRAINTS.md` are the source of truth for global gates.
+This registry and the root quality bar in `docs/research-scratch/GOVERNANCE.md` are the source of truth for global gates.
 Slice plans such as `PLAN.md` may add slice-specific exit criteria but cannot
 override C-1 through C-8 or G-60. Precedence for gate questions:
 
-1. `CONSTRAINTS.md` (the bar; never relaxed to pass a check)
+1. `docs/research-scratch/GOVERNANCE.md` (the bar; never relaxed to pass a check)
 2. `docs/research-scratch/GOVERNANCE.md` (this file: how each gate is run, evidence, exceptions)
 3. ADRs (`docs/adr/`)
 4. Root `DESIGN.md`
@@ -510,7 +510,7 @@ Evidence | Exceptions | Owner | Status
 
 ### G-60: retired-literal scoping (codified per owner ruling + D-286)
 
-- **Checked (active) paths:** root `DESIGN.md`, root `CONSTRAINTS.md`, `app/`,
+- **Checked (active) paths:** root `DESIGN.md`, the root quality bar in `docs/research-scratch/GOVERNANCE.md`, `app/`,
   `resources/`, `config/`, routes, database, tests, shipped prototypes.
 - **Ignored (historical) paths:** `docs/adr/**`,
   `docs/design-research/MECHANICS-TRANSLATION-TRIAGE.md`,
@@ -627,7 +627,7 @@ Makefile gate targets: lore, lore-code (git grep); tests/lint/stan as before
 
 ### Changelog
 
-- 2026-09-28: registry created (T4). C-7 note added to `CONSTRAINTS.md`
+- 2026-09-28: registry created (T4). C-7 note added to `CONSTRAINTS.md` <!-- census: quoted-original -->
   referencing ADR-0007. gate.py relocated. G-60 scoping codified from the owner
   ruling + D-286. Disclosure pattern codified from the settled `N/A` ruling.
 
@@ -638,7 +638,7 @@ Makefile gate targets: lore, lore-code (git grep); tests/lint/stan as before
   `app/Http/Controllers/PreferenceController.php` — 138 lines of another session's
   uncommitted work — from a slice that never opened the file. This is a correction
   forward; the superseded command is preserved here rather than silently rewritten.
-  The same replacement is made in the `CONSTRAINTS.md` section below (the C-3 row
+  The same replacement is made in the `CONSTRAINTS.md` section below (the C-3 row <!-- census: quoted-original -->
   and verification-sequence step 3), and step 6 there now names `composer lore`
   and `composer lore-code` (KI-4: GNU make does not run on this host).
 
