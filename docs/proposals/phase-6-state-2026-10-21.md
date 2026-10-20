@@ -82,3 +82,5 @@ Companion reconciliation: `veterans.spec.ts:74` narrowed from `count(10)` to enu
 destinations. The 11th link was a hardcoded "Data sources" footer link (`AppLayout.vue:339`,
 `href="/database/sources"`) inside the aside, next to the ten-item nav loop — not a nav
 destination, but a live desktop link, so the whole-aside count was brittle to any addition.
+
+> **Dated erratum, 2026-10-21.** The 6.4 close recorded `dashboard.spec.ts:370`'s walk red as intra-file layout-preference contamination (`:300`/`:338` writing a preference `:370` reads). This is corrected: the case runs green in file order on both a fresh scratch DB and a reused one, with no reset applied. The red most plausibly resolved when the side agent's responsive commits landed between the 6.4 walk and the `Phase 8.7 remainder` re-diagnosis. No fix was ever needed. The persisted layout preference is server-side (`useLayout.ts:35` reads `page.props.preferences.settings.dashboard_layout`; `PreferenceController.php:64-65,135-143` stores `standard|compact|wide`), so it does survive across runs — but the `:370` case does not depend on the state left by `:300`/`:338` in the current tree.
