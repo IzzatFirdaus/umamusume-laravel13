@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { deleteRun } from '../utils/delete-run';
+import { recordTurns } from '../utils/record-turns';
 
 /*
  * Rendered-copy, state and accessibility evidence for SCREEN-001, the 2.0 landing screen
@@ -14,12 +15,13 @@ import { deleteRun } from '../utils/delete-run';
  * it over HTTP in `afterEach` (`tests/utils/delete-run.ts`), so this spec leaves the database
  * exactly as it found it (the `run-detail.spec.ts` pattern).
  *
- * What is not browser-asserted, and why: the populated numbers on the card (a real turn count, a
- * recorded Energy, a career position). Reaching them needs a turn logged through the run page's
- * guided rail, which is `run-detail.spec.ts`'s surface; `DashboardTest` pins the props that drive
- * them, including the position arithmetic on the client's 24-turn grid. A newly created run has
- * logged nothing, so the states this spec can reach on one are the absent ones, which is where the
- * copy matters most.
+ * What is not browser-asserted, and why: the recorded Energy and the career position on the card.
+ * The turn count IS reached now: the rail case logs its turns over `runs.turns.store` with
+ * `tests/utils/record-turns.ts`, the route-level fixture the career specs already use, because no
+ * rendered surface creates a turn any more. `DashboardTest` pins the props that drive the rest,
+ * including the position arithmetic on the client's calendar grid. A newly created run has logged
+ * nothing, so the states this spec can reach on one are the absent ones, which is where the copy
+ * matters most.
  *
  * Axe coverage is provided by `tests/browser/accessibility.spec.ts`: `@axe-core/playwright` is installed
  * and scans pages against `wcag2a`, `wcag2aa`, and `wcag21aa`; this spec retains the hand-rolled checks
@@ -212,6 +214,36 @@ test('weight-emphasizes the active career name over the other card headings', as
     for (const region of ['QUICK ACTIONS', 'DATA STATUS']) {
         await expect(page.getByRole('region', { name: region }).getByRole('heading')).toHaveClass(/text-lg/);
     }
+});
+
+test('reads the career progress as one mark per career turn', async ({ page }) => {
+    const runUrl = await createActiveRun(page, 'unity_cup');
+    const runId = /\/training-runs\/(\d+)/.exec(runUrl)?.[1];
+
+    expect(runId, 'the created run carries no id').toBeDefined();
+
+    // Three logged turns, so the rail has filled marks and a mark to stand on. They go over the
+    // route that owns the write, because no rendered surface creates a turn any more.
+    await recordTurns(page, runId as string, 3);
+
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+
+    const rail = page.locator('ol[aria-label="Career progress"]');
+
+    // One mark per career turn. The career is three career years of the client's 24-turn grid, so
+    // the rail carries seventy-two marks and not the twenty-four of a single year: a bar measured
+    // against one year read as a hundred percent from turn twenty-four onward and then stopped.
+    await expect(rail.getByRole('listitem')).toHaveCount(72);
+
+    // The logged turns are the filled marks, and the last of them is where the career stands.
+    await expect(page.locator('ol[aria-label="Career progress"] li.bg-primary-action')).toHaveCount(3);
+    await expect(rail.getByRole('listitem').nth(2)).toHaveAttribute('aria-current', 'step');
+    await expect(rail.getByRole('listitem').nth(1)).not.toHaveAttribute('aria-current', 'step');
+
+    // The text names the position, and the turns left are a real signal rather than decoration.
+    await expect(page.getByText('Turn 3 of 72')).toBeVisible();
+    await expect(page.getByText('69 turns to go')).toBeVisible();
 });
 
 test('names the multi-career count only when a second career is live', async ({ page }) => {

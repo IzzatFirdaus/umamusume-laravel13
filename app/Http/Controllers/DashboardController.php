@@ -20,8 +20,9 @@ use Inertia\Response;
  * The Trainer Desk 2.0 landing screen (SCREEN-001, `docs/proposals/screen-spec-2.0.md`, `ADR-0020` §1).
  *
  * Thin: every value here is a stored fact, a config value, or a named absence. Nothing is derived
- * beyond the career position, which is the client's own 24-turn calendar grid read back from a
- * recorded turn count (`TrainingRun::careerYearForTurn`'s own divisor). Three things the brief's
+ * beyond the career position, which is the client's own calendar grid read back from a
+ * recorded turn count (`TrainingRun::careerYearForTurn`'s own divisor: twenty-four turns
+ * to a career year, three career years to a career). Three things the brief's
  * SCREEN-001 mockup asks for are deliberately absent, each for a stated reason:
  *
  * - **Recent Builds.** There is no "build" record and no query that lists one. A run is not a build
@@ -112,6 +113,13 @@ class DashboardController extends Controller
             'scenario_label' => $this->scenarioLabel($run),
             'position_label' => $this->positionLabel($turn),
             'turn' => $turn,
+            // The career's own length, for the turn rail: the client's grid is
+            // `TrainingRun::TURNS_PER_YEAR` turns per career year over the three career years
+            // (`RaceCatalogSlot::YEAR_JUNIOR` to `RaceCatalogSlot::YEAR_SENIOR`), which is the
+            // seventy-two turns `TrainingRun::nextTurnToPlay()` ends the career at. The
+            // post-December finale block sits outside that grid, so it is not counted. The view
+            // reads the number instead of typing it, so the rail and the model cannot disagree.
+            'total_turns' => TrainingRun::TURNS_PER_YEAR * RaceCatalogSlot::YEAR_SENIOR,
             'energy' => $strip['energy'],
             'resource' => $this->primaryResource($run, $strip),
             'team_rank' => $this->teamRank($run),

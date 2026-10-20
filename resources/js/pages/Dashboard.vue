@@ -61,6 +61,11 @@ interface ActiveCareer {
     position_label: string | null;
     /** Logged turns, the same reading the run page's resource strip takes. */
     turn: number;
+    /**
+     * The career's own length in turns. The client's grid is 24 turns to a career year over three
+     * career years, so a career is 72. The controller reads the number from the model's constants.
+     */
+    total_turns: number;
     energy: number | null;
     resource: { label: string; value: number | null; value_hint: string } | null;
     team_rank: { value: string | null; value_hint: string };
@@ -123,6 +128,40 @@ const DASHBOARD_CARD_IDS: ReadonlyArray<string> = [
     'data_status',
 ];
 const allCardsHidden = computed<boolean>(() => DASHBOARD_CARD_IDS.every((id) => hiddenCards.value.includes(id)));
+
+/*
+ * The turn rail. One mark per career turn, so the eye counts what is done instead of reading a
+ * fraction off a bar: at turn 1 of a seventy-two turn career a bar is one percent full and says
+ * nothing, while one filled mark out of seventy-two says exactly that.
+ *
+ * The length is the career's own grid, and the controller reads it from the model's constants
+ * (`TrainingRun::TURNS_PER_YEAR` turns per career year over the three career years, the finale
+ * block sitting outside the grid), so the rail cannot disagree with the model that ends the
+ * career. The denominator this replaces was 24, which is one career *year*: a bar filled against
+ * it sat at a hundred percent from turn twenty-four onward and then stopped moving.
+ */
+const totalTurns = computed<number>(() => props.activeCareer?.total_turns ?? 0);
+const turnMarks = computed<number[]>(() => Array.from({ length: totalTurns.value }, (_, index) => index + 1));
+const remainingTurns = computed<number>(() => Math.max(0, totalTurns.value - (props.activeCareer?.turn ?? 0)));
+// A number every twelve turns: a career year is twenty-four, so the labels mark the half-year and
+// the two ends, and a reader can place a turn on the rail.
+const turnLabels = computed<number[]>(() => {
+    const total = totalTurns.value;
+
+    if (total === 0) {
+        return [];
+    }
+
+    const labels = [1];
+
+    for (let mark = 12; mark < total; mark += 12) {
+        labels.push(mark);
+    }
+
+    labels.push(total);
+
+    return labels;
+});
 
 // Grid container class varies by layout preference (PLAN 6B.15).
 const gridClass = computed(() => {
@@ -278,22 +317,49 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                     />
                 </div>
 
-                <!-- Goal-Gradient: the 24-turn run reads as a bar, not only as a fraction. The
-                     element carries the role and the values; the fill is decoration. -->
+                <!-- The turn rail. One mark per career turn, filled up to the last logged one, and
+                     the mark the career stands on carries `aria-current`, so the position is named
+                     rather than implied. A list of marks and not a progressbar: the marks are
+                     discrete, and a bar measured against one career year sat at a hundred percent
+                     from turn twenty-four onward. -->
                 <div class="mt-4">
-                    <p class="text-xs font-medium text-ink-muted">Turn {{ props.activeCareer.turn }} / 24</p>
-                    <div
-                        role="progressbar"
-                        aria-label="Turn progress"
-                        :aria-valuenow="props.activeCareer.turn"
-                        aria-valuemin="0"
-                        aria-valuemax="24"
-                        class="mt-1 h-2 overflow-hidden rounded-pill bg-sunken"
+                    <div class="flex items-baseline justify-between text-xs">
+                        <span class="font-semibold text-ink-strong">
+                            Turn {{ props.activeCareer.turn }} of {{ totalTurns }}
+                        </span>
+                        <span class="text-ink-muted">{{ remainingTurns }} turns to go</span>
+                    </div>
+                    <ol
+                        role="list"
+                        aria-label="Career progress"
+                        class="mt-2 grid gap-0.5"
+                        :style="{ gridTemplateColumns: `repeat(${totalTurns}, minmax(0, 1fr))` }"
                     >
-                        <div
-                            class="h-full rounded-pill bg-brand-chrome transition-[width] duration-150 ease-out motion-reduce:transition-none"
-                            :style="{ width: `${Math.min(100, (props.activeCareer.turn / 24) * 100)}%` }"
+                        <li
+                            v-for="mark in turnMarks"
+                            :key="mark"
+                            :class="
+                                mark <= props.activeCareer.turn
+                                    ? 'h-4 rounded-sm bg-primary-action'
+                                    : 'h-4 rounded-sm border border-rule bg-raised'
+                            "
+                            :aria-current="mark === props.activeCareer.turn ? 'step' : undefined"
                         />
+                    </ol>
+                    <div
+                        aria-hidden="true"
+                        class="mt-1 grid text-xs text-ink-muted"
+                        :style="{ gridTemplateColumns: `repeat(${totalTurns}, minmax(0, 1fr))` }"
+                    >
+                        <span
+                            v-for="mark in turnLabels"
+                            :key="mark"
+                            class="whitespace-nowrap"
+                            :style="{
+                                gridColumnStart: mark,
+                                justifySelf: mark === totalTurns ? 'end' : 'start',
+                            }"
+                        >{{ mark }}</span>
                     </div>
                 </div>
 
