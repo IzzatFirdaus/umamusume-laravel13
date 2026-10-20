@@ -200,7 +200,12 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                          control. -->
                     <span class="flex items-center gap-3">
                         <ArtworkSlot :url="trainee.artworkURL" alt="" size="size-12" reserve />
-                        <Link :href="`/umamusume/${trainee.slug}`" class="text-lg font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">
+                        <!-- The hit area is the link's own: the row is not a target (the artwork slot
+                             carries no `href` and there is no row handler), so the name link is the only
+                             way into the detail. `min-h-11` grows that target to the house 44px bar
+                             (DESIGN.md Â§12, KI-29) without touching the type. This one is arc-class
+                             rather than an AA failure: it measured 28px, above the 24px floor. -->
+                        <Link :href="`/umamusume/${trainee.slug}`" class="inline-flex min-h-11 items-center text-lg font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">
                             {{ trainee.name }}
                             <span v-if="trainee.name_ja" lang="ja" class="ml-2 text-sm font-normal text-ink-muted">
                                 {{ trainee.name_ja }}

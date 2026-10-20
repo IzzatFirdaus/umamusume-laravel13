@@ -79,9 +79,17 @@ const props = defineProps<{
                     <p class="font-mono text-sm font-semibold text-ink-strong">{{ dataset.name }}</p>
 
                     <p class="mt-1 break-all text-sm text-ink">
+                        <!-- The URL is the only content of its paragraph, so the link's own hit area is
+                             the target. `min-h-11` grows it to the house 44px bar (DESIGN.md Â§12, KI-29);
+                             `inline-flex` keeps it on the text's own line, and the paragraph grows with
+                             it rather than the text being displaced. -->
+                        <!-- The URL is the only content of its paragraph, so the link's own hit area is
+                             the target. `min-h-11` grows it to the house 44px bar (DESIGN.md Â§12, KI-29);
+                             `inline-flex` keeps it on the text's own line, and the paragraph grows with
+                             it rather than the text being displaced. -->
                         <a
                             :href="dataset.url"
-                            class="underline"
+                            class="inline-flex min-h-11 items-center underline"
                             rel="noreferrer noopener"
                             target="_blank"
                         >{{ dataset.url }}</a>
@@ -135,7 +143,7 @@ const props = defineProps<{
                     <p v-if="dataset.url !== ''" class="mt-2 text-sm">
                         <a
                             :href="dataset.url"
-                            class="underline"
+                            class="inline-flex min-h-11 items-center underline"
                             rel="noreferrer noopener"
                             target="_blank"
                         >Open the publisher's page</a>

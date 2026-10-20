@@ -233,7 +233,10 @@ function goToPage(page: number): void {
                     reserve
                 />
 
-                <Link :href="card.url" class="font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">{{ card.name }}</Link>
+                <!-- The hit area is the link's own: the row is not a target (no `rowHref`, no row
+                     handler), so the name link is the only way into the detail. `min-h-11` grows that
+                     target to the house 44px bar (DESIGN.md Â§12, KI-29) without touching the type. -->
+                <Link :href="card.url" class="inline-flex min-h-11 items-center font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">{{ card.name }}</Link>
 
                 <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
 

@@ -196,7 +196,10 @@ function goToPage(page: number): void {
                 :key="skill.id"
                 class="flex flex-wrap items-baseline gap-x-2 gap-y-1 px-4 py-3 text-sm"
             >
-                <Link :href="`/skills/${skill.id}`" class="font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">{{ skill.name }}</Link>
+                <!-- The hit area is the link's own: the row is not a target (no `rowHref`, no row
+                     handler), so the name link is the only way into the detail. `min-h-11` grows that
+                     target to the house 44px bar (DESIGN.md Â§12, KI-29) without touching the type. -->
+                <Link :href="`/skills/${skill.id}`" class="inline-flex min-h-11 items-center font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">{{ skill.name }}</Link>
 
                 <!-- 18 of the 623 [Global] rows store the same string in both name columns, so the
                      second slot only appears when it carries something the first does not. -->
