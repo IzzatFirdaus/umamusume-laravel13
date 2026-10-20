@@ -519,10 +519,15 @@ const jumpToShop = (): void => {
 
         <!-- The page's own wayfinder (audit 2026-10-12 §3.6): anchors into the regions the screen
              already names, never tabs - SCREEN_SPEC.md §SCR-CAR-011 forbids hiding a region at a
-             breakpoint, and tabs hide panels by definition. Sticky from md up, the same widths the
-             wizard's step bar ruling chose; below md it scrolls with the page and nothing leaves
-             the accessibility tree. -->
-        <nav aria-label="On this page" class="mb-4 border-b border-rule bg-page py-1 md:sticky md:top-0 md:z-10 md:-mx-6 md:px-6">
+             breakpoint, and tabs hide panels by definition.
+
+             `md:sticky md:top-0 md:z-10` was here and is REMOVED, along with the sentence that claimed
+             it: the nav sits inside `main`, which carries `container-type: inline-size` (load-bearing
+             for this page's `@4xl:`/`@5xl:` grid), so the sticky containing block moves with the page
+             and the nav scrolled away with everything else. Retired rather than left as a no-op so the
+             source does not claim a behaviour the page does not have;
+             `tests/browser/containment.spec.ts` pins the current behaviour deliberately. -->
+        <nav aria-label="On this page" class="mb-4 border-b border-rule bg-page py-1 md:-mx-6 md:px-6">
             <ul class="flex flex-wrap gap-1 text-sm">
                 <li v-for="link in sectionLinks" :key="link.href">
                     <a :href="link.href" class="inline-flex min-h-11 items-center rounded-md px-3 text-ink hover:bg-raised hover:text-ink-strong transition-colors duration-150 ease-out">{{ link.label }}</a>

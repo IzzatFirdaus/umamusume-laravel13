@@ -1,0 +1,90 @@
+import { test, expect } from '@playwright/test';
+import { uraCompletedRun } from '../utils/ura-completed-run';
+
+/*
+ * The containment constraint, pinned.
+ *
+ * `main` in `AppLayout.vue` carries `container-type: inline-size` (the `@container` class), which is
+ * load-bearing: twenty-one files lay themselves out with the `@2xl:`/`@3xl:`/`@4xl:`/`@5xl:` variants and
+ * those resolve against that element rather than the viewport. The CONSEQUENCE is that `position: sticky`
+ * is a no-op for every descendant, because the sticky containing block is the containment ancestor rather
+ * than the scrollport.
+ *
+ * So this file asserts the CURRENT, DELIBERATE behaviour: these elements do NOT stick. It is a regression
+ * test that documents a limitation, not a test of a feature, and it exists so the retired classes cannot
+ * quietly come back as decoration.
+ *
+ * If you are here because an assertion failed, you may have fixed the containment. Then the right move is
+ * to invert these cases to assert sticking, and remove the retirement notes from `AppLayout.vue`,
+ * `SetupLayout.vue` and `Career/Cockpit.vue`. Fixing it is a design decision, not a cleanup.
+ */
+
+/** How far the element's top moved after scrolling the window from the top to `to` px. */
+async function driftAfterScrollTo(page: import('@playwright/test').Page, selector: string, to: number): Promise<number> {
+    const locator = page.locator(selector).first();
+    await expect(locator).toBeVisible();
+
+    // Reset to the top FIRST. Without this the second call measures from a page already scrolled by the
+    // first, so `before` and `after` are the same position and the drift reads 0 - which is what a broken
+    // measurement looks like, not what a sticky element looks like.
+    const reset = await page.evaluate(() => {
+        window.scrollTo(0, 0);
+        return window.scrollY;
+    });
+    expect(reset, 'the page did not return to the top before measuring').toBeLessThanOrEqual(2);
+
+    const before = await locator.evaluate((el) => el.getBoundingClientRect().top);
+    const scrolled = await page.evaluate((y) => {
+        window.scrollTo(0, y);
+        return window.scrollY;
+    }, to);
+
+    // The scroll has to have HAPPENED, or the measurement proves nothing at all.
+    expect(scrolled, `the page did not scroll to ${to}`).toBeGreaterThanOrEqual(to - 2);
+
+    const after = await locator.evaluate((el) => el.getBoundingClientRect().top);
+
+    return before - after;
+}
+
+test('the containment keeps the wayfinder and the summary strip from sticking', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(`/training-runs/${uraCompletedRun()}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // Both scroll away by the full distance. A sticky element would drift by ~0.
+    const wayfinder = await driftAfterScrollTo(page, 'nav[aria-label="On this page"]', 200);
+    const strip = await driftAfterScrollTo(page, '[aria-label="Run summary"]', 200);
+
+    expect(wayfinder, `the wayfinder drifted ${wayfinder}px, so something made it stick`).toBeGreaterThanOrEqual(190);
+    expect(strip, `the strip drifted ${strip}px, so something made it stick`).toBeGreaterThanOrEqual(190);
+});
+
+test('no retired sticky utility survives in a class attribute', async () => {
+    /*
+     * A SOURCE check, and it is here for a measured reason: the behaviour case above CANNOT test the
+     * retirement. Reintroducing `md:sticky` on the wayfinder leaves the DOM behaving identically, because
+     * the containment turns the class into a no-op - the proof was attempted and the case still passed
+     * with the class back. So the retirement is a SOURCE fact, and this is the assertion that can fail.
+     *
+     * It matches the utility inside a `class="..."` attribute only. The retirement notes in these files
+     * name the utilities in prose, and a blanket text scan would flag the very comments explaining the
+     * removal - the same trap the retired component name set in career-cockpit.spec.ts.
+     */
+    const fs = await import('node:fs');
+
+    // The two files this slice retired the claims from. `StickyFooter.vue` and `Veterans/Compare.vue`
+    // also use sticky positioning and are deliberately NOT in this list: the first is a primitive used
+    // by two pages and retiring its contract is its own decision, and the second positions sticky cells
+    // inside a table's own scroll container, which is a different containing block.
+    const retired: string[] = [
+        'resources/js/layouts/SetupLayout.vue',
+        'resources/js/pages/Career/Cockpit.vue',
+    ];
+
+    const offenders = retired.filter((file) =>
+        /class="[^"]*\bmd:sticky\b/.test(fs.readFileSync(file, 'utf8')),
+    );
+
+    expect(offenders, `a retired sticky utility came back in ${offenders.join(', ')}`).toEqual([]);
+});

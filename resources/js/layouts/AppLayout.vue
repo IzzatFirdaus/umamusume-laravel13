@@ -403,7 +403,22 @@ const moreIsCurrent = computed(() =>
             </header>
             <!-- The ratified shell measure (DESIGN.md:197-208): the error documents constrain
                  themselves to this width and the product shell now does too. The h1 above is the
-                 shell's, per DESIGN.md §2.2's 2026-10-17 amendment; nothing here repeats it. -->
+                 shell's, per DESIGN.md §2.2's 2026-10-17 amendment; nothing here repeats it.
+
+                 `@container` is `container-type: inline-size`, and it is LOAD-BEARING: twenty-one
+                 files lay themselves out with the `@2xl:`/`@3xl:`/`@4xl:`/`@5xl:` variants, which
+                 resolve against this element rather than the viewport. Do not remove it to make an
+                 element stick.
+
+                 Its CONSEQUENCE is that `position: sticky` is a NO-OP for every descendant of this
+                 `main`: the sticky containing block is the containment ancestor, not the scrollport,
+                 so a sticky child scrolls away exactly as a static one does. Every sticky claim that
+                 used to live under here has been retired rather than left in place - the wizard step
+                 bar (`SetupLayout.vue`), the "On this page" wayfinder (`Career/Cockpit.vue`), and the
+                 summary strip's own class. `tests/browser/containment.spec.ts` pins the current,
+                 deliberate behaviour, so a future containment fix updates that test instead of
+                 silently restoring nothing. Making sticky work here is a design decision, not a
+                 cleanup. -->
             <main id="main" data-layout-container class="@container" :class="['mx-auto min-w-0 w-full max-w-6xl flex-1 px-4 py-6 pb-24 md:px-8 md:pb-6', layoutWidthClass]">
                 <!-- The flash region is always mounted and carries only its text (WCAG 4.1.3): a live
                      region announces what changes inside it, so a region created in the same tick as its

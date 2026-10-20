@@ -139,8 +139,16 @@ onMounted(async () => {
         <!-- The step list is a labelled nav, and the current step carries `aria-current="step"`, so
              the position is announced rather than carried by the accent alone (WCAG 1.4.1). The visible
              count and the `sr-only` line are the same fact in two media: the number is a position, and
-             a screen reader should hear it before the list rather than after the sixth item. -->
-        <nav aria-label="Setup steps" class="mb-4 border-b border-rule pb-2 md:sticky md:top-0 md:z-10 md:-mx-6 md:bg-page md:px-6">
+             a screen reader should hear it before the list rather than after the sixth item.
+
+             `md:sticky md:top-0 md:z-10` was here and is REMOVED: it never did anything. This nav sits
+             inside the `AppLayout` `main`, which carries `container-type: inline-size` (load-bearing for
+             the `@3xl:`/`@4xl:` step layouts - see the note on `wrapperClass` above), so the sticky
+             containing block moves with the page instead of the scrollport and the nav scrolled away
+             with everything else. The class is retired rather than kept as a no-op so the source does
+             not claim a behaviour the page does not have. `tests/browser/containment.spec.ts` pins the
+             current behaviour deliberately. -->
+        <nav aria-label="Setup steps" class="mb-4 border-b border-rule pb-2 md:-mx-6 md:bg-page md:px-6">
             <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                 <p class="text-xs text-ink-muted">
                     Step {{ props.step }} of {{ steps.length }}
