@@ -19,12 +19,13 @@
  * for a table this small).
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import DataTable, { type DataTableColumn } from '../../components/ui/DataTable.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import SparkChip from '../../components/SparkChip.vue';
 import ReferenceDrawer from '../../components/database/ReferenceDrawer.vue';
 import SourceNote from '../../components/database/SourceNote.vue';
 import { Head } from '@inertiajs/vue3';
-import { nextTick, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import type { ProvenanceState } from '../../types';
 
 type Badge = ProvenanceState;
@@ -61,6 +62,43 @@ const props = defineProps<{
 
 const selected = ref<Category | null>(null);
 const trigger = ref<HTMLElement | null>(null);
+
+/*
+ * The categories are a table, not a list of cards: a reader compares a record count against another
+ * record count, and a table says which column a figure sits in. The category chip stays because the
+ * family is the word the page is organised by, and the count is right-aligned in tabular figures
+ * because a column of counts is compared down the page.
+ */
+const categoryColumns: DataTableColumn[] = [
+    { key: 'category', label: 'Category' },
+    { key: 'jp_name', label: 'JP name' },
+    { key: 'effect', label: 'Effect' },
+    { key: 'records', label: 'Records', align: 'right', mono: true },
+    { key: 'state', label: 'Source' },
+];
+
+const categoryRows = computed(() =>
+    props.categories.map((row) => ({
+        category: row.category,
+        global_name: row.global_name,
+        jp_name: row.jp_name,
+        effect: row.effect,
+        records: `${row.records} records`,
+        state: row.state,
+        source_title: row.source_title,
+    })),
+);
+
+/*
+ * The star-roll odds are the same property across three bands, so they are one table with the
+ * bands down the side. The figures are the source's own strings, so they are printed as they came.
+ */
+const oddsColumns: DataTableColumn[] = [
+    { key: 'band', label: 'Final stat value' },
+    { key: 'one_star', label: '1 star', align: 'right', mono: true },
+    { key: 'two_stars', label: '2 stars', align: 'right', mono: true },
+    { key: 'three_stars', label: '3 stars', align: 'right', mono: true },
+];
 
 const open = (row: Category, event: MouseEvent): void => {
     trigger.value = event.currentTarget as HTMLElement;
@@ -113,56 +151,50 @@ const close = async (): Promise<void> => {
             </p>
         </section>
 
-        <ul v-else class="mt-2 flex flex-col gap-3">
-            <li
-                v-for="row in props.categories"
-                :key="row.category"
-                 class="rounded-md border border-rule bg-panel"
-            >
-                <button
-                    type="button"
-                    class="flex min-h-11 w-full flex-wrap items-baseline justify-between gap-x-4 gap-y-2 px-4 py-3 text-left hover:bg-panel transition-colors duration-150 ease-out"
-                    :aria-expanded="selected?.category === row.category"
-                    @click="open(row, $event)"
-                >
-                    <span class="flex flex-wrap items-center gap-2">
-                        <SparkChip :label="row.category" size="sm" />
-                        <span class="text-sm font-medium text-ink-strong">{{ row.global_name }}</span>
-                    </span>
-
-                    <span class="flex flex-wrap items-center gap-2">
-                        <span class="font-mono text-xs tabular-nums text-ink-muted">
-                            {{ row.records }} records
-                        </span>
-                        <ProvenanceBadge :state="row.state" :title="row.source_title" />
-                    </span>
-                </button>
-
-                <dl
-                    class="grid grid-cols-1 gap-x-4 gap-y-1 border-t border-rule px-4 py-3 text-sm @3xl:grid-cols-[9rem_1fr]"
-                >
-                    <dt class="text-ink-muted">JP name</dt>
-                    <dd class="text-ink" lang="ja">{{ row.jp_name }}</dd>
-                    <dt class="text-ink-muted">Effect</dt>
-                    <dd class="text-ink">{{ row.effect }}</dd>
-                </dl>
-
-                <div class="px-4 pb-3">
-                    <ReferenceDrawer
-                        v-if="selected?.category === row.category"
-                        :title="row.global_name"
-                        @close="close"
+        <DataTable
+            v-else
+            class="mt-2"
+            caption="Spark categories"
+            :columns="categoryColumns"
+            :rows="categoryRows"
+        >
+            <!-- The category cell carries the chip and the drawer's trigger, so the row still opens
+                 its own detail, and the Japanese name keeps its language so a screen reader reads
+                 it as Japanese rather than as an English word. -->
+            <template #cell-category="{ row }">
+                <span class="flex flex-wrap items-center gap-2">
+                    <SparkChip :label="row.category" size="sm" />
+                    <button
+                        type="button"
+                        class="flex min-h-11 items-center text-left text-sm font-medium text-ink-strong hover:underline"
+                        :aria-expanded="selected?.category === row.category"
+                        @click="open(row, $event)"
                     >
-                        <p>{{ row.effect }}</p>
-                        <p class="text-ink-muted">
-                            {{ row.records }} records, as the reference guide
-                            counts them.
-                        </p>
-                        <p class="text-xs text-ink-muted">{{ row.source_title }}</p>
-                    </ReferenceDrawer>
-                </div>
-            </li>
-        </ul>
+                        {{ row.global_name }}
+                    </button>
+                </span>
+            </template>
+            <template #cell-jp_name="{ row }">
+                <span lang="ja">{{ row.jp_name }}</span>
+            </template>
+            <template #cell-state="{ row }">
+                <ProvenanceBadge :state="row.state" :title="row.source_title" />
+            </template>
+        </DataTable>
+
+        <ReferenceDrawer
+            v-if="selected"
+            class="mt-3"
+            :title="selected.global_name"
+            @close="close"
+        >
+            <p>{{ selected.effect }}</p>
+            <p class="text-ink-muted">
+                {{ selected.records }} records, as the reference guide
+                counts them.
+            </p>
+            <p class="text-xs text-ink-muted">{{ selected.source_title }}</p>
+        </ReferenceDrawer>
 
         <p v-if="props.categories.length > 0" class="mt-3 max-w-3xl text-sm text-ink-muted">
             The guide counts 68 further records in the same export that no page in its pass explains;
@@ -180,36 +212,12 @@ const close = async (): Promise<void> => {
 
             <p class="mt-2 max-w-3xl text-sm text-ink-muted">{{ props.rollOddsNote }}</p>
 
-            <div
-                 class="mt-3 overflow-x-auto rounded-md border border-rule bg-panel"
-                role="region"
-                tabindex="0"
-                aria-label="Star-roll odds, scrollable"
-            >
-                <table class="w-full min-w-[28rem] text-sm">
-                    <caption class="sr-only">
-                        Star-roll odds by final stat value: one, two and three stars
-                    </caption>
-                    <thead>
-                        <tr class="border-b border-rule bg-sunken text-left text-xs text-ink-muted">
-                            <th scope="col" class="px-3 py-1.5 font-semibold">Final stat value</th>
-                            <th scope="col" class="px-3 py-1.5 font-semibold">1 star</th>
-                            <th scope="col" class="px-3 py-1.5 font-semibold">2 stars</th>
-                            <th scope="col" class="px-3 py-1.5 font-semibold">3 stars</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-rule">
-                        <tr v-for="odds in props.rollOdds" :key="odds.band">
-                            <th scope="row" class="px-3 py-1.5 text-left font-medium text-ink-strong">
-                                {{ odds.band }}
-                            </th>
-                            <td class="px-3 py-1.5 tabular-nums text-ink">{{ odds.one_star }}</td>
-                            <td class="px-3 py-1.5 tabular-nums text-ink">{{ odds.two_stars }}</td>
-                            <td class="px-3 py-1.5 tabular-nums text-ink">{{ odds.three_stars }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <DataTable
+                class="mt-3"
+                caption="Star-roll odds by final stat value: one, two and three stars"
+                :columns="oddsColumns"
+                :rows="props.rollOdds"
+            />
         </section>
     </AppLayout>
 </template>

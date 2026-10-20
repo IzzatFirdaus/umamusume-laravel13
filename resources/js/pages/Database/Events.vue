@@ -15,11 +15,12 @@
  * drawer (§32), never in a modal (§31).
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import DataTable, { type DataTableColumn } from '../../components/ui/DataTable.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import ReferenceDrawer from '../../components/database/ReferenceDrawer.vue';
 import SourceNote from '../../components/database/SourceNote.vue';
 import { Head } from '@inertiajs/vue3';
-import { nextTick, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import type { ProvenanceState } from '../../types';
 
 type Badge = ProvenanceState;
@@ -42,6 +43,31 @@ const props = defineProps<{
 
 const selected = ref<EventRow | null>(null);
 const trigger = ref<HTMLElement | null>(null);
+
+/*
+ * The event types are a table, not a list of cards: a reader compares a cadence against another
+ * cadence, and a table says which column a figure sits in. The server tags stay chips because the
+ * server is the fact two event types are compared on, and the name cell stays the drawer's trigger
+ * so the row still opens its own detail.
+ */
+const eventColumns: DataTableColumn[] = [
+    { key: 'name', label: 'Event' },
+    { key: 'servers', label: 'Servers' },
+    { key: 'cadence', label: 'Cadence' },
+    { key: 'mechanics', label: 'Mechanics' },
+    { key: 'state', label: 'Source' },
+];
+
+const eventRows = computed(() =>
+    props.rows.map((row) => ({
+        name: row.name,
+        servers: row.servers,
+        cadence: row.cadence,
+        mechanics: row.mechanics,
+        state: row.state,
+        source_title: row.source_title,
+    })),
+);
 
 const open = (row: EventRow, event: MouseEvent): void => {
     trigger.value = event.currentTarget as HTMLElement;
@@ -97,53 +123,50 @@ const close = async (): Promise<void> => {
             </p>
         </section>
 
-        <ul v-else class="mt-2 flex flex-col gap-3">
-            <li
-                v-for="row in props.rows"
-                :key="row.name"
-                class="rounded-md border border-rule bg-raised"
-            >
+        <DataTable
+            v-else
+            class="mt-2"
+            caption="Recurring event types"
+            :columns="eventColumns"
+            :rows="eventRows"
+        >
+            <!-- The name cell is the drawer trigger, so the row still opens its own detail. The
+                 server tags are chips because the server is the fact a reader compares on. -->
+            <template #cell-name="{ row }">
                 <button
                     type="button"
-                    class="flex min-h-11 w-full flex-wrap items-baseline justify-between gap-x-4 gap-y-2 px-4 py-3 text-left hover:bg-panel transition-colors duration-150 ease-out"
+                    class="flex min-h-11 items-center text-left text-sm font-medium text-ink-strong hover:underline"
                     :aria-expanded="selected?.name === row.name"
                     @click="open(row, $event)"
                 >
-                    <span class="text-sm font-medium text-ink-strong">{{ row.name }}</span>
-
-                    <span class="flex flex-wrap items-center gap-2">
-                        <span
-                            v-for="server in row.servers"
-                            :key="server"
-                            class="rounded-full bg-sunken px-2 py-0.5 text-xs font-semibold text-ink-strong"
-                        >
-                            [{{ server }}]
-                        </span>
-                        <ProvenanceBadge :state="row.state" :title="row.source_title" />
-                    </span>
+                    {{ row.name }}
                 </button>
-
-                <dl
-                    class="grid grid-cols-1 gap-x-4 gap-y-1 border-t border-rule px-4 py-3 text-sm @3xl:grid-cols-[9rem_1fr]"
-                >
-                    <dt class="text-ink-muted">Cadence</dt>
-                    <dd class="text-ink">{{ row.cadence }}</dd>
-                    <dt class="text-ink-muted">Mechanics</dt>
-                    <dd class="text-ink">{{ row.mechanics }}</dd>
-                </dl>
-
-                <div class="px-4 pb-3">
-                    <ReferenceDrawer
-                        v-if="selected?.name === row.name"
-                        :title="row.name"
-                        @close="close"
+            </template>
+            <template #cell-servers="{ row }">
+                <span class="flex flex-wrap items-center gap-1">
+                    <span
+                        v-for="server in row.servers"
+                        :key="server"
+                        class="rounded-full bg-sunken px-2 py-0.5 text-xs font-semibold text-ink-strong"
                     >
-                        <p>{{ row.mechanics }}</p>
-                        <p class="text-ink-muted">Cadence: {{ row.cadence }}</p>
-                        <p class="text-xs text-ink-muted">{{ row.source_title }}</p>
-                    </ReferenceDrawer>
-                </div>
-            </li>
-        </ul>
+                        [{{ server }}]
+                    </span>
+                </span>
+            </template>
+            <template #cell-state="{ row }">
+                <ProvenanceBadge :state="row.state" :title="row.source_title" />
+            </template>
+        </DataTable>
+
+        <ReferenceDrawer
+            v-if="selected"
+            class="mt-3"
+            :title="selected.name"
+            @close="close"
+        >
+            <p>{{ selected.mechanics }}</p>
+            <p class="text-ink-muted">Cadence: {{ selected.cadence }}</p>
+            <p class="text-xs text-ink-muted">{{ selected.source_title }}</p>
+        </ReferenceDrawer>
     </AppLayout>
 </template>

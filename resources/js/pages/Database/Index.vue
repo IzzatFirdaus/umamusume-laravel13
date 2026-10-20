@@ -17,6 +17,7 @@
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
+import Card from '../../components/ui/Card.vue';
 import SubCell from '../../components/SubCell.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
@@ -46,8 +47,16 @@ const sourceReason: Record<string, string> = {
              once at the top rather than as a loose paragraph that reads as a second title. -->
 
          <nav aria-label="Database areas" class="mt-6">
-             <ul class="divide-y divide-rule rounded-md border border-rule bg-panel">
-                 <li v-for="area in props.areas" :key="area.label" class="flex items-center gap-x-4 px-4 py-2">
+             <!-- One card per area, so each dataset is a destination of its own rather than a row
+                  in a list that has to be scanned to find the one you want. The card is the list
+                  item, so the list a screen reader hears is the list the page shows. -->
+             <ul class="grid gap-3 @2xl:grid-cols-2 @4xl:grid-cols-3">
+                 <Card
+                     v-for="area in props.areas"
+                     :key="area.label"
+                     as="li"
+                     class="flex items-center gap-x-4"
+                 >
                      <!-- The source cell sits beside the link, not inside it: a link's accessible name is
                           its contents, and the hub's rows are addressed by their exact label elsewhere
                           (`database.spec.ts`); "Events Source Transcribed" would be a different name. -->
@@ -64,7 +73,7 @@ const sourceReason: Record<string, string> = {
                          value-class="font-mono text-sm text-ink-strong"
                          :title="sourceReason[area.source]"
                      />
-                 </li>
+                 </Card>
              </ul>
          </nav>
     </AppLayout>

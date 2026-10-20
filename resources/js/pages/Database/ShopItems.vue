@@ -15,12 +15,13 @@
  * modelled, so no row is marked best value and no row is selected.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import DataTable, { type DataTableColumn } from '../../components/ui/DataTable.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import SparkChip from '../../components/SparkChip.vue';
 import ReferenceDrawer from '../../components/database/ReferenceDrawer.vue';
 import SourceNote from '../../components/database/SourceNote.vue';
 import { Head } from '@inertiajs/vue3';
-import { nextTick, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import type { ProvenanceState } from '../../types';
 
 type Badge = ProvenanceState;
@@ -54,6 +55,38 @@ const props = defineProps<{
 
 const selected = ref<ShopRow | null>(null);
 const trigger = ref<HTMLElement | null>(null);
+
+/*
+ * The catalogue is a table, not a list of cards: a reader compares a spend site against another
+ * spend site, and a table says which column a fact sits in. The kind and the spend site stay chips
+ * because they are the two facts the page is organised by, and the cost is right-aligned in
+ * tabular figures because a column of prices is compared down the page.
+ */
+const shopColumns: DataTableColumn[] = [
+    { key: 'name', label: 'Item' },
+    { key: 'kind', label: 'Kind' },
+    { key: 'spend_site', label: 'Spend site' },
+    { key: 'effect', label: 'Effect' },
+    { key: 'state', label: 'Source' },
+];
+
+const shopRows = computed(() =>
+    props.rows.map((row) => ({
+        name: row.name,
+        kind: row.kind,
+        spend_site: row.spend_site,
+        effect: row.effect,
+        state: row.state,
+        source_title: row.source_title,
+        detail: row.detail,
+    })),
+);
+
+const proShopColumns: DataTableColumn[] = [
+    { key: 'name', label: 'Item' },
+    { key: 'effect', label: 'Effect' },
+    { key: 'cost', label: 'Cost (coins)', align: 'right', mono: true },
+];
 
 const open = (row: ShopRow, event: MouseEvent): void => {
     trigger.value = event.currentTarget as HTMLElement;
@@ -107,52 +140,50 @@ const close = async (): Promise<void> => {
             </p>
         </section>
 
-        <ul v-else class="mt-2 flex flex-col gap-3">
-            <li
-                v-for="row in props.rows"
-                :key="row.name"
-                 class="rounded-md border border-rule bg-panel"
-            >
+        <DataTable
+            v-else
+            class="mt-2"
+            caption="Shop item catalogue"
+            :columns="shopColumns"
+            :rows="shopRows"
+        >
+            <!-- The name cell is the drawer's trigger, so the row still opens its own detail, and
+                 the kind and the spend site stay chips because they are the two facts a reader
+                 compares an item on. -->
+            <template #cell-name="{ row }">
                 <button
                     type="button"
-                    class="flex min-h-11 w-full flex-wrap items-baseline justify-between gap-x-4 gap-y-2 px-4 py-3 text-left hover:bg-panel transition-colors duration-150 ease-out"
+                    class="flex min-h-11 items-center text-left text-sm font-medium text-ink-strong hover:underline"
                     :aria-expanded="selected?.name === row.name"
                     @click="open(row, $event)"
                 >
-                    <span class="text-sm font-medium text-ink-strong">{{ row.name }}</span>
-
-                    <span class="flex flex-wrap items-center gap-2">
-                        <SparkChip
-                            :label="row.kind === 'currency' ? 'Currency' : 'Consumable'"
-                            :variant="row.kind === 'currency' ? 'currency' : 'consumable'"
-                            size="sm"
-                        />
-                        <SparkChip :label="row.spend_site" size="sm" />
-                        <ProvenanceBadge :state="row.state" :title="row.source_title" />
-                    </span>
+                    {{ row.name }}
                 </button>
+            </template>
+            <template #cell-kind="{ row }">
+                <SparkChip
+                    :label="row.kind === 'currency' ? 'Currency' : 'Consumable'"
+                    :variant="row.kind === 'currency' ? 'currency' : 'consumable'"
+                    size="sm"
+                />
+            </template>
+            <template #cell-spend_site="{ row }">
+                <SparkChip :label="row.spend_site" size="sm" />
+            </template>
+            <template #cell-state="{ row }">
+                <ProvenanceBadge :state="row.state" :title="row.source_title" />
+            </template>
+        </DataTable>
 
-                <dl
-                    class="grid grid-cols-1 gap-x-4 gap-y-1 border-t border-rule px-4 py-3 text-sm @3xl:grid-cols-[9rem_1fr]"
-                >
-                    <dt class="text-ink-muted">Effect</dt>
-                    <dd class="text-ink">{{ row.effect }}</dd>
-                    <dt class="text-ink-muted">Spend site</dt>
-                    <dd class="text-ink">{{ row.spend_site }}</dd>
-                </dl>
-
-                <div class="px-4 pb-3">
-                    <ReferenceDrawer
-                        v-if="selected?.name === row.name"
-                        :title="row.name"
-                        @close="close"
-                    >
-                        <p>{{ row.detail }}</p>
-                        <p class="text-xs text-ink-muted">{{ row.source_title }}</p>
-                    </ReferenceDrawer>
-                </div>
-            </li>
-        </ul>
+        <ReferenceDrawer
+            v-if="selected"
+            class="mt-3"
+            :title="selected.name"
+            @close="close"
+        >
+            <p>{{ selected.detail }}</p>
+            <p class="text-xs text-ink-muted">{{ selected.source_title }}</p>
+        </ReferenceDrawer>
 
         <!--
             The Pro Shop block: the scenario matrix's own `shop_items`, reused verbatim. Its cost column
@@ -173,17 +204,12 @@ const close = async (): Promise<void> => {
                 {{ props.scenarioShop.items.length }} catalogue items
             </p>
 
-            <ul class="mt-2 flex flex-col gap-2">
-                <li
-                    v-for="item in props.scenarioShop.items"
-                    :key="item.name"
-                     class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-md border border-rule bg-panel px-4 py-2 text-sm"
-                >
-                    <span class="font-medium text-ink-strong">{{ item.name }}</span>
-                    <span class="text-ink-muted">{{ item.effect }}</span>
-                    <span class="font-mono tabular-nums text-ink-strong">{{ item.cost }} coins</span>
-                </li>
-            </ul>
+            <DataTable
+                class="mt-2"
+                caption="Pro Shop catalogue items"
+                :columns="proShopColumns"
+                :rows="props.scenarioShop.items"
+            />
         </section>
     </AppLayout>
 </template>

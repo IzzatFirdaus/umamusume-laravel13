@@ -15,6 +15,7 @@
  * Density is allowed on this screen only (plan §13, "Deliberately traded").
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import DataTable, { type DataTableColumn } from '../../components/ui/DataTable.vue';
 import { Head } from '@inertiajs/vue3';
 
 interface Cap {
@@ -40,6 +41,35 @@ const props = defineProps<{
 }>();
 
 const bonusText = (bonus: number): string => (bonus > 0 ? `+${bonus}` : `${bonus}`);
+
+/*
+ * The caps table and the panels table are the shared `DataTable` primitive, so a screen reader
+ * announces each as a table with its rows and columns rather than as a list of numbers. The figures
+ * are right-aligned and set in tabular figures, because a column of caps read down the page is
+ * compared, not read.
+ */
+const capColumns: DataTableColumn[] = [
+    { key: 'stat', label: 'Stat' },
+    { key: 'base', label: 'Base', align: 'right', mono: true },
+    { key: 'bonus', label: 'Bonus', align: 'right', mono: true },
+    { key: 'cap', label: 'Published cap', align: 'right', mono: true },
+];
+
+const panelColumns: DataTableColumn[] = [
+    { key: 'label', label: 'Panel' },
+    { key: 'state', label: 'State' },
+];
+
+const capRows = (scenario: Scenario): Record<string, unknown>[] =>
+    scenario.caps.map((cap) => ({
+        stat: cap.stat,
+        base: props.baseCap,
+        bonus: bonusText(cap.bonus),
+        cap: cap.cap,
+    }));
+
+const panelRows = (scenario: Scenario): Record<string, unknown>[] =>
+    scenario.panels.map((panel) => ({ label: panel.label, enabled: panel.enabled }));
 </script>
 
 <template>
@@ -89,29 +119,12 @@ const bonusText = (bonus: number): string => (bonus > 0 ? `+${bonus}` : `${bonus
                     <div>
                         <h4 class="text-lg font-semibold text-ink-strong">Caps</h4>
 
-                        <table class="mt-2 w-full text-sm">
-                            <caption class="sr-only">
-                                {{ scenario.label }} published caps: base, bonus and the sum per stat
-                            </caption>
-                            <thead>
-                                <tr class="border-b border-rule text-left text-xs text-ink-muted">
-                                    <th scope="col" class="py-1 pr-3 font-semibold">Stat</th>
-                                    <th scope="col" class="py-1 pr-3 font-semibold">Base</th>
-                                    <th scope="col" class="py-1 pr-3 font-semibold">Bonus</th>
-                                    <th scope="col" class="py-1 font-semibold">Published cap</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-rule">
-                                <tr v-for="cap in scenario.caps" :key="cap.stat">
-                                    <th scope="row" class="py-1.5 pr-3 text-left font-medium text-ink-strong">
-                                        {{ cap.stat }}
-                                    </th>
-                                    <td class="py-1.5 pr-3 tabular-nums text-ink">{{ props.baseCap }}</td>
-                                    <td class="py-1.5 pr-3 tabular-nums text-ink">{{ bonusText(cap.bonus) }}</td>
-                                    <td class="py-1.5 tabular-nums font-semibold text-ink-strong">{{ cap.cap }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <DataTable
+                            class="mt-2"
+                            :caption="`${scenario.label} stat caps`"
+                            :columns="capColumns"
+                            :rows="capRows(scenario)"
+                        />
                     </div>
 
                     <div class="space-y-4">
@@ -132,22 +145,26 @@ const bonusText = (bonus: number): string => (bonus > 0 ? `+${bonus}` : `${bonus
                         <div>
                             <h4 class="text-lg font-semibold text-ink-strong">Panels</h4>
 
-                            <ul class="mt-2 divide-y divide-rule border-y border-rule">
-                                <li
-                                    v-for="panel in scenario.panels"
-                                    :key="panel.label"
-                                    class="flex items-baseline justify-between gap-3 py-1.5 text-sm"
-                                >
-                                    <span :class="panel.enabled ? 'text-ink-strong' : 'text-ink-muted'">
-                                        {{ panel.label }}
+                            <DataTable
+                                class="mt-2"
+                                :caption="`${scenario.label} panels`"
+                                :columns="panelColumns"
+                                :rows="panelRows(scenario)"
+                            >
+                                <!-- The tick and the dash carry the state, and the word beside them
+                                     carries it for a screen reader, so the state never rides on the
+                                     glyph or on colour alone. -->
+                                <template #cell-state="{ row }">
+                                    <span v-if="row.enabled" class="text-ink-strong">
+                                        <span aria-hidden="true">✓</span>
+                                        <span class="sr-only">on</span>
                                     </span>
-                                    <span
-                                        :class="panel.enabled ? 'font-semibold text-ink-strong' : 'text-ink-muted'"
-                                    >
-                                        {{ panel.enabled ? 'on' : 'off' }}
+                                    <span v-else class="text-ink-muted">
+                                        <span aria-hidden="true">—</span>
+                                        <span class="sr-only">off</span>
                                     </span>
-                                </li>
-                            </ul>
+                                </template>
+                            </DataTable>
                         </div>
                     </div>
                 </div>

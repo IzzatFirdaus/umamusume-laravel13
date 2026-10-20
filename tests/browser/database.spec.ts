@@ -44,6 +44,10 @@ test('the hub lists the eight areas and no deferred section', async ({ page }) =
         await expect(areas.getByRole('link', { name: label, exact: true })).toBeVisible();
     }
 
+    // One card per area, and the card IS the list item, so the list a screen reader hears is the
+    // list the page shows.
+    await expect(areas.getByRole('listitem')).toHaveCount(8);
+
     // The three areas that were once "Not in this build" are destinations now, so the section that
     // named them absent is deleted rather than softened: a heading saying otherwise would be false.
     await expect(page.getByRole('heading', { name: 'Not in this build' })).toHaveCount(0);
@@ -110,6 +114,14 @@ test('the Events view renders the recurring types with glyph-and-word provenance
     // No colour-only state: the server tag is bracketed text, so it reads without styling.
     await expect(page.getByText('[JP]').first()).toBeVisible();
     await expect(page.getByText('[Global]').first()).toBeVisible();
+
+    // The recurring types are a table: a reader compares a cadence against another cadence, and a
+    // table says which column a figure sits in. The server tags are chips in the servers column.
+    const types = page.getByRole('table', { name: 'Recurring event types' });
+    await expect(types).toBeVisible();
+    await expect(types.getByRole('columnheader', { name: 'Cadence' })).toBeVisible();
+    await expect(types.getByRole('columnheader', { name: 'Servers' })).toBeVisible();
+    await expect(types.getByText('[JP]').first()).toBeVisible();
 });
 
 test('the Data sources page lists every dataset and names no repository path', async ({ page }) => {
@@ -166,6 +178,17 @@ test('the Shop Items view renders the catalogue and the reused Pro Shop block', 
     await expect(page.getByRole('heading', { name: 'Trackblazer Pro Shop', level: 3 })).toBeVisible();
     await expect(page.getByText('19 catalogue items')).toBeVisible();
     await expect(page.getByText('Speed Notepad', { exact: true })).toBeVisible();
+
+    // The catalogue and the Pro Shop are two tables, and the price sits in the column it belongs
+    // to rather than in a row of prose.
+    const catalogue = page.getByRole('table', { name: 'Shop item catalogue' });
+    await expect(catalogue).toBeVisible();
+    await expect(catalogue.getByRole('columnheader', { name: 'Spend site' })).toBeVisible();
+    await expect(catalogue.getByRole('columnheader', { name: 'Kind' })).toBeVisible();
+
+    const proShop = page.getByRole('table', { name: 'Pro Shop catalogue items' });
+    await expect(proShop).toBeVisible();
+    await expect(proShop.getByRole('columnheader', { name: 'Cost (coins)' })).toBeVisible();
 });
 
 test('the Sparks view renders the categories and the star-roll odds table', async ({ page }) => {
@@ -182,8 +205,13 @@ test('the Sparks view renders the categories and the star-roll odds table', asyn
         page.getByText('68 further records in the same export that no page in its pass explains'),
     ).toBeVisible();
 
-    // The JP name carries lang="ja" (WCAG 3.1.2 Language of Parts).
-    const jp = page.locator('dd[lang="ja"]').first();
+    // The JP name carries lang="ja" (WCAG 3.1.2 Language of Parts). It is a cell in the categories
+    // table now, not a term in a definition list.
+    const categories = page.getByRole('table', { name: 'Spark categories' });
+    await expect(categories).toBeVisible();
+    await expect(categories.getByRole('columnheader', { name: 'Records' })).toBeVisible();
+
+    const jp = categories.locator('[lang="ja"]').first();
     await expect(jp).toBeVisible();
     await expect(jp).toHaveAttribute('lang', 'ja');
 
@@ -288,11 +316,19 @@ test('the scenario matrix prints config/scenarios.php, verification date and all
     // Exactly one scenario is partially documented, and the flag comes from config, not from a name test.
     await expect(page.getByText('PARTIALLY DOCUMENTED')).toHaveCount(1);
 
-    // Panel state is a word, never a colour alone (design-2.0 §42). The matrix has no region role of
-    // its own (each scenario is a labelled section, not a scroll container), so the sweep is the page.
-    const matrix = page.locator('main');
-    await expect(matrix.getByText('on', { exact: true }).first()).toBeVisible();
-    await expect(matrix.getByText('off', { exact: true }).first()).toBeVisible();
+    // Panel state is a tick or a dash with the word beside it for a screen reader, so the state
+    // never rides on the glyph or on colour alone (design-2.0 §42). The panels are a table, and the
+    // caps beside them are another one.
+    const panels = page.getByRole('table', { name: /panels$/ }).first();
+    await expect(panels).toBeVisible();
+    await expect(panels.getByText('on', { exact: true }).first()).toBeAttached();
+    // Some scenario has an off panel, and its word is in that table for a screen reader to read.
+    await expect(page.getByText('off', { exact: true }).first()).toBeAttached();
+    await expect(panels.locator('[aria-hidden="true"]').first()).toHaveText(/^[✓—]$/);
+
+    const caps = page.getByRole('table', { name: 'URA Finale stat caps' });
+    await expect(caps).toBeVisible();
+    await expect(caps.getByRole('columnheader', { name: 'Published cap' })).toBeVisible();
 });
 
 test('no page scrolls sideways at 320px, and the race table scrolls inside its own region', async ({ page }) => {
