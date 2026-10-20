@@ -141,6 +141,14 @@ test('prints the Japanese name in its own language and links the provenance sour
 
     // The trainee's own fetch history is on screen as a real link, not a parked string.
     await expect(page.getByRole('link', { name: /character-cards/ }).first()).toBeVisible();
+
+    // The voice actor's own Japanese name is a language part too (WCAG 3.1.2): without lang="ja"
+    // a screen reader reads the kana as English.
+    const voiceActor = page.getByText('Voice actor').locator('xpath=following-sibling::dd');
+    await expect(voiceActor.locator('[lang="ja"]')).toHaveCount(1);
+
+    // The handoff names the trainee it starts, so the button says whose career it begins.
+    await expect(page.getByRole('button', { name: /Start career with Special Week/ })).toBeVisible();
 });
 
 test('switches costume forms from the tab strip with the keyboard', async ({ page }) => {
