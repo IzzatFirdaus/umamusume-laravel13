@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { deleteRun } from '../utils/delete-run';
 import { startCareer } from '../utils/start-career';
+import { uraCompletedRun } from '../utils/ura-completed-run';
 
 /*
  * The career section nav (plan slice 4.1): the identity strip and the nine sections as one tab row,
@@ -63,11 +64,25 @@ test('an unreachable Result tab is a focusable non-navigating span', async ({ pa
 });
 
 test('a completed career reaches its Result tab', async ({ page }) => {
-    // The other half of the reachability rule: the span above is conditional on the run still being
-    // active, not a tab that is never a link. A completed run renders it as an ordinary link.
-    test.skip(true, 'blocked-on-stale-bundle; eligible when the tree is quiet');
+    // The positive half of the reachability rule the case above asserts in the negative: on an ACTIVE
+    // run the Result tab is a focusable span (deliberately unreachable); on a COMPLETED run it renders
+    // as an ordinary link. The fixture is the seeded URA run, not a wizard walk - the same fixture the
+    // completed-run cases in career-cockpit.spec.ts use, and for the same reason: rebuilding a finished
+    // career through the wizard turn by turn is a second suite, not a fixture.
+    await page.goto(`/training-runs/${uraCompletedRun()}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
 
-    createdRunUrls.push(await startCareer(page, 'unity_cup'));
+    const result = page
+        .getByRole('navigation', { name: 'Career sections' })
+        .getByRole('link', { name: 'Result', exact: true });
+
+    // A real link, not the span the active state renders: an href ending in /result, no aria-disabled,
+    // and an <a> element rather than a <span role="link">. These four mirror the four the negative case
+    // asserts, one state apart.
+    await expect(result).toBeVisible();
+    await expect(result).toHaveAttribute('href', /result$/);
+    await expect(result).not.toHaveAttribute('aria-disabled');
+    expect(await result.evaluate((el) => el.tagName)).toBe('A');
 });
 
 test('clicking or activating the unreachable Result tab changes no URL', async ({ page }) => {
