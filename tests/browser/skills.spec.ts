@@ -153,3 +153,26 @@ test('the skills index passes an axe scan at WCAG A and AA', async ({ page }) =>
     const results = await buildAxe(page).analyze();
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });
+
+/*
+ * The skill DETAIL page's own axe scan (plan slice 8.8c).
+ *
+ * `/skills/{skill}` is a route of its own, and the case that reaches it gets there by CLICKING a
+ * search result, so the corpus holds no literal navigation to it. The route-coverage guard matches
+ * a route against the corpus's literals, so the detail page needs one of its own - and it needs a
+ * scan, since the index page's scan says nothing about the detail page's markup.
+ *
+ * The id is the export's own for `#LookatCurren`, the skill the case above follows.
+ */
+test('the skill detail passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await page.goto('/skills/370');
+    await page.locator('#app > *').first().waitFor();
+
+    // The heading is asserted first so a wrong id fails as a missing page rather than passing as
+    // a clean scan of whatever error page the route fell back to.
+    await expect(page.getByRole('heading', { name: '#LookatCurren', level: 1 })).toBeVisible();
+
+    await openAllDisclosures(page);
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});

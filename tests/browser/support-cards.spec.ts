@@ -322,3 +322,22 @@ test('the support-card index passes an axe scan at WCAG A and AA', async ({ page
     const results = await buildAxe(page).analyze();
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });
+
+/*
+ * The support-card DETAIL page's own axe scan (plan slice 8.8c).
+ *
+ * `/support-cards/{card}` is a route of its own, and the corpus reaches it by literal navigation but
+ * never scans it: the index page's scan says nothing about the detail page's markup.
+ */
+test('the support-card detail passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await page.goto('/support-cards/1');
+    await page.locator('#app > *').first().waitFor();
+
+    // The heading is asserted first so a wrong id fails as a missing page rather than passing as
+    // a clean scan of whatever error page the route fell back to.
+    await expect(page.getByRole('heading', { name: 'Special Week [Tracen Academy]', level: 1 })).toBeVisible();
+
+    await openAllDisclosures(page);
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
