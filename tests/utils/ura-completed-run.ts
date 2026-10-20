@@ -1,6 +1,57 @@
 import { execFileSync } from 'node:child_process';
 import { DatabaseSync } from 'node:sqlite';
+import { test } from '@playwright/test';
 import { scratchDatabasePath } from '../browser/global-setup';
+import { deleteRun } from './delete-run';
+
+/*
+ * The seeded runs this module left behind, read back as a footprint.
+ *
+ * `uraCompletedRun()` returns ONE id, but `UraFinaleRunsSeeder` writes a whole tracker set: the
+ * scratch database holds seven `training_runs` after a single `containment.spec.ts` run. A teardown
+ * that deleted only the returned id would leave six, which is why the first attempt changed nothing.
+ * The footprint is the rows the seeder marks, and `import_source` is that mark - the seeder's own
+ * idempotency guard reads the same column (`UraFinaleRunsSeeder:429`).
+ *
+ * `TrackerVeteransSeeder` shares these run definitions, so the value is not a private discriminator.
+ * That does not matter here: the footprint is read per invocation from the suite's own scratch file,
+ * and deleting it is safe because the seeder re-seeds on demand - the next file that needs a
+ * completed run asks for one and gets it. The teardown is `afterAll`, not `afterEach`, so every case
+ * inside one file shares the single seeded set.
+ */
+function seededRunIds(): number[] {
+    const db = new DatabaseSync(scratchDatabasePath());
+
+    try {
+        return db
+            .prepare('SELECT id FROM training_runs WHERE import_source IS NOT NULL ORDER BY id')
+            .all()
+            .map((row) => (row as { id: number }).id);
+    } finally {
+        db.close();
+    }
+}
+
+test.afterAll(async ({ browser }) => {
+    const ids = seededRunIds();
+
+    if (ids.length === 0) {
+        return;
+    }
+
+    const page = await browser.newPage();
+
+    try {
+        // `runs.destroy` needs the session's CSRF cookie, which a document request issues.
+        await page.goto('/', { waitUntil: 'domcontentloaded' });
+
+        for (const id of ids) {
+            await deleteRun(page, `/training-runs/${id}`);
+        }
+    } finally {
+        await page.close();
+    }
+});
 
 /*
  * The suite's own scratch database, found the way `global-setup.ts` finds it.
