@@ -4937,3 +4937,18 @@ The `containment-mechanism.spec.ts` fixture kept above is the control that slice
   surfaced NO new violations in this territory, so no slice had to be reopened.
 - Walk note: `grand-concert-panel.spec.ts` stays excluded from every walk here until the 7.11
   ruling lands.
+
+
+## Phase 8 close slices (2026-10-21)
+
+- 72d83476 chore(career): remove two unreferenced Cockpit panels (structural). EpithetRoutesPanel and GradePointObjectivesPanel: zero references. UraDuelPanel/UraMilestoneTracker retained - read by tests/Feature/UraFinaleSurfacesTest.php:303-304,353.
+- f456ed8c chore(career): remove unreferenced ProShopPanel (structural). The Panels dir held eleven; the registry registered ten.
+- 749c35a5 feat(catalog): start-career label names the trainee; va_ja is lang=ja (behavioral, rebuild-in-cycle). va_ja was the one Japanese-language element without lang=ja - WCAG 3.1.2.
+- d6c62d6f test(legacy): rewrite the six-node case against the post-a11y DOM (behavioral + structural). details anchor via has:getByText; getByRole('group') does not address a details element.
+- a6715220 refactor(pagination): unify on ui/Pagination.vue; delete the duplicate (structural, build). TraineeCatalog was the last importer of the old component.
+- 1cb7f9a4 docs(phase-8): close with state-vs-plan record (doc).
+
+DEFERRED:
+- :330 anomaly - viewport genuinely scrolls at 320px (scrollLeft proves it); no element box escapes; four hypotheses excluded. Unblocks on pseudo-element / position:fixed / @container containment localisation.
+- Step 4 Trackblazer grade_points_earned - premise refuted: no TrackblazerState model; the field is a RaceEntry column with writers (RaceEntry.php:141-149); shop_coins is derived, not stored.
+- vue-tsc measurement - blocked on TypeScript 7.0.2 incompatibility (./lib/tsc not exported). Unblocks on a dependency-version ruling.
