@@ -187,6 +187,33 @@ test('names the active career and resumes it from the keyboard', async ({ page }
     await page.waitForURL(/\/cockpit$/);
 });
 
+test('weight-emphasizes the active career name over the other card headings', async ({ page }) => {
+    await createActiveRun(page, 'unity_cup');
+
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+
+    const card = page.getByRole('region', { name: 'ACTIVE CAREER' });
+
+    // Von Restorff by weight, not by restructure: the trainee's name is the largest thing in the
+    // card, and the grid it sits in is the one the two-column layout already established.
+    const name = card.getByText(TRAINEE);
+    await expect(name).toHaveClass(/text-3xl/);
+    await expect(name).toHaveClass(/font-bold/);
+
+    // The Japanese name scales with it and stays subordinate: it is muted and not bold.
+    const japanese = card.locator('[lang="ja"]');
+    await expect(japanese).toHaveClass(/text-xl/);
+    await expect(japanese).not.toHaveClass(/font-bold/);
+
+    // The card's own heading and the other two cards' headings do not move with it: the
+    // emphasis is the name inside the card, not a louder set of headings.
+    await expect(card.getByRole('heading', { name: 'Active Career' })).toHaveClass(/text-lg/);
+    for (const region of ['QUICK ACTIONS', 'DATA STATUS']) {
+        await expect(page.getByRole('region', { name: region }).getByRole('heading')).toHaveClass(/text-lg/);
+    }
+});
+
 test('names the multi-career count only when a second career is live', async ({ page }) => {
     // Zero runs: the spec's own precondition, and the notice renders nothing.
     await page.goto('/');

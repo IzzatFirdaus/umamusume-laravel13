@@ -230,12 +230,12 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                         size="size-16"
                     />
                     <div class="min-w-0 flex-1">
-                        <p class="text-lg font-semibold text-ink-strong truncate">
+                        <p class="text-3xl font-bold text-ink-strong truncate">
                             {{ props.activeCareer.trainee }}
                             <span
                                 v-if="props.activeCareer.trainee_ja"
                                 lang="ja"
-                                class="ml-2 text-sm font-normal text-ink-muted"
+                                class="ml-2 text-xl font-normal text-ink-muted"
                             >{{ props.activeCareer.trainee_ja }}</span>
                         </p>
 
