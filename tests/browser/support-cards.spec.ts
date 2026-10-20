@@ -248,3 +248,61 @@ test('renders the support-card header thumbnail as a bare frame with no link', a
     await expect(page.locator('a:has(img[src*="/artwork/support_thumb/"])')).toHaveCount(0);
     await expect(page.locator('a[aria-label=""]')).toHaveCount(0);
 });
+
+/*
+ * The support-card filter's busy state: the same idiom the roster and skills filters use, read off
+ * the live element while a visit is held open.
+ */
+test('the support-card filter holds its pending state while the filtered page is in flight', async ({ page }) => {
+    await page.goto('/support-cards');
+    await page.locator('#app > *').first().waitFor();
+
+    let release: (() => void) | undefined;
+    const held = new Promise<void>((resolve) => {
+        release = resolve;
+    });
+
+    await page.route('**/support-cards*', async (route) => {
+        await held;
+        await route.continue();
+    });
+
+    const filter = page.getByRole('button', { name: 'Filter' });
+    const form = page.locator('form').filter({ has: filter });
+
+    await filter.click();
+
+    await expect(form, 'the form says it is busy while the visit is in flight').toHaveAttribute('aria-busy', 'true');
+    await expect(filter, 'the submit is disabled while the visit is in flight').toBeDisabled();
+
+    release?.();
+
+    await expect(form, 'the busy state clears when the visit finishes').not.toHaveAttribute('aria-busy', 'true');
+});
+
+/*
+ * The support-card filter's error state. `SupportCardSearchRequest` validates the four facets
+ * against fixed lists, so the surface is a URL rather than the dropdown, and the message has to
+ * land on the facet that failed.
+ */
+test('the support-card filter shows a rejected rarity on the field that failed', async ({ page }) => {
+    await page.goto('/support-cards');
+    await page.locator('#app > *').first().waitFor();
+
+    const referer = page.url();
+    await page.setExtraHTTPHeaders({ Referer: referer });
+    await page.goto('/support-cards?rarity=not-a-rarity');
+    await page.locator('#app > *').first().waitFor();
+
+    const rarity = page.locator('select[name="rarity"]');
+
+    await expect(rarity, 'the rejected field is marked invalid').toHaveAttribute('aria-invalid', 'true');
+    await expect(
+        page.locator('#support-card-rarity-error'),
+        'the error renders where the field can point at it',
+    ).toBeVisible();
+    await expect(rarity, 'the field points at its own error').toHaveAttribute(
+        'aria-describedby',
+        'support-card-rarity-error',
+    );
+});

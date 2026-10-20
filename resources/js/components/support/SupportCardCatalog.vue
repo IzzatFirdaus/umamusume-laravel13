@@ -123,7 +123,11 @@ function goToPage(page: number): void {
     <!-- Control height is `h-11`, the value DESIGN.md §6.14 fixes for a form input and the one
          skills/index already carries, so the two filter surfaces measure the same in a browser. -->
     <div class="mt-4 rounded-md border border-rule bg-raised p-4">
-        <form class="flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
+        <form
+            class="flex flex-wrap items-end gap-3 text-sm"
+            :aria-busy="loading ? 'true' : null"
+            @submit.prevent="applyFilters"
+        >
             <BaseSelect
                 v-model="rarity"
                 id="support-card-rarity"
@@ -131,6 +135,7 @@ function goToPage(page: number): void {
                 label="Rarity"
                 :options="[{ value: '', label: 'All' }, ...Object.entries(rarityWords).map(([value, word]) => ({ value, label: word }))]"
                 placeholder="All"
+                :error="errors.rarity"
             />
             <BaseSelect
                 v-model="type"
@@ -139,6 +144,7 @@ function goToPage(page: number): void {
                 label="Type"
                 :options="[{ value: '', label: 'All' }, ...Object.entries(typeWords).map(([value, word]) => ({ value, label: word }))]"
                 placeholder="All"
+                :error="errors.type"
             />
             <BaseSelect
                 v-model="status"
@@ -147,6 +153,7 @@ function goToPage(page: number): void {
                 label="Availability"
                 :options="[{ value: '', label: 'All' }, ...availabilities.map((option) => ({ value: option, label: option }))]"
                 placeholder="All"
+                :error="errors.status"
             />
             <BaseSelect
                 v-model="sort"
@@ -155,16 +162,13 @@ function goToPage(page: number): void {
                 label="Sort by"
                 :options="[{ value: '', label: 'Name' }, ...Object.entries(sorts).map(([value, label]) => ({ value, label }))]"
                 placeholder="Name"
+                :error="errors.sort"
             />
-            <BaseButton type="submit" variant="primary" size="md">
+            <BaseButton type="submit" variant="primary" size="md" :loading="loading">
                 Filter
             </BaseButton>
         </form>
 
-        <p v-if="errors.rarity" class="mt-2 text-sm text-risk">Rarity: {{ errors.rarity }}</p>
-        <p v-if="errors.type" class="mt-2 text-sm text-risk">Type: {{ errors.type }}</p>
-        <p v-if="errors.status" class="mt-2 text-sm text-risk">Availability: {{ errors.status }}</p>
-        <p v-if="errors.sort" class="mt-2 text-sm text-risk">Sort by: {{ errors.sort }}</p>
     </div>
 
     <p v-if="loading" role="status" class="mt-4 text-sm text-ink-muted">Loading results…</p>

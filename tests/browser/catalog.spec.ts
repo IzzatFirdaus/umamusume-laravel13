@@ -101,3 +101,66 @@ test('renders a mirrored portrait as a decorative loopback frame', async ({ page
     }
 });
 
+/*
+ * The roster filter's busy state.
+ *
+ * The form's own `loading` flag is set from Inertia's `onStart` and cleared on `onFinish`, so the
+ * pending state exists only while a visit is in flight. The request is therefore held open on the
+ * way out, and the state is read off the live element: the form carries `aria-busy`, and the
+ * submit button is disabled, which is what stops a second filter from being sent on top of the
+ * first.
+ */
+test('the roster filter holds its pending state while the filtered page is in flight', async ({ page }) => {
+    await page.goto('/umamusume');
+    await page.locator('#app > *').first().waitFor();
+
+    let release: (() => void) | undefined;
+    const held = new Promise<void>((resolve) => {
+        release = resolve;
+    });
+
+    await page.route('**/umamusume*', async (route) => {
+        await held;
+        await route.continue();
+    });
+
+    const filter = page.getByRole('button', { name: 'Filter' });
+    const form = page.locator('form').filter({ has: filter });
+
+    await filter.click();
+
+    await expect(form, 'the form says it is busy while the visit is in flight').toHaveAttribute('aria-busy', 'true');
+    await expect(filter, 'the submit is disabled while the visit is in flight').toBeDisabled();
+
+    release?.();
+
+    await expect(form, 'the busy state clears when the visit finishes').not.toHaveAttribute('aria-busy', 'true');
+    await expect(filter, 'the submit comes back when the visit finishes').toBeEnabled();
+});
+
+/*
+ * The roster filter's error state.
+ *
+ * `CatalogSearchRequest` validates `status` against `ReleaseStatus`, and the dropdown offers only
+ * valid statuses, so the surface is a URL: a bookmark, a tampered link, or a filter state cached
+ * from before the validator tightened. The Referer is set so the validation failure redirects back
+ * to this page instead of the fallback URL, and the error has to land on the select that failed.
+ */
+test('the roster filter shows a rejected release status on the field that failed', async ({ page }) => {
+    await page.goto('/umamusume');
+    await page.locator('#app > *').first().waitFor();
+
+    const referer = page.url();
+    await page.setExtraHTTPHeaders({ Referer: referer });
+    await page.goto('/umamusume?status=not-a-release-status');
+    await page.locator('#app > *').first().waitFor();
+
+    const status = page.locator('select[name="status"]');
+
+    await expect(status, 'the rejected field is marked invalid').toHaveAttribute('aria-invalid', 'true');
+    await expect(
+        page.locator('#trainee-status-error'),
+        'the error renders where the field can point at it',
+    ).toBeVisible();
+    await expect(status, 'the field points at its own error').toHaveAttribute('aria-describedby', 'trainee-status-error');
+});

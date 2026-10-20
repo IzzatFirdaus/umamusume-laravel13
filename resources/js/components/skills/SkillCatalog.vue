@@ -53,7 +53,12 @@ const props = defineProps<{
 }>();
 
 const page = usePage();
-const typeError = computed(() => (page.props.errors as Record<string, string | undefined> | undefined)?.type ?? null);
+/*
+ * The filter's own validation errors, read the way the support-card sibling reads them and rendered
+ * on the field that failed. `SkillSearchRequest` rejects a search longer than 120 characters and a
+ * type outside the parser's categories, and both messages belong to the control a Trainer changes.
+ */
+const errors = computed(() => (page.props.errors as Record<string, string | undefined> | undefined) ?? {});
 
 const search = ref(props.search ?? '');
 const type = ref(props.type ?? '');
@@ -110,7 +115,11 @@ function goToPage(page: number): void {
          and `h-11` is this repository's idiom for it). The checkbox is the WCAG 2.2 AA floor
          of 24px, with the label carrying the rest of the click area. -->
     <div class="mt-4 rounded-md border border-rule bg-raised p-4">
-        <form class="flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
+        <form
+            class="flex flex-wrap items-end gap-3 text-sm"
+            :aria-busy="loading ? 'true' : null"
+            @submit.prevent="applyFilters"
+        >
             <label class="flex flex-col gap-1">
                 <span class="text-ink">Search</span>
                 <BaseInput
@@ -119,6 +128,7 @@ function goToPage(page: number): void {
                     id="skill-search"
                     name="search"
                     placeholder="Part of a skill name"
+                    :error="errors.search"
                 />
             </label>
 
@@ -126,24 +136,26 @@ function goToPage(page: number): void {
                 <span class="text-ink">Type</span>
                 <BaseSelect
                     v-model="type"
+                    id="skill-type"
+                    name="type"
                     :options="[{ value: '', label: 'All' }, ...types.map((option) => ({ value: option, label: option })), { value: unspecifiedType, label: unspecifiedType }]"
                     placeholder="All"
+                    :error="errors.type"
                 />
             </label>
 
             <BaseCheckbox
               v-model="unique"
+              id="skill-unique"
               name="unique"
               value="1"
               label="Unique only"
             />
 
-            <BaseButton type="submit" variant="primary" size="md">
+            <BaseButton type="submit" variant="primary" size="md" :loading="loading">
                 Filter
             </BaseButton>
         </form>
-
-        <p v-if="typeError" class="mt-2 text-sm text-risk">Type: {{ typeError }}</p>
     </div>
 
     <!-- D-65: the invitation belongs to the state where nobody has asked yet. -->

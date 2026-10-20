@@ -404,3 +404,57 @@ test('the three reference views keep every control at the 44px floor', async ({ 
         }
     }
 });
+
+/*
+ * The skills filter's busy state: the same idiom the roster and support-card filters use, read off
+ * the live element while a visit is held open.
+ */
+test('the skills filter holds its pending state while the filtered page is in flight', async ({ page }) => {
+    await page.goto('/database/skills', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    let release: (() => void) | undefined;
+    const held = new Promise<void>((resolve) => {
+        release = resolve;
+    });
+
+    await page.route('**/skills*', async (route) => {
+        await held;
+        await route.continue();
+    });
+
+    const filter = page.getByRole('button', { name: 'Filter' });
+    const form = page.locator('form').filter({ has: filter });
+
+    await filter.click();
+
+    await expect(form, 'the form says it is busy while the visit is in flight').toHaveAttribute('aria-busy', 'true');
+    await expect(filter, 'the submit is disabled while the visit is in flight').toBeDisabled();
+
+    release?.();
+
+    await expect(form, 'the busy state clears when the visit finishes').not.toHaveAttribute('aria-busy', 'true');
+});
+
+/*
+ * The skills filter's error state. `SkillSearchRequest` rejects a search longer than 120
+ * characters, and the input has no maxlength of its own, so this one is reachable from the UI:
+ * the message has to land on the field a Trainer has to shorten.
+ */
+test('the skills filter shows a rejected search on the field that failed', async ({ page }) => {
+    await page.goto('/database/skills', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await page.locator('#skill-search').fill('x'.repeat(121));
+    await page.getByRole('button', { name: 'Filter' }).click();
+    await page.locator('#app > *').first().waitFor();
+
+    const search = page.locator('#skill-search');
+
+    await expect(search, 'the rejected field is marked invalid').toHaveAttribute('aria-invalid', 'true');
+    await expect(
+        page.locator('#error-skill-search'),
+        'the error renders where the field can point at it',
+    ).toBeVisible();
+    await expect(search, 'the field points at its own error').toHaveAttribute('aria-describedby', 'error-skill-search');
+});

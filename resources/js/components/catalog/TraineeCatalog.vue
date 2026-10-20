@@ -16,8 +16,8 @@ import BaseInput from '../Form/BaseInput.vue';
 import BaseSelect from '../Form/BaseSelect.vue';
 import BaseCheckbox from '../Form/BaseCheckbox.vue';
 import BaseButton from '../Form/BaseButton.vue';
-import { Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Link, router, usePage } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
 
 interface Card {
     id: number;
@@ -70,6 +70,20 @@ const search = ref(props.search ?? '');
 const status = ref(props.showAllStatus ? 'all' : (props.currentStatus ?? ''));
 const showUnconfirmed = ref(props.showUnconfirmed);
 const loading = ref(false);
+const page = usePage();
+
+/*
+ * The roster filter's own validation errors, read the way the skills and support-card siblings read
+ * theirs and rendered on the field that failed rather than as a bare line under the form.
+ *
+ * `CatalogSearchRequest` validates `status` against `ReleaseStatus`, and a rejected status came
+ * back in the error bag and was dropped: this page read no `page.props.errors` at all, while the
+ * two sibling catalogues read theirs. The surface is not a Trainer picking a bad value - the
+ * dropdown offers only valid ones - but a URL that carries one (a bookmark, a tampered link, a
+ * filter state cached from before the validator tightened), which reaches the server exactly like
+ * a good one and has to be readable when it comes back.
+ */
+const errors = computed(() => (page.props.errors as Record<string, string | undefined> | undefined) ?? {});
 
 function applyFilters(): void {
     router.get(
@@ -99,7 +113,11 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
     <h2 class="text-lg font-semibold text-ink-strong">Umamusume catalog</h2>
 
     <div class="mt-4 rounded-md border border-rule bg-raised p-4">
-        <form class="flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
+        <form
+            class="flex flex-wrap items-end gap-3 text-sm"
+            :aria-busy="loading ? 'true' : null"
+            @submit.prevent="applyFilters"
+        >
             <label class="flex flex-col gap-1">
                 <span class="text-ink-muted">Search</span>
                 <BaseInput
@@ -108,14 +126,18 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                     id="trainee-search"
                     name="search"
                     placeholder="Trainee or card name"
+                    :error="errors.search"
                 />
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-ink-muted">Release status</span>
                 <BaseSelect
                     v-model="status"
+                    id="trainee-status"
+                    name="status"
                     :options="[{ value: 'all', label: allStatusesLabel }, ...statuses.map((s) => ({ value: s.value, label: s.label }))]"
                     placeholder="All"
+                    :error="errors.status"
                 />
             </label>
             <!-- `BaseCheckbox` renders its own `<label>`; wrapping it in a second one is invalid HTML
@@ -123,11 +145,13 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                  control. The sibling `skills/SkillCatalog.vue` calls it the same way. -->
             <BaseCheckbox
                 v-model="showUnconfirmed"
+                id="trainee-show-unconfirmed"
                 name="show_unconfirmed"
                 value="1"
                 label="Show unconfirmed cards"
+                :error="errors.show_unconfirmed"
             />
-            <BaseButton type="submit" variant="primary" size="md">
+            <BaseButton type="submit" variant="primary" size="md" :loading="loading">
                 Filter
             </BaseButton>
         </form>
