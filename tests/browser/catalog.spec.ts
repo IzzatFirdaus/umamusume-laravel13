@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 
 // Rendered-copy evidence for the ported Catalog index (SCR-CAT-001, ADR-0020 §1). The
 // server-side tests assert the props; these assert what the browser shows.
@@ -163,4 +164,20 @@ test('the roster filter shows a rejected release status on the field that failed
         'the error renders where the field can point at it',
     ).toBeVisible();
     await expect(status, 'the field points at its own error').toHaveAttribute('aria-describedby', 'trainee-status-error');
+});
+
+/*
+ * The roster index's own axe scan (plan slice 8.8b).
+ *
+ * `catalog-detail.spec.ts` scans the trainee DETAIL page, which is a different route: the scan there
+ * visits `/umamusume/special-week`, and this one visits `/umamusume`. A file that scans one of the
+ * two says nothing about the other, which is the gap the route coverage map exists to name.
+ */
+test('the roster index passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await page.goto('/umamusume');
+    await page.locator('#app > *').first().waitFor();
+
+    await openAllDisclosures(page);
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });

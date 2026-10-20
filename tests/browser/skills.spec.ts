@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 
 // Rendered-copy evidence for the ported Skills screens (SCR-SKL-001/002, ADR-0020 §1). The
 // server-side tests (SkillSearchScreenTest, SkillDetailTest) assert the resolved props; these
@@ -136,4 +137,19 @@ test('filters to the unique-class rows and shows the badge on the result', async
 
     // The badge is a claim about the class code, so the filter and the badge agree.
     await expect(page.locator(`#skill-results [title="${UNIQUE_BADGE_DISCLOSURE}"]`).first()).toBeVisible();
+});
+
+/*
+ * The skills index's own axe scan (plan slice 8.8b).
+ *
+ * `/skills` is a route of its own with a page of its own, and the Database hub's `/database/skills`
+ * is a different page: a scan on one says nothing about the other.
+ */
+test('the skills index passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await page.goto('/skills');
+    await page.locator('#app > *').first().waitFor();
+
+    await openAllDisclosures(page);
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });

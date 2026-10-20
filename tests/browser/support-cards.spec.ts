@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 
 // Rendered-copy evidence for the ported support-card screens (SCR-SUP-001/002, ADR-0020 §1). The
 // server-side tests (SupportCardPageTest) assert the resolved props; these assert what the browser
@@ -305,4 +306,19 @@ test('the support-card filter shows a rejected rarity on the field that failed',
         'aria-describedby',
         'support-card-rarity-error',
     );
+});
+
+/*
+ * The support-card index's own axe scan (plan slice 8.8b).
+ *
+ * `/support-cards` is a route of its own with a page of its own, and the Database hub's
+ * `/database/supports` is a different page: a scan on one says nothing about the other.
+ */
+test('the support-card index passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await page.goto('/support-cards');
+    await page.locator('#app > *').first().waitFor();
+
+    await openAllDisclosures(page);
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });

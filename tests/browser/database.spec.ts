@@ -458,3 +458,96 @@ test('the skills filter shows a rejected search on the field that failed', async
     ).toBeVisible();
     await expect(search, 'the field points at its own error').toHaveAttribute('aria-describedby', 'error-skill-search');
 });
+
+/*
+ * The axe sweep for the Database area (plan slice 8.8b).
+ *
+ * One case per route, and each case is its own scan: a case that visited two routes and scanned
+ * at the end would assert the LAST route it reached, so a scan that belonged to the first route
+ * would be attributed to the second. The tree's own idiom is a dedicated scan case - `review.spec.ts`
+ * and `accessibility.spec.ts` both carry one - and the coverage map that lands after this reads
+ * these cases to say which routes are scanned.
+ *
+ * The scan itself is the suite's: `buildAxe` scopes to `#app`, and `openAllDisclosures` opens every
+ * `<details>` first, because axe does not descend into a closed one (8.7).
+ */
+test('the database hub passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await page.goto('/database', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await openAllDisclosures(page);
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
+test('the Events view passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await page.goto('/database/events', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await openAllDisclosures(page);
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
+test('the race database passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await page.goto('/database/races', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await openAllDisclosures(page);
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
+test('the scenario matrix passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await page.goto('/database/scenarios', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await openAllDisclosures(page);
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
+test('the Shop Items view passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await page.goto('/database/shop-items', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await openAllDisclosures(page);
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
+test('the skills area passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await page.goto('/database/skills', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await openAllDisclosures(page);
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
+test('the data sources page passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await page.goto('/database/sources', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await openAllDisclosures(page);
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
+test('the Sparks view passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await page.goto('/database/sparks', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await openAllDisclosures(page);
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
+test('the support-card area passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await page.goto('/database/supports', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await openAllDisclosures(page);
+    const results = await buildAxe(page).analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
