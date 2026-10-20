@@ -128,7 +128,7 @@ const TAB =
 const TAB_CURRENT = 'bg-raised font-bold text-ink-strong';
 const TAB_DISABLED = 'inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink-muted';
 
-const pillVariant = computed<string>(() => (props.status === 'active' ? 'positive' : 'neutral'));
+const pillVariant = computed<string>(() => (props.status === 'Active' ? 'positive' : 'neutral'));
 const showTraineeJa = computed<boolean>(
     () =>
         props.traineeJa !== null &&
