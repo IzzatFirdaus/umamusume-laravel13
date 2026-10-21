@@ -292,9 +292,12 @@ it('keeps every scenario name and target vocabulary out of the step-3 components
     // D-240, gate G-33), and the vocabularies ship from the controller so the page cannot drift
     // from `BuildTargetPayload`'s constants. The files that could carry either are the two SFCs
     // this slice adds.
+    // The live component, not the alias: `de7dccb6` moved the trust mark out of
+    // `ProvenanceBadge` (now a thin alias) into `ProvenanceMark`, and a scan of the alias proves
+    // nothing about the vocabulary the live one holds.
     $sources = [
         'resources/js/pages/Career/BuildTarget.vue',
-        'resources/js/components/ProvenanceBadge.vue',
+        'resources/js/components/ProvenanceMark.vue',
     ];
 
     $scenarioNames = array_map(

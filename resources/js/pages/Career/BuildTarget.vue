@@ -500,14 +500,7 @@ function removeAt(index: number): void {
 
                         <!-- Ceiling column (only for stats that have an enterable ceiling) -->
                         <div v-if="props.capStats.includes(stat)" class="space-y-1">
-                            <AbsenceValue
-                                v-if="stat === 'Wit'"
-                                compact
-                                class="font-mono"
-                                reason="Wit ceiling is not set by the scenario matrix."
-                            />
                             <BaseInput
-                                v-else
                                 v-model="form[capColumn(stat)]"
                                 :id="controlId(capColumn(stat))"
                                 type="number"
