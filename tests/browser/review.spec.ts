@@ -82,11 +82,8 @@ test('each card explains itself: count, pill, badge, reason, and one primary-act
         test.skip(true, 'No pending candidates in the scratch database.');
     }
 
-    // 6A.7: the list opens with a count that tracks the paginator. The trailing `\s*` absorbs the
-    // single space Vue's whitespace condense leaves between the last interpolation and the period's
-    // line break; the sentence itself stays pinned.
-    await expect(page.getByText(/^\d+ of \d+ items to resolve\.\s*$/)).toBeVisible();
-
+    // #11 replaced the "N of M items to resolve" sentence with a progress bar; the count now lives
+    // beside the bar as "N of M resolved" and is pinned by the progress case below.
     const card = page.locator('main ul > li').first();
 
     // 6A.6 + 6A.2: a status pill and a shared provenance badge carry what the metadata row used to
@@ -215,6 +212,43 @@ test('splits the queue into the decidable half and the research half', async ({ 
     await expect(decidable.getByText('Suggested id:')).toHaveCount(decidableCards);
     await expect(research.getByText('Suggested id:')).toHaveCount(0);
     await expect(research.getByText('No match')).toHaveCount(researchCards);
+});
+
+test('shows review progress and keeps the pager reachable', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    seedPendingCandidates(2, { suggested: true });
+    seedPendingCandidates(24);
+
+    await page.goto('/review');
+    await page.locator('#app > *').first().waitFor();
+
+    // The bar carries the queue's numbers as a value a screen reader can read, not only as a width.
+    const bar = page.getByRole('progressbar', { name: 'Review progress' });
+    await expect(bar).toBeVisible();
+    await expect(bar).toHaveAttribute('aria-valuemin', '0');
+
+    const total = Number(await bar.getAttribute('aria-valuemax'));
+    const now = Number(await bar.getAttribute('aria-valuenow'));
+    expect(total, 'the bar is measured against the whole queue').toBeGreaterThan(0);
+    expect(now, 'resolved cannot exceed the total').toBeLessThanOrEqual(total);
+
+    // The sentence the bar replaced is gone; the same two numbers are still stated beside it.
+    await expect(page.getByText(/\d+ of \d+ items to resolve\./)).toHaveCount(0);
+    await expect(page.getByText(`${now} of ${total} resolved`)).toBeVisible();
+
+    // The pager stays put while the queue scrolls under it. This is measured, not asserted as a
+    // class: the shell's `main` carries `@container`, and containment makes `position: sticky` a
+    // no-op for its descendants (containment-mechanism.spec.ts proves that), so a `sticky` class
+    // here would be a claim the browser does not honour.
+    const pager = page.getByTestId('review-pager');
+    await expect(pager).toBeVisible();
+    const beforeScroll = await pager.evaluate((element) => element.getBoundingClientRect().bottom);
+    await page.mouse.wheel(0, 900);
+    await page.waitForTimeout(250);
+    const afterScroll = await pager.evaluate((element) => element.getBoundingClientRect().bottom);
+
+    expect(afterScroll, 'the pager is still at the bottom of the viewport after scrolling').toBeLessThanOrEqual(720 + 1);
+    expect(Math.abs(afterScroll - beforeScroll), 'the pager did not scroll away with the content').toBeLessThanOrEqual(1);
 });
 
 test('passes an axe scan at WCAG A and AA', async ({ page }) => {

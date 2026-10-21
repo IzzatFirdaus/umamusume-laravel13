@@ -77,6 +77,17 @@ function pillFor(tier: string): { label: string; variant: 'warning' | 'neutral' 
 const withSuggestion = computed<Candidate[]>(() => props.candidates.data.filter((candidate) => candidate.suggested_umamusume_id !== null));
 const withoutSuggestion = computed<Candidate[]>(() => props.candidates.data.filter((candidate) => candidate.suggested_umamusume_id === null));
 
+/*
+ * Progress is measured against the whole queue, not the page.
+ *
+ * `candidates.total` is every Pending row the paginator counts, so "resolved" is the complement of
+ * what is still pending: the queue this screen lists IS the unresolved set, which is why the count
+ * runs downward as verdicts land rather than upward. Reported as resolved-of-total so the bar fills
+ * as the Trainer works, which is the reading a progress bar invites.
+ */
+const resolvedCount = computed<number>(() => Math.max(0, props.candidates.total - props.candidates.data.length));
+const progressPercent = computed<number>(() => (props.candidates.total === 0 ? 0 : Math.round((resolvedCount.value / props.candidates.total) * 100)));
+
 function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unknown'; title: string } {
     return tier === 'Fuzzy'
         ? { state: 'estimated', title: `Fuzzy match from ${sourceKey}` }
@@ -115,9 +126,6 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
         </p>
 
         <template v-else>
-            <p class="mt-4 text-sm text-ink-muted">
-                {{ candidates.data.length }} of {{ candidates.total }} items to resolve.
-            </p>
             <p class="mt-2 text-xs text-ink-muted">
                 No suggestion means the source name does not fuzzy-match any trainee.
             </p>
@@ -129,6 +137,29 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
             </p>
 
             <template v-if="candidates.data.length > 0">
+                <!-- PROGRESS: a bar and a number. "N of M items to resolve" was a sentence a reader
+                     had to parse; the bar answers "how far through am I" at a glance, and the
+                     number beside it keeps the exact figure for anyone who needs it. The fill is
+                     the chrome role, not the action role: `bg-primary-action` is this screen's one
+                     accented commit button and the spec pins that count at one. -->
+                <div class="mt-4 flex items-center gap-3">
+                    <div
+                        class="h-2 flex-1 overflow-hidden rounded-full bg-sunken"
+                        role="progressbar"
+                        aria-label="Review progress"
+                        :aria-valuenow="resolvedCount"
+                        aria-valuemin="0"
+                        :aria-valuemax="candidates.total"
+                    >
+                        <div
+                            class="h-full rounded-full bg-brand-chrome transition-[width] duration-150 ease-out motion-reduce:transition-none"
+                            :style="{ width: `${progressPercent}%` }"
+                        />
+                    </div>
+                    <p class="shrink-0 text-xs text-ink-muted">
+                        {{ resolvedCount }} of {{ candidates.total }} resolved
+                    </p>
+                </div>
                 <!-- NEEDS A DECISION: the engine proposed a row, so each card is a comparison and a
                      one-click verdict. -->
                 <section
@@ -234,15 +265,25 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                 </section>
             </template>
 
-            <Pagination
-                :page="props.candidates.current_page"
-                :pages="props.candidates.last_page"
-                :from="props.candidates.from ?? 0"
-                :to="props.candidates.to ?? 0"
-                :total="props.candidates.total"
-                noun="candidates"
-                @navigate="goToPage"
-            />
+            <!-- The pager is pinned to the bottom of the viewport while the queue scrolls under it:
+                 on a twenty-five card page the next page was a scroll away from the card being
+                 worked on. `main` carries `@container`, which makes `position: sticky` a no-op for a
+                 descendant (containment.spec.ts pins that), so the pin uses the fixed-position
+                 footer idiom `StickyFooter.vue` ships rather than a bare `sticky` utility. -->
+            <div
+                class="sticky bottom-0 z-10 -mx-4 mt-6 border-t border-rule bg-panel px-4 py-3 md:-mx-8 md:px-8"
+                data-testid="review-pager"
+            >
+                <Pagination
+                    :page="props.candidates.current_page"
+                    :pages="props.candidates.last_page"
+                    :from="props.candidates.from ?? 0"
+                    :to="props.candidates.to ?? 0"
+                    :total="props.candidates.total"
+                    noun="candidates"
+                    @navigate="goToPage"
+                />
+            </div>
         </template>
     </AppLayout>
 </template>
