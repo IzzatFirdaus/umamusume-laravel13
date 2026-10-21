@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*
- * SCREEN-004, Trainee Profile (`ADR-0020` §1; `docs/proposals/screen-spec-2.0.md` §7). The read screen
+ * SCREEN-004, Trainee Profile (`ADR-0020` §1; `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` §7). The read screen
  * behind SCR-CAR-003's "View Profile" action: everything the catalog holds about one trainee, presented
  * before the choice is made.
  *

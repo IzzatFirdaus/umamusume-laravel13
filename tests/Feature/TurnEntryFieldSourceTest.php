@@ -8,7 +8,7 @@ declare(strict_types=1);
  * The five stat inputs were declared separately on the run record, the training decision and the cockpit
  * correction, and drifted apart (`Speed *`, `Speed total *`, `Speed`). `turnEntryFields.ts` became the
  * one owner. Two of the three surfaces read it now: the run record was retired with owner ruling R-2
- * (`docs/proposals/frontend-development-plan.md` §9.6 close-out, 2026-10-09), leaving the training
+ * (`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §9.6 close-out, 2026-10-09), leaving the training
  * decision and the cockpit correction.
  *
  * Asserted against the source because there is no component-test harness and no rendered HTML to read:
@@ -83,7 +83,7 @@ it('has the cockpit read the shared list instead of declaring its own', function
 
 /*
  * The run record's half of the previous case here retired with owner ruling R-2
- * (`docs/proposals/frontend-development-plan.md` §9.6 close-out, 2026-10-09): `Runs/Show.vue`
+ * (`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §9.6 close-out, 2026-10-09): `Runs/Show.vue`
  * was deleted, and the Cockpit's correction form is the 2.0 owner of the turn-entry write. Its
  * posting of the same `StoreTurnEntryRequest` - the half of this file's concern that is about the
  * request's contract rather than the shared field list - is asserted in `CareerCockpitTest`, in the

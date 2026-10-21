@@ -31,10 +31,19 @@ this master as a separate tracked file; it is now embedded below and the origina
 after the line-level containment check passed)
 ```
 
-14. `docs/proposals/design-2.0.md` (1,652 lines, appended 2026-10-10, Round 14, augment-only) as the
+14. `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` (1,652 lines, appended 2026-10-10, Round 14, augment-only) as the
     section `## design-2.0.md`: the Trainer Desk 2.0 design target (visual/interaction spec for the
     Inertia + Vue rewrite), a reference-only document that stays at its own path. Nothing was deleted
     and no citation was repointed.
+15. Round 18 (2026-10-21, owner-ordered): `docs/proposals/design-2.0.md` (1,653 lines) was already
+    embedded by Round 14 and was measured on 2026-10-21 as already containing every source body line
+    (942 of 942 non-blank body lines), so it was **not** re-embedded and the section above is unchanged
+    in content. Only the framing note was refreshed, to record that the source is now deleted from
+    `docs/proposals/`. Live citations to the source were repointed to this section; the dated records
+    that name the old path were marked with the census's `<!-- census: quoted-original -->` flag. The
+    other seven files of this round landed in `PROCESS-PLANS.md` (one), `SLICE-RECORDS.md` (one),
+    `PLANS-AND-BRIEFS.md` (three) and `AUDIT-AND-VERIFICATION.md` (two); the routing table for all
+    eight is in `docs/research-scratch/INDEX.md` §Round 18.
 
 ---
 
@@ -5360,7 +5369,7 @@ Added 2026-10-03 from the Phase B pass. `2026-07-14 025344` shows the trainee "C
 
 ## design-2.0.md
 
-> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/proposals/design-2.0.md` (1652 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+> **Refreshed 2026-10-21 (Round 18, owner-ordered).** Source: `docs/proposals/design-2.0.md`. The section below was embedded by Round 14 and was measured on 2026-10-21 as already containing every source body line, so it is not re-embedded. The original was deleted from `docs/proposals/` after that measurement. Cite this anchor, not the deleted path. <!-- census: quoted-original -->
 
 ## Uma Trainer Desk — Design System (2.0 design target)
 
@@ -5383,8 +5392,8 @@ Added 2026-10-03 from the Phase B pass. `2026-07-14 025344` shows the trainee "C
 > (*Dated close-out 2026-10-08, documentation-sync pass: the Inertia + Vue rewrite this banner says "§1
 > targets" landed through Phases A–E. The shipped surface and every screen's real shape are recorded in
 > `SCREEN_SPEC.md` §3/§4 (`SCR-CAR-001`–`024`, `SCR-VET-001`–`004`), the visual decisions in `DESIGN.md`,
-> and the slice-by-slice landings in `docs/proposals/frontend-development-plan.md` §4–§9, which this file's
-> screen inventory was deliberately built as the union-with-`screen-spec-2.0.md` input for. Two of this
+> and the slice-by-slice landings in `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §4–§9, which this file's
+> screen inventory was deliberately built as the union-with-`docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` input for. Two of this
 > document's Grand Concert premises are superseded by the tree and recorded in the plan's E6 close-out and
 > `SCREEN_SPEC.md` SCR-CAR-024: `docs/scenarios/07-grand-concert.md` is a sourced guide rather than a stub,
 > and the config key that drives the PARTIALLY DOCUMENTED badge is `partially_documented` (the owner's

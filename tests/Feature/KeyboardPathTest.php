@@ -14,7 +14,7 @@ declare(strict_types=1);
  *
  * Four cases here used to read that component: the digit/arrow/Escape advertisement, the
  * document-listener registration, the radio-group roving, and the digit guard. Owner ruling R-2
- * (`docs/proposals/frontend-development-plan.md` §9.6 close-out, 2026-10-09) retires the guided
+ * (`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §9.6 close-out, 2026-10-09) retires the guided
  * rail with `Runs/Show.vue`, and the Cockpit's correction form owns no digit, arrow or Escape path
  * of its own - it is a turn `select` plus a Save button. The flow is gone, so the cases retire with
  * it rather than being repointed at a control that has no such interaction to hold.

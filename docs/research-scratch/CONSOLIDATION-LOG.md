@@ -226,8 +226,8 @@ records a false completion. That condition held for one day and the owner revers
 `PROCESS-PLANS.md` now carries two plans with open steps as their authoritative copy. Round 11 follows the
 reversed rule and keeps its guard: five of the six sources were live, each destination states in its own
 Provenance that the section is the authoritative copy where open steps continue, and no status line was
-softened to make a fold look like a closure. Where a fold was refused, it is said: `docs/proposals/` keeps `docs/proposals/design-2.0.md` and
-`docs/proposals/screen-spec-2.0.md` in place, so the 2.0 spec set now spans two locations, and that
+softened to make a fold look like a closure. Where a fold was refused, it is said: `docs/proposals/` keeps `docs/proposals/design-2.0.md` and <!-- census: quoted-original -->
+`docs/proposals/screen-spec-2.0.md` in place, so the 2.0 spec set now spans two locations, and that <!-- census: quoted-original -->
 split is recorded in `PROCESS-PLANS.md` rather than hidden by the commit message.
 
 **Round 7's standing ruling on the calendar tables was reversed by the owner, against the objection

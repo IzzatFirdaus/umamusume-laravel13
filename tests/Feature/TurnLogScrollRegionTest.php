@@ -5,7 +5,7 @@ declare(strict_types=1);
 /*
  * KI-25: the turn log forced a horizontal scroll at 390px that nobody could reach.
  *
- * Retired with owner ruling R-2 (`docs/proposals/frontend-development-plan.md` §9.6 close-out,
+ * Retired with owner ruling R-2 (`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §9.6 close-out,
  * 2026-10-09). This file held the two assertions that named the convention: the run page's turn log
  * wrapped in `role="region" tabindex="0" aria-label="Turn log" overflow-x-auto`, and the census that
  * kept the tab stop on the region that still clipped while the calendar - which had given its band

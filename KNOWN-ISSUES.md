@@ -281,7 +281,7 @@ The migrated copy was then served on a spare port and `GET /` and `GET /legacy` 
    `KI-59` describe. The population step is `php artisan uma:reparse <source>` (`AGENTS.md` §11, and
    `KI-27` for why a short-circuited `uma:fetch` will not do it).
 2. The plan tracks slices by whether their code landed, and
-   `docs/proposals/frontend-development-plan.md` §5 records C3 as `Landed` while the table it names had
+   `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §5 records C3 as `Landed` while the table it names had
    never been created on the only database anyone browses. "Landed" there means merged and tested; it
    carries no leg for "applied to the dev database", which is the leg that broke.
 
@@ -338,7 +338,7 @@ is not, and closure is held on `O-1`.**
 in `PipelineRunner`, which this pass did not read, so the skip is recorded as unattributed rather than
 assigned to a cause. A future pass should read that counter before treating the message as evidence.
 
-**What stays open.** Half (c): `docs/proposals/frontend-development-plan.md` still records a slice as
+**What stays open.** Half (c): `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` still records a slice as
 `Landed` with no leg for `applied to the dev database`, and no gate runs `migrate:status` against the dev
 file, so the next migration can sit Pending in exactly this way again. Landing (c) means editing
 `AGENTS.md` §9 and the plan's status table, both of which have been fenced against agent edits in every
@@ -647,7 +647,7 @@ step this defect lives in, and that is the part a reader should not infer.
 
 ### KI-65 The D5/D6 wizard halves landed red at `0006b17` and carried a private copy of the parent-name resolution - FILED 2026-10-07 (D9 hand-off, from the plan's §4.1 queue), CLOSED 2026-10-09
 
-**Symptom, as recorded.** `frontend-development-plan.md` §4.1 item 1 and the §15 changelog row for
+**Symptom, as recorded.** `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §4.1 item 1 and the §15 changelog row for
 2026-10-06 record that the step-4 and step-5 wizard halves landed at `0006b17` with three failing tests
 and three PHPStan errors, no browser spec, and no `SCR-CAR-*` rows, and that no `KNOWN-ISSUES.md` entry
 was filed for it at the time. This entry is that entry.
@@ -1971,7 +1971,7 @@ deleting session's act; this entry records the state, and KI-86 carries the code
 caused.
 
 **Disposition recorded 2026-10-09 (the text above and the first erratum are left exactly as written).** The
-owner approval this entry said was missing is on record: `docs/proposals/frontend-development-plan.md`, its
+owner approval this entry said was missing is on record: `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md`, its
 F2 close-out dated 2026-10-09, states "All five rulings were approved as recommended (R-1 approve
 retirement; R-2 move assertions and retire the flow-only remainder; R-3 split per assertion)." The 24 files
 `91494a1` deleted split exactly across the two approved groups, and each disposition is executed, so the
@@ -2261,7 +2261,7 @@ finale's payload vocabulary (`docs/proposals/Our-Grand-Concert-plan.md` §9 E8).
   top-level sections (`# Global Out-of-Scope Rules`, `# Repository Safety Constraints`, `# Slice Completion
   Contract`, `# Current Status`). There is no `## 9`, so there is no §9 for an E8 to sit in.
 - **No document under `docs/` defines an `E8` at all.** The E-numbered slice ids live in
-  `docs/proposals/frontend-development-plan.md` and run **E1 through E6**; `SCREEN_SPEC.md` cites them in that
+  `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` and run **E1 through E6**; `SCREEN_SPEC.md` cites them in that
   same form (`plan §9 E4` at `:2827`). A grep for the word `E8` across `docs/` returns zero hits.
 
 So the reference is not imprecise, it is dangling twice over: the section is absent from the file named, and
@@ -2270,7 +2270,7 @@ the section id is absent from the repository.
 **The two corrections, neither taken here.**
 
 1. **Point at a section that exists.** If the intended subject is the slice plan governing this work, the
-   pointer belongs in `docs/proposals/frontend-development-plan.md`'s own §9 slice table — but that table has
+   pointer belongs in `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md`'s own §9 slice table — but that table has
    no E8 row either, so this correction cannot be written until its author names which slice the test actually
    belongs to.
 2. **Rewrite the comment to name the shipped source.** The test's real provenance is the code it exercises:
@@ -2676,8 +2676,8 @@ tracked, present files as dead:
    sat next to it - Markdown's own relative-link rule, unimplemented.
 2. A bare name was tried in three directories (`docs/`, `docs/research-scratch/`, beside the citing file), so the
    corpus's shorthand broke for every docs area added after those three were chosen. `AGENTS.md:54` telling a
-   reader to open `code-style.md` counted dead, and so did `frontend-development-plan.md`, `design-2.0.md`,
-   `screen-spec-2.0.md`, the `docs/scenarios/` guides, the `docs/audits/` rounds and the `screenshot-notes/` files -
+   reader to open `code-style.md` counted dead, and so did `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md`, `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md`,
+   `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md`, the `docs/scenarios/` guides, the `docs/audits/` rounds and the `screenshot-notes/` files -
    all tracked, all present. Gap 2 was already acknowledged once in the function's own docstring for
    `GOVERNANCE.md`; the same class had simply grown past the three directories.
 
@@ -3060,9 +3060,9 @@ reports GONE CLAUDE.md:12 -> CONSTRAINTS.md and GONE CLAUDE.md:247 -> CLAUDE.loc
 OPEN and the fix is still owed by the peer, who owns the file. The dispatch ledger's Section 41 carries
 the pre-rewrite line number.
 
-### KI-108 `docs/proposals/execution-ledger-2026-10-17.md` contains NUL bytes in the working tree - FILED 2026-10-20 (citation-fix batch close-out), OPEN, PEER-OWNED
+### KI-108 `docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md` contains NUL bytes in the working tree - FILED 2026-10-20 (citation-fix batch close-out), OPEN, PEER-OWNED
 
-**Status: OPEN, peer-owned.** `docs/proposals/execution-ledger-2026-10-17.md` carries approximately 6571
+**Status: OPEN, peer-owned.** `docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md` carries approximately 6571
 NUL bytes in the working tree. All committed versions (HEAD, bd9e2e5, 4db04fd) are clean UTF-8; the NULs
 exist only in the peer's uncommitted edits (git status: ` M`).
 
@@ -3160,7 +3160,7 @@ bytes, first bytes `FF FE 3C 00`, 21,646 NULs) was added by `b30906a` (the
 peer's cockpit cutover), so it is peer-owned; disposition is the peer's call.
 Neither file is currently read by either gate — the risk is future, when a
 citation resolves into either file. No `git rm --cached` without owner review.
-See §42 in `docs/proposals/execution-ledger-2026-10-17.md` for byte-exact
+See §42 in `docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md` for byte-exact
 evidence.
 
 ### KI-110 `doc_census.py` reads working tree, not committed ref - FILED 2026-10-20 (citation-fix batch close-out), ACCEPTED LIMITATION
@@ -3201,10 +3201,10 @@ RACE-AND-SLICE-RESEARCH.md 11, REFERENCE-GUIDE-BUILD-CHAIN.md 6, ARCHITECTURE.md
 CHARACTERS-SOURCE.md 3, SKILL_AUTOMATION.md 2, DESIGN-AND-MECHANICS-REQUESTS.md 2, README.md 1,
 REORGANIZATION_PLAN.md 1, Rice_Shower_Unity-Cup.md 1.
 
-**What is left.** `docs/proposals/frontend-development-plan.md` holds 6 invalid closers and 4 unclosed
+**What is left.** `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` holds 6 invalid closers and 4 unclosed
 blocks. `docs/UMAMUSUME_REFERENCE.md` holds 6 unclosed blocks and no invalid closer. Both carry another
 session's uncommitted work, so neither was touched. Both are reachable by the same mechanical rule: 3
-closers in `UMAMUSUME_REFERENCE.md` (lines 133, 2683, 2691) and 2 in `frontend-development-plan.md` (lines
+closers in `UMAMUSUME_REFERENCE.md` (lines 133, 2683, 2691) and 2 in `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` (lines
 576, 921) were simulated against the real checker, and each reaches zero findings with no other change.
 
 **Fix path (future doc dispatch, once the peer work in those two files is landed).** Strip the info string

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*
- * SCREEN-003, Trainee Selection (`ADR-0020` §1; `docs/proposals/screen-spec-2.0.md` §6). Step 2 of the
+ * SCREEN-003, Trainee Selection (`ADR-0020` §1; `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` §6). Step 2 of the
  * setup wizard.
  *
  * **The page prints props and decides nothing.** Every filter vocabulary, every column name and the letter
@@ -384,7 +384,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
                     <AbsenceValue compact reason="The character document published no aptitude letters for this trainee." />
                 </div>
                 <div v-else class="flex flex-wrap gap-1.5">
-                    <!-- `design-2.0` §17: the badge prints the letter and its band as two words, never
+                    <!-- `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §17: the badge prints the letter and its band as two words, never
                          a colour alone. -->
                     <AptitudeBadge
                         v-for="cell in primaryAxes"

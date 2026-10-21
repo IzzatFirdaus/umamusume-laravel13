@@ -9,7 +9,7 @@ use App\Models\Umamusume;
 use App\Services\ScenarioCaps;
 
 /**
- * The career setup wizard's draft (SCREEN-002 to SCREEN-008, `docs/proposals/frontend-development-plan.md` §8).
+ * The career setup wizard's draft (SCREEN-002 to SCREEN-008, `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §8).
  *
  * **Why a session and not a run.** The wizard needs somewhere to hold a scenario before a trainee
  * exists and a trainee before a build target exists, and the obvious answer, an early-created run,

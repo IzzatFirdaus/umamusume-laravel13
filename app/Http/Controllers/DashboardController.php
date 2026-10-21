@@ -17,7 +17,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * The Trainer Desk 2.0 landing screen (SCREEN-001, `docs/proposals/screen-spec-2.0.md`, `ADR-0020` §1).
+ * The Trainer Desk 2.0 landing screen (SCREEN-001, `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md`, `ADR-0020` §1).
  *
  * Thin: every value here is a stored fact, a config value, or a named absence. Nothing is derived
  * beyond the career position, which is the client's own calendar grid read back from a
@@ -291,7 +291,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * The badge the Data Versioning UI asks for (`design-2.0` §48). `verified_at` is a config fact,
+     * The badge the Data Versioning UI asks for (`docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §48). `verified_at` is a config fact,
      * not a literal, so the badge cannot drift from the matrix it describes. The ruleset version is
      * not here: it is the shared `app.ruleset` prop and it is null, so the page prints `N/A` with a
      * reason rather than a second, emptier copy of the same absence.

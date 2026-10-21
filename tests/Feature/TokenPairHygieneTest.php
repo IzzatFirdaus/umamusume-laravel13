@@ -16,7 +16,7 @@ declare(strict_types=1);
  * The sweep covers both source trees. The components it guards are Vue now (ADR-0020 §1, B1),
  * so a Blade-only walk would go quiet the moment the last component moved.
  *
- * Two cases retired 2026-10-09 with owner ruling R-2 (`docs/proposals/frontend-development-plan.md`
+ * Two cases retired 2026-10-09 with owner ruling R-2 (`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md`
  * §9.6 close-out). The declaration pin for `--color-on-green` went with the token itself: the
  * low-Energy advisory badge was the only consumer of its `text-on-green` utility, the badge
  * lived on the guided rail, and no plan or design document names a surface that would re-use
@@ -108,7 +108,7 @@ it('leaves no component wearing the gold ink on the green fill', function (): vo
  * `bg-green px-1.5 font-bold text-on-green` in `resources/js/components/GuidedStep.vue`, so that
  * the advisory badge's green fill took the new ink and the Caution band kept the gold pair. The
  * component was the last consumer of `text-on-green`; owner ruling R-2
- * (`docs/proposals/frontend-development-plan.md` §9.6 close-out, 2026-10-09) retires it with
+ * (`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §9.6 close-out, 2026-10-09) retires it with
  * `Runs/Show.vue`, and no surviving component carries both halves of the pair in one file, so the
  * assertion had no subject to point at.
  *

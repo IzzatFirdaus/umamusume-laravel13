@@ -96,7 +96,7 @@ neither stub is a root document any more.
 | `README.md`                                                            | onboarding, commands, route and doc tables                                                                                                                                                              | governance                                                |
 | `VERSION.md`                                                           | current version, pre-release status, Git tags, release commit, framework and PHP versions; Semantic Versioning as interpreted for this project                                                            | implementation detail; changelog (that is `CHANGELOG.md`) |
 | `MCP_SETUP.md` | MCP client configuration: where each client reads its servers, and the host gotchas that make a correct-looking config fail silently | framework or schema guidance |
-| `docs/proposals/execution-ledger-2026-10-17.md` | the append-only dispatch ledger: one numbered section per dispatch, with the gates run, the decisions taken and what was deferred | product intent, or the gate definitions (that is the governance master) |
+| `docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md` | the append-only dispatch ledger: one numbered section per dispatch, with the gates run, the decisions taken and what was deferred | product intent, or the gate definitions (that is the governance master) |
 | `docs/adr/README.md`                                                   | ADR index, derived; regenerate with the command in that file                                                                                                                                            | hand-edited index rows                                    |
 | `docs/OPEN-QUESTIONS.md`                                               | open-question register for `PRD.md`; one line per question with status, owner, resolution pointer                                                                                                                                                                   | answered-and-remainder narration (that is `CHANGELOG.md`) |
 | `docs/UMAMUSUME_REFERENCE.md`                                          | source-cited mechanics corpus, eight sections, dated live-ops snapshots                                                                                                                                 | a write-up that cites this repo is not a second source    |
@@ -508,7 +508,7 @@ documentation; run the underlying `composer` script or vendor command instead.
 - **Defect register.** Append new `KI-nn` entries to `KNOWN-ISSUES.md` in its four-part
   form (numbered heading continuing from the highest, status line, proving command or
   file, closure commit plus what closure does not cover). Never renumber an existing entry.
-- **Execution ledger.** `docs/proposals/execution-ledger-2026-10-17.md` is append-only: a
+- **Execution ledger.** `docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md` is append-only: a
 dispatch appends one numbered section and never edits an earlier one. The file mixes CRLF and LF
 line endings and is not clean UTF-8, so read its diff with `git diff --ignore-cr-at-eol` and
 compare byte counts rather than rendered text.

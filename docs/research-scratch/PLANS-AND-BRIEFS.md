@@ -25,11 +25,11 @@ This document consolidates the following source files verbatim (no summarization
   deletion after this fold is recoverable from git history.
 - `docs/proposals/provenance-and-absence-contracts.md` (839 lines, appended 2026-10-10, Round 14,
   augment-only) as the section `## provenance-and-absence-contracts.md`, and
-  `docs/proposals/screen-spec-2.0.md` (1,787 lines, appended 2026-10-10, Round 14, augment-only) as the
+  `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` (1,787 lines, appended 2026-10-10, Round 14, augment-only) as the
   section `## screen-spec-2.0.md`: both are live Trainer Desk 2.0 reference documents (a pre-ruling
   reconciliation proposal and the 2.0 screen-set target, reference-only, not authorization) that stay at
   their own paths; nothing was deleted and no citation was repointed.
-- `docs/proposals/provenance-and-absence-contracts.md` (839 lines) and `docs/proposals/screen-spec-2.0.md`
+- `docs/proposals/provenance-and-absence-contracts.md` (839 lines) and `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md`
   (1,787 lines), embedded verbatim 2026-10-10 (Round 14, augment-only) as the sections
   `## provenance-and-absence-contracts.md` and `## screen-spec-2.0.md`. The first is the reconciliation
   proposal with its ten owner rulings; the second is the 2.0 screen-set target with its governance holds.
@@ -38,7 +38,28 @@ This document consolidates the following source files verbatim (no summarization
   owner-ordered): the source had grown to 889 lines (§22, the 2026-10-11 Phase G preflight, added after
   the Round 14 embed), so the section above was re-embedded from the current source, verified line by
   line (0 missing), and the original was deleted from `docs/proposals/`. Live citations were repointed to
-  this section; `docs/proposals/screen-spec-2.0.md` stays live at its own path.
+  this section; `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` stays live at its own path.
+- Round 18 (2026-10-21, owner-ordered): two more `docs/proposals/` files were consolidated here, and
+  the Round 14 embed of a third was refreshed.
+  - `docs/proposals/frontend-fidelity-2026-10-13.md` (476 lines) as the section
+    `## frontend-fidelity-2026-10-13.md`, and
+    `docs/proposals/ux-laws-audit-plan-2026-10-13.md` (626 lines) as the section
+    `## ux-laws-audit-plan-2026-10-13.md`. The first is the two-track fidelity plan (why the shipped
+    surface reads as a wireframe, and the two-track path); the second is its sibling, the 27-law
+    checklist with its coverage matrix, instruments and output contract. Both were re-verified
+    line-by-line before the delete (399 of 399 and 521 of 521 non-blank lines present, in order, with
+    one-level heading demotion; 0 missing) and again after it.
+  - `docs/proposals/screen-spec-2.0.md` (1,788 lines) was already embedded by Round 14 and was measured
+    on 2026-10-21 as already containing every source body line, so it was not re-embedded; only the
+    framing note was refreshed, to record that the source is now deleted.
+  - The owner approved one departure from verbatim: each source's own cross-references inside the
+    embedded body are repointed to the master and its section anchor, so every citation in the tree
+    resolves rather than rotting. The bodies are otherwise byte-identical to their sources, and the
+    verification compares against the source lines with the same substitution applied.
+  - The other five files of this round landed in `PROCESS-PLANS.md` (one), `SLICE-RECORDS.md` (one) and
+    `AUDIT-AND-VERIFICATION.md` (two), with one refreshed in place in `DESIGN-CORPUS.md`; the routing
+    table for all eight is in `docs/research-scratch/INDEX.md` §Round 18.
+
 
 ---
 
@@ -937,7 +958,7 @@ If the same three files block a third dispatch, A has been shown not to work and
 
 **Goal:** Render id-addressed artwork (trainee portraits, support-card thumbnails)
 on the screens that already display the rows that own them, with WCAG 2.2 AA
-conformance and the UX laws named in `docs/proposals/frontend-development-plan.md`
+conformance and the UX laws named in `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md`
 §13, while preserving the existing text-only row as the universal fallback.
 
 **Architecture:** The mirror is already built (`uma:fetch-art`,
@@ -1782,8 +1803,8 @@ Wire the slot in the existing header block of both, alongside the title/rarity:
 
 **Files:**
 
-- Modify: `docs/proposals/design-2.0.md` — change log row (the prose is already in §42 + §45a, land a dated row).
-- Modify: `docs/proposals/screen-spec-2.0.md` — change log row for §34 footnote + §35.
+- Modify: `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` — change log row (the prose is already in §42 + §45a, land a dated row).
+- Modify: `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` — change log row for §34 footnote + §35.
 - Modify: `DESIGN.md §4.7` — status word tone (mirror exists, slots do not; the Blade rendering of one slot is now also part of this file's binding rules by example).
 - Modify: `SCREEN_SPEC.md §7-16` — status widens: the mirror exists, the per-screen wire-ups exist, what remains is the skill icon migration question.
 - Modify: `AGENTS.md §10 commands` — already has `uma:fetch-art`; nothing changes.
@@ -1862,8 +1883,8 @@ Wire the slot in the existing header block of both, alongside the title/rarity:
 | 6      | Catalog detail Identity (`catalog/show.blade.php`) — `decorative`, `size-16`                                  | `[x]`                       | `53e5d12`              | 2 cases green; the `$activeCard ?? first` duplication in the view is recorded, not fixed                                                                                                                                                                                                                                                                                   |
 | 7      | Catalog index Inertia page (`Catalog/Index.vue` + `CatalogController::index`) — `artworkURL` per row + form   | `[x]`                       | `b5547d6`, `625c86e`   | 2 Pest + 2 Playwright green; browser cases derived from the DOM after a fix round                                                                                                                                                                                                                                                                                          |
 | 8      | Support-card index + detail (Blade) — `<x-support-thumb>` `size-12` / `size-16`                               | `[x]`                       | `7d7e5d6`              | 5 cases green; the id-swap guard proved by a swap experiment; full suite 1240 passed                                                                                                                                                                                                                                                                                       |
-| 9      | Run Create / Legacy Select — `size-10`                                                                        | `[x]` **not implemented**   | —                      | **Blocked, no slice committed.** No placeable surface: the view's picker is a native `<select>` (an `<img>` cannot render inside `<option>`) plus a client-rendered combobox listbox, and on `trainer-desk-2.0` both the view and `trainee-combobox.ts` are deleted by the port. Recorded as unplaceable in `PRD.md` OQ-6, `SCREEN_SPEC.md` §7-16 and `design-2.0` §45a.   |
-| 10     | Cross-doc change-log rows + gate run-down                                                                     | `[x]`                       | see below              | `DESIGN.md` §3 count, §4.7 status and geometry, `SCREEN_SPEC.md` §7-16 superseded-in-part, `PRD.md` OQ-6 narrowed, `design-2.0` §45a shipped-state note; full gate block in the Slice Log                                                                                                                                                                                  |
+| 9      | Run Create / Legacy Select — `size-10`                                                                        | `[x]` **not implemented**   | —                      | **Blocked, no slice committed.** No placeable surface: the view's picker is a native `<select>` (an `<img>` cannot render inside `<option>`) plus a client-rendered combobox listbox, and on `trainer-desk-2.0` both the view and `trainee-combobox.ts` are deleted by the port. Recorded as unplaceable in `PRD.md` OQ-6, `SCREEN_SPEC.md` §7-16 and `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §45a.   |
+| 10     | Cross-doc change-log rows + gate run-down                                                                     | `[x]`                       | see below              | `DESIGN.md` §3 count, §4.7 status and geometry, `SCREEN_SPEC.md` §7-16 superseded-in-part, `PRD.md` OQ-6 narrowed, `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §45a shipped-state note; full gate block in the Slice Log                                                                                                                                                                                  |
 
 **Slice report format.** For each landing slice, append a dated block under
 `## Slice Log` below in this shape (`Phase gate reporting format`):
@@ -1925,7 +1946,7 @@ rewriting. The four claims above that stopped being true:
    `Catalog/Show.vue`, `SupportCards/Index.vue`, `SupportCards/Show.vue` (`fff920f`).
 2. **"Create: `resources/views/components/character-portrait.blade.php`"** (`Task 4`) and the
    `support-thumb.blade.php` twin (`Task 5`). Both files landed as written, then `b645048` deleted
-   them with zero call sites remaining, which is `docs/proposals/frontend-development-plan.md` §5.1
+   them with zero call sites remaining, which is `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §5.1
    step 8 behaving as designed. One SFC, `ArtworkSlot.vue`, is now the single owner of the slot
    contract.
 3. **"the slot component declares the `decorative` flag"** (Self-Review Notes, Type consistency).
@@ -1937,7 +1958,7 @@ rewriting. The four claims above that stopped being true:
    defect cannot be expressed.
 4. **"Task 9 ... Run Create / Legacy Select."** Never built, and not buildable as specified: that
    picker is a native `<select>`, and an `<img>` cannot render inside an `<option>`. Recorded as
-   unplaceable in `PRD.md` OQ-6, `SCREEN_SPEC.md` §7-16 and `design-2.0` §45a.
+   unplaceable in `PRD.md` OQ-6, `SCREEN_SPEC.md` §7-16 and `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §45a.
 
 **Process note, so the record is complete.** Finding 3 was raised by review while `Task 4` was in
 flight and named the axe rule it would fail. It was deferred as a minor on the grounds that the
@@ -1955,7 +1976,7 @@ rule, and the `skills.iconid` deferral. All five remain as specified.
 
 ## E4 — Trackblazer scenario panel (SCREEN-016), 2026-10-07
 
-Slice row: `docs/proposals/frontend-development-plan.md` line 195 (E4, SCREEN-016, depends on E1,
+Slice row: `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` line 195 (E4, SCREEN-016, depends on E1,
 plan §9 E4). Status before this slice: `config/scenarios.php` `trackblazer` entry present and
 verified 2026-09-27 against three Global prose sources; matrix flags `grade_objectives`,
 `shop`, `epithet_routes` ON; matrix flag `race_calendar` OFF (no mandatory calendar). The
@@ -2057,14 +2078,14 @@ use the ActionGrid only; no other scenario-actions entries are added by E4.
   (uma.guide, after 2026-07-01 rework).
 - Finale kind and races: `config/scenarios.php` line 358, `finale.kind === 'points_league'`,
   `finale.races === 3`.
-- `Twinkle Star Climax` exclusion: `screen-spec-2.0.md` line 138 conflict row 31;
+- `Twinkle Star Climax` exclusion: `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` line 138 conflict row 31;
   `docs/UMAMUSUME_REFERENCE.md` §7 conflict row 31; the named-absence `title` cites
   the conflict row.
 - Purchase validation rules and held-copies cap: `app/Http/Requests/StoreShopPurchaseRequest.php`
   docblock + body.
-- Trust vocabulary: `design-2.0.md` §49 (`Confirmed / Calculated / Estimated / Unknown`)
+- Trust vocabulary: `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §49 (`Confirmed / Calculated / Estimated / Unknown`)
   and `ADR-0020` §2.
-- 44px / `min-h-11` target rule + WCAG 2.4.11: `frontend-development-plan.md` §12.
+- 44px / `min-h-11` target rule + WCAG 2.4.11: `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §12.
 
 ### Not built, and why
 
@@ -2585,7 +2606,7 @@ string.
 |---|---|---|---|---|
 | **Confirmed** | The figure is a reading taken as-is from a named owner: a source-published value, a declared constant, or a value the Trainer entered. No arithmetic was performed on it. | Energy cost `E−28 … E−17` (`TrainingCard.vue:234`, a config constant with source and date); hint-ladder percentages (`SkillsPlanner.vue:213`, "Read off the [Global] Learn screen on 2026-10-03"); observed inheritance outcomes (`InheritanceEvent.vue:346`, "Entered by the Trainer") | Anything the tool computed, summed, counted, compared or interpolated — even when every input is a reading | **Inference from four shipped rationales**, consistent with `ADR-0001` §2's entered/declared split. The *definition* is new policy |
 | **Calculated** | The figure is the tool's own arithmetic over readings, deterministic and reproducible, with the arithmetic stated beside it. | Target deficit (`TrainingCard.vue:251`, `state="calculated"` beside the deficit row); RacePlanner target alignment (`RacePlanner.vue:268`, "derived from two recorded values, so it is a comparison rather than a reading"); SP coverage (`SkillsPlanner.vue:180`, "the sum of the base prices"); build-target summary (`BuildTarget.vue:530`, "assembled by this tool from the values entered, not a stored fact") | Any figure whose inputs are not all recorded, and any model output (that is `Estimated`) | **Inference**, and the four rationales above are mutually independent. `ADR-0001` §2's R4 replacement is the nearest contract text |
-| **Estimated** | Two candidate meanings, and the shipped chips follow the one the accepted ADR does **not** describe. (a) `ADR-0001` §3: the tool's own model output, **off by default**, formula and parameters on the same surface, labelled as this tool's model and not the game's. (b) `config/reference.php:31`: "the doc backs it only with a third-party guide, or marks the contents unread" — a *weak source*, not a model. | All four shipped chips are meaning (b): `UnityCupPanel.vue:110` (the +30 read beside the S emblem), `:164` (a band table transcribed from one publisher), `InheritanceEvent.vue:249` ("Sourced probabilities from the chosen parents and grandparents. **No outcome is computed**"), and `config/reference.php:129`. **Meaning (a) is implemented nowhere:** the `failure_estimate` preference is stored and read back but renders no number — `tests/Feature/PreferenceControlsTest.php:24` states the reason in its own docblock, "it shows no number, because there is no number", and `TrainerAdvisor` ships the two bands only. So no chip today claims a modelled figure, and the opt-in half of `ADR-0001` §3 is an unbuilt option, not a violated rule | A sourced value (that is `Confirmed` under meaning (a), `Estimated` under meaning (b) — the two readings disagree here); a game mechanic presented as fact; any win probability (`ADR-0016`, `PRD.md` §6.11, and `design-2.0` §49's own "Estimated win chance: 82%" example is the banned figure, held by that document's governance banner) | **The word is authorized by two artifacts on different axes.** `ADR-0001` §3 authorizes (a) and the app does not do (a). `config/reference.php` defines (b) and the app does do (b), outside the advisor scope |
+| **Estimated** | Two candidate meanings, and the shipped chips follow the one the accepted ADR does **not** describe. (a) `ADR-0001` §3: the tool's own model output, **off by default**, formula and parameters on the same surface, labelled as this tool's model and not the game's. (b) `config/reference.php:31`: "the doc backs it only with a third-party guide, or marks the contents unread" — a *weak source*, not a model. | All four shipped chips are meaning (b): `UnityCupPanel.vue:110` (the +30 read beside the S emblem), `:164` (a band table transcribed from one publisher), `InheritanceEvent.vue:249` ("Sourced probabilities from the chosen parents and grandparents. **No outcome is computed**"), and `config/reference.php:129`. **Meaning (a) is implemented nowhere:** the `failure_estimate` preference is stored and read back but renders no number — `tests/Feature/PreferenceControlsTest.php:24` states the reason in its own docblock, "it shows no number, because there is no number", and `TrainerAdvisor` ships the two bands only. So no chip today claims a modelled figure, and the opt-in half of `ADR-0001` §3 is an unbuilt option, not a violated rule | A sourced value (that is `Confirmed` under meaning (a), `Estimated` under meaning (b) — the two readings disagree here); a game mechanic presented as fact; any win probability (`ADR-0016`, `PRD.md` §6.11, and `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §49's own "Estimated win chance: 82%" example is the banned figure, held by that document's governance banner) | **The word is authorized by two artifacts on different axes.** `ADR-0001` §3 authorizes (a) and the app does not do (a). `config/reference.php` defines (b) and the app does do (b), outside the advisor scope |
 | **Unknown** | *No single defensible proposal, and two live definitions already compete.* `config/reference.php:32` defines it as **"the doc marks the value unverified"** — a statement about a source. `ProvenanceBadge.vue:26-27` defines it as "the state for 'there is no number'" — a statement about a value. `DESIGN.md` §4.2, restated in a dated 2026-10-08 correction, says an unrecorded value renders `N/A` with a reason naming the kind of absence, **"never `Unknown`"**. Nothing in the accepted chain arbitrates | The two shipped meanings: the reference Events row (source unverified) and the four absence chips (value absent) | A value the tool derived, and any value that is present and well-sourced | **Contradicted on one reading, authored on another.** The five emissions split: 1 is a source-strength mark with a written definition, 4 are absence marks the absence rule forbids. This is the label whose meaning the owner must pick, per surface class |
 
 Two consequences the owner must rule on, stated without preference:
@@ -3004,7 +3025,7 @@ of evidence it rests on. §§1-8 above are the analysis that produced them and a
 | **1** | **1c, split by surface class.** `ADR-0020` §2 regulates the advisor's numbers; `config/reference.php:30-33` regulates the reference views; neither reaches the other. Both get written down in `DESIGN.md` prose. Zero code. | `ADR-0020` §2:73-74 scopes the vocabulary "for the advisor's numbers"; the config block defines its own four mappings and reserves `calculated` at `:33` |
 | **2** | **2a, remove all four absence chips** (`TrainingCard.vue:226`/`:323`/`:365`, `ScenarioPanel.vue:246`), and update `grand-concert-panel.spec.ts:83` with the ruling named as the reason. **This is policy, not enforcement.** | `DESIGN.md` §4.2 and D-220 fix how an absence renders; nothing in the chain ever said a chip may not accompany one |
 | **3** | **3b, per-surface meaning.** The reference views keep "the doc marks the value unverified"; absences retire the word. The one config `unknown` at `reference.php:105` stays. | Coheres with 2; the two emissions were never the same claim (`reference.php:32` vs `ProvenanceBadge.vue:26-27`) |
-| **4** | **4b, ratify sense (b).** `Estimated` means weakly sourced. `ADR-0001` §3 gets a narrow appended note that sense (a) is unbuilt; its substance is not rewritten and its text is not deleted. | Sense (a) has no legal object: `design-2.0` §49's worked example is a win chance, and `PRD.md` §6.11 forbids computing one |
+| **4** | **4b, ratify sense (b).** `Estimated` means weakly sourced. `ADR-0001` §3 gets a narrow appended note that sense (a) is unbuilt; its substance is not rewritten and its text is not deleted. | Sense (a) has no legal object: `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §49's worked example is a win chance, and `PRD.md` §6.11 forbids computing one |
 | **5** | **5a, P1 inline.** The constant's source, read date and stale flag print visibly under the figure; the one-line cost on the densest card is accepted. `ScenarioPanel.vue:205-208` and `Dashboard.vue:300-301` are cited as the shipped precedent in the commit message. | `ADR-0001` §2:46 says **visible**; §7:101 says every suggestion **displays** the date. A `title` is mouse-only, so it fails both on keyboard and touch |
 | **6** | **6a, Option A + A1.** Repoint the two labels to `Mayano Top Gun` and `Daiwa Scarlet`; re-target the ~19 `name=` locators at ids and labels; `global-setup.ts:64` opts the seeder in. Test-only, real rows, no `FR-G-1` collision. → **Partly superseded before it could be executed**, by `c29a71b` (13:44, another session): the A1 locator work landed as written, and the label half was removed instead of repointed — the fixture now leaves the parent pick **unchosen**, because `legacy_id` is nullable and the scratch DB holds no Veterans, with the picker's own contract covered by `ancestry-node-picker.spec.ts`. **Consequence: the seeder opt-in must not be added.** Seeding seven Veterans would break the empty-`veterans` condition plan §4.1 item 7 requires, and no spec needs them any more. | Both blockers were independent; the peer deleted one by removing the dependency rather than satisfying it |
 | **7** | **7a, O1 prose only.** The two markers go; the prose must name the kind of absence (D-220). The panel's other half, `:82-97`'s three absence idioms through one `<dl>`, is **explicitly out of scope** and recorded as future cleanup. | `DESIGN.md:571`: a caller printing its reason as visible prose "needs no component" |
@@ -3378,7 +3399,7 @@ is attributable to neither session. It is stated here rather than assumed resolv
 
 ## screen-spec-2.0.md
 
-> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/proposals/screen-spec-2.0.md` (1787 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+> **Refreshed 2026-10-21 (Round 18, owner-ordered).** Source: `docs/proposals/screen-spec-2.0.md`. The section below was embedded by Round 14 and was measured on 2026-10-21 as already containing every source body line, so it is not re-embedded. The original was deleted from `docs/proposals/` after that measurement. Cite this anchor, not the deleted path. <!-- census: quoted-original -->
 
 ## Uma Trainer Desk — Screen Specification (2.0 design target)
 
@@ -3408,7 +3429,7 @@ is attributable to neither session. It is stated here rather than assumed resolv
 > kept verbatim so the design intent survives for the slice that closes their blocker.
 > *Dated close-out 2026-10-08 (documentation-sync pass): the Inertia + Vue rewrite this banner says "§1
 > targets" landed through Phases A–E, and each screen in this inventory shipped under the union-with-
-> `design-2.0.md` mapping the plan's §4 preamble records. `SCREEN_SPEC.md` §3/§4 is the authoritative record
+> `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` mapping the plan's §4 preamble records. `SCREEN_SPEC.md` §3/§4 is the authoritative record
 > of what exists (`SCR-CAR-001`–`024`, `SCR-VET-001`–`004`, `SCR-SYS-005`–`007`), and the plan's §4–§9
 > close-outs record each slice. The governance holds above still bind: the win-probability, per-training
 > yield, expected-inheritance, shop-recommendation and numeric-confidence sections remain unbuilt and
@@ -3491,7 +3512,7 @@ records what the corpus holds for each screen's data. It does not edit the brief
 (`docs/UMAMUSUME_REFERENCE.md` L1016; `SCENARIO-PUBLISHER-REFERENCES.md` L544). "Support Decks" in the
 brief's nav (§3) is the repository's **Support Cards** (`SCREEN_SPEC.md` §3 nav order).
 
-**Screen mapping.** This document's screens are `SCREEN-001` … `SCREEN-024`. `design-2.0.md` carries a
+**Screen mapping.** This document's screens are `SCREEN-001` … `SCREEN-024`. `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` carries a
 **different** inventory (`SCR-001` … `SCR-027`) that adds a Skills Planner and a Grand Concert panel and
 omits Inheritance Event, Career Timeline and Veteran Comparison. The two lists disagree; neither is
 authoritative over the other, and the development plan builds their union. "Port" = the screen exists today
@@ -3524,7 +3545,7 @@ and this rewrite re-renders it in Vue; "New" = no current screen.
 | SCREEN-023   | Database                      | `SCR-CAT-001/002`, `SCR-SKL-001/002`, `SCR-SUP-001/002`   | `GET /umamusume`, `/skills`, `/support-cards`                                    | Port; races and scenarios are new                                |
 | SCREEN-024   | Settings                      | `SCR-SYS-002`                                             | `GET /preferences`                                                               | Ported to Vue 2026-10-04                                         |
 
-**From `design-2.0.md` but not here:** a Skills Planner (`SCR-013`) and a Grand Concert panel (`SCR-017`).
+**From `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` but not here:** a Skills Planner (`SCR-013`) and a Grand Concert panel (`SCR-017`).
 Both are in the development plan's union. Grand Concert's panel is a baseline strip only (below).
 
 **Not in either brief but already shipping:** the Review queue (`SCR-REV-001`, `GET /review`, ported to Vue)
@@ -5118,13 +5139,13 @@ Requirements:
 - sufficient contrast
 - numerical values paired with visual indicators
 
-**Image slots** are governed by `design-2.0` §42 (alt text, reserved-box contrast, label-in-name) and §45a (per-screen placement, geometry, click action). WCAG 2.2 AA conformance for slot-bearing screens is verified by the axe pass in `docs/proposals/frontend-development-plan.md` §12, *per screen*; the law-by-law review of "recognition rather than recall" and "minimal design" sits in that plan's §13.
+**Image slots** are governed by `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §42 (alt text, reserved-box contrast, label-in-name) and §45a (per-screen placement, geometry, click action). WCAG 2.2 AA conformance for slot-bearing screens is verified by the axe pass in `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §12, *per screen*; the law-by-law review of "recognition rather than recall" and "minimal design" sits in that plan's §13.
 
 ---
 
 ## 35. Sourced image slots
 
-Per-screen placement is `design-2.0` §45a; the Blade parity rule is `DESIGN.md` §4.7. A cell that ships no `<img>` today stays a text-only row. The four absence states (`never mirrored`, `gone upstream`, `unreadable on disk`, `not yet mirrored`) render identically — there is no broken frame, no grey box, no placeholder glyph (R-31). Skill icons are deferred until `skills.iconid` exists as a column (a migration of its own; `ADR-0021` Verification records the finding). Reduced motion is inherited from `design-2.0` §43 and from `frontend-development-plan.md` §12.2: a slot's reveal is no animation, so a fixed focal-length layout is what a screen reader and a sighted Trainer both experience.
+Per-screen placement is `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §45a; the Blade parity rule is `DESIGN.md` §4.7. A cell that ships no `<img>` today stays a text-only row. The four absence states (`never mirrored`, `gone upstream`, `unreadable on disk`, `not yet mirrored`) render identically — there is no broken frame, no grey box, no placeholder glyph (R-31). Skill icons are deferred until `skills.iconid` exists as a column (a migration of its own; `ADR-0021` Verification records the finding). Reduced motion is inherited from `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §43 and from `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §12.2: a slot's reveal is no animation, so a fixed focal-length layout is what a screen reader and a sighted Trainer both experience.
 
 ---
 
@@ -5167,3 +5188,1117 @@ For each screen that changed in this pass, the following states must be defined 
 | SCREEN-016    | Pre-debut (shop locked), shop open with partial coin balance, GP period completed, finale reached (coin income ends), schedule risk flagged |
 
 **Keyboard and narrow-screen behavior:** the primary recommendation must remain visible above secondary charts and logs at 320px width. The Next Decision component must be reachable via keyboard in a single `Tab` from the stat bands. Colour is never the sole status indicator — text and icon must carry the same meaning.
+
+---
+
+## frontend-fidelity-2026-10-13.md
+
+> **Consolidated 2026-10-21 (Round 18, owner-ordered).** Source: `docs/proposals/frontend-fidelity-2026-10-13.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+
+## Frontend fidelity — why the shipped surface reads as a wireframe, and the two-track path to a product
+
+> **Reference only. Not authorization.** Nothing in this file is a decision. No component, token, copy
+> string, gate or spec line was changed to produce it. Each section names the files an approval would
+> touch and touches none of them.
+>
+> Recorded 2026-10-13 from the owner's own assessment ("these are what I consider high-fidelity
+> wireframes, but not what the frontend of this application could be"), the six dark-theme wizard
+> screenshots supplied with it, a read of the visual contract (`DESIGN.md`), the richer 2.0 target
+> (`docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md`), the token block (`resources/css/app.css`) and the three existing UI
+> audits in this directory. It is the fifth proposal-side audit file; it reconciles the other four rather
+> than restating them. **Added 2026-10-13:** the 25 full-page captures in `docs/proposals/HLF_reference/`
+> (a v0 high-fidelity build) are folded in at §4 as the concrete, screen-by-screen target. They are still,
+> in the owner's words, a high-fidelity wireframe rather than the finished product.
+>
+> **The one-line finding:** the surface is not under-built as engineering. It is a faithful implementation
+> of an **austere** visual contract, and the richer target that would make it read as a product already
+> exists on paper — but sits **lower in the precedence chain**, so the austere reading wins by default.
+
+### 0. What governs this question
+
+Per `AGENTS.md` §2 the chain is: quality bar → gate registry → ADRs → `PRD.md` → `ARCHITECTURE.md` →
+`SCREEN_SPEC.md` → **`DESIGN.md`** (visual system) → `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` (reference target).
+The last two are the whole argument:
+
+1. **`DESIGN.md` is the shipped contract** (`DESIGN.md:41-47`, `ADR-0006` authority split). It carries the
+   austere rules: dial `ENERGY 1 / RHYTHM 1 / MOTION 1` (`:24-27`), "no pastel anime gradients, no soft drop
+   shadows, no marketing layout" (`:58-60`), "Radius `rounded-md` consistently" (`:243`), "Shadows: none.
+   Separation comes from the rule edge and the raised/sunken step" (`:244-245`), "No page animations; a desk
+   does not move" (`:696`).
+2. **`docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` is the richer target** and it is **outranked**: it describes a four-level visual
+   hierarchy (`:290-358`), a radius scale (`:525-540`), sparing shadows for dialogs/panels/recommendations
+   (`:543-560`), a Display/Heading/Body/Numeric type hierarchy (`:443-494`), and cards as the fundamental
+   grouping mechanism (`:586-613`). Under `AGENTS.md` §2 the reference target loses to `DESIGN.md`; where
+   they disagree, the austere clause ships.
+
+So the wireframe read is **the precedence chain working as designed**, not a build failure. Changing it is
+a **contract amendment** (an owner ruling), which is why this file has two tracks and only one of them is a
+styling job.
+
+### 1. The verdict, stated plainly
+
+- **The engineering is not the problem.** The audits record a token-only surface with zero `dark:` forks,
+  44px targets, one focus ring, both themes measured, and single-owner discipline that holds
+  (`docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §1.3). The dark screenshots show correct, accessible,
+  consistent components.
+- **The expression is the problem**, and it is **partly deliberate** (the `DESIGN.md` clauses above) and
+  **partly unlanded craft** (the type scale, the measure, the density — things both documents already ask
+  for and neither has shipped).
+- **"What the frontend could be" is already written down** — it is `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md`. The task is not to
+  invent a direction; it is to decide which of the 2.0 expression clauses become binding, and to land the
+  craft both documents agree on.
+
+### 2. Why it reads as a wireframe (evidence)
+
+#### 2.1 The tells
+
+| Tell (visible in the screenshots) | Evidence |
+| --- | --- |
+| Cards dissolve into the page; the surface is flat | `DESIGN.md:244-245` "Shadows: none"; `app.css:20-21` "No shadows and no custom radius tokens". In the **dark** override the ramp collapses: `page #0D0C0F` ≈ `panel #121013`, and the only separation is the hairline `rule #2E2C33` (`app.css:221-231`). |
+| Uniform typography; nothing leads the eye | `DESIGN.md:188-190` specifies section `text-lg` / title `text-2xl`; the audit measured **75** headers at `text-base` and the shell `#title` at `text-base` (`docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §2.2, X-2). |
+| One accent, grayscale everywhere else | `app.css:57` "Green is action and affordability only, never 'good'"; `DESIGN.md:53-54` "Colour is semantic only". Lime on the button is the page's only hue. Sampled against the client sheets and the official site in §2.3. |
+| Native form controls | selects/inputs are `border border-rule bg-raised rounded-md` and nothing more; there is no shared form-control component. |
+| Content pinned left, vast dead space | `AppLayout.vue:295` `main` has no `max-w` (`remaining-screens` §2.8, F-A2); the ratified widths (`DESIGN.md:210-221`) are used by almost nobody. |
+| No imagery | the artwork system exists and is built (`ADR-0021`, `uma:fetch-art`) but no wizard or catalog-in-wizard surface shows a frame. |
+| No motion | `DESIGN.md:692-709`: MOTION 1, and `transition-colors` "ships nowhere"; one `animate-pulse` in the whole tree (`F-G10`). |
+| No display voice | `app.css:31` system font stack only; the rounded display font "stays parked behind a C-8 approval" (`DESIGN.md:204-206`, `app.css:29`). |
+
+#### 2.2 The root cause
+
+Two contracts, and the austere one outranks the rich one. `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §3 asks for a surface that is
+"optimistic, tactical, game-adjacent, modern"; `DESIGN.md` §1 asks for a "sports-science or esports
+analytics tool, never like a gacha wiki". Both are defensible; they are not the same product, and the
+shipped surface is the second one, implemented cleanly and completely. A "wireframe" is the honest
+description of a fully-realised austere analytics tool.
+
+#### 2.3 The colour question — sampled from the client sheets and the official site
+
+The owner's assessment is specifically about colour: the light surface "does not resemble Umamusume
+Pretty Derby". Two palettes were sampled to test that claim rather than assert it — the 19 in-game sheets
+in `docs/design-research/_scratch/references/sheets/` and the 11 official captures in
+`.../references/web/`. Both are read-only (`AGENTS.md` §11). The values below are **quantized buckets of
+dominant and saturated pixels, not a published spec**; treat them as indicative.
+
+| Sampled from | Dominant field | Signature accents |
+| --- | --- | --- |
+| Client sheets (19) | near-black `#161616` (40-53% of every frame) | cream/parchment `#FFEECC`, pale lavender `#F4F4FF`, lime `#77CC11`, sky `#77CCFF`/`#55BBFF`, violet `#554499`, crimson `#BB3355`, warm tan `#BB9988` |
+| Official site (11) | royal blue `#2255FF` (6-29% of saturated pixels) | hot pink `#FF77CC` call-to-action, lime `#BBDD11`, racing green `#44AA33`, violet `#8877FF`, teal `#00BBBB`, gold `#CCBB00` |
+
+Two findings, and the first corrects a framing this proposal would otherwise repeat:
+
+1. **The shipped palette is already client-measured — the hues line up.** `DESIGN.md:56` states both
+   palettes are "measured from client frames", `DESIGN.md:120-137` is a measured pair table, and `:149-151`
+   warns that six degrees of drift off the client's action green "breaks the resemblance". The sampling
+   agrees: shipped action green `#7FCC09` ≈ sheet lime `#77CC11`; shipped ink brown `#6A5641` ≈ sheet tan
+   `#BB9988`; shipped page `#F2F1F8` ≈ sheet `#F4F4FF`; shipped Skill-Points cyan `#009FE1`
+   (`DESIGN.md:133`, "the client's cyan, exact") is the sheet sky family. So "the app does not use the
+   game's colours" is **not** the finding — the app does.
+2. **What is missing is the *marketing* palette and the client's *chrome distribution*.** The royal blue
+   `#2255FF` and hot pink `#FF77CC` that carry the official site are **not in the token set at all**, and
+   the client's own base in the sampled frames is dark (`#161616`) — the opposite of the shipped default.
+   The shipped surface uses the client's *hues* but not its *product surface*: no blue chrome field, no
+   pink call-to-action, no violet, and a pale default where the client frames are dark. That distribution
+   gap is what the eye reads as "does not resemble the game".
+
+The consequence for the tracks: **colour is almost entirely a Track 2 question.** `app.css:57` ("Green is
+action and affordability only, never 'good'") and `DESIGN.md:53` ("Colour is semantic only") forbid a brand
+blue or pink inside the contract; adding either is a `DESIGN.md` §2.1 amendment (Track 2 D) with a measured
+pair per new role (G-18). Track 1 can only (a) spend the *existing* client-derived tokens more deliberately
+— gold `pick` `#EFC96A`, cyan `sp` `#009FE1`, warm ink — where the client itself uses them, and (b) fix the
+dark ramp (§2.1), which is the one move that brings a theme *closer* to the client base. One hue family,
+violet (client `#554499` / site `#8877FF`), has no shipped token in either theme.
+
+Honesty note: the sheets are client captures with artwork, anti-aliasing and a quantized palette; the site
+is a marketing surface, not the client. Neither is a brand specification, and no official palette is
+published in-repo. These are directions to audit against, not values to paste.
+
+#### 2.4 The game client corpus — the fidelity reference above the HLF
+
+The repo already holds a detailed, cited description of the *real* game client's UI, and it outranks the HLF
+as a fidelity target: the HLF is a wireframe of a tool, while these notes describe the product the Trainer
+already uses. The corpus is `docs/research-scratch/screenshot-notes/00`-`06` (7 notes over 52 reconciled
+frames), `screenshot-notes-extras/` (3), and the `screenshot-registry/` evidence set. Each note carries the
+same four headings — *Visual hierarchy*, *What carries state*, *Absences*, *What this screen teaches the
+app* — so it reads as a UI specification, not a gameplay log.
+
+Patterns the client uses that the shipped build lacks:
+
+| Client pattern | Where | What Trainer Desk lacks |
+| --- | --- | --- |
+| Per-item detail as a modal over a dimmed backdrop | `00:40`, `04:24` | detail is a page, not a modal grammar |
+| A negative-capable mark vocabulary with no legend (double-circle / circle / triangle / cross) | `00:16`, `00:97` | no shape-rank vocabulary; grades are letters |
+| Stacked base/bonus gain bubbles (small upper bubble = bonus) | `01:53` | no projected-gain channel at all |
+| A three-kind log grammar (named speech / unnamed narration / signed outcome) | `01:143` | the log/rail is flat |
+| A risk channel that appears only when non-zero (pink `Failure 5%`) | `01:318` | no conditional alert treatment |
+| Pending basket kept distinct from the displayed balance | `03:27` | selection and balance are not separated |
+| A goal ladder with one "next" plus a `Goals Achieved 5/8` footer | `02:160`, `02:165` | goals are a list, not a ladder |
+| A contextual hint naming the weak stat, on the decision surface | `05:32` | the advisor is a flat rail, not a hint bubble |
+| Accent taken as data (per-trainee / per-state tint) | `01:86` | per-scenario accent exists; per-state tint does not |
+
+Three of these reinforce §2.3 rather than opening a new track:
+
+- **The client's signed-change colours match the shipped tokens.** `00:75` records outcome deltas as
+  "sentences with direction words colour-coded (down blue, up orange)"; the shipped `--color-down` is blue
+  and `--color-up` is orange (`DESIGN.md:129-130`). The app already reproduces the client's up/down
+  semantics, which is further evidence for §2.3 finding 1.
+- **The client's mood ramp is non-monotone, negatives cool.** `06:103`: "GREAT deep pink, GOOD burnt orange,
+  NORMAL gold, BAD blue, AWFUL purple... the two negative tiers sit on the cool side of the wheel". That is
+  the same warm/cool split the app's up/down pair uses, and it is a *semantic* ramp, not brand chrome.
+- **The client confirms the app's cut features.** No win probability (`02:27`, `02:76`, `02:190`), no score
+  or aggregate (`02:217`: a clean sweep renders as "five identical 'WIN' words with no aggregate"). The app's
+  cuts are faithful to the client, not a reduction of it.
+
+One tension, carried to the law audit (`docs/research-scratch/PLANS-AND-BRIEFS.md` section `## ux-laws-audit-plan-2026-10-13.md` §2.7): the client *does* carry
+alert channels — a red exclamation badge on a support card (`01:113`), a pink failure badge (`01:318`), and a
+pending-obligation tag pinned to an action button (`05:85`) — which sits against the app's "no warning role"
+cut (`app.css:57`, `DESIGN.md:53`).
+
+**Law attribution (corrected 2026-10-21).** Where this file names a law by number it inherits the numbering of
+`docs/research-scratch/PLANS-AND-BRIEFS.md` section `## ux-laws-audit-plan-2026-10-13.md`, and that numbering is deliberately unchanged. What changed there is
+attribution only, and it narrows three claims this file shares:
+
+- The audit plan's rows **11 Continuity**, **12 Closure** and **13 Common Fate** are Gestalt principles, not
+  lawsofux.com entries (the site publishes neither Closure, nor Continuity, nor Common Fate); row **14** is no
+  longer called "Law of Experience" because no such law is published by lawsofux.com or uilaws.com. A sentence
+  in this file that says "this is a law" of one of those four should be read as "this is a Gestalt-derived
+  principle". The §2.4 tension above is unaffected: it is about the client's alert vocabulary versus the app's
+  colour cut, and it does not depend on which collection an entry sits in.
+- The audit plan's **row 27** ("aesthetic consistency and visual hierarchy") is a house principle, not a law;
+  where this file treats typography/consistency as a cross-cutting standard, that standard is the repo's own.
+- **Nothing in this file moves a token.** §2.3's finding (the palette is client-measured; the gap is the
+  marketing palette and the client's chrome distribution) is unaffected by attribution, and §6's Track 2 D
+  remains a `DESIGN.md` amendment requiring an owner ruling, not a law fix.
+
+Track placement: the modal grammar, the shape vocabulary, the gain bubbles, the log grammar, the goal ladder
+and the decision-surface hint are **Track 1** (craft). The conditional alert channel is **Track 2 D**
+(colour/role); the per-state accent is a data-model question. The notes are notes, not frames: the registry's
+own rule applies — "a note is a lead, not a verification" (`screenshot-registry/README.md:166-167`).
+
+#### 2.5 The corpus's own interaction principles, and the web study
+
+`DESIGN-CORPUS.md` is the folded corpus `DESIGN.md` was derived from, and it states interaction patterns
+"worth carrying" that the shipped build does not carry:
+
+- **Preview before commit** (`:4093`) — "every consequential choice shows its outcome numbers before it is
+  accepted, and acceptance is a separate action".
+- **Colour always paired with a word** (`:4094`) — "both the aesthetic and, conveniently, the accessible
+  implementation".
+- **Numbers live above the thing they change** (`:4095`) — the gain bubble floats over the stat it changes.
+- **One saturated tile marks the active destination** (`:4096`) — a filled block, not an underline.
+- **Grouping by phase, collapsible** (`:4097`) — the Log's phase bar, "exactly the shape a 24-turn run needs".
+- **Shape carries meaning** (`:4098`) — "Circular buttons for the five disciplines, rectangles for everything
+  else".
+
+Plus §35 **Progressive Disclosure** (`:6503`, show `Speed +62 / 3 Supports / 2% Failure`, expand to the
+breakdown) and §36 **Explainability** (`:6538`, every recommendation answers "why?"), and the "Additional
+Design Details" (`:5614-5622`): never a single unexplained score, `N/A` + `title` for unavailable data,
+progressive disclosure at 320px, **non-colour-only warnings**, and actual-vs-hypothetical balances.
+
+These are the repo's own declared principles, not new ones, and each is a **Track 1** gap where the shipped
+build does not render it: the wizard's per-stat editor shows the breakdown without a preview-and-accept step,
+and the advisor is a flat rail with no "why".
+
+One correction to §3's shadow question. The `DESIGN-CORPUS.md` §6 web study (`:4104-4116`) measured the
+official properties as carrying **zero** `box-shadow` and **zero** `linear-gradient`/`radial-gradient`, with
+all their depth from `filter: drop-shadow()`. That both supports the app's flat, gradient-free surface and
+nuances Track 2 B: where the app does add elevation, the brand precedent is `drop-shadow`, not `box-shadow`.
+
+### 3. The richer target already exists — reconciliation table
+
+Every clause a "real frontend" needs is already specified in `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` and is currently losing to
+`DESIGN.md`. This is the reconciliation the owner has to make:
+
+| Expression clause | `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` (rich target) | `DESIGN.md` (shipped, wins) | Conflict? |
+| --- | --- | --- | --- |
+| Visual hierarchy | four levels, Critical→Metadata (`:290-358`) | none stated as levels | additive, no conflict |
+| Radius | 6 / 10 / 14 / 16 / 999 (`:525-540`) | one `rounded-md` (`:243`) | **direct** |
+| Shadows | sparing, for dialogs/panels/recommendations/menus (`:543-560`) | "Shadows: none" (`:244-245`) | **direct** |
+| Type hierarchy | Display / Heading / Body / Numeric (`:443-494`) | scale is **Proposed**, display font parked (`:201-206`) | **direct on display** |
+| Cards | the fundamental grouping mechanism (`:586-613`) | cards exist but with no elevation | partial |
+| Personality | optimistic, game-adjacent, modern (`:266-288`) | serious analytics tool, no marketing (`:58-60`) | **tonal** |
+| Data visualization / density / disclosure | `:1398`, `:1113`, `:1143` | not addressed | additive |
+
+Three clauses conflict directly. Under `AGENTS.md` §2 the shipped surface is correct to ignore them, and
+an agent may not resolve them silently — this is escalation territory (a design-contract change).
+
+### 4. The HLF reference set — the high-fidelity target, pattern by pattern
+
+`docs/proposals/HLF_reference/` holds 25 full-page captures of a v0 build (the filenames read
+`ui-improvement-suggestions-v0-build`, page badge `v2.0.0`). It is the concrete, screen-by-screen answer to
+"what the frontend could be", and it is the most useful artifact in this directory for the fidelity
+question because it renders the target instead of describing it. It is also, per the owner, still a
+**high-fidelity wireframe**: its data is placeholder, some copy is invented, and it is not bound by the
+token contract. The game client corpus (§2.4) is the higher-fidelity reference beneath it: this section
+treats the HLF as the tool-shaped target, §2.4 as the product-shaped one.
+
+#### 4.1 The pattern inventory
+
+| Pattern | Where the HLF shows it | What the shipped build lacks |
+| --- | --- | --- |
+| Page header: lime eyebrow + large title + one-line subtitle | every screen (`OVERVIEW`/`LIBRARY`/`COMPARE`/`REFERENCE`/`DATA QUALITY`/`PREFERENCES`) | the shell `#title` is `text-base`; no eyebrow/subtitle convention |
+| Back breadcrumb (`← Back to …`) | every detail screen | present on some, not as a convention |
+| KPI stat cards (label, big number, sub-label) | Dashboard | none |
+| Status pills (In progress, Complete, Needs review, Needs legacy, Active, Completed, Observed, Mandatory) | Careers, Cockpit, Review, Legacy, Veterans | status exists but flat |
+| Provenance badges (Confirmed, Unknown, Calculated, Partial) | Events, Shop Items, Sparks, Cockpit | `ProvenanceBadge` exists but is under-used |
+| Category/type chips (SSR/SR/R, Power/Speed, Stat/Aptitude/Skill/Competition/Scenario, Consumable/Currency) | Support cards, Sparks, Shop Items | partial |
+| Effect chips (`Friendship Bonus 15%`, `Speed Bonus 1`, …) | Support card detail | none |
+| Labeled sub-cells (key/value mini-boxes) | Cockpit identity + stats, Compare, Support/Skill detail | none — the signature HLF component |
+| Contained bordered cards on a raised surface | everywhere | cards have no elevation and dissolve in dark |
+| Progress bars (lime fill) | Careers | none |
+| Row-count line (`400 catalogue rows`, `559 of 559`) | Support cards, Skills, Races, Events, Sparks | partial |
+| Tables (Races; Compare as property/value; Sparks odds) | Races, Compare, Sparks | tables exist |
+| Search + filter rows in a bordered container | Careers, Support cards, Veterans, Skills, Legacy, Trainee | partial, unstyled controls |
+| Tabs | Settings (General/Recommendation/Data/Game version), Cockpit (Cockpit/Dashboard) | none |
+| Anchor nav | Cockpit (Position, Run identity, Stats and state, Actions, Scenario, Races, Advisor) | none |
+| Pagination | Support cards, Skills, Review, Races | exists |
+| Artwork thumbnails | Support cards list + detail header | artwork system built (`ADR-0021`), unused here |
+| Wizard option cards (status line + one Select button) | Scenario, Target, Legacy, Deck | the steps are heavy editors instead |
+| Advisor structure: Objectives / Current priority / Recommended action / Recorded action | Cockpit | the advisor is a flat rail |
+| Scenario panels grid with honesty notes | Cockpit | scenario region is sparser |
+| Raw engine data shown as-is with a note | Skill detail (`Condition`, `Base time`, effect codes) | partial |
+
+#### 4.2 What the HLF proves is reachable inside the current contract
+
+The HLF's "product" feel comes mostly from **borders + a real surface step + a type scale + density + a
+badge/sub-cell vocabulary + artwork** — **not from shadows**. Its cards are bordered, not shadowed. So
+Track 1 (plus a radius decision) gets most of the way, and Track 2's **shadow clause is optional**: the HLF
+weakens the case for amending "Shadows: none" (`DESIGN.md:244-245`). What the HLF does require beyond
+Track 1:
+
+- a **radius scale** (its cards are visibly rounder than `rounded-md`) → Track 2 A;
+- a **badge colour vocabulary** (lime `In progress` / `Confirmed` / `Mandatory`, amber `Unknown` / `Needs
+  decision`) → **conflicts with `app.css:57` "green is action and affordability only, never 'good'"** →
+  Track 2 D;
+- a **real type scale** (Display / Heading / Body / Numeric) → Track 1-2, plus Track 2 C for the display
+  face.
+
+#### 4.3 What the HLF changes beyond styling (scope / semantics — needs a decision)
+
+- **Wizard steps become option-card presets.** Target → `Speed focus / Balanced growth / Race
+  preparation`; Legacy → `No legacy recorded / Use a saved selection`; Deck → `Current support deck /
+  Start with empty deck`. This **removes the per-stat target editor, the two-parent ancestry editor and
+  the six-slot deck editor from the wizard**. That is a domain/scope change, not a skin — those editors
+  must move elsewhere or be cut, and it needs a `SCREEN_SPEC.md` + `PRD` decision (escalation 2).
+- **Preflight drops the duplicate "Edit step" buttons** and gives each warning an inline reason
+  (`Scenario is not chosen. Nothing is recorded in this setup.`). This matches the audits' Occam's Razor
+  finding and is adoptable inside Track 1.
+- **Cockpit gains a tab toggle ("Cockpit | Dashboard") and an anchor nav.** Per cockpit audit §0.1,
+  `SCREEN_SPEC.md:1841` forbids hiding an element at a breakpoint and a tab strip that shows one section
+  at a time; an **anchor** nav is allowed. So the anchor nav is compatible; the "Cockpit | Dashboard"
+  toggle must be checked against that ruling before it ships.
+- **Compare becomes a property/value table** instead of a wide matrix — this is *better* for the
+  responsive region contract than the current compare tables, and worth adopting.
+- **A richer status vocabulary** (`Needs legacy`, `Needs review`, `In progress`, `Partial record`,
+  `Observed`) — a copy/state expansion that ties to the absence/state work in the audits.
+- **The stepper still says "done" for un-entered steps.** On the Career-contract screen all six steps read
+  "done" while every warning says "Nothing is recorded in this setup". The HLF **reproduces the P0** the
+  live capture found (`docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"setup-wizard-ui-audit-2026-10-12.md" §2.2); adopting the HLF does not fix the
+  stepper semantics — the three-state decision still stands.
+
+#### 4.4 Honesty patterns worth keeping
+
+- "Each figure is the effect's highest stated anchor, not an interpolation."
+- "The expressions and effect codes above are the source's own engine data, not client labels."
+- "Reference note: this scenario intentionally exposes only the widgets and panels documented for its
+  ruleset."
+- Raw engine data (skill `Condition`, `Base time`, effect codes) shown as-is with a note.
+
+These are exactly the provenance/absence discipline the audits ask for, rendered well, and they are the
+part of the HLF that is safest to adopt.
+
+#### 4.5 Where the HLF lands each track
+
+| HLF pattern | Lands in |
+| --- | --- |
+| Header, sub-cells, badges, chips, progress, counts, tabs, anchor nav, artwork, tables, filters | **Track 1** (craft, no ruling) |
+| Radius scale | **Track 2 A** |
+| Badge colours (lime/amber status) | **Track 2 D** |
+| Display type tier | Track 1-2, full version **Track 2 C** |
+| Card borders + surface step | **Track 1** (no shadow amendment needed) |
+| Wizard option-card simplification | **scope decision** (escalation 2), not styling |
+| Cockpit tab toggle | check against `SCREEN_SPEC.md:1841` |
+| Compare as property/value table | Track 1 (and improves the responsive contract) |
+| Stepper "done" wording | unchanged — the P0 remains |
+
+#### 4.6 The caveat, restated
+
+The HLF is itself a wireframe: it uses placeholder values (a completed run showing `Turn 1`), invented copy
+("Good morning, Trainer"), and colours that may not clear the token contract. It is a **direction to audit
+against**, not a build to copy. Its value is that it answers "what could this look like" with pixels, so
+the two tracks can be argued concretely rather than abstractly.
+
+### 5. Track 1 — inside the current contract (no ruling needed)
+
+These are craft layers that **both** documents already ask for and neither has shipped. They are the
+cheapest real gain and they need no contract change. Sequenced by leverage:
+
+| # | Move | Where | Acceptance |
+| --- | --- | --- | --- |
+| 1 | Apply the ratified shell measure | `AppLayout.vue:295` → `mx-auto w-full max-w-5xl` (F-A2, X-8) | no page runs to the shell's full width; the dead right column is gone; `dashboard.spec.ts:195-224`, `veterans.spec.ts:40-43` move with it |
+| 2 | Land the type scale (one shell decision, then pages) | shell `#title` → `text-2xl`; section headers → `text-lg font-semibold`; promote the `text-xs uppercase` eyebrows (X-2, F-A3; cockpit audit §3.1) | one `h1` per page at `text-2xl`; headers at `text-lg`; the 75-vs-30 spread closed |
+| 3 | Give the dark ramp real separation | dark override `panel`/`page` step, or render cards on `raised` (`app.css:219-231`); the rule edge is the *sanctioned* mechanism (`DESIGN.md:244-245`), it is simply too weak in dark | a measured non-text step ≥ 3:1 (WCAG 1.4.11) between a card and its page; axe clean |
+| 4 | One form-control treatment | a shared input/select/checkbox style; the `caret-color` rule already exists (`app.css:718`) | every control ≥ 44px, one border and radius, consistent focus ring |
+| 5 | Densify where the data already exists | Scenario, Trainee, Legacy, Deck have sparse layouts with content available; tighten to the 4/8/12/16/24 scale (`DESIGN.md:238-240`) | measured reduction in vertical dead space; no clipping at 768/1280 |
+| 6 | Spend the motif budget, add the artwork | enamel once per screen (X-3, F-F3); render `ArtworkSlot` on the catalog/trainee/deck surfaces (`ADR-0021`) | enamel count = one primary per screen; four artwork slots render |
+| 7 | Finish the empty / loading / error states | C-7, `ADR-0007`; the audits found several silent states (X-4) | every data view renders its three states |
+
+Note the ordering constraint the audits already state: **do not restyle per-page headings before the shell
+`#title` decision** (`remaining-screens` §5.8). Move 2 is one shell decision first, then the pages.
+
+### 6. Track 2 — needs a `DESIGN.md` amendment (owner ruling)
+
+Each of these reverses or extends a clause in the shipped contract. None is an agent's call.
+
+| # | Amendment | Reverses / extends | Path |
+| --- | --- | --- | --- |
+| A | Radius scale (6/10/14/16/999) | `DESIGN.md:243` "`rounded-md` consistently" | owner ruling → `DESIGN.md` §2.3 rewrite |
+| B | Sparing elevation for overlays only (dialogs, floating panels, the recommendation card, menus) | `DESIGN.md:244-245` "Shadows: none"; `app.css:20-21`; brand precedent is `drop-shadow`, not `box-shadow` (§2.5) | owner ruling → new `DESIGN.md` elevation table + a shadow token |
+| C | A Display type tier (self-hosted rounded font) | `DESIGN.md:204-206`, parked behind **C-8** | C-8 dependency approval **and** owner ruling; offline constraint (`DESIGN.md:675-678`) still binds |
+| D | A wider semantic colour vocabulary (brand blue chrome, pink call-to-action, violet; §2.3) | `DESIGN.md:53-54`, `app.css:57` (green = action only) | owner ruling; every new role needs a measured pair (G-18) |
+| E | A motion budget above 1 for state transitions | `DESIGN.md:694-696`, MOTION 1 | owner ruling → raise the dial; respect the reduced-motion block |
+| F | Adopt the four-level visual hierarchy | additive (no shipped equivalent) | owner ruling → `DESIGN.md` §2 gains a hierarchy table |
+
+Track 2 is where "what the frontend could be" actually lives. Track 1 alone will make it read as a
+*well-crafted* austere tool, not a product with a voice.
+
+### 7. What each move touches
+
+| Move | Audits / rulings it moves with | Guarded |
+| --- | --- | --- |
+| T1-1 measure | `remaining-screens` §2.8 / F-A2; `DESIGN.md:210-221` | `dashboard.spec.ts`, `veterans.spec.ts` |
+| T1-2 type scale | `remaining-screens` §2.2 / X-2; cockpit audit §3.1 | `dashboard.spec.ts:87-92,130`, the accessible-name assertions in `database.spec.ts` |
+| T1-3 dark ramp | `DESIGN.md:244-245`; G-18 pair list (`DesignTokensTest.php`) | the G-18 browser gate; propose pair rows, do not move a token |
+| T1-4 form controls | `remaining-screens` §2.5 / X-5 | `tests/utils/tap-targets.ts`, `accessibility.spec.ts` |
+| T1-6 enamel / artwork | `remaining-screens` §2.3 / X-3; `ADR-0021` | four 44px sweeps; `ArtworkMirrorTest` |
+| T2-A..F | a new owner ruling per clause; `DESIGN.md` §2 amendment | the G-18 gate, `DesignTokensTest.php`, `TokenPairHygieneTest.php` |
+
+### 8. What this proposal must not do
+
+Inherited from `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §5 and `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## ux-laws-audit-plan-2026-10-13.md` §9,
+plus three this document adds:
+
+1. Do not move a colour token to answer a contrast question; propose pair rows and let the gate decide.
+2. Do not add a cold-load spinner, skeleton, or `aria-busy` on page load (`ADR-0007`).
+3. Do not add a score, percentage, confidence, grade, or recommendation to any surface.
+4. Do not restyle per-page before the shell `#title` decision.
+5. Do not reflow the race calendar / turn log / compare tables into stacked cards.
+6. **Do not implement a Track 2 clause (radius, shadow, font, colour, motion) before the `DESIGN.md`
+   amendment is signed.** That is the exact drift the precedence chain exists to prevent.
+7. **Do not treat `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` as binding.** It is a reference target (`AGENTS.md` §2); until amended,
+   `DESIGN.md` wins on every conflict.
+8. **Do not let "make it prettier" reintroduce slop.** The audits confirmed zero gradients-as-identity,
+   zero glass, zero glow (`remaining-screens` §1.3); the richer target is hierarchy and material, not
+   decoration.
+9. **Do not copy the HLF's placeholder data or invented copy.** Its completed-run-shows-`Turn 1` state and
+   lines like "Good morning, Trainer" are mock content; the copy rules (`AGENTS.md` §5, the lore gate,
+   the client vocabulary) still bind.
+10. **Do not adopt the HLF's wizard option-card simplification as a restyle.** It removes the per-stat
+    target, ancestry and deck editors from setup; that is a scope change and needs a `SCREEN_SPEC.md` +
+    `PRD` decision before any component moves.
+11. **Do not adopt the HLF's badge colours before Track 2 D is ruled.** Lime for `In progress` / `Confirmed`
+    / `Mandatory` breaks `app.css:57` today.
+
+### 9. Questions for the owner
+
+1. **Which product is it?** `DESIGN.md`'s "serious analytics tool, never a gacha wiki" or
+   `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md`'s "optimistic, game-adjacent, modern"? Track 2 only makes sense under the second, and
+   the answer changes every downstream clause.
+2. **Radius and elevation (Track 2 A/B).** Adopt the 2.0 scale and sparing shadows, or hold the flat
+   contract and rely on Track 1's dark-ramp fix to give cards presence without elevation?
+3. **Display type (Track 2 C).** Is the C-8 dependency approval worth a self-hosted display font for the
+   Display tier, given the offline constraint (`DESIGN.md:675-678`), or does the Display tier get its
+   emphasis from weight and size on the system stack?
+4. **Sequencing.** Land Track 1 as one slice (it is the visible, no-ruling gain), or wait and do Track 1 +
+   the approved Track 2 clauses together so the shell is only touched once?
+5. **Where does the amendment live?** A `DESIGN.md` §2 rewrite with new owner-ruling lines, or a new ADR
+   that `DESIGN.md` cites — given `ADR-0006` makes `DESIGN.md` the single source of truth for the visual
+   contract.
+6. **The HLF wizard simplification (§4.3).** Do the per-stat target, two-parent ancestry and six-slot deck
+   editors move to the run screens, or are they cut? The HLF reduces all three steps to a preset choice,
+   which is the single largest change in the reference set.
+7. **The HLF badge colours (§4.2).** Adopt the lime/amber status vocabulary as a new semantic role
+   (Track 2 D), or map status to the existing tokens so no new pair is needed?
+8. **What is the target of record?** Does the HLF become the concrete target (with `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` updated
+   to cite it), or does `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` stay the target and the HLF remain illustration?
+9. **Colour (§2.3).** Does the target adopt the official site's royal-blue chrome and pink call-to-action
+   (Track 2 D, with a measured pair per role), or hold the client-measured, green-is-action palette and
+   accept that the surface will resemble the *client* but not the *marketing site*? Relatedly: the shipped
+   default theme is light (owner ruling 2026-09-27, `app.css:35`) while the client frames sampled here are
+   dark — does light stay the default, or does the fidelity goal pull the default back to the client base?
+
+### 10. Verification plan
+
+Per `AGENTS.md` §9. Nothing below was run for this proposal.
+
+| Approved change | Level 1 while working | Level 2 at slice end | Level 3 before hand-off |
+| --- | --- | --- | --- |
+| Track 1 (any move) | the touched screen's spec; `tests/utils/tap-targets.ts` where height is involved | the cluster's specs + `tests/browser/accessibility.spec.ts` | the full suite (the shell is felt by every screen); `npm run typecheck`, `pint --test --format agent <paths>`, PHPStan |
+| Track 1-3 (dark ramp) | `php artisan test --compact --filter=DesignTokensTest` | the browser half of the same file (G-18, both themes) | the pair list and the `DESIGN.md:145-148` count move together |
+| A Track 2 clause | not testable until the `DESIGN.md` amendment lands | — | re-baseline the audits against the amended contract before any component change |
+
+Pre-flight before any broad sweep: time one trivial SQLite read (`KI-74`); a contended box voids the sweep
+before it starts.
+
+### 11. Hand-off notes
+
+- **Deliverables produced:** this file. No component, token, copy string, gate, spec, or test was changed.
+- **Facts this pass relies on:** the dial and the flat rules are `DESIGN.md:24-27, 58-60, 243-245, 696`; the
+  richer target is `docs/proposals/design-2.0.md:290-358, 443-494, 525-560, 586-613`; the token values and
+  the dark-ramp collapse are `app.css:20-21, 31, 219-231`; the type-scale and measure gaps are
+  `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §2.2 and §2.8; the live evidence is the six dark wizard
+  screenshots and the 81 captures in `.scratch-uma/ux-audit/`; the concrete target is the 25 captures in
+  `docs/proposals/HLF_reference/` (read in full, §4).
+- **Colour evidence (§2.3):** sampled programmatically (`.scratch-uma/ux-audit/palette-extract.ps1`,
+  `palette-accents.ps1`) from the 19 client sheets and the 11 official-site captures, because attaching the
+  ~2 MB frames directly exceeded the model's context limit. The values are quantized buckets, not a
+  published brand specification.
+- **Client-UI corpus (§2.4):** `docs/research-scratch/screenshot-notes/00`-`06` (7 notes, 52 reconciled
+  frames), `screenshot-notes-extras/` (3) and `screenshot-registry/` describe the real client's UI with
+  per-screen *Visual hierarchy / What carries state / Absences / What this screen teaches the app* notes;
+  folded in as the fidelity reference above the HLF. All citations verified against the source files.
+- **Corpus principles (§2.5):** `DESIGN-CORPUS.md` §5 "Interaction and state patterns worth carrying"
+  (`:4091-4098`), §35 Progressive Disclosure (`:6503`), §36 Explainability (`:6538`) and the "Additional
+  Design Details" block (`:5614-5622`) declare the interaction principles the app should carry; the §6 web
+  study (`:4104-4116`) shows the official properties are gradient-free with `drop-shadow` depth.
+- **Fact this pass corrected in its own framing:** the shipped palette is not un-game-like — it is
+  client-measured (`DESIGN.md:56, 120-137, 149-151`, including "the client's cyan, exact"). The gap the
+  owner sees is the *marketing* palette (royal blue, hot pink) and the client's chrome distribution, not
+  the hues the app already uses.
+- **Not delivered, stated plainly:** no prototype, no measurement, no suite run, no lore gate, no fix. The
+  HLF was read as reference; nothing in it was implemented or copied.
+- **Fact this pass corrected in its own framing:** "the frontend could be X" is not an open design
+  question — a richer target already exists in `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md`, and the HLF reference set now renders it;
+  the real question is that it is outranked by `DESIGN.md`, so the work is a contract decision plus the
+  craft both documents already ask for.
+
+---
+
+## ux-laws-audit-plan-2026-10-13.md
+
+> **Consolidated 2026-10-21 (Round 18, owner-ordered).** Source: `docs/proposals/ux-laws-audit-plan-2026-10-13.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+
+## Laws of UX audit — plan (canonical checklist, coverage matrix, instruments, output contract)
+
+> **Reference only. Not authorization.** Nothing in this file is a decision. No component, token, copy
+> string, gate or spec line was changed to produce it. Every section names the files an approval would
+> touch and touches none of them.
+>
+> Recorded 2026-10-13. This is a **plan**, not an audit: it defines the method, the coverage matrix, the
+> instruments and the output contract for auditing Trainer Desk against the Laws of UX. It is the fourth
+> file in the proposal-side audit set and it **extends** the existing three rather than restating them:
+> `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"cockpit-ui-audit-2026-10-12.md" owns `SCR-CAR-011`, `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"setup-wizard-ui-audit-2026-10-12.md"
+> owns the six `/career/setup/*` steps, and `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" owns
+> the other 40 pages. Their findings are the audit's **input**; this plan says how to evaluate them (and
+> the screens they did not reach) against the laws, and what instrument produces each verdict.
+>
+> **What this plan deliberately does not do:** it does not re-run the audits, does not assign new finding
+> IDs, and does not re-open any of the eleven "what a later pass must not do" items in
+> `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §5. It inherits them (restated in §9).
+
+### 0. What governs this plan
+
+Per `AGENTS.md` §2 the precedence chain that settles every dispute below is: quality bar → gate registry
+→ accepted ADRs → `PRD.md` → `ARCHITECTURE.md` → `SCREEN_SPEC.md` (screen behaviour) → `DESIGN.md` (visual
+system) → `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` (reference target). The Laws of UX are a **lens over that chain,
+never a replacement for it**: where a law appears to ask for something an ADR or a `SCREEN_SPEC` ruling
+forbids (a score, a win-chance, a warning role, a scenario name in a component), the law loses and the
+conflict is recorded, not resolved silently. Five facts from the existing files frame the whole plan:
+
+1. **The app has its own UX spine already.** `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §2 states it as
+   `State → Options → Recommendation → Explanation → Decision`. The laws are how we test whether each
+   screen honours that spine; they are not a second spine.
+2. **The visual contract is already measured in places.** `DESIGN.md` §2-§8 (tokens, type scale at
+   `:188-190`, ratified widths at `:197-208`, the wide-table region rule at `:209-224`, motifs at
+   `:231-248`, absence/provenance at `:567-624`, motion at `:679-726`, WCAG 2.2 AA floor at `:851-872`).
+   A law that is really a contract question is settled by the contract, not by taste.
+3. **The three audits already produced a score card.** `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §1.1
+   scores eight clusters on impeccable's five dimensions (Accessibility, Performance, Theming,
+   Responsive, Implementation Integrity), 104/160; §1.2 counts 1 P0, 26 P1, 31 P2, 29 P3. This plan adds
+   a **laws** axis on top of that score card; it does not rescore the clusters.
+4. **The bar cannot see several classes the laws travel on.** `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md"
+   §4 is the list: `npm run typecheck` reads no `.vue` file (§4.1), the copy-hygiene guard sees no
+   server-composed string (§4.2), the G-18 contrast contract pins 19 pairs with one `ink-muted` pair
+   (§4.3), registers lag the code (§4.4), an unvalidated config→badge index exists (§4.5), and the
+   deterministic slop detector returned `[]` (§4.6). The plan's instruments (§4) are chosen to reach the
+   channels those gaps leave dark.
+5. **The 2026-10-13 live capture already corroborates two existing findings.** The session-private
+   harness (§4.2) rendered the setup wizard with every later step marked `done` while nothing was entered
+   (`SetupLayout.vue:45-46`; corroborates `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"setup-wizard-ui-audit-2026-10-12.md" §2.2), and rendered
+   Preflight's five warnings beside the same all-`done` bar. Those are the first pixel-level confirmations
+   in this corpus; the plan makes that harness the default measurement instrument, and the pass's own laws
+   report is reconciled in §2.9.
+
+### 1. The canonical checklist this audit applies (verbatim)
+
+This is the checklist the audit is run against, reproduced exactly as supplied. It is the audit's spine;
+§3 maps each row to a repo-grounded check and an instrument.
+
+**Attribution correction (2026-10-21).** The supplied checklist attributes all 27 rows to "Laws of UX
+collection: https://lawsofux.com/", and that attribution is wrong for six of them. Checked against the live
+index on 2026-10-21: lawsofux.com publishes **28** entries (Aesthetic-Usability Effect, Choice Overload,
+Chunking, Cognitive Bias, Cognitive Load, Doherty Threshold, Fitts's Law, Flow, Goal-Gradient Effect, Hick's
+Law, Jakob's Law, Law of Common Region, Law of Proximity, Law of Prägnanz, Law of Similarity, Law of Uniform
+Connectedness, Mental Model, Miller's Law, Occam's Razor, Paradox of the Active User, Pareto Principle,
+Parkinson's Law, Peak-End Rule, Postel's Law, Selective Attention, Serial Position Effect, Tesler's Law, Von
+Restorff Effect, plus Zeigarnik Effect, which the index truncates but which has its own page at
+`lawsofux.com/zeigarnik-effect/`). Of the checklist's 27 rows:
+
+- **Six are not Laws of UX at all.** Rows **11 Continuity**, **12 Closure** and **13 Common Fate** are
+  Gestalt grouping principles, not entries in the lawsofux.com collection. They are lawful design constraints
+  and the repo checks behind them stay, but they belong to the Gestalt/visual family that
+  https://www.uilaws.com/ actually publishes (its index lists Closure and Continuity explicitly alongside
+  Symmetry, Rule of Thirds, White Space, Color Theory, Typography Hierarchy, Consistency, Proximity, Contrast,
+  Fitts's Law, Hick's Law, Jakob's Law). Row **14 "Law of Experience"** is not published on either site and has
+  no source; it is renamed below to the sourced principle it was standing in for.
+- **Row 27 "Aesthetic consistency and visual hierarchy" is not a law**, and the checklist itself says so ("Although not
+  a single law"). It is a cross-cutting house principle and is kept as such, clearly labelled.
+- **Eleven lawsofux.com entries are absent from the 27 as first-class rows**: Chunking, Cognitive Bias, Mental
+  Model, Paradox of the Active User, Parkinson's Law, Postel's Law, Selective Attention, and — named in §2.1
+  as "adjacent principles" — the last four of those. They are folded in below as **§1.1b**, with numbering that
+  starts at 28 so that **rows 1-27 keep the numbers every other section of this plan and
+  `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## frontend-fidelity-2026-10-13.md` cite**. No renumbering is performed; a reference to "(14)" still resolves
+  to the same subject it resolved to before this correction.
+
+This note is the before/after record. Every downstream "law N" citation in this file is left numerically
+stable on purpose, and §2.1, §2.4, §2.8 and §12 carry their own dated corrections where the attribution
+change altered their reasoning.
+
+#### 1.1 The laws and principles
+
+````text
+Below is a practical checklist based on the Laws of UX collection: https://lawsofux.com/ ## UX laws and principles 1. **Aesthetic–Usability Effect** — Attractive interfaces are perceived as easier to use. Use intentional visual hierarchy, spacing, typography, contrast, and polished states; do not let aesthetics hide usability problems. 2. **Jakob's Law** — Users expect interfaces to work like familiar products. Use recognizable navigation, buttons, forms, filters, tables, dialogs, and wizard conventions. 3. **Fitts's Law** — The time to reach a target depends on its size and distance. Make primary actions large enough, keep related controls close, and provide generous touch targets. 4. **Hick's Law** — More choices increase decision time. Reduce simultaneous options, group them, use progressive disclosure, and provide sensible defaults. 5. **Miller's Law** — Working memory is limited. Chunk information into meaningful groups; do not treat "7±2" as a literal UI quota. 6. **Law of Proximity** — Nearby elements are perceived as related. Keep labels close to fields, actions close to the content they affect, and separate unrelated sections with spacing. 7. **Law of Similarity** — Similar-looking elements are perceived as having similar roles. Keep equivalent controls visually consistent and avoid making different actions look identical. 8. **Law of Common Region** — Elements inside the same boundary are perceived as a group. Use cards, panels, fieldsets, and table sections purposefully; avoid excessive containers. 9. **Law of Uniform Connectedness** — Visually connected elements are perceived as related. Use shared borders, background, connector lines, or grouping patterns for related steps and relationships. 10. **Law of Prägnanz** — People interpret ambiguous visuals in the simplest possible way. Prefer clear shapes, obvious hierarchy, plain labels, and low-noise layouts. 11. **Law of Continuity** (Gestalt; published by uilaws.com, *not* a lawsofux.com entry) — Users follow smooth visual paths. Align content, preserve reading order, and make steppers, timelines, tables, and lists scan naturally. 12. **Law of Closure** (Gestalt; published by uilaws.com, *not* a lawsofux.com entry) — People mentally complete incomplete shapes or groups. Use carefully designed partial indicators, but never make critical information depend on guesswork. 13. **Law of Common Fate** (Gestalt; not published by either collection) — Elements moving or changing together are perceived as related. Use coordinated transitions and state changes; avoid unrelated motion. 14. **Prior Experience** (sourced general principle; no "Law of Experience" is published by either collection) — Previous experience shapes perception. Reuse established patterns and domain conventions, especially for navigation, status, editing, filtering, and confirmation. 15. **Von Restorff Effect** — The distinctive item is remembered. Reserve contrast, color, size, and emphasis for the most important action, warning, or status. 16. **Serial Position Effect** — Users tend to remember the first and last items best. Put high-priority navigation and actions at predictable beginning or ending positions. 17. **Peak–End Rule** — People judge an experience largely by its most intense moment and its ending. Make errors, completion, saving, onboarding, and final confirmation especially clear and reassuring. 18. **Goal-Gradient Effect** — Motivation increases as users approach a goal. Show meaningful progress, remaining work, completion counts, and a clear next step. 19. **Zeigarnik Effect** — Unfinished tasks remain mentally active. Make incomplete work visible, resumable, and clearly distinguishable from completed work. 20. **Tesler's Law** — Every system has unavoidable complexity. The product should absorb complexity wherever possible instead of making users understand internal data models. 21. **Occam's Razor** — Prefer the simplest explanation and interaction that solves the problem. Remove duplicate copy, empty states, redundant controls, and unnecessary steps. 22. **Pareto Principle** — A small portion of features often provides most value. Prioritize the core workflow and keep advanced or low-frequency features secondary. 23. **Doherty Threshold** — Productivity improves when the system responds quickly. Provide immediate feedback, loading states, optimistic updates where safe, and avoid unexplained pauses. 24. **Cognitive Load** — Every interface consumes mental effort. Reduce memory demands, use recognition over recall, expose only relevant information, and write concise instructions. 25. **Choice Overload / Paradox of Choice** — Too many options reduce confidence and completion. Use defaults, recommendations, filtering, categories, and progressive disclosure. 26. **Flow** — Users perform best when challenges, feedback, and goals are balanced. Keep users oriented, avoid unnecessary interruptions, and make the next action obvious. 27. **Aesthetic consistency and visual hierarchy** (house principle, *not* a published law) — Although not a single law, these are essential cross-cutting principles: consistent tokens, typography, spacing, color semantics, focus states, and component behavior.
+````
+
+#### 1.1b Laws of UX entries absent from the 27 (added 2026-10-21)
+
+lawsofux.com publishes 28 entries; the supplied list of 27 omits six of them and invents four. The list below
+closes the gap with numbering that continues from 27, so nothing above this section renumbers. Each row is
+judged by the same §3 matrix format. Instruments are proposed, not adopted: no check here has been run.
+
+| # | Law (source) | Screens | What to check | Instrument |
+| --- | --- | --- | --- | --- |
+| 28 | Chunking (lawsofux.com) | C, E, F | long option lists, stat blocks and modifier sets are grouped meaningfully, not as one flat run | Judge |
+| 29 | Mental Model (lawsofux.com) | all | the app's nouns match what a trainer thinks a race, a run and a stat are; no internal-model leak (`DESIGN-CORPUS.md` §36) | Judge |
+| 30 | Paradox of the Active User (lawsofux.com) | Wizard, onboarding | every screen works without reading docs; the first run needs no manual | Judge |
+| 31 | Parkinson's Law (lawsofux.com) | F, Wizard | no screen invents busywork or fills an empty layout with controls | Judge |
+| 32 | Postel's Law (lawsofux.com) | B, D1, D2, Wizard | liberal input acceptance (paste, partial) with conservative output (canonical enum labels from `lang/en/uma.php`) | Judge + source |
+| 33 | Selective Attention (lawsofux.com) | Cockpit, Result | the goal-relevant datum wins attention; no competing accent on the same screen | Judge + Measure (accent count) |
+
+Two further caveats on the source list:
+
+- **Working Memory is not a lawsofux.com entry** and stays an adjacent principle (bound to Miller's, row 5).
+- **uilaws.com's 13 entries** (Symmetry, Rule of Thirds, White Space, Color Theory, Typography Hierarchy,
+  Consistency, Proximity, Contrast, Closure, Continuity, Fitts's Law, Hick's Law, Jakob's Law) are a visual-style
+  collection, not part of the Laws of UX spine. Four of them overlap rows already here. The remaining nine are
+  layout/visual standards this repo already owns in `DESIGN.md`, so they are **not** added as audit rows; the
+  audit borrows only Closure and Continuity (rows 11-12), which describe scanned-reading behaviour the repo
+  actually tests.
+
+
+
+````text
+Check each page for: - **Purpose:** Is the page goal obvious within seconds? - **Hierarchy:** Can users identify the page title, primary action, secondary actions, status, and next step? - **Navigation:** Is the current location clear? Can users move backward, forward, or exit without losing work? - **State:** Are loading, empty, saved, unsaved, error, disabled, selected, and completed states distinguishable? - **Content:** Is information prioritized, concise, scannable, and free of repeated or empty-value noise? - **Interaction:** Are controls discoverable, correctly labeled, reachable, keyboard accessible, and close to the content they affect? - **Feedback:** Does every important action produce timely confirmation or an actionable error? - **Accessibility:** Check contrast, focus visibility, target size, labels, semantic structure, keyboard flow, screen-reader names, error association, and reduced motion. - **Responsive behavior:** Check desktop, tablet, mobile, zoom, long labels, localization, and narrow widths; ensure no clipping, overlap, or horizontal scrolling unless intentional. - **Consistency:** Compare the page with adjacent pages for navigation, button hierarchy, terminology, spacing, forms, status labels, and component behavior.
+````
+
+#### 1.3 The states to test
+
+````text
+Test these states where applicable: - first visit - populated state - empty state - loading state - error state - validation failure - disabled controls - selected and completed states - saved versus unsaved changes - navigation backward and forward - refresh or interrupted flow - keyboard-only navigation - focus visibility - screen-reader semantics - narrow mobile viewport - long content and long labels - zoom or text scaling
+````
+
+#### 1.4 Special attention
+
+````text
+Pay special attention to: - misleading completion indicators - duplicated or low-value information - unclear primary versus secondary actions - controls that are too small or too far from their target content - excessive choices presented at once - unexplained N/A, empty, or technical values - repeated explanatory copy - inconsistent terminology or component behavior - pages that make users manage internal system complexity - missing feedback after save, submit, filter, select, or navigation actions - warnings that do not look meaningfully different from ordinary content - forms without clear labels, units, constraints, defaults, or errors - content that is visually clipped, crowded, or difficult to scan
+````
+
+#### 1.5 The output structure
+
+````text
+Output the audit in this exact structure: # UX Audit Summary - Overall assessment - Strongest patterns - Highest-risk issues - Laws most frequently violated - Accessibility and responsive risk summary # Route-by-route findings For each route: ## [Route name] - User goal: - Primary task: - Overall rating: Strong / Mixed / Weak - Findings table with columns: Law or principle | Status | Evidence | User impact | Recommendation | Severity | Issue type # Cross-page consistency findings Compare navigation, page headers, breadcrumbs or steppers, buttons, forms, cards, tables, filters, status indicators, empty states, errors, save feedback, and responsive behavior. # Prioritized remediation plan Group recommendations into: - P0: blocks task completion, causes data loss, or creates serious accessibility failure - P1: materially increases confusion, errors, or abandonment - P2: reduces efficiency or scanability - P3: visual polish and refinement For each recommendation include: - exact UI change - affected route/component - law or principle improved - acceptance criteria Be rigorous and evidence-based. Do not claim a law is satisfied merely because the page looks clean. Distinguish visual polish from actual usability, accessibility, comprehension, and task success. If a law is not applicable, mark it N/A and explain why.
+````
+
+### 2. Reconciliation with the existing corpus
+
+#### 2.1 Against `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §13 ("Laws of UX applied")
+
+The directory **already contains a Laws-of-UX table**, at `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md`:2479-2519. It is
+not the same list as the canonical checklist and this plan must reconcile the two rather than ship a
+second, contradictory table.
+
+- **Four distinction checks, only two of them Laws of UX (corrected 2026-10-21):** the original text here read
+  "four canonical laws are absent from §13: Law of Continuity (11), Law of Closure (12), Law of Common Fate
+  (13), Law of Experience (14)". That premise is false: Continuity and Closure are Gestalt principles published
+  by uilaws.com, Common Fate is published by neither collection, and no "Law of Experience" exists on either
+  site. The checks themselves are still valid and §13 still does not carry them — it does not test
+  reading-path continuity, partial-indicator honesty, coordinated motion, or cross-product convention reuse.
+  What is wrong is only the label. Read the four as "checks §13 omits", not "laws §13 omits".
+- **Five of §13's rows are canonical after all (corrected 2026-10-21):** the original text here read "Seven of
+  §13's rows are not in the canonical 27: Chunking, Mental Model, Paradox of the Active User, Parkinson's Law,
+  Selective Attention, Working Memory, Postel's Law". Five of those seven *are* published Laws of UX entries —
+  Chunking, Mental Model, Paradox of the Active User, Parkinson's Law, Selective Attention and Postel's Law —
+  so they are canonical, not adjacent. Only **Working Memory** is genuinely adjacent (it is a capacity notion
+  that Miller's Law bounds). They stay bound to real decisions, and §1.1b now carries them as first-class rows
+  28-33 rather than as "adjacent principles"; the folding below is retained only as a note on where each bound
+  in §13: Chunking→Miller's (5), Working Memory→Cognitive Load (24), Selective Attention→Von Restorff (15),
+  Postel's Law→§9 ruling vocabulary (state semantics), Mental Model / Paradox of the Active User / Parkinson's
+  Law→design intents the original 27 did not carry, now rows 28-33.
+- **§13 is a design-intent table; this plan is a verification contract.** §13 says where a law *binds*;
+  §3 says how a verdict on it is *produced and evidenced*. The two compose: §13's "Where it binds" column
+  is the starting screen list, and §3's instrument column is what turns the binding into a PASS/PARTIAL/FAIL.
+- **No row of §13 is deleted by this plan.** Where a §13 row and a canonical law overlap (e.g. §13
+  `Miller's Law` ↔ canonical 5), the plan treats §13 as the prior art and cites it, rather than opening a
+  competing row.
+
+#### 2.2 Against the three existing UI audits (findings already law-shaped)
+
+The audits did not name laws, but many of their findings are law failures in everything but name. The
+plan **adopts these as pre-classified**, so the audit re-tests them against the law rather than
+re-discovering them. The mapping is one-directional: an existing finding can evidence a law; the law does
+not create a new finding.
+
+| Existing finding (source) | Canonical law it evidences | What the plan adds |
+| --- | --- | --- |
+| X-1 / `F-A1`,`F-B2`,`F-E3`,`F-G7` absence reasons mouse-only (P1) | Accessibility channel; Law of Closure (12) is NOT satisfied by a hidden reason; Cognitive Load (24) | a keyboard-reachability check per absence site, not a `title` grep |
+| X-2 / `F-A3`,`F-B6`,`F-C4`,`F-G12` type scale never landed; titles twice | Aesthetic consistency (27); Prägnanz (10); Serial Position (16) | a rendered type-scale read at 390/768/1024/1280 |
+| X-3 / `F-F3`,`F-G9`,`F-E7` enamel lost its single home | Von Restorff (15); Aesthetic consistency (27) | count of accented primaries per screen, measured |
+| X-4 / `F-D2`,`F-D3`,`F-E2`,`F-E4`,`F-G5` silent writes, double-submit | Doherty Threshold (23); Feedback (1.2); Flow (26) | a pending/disabled state read on each write |
+| X-5 / `F-D4`,`F-D22`,`F-E11`,`F-F8`,`F-G4`,`F-G11` mouse-only form semantics | Fitts's Law (3); Proximity (6); Accessibility | the 44px sweep + axe + `aria-describedby` association per field |
+| X-6 / `F-G2`,`F-B3`,`F-B7`,`F-D28`,`F-E5` contributor copy | Cognitive Load (24); Occam's Razor (21) | a copy read against the client-vocabulary map |
+| X-7 / `F-C1`,`F-G1`,`F-G6` props that match neither child nor server | Prägnanz (10) (a control that renders nothing is ambiguous); Implementation Integrity | the two named TS2339-class escapes, plus the `warning`-token dead-class read |
+| X-8 / `F-A2`,`F-F6`,`F-D6`,`F-G12` no ratified measure | Miller's Law (5) line length; Law of Continuity (11) | a measured prose width per cluster |
+| `setup-wizard-ui-audit` §2.2 step bar cannot tell saved from unsaved | Zeigarnik (19); Visibility of system status; misleading completion indicator (§1.4) | the live capture now proves it (see §0.5); the plan adds the three-state acceptance |
+| `cockpit-ui-audit` §3.2 advisor sticky at `lg` | Fitts's Law (3); Law of Continuity (11) | a measured advisor track width and the `min-w-0` collapse check |
+| `remaining-screens` §1.2 one P0 (`F-E1`, Legacy builder data loss) | Peak-End Rule (17) at a destructive confirm; error prevention | kept as a defect, not a design finding (its own note, §3.6) |
+
+#### 2.3 Against the app's own UX spine
+
+`docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §2's `State → Options → Recommendation → Explanation → Decision` is the app's intended
+decision hierarchy. The canonical laws 17-26 (Peak-End, Goal-Gradient, Zeigarnik, Tesler's, Occam's,
+Pareto, Doherty, Cognitive Load, Choice Overload, Flow) are exactly the tests of whether a screen honours
+that spine. Where a screen's `Recommendation` is missing or its `Explanation` duplicates, the law row
+carries the verdict and the spine names the fix.
+
+#### 2.4 Against the instrument findings
+
+`docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §4 names six things the quality bar cannot see. Each is a
+**blind channel a law travels on**, so this plan adds an instrument for it (§4) rather than repeating the
+finding:
+
+| Instrument gap (§4) | Law that travels on it | Instrument this plan adds |
+| --- | --- | --- |
+| §4.1 typecheck reads no SFC | Prägnanz (10), state semantics | source read + the live capture; do not claim type safety |
+| §4.2 copy guard sees no server copy | Cognitive Load (24), Occam's (21) | read the PHP that composes UI strings |
+| §4.3 G-18 covers one `ink-muted` pair | Aesthetic consistency (27); contrast | propose pair rows, let the browser gate decide (never move a token) |
+| §4.4 registers lag the code | Prior Experience (14) | report the doc/code drift, do not edit the rule |
+| §4.5 unvalidated config→badge index | Prägnanz (10) | read the three `DatabaseController` loops |
+| §4.6 detector saw nothing | — | treat `[]` as an instrument limit, not a pass |
+
+#### 2.5 Against the HLF reference set (the target rendered)
+
+`docs/proposals/HLF_reference/` (25 captures of a v0 build, `v2.0.0`) is the first artifact in the corpus
+that **renders** the target rather than describing it, and it is the natural comparison surface for a laws
+verdict: a law that FAILs on the shipped screen but PASSes in the HLF names a concrete, already-drawn fix.
+Its patterns map to the canonical laws as:
+
+| HLF pattern | Canonical law it satisfies | Note for the audit |
+| --- | --- | --- |
+| Eyebrow + large title + subtitle page header | Visual hierarchy (27), Prägnanz (10) | the shipped shell `#title` is `text-base` (X-2) |
+| Labeled sub-cells (key/value mini-boxes) | Proximity (6), Common Region (8), Prägnanz (10) | absent from the shipped build |
+| Status / provenance / category / effect chips | Von Restorff (15), Similarity (7) | the badge colours conflict with `app.css:57` |
+| Progress bars + row-count lines | Goal-Gradient (18), Zeigarnik (19) | Careers progress is the clearest gain |
+| KPI stat cards + "Next best action" panel | Pareto (22), Serial Position (16), Flow (26) | the shipped Dashboard has no next action |
+| Wizard option cards (one Select button + status line) | Hick's (4), Choice Overload (25), Occam's (21) | a **scope** change, not styling (fidelity file §4.3) |
+| Preflight single-row warnings, no duplicate Edit | Occam's (21), Flow (26) | matches the audit's own P1 |
+| Advisor: Objectives / Priority / Recommended / Recorded | Flow (26), Peak-End (17), Tesler's (20) | the shipped advisor is a flat rail |
+| Compare as a property/value table | Continuity (11), Miller's (5) | better for the responsive region contract |
+| Honesty notes on raw engine data | Cognitive Load (24), Prior Experience (14) | already the audits' discipline |
+
+Two cautions the audit must carry: the HLF is itself a **wireframe** (placeholder data, invented copy,
+unmeasured colours), so it is a comparison target, not evidence of a passing verdict; and it **reproduces
+the stepper P0** (all six steps read "done" while every warning says nothing is recorded), so a screen that
+matches the HLF is not automatically correct.
+
+#### 2.6 Against the colour evidence (`docs/research-scratch/PLANS-AND-BRIEFS.md` section `## frontend-fidelity-2026-10-13.md` §2.3)
+
+The fidelity file samples the 19 client sheets and the 11 official-site captures and finds the shipped
+palette is **already client-measured**, but drops the marketing palette (royal blue `#2255FF`, hot pink
+`#FF77CC`) and the client's chrome distribution (fidelity §2.3). Read through the laws:
+
+- **Von Restorff (15) is satisfied today, and a brand palette can break it.** The single lime accent is the
+  one distinct element; the audit's instrument (accent count per screen, §3.2 row 15) is the guard. Adding
+  blue chrome and a pink call-to-action is a *Track 2 D* contract change (fidelity §6), not a law fix, and it
+  must not raise the accented-primary count above one.
+- **Aesthetic-Usability (1) is the law the owner's complaint travels on** — but §9 item 13 binds: a richer
+  palette is not a PASS by itself and must not mask a usability defect.
+- **Prior Experience (14) and Jakob's Law (2) both point at the client.** The Trainer's familiar product is
+  the game; a surface that keeps the client's hues but drops its chrome distribution fails the expectation
+  those laws describe. This is the same `app.css:57` conflict §2.5 already flags for the badge colours.
+
+A law does not move a token: any colour change goes through the pair table and the G-18 browser gate (§9
+item 1, §4.3), and the scope decision is the owner question in `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## frontend-fidelity-2026-10-13.md` §9 item 9.
+
+#### 2.7 Against the game-client screenshot corpus (the domain precedent)
+
+`docs/research-scratch/screenshot-notes/00`-`06`, `screenshot-notes-extras/` and the `screenshot-registry/`
+evidence set describe the real client's UI. This matters to two laws above all: **Jakob's Law (2)** and the
+**Prior Experience (14)** are measured against *the product the Trainer already uses*, not against generic
+web convention, so the client corpus is the audit's primary convention reference. Its conventions map as:
+
+| Client convention | Where | Laws it informs | Note for the audit |
+| --- | --- | --- | --- |
+| Per-item detail as a modal over a dimmed backdrop | `00:40`, `04:24` | 2 Jakob's, 8 Common Region | a conventional affordance the app does not use |
+| Shape-rank vocabulary with no legend (double-circle/circle/triangle/cross) | `00:16`, `00:97` | 7 Similarity, 14 Experience | graded marks read at a glance; the app uses letters |
+| One deviant mark carries the worst rating ("the only negative mark in the row") | `00:26` | 15 Von Restorff | |
+| Stacked base/bonus gain bubbles | `01:53` | 6 Proximity, 10 Prägnanz | composition encoded by stacking, unlabelled |
+| Three-kind log grammar (speech / narration / signed outcome) | `01:143` | 7 Similarity, 8 Common Region, 14 | one list, three entry kinds |
+| Conditional risk channel (pink badge only when non-zero) | `01:318` | 15 Von Restorff, 12 Closure | see the warning-role tension below |
+| Pending basket distinct from displayed balance | `03:27` | 14 Experience, 27 consistency | selection and commitment modelled apart |
+| Stepper's *absence* marks "owned" | `03:50` | 12 Closure, 7 Similarity | absence of a control is the state |
+| Goal ladder: one "next" plus a `Goals Achieved 5/8` footer | `02:160`, `02:165` | 18 Goal-Gradient, 19 Zeigarnik | |
+| Contextual hint naming the weak stat, on the decision surface | `05:32` | 4 Hick's, 15 Von Restorff, 26 Flow | guidance on the decision, not a help screen |
+| Obligation tag pinned to the action button | `05:85` | 9 Uniform Connectedness, 8 Common Region | obligation and action are separate layers |
+| Active row breaks an otherwise uniform table (`Current →`) | `06:100` | 15 Von Restorff, 16 Serial Position | |
+| One outcome shown as art-anchored prose and a full running log | `06:26` | 17 Peak-End, 20 Tesler's, 14 | summary and auditable record |
+
+Two cautions, and they are why this is a *reference*, not a checklist:
+
+- **The client is not uniformly law-compliant.** It deliberately raises choice load: the Choices panel is
+  "a comparison table, not a confirmation dialog: every option's full branch set is listed at once"
+  (`02:101`), and the turn is "a six-way choice presented flat" (`05:32`). "The client does it" is not a PASS
+  for Hick's Law (4) or Choice Overload (25); the audit must separate a client convention worth copying from
+  a client anti-pattern.
+- **The client carries alert channels the app cut.** A red exclamation badge (`01:113`), a pink failure
+  badge (`01:318`) and a pinned obligation tag (`05:85`) are alert semantics, while §9 item 3 forbids
+  inventing a warning role. The conflict is recorded, not resolved (owner question 7).
+
+#### 2.8 Against the UX material already in `docs/research-scratch`
+
+Beyond the three audits, the client notes and the HLF, `docs/research-scratch` already carries UX-law and
+heuristic material. The plan must reconcile it rather than re-derive it:
+
+| Source | What it is | Canonical laws it touches | How the plan uses it |
+| --- | --- | --- | --- |
+| `AUDIT-AND-VERIFICATION.md` §3 "UX-law lens (driven, not asserted)" (`:4284-4293`) | the repo's only *driven* law table: Fitts's Law FAILs on nav/export links (L-F01); Hick's, Common Region, Zeigarnik and Von Restorff HOLD; Jakob's/Prägnanz/Aesthetic-Usability "not invoked as anchors" | 3, 4, 8, 19, 15, 2, 10, 1 | prior art and the *method*: a law verdict carries a driven check, not an assertion |
+| `UX-DELIVERABLES.md` Part 3 (`:1729-2182`) | a full Nielsen-10 + 5 game-specific heuristic evaluation of the *game*, rated 0-10, severity 0-4, overall 6.6/10 | overlaps 1-7, 10-12, 15, 17-19, 21, 23-27 | the only existing *heuristic* evaluation in the repo; see the two cautions below |
+| `DESIGN-CORPUS.md` §5 "Interaction and state patterns worth carrying" (`:4091-4098`) | six declared patterns: preview-before-commit, colour-always-paired-with-a-word, numbers-above-what-they-change, one-saturated-tile-marks-the-active-destination, grouping-by-phase-collapsible, shape-carries-meaning | 3, 6, 8, 9, 12, 15, 18, 24, 27 | the app's own declared principles; a screen that violates one is a law FAIL with a repo citation |
+| `DESIGN-CORPUS.md` §35 Progressive Disclosure (`:6503`), §36 Explainability (`:6538`) | declared principles: do not expose every modifier at once; every recommendation must answer "why?" | 4, 20, 21, 24, 25, 26 | the concrete check for the Hick's / Choice Overload / Cognitive Load rows |
+| `DESIGN-CORPUS.md` "Additional Design Details" (`:5614-5622`) | shared comparison pattern (never a single unexplained score); `N/A` + `title` for unavailable; progressive disclosure at 320px; non-colour-only warnings; actual-vs-hypothetical balances | 1, 12, 14, 20, 22, 24, 27 | the accessibility floor the laws are tested against; also the source of §9's "no score" rule |
+
+Two cautions:
+
+- **Nielsen's heuristics are not the canonical 27.** The `UX-DELIVERABLES.md` evaluation is organised around
+  Nielsen's 10 plus five game-specific heuristics (Feedback Loop Quality, Reward Cadence, Cognitive Load
+  Management, Information Architecture, Progressive Disclosure). The plan maps them to the canonical 27
+  rather than adopting them as a second checklist — the same treatment §2.1 gives `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md`
+  §13.
+- **That evaluation scores the *game*, not Trainer Desk.** Its ratings and severities are about the client,
+  and the whole file is a triaged mirror (`DESIGN-CORPUS.md:3371, 3389-3391`, `D-283`/`D-285`): it supplies
+  patterns and a method, never values, and it is not a verdict on this app. Its own provenance is the
+  verbatim merge of three source write-ups, tooled at
+  `docs/research-scratch-source/scripts/merge_ux_docs.py` and `verify_ux_merge.py`.
+
+#### 2.9 Against the 2026-10-13 live-capture laws pass (`UX-AUDIT-REPORT.md`)
+
+A first **partial laws pass** already exists: `docs/audits/UX-AUDIT-REPORT.md` (2026-10-13),
+framework "Laws of UX (lawsofux.com)", produced from the same session-private harness this plan adopts in
+§4.2 (21 screens × 4 widths, 81 captures). It is the plan's output contract (§1.5, §6) already prototyped:
+a summary, per-screen findings tables with a law column and P0-P3 severity, cross-page findings, and a
+prioritized remediation plan.
+
+- **Its declared violations:** Visibility of system status, Postel's Law, Occam's Razor, Tesler's Law,
+  Zeigarnik, Von Restorff. Note the mix: "Visibility of system status" and "Recognition over recall" are
+  Nielsen heuristics, and "Postel's Law" is a §2.1 adjacent principle, not a canonical row.
+- **Its declared strengths:** Jakob's Law, Common Region / Proximity, Aesthetic-Usability, Fitts's Law,
+  Serial Position.
+- **Its findings corroborate the three audits independently** — the stepper "done" P0 (`SetupLayout.vue:45-46`),
+  the Preflight duplication, the undifferentiated `N/A`, and the advisor track's missing width floor — a fourth
+  confirmation alongside `setup-wizard-ui-audit` §2.2 and the cockpit audit.
+- **The cluster-audit rubric already encodes a cognitive-load checklist** (.scratch-uma/ui-audit-2026-10-13/rubric.md:
+  single focus, chunking ≤ 4, grouping, one thing at a time, ≤ 4 options at a decision point, no memory bridge,
+  progressive disclosure) — the instrument for the Miller / Hick's / Choice Overload / Cognitive Load rows.
+
+**Durability caveat.** This report lives under gitignored `.scratch-uma/` (KI-70), so it is session-private and
+**not durable evidence** under §4.6: its findings must be re-derived on a quiet box or promoted into a tracked
+document before they count. The plan treats it as a pilot of the output contract, not as a filed audit.
+
+### 3. Coverage matrix — law × cluster × instrument
+
+#### 3.1 Clusters (inherited, unchanged)
+
+The eight clusters are `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §0.1 (A shell/home/errors, B reference
+catalogs, C Database hub, D1 run lifecycle, D2 queue/settings, E Legacy/Veterans/deck, F career decisions,
+G record/outcome/snapshot), plus the two surfaces the other audits own: **Cockpit** (`SCR-CAR-011`) and
+**Wizard** (the six `/career/setup/*` steps). Ten units in total. The audit adds no cluster.
+
+#### 3.2 The matrix
+
+For each canonical item: the cluster(s) where it is load-bearing, the concrete repo check, and the
+instrument that produces the verdict. `Auto` = a gate or script can decide it; `Judge` = expert read
+against a screenshot/DOM; `Measure` = a live capture reading (width, height, line count, timing).
+
+| # | Law / principle | Binds (clusters) | Concrete repo check | Instrument |
+| --- | --- | --- | --- | --- |
+| 1 | Aesthetic-Usability Effect | all | tokens-only, no `dark:`, no shadow/gradient identity (`DESIGN.md:231`); a "clean" screen is not a pass | Judge + token grep |
+| 2 | Jakob's Law | A, D1, Wizard | sidebar/table/form/stepper conventions present; `TraineeCombobox.vue` is a real combobox | Judge |
+| 3 | Fitts's Law | A, D1, D2, F | 44px house bar; primary action nearest the decision | Auto (`tests/utils/tap-targets.ts`) |
+| 4 | Hick's Law | B, C, D1, F, Wizard | simultaneous option count per screen; defaults present | Judge + Measure (control count) |
+| 5 | Miller's Law | C, E, F, G, Wizard | chunking to ≤ ~5-7; nav ≤ 8 (`PROCESS-PLANS.md:6560`) | Judge |
+| 6 | Law of Proximity | all | label↔field, action↔content distance; provenance badge beside its number | Judge + Measure |
+| 7 | Law of Similarity | B, C, E, F | equivalent controls share one component/class; `VeteranRow` is the one row shape; one `SparkChip` per spark (`PROCESS-PLANS.md:6686`) | Auto (class grep) + Judge |
+| 8 | Law of Common Region | all | cards/fieldsets bound one concept; no over-containerisation | Judge |
+| 9 | Law of Uniform Connectedness | E, G | ancestry graph lines, timeline rail, stepper connector | Judge |
+| 10 | Law of Prägnanz | all | one idea per card; no ambiguous control; dead `warning` classes (`F-G1`) render nothing | Judge + source |
+| 11 | Law of Continuity (Gestalt, uilaws.com) | A, C, F, G | reading order; stepper/timeline/table scan path; `lg` track balance | Judge + Measure |
+| 12 | Law of Closure (Gestalt, uilaws.com) | A, B, G | partial indicators honest; a hidden reason is a FAIL, not closure | Judge + a11y |
+| 13 | Law of Common Fate (Gestalt, unpub.) | F, G | one `animate-pulse` (`F-G10`); coordinated transitions only | Auto (motion grep) |
+| 14 | Prior Experience (sourced principle, no published law) | all | reuses domain conventions; docs/code drift reported (§4.4) | Judge |
+| 15 | Von Restorff Effect | A, D2, F, G | accented primaries per screen; the one `RECOMMENDED` marker | Measure (count) |
+| 16 | Serial Position Effect | A, F, Wizard | primary action first/last; high-priority nav at ends | Judge |
+| 17 | Peak-End Rule | G, Wizard, Result | errors/completion/save/final-confirm are clear; `F-E1` destructive confirm | Judge + source |
+| 18 | Goal-Gradient Effect | F, Cockpit, targets | progress shows distance-to-goal, not just current value | Judge |
+| 19 | Zeigarnik Effect | Wizard, E, F | incomplete work visible/resumable/distinct; step bar three-state | Judge + Measure (stepper) |
+| 20 | Tesler's Law | Wizard, E, F | the tool absorbs complexity; no internal-model exposure | Judge |
+| 21 | Occam's Razor | all | duplicate copy/controls/steps removed; deck paragraph ×6 | Judge + source |
+| 22 | Pareto Principle | A, D1, Wizard | core workflow first; advanced features secondary | Judge |
+| 23 | Doherty Threshold | B, D1, D2 | immediate feedback; `processing` exists; no unexplained pause | Measure (timing) + source |
+| 24 | Cognitive Load | all | recognition over recall; concise instructions; no contributor copy | Judge + source |
+| 25 | Choice Overload | B, C, Wizard | defaults/recommendations/filtering/progressive disclosure | Judge |
+| 26 | Flow | Cockpit, F, Wizard | oriented, uninterrupted, next action obvious; no modal over a decision | Judge |
+| 27 | Aesthetic consistency & hierarchy (house principle, not a law) | all | one token set, one type scale, one focus ring, one component behaviour | Auto (token grep, G-18) + Measure |
+
+#### 3.3 Automatable vs judgement
+
+- **Automatable now:** 3 (tap-targets), 13 (motion grep), 27 (token/type grep + G-18 browser gate), and the
+  accessibility sub-checks under 1.2's Accessibility row (axe, `aria-describedby` association).
+- **Measure (live capture):** 4, 6, 11, 15, 19, 23 — width, control count, accent count, stepper state,
+  timing. These are the rows `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" marks `needs measurement`.
+- **Judgement only:** 1, 2, 8, 9, 14, 16, 17, 18, 20, 21, 22, 24, 25, 26. Each must cite a screenshot or a
+  `file:line`, never an impression.
+
+### 4. Instruments
+
+#### 4.1 Source read (primary, cheapest)
+
+Read each page and its composed components plus the controller that builds its props, as the existing
+audits did. Every claim about rendered appearance that the source cannot settle is marked
+`needs measurement` and names the measurement (the discipline `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md"
+states at its head, `:14-18`).
+
+#### 4.2 Live browser capture (the measurement instrument)
+
+The 2026-10-13 session established the harness and it is reusable:
+
+- **Session-private, always** (`AGENTS.md` §9, KI-73, KI-80): a private port and a private scratch
+  database, e.g. `PLAYWRIGHT_PORT=8177 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/ux-audit/browser-8177.sqlite`.
+  An unqualified `npm run test:browser` in a shared worktree takes a peer's suite down.
+- **Pre-flight every broad sweep** (`KI-74`): time one trivial SQLite read against the dev file; if it
+  takes more than a few seconds the box is contended and the sweep is **void before it starts**. Measured
+  2026-10-13: 0.93s quiet (`docs/research-scratch/PROCESS-PLANS.md` §"trainer-desk-remaining-baseline.txt" (source line 17)), 6ms on a second quiet read, but a
+  later run was cut short by peer Pest suites and two dev servers (8143, 8000) and was **not** relaunched.
+- **Capture contract per (route × width):** full-page screenshot at 390/768/1024/1280, plus a metric pass
+  — horizontal overflow (`scrollWidth - clientWidth`), elements where `scrollWidth > clientWidth`, the
+  minimum visible control height, and a "squeeze" scan (a short leaf text node wrapped to ≥3 lines, the
+  proxy for the "one character per column" defect class).
+- **Resumable and incremental:** write results after every capture and skip a `(label,width)` already in
+  `results.json`, so a crash or a contended box loses nothing. The 2026-10-13 first attempt lost its
+  metrics because it wrote only at the end; the rewrite fixed that.
+- **Axe as a separate pass** (`AUDIT_AXE=1`), never inside the timing sweep, so the layout pass stays
+  fast and hang-resistant.
+
+#### 4.3 Gates reused (not reinvented)
+
+`tests/browser/accessibility.spec.ts` (axe A+AA scoped to `#app`), `tests/utils/tap-targets.ts` (44px),
+`tests/utils/accessibility.ts` (`buildAxe`), `tests/Feature/DesignTokensTest.php` (the G-18 pair list at
+`:298`, `:540-546`), `tests/Feature/RenderedCopyHygieneTest.php` (with its §4.2 limit), and the browser
+specs named per screen in the three audits' "Guarded" columns.
+
+#### 4.4 Measurement discipline
+
+A verdict is `Measure` only when a number was read. Contrast is never asserted from a class list; the
+G-18 pair list is extended and the browser gate decides (§4.3, `remaining-screens` §5.1). A passing axe
+scan is never proof of an accessible name (`remaining-screens` §5.11, `F-G4`).
+
+#### 4.5 Reference-target comparison (the HLF)
+
+For any law that FAILs on a shipped screen, compare it against the matching capture in
+`docs/proposals/HLF_reference/` before writing the recommendation (§2.5): a pattern the HLF already renders
+(sub-cells, badges, progress bars, the option-card wizard) turns a judgement call into "adopt this pattern,
+subject to the token and scope decisions in `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## frontend-fidelity-2026-10-13.md` §4-§6". This is a `Judge`
+instrument with a rendered citation, not a `Measure` one, and the HLF's own caveats (§2.5) apply.
+
+#### 4.6 Evidence discipline borrowed from the screenshot registry
+
+The registry is a worked example of the evidence contract this audit needs, and its rules are stricter than
+"cite a file":
+
+- **A note is a lead, not a verification.** `screenshot-registry/README.md:166-167`; the state
+  `documented_unverified` exists to mark that boundary. A law verdict is never based on a note alone.
+- **No rule claim from a single frame.** `screenshot-registry/FINAL_REPORT.md:277`: "No claim about a rule
+  has been made from a single screenshot." A single frame may evidence a *state*, not a *rule*.
+- **Confidence is state-encoded, not prose.** `verified` requires a recorded observation; `partial` requires
+  an outstanding question (`README.md:92-93`). A law verdict carries the same: PASS with its evidence, or
+  PARTIAL naming what is unresolved.
+- **Provenance is append-only** (`README.md:112`), and a cluster "is not a byte identity" (`README.md:61`,
+  `FINAL_REPORT.md:276`). Where a finding rests on a perceptual group or a derived index, the caveat travels
+  with it.
+- **Inference is fenced from observation.** `PHASE-B-REPORT.md:154` flags a note's "presumably" as "an
+  inference marker in a note that elsewhere separates observation from reading". A verdict that reasons past
+  what a frame shows must say so.
+
+Applied here: every PASS/PARTIAL/FAIL in the §6 report carries a screenshot path or a `file:line`; a measured
+claim names the number (§4.4); and a claim resting on one frame is downgraded to `needs measurement`.
+
+### 5. Method per page
+
+For each route:
+
+1. State the page's primary user goal and the main task.
+2. Walk §1.2's ten axes and §1.3's states; note which states the page cannot reach.
+3. Score each **applicable** canonical law PASS / PARTIAL / FAIL / N/A; N/A names why (e.g. Goal-Gradient
+   is N/A on a static reference table; Common Fate is N/A on a screen with no motion).
+4. Cite concrete evidence: a `file:line`, a screenshot path, or a measured number. No claim without one.
+5. State the user impact in UX terms (discoverability, comprehension, decision cost, error risk,
+   confidence, efficiency, accessibility, completion).
+6. Give one specific recommended change, never a vague suggestion.
+7. Assign severity P0-P3 (§7) and an issue type (visual, content, interaction, responsive, accessibility,
+   architectural).
+8. Reconcile with the existing audit: if the finding is already in one of the three audits, cite its ID
+   (`F-xx`) instead of filing a new one; if it is new, it is new evidence, not a new register entry.
+
+### 6. Output contract
+
+The report is produced in the exact structure of §1.5, with one addition that the existing corpus needs:
+each route's findings table carries an **`Existing ID`** column so a reader can join a law verdict to the
+audit finding it came from (`F-A1`, `X-1`, …) and never sees the same defect filed twice. The four report
+sections map to the existing files as: **Summary** ≈ `remaining-screens` §1 (score card, reused) plus a
+laws-frequency count; **Route-by-route** ≈ the cluster tables (§3) re-projected per law; **Cross-page
+consistency** ≈ `remaining-screens` §2 (X-1..X-8) re-read as law rows; **Prioritized remediation** ≈ the
+existing severities, grouped P0-P3, each with an acceptance criterion.
+
+### 7. Severity and scoring
+
+Severity is the impeccable scale already in use (`docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §1.2): P0
+blocks task completion, causes data loss, or is a serious accessibility failure; P1 materially increases
+confusion, errors, or abandonment; P2 reduces efficiency or scanability; P3 is polish. The plan adds no
+new scale. A law FAIL is not automatically P0: severity is the impact, not the law. The cluster score card
+(§1.1) is **not** rescored; the laws layer reports counts per law, joined to the existing severity counts.
+
+### 8. Effort and batching
+
+- Ten clusters, ~50 routes, four widths. Capture dominates wall-clock (a document is ~0.3-1s plus a
+  screenshot; the 2026-10-13 sweep averaged roughly 0.3 shots/s before contention).
+- Batch one cluster at a time, in the existing order (A → G, plus Cockpit and Wizard), each batch =
+  capture → per-law verdicts → reconcile with the existing IDs. Two checkpoints (after D2, after G) so
+  emphasis can be redirected before the tail.
+- The sweep is split into a **layout pass** (no axe, fast, resumable) and an **axe pass** (subset), so
+  neither can void the other under load.
+
+### 9. What this audit must not do
+
+Inherited verbatim in substance from `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §5, because a law is not a
+licence to break a ruling:
+
+1. Do not move a colour token to answer a contrast question; propose pair rows and let the gate decide.
+2. Do not add a fifth provenance label or a section-qualifying badge.
+3. Do not invent a `--color-warning` role; the declared pair is `risk`.
+4. Do not reflow the race calendar, turn log, or compare tables into stacked cards; the region contract is
+   `overflow-x-auto` + `role="region"` + `tabindex="0"` + `aria-label`.
+5. Do not add a cold-load spinner, skeleton, or `aria-busy` on page load (`ADR-0007`).
+6. Do not add a score, percentage, confidence, risk grade, win chance, or recommendation to any surface.
+7. Do not name a scenario in a component (gate G-33) or default a `scenarioLabel`.
+8. Do not restyle per-page headings before the shell `#title` decision is settled.
+9. Do not migrate an absence without moving the specs that pin the current channel (owner approval).
+10. Do not add a client-side theme write.
+11. Do not treat a passing axe scan as proof of an accessible name.
+12. Do not widen `AGENTS.md` §7's component list, and do not hand-edit `PRODUCT.md`, `SKILL.md`, or the
+    derived ADR index.
+
+And two the laws lens specifically tempts, added here:
+
+13. Do not treat "it looks clean" as a PASS. §1.5's closing line binds the auditor: polish is not
+    usability, accessibility, comprehension, or task success.
+14. Do not let a law override a ruling. Where a canonical law asks for what an ADR or a `SCREEN_SPEC`
+    ruling forbids (no score, no win-chance, no warning role, no scenario name in a component), the
+    conflict is recorded and the ruling wins.
+
+### 10. Questions for the owner
+
+1. **One table or two (§2.1)?** `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §13 and this plan both map laws to
+   decisions. Should §13 be restated to the canonical 27 and the seven extras folded in as adjacent
+   principles, or should §13 stand as design-intent and this plan stay the verification contract beside
+   it? (The plan currently assumes the latter.)
+2. **The four laws §13 omits (Continuity, Closure, Common Fate, Experience).** Are they in scope as
+   first-class rows (the plan assumes yes), or deliberately traded as §13's "Deliberately traded" note
+   does for Occam's Razor in the Database area?
+3. **Zeigarnik and the step bar.** The live capture proves the bar marks visited-not-saved steps "done".
+   Does the fix change the label (keep the 2026-10-13 ruling that "completed" means visited) or the state
+   model (three states, "done" only when saved)? This is the same question `setup-wizard-ui-audit` §6
+   raises; it needs one answer.
+4. **`Measure` budget.** Do you want the full four-width capture on all ~50 routes, or the reduced
+   first pass (one representative per cluster) that the 2026-10-13 live run effectively produced before
+   contention?
+5. **Register (§2.2, §4.4).** A law audit will surface the same defects the three audits already filed.
+   Confirm the rule the plan assumes: cite the existing `F-xx`/`X-n` and add no new register entry unless
+   the defect is genuinely new.
+6. **The HLF as the comparison surface (§2.5, §4.5).** Should every FAIL be compared against the matching
+   `HLF_reference` capture before a recommendation is written — i.e. is the HLF the canonical comparison
+   target? And does the HLF's wizard simplification (option-card presets that drop the per-stat, ancestry
+   and deck editors) fall inside the audit's scope, or stay a separate `SCREEN_SPEC`/`PRD` scope decision
+   as `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## frontend-fidelity-2026-10-13.md` §4.3 proposes?
+7. **The client's alert channels (§2.7).** The client carries a red exclamation badge (`01:113`), a pink
+   failure badge (`01:318`) and a pinned obligation tag (`05:85`), while §9 item 3 forbids inventing a
+   `--color-warning` role and the declared pair is `risk`. Does the audit record the client's alert
+   vocabulary as a convention to *report* (a PARTIAL on Von Restorff/Closure), or does it stay out of scope
+   because the app's cut is deliberate?
+8. **Method of record (§2.8).** The repo already holds a Nielsen-style heuristic evaluation of the game
+   (`UX-DELIVERABLES.md` Part 3: 0-10 ratings, 0-4 severity, an overall 6.6/10). Should this audit adopt that
+   rating *shape* (a per-heuristic score and an overall number) alongside the PASS/PARTIAL/FAIL contract and
+   the impeccable severity scale, or keep the two separate — the laws layer reporting counts per law, as §7
+   assumes?
+
+### 11. Verification plan for any approved subset
+
+Per `AGENTS.md` §9's cost-aware escalation. Nothing below was run for this plan.
+
+| Approved change | Level 1 while working | Level 2 at slice end | Level 3 before hand-off |
+| --- | --- | --- | --- |
+| This plan itself (docs only) | `python tools/md_fence_check.py docs/proposals/ux-laws-audit-plan-2026-10-13.md` | — | the file's own fence check; no code gate applies to a proposal |
+| A law verdict re-classified against an existing finding | the named finding's Guarded tests | the cluster's specs | the hand-off sequence only if the re-classification changes a proposed fix |
+| Any fix a law row recommends | that screen's spec + `tests/utils/tap-targets.ts` where height is involved | `tests/browser/accessibility.spec.ts` | the full suite; a `Measure` claim must carry the number, not a screenshot alone |
+| The live capture harness (§4.2) | one cluster at one width | the cluster at four widths | pre-flight the SQLite read (`KI-74`); if contended, the sweep is void and is reported void |
+
+### 12. Hand-off notes
+
+- **Deliverables produced:** this file. No component, token, copy string, gate, spec, or test was changed.
+- **Facts this plan relies on, and their source:** the canonical list comes from the supplied checklist (§1),
+  corrected 2026-10-21 against the live indexes at https://lawsofux.com/ (28 entries) and
+  https://www.uilaws.com/ (13 visual principles): four of the supplied rows are re-attributed (§1.1) and six
+  lawsofux.com entries the supplied list omitted are added as rows 28-33 (§1.1b);
+  the existing Laws table is `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md`:2479-2519; the findings and severities are
+  `docs/research-scratch/AUDIT-AND-VERIFICATION.md` §"remaining-screens-ui-audit-2026-10-13.md" §1-§3; the instrument limits are its §4; the two other
+  audits own the Cockpit and the wizard; the baseline is `docs/research-scratch/PROCESS-PLANS.md` §"trainer-desk-remaining-baseline.txt"; the live
+  capture harness and the 81 screenshots are `.scratch-uma/ux-audit/`; the rendered comparison target is
+  the 25 captures in `docs/proposals/HLF_reference/` (§2.5), read in full; the colour evidence in §2.6 is
+  sampled in `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## frontend-fidelity-2026-10-13.md` §2.3 (quantized pixel buckets from the 19 client sheets and
+  11 site captures, via `.scratch-uma/ux-audit/palette-extract.ps1` and `palette-accents.ps1`); the
+  game-client conventions in §2.7 are from `docs/research-scratch/screenshot-notes/00`-`06`,
+  `screenshot-notes-extras/` and `screenshot-registry/` (all citations verified against source), and §4.6's
+  evidence rules are `README.md` and `FINAL_REPORT.md`; the prior UX-law and heuristic
+  material reconciled in §2.8 is `AUDIT-AND-VERIFICATION.md:4284-4293` (the only driven law table),
+  `UX-DELIVERABLES.md:1729-2182` (the Nielsen-style heuristic evaluation) and `DESIGN-CORPUS.md:4091-4098,
+  5614-5622, 6503, 6538`. `docs/research-scratch-source/` was scanned and holds **no** UX-law material (0
+  markdown files; raw scrapes, game JSON, a screenshot inventory and build scripts), so nothing was drawn
+  from it beyond the merge-tool provenance of `UX-DELIVERABLES.md`; `docs/audits/UX-AUDIT-REPORT.md`
+  (2026-10-13) is a first partial laws pass, reconciled in §2.9 with a durability caveat, and
+  .scratch-uma/ui-audit-2026-10-13/rubric.md supplies the cluster-audit cognitive-load checklist.
+- **Not delivered, stated plainly:** no law verdict was produced here; this is the plan that says how to
+  produce them. No browser measurement, no contrast arithmetic, no suite run, no lore gate. The HLF was
+  read as reference; nothing in it was implemented or copied.
+- **Facts this pass corrected in its own brief:** the directory already carries a Laws-of-UX table (§13 of
+  the frontend plan) and it is not the canonical 27 — four canonical laws are missing from it and seven of
+  its rows are not canonical; the live capture corroborates two existing findings (the step bar and
+  Preflight) rather than opening new ones; and the HLF reference set now supplies a rendered target, which
+  makes the §4.5 comparison instrument possible. **Added 2026-10-13:** the game-client screenshot corpus is
+  the primary convention reference for Jakob's Law and Prior Experience (14), so §2.7 maps it and §4.6 binds
+  the audit's evidence discipline to the registry's rules.

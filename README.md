@@ -274,7 +274,7 @@ tools/                    lore.php (lore gate), gate.py (design-artifact gate), 
 | `KNOWN-ISSUES.md`                       | Pointer; defect register KI-01..KI-56 under `docs/research-scratch/AUDIT-AND-VERIFICATION.md`. New entries append to the root file.   |
 | `docs/adr/README.md`                    | ADR index (`ADR-0001` to `ADR-0027`; 0027 is Proposed) with the errata convention                                                                       |
 | `MCP_SETUP.md`                         | MCP client configuration: where each client reads its servers, and the host gotchas that make a correct-looking config fail silently     |
-| `docs/proposals/execution-ledger-2026-10-17.md` | The append-only dispatch ledger: one numbered section per dispatch, with the gates run, the decisions taken and what was deferred |
+| `docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md` | The append-only dispatch ledger: one numbered section per dispatch, with the gates run, the decisions taken and what was deferred |
 | `docs/UMAMUSUME_REFERENCE.md`           | Source-cited mechanics reference; live-ops claims are dated snapshots                                                                 |
 | `docs/scenarios/`                       | Per-scenario playing guides                                                                                                           |
 | `.ai/rules/index.md`                    | Path-scoped repo rules (style, Eloquent, testing)                                                                                     |
@@ -305,7 +305,7 @@ Repository practice that the code does not show:
 - **`AGENTS.md` §11 owns the protected list, and the root document set is closed.** No new markdown file is
   created in the repository root; new documentation content goes into a `docs/research-scratch/` master or
   into `KNOWN-ISSUES.md`, and `PRODUCT.md` is regenerated rather than hand-edited.
-- **`docs/proposals/execution-ledger-2026-10-17.md` is append-only.** One numbered section per dispatch, an
+- **`docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md` is append-only.** One numbered section per dispatch, an
   earlier section is never edited, and a correction is a new dated section that names what it supersedes.
 - **This tree holds other sessions' uncommitted work.** Do not revert it, reformat it, or commit it. Scope
   your edits and your tools to your own files, and if a file you need is held by another session, skip it and

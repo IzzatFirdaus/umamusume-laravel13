@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /*
  * FD-4, the recorded-action card: the action the Trainer took, what this rail said before it, and what
- * the turn actually gave (`docs/proposals/frontend-development-plan.md` §9a FD-4, cited on this screen as
- * `screen-spec-2.0.md` §12, "SCREEN-009 — Career Cockpit").
+ * the turn actually gave (`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §9a FD-4, cited on this screen as
+ * `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` §12, "SCREEN-009 — Career Cockpit").
  *
  * **Three states, and the card prints which one it is in.** An action with no entered result is greyed and
  * asks for the result in a polite `role="status"` rather than showing an empty comparison; an action with a

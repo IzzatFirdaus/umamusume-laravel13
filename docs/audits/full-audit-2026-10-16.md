@@ -408,7 +408,7 @@ seven named items verified plus eight new.
 |---|---|---|---|
 | **3** | Fullstack 2.0, §3.1 controllers · §3.2 requests/models/services/actions/enums · §3.3 schema · §3.4 data pipeline · §3.5 routes · §3.6 config · §3.7 quality bar · §3.8 ADR coverage incl. `ADR-0020` · §3.9 tests by layer · §3.10 `lang/en` · §3.11 tools · §3.12 legacy Blade | **Stage 2** | A dedicated pass. §3.1 alone enumerates every method of every controller against every route; §3.3 needs `php artisan migrate:status`, which this pass deliberately did not run |
 | **5** | Owner-decision queue re-derived against the 137-path dirty tree | **Stage 3** | Re-validation of Appendix A rows 3, 5, 7, 13, 40, 41 first |
-| **6** | Code backlog re-derived | **Stage 3** | Re-validation of Appendix B against `frontend-development-plan.md` §4 as it now stands |
+| **6** | Code backlog re-derived | **Stage 3** | Re-validation of Appendix B against `frontend-development-plan.md` §4 as it now stands | <!-- census: quoted-original -->
 
 Deferred rather than done thinly: a Phase 3 pass that cannot run `migrate:status` or read every controller
 method would produce the kind of confident-but-unmeasured inventory this whole arc exists to stop.

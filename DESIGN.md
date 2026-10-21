@@ -150,7 +150,7 @@ and the corpus-transcription caveat above holds. Replacing those two stubs is th
 | Turn chip anchor         | `--color-anchor`                         | `#0B6FB8`               | `#8FC4EE`               | deliberately not `--color-down`; blue already means "went down"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | Focus ring               | `--color-ring`                           | `#4E7906`               | `#7FCC09`               | 3:1 non-text boundary in both themes; `--color-green` alone fails light at 1.88 (see §8). Measured against the surfaces it actually sits on: **5.17 / 4.88 / 4.61** on light `raised` / `panel` / `page`, **7.61 / 9.51 / 9.79** in dark                                                                                                                                                                                                                                                                                                                                                                                        |
 
-> **Amended 2026-10-15 (Track 2-D, owner-signed): four roles are added to the light palette; each carries a G-18 measured pair.** Values are sampled from the 11 official-site captures and cross-checked against the 19 client sheets (`frontend-fidelity-2026-10-13.md` §2.3). They are the ruling's starting draft; the owner may adjust before the tokens land.
+> **Amended 2026-10-15 (Track 2-D, owner-signed): four roles are added to the light palette; each carries a G-18 measured pair.** Values are sampled from the 11 official-site captures and cross-checked against the 19 client sheets (`docs/research-scratch/PLANS-AND-BRIEFS.md` section `## frontend-fidelity-2026-10-13.md` §2.3). They are the ruling's starting draft; the owner may adjust before the tokens land.
 
 | Role | Token | Light | Dark | G-18 pair |
 |---|---|---|---|---|
@@ -191,7 +191,7 @@ stylesheet rather than a hand count — `tests/Feature/DesignTokensTest.php:237`
 test, `:268` asserts `toHaveCount(59)` over `array_unique` of the matched names — and a
 direct scan of `resources/css/app.css` on 2026-10-14 measures 110 `--color-*` declarations
 resolving to **59** unique names. The cause is recorded in
-`docs/proposals/frontend-development-plan.md`, Part 1.6.2, landed at `b30906a`
+`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md`, Part 1.6.2, landed at `b30906a`
 (2026-10-09): `--color-on-green` lost its only consumer and went with the declaration. The
 figures in the sentence above count rows, not declarations: its 20 rows name 21 distinct
 tokens, all of them still declared, so 38 declared tokens have no row above and "the 40
@@ -292,7 +292,7 @@ external fonts (offline constraint + C-8 dependency gate).
 >
 > **Why the proposal closed rather than shipped.** Four reasons, recorded so a later pass does not re-open the question on the same evidence. (a) The 2026-10-14 size amendment already carries the tier: the `h1` at 30px against section headers at 18px is a 12px step, double the previous 6px gap, and it reads as a tier without a face. (b) §7's offline constraint binds: a bundled face is a second asset to version and load, for a page title whose content is Latin and whose character is carried by weight. (c) C-8 approval is a permanent governance cost — would need to exist and stay valid — for an aesthetic gain the size amendment already delivers. (d) The HLF reference the proposal cited renders its `h1` at heavy weight from a system-adjacent sans; what reads as display in the reference is size and weight, not typeface identity, and this amendment follows the reference rather than inventing a face for it.
 >
-> **What reads as the app's visual voice, since it is not the face.** `frontend-fidelity-2026-10-13.md` §2.1 lists "no display voice" as one of its wireframe tells. What clears the tell is the header convention (eyebrow + `h1` + one-line subtitle), the accent budget (one action per screen — the blue `--color-primary-action`; amended 2026-10-15 from lime), the chip and badge vocabulary, and the sub-cell density — all of which ship in Track 1 slices without a font. The tier system carries the hierarchy; the face is redundant to it.
+> **What reads as the app's visual voice, since it is not the face.** `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## frontend-fidelity-2026-10-13.md` §2.1 lists "no display voice" as one of its wireframe tells. What clears the tell is the header convention (eyebrow + `h1` + one-line subtitle), the accent budget (one action per screen — the blue `--color-primary-action`; amended 2026-10-15 from lime), the chip and badge vocabulary, and the sub-cell density — all of which ship in Track 1 slices without a font. The tier system carries the hierarchy; the face is redundant to it.
 
 ### 2.3 Spacing and layout
 
@@ -621,7 +621,7 @@ disclosure wording. Filed as KI-35.
 `x-character-portrait` and `x-support-thumb` were built for the three Blade screens the artwork
 work originally targeted, then deleted the same day: the A1 to A3 ports retired
 `catalog/show.blade.php` and both support-card Blade views, and those components had no other call
-site (`frontend-development-plan.md` §5.1 step 8: delete at zero call sites). `ArtworkSlot.vue`
+site (`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §5.1 step 8: delete at zero call sites). `ArtworkSlot.vue`
 replaced them and is now used by all four slot-bearing screens. `grep -rn "<img" resources/views`
 is zero again, and that is now the correct answer rather than a gap: the screens render `<img>` from
 `.vue` files.
@@ -681,9 +681,9 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
 
   | Box | Surface | Click action | Source |
   | --- | --- | --- | --- |
-  | `size-16` | trainee portrait on catalog detail; support thumb on support-card detail | no action | `design-2.0` §45a |
-  | `size-12` | trainee portrait on catalog index; support thumb on support-card index | navigates to detail | `design-2.0` §45a |
-  | `size-10` | trainee portrait on the catalog index's costume-form row | no action | `design-2.0` §45a |
+  | `size-16` | trainee portrait on catalog detail; support thumb on support-card detail | no action | `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §45a |
+  | `size-12` | trainee portrait on catalog index; support thumb on support-card index | navigates to detail | `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §45a |
+  | `size-10` | trainee portrait on the catalog index's costume-form row | no action | `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §45a |
 
   The three values are pinned as a TypeScript union on `ArtworkSlot.vue`'s `size` prop
   rather than passed as free strings, so Tailwind's scanner — which reads raw source text —
@@ -809,7 +809,7 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
 > forbids renders with a native disabled state or as a named absence with its reason, never as an enabled
 > control whose label promises what the product cannot perform; the `N/A`-not-a-dash rule of §5 applies to
 > affordances as it does to values. (c) An empty state states what is missing, why it matters and what to
-> do (the `design-2.0` §29 voice the shipped screens carry); this amendment binds that voice as the rule
+> do (the `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §29 voice the shipped screens carry); this amendment binds that voice as the rule
 > every migrated screen inherits, so Phase 3+ does not re-invent it per page.
 
 ## 6. Lore-sensitive design rules (hard gate)
@@ -1049,7 +1049,7 @@ question list above is preserved as written).*
 - **Question 1 is closed by deletion.** The three unreachable components the question names were the
   zero-consumer Blade set; slice B1 (`0ea8d43`, 2026-10-05) deleted `run-header`, `deck-editor` and
   `energy-gauge` along with `resources/views/components/` itself, and the Vue ports replaced them on
-  the run record screen and the deck surfaces (`frontend-development-plan.md` §4's B1 row). The
+  the run record screen and the deck surfaces (`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §4's B1 row). The
   question's "adopt or delete" pair was answered with delete, which its own framing allowed. The §3
   table above records the same outcome in its dated paragraphs.
 - **Question 6 is answered by the tree the way the question's own first reading suggested, and the
@@ -1082,7 +1082,7 @@ fix the source file rather than keep naming it).*
 **Target: WCAG 2.2 level AA on every shipped screen**, the ported Inertia pages and the live
 Blade screens alike, verified by an axe pass plus a keyboard-only pass, 200% zoom, 320px
 reflow, and a reduced-motion check. The criterion-by-criterion disposition lives in
-`docs/proposals/frontend-development-plan.md` §12; this section records only what the visual
+`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §12; this section records only what the visual
 system owns.
 
 - **Focus.** One base-layer `:focus-visible` rule (2px `--color-ring`, 2px offset) covers every
@@ -1146,8 +1146,8 @@ system owns.
   rules, the absence discipline, the C-4 alt boundary, and OQ-6 remaining the owner's call. The
   known gap named in the new bullet is real and unfixed; two call sites currently hold it apart by
   opposite workarounds rather than by one decision.
-- **2026-10-04** — 2.0 design target filed for reference at `docs/proposals/design-2.0.md`
-  (with `docs/proposals/screen-spec-2.0.md`), the Inertia/Vue rewrite reference (`ADR-0020` §1).
+- **2026-10-04** — 2.0 design target filed for reference at `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md`
+  (with `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md`), the Inertia/Vue rewrite reference (`ADR-0020` §1).
   This file still owns the shipped Blade visual system. The target's trust-model, explainability,
   no-false-precision and accessibility rules align with `ADR-0001` and are the intended carry-across;
   its one conflict (a race win-chance example) is governance-held in the target's banner. No token,

@@ -34,7 +34,7 @@ use Inertia\Response;
  * before it can reach a screen. The page renders `N/A` with the exclusion named in its `title`. The
  * design brief for this screen prints a projected gain and a failure percentage per card, which states
  * intent rather than data; its own correction table rules those figures unsourced
- * (`docs/proposals/screen-spec-2.0.md`, PRODUCT DIRECTION CORRECTIONS, SCREEN-010 row). They are not
+ * (`docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md`, PRODUCT DIRECTION CORRECTIONS, SCREEN-010 row). They are not
  * quoted here, so a grep for a hard-coded yield or failure number over this slice has one answer.
  *
  * **Every figure comes from one of four places, and none of them is this controller**: entered values

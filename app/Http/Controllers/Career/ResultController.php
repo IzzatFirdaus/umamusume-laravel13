@@ -34,7 +34,7 @@ use Inertia\Response;
  * `TrainerAdvisor::deficits()`** rather than recomputed here so the result and the ranking can
  * never disagree (`ADR-0015`).
  *
- * **`screen-spec-2.0`'s "build quality" section is omitted as a ruling, not by oversight.** The
+ * **`docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md`'s "build quality" section is omitted as a ruling, not by oversight.** The
  * brief's SCREEN-019 correction row upgrades the screen to a Veteran Creation workflow with a
  * factor quality assessment and a best-use recommendation; both are `ADR-0020` §3's held
  * computation, and neither has a column to read even if it were permitted. The omission is
@@ -354,7 +354,7 @@ class ResultController extends Controller
     /**
      * `app.ruleset` is null in the shared props and no source defines a Global ruleset version, so
      * the line is a named absence with its reason rather than an invented string
-     * (`docs/proposals/design-2.0.md` §48).
+     * (`docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §48).
      *
      * @return array{value: null, title: string}
      */

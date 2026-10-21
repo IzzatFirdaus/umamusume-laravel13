@@ -10,7 +10,7 @@ use App\Models\TurnEntry;
 use App\Services\ScenarioCaps;
 
 /**
- * FD-2, the shared Next Decision contract (plan §9a, `screen-spec-2.0.md` §12 and §30).
+ * FD-2, the shared Next Decision contract (plan §9a, `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` §12 and §30).
  *
  * **It wraps `TrainerAdvisor`, it does not replace it.** Every ranking rule, every deficit and every
  * reason sentence is the engine's own and arrives in the `Advice` this method is handed; nothing here
@@ -18,7 +18,7 @@ use App\Services\ScenarioCaps;
  * twelve tests stay standing. A composable inside the component was rejected: FD-2 requires the logic
  * in a service, and the payload must be reachable by `assertInertia` like every other Cockpit section.
  *
- * **It reads no scenario key and no scenario label.** Of the seven tiers `screen-spec-2.0.md:1574-1582`
+ * **It reads no scenario key and no scenario label.** Of the seven tiers `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md`:1574-1582
  * lists, only two are evaluable from state this tree records today: the advisory Energy line (tier 1) and
  * the deficit against the Trainer's own target (tier 4). The rest belong to objectives FD-3 brings later.
  * So the same eight keys come out of every scenario and a fifth one needs no edit here (G-33, `D-240`).
@@ -28,7 +28,7 @@ use App\Services\ScenarioCaps;
  * field for them. `Advice->band` stays inside the engine: on the wire, Energy is either recorded — as a
  * figure or as the Trainer's own band word — and the engine ranked, or it is absent and this refuses.
  *
- * **Two refusal copies, never one.** `design-2.0.md:234-237` separates "the engine could evaluate but
+ * **Two refusal copies, never one.** `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md`:234-237 separates "the engine could evaluate but
  * found none worth recommending" from "the rules or data to rank actions are incomplete". Which one
  * fired is decided from the run's own state — whether Energy and a `build_target` exist — not by
  * matching the engine's prose.
@@ -292,7 +292,7 @@ final class NextDecision
     private function priority(Advice $advice, ?array $refusal, array $objectives): string
     {
         // FD-3 first, and deliberately ahead of the refusal below: an obligation that has arrived and
-        // carries no record is actionable whatever the advisor cannot rank. `screen-spec-2.0.md:1574-1582`
+        // carries no record is actionable whatever the advisor cannot rank. `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md`:1574-1582
         // puts mandatory objectives at tier 2 and build targets at tier 4, so a missing target or a missing
         // Energy reading suppresses the *session* recommendation in `refusal` without cancelling the race
         // the calendar says is due. The copy is E2's own, "due and not recorded", which is exactly what the

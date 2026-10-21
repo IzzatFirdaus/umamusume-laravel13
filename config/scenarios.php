@@ -94,7 +94,7 @@ return [
     | row, which is why this list is one flat order rather than four.
     |
     | Ratified by the owner on 2026-10-10 (ruling D-3): `mandatory_race > grade_checkpoint > fan_gate >
-    | scenario_milestone > finale`. `screen-spec-2.0.md:1574-1582` ranks survival above mandatory objectives
+    | scenario_milestone > finale`. `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md`:1574-1582 ranks survival above mandatory objectives
     | above scenario objectives above build targets, and the two tiers above this list — the advisory Energy
     | line and the run's own obligations — are computed by `NextDecision`, not ordered here. Nothing here is
     | a game rule and no surface presents it as one.

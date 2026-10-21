@@ -118,6 +118,20 @@ target. The other eight files of this round landed in `PROCESS-PLANS.md` (four) 
 `SLICE-RECORDS.md` (four); the routing table for all nine is in
 `docs/research-scratch/INDEX.md` §Round 17.
 
+**Round 18 (2026-10-21, consolidation):** the owner ordered eight more `docs/proposals/` files
+consolidated and the originals deleted. Two landed here as their own sections:
+`docs/proposals/dashboard-deferred-2026-10-21.md` (15 lines), the three Dashboard deferrals, each
+naming the operator's call and why no code change ships for it, and
+`docs/proposals/review-deferred-2026-10-21.md` (56 lines), the six Review-queue deferrals, each naming
+what it waits on so a later dispatch can pick one up without re-deriving the decision. Both are
+deferral records, which belong with the audits rather than with a plan or a slice. Each was
+re-verified line-by-line before the delete (8 of 8 and 40 of 40 non-blank lines present, in order, with
+one-level heading demotion; 0 missing) and again after it. The owner approved one departure from
+verbatim: each source's own cross-references inside the embedded body are repointed to the master and
+its section anchor. The other six files of this round landed in `PROCESS-PLANS.md` (one),
+`SLICE-RECORDS.md` (one) and `PLANS-AND-BRIEFS.md` (three), with one refreshed in place in
+`DESIGN-CORPUS.md`; the routing table for all eight is in `docs/research-scratch/INDEX.md` §Round 18.
+
 ---
 
 ## audit-verification-2026-10-01.md
@@ -8237,7 +8251,7 @@ Each observation from the second audit is classified as one of:
 | **R2-02: Legacy selections disappear during wizard navigation** | Screen 5: ancestry entered, saved with no flash; Screen 7: Preflight reports ANCESTRY N/A | Fixed (Phase 6, `31c9f5d`, `5876f64`, `f39ff03`) | **Not a code defect — session configuration issue** | Feature tests prove the persistence logic works correctly (`CareerLegacyDeckStepsTest` passes, including new R2-02 regression test verifying flash message and Preflight readback). The audit observation is consistent with a session persistence failure in the browser environment, not a code bug. Likely causes: (a) `SESSION_DRIVER=database` in `.env` but no `sessions` table migrated, or (b) browser session cookies not persisted between requests, or (c) CSRF token mismatch preventing form submission. The controller's redirect-with-flash pattern is correct; if the session cannot store data, neither the flash nor the legacy payload survives. Correction 2026-10-10 (this session, measured on this tree): hypothesis (a) is disproved here. `Schema::hasTable('sessions')` answers yes with 3 rows on `database/database.sqlite`, and `.env:30` reads `SESSION_DRIVER=database`, so the sessions table is migrated on the database the walkthrough would have used. (b) and (c) were not tested and nothing reproducible was demonstrated, so the cause of the observed browser failure stays unidentified; the row stands as "the code path is not at fault", which is all the evidence supports. | No code change needed. Document troubleshooting: verify `php artisan migrate:status` includes sessions table when using database session driver, or switch to `SESSION_DRIVER=file` for local development. Correction 2026-10-10: that check is already answered on this tree (the table is there), so the clause stands only as guidance for a fresh worktree. Nothing to implement for this finding. | New regression test added: `CareerLegacyDeckStepsTest::'it shows a confirmation flash and persists legacy data through navigation to Preflight (R2-02)'` verifies flash message, session persistence, and Preflight readback in one request cycle. |
 | **R2-03: Preflight permits contract with unresolved warnings** | Screen 7: Warnings list target and ancestry gaps, but Start Career remains enabled | Known limitation (resolution record does not address blocking semantics) | **Confirmed** | Preflight is read-only and delegates creation to the wizard's write path. The wizard allows partial saves by design (D4 fixed the target validation, but did not make warnings block creation). This is a product decision, not a defect. | Document as intentional: warnings inform but do not block. If owner wants blocking, that's a new feature request. | `CareerPreflightTest` verifies warning display; add case for creation with warnings. |
 | **R2-04: Snapshot state conflated with subsequent turn state** | Screen 10: Turn form defaults to Turn 1; Screen 11: Cockpit shows Junior Year Early January after recording stats | Fixed (Phases 4–5, same as R2-01) | **Same as R2-01** | The wizard creates a new career, not a snapshot import. The turn form's default is correct for a new career. The snapshot import path (if it exists) would set the initial position differently. | Verify if snapshot import path exists and is reachable from the Dashboard. If not, this is a missing feature, not a bug. **Verdict, 2026-10-10, landed `65d7068`:** the path exists (`career.snapshot*`, `SnapshotController`, `Career/Snapshot/Entry|Setup|Review`) and the Dashboard linked it, but the sentence holding that link sat inside the `<section v-else>` empty state, so the door vanished the moment the tool held a career for the very Trainer the flow is for. The paragraph now renders outside both career branches with its words, link and destination untouched; `dashboard.spec.ts` asserts the door in each state and pins its href. No position value was invented, which is the R2-01 half of the same finding. | `SnapshotTrainingDecisionTest` covers snapshot-mode turn recording. |
-| **R2-05: Scenario metadata has duplicate Ruleset rows** | Screen 2: Unity Cup card prints `Ruleset · N/A` in fact block and `Ruleset · Team` in description block | Not addressed in resolution record | **Fixed** in `9777531`, browser-verified; the residual (the Cockpit's own strip) landed in `c7a9c87`, and the four further surfaces R2-19 names are closed in `24f7e48` | Confirmed, and the cause is a label collision rather than a duplicated fact. The two rows print two different values from two different sources and neither is hardcoded: the grid row is the tool-wide ruleset *version*, `props.ruleset.value`, which `ScenarioSelectController::ruleset()` returns as null by ruling because no source defines a Global version (`design-2.0` §48); the block row is the scenario's own rule family, `card.metadata.ruleset` from `config/scenarios.php` (`'Team'` for Unity Cup alone, added by `1098546`). `config/scenarios.php:225` already says the distinction in its own words, "ruleset names the scenario's rule family, not a version", but `1098546` reused the grid's heading for the new row, so one card headed two different facts `Ruleset` and read as self-contradicting. | Rename the headings so each fact owns one: grid `Ruleset version`, block `Rule family`. Values, sources and the `N/A`-with-`title` rule are untouched, and no `Team` is typed into the template. Done in `resources/js/pages/Career/ScenarioSelect.vue`; `SCREEN_SPEC.md` SCR-CAR-002 updated for the two headings, the absent-field state row and the test list. | `ScenarioMetadataTest::'it prints each fact on a scenario card under one label, and never one label twice'` pins the card's full `<dt>` heading set read off the template (RED before the fix with `'Ruleset'` twice, GREEN after, and it cannot pass on a pattern that matched nothing). `tests/browser/career-scenario-select.spec.ts` adds a rendered case: Unity Cup shows `Ruleset version · N/A` and `Rule family · Team`, and no element anywhere is headed bare `Ruleset`. |
+| **R2-05: Scenario metadata has duplicate Ruleset rows** | Screen 2: Unity Cup card prints `Ruleset · N/A` in fact block and `Ruleset · Team` in description block | Not addressed in resolution record | **Fixed** in `9777531`, browser-verified; the residual (the Cockpit's own strip) landed in `c7a9c87`, and the four further surfaces R2-19 names are closed in `24f7e48` | Confirmed, and the cause is a label collision rather than a duplicated fact. The two rows print two different values from two different sources and neither is hardcoded: the grid row is the tool-wide ruleset *version*, `props.ruleset.value`, which `ScenarioSelectController::ruleset()` returns as null by ruling because no source defines a Global version (`docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §48); the block row is the scenario's own rule family, `card.metadata.ruleset` from `config/scenarios.php` (`'Team'` for Unity Cup alone, added by `1098546`). `config/scenarios.php:225` already says the distinction in its own words, "ruleset names the scenario's rule family, not a version", but `1098546` reused the grid's heading for the new row, so one card headed two different facts `Ruleset` and read as self-contradicting. | Rename the headings so each fact owns one: grid `Ruleset version`, block `Rule family`. Values, sources and the `N/A`-with-`title` rule are untouched, and no `Team` is typed into the template. Done in `resources/js/pages/Career/ScenarioSelect.vue`; `SCREEN_SPEC.md` SCR-CAR-002 updated for the two headings, the absent-field state row and the test list. | `ScenarioMetadataTest::'it prints each fact on a scenario card under one label, and never one label twice'` pins the card's full `<dt>` heading set read off the template (RED before the fix with `'Ruleset'` twice, GREEN after, and it cannot pass on a pattern that matched nothing). `tests/browser/career-scenario-select.spec.ts` adds a rendered case: Unity Cup shows `Ruleset version · N/A` and `Rule family · Team`, and no element anywhere is headed bare `Ruleset`. |
 | **R2-06: Support-deck ownership copy contradicts persisted behavior** | Screen 6: Copy says flag has no persistence column; Screen 19: Flag survives reload | Fixed (D3, `fdebcc9`, added `deck_slots.ownership`) | **Fixed** in `dd179ba`, browser-verified | Confirmed, and wider than one screen. `fdebcc9` (2026-10-09) gave `deck_slots` its nullable `ownership` column and wired both writers, but the sentence written at D6-wizard survived in three shipped places: `Career/DeckSelect.vue` (step 5) and `Career/Preflight.vue` (step 6) each printed "The deck table has no column for it yet", and `components/support/SupportSlot.vue`'s own docblock still called the value client-side. Four comments in the write path said the same (`StoreDeckRequest` twice, `TrainingRunController::syncDeck()`, `SetupDraft::deck()`, `DeckSelectController`, `StoreDraftDeckRequest` twice). `Support/Builder.vue` had been corrected in the same pass as the migration, and that is why Screen 19 read true while Screen 6 read false. | Copy and comments only, no persistence change: each screen now states the flag's real route, draft then `PreflightController::store()` then the slot row, and each keeps the three-state distinction (`Owned`, `Rented`, unrecorded renders `N/A`). | Two things, because one was lying. `SupportDeckBuilderTest` gains (a) a sweep of the four shipped deck surfaces: the retired wording in any shape fails it, and (b) the write-and-read-back case for `runs.deck.sync` with a posted flag, which no test had run before, so the stale comments were never contradicted. `tests/browser/support-deck.spec.ts` asserted the run screen's **pre-D3** sentence and has been failing since `fdebcc9` (pre-existing, not caused here); it now asserts the sentence the screen prints. `career-legacy-deck-steps.spec.ts` likewise asserted "The deck table has no column for it". |
 | **R2-07: Retired run-record instructions remain visible** | Screen 9: `/training-runs/9` redirects to Cockpit, but three screens still reference "run record screen" | Partially fixed (2A.5, `d251f7f`, nav-rail relabelled) | **Fixed** in `380350e` (+ `a1379bd`), browser-verified | Confirmed, and the audit's "three screens" was the visible tip. `F2` deleted `Runs/Show.vue` and made `GET /training-runs/{run}` a redirect (`TrainingRunController::redirect()`), and `d251f7f` relabelled the nav rail, but seventeen shipped sentences across nine sources still named the retired screen in three phrasings: "the run record screen" (Cockpit strip absences, Career Result skills/races/status/retired lines, Timeline empty state, Save Veteran blocked state), "the record screens" (Save Veteran's `best_use` title), and "the run screen" (Race planner × 4, Skills planner absence, `RaceFacts` skill-point fact, Training Detail's first-turn link, Event and Inheritance no-turn panels, RaceCard's skip note). Two links also addressed the doorway itself while labelled otherwise: the deck builder's career-bar `run_url` and the Veteran's `runUrl`. A grep for the literal phrase found 9 files; a grep for the *concept* ("run screen", "career record") found the rest, which is why the audit's own wording was not enough. | Retarget each instruction to the surface that owns the action today, verified per destination: the action grid (`Cockpit.vue:588`), Training for the turn fields (`TrainingDetail.vue:121` posts `sp`), the Race planner for the calendar (`SCR-CAR-023`), the Skills planner for skill states (`skills_sync_url` form), the Cockpit for status and scenario (`Cockpit.vue:354,376`) and for recorded outcomes (`Cockpit.vue:510`). Where no 2.0 owner exists, Rest and Recreation, the copy now says so instead of sending the Trainer to a closed door. No route, redirect or payload was touched. | `NoStaleRunRecordLinksTest` already existed at `d251f7f` with two browser-side cases; it was kept verbatim and gained the sweep its design could not make: comment-stripped matchers over `app`, `resources/js`, `resources/views` and `lang`, plus a `runs.show` whitelist narrowed to the doorway's own file with its two retained redirects counted (2). Red first listed nine files; green after. `career-race-strip.spec.ts` had been failing since `3cdaa2f` (2026-10-09, the pass that repointed the strip's links) because it still addressed `Go to the run record screen` while the component printed `Go to the Cockpit` (pre-existing, not caused here); both its cases now pass, and `VeteranLibraryScreenTest`'s `runUrl` pin moved to `runs.cockpit` with the link. `CareerRacePlannerTest` gained a positive case so the retarget cannot pass by losing its destination. |
 | **R2-08: Target save confirmation is misleading** | Screen 4: Empty target saves with "Build target saved." but page says "No target is recorded yet" | Fixed (D4, `be02297`) | **Confirmed fixed, but UX ambiguity remains** | The validation now allows empty targets, and the success message is technically correct (the save succeeded). However, the distinction between "save succeeded" and "target configured" is subtle. | Consider changing the flash to "Target cleared." when all fields are empty, or adding a visual indicator of the empty state. | `CareerBuildTargetTest` covers empty save; add UX assertion if changed. |
@@ -8252,7 +8266,7 @@ Each observation from the second audit is classified as one of:
 | **R2-17: Run-scoped deck builder has no inbound link** | `/training-runs/{run}/deck` is reachable only by URL | Not addressed in the first audit | **Open, blocked on a concurrent session** | `runs.deck` answers, writes and reads back (Slice 2's `SupportDeckBuilderTest`), and the Training screen's door now points at it (`e2889ff`), but the Cockpit itself offers no door, so a Trainer mid-career cannot reach the deck builder by clicking. | Deferred with R2-16: the door belongs in `Cockpit.vue`, in the peer's dirty set. `TrainingDetail.vue`'s door landed first because that file was clean. | A feature test asserting the Cockpit response carries an `href` for `runs.deck`. |
 | **R2-18: Training screen's deck door opened a new wizard** | Found by the R2-07 sweep of `runs.training` | Not in the second audit's list | **Fixed** in `e2889ff` | The "no Support Cards are recorded" line on the Training decision screen linked the literal `/career/setup/deck`. That route is step 5 of a fresh setup draft, so a Trainer with a career open was sent out of it into an unrelated draft and the career's own deck stayed empty; the label beside it, "Deck step", named the wizard rather than the destination. `runs.deck` was already the screen that writes this run's six slots. | The server now supplies `run.deck_url` beside the two doors already in that prop set, the anchor binds it, and the label reads "Record this run's deck". The wizard's own internal links (`SetupLayout.vue`, `LegacySelect.vue`, `DeckSelect.vue`) are unchanged, because there the next step is the next step. | `CareerTrainingDetailTest` pins `run.deck_url` at the same run's `runs.deck` and greps the component for the retired literal (present exactly once before, absent now). The screen's suite 10 passed (266 assertions) and the five suites that write through `runs.training` 46 passed (601 assertions). Not browser-verified: that spec's fixture equips a card, so the empty-deck branch never renders there. |
 
-| **R2-19: The absent Global ruleset version is headed four different ways on six surfaces** | Found by the R2-05 residual sweep, 2026-10-10 | Not in the second audit's list | **Fixed** in `24f7e48`, browser-verified (was filed as open at the sweep, before slice 13 took it) | The same null value — `app.ruleset`, null by ruling because no source names a Global ruleset version (`design-2.0` §48) — reaches a Trainer under four headings: `Ruleset version` on the wizard card (`ScenarioSelect.vue:193`, `9777531`) and the Cockpit strip (`ScenarioPanel.vue:162`, `c7a9c87`), `Ruleset:` on the Dashboard's data-status panel (`Dashboard.vue:316`) and the Career Result's footer (`Result.vue:366`), `Ruleset snapshot:` on Preflight (`Preflight.vue:392`), and `Global Ruleset` on Preferences' game-version tab (`Preferences/Edit.vue:445`). Every one of them prints the refusal title that says *version*, so four of the six headings name the fact less exactly than the text beside them. R2-05 was one card carrying two headings for two facts; this is six surfaces carrying four headings for one fact. | Pick the card's wording, `Ruleset version`, and apply it to the four stragglers in one pass, leaving the wizard's `Rule family` row alone because that is a different fact. Values, sources and the `N/A`-with-`title` rule did not move. **Landed in `24f7e48`**, with Settings keeping its qualifier as `Global Ruleset Version`. | Two assertions pinned the old wording and moved with it: `dashboard.spec.ts` now takes the anchored version heading plus the retired `Ruleset:` as its red/green pair, and `preferences.spec.ts` matches with `exact`, because the retired label is a prefix of the new one and a substring match would pass on either wording. `CareerPreflightTest.php:132` pins Preflight's *value*, not its heading, and `CareerResultTest.php:240-241` pins the prop, so neither blocked the rename. `RulesetVersionVocabularyTest` now owns the rule: six named surfaces with the heading each must print, then a retired-wording sweep of all 105 `.vue` files under `resources/js`, the count case being the guard that keeps the sweep from reading as a pass when it scanned nothing. 2 passed (428 assertions); the two browser specs together 18 passed (7.7m) on `:8261`. |
+| **R2-19: The absent Global ruleset version is headed four different ways on six surfaces** | Found by the R2-05 residual sweep, 2026-10-10 | Not in the second audit's list | **Fixed** in `24f7e48`, browser-verified (was filed as open at the sweep, before slice 13 took it) | The same null value — `app.ruleset`, null by ruling because no source names a Global ruleset version (`docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §48) — reaches a Trainer under four headings: `Ruleset version` on the wizard card (`ScenarioSelect.vue:193`, `9777531`) and the Cockpit strip (`ScenarioPanel.vue:162`, `c7a9c87`), `Ruleset:` on the Dashboard's data-status panel (`Dashboard.vue:316`) and the Career Result's footer (`Result.vue:366`), `Ruleset snapshot:` on Preflight (`Preflight.vue:392`), and `Global Ruleset` on Preferences' game-version tab (`Preferences/Edit.vue:445`). Every one of them prints the refusal title that says *version*, so four of the six headings name the fact less exactly than the text beside them. R2-05 was one card carrying two headings for two facts; this is six surfaces carrying four headings for one fact. | Pick the card's wording, `Ruleset version`, and apply it to the four stragglers in one pass, leaving the wizard's `Rule family` row alone because that is a different fact. Values, sources and the `N/A`-with-`title` rule did not move. **Landed in `24f7e48`**, with Settings keeping its qualifier as `Global Ruleset Version`. | Two assertions pinned the old wording and moved with it: `dashboard.spec.ts` now takes the anchored version heading plus the retired `Ruleset:` as its red/green pair, and `preferences.spec.ts` matches with `exact`, because the retired label is a prefix of the new one and a substring match would pass on either wording. `CareerPreflightTest.php:132` pins Preflight's *value*, not its heading, and `CareerResultTest.php:240-241` pins the prop, so neither blocked the rename. `RulesetVersionVocabularyTest` now owns the rule: six named surfaces with the heading each must print, then a retired-wording sweep of all 105 `.vue` files under `resources/js`, the count case being the guard that keeps the sweep from reading as a pass when it scanned nothing. 2 passed (428 assertions); the two browser specs together 18 passed (7.7m) on `:8261`. |
 | **R2-20: The Cockpit's page-wide 44px sweep fails on a collapsed disclosure's button** | Found while browser-verifying slice 11, 2026-10-10 | Not in the second audit's list | **Filed as KI-92, open, not this session's to fix** | `scenario-panel.spec.ts:168-174` sizes every `main a, main button` by index. The run-delete door's submit button lives inside a closed `<details>` (`Cockpit.vue:661-684`), so it is in the DOM with no box, reads 0, and the case fails at `control 17` — the 18th control, one past the 17 the failure's own accessibility listing puts inside `main` before that door. The sweep was written by `6a74f85` (2026-10-08); the door arrived with `91494a1` (2026-10-09). The markup is compliant and the instrument is not: `ura-panel.spec.ts:206-223` already skips controls that `isVisible()` rejects and guards the skip so it cannot pass on nothing. | Out of Round 2's remit. The four Cockpit sweeps sharing the unfiltered shape are named in KI-92; only `scenario-panel.spec.ts` was measured. Fixed as its own change with the `ura-panel` guard copied to each, or left to whoever owns the accessibility sweep. | Nothing to add: the case is red now, so the fix is proved by the same command going green. What has to be proved is that the guard survives — the `measured > 8` assertion is what keeps the skip honest. |
 
 ### Baseline Test Report
@@ -8306,7 +8320,7 @@ The persistence path was already read end to end and the regression test exists 
 
 | Item | Evidence |
 | --- | --- |
-| Root cause | Two different facts printed under one heading in `ScenarioSelect.vue`: the grid's tool-wide ruleset *version* (`ScenarioSelectController::ruleset()`, null by ruling, `design-2.0` §48) and, since `1098546`, the Unity Cup card's rule *family* (`metadata.ruleset` from `config/scenarios.php`, `'Team'`). `config/scenarios.php:225` already distinguishes them in prose; the template reused the heading anyway. |
+| Root cause | Two different facts printed under one heading in `ScenarioSelect.vue`: the grid's tool-wide ruleset *version* (`ScenarioSelectController::ruleset()`, null by ruling, `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §48) and, since `1098546`, the Unity Cup card's rule *family* (`metadata.ruleset` from `config/scenarios.php`, `'Team'`). `config/scenarios.php:225` already distinguishes them in prose; the template reused the heading anyway. |
 | Files changed | `resources/js/pages/Career/ScenarioSelect.vue` (two `<dt>` headings, one `title` wording), `tests/Feature/ScenarioMetadataTest.php` (new heading-set case), `tests/browser/career-scenario-select.spec.ts` (updated one selector, new rendered case), `SCREEN_SPEC.md` SCR-CAR-002 (Layout/Content paragraph, absent-field row, test list). |
 | RED first | `vendor/bin/pest --filter=ScenarioMetadataTest` before the fix: `Failed asserting that two arrays are identical`, index 5 `Ruleset` expected `Ruleset version`, index 8 `Ruleset` expected `Rule family`, 1 failed / 1 passed. The pattern matched all ten headings, so the guard is not vacuous. |
 | Focused green | `vendor/bin/pest --filter=ScenarioMetadataTest` after the fix: 2 passed (20 assertions). |
@@ -8763,7 +8777,7 @@ percentage or as metres.
 
 Per `AGENTS.md` §2, the chain that settles every dispute below is: quality bar → gate registry →
 accepted ADRs → `PRD.md` → `ARCHITECTURE.md` → `SCREEN_SPEC.md` (screen behaviour) → `DESIGN.md`
-(visual system) → `docs/proposals/design-2.0.md` (reference target). Five points from reading it
+(visual system) → `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` (reference target). Five points from reading it
 in full, because four of the owner's suggestions land on them:
 
 1. **`SCREEN_SPEC.md:1841` fixes the layout and forbids the obvious implementation of one
@@ -8815,9 +8829,9 @@ than one part appears in more than one bucket; the number is the owner's, not th
 | 1 | Stronger hierarchy: a real page title, status badge, primary action at the top | `DESIGN.md:188-190` specifies page title `text-2xl font-600`, one `h1` per page. What shipped is `AppLayout.vue:281` at `text-base`, the same size as every `h2` panel heading on this screen, and the trainee name prints in both (`Cockpit.vue:461` and `CareerHeader.vue:82-83`). See §2.1. |
 | 2 | Reduce density: slightly larger text, more line height | `DESIGN.md:188-190` specifies body `text-sm` and section headers `text-lg`. Section headers shipped at `text-base` and a large share of this screen is `text-xs`. See §2.2. |
 | 3 | Better top summary | Supported in the narrow form: the *scenario resources* strip (`CareerHeader.vue:141-154`) is two bare `N/A` boxes with no hierarchy against the five-field definition list above it. The four readings the suggestion wants (energy, rank, spirit, turn) already exist, and three of them must stay where the owner ruled. See §2.3. |
-| 4 | Sticky advisor | `SCREEN_SPEC.md:1841` fixes the columns, not their scroll behaviour, and `design-2.0.md` §23 asks that "the player should never have to search for: *What should I do now?*" That is the argument for sticky. See §3.2 for the two constraints a sticky rail must respect. |
+| 4 | Sticky advisor | `SCREEN_SPEC.md:1841` fixes the columns, not their scroll behaviour, and `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §23 asks that "the player should never have to search for: *What should I do now?*" That is the argument for sticky. See §3.2 for the two constraints a sticky rail must respect. |
 | 5 | Clarify edit mode | The always-open edit strip (`Cockpit.vue:482-689`) mixes eleven identity inputs, two write buttons per select, two export links and a deck link, under an `sr-only` heading, directly beneath the read-only header. See §3.3. |
-| 6 | Larger action cards with descriptions and a recommended state | `design-2.0.md` §24 is the section that asks for comparable decision cards, and the grid's entries are already links with a note line. The gain is size and a mark, not new information. See §3.4. |
+| 6 | Larger action cards with descriptions and a recommended state | `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §24 is the section that asks for comparable decision cards, and the grid's entries are already links with a note line. The gain is size and a mark, not new information. See §3.4. |
 | 9 | Consistent scenario card headers and badges | The panel shell already composes `ScenarioStatusBadge.vue` (`ScenarioPanel.vue:158`) and `ProvenanceBadge` for `Estimated` (`UnityCupPanel.vue:204`, `:266`). What is inconsistent is header weight and copy length across the Unity Cup sub-panels, not the badge vocabulary. See §3.5. |
 | 9 | Two-column scenario layout on desktop | Already true: `ScenarioPanel.vue:171` is `sm:grid-cols-2 lg:grid-cols-4`. The screenshot reads as one long column because Unity Cup composes seven panels and the region is full width under the three columns. |
 | 10 | Section nav | Compatible with `SCREEN_SPEC.md:1841` as an anchor list; incompatible as tabs. See §3.6. |
@@ -8830,7 +8844,7 @@ than one part appears in more than one bucket; the number is the owner's, not th
 | 3 | "Replace the small scattered fields with 4–6 prominent stat cards: scenario, energy, rank, spirit, current turn, priority" | Two parts of this conflict. Energy is owner-ruled into the state panel (`SCREEN_SPEC.md:1858-1865`, guarded by `EnergyReadingConsistencyTest`). Priority is the advisor's first element and already sits at the top of the rail (`NextDecision.vue:168`). Rank and spirit are scenario widgets whose home is the header strip *and* the scenario panel; see §2.6 before proposing a third home. |
 | 6 | "Turn the action list into larger selectable cards with a **selected** state" | These are navigation links, not a selection control. A selected state would imply the choice has been committed; the Trainer navigates away to record it. `ActionGrid.vue:9-16` is explicit that each entry links to the screen that records the action. |
 | 6 | "Visually distinguish **risky** and **unavailable** actions" | Risk is a held computation: `ADR-0001`'s licence section keeps any numeric estimate opt-in and unbuilt, and `SCREEN_SPEC.md:1880-1881` retires `risk` from the wire. Unavailable arms do not exist by a landed keyboard-path decision (`ActionGrid.vue:9-16`). |
-| 7 | "Collapse long explanatory content behind 'Show details'" — applied to the advisor's `why` list | Ruling 5a (`SCREEN_SPEC.md:1886`) requires that where a figure rests on a constant, "the source and the read date print in the **visible text**, not only in the tooltip". A `<details>` is keyboard-reachable and so is not a tooltip, but `design-2.0.md` §2 (line 179) puts Explanation as the fourth of five first-class elements in the rail. The `why` list is the answer to "why should I believe this"; the defensible collapse targets are the scenario panels' methodology prose, not the rail. |
+| 7 | "Collapse long explanatory content behind 'Show details'" — applied to the advisor's `why` list | Ruling 5a (`SCREEN_SPEC.md:1886`) requires that where a figure rests on a constant, "the source and the read date print in the **visible text**, not only in the tooltip". A `<details>` is keyboard-reachable and so is not a tooltip, but `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §2 (line 179) puts Explanation as the fourth of five first-class elements in the rail. The `why` list is the answer to "why should I believe this"; the defensible collapse targets are the scenario panels' methodology prose, not the rail. |
 | 9 | "Add badges for 'Recorded' and 'Missing'" | The label set is four — `Confirmed` / `Calculated` / `Estimated` / `Unknown` — and its axis is set by surface class by owner ruling (`DESIGN.md:607-614`, recorded in `docs/proposals/provenance-and-absence-contracts.md` §9). `Recorded` and `Missing` are not in the vocabulary. An absence renders through `AbsenceValue.vue` with a reason, not a chip (`DESIGN.md:576-585`). |
 > One suggestion is neither shipped nor a conflict. **#8, "Increase muted text contrast"**, is
 > *unverified*: the pair this screen leans on is absent from the G-18 contract, so nothing currently
@@ -9228,7 +9242,7 @@ Six screens, one shell, one draft. The parts that settle disputes below:
 | Suggestion | The governing line |
 | ---------- | ------------------ |
 | **Cross-page** consistent max-width container | `DESIGN.md:197-208` already ratified it. Measured: `BuildTarget.vue:336` uses `max-w-3xl` and complies; the other five constrain nothing. See §2.1. |
-| **Cross-page** sticky step bar | `SetupLayout.vue:54-80` puts the step bar in document flow. The wizard is the longest flow in the app, and `design-2.0.md` §40 puts the same bar at the top of the mobile order. |
+| **Cross-page** sticky step bar | `SetupLayout.vue:54-80` puts the step bar in document flow. The wizard is the longest flow in the app, and `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §40 puts the same bar at the top of the mobile order. |
 | **Cross-page** completed steps visibly distinct | `SetupLayout.vue:69` distinguishes only the current step. Every other step renders identically whether or not it was saved. See §2.2. |
 | **Cross-page** persistent bottom action bar with Back | Each step already writes its own draft. Back exists on two steps of six, and Preflight's link row has a duplicate and two missing doors — see §2.3. |
 | **Cross-page** helper text plus expandable "Learn more" | The house pattern is a native `<details>` whose summary carries the reason (`DESIGN.md:576-585`, `AbsenceValue.vue`), already used here at `LegacySelect.vue:402` and `:459`. |
@@ -9236,7 +9250,7 @@ Six screens, one shell, one draft. The parts that settle disputes below:
 | **Cross-page** semantic badges over colour | Already true where a badge exists: `PARTIALLY DOCUMENTED` is glyph plus word (`ScenarioSelect.vue:152-159`), warnings carry `!` plus title plus detail (`Preflight.vue:185-187`), `ProvenanceBadge` always pairs glyph and word. |
 | **1.2** equal-height scenario cards | `ScenarioSelect.vue:141-147` is a CSS grid, so cards already share a row height. The screenshot reads unequal because the metadata block is optional (`:217` vs `:240`). |
 | **1.3** stronger selected state | The border and the word are there (`ScenarioSelect.vue:146`, `:264-267`). `:260-263` explains why the word sits beside the action and not in the heading: inside the `<h2>` it would join the accessible name and "Trackblazer" would stop matching itself. Only a check icon is genuinely absent. |
-| **1.4** collapsible "Scenario details" | The mechanics are the card's sourced content (`ScenarioSelect.vue:233-238`) and `design-2.0.md` §25 names key mechanics as what the card exists to show. Defensible to collapse the `key_mechanics` list; not the fact grid. |
+| **1.4** collapsible "Scenario details" | The mechanics are the card's sourced content (`ScenarioSelect.vue:233-238`) and `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §25 names key mechanics as what the card exists to show. Defensible to collapse the `key_mechanics` list; not the fact grid. |
 | **3.1** grouped two-column target sections | `BuildTarget.vue:337-340` already groups "What the career is for" into a `sm:grid-cols-2` fieldset. The ceilings fieldset (`:507-535`) is the one that would gain most. |
 | **3.6** per-field validation | Already done: every target and ceiling field renders its own `role="alert"` (`BuildTarget.vue:481-486`, `:528-533`) with a per-fieldset fallback (`:490-495`) and `describedBy` wiring (`:459`, `:521`). |
 | **4.2** collapse parent branches | `LegacySelect.vue:402` and `:459` already use `<details>` for the per-grandparent spark editors. Extending that to a whole branch is the same pattern. |
@@ -9254,7 +9268,7 @@ Six screens, one shell, one draft. The parts that settle disputes below:
 | **1.6** make the whole card clickable | `ScenarioSelect.vue:10-14` records the inverse: the card-button pattern is a native `<button>` with `aria-pressed` precisely because it "is in the tab order, needs no arrow-key handler to be reachable, and states which card holds the stored choice". A second click target gives one action two paths and two accessible names. |
 | **4.4** "Add grandparent" instead of blank fields | The four grandparents are the record's fixed shape — six nodes, `AncestryGraph::build()`'s own node set (`LegacySelect.vue:12-13`). A blank grandparent is a stored *absence*, not an empty row; hiding it would remove the surface where a Trainer records a name she reads later. |
 | **6.8** final confirmation dialog | The house pattern for a confirm step is a native `<details>` with an explicit submit inside it — `Cockpit.vue:943-966` (delete-career), `:828-845` (delete-turn). A modal adds a focus-trap surface the flow does not otherwise need, and Preflight is already the summary such a dialog would restate. |
-| **2.3 / 2.4** scenario fit, "+N more" on trait chips | "Scenario fit" is the same unsourced recommendation as 1.5. "+N more" is worth doing but changes `AptitudeBadge`'s contract: every letter currently prints its word (`TraineeSelect.vue:373-387`), and `design-2.0.md` §17 plus `DESIGN.md` §3.1 require letter *and* word so nothing is colour-only. A "+N" collapse must not hide letters. |
+| **2.3 / 2.4** scenario fit, "+N more" on trait chips | "Scenario fit" is the same unsourced recommendation as 1.5. "+N more" is worth doing but changes `AptitudeBadge`'s contract: every letter currently prints its word (`TraineeSelect.vue:373-387`), and `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §17 plus `DESIGN.md` §3.1 require letter *and* word so nothing is colour-only. A "+N" collapse must not hide letters. |
 
 ### 2. Findings
 
@@ -9328,7 +9342,7 @@ Sprint, Mile, Medium, Long, Front runner, Pace chaser, Late surger, End closer �
 per row, repeated on every row of the page, in the screenshot reading as a wall of chips that
 outweighs each trainee's name.
 
-`design-2.0.md` §17 and `DESIGN.md` §3.1 require letter **and** word so nothing is colour-only,
+`docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §17 and `DESIGN.md` §3.1 require letter **and** word so nothing is colour-only,
 so the chips cannot be thinned by dropping words. What is not required is that all ten carry
 equal weight on a *selection* screen, whose question is "is this the trainee I want?" and not
 "what are her aptitudes?" — the latter is `TraineeProfile.vue`, one click away at
@@ -9443,7 +9457,7 @@ Option 1 is the one that answers the owner's "+N more" intent without touching
 derived from the controller rather than declared locally, since the split by axis is server
 knowledge.
 
-**Must not break:** letter **and** word on every badge that renders (`design-2.0.md` §17,
+**Must not break:** letter **and** word on every badge that renders (`docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §17,
 `DESIGN.md` §3.1). No badge may collapse to a colour or to a bare letter.
 
 #### 3.5 Finish the `AbsenceValue` migration on this flow
@@ -9469,7 +9483,7 @@ check whether `SCREEN_SPEC.md` §SCR-CAR-010 pins their wording before changing 
 
 `ScenarioSelect.vue:233-238`, behind a `<details>` whose summary states the count ("Key
 mechanics (3)"). The fact grid (`:162-213`) stays open — it is the comparison the card exists
-for, and `design-2.0.md` §25's "should not become" list is about scenario-specific sprawl, not
+for, and `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §25's "should not become" list is about scenario-specific sprawl, not
 about the facts.
 
 **Must not break:** G-33. The count comes from `card.metadata.key_mechanics.length`, a prop, not
@@ -9513,7 +9527,7 @@ The Edit links navigate to a step that opens on the draft; adding two more keeps
    `BuildTargetPayload::KEYS`.
 5. Hide a grandparent node, or turn the six-node graph into a free-form tree —
    `LegacySelect.vue:12-16`.
-6. Drop the word from an aptitude badge, or colour-code one — `design-2.0.md` §17,
+6. Drop the word from an aptitude badge, or colour-code one — `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §17,
    `DESIGN.md` §3.1.
 7. Put a scenario name into a component — gate G-33.
 8. Add a dependency (virtualization, an icon set, a modal library) — `AGENTS.md` §5 requires
@@ -10222,7 +10236,7 @@ Pre-flight before any Level 3 or browser run: time one trivial SQLite read again
 
 > **Scope.** The two surfaces Agent 3 owns: `SCR-CAR-011` (`/training-runs/{run}/cockpit`) and the six
 > `/career/setup/*` steps. Method, instruments and the evidence contract are
-> `ux-laws-audit-plan-2026-10-13.md` (§3 matrix, §4 instruments, §5 method, §6 output contract, §9 rules).
+> `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## ux-laws-audit-plan-2026-10-13.md` (§3 matrix, §4 instruments, §5 method, §6 output contract, §9 rules).
 > Findings from the three prior audits are cited by their own IDs in the **Existing ID** column and are
 > not re-filed. Everything here was re-derived on the tree at the SHAs named in §Verdict, not inherited.
 >
@@ -10245,7 +10259,7 @@ Pre-flight before any Level 3 or browser run: time one trivial SQLite read again
 ## UX Audit Summary
 
 - **Overall assessment.** Both surfaces are **Strong with two recorded tensions**. The cockpit honours
-  the app's own spine (`design-2.0.md` §2: State → Options → Recommendation → Explanation → Decision)
+  the app's own spine (`docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §2: State → Options → Recommendation → Explanation → Decision)
   structurally, not decoratively: `NextDecision.vue`'s five-element order is its declared contract and
   every branch prints one element. The wizard's one real law failure of the day — the stepper marking
   visited-not-saved steps "done" — was fixed at `4a5ff88` under owner ruling C-1 ("keep visited", answered
@@ -10436,7 +10450,7 @@ Pre-flight before any Level 3 or browser run: time one trivial SQLite read again
      obligation tag (`05:85`) are alert semantics the app deliberately cut (`app.css:57`,
      `DESIGN.md:53`, §9 item 3). Von Restorff and Closure are scored PARTIAL-with-citation on the
      surfaces where a warning would have carried them; no component may adopt the vocabulary without
-     a Track 2 D ruling (`frontend-fidelity-2026-10-13.md` §6 D).
+     a Track 2 D ruling (`docs/research-scratch/PLANS-AND-BRIEFS.md` section `## frontend-fidelity-2026-10-13.md` §6 D).
 
 ## Verdict on this report's own rules
 
@@ -10619,3 +10633,87 @@ labelled). A full read of the panel is required before any fix is proposed.
 | `legacy.spec.ts:330` | live WCAG 1.4.10 violation; owner not yet localised | 0 — needs the populated-state dump |
 | `dashboard.spec.ts:370` | **no gap** — green as shipped | 0 |
 | Unity Cup (step 1.1) | partially measured; five questions unclassified | 0 — incomplete |
+
+---
+
+## dashboard-deferred-2026-10-21.md
+
+> **Consolidated 2026-10-21 (Round 18, owner-ordered).** Source: `docs/proposals/dashboard-deferred-2026-10-21.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+
+## Dashboard deferrals (2026-10-21)
+
+Three proposed Dashboard changes are deferred to the operator. No code change ships for any of them.
+
+### #8 Quick Actions: keep "Open settings"
+
+The proposal trims the Quick Actions card from four destinations to three by dropping "Open settings". The sidebar collapses below `md`, and on mobile the Settings destination sits behind the bottom bar's More disclosure. The "Open settings" Quick Action is the direct, one-tap path that does not require opening the disclosure first. Dropping it removes that direct path, so the trim is the operator's call, not a cleanup.
+
+### #11 Border token: leave `border-rule` as signed
+
+The proposal changes the border colour token (it names `#6e6c73` to `#34343d`). `DESIGN.md` is the signed visual system, and a colour-token edit is exactly what the arc has refused without a Track 2 amendment. The base token is not editable here. If the border reads too loud against muted copy, the fix is a lower-contrast class on the affected surface (for example `border-rule/60`, if the token system supports opacity), never a base-token change.
+
+### #12 Sidebar grouping: leave the shell alone
+
+The proposal groups the sidebar into Training / Library / System. That reorders `AppLayout.vue`'s ten-destination navigation, the load-bearing shell every page inherits. It is a shell restructure, not a Dashboard fix, and it is deferred.
+
+---
+
+## review-deferred-2026-10-21.md
+
+> **Consolidated 2026-10-21 (Round 18, owner-ordered).** Source: `docs/proposals/review-deferred-2026-10-21.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+
+## Review queue deferrals (2026-10-21)
+
+Six proposals are deferred. Each names what it is waiting on, so a later dispatch can pick one up
+without re-deriving the decision.
+
+### #9 Umamusume id as a picker
+
+The id field accepts a raw integer with no type-ahead. `Combobox.vue` exists (from `1.9a`) and may
+fit, but whether it does is a decision rather than a measurement: the field takes a catalog
+*primary key*, while the combobox is built for choosing from a list of labelled options, and the
+queue's rows are decision cards where a wrong pick merges two trainees. Unblocking: a ruling on
+whether `Combobox` fits this field or a new picker component is warranted. The measuring work is
+reading `Combobox`'s props against the field's contract.
+
+### #10 Two badge languages unified
+
+The queue shows "Fuzzy match" (a `StatusPill`, a *search* state: how close the engine's guess was)
+and "? Unknown" via `StatusBadge` (a *record* state: what the catalog row's provenance is). They
+are different axes, and collapsing them needs a decision the tree does not contain: what the record
+state should mean when a row is neither Confirmed nor Estimated. Unblocking: a badge taxonomy
+ruling.
+
+### #12 Keyboard triage
+
+A real feature (j/k to move, digits to set a verdict, Enter to commit) rather than a fix. It needs
+its own dispatch with its own test discipline: the queue is the keyboard-first screen, and the
+44px/tap-target and axe cases already pin its current baseline. Unblocking: its own dispatch.
+
+### Confidence score display
+
+The proposal asks for a confidence number on the fuzzy card. The matcher computes a tier, not a
+score: this is a backend change (compute and expose a number) plus a new badge variant, not a UI
+fix. The honest interim already holds: "Fuzzy match" is a label, not a measurement, and the card
+does not pretend otherwise. Unblocking: the matcher computes confidence and the payload carries it.
+
+### Sidebar grouping
+
+Grouping the shell's navigation (Training / Library / System) is a cross-cutting change to
+`AppLayout.vue`, the same deferral the dashboard dispatch recorded as its #12. Unblocking: a shell
+grouping ruling.
+
+### Left-edge alignment
+
+**Closed as already-satisfied**, by measurement rather than by argument. The page's first card edge
+sits exactly on the shell's content edge; the 17px between that edge and the form inside it is the
+card's own `p-4` plus its 1px border. The reported x=352 was measured from inside a card, not from
+the page's first element. `tests/browser/review.spec.ts` now pins the finding, so a gutter on this
+page would red there.
+
+### #3 Bulk action (deferred on the controller, not on a ruling)
+
+No bulk route exists: `routes/web.php` declares `GET /review` and `POST /review/{candidate}` only,
+and `ReviewController` has `index` and `resolve`. A bulk resolve is a controller method plus a route
+plus its own Form Request, which is its own dispatch. Unblocking: a bulk-resolve controller method
+and route land; the UI half is then the select-all header the proposal describes.

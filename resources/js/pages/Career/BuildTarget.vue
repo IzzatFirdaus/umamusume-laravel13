@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*
- * SCREEN-005, Build Target (`ADR-0020` §1; `docs/proposals/screen-spec-2.0.md` SCREEN-005). Step 3 of
+ * SCREEN-005, Build Target (`ADR-0020` §1; `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` SCREEN-005). Step 3 of
  * the setup wizard, headed "Your target".
  *
  * **The page prints props and assembles nothing the server did not send.** The purpose options arrive

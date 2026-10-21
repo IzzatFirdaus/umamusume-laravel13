@@ -15,7 +15,7 @@ Three states are kept apart throughout this record, because the project's own so
 
 - **Shipped**: read from `routes/web.php` and the `SCREEN_SPEC.md` §3 status column.
 - **Authorized direction**: an accepted ADR plus a PRD story, not yet built or built only in part.
-- **Exploratory**: `docs/proposals/design-2.0.md` and `docs/proposals/screen-spec-2.0.md`, both filed
+- **Exploratory**: `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` and `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md`, both filed
   2026-10-04 under the banner "2.0 design target, reference only, not authorization". A screen named in
   those two files is a design target, not a capability, and several of their sections name computation the
   project has ruled banned.
@@ -206,7 +206,7 @@ Open, and not to be designed as though decided:
   `N/A` with the blocker named.
 - **Which provenance vocabulary the product uses is unsettled.** `ADR-0020` §2 adopted "confirmed /
   calculated / RNG / user input" as the display contract and PRD FR-F-3 repeats it. The shipped
-  `ProvenanceBadge.vue`, built to `design-2.0` §49, renders **Confirmed / Calculated / Estimated /
+  `ProvenanceBadge.vue`, built to `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §49, renders **Confirmed / Calculated / Estimated /
   Unknown** instead, and the same reference target elsewhere proposes Observed / Calculated / Predicted /
   RNG. Per `AGENTS.md` §2 the code wins and the written rule is stale, but the ADR is the higher layer, so
   this record names the disagreement rather than picking a set. What is settled across all three is the
@@ -267,11 +267,11 @@ screen). Subject to that document's own staleness flags; re-verify dated claims 
 - `SCREEN_SPEC.md`: the authoritative screen record of what exists, `SCR-CAR-001` to `024`,
   `SCR-VET-001` to `004`, `SCR-SYS-001` to `010`, with §7 as the gap and conflict register and §8 as the
   authority table.
-- `docs/proposals/design-2.0.md` and `docs/proposals/screen-spec-2.0.md`: the 2.0 design target,
+- `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` and `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md`: the 2.0 design target,
   **reference only, not authorization**, each carrying a governance banner over the sections that name
   deferred or banned computation. Their 2026-10-05 "product direction corrections" sections are the same
   instrument's notes, not accepted decisions.
-- `docs/proposals/frontend-development-plan.md`: the Phase A to E build plan and its per-slice close-outs;
+- `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md`: the Phase A to E build plan and its per-slice close-outs;
   a plan, so it cannot override a gate or an ADR (`AGENTS.md` §2).
 - `docs/research-scratch/PROCESS-PLANS.md`, section `## trainer-advisor.md`: the subsystem 1 spec the
   shipped advisor is built to, including its out-of-scope list.
@@ -335,7 +335,7 @@ screen). Subject to that document's own staleness flags; re-verify dated claims 
 The design system sets **WCAG 2.2 level AA on every shipped screen** as its conformance target
 (`DESIGN.md` §12), verified by an axe pass plus a keyboard-only pass, 200% zoom, 320px reflow and a
 reduced-motion check; the criterion-by-criterion disposition lives in
-`docs/proposals/frontend-development-plan.md` §12. `@axe-core/playwright` is installed and
+`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §12. `@axe-core/playwright` is installed and
 `tests/browser/accessibility.spec.ts` scans pages against `wcag2a`, `wcag2aa` and `wcag21aa`, so the
 method exists and runs. Each screen's pass claim is that slice's own record: this file does not re-run
 the browser suite and does not certify conformance. The rewrite carries the accessibility behavior that was

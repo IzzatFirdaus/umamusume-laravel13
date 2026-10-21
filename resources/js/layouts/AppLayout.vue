@@ -112,7 +112,7 @@ function isCurrent(to: string): boolean {
 }
 
 // The 2.0 navigation. The desktop sidebar has no numbered section of its own in
-// `docs/proposals/design-2.0.md`: §41 is the only Navigation section the brief holds, and it owns the
+// `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md`: §41 is the only Navigation section the brief holds, and it owns the
 // mobile bar below, so the sidebar's destinations are the shipped list rather than a cited one. An
 // earlier comment here cited §28, which is Trackblazer Visual Language.
 //
@@ -156,7 +156,7 @@ interface NavItem {
     prefetches: boolean;
     /**
      * The key into `NavGlyph`'s mark list, for the collapsed rail. Conceptual mapping from
-     * `design-2.0` §44, filtered through the `DESIGN.md` §6 motif gate; `list` (Careers) and `spark`
+     * `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §44, filtered through the `DESIGN.md` §6 motif gate; `list` (Careers) and `spark`
      * (Skills) are the two §44 does not name a destination for, so they take its `Play / Flag` sibling
      * and its `Skill Points` mark. Never the whole name of a destination: the word stays in the DOM.
      */
@@ -175,7 +175,7 @@ const items: NavItem[] = [
     // /database, not /umamusume: the Database hub (SCREEN-023, plan §8 D17) is the label's
     // destination, and /umamusume is one of its five areas. Repointed rather than added, so this slice
     // contributes no destination. The count is ten live items with zero named absences, which is above
-    // `frontend-development-plan.md` §13's "at or under eight"; the breach predates D17 and its repair is
+    // `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §13's "at or under eight"; the breach predates D17 and its repair is
     // the owner's ruling, not a quiet merge of two entries.
     { label: 'Database', mobileLabel: null, to: '/database', spa: true, inBar: false, prefetches: true, icon: 'book' },
     { label: 'Settings', mobileLabel: null, to: '/preferences', spa: true, inBar: false, prefetches: true, icon: 'gear' },

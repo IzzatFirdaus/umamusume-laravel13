@@ -45,7 +45,7 @@ not extracted.
 cases, source citations and route URLs were **not swept**. Those need either `php artisan route:list`,
 `migrate:status`, or a test run — all barred by the constraints (no build, no browser suite, no gate runs) — or
 human reading per file, which at 129 files including a 535 KB `SCREEN_SPEC.md` and a 410 KB
-`frontend-development-plan.md` is a multi-pass job. They are named in §9.
+`frontend-development-plan.md` is a multi-pass job. They are named in §9. <!-- census: quoted-original -->
 
 **Two instrument bugs found and fixed mid-pass, and both changed the numbers:**
 

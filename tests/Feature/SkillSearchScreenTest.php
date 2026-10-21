@@ -14,7 +14,7 @@ use Inertia\Testing\AssertableInertia as Assert;
  *
  * Ported to Inertia + Vue (ADR-0020 §1): behavior is asserted on the page props here, and the
  * rendered copy and the accessibility path move to `tests/browser/skills.spec.ts` (the port recipe
- * in `docs/proposals/frontend-development-plan.md` §5.1).
+ * in `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §5.1).
  *
  * Rows arrive through the same producer path the import uses: `PipelineRunner` → `GametoraSkillsParser`
  * → `StoreSkills`. Nothing here hand-writes a `skills` row, because a test that builds the array a
@@ -384,7 +384,7 @@ it('is reachable from the shell nav rather than a run-screen door', function ():
     skillScreenImport();
 
     // G-SK-13: Screen D exists to relieve the catalogue the 2.0.0 run record listed in one select.
-    // Owner ruling R-2 (`docs/proposals/frontend-development-plan.md` §9.6 close-out, 2026-10-09)
+    // Owner ruling R-2 (`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §9.6 close-out, 2026-10-09)
     // retired that page with `Runs/Show.vue`, and the Cockpit holds no `/skills` door of its own, so
     // the run-scoped half of this assertion is gone. What remains is the shell's own nav item - the one
     // door every screen carries - read from the layout that renders it (the page is client-rendered,

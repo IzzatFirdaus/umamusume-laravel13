@@ -16,7 +16,7 @@ use Inertia\Response;
 
 /**
  * The Veteran library: the Trainer's own filed careers, browsed and opened (`SCREEN-021`, PRD FR-G-2,
- * `frontend-development-plan.md` §8's D16).
+ * `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §8's D16).
  *
  * **The read half of D16, with its write half beside it.** Save Veteran (`SCREEN-020`) is
  * `Career\SaveVeteranController`, and it is the first caller of `RecordVeteran`, so a library that looks
@@ -137,7 +137,7 @@ final class VeteranController extends Controller
 
     /**
      * `GET /veterans/compare` — up to four filed careers, one property per row (`SCREEN-022`,
-     * `design-2.0` §46).
+     * `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §46).
      *
      * **Why this exists beside the Legacy Lab's compare.** That surface refuses a run with no Legacy
      * read-back, on the reasoning that a column of absences looks compared and is not. The comparison the
@@ -148,7 +148,7 @@ final class VeteranController extends Controller
      * picker cannot print four different Veterans.
      *
      * **Every cell is a stored column, and the three rows the brief asks for that are not stored are named,
-     * not scored.** `design-2.0` §46 and `SCREEN-022`'s correction row want inheritance usefulness, a
+     * not scored.** `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §46 and `SCREEN-022`'s correction row want inheritance usefulness, a
      * compatibility calculation and a factor comparison. `ADR-0020` §3 keeps those out of the record screens
      * and no table prices them, so they arrive in `absences` with their reason. `FR-G-4` is why nothing here
      * orders the columns by anything it derived.

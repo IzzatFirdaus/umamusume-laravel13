@@ -37,7 +37,7 @@ use Inertia\Response;
  *   silent corpus is "renders absence, never a number" (§3), so a Spark's chance is `N/A` with the
  *   reason in its `title`. This is the one place the slice's acceptance could have been read as
  *   "show Estimated" and the repository overrode it: there is nothing here to label.
- * - **No optimization.** `screen-spec-2.0.md`'s own governance note on SCREEN-006 holds the
+ * - **No optimization.** `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md`'s own governance note on SCREEN-006 holds the
  *   "up to three recommended combinations" and "expected inheritance" clauses, and `ADR-0020` §3
  *   repeats that "Optimize Parents" and any auto-proposed combination are computation. The Compare
  *   screen aligns rows; it never ranks them and never proposes.
@@ -182,7 +182,7 @@ class LegacyController extends Controller
     /**
      * `GET /legacy/compare` — up to four recorded configurations side by side.
      *
-     * Rows are properties, columns are runs, and both are stored. The alignment is `design-2.0` §46's
+     * Rows are properties, columns are runs, and both are stored. The alignment is `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §46's
      * whole ask: "never force the user to compare two separate cards mentally". There is no total
      * row, no "best" marker and no ordering, because each of those would rank configurations on a
      * value the tool does not hold (`ADR-0020` §3).

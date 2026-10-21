@@ -22,7 +22,7 @@ use Inertia\Response;
  * Trainee Profile, `SCREEN-004` (PRD FR-A-1, FR-A-4, `ADR-0020` §1). The read screen behind SCR-CAR-003's
  * "View Profile" action, and the wizard's second step rather than a third copy of the catalog.
  *
- * **What this screen is for.** SCREEN-004's purpose in `docs/proposals/screen-spec-2.0.md` §7 is to give
+ * **What this screen is for.** SCREEN-004's purpose in `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` §7 is to give
  * the Trainer build-relevant information *before* committing to a trainee, so it prints what the catalog
  * actually holds about her, states the wizard's stored choice, and offers the same `Select` action as the
  * roster. It is not a duplicate of `Catalog/Show`: that page owns aliases, run history and provenance, and
