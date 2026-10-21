@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Careers · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item active" href="runs-index.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">My data · <b>Careers</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">1 active</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Careers</div>
+      <div class="hrow">
+        <div>
+          <h1>Training runs</h1>
+          <p class="lede">Every career you have started, played or imported. One is still in progress.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn btn-primary" href="career-scenario.html">New career</a>
+          <a class="btn" href="import.html">Import a run</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="filters" style="margin-bottom:14px">
+        <label class="field" style="flex:1 1 260px">
+          <span class="k">Search trainee</span>
+          <span class="in"><input placeholder="Rice Shower, Maruzensky…"></span>
+        </label>
+        <label class="field" style="flex:0 1 190px">
+          <span class="k">Scenario</span>
+          <span class="in"><select>
+            <option>All scenarios</option>
+            <option>URA Finale</option>
+            <option selected>Unity Cup</option>
+            <option>Trackblazer</option>
+            <option>Our Grand Concert</option>
+          </select></span>
+        </label>
+        <label class="field" style="flex:0 1 170px">
+          <span class="k">Status</span>
+          <span class="in"><select>
+            <option>All statuses</option>
+            <option selected>Active</option>
+            <option>Completed</option>
+            <option>Retired</option>
+          </select></span>
+        </label>
+        <a class="btn btn-quiet" href="runs-index.html">Clear</a>
+      </div>
+
+      <div class="card">
+        <table class="t">
+          <thead>
+            <tr>
+              <th>Trainee</th>
+              <th>Scenario</th>
+              <th class="n">Turn</th>
+              <th>Position</th>
+              <th>Status</th>
+              <th class="n">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="is-current">
+              <td><b>Rice Shower</b><br><span style="color:var(--ink-muted)">ライスシャワー · [Rosy Dreams] · ★3</span></td>
+              <td>Unity Cup</td>
+              <td class="n mono">67 <span style="font-size:10.5px;color:var(--ink-muted)">/ 72</span></td>
+              <td>Senior Year · Early October</td>
+              <td><span class="pill pill-positive">Active</span></td>
+              <td class="n"><a class="btn btn-sm" href="cockpit-unity-cup.html">Cockpit</a></td>
+            </tr>
+            <tr>
+              <td><b>Maruzensky</b><br><span style="color:var(--ink-muted)">マルゼンスキー</span></td>
+              <td>URA Finale</td>
+              <td class="n mono">75</td>
+              <td>Finished</td>
+              <td><span class="pill pill-neutral">Completed</span></td>
+              <td class="n"><a class="btn btn-sm" href="result.html">Result</a></td>
+            </tr>
+            <tr>
+              <td><b>Haru Urara</b><br><span style="color:var(--ink-muted)">ハルウララ</span></td>
+              <td>URA Finale</td>
+              <td class="n mono">69</td>
+              <td>Finished</td>
+              <td><span class="pill pill-neutral">Completed</span></td>
+              <td class="n"><a class="btn btn-sm" href="result.html">Result</a></td>
+            </tr>
+            <tr>
+              <td><b>Vodka</b><br><span style="color:var(--ink-muted)">ウオッカ</span></td>
+              <td>URA Finale</td>
+              <td class="n mono">72</td>
+              <td>Finished</td>
+              <td><span class="pill pill-neutral">Completed</span></td>
+              <td class="n"><a class="btn btn-sm" href="result.html">Result</a></td>
+            </tr>
+            <tr>
+              <td><b>Daiwa Scarlet</b><br><span style="color:var(--ink-muted)">ダイワスカーレット</span></td>
+              <td>URA Finale</td>
+              <td class="n mono">72</td>
+              <td>Finished</td>
+              <td><span class="pill pill-neutral">Completed</span></td>
+              <td class="n"><a class="btn btn-sm" href="result.html">Result</a></td>
+            </tr>
+            <tr>
+              <td><b>Special Week</b><br><span style="color:var(--ink-muted)">スペシャルウィーク</span></td>
+              <td>URA Finale</td>
+              <td class="n mono">44</td>
+              <td>Retired at turn 44</td>
+              <td><span class="pill pill-neutral">Retired</span></td>
+              <td class="n"><a class="btn btn-sm" href="result.html">Result</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pager">
+          <span>11 careers · page 1 of 2</span>
+          <button class="btn" disabled>Previous</button>
+          <button class="btn">Next</button>
+        </div>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Careers</h2>
+        <ol>
+          <li><b>Filters are one inline row.</b> DESIGN.md §2.3: filters as a single inline form row, pagination under the table. Both are honoured here.</li>
+          <li><b>The active run is the only row with a fill.</b> <code>tr.is-current</code> uses the green tint plus the status pill, so the state is carried by a word and a row position, not by colour alone (WCAG 1.4.1, DESIGN.md D-12).</li>
+          <li><b>Turn is shown against the career length.</b> "67 / 72" gives the denominator the Dashboard lacked. The running app's list has no turn-rail denominator on this table.</li>
+          <li><b>Retired is not the same as Completed.</b> The position column says "Retired at turn 44" rather than "Finished", which is the distinction <code>Cockpit.vue:973</code> already draws in its closed-state sentence.</li>
+          <li><b>No destructive action in the row.</b> Deleting a career stays on the cockpit behind its own disclosure. A list is not the place to arm a delete (Cognitive Load; the same rule the cockpit's danger zone follows).</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          Wireframe only. Run 25's row is real; the ten URA Finale rows are the dev database's real trainees,
+          with turns and statuses abbreviated to what the list screen shows.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html" class="active"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

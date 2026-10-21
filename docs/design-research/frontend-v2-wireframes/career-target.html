@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build target · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item active" href="career-scenario.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">New career · Step 3 of 6 · <b>Build target</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">URA Finale</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">New career</div>
+      <div class="hrow">
+        <div>
+          <h1>What are you building toward?</h1>
+          <p class="lede">Five stat targets and the distance you are building for. These are your own goals, not a game rule, and the cockpit's bars are drawn against them.</p>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="stepper" role="list" aria-label="Setup steps">
+        <span class="step is-done"><span class="n">1</span>Scenario</span>
+        <span class="step is-done"><span class="n">2</span>Trainee</span>
+        <span class="step" aria-current="step"><span class="n">3</span>Build target</span>
+        <span class="step"><span class="n">4</span>Legacy</span>
+        <span class="step"><span class="n">5</span>Deck</span>
+        <span class="step"><span class="n">6</span>Preflight</span>
+      </div>
+
+      <div class="warn" style="margin-bottom:14px">
+        <span aria-hidden="true">!</span>
+        <span><b>This is the step the current build skips.</b> Every stat target in the live run is
+        <code>null</code>, so the cockpit prints "No build target was set for this run" and draws no bar.
+        The screen below is what that gap costs, stated as the fix.</span>
+      </div>
+
+      <div class="grid g-side">
+
+        <div class="card" style="margin:0">
+          <h2>Stat targets</h2>
+          <p class="sub">Each target is compared against the run's scenario cap, so a target above the cap is refused at preflight rather than silently clipped.</p>
+
+          <div class="grid g-2">
+            <label class="field">
+              <span class="k">Speed</span>
+              <span class="in"><input value="1100" aria-label="Speed target"><span class="u">/ 1400 cap</span></span>
+              <span class="hint">79% of cap</span>
+            </label>
+            <label class="field">
+              <span class="k">Stamina</span>
+              <span class="in"><input value="900" aria-label="Stamina target"><span class="u">/ 1400 cap</span></span>
+              <span class="hint">64% of cap</span>
+            </label>
+            <label class="field">
+              <span class="k">Power</span>
+              <span class="in"><input value="900" aria-label="Power target"><span class="u">/ 1400 cap</span></span>
+              <span class="hint">64% of cap</span>
+            </label>
+            <label class="field">
+              <span class="k">Guts</span>
+              <span class="in"><input value="600" aria-label="Guts target"><span class="u">/ 1400 cap</span></span>
+              <span class="hint">43% of cap</span>
+            </label>
+            <label class="field">
+              <span class="k">Wit</span>
+              <span class="in"><input value="1100" aria-label="Wit target"><span class="u">/ 1400 cap</span></span>
+              <span class="hint">79% of cap</span>
+            </label>
+          </div>
+
+          <div style="margin-top:14px">
+            <div style="font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px">Total against the published sample</div>
+            <div class="srow"><span class="k">Your total</span><span class="v mono">4,600</span></div>
+            <div class="srow"><span class="k">Published Global sample build <em>Special Week</em></span><span class="v mono">4,800</span></div>
+            <div class="srow"><span class="k">Sum of the five scenario caps</span><span class="v mono">7,000</span></div>
+            <p class="note" style="margin-top:8px"><span class="g">○</span><span>
+              The 4,800 row is one publisher's sample build — Speed 1500+ · Stamina 800 · Power 1000 · Guts 500 · Wit 1000
+              (<code>UMAMUSUME_REFERENCE.md</code> §1.3.7). It is a reference point, not a requirement, and the page says so
+              rather than presenting one guide's spread as the goal.
+            </span></p>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Distance</h2>
+            <p class="sub">Sets the stamina floor the advisor warns about before a race.</p>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <label style="display:flex;gap:9px;align-items:center;font-size:13px">
+                <input type="radio" name="distance"> Sprint <span style="color:var(--ink-muted);font-size:12px">1400 m and under · Speed-first</span>
+              </label>
+              <label style="display:flex;gap:9px;align-items:center;font-size:13px">
+                <input type="radio" name="distance"> Mile <span style="color:var(--ink-muted);font-size:12px">1401–1800 m · Speed-first, stamina as insurance</span>
+              </label>
+              <label style="display:flex;gap:9px;align-items:center;font-size:13px">
+                <input type="radio" name="distance" checked> Medium <span style="color:var(--ink-muted);font-size:12px">1801–2400 m · Speed plus the stamina to finish</span>
+              </label>
+              <label style="display:flex;gap:9px;align-items:center;font-size:13px">
+                <input type="radio" name="distance"> Long <span style="color:var(--ink-muted);font-size:12px">2401 m and up · all five stats high</span>
+              </label>
+            </div>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              Band edges are Game8's. <b>1400 m is an open conflict:</b> Game8 places it in Sprint, the data export files every
+              1400 m course under <code>distance</code> code 2, which reads as Mile, and the client's own "(Mile)"-tagged skills
+              gate on <code>distance_type==2</code> (<code>UMAMUSUME_REFERENCE.md</code> §1.3.3, conflict row 7). The page states the
+              edges and does not resolve them.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Stamina floor</h2>
+            <p class="sub">What the advisor checks before recommending a Medium or Long race.</p>
+            <table class="t">
+              <tbody>
+                <tr><td>Sprint</td><td class="n mono">400</td></tr>
+                <tr class="is-current"><td><b>Medium</b> (selected)</td><td class="n mono"><b>600</b></td></tr>
+                <tr><td>Long</td><td class="n mono">700</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">
+              These are URA Finale's published finale targets by distance (<code>config/scenarios.php</code>
+              <code>finale_targets.stamina_by_distance</code>), so the floor and the finale ask for the same number.
+            </p>
+          </div>
+
+          <div class="card">
+            <h2>Target from a saved default</h2>
+            <p class="sub">Settings can hold a default spread so a new run does not start blank.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-sm">Medium front-runner</button>
+              <button class="btn btn-sm">Long stayer</button>
+              <button class="btn btn-sm">Mile sprinter</button>
+            </div>
+            <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">No default is set. <a href="preferences.html" style="text-decoration:underline">Set one in Settings</a>.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="savebar">
+        <span class="dirty">3 of 6 · targets entered</span>
+        <a class="btn" href="career-profile.html">Back</a>
+        <a class="btn btn-primary" href="career-legacy.html">Continue to legacy</a>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Build target</h2>
+        <ol>
+          <li><b>This step closes the cockpit's largest Goal-Gradient failure at its source.</b> The audit found every <code>state.stats[].target</code> null, so five rows drew no bar. A target is only collectable if the wizard asks for it, which is why the screen exists rather than the cockpit gaining an ad-hoc editor.</li>
+          <li><b>Every field carries its own denominator.</b> "1100 / 1400 cap" puts the scenario ceiling in the field instead of a separate table, which is the external review's "units belong inside the field" point applied to a cap.</li>
+          <li><b>One reference row, labelled as one guide's opinion.</b> The 4,800 sample is printed as a comparison and named as a published sample build, not as the target. Presenting one guide's spread as a requirement is the kind of fabricated rule the lore and provenance gates exist to stop.</li>
+          <li><b>The 1400 m conflict is stated, not resolved.</b> Two authorities disagree and a third, the client, sides with the export. Printing one answer would hide a live conflict from the person best placed to notice when it bites.</li>
+          <li><b>Stamina floor comes from the scenario, not from a second table.</b> The values are URA Finale's own <code>finale_targets</code>, so the wizard and the finale cannot disagree.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

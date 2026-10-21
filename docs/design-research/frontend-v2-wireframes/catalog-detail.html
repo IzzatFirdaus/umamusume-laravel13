@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admire Vega · catalog detail · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item active" href="database.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><a href="database.html">Database</a> · <a href="catalog.html">Trainees</a> · <b>Admire Vega</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">Released (Global)</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Trainee</div>
+      <div class="hrow">
+        <div>
+          <h1>Admire Vega <span style="font-size:16px;font-weight:600;color:var(--ink-muted)">アドマイヤベガ</span></h1>
+          <p class="lede">One costume: [Starry Nocturne], ★★★ SSR. Aptitudes, growth row and unique skill below.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="catalog.html">Back to catalog</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="grid g-side">
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Base stats and growth</h2>
+            <p class="sub">Base values are what the card starts with. A three-star card's five base values always sum to 450 in the export.</p>
+            <table class="t">
+              <thead><tr><th>Stat</th><th class="n">Base</th><th class="n">Growth</th></tr></thead>
+              <tbody>
+                <tr><td>Speed</td><td class="n mono">—</td><td class="n mono">+0%</td></tr>
+                <tr><td>Stamina</td><td class="n mono">—</td><td class="n mono">+0%</td></tr>
+                <tr><td>Power</td><td class="n mono">—</td><td class="n mono">+0%</td></tr>
+                <tr><td>Guts</td><td class="n mono">—</td><td class="n mono">+0%</td></tr>
+                <tr><td>Wit</td><td class="n mono">—</td><td class="n mono">+0%</td></tr>
+                <tr class="is-current"><td><b>Total</b></td><td class="n mono"><b>450</b></td><td class="n mono">30</td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              The total row is the one number the catalog guarantees: 450 for a three-star, 425 for two-star, 400 for one-star.
+              Per-stat base values are not on this payload, so each cell states an absence rather than a guess.
+              Growth totals 30 points across one to three stats in five-point steps.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Aptitudes, full set</h2>
+            <table class="t">
+              <thead><tr><th>Surface</th><th class="n">Grade</th><th>Distance</th><th class="n">Grade</th><th>Style</th><th class="n">Grade</th></tr></thead>
+              <tbody>
+                <tr><td>Turf</td><td class="n"><span class="pill pill-positive">A</span></td><td>Medium</td><td class="n"><span class="pill pill-positive">A</span></td><td>End closer</td><td class="n"><span class="pill pill-positive">A</span></td></tr>
+                <tr><td>Dirt</td><td class="n"><span class="pill pill-neutral">G</span></td><td>Mile</td><td class="n"><span class="pill pill-neutral">C</span></td><td>Late surger</td><td class="n"><span class="pill pill-neutral">B</span></td></tr>
+                <tr><td></td><td></td><td>Sprint</td><td class="n"><span class="pill pill-neutral">F</span></td><td>Pace chaser</td><td class="n"><span class="pill pill-neutral">G</span></td></tr>
+                <tr><td></td><td></td><td>Long</td><td class="n"><span class="pill pill-neutral">C</span></td><td>Front runner</td><td class="n"><span class="pill pill-neutral">G</span></td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+              The letter is the fact; the pill's tint only groups strong from weak. A colour-blind Trainer reads the same
+              table, which is the rule the per-stat whisper tints already follow in <code>DESIGN.md</code> §2.1.
+            </span></p>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Costumes</h2>
+            <table class="t">
+              <thead><tr><th>Title</th><th>Rarity</th><th>Growth</th></tr></thead>
+              <tbody>
+                <tr class="is-current"><td><b>[Starry Nocturne]</b><br><span style="color:var(--ink-muted)">Debut form</span></td><td>★★★</td><td class="mono">—</td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+              The growth row <b>varies by costume</b>, so a character-wide value cannot exist. This trainee has one form;
+              a trainee with three shows three different rows.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Star breakthrough</h2>
+            <table class="t">
+              <thead><tr><th>Rank</th><th class="n">Total</th></tr></thead>
+              <tbody>
+                <tr class="is-current"><td><b>★3</b> (native)</td><td class="n mono"><b>450</b></td></tr>
+                <tr><td>★4</td><td class="n mono">500</td></tr>
+                <tr><td>★5</td><td class="n mono">550</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">
+              Every rank past native adds exactly 50 points, redistributed by profile. This is the biggest single
+              structural fact in the export: it holds for all 268 cards.
+            </p>
+          </div>
+
+          <div class="card">
+            <h2>Unique skill</h2>
+            <p style="font-size:12.5px;color:var(--ink-muted);margin:0 0 9px">
+              A trainee-specific skill, independent of the support deck. Its name and effect come from the skill
+              catalogue, and the detail screen owns them.
+            </p>
+            <a class="btn btn-sm" href="skill-detail.html">Open in the skill library</a>
+          </div>
+
+          <div class="card">
+            <h2>Provenance</h2>
+            <table class="t">
+              <tbody>
+                <tr><td>Data</td><td>GameTora character cards</td></tr>
+                <tr><td>Last read</td><td class="mono">2026-09-27</td></tr>
+                <tr><td>Breakthrough totals</td><td>Export-confirmed</td></tr>
+              </tbody>
+            </table>
+            <a class="btn btn-sm" href="database-sources.html" style="margin-top:10px">Source ledger</a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Trainee detail</h2>
+        <ol>
+          <li><b>The total is guaranteed where the parts are not.</b> 450 / 425 / 400 is a hard invariant in the export, so the screen can print it while leaving per-stat cells blank. That is the difference between an absence and an unknown total.</li>
+          <li><b>Growth is per costume, and the page says why.</b> A character-wide growth value cannot exist; stating that prevents a Trainer from hunting for one.</li>
+          <li><b>Aptitudes are one row per axis, not one letter per cell.</b> Six strong letters and three weak ones fit in three lines; a nine-cell grid would be the same data at twice the height.</li>
+          <li><b>Breakthrough is a three-row table.</b> The +50 per rank rule is the most useful catalogue fact for a Trainer building a factor, and it costs three rows.</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          Wireframe only. Admire Vega's identity and full aptitude set are live props; the 450 / 500 / 550 totals and
+          the growth-by-costume rule are sourced (<code>UMAMUSUME_REFERENCE.md</code> §1.3.5).
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html" class="active"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

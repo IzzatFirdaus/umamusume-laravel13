@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Training decision · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item active" href="runs-index.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">Rice Shower · Unity Cup · <b>Training</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">Turn 67</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Training decision</div>
+      <div class="hrow">
+        <div>
+          <h1>Pick this turn's action</h1>
+          <p class="lede">Five disciplines, rest, recreation and an optional race. The advisor's recommendation is marked; nothing is committed until you record the turn.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="cockpit-unity-cup.html">Back to cockpit</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <nav aria-label="Career" class="stepper" style="margin-bottom:14px">
+        <a class="step" href="cockpit-unity-cup.html">Cockpit</a>
+        <span class="step" aria-current="step">Training</span>
+        <a class="step" href="race-decision.html">Races</a>
+        <a class="step" href="skills-planner.html">Skills</a>
+        <a class="step" href="event-decision.html">Events</a>
+        <a class="step" href="inheritance.html">Inheritance</a>
+        <a class="step" href="run-deck.html">Deck</a>
+        <a class="step" href="timeline.html">Timeline</a>
+        <a class="step" href="result.html">Result</a>
+      </nav>
+
+      <div class="grid g-side">
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Disciplines</h2>
+            <p class="sub">Energy 58 · Mood GREAT (+20% training yield) · Wit costs no Energy.</p>
+
+            <div style="display:flex;flex-direction:column;gap:9px">
+
+              <div style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:13px;align-items:center;flex-wrap:wrap">
+                <input type="radio" name="pick" aria-label="Speed training" style="width:16px;height:16px">
+                <div style="flex:1 1 190px;min-width:0">
+                  <div style="font-weight:800;color:var(--ink-strong)">Speed</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Power · Lv 3 · 3% failure</div>
+                </div>
+                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--ink-strong)">
+                  +12 Speed<br><span style="color:var(--ink-muted);font-weight:600">+5 Power · +2 SP</span>
+                </div>
+                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--down);font-weight:800">−23 Energy</div>
+              </div>
+
+              <div style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:13px;align-items:center;flex-wrap:wrap">
+                <input type="radio" name="pick" aria-label="Stamina training" style="width:16px;height:16px">
+                <div style="flex:1 1 190px;min-width:0">
+                  <div style="font-weight:800;color:var(--ink-strong)">Stamina</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Guts · Lv 2 · 1% failure</div>
+                </div>
+                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--ink-strong)">
+                  +11 Stamina<br><span style="color:var(--ink-muted);font-weight:600">+4 Guts · +2 SP</span>
+                </div>
+                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--down);font-weight:800">−21 Energy</div>
+              </div>
+
+              <div style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:13px;align-items:center;flex-wrap:wrap">
+                <input type="radio" name="pick" aria-label="Power training" style="width:16px;height:16px">
+                <div style="flex:1 1 190px;min-width:0">
+                  <div style="font-weight:800;color:var(--ink-strong)">Power</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Stamina · Lv 3 · 2% failure</div>
+                </div>
+                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--ink-strong)">
+                  +10 Power<br><span style="color:var(--ink-muted);font-weight:600">+5 Stamina · +2 SP</span>
+                </div>
+                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--down);font-weight:800">−22 Energy</div>
+              </div>
+
+              <div style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:13px;align-items:center;flex-wrap:wrap">
+                <input type="radio" name="pick" aria-label="Guts training" style="width:16px;height:16px">
+                <div style="flex:1 1 190px;min-width:0">
+                  <div style="font-weight:800;color:var(--ink-strong)">Guts</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Speed and Power · Lv 2 · 5% failure</div>
+                </div>
+                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--ink-strong)">
+                  +10 Guts<br><span style="color:var(--ink-muted);font-weight:600">+4 Speed · +4 Power · +2 SP</span>
+                </div>
+                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--down);font-weight:800">−24 Energy</div>
+              </div>
+
+              <div style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:13px;align-items:center;flex-wrap:wrap">
+                <input type="radio" name="pick" aria-label="Wit training" style="width:16px;height:16px">
+                <div style="flex:1 1 190px;min-width:0">
+                  <div style="font-weight:800;color:var(--ink-strong)">Wit <span class="tag auto">no Energy</span></div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Speed · Lv 3 · no failure figure printed</div>
+                </div>
+                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--ink-strong)">
+                  +11 Wit<br><span style="color:var(--ink-muted);font-weight:600">+2 Speed · +4 SP</span>
+                </div>
+                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--up);font-weight:800">+5 Energy</div>
+              </div>
+
+            </div>
+
+            <p class="note" style="margin-top:11px"><span class="g">○</span><span>
+              <b>Gains shown are the session's before multipliers</b> and they are illustrative here. The client prints a
+              static failure percentage per tile; Guts read highest at 5% and Stamina lowest at 1% on the one turn
+              captured, and the Wit tile printed none — a blank, not a zero
+              (<code>UMAMUSUME_REFERENCE.md</code> §1.1.5).
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Other actions</h2>
+            <div class="grid g-3" style="gap:9px">
+              <label style="border:1px solid var(--pick-line);border-width:2px;background:var(--green-tint);border-radius:var(--r-md);padding:10px 12px;display:flex;gap:9px;align-items:center;cursor:pointer">
+                <input type="radio" name="pick" checked aria-label="Rest">
+                <div>
+                  <div style="font-weight:800;color:var(--ink-strong)">Rest <span class="pill pill-positive" style="vertical-align:2px">Recommended</span></div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">+30 Energy · free turn</div>
+                </div>
+              </label>
+              <label style="border:1px solid var(--rule-soft);border-radius:var(--r-md);padding:10px 12px;display:flex;gap:9px;align-items:center;cursor:pointer">
+                <input type="radio" name="pick" aria-label="Recreation">
+                <div>
+                  <div style="font-weight:800;color:var(--ink-strong)">Recreation</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">Raises mood one tier</div>
+                </div>
+              </label>
+              <label style="border:1px solid var(--rule-soft);border-radius:var(--r-md);padding:10px 12px;display:flex;gap:9px;align-items:center;cursor:pointer">
+                <input type="radio" name="pick" aria-label="Enter a race">
+                <div>
+                  <div style="font-weight:800;color:var(--ink-strong)">Race</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">Optional race · see the race desk</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Why Rest</h2>
+            <ul style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.6">
+              <li>Energy is recorded as a <b>low band</b>, below the 50 advisory line. <span class="tag">confirmed</span></li>
+              <li>Rest recovers <b>+30</b> on a normal result, +50 modal, +70 on a big success. <span class="tag">confirmed</span></li>
+              <li>Unity Cup is <b>5 turns away</b>. <span class="tag auto">calculated</span></li>
+              <li>This rest uses <b>1 of the 5 remaining turns</b>. <span class="tag auto">calculated</span></li>
+            </ul>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              Below 50 Energy the failure curve changes character rather than degrading linearly, which is why the
+              line sits where it does (<code>UMAMUSUME_REFERENCE.md</code> §1.1.5).
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Recorded outcome</h2>
+            <p class="sub">Written only after the turn is committed.</p>
+            <div class="grid g-2" style="gap:9px">
+              <label class="field"><span class="k">Energy after</span><span class="in"><input placeholder="—"></span></label>
+              <label class="field"><span class="k">Mood after</span><span class="in"><select><option>Unchanged</option><option>GREAT</option><option>GOOD</option><option>NORMAL</option><option>BAD</option><option>AWFUL</option></select></span></label>
+              <label class="field"><span class="k">Fans</span><span class="in"><input placeholder="—"></span></label>
+              <label class="field"><span class="k">Skill points</span><span class="in"><input placeholder="173"></span></label>
+            </div>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              These fields exist because the client shows them, not because the tool computes them. An empty field
+              records "not read off the screen", which is different from a zero.
+            </span></p>
+          </div>
+
+          <div class="savebar" style="margin-top:0">
+            <span class="dirty">Rest selected</span>
+            <button class="btn">Discard</button>
+            <button class="btn btn-primary">Record turn 67</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Training decision</h2>
+        <ol>
+          <li><b>Five disciplines, one row each, gains right-aligned in monospace.</b> Comparable numbers in a column is Fitts and Miller working together: the eye compares five gain figures in one vertical scan instead of five paragraphs.</li>
+          <li><b>Energy is signed and coloured, and the sign carries the meaning.</b> "−23 Energy" is a loss (blue, per DESIGN.md: down is blue, never red); "+5 Energy" on Wit is a gain (orange). The word and the sign inform; colour reinforces.</li>
+          <li><b>Wit is marked "no Energy" with a tag, not just a plus sign.</b> It is the one discipline that refunds, and the plan makes it the low-risk filler when resting is not wanted.</li>
+          <li><b>The recommendation is chosen by default but not hidden.</b> Rest is preselected and marked, yet the five disciplines stay fully selectable: the advisor advises, it does not act (design-2.0 §2, player agency).</li>
+          <li><b>The outcome fields are separate from the choice.</b> Choosing a discipline and recording what the client showed are two facts; merging them would invite the tool to invent a reading.</li>
+          <li><b>The career nav is greyed to a stepper, not repeated as a second tab bar.</b> Cockpit already owns the top-level nav; inside a run, moving between decision screens is a step, not a destination change.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html" class="active"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

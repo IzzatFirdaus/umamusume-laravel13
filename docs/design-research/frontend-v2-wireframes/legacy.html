@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Legacy Lab · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item active" href="legacy.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">My data · <b>Legacy Lab</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">7 veterans</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Legacy Lab</div>
+      <div class="hrow">
+        <div>
+          <h1>Build and compare inheritance pairs</h1>
+          <p class="lede">A legacy is two parents and the sparks they pass on. Compare candidate pairs before committing one to a run.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn btn-primary" href="legacy-compare.html">Compare two pairs</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="grid g-side">
+
+        <div class="card" style="margin:0">
+          <h2>Saved legacies</h2>
+          <p class="sub">A saved pair is reusable across runs. Its value is the sparks the two parents carry together.</p>
+          <table class="t">
+            <thead><tr><th>Legacy</th><th>Parent A</th><th>Parent B</th><th class="n">Blue sparks</th><th class="n"></th></tr></thead>
+            <tbody>
+              <tr class="is-current">
+                <td><b>Vodka × Daiwa Scarlet</b></td>
+                <td>Vodka ★★★</td>
+                <td>Daiwa Scarlet ★★★</td>
+                <td class="n mono">2 × ★3</td>
+                <td class="n"><a class="btn btn-sm" href="legacy-builder.html">Open</a></td>
+              </tr>
+              <tr>
+                <td><b>Maruzensky × Haru Urara</b></td>
+                <td>Maruzensky</td>
+                <td>Haru Urara</td>
+                <td class="n mono">1 × ★2</td>
+                <td class="n"><a class="btn btn-sm" href="legacy-builder.html">Open</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>What a legacy is worth</h2>
+            <table class="t">
+              <tbody>
+                <tr><td>Blue spark, ★3</td><td class="n mono">+16 cap</td></tr>
+                <tr><td>Blue spark, ★2</td><td class="n mono">+8 cap</td></tr>
+                <tr><td>Blue spark, ★1</td><td class="n mono">+5 cap</td></tr>
+                <tr><td>Pink spark range</td><td class="n mono">+5 / +12 / +21</td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+              Blue sparks raise a stat's cap by +16 per ★3 basic-ability factor, applied at run start and at the
+              Classic and Senior inheritance moments. Pink sparks shift an aptitude grade by the stated range.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Parents available</h2>
+            <p style="font-size:12.5px;color:var(--ink-muted);margin:0 0 9px">
+              Seven veterans can be used as parents. A veteran cannot be its own parent, and the two slots cannot
+              hold the same record.
+            </p>
+            <a class="btn btn-sm" href="veterans.html">Open the veteran library</a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Legacy Lab</h2>
+        <ol>
+          <li><b>Saved legacies, not saved single parents.</b> The unit that matters is the pair, because the two sparks combine. Storing pairs is the structure the inheritance rule implies.</li>
+          <li><b>The value table is three rows.</b> Blue spark grades and the pink range are the whole economy of a legacy, and a Trainer comparing pairs decides on them.</li>
+          <li><b>Compare is the filled action.</b> Building a legacy is exploration; comparing two is the decision. The primary button sits on the decision.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html" class="active"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

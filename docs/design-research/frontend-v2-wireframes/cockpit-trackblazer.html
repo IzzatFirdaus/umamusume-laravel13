@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cockpit · Trackblazer · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="mockbar">MOCK DATA · no Trackblazer run exists in this database. Layout and scenario settings are real; the trainee figures are illustrative.</div>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item active" href="runs-index.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">Example Trainee · <b>Trackblazer</b> · Cockpit</span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">Turn 60 · Active</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Cockpit</div>
+      <div class="hrow">
+        <div>
+          <h1>Example Trainee</h1>
+          <p class="lede">Senior Year · Early September · Turn 60. Grade Points 212, coins 145, Energy 72, Mood GREAT.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="runs-index.html">All careers</a>
+          <a class="btn btn-primary" href="race-decision.html">Race a G1</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="info" style="margin-bottom:14px">
+        <span aria-hidden="true">i</span>
+        <span>The full Trackblazer treatment, including the Race Fatigue table, shop constraints and the two-currency warning,
+        is <code>cockpit-wireframes-2026-10-21/03-trackblazer.html</code>. This is the same scenario at shell density.</span>
+      </div>
+
+      <div class="grid g-side">
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Grade Point runway</h2>
+            <p class="sub">The one dated checkpoint this scenario has. Surplus Points do not carry over.</p>
+            <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+              <span class="mono" style="font-size:26px;font-weight:800;color:var(--ink-strong)">212</span>
+              <span class="mono" style="font-size:14px;color:var(--ink-muted)">/ 300</span>
+              <span class="pill pill-caution" style="margin-left:auto">88 short</span>
+            </div>
+            <div class="track" style="margin-top:8px;height:8px"><i style="width:71%;background:var(--green-deep)"></i></div>
+            <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">22 turns to the End of Senior Year checkpoint.</p>
+
+            <h3 style="margin-top:14px">Checkpoints</h3>
+            <table class="t">
+              <thead><tr><th>Checkpoint</th><th class="n">Target</th><th class="n">Standing</th></tr></thead>
+              <tbody>
+                <tr><td>Debut race</td><td class="n">—</td><td class="n">met</td></tr>
+                <tr><td>End of Junior Year</td><td class="n mono">60</td><td class="n mono">60</td></tr>
+                <tr><td>End of Classic Year</td><td class="n mono">300</td><td class="n mono">300</td></tr>
+                <tr class="is-current"><td><b>End of Senior Year</b></td><td class="n mono"><b>300</b></td><td class="n mono"><b>212</b></td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+              Standard track shown. A dirt-leaning trainee reads <b>30 / 200 / 300</b> and a narrow-turf trainee <b>60 / 200 / 300</b>,
+              so the table must follow the trainee's aptitude.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Economy</h2>
+            <div class="grid g-3" style="gap:9px">
+              <div class="tile"><div class="k">Coins</div><div class="v mono" style="font-size:14px">145</div></div>
+              <div class="tile"><div class="k">Shop reset</div><div class="v" style="font-size:13px">3 turns</div></div>
+              <div class="tile"><div class="k">Summer reserve</div><div class="v" style="font-size:13px">keep 100</div></div>
+            </div>
+            <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+              <b>Grade Points and Shop Coins are independent.</b> Points scale with race grade; coins scale with placement only,
+              so a Pre-OP win pays the same 100 coins as a G1 win but a fifth of the points. <a href="database-shop-items.html" style="text-decoration:underline">Shop catalogue</a>
+            </span></p>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Advisor</h2>
+            <div style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted)">Priority</div>
+            <p style="margin:4px 0 11px;font-weight:800;color:var(--ink-strong)">End of Senior Year checkpoint: 88 points short.</p>
+            <div style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted)">Recommended</div>
+            <div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-top:5px">
+              <a class="btn btn-primary" href="race-decision.html">Race a G1</a>
+              <span style="font-size:12px;color:var(--ink-muted)">A G1 win pays 100 Grade Points</span>
+            </div>
+            <ul style="margin:11px 0 0;padding-left:18px;font-size:12.5px;line-height:1.6">
+              <li>Two G1 wins close the 88-point gap with margin. <span class="tag auto">calculated</span></li>
+              <li>This is the scenario's one dated obligation, so it outranks the shop. <span class="tag auto">calculated</span></li>
+              <li>Once the checkpoint is met, a race pays coins, stats and epithet progress only. <span class="tag">rule</span></li>
+            </ul>
+
+            <h3 style="margin-top:14px">Race fatigue</h3>
+            <table class="t">
+              <thead><tr><th>Event</th><th class="n">1</th><th class="n">2</th><th class="n">3</th><th class="n">4+</th></tr></thead>
+              <tbody>
+                <tr class="is-current"><td>Mood Down (1+ energy)</td><td class="n mono">0%</td><td class="n mono"><b>0%</b></td><td class="n mono">60%</td><td class="n mono">100%</td></tr>
+                <tr><td>Skin Outbreak (0 energy)</td><td class="n mono">4%</td><td class="n mono">8%</td><td class="n mono">25%</td><td class="n mono">33%</td></tr>
+                <tr><td>3 stats −10 (any)</td><td class="n mono">0%</td><td class="n mono">0%</td><td class="n mono">0%</td><td class="n mono">40%</td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:9px"><span class="g">○</span><span>Three races in a row is the cliff: Mood Down jumps from 0% to 60%.</span></p>
+          </div>
+
+          <div class="card">
+            <h2>Where to go</h2>
+            <div class="grid g-2" style="gap:8px">
+              <a class="btn" href="race-decision.html">Race decision</a>
+              <a class="btn" href="training-decision.html">Training decision</a>
+              <a class="btn" href="database-shop-items.html">Shop catalogue</a>
+              <a class="btn" href="timeline.html">Timeline</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Trackblazer cockpit</h2>
+        <ol>
+          <li><b>This is the scenario where the app already owns a real target.</b> 60 / 300 / 300 are published checkpoints, so the bar above has a genuine denominator — unlike Unity Cup, where the run holds no targets at all.</li>
+          <li><b>"88 short" is the whole page in two words.</b> The runway is the decision; everything else on the screen supports it.</li>
+          <li><b>Fatigue is shown as the row for the current chain.</b> Two races in a row carries no penalty; the third is where Mood Down jumps to 60%. Printing the whole grid lets a Trainer plan the run, not just the turn.</li>
+          <li><b>The two currencies are separated in one sentence.</b> It is the most likely arithmetic mistake on this scenario.</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          MOCK DATA. Panel set, caps, checkpoints, currency tables and the fatigue figures are real config and sourced
+          values; the trainee, turn, points and coin balance are illustrative.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html" class="active"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

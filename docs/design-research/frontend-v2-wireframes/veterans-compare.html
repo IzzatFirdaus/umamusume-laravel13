@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compare veterans · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item active" href="veterans.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><a href="veterans.html">Veterans</a> · <b>Compare</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">3 selected</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Veteran comparison</div>
+      <div class="hrow">
+        <div>
+          <h1>Vodka · Daiwa Scarlet · Maruzensky</h1>
+          <p class="lede">Three records side by side. Differences are marked so the eye goes to what changed, and matching rows still print.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="veterans.html">Back to library</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="card">
+        <table class="t">
+          <thead>
+            <tr><th style="width:22%">Property</th><th>Vodka</th><th>Daiwa Scarlet</th><th>Maruzensky</th><th>Difference</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Scenario</td><td>URA Finale</td><td>URA Finale</td><td>URA Finale</td><td><span class="pill pill-neutral">same</span></td></tr>
+            <tr><td>Saved</td><td class="mono">2026-10-15</td><td class="mono">2026-10-15</td><td class="mono">2026-10-12</td><td><span class="pill pill-caution">3 days apart</span></td></tr>
+            <tr class="is-current"><td><b>Blue factor</b></td><td class="mono"><b>Speed ★3</b></td><td class="mono"><b>Power ★3</b></td><td class="mono">Stamina ★2</td><td><span class="pill pill-caution">two different stats</span></td></tr>
+            <tr class="is-current"><td><b>Pink factor</b></td><td>Turf ★2</td><td>Medium ★3</td><td>Mile ★1</td><td><span class="pill pill-caution">all differ</span></td></tr>
+            <tr><td>Unique factor</td><td>★1</td><td>★1</td><td>★1</td><td><span class="pill pill-neutral">same</span></td></tr>
+            <tr><td>Total factor grades</td><td class="mono">★6</td><td class="mono">★7</td><td class="mono">★4</td><td><span class="pill pill-caution">D +1</span></td></tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+          The two blue factors are on <b>different stats</b>, which matters more than their grades: a Speed parent and a
+          Power parent cannot reinforce each other, while two Speed ★3 parents stack to +32 on one cap.
+        </span></p>
+      </div>
+
+      <div class="grid g-3" style="margin-top:14px">
+        <div class="card" style="margin:0">
+          <h2>Vodka</h2>
+          <table class="t"><tbody>
+            <tr><td>Blue</td><td class="n">Speed ★3</td></tr>
+            <tr><td>Pink</td><td class="n">Turf ★2</td></tr>
+            <tr><td>Best for</td><td class="n">Speed cap</td></tr>
+          </tbody></table>
+        </div>
+        <div class="card" style="margin:0">
+          <h2>Daiwa Scarlet</h2>
+          <table class="t"><tbody>
+            <tr><td>Blue</td><td class="n">Power ★3</td></tr>
+            <tr><td>Pink</td><td class="n">Medium ★3</td></tr>
+            <tr><td>Best for</td><td class="n">Aptitude</td></tr>
+          </tbody></table>
+        </div>
+        <div class="card" style="margin:0">
+          <h2>Maruzensky</h2>
+          <table class="t"><tbody>
+            <tr><td>Blue</td><td class="n">Stamina ★2</td></tr>
+            <tr><td>Pink</td><td class="n">Mile ★1</td></tr>
+            <tr><td>Best for</td><td class="n">Nothing decisive</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Veteran comparison</h2>
+        <ol>
+          <li><b>Differences are a column.</b> The comparison states "same" or what changed; the row tint only draws the eye. That is Von Restorff used for scanning rather than for decoration.</li>
+          <li><b>The most useful difference is explained in prose.</b> Two blue factors on different stats read as similar in a table and mean something quite different; the note says which.</li>
+          <li><b>"Nothing decisive" is a permitted verdict.</b> A comparison that can only produce winners is a recommendation engine. Stating that a record has no decisive trait is the honest third answer.</li>
+          <li><b>Matching rows still print.</b> Hiding them would make a Trainer wonder whether the property was compared at all.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

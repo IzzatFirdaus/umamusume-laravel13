@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inheritance event · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item active" href="runs-index.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">Rice Shower · Unity Cup · <b>Inheritance</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">Classic · Turn 25</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Inheritance event</div>
+      <div class="hrow">
+        <div>
+          <h1>Choose what to inherit</h1>
+          <p class="lede">The inheritance moment happens at 育成開始時, Classic and Senior. Pick the spark you want carried from each parent; the run's caps move by the result.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="cockpit-unity-cup.html">Back to cockpit</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <nav aria-label="Career" class="stepper" style="margin-bottom:14px">
+        <a class="step" href="cockpit-unity-cup.html">Cockpit</a>
+        <a class="step" href="training-decision.html">Training</a>
+        <a class="step" href="race-decision.html">Races</a>
+        <a class="step" href="skills-planner.html">Skills</a>
+        <a class="step" href="event-decision.html">Events</a>
+        <span class="step" aria-current="step">Inheritance</span>
+        <a class="step" href="run-deck.html">Deck</a>
+        <a class="step" href="timeline.html">Timeline</a>
+        <a class="step" href="result.html">Result</a>
+      </nav>
+
+      <div class="grid g-2">
+
+        <div class="card" style="margin:0">
+          <h2>Parent A · Vodka</h2>
+          <p class="sub">ウオッカ · URA Finale · ★★★</p>
+          <table class="t">
+            <thead><tr><th>Spark</th><th>Grade</th><th>What it carries</th><th class="n"></th></tr></thead>
+            <tbody>
+              <tr class="is-current">
+                <td><b>Blue · Speed</b></td><td>★3</td><td>+16 Speed cap</td>
+                <td class="n"><input type="radio" name="a" checked aria-label="Inherit Speed cap"></td>
+              </tr>
+              <tr>
+                <td>Pink · Turf</td><td>★2</td><td>+12 aptitude</td>
+                <td class="n"><input type="radio" name="a" aria-label="Inherit Turf aptitude"></td>
+              </tr>
+              <tr>
+                <td>White · Corner</td><td>★1</td><td>Skill hint</td>
+                <td class="n"><input type="radio" name="a" aria-label="Inherit corner hint"></td>
+              </tr>
+              <tr>
+                <td>White · Lucky</td><td>★2</td><td>Skill hint</td>
+                <td class="n"><input type="radio" name="a" aria-label="Inherit lucky hint"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card" style="margin:0">
+          <h2>Parent B · Daiwa Scarlet</h2>
+          <p class="sub">ダイワスカーレット · URA Finale · ★★★</p>
+          <table class="t">
+            <thead><tr><th>Spark</th><th>Grade</th><th>What it carries</th><th class="n"></th></tr></thead>
+            <tbody>
+              <tr>
+                <td><b>Blue · Speed</b></td><td>★3</td><td>+16 Speed cap</td>
+                <td class="n"><input type="radio" name="b" checked aria-label="Inherit Speed cap from B"></td>
+              </tr>
+              <tr>
+                <td>Pink · Medium</td><td>★3</td><td>+21 aptitude</td>
+                <td class="n"><input type="radio" name="b" aria-label="Inherit Medium aptitude"></td>
+              </tr>
+              <tr>
+                <td>White · Stamina</td><td>★1</td><td>Skill hint</td>
+                <td class="n"><input type="radio" name="b" aria-label="Inherit stamina hint"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h2>Result of this pick</h2>
+        <table class="t">
+          <thead><tr><th>Stat</th><th class="n">Before</th><th class="n">Change</th><th class="n">After</th></tr></thead>
+          <tbody>
+            <tr class="is-current"><td><b>Speed</b> cap</td><td class="n mono">1325</td><td class="n mono" style="color:var(--up);font-weight:800">+32</td><td class="n mono"><b>1357</b></td></tr>
+            <tr><td>Stamina cap</td><td class="n mono">1322</td><td class="n mono" style="color:var(--ink-muted)">—</td><td class="n mono">1322</td></tr>
+            <tr><td>Power cap</td><td class="n mono">1368</td><td class="n mono" style="color:var(--ink-muted)">—</td><td class="n mono">1368</td></tr>
+            <tr><td>Guts cap</td><td class="n mono">1308</td><td class="n mono" style="color:var(--ink-muted)">—</td><td class="n mono">1308</td></tr>
+            <tr><td>Wit cap</td><td class="n mono">1800</td><td class="n mono" style="color:var(--ink-muted)">—</td><td class="n mono">1800</td></tr>
+          </tbody>
+        </table>
+        <div class="grid g-3" style="margin-top:12px">
+          <div class="tile"><div class="k">Blue sparks</div><div class="v mono" style="font-size:14px">2 × ★3 = +32</div></div>
+          <div class="tile"><div class="k">Aptitude shifts</div><div class="v" style="font-size:13px;color:var(--ink-muted)">none this pick</div></div>
+          <div class="tile"><div class="k">Skill hints</div><div class="v" style="font-size:13px;color:var(--ink-muted)">none this pick</div></div>
+        </div>
+        <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+          Two ★3 blue parents give <b>+16 each</b>, so the cap moves 32 in one moment. This run's ceilings are already
+          above its scenario's 1300 because the import recorded entered ceilings; the inheritance adds to the entered
+          value, never to the published one.
+        </span></p>
+      </div>
+
+      <div class="savebar">
+        <span class="dirty">2 sparks chosen</span>
+        <a class="btn" href="cockpit-unity-cup.html">Skip this moment</a>
+        <button class="btn btn-primary">Record inheritance</button>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Inheritance event</h2>
+        <ol>
+          <li><b>The before/after table is the decision.</b> A Trainer picks between sparks by their cap consequence, so the consequence is printed. Picking a ★3 blue and then finding out it moved a cap is the opposite of a decision surface.</li>
+          <li><b>Blue, pink and white are named, not colour-coded only.</b> The spark family is the word (Blue = cap, Pink = aptitude, White = skill hint); the colour reinforces. A colour-blind Trainer reads the same table.</li>
+          <li><b>One pick per parent, enforced by radios.</b> The moment grants one spark per parent; allowing two would promise a rule the game does not have.</li>
+          <li><b>Inheritance adds to the entered ceiling, not the published one.</b> This run already carries entered ceilings above the scenario's 1300, and the note says so. Collapsing the two is the same defect the cockpit audit filed as A3.</li>
+          <li><b>"Skip this moment" is offered.</b> Inheritance is optional at every one of its three moments; a screen that only offers a pick implies the moment is mandatory.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html" class="active"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sparks · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item active" href="database.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><a href="database.html">Database</a> · <b>Sparks</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">Inheritance</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Sparks</div>
+      <div class="hrow">
+        <div>
+          <h1>Spark families and grades</h1>
+          <p class="lede">What a parent passes on. Three families, five grades, and one rule that decides a build: blue raises caps, pink shifts aptitudes.</p>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="card">
+        <h2>Families</h2>
+        <table class="t">
+          <thead><tr><th>Family</th><th>Carries</th><th>Applied at</th></tr></thead>
+          <tbody>
+            <tr class="is-current"><td><b>Blue</b></td><td>A stat's <b>cap</b>, by a fixed step per grade</td><td>Run start, Classic inheritance, Senior inheritance</td></tr>
+            <tr><td><b>Pink</b></td><td>An <b>aptitude</b> grade</td><td>Same three moments</td></tr>
+            <tr><td><b>White</b></td><td>Skill hints</td><td>When the spark is granted</td></tr>
+            <tr><td>Unique</td><td>The trainee's own skill</td><td>Same three moments</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid g-2" style="margin-top:14px">
+        <div class="card" style="margin:0">
+          <h2>Blue spark values</h2>
+          <table class="t">
+            <thead><tr><th>Grade</th><th class="n">Cap added</th><th>Per two parents</th></tr></thead>
+            <tbody>
+              <tr class="is-current"><td><b>★3</b></td><td class="n mono">+16</td><td class="mono">+32</td></tr>
+              <tr><td>★2</td><td class="n mono">+8</td><td class="mono">+16</td></tr>
+              <tr><td>★1</td><td class="n mono">+5</td><td class="mono">+10</td></tr>
+            </tbody>
+          </table>
+          <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+            Blue sparks add to the run's <b>entered</b> ceiling, not the scenario's published one. That is why a run can
+            show a cap above its scenario's figure, and why the cockpit prints both.
+          </span></p>
+        </div>
+
+        <div class="card" style="margin:0">
+          <h2>Pink spark values</h2>
+          <table class="t">
+            <thead><tr><th>Grade</th><th class="n">Aptitude shift</th></tr></thead>
+            <tbody>
+              <tr><td>★3</td><td class="n mono">+21</td></tr>
+              <tr class="is-current"><td><b>★2</b></td><td class="n mono">+12</td></tr>
+              <tr><td>★1</td><td class="n mono">+5</td></tr>
+            </tbody>
+          </table>
+          <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+            An aptitude shift is measured against the grade letters, not a stat figure. Raising turf and distance
+            aptitude to A before a run starts is the highest-leverage use of a pink spark.
+          </span></p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h2>The inheritance loop</h2>
+        <table class="t">
+          <thead><tr><th>Step</th><th>What happens</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Train to a final total.</td></tr>
+            <tr><td>2</td><td>Bank the factor grade into a veteran record.</td></tr>
+            <tr><td>3</td><td>Inherit the +16 per ★3 at the next run's start.</td></tr>
+            <tr><td>4</td><td>Train past the previous ceiling.</td></tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+          The loop repeats at every inheritance moment. Because blue sparks raise the <b>ceiling</b> rather than a
+          starting value, the payoff compounds across a run instead of arriving once.
+        </span></p>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Sparks</h2>
+        <ol>
+          <li><b>Two families get full value tables; two get a sentence.</b> Blue and pink have published per-grade figures that decide a build; white and unique do not, so they are listed without invented numbers.</li>
+          <li><b>"Per two parents" is computed, not typed.</b> The column exists because the common decision is whether to run two of the same family, and doubling is the arithmetic.</li>
+          <li><b>Entered versus published ceiling is restated here too.</b> It is the same distinction the cockpit audit filed as a defect, and a reference page is the cheapest place to teach it.</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          Wireframe only. Blue +16 / pink +5 / +12 / +21 and the bank-and-inherit loop are sourced
+          (<code>UMAMUSUME_REFERENCE.md</code> §1.3.4, §1.3.6, §1.5.1–1.5.3).
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html" class="active"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

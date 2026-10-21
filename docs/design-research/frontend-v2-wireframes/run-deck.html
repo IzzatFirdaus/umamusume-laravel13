@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Run deck · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item active" href="runs-index.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">Rice Shower · Unity Cup · <b>Deck</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">Turn 67</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Run deck</div>
+      <div class="hrow">
+        <div>
+          <h1>This run's six slots</h1>
+          <p class="lede">The deck is run-scoped: changing it here does not touch any other career. Effects apply from the next turn.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="cockpit-unity-cup.html">Back to cockpit</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <nav aria-label="Career" class="stepper" style="margin-bottom:14px">
+        <a class="step" href="cockpit-unity-cup.html">Cockpit</a>
+        <a class="step" href="training-decision.html">Training</a>
+        <a class="step" href="race-decision.html">Races</a>
+        <a class="step" href="skills-planner.html">Skills</a>
+        <a class="step" href="event-decision.html">Events</a>
+        <a class="step" href="inheritance.html">Inheritance</a>
+        <span class="step" aria-current="step">Deck</span>
+        <a class="step" href="timeline.html">Timeline</a>
+        <a class="step" href="result.html">Result</a>
+      </nav>
+
+      <div class="grid g-3">
+        <div class="card" style="margin:0">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+            <div><b style="color:var(--ink-strong)">Speed card</b><div style="font-size:11.5px;color:var(--ink-muted)">SSR · Speed · 3 of 4 breaks</div></div>
+            <span class="pill pill-positive">Gauge 80</span>
+          </div>
+          <div class="track" style="margin-top:9px"><i style="width:80%"></i></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-muted);margin-top:3px"><span>Friendship +25%</span><span>Lvl 45</span></div>
+          <div style="display:flex;gap:6px;margin-top:10px"><button class="btn btn-sm">Swap</button><button class="btn btn-quiet btn-sm">Remove</button></div>
+        </div>
+        <div class="card" style="margin:0">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+            <div><b style="color:var(--ink-strong)">Speed card</b><div style="font-size:11.5px;color:var(--ink-muted)">SSR · Speed · 4 of 4 breaks</div></div>
+            <span class="pill pill-positive">Gauge 80</span>
+          </div>
+          <div class="track" style="margin-top:9px"><i style="width:80%"></i></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-muted);margin-top:3px"><span>Friendship +30%</span><span>Lvl 50</span></div>
+          <div style="display:flex;gap:6px;margin-top:10px"><button class="btn btn-sm">Swap</button><button class="btn btn-quiet btn-sm">Remove</button></div>
+        </div>
+        <div class="card" style="margin:0">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+            <div><b style="color:var(--ink-strong)">Power card</b><div style="font-size:11.5px;color:var(--ink-muted)">SSR · Power</div></div>
+            <span class="pill pill-neutral">Gauge 55</span>
+          </div>
+          <div class="track" style="margin-top:9px"><i style="width:55%"></i></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-muted);margin-top:3px"><span>Not yet orange</span><span>—</span></div>
+          <div style="display:flex;gap:6px;margin-top:10px"><button class="btn btn-sm">Swap</button><button class="btn btn-quiet btn-sm">Remove</button></div>
+        </div>
+        <div class="card" style="margin:0">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+            <div><b style="color:var(--ink-strong)">Pal card</b><div style="font-size:11.5px;color:var(--ink-muted)">SSR · Pal · events only</div></div>
+            <span class="pill pill-outline">No gauge kit</span>
+          </div>
+          <div style="font-size:11px;color:var(--ink-muted);margin-top:9px">Event effectiveness · failure protection · event recovery.</div>
+          <div style="display:flex;gap:6px;margin-top:10px"><button class="btn btn-sm">Swap</button><button class="btn btn-quiet btn-sm">Remove</button></div>
+        </div>
+        <div class="card" style="margin:0;border-style:dashed">
+          <div style="color:var(--ink-muted);font-size:12.5px">Empty slot</div>
+          <button class="btn btn-sm" style="margin-top:9px">Add a card</button>
+        </div>
+        <div class="card" style="margin:0;border-style:dashed">
+          <div style="color:var(--ink-muted);font-size:12.5px">Empty slot</div>
+          <button class="btn btn-sm" style="margin-top:9px">Add a card</button>
+        </div>
+      </div>
+
+      <div class="savebar">
+        <span class="dirty">4 of 6 slots filled</span>
+        <a class="btn" href="cockpit-unity-cup.html">Cancel</a>
+        <button class="btn btn-primary">Save deck</button>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Run deck</h2>
+        <ol>
+          <li><b>Six slots always shown.</b> Empty slots are dashed boxes with an add action, so the deck's size is visible rather than inferred from a count in a heading.</li>
+          <li><b>Gauge state carries a word.</b> "Gauge 80" and "Not yet orange" rather than a colour alone; the bar is decoration.</li>
+          <li><b>Pal cards say "No gauge kit".</b> The absence is the deciding fact, printed on the card.</li>
+          <li><b>Save is one action for the whole deck.</b> Per-card writes would be six save verbs, which is the defect the external review counted on the cockpit.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html" class="active"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

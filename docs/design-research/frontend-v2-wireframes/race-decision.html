@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Race decision · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item active" href="runs-index.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">Rice Shower · Unity Cup · <b>Races</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">Turn 67</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Race decision</div>
+      <div class="hrow">
+        <div>
+          <h1>Enter a race, or skip the turn</h1>
+          <p class="lede">Races pay fans, Skill Points and stat gains; a training turn usually pays more stats. Pick the race or close this screen.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="cockpit-unity-cup.html">Back to cockpit</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <nav aria-label="Career" class="stepper" style="margin-bottom:14px">
+        <a class="step" href="cockpit-unity-cup.html">Cockpit</a>
+        <a class="step" href="training-decision.html">Training</a>
+        <span class="step" aria-current="step">Races</span>
+        <a class="step" href="skills-planner.html">Skills</a>
+        <a class="step" href="event-decision.html">Events</a>
+        <a class="step" href="inheritance.html">Inheritance</a>
+        <a class="step" href="run-deck.html">Deck</a>
+        <a class="step" href="timeline.html">Timeline</a>
+        <a class="step" href="result.html">Result</a>
+      </nav>
+
+      <div class="grid g-side">
+
+        <div class="card" style="margin:0">
+          <h2>Available this turn</h2>
+          <p class="sub">Filtered to races this trainee's aptitude permits. Every row states the grade, the surface and the distance band.</p>
+
+          <table class="t">
+            <thead>
+              <tr><th>Race</th><th>Grade</th><th>Surface · distance</th><th class="n">Fans needed</th><th class="n">Skill Pt</th><th class="n"></th></tr>
+            </thead>
+            <tbody>
+              <tr class="is-current">
+                <td><b>Autumn Stakes</b><br><span style="color:var(--ink-muted)">Kyoto · 2,000 m</span></td>
+                <td>G2</td>
+                <td>Turf · Medium <span class="pill pill-positive" style="vertical-align:1px">A</span></td>
+                <td class="n mono">—</td>
+                <td class="n mono">+35</td>
+                <td class="n"><a class="btn btn-sm btn-primary" href="#">Enter</a></td>
+              </tr>
+              <tr>
+                <td><b>Kisaragi Stakes</b><br><span style="color:var(--ink-muted)">Tokyo · 1,800 m</span></td>
+                <td>G3</td>
+                <td>Turf · Mile <span class="pill pill-caution" style="vertical-align:1px">C</span></td>
+                <td class="n mono">—</td>
+                <td class="n mono">+35</td>
+                <td class="n"><a class="btn btn-sm" href="#">Enter</a></td>
+              </tr>
+              <tr>
+                <td><b>Hopeful Stakes</b><br><span style="color:var(--ink-muted)">Nakayama · 2,000 m</span></td>
+                <td>G1</td>
+                <td>Turf · Medium <span class="pill pill-positive" style="vertical-align:1px">A</span></td>
+                <td class="n mono">—</td>
+                <td class="n mono">+45</td>
+                <td class="n"><a class="btn btn-sm" href="#">Enter</a></td>
+              </tr>
+              <tr>
+                <td><b>Dirt Dash</b><br><span style="color:var(--ink-muted)">Hanshin · 1,400 m</span></td>
+                <td>OP</td>
+                <td>Dirt · Sprint <span class="pill pill-neutral" style="vertical-align:1px">G</span></td>
+                <td class="n mono">—</td>
+                <td class="n mono">+30</td>
+                <td class="n"><button class="btn btn-sm" disabled>Aptitude too low</button></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="pager">
+            <span>38 races this turn · page 1 of 5</span>
+            <button class="btn btn-sm" disabled>Previous</button>
+            <button class="btn btn-sm">Next</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Autumn Stakes</h2>
+            <div class="grid g-2" style="gap:9px">
+              <div class="tile"><div class="k">Grade</div><div class="v" style="font-size:14px">G2</div></div>
+              <div class="tile"><div class="k">Distance</div><div class="v mono" style="font-size:14px">2,000 m</div></div>
+              <div class="tile"><div class="k">Aptitude</div><div class="v" style="font-size:14px">Turf A · Medium A</div></div>
+              <div class="tile"><div class="k">Skill Points</div><div class="v mono" style="font-size:14px">+35</div></div>
+            </div>
+
+            <h3 style="margin-top:14px">Placement payouts</h3>
+            <table class="t">
+              <thead><tr><th>Placement</th><th class="n">Skill Pt</th><th class="n">Stat</th><th class="n">Fans</th></tr></thead>
+              <tbody>
+                <tr class="is-current"><td><b>1st</b></td><td class="n mono"><b>35</b></td><td class="n mono">+8</td><td class="n mono">scales</td></tr>
+                <tr><td>2nd</td><td class="n mono">—</td><td class="n mono">—</td><td class="n mono">scales</td></tr>
+                <tr><td>3rd</td><td class="n mono">—</td><td class="n mono">—</td><td class="n mono">scales</td></tr>
+              </tbody>
+            </table>
+
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              <b>Only the 1st-place figure is sourced.</b> A first-place finish at 0 Race Bonus pays a random-stat gain and an SP
+              figure by grade — G1 +10 stat / +45 SP, G2–G3 +8 / +35, OP–Pre-OP +5 / +30. Trackblazer pays the same stat gain at a lower SP.
+              Second and third are <b>not published</b>, so the rows stay blank rather than extrapolated.
+            </span></p>
+
+            <p class="note" style="margin-top:8px"><span class="g">○</span><span>
+              The 34% Race Bonus breakpoint is the one the guide names for URA Finale and Unity Cup; 50% is Trackblazer's.
+              A planner must print the payout the client shows rather than recompute it.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Consecutive races</h2>
+            <p style="font-size:12.5px;color:var(--ink-muted);margin:0">
+              Races in a row raise the failure risk. Trackblazer publishes the odds; URA Finale and Unity Cup do not,
+              so this screen states the count and not a probability.
+            </p>
+            <div class="srow" style="margin-top:8px"><span class="k">Races in a row so far</span><span class="v mono">0</span></div>
+            <div class="note" style="margin-top:8px"><span class="g">○</span><span>No probability is printed for this scenario. Inventing one would be the "score" the app is forbidden to add.</span></div>
+          </div>
+
+          <div class="savebar" style="margin-top:0">
+            <span class="dirty">No race chosen</span>
+            <a class="btn" href="training-decision.html">Train instead</a>
+            <button class="btn btn-primary" disabled>Enter a race</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Race decision</h2>
+        <ol>
+          <li><b>Blocked rows are visible, not filtered out.</b> The Dirt Dash row is disabled with "Aptitude too low" rather than hidden. Hiding it would leave a Trainer wondering whether the race exists; showing it teaches the aptitude rule.</li>
+          <li><b>Aptitude letters sit beside the distance band</b> so the filter's result explains itself. Same chunking as the trainee grid.</li>
+          <li><b>Unpublished payouts stay blank.</b> Only 1st place is sourced; 2nd and 3rd cells are empty. Printing an extrapolated "2nd = 60%" would be a fabricated game rule — the exact failure the provenance gates exist to stop.</li>
+          <li><b>Where no probability exists, none is invented.</b> URA and Unity Cup publish no consecutive-race table, so the screen shows the count and says why there is no percentage.</li>
+          <li><b>"Train instead" is a real escape.</b> A race screen that only offers races forces the decision; the outline button returns to training without losing the turn.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html" class="active"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

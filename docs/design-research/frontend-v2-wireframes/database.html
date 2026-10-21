@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Database hub · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item active" href="database.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><b>Database</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">Current · 2026-09-27</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Database</div>
+      <div class="hrow">
+        <div>
+          <h1>Reference data</h1>
+          <p class="lede">Everything the tool knows about the game, and where each figure came from. Nine areas, one source ledger.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn btn-primary" href="database-sources.html">Source ledger</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="info" style="margin-bottom:14px">
+        <span aria-hidden="true">i</span>
+        <span><b>Global data · Current.</b> The scenario matrix was verified 2026-09-27 against GameTora <code>scenarios.json</code>
+        plus three Global prose sources. Nothing on this page was fetched today; the date is a verification date, not an update date.</span>
+      </div>
+
+      <div class="grid g-3">
+
+        <a class="card" href="catalog.html" style="margin:0;display:block">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <b style="font-size:14.5px;color:var(--ink-strong)">Trainees</b><span class="mono" style="font-weight:800;color:var(--ink-strong)">71</span>
+          </div>
+          <p style="font-size:12px;color:var(--ink-muted);margin:6px 0 0">Aptitudes, costumes, base stats and growth rows.</p>
+        </a>
+
+        <a class="card" href="support-cards.html" style="margin:0;display:block">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <b style="font-size:14.5px;color:var(--ink-strong)">Support cards</b><span class="mono" style="font-weight:800;color:var(--ink-strong)">559</span>
+          </div>
+          <p style="font-size:12px;color:var(--ink-muted);margin:6px 0 0">Seven types, effect ladders, limit-break stages.</p>
+        </a>
+
+        <a class="card" href="skills.html" style="margin:0;display:block">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <b style="font-size:14.5px;color:var(--ink-strong)">Skills</b><span class="mono" style="font-weight:800;color:var(--ink-strong)">1,910</span>
+          </div>
+          <p style="font-size:12px;color:var(--ink-muted);margin:6px 0 0">Engine conditions, base costs, hint ladders.</p>
+        </a>
+
+        <a class="card" href="database-races.html" style="margin:0;display:block">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <b style="font-size:14.5px;color:var(--ink-strong)">Races</b><span class="badge pill pill-outline" style="font-weight:800">Catalog</span>
+          </div>
+          <p style="font-size:12px;color:var(--ink-muted);margin:6px 0 0">Grade, surface, distance band, fan thresholds.</p>
+        </a>
+
+        <a class="card" href="database-scenarios.html" style="margin:0;display:block">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <b style="font-size:14.5px;color:var(--ink-strong)">Scenarios</b><span class="mono" style="font-weight:800;color:var(--ink-strong)">4</span>
+          </div>
+          <p style="font-size:12px;color:var(--ink-muted);margin:6px 0 0">Caps, panels, live-on-Global dates, rulesets.</p>
+        </a>
+
+        <a class="card" href="database-events.html" style="margin:0;display:block">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <b style="font-size:14.5px;color:var(--ink-strong)">Events</b><span class="badge pill pill-outline" style="font-weight:800">Reference</span>
+          </div>
+          <p style="font-size:12px;color:var(--ink-muted);margin:6px 0 0">Support-card and trainee event chains.</p>
+        </a>
+
+        <a class="card" href="database-shop-items.html" style="margin:0;display:block">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <b style="font-size:14.5px;color:var(--ink-strong)">Shop items</b><span class="badge pill pill-outline" style="font-weight:800">Trackblazer</span>
+          </div>
+          <p style="font-size:12px;color:var(--ink-muted);margin:6px 0 0">19 items, costs, effects and one publisher's ratings.</p>
+        </a>
+
+        <a class="card" href="database-sparks.html" style="margin:0;display:block">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <b style="font-size:14.5px;color:var(--ink-strong)">Sparks</b><span class="badge pill pill-outline" style="font-weight:800">Inheritance</span>
+          </div>
+          <p style="font-size:12px;color:var(--ink-muted);margin:6px 0 0">Blue, pink and white factor families and their grades.</p>
+        </a>
+
+        <a class="card" href="database-sources.html" style="margin:0;display:block;border-color:var(--pick-line)">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <b style="font-size:14.5px;color:var(--ink-strong)">Sources</b><span class="pill pill-positive">Ledger</span>
+          </div>
+          <p style="font-size:12px;color:var(--ink-muted);margin:6px 0 0">Every figure above, with its publisher, date and confidence tier.</p>
+        </a>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Database hub</h2>
+        <ol>
+          <li><b>Nine areas, one grid, no nesting.</b> The hub is a launcher, not a tree. Each tile names the area and the count, so a Trainer knows the catalogue's size before clicking (recognition over recall).</li>
+          <li><b>The verification date is stated as a verification date.</b> "Verified 2026-09-27" is not "updated today". The distinction is load-bearing: the matrix states it was checked, not fetched.</li>
+          <li><b>One tile is visibly the ledger.</b> Sources carries the pick border because it is the answer to every "where did this come from" question; making it look like the other eight would bury it.</li>
+          <li><b>Every count is live.</b> 71 / 559 / 1910 / 4 are the payload's own numbers, not typed into the template. A hub with hand-typed counts drifts the moment a dataset updates.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html" class="active"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

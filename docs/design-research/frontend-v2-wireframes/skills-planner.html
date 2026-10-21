@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skills planner · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item active" href="runs-index.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">Rice Shower · Unity Cup · <b>Skills</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">173 SP</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Skills planner</div>
+      <div class="hrow">
+        <div>
+          <h1>Spend 173 Skill Points</h1>
+          <p class="lede">A hint lowers a skill's cost; the ladder is 10% / 20% / 30% / 35% / 40% off. A hint you have not earned still buys the skill at full price.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="cockpit-unity-cup.html">Back to cockpit</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <nav aria-label="Career" class="stepper" style="margin-bottom:14px">
+        <a class="step" href="cockpit-unity-cup.html">Cockpit</a>
+        <a class="step" href="training-decision.html">Training</a>
+        <a class="step" href="race-decision.html">Races</a>
+        <span class="step" aria-current="step">Skills</span>
+        <a class="step" href="event-decision.html">Events</a>
+        <a class="step" href="inheritance.html">Inheritance</a>
+        <a class="step" href="run-deck.html">Deck</a>
+        <a class="step" href="timeline.html">Timeline</a>
+        <a class="step" href="result.html">Result</a>
+      </nav>
+
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <div style="flex:1 1 240px;min-width:0">
+            <div style="font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-muted)">Skill Points</div>
+            <div style="font-size:26px;font-weight:800;color:var(--ink-strong);line-height:1.2" class="mono">173</div>
+          </div>
+          <div style="flex:1 1 200px;min-width:0">
+            <div style="font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-muted)">Planned spend</div>
+            <div style="font-size:26px;font-weight:800;color:var(--ink-strong);line-height:1.2" class="mono">140</div>
+          </div>
+          <div style="flex:1 1 200px;min-width:0">
+            <div style="font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-muted)">Remaining</div>
+            <div style="font-size:26px;font-weight:800;color:var(--green-deep);line-height:1.2" class="mono">33</div>
+          </div>
+          <a class="btn btn-primary" href="#">Learn planned skills</a>
+        </div>
+      </div>
+
+      <div class="filters" style="margin-bottom:12px">
+        <label class="field" style="flex:1 1 220px"><span class="k">Search</span><span class="in"><input placeholder="Skill name"></span></label>
+        <label class="field" style="flex:0 1 150px"><span class="k">Rarity</span><span class="in"><select><option>Any</option><option>Rare</option><option>Normal</option></select></span></label>
+        <label class="field" style="flex:0 1 150px"><span class="k">Type</span><span class="in"><select><option>Any</option><option selected>Speed</option><option>Stamina</option><option>Power</option><option>Guts</option><option>Wit</option></select></span></label>
+        <label class="field" style="flex:0 1 170px"><span class="k">Hints</span><span class="in"><select><option>Any</option><option selected>Hinted only</option><option>Not hinted</option></select></span></label>
+        <a class="btn btn-quiet" href="skills-planner.html">Clear</a>
+      </div>
+
+      <div class="card">
+        <table class="t">
+          <thead>
+            <tr>
+              <th style="width:32px"></th>
+              <th>Skill</th>
+              <th>Type</th>
+              <th>Hint</th>
+              <th class="n">Base</th>
+              <th class="n">Discount</th>
+              <th class="n">Cost</th>
+              <th class="n"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="is-current">
+              <td><input type="checkbox" checked aria-label="Plan Corner Recovery"></td>
+              <td><b>Corner Recovery ○</b><br><span style="color:var(--ink-muted)">Pace Chaser · corners</span></td>
+              <td>Speed</td>
+              <td><span class="pill pill-positive">Lv3 · 30%</span></td>
+              <td class="n mono">130</td>
+              <td class="n mono">−39</td>
+              <td class="n mono"><b>91</b></td>
+              <td class="n"><span class="pill pill-caution">Planned</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" checked aria-label="Plan Straightaway Recovery"></td>
+              <td><b>Straightaway Recovery</b><br><span style="color:var(--ink-muted)">General · final straight</span></td>
+              <td>Recovery</td>
+              <td><span class="pill pill-positive">Lv1 · 10%</span></td>
+              <td class="n mono">160</td>
+              <td class="n mono">−16</td>
+              <td class="n mono"><b>144</b></td>
+              <td class="n"><span class="pill pill-caution">Planned</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" aria-label="Plan Speed Star"></td>
+              <td><b>Speed Star</b><br><span style="color:var(--ink-muted)">Rare · late-stage velocity</span></td>
+              <td>Speed</td>
+              <td><span class="pill pill-neutral">none</span></td>
+              <td class="n mono">200</td>
+              <td class="n mono">—</td>
+              <td class="n mono">200</td>
+              <td class="n"><button class="btn btn-sm">Plan</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" aria-label="Plan Wit Chaser"></td>
+              <td><b>Wit Chaser</b><br><span style="color:var(--ink-muted)">Unique · conditional</span></td>
+              <td>Wit</td>
+              <td><span class="pill pill-neutral">none</span></td>
+              <td class="n mono">180</td>
+              <td class="n mono">—</td>
+              <td class="n mono">180</td>
+              <td class="n"><button class="btn btn-sm" disabled>Too expensive</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pager">
+          <span>1,910 skills · page 1 of 96</span>
+          <button class="btn btn-sm" disabled>Previous</button>
+          <button class="btn btn-sm">Next</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Why the hint ladder is not linear</h2>
+        <table class="t">
+          <thead><tr><th>Hint level</th><th class="n">Discount</th><th>Client caption</th></tr></thead>
+          <tbody>
+            <tr><td>Lv1</td><td class="n mono">10%</td><td class="mono">Hint Lvl 1</td></tr>
+            <tr><td>Lv2</td><td class="n mono">20%</td><td class="mono">Hint Lvl 2</td></tr>
+            <tr><td>Lv3</td><td class="n mono">30%</td><td class="mono">Hint Lvl 3</td></tr>
+            <tr><td>Lv4</td><td class="n mono">35%</td><td class="mono">Hint Lvl 4</td></tr>
+            <tr><td>Lv Max</td><td class="n mono">40%</td><td class="mono">Hint Lvl Max</td></tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+          The ladder steps +10, +10, +10, +5, +5 — <b>not linear past Lv3</b>. The measured sample reconciles exactly:
+          130 → 104 / 91 / 84, and 160 → 144 / 128 / 112 / 96. The one rounding case is 130 × 0.65 = 84.5, floored to 84.
+          "Lv Max" is a caption, not a fifth number (<code>UMAMUSUME_REFERENCE.md</code> §1.1.4).
+        </span></p>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Skills planner</h2>
+        <ol>
+          <li><b>Base, discount and cost are three columns, not one.</b> A Trainer deciding between skills needs to see why 130 costs 91; showing only the final price hides the value of earning a hint.</li>
+          <li><b>The budget bar is the Goal-Gradient.</b> Remaining 33 is printed as a number and set apart in green, so the constraint is visible while browsing rather than discovered at commit.</li>
+          <li><b>Unaffordable rows stay visible and say why.</b> "Too expensive" rather than a hidden row. Same rule as the race screen's blocked aptitude row.</li>
+          <li><b>Planning is not learning.</b> Checkboxes build a plan; a single "Learn planned skills" commits it. That separates browsing from a write, which is the preview-before-commit pattern the corpus declares (<code>DESIGN-CORPUS.md</code> §5).</li>
+          <li><b>The ladder is explained because its shape is surprising.</b> Most players assume a flat 10% per level; the client says otherwise past Lv3. Printing the table once is cheaper than a Trainer mis-budgeting a skill.</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          Wireframe only. The hint ladder, the two worked price samples and the 1,910 skill count are sourced
+          (<code>UMAMUSUME_REFERENCE.md</code> §1.1.4; live dashboard count). Skill names and the SP balance are illustrative.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html" class="active"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

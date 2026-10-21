@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Events reference · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item active" href="database.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><a href="database.html">Database</a> · <b>Events</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">Reference</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Events</div>
+      <div class="hrow">
+        <div>
+          <h1>Event catalog</h1>
+          <p class="lede">Support-card and trainee event chains. The options and their outcomes are the client's; no effect is modelled where no source publishes one.</p>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="card">
+        <table class="t">
+          <thead><tr><th>Event</th><th>Kind</th><th>Chain</th><th class="n">Options</th><th>Effects documented?</th></tr></thead>
+          <tbody>
+            <tr class="is-current"><td><b>The reporter asks for a quote</b></td><td>Support card</td><td>1 of 1</td><td class="n mono">3</td><td><span class="pill pill-caution">No</span></td></tr>
+            <tr><td><b>A follow-up event</b></td><td>Support card</td><td>2 of 2</td><td class="n mono">2</td><td><span class="pill pill-caution">No</span></td></tr>
+            <tr><td><b>A trainee secret event</b></td><td>Trainee</td><td>1 of 1</td><td class="n mono">2</td><td><span class="pill pill-negative" style="background:var(--sunken);color:var(--ink-muted)">Does not fire in Trackblazer</span></td></tr>
+            <tr><td><b>A scenario event</b></td><td>Scenario</td><td>1 of 1</td><td class="n mono">2</td><td><span class="pill pill-caution">No</span></td></tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+          Event copy and option effects are client strings. This catalogue names the events and their shape; it does not
+          paraphrase the text, and it never assigns a "best" option.
+        </span></p>
+      </div>
+
+      <div class="grid g-2" style="margin-top:14px">
+        <div class="card" style="margin:0">
+          <h2>Where events come from</h2>
+          <table class="t">
+            <tbody>
+              <tr><td>Support-card events</td><td>Fires from the card in the deck.</td></tr>
+              <tr><td>Trainee secret events</td><td>Fires on a schedule; <b>not</b> in Trackblazer.</td></tr>
+              <tr><td>Scenario events</td><td>Fires from the scenario's own logic.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card" style="margin:0">
+          <h2>Retry rules</h2>
+          <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.55;margin:0">
+            An event choice is final. The Alarm Clock is the game's retry item and it covers <b>goal races</b> whose placing
+            was missed, and a lost Team Race — not an event.
+          </p>
+          <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+            A guide narrows the Alarm Clock further: a player may use up to three per run. The catalogue states the
+            item's own limits rather than implying an unbounded undo.
+          </span></p>
+        </div>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Events</h2>
+        <ol>
+          <li><b>"Effects documented?" is a column.</b> Most events have no published effect table, and saying so per row is more honest than a catalogue that looks complete.</li>
+          <li><b>Scenario scoping is explicit.</b> The secret-event row states it does not fire in Trackblazer, which is a real mechanical difference and not a caveat.</li>
+          <li><b>Retry rules sit beside the events.</b> A Trainer looking up an event after a bad outcome is exactly who needs to know what can and cannot be undone.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html" class="active"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

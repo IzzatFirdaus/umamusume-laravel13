@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review queue · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item active" href="review.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">My data · <b>Review</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-caution">2 pending</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Review queue</div>
+      <div class="hrow">
+        <div>
+          <h1>Confirm or reject matches</h1>
+          <p class="lede">When the importer is unsure which catalog record a line refers to, it asks. Nothing is written until you answer.</p>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="card">
+        <h2>Pending</h2>
+        <table class="t">
+          <thead><tr><th>Candidate</th><th>Question</th><th>Best match</th><th class="n">Confidence</th><th class="n"></th></tr></thead>
+          <tbody>
+            <tr class="is-current">
+              <td><b>"Rice Shower"</b><br><span style="color:var(--ink-muted)">from a run write-up</span></td>
+              <td>Which trainee is this?</td>
+              <td>Rice Shower · ライスシャワー</td>
+              <td class="n"><span class="pill pill-positive">Exact</span></td>
+              <td class="n"><a class="btn btn-sm btn-primary" href="review-detail.html">Review</a></td>
+            </tr>
+            <tr>
+              <td><b>"the Turf Queens"</b><br><span style="color:var(--ink-muted)">from a team note</span></td>
+              <td>No catalog record carries this name.</td>
+              <td><span class="pill pill-caution">No match</span></td>
+              <td class="n"><span class="pill pill-neutral">—</span></td>
+              <td class="n"><a class="btn btn-sm" href="review-detail.html">Review</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+          A "no match" candidate is a real outcome, not a failure. One scenario's opponent names are recorded as
+          <b>uncorroborated</b> in the repository: the corpus names only one of the three teams, and nothing renders the
+          other two. The queue asks rather than guessing.
+        </span></p>
+      </div>
+
+      <div class="grid g-side" style="margin-top:14px">
+        <div class="card" style="margin:0">
+          <h2>How a match is decided</h2>
+          <table class="t">
+            <thead><tr><th>Signal</th><th>Weight</th></tr></thead>
+            <tbody>
+              <tr><td>Exact name match</td><td>Decisive — offered as the default</td></tr>
+              <tr><td>Japanese name match</td><td>Decisive when the romanised form differs</td></tr>
+              <tr><td>Known alias</td><td>Strong — shown as a separate candidate</td></tr>
+              <tr><td>Fuzzy spelling</td><td>Suggested only, never pre-selected</td></tr>
+            </tbody>
+          </table>
+          <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+            A fuzzy match is <b>never</b> applied automatically. The importer may offer it; only a Trainer may accept it.
+          </span></p>
+        </div>
+
+        <div class="card" style="margin:0">
+          <h2>Why this exists</h2>
+          <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.55;margin:0">
+            A wrong match silently poisons every downstream screen: a run attributed to the wrong trainee gets the wrong
+            aptitudes, growth row and unique skill. The queue exists so a guess becomes a question.
+          </p>
+          <div class="grid g-2" style="margin-top:10px">
+            <div class="tile"><div class="k">Pending</div><div class="v mono" style="font-size:14px">2</div></div>
+            <div class="tile"><div class="k">Resolved today</div><div class="v mono" style="font-size:14px">0</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Review queue</h2>
+        <ol>
+          <li><b>A question, not an error.</b> The queue is a normal part of importing, and the copy says so. Treating an uncertain match as a failure would push Trainers toward accepting whatever the importer guessed.</li>
+          <li><b>Confidence is a word and a policy.</b> "Exact" is decisive and pre-selected; "fuzzy" is suggested and never pre-selected. Naming the policy is what stops an over-eager default.</li>
+          <li><b>The consequence is stated.</b> The right-hand card explains that a wrong match corrupts every downstream screen, which is why a human is asked at all.</li>
+          <li><b>"No match" is a first-class state</b>, shown as a caution pill rather than hidden. Some names genuinely are not in the catalogue.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html" class="active"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

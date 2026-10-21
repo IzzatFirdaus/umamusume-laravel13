@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preflight · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item active" href="career-scenario.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">New career · Step 6 of 6 · <b>Preflight</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-caution">1 warning</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">New career</div>
+      <div class="hrow">
+        <div>
+          <h1>Before the first turn</h1>
+          <p class="lede">One screen listing what will be created, what the run will be measured against, and the things worth knowing before you commit.</p>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="stepper" role="list" aria-label="Setup steps">
+        <span class="step is-done"><span class="n">1</span>Scenario</span>
+        <span class="step is-done"><span class="n">2</span>Trainee</span>
+        <span class="step is-done"><span class="n">3</span>Build target</span>
+        <span class="step is-done"><span class="n">4</span>Legacy</span>
+        <span class="step is-done"><span class="n">5</span>Deck</span>
+        <span class="step" aria-current="step"><span class="n">6</span>Preflight</span>
+      </div>
+
+      <div class="grid g-side">
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>This run</h2>
+            <div class="grid g-4" style="gap:9px">
+              <div class="tile"><div class="k">Trainee</div><div class="v" style="font-size:13px">Admire Vega</div></div>
+              <div class="tile"><div class="k">Form</div><div class="v" style="font-size:13px">[Starry Nocturne]</div></div>
+              <div class="tile"><div class="k">Scenario</div><div class="v" style="font-size:13px">URA Finale</div></div>
+              <div class="tile"><div class="k">Distance</div><div class="v" style="font-size:13px">Medium</div></div>
+              <div class="tile"><div class="k">Parents</div><div class="v" style="font-size:13px">Vodka · empty</div></div>
+              <div class="tile"><div class="k">Deck</div><div class="v" style="font-size:13px">4 of 6</div></div>
+              <div class="tile"><div class="k">Target total</div><div class="v mono" style="font-size:13px">4,600</div></div>
+              <div class="tile"><div class="k">Career length</div><div class="v mono" style="font-size:13px">72 turns</div></div>
+            </div>
+            <p style="font-size:11.5px;color:var(--ink-muted);margin:10px 0 0">
+              72 turns is three career years of the client's own 24-turn grid. The post-December finale block sits
+              outside that grid and is not counted.
+            </p>
+          </div>
+
+          <div class="card">
+            <h2>Checks</h2>
+            <table class="t">
+              <thead><tr><th>Check</th><th>State</th><th>Detail</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>Trainee belongs to the scenario</td>
+                  <td><span class="pill pill-positive">Pass</span></td>
+                  <td>Admire Vega is released on Global and linked to URA Finale.</td>
+                </tr>
+                <tr>
+                  <td>Deck has six cards</td>
+                  <td><span class="pill pill-caution">Warning</span></td>
+                  <td>Two slots are empty. A four-card deck runs; it just starts with less support. <a href="career-deck.html" style="text-decoration:underline">Finish the deck</a></td>
+                </tr>
+                <tr>
+                  <td>No duplicate card</td>
+                  <td><span class="pill pill-positive">Pass</span></td>
+                  <td>The client forbids two copies of one card in a deck.</td>
+                </tr>
+                <tr>
+                  <td>Targets within the scenario caps</td>
+                  <td><span class="pill pill-positive">Pass</span></td>
+                  <td>Highest target is 1100 Speed against a 1400 cap.</td>
+                </tr>
+                <tr>
+                  <td>Scenario matrix is current</td>
+                  <td><span class="pill pill-positive">Current</span></td>
+                  <td>Verified 2026-09-27 · GameTora scenarios.json. <a href="database-sources.html" style="text-decoration:underline">Source ledger</a></td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              A warning is not a block. The one warning here is a deck with empty slots, which is a legitimate
+              choice; the run commits either way and the warning is stated once, not repeated on every screen.
+            </span></p>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>What this scenario asks</h2>
+            <table class="t">
+              <tbody>
+                <tr><td>Facility levels</td><td>Rise by <b>repetition</b>: four uses per level, capped at Lv5.</td></tr>
+                <tr><td>Fan gates</td><td>Three Unique Skill gates in Senior year: Valentine's 60,000 turf, Fan Fest 70,000, Holiday Season 120,000.</td></tr>
+                <tr><td>Happy Meek</td><td>Can appear on any stat-training turn. Win pays 30 SP and +1 cap tier; lose pays 15 SP.</td></tr>
+                <tr><td>Finale targets</td><td>Speed around 800, or an A rank. Stamina by distance: Medium 600.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h2>What is not built yet</h2>
+            <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.55;margin:0 0 9px">
+              These are product gaps, stated as gaps rather than as "not built" developer text on the run screen:
+            </p>
+            <ul style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.6;color:var(--ink-muted)">
+              <li>Per-discipline facility training counts are not recorded, so no facility level can be shown.</li>
+              <li>Happy Meek duel progress is not recorded, so the panel shows the mechanism and no count.</li>
+              <li>Fans are not recorded on every turn, so a fan gate cannot be marked met until one is.</li>
+            </ul>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              Each line names <b>what</b> is missing and <b>what the screen does instead</b>. None says "not built",
+              which is developer language in a user interface.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Commit</h2>
+            <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.55;margin:0 0 10px">
+              Creating the run writes the trainee, scenario, target, parents and deck. Turn 1 is recorded from the
+              cockpit, not here, so nothing is marked played until a turn is actually logged.
+            </p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a class="btn btn-primary" href="cockpit-ura-finale.html">Create the run</a>
+              <a class="btn" href="career-deck.html">Back to deck</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Preflight</h2>
+        <ol>
+          <li><b>Peak-End Rule at the commit.</b> The last screen before the run starts is the one that lists what will exist and what to expect. A confidence drop here costs the whole run, so the page ends with the commit and nothing else.</li>
+          <li><b>One warning, stated once.</b> The external review's "preflight single-row warnings, no duplicate Edit" is applied literally: one row, one link to the place the fix lives, no repeated copy.</li>
+          <li><b>Product gaps are described as behaviour, not as build status.</b> "Fans are not recorded on every turn, so a fan gate cannot be marked met until one is" replaces "not built", which is developer text in a user interface.</li>
+          <li><b>The scenario's own asks are summarised from its entry</b> — repetition, fan gates, Happy Meek, finale targets — rather than restated from memory. Where the scenario owns a fact, this screen points at it.</li>
+          <li><b>Commit is the only filled action.</b> Back is an outline. The run is not created until a turn is logged, so the screen promises nothing it does not do.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

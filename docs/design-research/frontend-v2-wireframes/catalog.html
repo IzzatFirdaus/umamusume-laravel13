@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Umamusume catalog · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item active" href="database.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><a href="database.html">Database</a> · <b>Trainees</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">71 trainees</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Catalog</div>
+      <div class="hrow">
+        <div>
+          <h1>Umamusume catalog</h1>
+          <p class="lede">71 trainees and their costumes. Every aptitude letter here is the catalog's; stat grades are a separate, provisional scale and are never printed under the same label.</p>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <nav aria-label="Database areas" class="stepper" style="margin-bottom:14px">
+        <a class="step" href="database.html">Hub</a>
+        <span class="step" aria-current="step">Trainees</span>
+        <a class="step" href="support-cards.html">Supports</a>
+        <a class="step" href="skills.html">Skills</a>
+        <a class="step" href="database-races.html">Races</a>
+        <a class="step" href="database-scenarios.html">Scenarios</a>
+        <a class="step" href="database-events.html">Events</a>
+        <a class="step" href="database-shop-items.html">Shop items</a>
+        <a class="step" href="database-sparks.html">Sparks</a>
+        <a class="step" href="database-sources.html">Sources</a>
+      </nav>
+
+      <div class="filters" style="margin-bottom:12px">
+        <label class="field" style="flex:1 1 240px"><span class="k">Search</span><span class="in"><input placeholder="Name or unique skill"></span></label>
+        <label class="field" style="flex:0 1 150px"><span class="k">Surface</span><span class="in"><select><option>Any</option><option>A</option><option>B</option><option>C</option></select></span></label>
+        <label class="field" style="flex:0 1 150px"><span class="k">Distance</span><span class="in"><select><option>Any</option><option>A</option><option>B</option><option>C</option></select></span></label>
+        <label class="field" style="flex:0 1 160px"><span class="k">Running style</span><span class="in"><select><option>Any</option><option>A</option><option>B</option></select></span></label>
+        <label class="field" style="flex:0 1 160px"><span class="k">Release</span><span class="in"><select><option>Any</option><option selected>Released (Global)</option><option>Announced</option><option>JP only</option></select></span></label>
+        <a class="btn btn-quiet" href="catalog.html">Clear</a>
+      </div>
+
+      <div class="grid g-3">
+        <a class="card" href="catalog-detail.html" style="margin:0;display:block">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:9px">
+            <div>
+              <div style="font-size:15px;font-weight:800;color:var(--ink-strong)">Admire Vega</div>
+              <div style="font-size:12px;color:var(--ink-muted)">アドマイヤベガ · [Starry Nocturne]</div>
+            </div>
+            <span class="pill pill-positive">Global</span>
+          </div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:9px">
+            <span class="pill pill-neutral">★★★ SSR</span><span class="pill pill-outline">Turf A</span><span class="pill pill-outline">Medium A</span><span class="pill pill-outline">End A</span>
+          </div>
+        </a>
+        <a class="card" href="catalog-detail.html" style="margin:0;display:block">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:9px">
+            <div>
+              <div style="font-size:15px;font-weight:800;color:var(--ink-strong)">Agnes Digital</div>
+              <div style="font-size:12px;color:var(--ink-muted)">アグネスデジタル</div>
+            </div>
+            <span class="pill pill-positive">Global</span>
+          </div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:9px">
+            <span class="pill pill-neutral">SSR</span><span class="pill pill-outline">Dirt A</span><span class="pill pill-outline">Mile A</span><span class="pill pill-outline">Pace A</span>
+          </div>
+        </a>
+        <a class="card" href="catalog-detail.html" style="margin:0;display:block">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:9px">
+            <div>
+              <div style="font-size:15px;font-weight:800;color:var(--ink-strong)">Rice Shower</div>
+              <div style="font-size:12px;color:var(--ink-muted)">ライスシャワー</div>
+            </div>
+            <span class="pill pill-positive">Global</span>
+          </div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:9px">
+            <span class="pill pill-neutral">★★★ SSR</span><span class="pill pill-outline">Turf A</span><span class="pill pill-outline">Medium A</span><span class="pill pill-outline">End A</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="pager">
+        <span>71 trainees · page 1 of 12</span>
+        <button class="btn btn-sm" disabled>Previous</button>
+        <button class="btn btn-sm">Next</button>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Umamusume catalog</h2>
+        <ol>
+          <li><b>Cards, not a table.</b> A trainee is identified by name and three aptitude letters, so a card grid reads faster than a nine-column table at this catalogue size. Above roughly 200 rows with more columns, the pattern inverts back to a table.</li>
+          <li><b>Three letters, not nine.</b> Each card shows the strongest value per axis; the detail screen owns the full set. That is the chunking the trainee picker also uses, so the grammar is learned once.</li>
+          <li><b>Aptitude never shares a label with a stat grade.</b> The cockpit's stat-grade banding is marked <code>provisional</code> in config; this screen prints aptitudes only, and the lede says so.</li>
+          <li><b>Release status is a word.</b> "Global" is a pill with text. The catalog's JP-only case is rendered as a muted label in the running app, and no badge is invented here.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html" class="active"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

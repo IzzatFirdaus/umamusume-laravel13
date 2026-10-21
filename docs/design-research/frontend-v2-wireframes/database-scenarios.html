@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scenarios reference · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item active" href="database.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><a href="database.html">Database</a> · <b>Scenarios</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">4 scenarios</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Scenarios</div>
+      <div class="hrow">
+        <div>
+          <h1>Scenario matrix</h1>
+          <p class="lede">Four permanent Global scenarios. This table is the composition source: the cockpit renders exactly these panels and no others.</p>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="card">
+        <h2>Caps</h2>
+        <table class="t">
+          <thead><tr><th>Scenario</th><th>Live on Global</th><th class="n">Speed</th><th class="n">Stamina</th><th class="n">Power</th><th class="n">Guts</th><th class="n">Wit</th></tr></thead>
+          <tbody>
+            <tr><td><b>URA Finale</b></td><td class="mono">2025-06-26</td><td class="n mono">1400</td><td class="n mono">1400</td><td class="n mono">1400</td><td class="n mono">1400</td><td class="n mono">1400</td></tr>
+            <tr class="is-current"><td><b>Unity Cup</b></td><td class="mono">2025-11-06</td><td class="n mono">1300</td><td class="n mono">1300</td><td class="n mono">1300</td><td class="n mono">1300</td><td class="n mono"><b>1800</b></td></tr>
+            <tr><td><b>Trackblazer</b></td><td class="mono">2026-03-12</td><td class="n mono">1200</td><td class="n mono"><b>1900</b></td><td class="n mono">1200</td><td class="n mono">1200</td><td class="n mono">1500</td></tr>
+            <tr><td><b>Our Grand Concert</b></td><td class="mono">2026-07-22</td><td class="n mono"><b>1600</b></td><td class="n mono">1300</td><td class="n mono">1300</td><td class="n mono">1500</td><td class="n mono">1300</td></tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+          The bold figure in each row is that scenario's outlier, and the outlier is its mechanical identity: Unity Cup's
+          Wit cap is why a Wit-forward deck is unusually strong there, and Our Grand Concert's 1600 Speed is the
+          <b>highest Global Speed ceiling in play</b>. Base is 1200 for every stat; the hard ceiling is 2000.
+        </span></p>
+      </div>
+
+      <div class="card">
+        <h2>Panels each scenario composes</h2>
+        <table class="t">
+          <thead><tr><th>Panel</th><th class="n">URA</th><th class="n">Unity</th><th class="n">Trackblazer</th><th class="n">Concert</th></tr></thead>
+          <tbody>
+            <tr><td>Race calendar</td><td class="n">on</td><td class="n">on</td><td class="n">off</td><td class="n">off</td></tr>
+            <tr><td>Career goals</td><td class="n">on</td><td class="n">on</td><td class="n">off</td><td class="n">on</td></tr>
+            <tr><td>Team races</td><td class="n">off</td><td class="n">on</td><td class="n">off</td><td class="n">off</td></tr>
+            <tr><td>Team rank ladder</td><td class="n">off</td><td class="n">on</td><td class="n">off</td><td class="n">off</td></tr>
+            <tr><td>Grade Point objectives</td><td class="n">off</td><td class="n">off</td><td class="n">on</td><td class="n">off</td></tr>
+            <tr><td>Pro Shop</td><td class="n">off</td><td class="n">off</td><td class="n">on</td><td class="n">off</td></tr>
+            <tr><td>Epithet routes</td><td class="n">off</td><td class="n">off</td><td class="n">on</td><td class="n">off</td></tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+          An off panel draws nothing at all. The cockpit never shows an empty box for a system its scenario does not use,
+          which is why URA Finale looks sparser than Unity Cup and both are correct.
+        </span></p>
+      </div>
+
+      <div class="card">
+        <h2>Ruleset dates</h2>
+        <table class="t">
+          <thead><tr><th>Scenario</th><th>Date</th><th>What it marks</th></tr></thead>
+          <tbody>
+            <tr><td>URA Finale</td><td class="mono">2026-07-01</td><td>Rework: caps 1200 → 1400, Happy Meek duels added.</td></tr>
+            <tr><td>Unity Cup</td><td class="mono">2026-07-01</td><td>Rework: caps to 1300 with Wit 1800, Extreme Bursts, team training Energy cost removed.</td></tr>
+            <tr><td>Trackblazer</td><td class="mono">2026-03-12</td><td>Launch. No subsequent rework documented.</td></tr>
+            <tr><td>Our Grand Concert</td><td class="mono">2026-07-22</td><td>Launch. No subsequent rework documented.</td></tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+          A ruleset date is <b>not</b> an app ruleset version. No source defines a Global ruleset version, so the version
+          line elsewhere reads <code>N/A</code> and the two facts are never merged into one label.
+        </span></p>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Scenarios</h2>
+        <ol>
+          <li><b>Bold marks the outlier, not the maximum.</b> Every row has one stat that differs; making it bold lets a Trainer read four scenarios' identity in one glance.</li>
+          <li><b>Panels are a matrix, not prose.</b> Four columns of on/off is the composition contract itself, and printing it makes the cockpit's behaviour explainable.</li>
+          <li><b>Ruleset date is separated from version.</b> They are two facts; merging them would invent a version number no source defines.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html" class="active"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

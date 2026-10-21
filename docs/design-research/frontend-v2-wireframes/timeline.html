@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Career timeline · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item active" href="runs-index.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">Maruzensky · URA Finale · <b>Timeline</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-neutral">Completed</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Career timeline</div>
+      <div class="hrow">
+        <div>
+          <h1>Every logged turn, race and event</h1>
+          <p class="lede">Maruzensky's URA Finale career, in order. 75 turns recorded. This is the auditable record behind the Result screen.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="result.html">Career result</a>
+          <a class="btn" href="runs-index.html">All careers</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="grid g-4" style="margin-bottom:14px">
+        <div class="card" style="margin:0"><div class="k" style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--ink-muted)">Turns recorded</div><div style="font-size:22px;font-weight:800;color:var(--ink-strong)" class="mono">75</div></div>
+        <div class="card" style="margin:0"><div class="k" style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--ink-muted)">Races entered</div><div style="font-size:22px;font-weight:800;color:var(--ink-strong)" class="mono">4</div></div>
+        <div class="card" style="margin:0"><div class="k" style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--ink-muted)">Events</div><div style="font-size:22px;font-weight:800;color:var(--ink-strong)" class="mono">0</div></div>
+        <div class="card" style="margin:0"><div class="k" style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--ink-muted)">Finale</div><div style="font-size:16px;font-weight:800;color:var(--ink-strong)">Completed · 1st</div></div>
+      </div>
+
+      <div class="filters" style="margin-bottom:12px">
+        <label class="field" style="flex:0 1 160px"><span class="k">Kind</span><span class="in"><select><option>All entries</option><option>Training</option><option>Race</option><option>Event</option><option>Rest</option></select></span></label>
+        <label class="field" style="flex:0 1 170px"><span class="k">Year</span><span class="in"><select><option>All years</option><option>Junior</option><option>Classic</option><option>Senior</option></select></span></label>
+        <a class="btn btn-quiet" href="timeline.html">Clear</a>
+      </div>
+
+      <div class="card">
+        <h2>The record</h2>
+        <table class="t">
+          <thead>
+            <tr><th class="n" style="width:70px">Turn</th><th>Position</th><th>Kind</th><th>What happened</th><th class="n">Energy</th><th class="n">SP</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="n mono">1</td><td>Junior · Early Jan</td><td>Training</td><td>Speed training</td><td class="n mono">—</td><td class="n mono">—</td></tr>
+            <tr><td class="n mono">2</td><td>Junior · Late Jan</td><td>Training</td><td>Speed training</td><td class="n mono">—</td><td class="n mono">—</td></tr>
+            <tr class="is-current"><td class="n mono">12</td><td>Junior · Late Jun</td><td>Race</td><td><b>Junior Make Debut</b> · Debut · <b>1st</b></td><td class="n mono">—</td><td class="n mono">—</td></tr>
+            <tr><td class="n mono">30</td><td>Classic · Late Jun</td><td>Race</td><td>URA Finals Qualifier · G1 · <b>1st</b></td><td class="n mono">—</td><td class="n mono">—</td></tr>
+            <tr><td class="n mono">31</td><td>Classic · Early Jul</td><td>Race</td><td>URA Finals Semifinal · <b>1st</b></td><td class="n mono">—</td><td class="n mono">—</td></tr>
+            <tr><td class="n mono">32</td><td>Classic · Late Jul</td><td>Race</td><td>URA Finals Final (URA) · <b>1st</b></td><td class="n mono">—</td><td class="n mono">—</td></tr>
+            <tr><td class="n mono">75</td><td>Senior · Late Dec</td><td>Result</td><td>Finale completed · 1st</td><td class="n mono">25</td><td class="n mono">34</td></tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+          Turn numbers are the run's own; the four races are the only entries whose turn was published.
+          Energy and SP are blank where the import did not capture them — a blank is "not recorded", never zero.
+        </span></p>
+        <div class="pager">
+          <span>75 entries · showing 7</span>
+          <button class="btn btn-sm" disabled>Previous</button>
+          <button class="btn btn-sm">Next</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Phase grouping</h2>
+        <p class="sub">Collapsed by phase, the shape a 72-turn run needs. The open phase is the one you are reading.</p>
+        <details open>
+          <summary style="min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:800;color:var(--ink-strong)">Junior Year · 24 turns</summary>
+          <p style="font-size:12.5px;color:var(--ink-muted);margin:6px 0 0">Turns 1–24. Duration unknown for most entries; the Debut race is the one dated obligation.</p>
+        </details>
+        <details style="margin-top:8px">
+          <summary style="min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:800;color:var(--ink-strong)">Classic Year · 24 turns</summary>
+        </details>
+        <details style="margin-top:8px">
+          <summary style="min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:800;color:var(--ink-strong)">Senior Year · 24 turns</summary>
+        </details>
+        <details style="margin-top:8px">
+          <summary style="min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:800;color:var(--ink-strong)">After the grid · finale block</summary>
+        </details>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Career timeline</h2>
+        <ol>
+          <li><b>Phase grouping is collapsible, which is the corpus's own pattern.</b> <code>DESIGN-CORPUS.md</code> §5 declares "grouping by phase, collapsible — exactly the shape a 24-turn run needs", and this screen is where that shape belongs.</li>
+          <li><b>Turn numbers are the spine, left-aligned and monospace.</b> A record is read by finding a turn; putting the number first makes scanning vertical rather than horizontal.</li>
+          <li><b>Blank is not zero.</b> Energy and SP columns are empty where the import did not capture them. A zero would claim a reading nobody took.</li>
+          <li><b>The finale block sits outside the 72-turn grid</b> and is grouped separately, because the post-December block is not part of the three-year grid the client counts.</li>
+          <li><b>Four races, four statuses, one word each.</b> "1st" is the only claim made; no score, no grade, no aggregate, per the app's no-score rule.</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          Wireframe only. Turn count, race entries, finale outcome and the final Energy/SP are run 17's live props;
+          intermediate turn positions are illustrative and the note says so.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html" class="active"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

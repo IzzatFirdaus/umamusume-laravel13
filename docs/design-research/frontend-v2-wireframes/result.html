@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Career result · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item active" href="runs-index.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">Maruzensky · URA Finale · <b>Result</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-neutral">Completed</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Career result</div>
+      <div class="hrow">
+        <div>
+          <h1>Maruzensky · URA Finale</h1>
+          <p class="lede">Completed · Turn 75 · URA Finale 1st. The final totals this run produced, and what can be banked from it.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="timeline.html">Open the timeline</a>
+          <a class="btn btn-primary" href="#">Bank as a veteran</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="grid g-4" style="margin-bottom:14px">
+        <div class="card" style="margin:0;border-left:3px solid var(--green-deep)">
+          <div class="k" style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--ink-muted)">Finale</div>
+          <div style="font-size:20px;font-weight:800;color:var(--ink-strong)">Completed · 1st</div>
+          <div style="font-size:11.5px;color:var(--ink-muted)">URA Finale</div>
+        </div>
+        <div class="card" style="margin:0">
+          <div class="k" style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--ink-muted)">Final turn</div>
+          <div style="font-size:20px;font-weight:800;color:var(--ink-strong)" class="mono">75</div>
+        </div>
+        <div class="card" style="margin:0">
+          <div class="k" style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--ink-muted)">Races won</div>
+          <div style="font-size:20px;font-weight:800;color:var(--ink-strong)" class="mono">4 of 4</div>
+        </div>
+        <div class="card" style="margin:0">
+          <div class="k" style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--ink-muted)">Skill points at end</div>
+          <div style="font-size:20px;font-weight:800;color:var(--ink-strong)" class="mono">34</div>
+        </div>
+      </div>
+
+      <div class="grid g-side">
+
+        <div class="card" style="margin:0">
+          <h2>Final stats</h2>
+          <p class="sub">The totals this career ended with. Read against the scenario's 1400 cap.</p>
+          <div class="srow"><span class="k">Speed</span><span class="v mono">785 <s>/ 1400</s></span><div class="track"><i style="width:56%"></i><span class="capmark" style="left:100%"></span></div></div>
+          <div class="srow"><span class="k">Stamina</span><span class="v mono">344 <s>/ 1400</s></span><div class="track"><i style="width:25%"></i></div></div>
+          <div class="srow"><span class="k">Power</span><span class="v mono">753 <s>/ 1400</s></span><div class="track"><i style="width:54%"></i></div></div>
+          <div class="srow"><span class="k">Guts</span><span class="v mono">321 <s>/ 1400</s></span><div class="track"><i style="width:23%"></i></div></div>
+          <div class="srow"><span class="k">Wit</span><span class="v mono">628 <s>/ 1400</s></span><div class="track"><i style="width:45%"></i></div></div>
+          <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+            Bars measure against the cap, and no build target was set for this run, so there is no second denominator.
+            A finished run keeps its readings; it does not get a retroactive target.
+          </span></p>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Finale-ready check</h2>
+            <p class="sub">Measured against URA Finale's published targets.</p>
+            <table class="t">
+              <tbody>
+                <tr><td>Speed against "around 800, or an A rank"</td><td class="n"><span class="pill pill-caution">785 · close</span></td></tr>
+                <tr><td>Stamina against 600 (Medium)</td><td class="n"><span class="pill pill-neutral">344 · short</span></td></tr>
+                <tr><td>Finale itself</td><td class="n"><span class="pill pill-positive">Won · 1st</span></td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              The run <b>won the finale while short of the published stamina guide</b>. That is a fact worth printing: it
+              shows the "finale-ready" targets are a recommendation, not a gate, and a result screen that implied
+              otherwise would be teaching a rule the game does not enforce.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>What can be banked</h2>
+            <table class="t">
+              <thead><tr><th>Factor</th><th>Grade</th><th class="n"></th></tr></thead>
+              <tbody>
+                <tr><td>Basic ability · Speed</td><td>★3</td><td class="n"><span class="pill pill-positive">Bankable</span></td></tr>
+                <tr><td>Aptitude · Turf</td><td>★2</td><td class="n"><span class="pill pill-positive">Bankable</span></td></tr>
+                <tr><td>Unique skill</td><td>★1</td><td class="n"><span class="pill pill-positive">Bankable</span></td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">
+              Banking saves a <b>Veteran Umamusume</b> record that later runs can inherit from. Factor grades are the
+              run's own; the ★4 ceiling is 500 total and ★5 is 550, so a ★3 is the usual record shape.
+            </p>
+          </div>
+
+          <div class="card">
+            <h2>Export</h2>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a class="btn btn-sm" href="#">Download CSV</a>
+              <a class="btn btn-sm" href="#">Download JSON</a>
+            </div>
+            <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">Both are plain file downloads, not navigations.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Career result</h2>
+        <ol>
+          <li><b>Peak-End Rule, done properly.</b> The result is the end of the experience, so it leads with the outcome and the final totals rather than a score. There is no aggregate, percentage or grade for the career — the app never invents a score (ADR-0001 §3).</li>
+          <li><b>The honest finding is printed.</b> This run won the finale with 344 Stamina against a published 600 guide. Saying so is more useful than a green check, and it stops the result screen from teaching a gate the game does not enforce.</li>
+          <li><b>Final stats are read against the cap, not a target.</b> No target existed, and a finished run does not gain one retroactively.</li>
+          <li><b>Banking is the one filled action.</b> Export and timeline are reads; banking is the only write, and it is the only thing a finished run is for.</li>
+          <li><b>Four KPI tiles, one accented.</b> Only the finale outcome carries a colour edge, because it is the single most important fact on the page.</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          Wireframe only. Finale outcome, turn 75, the five final stats and the 34 SP are run 17's live props.
+          Factor grades are illustrative; the ★4 / ★5 totals quoted are sourced (<code>UMAMUSUME_REFERENCE.md</code> §1.3.5).
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html" class="active"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

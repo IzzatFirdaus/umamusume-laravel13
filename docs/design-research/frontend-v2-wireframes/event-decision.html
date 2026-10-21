@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event decision · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item active" href="runs-index.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">Rice Shower · Unity Cup · <b>Events</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">Turn 67</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Event decision</div>
+      <div class="hrow">
+        <div>
+          <h1>A training event is asking</h1>
+          <p class="lede">Pick one option. The event resolves immediately and cannot be re-run; an Alarm Clock retries a lost goal race, not an event.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="cockpit-unity-cup.html">Back to cockpit</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <nav aria-label="Career" class="stepper" style="margin-bottom:14px">
+        <a class="step" href="cockpit-unity-cup.html">Cockpit</a>
+        <a class="step" href="training-decision.html">Training</a>
+        <a class="step" href="race-decision.html">Races</a>
+        <a class="step" href="skills-planner.html">Skills</a>
+        <span class="step" aria-current="step">Events</span>
+        <a class="step" href="inheritance.html">Inheritance</a>
+        <a class="step" href="run-deck.html">Deck</a>
+        <a class="step" href="timeline.html">Timeline</a>
+        <a class="step" href="result.html">Result</a>
+      </nav>
+
+      <div class="grid g-side">
+
+        <div class="card" style="margin:0">
+          <h2>What the event shows</h2>
+
+          <div style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:14px 16px">
+            <div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap">
+              <span style="font-size:15px;font-weight:800;color:var(--ink-strong)">The reporter asks for a quote</span>
+              <span class="tag">Training event</span>
+              <span class="tag">Support card</span>
+            </div>
+            <p style="font-size:13px;color:var(--ink);line-height:1.6;margin:10px 0 0">
+              A reporter wants a few words after practice. Your trainee looks at you, waiting.
+            </p>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              Event text is the client's own copy and is not transcribed here. This row is a placeholder shape with an
+              illustrative title; a real screen prints what the client prints, never a paraphrase.
+            </span></p>
+          </div>
+
+          <h3 style="margin-top:14px">Options</h3>
+
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <label style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:11px;align-items:flex-start;cursor:pointer">
+              <input type="radio" name="opt" style="margin-top:3px;width:16px;height:16px">
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:700;color:var(--ink-strong);font-size:13.5px">"Tell them the truth."</div>
+                <div style="font-size:11.5px;color:var(--ink-muted);margin-top:3px">Effect not published. The option is choice only.</div>
+              </div>
+            </label>
+
+            <label style="border:1px solid var(--pick-line);border-width:2px;background:var(--green-tint);border-radius:var(--r-md);padding:11px 13px;display:flex;gap:11px;align-items:flex-start;cursor:pointer">
+              <input type="radio" name="opt" checked style="margin-top:3px;width:16px;height:16px">
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">"Say something kind."</div>
+                <div style="font-size:11.5px;color:var(--ink-muted);margin-top:3px">Selecting shown; outcome not predicted.</div>
+              </div>
+            </label>
+
+            <label style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:11px;align-items:flex-start;cursor:pointer">
+              <input type="radio" name="opt" style="margin-top:3px;width:16px;height:16px">
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:700;color:var(--ink-strong);font-size:13.5px">"Leave it to the coach."</div>
+                <div style="font-size:11.5px;color:var(--ink-muted);margin-top:3px">Effect not published.</div>
+              </div>
+            </label>
+          </div>
+
+          <p class="note" style="margin-top:11px"><span class="g">○</span><span>
+            <b>No option predicts its outcome.</b> The app is forbidden to invent a score, a percentage or a "best pick"
+            for an event whose results no source publishes. It records the choice and the effect you report afterwards.
+          </span></p>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Record the outcome</h2>
+            <p class="sub">After the client resolves the event, record what it did.</p>
+            <div class="grid g-2" style="gap:9px">
+              <label class="field"><span class="k">Energy</span><span class="in"><input placeholder="—"></span></label>
+              <label class="field"><span class="k">Mood</span><span class="in"><select><option>Unchanged</option><option>+1 tier</option><option>−1 tier</option></select></span></label>
+              <label class="field"><span class="k">Skill points</span><span class="in"><input placeholder="—"></span></label>
+              <label class="field"><span class="k">Stat changed</span><span class="in"><select><option>None</option><option>Speed</option><option>Stamina</option><option>Power</option><option>Guts</option><option>Wit</option></select></span></label>
+            </div>
+            <label class="field" style="margin-top:9px"><span class="k">Note</span><span class="in"><input placeholder="Optional"></span></label>
+          </div>
+
+          <div class="card">
+            <h2>This event's provenance</h2>
+            <table class="t">
+              <tbody>
+                <tr><td>Source</td><td>Client screen</td></tr>
+                <tr><td>Effect table</td><td><span class="pill pill-caution">Not published</span></td></tr>
+                <tr><td>Retryable</td><td>No — Alarm Clock covers goal races only</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">
+              An Alarm Clock retries a goal race whose placing was missed; it does not re-open an event choice.
+            </p>
+          </div>
+
+          <div class="savebar" style="margin-top:0">
+            <span class="dirty">Option 2 selected</span>
+            <button class="btn">Skip</button>
+            <button class="btn btn-primary">Record event</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Event decision</h2>
+        <ol>
+          <li><b>Options are choices, not outcomes.</b> Every option says "effect not published" rather than carrying a guessed benefit. The app's own rule is that it never invents a score or a probability (ADR-0001 §3, ADR-0020 §2), and an event is exactly where that rule is easiest to break.</li>
+          <li><b>The selected option is marked three ways</b> — radio, pick border, tint — consistent with every other selection surface in the wireframe.</li>
+          <li><b>Outcome recording is a separate block.</b> The app records what the client showed, after the fact. It does not pre-fill an expected result, because a forecast printed on the choice screen would become advice nobody gave.</li>
+          <li><b>Retryability is stated up front.</b> "Alarm Clock covers goal races only" answers the one question a Trainer has after a bad event, before they look for an undo that does not exist.</li>
+          <li><b>Event copy is not paraphrased.</b> The title here is a labelled placeholder. Real client copy is printed verbatim or not at all — paraphrasing game text is how a tracker starts teaching the wrong event.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html" class="active"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

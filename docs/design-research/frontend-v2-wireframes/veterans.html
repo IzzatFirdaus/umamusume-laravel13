@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veterans · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item active" href="veterans.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">My data · <b>Veterans</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">7 banked</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Veterans</div>
+      <div class="hrow">
+        <div>
+          <h1>Veteran library</h1>
+          <p class="lede">Finished careers, banked as inheritance candidates. Seven are registered; a Champions Meeting team needs three.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn btn-primary" href="veterans-compare.html">Compare veterans</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="filters" style="margin-bottom:12px">
+        <label class="field" style="flex:1 1 240px"><span class="k">Search</span><span class="in"><input placeholder="Trainee name"></span></label>
+        <label class="field" style="flex:0 1 170px"><span class="k">Scenario</span><span class="in"><select><option>Any</option><option>URA Finale</option><option>Unity Cup</option><option>Trackblazer</option><option>Our Grand Concert</option></select></span></label>
+        <label class="field" style="flex:0 1 160px"><span class="k">Factor grade</span><span class="in"><select><option>Any</option><option>★3</option><option>★2</option><option>★1</option></select></span></label>
+        <a class="btn btn-quiet" href="veterans.html">Clear</a>
+      </div>
+
+      <div class="card">
+        <table class="t">
+          <thead>
+            <tr><th>Trainee</th><th>Scenario</th><th>Saved</th><th class="n">Blue</th><th class="n">Pink</th><th class="n">Unique</th><th class="n"></th></tr>
+          </thead>
+          <tbody>
+            <tr class="is-current">
+              <td><b>Vodka</b><br><span style="color:var(--ink-muted)">ウオッカ</span></td>
+              <td>URA Finale</td><td class="mono">2026-10-15</td>
+              <td class="n mono">★3</td><td class="n mono">★2</td><td class="n mono">★1</td>
+              <td class="n"><a class="btn btn-sm" href="veteran-detail.html">Open</a></td>
+            </tr>
+            <tr>
+              <td><b>Vodka</b><br><span style="color:var(--ink-muted)">ウオッカ</span></td>
+              <td>URA Finale</td><td class="mono">2026-10-15</td>
+              <td class="n mono">★3</td><td class="n mono">★2</td><td class="n mono">★1</td>
+              <td class="n"><a class="btn btn-sm" href="veteran-detail.html">Open</a></td>
+            </tr>
+            <tr>
+              <td><b>Daiwa Scarlet</b><br><span style="color:var(--ink-muted)">ダイワスカーレット</span></td>
+              <td>URA Finale</td><td class="mono">2026-10-15</td>
+              <td class="n mono">★3</td><td class="n mono">★3</td><td class="n mono">★1</td>
+              <td class="n"><a class="btn btn-sm" href="veteran-detail.html">Open</a></td>
+            </tr>
+            <tr>
+              <td><b>Maruzensky</b><br><span style="color:var(--ink-muted)">マルゼンスキー</span></td>
+              <td>URA Finale</td><td class="mono">2026-10-12</td>
+              <td class="n mono">★2</td><td class="n mono">★1</td><td class="n mono">★1</td>
+              <td class="n"><a class="btn btn-sm" href="veteran-detail.html">Open</a></td>
+            </tr>
+            <tr>
+              <td><b>Haru Urara</b><br><span style="color:var(--ink-muted)">ハルウララ</span></td>
+              <td>URA Finale</td><td class="mono">2026-10-11</td>
+              <td class="n mono">★1</td><td class="n mono">★1</td><td class="n mono">★1</td>
+              <td class="n"><a class="btn btn-sm" href="veteran-detail.html">Open</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pager">
+          <span>7 veterans · page 1 of 2</span>
+          <button class="btn btn-sm" disabled>Previous</button>
+          <button class="btn btn-sm">Next</button>
+        </div>
+      </div>
+
+      <div class="grid g-2" style="margin-top:14px">
+        <div class="card" style="margin:0">
+          <h2>Factor grades</h2>
+          <table class="t">
+            <thead><tr><th>Family</th><th>Carries</th></tr></thead>
+            <tbody>
+              <tr><td>Blue</td><td>Cap. +16 per ★3 at each inheritance moment.</td></tr>
+              <tr><td>Pink</td><td>Aptitude shift. +5 / +12 / +21 by grade.</td></tr>
+              <tr><td>Unique</td><td>The trainee's own skill, carried into inheritance.</td></tr>
+            </tbody>
+          </table>
+          <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+            An ultimate-factor research item can push a graduated Umamusume's factor to ★3, but <b>cannot push a factor past ★4</b>.
+            A veteran record therefore carries the grades it was banked with.
+          </span></p>
+        </div>
+
+        <div class="card" style="margin:0">
+          <h2>Team eligibility</h2>
+          <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.55;margin:0">
+            Entering a Champions Meeting needs three Veteran Umamusume registered as a team. This library holds seven,
+            so the requirement is met twice over.
+          </p>
+          <div class="grid g-3" style="margin-top:10px">
+            <div class="tile"><div class="k">Registered</div><div class="v mono" style="font-size:14px">7</div></div>
+            <div class="tile"><div class="k">Needed for a team</div><div class="v mono" style="font-size:14px">3</div></div>
+            <div class="tile"><div class="k">Teams available</div><div class="v mono" style="font-size:14px">2</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Veterans</h2>
+        <ol>
+          <li><b>Three grade columns, not a total.</b> A veteran's value for inheritance is which family carries which grade; collapsing them into one number would hide the only decision a Trainer makes here.</li>
+          <li><b>The two Vokda rows are real duplicates.</b> Two separate careers can produce two identical records, and the list says so rather than deduplicating them — they are different runs, not one row shown twice.</li>
+          <li><b>Team eligibility is arithmetic the page does for you.</b> Seven registered, three needed, two teams available. That is the Goal-Gradient frame on a library screen with no other goal.</li>
+          <li><b>The ★4 ceiling is stated.</b> It bounds what a veteran can ever become, which is the fact that decides whether to spend a research report on it.</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          Wireframe only. The 7 count and three real veteran rows are the live dashboard payload's;
+          factor grades are illustrative. The ★4 ceiling and team rule are sourced (<code>UMAMUSUME_REFERENCE.md</code> §1.3.6).
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

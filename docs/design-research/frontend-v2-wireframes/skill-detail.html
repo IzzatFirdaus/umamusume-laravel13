@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skill detail · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item active" href="skills.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><a href="skills.html">Skills</a> · <b>Corner Recovery ○</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">Recovery</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Skill</div>
+      <div class="hrow">
+        <div>
+          <h1>Corner Recovery ○</h1>
+          <p class="lede">Recovery · Pace Chaser · corners. Base cost 130 Skill Points before any hint discount.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="skills.html">Back to search</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="grid g-side">
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>The source's own engine data</h2>
+            <p class="sub">Shown as-is. These are the export's tokens, not client labels.</p>
+            <table class="t">
+              <tbody>
+                <tr><td>Condition</td><td class="mono" style="font-size:11.5px">corner_random!=0</td></tr>
+                <tr><td>Precondition</td><td class="mono" style="font-size:11.5px">phase&ge;2</td></tr>
+                <tr><td>Base cost</td><td class="mono">130 SP</td></tr>
+                <tr><td>Rarity</td><td>Normal</td></tr>
+                <tr><td>Running style</td><td>Pace Chaser</td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              <b>The expressions and effect codes above are the source's own engine data, not client labels.</b>
+              A tracker that "cleaned" them into prose would lose the one representation that can be diffed against the export.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Displayed cost at each hint level</h2>
+            <table class="t">
+              <thead><tr><th>Hint</th><th class="n">Discount</th><th class="n">Displayed cost</th></tr></thead>
+              <tbody>
+                <tr><td>None</td><td class="n mono">0%</td><td class="n mono">130</td></tr>
+                <tr><td>Lv1</td><td class="n mono">10%</td><td class="n mono">117</td></tr>
+                <tr><td>Lv2</td><td class="n mono">20%</td><td class="n mono">104</td></tr>
+                <tr class="is-current"><td><b>Lv3</b></td><td class="n mono">30%</td><td class="n mono"><b>91</b></td></tr>
+                <tr><td>Lv4</td><td class="n mono">35%</td><td class="n mono">84</td></tr>
+                <tr><td>Lv Max</td><td class="n mono">40%</td><td class="n mono">78</td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              The displayed cost is <code>base × (1 − discount)</code>, floored. This is a measured example:
+              130 → 104 / 91 / 84 reconciles exactly, and 130 × 0.65 = 84.5 is the one observed rounding case,
+              shown as 84 (<code>UMAMUSUME_REFERENCE.md</code> §1.1.4).
+            </span></p>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Readable description</h2>
+            <p style="font-size:13px;color:var(--ink);line-height:1.6;margin:0">
+              Recovers stamina when the runner takes a corner, for Pace Chaser runners.
+            </p>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              The plain description is a convenience reading of the tokens above, never a replacement for them.
+              Where a client string exists it is printed verbatim; where none does, this block says "no client string".
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Related</h2>
+            <table class="t">
+              <tbody>
+                <tr><td>Same condition</td><td class="n">3 skills</td></tr>
+                <tr><td>Same running style</td><td class="n">42 skills</td></tr>
+                <tr><td>Same rarity and type</td><td class="n">18 skills</td></tr>
+              </tbody>
+            </table>
+            <a class="btn btn-sm" href="skills.html" style="margin-top:10px">Search with these filters</a>
+          </div>
+
+          <div class="card">
+            <h2>In your runs</h2>
+            <table class="t">
+              <tbody>
+                <tr><td>Rice Shower · Unity Cup</td><td class="n"><span class="pill pill-positive">Hinted · Lv3</span></td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">A hint belongs to the run that earned it, so it is shown per-run and not as a card property.</p>
+          </div>
+
+          <div class="card">
+            <h2>Provenance</h2>
+            <table class="t">
+              <tbody>
+                <tr><td>Data</td><td>GameTora skill export</td></tr>
+                <tr><td>Entries</td><td class="mono">1,910</td></tr>
+                <tr><td>Hint ladder</td><td>Client-confirmed 2026-10-03</td></tr>
+              </tbody>
+            </table>
+            <a class="btn btn-sm" href="database-sources.html" style="margin-top:10px">Source ledger</a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Skill detail</h2>
+        <ol>
+          <li><b>Engine tokens first, prose second.</b> The condition table is the primary content and the readable sentence is a labelled convenience. Reversing that order would make the screen un-diffable against the export.</li>
+          <li><b>The full price ladder is computed and shown.</b> One row per hint level, so a Trainer sees exactly what earning one more hint buys before spending SP on it.</li>
+          <li><b>The rounding case is displayed, not hidden.</b> 84.5 floored to 84 is the only rounding observed, and printing it is cheaper than a Trainer filing a bug.</li>
+          <li><b>Hints are per-run.</b> The "In your runs" block keeps a run-scoped fact out of a catalogue fact, which is the same separation the cockpit's entered ceiling versus scenario cap needs.</li>
+          <li><b>Provenance is a family and a date, with a link.</b> No file paths on screen.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

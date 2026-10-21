@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page not found · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><b>404</b></span>
+        <span class="spacer"></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">404</div>
+      <div class="hrow">
+        <div>
+          <h1>That page does not exist</h1>
+          <p class="lede">The address did not match any screen. Nothing was changed and nothing was lost.</p>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+      <div class="empty">
+        <h3>Where would you like to go?</h3>
+        <p>If you followed a link from inside the app, that link is broken and worth reporting. If you typed the address, check it against one of these.</p>
+        <div class="act" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <a class="btn btn-primary" href="index.html">Dashboard</a>
+          <a class="btn" href="runs-index.html">Careers</a>
+          <a class="btn" href="database.html">Database</a>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h2>What this page does not do</h2>
+        <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.55;margin:0">
+          It does not redirect you somewhere else automatically. A silent redirect hides the broken link that sent you
+          here, which is the thing worth fixing.
+        </p>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · 404</h2>
+        <ol>
+          <li><b>The error state is a designed state.</b> DESIGN.md §1 principle 5: every state is designed — empty, loading, error, data.</li>
+          <li><b>It says nothing was lost.</b> The first thing a Trainer asks at an error is whether their run survived. Answering it costs one sentence.</li>
+          <li><b>Three exits, one primary.</b> Dashboard is filled; the other two are outlines.</li>
+          <li><b>No auto-redirect.</b> A redirect would conceal the broken link, which is the only useful information on this page.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item active" href="index.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><b>Dashboard</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">1 active career</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Dashboard</div>
+      <div class="hrow">
+        <div>
+          <h1>Trainer Desk</h1>
+          <p class="lede">One active career, ten finished runs, and four permanent Global scenarios.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn btn-primary" href="career-scenario.html">New career</a>
+          <a class="btn" href="runs-index.html">All careers</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="grid g-side" style="margin-bottom:14px">
+        <div class="card" style="margin:0">
+          <h2>Pick up where you left off</h2>
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:2px 0 6px">
+            <div style="flex:1 1 250px;min-width:0">
+              <div style="font-size:19px;font-weight:800;color:var(--ink-strong)">Rice Shower
+                <span class="pill pill-accent" style="vertical-align:3px">Unity Cup</span>
+              </div>
+              <div style="font-size:12.5px;color:var(--ink-muted);margin-top:3px">
+                ライスシャワー · Junior Year · Early January
+              </div>
+            </div>
+            <a class="btn btn-primary" href="cockpit-unity-cup.html">Open cockpit</a>
+          </div>
+
+          <div class="grid g-3" style="margin-top:6px">
+            <div class="tile">
+              <div class="k">Turn</div>
+              <div class="v mono">1 <span style="font-size:11px;font-weight:600;color:var(--ink-muted)">of 72</span></div>
+            </div>
+            <div class="tile">
+              <div class="k">Energy</div>
+              <div class="v na">not recorded</div>
+            </div>
+            <div class="tile">
+              <div class="k">Team rank</div>
+              <div class="v na">not recorded</div>
+            </div>
+          </div>
+
+          <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+            No logged turn has reported Energy or a team rank yet.
+            <b>A turn is counted from the turns recorded, not from the position the run was imported at.</b>
+            This run's cockpit reports turn 67 from its imported position; the strip here counts one recorded
+            turn. Both are labelled, and the disagreement is a known defect, not a rendering choice.
+          </span></p>
+        </div>
+
+        <div class="card" style="margin:0">
+          <h2>Needs you</h2>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div class="tile" style="border-left:3px solid var(--risk)">
+              <div class="k">Data status</div>
+              <div class="v" style="font-size:14px">Global data · Current</div>
+              <div style="font-size:11.5px;color:var(--ink-muted)">Verified 2026-09-27 · GameTora scenarios.json</div>
+              <a href="database-sources.html" style="font-size:12px;text-decoration:underline;color:var(--ink-strong)">Source ledger</a>
+            </div>
+            <div class="tile">
+              <div class="k">Veterans</div>
+              <div class="v" style="font-size:14px">7 banked</div>
+              <a href="veterans.html" style="font-size:12px;text-decoration:underline;color:var(--ink-strong)">Open the library</a>
+            </div>
+            <div class="tile">
+              <div class="k">Review queue</div>
+              <div class="v" style="font-size:14px">Check pending matches</div>
+              <a href="review.html" style="font-size:12px;text-decoration:underline;color:var(--ink-strong)">Open review</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid g-4" style="margin-bottom:14px">
+        <div class="card" style="margin:0">
+          <div class="k" style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)">Careers running</div>
+          <div style="font-size:26px;font-weight:800;color:var(--ink-strong);line-height:1.2">1</div>
+          <div style="font-size:11.5px;color:var(--ink-muted)">Rice Shower · Unity Cup</div>
+        </div>
+        <div class="card" style="margin:0">
+          <div class="k" style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)">Trainees catalogued</div>
+          <div style="font-size:26px;font-weight:800;color:var(--ink-strong);line-height:1.2 mono">71</div>
+          <div style="font-size:11.5px;color:var(--ink-muted)"><a href="catalog.html" style="text-decoration:underline">Browse catalog</a></div>
+        </div>
+        <div class="card" style="margin:0">
+          <div class="k" style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)">Skills</div>
+          <div style="font-size:26px;font-weight:800;color:var(--ink-strong);line-height:1.2 mono">1,910</div>
+          <div style="font-size:11.5px;color:var(--ink-muted)"><a href="skills.html" style="text-decoration:underline">Skill search</a></div>
+        </div>
+        <div class="card" style="margin:0">
+          <div class="k" style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)">Support cards</div>
+          <div style="font-size:26px;font-weight:800;color:var(--ink-strong);line-height:1.2 mono">559</div>
+          <div style="font-size:11.5px;color:var(--ink-muted)"><a href="support-cards.html" style="text-decoration:underline">Browse cards</a></div>
+        </div>
+      </div>
+
+      <div class="grid g-side">
+        <div class="card" style="margin:0">
+          <h2>Recent veterans</h2>
+          <table class="t">
+            <thead><tr><th>Trainee</th><th>Scenario</th><th>Saved</th><th class="n"></th></tr></thead>
+            <tbody>
+              <tr><td><b>Vodka</b> <span style="color:var(--ink-muted)">ウオッカ</span></td><td>URA Finale</td><td class="mono">2026-10-15</td>
+                <td class="n"><a class="btn btn-sm" href="veteran-detail.html">Open</a></td></tr>
+              <tr><td><b>Vodka</b> <span style="color:var(--ink-muted)">ウオッカ</span></td><td>URA Finale</td><td class="mono">2026-10-15</td>
+                <td class="n"><a class="btn btn-sm" href="veteran-detail.html">Open</a></td></tr>
+              <tr><td><b>Daiwa Scarlet</b> <span style="color:var(--ink-muted)">ダイワスカーレット</span></td><td>URA Finale</td><td class="mono">2026-10-15</td>
+                <td class="n"><a class="btn btn-sm" href="veteran-detail.html">Open</a></td></tr>
+            </tbody>
+          </table>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+            <span style="font-size:12px;color:var(--ink-muted)">7 veterans · 3 shown</span>
+            <a class="btn btn-sm" href="veterans.html">All veterans</a>
+          </div>
+        </div>
+
+        <div class="card" style="margin:0">
+          <h2>Quick actions</h2>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <a class="btn" href="import.html">Import a historical career</a>
+            <a class="btn" href="review.html">Review queue</a>
+            <a class="btn" href="preferences.html">Open settings</a>
+            <a class="btn" href="database.html">Database hub</a>
+          </div>
+          <p class="note" style="margin-top:11px"><span class="g">○</span><span>Four destinations. The running app's sidebar carries ten flat items; this dashboard is the same set, grouped, with one primary action.</span></p>
+        </div>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Dashboard</h2>
+        <ol>
+          <li><b>One primary action.</b> "Open cockpit" is the only filled button in the top region. The page-head "New career" is the second, and only because a landing screen owes a way to start one; every other action is an outline or a link.</li>
+          <li><b>Contradiction printed, not hidden.</b> This screen reports turn 1 because <code>stripValues()</code> returns <code>turnEntries-&gt;count()</code>, while the cockpit reports turn 67 from <code>nextTurnToPlay()</code>. Both are labelled and the note names the defect. A wireframe that silently picked one would be the same class of error the audit filed against Energy.</li>
+          <li><b>Absence keeps its tile.</b> Energy and team rank say "not recorded" rather than dropping the row. The external prototype review's "drop the row" rule is applied to explanation paragraphs, not to a value the screen claims to report.</li>
+          <li><b>Nav taxonomy, two levels.</b> Ten destinations grouped as Play / My data / Library / System. The running sidebar is one flat list of ten, which breaches the "at or under eight" target recorded in <code>AppLayout.vue:178</code>; grouping fixes it without deleting a destination.</li>
+          <li><b>Mobile is a different shape.</b> Below 760px the sidebar becomes design-2.0 §41's bottom bar: Home / Career / Legacy / Deck / More.</li>
+          <li><b>Accent discipline.</b> The status lime appears once (the "1 active career" pill), the action blue once (the primary), the risk red once (the data-status edge). Section headings are ink plus a rule. That is the fix for the nine saturated lime bars the external review measured.</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          Wireframe only. Values are the live dashboard payload read from <code>http://127.0.0.1:8000/</code>
+          on 2026-10-21: counts 71 / 1910 / 559, 7 veterans, verified 2026-09-27. No component, token, gate or
+          test changed.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html" class="active"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

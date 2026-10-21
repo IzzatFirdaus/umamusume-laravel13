@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Legacy selection · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item active" href="career-scenario.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">New career · Step 4 of 6 · <b>Legacy</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">URA Finale</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">New career</div>
+      <div class="hrow">
+        <div>
+          <h1>Inherit from two parents</h1>
+          <p class="lede">A run starts with the sparks its parents carry. Both slots are optional; a run with no parents starts from the card's own base.</p>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="stepper" role="list" aria-label="Setup steps">
+        <span class="step is-done"><span class="n">1</span>Scenario</span>
+        <span class="step is-done"><span class="n">2</span>Trainee</span>
+        <span class="step is-done"><span class="n">3</span>Build target</span>
+        <span class="step" aria-current="step"><span class="n">4</span>Legacy</span>
+        <span class="step"><span class="n">5</span>Deck</span>
+        <span class="step"><span class="n">6</span>Preflight</span>
+      </div>
+
+      <div class="grid g-2">
+
+        <div class="card" style="margin:0;border-color:var(--pick-line);border-width:2px">
+          <h2 style="display:flex;justify-content:space-between;align-items:center">
+            <span>Parent A</span>
+            <span class="pill pill-positive">Chosen</span>
+          </h2>
+          <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+            <div style="flex:1 1 220px;min-width:0">
+              <div style="font-size:15px;font-weight:800;color:var(--ink-strong)">Vodka <span style="font-weight:600;font-size:12px;color:var(--ink-muted)">ウオッカ</span></div>
+              <div style="font-size:12px;color:var(--ink-muted)">URA Finale · ★★★ · saved 2026-10-15</div>
+              <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">
+                <span class="tag you">Blue spark · Speed</span>
+                <span class="tag you">Pink spark · Turf</span>
+                <span class="tag">White ×3</span>
+              </div>
+              <a class="btn btn-sm" href="veteran-detail.html" style="margin-top:10px">Inspect</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin:0">
+          <h2 style="display:flex;justify-content:space-between;align-items:center">
+            <span>Parent B</span>
+            <span class="pill pill-neutral">Not chosen</span>
+          </h2>
+          <p class="sub">Pick from your veteran library, or leave this slot empty.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <a class="btn btn-primary" href="veterans.html">Choose a veteran</a>
+            <button class="btn">Leave empty</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h2>What inheritance actually does</h2>
+        <table class="t">
+          <thead><tr><th>Mechanism</th><th>Effect</th><th>Source</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Blue spark</td>
+              <td>Raises a stat's <b>cap</b> by +16 per ★3 basic-ability factor, applied at run start, at the Classic inheritance moment and at the Senior one.</td>
+              <td class="mono" style="font-size:11px">§1.3.4</td>
+            </tr>
+            <tr>
+              <td>Pink spark</td>
+              <td>Shifts an <b>aptitude</b> grade. Measured values are +5 / +12 / +21 per stat by grade.</td>
+              <td class="mono" style="font-size:11px">§1.5.1–1.5.3</td>
+            </tr>
+            <tr>
+              <td>Unique-skill factor</td>
+              <td>Raises caps in proportion to the donor's growth rates.</td>
+              <td class="mono" style="font-size:11px">§1.3.4</td>
+            </tr>
+            <tr>
+              <td>Enhanced spark</td>
+              <td>Carries a stat bonus <em>and</em> a skill hint into inheritance. Only reachable from a won powered-up duel or an event, and its trigger rate is unpublished.</td>
+              <td class="mono" style="font-size:11px">§2.2.1</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+          <b>The cap raise is the loop.</b> Train to a final total, bank the factor grade, inherit the +16 per ★3, then train
+          past the previous ceiling (<code>UMAMUSUME_REFERENCE.md</code> §1.3.6). A run with two ★3 blue parents therefore
+          starts with a higher ceiling than the scenario publishes, which is why the cockpit shows an entered ceiling
+          beside the scenario's rather than one number.
+        </span></p>
+      </div>
+
+      <div class="grid g-2" style="margin-top:14px">
+        <div class="card" style="margin:0">
+          <h2>Projected start</h2>
+          <p class="sub">What the two parents add to this run, before a single turn is played.</p>
+          <table class="t">
+            <thead><tr><th>Stat</th><th class="n">Scenario cap</th><th class="n">From Parent A</th><th class="n">Projected</th></tr></thead>
+            <tbody>
+              <tr><td>Speed</td><td class="n mono">1400</td><td class="n mono">+16</td><td class="n mono"><b>1416</b></td></tr>
+              <tr><td>Stamina</td><td class="n mono">1400</td><td class="n mono">—</td><td class="n mono">1400</td></tr>
+              <tr><td>Power</td><td class="n mono">1400</td><td class="n mono">—</td><td class="n mono">1400</td></tr>
+              <tr><td>Guts</td><td class="n mono">1400</td><td class="n mono">—</td><td class="n mono">1400</td></tr>
+              <tr><td>Wit</td><td class="n mono">1400</td><td class="n mono">—</td><td class="n mono">1400</td></tr>
+            </tbody>
+          </table>
+          <p class="note" style="margin-top:9px"><span class="g">○</span><span>Only Parent A is chosen, so only one cap moves. The projection is arithmetic on the published +16 rule; it is not a reading off a client screen.</span></p>
+        </div>
+
+        <div class="card" style="margin:0">
+          <h2>Parents must differ</h2>
+          <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.55;margin:0">
+            A veteran cannot be its own parent, and the two slots cannot hold the same record. The picker enforces the
+            first rule by hiding the trainee you are running; the second by disabling an already-chosen record.
+          </p>
+          <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+            Choosing no parents is a legitimate build, not an error. The run record carries two nullable parent ids
+            for exactly that reason, and no screen invents a default pair.
+          </span></p>
+        </div>
+      </div>
+
+      <div class="savebar">
+        <span class="dirty">4 of 6 · one parent chosen</span>
+        <a class="btn" href="career-target.html">Back</a>
+        <a class="btn btn-primary" href="career-deck.html">Continue to deck</a>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Legacy selection</h2>
+        <ol>
+          <li><b>The mechanism is explained where the choice is made.</b> Inheritance is the least obvious system in the game and the one most likely to be misread as decoration. Putting the +16-per-★3 rule on the selection screen answers it before a Trainer has to ask (Paradox of the Active User).</li>
+          <li><b>A projected start table, not a promise.</b> One row moves because one parent was chosen; the other four stay at the scenario cap. The table shows the arithmetic's effect rather than a "power score".</li>
+          <li><b>Empty is a valid state, shown as one.</b> "Leave empty" is an outline button beside the primary, and the note says a parentless build is legitimate. That is the Difference between an absence and an error.</li>
+          <li><b>Enhanced sparks are described but never given a rate.</b> The trigger rate is published nowhere; the row says so instead of implying a probability.</li>
+          <li><b>Two slots, two cards, one chosen.</b> The chosen parent takes the pick border and the positive pill; the empty slot stays neutral. Same selection grammar as the scenario and trainee steps.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

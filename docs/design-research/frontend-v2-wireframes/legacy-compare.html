@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compare legacies · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item active" href="legacy.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><a href="legacy.html">Legacy Lab</a> · <b>Compare</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">2 pairs</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Legacy comparison</div>
+      <div class="hrow">
+        <div>
+          <h1>Compare two legacies</h1>
+          <p class="lede">Same table, two columns. Differences are marked; identical rows are stated once so the eye goes to what changed.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="legacy.html">Back to legacies</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="card">
+        <table class="t">
+          <thead>
+            <tr><th style="width:24%">Property</th><th>Vodka × Daiwa Scarlet</th><th>Maruzensky × Haru Urara</th><th>Difference</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Parent A rarity</td><td>★★★</td><td>★★★</td><td><span class="pill pill-neutral">same</span></td></tr>
+            <tr><td>Parent B rarity</td><td>★★★</td><td>★★★</td><td><span class="pill pill-neutral">same</span></td></tr>
+            <tr class="is-current"><td><b>Blue sparks</b></td><td class="mono"><b>2 × ★3 = +32</b></td><td class="mono">1 × ★2 = +8</td><td><span class="pill pill-caution">+24 to A</span></td></tr>
+            <tr class="is-current"><td><b>Aptitude sparks</b></td><td>Turf ★2 · Medium ★3</td><td>Dirt ★1</td><td><span class="pill pill-caution">A has 2, B has 1</span></td></tr>
+            <tr><td>White sparks</td><td>2</td><td>0</td><td><span class="pill pill-caution">+2 to A</span></td></tr>
+            <tr><td>Scenario sources</td><td>URA Finale ×2</td><td>URA Finale ×2</td><td><span class="pill pill-neutral">same</span></td></tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+          The first difference row is the one that decides it: <b>+32 against +8 is a 24-point cap gap</b> at run start,
+          which compounds because inheritance repeats at the Classic and Senior moments.
+        </span></p>
+      </div>
+
+      <div class="grid g-2" style="margin-top:14px">
+        <div class="card" style="margin:0">
+          <h2>Starting caps · legacy A</h2>
+          <table class="t">
+            <tbody>
+              <tr class="is-current"><td>Speed</td><td class="n mono">1432</td></tr>
+              <tr><td>Stamina</td><td class="n mono">1400</td></tr>
+              <tr><td>Power</td><td class="n mono">1400</td></tr>
+              <tr><td>Guts</td><td class="n mono">1400</td></tr>
+              <tr><td>Wit</td><td class="n mono">1400</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card" style="margin:0">
+          <h2>Starting caps · legacy B</h2>
+          <table class="t">
+            <tbody>
+              <tr><td>Speed</td><td class="n mono">1408</td></tr>
+              <tr><td>Stamina</td><td class="n mono">1400</td></tr>
+              <tr><td>Power</td><td class="n mono">1400</td></tr>
+              <tr><td>Guts</td><td class="n mono">1400</td></tr>
+              <tr><td>Wit</td><td class="n mono">1400</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Legacy comparison</h2>
+        <ol>
+          <li><b>Differences are a column, not a colour.</b> "same" and "+24 to A" say what changed; the row tint only draws the eye to the rows that carry a difference.</li>
+          <li><b>Identical rows still print.</b> A comparison that hides matching rows makes a Trainer wonder whether the property was checked at all.</li>
+          <li><b>No aggregate winner.</b> The page states the cap gap and lets the Trainer decide; scoring two legacies would be the invented recommendation the app forbids.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html" class="active"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

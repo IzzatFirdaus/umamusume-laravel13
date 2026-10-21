@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cockpit · Our Grand Concert · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="mockbar">MOCK DATA · no Our Grand Concert run exists in this database. Layout and scenario vocabulary are real; the trainee figures are illustrative.</div>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item active" href="runs-index.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">Example Trainee · <b>Our Grand Concert</b> · Cockpit</span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">Turn 62 · Active</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Cockpit</div>
+      <div class="hrow">
+        <div>
+          <h1>Example Trainee</h1>
+          <p class="lede">Senior Year · Early October · Turn 62. Energy 58, Mood GREAT, Fans 84,600, Skill Points 190.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="runs-index.html">All careers</a>
+          <a class="btn btn-primary" href="training-decision.html">Train with a lesson</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="info" style="margin-bottom:14px">
+        <span aria-hidden="true">i</span>
+        <span>The full Grand Concert treatment, including the Lesson and Song mechanics and the Performance-panel boundary,
+        is <code>cockpit-wireframes-2026-10-21/04-our-grand-concert.html</code>. This is the same scenario at shell density.</span>
+      </div>
+
+      <div class="grid g-side">
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Performance</h2>
+            <p class="sub">Five types, earned from training. No starting value, per-turn amount or Lesson cost is published, so no total is shown.</p>
+            <div class="grid g-3" style="gap:8px">
+              <div class="tile"><div class="k">Dance</div><div class="v" style="font-size:13px;color:var(--ink-muted)">not recorded</div></div>
+              <div class="tile"><div class="k">Passion</div><div class="v" style="font-size:13px;color:var(--ink-muted)">not recorded</div></div>
+              <div class="tile"><div class="k">Vocals</div><div class="v" style="font-size:13px;color:var(--ink-muted)">not recorded</div></div>
+              <div class="tile"><div class="k">Visuals</div><div class="v" style="font-size:13px;color:var(--ink-muted)">not recorded</div></div>
+              <div class="tile"><div class="k">Composure</div><div class="v" style="font-size:13px;color:var(--ink-muted)">not recorded</div></div>
+            </div>
+            <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+              The Performance field lives on the turn-entry screen, not in the cockpit. This panel is a read, and until a
+              turn records a reading, the honest value is "not recorded" for every type.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>The concert loop</h2>
+            <table class="t">
+              <tbody>
+                <tr><td>Lessons</td><td>Open on <b>turn five</b>, between outing and race.</td></tr>
+                <tr><td>Spend</td><td>Performance buys Songs and concert techniques.</td></tr>
+                <tr><td>Gauge</td><td>Three Songs fill Live Performance Expectations.</td></tr>
+                <tr><td>Concerts</td><td>Four Promo Concerts, then the Grand Concert, every six months from late December of Junior Year.</td></tr>
+                <tr><td>Payout</td><td>5 SP per technique Lesson, 25 per Song Lesson, +50 Performance cap per live.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Advisor</h2>
+            <div style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted)">Priority</div>
+            <p style="margin:4px 0 11px;font-weight:800;color:var(--ink-strong)">Live Performance Expectations: Great Success is the scenario's own objective.</p>
+            <div style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted)">Recommended</div>
+            <div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-top:5px">
+              <a class="btn btn-primary" href="training-decision.html">Train with a lesson</a>
+              <span style="font-size:12px;color:var(--ink-muted)">Ten turns to the concert</span>
+            </div>
+            <ul style="margin:11px 0 0;padding-left:18px;font-size:12.5px;line-height:1.6">
+              <li>A lesson raises Performance and spends one turn. <span class="tag">confirmed</span></li>
+              <li>Ten turns remain before the concert. <span class="tag auto">calculated</span></li>
+              <li>The guide says to focus on training rather than stacking races. <span class="tag">source</span></li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h2>Scenario</h2>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px">
+              <span class="pill pill-accent">Our Grand Concert</span><span class="pill pill-outline">Guide held</span>
+            </div>
+            <p style="font-size:12.5px;color:var(--ink-muted);margin:0 0 9px">
+              Ruleset 2026-07-22 · Global launch. Speed cap +400 and Guts +300 are this scenario's identity in numbers.
+            </p>
+            <table class="t">
+              <tbody>
+                <tr><td>Speed cap</td><td class="n mono">1600</td></tr>
+                <tr><td>Guts cap</td><td class="n mono">1500</td></tr>
+                <tr><td>Other three</td><td class="n mono">1300</td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:9px"><span class="g">○</span><span>1600 Speed is the highest Global Speed ceiling in play.</span></p>
+          </div>
+
+          <div class="card">
+            <h2>Where to go</h2>
+            <div class="grid g-2" style="gap:8px">
+              <a class="btn" href="training-decision.html">Training decision</a>
+              <a class="btn" href="timeline.html">Timeline</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Our Grand Concert cockpit</h2>
+        <ol>
+          <li><b>This is the worst Goal-Gradient case, and the page says why.</b> The other three scenarios own progress data that renders in the wrong place; here the central system stores no number at all, so five honest absences are the correct render.</li>
+          <li><b>The loop is explained even though its numbers are missing.</b> Lessons, Songs, the gauge and the concert cadence are published mechanics; a Trainer can plan the run even while the app cannot count Performance.</li>
+          <li><b>Payouts are stated per action type.</b> 5 SP per technique Lesson against 25 per Song Lesson is a 5× difference that decides how a Trainer spends Performance.</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          MOCK DATA. Panel set, caps, the Lesson and concert rules and the payout figures are real config and sourced
+          values; the trainee, turn and state readings are illustrative.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html" class="active"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

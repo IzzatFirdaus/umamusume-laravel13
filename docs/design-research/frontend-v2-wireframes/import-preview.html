@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Import preview · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item active" href="career-scenario.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">Import · <b>Preview</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-caution">4 fields missing</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Import preview</div>
+      <div class="hrow">
+        <div>
+          <h1>Here is what the text says</h1>
+          <p class="lede">Every field the importer found, with an edit box on each. Fields it could not find are marked, not defaulted. Nothing is written until you confirm.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="import.html">Back to the text</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="grid g-3" style="margin-bottom:14px">
+        <div class="card" style="margin:0;border-left:3px solid var(--green-deep)">
+          <div class="k" style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--ink-muted)">Found</div>
+          <div style="font-size:22px;font-weight:800;color:var(--ink-strong)" class="mono">14</div>
+        </div>
+        <div class="card" style="margin:0;border-left:3px solid var(--status-caution-ink)">
+          <div class="k" style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--ink-muted)">Missing</div>
+          <div style="font-size:22px;font-weight:800;color:var(--ink-strong)" class="mono">4</div>
+        </div>
+        <div class="card" style="margin:0">
+          <div class="k" style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--ink-muted)">Source</div>
+          <div style="font-size:14px;font-weight:800;color:var(--ink-strong)">Pasted text · 6 lines</div>
+        </div>
+      </div>
+
+      <div class="grid g-side">
+
+        <div class="card" style="margin:0">
+          <h2>Identity and position</h2>
+          <div class="grid g-2">
+            <label class="field"><span class="k">Scenario <span class="tag auto">found</span></span><span class="in"><input value="Unity Cup"></span></label>
+            <label class="field"><span class="k">Trainee <span class="tag auto">found</span></span><span class="in"><input value="Rice Shower"></span></label>
+            <label class="field"><span class="k">Costume <span class="tag auto">found</span></span><span class="in"><input value="[Rosy Dreams]"></span></label>
+            <label class="field"><span class="k">Year <span class="tag auto">found</span></span><span class="in"><input value="Senior"></span></label>
+            <label class="field"><span class="k">Month <span class="tag auto">found</span></span><span class="in"><input value="Early October"></span></label>
+            <label class="field"><span class="k">Turn <span class="tag auto">found</span></span><span class="in"><input value="67"></span></label>
+            <label class="field is-fail"><span class="k">Status</span><span class="in"><input placeholder="Not found — choose one"></span><span class="fail">Not in the text. Choose Active, Completed or Retired.</span></label>
+            <label class="field is-fail"><span class="k">Rarity</span><span class="in"><input placeholder="Not found"></span><span class="fail">Not in the text. Pick ★1, ★2 or ★3.</span></label>
+          </div>
+
+          <h2 style="margin-top:16px">Stats and state</h2>
+          <div class="grid g-3">
+            <label class="field"><span class="k">Speed</span><span class="in"><input value="607"></span></label>
+            <label class="field"><span class="k">Stamina</span><span class="in"><input value="577"></span></label>
+            <label class="field"><span class="k">Power</span><span class="in"><input value="549"></span></label>
+            <label class="field"><span class="k">Guts</span><span class="in"><input value="736"></span></label>
+            <label class="field"><span class="k">Wit</span><span class="in"><input value="397"></span></label>
+            <label class="field"><span class="k">Skill points</span><span class="in"><input value="173"></span></label>
+            <label class="field"><span class="k">Energy</span><span class="in"><input value="Low band"><span class="u">band</span></span><span class="hint">Read as a band, not a number.</span></label>
+            <label class="field"><span class="k">Mood</span><span class="in"><input value="GREAT"></span></label>
+            <label class="field"><span class="k">Fans</span><span class="in"><input value="209,245"></span></label>
+          </div>
+
+          <h2 style="margin-top:16px">Team block</h2>
+          <div class="grid g-3">
+            <label class="field"><span class="k">Team name</span><span class="in"><input value="Blue Bloom"></span></label>
+            <label class="field"><span class="k">League</span><span class="in"><input value="8"></span></label>
+            <label class="field is-fail"><span class="k">Team rank</span><span class="in"><input placeholder="Not found"></span><span class="fail">Not in the text.</span></label>
+            <label class="field"><span class="k">Team trainings</span><span class="in"><input value="55"></span></label>
+            <label class="field"><span class="k">Spirit bursts</span><span class="in"><input value="6"></span></label>
+            <label class="field"><span class="k">Extreme bursts</span><span class="in"><input value="5"></span></label>
+            <label class="field is-fail"><span class="k">Motto</span><span class="in"><input placeholder="Not found"></span><span class="fail">Not in the text.</span></label>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>How to proceed</h2>
+            <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.55;margin:0 0 10px">
+              Four fields are missing. You can fill them now, or import the run with those fields empty — an imported
+              run records what the text said and nothing more.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn">Fill the missing fields</button>
+              <button class="btn">Drop the missing fields</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>What will be created</h2>
+            <table class="t">
+              <tbody>
+                <tr><td>Run</td><td class="mono">1</td></tr>
+                <tr><td>Turn entry</td><td class="mono">1</td></tr>
+                <tr><td>Race entries</td><td class="mono">0</td></tr>
+                <tr><td>Team state</td><td class="mono">1</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">
+              One turn entry, not 67: the text states a position, not every turn's reading. A run imported at turn 67
+              therefore shows a turn count that disagrees with its position, and the dashboard says so.
+            </p>
+          </div>
+
+          <div class="card">
+            <h2>Commit</h2>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a class="btn btn-primary" href="cockpit-unity-cup.html">Import this run</a>
+              <a class="btn" href="import.html">Start over</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Import preview</h2>
+        <ol>
+          <li><b>Every field is an edit box with a found / missing tag.</b> The import is reviewable field by field rather than as an all-or-nothing commit, which is the preview-before-commit pattern the corpus declares.</li>
+          <li><b>Missing fields say what to do, not just that they are empty.</b> "Choose Active, Completed or Retired" names the valid set; an empty box with "required" is a puzzle.</li>
+          <li><b>The one-turn-entry consequence is stated before the commit.</b> This is the honest answer to the dashboard/cockpit turn disagreement found in the audit: an import records a position, so the strip's turn count and the cockpit's next turn can legitimately differ, and the importer says so rather than hiding it.</li>
+          <li><b>Three counts at the top.</b> Found, missing and source, so a Trainer knows at a glance how much work remains.</li>
+          <li><b>Commit is the only filled action, and it names what it does.</b> "Import this run", not "Continue".</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          Wireframe only. Every "found" value above is run 25's real data, which is what its import produced.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

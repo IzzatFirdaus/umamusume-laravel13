@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cockpit · URA Finale · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item active" href="runs-index.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">Maruzensky · <b>URA Finale</b> · Cockpit</span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-neutral">Completed</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Cockpit</div>
+      <div class="hrow">
+        <div>
+          <h1>Maruzensky</h1>
+          <p class="lede">URA Finale · Turn 75 · Completed · URA Finale 1st. A closed career shows its summary instead of a recommendation.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="runs-index.html">All careers</a>
+          <a class="btn btn-primary" href="result.html">Career result</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="info" style="margin-bottom:14px">
+        <span aria-hidden="true">i</span>
+        <span>The full URA Finale treatment, including the fan-gate table, Happy Meek duel panel and facility-repetition
+        notes, is <code>cockpit-wireframes-2026-10-21/02-ura-finale.html</code>. This is the same record at shell density.</span>
+      </div>
+
+      <div class="grid g-side">
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>This run is complete.</h2>
+            <p style="font-size:13px;color:var(--ink-muted);margin:0">Nothing is being decided, so nothing is ranked and nothing is refused.</p>
+            <div class="grid g-4" style="margin-top:12px">
+              <div class="tile"><div class="k">Finale</div><div class="v" style="font-size:13px">Completed · 1st</div></div>
+              <div class="tile"><div class="k">Turn</div><div class="v mono" style="font-size:13px">75</div></div>
+              <div class="tile"><div class="k">Races</div><div class="v mono" style="font-size:13px">4 of 4</div></div>
+              <div class="tile"><div class="k">Skill points</div><div class="v mono" style="font-size:13px">34</div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Final stats</h2>
+            <div class="srow"><span class="k">Speed</span><span class="v mono">785 <s>/ 1400</s></span><div class="track"><i style="width:56%"></i></div></div>
+            <div class="srow"><span class="k">Stamina</span><span class="v mono">344 <s>/ 1400</s></span><div class="track"><i style="width:25%"></i></div></div>
+            <div class="srow"><span class="k">Power</span><span class="v mono">753 <s>/ 1400</s></span><div class="track"><i style="width:54%"></i></div></div>
+            <div class="srow"><span class="k">Guts</span><span class="v mono">321 <s>/ 1400</s></span><div class="track"><i style="width:23%"></i></div></div>
+            <div class="srow"><span class="k">Wit</span><span class="v mono">628 <s>/ 1400</s></span><div class="track"><i style="width:45%"></i></div></div>
+            <p class="note" style="margin-top:9px"><span class="g">○</span><span>No build target was set for this run, so there is one denominator: the scenario cap.</span></p>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Scenario</h2>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px">
+              <span class="pill pill-accent">URA Finale</span><span class="pill pill-outline">Guide held</span>
+            </div>
+            <p style="font-size:12.5px;color:var(--ink-muted);margin:0 0 9px">
+              Ruleset 2026-07-01: the rework raised caps from 1200 to 1400 in all five stats and added Happy Meek duels.
+            </p>
+            <table class="t">
+              <tbody>
+                <tr><td>Unique Skill gates</td><td>3, all in Senior year</td></tr>
+                <tr><td>Finale targets</td><td>Speed ≈800 · Stamina 600 (Medium)</td></tr>
+                <tr><td>Facility levels</td><td>By repetition, Lv5 max</td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+              This run <b>won its finale with 344 Stamina</b> against a 600 guide. The guides are a recommendation, not a gate,
+              and the page says so rather than showing a green check.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Where to go</h2>
+            <div class="grid g-2" style="gap:8px">
+              <a class="btn" href="timeline.html">Timeline</a>
+              <a class="btn" href="result.html">Career result</a>
+              <a class="btn" href="veterans.html">Bank as a veteran</a>
+              <a class="btn" href="cockpit-unity-cup.html">Unity Cup cockpit</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · URA Finale cockpit</h2>
+        <ol>
+          <li><b>A closed run has no advisor.</b> <code>AdvisorRail</code> is <code>v-if="isActive"</code> in the running app, so a Completed run shows the complete-state sentence instead of a recommendation. That behaviour is correct and is reproduced here.</li>
+          <li><b>The published-vs-observed cap caveat is kept.</b> URA's published cap is a flat 1400; two client captures showed unequal ceilings on specific runs. A tool must not print those as "the URA cap", and this page prints the published row.</li>
+          <li><b>The guide is a recommendation, not a gate.</b> Printing the win alongside a short stamina figure is the most useful thing this screen can say.</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          Wireframe only. Finale outcome, turn, the five final stats and the 34 SP are run 17's live props.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html" class="active"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

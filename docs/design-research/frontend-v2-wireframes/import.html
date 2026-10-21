@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Import a run · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item active" href="career-scenario.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">Import · <b>Paste or upload</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">Draft</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Import</div>
+      <div class="hrow">
+        <div>
+          <h1>Bring in a historical career</h1>
+          <p class="lede">Paste a run write-up or upload a file. The importer reads what it can, shows you what it found, and writes nothing until you confirm.</p>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="grid g-side">
+
+        <div class="card" style="margin:0">
+          <h2>Source</h2>
+
+          <div style="display:flex;gap:6px;margin-bottom:12px">
+            <span class="pill pill-accent">Paste text</span>
+            <span class="pill pill-outline">Upload a file</span>
+          </div>
+
+          <label class="field">
+            <span class="k">Paste the run write-up</span>
+            <span class="in" style="min-height:180px;align-items:flex-start;padding:10px">
+              <textarea style="width:100%;min-height:160px;border:0;background:transparent;font:inherit;color:inherit;resize:vertical;outline:none" placeholder="Paste the notes you kept during the career…">Unity Cup, [Rosy Dreams] Rice Shower, 68 client frames
+Senior Year, Early October, turn 67
+Speed 607 / Stamina 577 / Power 549 / Guts 736 / Wit 397
+Energy low band, mood GREAT, fans 209,245, SP 173
+Team Blue Bloom, league 8, 55 team trainings, 6 spirit bursts, 5 extreme</textarea>
+            </span>
+          </label>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+            <a class="btn btn-primary" href="import-preview.html">Read the text</a>
+            <a class="btn" href="runs-index.html">Cancel</a>
+          </div>
+
+          <p class="note" style="margin-top:12px"><span class="g">○</span><span>
+            Nothing is written on this step. The importer's output is reviewed on the next screen, where every
+            extracted field can be corrected before it becomes a run.
+          </span></p>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>What the importer looks for</h2>
+            <table class="t">
+              <tbody>
+                <tr><td>Scenario</td><td>One of the four Global scenarios, by name.</td></tr>
+                <tr><td>Trainee and costume</td><td>Name plus an optional <code>[Costume]</code> tag.</td></tr>
+                <tr><td>Position</td><td>A year, a month and a turn number.</td></tr>
+                <tr><td>Stats</td><td>Five labelled figures, in any order.</td></tr>
+                <tr><td>Mood and Energy</td><td>One of the five mood tiers; a figure or a band word.</td></tr>
+                <tr><td>Team block</td><td>Unity Cup only: name, motto, league, trainings, burst counts.</td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+              Anything the importer cannot find stays empty. It never fills a missing field with a default, which is why
+              a partially read import is a normal outcome rather than an error.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Files you can upload</h2>
+            <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.55;margin:0">
+              Markdown, plain text or the JSON export this app produces. A JSON export round-trips exactly; text is
+              read heuristically and every field is shown for review.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Import</h2>
+        <ol>
+          <li><b>Write nothing until confirm.</b> The whole import is a preview step followed by a commit. Parsing into the database directly would make a bad read permanent and unreviewable.</li>
+          <li><b>Absence is a normal result.</b> A partially read import is expected and is not an error state. The importer states what it found rather than blocking on what it did not.</li>
+          <li><b>The textarea is the primary control, set large.</b> Pasting a run write-up is the common case and deserves more space than a filename picker.</li>
+          <li><b>Format support is stated, not discovered.</b> The card says which formats round-trip and which are heuristic, so a Trainer knows how much review to expect.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

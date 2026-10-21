@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item active" href="preferences.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">System · <b>Settings</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">Saved</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Settings</div>
+      <div class="hrow">
+        <div>
+          <h1>Preferences</h1>
+          <p class="lede">Layout, language, theme and the target defaults a new career starts from. Stored in the database, not the browser.</p>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="grid g-side">
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Layout width</h2>
+            <p class="sub">How much horizontal space pages use. Compact is best for forms; Wide is best for tables and grids.</p>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <label style="border:1px solid var(--rule-soft);border-radius:var(--r-md);padding:11px 13px;display:flex;gap:10px;align-items:flex-start;cursor:pointer">
+                <input type="radio" name="layout" value="standard" style="margin-top:3px">
+                <div>
+                  <div style="font-weight:800;color:var(--ink-strong)">Standard</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">Bento composition. Grouped cards at the default shell width (1152px).</div>
+                </div>
+              </label>
+              <label style="border:1px solid var(--rule-soft);border-radius:var(--r-md);padding:11px 13px;display:flex;gap:10px;align-items:flex-start;cursor:pointer">
+                <input type="radio" name="layout" value="wide" style="margin-top:3px">
+                <div>
+                  <div style="font-weight:800;color:var(--ink-strong)">Wide</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">Wide bento composition. The same grouping at the wider cap (1536px).</div>
+                </div>
+              </label>
+              <label style="border:1px solid var(--rule-soft);border-radius:var(--r-md);padding:11px 13px;display:flex;gap:10px;align-items:flex-start;cursor:pointer">
+                <input type="radio" name="layout" value="compact" style="margin-top:3px">
+                <div>
+                  <div style="font-weight:800;color:var(--ink-strong)">Compact</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">Focused composition. A single reading column, best for forms and long copy.</div>
+                </div>
+              </label>
+            </div>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              The widths are the ratified ones: 768 / 1152 / 1536. Below 1280px the wide shell collapses to the
+              standard breakpoints, so choosing wide on a laptop changes nothing.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Target defaults</h2>
+            <p class="sub">What a new career's build-target step starts from. Empty means the step starts blank.</p>
+            <div class="grid g-3" style="gap:9px">
+              <label class="field"><span class="k">Speed</span><span class="in"><input value="1100"></span></label>
+              <label class="field"><span class="k">Stamina</span><span class="in"><input value="900"></span></label>
+              <label class="field"><span class="k">Power</span><span class="in"><input value="900"></span></label>
+              <label class="field"><span class="k">Guts</span><span class="in"><input value="600"></span></label>
+              <label class="field"><span class="k">Wit</span><span class="in"><input value="1100"></span></label>
+              <label class="field"><span class="k">Distance</span><span class="in"><select><option>Sprint</option><option>Mile</option><option selected>Medium</option><option>Long</option></select></span></label>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Data</h2>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <a class="btn" href="#">Export everything as JSON</a>
+              <a class="btn" href="#">Download a backup</a>
+            </div>
+            <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">
+              Export is a file download. A backup is a complete copy you can restore from.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Theme</h2>
+            <p style="color:var(--ink-muted);font-size:12.5px;margin:0 0 10px">
+              Applied to every screen. “Follow the system” stores nothing, so the OS preference decides.
+            </p>
+            <div class="grid2" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:9px">
+              <label style="border:1px solid var(--rule);border-radius:var(--r-md);padding:10px 12px;display:flex;gap:9px;align-items:flex-start;cursor:pointer">
+                <input type="radio" name="theme" value="system" checked style="margin-top:3px">
+                <div>
+                  <div style="font-weight:700;color:var(--ink-strong);font-size:13.5px">Follow the system</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted);margin-top:2px">OS decides. Nothing stored.</div>
+                </div>
+              </label>
+              <label style="border:1px solid var(--rule);border-radius:var(--r-md);padding:10px 12px;display:flex;gap:9px;align-items:flex-start;cursor:pointer">
+                <input type="radio" name="theme" value="light" style="margin-top:3px">
+                <div>
+                  <div style="font-weight:700;color:var(--ink-strong);font-size:13.5px">Light</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted);margin-top:2px">The default palette.</div>
+                </div>
+              </label>
+              <label style="border:1px solid var(--rule);border-radius:var(--r-md);padding:10px 12px;display:flex;gap:9px;align-items:flex-start;cursor:pointer">
+                <input type="radio" name="theme" value="dark" style="margin-top:3px">
+                <div>
+                  <div style="font-weight:700;color:var(--ink-strong);font-size:13.5px">Dark</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted);margin-top:2px">The measured dark ramp.</div>
+                </div>
+              </label>
+            </div>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              This is the app’s only theme control — a three-option choice, not a two-way switch. It is a
+              <strong>select</strong> in the running Preferences page; it is drawn as radios here so the three
+              options read side by side. There is no per-page switching anywhere else in the product.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Language</h2>
+            <label class="field"><span class="k">Interface language</span><span class="in"><select><option selected>English</option><option>日本語</option></select></span></label>
+            <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">
+              Game vocabulary is the client's own English either way; the language setting changes the interface, not the game terms.
+            </p>
+          </div>
+
+          <div class="card">
+            <h2>Dashboard</h2>
+            <table class="t">
+              <thead><tr><th>Card</th><th class="n">Shown</th></tr></thead>
+              <tbody>
+                <tr><td>Active career</td><td class="n"><span class="pill pill-positive">Yes</span></td></tr>
+                <tr><td>Counts</td><td class="n"><span class="pill pill-positive">Yes</span></td></tr>
+                <tr><td>Recent veterans</td><td class="n"><span class="pill pill-positive">Yes</span></td></tr>
+                <tr><td>Quick actions</td><td class="n"><span class="pill pill-positive">Yes</span></td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">Hidden cards are excluded, not collapsed.</p>
+          </div>
+
+          <div class="savebar" style="margin-top:14px">
+            <span class="dirty">All changes saved</span>
+            <button class="btn btn-primary" disabled>Save changes</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Settings</h2>
+        <ol>
+          <li><b>One save model across the screen.</b> One bar, one verb, disabled when clean. The cockpit's seven save verbs in four styles is the defect this avoids.</li>
+          <li><b>Layout choices state their widths.</b> "Compact / Standard / Wide" means nothing without 768 / 1152 / 1536, and a Trainer choosing wide on a laptop needs to know it collapses.</li>
+          <li><b>Theme is a stored preference with a documented resolution order.</b> No client-side write, which is the rule the app already enforces.</li>
+          <li><b>Language and game vocabulary are separated.</b> Switching the interface to Japanese does not translate the client's own terms, because those are proper nouns in the game.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+<script>
+/* Layout width demo. The app stores this server-side (PRD §6.12 cuts browser storage as a
+   source of truth); a static file has no database, so the choice rides localStorage here and
+   every other page reads it on load. This is a wireframe concession, not a proposal. */
+(function(){
+  var KEY = 'td-wireframe-layout';
+  var radios = document.querySelectorAll('input[name="layout"]');
+  var stored = null;
+  try { stored = localStorage.getItem(KEY); } catch (e) {}
+  var mode = stored === 'compact' || stored === 'wide' || stored === 'standard' ? stored : 'standard';
+
+  document.documentElement.dataset.layout = mode;
+  radios.forEach(function (r) { r.checked = r.value === mode; });
+
+  radios.forEach(function (r) {
+    r.addEventListener('change', function () {
+      if (!r.checked) { return; }
+      document.documentElement.dataset.layout = r.value;
+      try { localStorage.setItem(KEY, r.value); } catch (e) {}
+    });
+  });
+})();
+</script>
+</body>
+</html>

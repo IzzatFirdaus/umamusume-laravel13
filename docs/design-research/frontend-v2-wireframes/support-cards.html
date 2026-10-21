@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support cards · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item active" href="support-cards.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">Library · <b>Support cards</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">559 cards</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Support cards</div>
+      <div class="hrow">
+        <div>
+          <h1>Every support card</h1>
+          <p class="lede">559 catalogued. Seven types, and Global holds 115 SSR cards against JP's 312, so the two catalogues are not interchangeable.</p>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="filters" style="margin-bottom:12px">
+        <label class="field" style="flex:1 1 240px"><span class="k">Search</span><span class="in"><input placeholder="Card name"></span></label>
+        <label class="field" style="flex:0 1 150px"><span class="k">Type</span><span class="in"><select><option>Any</option><option selected>Speed</option><option>Stamina</option><option>Power</option><option>Guts</option><option>Wit</option><option>Pal</option><option>Group</option></select></span></label>
+        <label class="field" style="flex:0 1 140px"><span class="k">Rarity</span><span class="in"><select><option>Any</option><option selected>SSR</option><option>SR</option><option>R</option></select></span></label>
+        <label class="field" style="flex:0 1 150px"><span class="k">Server</span><span class="in"><select><option selected>Global</option><option>JP</option></select></span></label>
+        <a class="btn btn-quiet" href="support-cards.html">Clear</a>
+      </div>
+
+      <div class="card">
+        <table class="t">
+          <thead>
+            <tr><th>Card</th><th>Type</th><th>Rarity</th><th>Friendship bonus</th><th>Key effects</th><th class="n"></th></tr>
+          </thead>
+          <tbody>
+            <tr class="is-current">
+              <td><b>A Speed card</b><br><span style="color:var(--ink-muted)">SSR · Speed</span></td>
+              <td>Speed</td><td>SSR</td>
+              <td class="mono">+25%</td>
+              <td><span class="tag auto">Initial Friendship Gauge</span> <span class="tag auto">Specialty Priority</span></td>
+              <td class="n"><a class="btn btn-sm" href="support-card-detail.html">Open</a></td>
+            </tr>
+            <tr>
+              <td><b>Another Speed card</b><br><span style="color:var(--ink-muted)">SSR · Speed</span></td>
+              <td>Speed</td><td>SSR</td>
+              <td class="mono">+30%</td>
+              <td><span class="tag auto">Initial Friendship Gauge</span> <span class="tag auto">Failure Protection</span></td>
+              <td class="n"><a class="btn btn-sm" href="support-card-detail.html">Open</a></td>
+            </tr>
+            <tr>
+              <td><b>A Pal card</b><br><span style="color:var(--ink-muted)">SSR · Pal</span></td>
+              <td>Pal</td><td>SSR</td>
+              <td><span class="pill pill-caution">None</span></td>
+              <td><span class="tag auto">Event Effectiveness</span> <span class="tag auto">Event Recovery</span></td>
+              <td class="n"><a class="btn btn-sm" href="support-card-detail.html">Open</a></td>
+            </tr>
+            <tr>
+              <td><b>A Group card</b><br><span style="color:var(--ink-muted)">SSR · Group</span></td>
+              <td>Group</td><td>SSR</td>
+              <td class="mono">full kit</td>
+              <td><span class="tag auto">Friendship Bonus</span> <span class="tag auto">Wit Friendship Recovery</span></td>
+              <td class="n"><a class="btn btn-sm" href="support-card-detail.html">Open</a></td>
+            </tr>
+            <tr>
+              <td><b>A Stamina card</b><br><span style="color:var(--ink-muted)">SR · Stamina</span></td>
+              <td>Stamina</td><td>SR</td>
+              <td class="mono">+15%</td>
+              <td><span class="tag auto">Initial Friendship Gauge</span></td>
+              <td class="n"><a class="btn btn-sm" href="support-card-detail.html">Open</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pager">
+          <span>559 cards · page 1 of 12</span>
+          <button class="btn btn-sm" disabled>Previous</button>
+          <button class="btn btn-sm">Next</button>
+        </div>
+      </div>
+
+      <div class="grid g-2" style="margin-top:14px">
+        <div class="card" style="margin:0">
+          <h2>The seven types</h2>
+          <table class="t">
+            <thead><tr><th>Type</th><th class="n">JP R/SR/SSR</th><th class="n">Global SSR</th></tr></thead>
+            <tbody>
+              <tr><td>Speed</td><td class="n mono">34 / 19 / 72</td><td class="n mono">28</td></tr>
+              <tr><td>Stamina</td><td class="n mono">25 / 17 / 55</td><td class="n mono">22</td></tr>
+              <tr><td>Power</td><td class="n mono">21 / 21 / 57</td><td class="n mono">21</td></tr>
+              <tr><td>Guts</td><td class="n mono">30 / 22 / 59</td><td class="n mono">20</td></tr>
+              <tr><td>Wit</td><td class="n mono">25 / 21 / 53</td><td class="n mono">18</td></tr>
+              <tr><td>Pal</td><td class="n mono">11 / 1 / 11</td><td class="n mono">4</td></tr>
+              <tr><td>Group</td><td class="n mono">0 / 0 / 5</td><td class="n mono">2</td></tr>
+            </tbody>
+          </table>
+          <p class="note" style="margin-top:9px"><span class="g">○</span><span>Counts are records in the export; Global counts cards carrying a <code>release_en</code> date.</span></p>
+        </div>
+
+        <div class="card" style="margin:0">
+          <h2>Effects that decide a deck slot</h2>
+          <table class="t">
+            <tbody>
+              <tr><td>Friendship Bonus</td><td>Multiplies the tile's payout. Two cards multiply: 1.25 × 1.30 = 1.625.</td></tr>
+              <tr><td>Initial Friendship Gauge</td><td>Raises the gauge the card starts with, so it can reach orange sooner.</td></tr>
+              <tr><td>Specialty Priority</td><td>Raises how often the card appears at its preferred facility.</td></tr>
+              <tr><td>Failure Protection</td><td>Shrinks the failure roll on a shared tile.</td></tr>
+              <tr><td>Wit Friendship Recovery</td><td>Scales the Energy Wit friendship training returns.</td></tr>
+            </tbody>
+          </table>
+          <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+            <b>Cap-setting effects exist in the vocabulary but are carried by zero of the 559 cards.</b> No UI offers
+            a "cap raised by support cards" line, because the catalogue contains no card that does it.
+          </span></p>
+        </div>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Support cards</h2>
+        <ol>
+          <li><b>Effect chips are words, not icons.</b> "Initial Friendship Gauge" rather than a symbol, because the client's own label is the only name a Trainer will recognise in game.</li>
+          <li><b>Pal cards print "None" for the friendship bonus.</b> The absence is the deciding fact for that type, so it is a labelled cell rather than an empty one. All 296 non-Pal, non-Group SSRs carry the effect; the 11 JP Pal SSRs do not.</li>
+          <li><b>Type counts sit on the page.</b> The Global/JP asymmetry is why a deck advice from a JP guide can mislead; showing the counts makes that concrete instead of abstract.</li>
+          <li><b>The zero-coverage fact is stated.</b> The cap-setting effect family is real vocabulary with no shipped card. A catalogue that silently omitted it would look complete while missing a documented mechanism; one that offered it would display a feature the data does not contain.</li>
+          <li><b>One row per card, effects summarised.</b> The card detail owns the full ladder; the index owns comparison.</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          Wireframe only. Totals (559, 115 Global SSR vs 312 JP), type counts and the effect descriptions are sourced
+          (<code>UMAMUSUME_REFERENCE.md</code> §1.4.1, §1.4.8; live dashboard count). Individual card names are placeholders.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

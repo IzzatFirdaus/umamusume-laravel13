@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admire Vega · profile · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item active" href="career-scenario.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">New career · Step 2 · <b>Trainee profile</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">Released (Global)</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Trainee profile</div>
+      <div class="hrow">
+        <div>
+          <h1>Admire Vega <span style="font-size:16px;font-weight:600;color:var(--ink-muted)">アドマイヤベガ</span></h1>
+          <p class="lede">[Starry Nocturne] · ★★★ SSR · Medium Turf End Closer. This is a read screen: nothing here is edited in the wizard.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="career-trainee.html">Choose a different trainee</a>
+          <a class="btn btn-primary" href="career-target.html">Continue</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="stepper" role="list" aria-label="Setup steps">
+        <span class="step is-done"><span class="n">1</span>Scenario</span>
+        <span class="step" aria-current="step"><span class="n">2</span>Trainee</span>
+        <span class="step"><span class="n">3</span>Build target</span>
+        <span class="step"><span class="n">4</span>Legacy</span>
+        <span class="step"><span class="n">5</span>Deck</span>
+        <span class="step"><span class="n">6</span>Preflight</span>
+      </div>
+
+      <div class="grid g-side">
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Aptitudes</h2>
+            <p class="sub">One letter per axis. The highest in each row decides the races this trainee can win.</p>
+            <table class="t">
+              <thead><tr><th>Surface</th><th>Distance</th><th>Running style</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><b>Turf A</b><br><span style="color:var(--ink-muted)">Dirt G</span></td>
+                  <td><b>Medium A</b><br><span style="color:var(--ink-muted)">Sprint F · Mile C · Long C</span></td>
+                  <td><b>End closer A</b><br><span style="color:var(--ink-muted)">Late surger B · Pace G · Front G</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              Grade letters are the catalog's own. The cockpit's <code>TeamPanelBuilder</code> derives stat grade badges from a
+              <b>locally invented banding</b> that <code>config/scenarios.php</code> marks <code>provisional</code>; that scale is a
+              different thing from an aptitude letter and the two are never printed under one label.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Growth row</h2>
+            <p class="sub">The place this trainee's training gains are weighted. Read from the catalog card, not entered by hand.</p>
+            <div class="grid g-4" style="gap:8px">
+              <div class="tile"><div class="k">Speed</div><div class="v mono">+0%</div></div>
+              <div class="tile"><div class="k">Stamina</div><div class="v mono">+0%</div></div>
+              <div class="tile"><div class="k">Power</div><div class="v mono">+0%</div></div>
+              <div class="tile"><div class="k">Guts</div><div class="v mono">+0%</div></div>
+              <div class="tile"><div class="k">Wit</div><div class="v mono">+0%</div></div>
+            </div>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              Zeros are printed as <b>+0%</b>, never blank. The client prints the same way, and the growth row is
+              always five cells wide (<code>UMAMUSUME_REFERENCE.md</code> §1.3.5). Values here are illustrative until the
+              card is read.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Unique skill</h2>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:800;color:var(--ink-strong)">A trainee-specific skill</div>
+                <div style="font-size:12px;color:var(--ink-muted)">Base stats, base aptitudes and the unique skill all come from the card.</div>
+              </div>
+              <a class="btn btn-sm" href="skill-detail.html">Open in the skill library</a>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Base stats</h2>
+            <p class="sub">What the card starts with, before any training.</p>
+            <div class="srow"><span class="k">Speed</span><span class="v mono">—</span><div class="track"><i style="width:0"></i></div></div>
+            <div class="srow"><span class="k">Stamina</span><span class="v mono">—</span><div class="track"><i style="width:0"></i></div></div>
+            <div class="srow"><span class="k">Power</span><span class="v mono">—</span><div class="track"><i style="width:0"></i></div></div>
+            <div class="srow"><span class="k">Guts</span><span class="v mono">—</span><div class="track"><i style="width:0"></i></div></div>
+            <div class="srow"><span class="k">Wit</span><span class="v mono">—</span><div class="track"><i style="width:0"></i></div></div>
+            <p class="note" style="margin-top:8px"><span class="g">○</span><span>
+              Base stats are not carried on this screen's payload, so every row states an absence rather than a figure.
+              A three-star card's five base values always sum to 450 in the export (<code>UMAMUSUME_REFERENCE.md</code> §1.3.5),
+              which is what the run will start from once it exists.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Forms</h2>
+            <table class="t">
+              <thead><tr><th>Title</th><th>Rarity</th><th class="n"></th></tr></thead>
+              <tbody>
+                <tr class="is-current">
+                  <td><b>[Starry Nocturne]</b><br><span style="color:var(--ink-muted)">Debut form</span></td>
+                  <td>★★★ SSR</td>
+                  <td class="n"><span class="pill pill-positive">Selected</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">This trainee has one form. Costumes with several show one row each, because rarity and the growth row vary by costume.</p>
+          </div>
+
+          <div class="card">
+            <h2>Scenarios this trainee is linked to</h2>
+            <p class="sub">A scenario link decides which scenario cards name this trainee. It does not lock the choice.</p>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <span class="pill pill-outline">URA Finale</span>
+              <span class="pill pill-outline">Unity Cup</span>
+              <span class="pill pill-outline">Trackblazer</span>
+              <span class="pill pill-outline">Our Grand Concert</span>
+            </div>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>No per-trainee link list is carried on this payload, so the four scenarios are shown as available rather than as links.</span></p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Trainee profile</h2>
+        <ol>
+          <li><b>A read screen says so.</b> The lede tells a Trainer nothing here is edited, which stops the Paradox of the Active User from hunting for an edit control that does not exist.</li>
+          <li><b>Aptitude and stat grade are kept apart in prose, not merged by colour.</b> The running cockpit's <code>TeamPanelBuilder</code> stamps a locally invented grade band that config marks <code>provisional</code> (<code>grade_banding.provisional => true</code>). An aptitude letter from the catalog and a provisional stat grade must never share a label, and this screen says which one it is showing.</li>
+          <li><b>Zeros print as +0%.</b> The growth row is always five cells wide, matching the client's own render (<code>UMAMUSUME_REFERENCE.md</code> §1.3.5). A blank cell would read as "not recorded", which is a different fact.</li>
+          <li><b>Absent data keeps its row.</b> Base stats are not on this payload, so five rows state the absence and the note explains the 450 rule rather than deleting the block. This is the line between the repo's "absence prints with its reason" rule and the external review's "drop the row" rule: the row stays when the screen claims to report the value.</li>
+          <li><b>Two or three actions at most.</b> Back, a way to change the choice, and Continue. The change action is a full outline button rather than a bare link, because the whole point of this screen is deciding.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

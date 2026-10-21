@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session expired · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><b>419</b></span>
+        <span class="spacer"></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Session expired</div>
+      <div class="hrow">
+        <div>
+          <h1>Your session timed out</h1>
+          <p class="lede">The form you submitted was not accepted because the page had been open too long. Your last saved turn is unaffected.</p>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+      <div class="empty">
+        <h3>Reload and try again</h3>
+        <p>Reload the screen you were on. Anything you had typed but not saved needs re-entering; anything already saved is safe.</p>
+        <div class="act" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <a class="btn btn-primary" href="cockpit-unity-cup.html">Back to the cockpit</a>
+          <a class="btn" href="index.html">Dashboard</a>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h2>Why this happens</h2>
+        <table class="t">
+          <tbody>
+            <tr><td>Cause</td><td>The page's security token expired while the tab sat open.</td></tr>
+            <tr><td>Your data</td><td>Everything saved before the submission is intact.</td></tr>
+            <tr><td>What is lost</td><td>Only the unsaved contents of the form you just submitted.</td></tr>
+          </tbody>
+        </table>
+        <div class="warn" style="margin-top:10px">
+          <span aria-hidden="true">!</span>
+          <span>This page replaces the framework's default error modal. The app's own alert is the single surface for a
+          failed write, so two competing error surfaces never appear at once.</span>
+        </div>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · 419</h2>
+        <ol>
+          <li><b>It answers the data-loss question first.</b> "Your last saved turn is unaffected" is the first sentence, because it is the only thing a Trainer cares about at this moment.</li>
+          <li><b>It distinguishes saved from unsaved.</b> The table names what survives and what does not, instead of a generic "try again".</li>
+          <li><b>It does not auto-retry.</b> Automatically resubmitting a stale form can duplicate a turn; asking a human to reload is the safe path.</li>
+          <li><b>One error surface.</b> The page replaces the framework's modal rather than stacking on top of it.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

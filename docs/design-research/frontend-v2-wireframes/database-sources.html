@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source ledger · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item active" href="database.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><a href="database.html">Database</a> · <b>Sources</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">Current</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Source ledger</div>
+      <div class="hrow">
+        <div>
+          <h1>Where every figure came from</h1>
+          <p class="lede">One row per source: what it supplies, when it was read, and how much weight it carries. This is the page the "Source" links point at.</p>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="info" style="margin-bottom:14px">
+        <span aria-hidden="true">i</span>
+        <span><b>Matrix verified 2026-09-27.</b> A verification date records when the matrix was checked against its sources.
+        Nothing on this page was fetched today.</span>
+      </div>
+
+      <div class="card">
+        <h2>Tiers</h2>
+        <table class="t">
+          <thead><tr><th>Tier</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill pill-positive">S</span></td><td>Official publisher — Cygames site or in-game notice.</td></tr>
+            <tr><td><span class="pill pill-positive">A</span></td><td>Maintained strategy wiki.</td></tr>
+            <tr><td><span class="pill pill-caution">B</span></td><td>Data export or a single guide read.</td></tr>
+            <tr><td><span class="pill pill-neutral">C</span></td><td>Community observation, one frame.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Sources</h2>
+        <table class="t">
+          <thead><tr><th>Source</th><th>Tier</th><th>Supplies</th><th>Read</th><th>State</th></tr></thead>
+          <tbody>
+            <tr class="is-current">
+              <td><b>GameTora scenarios.json</b></td><td>S/B</td><td>Scenario caps, hard ceiling, roster stats</td><td class="mono">2026-09-27</td>
+              <td><span class="pill pill-positive">Current</span></td>
+            </tr>
+            <tr><td>GameTora character cards</td><td>B</td><td>Base stats, growth rows, breakthrough totals</td><td class="mono">2026-09-27</td><td><span class="pill pill-positive">Current</span></td></tr>
+            <tr><td>GameTora support effects</td><td>B</td><td>Effect ids, coverage counts</td><td class="mono">2026-09-27</td><td><span class="pill pill-positive">Current</span></td></tr>
+            <tr><td>GameTora skills</td><td>B</td><td>Engine conditions, base costs</td><td class="mono">2026-09-27</td><td><span class="pill pill-positive">Current</span></td></tr>
+            <tr><td>Global launch notice 905</td><td>S</td><td>Grand Concert vocabulary, Performance types</td><td class="mono">2026-10-05</td><td><span class="pill pill-positive">Current</span></td></tr>
+            <tr><td>Game8 race bonus</td><td>A</td><td>Post-race SP and stat payout by grade</td><td class="mono">2026-06-26</td><td><span class="pill pill-caution">34% row confirmed</span></td></tr>
+            <tr><td>uma.guide shop list</td><td>B</td><td>Trackblazer item costs and ratings</td><td class="mono">2026-04-29</td><td><span class="pill pill-caution">Single publisher</span></td></tr>
+            <tr><td>Client captures</td><td>C</td><td>Mood panel, hint ladder, failure tiles, level caps</td><td class="mono">2026-10-03</td><td><span class="pill pill-neutral">Tier B, per §8.3</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid g-2" style="margin-top:14px">
+        <div class="card" style="margin:0">
+          <h2>Open conflicts</h2>
+          <table class="t">
+            <thead><tr><th>Question</th><th>State</th></tr></thead>
+            <tbody>
+              <tr><td>Is 1400 m Sprint or Mile?</td><td><span class="pill pill-caution">Game8 says Sprint; export says Mile</span></td></tr>
+              <tr><td>Mood race effect: ±4% or ±10%?</td><td><span class="pill pill-caution">Client panel says ±4%</span></td></tr>
+              <tr><td>Can Wit training fail?</td><td><span class="pill pill-caution">Unsettled</span></td></tr>
+              <tr><td>Trackblazer bond: 19/31/51 or 15/30/50?</td><td><span class="pill pill-caution">Two publishers, both printed</span></td></tr>
+            </tbody>
+          </table>
+          <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+            A conflict is <b>printed as a conflict</b>. The app does not pick a side on the Trainer's behalf, because the
+            side that is wrong will cost a run.
+          </span></p>
+        </div>
+
+        <div class="card" style="margin:0">
+          <h2>What this page is for</h2>
+          <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.55;margin:0">
+            Every "Source" link in the app lands here instead of printing a file path and a line number in the interface.
+            A citation belongs on the record; the screen only needs to say which source it is.
+          </p>
+          <div class="grid g-2" style="margin-top:10px">
+            <div class="tile"><div class="k">Sources tracked</div><div class="v mono" style="font-size:14px">8</div></div>
+            <div class="tile"><div class="k">Open conflicts</div><div class="v mono" style="font-size:14px">4</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Source ledger</h2>
+        <ol>
+          <li><b>This page replaces file paths in the UI.</b> The external review's point 10: "Source: UMAMUSUME_REFERENCE.md §2.2, docs/scenarios/02-unity-cup.md:28, SCENARIO-PUBLISHER-REFERENCES.md line 568" is a changelog, not an interface. One ledger row and one link does the same job.</li>
+          <li><b>Tiers are words in pills.</b> S / A / B / C each get a sentence, so the weight is legible rather than a code.</li>
+          <li><b>Conflicts are a first-class section.</b> Four live disagreements are listed with both sides. A ledger that only recorded agreements would be a confident record of things nobody double-checked.</li>
+          <li><b>The verification date is stated as verification.</b> "Verified 2026-09-27" is not "updated today".</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html" class="active"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

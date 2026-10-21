@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vodka · veteran detail · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item active" href="veterans.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><a href="veterans.html">Veterans</a> · <b>Vodka</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">Banked</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Veteran</div>
+      <div class="hrow">
+        <div>
+          <h1>Vodka <span style="font-size:16px;font-weight:600;color:var(--ink-muted)">ウオッカ</span></h1>
+          <p class="lede">URA Finale · saved 2026-10-15 · from run 22. The final totals and every factor this record can carry.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="veterans.html">Back to library</a>
+          <a class="btn btn-primary" href="career-legacy.html">Use as a parent</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="grid g-side">
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Factors</h2>
+            <p class="sub">What a future run can inherit from this record.</p>
+            <table class="t">
+              <thead><tr><th>Family</th><th>Factor</th><th class="n">Grade</th><th>Carries</th></tr></thead>
+              <tbody>
+                <tr class="is-current"><td>Blue</td><td>Speed</td><td class="n">★3</td><td class="mono">+16 cap</td></tr>
+                <tr><td>Pink</td><td>Turf</td><td class="n">★2</td><td class="mono">+12 aptitude</td></tr>
+                <tr><td>White</td><td>Corner</td><td class="n">★1</td><td>Skill hint</td></tr>
+                <tr><td>White</td><td>Lucky</td><td class="n">★2</td><td>Skill hint</td></tr>
+                <tr><td>Unique</td><td>Own skill</td><td class="n">★1</td><td>The trainee's own skill</td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              A factor's grade is the ceiling on what it can pass on. An ultimate-factor research report can raise a
+              factor to ★3 and <b>no further than ★4</b>.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Final stats</h2>
+            <div class="srow"><span class="k">Speed</span><span class="v mono">—</span></div>
+            <div class="srow"><span class="k">Stamina</span><span class="v mono">—</span></div>
+            <div class="srow"><span class="k">Power</span><span class="v mono">—</span></div>
+            <div class="srow"><span class="k">Guts</span><span class="v mono">—</span></div>
+            <div class="srow"><span class="k">Wit</span><span class="v mono">—</span></div>
+            <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+              Final stats are not carried on this record's payload, so each row states the absence. A veteran's
+              inheritance value is its factors, not its final totals; the totals matter for a Champions Meeting team entry.
+            </span></p>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Record</h2>
+            <table class="t">
+              <tbody>
+                <tr><td>Scenario</td><td>URA Finale</td></tr>
+                <tr><td>Source run</td><td class="mono">run 22</td></tr>
+                <tr><td>Saved</td><td class="mono">2026-10-15</td></tr>
+                <tr><td>Rarity</td><td>★★★</td></tr>
+                <tr><td>Factor ceiling</td><td>★4</td></tr>
+              </tbody>
+            </table>
+            <a class="btn btn-sm" href="cockpit-ura-finale.html" style="margin-top:10px">Open the source run</a>
+          </div>
+
+          <div class="card">
+            <h2>Used as a parent</h2>
+            <table class="t">
+              <tbody>
+                <tr><td>Vodka × Daiwa Scarlet</td><td class="n"><span class="pill pill-positive">Legacy A</span></td></tr>
+                <tr><td>Maruzensky × Haru Urara</td><td class="n"><span class="pill pill-neutral">Not used</span></td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">One record can parent several legacies; using it once does not consume it.</p>
+          </div>
+
+          <div class="card">
+            <h2>Provenance</h2>
+            <table class="t">
+              <tbody>
+                <tr><td>Record</td><td>Banked from a finished run</td></tr>
+                <tr><td>Factors</td><td>As banked 2026-10-15</td></tr>
+              </tbody>
+            </table>
+            <a class="btn btn-sm" href="database-sources.html" style="margin-top:10px">Source ledger</a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Veteran detail</h2>
+        <ol>
+          <li><b>Factors lead.</b> A veteran exists to be inherited from, so the factor table is the first block. Final stats come second because they only matter for a team entry.</li>
+          <li><b>Absence is honest.</b> Five final-stat rows state that the payload does not carry them, rather than printing zeros or dropping the block. A zero would look like a real reading of a real run.</li>
+          <li><b>The ★4 ceiling is stated where it applies.</b> It bounds a decision (spend a research report or not), so it belongs on the record it constrains.</li>
+          <li><b>A record is reusable.</b> "Using it once does not consume it" answers the question a Trainer asks before picking a parent they might want later.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

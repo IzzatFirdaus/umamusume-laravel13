@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Choose a trainee · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item active" href="career-scenario.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">New career · Step 2 of 6 · <b>Trainee</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">URA Finale</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">New career</div>
+      <div class="hrow">
+        <div>
+          <h1>Who are you training?</h1>
+          <p class="lede">71 trainees are catalogued. Filter by aptitude if you are building toward a specific race, then pick the card you are running.</p>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="stepper" role="list" aria-label="Setup steps">
+        <span class="step is-done"><span class="n">1</span>Scenario</span>
+        <span class="step" aria-current="step"><span class="n">2</span>Trainee</span>
+        <span class="step"><span class="n">3</span>Build target</span>
+        <span class="step"><span class="n">4</span>Legacy</span>
+        <span class="step"><span class="n">5</span>Deck</span>
+        <span class="step"><span class="n">6</span>Preflight</span>
+      </div>
+
+      <div class="filters" style="margin-bottom:12px">
+        <label class="field" style="flex:1 1 240px">
+          <span class="k">Search</span>
+          <span class="in"><input placeholder="Name or unique skill"></span>
+        </label>
+        <label class="field" style="flex:0 1 150px">
+          <span class="k">Surface</span>
+          <span class="in"><select><option>Any</option><option selected>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></span>
+        </label>
+        <label class="field" style="flex:0 1 150px">
+          <span class="k">Distance</span>
+          <span class="in"><select><option>Any</option><option>A</option><option>B</option><option selected>C</option><option>D</option></select></span>
+        </label>
+        <label class="field" style="flex:0 1 160px">
+          <span class="k">Running style</span>
+          <span class="in"><select><option>Any</option><option>A</option><option>B</option><option>C</option></select></span>
+        </label>
+        <label class="field" style="flex:0 1 170px">
+          <span class="k">Sort</span>
+          <span class="in"><select><option selected>Name A–Z</option><option>Turf</option><option>Dirt</option><option>Unique skill</option></select></span>
+        </label>
+        <a class="btn btn-quiet" href="career-trainee.html">Clear</a>
+      </div>
+
+      <div class="grid g-3">
+
+        <label class="card" style="margin:0;cursor:pointer;border-color:var(--pick-line);border-width:2px;background:var(--green-tint)">
+          <div style="display:flex;gap:11px;align-items:flex-start">
+            <input type="radio" name="trainee" checked style="margin-top:3px;width:16px;height:16px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:800;color:var(--ink-strong)">Admire Vega</div>
+              <div style="font-size:12px;color:var(--ink-muted)">アドマイヤベガ · [Starry Nocturne]</div>
+              <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:7px">
+                <span class="pill pill-neutral">★★★ SSR</span>
+                <span class="pill pill-outline">1 form</span>
+                <span class="pill pill-positive">Released (Global)</span>
+              </div>
+              <table class="t" style="margin-top:9px;font-size:11.5px">
+                <tbody>
+                  <tr><td style="border:0;padding:2px 4px 2px 0;color:var(--ink-muted)">Surface</td><td style="border:0;padding:2px 0"><b>Turf A</b> · Dirt G</td></tr>
+                  <tr><td style="border:0;padding:2px 4px 2px 0;color:var(--ink-muted)">Distance</td><td style="border:0;padding:2px 0">Sprint F · Mile C · <b>Medium A</b> · Long C</td></tr>
+                  <tr><td style="border:0;padding:2px 4px 2px 0;color:var(--ink-muted)">Style</td><td style="border:0;padding:2px 0">Front G · Pace G · Late B · <b>End A</b></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </label>
+
+        <label class="card" style="margin:0;cursor:pointer">
+          <div style="display:flex;gap:11px;align-items:flex-start">
+            <input type="radio" name="trainee" style="margin-top:3px;width:16px;height:16px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:800;color:var(--ink-strong)">Agnes Digital</div>
+              <div style="font-size:12px;color:var(--ink-muted)">アグネスデジタル</div>
+              <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:7px">
+                <span class="pill pill-neutral">SSR</span>
+                <span class="pill pill-outline">2 forms</span>
+                <span class="pill pill-positive">Released (Global)</span>
+              </div>
+              <table class="t" style="margin-top:9px;font-size:11.5px">
+                <tbody>
+                  <tr><td style="border:0;padding:2px 4px 2px 0;color:var(--ink-muted)">Surface</td><td style="border:0;padding:2px 0">Turf C · <b>Dirt A</b></td></tr>
+                  <tr><td style="border:0;padding:2px 4px 2px 0;color:var(--ink-muted)">Distance</td><td style="border:0;padding:2px 0">Sprint B · <b>Mile A</b> · Medium C · Long F</td></tr>
+                  <tr><td style="border:0;padding:2px 4px 2px 0;color:var(--ink-muted)">Style</td><td style="border:0;padding:2px 0">Front C · <b>Pace A</b> · Late B · End D</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </label>
+
+        <label class="card" style="margin:0;cursor:pointer">
+          <div style="display:flex;gap:11px;align-items:flex-start">
+            <input type="radio" name="trainee" style="margin-top:3px;width:16px;height:16px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:800;color:var(--ink-strong)">Rice Shower</div>
+              <div style="font-size:12px;color:var(--ink-muted)">ライスシャワー</div>
+              <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:7px">
+                <span class="pill pill-neutral">★★★ SSR</span>
+                <span class="pill pill-outline">1 form</span>
+              </div>
+              <table class="t" style="margin-top:9px;font-size:11.5px">
+                <tbody>
+                  <tr><td style="border:0;padding:2px 4px 2px 0;color:var(--ink-muted)">Surface</td><td style="border:0;padding:2px 0"><b>Turf A</b> · Dirt G</td></tr>
+                  <tr><td style="border:0;padding:2px 4px 2px 0;color:var(--ink-muted)">Distance</td><td style="border:0;padding:2px 0">Sprint F · Mile C · <b>Medium A</b> · Long C</td></tr>
+                  <tr><td style="border:0;padding:2px 4px 2px 0;color:var(--ink-muted)">Style</td><td style="border:0;padding:2px 0">Front G · Pace G · Late B · <b>End A</b></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </label>
+
+      </div>
+
+      <div class="pager" style="justify-content:space-between">
+        <span style="font-size:12.5px;color:var(--ink-muted)">71 trainees · page 1 of 12 · sorted by name</span>
+        <span style="display:flex;gap:6px">
+          <button class="btn btn-sm" disabled>Previous</button>
+          <button class="btn btn-sm">Next</button>
+        </span>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h2>Selected</h2>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <div style="flex:1 1 260px">
+            <div style="font-size:15px;font-weight:800;color:var(--ink-strong)">Admire Vega <span style="font-weight:600;color:var(--ink-muted)">[Starry Nocturne]</span></div>
+            <div style="font-size:12px;color:var(--ink-muted)">Medium · Turf · End Closer. The form you pick sets the run's rarity, potential and growth row.</div>
+          </div>
+          <a class="btn" href="career-profile.html">Preview profile</a>
+        </div>
+      </div>
+
+      <div class="savebar">
+        <span class="dirty">Step 2 of 6</span>
+        <a class="btn" href="career-scenario.html">Back</a>
+        <a class="btn btn-primary" href="career-profile.html">Continue to build target</a>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Trainee selection</h2>
+        <ol>
+          <li><b>Cards carry the knowing, not the browsing cost.</b> Each card shows the three aptitude axes that decide a race: surface, distance, running style. That is Miller's Law chunking — nine letters per trainee collapsed into three readable rows, with the strongest value in bold.</li>
+          <li><b>A selection echo before the commit.</b> The "Selected" card repeats the choice in one sentence, because a grid of twelve is easy to click past (Paradox of the Active User).</li>
+          <li><b>Filters are one row, sort is in the row.</b> Five controls, all inline, no filter drawer. The running screen already exposes exactly these facets (<code>facets</code> and <code>sortKeys</code> in the payload).</li>
+          <li><b>Pagination states the denominator.</b> "71 trainees · page 1 of 12" — the running screen prints the page but not the roster size.</li>
+          <li><b>Released status is a word, not a colour.</b> The pill says "Released (Global)"; the catalog's <code>JapanOnly</code> row is the case DESIGN.md §2.1 records as still unimplemented and is not invented here.</li>
+          <li><b>Chosen card uses three signals</b> — radio, 2px pick border, tint — matching the scenario step so the selection pattern is learned once (Jakob's Law).</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          Wireframe only. Admire Vega's name, slug, form, rarity and full aptitude set are the live payload's;
+          Agnes Digital and Rice Shower are shown to demonstrate density and their aptitude figures are illustrative.
+          Real records: <code>/career/setup/trainee</code>, read 2026-10-21.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

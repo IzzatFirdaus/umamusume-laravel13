@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support deck · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item active" href="career-scenario.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">New career · Step 5 of 6 · <b>Support deck</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-outline">URA Finale</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">New career</div>
+      <div class="hrow">
+        <div>
+          <h1>Build the six-card deck</h1>
+          <p class="lede">Six slots. Every card earns its place by the training it boosts, the events it brings, or the friendship gauge it starts with.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="support-cards.html">Browse 559 cards</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="stepper" role="list" aria-label="Setup steps">
+        <span class="step is-done"><span class="n">1</span>Scenario</span>
+        <span class="step is-done"><span class="n">2</span>Trainee</span>
+        <span class="step is-done"><span class="n">3</span>Build target</span>
+        <span class="step is-done"><span class="n">4</span>Legacy</span>
+        <span class="step" aria-current="step"><span class="n">5</span>Deck</span>
+        <span class="step"><span class="n">6</span>Preflight</span>
+      </div>
+
+      <div class="grid g-side">
+
+        <div class="card" style="margin:0">
+          <h2>Deck <span style="font-weight:600;font-size:12px;color:var(--ink-muted)">4 of 6 slots filled</span></h2>
+
+          <div class="grid g-2">
+
+            <div style="border:1px solid var(--rule-soft);border-radius:var(--r-sm);background:var(--raised);padding:10px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+                <div>
+                  <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Speed card</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Speed</div>
+                </div>
+                <button class="btn btn-quiet btn-sm" aria-label="Remove Speed card">✕</button>
+              </div>
+              <div class="track" style="margin-top:8px"><i style="width:80%"></i></div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-muted);margin-top:3px">
+                <span>Gauge 80 · orange</span><span>Friendship bonus +25%</span>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--rule-soft);border-radius:var(--r-sm);background:var(--raised);padding:10px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+                <div>
+                  <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Speed card</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Speed</div>
+                </div>
+                <button class="btn btn-quiet btn-sm" aria-label="Remove second Speed card">✕</button>
+              </div>
+              <div class="track" style="margin-top:8px"><i style="width:80%"></i></div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-muted);margin-top:3px">
+                <span>Gauge 80 · orange</span><span>Friendship bonus +30%</span>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--rule-soft);border-radius:var(--r-sm);background:var(--raised);padding:10px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+                <div>
+                  <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Power card</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Power</div>
+                </div>
+                <button class="btn btn-quiet btn-sm" aria-label="Remove Power card">✕</button>
+              </div>
+              <div class="track" style="margin-top:8px"><i style="width:55%"></i></div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-muted);margin-top:3px">
+                <span>Gauge 55</span><span>Not yet orange</span>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--rule-soft);border-radius:var(--r-sm);background:var(--raised);padding:10px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+                <div>
+                  <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Pal card</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Pal</div>
+                </div>
+                <button class="btn btn-quiet btn-sm" aria-label="Remove Pal card">✕</button>
+              </div>
+              <div style="font-size:11px;color:var(--ink-muted);margin-top:8px">
+                Event effectiveness · failure protection · event recovery. <b>No friendship bonus</b> — Pal cards earn their slot through events.
+              </div>
+            </div>
+
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+            <a class="btn btn-primary" href="support-cards.html">Add a card</a>
+            <button class="btn">Suggest for Medium front-runner</button>
+          </div>
+
+          <p class="note" style="margin-top:12px"><span class="g">○</span><span>
+            <b>Two rainbow cards on one tile is the largest multiplier in a turn.</b> Bonuses multiply rather than add,
+            so a +25% and a +30% card give 1.25 × 1.30 = <b>1.625</b>, not +55%
+            (<code>UMAMUSUME_REFERENCE.md</code> §1.1.3).
+          </span></p>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Deck diagnostics</h2>
+            <table class="t">
+              <thead><tr><th>Check</th><th>State</th></tr></thead>
+              <tbody>
+                <tr><td>Six slots filled</td><td><span class="pill pill-caution">4 of 6</span></td></tr>
+                <tr><td>Duplicate card in the deck</td><td><span class="pill pill-positive">None</span></td></tr>
+                <tr><td>Cards already at orange gauge</td><td class="mono">2</td></tr>
+                <tr><td>Cards carrying a friendship bonus</td><td class="mono">3 of 4</td></tr>
+                <tr><td>Scenario link on a card</td><td class="mono">0</td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              A card reaches friendship training at gauge <b>80</b>, which the client draws as the fourth mark and
+              colours orange. The gauge rises about +5 per joint training, so a card with no head start needs most
+              of a run to get there — which is why the "Initial Friendship Gauge" effect is the one that matters.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Card types</h2>
+            <table class="t">
+              <thead><tr><th>Type</th><th>What it does</th></tr></thead>
+              <tbody>
+                <tr><td>Speed · Stamina · Power · Guts · Wit</td><td>Boosts its own training tile; carries the friendship kit.</td></tr>
+                <tr><td>Pal</td><td>No friendship bonus. Earns its slot on event chains: energy return, mood, failure protection.</td></tr>
+                <tr><td>Group</td><td>SSR only. Full friendship kit plus Wit friendship recovery; several trainees behind one card.</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">Seven types, and Group is a type rather than a flag on another one. Global holds 115 SSR cards against JP's 312, so the two catalogues are not interchangeable.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="savebar">
+        <span class="dirty">5 of 6 · deck has 4 cards</span>
+        <a class="btn" href="career-legacy.html">Back</a>
+        <a class="btn btn-primary" href="career-preflight.html">Continue to preflight</a>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Support deck</h2>
+        <ol>
+          <li><b>Gauge state is a word and a bar, not a colour.</b> "Gauge 80 · orange" prints the value and the stage the client uses; the bar is decoration and is <code>aria-hidden</code>. The client's own gauge turns orange at the fourth mark, so the label matches what a Trainer sees in game.</li>
+          <li><b>Pal cards say what they do not do.</b> "No friendship bonus" is printed on the card rather than discovered mid-run. The export is unambiguous: zero of the 11 JP SSR Pal cards carry the friendship effect, and all 296 other SSRs do.</li>
+          <li><b>The multiplier is stated as multiplication.</b> 1.25 × 1.30 = 1.625, with the arithmetic shown. Stating "+55%" would teach the wrong model, and the wrong model costs a run.</li>
+          <li><b>Diagnostics are checks with pass and caution states</b>, not a score. There is no deck rating, because no source publishes one — and the advisor pattern in this app never invents a number it cannot source.</li>
+          <li><b>Duplicate cards are prevented by the client, mirrored here as a check.</b> Two identical copies cannot sit in one deck; duplicates are spent on limit breaks instead. The card's own four-break diamonds are not modelled on this screen because level caps are a per-card fact, not a deck fact.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

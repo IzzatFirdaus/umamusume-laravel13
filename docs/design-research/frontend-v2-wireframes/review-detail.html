@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review a match · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item active" href="review.html" aria-current="page"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><a href="review.html">Review</a> · <b>"Rice Shower"</b></span>
+        <span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">Exact match</span></span>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Review</div>
+      <div class="hrow">
+        <div>
+          <h1>Is this the right trainee?</h1>
+          <p class="lede">The text says "Rice Shower". One catalog record matches exactly; no alias or fuzzy candidate is offered.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="review.html">Back to queue</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="grid g-2">
+
+        <div class="card" style="margin:0">
+          <h2>Source</h2>
+          <p class="sub">What the text said, verbatim.</p>
+          <div style="border:1px solid var(--rule-soft);border-radius:var(--r-sm);background:var(--raised);padding:11px 13px;font-size:13px">
+            Unity Cup, [Rosy Dreams] Rice Shower, 68 client frames
+          </div>
+          <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+            The costume tag is part of the match: <code>[Rosy Dreams]</code> narrows the record to one form. Stripping it
+            would leave a trainee with several costumes indistinguishable.
+          </span></p>
+        </div>
+
+        <div class="card" style="margin:0;border-color:var(--pick-line);border-width:2px">
+          <h2 style="display:flex;justify-content:space-between;align-items:center">
+            <span>Best match</span><span class="pill pill-positive">Exact</span>
+          </h2>
+          <div style="font-size:16px;font-weight:800;color:var(--ink-strong)">Rice Shower <span style="font-size:13px;font-weight:600;color:var(--ink-muted)">ライスシャワー</span></div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">
+            <span class="pill pill-neutral">★★★ SSR</span><span class="pill pill-outline">Turf A</span><span class="pill pill-outline">Medium A</span><span class="pill pill-outline">End A</span>
+          </div>
+          <table class="t" style="margin-top:10px">
+            <tbody>
+              <tr><td>Costume</td><td>[Rosy Dreams]</td></tr>
+              <tr><td>Slug</td><td class="mono" style="font-size:11.5px">rice-shower</td></tr>
+              <tr><td>Matched on</td><td>Exact English name</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h2>Other candidates</h2>
+        <table class="t">
+          <thead><tr><th>Record</th><th>Kind</th><th>Why it is listed</th><th class="n"></th></tr></thead>
+          <tbody>
+            <tr><td>Rice Shower · [Rosy Dreams]</td><td>Exact</td><td>Exact English name</td><td class="n"><span class="pill pill-positive">Chosen</span></td></tr>
+            <tr><td>Rice Shower · other costume</td><td>Same trainee</td><td>A different form; growth row and rarity differ</td><td class="n"><button class="btn btn-sm">Use this</button></td></tr>
+            <tr><td>—</td><td>Alias</td><td>No alias is registered for this name</td><td class="n"><span class="pill pill-neutral">none</span></td></tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+          The costume row is the one real risk here: two forms of the same trainee share a name and differ in growth.
+          Listing them separately rather than collapsing them is what makes the costume tag meaningful.
+        </span></p>
+      </div>
+
+      <div class="savebar">
+        <span class="dirty">Not yet answered</span>
+        <button class="btn">Reject this match</button>
+        <button class="btn btn-primary">Confirm this match</button>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Review a match</h2>
+        <ol>
+          <li><b>Source and candidate side by side.</b> The comparison is the decision, so the two halves share one row rather than stacking (Law of Proximity).</li>
+          <li><b>Same-trainee-different-costume is a candidate row, not a hidden variant.</b> Two forms share a name and differ in growth, so collapsing them would lose the one distinction that matters.</li>
+          <li><b>Reject is a real action.</b> A queue that only offers "confirm" is not a review; it is a rubber stamp.</li>
+          <li><b>Confirm is the only filled action</b>, and it is not pre-checked. The answer is a Trainer's, not the importer's.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html" class="active"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>
