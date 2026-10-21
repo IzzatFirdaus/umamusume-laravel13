@@ -1,6 +1,6 @@
 // The re-check the index asks for, run against the changes in this pass.
 //
-// This is the procedure from docs/proposals/design-framework-index-2026-10-21.md,
+// This is the procedure from docs/framework-ui-ux/design-framework-index-2026-10-21.md,
 // "The re-check, and when it is owed", applied to what changed on 2026-10-22:
 //
 //   1 controls added/removed/moved    -> Fitts 44px, Hick count

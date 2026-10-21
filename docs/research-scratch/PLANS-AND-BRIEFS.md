@@ -60,20 +60,20 @@ This document consolidates the following source files verbatim (no summarization
     `AUDIT-AND-VERIFICATION.md` (two), with one refreshed in place in `DESIGN-CORPUS.md`; the routing
     table for all eight is in `docs/research-scratch/INDEX.md` §Round 18.
 - **Round 20 (2026-10-21, owner-ordered): seven more frameworks, also not consolidated.**
-  One live `docs/proposals/` file was added per framework, deliberately left in place like the
+  One live `docs/framework-ui-ux/` file was added per framework, deliberately left in place like the
   Round 19 file:
 
   | File | Framework |
   | --- | --- |
-  | `docs/proposals/design-framework-index-2026-10-21.md` | the entry point |
-  | `docs/proposals/usability-heuristics-2026-10-21.md` | Nielsen's ten |
-  | `docs/proposals/shneiderman-golden-rules-2026-10-21.md` | eight rules |
-  | `docs/proposals/tognazzini-first-principles-2026-10-21.md` | sixteen principles |
-  | `docs/proposals/gerhardt-powals-principles-2026-10-21.md` | ten cognitive engineering principles |
-  | `docs/proposals/information-architecture-principles-2026-10-21.md` | Dan Brown's eight |
-  | `docs/proposals/gestalt-principles-2026-10-21.md` | twelve Gestalt principles |
-  | `docs/proposals/norman-interaction-principles-2026-10-21.md` | Norman's six, the two gulfs, the seven stages |
-  | `docs/proposals/wcag-2.2-accessibility-2026-10-21.md` | WCAG 2.2 AA |
+  | `docs/framework-ui-ux/design-framework-index-2026-10-21.md` | the entry point |
+  | `docs/framework-ui-ux/usability-heuristics-2026-10-21.md` | Nielsen's ten |
+  | `docs/framework-ui-ux/shneiderman-golden-rules-2026-10-21.md` | eight rules |
+  | `docs/framework-ui-ux/tognazzini-first-principles-2026-10-21.md` | sixteen principles |
+  | `docs/framework-ui-ux/gerhardt-powals-principles-2026-10-21.md` | ten cognitive engineering principles |
+  | `docs/framework-ui-ux/information-architecture-principles-2026-10-21.md` | Dan Brown's eight |
+  | `docs/framework-ui-ux/gestalt-principles-2026-10-21.md` | twelve Gestalt principles |
+  | `docs/framework-ui-ux/norman-interaction-principles-2026-10-21.md` | Norman's six, the two gulfs, the seven stages |
+  | `docs/framework-ui-ux/wcag-2.2-accessibility-2026-10-21.md` | WCAG 2.2 AA |
 
   The same reason as Round 19 applies, and more strongly: three of these had a **blocked or partial
   primary source** (Gerhardt-Powals is paywalled, Dan Brown's article is behind a Cloudflare
@@ -83,8 +83,8 @@ This document consolidates the following source files verbatim (no summarization
   `DESIGN-CORPUS.md` names the layering, and `GOVERNANCE.md` §9 records which of them the C-7
   review actually uses.
 
-- **Round 19 (2026-10-21, owner-ordered): no consolidation.** One new live `docs/proposals/` file was
-  added and deliberately left in place: `docs/proposals/usability-heuristics-2026-10-21.md`. It records
+- **Round 19 (2026-10-21, owner-ordered): no consolidation.** One new live `docs/framework-ui-ux/` file was
+  added and deliberately left in place: `docs/framework-ui-ux/usability-heuristics-2026-10-21.md`. It records
   Nielsen's ten usability heuristics verbatim from NN/g, the per-heuristic detail articles, the mapping
   onto the D-rules, and the H3 / H7 / H10 gap register.
 

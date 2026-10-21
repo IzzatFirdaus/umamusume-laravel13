@@ -223,7 +223,7 @@ glance.
 
 ### The re-check, and the two tools that run it
 
-`docs/proposals/design-framework-index-2026-10-21.md` is the checklist a change is held against
+`docs/framework-ui-ux/design-framework-index-2026-10-21.md` is the checklist a change is held against
 before it is committed, and it names the procedure. Two scripts run the mechanical part of it:
 
 - `framework-check.mjs` — the checkable rules, over all 49 pages and the stylesheet.
@@ -237,8 +237,8 @@ and a bare "Continue" that did not name its destination.
 
 ## The seven frameworks this set answers to
 
-The references are in [`docs/proposals/`](../../proposals/): one file per framework, each quoted from its
-source, plus [`design-framework-index-2026-10-21.md`](../../proposals/design-framework-index-2026-10-21.md),
+The references are in [`docs/framework-ui-ux/`](../../framework-ui-ux/): one file per framework, each quoted from its
+source, plus [`design-framework-index-2026-10-21.md`](../../framework-ui-ux/design-framework-index-2026-10-21.md),
 which maps a question to the narrowest framework that decides it and records the seven places where the
 frameworks contradict each other and how each was settled.
 
@@ -287,7 +287,7 @@ described as 2.5.8 compliance.
 
 ## Usability heuristics
 
-The reference is [`docs/proposals/usability-heuristics-2026-10-21.md`](../../proposals/usability-heuristics-2026-10-21.md),
+The reference is [`docs/framework-ui-ux/usability-heuristics-2026-10-21.md`](../../framework-ui-ux/usability-heuristics-2026-10-21.md),
 which records Nielsen's ten as NN/g states them. Every page carries a **Heuristic coverage** item in its
 own annotation key. Three of the ten needed a change to the set rather than an annotation:
 

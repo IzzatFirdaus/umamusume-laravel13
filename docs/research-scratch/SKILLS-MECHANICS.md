@@ -1640,8 +1640,8 @@ unique → Filter → pagination pages, every control reachable, and each stop c
 > **The interface contract behind these mechanics, added 2026-10-21.** This file owns the
 > *mechanics*: what a skill does, what it costs, and what fires it. Where it touches a rendered
 > surface, the operative contract is the design corpus and the framework set, not this file:
-> `docs/proposals/wcag-2.2-accessibility-2026-10-21.md` for the normative contrast and target
-> requirements, and `docs/proposals/gestalt-principles-2026-10-21.md` for why a chip that reads as a
+> `docs/framework-ui-ux/wcag-2.2-accessibility-2026-10-21.md` for the normative contrast and target
+> requirements, and `docs/framework-ui-ux/gestalt-principles-2026-10-21.md` for why a chip that reads as a
 > group is a group. A measured pair such as the one below is recorded against WCAG 1.4.3 (Minimum),
 > whose 4.5:1 applies to text and whose exceptions for inactive components, decoration and logotypes
 > are worth reading before a pair is judged.

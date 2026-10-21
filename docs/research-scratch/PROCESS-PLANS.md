@@ -13708,7 +13708,7 @@ index after this table was first written and is recorded here as awareness rathe
 rule, because every real interface use of it is either an honest warning or a dark pattern.
 
 The usability heuristics these laws operationalise are stated separately, with their NN/g-sourced
-detail and their D-rule mapping, in `docs/proposals/usability-heuristics-2026-10-21.md`.
+detail and their D-rule mapping, in `docs/framework-ui-ux/usability-heuristics-2026-10-21.md`.
 
 | Law                            | Where it binds        | Concrete decision                                                                              |
 | ------------------------------ | --------------------- | ---------------------------------------------------------------------------------------------- |
@@ -13753,8 +13753,8 @@ to no-false-precision: polish never adds a number the corpus lacks.
 
 Added 2026-10-21. Section 13 above is the **Laws of UX** checklist and stays the authority for
 those twenty-nine entries. Six further frameworks were read from source on the same day and
-recorded in `docs/proposals/`, each in its own file, with the index at
-`docs/proposals/design-framework-index-2026-10-21.md`.
+recorded in `docs/framework-ui-ux/`, each in its own file, with the index at
+`docs/framework-ui-ux/design-framework-index-2026-10-21.md`.
 
 This section says what each adds that the Laws of UX table does not, and which decision in the
 product it settles. A review cites the narrowest framework that decides the question.

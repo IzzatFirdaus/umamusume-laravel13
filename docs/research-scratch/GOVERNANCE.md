@@ -316,7 +316,7 @@ The skill registry's machine half is **`.agents/skills.json`**; the hand-maintai
 | C-9   | TypeScript        | Zero errors from `tsc --noEmit` (`strict: true`, `noEmit: true`)                   | `npm run typecheck`                                                                     |
 
 **The full framework set, recorded 2026-10-21.** C-7's checklist is Nielsen's ten usability
-heuristics, and it is one of **eight** framework documents now in `docs/proposals/`, each quoted from
+heuristics, and it is one of **eight** framework documents now in `docs/framework-ui-ux/`, each quoted from
 its source:
 
 | Framework | File | What it is for |
@@ -330,7 +330,7 @@ its source:
 | Norman's interaction principles | `norman-interaction-principles-2026-10-21.md` | Affordance versus signifier, and the two gulfs. |
 | WCAG 2.2 AA | `wcag-2.2-accessibility-2026-10-21.md` | The only **normative** one. |
 
-`docs/proposals/design-framework-index-2026-10-21.md` maps a question to the narrowest framework that
+`docs/framework-ui-ux/design-framework-index-2026-10-21.md` maps a question to the narrowest framework that
 decides it, and records the seven conflicts between them and the ruling on each. A review cites that
 ruling rather than filing a contradiction as a defect.
 
@@ -340,7 +340,7 @@ is reported as **unmeasured** rather than passed, because Chromium cannot launch
 sandbox: no contrast ratio, target size or reflow behaviour in this tree has been measured in a browser.
 
 **What the C-7 review checklist is, recorded 2026-10-21.** The checklist is Nielsen's ten usability
-heuristics, stated verbatim in `docs/proposals/usability-heuristics-2026-10-21.md` together with the
+heuristics, stated verbatim in `docs/framework-ui-ux/usability-heuristics-2026-10-21.md` together with the
 per-heuristic detail, the mapping onto the D-rules, and the H3 / H7 / H10 gap register. A C-7 verdict
 therefore cites a heuristic and the D-rule that implements it. A FAIL that a ratified D-rule already
 covers is filed against the D-rule, so the same defect does not arrive twice under two names.

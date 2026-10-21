@@ -157,7 +157,7 @@ Every task satisfies all of these. Exact values, verbatim from `CONSTRAINTS.md`,
 - **Never print a bare `0` for an absent value** â€” `N/A` plus tooltip (KI-7, disclosure pattern: `GATE-REGISTRY.md`'s "Disclosure pattern (false zero)" section). Applies to form counts.
 > **The accessibility framework behind these gates, added 2026-10-21.** This file owns the
 > roster work and the gates it carries. Where a gate is about a rendered surface, the operative
-> criteria are in `docs/proposals/wcag-2.2-accessibility-2026-10-21.md`: **1.4.3 Contrast (Minimum)**
+> criteria are in `docs/framework-ui-ux/wcag-2.2-accessibility-2026-10-21.md`: **1.4.3 Contrast (Minimum)**
 > for text (4.5:1, or 3:1 at large scale), **1.4.11 Non-text Contrast** (3:1) for a boundary a user
 > must see, and **1.4.1 Use of Color** for the rule that state is never colour alone. The badge
 > contrast gate below is a house rule that exceeds the standard, in the same way the 44px target

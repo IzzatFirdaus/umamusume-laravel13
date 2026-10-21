@@ -1,6 +1,6 @@
 # Design framework index
 
-Status: **settled reference.** The entry point to the framework documents in `docs/proposals/`, and the
+Status: **settled reference.** The entry point to the framework documents in `docs/framework-ui-ux/`, and the
 map from each framework to the pages that answer it.
 
 Seven frameworks were read from source on **2026-10-21**, each into its own file. This file says what

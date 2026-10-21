@@ -64,7 +64,7 @@ Added 2026-10-21, so this set matches the v2 frontend set and the app.
 
 ## Usability heuristics
 
-The reference is [`docs/proposals/usability-heuristics-2026-10-21.md`](../../proposals/usability-heuristics-2026-10-21.md),
+The reference is [`docs/framework-ui-ux/usability-heuristics-2026-10-21.md`](../../framework-ui-ux/usability-heuristics-2026-10-21.md),
 which records Nielsen's ten as NN/g states them. Every page carries a **Heuristic coverage** item in its
 own annotation key.
 
@@ -90,8 +90,8 @@ the shell, and the `help.html` page in the v2 set is where it lives.
 
 ## The seven frameworks this set answers to
 
-The references are in [`docs/proposals/`](../../proposals/), one file per framework, each quoted from its
-source, with [`design-framework-index-2026-10-21.md`](../../proposals/design-framework-index-2026-10-21.md)
+The references are in [`docs/framework-ui-ux/`](../../framework-ui-ux/), one file per framework, each quoted from its
+source, with [`design-framework-index-2026-10-21.md`](../../framework-ui-ux/design-framework-index-2026-10-21.md)
 as the entry point. Every page here carries a **Framework coverage** item naming the framework that
 decides that cockpit's distinctive decision.
 

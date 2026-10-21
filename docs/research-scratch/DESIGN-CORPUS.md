@@ -1735,18 +1735,18 @@ upstream framework only as its justification.
 1. The **Laws of UX** and **Laws of UI** inventory, audited in `PLANS-AND-BRIEFS.md`
    (§ux-laws-audit-plan). Twenty-nine entries at lawsofux.com and thirteen at uilaws.com.
 2. **Nielsen's ten usability heuristics**, stated verbatim in
-   `docs/proposals/usability-heuristics-2026-10-21.md`. The per-screen evaluation and ratings live in
+   `docs/framework-ui-ux/usability-heuristics-2026-10-21.md`. The per-screen evaluation and ratings live in
    `UX-DELIVERABLES.md` Part 3, which defers to that file for what each heuristic *requires*.
-3. **Six further frameworks**, one file each in `docs/proposals/`, read from source on 2026-10-21:
+3. **Six further frameworks**, one file each in `docs/framework-ui-ux/`, read from source on 2026-10-21:
    Shneiderman's eight Golden Rules, Tognazzini's sixteen First Principles, Gerhardt-Powals' ten
    cognitive engineering principles, Dan Brown's eight information architecture principles, the twelve
    Gestalt principles, and Norman's interaction principles with the two gulfs and the seven stages.
-   `docs/proposals/design-framework-index-2026-10-21.md` is the entry point, and it records the seven
+   `docs/framework-ui-ux/design-framework-index-2026-10-21.md` is the entry point, and it records the seven
    places where these frameworks contradict each other and how each was settled.
 
 **WCAG 2.2 Level AA is the one normative layer.** It is not a framework in the same sense: a review
 cites a success criterion, never a principle. Two consequences are recorded in
-`docs/proposals/wcag-2.2-accessibility-2026-10-21.md` and are worth repeating here, because both have
+`docs/framework-ui-ux/wcag-2.2-accessibility-2026-10-21.md` and are worth repeating here, because both have
 been got wrong in this tree before:
 
 - The **44px target exceeds WCAG 2.5.8 (Minimum)**, which requires 24x24 CSS px. It comes from the
@@ -1761,7 +1761,7 @@ recorded rather than resolved silently.
 **Where the usability heuristics sit, added 2026-10-21.** The D-rules below are the ratified
 implementation of two upstream layers. The first is the Laws of UX and Laws of UI inventory recorded in
 `PLANS-AND-BRIEFS.md` (§ux-laws-audit-plan) and audited here. The second is Nielsen's ten usability
-heuristics, recorded verbatim in `docs/proposals/usability-heuristics-2026-10-21.md`, together with the
+heuristics, recorded verbatim in `docs/framework-ui-ux/usability-heuristics-2026-10-21.md`, together with the
 per-heuristic detail, the mapping onto these D-rules, and the H3 / H7 / H10 gap register. A review
 therefore cites a D-rule as the operative clause and the upstream heuristic only as its justification;
 where a D-rule and a heuristic appear to disagree, the D-rule governs and the disagreement is recorded

@@ -1730,10 +1730,10 @@ END: Goddess activated, bonuses applied
 
 > **The wider framework set, added 2026-10-21.** This Part evaluates against Nielsen's ten
 > heuristics, and seven further frameworks were read from source on the same day, each into its own
-> file in `docs/proposals/`: Shneiderman's eight Golden Rules, Tognazzini's sixteen First Principles,
+> file in `docs/framework-ui-ux/`: Shneiderman's eight Golden Rules, Tognazzini's sixteen First Principles,
 > Gerhardt-Powals' ten cognitive engineering principles, Dan Brown's eight information architecture
 > principles, the twelve Gestalt principles, Norman's interaction principles with the two gulfs and the
-> seven stages, and WCAG 2.2 Level AA. `docs/proposals/design-framework-index-2026-10-21.md` is the entry
+> seven stages, and WCAG 2.2 Level AA. `docs/framework-ui-ux/design-framework-index-2026-10-21.md` is the entry
 > point and maps a question to the narrowest framework that decides it.
 >
 > Three of them have a **blocked or partial primary source** and record that at the top of their own
@@ -1741,7 +1741,7 @@ END: Goddess activated, bonuses applied
 > proposals file owns what each heuristic says, this Part owns the evaluation.
 
 > **Canonical reference, added 2026-10-21.** The ten heuristics this Part evaluates against are recorded
-> in full, verbatim from NN/g, in `docs/proposals/usability-heuristics-2026-10-21.md`. That file is the
+> in full, verbatim from NN/g, in `docs/framework-ui-ux/usability-heuristics-2026-10-21.md`. That file is the
 > authority for what each heuristic says, its per-heuristic detail articles, its mapping onto the
 > repository's D-rules, and the H3 / H7 / H10 gap register. This Part remains the authority for the
 > **per-screen evaluation and the ratings**; where the two disagree about what a heuristic requires,
