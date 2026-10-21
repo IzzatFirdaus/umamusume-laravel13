@@ -4952,3 +4952,47 @@ DEFERRED:
 - :330 anomaly - viewport genuinely scrolls at 320px (scrollLeft proves it); no element box escapes; four hypotheses excluded. Unblocks on pseudo-element / position:fixed / @container containment localisation.
 - Step 4 Trackblazer grade_points_earned - premise refuted: no TrackblazerState model; the field is a RaceEntry column with writers (RaceEntry.php:141-149); shop_coins is derived, not stored.
 - vue-tsc measurement - blocked on TypeScript 7.0.2 incompatibility (./lib/tsc not exported). Unblocks on a dependency-version ruling.
+
+## 60. Dispatch 53 - dashboard proposal measured against the tree, 2026-10-21
+
+1 of 14 landed (scenario dedupe); 13 measured false, deferred, or design.
+
+### Measure
+
+- The dispatch's baseline (d6c62d6f, ahead 4) was stale: HEAD was a6715220, ahead 5, and the
+  working tree was clean. Every target file was tracked and peer-clean.
+- Two of the dispatch's six target paths did not exist as written. DataTable.vue and
+  StatusBadge.vue live under resources/js/components/ui/, not resources/js/components/, so the
+  dispatch's own git ls-files returned neither.
+- The 14 claims were measured against the tree before any edit. Six did not survive: #1 and #13
+  (the shell's main already carries layoutWidthClass, and the grid's max-w-6xl self-cap is
+  deliberate, pinned by dashboard.spec.ts:352 and :465), #2 (the header band and main share the
+  same px-4 md:px-8 gutter, so there is no 220px indent), #3 (the grid is already two-column
+  with one filled primary), #7 (N/A with a title is the AGENTS.md section 5 contract, pinned at
+  :160-168), #9 (the Verified line is pinned inside the DATA STATUS region at :105-107), and #10
+  (the count tiles pin tallestCell('Data Status') >= 88 at :450 and :469).
+- #14 measured false on both halves: the seven veterans carry unique training_run_id values,
+  so there is no dedupe miss, and Vodka's name_ja is ウオッカ, the character's own name, not
+  ウォッカ.
+- #5's premise was false: DataTable.vue has five consumers (TraineeSelect and four Database
+  pages), not one.
+
+### Apply
+
+- One fix landed: 289b0fab - the veteran row printed the scenario twice, once inside
+  VeteranRow::label()'s 'name · scenario · date' and once in a separate scenario_label span.
+  The span went; the label stays.
+- 7667efa records the three deferrals in docs/proposals/dashboard-deferred-2026-10-21.md.
+
+### Gates
+
+- npm run typecheck clean; npm run lint:ui clean.
+- No browser walk: the change was a template-only dedup, and the suite's scratch database holds
+  no veterans, so the populated row the change touches is not reached by any case.
+
+DEFERRED:
+- #8 Quick Actions 4 to 3 (operator ruling; Open settings is the direct path to settings once the
+  sidebar collapses).
+- #11 the border-rule token (DESIGN.md is signed; a token edit needs a Track 2 amendment).
+- #12 sidebar grouping (a shell restructure, not a dashboard fix).
+- #4, #5, #7, #9 and #10 (design changes or re-scopes; see the measure section).
