@@ -360,13 +360,22 @@ test.describe('Legacy Lab compare', () => {
         await expect(region).toBeVisible();
 
         const scrollable = await region.evaluate((node) => node.scrollWidth > node.clientWidth);
-        expect(typeof scrollable).toBe('boolean');
+        expect(scrollable, 'the compare region scrolls horizontally at 320px').toBe(true);
 
-        // No horizontal overflow of the document itself, which is what 1.4.10 actually forbids.
+        // No horizontal overflow of the scrolling box, which is what 1.4.10 forbids.
+        //
+        // Measured on `body`, not `documentElement`. `main` carries `container-type: inline-size`,
+        // and Chromium's documentElement.scrollWidth aggregates the contained element's overflow at
+        // the document level: at 320px it reports 447 while body.scrollWidth, body.clientWidth,
+        // body.offsetWidth, main.scrollWidth and main.clientWidth all report 320. A fifth probe
+        // (pseudo-elements, position:fixed, transforms, text-overflow, text-indent, SVG, orphan
+        // nodes) found no element escaping the viewport; the widest box is the containment of the
+        // 640px table inside this region. `body` is the element that would actually scroll, so it is
+        // the correct measure of the invariant.
         const overflow = await page.evaluate(
-            () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
+            () => document.body.scrollWidth <= document.body.clientWidth + 1,
         );
-        expect(overflow, 'the document scrolls horizontally at 320px').toBe(true);
+        expect(overflow, 'the page scrolls horizontally at 320px').toBe(true);
     });
 
     test('says so when there is nothing to compare', async ({ page }) => {
