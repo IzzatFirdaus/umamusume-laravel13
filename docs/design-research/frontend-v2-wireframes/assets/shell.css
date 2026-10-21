@@ -79,7 +79,24 @@ html[data-theme='dark']{
   --status-caution:#FFE9A8; --status-caution-ink:#6A4A00;
   --mood-great:#FB5590; --on-mood:#1F1508;
   --shadow-overlay:0 6px 16px rgb(0 0 0 / .32);
+  /* Stat band tints, dark set. Values from DESIGN-CORPUS.md:385-392, which records
+     the dark column of the stat band table. They stay tints: a stat carries no
+     saturated identity hue, and its identity is its glyph plus this whisper. */
+  --tint-speed:#252C42; --tint-stamina:#3B2736; --tint-power:#312C2A;
+  --tint-guts:#3F272B; --tint-wit:#26302A;
+  --line-speed:#3B4A6B; --line-stamina:#6B4459; --line-power:#6B5738;
+  --line-guts:#6B4148; --line-wit:#3F6340;
 }
+/* The stat and type icons brighten in the dark theme, because the client's chip
+   colours are measured against its own pale surface and a mid-chroma blue on a
+   near-black panel loses its edge. */
+html[data-theme='dark'] .stat-speed{color:#7FA8E8}
+html[data-theme='dark'] .stat-stamina{color:#F08A96}
+html[data-theme='dark'] .stat-power{color:#C99A6B}
+html[data-theme='dark'] .stat-guts{color:#F08BB4}
+html[data-theme='dark'] .stat-wit{color:#8CC78A}
+html[data-theme='dark'] .stat-pal{color:#AEBB84}
+html[data-theme='dark'] .stat-group{color:#86C996}
 
 *{box-sizing:border-box}
 html{background:var(--page)}
@@ -96,26 +113,76 @@ button{font-family:inherit}
 /* ============================== app frame ============================== */
 .app{display:grid;grid-template-columns:var(--rail-w) minmax(0,1fr);min-height:100vh}
 
-/* --- sidebar (desktop) --- */
+/* --- sidebar (desktop) ---
+   THE COLLAPSIBLE RAIL.
+   Mirrors resources/js/layouts/AppLayout.vue:191-233 and its template at :286-345.
+   Collapsed means marks instead of words; expanded means words only, so a mark
+   never competes with the word it stands for.
+
+   The word never leaves the DOM: it moves to `sr-only`, so every destination keeps
+   its accessible name and gains a `title` carrying it (AppLayout.vue:196-199).
+
+   The active destination keeps `aria-current="page"` plus a left rule on top of its
+   fill, because state may never ride on colour alone.
+
+   The choice lives in localStorage, not a Preference row: `Preference::KEYS` is
+   exactly `theme` and `failure_estimate`, so a third stored key would widen product
+   scope. The cost, stated rather than hidden: the rail follows this browser, not
+   this Trainer, and it does not appear on the Settings page. */
 .rail{background:var(--panel);border-right:1px solid var(--rule-soft);
-  display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+  width:var(--rail-w);flex:none;transition:width .18s ease}
+.rail.is-collapsed{width:56px}
+@media (prefers-reduced-motion: reduce){.rail{transition:none}}
 .rail-top{padding:14px 10px 6px}
 .rail-brand{display:flex;align-items:center;gap:9px;padding:6px 10px 14px}
 .rail-brand .mk{width:22px;height:22px;border-radius:var(--r-sm);background:var(--brand-chrome);
   display:grid;place-items:center;color:#fff;font-size:11px;font-weight:900}
 .rail-brand .tx{font-size:12px;font-weight:900;letter-spacing:.10em;color:var(--ink-strong)}
+/* The collapsed rail's own label rule, so the rail keeps its top edge and does not
+   float without one. The product name left this column when it moved to the bar. */
+.rail-mark{display:none;align-items:center;justify-content:center;border-bottom:1px solid var(--rule);
+  padding:12px 8px;font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--ink-strong)}
+.rail.is-collapsed .rail-mark{display:flex}
 .rail-group{padding:12px 22px 5px;font-size:10px;font-weight:800;letter-spacing:.13em;
   text-transform:uppercase;color:var(--ink-faint)}
+.rail.is-collapsed .rail-group{display:none}
 .nav-item{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 11px;margin:1px 4px;
-  border-radius:var(--r-sm);color:var(--ink);font-size:13.5px;font-weight:500;position:relative}
+  border-radius:var(--r-sm);color:var(--ink);font-size:13.5px;font-weight:500;position:relative;
+  text-decoration:none}
 .nav-item:hover{background:var(--sunken)}
 .nav-item.active{background:var(--brand-accent-soft);color:var(--ink-strong);font-weight:800}
 .nav-item.active::before{content:"";position:absolute;left:-4px;top:8px;bottom:8px;width:3px;
   border-radius:0 3px 3px 0;background:var(--brand-chrome)}
 .nav-item .dot{width:6px;height:6px;border-radius:50%;background:var(--ink-faint);flex:none}
 .nav-item.active .dot{background:var(--brand-chrome)}
+/* The word moves to `sr-only` when the rail collapses, so the destination keeps its
+   accessible name and the `title` carries it too. The mark and the word are never
+   both visible. */
+.rail.is-collapsed .nav-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.rail.is-collapsed .nav-item{justify-content:center;padding:0}
+.rail.is-collapsed .nav-item .dot{display:none}
+/* The marks. One family, one grid, one stroke weight, drawn as paths rather than
+   glyphs, so the rail reads as the same family as the chrome above it. The path
+   data is the app's own, from NavGlyph.vue:24-72. */
+.glyph{display:inline-flex;flex:none;width:20px;height:20px;align-items:center;justify-content:center}
+.glyph svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+/* The rail's own control, in the top bar. Text only, no chevron: the word is the
+   action and the accessible name is always the action, so a glyph added nothing a
+   screen reader could use. */
+.rail-toggle{display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+  min-width:44px;padding:0 10px;border-radius:var(--r-sm);border:1px solid transparent;
+  background:transparent;color:var(--on-brand-chrome);font-size:12px;font-weight:800;
+  cursor:pointer;text-decoration:none}
+.rail-toggle:hover{background:rgba(255,255,255,.16)}
+.rail-toggle:focus-visible{outline:3px solid var(--on-brand-chrome);outline-offset:2px}
 .rail-foot{margin-top:auto;border-top:1px solid var(--rule-soft);padding:11px 22px;
   font-size:12px;color:var(--ink-muted);text-decoration:underline}
+.rail.is-collapsed .rail-foot{padding:11px 0;text-align:center}
+.rail.is-collapsed .rail-foot a{font-size:0}
+.rail.is-collapsed .rail-foot a::before{content:"?";font-size:13px;font-weight:800}
 
 /* --- main column --- */
 .main{display:flex;flex-direction:column;min-width:0}
@@ -370,6 +437,112 @@ table.t tr.is-current td{font-weight:700;color:var(--ink-strong)}
   border-radius:4px;border:1px solid var(--rule);background:var(--raised);color:var(--ink-muted);
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;font-weight:800;line-height:1}
 .kbd.on-brand{border-color:rgba(255,255,255,.45);background:transparent;color:var(--on-brand-chrome)}
+
+/* ---------------------------------------------------------------------------
+   STAT AND TYPE ICONS
+   The five discipline glyphs are the client's own objects and the only icons with a
+   fixed identity (DESIGN-CORPUS.md:609, and the fixed assignment table at :617-635):
+   running shoe (Speed), heart (Stamina), flexed arm (Power), flame (Guts),
+   graduation cap (Wit). Pal is a single figure and Group is a pair, which is what
+   the client's own support-card type chips wear.
+
+   "Remade" is the operative word. The client's originals are small 3D renders, and
+   DESIGN-CORPUS.md:607 forbids 3D renders and clip-art imitating the client's art
+   in this system, and :605 forbids mixing a hairline set with a solid set. So the
+   marks are redrawn on one 24 grid, one stroke weight, one family, in the same
+   style as the navigation marks in NavGlyph.vue. The paths are in
+   assets/stat-icons.svg.
+
+   The COLOURS are the client's support-card TYPE CHIP colours, read from the
+   legend row in 155016: the blue boot, the pink flame, the red heart, the brown
+   flexed arm, the dark-green cap, the olive figure and the green pair. The corpus
+   records the chip fills as indicative until measured, and the glyph identities as
+   not in doubt.
+
+   They are NOT a stat hue. DESIGN-CORPUS.md:371-393 is explicit that the five stats
+   carry no saturated identity colour, that a hue per stat collides with the
+   semantic roles, and that a stat's identity is its glyph plus a whisper of band
+   tint. So the icon is coloured, and the band tint stays a tint.
+
+   Two collisions the corpus records as UNRESOLVED are carried here unresolved
+   rather than quietly fixed: Mood against the friend chip, and Fans against the
+   group chip (DESIGN-CORPUS.md:630-633).
+   --------------------------------------------------------------------------- */
+.stat-icon{display:inline-flex;flex:none;width:18px;height:18px;vertical-align:-3px}
+.stat-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+.stat-speed{color:#2F6BC4}
+.stat-stamina{color:#C64B5E}
+.stat-power{color:#8A5A32}
+.stat-guts{color:#C4557E}
+.stat-wit{color:#3E6B3A}
+.stat-pal{color:#6E7A45}
+.stat-group{color:#3E7A4A}
+.stat-sp{color:#0E7490}
+
+/* A type chip: the icon, the word, and never the icon alone. */
+.type-chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;
+  letter-spacing:.02em;border:1px solid var(--rule-soft);border-radius:var(--r-sm);
+  padding:1px 7px;background:var(--raised)}
+.type-chip .stat-icon{width:14px;height:14px;vertical-align:-2px}
+.type-chip .stat-icon svg{width:14px;height:14px;stroke-width:1.9}
+
+/* The band's own tint, which is the other half of a stat's identity and stays a
+   tint rather than a colour chip. */
+.band-speed{background:var(--tint-speed);border-color:var(--line-speed)}
+.band-stamina{background:var(--tint-stamina);border-color:var(--line-stamina)}
+.band-power{background:var(--tint-power);border-color:var(--line-power)}
+.band-guts{background:var(--tint-guts);border-color:var(--line-guts)}
+.band-wit{background:var(--tint-wit);border-color:var(--line-wit)}
+
+/* ---------------------------------------------------------------------------
+   A SINGLE PLACE FOR A PAGE'S POSITION AND ITS ONE ACTION
+   The stepper and the save bar both used to carry "Step 1 of 6", and a wizard that
+   says where it is in two places says it twice. The position and the action live
+   together in the page head, on one row above the rule, so a Trainer reads both
+   from the same glance.
+   --------------------------------------------------------------------------- */
+.hrow{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.hrow-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hrow-position{display:inline-flex;align-items:center;gap:9px;font-size:12px;
+  font-weight:700;color:var(--ink-muted)}
+.hrow-position .of{color:var(--ink-faint)}
+
+/* ---------------------------------------------------------------------------
+   THE REFERENCE-DATA SUB-NAVIGATION STRIP
+   The nine areas the Database hub owns, as one row. It answers "where am I in the
+   reference data" and "where else can I go" in the same glance, and it puts the
+   hub one click away on every page rather than in a word in the corner.
+
+   The breadcrumb already linked "Database", but it sat in the top bar on the
+   brand-blue chrome at 0.9 opacity with no underline, so it read as a word rather
+   than as a link. This strip is the way back that can be seen.
+
+   Information Architecture principle 7 (focused navigation): the nine areas are one
+   family, so they are grouped as one family. Principle 5 (front doors): a Trainer
+   who arrives at a library page directly finds the whole reference set.
+   --------------------------------------------------------------------------- */
+.subnav{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:16px;
+  padding:5px;border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised)}
+.subnav-hub{display:inline-flex;align-items:center;min-height:34px;padding:0 11px;
+  border-radius:var(--r-sm);background:var(--brand-chrome);color:var(--on-brand-chrome);
+  font-size:12px;font-weight:800;text-decoration:none;white-space:nowrap}
+.subnav-hub:hover{filter:brightness(1.08)}
+.subnav-hub:focus-visible{outline:3px solid var(--ring);outline-offset:2px}
+.subnav-sep{width:1px;align-self:stretch;margin:0 5px;background:var(--rule-soft)}
+.subnav-item{display:inline-flex;align-items:center;min-height:34px;padding:0 11px;
+  border-radius:var(--r-sm);color:var(--ink-muted);font-size:12px;font-weight:700;
+  text-decoration:none;white-space:nowrap}
+.subnav-item:hover{background:var(--sunken);color:var(--ink-strong)}
+.subnav-item:focus-visible{outline:3px solid var(--ring);outline-offset:2px}
+/* The current area is marked by a word weight AND a fill, never by colour alone. */
+.subnav-item.is-current{background:var(--brand-accent-soft);color:var(--ink-strong);
+  font-weight:800;box-shadow:inset 0 -2px 0 var(--brand-chrome)}
+@media(max-width:820px){.subnav{overflow-x:auto;flex-wrap:nowrap}}
+
+/* The breadcrumb's link becomes visibly a link. */
+.topbar .crumb a{text-decoration:underline;text-underline-offset:2px;opacity:1}
+.topbar .crumb a:hover{opacity:1;text-decoration-thickness:2px}
 
 /* empty state */
 .empty{border:1px dashed var(--rule);border-radius:var(--r-md);background:var(--panel);

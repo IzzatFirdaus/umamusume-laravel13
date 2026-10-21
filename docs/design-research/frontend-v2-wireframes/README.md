@@ -116,6 +116,91 @@ decision. The distribution:
 `training-decision` cites **Fitts** and **Miller** together, and `race-decision` cites **Hick** and
 **Closure** in one item, because naming one law per page would have understated what those screens do.
 
+## The rail, the marks, and the way back
+
+Three things the app has and this set did not, added 2026-10-21.
+
+### The rail collapses
+
+The app's global navigation can be collapsed to marks instead of words, and the
+wireframe now does the same. Mirroring `resources/js/layouts/AppLayout.vue:191-233` and its template
+at `:286-345`:
+
+- **Collapsed is marks; expanded is words.** Never both, because a mark beside the word it stands
+  for is two things competing for the same space.
+- **The word never leaves the DOM.** It moves to `sr-only`, so every destination keeps its
+  accessible name, and the item gains a `title` carrying it too.
+- **The active destination keeps `aria-current="page"`** plus a left rule on top of its fill,
+  because state may never ride on colour alone.
+- **The control lives in the top bar**, not in the column. The bar is the one row present at every
+  width, so the control that resizes the rail belongs beside the product name rather than inside
+  the thing it resizes.
+- **The collapsed column keeps a short `TD` mark**, so the rail does not float without a top edge.
+- **The choice is `localStorage`, not a Preference row.** `Preference::KEYS` is exactly `theme`
+  and `failure_estimate`, so a third stored key would widen product scope. The cost, stated rather
+  than hidden: the rail follows this browser, not this Trainer, and it does not appear on Settings.
+
+The key and the two values are the app's: `trainer-desk.nav-rail`, `compact` and `wide`.
+
+### The stat and type marks
+
+The five discipline glyphs are the client's own objects and the only icons with a fixed identity
+(`DESIGN-CORPUS.md:609`, and the fixed assignment table at `:617-635`): running shoe (Speed),
+heart (Stamina), flexed arm (Power), flame (Guts), graduation cap (Wit). **Pal** is a single figure
+and **Group** is a pair, which is what the client's own support-card type chips wear.
+
+"Remade" is the operative word. The client's originals are small 3D renders, and `DESIGN-CORPUS.md:607`
+forbids 3D renders and clip-art imitating the client's art in this system, and `:605` forbids mixing
+a hairline set with a solid set. So the marks are redrawn on one 24 grid, one stroke weight, one
+family, in the same style as the navigation marks. The paths are in `assets/stat-icons.svg`, and
+each page carries the sprite inline, because an SVG `<use>` across files is blocked under `file://`
+and would render blank.
+
+**The colours are the client's support-card TYPE CHIP colours**, read from the legend row in
+`155016`: the blue boot, the pink flame, the red heart, the brown flexed arm, the dark-green cap,
+the olive figure and the green pair. The corpus records the chip fills as indicative until measured,
+and the glyph identities as not in doubt.
+
+**They are not a stat hue, and that is the part worth being careful about.**
+`DESIGN-CORPUS.md:371-393` is explicit: the five stats carry **no saturated identity colour**, a hue
+per stat collides with the semantic roles (a Guts delta tinted like a validation error is a defect
+waiting to ship), and a stat's identity is its **glyph plus a whisper of band tint**. So the icon is
+coloured and the band tint stays a tint. The tints are in the stylesheet, with their own dark values.
+
+Two collisions the corpus records as **unresolved** are carried here unresolved: Mood against the
+friend chip, and Fans against the group chip.
+
+### The way back to the Database hub
+
+Every Database sub-page carried a breadcrumb reading "Database · Sources", with "Database" as a
+link. So a way back existed, and that was the problem: the breadcrumb sits in the top bar on the
+brand-blue chrome at 0.9 opacity with no underline, so the link reads as a word rather than as a
+link, and a Trainer looking for the way back finds the global rail instead.
+
+Two changes fix it. A **sub-navigation strip** of the nine areas now sits at the top of the canvas on
+every Database and library page, with the current one marked, so "where am I in the reference data"
+and "where else can I go" are answered in one row. And the breadcrumb's "Database" is now visibly a
+link.
+
+This is Information Architecture principle 7 (focused navigation: the nine areas are one family, so
+they are grouped as one family) and principle 5 (front doors: a Trainer who arrives at a library
+page directly finds the whole reference set, not a dead end).
+
+### One place for the position and the action
+
+The wizard carried "Step 1 of 6" in the save bar at the bottom of the page while the stepper sat at
+the top, so a Trainer was told where they were twice, in two places, one of them below the fold.
+Across the seven wizard pages the position appeared in three different places: the save bar, the
+breadcrumb, and nowhere at all.
+
+**The position now lives in one place, the page head**, on the title row above the rule, next to the
+stepper's own reading. The breadcrumb keeps the trail and loses the step, because a trail and a
+position are different facts. The save bar keeps the action and the status.
+
+**On Settings, the save action moved up too.** "Save changes" belongs beside the page's position,
+because the page's whole job is that one action, so the save bar leaves the page head and the status
+line moves with it.
+
 ## The seven frameworks this set answers to
 
 The references are in [`docs/proposals/`](../../proposals/): one file per framework, each quoted from its
@@ -302,4 +387,11 @@ second source of truth. That is a wireframe workaround, not a proposal.
 ## Files
 
 - `assets/shell.css` — the whole visual system: tokens, primitives, nav, mobile bar, annotations.
+- `assets/stat-icons.svg` — the stat and type marks, as `<symbol>`s. The source of truth; each page that
+  uses a mark carries the sprite inline, because an SVG `<use>` across files is blocked under `file://`
+  and would render blank.
+- `assets/shell.js` — the navigation's destination list, the single place the ten destinations live.
+- `build-index.js` — the generator that wrote the pages. It is a record of how they were made, not a
+  build step: re-running it would overwrite the annotated pages, so the pages are the artefact and this
+  is the history.
 - `*.html` — one per screen, each self-contained apart from that stylesheet.
