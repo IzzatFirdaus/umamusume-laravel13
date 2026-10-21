@@ -285,7 +285,8 @@ it('counts every colour token the static theme declares', function (): void {
  * not this slice's to make: `DESIGN.md` §2.2 signs Body `text-sm` (14px) and Critical
  * `text-3xl` (30px), and §2.3 signs "Tailwind default 0.25rem increments" for spacing. A type or
  * spacing token at the plan's 16/20/28 would re-litigate a signed amendment, which
- * `implementation-backlog-2026-10-17.md` §C leaves to the owner.
+ * `docs/research-scratch/PROCESS-PLANS.md` section `## implementation-backlog-2026-10-17.md`
+ * §C leaves to the owner.
  */
 it('declares the ratified radius scale and the overlay shadow in the static theme', function (): void {
     $block = themeStaticBlock();

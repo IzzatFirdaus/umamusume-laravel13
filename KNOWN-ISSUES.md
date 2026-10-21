@@ -3093,7 +3093,8 @@ Second, the first commit to write this path is a1db210, not bd9e2e5.
 The consequence is larger than the entry states. tools/doc_census.py reads the file with encoding="utf-8" and
 errors="replace", so in a clean checkout the UTF-16LE ledger yields no readable citation at all: the census
 sees 0 of the 48 distinct backticked .md references it actually carries, and 7 of those 48 are dead -
-code-style.md, eloquent.md, frontend-fidelity-2026-10-13.md, implementation-backlog-2026-10-17.md,
+code-style.md, eloquent.md, frontend-fidelity-2026-10-13.md,
+`docs/research-scratch/PROCESS-PLANS.md` section `## implementation-backlog-2026-10-17.md`,
 testing-standards.md, ui-ux-application-context-brief.md, and the
 .scratch-uma/dispatch-2026-10-17/implementation-backlog.md that the peer's own working-tree edit already
 unbackticks. The gate therefore reports a count that is a lower bound in a second, independent way, and the
@@ -3119,7 +3120,8 @@ entry's own "first written by bd9e2e5" is also wrong.
 The census consequence is the opposite of what the correction above claims. tools/doc_census.py reads the file
 with encoding utf-8 and errors replace, and a NUL is a valid codepoint, so the file decodes and the census
 sees 47 of the 47 distinct backticked .md references the ledger carries. Six of them are dead -
-code-style.md, eloquent.md, frontend-fidelity-2026-10-13.md, implementation-backlog-2026-10-17.md,
+code-style.md, eloquent.md, frontend-fidelity-2026-10-13.md,
+`docs/research-scratch/PROCESS-PLANS.md` section `## implementation-backlog-2026-10-17.md`,
 testing-standards.md and ui-ux-application-context-brief.md - and all six are counted. The gate is not
 under-reporting on this file, and the count is not a lower bound because of the encoding. A byte-exact scan
 of all 167 tracked .md files at HEAD finds no byte order mark in any of them and NUL bytes in this one file

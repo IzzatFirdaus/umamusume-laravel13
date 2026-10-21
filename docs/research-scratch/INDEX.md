@@ -420,6 +420,47 @@ documents, which are prose, not paths. `docs/proposals/ux-laws-audit-plan-2026-1
 `docs/proposals/frontend-fidelity-2026-10-13.md` were themselves not in the owner's list and stay at
 their own paths.
 
+### Round 17 (2026-10-21, owner-ordered) — nine `docs/proposals/` files into the masters that own their subject
+
+The owner ordered nine proposal files consolidated and the originals deleted from `docs/proposals/`.
+Seven are markdown (28 to 557 lines) and two are plain-text playbooks and a phase map. All nine were
+embedded fresh; none had been embedded by an earlier round. Four landed in the process master, four in
+the slice-records master, and one in the audits master, on the rule that a plan of record belongs with
+the plans, a dated state record with the slice records, and a findings document with the audits.
+
+| Absorbed file                                                   | Lines | New home                                                                                            | Recoverable after delete?                                                                 |
+| --------------------------------------------------------------- | ----- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `docs/proposals/trainer-desk-implementation-plan-2026-10-17.md`  | 415   | `PROCESS-PLANS.md`, section `## trainer-desk-implementation-plan-2026-10-17.md`                        | Yes — tracked and clean at HEAD                                                            |
+| `docs/proposals/implementation-backlog-2026-10-17.md`            | 557   | `PROCESS-PLANS.md`, section `## implementation-backlog-2026-10-17.md`                                  | Yes — tracked and clean at HEAD                                                            |
+| `docs/proposals/Trainer Desk 2.0 — Remaining implementation.txt` | 365   | `PROCESS-PLANS.md`, section `## Trainer Desk 2.0 — Remaining implementation.txt`                      | Yes — tracked and clean at HEAD                                                            |
+| `docs/proposals/UXUI Update Phases and Slices.txt`               | 60    | `PROCESS-PLANS.md`, section `## UXUI Update Phases and Slices.txt` (a fenced text block)               | Yes — tracked and clean at HEAD                                                            |
+| `docs/proposals/sync-2026-10-15.md`                              | 28    | `SLICE-RECORDS.md`, section `## sync-2026-10-15.md`                                                    | Yes — tracked and clean at HEAD                                                            |
+| `docs/proposals/phase-5-state-2026-10-20.md`                     | 245   | `SLICE-RECORDS.md`, section `## phase-5-state-2026-10-20.md`                                          | Yes — tracked and clean at HEAD                                                            |
+| `docs/proposals/phase-6-state-2026-10-21.md`                     | 63    | `SLICE-RECORDS.md`, section `## phase-6-state-2026-10-21.md`                                          | Yes — tracked and clean at HEAD                                                            |
+| `docs/proposals/phase-8-state-2026-10-21.md`                     | 68    | `SLICE-RECORDS.md`, section `## phase-8-state-2026-10-21.md`                                          | Yes — tracked and clean at HEAD                                                            |
+| `docs/proposals/phase-8-7-remainder-findings-2026-10-21.md`      | 120   | `AUDIT-AND-VERIFICATION.md`, section `## phase-8-7-remainder-findings-2026-10-21.md`                 | Yes — tracked and clean at HEAD                                                            |
+
+Verification, per the discipline's line-by-line rule, ran before the delete: every non-blank line of
+each source was found in its section, in order, with one-level heading demotion for the markdown
+sources and a literal comparison for the two text sources (415/415, 557/557, 365/365, 60/60, 28/28,
+245/245, 63/63, 68/68, 120/120; 0 missing in each). The two text sources are carried inside a fenced
+block, the Round 16 precedent. `Trainer Desk 2.0 — Remaining implementation.txt` carries its own fences
+(one of them ` ```vue `), so its wrapper is a bare four-backtick fence rather than an info-bearing one:
+`tools/md_fence_check.py` reads an info-bearing opener as owning the block and would then report the
+source's own ` ```vue ` as an invalid closer.
+
+Live citations were repointed before the delete: `tests/Feature/DesignTokensTest.php`'s docblock (1),
+`KNOWN-ISSUES.md` (2), and the execution ledger's two read-pointers, the lines that tell a reader
+where to *open* the backlog. Three classes of reference were left standing deliberately: the ledger's
+dated per-dispatch premises and its untracked-file listings, which record where a file sat on the day
+they were written and which `AGENTS.md` §11's append-only rule protects; the ledger's Section 58
+erratum reference to the Phase 5 state document, which is a dated record of where a correction was
+filed; and the two dated "working tree at writing" records in
+`docs/research/ui-ux-application-context-brief.md`, whose path references were annotated forward rather
+than rewritten, so the dated claim stays true and the reader is still told where the file went. The
+execution ledger gained one appended section (62) recording this round, in the same byte-safe
+read/splice/write its own rule requires, with its 6,571 NUL bytes asserted unchanged before and after.
+
 ### Deliberate exceptions, outside the masters
 
 Three entries stay outside `docs/research-scratch/` on purpose. They are listed here so a future pass

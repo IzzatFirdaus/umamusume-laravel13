@@ -7,7 +7,7 @@
 | Date of writing | 2026-10-17 |
 | HEAD at writing | `dfef6c7` (`fix(wizard): wrap the facts grid's dt/dd pair in a dl`) |
 | Branch | `master` |
-| Working tree at writing | Clean except uncommitted changes to 12 files (Dashboard and Veterans identity surfaces: `DashboardController.php`, `VeteranController.php`, `VeteranRow.php`, `VeteranRow.vue`, `Dashboard.vue`, `Legacy/Index.vue`, `Veterans/Compare.vue`, `Veterans/Index.vue`, error blade views, `ErrorPageViewsTest.php`) plus one untracked proposal (`docs/proposals/implementation-backlog-2026-10-17.md`). See §9 and §12. |
+| Working tree at writing | Clean except uncommitted changes to 12 files (Dashboard and Veterans identity surfaces: `DashboardController.php`, `VeteranController.php`, `VeteranRow.php`, `VeteranRow.vue`, `Dashboard.vue`, `Legacy/Index.vue`, `Veterans/Compare.vue`, `Veterans/Index.vue`, error blade views, `ErrorPageViewsTest.php`) plus one untracked proposal (`docs/proposals/implementation-backlog-2026-10-17.md`, since consolidated into `docs/research-scratch/PROCESS-PLANS.md` section `## implementation-backlog-2026-10-17.md` and deleted 2026-10-21). See §9 and §12. |
 | Reading conventions | Every claim is labelled **CONFIRMED** (read from code/routes/persistence/tests), **DOCUMENTED** (authoritative doc), **HISTORICAL** (audit/older claim), **INFERRED** (reasoned, not directly proven), or **PROPOSED** (design/plan, not built). Line numbers are accurate only at the time of writing. |
 
 ---
@@ -572,7 +572,7 @@ Source: `docs/audits/rice-shower-unity-cup-round3-reconciliation.md`. The regist
 
 ### 12.1 Concurrent workstream at writing (CONFIRMED)
 
-The working tree carries uncommitted changes to 12 files — all on the Dashboard and Veterans identity surfaces (`DashboardController.php`, `VeteranController.php`, `VeteranRow.php`, `VeteranRow.vue`, `Dashboard.vue`, `Legacy/Index.vue`, `Veterans/Compare.vue`, `Veterans/Index.vue`, `resources/views/errors/{404,419,500}.blade.php`, `ErrorPageViewsTest.php`) — plus one untracked proposal (`docs/proposals/implementation-backlog-2026-10-17.md`). These are not related to the round-2/round-3 remediation and **this brief did not touch any of them**. The R2-06 deck-ownership fix is now **committed** (`dd179ba`), so it is no longer an uncommitted workstream. The Round 3 reconciliation (`docs/audits/rice-shower-unity-cup-round3-reconciliation.md`) is itself untracked and belongs to the audit workstream, not this brief.
+The working tree carries uncommitted changes to 12 files — all on the Dashboard and Veterans identity surfaces (`DashboardController.php`, `VeteranController.php`, `VeteranRow.php`, `VeteranRow.vue`, `Dashboard.vue`, `Legacy/Index.vue`, `Veterans/Compare.vue`, `Veterans/Index.vue`, `resources/views/errors/{404,419,500}.blade.php`, `ErrorPageViewsTest.php`) — plus one untracked proposal (`docs/proposals/implementation-backlog-2026-10-17.md`, since consolidated into `docs/research-scratch/PROCESS-PLANS.md` section `## implementation-backlog-2026-10-17.md` and deleted 2026-10-21). These are not related to the round-2/round-3 remediation and **this brief did not touch any of them**. The R2-06 deck-ownership fix is now **committed** (`dd179ba`), so it is no longer an uncommitted workstream. The Round 3 reconciliation (`docs/audits/rice-shower-unity-cup-round3-reconciliation.md`) is itself untracked and belongs to the audit workstream, not this brief.
 
 ---
 

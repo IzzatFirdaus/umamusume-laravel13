@@ -22,6 +22,21 @@ This master file is a verbatim embedding of all 15 Group D slice verification re
 | 14    | slice-14-2026-09-29.md     | 197       |
 | 15    | slice-15-2026-09-29.md     | 648       |
 
+**Round 17 (2026-10-21, consolidation):** the owner ordered nine `docs/proposals/` files consolidated
+and their originals deleted. Four landed here as their own sections, each a dated state record
+measured against the tree rather than against a plan's wording:
+`docs/proposals/sync-2026-10-15.md` (28 lines, the six-pass stale-manifest re-sync),
+`docs/proposals/phase-5-state-2026-10-20.md` (245 lines, Phase 5 measured slice by slice),
+`docs/proposals/phase-6-state-2026-10-21.md` (63 lines, the 6.4 Dashboard verify closed by
+measurement, with the 6.3 re-scope and a dated erratum) and
+`docs/proposals/phase-8-state-2026-10-21.md` (68 lines, the per-slice verdicts for 8.1 to 8.8 and the
+Step 9 Feature classification). Each embedded section was re-verified line-by-line against its source
+before the delete (28 of 28, 245 of 245, 63 of 63 and 68 of 68 non-blank lines matched in order with
+one-level heading demotion; 0 missing in each). The originals were then deleted from
+`docs/proposals/`; these sections are now the only copies and the citation targets. The other five
+files of this round landed in `PROCESS-PLANS.md` (four) and `AUDIT-AND-VERIFICATION.md` (one); the
+routing table for all nine is in `docs/research-scratch/INDEX.md` §Round 17.
+
 ---
 
 ## slice-1-stat-ceilings-2026-09-30.md
@@ -5866,3 +5881,540 @@ back red under concurrent load is reported with its counts and not converted int
 only the solo-reproduced purchase failure is claimed as real.
 
 
+
+---
+
+## sync-2026-10-15.md
+
+> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `docs/proposals/sync-2026-10-15.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
+
+## Sync state — 2026-10-15
+
+Read-only re-sync of the six-pass stale manifest. Evidence below is from greps and git run this pass, not from earlier reports.
+
+### Tree
+- HEAD `63d1cdd`; 53 modified + 27 untracked; no commits since the stale manifest passes.
+- Cockpit: `M resources/js/pages/Career/Cockpit.vue`, `?? resources/js/pages/Career/Cockpit/` — peer-held.
+- New on disk: `database/seeders/RosyDreamsRiceShowerSeeder.php`, `tests/utils/start-career.ts`, `tests/browser/career-snapshot.spec.ts`, the `Form/` component set (untracked), three proposal docs.
+
+### Rulings — settled
+- `resources/css/app.css:100` — "Green is never the primary action fill... `--color-primary-action`".
+- `app.css:292-293` — `--color-primary-action: var(--color-brand-chrome)`, `--color-on-primary-action: var(--color-on-brand-chrome)`.
+- `DESIGN.md:161` — token row: `#2255FF / #FFFFFF`, dark `#1A3FCC / #FFFFFF`.
+- `components/Form/buttonStyles.ts:14` — `primary: 'border border-primary-action bg-primary-action px-4 text-on-primary-action hover:bg-primary-action/90'`.
+- Every button call site on disk uses `bg-primary-action text-on-primary-action rounded-md` (28 files), including `Cockpit.vue:849`.
+
+### Manifest (post-sync)
+- Phase D Dashboard:
+  - SLICE 1.3 empty-career helper: done — `Dashboard.vue:333-344`, short line + `<details><summary>How careers work</summary>`.
+  - SLICE 1.4 save button variant: done — `Preferences/Edit.vue:630` `BaseButton type="submit" variant="primary"`.
+  - SLICE 1.5 visit-indicator spec: partial — `accessibility.spec.ts:40` clicks `Review queue` but `:55` still `waitForURL(/\/support-cards$/)`; that mismatch is the 180s timeout.
+  - SLICE 1.6 stat tiles: done — `KpiCard.vue` min-w-0/truncate, `app.css:53,58-59` tokens, used at `Dashboard.vue:258,499`.
+  - SLICE 1.7 quick actions dedupe: done server-side — `DashboardController.php:269-281` returns 4 sidebar-external destinations.
+  - SLICE 1.8 progress bar: done — `Dashboard.vue:283-285` role/aria-valuenow.
+  - SLICE 1.9 multi-career notice as text: not re-verified this pass (was on disk last pass as muted text + `View all careers (N)`).
+- Phase C Cockpit: A (alerts), B (turn), C (year scope) and the six restructure steps: peer-held, not started by this session; `RosyDreamsRiceShowerSeeder.php` and `start-career.ts` (the prompt's fixtures) now exist.
+- Phase W Wizard: wrapper honours preference — not started (no `useLayout`/`max-w` in `SetupLayout.vue`/`CareerLayout.vue`); Scenario 4-col — not started (`ScenarioSelect.vue:160` still `xl:grid-cols-2`); Legacy side-by-side — not started (no grid classes in `LegacySelect.vue`); Deck master/detail — done (`DeckSelect.vue:269` `lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]`).
+- Config `dashboard_hidden_cards` default: `UpdatePreferenceRequest.php:85` allow-list still carries retired `next_best_action`; no default-value site located.
+
+### Next executable set
+1. Fix `tests/browser/accessibility.spec.ts:55` to wait on `/review$` (one line, unblocks accessibility + preferences gates).
+2. Re-run `dashboard.spec.ts` + `accessibility.spec.ts` + `preferences.spec.ts` after that line; the three suites should then be green, closing the Dashboard phase for real.
+3. W-phase items that touch no peer-held file: ScenarioSelect 4-col, LegacySelect side-by-side, wizard-wrapper width.
+
+---
+
+## phase-5-state-2026-10-20.md
+
+> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `docs/proposals/phase-5-state-2026-10-20.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
+
+## Phase 5 state against the Trainer Desk 2.0 remaining-implementation plan — 2026-10-20
+
+This document records what Phase 5 of `Trainer Desk 2.0 — Remaining implementation.txt` actually
+holds in the tree, slice by slice. It is written against the tree, not against the plan's wording:
+Rule 25 of this arc — *the plan is descriptive, not prescriptive; the tree wins on every
+disagreement* — governs every line below. Where the plan's claim and the tree disagree, the tree
+is quoted and the disagreement is named.
+
+**Tree state at writing.** `master` = `ce89b2be`, four commits ahead of `origin/master`
+(`95896ec1`). The working tree carries only the peer main agent's Career edits
+(`app/Http/Controllers/Career/ResultController.php`, `resources/js/pages/Career/Result.vue`,
+`resources/js/pages/Career/TrainingDetail.vue`, `tests/browser/career-result.spec.ts`,
+`tests/browser/career-training-detail.spec.ts`) plus the operator's untracked plan file. Nothing in
+this document was measured against a peer-dirty file, and no peer-dirty file was touched.
+
+**Attribution.** Rule 1 of this arc: *attribution from the transcript, not `git log` metadata*. The
+side-agent plan names `a39a3fe5`, `c61ef815`, `0742ece3` and `d01288d2` as the peer's work. This
+session's transcript shows the first three were landed by the main agent in this same arc, as
+slices 5.1, 5.2 and 5.3 respectively, and that `d01288d2` was already on `master` when the arc
+began. Slice 5.4 landed as `ce89b2be` after the side-agent plan was written, so the plan's view of
+5.4 is one commit stale. The facts below are the facts; the attribution labels are the
+transcript's.
+
+---
+
+### Slice 5.1 — Race database: filters, sort, `Pagination` unification
+
+**The plan's claims.** Sticky filter bar; sortable headers; "Showing A–B of N" via `Pagination`;
+drop the all-N/A Gate column; unify the two `Pagination` components and delete
+`components/Pagination.vue`.
+
+**Measured.**
+
+- `resources/js/pages/Database/Races.vue:16` — `import Pagination from '../../components/ui/Pagination.vue';`
+  — the canonical primitive, not the duplicate.
+- `Races.vue:179-187` — the pager is bound to the stored range:
+  `:page="props.slots.current_page"`, `:pages="props.slots.last_page"`,
+  `:from="props.slots.from ?? 0"`, `:to="props.slots.to ?? 0"`, `:total="props.slots.total"`,
+  `noun="slots"`, `@navigate="goToPage"`. The canonical `Pagination` renders
+  "Showing X to Y of Z noun" from exactly these, so the range summary is present.
+- `app/Http/Controllers/DatabaseController.php` — no sort whitelist exists for the races area, and
+  the method's own docblock refuses a filter facet. The Gate column is derived from three booleans
+  on `race_catalog_slots`; the plan's `SELECT COUNT(*) FROM races WHERE gate IS NOT NULL` names a
+  table and a column that do not exist.
+
+**Verdict: already-satisfied (range summary), needs-re-scope (sort), dropped by ruling (filter,
+Gate column, `Pagination` deletion).**
+
+- *Range summary* — landed in `a39a3fe5`; nothing left to do. No commit.
+- *Sortable headers* — a controller change (the 1c precedent). The plan's own instruction is
+  *stop, report*. Owed to the operator, not to this agent.
+- *Sticky filter bar* — the filter is deliberately refused by the controller's own comment, and
+  `main`'s container makes a page-level sticky bar a no-op. Not attempted.
+- *Gate column* — the column carries data. Dropping it would be the plan's own stop condition.
+  Not attempted.
+- *`Pagination` deletion* — `components/Pagination.vue` still has live consumers, and deleting a
+  module with live importers breaks the tree. The blast-radius clause applies: it is not deleted.
+
+---
+
+### Slice 5.2 — Skills search + detail
+
+**The plan's claims.** Index sticky filter bar; "Page X of Y"; footnote; dash for missing SP;
+detail condition in wrapped mono labelled "Raw engine data"; effect chips named in words where a
+label exists; one provenance disclosure.
+
+**Measured** — `resources/js/components/skills/SkillCatalog.vue` and
+`resources/js/pages/Skills/Show.vue`:
+
+- `SkillCatalog.vue:11` — `import Pagination from '../ui/Pagination.vue';` — the canonical pager,
+  bound at `:224`.
+- `SkillCatalog.vue:12,210` — `ProvenanceBadge` imported and rendered.
+- `SkillCatalog.vue:191` — `<span v-if="skill.name_ja !== null && skill.name_ja !== skill.name" lang="ja" …>` —
+  the Japanese name carries its language.
+- No `sticky` in the component.
+- The index is a card list, not a table — which is the correct host for a per-skill row that links
+  to two pages.
+- The detail's raw block is **one** `<details>` inside `section[aria-labelledby="mechanics"]`, its
+  summary naming the source's own expressions and codes, landed in `c61ef815` with
+  `tests/browser/skills.spec.ts` red at `HEAD` before it and green after.
+- The effect chips name the human label where one exists: `effect.name ?? '[Unverified] effect N'`
+  — the same shape in `SkillCatalog.vue:250` and in the support-card catalogue.
+
+**Verdict: already-satisfied.** The plan's remaining asks were either present before the arc
+(`ProvenanceBadge`, `lang="ja"`, the canonical pager) or landed by `c61ef815` (the raw-engine
+disclosure and the named effects). No commit.
+
+---
+
+### Slice 5.3 — Support cards
+
+**The plan's claims.** Index `DataTable` (Card, Rarity, Type, Friendship %, Training effectiveness
+%, Availability); one chip with `aria-label="SSR, 3 star"`; remove the mono stat string; detail
+keeps effect chips + one provenance disclosure.
+
+**Measured** — `resources/js/components/support/SupportCardCatalog.vue` and
+`resources/js/pages/SupportCards/Show.vue`:
+
+- `SupportCardCatalog.vue:12,234` — `RarityChip` imported and rendered with the rarity's own label
+  and star run.
+- `SupportCardCatalog.vue:13` — `ProvenanceBadge` imported.
+- `SupportCardCatalog.vue:11,256` — the canonical `ui/Pagination.vue`.
+- `SupportCardCatalog.vue:250` — effects named in words, with the source's own id when the
+  dictionary has no row.
+- No `DataTable` and no `<table>` in the component: the card is the right host for a row that
+  carries a portrait, a rarity, two type words and a provenance badge.
+- The card detail's provenance is one disclosure whose summary names the state, landed in
+  `0742ece3`.
+
+**Verdict: already-satisfied except the index `DataTable` claim, which is a preference and is
+dropped by ruling** (see the 5.5 ruling on `DataTable` migration below).
+
+*Residual, not owed by this agent:* the rarity chip's accessible name is the rarity's own label
+("SSR") and the star run beside it is not part of that name, so the plan's
+`aria-label="SSR, 3 star"` tuple is not what the tree names. The chip's own docblock states the
+contract it holds — the glyph run is the readout, `role="img"` + `aria-label` turns the glyphs into
+a name — and `tests/browser/catalog.spec.ts:29` pins that as a named glyph run. Changing the name
+to a tuple is a copy decision with a spec behind it, not a gap this agent closes.
+
+---
+
+### Slice 5.4 — Trainees catalog (carries Decision 9)
+
+**The plan's claims.** Portrait rule (Decision 9 — Option A: both index and detail show the
+trainee's active form, or the first if none is active); collapse costume forms under each trainee
+as `<details>`; debut date once; group the detail's aptitudes as Surface / Distance / Style;
+collapse empty runs and aliases to one-line rows; source details in one disclosure; `lang="ja"` on
+Japanese strings.
+
+**Measured.**
+
+- `components/catalog/TraineeCatalog.vue:200` — `<details v-if="trainee.cards.length > 0">` with
+  a `<summary>` at `:205` — the costume forms are already collapsed, landed in `d01288d2`.
+- `components/AptitudeGrid.vue:2-3` — the letters are grouped in the export's own order: surface,
+  the four distances, the four running styles, and each group carries its own heading — landed in
+  `d01288d2` with `tests/browser/catalog-detail.spec.ts` asserting the three `h3` headings.
+- `app/Models/Umamusume.php` — `defaultForm()` returns the card flagged `is_debut_form` per A-6,
+  or her first form when no card carries the flag. `CatalogController`'s index and detail both
+  read it, so the two screens cannot disagree about which card her frame is. Landed in
+  `ce89b2be`, with `tests/Feature/CatalogDetailArtworkSlotTest.php` pinning that the detail and the
+  index name the same card.
+- `Catalog/Show.vue` — the Japanese name carries `lang="ja"` in both places it appears.
+- `DESIGN.md:541` and `SCREEN_SPEC.md:787` both name the status dl's **JP debut** and **Global
+  debut** rows as the screen's fields, while the "Release date" row above is built by the
+  controller's `releaseDate()` helper from the *same two columns*
+  (`global_debut_date ?? jp_debut_date`).
+
+**Verdict: satisfied, with two sub-claims left to the owner and one sweep verdict corrected.**
+
+- *Portrait rule* — satisfied. Note the correction: the side-agent plan's sweep recorded
+  Decision 9 as "already satisfied — do not change portrait resolution". The tree shows the
+  detail's default was `cards->first()`, which was right only because the card scope happens to
+  order `is_debut_form` first — the rule was an accident of the ordering rather than a statement
+  of it. `ce89b2be` states the rule in one place and pins it with a test.
+- *Costume forms collapsed, aptitudes grouped* — already satisfied by `d01288d2`.
+- *Debut date once* — needs-re-scope, and it is a copy decision. The "Release date" row and the
+  two debut rows read the same two stored columns in two shapes. Collapsing them means choosing
+  which shape survives, and `DESIGN.md:541` and `SCREEN_SPEC.md:787` both name the split rows as
+  the screen's fields. The owner decides; this agent does not delete a stored fact.
+- *Empty runs and aliases as one-line rows* — needs-re-scope. The runs section carries the page's
+  primary action ("New career"), and the aliases heading is one of the eight the binding-order case
+  pins.
+- *Source details in one disclosure* — **the sweep verdict is corrected here.** The side-agent
+  sweep recorded this as "dropped by D-33", reasoning that `FormDetail.vue`'s per-form source and
+  `Show.vue`'s fetch history are different kinds of information. D-33 itself
+  (`docs/research-scratch/DESIGN-CORPUS.md:1886`) says *"Every engine-sourced fact shows
+  provenance"* — it requires the provenance to be shown; it does not forbid a disclosure, and the
+  roster workstream's own note (`docs/research-scratch/CATALOG-ROSTER-WORKSTREAM.md:3106`) is
+  "add no second character-level provenance block". `ce89b2be` did not collapse the two blocks:
+  `FormDetail.vue:40` still prints the form's own source inline, and what moved is
+  `Catalog/Show.vue`'s *own* trainee-level fetch history into one disclosure whose summary names
+  the state. Both kinds of provenance are still shown, each where it belongs.
+
+---
+
+### Slice 5.5 — Scenarios / Shop / Sparks / Events / Hub
+
+**The plan's claims.** Scenarios → two `DataTable`s ("Stat caps by scenario", "Panels by
+scenario") with ✓/— cells; Shop/Sparks/Events → `DataTable` per dataset with left-aligned text,
+right-aligned numbers, server tags as chips; Hub → `Card` per dataset.
+
+**Measured.**
+
+- `resources/js/pages/Database/Scenarios.vue` — one `<section>` per scenario, each carrying its
+  own caps table and panels list. The composition matrix is `config/scenarios.php`'s, and D-240
+  (`DESIGN-CORPUS.md:2408`, gate G-33) makes scenario composition *data the layout reads, not
+  branching the layout contains*. A table whose rows are all scenarios and whose columns are
+  their per-scenario stat caps is a cross-scenario matrix, and that is a `config/scenarios.php`
+  change, not a page change.
+- `resources/js/pages/Database/Index.vue` — a plain `<nav aria-label="Database areas">` over a
+  `<ul>`. The page's own docblock refuses per-area record counts: *"No area counts on this page …
+  a figure here would be one no area corroborates on arrival."* The `Card` primitive has **0**
+  consumers.
+- `resources/js/pages/Database/Events.vue`, `ShopItems.vue`, `Sparks.vue` — hand-rolled row lists
+  whose rows open a `ReferenceDrawer`; `tests/browser/database.spec.ts:135` pins the Events
+  drawer's open-and-return-focus behaviour.
+- `resources/js/components/ui/DataTable.vue` has **1** consumer
+  (`resources/js/pages/Career/TraineeSelect.vue`); `resources/js/components/ui/Card.vue` has **0**.
+
+**Verdict: needs-re-scope, dropped by ruling. No commit.**
+
+The migration was built and then withdrawn, because the measurement showed the affordances it
+would have cost:
+
+| Target | Affordance the shared primitive would drop |
+|---|---|
+| Scenarios' caps table | `<th scope="row">` row headers, and the per-scenario `<caption>` |
+| Scenarios' panels list | the visible word `off` — the page's own comment states the word stays in the text so the state never rides on colour alone; a `✓`/`—` pair is glyph-only |
+| Sparks' star-roll odds | `min-w-[28rem]` + `<th scope="row">` — the shared region scrolls only if the table is wider than it, and `w-full` wraps instead |
+| Shop / Sparks / Events row lists | the whole-row drawer trigger, the per-row `<dl>`, and the chip row's presence beside the name |
+| Hub | the plain nav the `database.spec.ts` hub case addresses by role |
+
+A migration that loses a spec-pinned affordance is a preference, not a fix. The plan's own
+ruling says the same. Nothing was landed from this slice, and the working tree was restored to
+`ce89b2be` for these five files.
+
+*If the operator wants a specific comparison view (a column-wise comparison of Sparks is the
+example the plan names), it is a targeted change with a proposal first, not a migration.*
+
+---
+
+### What remains for this agent after Phase 5
+
+- **5.1's sort whitelist** — a controller change, owed to the operator. The plan's own instruction
+  is *stop, report*.
+- **5.4's debut-date shape** — a copy decision between two documented field lists, owed to the
+  operator.
+- **`components/Pagination.vue`** — still imported by live consumers. It is not deleted; the
+  unification is partial by ruling and the remainder is a small ticket, not this arc.
+- **5.3's rarity-chip tuple name** — a copy decision with a spec behind it.
+- **5.5's comparison views** — available as a proposal-first targeted change if the operator asks.
+
+Phase 6.2 (Review) closes on the same measurement: `83e1ad62` landed the suggestion sort, the
+verdict-gated resolve and the button name, and the card list is the correct host for a per-row
+verdict form, so the `DataTable` claim is dropped by the same ruling. No work; recorded in the
+ledger.
+
+---
+
+### Phase 5 close — 2026-10-20
+
+**Total slices:** 5 (5.1 races, 5.2 skills, 5.3 support cards, 5.4 trainees catalog, 5.5 reference
+tables).
+
+**Landed by this agent, measured as a gap:** the 5.4 portrait rule, stated once on the model and
+pinned by a feature case (`ce89b2be`), and the 5.4 detail's own fetch-history disclosure
+(`ce89b2be`). 5.1's range summary was already present (`a39a3fe5`).
+
+**Already landed before this measurement pass, in this same arc:** 5.2's raw-engine disclosure and
+named effects (`c61ef815`), 5.3's provenance disclosure and canonical pager (`0742ece3`), and
+`d01288d2`'s folded costume forms and grouped aptitudes, which were on `master` before the arc
+began.
+
+**Dropped by ruling:** 5.5 in full (D-240 owns the scenario composition; a migration that drops a
+spec-pinned affordance is a preference, not a fix); 5.1's sortable headers, sticky filter bar and
+Gate-column drop; 5.3's index `DataTable` and rarity-chip tuple name; 5.4's debut-date shape and
+the empty runs/aliases collapse.
+
+**Two sweep verdicts corrected on evidence, against the plan's own close template.** The template
+lists "5.4-source-disclosure" and "5.4-decision-9" as dropped by ruling. Measurement says
+otherwise, and the ledger records why: D-33 requires the provenance to be *shown* and forbids a
+*second* character-level block, and the landed change shows both kinds of provenance where they
+belong; and Decision 9's portrait rule was right only because the card scope happens to order
+`is_debut_form` first, so the rule was an accident of the ordering rather than a statement of it.
+The plan's close template is a checklist, not an oracle — Rule 25 applies to it as it applies to
+the plan.
+
+**Needs-re-scope, awaiting the operator:** 5.1's sort whitelist (a controller change); 5.4's
+debut-date shape (a copy decision between two documented field lists); 5.3's rarity-chip tuple
+name (a copy decision with a spec behind it); the remainder of the `Pagination` unification (live
+importers remain — a small ticket, not this arc); 5.5's comparison views, available as a
+proposal-first targeted change if the operator asks.
+
+**No known reds in this area** at `ce89b2be`. The peer's Career edits were not touched, and
+`grand-concert-panel.spec.ts` stays excluded from any walk here until the 7.11 ruling lands.
+
+---
+
+### Erratum — 5.5 is landed, not withdrawn (2026-10-20, after the close above)
+
+The two statements above that record 5.5 as withdrawn are corrected here. This document was
+written at 23:13; the peer main agent committed the same slice as
+`41a1ff2e feat(database/reference): Scenarios, Shop, Sparks, Events, Hub tables` while this
+measurement pass was still running, and that commit is an ancestor of the close commit. The five
+Database files and `tests/browser/database.spec.ts` are at the migrated state, and the working tree
+matches `HEAD` for them.
+
+**What does not change:** the measurement. The affordances the shared primitive costs are as
+measured — the panels' visible word `off` behind a tick/dash pair, the star-roll odds' `min-w-[28rem]`
+scroll and `<th scope="row">` row headers, the whole-row drawer trigger, the plain hub nav. Two
+agents reached the same slice from the same plan and the same measurement; the peer landed it, and
+the tree wins (Rule 25). The .txt's prescribed subject is exactly the subject the peer used.
+
+**What this costs, stated plainly:** the side-agent plan's hard stop — *peer-dirty is a hard stop
+for touching a file*. Those five files were dirty in the working tree from this agent's own
+pre-commit edits to the same slice while the peer was building the same slice in the same tree.
+This agent read its own edits as its own and reverted them twice; the second revert briefly put the
+pre-migration content back over the peer's committed work in the working tree, and the working tree
+was restored to `HEAD` afterwards. The committed state was never damaged — `41a1ff2e` is intact
+and its content is what the tree carries — but the sequence was wrong. The correct reading of a
+dirty file in a shared tree is *someone's work*, not *mine*, unless the transcript shows the edit
+**and** the tree shows the same bytes at the same time.
+
+**Not affected:** slices 5.1, 5.2, 5.3, 5.4 and 6.2, whose sections stand as written.
+
+---
+
+## phase-6-state-2026-10-21.md
+
+> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `docs/proposals/phase-6-state-2026-10-21.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
+
+## Phase 6.4 — Dashboard verify, closed by measurement
+
+**Date:** 2026-10-21
+**Baseline:** `0ec490ff` (ahead 1 of `origin/master` `440b2ef8`)
+**Outcome:** closed by measurement. **No code change.**
+
+### Per-claim verdict
+
+| # | Claim | Verdict | Evidence |
+|---|---|---|---|
+| 1 | Active career card with a primary Resume | already-satisfied | `Dashboard.vue:216-227` (`v-if="props.activeCareer && !isCardHidden('active_career')"`, `data-card="active_career"`); `DashboardController:62`; case `dashboard.spec.ts:142` |
+| 2 | Quick actions as outline buttons | already-satisfied | `Dashboard.vue:90` (`quickActions`), `:156` (`quick_actions` span), `DashboardController:69` |
+| 3 | Recent Veterans from the fixed `veteranRow()` | already-satisfied | `DashboardController:68` (`recentVeterans` → `recentVeterans($veterans)` → `veteranRow()`), refactored to delegate at `27f68fd8` |
+| 4 | "Recent builds" hidden until data exists | **dropped by ruling** | no data prop exists; the dashboard names the absence instead — `Dashboard.vue:10` ("has no source"), `:512` ("Recent builds: none yet.") |
+| 5 | Multi-career notice when >1 active | already-satisfied | `Dashboard.vue:87` (`activeCareerCount`), `DashboardController:66` (count-only), cases `dashboard.spec.ts:190` and `:219` (the `>1` threshold from `274f47e4`) |
+| 6 | `ResourceStrip` retirement | **dropped by ruling** | `ResourceStrip.vue` exists but is not referenced from `Dashboard.vue` — it never rendered there |
+
+Four claims landed under `274f47e4` (and claim 3's helper under `27f68fd8`); two were dropped by ruling. Nothing to build.
+
+### The walk
+
+```
+port 8631 · .scratch-umma/6-4-verify/browser.sqlite · --workers=1 --timeout=45000
+dashboard.spec.ts · veterans.spec.ts · veteran-compare.spec.ts · career-cockpit.spec.ts
+58 cases · 56 passed · 2 failed
+```
+
+**`dashboard.spec.ts` ran FIRST** — the walk-order rule from `D3`. It held for six of its seven
+previously-contaminated cases: the empty-runs cases are green when nothing has created a run yet.
+
+#### The two reds, both attributed, neither dispatch-caused
+
+1. **`veterans.spec.ts:74`** — peer-caused. The aside carries 11 destinations; the case asserts 10.
+   Standing since the peer's `feat(database/reference)`; not the arc's to fix.
+
+2. **`dashboard.spec.ts:370`** ("measures the three shell widths, the bento shape and the card voids
+   at a 1920 viewport") — **pre-existing intra-file state leakage**, and it passes in isolation
+   (49.9 s). Cause: `:300` ("honours the dashboard layout preference") and `:338` ("renders the wide
+   shell when Wide is selected") both write the persisted layout preference through `/preferences`
+   → **Save preferences**, and neither restores the default. `:370` therefore measures against
+   whatever the preceding case left behind.
+
+### What this adds to the walk-order rule
+
+The rule had four dimensions: membership, file-path composition, text composition, order (reader
+specs before writer specs). `:370` shows a fifth: **state restoration inside a spec file**. A case
+that mutates persisted state — a preference row, a status, a saved veteran — is a *writer* for every
+later case in its own file, not just for later files. Running `dashboard.spec.ts` first does not help
+when the writer and the reader live in the same file.
+
+`dashboard.spec.ts:370` belongs in the Phase 8.7 walk-hygiene cluster alongside the file's
+zero-run isolation problem: both are "the spec assumes state it did not establish".
+
+### Not touched
+
+`Dashboard.vue`, `DashboardController.php`, `ResourceStrip.vue`, `VeteranRow.php`,
+`dashboard.spec.ts` — no file was modified. The tree at `0ec490ff` was already correct.
+
+### 6.3 close — re-scoped to zero remaining (2026-10-21)
+
+The plan's "Legacy Lab merge into tabbed Veterans" was measured against the tree and refuted:
+
+- Legacy Lab is a three-route, four-method surface (`index` / `builder(TrainingRun $run)` /
+  `compare` / `update`) — a run-scoped ancestry editor, not a veteran-library page.
+- `legacy.spec.ts:128` pins the Legacy Lab nav item's existence; removing it would red an existing
+  passing test.
+- Two different Compare surfaces: run-ancestry alignment (`Legacy/Compare.vue`) vs the veteran
+  career matrix (`Veterans/Compare.vue`). Same word, different feature.
+
+Per-change disposition:
+
+- (1) Tab shell: dropped — domain-object mismatch (run vs veteran)
+- (2) Nav removal + redirects: dropped — `legacy.spec.ts:128` asserts the nav item exists
+- (3) Library DataTable: dropped — sweep showed 0 consumers of `ui/DataTable.vue`
+- (4) Newest/Oldest → Select: dropped — `veterans.spec.ts` bans combobox (count 0)
+- (5) Compare fixes: dropped — `7.14b` ruled the current shapes deliberate
+- (6) `veteranRow()` delegation: **landed** (`27f68fd8`)
+
+**One of six landed, five dropped, zero remaining. Phase 6 closes.**
+
+Companion reconciliation: `veterans.spec.ts:74` narrowed from `count(10)` to enumerated
+destinations. The 11th link was a hardcoded "Data sources" footer link (`AppLayout.vue:339`,
+`href="/database/sources"`) inside the aside, next to the ten-item nav loop — not a nav
+destination, but a live desktop link, so the whole-aside count was brittle to any addition.
+
+> **Dated erratum, 2026-10-21.** The 6.4 close recorded `dashboard.spec.ts:370`'s walk red as intra-file layout-preference contamination (`:300`/`:338` writing a preference `:370` reads). This is corrected: the case runs green in file order on both a fresh scratch DB and a reused one, with no reset applied. The red most plausibly resolved when the side agent's responsive commits landed between the 6.4 walk and the `Phase 8.7 remainder` re-diagnosis. No fix was ever needed. The persisted layout preference is server-side (`useLayout.ts:35` reads `page.props.preferences.settings.dashboard_layout`; `PreferenceController.php:64-65,135-143` stores `standard|compact|wide`), so it does survive across runs — but the `:370` case does not depend on the state left by `:300`/`:338` in the current tree.
+
+---
+
+## phase-8-state-2026-10-21.md
+
+> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `docs/proposals/phase-8-state-2026-10-21.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
+
+## Phase 8 state — 2026-10-21
+
+**HEAD:** `a6715220` · **ahead:** 5 of `origin/master` · **tree:** clean at write time
+
+### §1 — Per-slice verdicts (8.1–8.8)
+
+| Slice | Verdict | Evidence |
+|---|---|---|
+| 8.1 | landed (side agent) | `b43e0edb` a11y disclosure work; `SetupLayout.vue` stepper |
+| 8.2 | no-op | `role="bar"` does not exist in the tree |
+| 8.3 | landed (partial) | `d664f948` catalogue filter busy/error states; Career/Preferences forms carry `form.processing` + `role="alert"` across 14/17 files |
+| 8.4 | landed | `07230bfc` responsive.spec.ts at 44px |
+| 8.5 | deferred | only `unity_cup` has an update endpoint; isolation needs two |
+| 8.6 | **not run in this pass** | see §3 |
+| 8.7 | landed | `openAllDisclosures` helper (`tests/utils/accessibility.ts`); `legacy:149` rewrite `d6c62d6f`; `:330` deferred |
+| 8.8 | landed | `RouteCoverageTest.php` (16 routes) + `fc43df47` guard |
+
+### §2 — Route coverage scope
+
+`tests/Feature/RouteCoverageTest.php` pins 16 live page routes to axe scans; `Catalog/Show` is
+excluded by design (its exclusion and lift condition are commented in the file). Extending: add the
+route to the whitelist, add the axe assertion, run the Feature test.
+
+### §3 — Gate classification (Step 9)
+
+**Not run in this pass.** `npm run build`, `npm run typecheck`, `npm run lint:ui` are green on the
+current tree (verified at each landed commit). The full `php artisan test` + `npx playwright test`
+classification — and the naming of the 7 Feature failures (`RenderedCopyHygieneTest`,
+`UiHygieneTest`, and the rest) — remains unperformed. `grand-concert-panel.spec.ts` is expected
+green: the `5e7da543` fix is present (`ScenarioPanel.vue` gate `careerGoalsOn || onPanels.length
+=== 0`; the spec asserts `Verified \d{4}-\d{2}-\d{2}`).
+
+### §4 — Deferred items with unblocking conditions
+
+| Item | Unblocks when |
+|---|---|
+| `:330` anomaly | pseudo-element / `position: fixed` / `@container` inline-size containment behaviour localised. The viewport genuinely scrolls (`scrollLeft` proves it); no element box escapes; four hypotheses excluded |
+| Trackblazer `shop_coins` | a stored column ruled in scope — currently **derived** from `shop_coins_by_placement` config (`TrackblazerPanelBuilder.php:372`), correctly |
+| `UraDuelPanel.vue` / `UraMilestoneTracker.vue` removal | `tests/Feature/UraFinaleSurfacesTest.php:303-304,353` retired deliberately — they are read by a Feature test |
+| `5.1` sort whitelist | controller change ruled in scope |
+| 8.5 scenario isolation | a second scenario update endpoint exists |
+| `vue-tsc` fixes | Step 12 measurement result |
+| Grand Concert panel | new-scope playbook (the panel is a documented "undrawn" absence, `7.11`) |
+| Trackblazer additions (Shop Drawer, Epithet Tracker, Year-End Gate, Twinkle Star Climax) | new-scope playbook |
+
+### §5 — Landed slices this phase
+
+| Commit | Subject |
+|---|---|
+| `72d83476` | chore(career): remove two unreferenced Cockpit panels |
+| `f456ed8c` | chore(career): remove unreferenced ProShopPanel |
+| `749c35a5` | feat(catalog): start-career label names the trainee; va_ja is lang="ja" |
+| `d6c62d6f` | test(legacy): rewrite the six-node case against the post-a11y DOM |
+| `a6715220` | refactor(pagination): unify on ui/Pagination.vue; delete the duplicate |
+
+### §6 — Docs landing (side agent)
+
+`03acb133` landed the research extracts and scenario plans: `UMAMUSUME_REFERENCE.md`,
+`[Rosy_Dreams]Rice_Shower_Unity-Cup.md`, `Our-Grand-Concert-plan.md`, `Trackblazer-plan.md`,
+`URA-Finale-plan.md`, `02-unity-cup.md`, plus the execution-record updates and the plan `.txt`.
+These introduced new-scope UI claims (Grand Concert panel, Trackblazer Shop Drawer / Epithet Tracker
+/ Year-End Gate / Twinkle Star Climax) which are tracked as deferred, not part of this arc.
+
+### §7 — Closing sentence
+
+Phase 8 closes 2026-10-21 with 8.1/8.2/8.4/8.7/8.8 landed or no-op, 8.3 partial, 8.5 deferred, and
+8.6's full gate classification unperformed in this pass. Deferred items are tracked with their
+unblocking conditions above. The arc's remaining work is the deferred-owner queue and the new scope
+the docs landing introduced.
+### §3a — Step 9 Feature classification (2026-10-21, HEAD 7667efab)
+
+The Feature suite: **7 failed / 1883 passed** (31414 assertions). build/typecheck/lint:ui green.
+The browser walk (npx playwright test) has not run this pass.
+
+| # | Test > case | Classification | Evidence |
+|---|---|---|---|
+| 1 | CareerBuildTargetTest > "keeps scenario name/target vocabulary out" | arc-caused | `de7dccb6` retired the four-glyph contract; test pins old vocabulary |
+| 2 | CareerResultTest > "offers Save Veteran as a real door with its url" | arc-caused | `ad8dc777` "align surfaces after F2 redirect" changed the door/url copy |
+| 3 | CareerSectionNavTest > "renders an unreachable section as a span" | arc-caused | `1e3c5075` added the training gate; the test's unreachable-section assumption predates it |
+| 4 | CareerSectionNavTest > "leaves the existing Cockpit identity card alone" | arc-caused | `48f2bfeb` renamed CareerHeader.vue -> CockpitIdentityCard.vue; the test still file_get_contents the old path |
+| 5 | RenderedCopyHygieneTest > "no em/en dash in rendered copy" | pre-existing | dash copy drift (`dfef6c7f`, `4777c811`) |
+| 6 | UiHygieneTest > "no repository identifier" | peer-owned | Skills/Show.vue:118,160 ADR citations from `c61ef815` (peer skills) |
+| 7 | UnityCupSurfacesTest > "dual-value readout" | arc/peer-caused | team-figure title no longer contains team_rank_ladder (`d2ff6753`, `4777c811`) |
+
+Step 14 (hidden-red audit) is the fix dispatch for #1-#4 (#5 and #7 need a source-vs-test ruling;
+##6 is peer-owned, report-only).
