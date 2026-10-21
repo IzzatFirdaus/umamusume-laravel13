@@ -185,6 +185,38 @@ test('lines the three controls up on one baseline', async ({ page }) => {
     await expect(row.getByText('(optional)', { exact: true })).toBeAttached();
 });
 
+test('splits the queue into the decidable half and the research half', async ({ page }) => {
+    seedPendingCandidates(2, { suggested: true });
+    seedPendingCandidates(3);
+
+    await page.goto('/review');
+    await page.locator('#app > *').first().waitFor();
+
+    // The controller answers one paginated list, already ordered suggestion-first, so the split is
+    // presentation: two named sections, and no card in the wrong half. The counts are read from the
+    // page rather than pinned, because the queue is shared state: a seed that is already there (the
+    // pipeline's own pending rows) lands in one of these sections too.
+    const decidable = page.locator('section[aria-labelledby="review-with-suggestion"]');
+    const research = page.locator('section[aria-labelledby="review-without-suggestion"]');
+
+    await expect(decidable).toBeVisible();
+    await expect(research).toBeVisible();
+
+    // The heading carries its own count, and the count matches the cards under it.
+    const decidableHeading = (await decidable.locator('h3').innerText()).replace(/\s+/g, ' ').trim();
+    const researchHeading = (await research.locator('h3').innerText()).replace(/\s+/g, ' ').trim();
+    const decidableCards = await decidable.locator('ul > li').count();
+    const researchCards = await research.locator('ul > li').count();
+
+    expect(decidableHeading).toBe(`Needs a decision (${decidableCards})`);
+    expect(researchHeading).toBe(`No fuzzy match (${researchCards})`);
+
+    // The membership rule: a suggestion in the first half, none in the second.
+    await expect(decidable.getByText('Suggested id:')).toHaveCount(decidableCards);
+    await expect(research.getByText('Suggested id:')).toHaveCount(0);
+    await expect(research.getByText('No match')).toHaveCount(researchCards);
+});
+
 test('passes an axe scan at WCAG A and AA', async ({ page }) => {
     seedPendingCandidates(3, { suggested: true });
     seedPendingCandidates(2);

@@ -7,6 +7,7 @@ import StatusBadge from '../../components/ui/StatusBadge.vue';
 import SuggestionHint from '../../components/review/SuggestionHint.vue';
 import Pagination from '../../components/ui/Pagination.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 interface Candidate {
     id: number;
@@ -55,6 +56,26 @@ function pillFor(tier: string): { label: string; variant: 'warning' | 'neutral' 
         ? { label: 'Fuzzy match', variant: 'warning' }
         : { label: 'No match', variant: 'neutral' };
 }
+
+/*
+ * The queue is two questions, so it renders as two sections.
+ *
+ * The controller answers one paginated list and already orders a suggestion ahead of no suggestion
+ * (`orderByRaw('suggested_umamusume_id IS NULL')`), so the split is a presentation fact and not a
+ * second query: the array arrives in the order the two groups want, and filtering it partitions it
+ * without re-sorting either half.
+ *
+ *   - **Needs a decision** is the half the Trainer can settle in one click: the engine proposed a
+ *     catalog row, so each card is a comparison and a verdict.
+ *   - **No fuzzy match** is the half that needs research: nothing was proposed, so the row is a
+ *     name and a form.
+ *
+ * One list made the Trainer read twenty-five cards to find the two they could act on, and the
+ * proposal's collapse target (5,162px to ~1,000px) is mostly this: the no-match half collapses to
+ * one line each.
+ */
+const withSuggestion = computed<Candidate[]>(() => props.candidates.data.filter((candidate) => candidate.suggested_umamusume_id !== null));
+const withoutSuggestion = computed<Candidate[]>(() => props.candidates.data.filter((candidate) => candidate.suggested_umamusume_id === null));
 
 function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unknown'; title: string } {
     return tier === 'Fuzzy'
@@ -107,57 +128,111 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                 Set a verdict on any row to enable its resolve.
             </p>
 
-            <ul class="mt-3 space-y-3">
-                <li
-                    v-for="(candidate, index) in candidates.data"
-                    :key="candidate.id"
-                    class="rounded-md border border-rule bg-panel p-4 text-sm"
+            <template v-if="candidates.data.length > 0">
+                <!-- NEEDS A DECISION: the engine proposed a row, so each card is a comparison and a
+                     one-click verdict. -->
+                <section
+                    v-if="withSuggestion.length > 0"
+                    aria-labelledby="review-with-suggestion"
+                    class="mt-4"
                 >
-                    <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="font-medium text-ink-strong">{{ candidate.proposed_name }}</span>
-                            <!-- Plan 1.6: the match verdict is an exception when it is not a match,
-                                 and StatusBadge is the component that says so in one worded pill.
-                                 "Fuzzy match" stays a StatusPill because it is a softer warning
-                                 rather than an absence; "No match" is the absence, and it is
-                                 StatusBadge's `unknown` case. -->
-                            <StatusBadge
-                                v-if="candidate.match_tier !== 'Fuzzy'"
-                                state="unknown"
-                                label="No match"
-                            />
-                            <StatusPill
-                                v-else
-                                :label="pillFor(candidate.match_tier).label"
-                                :variant="pillFor(candidate.match_tier).variant"
-                                size="sm"
-                            />
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <ProvenanceBadge
-                                :state="badgeFor(candidate.match_tier, candidate.source_key).state"
-                                :title="badgeFor(candidate.match_tier, candidate.source_key).title"
-                            />
-                            <time class="text-xs text-ink-muted" :datetime="candidate.created_at">{{ candidate.created_at }}</time>
-                        </div>
-                    </div>
-                    <p v-if="candidate.proposed_name_ja" lang="ja" class="text-ink-muted">
-                        {{ candidate.proposed_name_ja }}
+                    <h3 id="review-with-suggestion" class="text-base font-semibold text-ink-strong">
+                        Needs a decision
+                        <span class="font-normal text-ink-muted">({{ withSuggestion.length }})</span>
+                    </h3>
+                    <p class="mt-1 text-xs text-ink-muted">
+                        The engine proposed a catalog row for each of these. Confirm, alias or reject it.
                     </p>
-                    <SuggestionHint
-                        v-if="candidate.suggestion"
-                        :suggestion="candidate.suggestion"
-                        :umamusume-id="candidate.suggested_umamusume_id"
-                        :source-key="candidate.source_key"
-                    />
+                    <ul class="mt-3 space-y-3">
+                        <li
+                            v-for="(candidate, index) in withSuggestion"
+                            :key="candidate.id"
+                            class="rounded-md border border-rule bg-panel p-4 text-sm"
+                        >
+                            <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="font-medium text-ink-strong">{{ candidate.proposed_name }}</span>
+                                    <!-- "Fuzzy match" stays a StatusPill because it is a softer warning
+                                         rather than an absence; "No match" is the absence and is
+                                         StatusBadge's `unknown` case (plan 1.6). -->
+                                    <StatusPill
+                                        :label="pillFor(candidate.match_tier).label"
+                                        :variant="pillFor(candidate.match_tier).variant"
+                                        size="sm"
+                                    />
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <ProvenanceBadge
+                                        :state="badgeFor(candidate.match_tier, candidate.source_key).state"
+                                        :title="badgeFor(candidate.match_tier, candidate.source_key).title"
+                                    />
+                                    <time class="text-xs text-ink-muted" :datetime="candidate.created_at">{{ candidate.created_at }}</time>
+                                </div>
+                            </div>
+                            <p v-if="candidate.proposed_name_ja" lang="ja" class="text-ink-muted">
+                                {{ candidate.proposed_name_ja }}
+                            </p>
+                            <SuggestionHint
+                                v-if="candidate.suggestion"
+                                :suggestion="candidate.suggestion"
+                                :umamusume-id="candidate.suggested_umamusume_id"
+                                :source-key="candidate.source_key"
+                            />
 
-                    <CandidateForm
-                        :candidate="candidate"
-                        :alias-languages="aliasLanguages"
-                        :accented="index === 0"
-                    />
-                </li>
-            </ul>
+                            <CandidateForm
+                                :candidate="candidate"
+                                :alias-languages="aliasLanguages"
+                                :accented="index === 0"
+                            />
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- NO FUZZY MATCH: nothing was proposed, so the row is a name and a form. -->
+                <section
+                    v-if="withoutSuggestion.length > 0"
+                    aria-labelledby="review-without-suggestion"
+                    class="mt-6"
+                >
+                    <h3 id="review-without-suggestion" class="text-base font-semibold text-ink-strong">
+                        No fuzzy match
+                        <span class="font-normal text-ink-muted">({{ withoutSuggestion.length }})</span>
+                    </h3>
+                    <p class="mt-1 text-xs text-ink-muted">
+                        Nothing in the catalog fuzzy-matches these names. Enter the id to merge into, or reject them.
+                    </p>
+                    <ul class="mt-3 space-y-3">
+                        <li
+                            v-for="candidate in withoutSuggestion"
+                            :key="candidate.id"
+                            class="rounded-md border border-rule bg-panel p-4 text-sm"
+                        >
+                            <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="font-medium text-ink-strong">{{ candidate.proposed_name }}</span>
+                                    <StatusBadge state="unknown" label="No match" />
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <ProvenanceBadge
+                                        :state="badgeFor(candidate.match_tier, candidate.source_key).state"
+                                        :title="badgeFor(candidate.match_tier, candidate.source_key).title"
+                                    />
+                                    <time class="text-xs text-ink-muted" :datetime="candidate.created_at">{{ candidate.created_at }}</time>
+                                </div>
+                            </div>
+                            <p v-if="candidate.proposed_name_ja" lang="ja" class="text-ink-muted">
+                                {{ candidate.proposed_name_ja }}
+                            </p>
+
+                            <CandidateForm
+                                :candidate="candidate"
+                                :alias-languages="aliasLanguages"
+                                :accented="false"
+                            />
+                        </li>
+                    </ul>
+                </section>
+            </template>
 
             <Pagination
                 :page="props.candidates.current_page"
