@@ -214,6 +214,7 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                                 :candidate="candidate"
                                 :alias-languages="aliasLanguages"
                                 :accented="index === 0"
+                                :default-expanded="true"
                             />
                         </li>
                     </ul>
@@ -236,12 +237,25 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                         <li
                             v-for="candidate in withoutSuggestion"
                             :key="candidate.id"
-                            class="rounded-md border border-rule bg-panel p-4 text-sm"
+                            class="rounded-md border border-rule bg-panel px-3 py-1 text-sm"
                         >
                             <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                                 <div class="flex flex-wrap items-center gap-2">
                                     <span class="font-medium text-ink-strong">{{ candidate.proposed_name }}</span>
+                                    <!-- Inline, not a second line: a collapsed row is one line, and
+                                         the Japanese name is part of identifying it. -->
+                                    <span v-if="candidate.proposed_name_ja" lang="ja" class="text-ink-muted">
+                                        {{ candidate.proposed_name_ja }}
+                                    </span>
                                     <StatusBadge state="unknown" label="No match" />
+                                    <!-- The disclosure rides the header row so a collapsed card is one
+                                         line: name, state, and the control that opens it. -->
+                                    <CandidateForm
+                                        :candidate="candidate"
+                                        :alias-languages="aliasLanguages"
+                                        :accented="false"
+                                        :default-expanded="false"
+                                    />
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <ProvenanceBadge
@@ -251,15 +265,6 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                                     <time class="text-xs text-ink-muted" :datetime="candidate.created_at">{{ candidate.created_at }}</time>
                                 </div>
                             </div>
-                            <p v-if="candidate.proposed_name_ja" lang="ja" class="text-ink-muted">
-                                {{ candidate.proposed_name_ja }}
-                            </p>
-
-                            <CandidateForm
-                                :candidate="candidate"
-                                :alias-languages="aliasLanguages"
-                                :accented="false"
-                            />
                         </li>
                     </ul>
                 </section>

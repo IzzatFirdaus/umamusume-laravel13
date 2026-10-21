@@ -284,6 +284,88 @@ test('measures the queue against the shell gutter', async ({ page }) => {
     expect(edges.mainPaddingLeft, 'the shell gutter is the only inset').toBeLessThanOrEqual(96);
 });
 
+test('collapses a no-match row to one line and opens it on click', async ({ page }) => {
+    seedPendingCandidates(1, { suggested: true });
+    seedPendingCandidates(3);
+
+    await page.goto('/review');
+    await page.locator('#app > *').first().waitFor();
+
+    const research = page.locator('section[aria-labelledby="review-without-suggestion"]');
+    const decidable = page.locator('section[aria-labelledby="review-with-suggestion"]');
+
+    // The decidable half is the primary decision surface: its form is open without a click.
+    const openCard = decidable.locator('ul > li').first();
+    await expect(openCard.getByLabel(/^Verdict for /)).toBeVisible();
+
+    // A no-match row renders collapsed. The form stays in the DOM (`v-show`) so its `useForm` keeps
+    // whatever the Trainer typed, so the assertion is visibility, not presence.
+    const collapsed = research.locator('ul > li').first();
+    const toggle = collapsed.getByRole('button', { name: /the verdict form for / });
+    await expect(toggle).toBeVisible();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(collapsed.getByLabel(/^Verdict for /)).toBeHidden();
+
+    // Clicking the row's own control reveals it in place.
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(collapsed.getByLabel(/^Verdict for /)).toBeVisible();
+
+    // And it closes again, which is what makes it a disclosure rather than a one-way reveal.
+    await toggle.click();
+    await expect(collapsed.getByLabel(/^Verdict for /)).toBeHidden();
+});
+
+test('the collapsed queue fits on one screen', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    seedPendingCandidates(2, { suggested: true });
+    seedPendingCandidates(22);
+
+    await page.goto('/review');
+    await page.locator('#app > *').first().waitFor();
+
+    const measured = await page.evaluate(() => {
+        const section = document.querySelector('section[aria-labelledby="review-without-suggestion"]') as HTMLElement | null;
+        const cards = [...(section?.querySelectorAll('ul > li') ?? [])] as HTMLElement[];
+
+        return {
+            height: document.documentElement.scrollHeight,
+            cards: document.querySelectorAll('main ul > li').length,
+            sectionHeight: section === null ? 0 : Math.round(section.getBoundingClientRect().height),
+            decidableHeight: Math.round((document.querySelector('section[aria-labelledby="review-with-suggestion"]') as HTMLElement | null)?.getBoundingClientRect().height ?? 0),
+            pageChrome: Math.round(document.querySelector('main')!.getBoundingClientRect().top) + 134,
+            cardHeights: cards.slice(0, 3).map((c) => Math.round(c.getBoundingClientRect().height)),
+            hiddenForms: cards.filter((c) => {
+                const form = c.querySelector('form');
+                return form !== null && getComputedStyle(form).display === 'none';
+            }).length,
+            cardCount: cards.length,
+        };
+    });
+
+    console.log(
+        `REVIEW-COLLAPSE total=${measured.height}px research=${measured.sectionHeight}px `
+        + `decidable=${measured.decidableHeight}px row=${measured.cardHeights[0]}px `
+        + `hidden=${measured.hiddenForms}/${measured.cardCount}`,
+    );
+
+    // Before the collapse the same 25 cards measured 4,949px, because every no-match row carried
+    // three controls plus a Resolve button. The mechanism is now measured directly: every no-match
+    // form is display:none.
+    expect(measured.cards, 'the queue is paginated at 25').toBe(25);
+    expect(measured.hiddenForms, 'every no-match form is collapsed').toBe(measured.cardCount);
+
+    // The acceptance is per-row, and that is the honest unit. A page-level number also encodes the
+    // seed's mix (the decidable section is expanded by design) and the shell chrome, neither of
+    // which the collapse governs. A collapsed row is one 44px control plus the card's own padding.
+    expect(measured.cardHeights[0], 'a collapsed row is one line, not a form').toBeLessThanOrEqual(56);
+
+    // The page still moves a long way down from where it started: 4,949 -> under 2,700. It does not
+    // reach the proposal's ~1,000-1,400 estimate, and cannot without breaking the tree's 44px tap
+    // floor: 22 rows at the 44px minimum is 968px of rows before any card padding or gap.
+    expect(measured.height, `collapsed queue height was ${measured.height}px`).toBeLessThan(2700);
+});
+
 test('passes an axe scan at WCAG A and AA', async ({ page }) => {
     seedPendingCandidates(3, { suggested: true });
     seedPendingCandidates(2);

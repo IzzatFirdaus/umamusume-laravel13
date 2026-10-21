@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import { BaseInput, BaseSelect } from '../Form';
 
 // One verdict form per pending candidate. Each control's accessible name carries the
@@ -9,15 +10,27 @@ import { BaseInput, BaseSelect } from '../Form';
 // form of the name, and WCAG 2.5.3 holds because the visible text is its prefix.
 // The queue's one accented primary (plan 6A.4): only the topmost unresolved card renders .
 // The shared controls are multi-root, so the class that sizes them rides a wrapper div.
-const props = defineProps<{
-    candidate: {
-        id: number;
-        proposed_name: string;
-        suggested_umamusume_id: number | null;
-    };
-    aliasLanguages: { value: string; label: string }[];
-    accented?: boolean;
-}>();
+const props = withDefaults(
+    defineProps<{
+        candidate: {
+            id: number;
+            proposed_name: string;
+            suggested_umamusume_id: number | null;
+        };
+        aliasLanguages: { value: string; label: string }[];
+        accented?: boolean;
+        /**
+         * Whether this row opens with its form showing.
+         *
+         * The queue's two halves want different answers. A row the engine proposed a match for is the
+         * primary decision surface, so it opens expanded; a row it could not match needs research before
+         * anything can be typed, so it opens collapsed to one line. Twenty-five expanded forms was the
+         * page's cost: measured at 4,949px with every form showing.
+         */
+        defaultExpanded?: boolean;
+    }>(),
+    { accented: false, defaultExpanded: true },
+);
 
 const form = useForm({
     // No preselected verdict. Confirm was the default and it is the one option that writes a catalog
@@ -42,6 +55,17 @@ const verdictOptions = [
 
 const aliasOptions = [{ value: '', label: 'Not set' }, ...props.aliasLanguages];
 
+/*
+ * Per-row disclosure.
+ *
+ * A collapsed row keeps everything a Trainer needs to decide whether to open it: the name, the
+ * Japanese name and the record state are rendered by the page above this component, so the toggle
+ * only needs to say whether the form below is showing. `useForm` is created either way, so opening
+ * a row does not reset a half-entered verdict.
+ */
+const expanded = ref(props.defaultExpanded);
+const formId = `review-form-${props.candidate.id}`;
+
 function onIdInput(value: string | number | File | null): void {
     form.umamusume_id = typeof value === 'string' || typeof value === 'number' ? value : '';
 }
@@ -52,12 +76,32 @@ function submit(): void {
 </script>
 
 <template>
+    <!-- The disclosure control, rendered only on a row that can be collapsed. It names the row it
+         opens (so twenty of them are distinguishable by a screen reader) and carries
+         `aria-expanded`, which is what makes the state audible rather than only visible. It is
+         inline with the row's own text rather than below it: a 44px block laid under every header
+         made a "one-line" row 108px tall, which is most of what the collapse was meant to save. -->
+    <button
+        v-if="!defaultExpanded"
+        type="button"
+        :aria-expanded="expanded"
+        :aria-controls="formId"
+        :aria-label="`${expanded ? 'Hide' : 'Show'} the verdict form for ${candidate.proposed_name}`"
+        class="-ml-2 inline-flex min-h-11 items-center gap-1 rounded-md px-2 align-middle text-xs font-medium text-ink-muted hover:text-ink-strong transition-colors duration-150 ease-out"
+        @click="expanded = !expanded"
+    >
+        <span aria-hidden="true">{{ expanded ? '▾' : '▸' }}</span>
+        {{ expanded ? 'Hide verdict form' : 'Set a verdict' }}
+    </button>
+
     <!-- Three columns on one grid, so the three controls share a baseline. The previous row was
          `flex items-end`: the id field's "(optional)" hint renders BELOW its input, so aligning the
          columns' bottoms lifted that one control 20px above its neighbours and the row read as three
          different baselines. The hint now sits in its own caption row under the grid, which is what
          makes the controls line up without pinning heights on controls that may need more. -->
     <form
+        v-show="expanded"
+        :id="formId"
         class="mt-3 grid grid-cols-1 items-start gap-x-3 gap-y-1 sm:grid-cols-[11rem_11rem_11rem_auto]"
         data-testid="review-form-row"
         :aria-busy="form.processing ? 'true' : null"
