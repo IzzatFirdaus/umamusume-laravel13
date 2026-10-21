@@ -57,6 +57,22 @@ Entries below are written at the time of the change, not back-filled.
   inventories `php artisan skill:manage` commands, not agent skills, so `GOVERNANCE.md` §6's
   machine-readable-half pairing is a naming collision (`AGENTS.md` §8, `docs/SKILL_AUTOMATION.md`).
 
+- The dashboard's active career reads its progress as a rail of 72 discrete turn marks instead of a
+  progress bar, and the rail carries the career's own length: the client's grid is 24 turns to a
+  career year over three career years.
+- The dashboard's grid follows the shell's layout width, so the Wide layout renders at the wide
+  shell's measure instead of self-capping at the standard one.
+- The dashboard's active career is weight-emphasized: the trainee's name is the largest thing in its
+  card, and the card headings beside it stay at their muted size.
+- The dashboard's data-freshness line moved from the Data Status card to the page header, beside the
+  page title. The card keeps the live state and the ruleset version.
+
+### Fixed
+
+- The dashboard's turn progress was measured against 24 turns, which is one career year, so the bar
+  read as complete from turn twenty-four onward in a seventy-two turn career. The rail now carries
+  the model's own career length.
+
 ### Notes on these entries
 
 The four `.ai` entries above are committed, at `cb34264 docs(rules): record the project conventions and
