@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb"><a href="database.html">Database</a> · <b>Scenarios</b></span>
@@ -117,12 +118,13 @@
           <li><b>Ruleset date is separated from version.</b> They are two facts; merging them would invent a version number no source defines.</li>
                   <li><b>Selective Attention: bold marks the outlier, not the maximum.</b> Every scenario row has exactly one stat that differs, so bolding it is what makes the identity of the scenario scannable. Bolding the highest number would highlight a different fact on every row.</li>
                   <li><b>Heuristic coverage.</b> H6. The outlier stat is bolded per row, so a scenario’s identity is recognised from the table rather than recalled from a guide.</li>
+                  <li><b>Framework coverage.</b> WCAG 1.4.1 on use of colour and Information architecture 2 on choices. The outlier stat is bolded per row, so a scenario's identity is recognised from the table rather than recalled from a guide.</li>
         </ol>
       </div>
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

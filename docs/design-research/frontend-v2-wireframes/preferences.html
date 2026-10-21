@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">System · <b>Settings</b></span>
@@ -173,7 +174,7 @@
           </div>
 
           <div class="savebar" style="margin-top:14px">
-            <span class="dirty">All changes saved</span>
+            <span class="dirty" role="status">All changes saved</span>
             <button class="btn btn-primary" disabled>Save changes</button>
           </div>
         </div>
@@ -189,12 +190,13 @@
           <li><b>Language and game vocabulary are separated.</b> Switching the interface to Japanese does not translate the client's own terms, because those are proper nouns in the game.</li>
                   <li><b>Jakob’s Law for the shape, Occam’s Razor for the verbs.</b> Preferences look like preferences: labelled controls, one save model, a bar that stays disabled while clean. The screen exists because the cockpit shipped seven save verbs in four styles.</li>
                   <li><b>Heuristic coverage.</b> H4. One save model across the screen, matching the convention a settings page is expected to follow.</li>
+                  <li><b>Framework coverage.</b> Shneiderman 1 on consistency and Tognazzini 5 on defaults. One save model across the screen, and a missing preference reads as the neutral default rather than as an error.</li>
         </ol>
       </div>
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

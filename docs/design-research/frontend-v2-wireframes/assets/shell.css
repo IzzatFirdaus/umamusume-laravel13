@@ -120,6 +120,17 @@ button{font-family:inherit}
 /* --- main column --- */
 .main{display:flex;flex-direction:column;min-width:0}
 
+/* ---------------------------------------------------------------------------
+   WCAG 2.2 SC 2.4.1 Bypass Blocks.
+   The skip link is the standard mechanism: a keyboard user reaches the repeated
+   navigation with one keystroke instead of tabbing through it. Visible on focus,
+   never permanently, so it costs no vertical space and a sighted user never sees it.
+   --------------------------------------------------------------------------- */
+.skip{position:absolute;left:8px;top:8px;z-index:60;transform:translateY(-200%);
+  padding:9px 14px;border-radius:var(--r-md);background:var(--brand-chrome);color:var(--on-brand-chrome);
+  font-size:13px;font-weight:800;text-decoration:none}
+.skip:focus{transform:translateY(0);outline:3px solid var(--ring);outline-offset:2px}
+
 /* --- top bar: brand chrome + 2px accent stripe (DESIGN §2.1 guard (a)) --- */
 .topbar{background:var(--brand-chrome);color:var(--on-brand-chrome);border-bottom:2px solid var(--brand-accent)}
 .topbar-in{display:flex;align-items:center;gap:16px;padding:10px 26px;max-width:var(--shell);margin:0 auto;width:100%}

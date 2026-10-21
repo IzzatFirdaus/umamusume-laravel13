@@ -245,11 +245,18 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
   letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.72);
   border:1px dashed rgba(255,255,255,.45);border-radius:999px;padding:2px 8px;margin-right:10px}
 .proto::before{content:"";width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.72)}
+
+/* WCAG 2.2 SC 2.4.1 Bypass Blocks. Visible on focus, never permanently. */
+.skip{position:absolute;left:8px;top:8px;z-index:60;transform:translateY(-200%);
+  padding:9px 14px;border-radius:10px;background:#2255FF;color:#fff;
+  font-size:13px;font-weight:800;text-decoration:none}
+.skip:focus{transform:translateY(0);outline:3px solid #7FCC09;outline-offset:2px}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
-<div class="topbar">
+<main id="main"><div class="topbar">
   <div class="inner">
     <span class="brand">Trainer Desk</span>
     <nav aria-label="Primary">
@@ -268,7 +275,7 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
 <div class="wrap">
   <p class="eyebrow">Cockpit</p>
   <h1>Rice Shower</h1>
-  <p class="sub">Senior Year · Early October · Turn 67 · [Rosy Dreams] · ★3 · Potential 2</p>
+  <p class="sub" role="status">Senior Year · Early October · Turn 67 · [Rosy Dreams] · ★3 · Potential 2</p>
 
   <!-- A1 -->
   <div class="strip">
@@ -524,6 +531,7 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
       <li><b>A7 — Hick's (4) + Selective Attention (33) fixed.</b> "Advisor" moves to the front and is marked as the decision; the six other anchors follow. Anchor order now matches the mobile DOM order, which today disagrees with the visual order.</li>
       <li><b>A8 — Occam's Razor (21).</b> The Scenario region says the team board is unrecorded once, instead of repeating a per-row absence across five coverage rows.</li>
           <li><b>Heuristic coverage.</b> H1. Energy band, mood tier, Spirit Burst count and the finale countdown are all system status printed rather than implied. The cockpit exists to answer "where am I" before "what next".</li>
+          <li><b>Framework coverage.</b> Gerhardt-Powals 3 on fusing data, and Information architecture 7 on focused navigation. The resource strip fuses turn, energy, fans and the next obligation into one reading, and the rail stays banded rather than growing with the run. Tognazzini 8 on Fitts, which is why every control is 44px.</li>
     </ol>
     <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
       Wireframe only. No component, token, copy string or test changed. Values are run 25's real props
@@ -545,12 +553,12 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
       <li><b>Burst proximity is a real boundary.</b> This run is at 11 bursts, inside 10–12, one short of the 13 tier. The old Goal-Gradient failure hid exactly that.</li>
     </ol>
     <p style="margin:8px 0 0;font-size:12px;color:var(--ink-muted)">
-      Energy below 50 is the published line where failure risk changes character; rest pays +30 (normal), +50
-      (modal), +70 (big success); Wit costs no Energy and pays +4–5 SP against +2 for the other four
+      Energy below 50 is the published line where failure risk changes character; rest pays +50 (modal, 58.1%),
+      +70 (25.4%), +30 (failure outcome, 12.8%); Wit costs no Energy and pays +4–5 SP against +2 for the other four
       (<code>UMAMUSUME_REFERENCE.md</code> §1.1.5–1.1.6).
     </p>
   </div>
-</div>
+</div></main>
 
 </body>
 </html>

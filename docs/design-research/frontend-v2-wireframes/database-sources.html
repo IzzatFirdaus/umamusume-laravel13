@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb"><a href="database.html">Database</a> · <b>Sources</b></span>
@@ -133,12 +134,13 @@
           <li><b>The verification date is stated as verification.</b> "Verified 2026-09-27" is not "updated today".</li>
                   <li><b>Mental Model replaces file paths with what the source is.</b> The screen answers which source backs a claim, not where the file lives. A repository path in a user interface describes the build, not the evidence.</li>
                   <li><b>Heuristic coverage.</b> H10. Which source backs a claim is the documentation this product needs, delivered where the claim lives rather than in a manual.</li>
+                  <li><b>Framework coverage.</b> Information architecture 5 on front doors and Gerhardt-Powals 2 on reducing uncertainty. The ledger answers which source backs a claim rather than where the file lives, and every figure carries its tier and date.</li>
         </ol>
       </div>
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

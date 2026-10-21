@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">My data · <b>Legacy Lab</b></span>
@@ -124,12 +125,13 @@
           <li><b>Compare is the filled action.</b> Building a legacy is exploration; comparing two is the decision. The primary button sits on the decision.</li>
                   <li><b>Law of Uniform Connectedness: the unit is the pair.</b> Two parents are shown together because the sparks combine; a saved legacy is a pair, not two records. Presenting them apart would hide the thing the screen exists to compare.</li>
                   <li><b>Heuristic coverage.</b> H6. The saved pairs show their sparks together, so the choice is made from what is visible rather than from a remembered combination.</li>
+                  <li><b>Framework coverage.</b> Information architecture 1 on objects and Gestalt on common region. A saved pair is one object, shown as one group, because the two sparks combine.</li>
         </ol>
       </div>
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

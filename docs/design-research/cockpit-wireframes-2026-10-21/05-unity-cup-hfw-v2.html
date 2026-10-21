@@ -286,11 +286,18 @@ table.caps td.overc{font-weight:800;color:var(--risk)}
   letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.72);
   border:1px dashed rgba(255,255,255,.45);border-radius:999px;padding:2px 8px;margin-right:10px}
 .proto::before{content:"";width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.72)}
+
+/* WCAG 2.2 SC 2.4.1 Bypass Blocks. Visible on focus, never permanently. */
+.skip{position:absolute;left:8px;top:8px;z-index:60;transform:translateY(-200%);
+  padding:9px 14px;border-radius:10px;background:#2255FF;color:#fff;
+  font-size:13px;font-weight:800;text-decoration:none}
+.skip:focus{transform:translateY(0);outline:3px solid #7FCC09;outline-offset:2px}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
-<div class="topbar">
+<main id="main"><div class="topbar">
   <div class="shell">
     <span class="brand">TRAINER DESK</span>
     <span class="proto" title="Structure, states and labels are real; the controls are not wired except the Settings page.">Static wireframe</span><span class="who"><span class="pill" style="border:1px solid rgba(255,255,255,.5)">Unity Cup</span></span>
@@ -359,7 +366,7 @@ table.caps td.overc{font-weight:800;color:var(--risk)}
       <!-- ---------- column 1: Profile form (CHANGES 5,6,7,8,9) ---------- -->
       <section class="card">
         <h3>Profile</h3>
-        <p class="sub">ライスシャワー · [Rosy Dreams] · ★3 · Potential 2</p>
+        <p class="sub" role="status">ライスシャワー · [Rosy Dreams] · ★3 · Potential 2</p>
 
         <div class="fs">
           <h4>Identity</h4>
@@ -611,6 +618,7 @@ table.caps td.overc{font-weight:800;color:var(--risk)}
         <li><b>16 — Advisor priority, which the page currently inverts.</b> <code>Unity-Cup-plan.md</code> §9 ranks: (1) don't end the run, (2) don't wreck the run, (3) burst breakpoints at 4 / 7 / 10 / 13, (4) facility levels derived from team ranks, (5) training target, (6) optimization. The recommendation must also carry a <b>dual readout</b>: trainee gain this turn versus team gain or future opportunity cost. The page today gives the trainee-side reason only.</li>
         <li><b>17 — Burst band boundaries are a real decision boundary.</b> This run sits at 11 bursts, inside the 10–12 band, with the next boundary at 13. The plan's bands are 4 / 7 / 10 / 13; config's <code>spirit_burst_bands</code> are 4–6, 7–9, 10–12, 13+. One burst short of 13 changes the reward tier, which is exactly the kind of proximity the old Goal-Gradient failure hid.</li>
             <li><b>Heuristic coverage.</b> H1 + H8. Status is stated once per region instead of repeated in three places, and each of the twelve prototype changes removes an element that competed with the decision. The prototype's own tell was density without information, which is the H8 failure NN/g calls noise crowding out signal.</li>
+          <li><b>Framework coverage.</b> Shneiderman 4 on closure and Information architecture 4 on exemplars. Status is stated once per region rather than repeated in three places, and each of the twelve prototype changes removes an element that competed with the decision.</li>
     </ol>
 
       <h4>The 12 changes, applied</h4>
@@ -683,7 +691,7 @@ table.caps td.overc{font-weight:800;color:var(--risk)}
     </div>
 
   </div>
-</div>
+</div></main>
 
 </body>
 </html>

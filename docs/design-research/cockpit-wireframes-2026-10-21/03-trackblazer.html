@@ -190,13 +190,20 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
   letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.72);
   border:1px dashed rgba(255,255,255,.45);border-radius:999px;padding:2px 8px;margin-right:10px}
 .proto::before{content:"";width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.72)}
+
+/* WCAG 2.2 SC 2.4.1 Bypass Blocks. Visible on focus, never permanently. */
+.skip{position:absolute;left:8px;top:8px;z-index:60;transform:translateY(-200%);
+  padding:9px 14px;border-radius:10px;background:#2255FF;color:#fff;
+  font-size:13px;font-weight:800;text-decoration:none}
+.skip:focus{transform:translateY(0);outline:3px solid #7FCC09;outline-offset:2px}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
 <div class="mockbar">MOCK DATA · no Trackblazer run exists in the dev database. Layout and scenario shape are real; every trainee figure is illustrative.</div>
 
-<div class="topbar">
+<main id="main"><div class="topbar">
   <div class="inner">
     <span class="brand">Trainer Desk</span>
     <nav aria-label="Primary">
@@ -209,7 +216,7 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
 <div class="wrap">
   <p class="eyebrow">Cockpit</p>
   <h1>Example Trainee</h1>
-  <p class="sub">Senior Year · Early September · Turn 60 · Trackblazer (Make a New Track)</p>
+  <p class="sub" role="status">Senior Year · Early September · Turn 60 · Trackblazer (Make a New Track)</p>
 
   <div class="strip">
     <div class="facts">
@@ -427,6 +434,7 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
       <li><b>B7 — Correction: the two currencies are not interchangeable, and the plan says so explicitly.</b> <code>Trackblazer-plan.md</code> §8 records that Grade Points and Shop Coins are "two independent counters and a planner must not derive one from the other", and that <code>config/scenarios.php</code> keeps <code>unity_cup.grade_points = null</code> and <code>unity_cup.shop_coins = null</code> — both Trackblazer-only. Any UI that prints one from the other is wrong. This is the same finding as B3, stated from the plan's side.</li>
       <li><b>B8 — Surplus Grade Points do not carry over, and the plan asks the page to say so.</b> After a period's threshold is met, further points do not help that checkpoint, so the advisor should print "checkpoint met; a race now pays coins, stats and epithet progress only." The wireframe's "88 to go" is only correct because the checkpoint is <em>not</em> yet met.</li>
           <li><b>Heuristic coverage.</b> H1 + H5. Every live resource has a visible state: Grade Points against the next deadline, coins, rotation countdown, Race Fatigue band. The fatigue band sits beside the race action so the cost of a third consecutive race is prevented rather than reported.</li>
+          <li><b>Framework coverage.</b> Gerhardt-Powals 1 on automating unwanted workload, and Tognazzini 15 on visible navigation. The Grade Point runway computes the shortfall, so the Trainer never subtracts 212 from 300, and the deadline is on a rail that is never hidden.</li>
     </ol>
     <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
       MOCK DATA. No Trackblazer run exists in the dev database, so nothing on this page is a rendered
@@ -434,7 +442,7 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
       values from <code>config/scenarios.php</code>; the trainee, turn, stats and coin balance are invented.
     </p>
   </div>
-</div>
+</div></main>
 
 </body>
 </html>

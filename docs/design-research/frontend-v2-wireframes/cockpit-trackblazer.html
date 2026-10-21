@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="mockbar">MOCK DATA · no Trackblazer run exists in this database. Layout and scenario settings are real; the trainee figures are illustrative.</div>
 <div class="app">
   <aside class="rail" aria-label="Primary">
@@ -32,7 +33,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">Example Trainee · <b>Trackblazer</b> · Cockpit</span>
@@ -159,6 +160,7 @@
           <li><b>The two currencies are separated in one sentence.</b> It is the most likely arithmetic mistake on this scenario.</li>
                   <li><b>Goal-Gradient is the whole panel.</b> 212 of 300, 88 short, 22 turns left. The law is about distance to the goal rather than the current value, so the shortfall and the turn count sit beside the bar; a bare total would answer a question nobody asked.</li>
                   <li><b>Heuristic coverage.</b> H1. Grade Points against the next deadline, plus the coin balance and the rotation countdown, so every live resource has a visible state.</li>
+                  <li><b>Framework coverage.</b> Gerhardt-Powals 1 on automating unwanted workload, and Tognazzini 15 on visible navigation. The Grade Point runway computes the shortfall, so the Trainer never subtracts 212 from 300, and the deadline is on a rail that is never hidden.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           MOCK DATA. Panel set, caps, checkpoints, currency tables and the fatigue figures are real config and sourced
@@ -168,7 +170,7 @@
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

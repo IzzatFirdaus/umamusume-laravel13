@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb"><b>Dashboard</b></span>
@@ -185,6 +186,7 @@
           <li><b>Accent discipline.</b> The status lime appears once (the "1 active career" pill), the action blue once (the primary), the risk red once (the data-status edge). Section headings are ink plus a rule. That is the fix for the nine saturated lime bars the external review measured.</li>
                   <li><b>Von Restorff on the primary action.</b> "Open cockpit" is the only filled button in the top region, so the page has exactly one accented element competing for the next click. Two filled actions would make the accent mean "a button" instead of "the button".</li>
                   <li><b>Heuristic coverage.</b> H8. One primary action and a dashboard of what changed, with the long tail behind links.</li>
+                  <li><b>Framework coverage.</b> Tognazzini 10 on latency and Shneiderman 3 on proportional feedback. One filled action in the top region, so the page has exactly one thing to acknowledge when it answers, and the acknowledgment is the whole of the top region.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. Values are the live dashboard payload read from <code>http://127.0.0.1:8000/</code>
@@ -195,7 +197,7 @@
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html" class="active"><span class="dot" aria-hidden="true"></span>Home</a>

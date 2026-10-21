@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb"><a href="database.html">Database</a> · <b>Sparks</b></span>
@@ -126,6 +127,7 @@
           <li><b>Entered versus published ceiling is restated here too.</b> It is the same distinction the cockpit audit filed as a defect, and a reference page is the cheapest place to teach it.</li>
                   <li><b>Pareto Principle splits the two families that matter from the two that do not.</b> Blue and pink carry published per-grade figures that decide an inheritance, so they get full value tables; green and white get a sentence, because their numbers are not published and a table of blanks implies otherwise.</li>
                   <li><b>Heuristic coverage.</b> H6. The two families with published figures get tables and the two without get a sentence, so the reader knows which numbers exist.</li>
+                  <li><b>Framework coverage.</b> Gerhardt-Powals 7 on limiting data-driven tasks and Information architecture 6 on multiple classification. The two families with published figures get tables and the two without get a sentence, and a spark is reachable by family, grade and owner.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. Blue +16 / pink +5 / +12 / +21 and the bank-and-inherit loop are sourced
@@ -135,7 +137,7 @@
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

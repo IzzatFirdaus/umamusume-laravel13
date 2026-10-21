@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb"><a href="database.html">Database</a> · <b>Shop items</b></span>
@@ -123,6 +124,7 @@
           <li><b>Independence of the two currencies is spelled out.</b> It is the most likely arithmetic mistake on this screen, and one sentence prevents it.</li>
                   <li><b>Law of Proximity attaches the rating to its source.</b> "Rating (one guide)" is in the column header, not a note below the table, because a one-guide rating read as consensus is the failure the header prevents.</li>
                   <li><b>Heuristic coverage.</b> H9. The rating names its source in the header, so a one-guide figure cannot be read as consensus.</li>
+                  <li><b>Framework coverage.</b> Gerhardt-Powals 2 on reducing uncertainty and Information architecture 4 on exemplars. The rating names its source in the header, and the item rows are the examples of what the shop sells.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. Item names, costs, effects and ratings are <code>config/scenarios.php</code>'s own rows;
@@ -132,7 +134,7 @@
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">New career · Step 5 of 6 · <b>Support deck</b></span>
@@ -85,7 +86,7 @@
                   <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Speed card</div>
                   <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Speed</div>
                 </div>
-                <button class="btn btn-quiet btn-sm" aria-label="Remove Speed card">✕</button>
+                <button class="btn btn-quiet btn-sm" aria-label="Remove Speed card"><span aria-hidden="true">✕</span><span class="sr-only">Remove Speed card</span></button>
               </div>
               <div class="track" style="margin-top:8px"><i style="width:80%"></i></div>
               <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-muted);margin-top:3px">
@@ -99,7 +100,7 @@
                   <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Speed card</div>
                   <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Speed</div>
                 </div>
-                <button class="btn btn-quiet btn-sm" aria-label="Remove second Speed card">✕</button>
+                <button class="btn btn-quiet btn-sm" aria-label="Remove second Speed card"><span aria-hidden="true">✕</span><span class="sr-only">Remove second Speed card</span></button>
               </div>
               <div class="track" style="margin-top:8px"><i style="width:80%"></i></div>
               <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-muted);margin-top:3px">
@@ -113,7 +114,7 @@
                   <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Power card</div>
                   <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Power</div>
                 </div>
-                <button class="btn btn-quiet btn-sm" aria-label="Remove Power card">✕</button>
+                <button class="btn btn-quiet btn-sm" aria-label="Remove Power card"><span aria-hidden="true">✕</span><span class="sr-only">Remove Power card</span></button>
               </div>
               <div class="track" style="margin-top:8px"><i style="width:55%"></i></div>
               <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-muted);margin-top:3px">
@@ -127,7 +128,7 @@
                   <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Pal card</div>
                   <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Pal</div>
                 </div>
-                <button class="btn btn-quiet btn-sm" aria-label="Remove Pal card">✕</button>
+                <button class="btn btn-quiet btn-sm" aria-label="Remove Pal card"><span aria-hidden="true">✕</span><span class="sr-only">Remove Pal card</span></button>
               </div>
               <div style="font-size:11px;color:var(--ink-muted);margin-top:8px">
                 Event effectiveness · failure protection · event recovery. <b>No friendship bonus</b> — Pal cards earn their slot through events.
@@ -185,7 +186,7 @@
       </div>
 
       <div class="savebar">
-        <span class="dirty">5 of 6 · deck has 4 cards</span>
+        <span class="dirty" role="status">5 of 6 · deck has 4 cards</span>
         <a class="btn" href="career-legacy.html">Back</a>
         <a class="btn btn-primary" href="career-preflight.html">Continue to preflight</a>
       </div>
@@ -200,12 +201,13 @@
           <li><b>Duplicate cards are prevented by the client, mirrored here as a check.</b> Two identical copies cannot sit in one deck; duplicates are spent on limit breaks instead. The card's own four-break diamonds are not modelled on this screen because level caps are a per-card fact, not a deck fact.</li>
                   <li><b>Miller’s Law bounds what is held, not what is shown.</b> The deck is six slots because the client caps it at six, so the screen never asks a Trainer to weigh more than six cards at once. The pool behind it is filtered rather than scrolled, which keeps the choice count inside the same limit.</li>
                   <li><b>Heuristic coverage.</b> H6. Six slots with the type of each, so the deck is recognised as a shape rather than recalled as a list.</li>
+                  <li><b>Framework coverage.</b> Norman on constraints, and Tognazzini 9 on human-interface objects. The picker offers no card that is already in the deck, so the client rule is expressed by the control instead of by a message after the fact. The remove control carries its visible glyph inside its accessible name, so a voice-control user can say what they see.</li>
         </ol>
       </div>
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

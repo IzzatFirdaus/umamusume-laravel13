@@ -88,6 +88,32 @@ Two heuristics are answered narrowly and deliberately:
 **H10 is not claimed here.** These are per-scenario cockpit views reached from a run; help belongs in
 the shell, and the `help.html` page in the v2 set is where it lives.
 
+## The seven frameworks this set answers to
+
+The references are in [`docs/proposals/`](../../proposals/), one file per framework, each quoted from its
+source, with [`design-framework-index-2026-10-21.md`](../../proposals/design-framework-index-2026-10-21.md)
+as the entry point. Every page here carries a **Framework coverage** item naming the framework that
+decides that cockpit's distinctive decision.
+
+| Framework | Pages | The decision it settles there |
+| --- | --- | --- |
+| **Gerhardt-Powals** (10) | all four | Whether the product left arithmetic in the user's head. The Grade Point runway computes the shortfall, so the Trainer never subtracts 212 from 300. |
+| **Shneiderman** (8) | `01`, `02`, `04`, `05` | How a flow behaves from open to close. A closed run states its outcome rather than leaving an empty advisor rail. |
+| **Information architecture** (8) | all four | The space between screens. The rail stays banded rather than growing with the run, and this scenario degrades to baseline plus known caps rather than inventing chrome. |
+| **Tognazzini** (16) | `01` | Latency, 44px targets, and the labels that lead with the differentiating word. |
+| **Gestalt** (12) | `01`, `04` | Whether two things will be read as one group. |
+| **Norman** (6) | `02`, `03` | Affordance versus signifier, and the two gulfs. |
+| **WCAG 2.2 AA** | all five | The only normative one, and these are cockpits that carry live figures, so it binds hardest here. |
+
+### Accessibility, as WCAG 2.2 AA
+
+This set had **no skip link, no `main` landmark and no status-message region on any of its five pages**.
+All three are now present, and the set has no `shell.css`, so the skip link's own rules are inlined per
+file.
+
+What is **not** verified: no contrast ratio has been measured in a browser, because Chromium cannot launch
+under this repository's sandbox. 1.4.3 and 1.4.11 remain unverified here and are recorded as such.
+
 ## Laws applied, and the rules each page had to satisfy
 
 The inventory is read from `lawsofux.com` (28 index entries plus Zeigarnik Effect) and `uilaws.com`

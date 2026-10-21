@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">Rice Shower · Unity Cup · <b>Races</b></span>
@@ -165,7 +166,7 @@
           </div>
 
           <div class="savebar" style="margin-top:0">
-            <span class="dirty">No race chosen</span>
+            <span class="dirty" role="status">No race chosen</span>
             <button class="btn btn-quiet" title="Reverses the last committed turn. The build has no undo; this screen proposes one.">Undo turn 66</button>
             <a class="btn" href="training-decision.html">Train instead</a>
             <button class="btn btn-primary" disabled>Enter a race</button>
@@ -184,12 +185,13 @@
           <li><b>"Train instead" is a real escape.</b> A race screen that only offers races forces the decision; the outline button returns to training without losing the turn.</li>
                   <li><b>Hick’s Law over Closure: blocked rows stay visible.</b> The Dirt Dash row is disabled with its reason rather than filtered out, because a hidden option reads as an option that does not exist, while a disabled one reads as a rule. The reason is the part that teaches the rule.</li>
                   <li><b>Heuristic coverage.</b> H5. A blocked race stays visible with its reason rather than being filtered away, so the rule is prevented from becoming a surprise.</li>
+                  <li><b>Framework coverage.</b> Norman on constraints and Information architecture 7 on focused navigation. A race the trainee cannot enter stays visible with the gate that blocks it, so the rule is learned rather than guessed, and the screen holds one decision.</li>
         </ol>
       </div>
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

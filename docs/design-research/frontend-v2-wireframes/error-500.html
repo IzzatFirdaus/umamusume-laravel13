@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb"><b>500</b></span>
@@ -85,12 +86,13 @@
           <li><b>Two exits, no retry loop.</b> An automatic retry on a 500 can multiply the failing request; a human decides.</li>
                   <li><b>Doherty Threshold governs what this screen may say.</b> Nothing is invented to fill the wait. The screen states what failed, what is still saved and what to do next, and the detail goes to the log rather than into the page.</li>
                   <li><b>Heuristic coverage.</b> H9 + H1. What failed, what is saved and what to do next, with the detail kept in the log rather than shown as a stack trace.</li>
+                  <li><b>Framework coverage.</b> WCAG 3.3.1 on error identification and Tognazzini 10 on latency. What failed, what is saved and what to do next, with the detail in the log rather than on the page, and no invented content to fill the wait.</li>
         </ol>
       </div>
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

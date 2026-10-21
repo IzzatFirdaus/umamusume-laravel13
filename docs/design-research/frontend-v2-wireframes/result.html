@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">Maruzensky · URA Finale · <b>Result</b></span>
@@ -149,6 +150,7 @@
           <li><b>Banking is the one filled action.</b> Export and timeline are reads; banking is the only write, and it is the only thing a finished run is for.</li>
           <li><b>Four KPI tiles, one accented.</b> Only the finale outcome carries a colour edge, because it is the single most important fact on the page.</li>
                   <li><b>Heuristic coverage.</b> H9. The screen leads with the outcome and states the honest finding, including what did not go to plan. A run that ends on a bare score is the error-recovery failure at the moment it is remembered.</li>
+                  <li><b>Framework coverage.</b> Shneiderman 4 on closure and Peak-End. The screen leads with the outcome and states the honest finding, including what did not go to plan, because the end of a run is the moment it is remembered by.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. Finale outcome, turn 75, the five final stats and the 34 SP are run 17's live props.
@@ -158,7 +160,7 @@
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

@@ -169,11 +169,18 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
   letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.72);
   border:1px dashed rgba(255,255,255,.45);border-radius:999px;padding:2px 8px;margin-right:10px}
 .proto::before{content:"";width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.72)}
+
+/* WCAG 2.2 SC 2.4.1 Bypass Blocks. Visible on focus, never permanently. */
+.skip{position:absolute;left:8px;top:8px;z-index:60;transform:translateY(-200%);
+  padding:9px 14px;border-radius:10px;background:#2255FF;color:#fff;
+  font-size:13px;font-weight:800;text-decoration:none}
+.skip:focus{transform:translateY(0);outline:3px solid #7FCC09;outline-offset:2px}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
-<div class="topbar">
+<main id="main"><div class="topbar">
   <div class="inner">
     <span class="brand">Trainer Desk</span>
     <nav aria-label="Primary">
@@ -186,7 +193,7 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
 <div class="wrap">
   <p class="eyebrow">Cockpit</p>
   <h1>Maruzensky</h1>
-  <p class="sub">URA Finale · Turn 75 · Completed · URA Finale placement 1st</p>
+  <p class="sub" role="status">URA Finale · Turn 75 · Completed · URA Finale placement 1st</p>
 
   <!-- A1 -->
   <div class="strip">
@@ -366,13 +373,14 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
       <li><b>Mood is a multiplier here too.</b> The client's panel: GREAT +20% training / +4% pre-race, GOOD +10% / +2%, NORMAL 0%, BAD −10% / −2%, AWFUL −20% / −4% (<code>UMAMUSUME_REFERENCE.md</code> §1.1.6). This run is at GREAT, so every training turn is worth a fifth more than the bare figure suggests.</li>
       <li><b>Published URA cap is flat 1400, and this run shows 1400 — but the client can show different.</b> <code>UMAMUSUME_REFERENCE.md</code> §1.3.4 records two URA client captures whose panel read Speed 1327 / Stamina 1322 / Power 1404 / Guts 1306 / Wit 1802. That is <b>per-run observed ceiling, not the URA cap</b>, and a tool must not print those five as "the URA cap". This run's clean 1400 across five stats is the published row, correctly rendered.</li>
           <li><b>Heuristic coverage.</b> H1 + H9. A Completed run states its outcome first, and the advisor slot is replaced by the end-state rather than left empty. An empty rail on a finished run would report an absence as a status.</li>
+          <li><b>Framework coverage.</b> Shneiderman 4 on closure and Information architecture 1 on objects. A closed run has no advisor, so the screen states the outcome and replaces the rail rather than leaving an empty region that reports nothing as if it were a status.</li>
     </ol>
     <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
       Wireframe only. Values are run 17's real props. No Active URA Finale run exists in the dev database,
       so the active-state scorings in the audit remain contract readings, not rendered observations.
     </p>
   </div>
-</div>
+</div></main>
 
 </body>
 </html>

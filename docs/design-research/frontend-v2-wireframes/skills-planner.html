@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">Rice Shower · Unity Cup · <b>Skills</b></span>
@@ -187,6 +188,7 @@
           <li><b>Planning is not learning.</b> Checkboxes build a plan; a single "Learn planned skills" commits it. That separates browsing from a write, which is the preview-before-commit pattern the corpus declares (<code>DESIGN-CORPUS.md</code> §5).</li>
           <li><b>The ladder is explained because its shape is surprising.</b> Most players assume a flat 10% per level; the client says otherwise past Lv3. Printing the table once is cheaper than a Trainer mis-budgeting a skill.</li>
                   <li><b>Heuristic coverage.</b> H1. SP remaining, hint level and the projected cost all move together, so the effect of a pick is visible before it is taken.</li>
+                  <li><b>Framework coverage.</b> Gerhardt-Powals 3 on fusing data, and Information architecture 6 on multiple classification. SP, hint level and the projected cost move together, and the library is reachable by category, by distance and by running style.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. The hint ladder, the two worked price samples and the 1,910 skill count are sourced
@@ -196,7 +198,7 @@
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

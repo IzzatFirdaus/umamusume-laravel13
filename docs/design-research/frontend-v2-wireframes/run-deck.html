@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">Rice Shower · Unity Cup · <b>Deck</b></span>
@@ -116,7 +117,7 @@
       </div>
 
       <div class="savebar">
-        <span class="dirty">4 of 6 slots filled</span>
+        <span class="dirty" role="status">4 of 6 slots filled</span>
         <a class="btn" href="cockpit-unity-cup.html">Cancel</a>
         <button class="btn btn-primary">Save deck</button>
       </div>
@@ -130,12 +131,13 @@
           <li><b>Save is one action for the whole deck.</b> Per-card writes would be six save verbs, which is the defect the external review counted on the cockpit.</li>
                   <li><b>Miller’s Law: six slots always shown.</b> Empty slots are dashed boxes with an add action, so the deck’s size is visible rather than implied. A deck rendered only from what is equipped cannot show how much room is left.</li>
                   <li><b>Heuristic coverage.</b> H6. Six slots always shown, empty ones dashed, so the remaining capacity is recognised rather than remembered.</li>
+                  <li><b>Framework coverage.</b> Norman on signifiers, and Gestalt on closure. Six slots always show, an empty one is a dashed box with an add action rather than an absence, and the dashed border is what tells the Trainer the slot is there.</li>
         </ol>
       </div>
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

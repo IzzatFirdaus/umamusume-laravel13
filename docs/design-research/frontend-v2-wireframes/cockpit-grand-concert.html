@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="mockbar">MOCK DATA · no Our Grand Concert run exists in this database. Layout and scenario vocabulary are real; the trainee figures are illustrative.</div>
 <div class="app">
   <aside class="rail" aria-label="Primary">
@@ -32,7 +33,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">Example Trainee · <b>Our Grand Concert</b> · Cockpit</span>
@@ -156,6 +157,7 @@
           <li><b>The loop is explained even though its numbers are missing.</b> Lessons, Songs, the gauge and the concert cadence are published mechanics; a Trainer can plan the run even while the app cannot count Performance.</li>
           <li><b>Payouts are stated per action type.</b> 5 SP per technique Lesson against 25 per Song Lesson is a 5× difference that decides how a Trainer spends Performance.</li>
                   <li><b>Heuristic coverage.</b> H1. Performance and Live Performance Expectations are shown as progress towards a named threshold, which is the state a concert decision turns on.</li>
+                  <li><b>Framework coverage.</b> Shneiderman 4 on closure and Gerhardt-Powals 3 on fusing data. The performance gauge and the concert countdown fuse to one threshold the decision turns on, and the run ends on a stated outcome rather than a gauge.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           MOCK DATA. Panel set, caps, the Lesson and concert rules and the payout figures are real config and sourced
@@ -165,7 +167,7 @@
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

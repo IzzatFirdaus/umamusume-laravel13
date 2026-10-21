@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">Library · <b>Support cards</b></span>
@@ -158,6 +159,7 @@
           <li><b>One row per card, effects summarised.</b> The card detail owns the full ladder; the index owns comparison.</li>
                   <li><b>Miller’s Law chunks the seven types.</b> Seven is already at the top of the short-term band, so the type table groups by family and the counts are read as one column per server. A flat list of 559 cards would have no chunk boundary at all.</li>
                   <li><b>Heuristic coverage.</b> H8. The seven types and the five deciding effects, with the counts that do not decide pushed behind a note.</li>
+                  <li><b>Framework coverage.</b> Information architecture 6 on multiple classification and 3 on disclosure. The library is browsable by type, by rarity and by server, and the index shows the deciding effects while the rest sits behind a note.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. Totals (559, 115 Global SSR vs 312 JP), type counts and the effect descriptions are sourced
@@ -167,7 +169,7 @@
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">Import · <b>Paste or upload</b></span>
@@ -125,12 +126,13 @@ Team Blue Bloom, league 8, 55 team trainings, 6 spirit bursts, 5 extreme</textar
           <li><b>Format support is stated, not discovered.</b> The card says which formats round-trip and which are heuristic, so a Trainer knows how much review to expect.</li>
                   <li><b>Postel’s Law is this screen’s whole contract.</b> Accept liberally — pasted text, Markdown or the app’s own JSON — and emit conservatively, in the client’s own enum labels. Anything the parser cannot find stays empty, because absence is a normal result and a default would be an invention.</li>
                   <li><b>Heuristic coverage.</b> H5. Nothing is written until the commit is confirmed, which is the check-before-commit half of error prevention.</li>
+                  <li><b>Framework coverage.</b> Shneiderman 5 on error prevention and Gerhardt-Powals 8 on only what is needed. Nothing is written until the commit, and the screen asks only for what the parser could not find.</li>
         </ol>
       </div>
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

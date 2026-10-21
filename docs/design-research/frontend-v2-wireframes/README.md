@@ -116,6 +116,56 @@ decision. The distribution:
 `training-decision` cites **Fitts** and **Miller** together, and `race-decision` cites **Hick** and
 **Closure** in one item, because naming one law per page would have understated what those screens do.
 
+## The seven frameworks this set answers to
+
+The references are in [`docs/proposals/`](../../proposals/): one file per framework, each quoted from its
+source, plus [`design-framework-index-2026-10-21.md`](../../proposals/design-framework-index-2026-10-21.md),
+which maps a question to the narrowest framework that decides it and records the seven places where the
+frameworks contradict each other and how each was settled.
+
+Every page now carries **three** annotation items, because they answer three different questions:
+
+| Item | The question it answers |
+| --- | --- |
+| the law, and the annotation around it | which principle governs this screen's composition |
+| **Heuristic coverage** | is the screen usable, in Nielsen's ten questions |
+| **Framework coverage** | which framework decides this screen's *distinctive* decision |
+
+**Framework coverage, by page group:**
+
+| Framework | Pages | The decision it settles there |
+| --- | --- | --- |
+| **Tognazzini** (16) | `index`, `support-card-detail`, `career-deck`, `training-decision` | Latency, 44px targets, undo, and labels that lead with the differentiating word |
+| **Shneiderman** (8) | `index`, `runs-index`, `career-preflight`, `career-scenario`, `cockpit-ura-finale`, `cockpit-grand-concert`, `training-decision`, `import`, `review`, `result`, `preferences` | How a flow behaves from open to close, and where consistency may be broken |
+| **Gerhardt-Powals** (10) | `career-trainee`, `career-target`, the four cockpits, `skills-planner`, `legacy-builder`, `veterans`, `veterans-compare`, `index` | Whether the product left arithmetic, estimation or comparison in the user's head |
+| **Information architecture** (8) | `career-scenario`, `career-profile`, `career-legacy`, `race-decision`, `runs-index`, `veterans`, `veteran-detail`, `support-cards`, `skills`, `catalog`, `catalog-detail`, the `database-*` pages, `legacy-*`, `veterans-compare`, `inheritance` | The space between screens: objects, classification, disclosure, growth |
+| **Gestalt** (12) | `inheritance`, `run-deck`, `timeline`, `legacy`, `database-scenarios` | Whether two things will be read as one group |
+| **Norman** (6) | `career-deck`, `race-decision`, `event-decision`, `run-deck`, `timeline`, `result`, `error-404` | Affordance versus signifier, and the two gulfs |
+| **WCAG 2.2 AA** | every page, plus `import-preview`, `review-detail`, `legacy-compare`, the three error pages | The only normative one. See the accessibility section below. |
+
+## Accessibility, as WCAG 2.2 AA
+
+The audit found the set had **no skip link, no `main` landmark and no status-message region on any of its
+49 pages**, and one class of button whose accessible name did not contain its visible label. All four are
+now fixed:
+
+| Criterion | Before | Now |
+| --- | --- | --- |
+| **2.4.1 Bypass Blocks** | 0 of 49 pages had a skip link | 49 of 49, visible on focus, never permanently |
+| **1.3.1 Info and Relationships** | `<div class="main">` was a class, not a landmark | `<main class="main" id="main">` on all 49, and it is what the skip link targets |
+| **4.1.3 Status Messages** | nothing announced a state change | the save bar's status text carries `role="status"` on the 12 pages that have one |
+| **2.5.3 Label in Name** | four deck buttons said "Remove Speed card" over a visible `✕` | the glyph is `aria-hidden` and the name follows it in a visually-hidden span, so a voice-control user can say what they see |
+
+**What is still unmeasured, and it is most of it.** Chromium cannot launch under this repository's
+sandbox (`spawn EPERM`), so **no contrast ratio has ever been measured in a browser.** `app.css` records
+intended ratios and the G-18 gate measures nothing yet, which `DESIGN.md` §2.1 already says. So
+1.4.3 Contrast (Minimum) and 1.4.11 Non-text Contrast are **unverified here**, and this file says so
+rather than claiming conformance.
+
+**The 44px target is a house rule that exceeds the standard.** WCAG 2.5.8 (Minimum) requires 24×24 CSS px.
+This product uses 44px because the app ships `h-11` and Fitts's Law asks for it. It should never be
+described as 2.5.8 compliance.
+
 ## Usability heuristics
 
 The reference is [`docs/proposals/usability-heuristics-2026-10-21.md`](../../proposals/usability-heuristics-2026-10-21.md),

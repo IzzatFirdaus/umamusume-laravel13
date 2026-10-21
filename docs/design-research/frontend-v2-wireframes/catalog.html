@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb"><a href="database.html">Database</a> · <b>Trainees</b></span>
@@ -130,12 +131,13 @@
           <li><b>Release status is a word.</b> "Global" is a pill with text. The catalog's JP-only case is rendered as a muted label in the running app, and no badge is invented here.</li>
                   <li><b>Hick’s Law sets the filter count, not the row count.</b> 71 trainees is long past the point where scanning beats choosing, so the deciding dimensions are filters and the results are cards. A table would add columns without reducing the number of decisions per trainee.</li>
                   <li><b>Heuristic coverage.</b> H8. Cards carry name plus three aptitude letters; every further column is behind the detail page, because it does not decide which trainee to open.</li>
+                  <li><b>Framework coverage.</b> Information architecture 3 on disclosure and 2 on choices. A trainee is identified by name and three aptitude letters, so the card grid reads faster than a table and every further column is behind the detail page.</li>
         </ol>
       </div>
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">New career · Step 6 of 6 · <b>Preflight</b></span>
@@ -182,12 +183,13 @@
           <li><b>The scenario's own asks are summarised from its entry</b> — repetition, fan gates, Happy Meek, finale targets — rather than restated from memory. Where the scenario owns a fact, this screen points at it.</li>
           <li><b>Commit is the only filled action.</b> Back is an outline. The run is not created until a turn is logged, so the screen promises nothing it does not do.</li>
                   <li><b>Heuristic coverage.</b> H1 + H5. Everything the run will contain is stated before the commit, and the one warning names its own fix instead of asking the Trainer to find it.</li>
+                  <li><b>Framework coverage.</b> Shneiderman 4 on closure, and Norman on the two gulfs. The last screen before the run lists what will exist, which closes the sequence, and the warning names the place the fix lives, which closes the gulf of evaluation for the one thing that is wrong.</li>
         </ol>
       </div>
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

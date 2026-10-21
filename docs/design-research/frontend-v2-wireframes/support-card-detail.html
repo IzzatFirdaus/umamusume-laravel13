@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb"><a href="support-cards.html">Support cards</a> · <b>A Speed card</b></span>
@@ -155,6 +156,7 @@
           <li><b>Where-used is answerable.</b> Runs own their slots, so the same card can appear in several runs without conflict, and the detail says which.</li>
           <li><b>Provenance is a row, and a link.</b> The external review's "get the file paths out of the UI" point: the screen names the source family and links to the ledger, rather than printing <code>.md</code> paths and line numbers.</li>
                   <li><b>Heuristic coverage.</b> H4. Effect names are the client’s own strings, so a card reads here exactly as it reads in the client.</li>
+                  <li><b>Framework coverage.</b> Tognazzini 4 on consistency with user expectation, and Gerhardt-Powals 5 on names related to function. The effect names are the client's own strings, so a card reads here exactly as it reads in game.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. Level-cap rule, break model, duplicate rule and effect families are sourced
@@ -164,7 +166,7 @@
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

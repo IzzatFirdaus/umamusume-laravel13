@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">New career · Step 2 of 6 · <b>Trainee</b></span>
@@ -182,7 +183,7 @@
       </div>
 
       <div class="savebar">
-        <span class="dirty">Step 2 of 6</span>
+        <span class="dirty" role="status">Step 2 of 6</span>
         <a class="btn" href="career-scenario.html">Back</a>
         <a class="btn btn-primary" href="career-profile.html">Continue to build target</a>
       </div>
@@ -197,6 +198,7 @@
           <li><b>Released status is a word, not a colour.</b> The pill says "Released (Global)"; the catalog's <code>JapanOnly</code> row is the case DESIGN.md §2.1 records as still unimplemented and is not invented here.</li>
           <li><b>Chosen card uses three signals</b> — radio, 2px pick border, tint — matching the scenario step so the selection pattern is learned once (Jakob's Law).</li>
                   <li><b>Heuristic coverage.</b> H6. The roster shows each trainee as a recognisable card with name and aptitude letters, so the Trainer picks from what is visible instead of recalling a name to search for.</li>
+                  <li><b>Framework coverage.</b> Gerhardt-Powals 1 on automating unwanted workload. The roster is a search over a catalogue rather than a free-text field, because the product already owns the data and the Trainer should not have to type a name to find it.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. Admire Vega's name, slug, form, rarity and full aptitude set are the live payload's;
@@ -207,7 +209,7 @@
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

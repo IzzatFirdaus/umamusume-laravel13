@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb"><b>404</b></span>
@@ -79,12 +80,13 @@
           <li><b>No auto-redirect.</b> A redirect would conceal the broken link, which is the only useful information on this page.</li>
                   <li><b>Jakob’s Law, then Peak-End.</b> The shape is the conventional error page, because an unfamiliar error costs the reader the time it takes to recognise one. It ends on the way back, which is the moment this screen is remembered by.</li>
                   <li><b>Heuristic coverage.</b> H9. Plain language, no error code, and the way back named, which is the three parts the heuristic asks for.</li>
+                  <li><b>Framework coverage.</b> WCAG 3.3.1 on error identification and Information architecture 5 on front doors. Plain language with no error code, and the page keeps the navigation because arriving here is the definition of arriving unexpectedly.</li>
         </ol>
       </div>
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

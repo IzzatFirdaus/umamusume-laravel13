@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">My data · <b>Careers</b></span>
@@ -164,6 +165,7 @@
           <li><b>Retired is not the same as Completed.</b> The position column says "Retired at turn 44" rather than "Finished", which is the distinction <code>Cockpit.vue:973</code> already draws in its closed-state sentence.</li>
           <li><b>No destructive action in the row.</b> Deleting a career stays on the cockpit behind its own disclosure. A list is not the place to arm a delete (Cognitive Load; the same rule the cockpit's danger zone follows).</li>
                   <li><b>Heuristic coverage.</b> H6. Status, scenario and turn are on each row, so a run is recognised without opening it.</li>
+                  <li><b>Framework coverage.</b> Shneiderman 8 on short-term memory across screens, and Information architecture 6 on multiple classification. Status, scenario and turn sit on the row, so a run is recognised without opening it, and the list is browsable by more than one axis.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. Run 25's row is real; the ten URA Finale rows are the dev database's real trainees,
@@ -173,7 +175,7 @@
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

@@ -183,13 +183,20 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
   letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.72);
   border:1px dashed rgba(255,255,255,.45);border-radius:999px;padding:2px 8px;margin-right:10px}
 .proto::before{content:"";width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.72)}
+
+/* WCAG 2.2 SC 2.4.1 Bypass Blocks. Visible on focus, never permanently. */
+.skip{position:absolute;left:8px;top:8px;z-index:60;transform:translateY(-200%);
+  padding:9px 14px;border-radius:10px;background:#2255FF;color:#fff;
+  font-size:13px;font-weight:800;text-decoration:none}
+.skip:focus{transform:translateY(0);outline:3px solid #7FCC09;outline-offset:2px}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
 <div class="mockbar">MOCK DATA · no Our Grand Concert run exists in the dev database. Layout and scenario vocabulary are real; every trainee figure is illustrative.</div>
 
-<div class="topbar">
+<main id="main"><div class="topbar">
   <div class="inner">
     <span class="brand">Trainer Desk</span>
     <nav aria-label="Primary">
@@ -202,7 +209,7 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
 <div class="wrap">
   <p class="eyebrow">Cockpit</p>
   <h1>Example Trainee</h1>
-  <p class="sub">Senior Year · Early October · Turn 62 · Our Grand Concert (Grand Live)</p>
+  <p class="sub" role="status">Senior Year · Early October · Turn 62 · Our Grand Concert (Grand Live)</p>
 
   <div class="strip">
     <div class="facts">
@@ -387,6 +394,7 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
       <li><b>C6 — validation vocabulary, which a reader-facing panel must not echo.</b> The plan rejects <code>Mental</code>, <code>Vocal</code>, <code>Visual</code>, <code>Dancing</code> and <code>dance</code> as invalid terminology; the client prints <b>Composure</b>, <b>Vocals</b> and <b>Visuals</b>. The list is a guard, not a claim that these words may be used. Zero and decimal Performance values are rejected.</li>
       <li><b>C7 — the Speed cap here is the highest in the game on Global.</b> Caps are 1600 / 1300 / 1300 / 1500 / 1300 over a 1200 base, and 1600 Speed is the highest <code>[Global]</code> Speed ceiling in play. The panel marks Speed +400 and Guts +300 because those two carry the scenario's identity in numbers.</li>
           <li><b>Heuristic coverage.</b> H1. Performance and Live Performance Expectations are shown against named thresholds. The scenario has no client frames, so the screen states what it knows and prints nothing it cannot source.</li>
+          <li><b>Framework coverage.</b> Shneiderman 4 on closure and Gerhardt-Powals 3 on fusing data. The performance gauge and the concert countdown fuse to one threshold the decision turns on, and the run ends on a stated outcome rather than a gauge. Information architecture 8 on growth, which is why the screen degrades to baseline plus known caps rather than inventing chrome.</li>
     </ol>
     <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
       MOCK DATA. No Our Grand Concert run exists in the dev database. The panel set, widget list, caps,
@@ -395,7 +403,7 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
       no stored value exists, not because the example was skipped.
     </p>
   </div>
-</div>
+</div></main>
 
 </body>
 </html>

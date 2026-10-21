@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb"><a href="database.html">Database</a> · <a href="catalog.html">Trainees</a> · <b>Admire Vega</b></span>
@@ -163,6 +164,7 @@
           <li><b>Breakthrough is a three-row table.</b> The +50 per rank rule is the most useful catalogue fact for a Trainer building a factor, and it costs three rows.</li>
                   <li><b>Miller’s Law chunks the nine aptitude letters.</b> Turbo/Dirt, then four distances, then four running styles: three families rather than nine undifferentiated grades. The grouping is the client’s own, not a layout convenience.</li>
                   <li><b>Heuristic coverage.</b> H6. Nine aptitude letters in three families, so they are read as groups rather than recalled one at a time.</li>
+                  <li><b>Framework coverage.</b> Gerhardt-Powals 3 on fusing data and Information architecture 6 on multiple classification. The nine aptitude letters are three families of three, and the total is guaranteed where the parts are not.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. Admire Vega's identity and full aptitude set are live props; the 450 / 500 / 550 totals and
@@ -172,7 +174,7 @@
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

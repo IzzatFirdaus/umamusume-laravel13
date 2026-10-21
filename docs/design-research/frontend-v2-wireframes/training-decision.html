@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">Rice Shower · Unity Cup · <b>Training</b></span>
@@ -229,12 +230,13 @@
           <li><b>The outcome fields are separate from the choice.</b> Choosing a discipline and recording what the client showed are two facts; merging them would invite the tool to invent a reading.</li>
           <li><b>The career nav is greyed to a stepper, not repeated as a second tab bar.</b> Cockpit already owns the top-level nav; inside a run, moving between decision screens is a step, not a destination change.</li>
                   <li><b>Heuristic coverage.</b> H5 + H7. Both branches of every gain are stated before the commit, and the flow is operable from the keyboard with 1 to 5 selecting and Enter confirming.</li>
+                  <li><b>Framework coverage.</b> Tognazzini 10 on latency, 8 on Fitts, and Shneiderman 6 on reversal. Every discipline click is acknowledged, every target is 44px, and the turn can be reversed from the screen that committed it. The keyboard contract is printed on screen because an accelerator a Trainer has to already know is not an accelerator.</li>
         </ol>
       </div>
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

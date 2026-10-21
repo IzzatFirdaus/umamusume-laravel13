@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">Maruzensky · URA Finale · <b>Timeline</b></span>
@@ -127,6 +128,7 @@
           <li><b>Four races, four statuses, one word each.</b> "1st" is the only claim made; no score, no grade, no aggregate, per the app's no-score rule.</li>
                   <li><b>Continuity (uilaws) is why this is a rail.</b> Elements arranged along a line are read as related in sequence, which is exactly what a turn log is. Phase grouping is collapsible but the spine never breaks, because a broken rail stops reading as one run.</li>
                   <li><b>Heuristic coverage.</b> H1. Every recorded turn is its own entry with its deltas, so a run’s state is reconstructable rather than summarised.</li>
+                  <li><b>Framework coverage.</b> Gestalt on continuity, and Norman on the gulf of evaluation. The rail never breaks mid-run, and every turn carries its deltas so the record can be read back rather than trusted.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. Turn count, race entries, finale outcome and the final Energy/SP are run 17's live props;
@@ -136,7 +138,7 @@
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>

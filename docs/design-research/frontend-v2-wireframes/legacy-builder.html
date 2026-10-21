@@ -9,6 +9,7 @@
 <script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <aside class="rail" aria-label="Primary">
     <div class="rail-top">
@@ -31,7 +32,7 @@
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
-  <div class="main">
+  <main class="main" id="main">
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb"><a href="legacy.html">Legacy Lab</a> · <b>Vodka × Daiwa Scarlet</b></span>
@@ -111,7 +112,7 @@
       </div>
 
       <div class="savebar">
-        <span class="dirty">Unsaved legacy</span>
+        <span class="dirty" role="status">Unsaved legacy</span>
         <a class="btn" href="legacy.html">Discard</a>
         <button class="btn btn-primary">Save legacy</button>
       </div>
@@ -125,12 +126,13 @@
           <li><b>Unsaved state is explicit, and Discard appears only when dirty.</b> The single-save-model rule the external review asked for, applied here as well as on the cockpit.</li>
                   <li><b>Doherty Threshold at the commit.</b> The preview table is the same one the wizard shows, so the effect of the pair is visible before the save. A write with no visible consequence is the delay this law is about.</li>
                   <li><b>Heuristic coverage.</b> H5. The preview is the same table the wizard shows, so the effect is checked before the save.</li>
+                  <li><b>Framework coverage.</b> Shneiderman 4 on closure and Gerhardt-Powals 1 on automating unwanted workload. The preview is the same table the wizard shows, so the effect is checked before the save, and the total is computed rather than left to be added up.</li>
         </ol>
       </div>
 
     </div>
   </div>
-</div>
+</main>
 
 <nav class="mbar" aria-label="Primary mobile">
   <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
