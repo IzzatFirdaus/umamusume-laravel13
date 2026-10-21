@@ -64,14 +64,23 @@ Added 2026-10-21, so this set matches the v2 frontend set and the app.
 
 ## Laws applied, and the rules each page had to satisfy
 
+The inventory is read from `lawsofux.com` (28 index entries plus Zeigarnik Effect) and `uilaws.com`
+(13 entries, which do publish Continuity and Closure). Two attribution notes carried from the audit:
+**Common Fate is published by neither site** and is cited as a Gestalt principle where used, and no
+"Law of Experience" exists — the concept is Prior Experience.
+
 | Law or rule | Where it shows |
 | --- | --- |
 | **Goal-Gradient (18)** | The scenario's one dated obligation is in the first viewport on all four cockpits: the finale countdown, the Grade Point deadline, the concert countdown. |
 | **Hick's Law (4)** | One recommended action and one alternative per cockpit, not six buttons. The advisor's priority order is stated once. |
 | **Miller's Law (5)** | Stat bands are five plus four tiles. Teammate rosters chunk by distance. |
 | **Von Restorff (15)** | One filled action per screen. An unmarked figure is the norm; only exceptions carry a provenance mark. |
-| **Selective Attention (33) / D-259** | Mood renders `GREAT ↑ +20%` — tier, arrow and percentage. The arrow is the only part carrying ordinal direction, because the five pill colours sit at equal luminance and `GOOD`/`BAD` are 3.3 degrees of hue apart (`DESIGN-CORPUS.md:2469`). |
+| **Selective Attention (33) / D-259** | Mood renders `GREAT ↑ +20%` — tier, arrow and percentage. The arrow is the only part carrying ordinal direction, because the five pill colours sit at equal luminance and `GOOD`/`BAD` are 3.3 degrees of hue apart. |
 | **Fitts's Law (3)** | 44px minimum on every control, matching the app's `h-11`. |
+| **Law of Uniform Connectedness (9)** | Where a relationship exists between records it is drawn, not implied: the party strip and the teammate rows share a boundary, and a member is never slotted into two distance rows at once (the v9 defect, `DESIGN-CORPUS.md:2433`). |
+| **Closure (12, uilaws)** | Partial indicators stay honest. A stat the run does not record reads `N/A` with a reason, never a closed-up or invented figure. |
+| **Chunking (28) / Cognitive Load (24)** | The advisor prints the number the decision needs, so the Trainer never recalls it from another screen. |
+| **Peak-End (17)** | The finale panel is the scenario's own shape — elimination, 4 Team Races, or a 3-race points league — not a generic bracket. |
 | **D-220 / D-241 — scenario composition** | Each cockpit renders only the widgets its scenario owns. URA Finale has no Team Rank gauge or shop; Trackblazer has no race calendar; Our Grand Concert degrades to baseline plus known caps rather than inventing chrome. |
 | **D-222 — a level chip names its cause** | Unity Cup's facility level comes from team stat rank (`G/F=1 … S=5`), Trackblazer's from repetition plus purchased levels, URA's from repetition alone. The identical label `Lv 5` means different things, so each says which. |
 | **D-223 — Spirit Burst is a six-state machine** | `spent` is not terminal: chargeable → charged → held → normal spent → Extreme chargeable → Extreme spent. |

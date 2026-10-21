@@ -68,6 +68,35 @@
         <a class="step" href="result.html">Result</a>
       </nav>
 
+      <div class="card" style="margin:0 0 14px">
+        <h2>Lineage</h2>
+        <p class="sub">Two parents and two grandparents behind each, per the six-ancestor rule. A repeated ancestor contributes compatibility 0.</p>
+        <div class="lineage" role="group" aria-label="Six-ancestor lineage">
+          <div class="lin-gen">
+            <div class="lin-node is-off"><span class="k">Grandparent</span><span class="v">Not set</span><span class="m">slot open</span></div>
+            <div class="lin-node is-off"><span class="k">Grandparent</span><span class="v">Not set</span><span class="m">slot open</span></div>
+          </div>
+          <div class="lin-gen">
+            <div class="lin-node is-parent"><span class="k">Parent A</span><span class="v">Vodka ★★★</span><span class="m">URA Finale</span></div>
+          </div>
+          <div class="lin-gen">
+            <div class="lin-node is-trainee"><span class="k">Trainee</span><span class="v">Rice Shower</span><span class="m">Unity Cup · turn 67</span></div>
+          </div>
+        </div>
+        <div class="lineage" role="group" aria-label="Six-ancestor lineage, second branch" style="margin-top:12px">
+          <div class="lin-gen">
+            <div class="lin-node is-off"><span class="k">Grandparent</span><span class="v">Not set</span><span class="m">slot open</span></div>
+            <div class="lin-node is-off"><span class="k">Grandparent</span><span class="v">Not set</span><span class="m">slot open</span></div>
+          </div>
+          <div class="lin-gen">
+            <div class="lin-node is-parent"><span class="k">Parent B</span><span class="v">Daiwa Scarlet ★★★</span><span class="m">URA Finale</span></div>
+          </div>
+          <div class="lin-gen">
+            <div class="lin-node"><span class="k">Compatibility</span><span class="v">◎</span><span class="m">raises trigger chance and payout</span></div>
+          </div>
+        </div>
+      </div>
+
       <div class="grid g-2">
 
         <div class="card" style="margin:0">
@@ -77,11 +106,11 @@
             <thead><tr><th>Spark</th><th>Grade</th><th>What it carries</th><th class="n"></th></tr></thead>
             <tbody>
               <tr class="is-current">
-                <td><b>Blue · Speed</b></td><td>★3</td><td>+16 Speed cap</td>
+                <td><b>Blue · Speed</b></td><td>★3</td><td>+21 Speed · +16 cap</td>
                 <td class="n"><input type="radio" name="a" checked aria-label="Inherit Speed cap"></td>
               </tr>
               <tr>
-                <td>Pink · Turf</td><td>★2</td><td>+12 aptitude</td>
+                <td>Pink · Turf</td><td>★4</td><td>+2 aptitude grades</td>
                 <td class="n"><input type="radio" name="a" aria-label="Inherit Turf aptitude"></td>
               </tr>
               <tr>
@@ -103,11 +132,11 @@
             <thead><tr><th>Spark</th><th>Grade</th><th>What it carries</th><th class="n"></th></tr></thead>
             <tbody>
               <tr>
-                <td><b>Blue · Speed</b></td><td>★3</td><td>+16 Speed cap</td>
+                <td><b>Blue · Speed</b></td><td>★3</td><td>+21 Speed · +16 cap</td>
                 <td class="n"><input type="radio" name="b" checked aria-label="Inherit Speed cap from B"></td>
               </tr>
               <tr>
-                <td>Pink · Medium</td><td>★3</td><td>+21 aptitude</td>
+                <td>Pink · Medium</td><td>★1</td><td>+1 aptitude grade</td>
                 <td class="n"><input type="radio" name="b" aria-label="Inherit Medium aptitude"></td>
               </tr>
               <tr>
@@ -154,10 +183,12 @@
         <h2>Annotation key · Inheritance event</h2>
         <ol>
           <li><b>The before/after table is the decision.</b> A Trainer picks between sparks by their cap consequence, so the consequence is printed. Picking a ★3 blue and then finding out it moved a cap is the opposite of a decision surface.</li>
-          <li><b>Blue, pink and white are named, not colour-coded only.</b> The spark family is the word (Blue = cap, Pink = aptitude, White = skill hint); the colour reinforces. A colour-blind Trainer reads the same table.</li>
+          <li><b>Blue, pink and white are named, not colour-coded only.</b> The spark family is the word (Blue = stat, Pink = aptitude, White = skill hint); the colour reinforces. A colour-blind Trainer reads the same table. Blue's <code>+21 stat</code> and its <code>+16 cap</code> are printed as two labelled effects, because one moves the stat and the other moves its ceiling.</li>
           <li><b>One pick per parent, enforced by radios.</b> The moment grants one spark per parent; allowing two would promise a rule the game does not have.</li>
           <li><b>Inheritance adds to the entered ceiling, not the published one.</b> This run already carries entered ceilings above the scenario's 1300, and the note says so. Collapsing the two is the same defect the cockpit audit filed as A3.</li>
           <li><b>"Skip this moment" is offered.</b> Inheritance is optional at every one of its three moments; a screen that only offers a pick implies the moment is mandatory.</li>
+          <li><b>Law of Uniform Connectedness: the lineage is drawn, not listed.</b> Six ancestors read as one lineage only if the connection between generations is visible, so the rule between columns carries it. Six unconnected boxes would be six records, not a family (<code>lawsofux.com/law-of-uniform-connectedness</code>, and Continuity on <code>uilaws.com</code>).</li>
+          <li><b>Empty grandparent slots read as empty, not as absent.</b> A dashed border and the words "slot open" say the slot exists and is unfilled. Hiding it would misstate how many ancestors the rule provides.</li>
         </ol>
       </div>
 

@@ -24,30 +24,70 @@ click from the dashboard reaches the whole surface.
 | Database (9 areas) | `database`, `database-sources`, `database-scenarios`, `database-races`, `database-events`, `database-shop-items`, `database-sparks` |
 | System | `preferences`, `error-404`, `error-419`, `error-500` |
 
-## The laws this set applies, and where
+## The law inventory this set answers to
 
-Each page ends with its own annotation key naming the law behind each decision. The set's recurring
-ones:
+Read from the two sources on 2026-10-21, because a wireframe that cites a law by the wrong name
+cites nothing. They are **two different collections** and the difference matters:
 
-| Law | How the wireframes apply it |
+- **Laws of UX** — `lawsofux.com`. **28 entries in the index, plus Zeigarnik Effect**, which has its
+  own page but is truncated out of the index listing. Total **29**. The index gained **Cognitive Bias**
+  and **Paradox of the Active User** since the repository's original 27-row audit.
+- **Laws of UI** — `uilaws.com`. Exactly **13** entries, and it currently lists **Continuity** and
+  **Closure**, the two Gestalt principles the repository previously had to attribute to nobody.
+
+Attribution corrections carried here:
+
+| Claim | Reality |
 | --- | --- |
-| **Fitts's Law (3)** | **Every control is 44px minimum.** The app ships `h-11` for all of them (`CapsuleHeader.vue`, `TraineeCombobox.vue:467`, `VeteranRow.vue:79`) and `SLICE-RECORDS.md:4716-4730` measures 44px in a browser rather than reading it. An earlier draft of this sheet used 40px for `.btn`, 32px for `.btn-sm` and 34px for `.step`, all below the contract; they are 44px now. |
-| **Goal-Gradient (18)** | The career goal is in the first viewport on every run screen. The build-target step exists so that bar has a denominator; today every target is `null`. |
-| **Hick's Law (4)** | Four scenario cards, not a dropdown. Ten nav destinations grouped into four bands. |
-| **Miller's Law (5)** | Three aptitude letters per card on an index, nine on the detail. Chunked, not trimmed. |
-| **Von Restorff (15)** | One filled action per screen. The nine saturated lime section bars the external review measured are gone; headings are ink plus a rule. An unmarked figure is the norm, so only exceptions carry a provenance mark. |
-| **Serial Position (16)** | The primary action leads; destructive actions sit last, behind a disclosure. |
-| **Peak-End (17)** | The result screen leads with the outcome and states the honest finding. |
-| **Doherty Threshold (23)** | Every write has a pending label and a saved confirmation. |
-| **Jakob's Law (2)** | Client grammar reused where it exists: four break diamonds, the gauge at 80 turning orange. |
-| **Prägnanz (10)** | One vocabulary, one owner: Performance types come from the enum, not from the template. |
-| **Occam's Razor (21)** | One save bar, one verb. Seven save verbs in four styles is the defect this replaces. |
-| **Law of Common Region (8)** | One field grid, one left edge, three fieldsets. |
-| **Selective Attention (33)** | The goal-relevant datum wins. The mood readout is word + arrow + percentage because at equal luminance `GOOD` and `BAD` are 3.3 degrees of hue apart, so colour alone cannot order them (`DESIGN-CORPUS.md:2469`, D-259). |
-| **Law of Prägnanz + D-259** | Mood renders `GREAT ↑ +20%`, not `GREAT` and not a colour. The arrow is the only part carrying the ordinal direction. |
-| **Nielsen H1 / H9 (D-45)** | Four states on every data view: empty, loading, populated, error. `.state`, `.skel` and `.state-error` are the primitives. |
-| **Skill: Consistency** (uilaws) | One selection grammar — radio, pick border, tint — on every picker in the set. |
-| **Skill: Contrast** (uilaws) | Colour never carries meaning alone. Every tint has a word beside it. |
+| Continuity, Closure were "laws of UX" | They are **Gestalt principles published by uilaws.com**, not lawsofux.com entries. |
+| Common Fate was a published law | **Neither site publishes it.** It is Gestalt, and any use here is cited as a principle, not a law. |
+| A "Law of Experience" | **No such law exists** on either site. The concept is Prior Experience, a sourced principle. |
+| "Aesthetic consistency and visual hierarchy" as law 27 | A **house principle**, not a law. |
+| Proximity, Similarity are uilaws-only | Both also publish them; the wireframes cite lawsofux.com's page. |
+
+## What each law changed in this set
+
+| Law | Source | How the wireframes apply it |
+| --- | --- | --- |
+| **Fitts's Law (3)** | both | **Every control is 44px minimum.** The app ships `h-11` for all of them (`CapsuleHeader.vue`, `TraineeCombobox.vue:467`, `VeteranRow.vue:79`) and `SLICE-RECORDS.md:4716-4730` measures 44px in a browser rather than reading it. An earlier draft used 40px for `.btn`, 32px for `.btn-sm`, 34px for `.step`, 38px for `.field .in`; all are 44px now. |
+| **Zeigarnik Effect (19)** | lawsofux | **The wizard step bar carries four states, not two** — not started, started-unfinished, saved, current — each with a glyph as well as a colour, plus a legend. The law's own takeaway is "provide a clear indication of progress", and the incomplete state is the one worth seeing. The shipped wizard fails here: `SetupLayout.vue:45-46` marks every step `done` while nothing has been entered. |
+| **Law of Uniform Connectedness (9)** | lawsofux | **The inheritance lineage is drawn.** Six ancestors are one lineage only if the connection between generations is visible, so a rule between columns carries it and the diagram is not six boxes. Continuity on uilaws makes the same point. |
+| **Goal-Gradient (18)** | lawsofux | The career goal is in the first viewport on every run screen. The build-target step exists so that bar has a denominator. |
+| **Hick's Law (4)** | both | Four scenario cards, not a dropdown. Ten nav destinations grouped into four bands. |
+| **Miller's Law (5)** | lawsofux | Three aptitude letters per card on an index, nine on the detail. Chunked, not trimmed. |
+| **Von Restorff (15)** | lawsofux | One filled action per screen. An unmarked figure is the norm, so only exceptions carry a provenance mark. |
+| **Serial Position (16)** | lawsofux | The primary action leads; destructive actions sit last, behind a disclosure. |
+| **Peak-End (17)** | lawsofux | The result screen leads with the outcome and states the honest finding. |
+| **Doherty Threshold (23)** | lawsofux | Every write has a pending label and a saved confirmation. |
+| **Jakob's Law (2)** | both | Client grammar reused where it exists: four break diamonds, the gauge at 80 turning orange. |
+| **Prägnanz (10)** | lawsofux | One vocabulary, one owner: Performance types come from the enum, not from the template. |
+| **Occam's Razor (21)** | lawsofux | One save bar, one verb. Seven save verbs in four styles is the defect this replaces. |
+| **Common Region (8)** | lawsofux | One field grid, one left edge, three fieldsets. |
+| **Proximity (6)** | both | Every field label sits inside its own `<label class="field">`, bound to the input — never floating above it. |
+| **Similarity (7)** | lawsofux | One `.btn`, one `.pill`, one `.tag` vocabulary. The same control in two places is the same class. |
+| **Selective Attention (33)** | lawsofux | The goal-relevant datum wins. Mood is word + arrow + percentage, because at equal luminance `GOOD` and `BAD` are 3.3 degrees of hue apart (`D-259`). |
+| **Chunking (28)** | lawsofux | Stat bands are five plus four tiles; the DB counts are grouped, not one flat run. |
+| **Cognitive Load (24)** | lawsofux | Recognition over recall: the advisor prints the number the decision needs rather than a pointer to another screen. |
+| **Choice Overload (25)** | lawsofux | Defaults and one recommendation at each decision point. |
+| **Tesler's Law (20)** | lawsofux | The app absorbs complexity: no internal model leaks into a label. |
+| **Pareto Principle (22)** | lawsofux | The few facts that drive the decision sit first; the long tail is behind a link. |
+| **Parkinson's Law (31)** | lawsofux | Nothing fills an empty layout. No invented controls for symmetry. |
+| **Postel's Law (32)** | lawsofux | The importer accepts liberal input and writes canonical enum labels out. |
+| **Mental Model (29)** | lawsofux | The app's nouns are the client's nouns: SP, Mood, Bond, Spark, Trainee Umamusume. |
+| **Paradox of the Active User (30)** | lawsofux | Every screen works without a manual. Reversibility is stated before the commit. |
+| **Aesthetic-Usability (1)** | lawsofux | Hierarchy and spacing are deliberate, but polish never substitutes for a sourced number. |
+| **Flow (26)** | lawsofux | One screen carries the run; the career nav is a stepper, not a second tab bar. |
+| **Closure (12)** | uilaws | Partial indicators stay honest. An empty grandparent slot reads "slot open" rather than being closed up or hidden. |
+| **Typography Hierarchy** | uilaws | Three steps: 28px page title, 15px card heading, 13px sub-heading, 12.5-13px body. The shipped app's 75 headers at `text-base` is the defect this avoids. |
+| **Consistency / Contrast** | uilaws | One selection grammar on every picker; colour never carries meaning alone. |
+| **D-45 (Nielsen H1/H9)** | — | Four states on every data view: empty, loading, populated, error. `.state`, `.skel` and `.state-error` are the primitives. |
+| **D-259** | — | Mood renders `GREAT ↑ +20%`. The arrow is the only part carrying ordinal direction. |
+
+Laws this set deliberately does **not** claim: **Symmetry** and **Rule of Thirds** (uilaws) are
+composition rules for a marketing surface, not a data tool; applying them to a stat table would be
+ornament. **Cognitive Bias** is recorded as awareness, not as an applied rule, because every actual
+use of it in an interface is either an honest warning or a dark pattern, and this tool does not
+manipulate.
 
 ## Two rules this set had to be corrected against
 
