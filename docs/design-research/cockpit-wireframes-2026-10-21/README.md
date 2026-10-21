@@ -62,6 +62,32 @@ Added 2026-10-21, so this set matches the v2 frontend set and the app.
   `td-wireframe-layout`) because a static artifact has no database. The app stores both server-side;
   `PRD.md` §6.12 cuts browser storage as a second source of truth.
 
+## Usability heuristics
+
+The reference is [`docs/proposals/usability-heuristics-2026-10-21.md`](../../proposals/usability-heuristics-2026-10-21.md),
+which records Nielsen's ten as NN/g states them. Every page carries a **Heuristic coverage** item in its
+own annotation key.
+
+**H1 Visibility of System Status is the heuristic this set exists for.** A cockpit answers "where am I"
+before "what next", so every live resource is printed rather than implied: Energy band, mood tier,
+Spirit Burst count, Grade Points against the next deadline, coins, rotation countdown, Race Fatigue
+band, the finale or concert countdown. The audit's recurring finding was that the app owned these
+facts and placed them below the decision, which is the H1 failure at the layout level rather than the
+copy level.
+
+Two heuristics are answered narrowly and deliberately:
+
+- **H5 Error Prevention** appears only where a scenario has a costly action. Trackblazer's Race Fatigue
+  band sits beside the race action, so the cost of a third consecutive race is prevented rather than
+  reported after the fact.
+- **H9 Help Users Recognize, Diagnose, and Recover from Errors** appears on the URA Finale cockpit,
+  which is the one file here that depicts a closed run. It states the outcome and replaces the advisor
+  slot with the end-state rather than leaving an empty rail, because an absence rendered as a blank
+  region reports "nothing" instead of "finished".
+
+**H10 is not claimed here.** These are per-scenario cockpit views reached from a run; help belongs in
+the shell, and the `help.html` page in the v2 set is where it lives.
+
 ## Laws applied, and the rules each page had to satisfy
 
 The inventory is read from `lawsofux.com` (28 index entries plus Zeigarnik Effect) and `uilaws.com`

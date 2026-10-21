@@ -37,7 +37,8 @@
         <span class="crumb">My data · <b>Careers</b></span>
         <span class="proto" title="Structure, states and labels are real; the controls are not wired except the Settings page.">Static wireframe</span><span class="spacer"></span>
         <span class="who"><span class="pill pill-positive">1 active</span></span>
-      </div>
+      <div class="toputils"><a class="iconbtn" href="help.html" title="Help and documentation"><span aria-hidden="true">?</span><span class="lbl">Help</span></a></div>
+        </div>
     </header>
 
     <div class="phead">
@@ -162,6 +163,7 @@
           <li><b>Turn is shown against the career length.</b> "67 / 72" gives the denominator the Dashboard lacked. The running app's list has no turn-rail denominator on this table.</li>
           <li><b>Retired is not the same as Completed.</b> The position column says "Retired at turn 44" rather than "Finished", which is the distinction <code>Cockpit.vue:973</code> already draws in its closed-state sentence.</li>
           <li><b>No destructive action in the row.</b> Deleting a career stays on the cockpit behind its own disclosure. A list is not the place to arm a delete (Cognitive Load; the same rule the cockpit's danger zone follows).</li>
+                  <li><b>Heuristic coverage.</b> H6. Status, scenario and turn are on each row, so a run is recognised without opening it.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. Run 25's row is real; the ten URA Finale rows are the dev database's real trainees,

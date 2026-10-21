@@ -610,7 +610,8 @@ table.caps td.overc{font-weight:800;color:var(--risk)}
         <li><b>15 — Rank → facility mapping, and the trap it sets.</b> G/F = Lv 1, D/E = Lv 2, B/C = Lv 3, A = Lv 4, S = Lv 5. <b>B and C share a level</b>, so "Stamina C → B" is a rank move that crosses no level boundary. The plan's own dated note (2026-10-21) records this being misdrawn as "C → Lv 2" in an earlier wireframe and corrected. Any UI that prints a rank→level arrow must show the level, not only the letter.</li>
         <li><b>16 — Advisor priority, which the page currently inverts.</b> <code>Unity-Cup-plan.md</code> §9 ranks: (1) don't end the run, (2) don't wreck the run, (3) burst breakpoints at 4 / 7 / 10 / 13, (4) facility levels derived from team ranks, (5) training target, (6) optimization. The recommendation must also carry a <b>dual readout</b>: trainee gain this turn versus team gain or future opportunity cost. The page today gives the trainee-side reason only.</li>
         <li><b>17 — Burst band boundaries are a real decision boundary.</b> This run sits at 11 bursts, inside the 10–12 band, with the next boundary at 13. The plan's bands are 4 / 7 / 10 / 13; config's <code>spirit_burst_bands</code> are 4–6, 7–9, 10–12, 13+. One burst short of 13 changes the reward tier, which is exactly the kind of proximity the old Goal-Gradient failure hid.</li>
-      </ol>
+            <li><b>Heuristic coverage.</b> H1 + H8. Status is stated once per region instead of repeated in three places, and each of the twelve prototype changes removes an element that competed with the decision. The prototype's own tell was density without information, which is the H8 failure NN/g calls noise crowding out signal.</li>
+    </ol>
 
       <h4>The 12 changes, applied</h4>
       <ol>

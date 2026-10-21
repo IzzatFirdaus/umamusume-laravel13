@@ -37,7 +37,8 @@
         <span class="crumb">Rice Shower · Unity Cup · <b>Training</b></span>
         <span class="proto" title="Structure, states and labels are real; the controls are not wired except the Settings page.">Static wireframe</span><span class="spacer"></span>
         <span class="who"><span class="pill pill-positive">Turn 67</span></span>
-      </div>
+      <div class="toputils"><a class="iconbtn" href="help.html" title="Help and documentation"><span aria-hidden="true">?</span><span class="lbl">Help</span></a></div>
+        </div>
     </header>
 
     <div class="phead">
@@ -80,7 +81,7 @@
               <div style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:13px;align-items:center;flex-wrap:wrap">
                 <input type="radio" name="pick" aria-label="Speed training" style="width:16px;height:16px">
                 <div style="flex:1 1 190px;min-width:0">
-                  <div style="font-weight:800;color:var(--ink-strong)">Speed</div>
+                  <div style="font-weight:800;color:var(--ink-strong)"><span class="kbd">1</span> Speed</div>
                   <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Power · Lv 1 base · 3% failure</div>
                 </div>
                 <div class="mono" style="text-align:right;font-size:12.5px;color:var(--ink-strong)">
@@ -92,7 +93,7 @@
               <div style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:13px;align-items:center;flex-wrap:wrap">
                 <input type="radio" name="pick" aria-label="Stamina training" style="width:16px;height:16px">
                 <div style="flex:1 1 190px;min-width:0">
-                  <div style="font-weight:800;color:var(--ink-strong)">Stamina</div>
+                  <div style="font-weight:800;color:var(--ink-strong)"><span class="kbd">2</span> Stamina</div>
                   <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Guts · Lv 1 base · 1% failure</div>
                 </div>
                 <div class="mono" style="text-align:right;font-size:12.5px;color:var(--ink-strong)">
@@ -104,7 +105,7 @@
               <div style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:13px;align-items:center;flex-wrap:wrap">
                 <input type="radio" name="pick" aria-label="Power training" style="width:16px;height:16px">
                 <div style="flex:1 1 190px;min-width:0">
-                  <div style="font-weight:800;color:var(--ink-strong)">Power</div>
+                  <div style="font-weight:800;color:var(--ink-strong)"><span class="kbd">3</span> Power</div>
                   <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Stamina · Lv 1 base · 2% failure</div>
                 </div>
                 <div class="mono" style="text-align:right;font-size:12.5px;color:var(--ink-strong)">
@@ -116,7 +117,7 @@
               <div style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:13px;align-items:center;flex-wrap:wrap">
                 <input type="radio" name="pick" aria-label="Guts training" style="width:16px;height:16px">
                 <div style="flex:1 1 190px;min-width:0">
-                  <div style="font-weight:800;color:var(--ink-strong)">Guts</div>
+                  <div style="font-weight:800;color:var(--ink-strong)"><span class="kbd">4</span> Guts</div>
                   <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Speed and Power · Lv 1 base · 5% failure</div>
                 </div>
                 <div class="mono" style="text-align:right;font-size:12.5px;color:var(--ink-strong)">
@@ -128,7 +129,7 @@
               <div style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:13px;align-items:center;flex-wrap:wrap">
                 <input type="radio" name="pick" aria-label="Wit training" style="width:16px;height:16px">
                 <div style="flex:1 1 190px;min-width:0">
-                  <div style="font-weight:800;color:var(--ink-strong)">Wit <span class="tag auto">no Energy</span></div>
+                  <div style="font-weight:800;color:var(--ink-strong)"><span class="kbd">5</span> Wit <span class="tag auto">no Energy</span></div>
                   <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Speed · Lv 1 base · no failure figure printed</div>
                 </div>
                 <div class="mono" style="text-align:right;font-size:12.5px;color:var(--ink-strong)">
@@ -209,7 +210,8 @@
           </div>
 
           <div class="savebar" style="margin-top:0">
-            <span class="dirty">Rest selected</span>
+            <span class="dirty kbd-hint">Rest selected · <span class="kbd">1</span>–<span class="kbd">5</span> pick · <span class="kbd">Enter</span> records · <span class="kbd">Esc</span> back</span>
+            <button class="btn btn-quiet" title="Reverses the last committed turn. The build has no undo; this screen proposes one.">Undo turn 66</button>
             <button class="btn">Discard</button>
             <button class="btn btn-primary">Record turn 67</button>
           </div>
@@ -226,6 +228,7 @@
           <li><b>The recommendation is chosen by default but not hidden.</b> Rest is preselected and marked, yet the five disciplines stay fully selectable: the advisor advises, it does not act (design-2.0 §2, player agency).</li>
           <li><b>The outcome fields are separate from the choice.</b> Choosing a discipline and recording what the client showed are two facts; merging them would invite the tool to invent a reading.</li>
           <li><b>The career nav is greyed to a stepper, not repeated as a second tab bar.</b> Cockpit already owns the top-level nav; inside a run, moving between decision screens is a step, not a destination change.</li>
+                  <li><b>Heuristic coverage.</b> H5 + H7. Both branches of every gain are stated before the commit, and the flow is operable from the keyboard with 1 to 5 selecting and Enter confirming.</li>
         </ol>
       </div>
 

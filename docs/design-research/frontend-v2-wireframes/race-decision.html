@@ -37,7 +37,8 @@
         <span class="crumb">Rice Shower · Unity Cup · <b>Races</b></span>
         <span class="proto" title="Structure, states and labels are real; the controls are not wired except the Settings page.">Static wireframe</span><span class="spacer"></span>
         <span class="who"><span class="pill pill-positive">Turn 67</span></span>
-      </div>
+      <div class="toputils"><a class="iconbtn" href="help.html" title="Help and documentation"><span aria-hidden="true">?</span><span class="lbl">Help</span></a></div>
+        </div>
     </header>
 
     <div class="phead">
@@ -165,6 +166,7 @@
 
           <div class="savebar" style="margin-top:0">
             <span class="dirty">No race chosen</span>
+            <button class="btn btn-quiet" title="Reverses the last committed turn. The build has no undo; this screen proposes one.">Undo turn 66</button>
             <a class="btn" href="training-decision.html">Train instead</a>
             <button class="btn btn-primary" disabled>Enter a race</button>
           </div>
@@ -181,6 +183,7 @@
           <li><b>Where no probability exists, none is invented.</b> URA and Unity Cup publish no consecutive-race table, so the screen shows the count and says why there is no percentage.</li>
           <li><b>"Train instead" is a real escape.</b> A race screen that only offers races forces the decision; the outline button returns to training without losing the turn.</li>
                   <li><b>Hick’s Law over Closure: blocked rows stay visible.</b> The Dirt Dash row is disabled with its reason rather than filtered out, because a hidden option reads as an option that does not exist, while a disabled one reads as a rule. The reason is the part that teaches the rule.</li>
+                  <li><b>Heuristic coverage.</b> H5. A blocked race stays visible with its reason rather than being filtered away, so the rule is prevented from becoming a surprise.</li>
         </ol>
       </div>
 

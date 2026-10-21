@@ -9,7 +9,8 @@ click from the dashboard reaches the whole surface.
 
 ## What this set covers
 
-47 screens, matching `SCREEN_SPEC.md`'s registry rather than a hand-picked subset.
+49 screens: the 48 that match `SCREEN_SPEC.md`'s registry rather than a hand-picked subset, plus
+`help`, which the usability heuristics required and the registry does not yet carry.
 
 | Group | Screens |
 | --- | --- |
@@ -22,7 +23,7 @@ click from the dashboard reaches the whole surface.
 | Library | `support-cards`, `support-card-detail`, `skills`, `skill-detail`, `catalog`, `catalog-detail` |
 | Review | `review`, `review-detail` |
 | Database (9 areas) | `database`, `database-sources`, `database-scenarios`, `database-races`, `database-events`, `database-shop-items`, `database-sparks` |
-| System | `preferences`, `error-404`, `error-419`, `error-500` |
+| System | `preferences`, `help`, `error-404`, `error-419`, `error-500` |
 
 ## The law inventory this set answers to
 
@@ -51,7 +52,7 @@ Attribution corrections carried here:
 | --- | --- | --- |
 | **Fitts's Law (3)** | both | **Every control is 44px minimum.** The app ships `h-11` for all of them (`CapsuleHeader.vue`, `TraineeCombobox.vue:467`, `VeteranRow.vue:79`) and `SLICE-RECORDS.md:4716-4730` measures 44px in a browser rather than reading it. An earlier draft used 40px for `.btn`, 32px for `.btn-sm`, 34px for `.step`, 38px for `.field .in`; all are 44px now. |
 | **Zeigarnik Effect (19)** | lawsofux | **The wizard step bar carries four states, not two** — not started, started-unfinished, saved, current — each with a glyph as well as a colour, plus a legend. The law's own takeaway is "provide a clear indication of progress", and the incomplete state is the one worth seeing. The shipped wizard fails here: `SetupLayout.vue:45-46` marks every step `done` while nothing has been entered. |
-| **Law of Uniform Connectedness (9)** | lawsofux | **The inheritance lineage is drawn.** Six ancestors are one lineage only if the connection between generations is visible, so a rule between columns carries it and the diagram is not six boxes. Continuity on uilaws makes the same point. |
+| **Law of Uniform Connectedness (9)** | lawsofux | **The inheritance diagram is drawn.** Six ancestors read as one line of descent only if the connection between generations is visible, so a rule between columns carries it and the diagram is not six boxes. Continuity on uilaws makes the same point. |
 | **Goal-Gradient (18)** | lawsofux | The career goal is in the first viewport on every run screen. The build-target step exists so that bar has a denominator. |
 | **Hick's Law (4)** | both | Four scenario cards, not a dropdown. Ten nav destinations grouped into four bands. |
 | **Miller's Law (5)** | lawsofux | Three aptitude letters per card on an index, nine on the detail. Chunked, not trimmed. |
@@ -114,6 +115,27 @@ decision. The distribution:
 
 `training-decision` cites **Fitts** and **Miller** together, and `race-decision` cites **Hick** and
 **Closure** in one item, because naming one law per page would have understated what those screens do.
+
+## Usability heuristics
+
+The reference is [`docs/proposals/usability-heuristics-2026-10-21.md`](../../proposals/usability-heuristics-2026-10-21.md),
+which records Nielsen's ten as NN/g states them. Every page carries a **Heuristic coverage** item in its
+own annotation key. Three of the ten needed a change to the set rather than an annotation:
+
+| Heuristic | What changed |
+| --- | --- |
+| **H3 User Control and Freedom** | **An `Undo turn N` control is now drawn** on the three decision screens and on the timeline. The shipped build has no undo after a committed turn, which the audit filed as severity 3. Drawing the missing control makes the gap visible instead of leaving it invisible. |
+| **H7 Flexibility and Efficiency** | **The keyboard contract is now on screen.** D-55 already specified "1 to 5 select, Enter confirms, Escape steps back", but nothing displayed it, so the accelerator could only be found by already knowing it. `training-decision` now prints `1` to `5` beside each discipline and states Enter and Escape in the save bar. |
+| **H10 Help and Documentation** | **A new `help.html` closes the gap.** Proactive help leads (the turn loop, the keyboard); reactive help follows (the tag vocabulary, the rules worth looking up, what to do when a figure looks wrong). It is reachable from a `?` in every page's top bar and deliberately absent from the rail, which already carries ten destinations. |
+
+The other seven are answered by decisions already in the set, and are recorded per page rather than
+restated here. Two NN/g points worth carrying because both are commonly misread:
+
+- **H8 is not the minimalism trend.** A cockpit is legitimately dense. The test is whether every element
+  carries information, not whether the page looks spare.
+- **H9 never displays an error prematurely.** Flagging a field the Trainer is still filling is the
+  hostile pattern NN/g names. A turn is committed once and cannot be re-answered, which makes premature
+  error copy here strictly worse than on a form.
 
 ## Two rules this set had to be corrected against
 

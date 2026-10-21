@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Help · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Primary">
+    <div class="rail-top">
+      <div class="rail-brand"><span class="mk" aria-hidden="true">TD</span><span class="tx">TRAINER DESK</span></div>
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="index.html"><span class="dot" aria-hidden="true"></span><span>Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html"><span class="dot" aria-hidden="true"></span><span>New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html"><span class="dot" aria-hidden="true"></span><span>Careers</span></a>
+      <a class="nav-item" href="legacy.html"><span class="dot" aria-hidden="true"></span><span>Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html"><span class="dot" aria-hidden="true"></span><span>Veterans</span></a>
+      <a class="nav-item" href="review.html"><span class="dot" aria-hidden="true"></span><span>Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html"><span class="dot" aria-hidden="true"></span><span>Support Cards</span></a>
+      <a class="nav-item" href="skills.html"><span class="dot" aria-hidden="true"></span><span>Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html"><span class="dot" aria-hidden="true"></span><span>Database</span></a>
+      <a class="nav-item" href="preferences.html"><span class="dot" aria-hidden="true"></span><span>Settings</span></a>
+    </div>
+    <a class="rail-foot" href="database-sources.html">Data sources</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><b>Help</b></span>
+        <span class="proto" title="Structure, states and labels are real; the controls are not wired except the Settings page.">Static wireframe</span><span class="spacer"></span>
+        <div class="toputils"><a class="iconbtn" href="help.html" aria-current="page" title="Help and documentation"><span aria-hidden="true">?</span><span class="lbl">Help</span></a></div>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Help and documentation</div>
+      <div class="hrow">
+        <div>
+          <h1>How this works</h1>
+          <p class="lede">The screen is meant to be usable without this page. This page exists for the two cases where it is not: a rule that is easier to look up than to infer, and a state that needs diagnosing.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn" href="index.html">Back to the dashboard</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="grid g-side">
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>The turn loop</h2>
+            <p class="sub">One turn, one committed action. Everything else is a record of it.</p>
+            <ol style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.7">
+              <li>Open the cockpit. Turn, Energy, Mood and the next obligation are in the first viewport.</li>
+              <li>Pick this turn's action on <a href="training-decision.html" style="text-decoration:underline">Training</a>, <a href="race-decision.html" style="text-decoration:underline">Races</a> or <a href="event-decision.html" style="text-decoration:underline">Events</a>.</li>
+              <li>Record the outcome. The turn is written only after the action resolves.</li>
+              <li>The <a href="timeline.html" style="text-decoration:underline">timeline</a> keeps every turn with its deltas, so the run can be read back.</li>
+            </ol>
+            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+              <b>Undo.</b> A committed turn is reversible from the screen it was committed on, through
+              <b>Undo last turn</b>. This is the one control the shipped build does not have, and it is
+              recorded as a gap rather than drawn as if it worked.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>Keyboard</h2>
+            <p class="sub">The guided flow is fully operable without a pointer.</p>
+            <table class="t">
+              <tbody>
+                <tr><td><span class="kbd">1</span> to <span class="kbd">5</span></td><td>Select a training discipline</td></tr>
+                <tr><td><span class="kbd">Enter</span></td><td>Confirm the current step</td></tr>
+                <tr><td><span class="kbd">Esc</span></td><td>Step back, or leave the current decision</td></tr>
+                <tr><td><span class="kbd">Tab</span></td><td>Move between controls; the focus ring is always visible</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h2>What the tags mean</h2>
+            <p class="sub">Only exceptions are marked. An unmarked figure is confirmed.</p>
+            <table class="t">
+              <tbody>
+                <tr><td><span class="trust trust-calculated"><span class="g">∑</span>Calculated</span></td><td>The tool derived it from values you entered. The rule is stated beside it.</td></tr>
+                <tr><td><span class="trust trust-estimated"><span class="g">~</span>Estimated</span></td><td>An approximate figure, or one resting on a single source.</td></tr>
+                <tr><td><span class="trust trust-unknown"><span class="g">?</span>Unknown</span></td><td>Not recorded, or not published. It is not a zero.</td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+              "Absence is a normal result." A field the importer cannot find stays empty. Nothing is filled
+              with a default, because a default is an invention wearing a number.
+            </span></p>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0">
+            <h2>Where the numbers come from</h2>
+            <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.6;margin:0 0 10px">
+              Every figure on a screen points at a source. The ledger lists them, with the date each was
+              read, so a stale figure can be recognised as stale.
+            </p>
+            <a class="btn" href="database-sources.html">Open the source ledger</a>
+          </div>
+
+          <div class="card">
+            <h2>Rules that are easier to look up</h2>
+            <table class="t">
+              <tbody>
+                <tr><td>Energy</td><td>50 is the sourced advisory line. Below it the failure curve changes character rather than degrading evenly.</td></tr>
+                <tr><td>Mood</td><td>Five tiers. GREAT +20%, GOOD +10%, NORMAL 0, BAD −10%, AWFUL −20% on training yield.</td></tr>
+                <tr><td>Sparks</td><td>Blue is the stat spark, Pink the aptitude spark. The cap raise is a separate mechanic.</td></tr>
+                <tr><td>Bond</td><td>0 to 100. A card turns orange at 80, which is where Friendship Training becomes available.</td></tr>
+                <tr><td>Deck</td><td>Six slots. Two copies of one card cannot be equipped together.</td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+              Each row is a link target in a built product. Here they are text, because this is a static
+              wireframe and a link that goes nowhere would be the defect D-81 names.
+            </span></p>
+          </div>
+
+          <div class="card">
+            <h2>If something looks wrong</h2>
+            <table class="t">
+              <tbody>
+                <tr><td>A figure is marked Unknown</td><td>The tool was never told it. The <a href="import-preview.html" style="text-decoration:underline">import preview</a> shows which fields a parse could not find.</td></tr>
+                <tr><td>A race is not selectable</td><td>Its row states the gate. <a href="race-decision.html" style="text-decoration:underline">Races</a> keeps blocked rows visible for that reason.</td></tr>
+                <tr><td>The turn count disagrees</td><td>An import records a position, not a history. The <a href="import-preview.html" style="text-decoration:underline">preview</a> states the consequence before the commit.</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:12px;color:var(--ink-muted);margin:10px 0 0">
+              Still wrong? <a href="database-sources.html" style="text-decoration:underline">Check the source</a> before assuming the tool is right.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Help</h2>
+        <ol>
+          <li><b>This page is the H10 gap closed.</b> Nielsen's tenth heuristic allows documentation where it is needed, and requires it to be searchable, task-focused, concrete and not too large. Four sections, each answering a question a Trainer arrives with, is the smallest shape that meets that.</li>
+          <li><b>Proactive help leads, reactive follows.</b> The turn loop is the help a first-run Trainer needs; the two lower cards are the lookup a returning one needs. NN/g's split, applied in that order because proactive help is read once and reactive help is read repeatedly.</li>
+          <li><b>It is reachable from every screen but absent from the rail.</b> The rail already carries ten destinations, and adding an eleventh to hold a page that is not part of the run would spend navigation on something used rarely. The top bar's <span class="kbd on-brand">?</span> is the entry, which is also what makes it discoverable.</li>
+          <li><b>Undo is described, not drawn.</b> The shipped build has no undo after a committed turn. Describing it here and marking it as a gap is honest; a button that did nothing would be the D-81 defect.</li>
+          <li><b>No link that goes nowhere.</b> The rule rows are text rather than links because there are no target pages behind them in this set. An inert control that looks live is a defect; a sentence that says what it would link to is not.</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          Wireframe only. The keyboard contract, the tag vocabulary and the rules are sourced; the screen itself is a proposal.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+</body>
+</html>

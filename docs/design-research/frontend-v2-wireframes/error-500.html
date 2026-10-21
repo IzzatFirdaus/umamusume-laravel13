@@ -36,7 +36,8 @@
       <div class="topbar-in">
         <span class="crumb"><b>500</b></span>
         <span class="proto" title="Structure, states and labels are real; the controls are not wired except the Settings page.">Static wireframe</span><span class="spacer"></span>
-      </div>
+      <div class="toputils"><a class="iconbtn" href="help.html" title="Help and documentation"><span aria-hidden="true">?</span><span class="lbl">Help</span></a></div>
+        </div>
     </header>
 
     <div class="phead">
@@ -83,6 +84,7 @@
           <li><b>Data unchanged, stated.</b> The second sentence answers whether a half-finished turn was written.</li>
           <li><b>Two exits, no retry loop.</b> An automatic retry on a 500 can multiply the failing request; a human decides.</li>
                   <li><b>Doherty Threshold governs what this screen may say.</b> Nothing is invented to fill the wait. The screen states what failed, what is still saved and what to do next, and the detail goes to the log rather than into the page.</li>
+                  <li><b>Heuristic coverage.</b> H9 + H1. What failed, what is saved and what to do next, with the detail kept in the log rather than shown as a stack trace.</li>
         </ol>
       </div>
 

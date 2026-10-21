@@ -37,7 +37,8 @@
         <span class="crumb">Maruzensky · URA Finale · <b>Timeline</b></span>
         <span class="proto" title="Structure, states and labels are real; the controls are not wired except the Settings page.">Static wireframe</span><span class="spacer"></span>
         <span class="who"><span class="pill pill-neutral">Completed</span></span>
-      </div>
+      <div class="toputils"><a class="iconbtn" href="help.html" title="Help and documentation"><span aria-hidden="true">?</span><span class="lbl">Help</span></a></div>
+        </div>
     </header>
 
     <div class="phead">
@@ -49,6 +50,7 @@
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <a class="btn" href="result.html">Career result</a>
+          <button class="btn btn-quiet" title="Reverses the last committed turn. The build has no undo; this screen proposes one.">Undo turn 75</button>
           <a class="btn" href="runs-index.html">All careers</a>
         </div>
       </div>
@@ -124,6 +126,7 @@
           <li><b>The finale block sits outside the 72-turn grid</b> and is grouped separately, because the post-December block is not part of the three-year grid the client counts.</li>
           <li><b>Four races, four statuses, one word each.</b> "1st" is the only claim made; no score, no grade, no aggregate, per the app's no-score rule.</li>
                   <li><b>Continuity (uilaws) is why this is a rail.</b> Elements arranged along a line are read as related in sequence, which is exactly what a turn log is. Phase grouping is collapsible but the spine never breaks, because a broken rail stops reading as one run.</li>
+                  <li><b>Heuristic coverage.</b> H1. Every recorded turn is its own entry with its deltas, so a run’s state is reconstructable rather than summarised.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. Turn count, race entries, finale outcome and the final Energy/SP are run 17's live props;
