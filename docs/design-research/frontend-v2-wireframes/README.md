@@ -89,6 +89,32 @@ ornament. **Cognitive Bias** is recorded as awareness, not as an applied rule, b
 use of it in an interface is either an honest warning or a dark pattern, and this tool does not
 manipulate.
 
+## Every page names its law
+
+All **48** pages carry a law-naming item in their own annotation key, and **23 distinct laws** are
+cited across the set. Nothing is a generic list: each item is written against that page's own first
+decision. The distribution:
+
+| Law | Pages |
+| --- | --- |
+| Goal-Gradient | `career-target`, all four `cockpit-*`, `skills-planner`, `veterans` |
+| Hick | `career-scenario`, `catalog`, `event-decision`, `race-decision`, `skills` |
+| Miller / Chunking | `career-deck`, `catalog-detail`, `database`, `run-deck`, `support-cards`, `support-card-detail`, `training-decision` |
+| Peak-End | `career-preflight`, `error-404`, `error-419`, `result` |
+| Paradox of the Active User | `career-legacy`, `career-profile`, `career-scenario`, `career-trainee` |
+| Proximity | `database-events`, `database-shop-items`, `import-preview`, `review-detail` |
+| Closure | `database-races`, `race-decision` |
+| Continuity | `inheritance`, `timeline` |
+| Uniform Connectedness | `inheritance`, `legacy` |
+| Cognitive Load | `runs-index`, `skill-detail` |
+| Doherty | `error-500`, `legacy-builder` |
+| Jakob | `career-trainee`, `error-404`, `preferences`, `support-card-detail` |
+| Von Restorff | `index`, `veterans-compare` |
+| Others | Postel (`import`), Zeigarnik (`review`), Serial Position (`veteran-detail`), Selective Attention (`database-scenarios`), Pareto (`database-sparks`), Mental Model (`database-sources`), Contrast (`legacy-compare`), Occam (`preferences`), Fitts (`training-decision`) |
+
+`training-decision` cites **Fitts** and **Miller** together, and `race-decision` cites **Hick** and
+**Closure** in one item, because naming one law per page would have understated what those screens do.
+
 ## Two rules this set had to be corrected against
 
 Both were real defects found by reading the sources, not styling preferences.
