@@ -24,7 +24,11 @@ it('renders an unreachable section as a span that cannot navigate', function ():
     expect($source)->toContain('role="link"')
         ->and($source)->toContain('aria-disabled="true"')
         ->and($source)->toContain('tabindex="0"')
-        ->and($source)->toContain(':title="UNAVAILABLE_TITLE"');
+        // The title is per-tab since 1e3c5075: the training section is non-live on an ended
+        // career and says so, while every other section carries the general reason. The
+        // constant is still what the helper falls back to, so both halves are asserted.
+        ->and($source)->toContain(':title="unavailableTitle(tab.key)"')
+        ->and($source)->toContain('const UNAVAILABLE_TITLE =');
 
     // It is a span, it carries NO href, and it has NO click handler. The branch is located by the
     // `<span` that owns the `v-else` (the tag opener precedes the directive, so a window starting at
@@ -80,9 +84,9 @@ it('leaves the existing Cockpit identity card alone', function (): void {
     // 4.1 named `CareerHeader.vue`, but that path is already the Cockpit's identity and position card
     // and is imported by Cockpit.vue. This pass built the nav under its own name rather than clobbering
     // it, and this case is what keeps the two from being conflated later.
-    $header = (string) file_get_contents(base_path('resources/js/components/career/CareerHeader.vue'));
+    $header = (string) file_get_contents(base_path('resources/js/components/career/CockpitIdentityCard.vue'));
 
     expect($header)->toContain('career-header-heading')
         ->and($header)->not->toContain('Career sections')
-        ->and((string) file_get_contents(base_path('resources/js/pages/Career/Cockpit.vue')))->toContain('CareerHeader');
+        ->and((string) file_get_contents(base_path('resources/js/pages/Career/Cockpit.vue')))->toContain('CockpitIdentityCard');
 });
