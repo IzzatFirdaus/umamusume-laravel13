@@ -211,9 +211,11 @@ it('(3) offers Save Veteran as a real door with its url, now that D16 has landed
             ->where('save_veteran.url', route('runs.veteran', $run))
             ->where('save_veteran.reason', fn (string $reason): bool => ! str_contains($reason, 'has not landed'))
             // The key set is pinned so a score or a recommendation cannot arrive here without a test naming
-            // it. `url` was added when the screen went from a named absence to a door; the held figures stay
-            // on `Career/SaveVeteran.vue`, not on this payload.
-            ->where('save_veteran', fn ($section): bool => array_keys($section instanceof Collection ? $section->all() : (array) $section) === ['available', 'reason', 'url'])
+            // it. `url` was added when the screen went from a named absence to a door; `veteran_url` came
+            // with the library link for a career already filed, so the section can offer the row that is
+            // already there beside the door. The held figures stay on `Career/SaveVeteran.vue`, not on
+            // this payload.
+            ->where('save_veteran', fn ($section): bool => array_keys($section instanceof Collection ? $section->all() : (array) $section) === ['available', 'reason', 'url', 'veteran_url'])
         );
 });
 
