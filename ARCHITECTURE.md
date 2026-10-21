@@ -6,7 +6,7 @@ Consolidated Umamusume Trainer companion. Local-only Laravel 13 tool. Condensed 
 
 ## 1. Tech Stack (version pins)
 
-Pinned from `composer show --direct` and `package.json` as installed in this repository (2026-09-27). Per the foundation rules, APIs must match these installed versions; do not assume.
+Pinned from `composer.lock`, `php -v` and `package.json` as installed in this repository, re-read 2026-10-22 and unchanged since the 2026-09-27 reading. Per the foundation rules, APIs must match these installed versions; do not assume — and re-read the pins rather than trusting this table, because a pin is a snapshot and not a promise.
 
 | Layer                | Package                      | Version                         | Notes                                                                                                                                                                          |
 | -------------------- | ---------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -19,30 +19,40 @@ Pinned from `composer show --direct` and `package.json` as installed in this rep
 | Formatting           | laravel/pint                 | 1.32.1                          | `pint.json` (laravel preset).                                                                                                                                                  |
 | Frontend CSS         | tailwindcss                  | ^4.0.0                          | CSS-first config: theme lives in `resources/css/app.css` `@theme` block. There is deliberately no `tailwind.config.js`; Tailwind v4 ignores one unless loaded via `@config`.   |
 | Bundler              | vite + laravel-vite-plugin   | ^7.0.7 / ^2.0.0                 | `@tailwindcss/vite` plugin.                                                                                                                                                    |
-| HTTP (client side)   | axios                        | ^1.11.0                         | Only if JS needs it; Blade-first.                                                                                                                                              |
+| Browser client       | @inertiajs/vue3 + vue        | ^2.3.28 / ^3.5.43               | The web surface is a server-driven SPA: Inertia serves the shell, Vue 3 owns every page under `resources/js/pages/`. `axios` is in `devDependencies` and is put on `window` by `resources/js/bootstrap.ts` for the legacy XHR calls; it is not the page client's transport. |
+| Server adapter       | inertiajs/inertia-laravel     | 3.5.1                           | The Inertia server adapter. `HandleInertiaRequests` is the only middleware the `web` group adds.                                                                                       |
 | HTTP (server side)   | `Http` facade                | framework built-in              | Fetch engine only. Timeouts, retries, rate limiting per §6. Ref: <https://laravel.com/docs/13.x/http-client>                                                                   |
 
-Not installed, not to be added without approval: sanctum, breeze, maatwebsite/excel, any SPA framework.
+Not installed, not to be added without approval: sanctum, breeze, maatwebsite/excel. The ban that once covered Inertia and SPAs is withdrawn (`ADR-0020` §1, `AGENTS.md` §7) — the shipped browser surface is Inertia + Vue 3, and nothing else is installed beside it.
 
-_Dated correction 2026-10-08 (documentation-sync pass): the "any SPA framework" clause and the `Blade-first`
-note on the HTTP row above are superseded in the same way the §4 clause below is. The 2.0 line shipped
-**Inertia + Vue 3** (`ADR-0020` §1; `AGENTS.md` §7 withdrew the older "no Inertia/SPA" ban), so the
-frontend is a server-driven SPA over the loopback backend; `axios` is not used (the Inertia client is),
-and the fetch engine's outbound `Http` facade row is unchanged._
+**Revision 0.3, 2026-10-22.** This file was re-based on the tree as it stands, so the pre-2.0 statements
+it carried and their dated corrections are replaced by the current text rather than stacked under them.
+What changed: the browser surface is Inertia + Vue 3 (`ADR-0020` §1) and the "Blade"/vanilla-JS readings in
+§1, §4 and §7 are gone; `axios` is exposed on `window` by `resources/js/bootstrap.ts` for the legacy XHR
+calls and is not the page client's transport; §3 gained the tables the 2.0 build added; §9 and §10 name the
+tree and the suite as they are. **The dated measurements inside §5, §6 and §12 keep their dates**, because
+they are dated claims about a fetch run and not descriptions of the shape, and `AGENTS.md` §11 governs how a
+dated claim is corrected.
 
 ## 2. System Design
 
 ```mermaid
 flowchart LR
     subgraph Local["Trainer's machine (local-only)"]
-        subgraph Web["Web (Blade + Tailwind v4)"]
-            UI[Catalog / Runs / Review UI]
+        subgraph Web["Web (Inertia + Vue 3, Tailwind v4)"]
+            UI[Vue pages<br/>resources/js/pages/]
         end
         subgraph API["/api/v1 (P2, read-only)"]
             RES[API Resources]
         end
+        subgraph App["App layer (app/Actions, app/Services, app/Domain)"]
+            ACT[Actions<br/>record, import, promote]
+            ADV[TrainerAdvisor<br/>the next decision]
+            DOM[CareerPosition, StatCeilings<br/>position and ceiling arithmetic]
+        end
         CMD[artisan uma:fetch / uma:reparse / uma:backup]
         WORKER[queue worker (database driver)]
+        ART[artwork asset route<br/>outside the web group]
         subgraph Engine["Data-fetching engine (app/Services/DataPipeline)"]
             FETCH[SourceFetcher] --> SNAP[(storage/app/private/snapshots)]
             FETCH --> PARSE[Source parser (per source)]
@@ -56,11 +66,17 @@ flowchart LR
     SRC1[JP source sites] -->|HTTPS, throttled| FETCH
     SRC2[Global source sites] -->|HTTPS, throttled| FETCH
     UI --> DB
+    UI --> ACT
+    UI --> ART
     RES --> DB
     CMD --> Engine
     WORKER --> Engine
     PROMOTE --> DB
     REVIEW --> DB
+    ACT --> DOM
+    DOM --> UI
+    DB --> ADV
+    ADV --> UI
 ```
 
 Trust boundaries (security-and-hardening §threat model): (1) fetched web content, untrusted, enters only through `SourceFetcher` + parser; (2) Trainer's browser input, validated by Form Requests; (3) everything inside `app/` after those boundaries is trusted. There is no authentication boundary because there is no auth surface (§8).
@@ -233,6 +249,29 @@ Planner-domain boundary [rev 0.2 — repo #4]: repo #4's career-run planner maps
 
 Framework defaults (`users`, `cache`, `jobs`) remain untouched; `users` is unused by design (no auth).
 
+### Scenario reference data and the tables the 2.0 build added
+
+The catalog and trainer-data blocks above are the 1.x shape. The 2.0 build added the scenario reference
+tables and a set of trainer-data tables. They are named here with their grain; the column-level detail
+lives in `ARCHITECTURE-ESSENTIALS.md`, which travels with the migrations.
+
+| Table | Grain | Why it exists |
+|---|---|---|
+| `scenarios` | one row per career scenario | the matrix behind the layout path — its `widgets`, `steps` and `panels` |
+| `scenario_races` | one row per race a scenario runs | the scenario's own race list, with its own `source_url` and `is_manual` |
+| `scenario_slots` | one row per seeded slot | which member starts in which race |
+| `race_catalog_slots` | one row per real race | the race catalog the calendar and the objective joins read |
+| `race_entries` | one row per logged race | a race is authored four ways, so four nullable pointers and no required slot |
+| `turn_events` | one row per recorded decision | the action noun the turn write used to drop (`ADR-0027`) |
+| `trainee_goals` | one row per objective, per **trainee** | the same race carries a different placing for different trainees (`ADR-0026`) |
+| `veterans` | one row per completed run, unique | the library: a pointer to the run plus the Trainer's own tags and notes |
+| `umamusume_profiles` | one row per character profile | the profile the setup wizard's second step reads |
+| `preferences` | one row per key | `theme` and `failure_estimate`; SQLite is the only preference store |
+
+The scenario tables are **reference data** and carry inline provenance like every other reference row
+(`ADR-0003` R3). The trainer-data tables are **the Trainer's own record** and carry none: the engine never
+writes them, and no `data_sources` row is written for one.
+
 ### Support-card entities: built under `ADR-0014`
 
 `support_cards`, `support_effects` and `deck_slots` exist, authorized 2026-09-30 by the owner's Slice 2
@@ -265,15 +304,10 @@ join is interchangeable with the other.
 
 ## 4. API Structure (REST, versioned, typed)
 
-Web UI is Blade (server-rendered). The JSON API is a read-only P2 surface for the Trainer's own scripts. Conventions per `api-and-interface-design`: plural nouns, no verbs; camelCase query params and response fields; one error shape; offset pagination on all lists; additive evolution only. Ref: <https://laravel.com/docs/13.x/eloquent-resources>
+Web UI is Inertia + Vue 3, a server-driven SPA (`ADR-0020` §1). The JSON API is a read-only P2 surface for the Trainer's own scripts. Conventions per `api-and-interface-design`: plural nouns, no verbs; camelCase query params and response fields; one error shape; offset pagination on all lists; additive evolution only. Ref: <https://laravel.com/docs/13.x/eloquent-resources>
 
-_Dated correction 2026-10-08 (documentation-sync pass): the "Web UI is Blade" clause above is superseded
-for the shipped browser surface. Since `ADR-0020` (§1) the web surface is Inertia + Vue 3
-(`resources/views/app.blade.php` is the Inertia shell), and Phase D–E shipped the career 2.0 screens on
-it (`resources/js/pages/Career/`, `Veterans/`, `Database/`, with `app/Http/Controllers/Career/*` and
-`DatabaseController` as their controllers and the scenario panels in
-`resources/js/components/scenario/`). Blade survives only as the shell, the three error documents and
-this paragraph's older reading. The JSON API line below it is unchanged._
+_The endpoints below are unchanged by the 2.0 build. `ADR-0020` §1 is the 2.0 surface's scope, and §7
+describes the surface that replaced the 1.x Blade one._
 
 ```text
 GET /api/v1/umamusume?status=&search=&page=&pageSize=   -> { data: [Umamusume], pagination: { page, pageSize, totalItems, totalPages } }
@@ -345,14 +379,33 @@ Default: manual `php artisan uma:fetch` (PRD OQ-3). Concurrency is controlled by
 
 ## 7. Frontend
 
-Blade + Tailwind v4 (CSS-first `@theme`), vanilla JS only where needed (autocomplete). Layout via the `layout` Blade component. UI states mandatory on every data view: empty, loading (fetch in flight), error (fetch failed), per antislop R-27. All strings pass the lore audit: "Umamusume" only, never equine terms, never animal framing.
+The web surface is a **server-driven SPA**: Inertia serves the shell and the page props, and Vue 3 owns
+every screen. `resources/views/` holds `app.blade.php` — the Inertia shell — and the three error documents
+(404, 419, 500) and nothing else; there is no `resources/views/components/`.
 
-_Dated correction 2026-10-08 (documentation-sync pass): the "Blade + Tailwind" framing and the "Layout
-via the `layout` Blade component" clause are superseded the way §4's are. The web surface is Inertia +
-Vue 3 (`resources/js/layouts/AppLayout.vue`, with `SetupLayout.vue` for the career setup wizard and
-`CareerLayout.vue` for the run-scoped career screens), the `layout` Blade component was deleted in slice
-B1, and the Vue pages follow the same state-they-are-mandatory rule (`empty`; a `role="status"` loading
-line for user-initiated async per ADR-0007; error). The lore clause is unchanged._
+- **Layouts:** `resources/js/layouts/` — `AppLayout` (catalog, runs, review, database), `SetupLayout` (the
+  career setup wizard) and `CareerLayout` (the cockpit and its detail screens).
+- **Pages:** `resources/js/pages/` — 49 single-file components across `Career/` (with `Cockpit/Panels/` and
+  `Snapshot/`), `Catalog/`, `Database/`, `Legacy/`, `Preferences/`, `Review/`, `Runs/`, `Skills/`,
+  `Support/`, `SupportCards/` and `Veterans/`.
+- **Shared components:** `resources/js/components/` — `ui/` (FormField, DataTable, Combobox, Select,
+  Pagination, PageHeader, Section, StatusBadge, StickyFooter, TextInput, Textarea, Checkbox, SegmentedControl,
+  AbsenceNote, Card), `scenario/` (ScenarioPanel and the per-scenario panels, with `registry.ts` as their
+  index), `career/`, `catalog/`, `database/`, `legacy/`, `review/`, `skills/`, `support/`, `Form/`, and the
+  standalone pieces (ResourceStrip, AptitudeGrid, EnergyGauge, MoodPill, AbsenceValue, TeamRacePanel,
+  TeamRankGauge, SpiritBurstRoster, …).
+- **State:** `useVisitState` (`resources/js/composables/`) owns the "visited" flags; `useTheme`, `useRole` and
+  `useLayout` own the rest. The pure field shapes live in `resources/js/domain/` (`turnEntryFields.ts`,
+  `veteranNote.ts`), so a field list is defined once.
+- **Page pattern:** every page receives its props from the server and owns its own empty, loading (fetch in
+  flight) and error (fetch failed) states — per antislop R-27. A user-initiated async load announces itself
+  with a `role="status"` line (ADR-0007).
+- **Styling:** Tailwind v4 (CSS-first `@theme`), design tokens only, no `dark:` utilities and no skeleton
+  palette classes. No chart library is installed.
+- **Data fetching:** the page client is Inertia's. `axios` is in `devDependencies` and is put on `window` by
+  `resources/js/bootstrap.ts` for the legacy XHR calls; it is not the page client's transport.
+- **All strings pass the lore audit:** "Umamusume" only, never the animal-framing vocabulary, never animal
+  framing.
 
 ## 8. Security Model
 
@@ -370,32 +423,62 @@ Local-only changes the threat list; it does not remove it.
 | Data integrity                                           | WAL + transactions (§3); `is_manual` protection; Trainer data unreachable from the engine's write path.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | Dependency supply chain                                  | `composer audit` / `npm audit` before release-tagging a local build; no new dependencies without approval (domain rules).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
-## 9. Directory Layout (delta from skeleton)
+## 9. Directory Layout
 
 ```text
 app/
-  Actions/            PromoteMatchedRecord.php, ResolveMatchCandidate.php
-  Console/Commands/   UmaFetch.php, UmaReparse.php, UmaBackup.php
-  Enums/              ReleaseStatus, RunStatus, SkillAcquisition, MatchTier, CandidateStatus, AliasLanguage
-  Http/Controllers/   CatalogController, TrainingRunController, ReviewController, Api/V1/*
-  Http/Requests/      StoreTrainingRunRequest, StoreTurnEntryRequest, StoreRunSkillRequest, ResolveMatchCandidateRequest
-  Http/Resources/     UmamusumeResource, TrainingRunResource, TurnEntryResource
-  Models/             Umamusume, UmamusumeAlias, Skill, TrainingRun, TurnEntry, DataSource, MatchCandidate, RunSkill (pivot)
-  Services/DataPipeline/  SourceFetcher, NameNormalizer, CrossReferenceMatcher, PipelineRunner (parse->match->promote stages), Contracts/SourceParser
-config/uma.php
+  Actions/            15 verbs: RecordVeteran, ListVeterans, ShowVeteran, CreateSnapshotRun,
+                      ImportHistoricalRun, PromoteMatchedRecord, ResolveMatchCandidate,
+                      StoreCharacterCards, StoreCharacterProfiles, StoreRaceCatalogSlots, StoreSkills,
+                      StoreSupportCards, StoreSupportEffects, StoreTraineeGoals, BackupDatabase
+  Console/Commands/   UmaFetch, UmaReparse, UmaFetchArt, UmaImportSupportCards, UmaBackup,
+                      UmaDbGuard, ManageSkills
+  Domain/Career/      CareerPosition, CareerPositionCast
+  Domain/Training/    StatCeilings
+  Enums/              24 backed enums (ReleaseStatus, RunStatus, SkillAcquisition, MatchTier,
+                      CandidateStatus, AliasLanguage, CardRarity, EnergyState, MoodTier, ...)
+  Exceptions/
+  Http/Controllers/   Catalog, Database, Dashboard, Legacy, Preference, Review, Skill, SupportCard,
+                      TrainingRun, Veteran, ArtworkAsset + Career/ (18 career controllers)
+  Http/Middleware/    HandleInertiaRequests
+  Http/Requests/      25 Form Requests
+  Http/Resources/     UmamusumeResource, TrainingRunResource, TurnEntryResource, SupportCardResource
+  Models/             25 models: catalog, trainer data, scenario, legacy
+  Providers/
+  Services/           Advisor/ (TrainerAdvisor), Career/ (SetupDraft, CareerCalendar),
+                      DataPipeline/ (+ Parsers/, Contracts/), DatabaseSafety/ (DatabaseGuard),
+                      Legacy/ (AncestryGraph, VeteranRow), Scenario/ (FinaleReader),
+                      SkillExecutor, SkillMatcher, SkillRegistry, ScenarioCaps, DeckAnalysis,
+                      RaceFacts, FanLadder, PageSize, SupportCardEffects, SkillSpendCoverage
+config/                15 files: scenarios.php, uma.php, advisor.php, database-safety.php, reference.php, ...
 database/
   factories/          per model
-  migrations/         catalog domain, trainer domain
-  seeders/            UmamusumeSeeder (JP/Global stub pairs), SkillSeeder
-storage/app/private/snapshots/   (gitignored)
+  migrations/         62 files
+  seeders/            catalog and trainer seeds
+resources/
+  css/app.css         Tailwind v4 @theme (design tokens)
+  js/                 bootstrap.ts, spa.ts, types.ts
+  js/components/      ui/, scenario/, career/, catalog/, database/, legacy/, review/, skills/,
+                      support/, Form/ + the standalone pieces (ResourceStrip, AptitudeGrid, EnergyGauge, ...)
+  js/composables/     useLayout, useRole, useTheme, useVisitState
+  js/domain/          turnEntryFields, veteranNote
+  js/layouts/         AppLayout, SetupLayout, CareerLayout
+  js/pages/           49 Vue pages: Career/ (incl. Cockpit/Panels/ and Snapshot/), Catalog/,
+                      Database/, Legacy/, Preferences/, Review/, Runs/, Skills/, Support/,
+                      SupportCards/, Veterans/
+  views/              app.blade.php (the Inertia shell) + errors/{404,419,500}.blade.php
+routes/                web.php, api.php, console.php
+storage/app/private/   snapshots/ and artwork/ (both gitignored)
 tests/
-  Feature/            Catalog, TrainingRun, ApiV1, FetchPipeline, CrossReferenceMatcher
-  Unit/               NameNormalizer (pure, no framework)
+  Feature/            201 files
+  Unit/               8 files
+  browser/            80 Playwright specs
+  Fixtures/           stored source bodies
 ```
 
 ## 10. Testing Strategy
 
-Pest 4, feature-first (repo test rules). HTTP faked (`Http::fake`) for all fetcher tests: no test touches the network. SQLite in-memory for tests (existing `phpunit.xml`). The pipeline is testable end-to-end: fake source body → snapshot → parse → match → assert promoted rows, review rows, `is_manual` protection, and idempotent re-run. Unicode edge cases are unit tests on `NameNormalizer` (full-width katakana, ・, prolonged sound mark). See `testing-best-practices` skill before writing any test. The suite spans five areas: `tests/Feature` (198 feature tests), `tests/Unit` (8), `tests/browser` (71 Playwright specs, run via `npm run test:browser`, session-private), `tests/Fixtures` (stored source bodies) and `tests/utils` (shared Playwright helpers). The browser specs run developer-locally only; the repository has no CI.
+Pest 4, feature-first (repo test rules). HTTP faked (`Http::fake`) for all fetcher tests: no test touches the network. SQLite in-memory for tests (existing `phpunit.xml`). The pipeline is testable end-to-end: fake source body → snapshot → parse → match → assert promoted rows, review rows, `is_manual` protection, and idempotent re-run. Unicode edge cases are unit tests on `NameNormalizer` (full-width katakana, ・, prolonged sound mark). See `testing-best-practices` skill before writing any test. The suite spans five areas: `tests/Feature` (201 feature tests), `tests/Unit` (8), `tests/browser` (80 Playwright specs, run via `npm run test:browser`, session-private), `tests/Fixtures` (stored source bodies) and `tests/utils` (shared Playwright helpers). The browser specs run developer-locally only; the repository has no CI.
 
 ## 11. Source Citations
 
@@ -467,3 +550,47 @@ surface (NFR-19) are not built. `CockpitController` still loads whole `race_cata
 request (bounded by scenario, not by page) and `PreferenceController::backup()` runs `VACUUM INTO` on
 the request thread; both are recorded here rather than changed, because neither is on the path that was
 breaking and both need their own measurement.
+
+## 13. Roadmap and open work
+
+The live plan for what is still to be built is `docs/proposals/`. Two rules keep this section short: a plan
+document is the authority for its own slices, and a slice is not done here until its acceptance record
+says so.
+
+- **The scenario programs.** `docs/proposals/{Our-Grand-Concert,URA-Finale,Trackblazer,Unity-Cup}-plan.md`
+  carry the four career scenarios, each with a dated source list, a per-slice decision and a verification
+  status.
+- **The known defect register.** `KNOWN-ISSUES.md` is the live list of open defects. An architecture
+  document never carries one: a defect has an owner and a closure test, and a document has neither.
+- **Decision records.** `docs/adr/` holds the rulings and `docs/adr/CURRENT.md` holds what is true now. A
+  session reads `CURRENT.md` before it opens a body, because a body's status line is a snapshot and it
+  goes stale.
+- **Reference facts.** `docs/UMAMUSUME_REFERENCE.md` is the authority for what the game does, and
+  `docs/scenarios/` for each scenario's mechanics. This file describes the application, not the game.
+
+## 14. Project Identification
+
+| Field | Value |
+|---|---|
+| Project | Trainer Desk |
+| Repository | `umamusume-laravel13` |
+| Runtime | PHP 8.5.8, Laravel 13.32.0, SQLite only |
+| Browser surface | Inertia 2.3 + Vue 3.5, Tailwind v4, Vite 7 |
+| Deployment | **None.** Loopback only, by design (`PRD.md` §6) |
+| Last updated | 2026-10-22 (revision 0.3) |
+
+## 15. Glossary
+
+| Term | Meaning |
+|---|---|
+| Trainer | The single user. There is no account surface, and "the Trainer" is how a person is named throughout the docs |
+| Umamusume | The characters. The word is exclusive, in singular and plural alike |
+| Career | One playthrough of a scenario, and the run it produces |
+| Run | The stored record of a career: `training_runs` plus its turns, races, events and skills |
+| Veteran | A completed run kept in the library — a pointer to the run, with the Trainer's own tags and notes |
+| Scenario | One of the four career scenarios: `ura_finale`, `unity_cup`, `trackblazer`, `our_grand_concert` |
+| Legacy | The inheritance lab: which two parents a run used |
+| Spirit Burst | A Unity Cup mechanic that spends a teammate's accumulated gauge for stats and a skill hint |
+| Source | One publisher page, named by a `config('uma.sources')` key |
+| Snapshot | The raw body a fetch stored, hashed, so a re-parse never needs the network again |
+| Slice | One numbered unit of work in a plan document, with its own acceptance record |

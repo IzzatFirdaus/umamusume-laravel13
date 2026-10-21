@@ -2,38 +2,106 @@
 
 Token-efficient digest of ARCHITECTURE.md for agent context injection. If this file and ARCHITECTURE.md disagree, ARCHITECTURE.md wins.
 
-_Dated correction 2026-10-08 (documentation-sync pass). Several statements below describe the pre-2.0
-surface. The web surface is now Inertia + Vue 3 (`ADR-0020` §1): `resources/views/` holds
-`app.blade.php` (the Inertia shell) and the three error documents only, `resources/views/components/`
-is empty since slice B1, and the career 2.0 screens (the setup wizard `Career/*`, the cockpit and its
-detail screens, the scenario panels) are Vue pages under `resources/js/pages/Career/`, `Veterans/` and
-`Database/`, driven by controllers under `app/Http/Controllers/Career/` plus `DatabaseController`.
-Phase C–E added a bounded set of services and read routes the schema lines below do not yet name:
-`App\Services\Advisor\TrainerAdvisor` (+ `config/advisor.php`, C2); `App\Services\Career\SetupDraft`;
-`App\Services\Legacy\AncestryGraph`; `App\Services\DeckAnalysis`; `App\Services\RaceFacts` (the shared
-ten-field race list); `App\Actions\RecordVeteran`'s first caller `SaveVeteranController`; and the
-`career.*`, `runs.cockpit`, `runs.{training,races.decision,races.planner,events,inheritance,skills.planner,timeline,result,veteran}` and
-`veterans.*` / `database.*` routes. The veterans line below says "no routes or screens yet (slice D16
-builds those)" — that is now false; D16 built them. Statements that read "Blade" as the shipped surface,
-or list the deleted `x-*` Blade components, are superseded by this note and kept as the record of the
-pre-2.0 shape._
+_Revision 2026-10-22._ This digest was rewritten against the tree as it stands, so the dated corrections
+that accumulated over the 2.0 build are gone rather than stacked: the browser surface is Inertia + Vue 3
+(`ADR-0020` §1), the career 2.0 screens are Vue pages under `resources/js/pages/`, and the service and
+route names below are the ones the tree actually has. The **schema digest is unchanged in substance** — it
+travels with the migrations, and `CLAUDE.md` §2 names this file as the digest — so the column-level facts
+below remain the authority. Statements that used to read "Blade" as the shipped surface, or that listed the
+deleted `x-*` Blade components, are now simply true of the current tree; the shape they described is the
+pre-2.0 record and belongs in `git history`, not in a digest agents re-read.
 
-## Stack (pinned, installed 2026-09-27)
+## Problem
 
-- PHP 8.5.8, laravel/framework 13.32.0, SQLite only (WAL + busy_timeout), `database` cache + queue stores
+Trainer Desk is a local-only companion for one Trainer running Umamusume careers. It holds three things:
+the character catalog with its provenance, the Trainer's own run records, and a fetch engine that
+cross-references the JP and Global guide sources. Everything runs on the Trainer's machine over SQLite, with
+no accounts and no public surface. The repository also holds the *reference facts about the game*
+(`docs/UMAMUSUME_REFERENCE.md`, `docs/scenarios/`), which is where a claim about mechanics belongs when it
+is about the game rather than about this application.
+
+## Codemap
+
+| Module | Location | Responsibility |
+|---|---|---|
+| Browser surface | `resources/js/pages/` (49 Vue pages), `resources/js/layouts/` (App, Setup, Career) | Every screen. The server ships props; the page owns its own empty / loading / error states |
+| Shared UI | `resources/js/components/` (`ui/`, `Form/`, `scenario/`, `career/`, `catalog/`, `database/`, `legacy/`, `review/`, `skills/`, `support/`) | Presentational components. No page-level data fetching |
+| Frontend domain | `resources/js/domain/`, `resources/js/composables/` | Pure turn-field and veteran-note shapes; the page visit lifecycle (`useVisitState`) |
+| HTTP layer | `app/Http/Controllers/` (+ `Career/`, 18 controllers), `Requests/` (25), `Resources/` (4) | Thin controllers, validation at the edge, JSON through API Resources |
+| Application layer | `app/Actions/` (15), `app/Services/` | The verbs: record a Veteran, promote a match, import a run, build a panel, advise the next decision |
+| Domain values | `app/Domain/Career`, `app/Domain/Training` | `CareerPosition` (turn index → year, month, phase), `StatCeilings` |
+| Reference data | `app/Models/`, `config/scenarios.php`, `config/uma.php`, `config/advisor.php` | The catalog, the trainer data, and the scenario tables the layout path reads |
+| Fetch engine | `app/Services/DataPipeline/` (+ `Parsers/`, `Contracts/`) | fetch → snapshot → parse → normalise → match → promote or queue for review |
+| Advisor | `app/Services/Advisor/` | `TrainerAdvisor` reads a run and returns a ranked next decision |
+| Scenario services | `app/Services/Scenario/`, `app/Services/Career/`, `app/Services/Legacy/` | The scenario's own panel builders, the career calendar, the ancestry graph |
+| Migrations | `database/migrations/` (62 files) | The schema, one dated file per change |
+| Tests | `tests/Feature/` (201), `tests/Unit/` (8), `tests/browser/` (80) | Pest for PHP, Playwright for the browser |
+| Reference facts | `docs/UMAMUSUME_REFERENCE.md`, `docs/scenarios/`, `docs/research-scratch/` | What is true about the game, and where each claim came from |
+| Decisions | `docs/adr/` (27) with `docs/adr/CURRENT.md` | The ruling set. `CURRENT.md` is what is true now, and it is what a session reads before opening a body |
+
+## Key Architectural Invariants
+
+- A scenario name in the layout path comes from `config/scenarios.php` and nowhere else.
+- A widget a scenario has no mechanic for is **absent**, never an empty slot. A value the run has not
+  recorded renders as `N/A` with a `title` naming the kind of absence, never as a default.
+- Design tokens only. Zero `dark:` utilities and zero skeleton palette classes.
+- The fetch engine never overwrites a Trainer's correction: `is_manual` is protected, and every engine write
+  carries its own provenance.
+- The engine's write path and the Trainer's write path never meet. A catalog fact and a Trainer's record are
+  different grains on different tables.
+- `ScenarioCaps` owns every stat-ceiling arithmetic. A per-run entered ceiling outranks it, and the service
+  reports which of the two answered.
+- Umamusume is the exclusive word for characters, in singular and plural alike.
+
+## Boundaries
+
+- **Browser / server**: Inertia page props over one HTTP boundary; every write arrives as a Form Request.
+- **Server / data**: Eloquent models over SQLite. Multi-row writes inside `DB::transaction`; schema changes
+  by migration only.
+- **App / external**: every outbound request goes through `SourceFetcher` under the `config('uma.sources')`
+  allowlist, re-checked on each redirect hop.
+- **App / filesystem**: the artwork mirror writes under `storage/app/private/artwork/`, outside the database,
+  and is served by one asset route registered outside the `web` group.
+
+## Cross-Cutting Concerns
+
+- **Auth**: none by design. There is no account surface and the app is loopback-only.
+- **Logging**: `config/logging.php`. Nothing user-facing goes to the browser console.
+- **Transactions**: one `DB::transaction` per record batch in the engine; a request write is one statement.
+- **Provenance**: a reference fact carries `source_url` and `fetched_at` inline (`ADR-0003` R3).
+  `data_sources` is the per-trainee fetch history, which is a different thing.
+- **Lore**: the banned vocabulary is the list `php tools/lore.php` enforces. Run it before shipping copy.
+
+## Terminology
+
+| Term | Meaning |
+|---|---|
+| Catalog | Reference data about the game: characters, cards, skills, races, scenarios |
+| Run | One Trainer's career: `training_runs` plus its turns, races, events and skills |
+| Veteran | A completed run kept in the library — a pointer to the run, with the Trainer's own tags and notes |
+| Scenario | One of the four career scenarios, keyed in `config/scenarios.php` |
+| Legacy | The inheritance lab: which two parents a run used |
+| Spirit Burst | A Unity Cup mechanic that spends a teammate's accumulated gauge for stats and a skill hint |
+| Source | One publisher page, named by a `config('uma.sources')` key |
+
+## Stack (pinned 2026-10-22)
+
+- PHP 8.5.8, laravel/framework 13.32.0, inertiajs/inertia-laravel 3.5.1, SQLite only (WAL + busy_timeout), `database` cache + queue stores
 - Pest 4.7.8 (feature-first), Larastan 3.12.1 level 6, Pint 1.32.1 (`pint.json`)
-- Tailwind v4 CSS-first (`@theme` in resources/css/app.css; NO tailwind.config.js), Vite 7, Blade, vanilla JS
-- Forbidden deps (cut in Pre-Mortem): sanctum, breeze, maatwebsite/excel, SPA frameworks, Redis
+- Tailwind v4 CSS-first (`@theme` in resources/css/app.css; NO tailwind.config.js), Vite 7, @inertiajs/vue3 2.3, Vue 3.5, TypeScript 7
+- Forbidden deps (cut in Pre-Mortem): sanctum, breeze, maatwebsite/excel, Redis. A SPA framework is **not** on that list: Inertia + Vue 3 is the shipped browser surface (`ADR-0020` §1, which withdrew the older "no Inertia/SPA" ban)
+- The pins are read, not assumed: PHP and Composer from `composer.lock` and `php -v`, npm from `package.json`, all re-read on 2026-10-22 and unchanged since the 2026-09-27 reading. A build that needs a version fact re-reads it
 
 ## Product shape
 
 - Local-only single-Trainer tool: NO auth, NO multi-user, NO public deploy, NO telemetry
-- Domains: catalog (Umamusume + skills + provenance), trainer data (runs/turns/skills), fetch engine (JP↔Global cross-reference)
-- Web = Blade; JSON = read-only /api/v1 (P2); export = CSV/JSON only
+- Domains: catalog (Umamusume + skills + provenance), trainer data (runs/turns/skills), fetch engine (JP↔Global cross-reference), and the career surfaces those two feed
+- Web = Inertia + Vue 3, a server-driven SPA over the loopback backend; JSON = read-only /api/v1 (P2); export = CSV/JSON only
+- The browser client is Inertia's. `axios` is declared in `devDependencies` and is put on `window` by `resources/js/bootstrap.ts` for the legacy XHR calls; it is not the page client's transport
 
 ## UI composition
 
-- `config/scenarios.php` is the only place scenario names appear in the layout path. `x-resource-strip` / `x-stat-band` / `x-race-calendar` / `x-guided-step` read `widgets`, `steps`, `panels`; a scenario name in a view is a D-240 failure (test: ResourceStripTest, GuidedStepScenarioCompositionTest). All four take `scenario` as a REQUIRED prop — a named default is the same smell
+- `config/scenarios.php` is the only place scenario names appear in the layout path. `ScenarioPanel.vue` and the per-scenario panels under `resources/js/components/scenario/` read the matrix's own `widgets`, `steps` and `panels`; a scenario name in a view is a D-240 failure, and `ScenarioIsolationTest` is the guard — the panel map a Cockpit payload carries is the matrix's answer for its own scenario and nobody else's
 - D-220: a widget a scenario has no mechanic for is absent, never an empty slot. Captions obey the same rule, and so does run state: a value the run has not recorded renders as `N/A` (with a `title` naming which kind of absence) plus "not yet recorded", never as a default (a Team Rank of "G" would assert a rank nobody entered). An em dash is not used as the disclosure glyph — R-02/D-79 ban it in shipped copy (owner ruling 2026-09-28, KI-7)
 - `config('scenarios.baseline')` names the strip a run with no scenario renders (URA Finale, the only Global scenario with every panel off by definition)
 - Design tokens only: `bg-page`/`bg-panel`/`bg-raised`/`bg-sunken`, `text-ink`/`-strong`/`-muted`, `border-rule`, `bg-chrome`+`enamel` for the one primary action. Zero `dark:` utilities and zero skeleton palette classes (G-19); `resources/views/vendor/pagination/tailwind.blade.php` is published for this reason
@@ -41,7 +109,7 @@ pre-2.0 shape._
 
 ## Lore (hard rule, details in CLAUDE.md)
 
-- Characters are Umamusume (humanoid race; singular=plural). Never "horse(s)", never animal framing, never sire/dam/mare/foal, no 🏇
+- Characters are Umamusume (humanoid race; singular=plural). Never animal framing: the banned vocabulary is the list `php tools/lore.php` enforces, and it is checked on every change that adds copy
 - Table `umamusume` (invariant plural); model `Umamusume`
 
 ## Schema (snake_case; enums TitleCase backed)
@@ -54,7 +122,7 @@ pre-2.0 shape._
 - match_candidates (review queue): source_key, proposed_name/_ja/_match_key, suggested_umamusume_id?, match_tier (Fuzzy|None), status (Pending|Confirmed|Aliased|Rejected), payload json
 - training_runs: umamusume_id FK, scenario?, status (Active|Completed|Retired), inheritance_parent_a_id?, inheritance_parent_b_id?, legacy_selection? (json, read back as `LegacySelectionPayload` — the Legacy Select screen's own record, not a free-text note), notes?, character_card_id? (ADR-0008: the costume form the run started on; `umamusume_id` stays the required owner; FR-C-1 as amended; **migrated as `2026_09_29_120200`**, with `TrainingRun::characterCard()`, a fillable `character_card_id` and a same-trainee `exists` rule on `StoreTrainingRunRequest`), imported_at?, import_source? (ADR-0017: the pair recording that this run arrived by file rather than by keystroke; **migrated as `2026_09_30_174646`**. Both nullable with no default, so a typed run — the overwhelming majority — says nothing. Neither borrows an existing column: `created_at` is when the row entered the database while `imported_at` is what the Trainer asserts about the run's own past, and `is_manual` (FR-B-4) and `source_url`/`fetched_at` describe the fetch engine's rows, not a Trainer's history). Two additive pointers, neither a replacement for the other: `legacy_selection` is the pre-run screen's payload and `character_card_id` is the form the Trainer started on, and a run may have one without the other. `build_target?` (json, read back as `App\Models\Advisor\BuildTargetPayload` — the Trainer-entered build target: `purpose` (a `BuildPurpose` case), `distance`, `surface`, `style`, five per-stat `targets` validated against `ScenarioCaps::forRun`, and ordered `skill_priorities`; FR-F-1, `ADR-0020` §2; **migrated as `2026_10_05_180000`**, with `TrainingRun::buildTarget()` and a fillable `build_target`). Nullable with no default, because "the Trainer entered no target" and "a target with nothing in it" are different states to the advisor — the first falls back to Energy-only guidance and names the absence, the second would be a claim they entered something — and a `{}` default would erase that difference at the schema layer, where it is hardest to see. Written whole rather than merged, through `StoreBuildTargetRequest` on `runs.build-target.update`; the fetch engine never writes it. **`cap_speed`, `cap_stamina`, `cap_power`, `cap_guts` (unsignedSmallInteger?, the four stat ceilings the Trainer read off the client for this run; PRD **FR-C-1**/`FR-C-2`, `ADR-0025`; migrated as `2026_10_12_140000`)**: entered, never derived (not the same object as `scenarios.cap_speed`..`cap_wit`, which are the engine's published per-*scenario* figures; these four are per-*run* and Trainer-typed). `ScenarioCaps::forRun()` prefers a non-null column and otherwise runs `ADR-0015`'s base-plus-bonus clamp unchanged, so the turn validator, the stat bars, the decision rails and the advisor all move with an entered ceiling; `ScenarioCaps::scenarioCaps()` answers the published arithmetic alone, which is what the cockpit's *Published stat caps* table prints because its source line names `config/scenarios.php`. `ScenarioCaps::ENTERED_CAPS` is the single list of the four stats and their columns; Wit has no column, because no ruled surface writes one. An entered figure is bounded above by the engine `hard_cap` (still clamped in `forRun()`) and below by the highest value this run's `turn_entries` already hold for that stat: a ceiling under a stored row, or a clear that drops the bound under one, is refused with both numbers named. Null reverts rather than zeroing, and a write that names none of the four keys leaves the stored ceilings alone, which is what lets the status, scenario and period forms save without touching them (`postedCaps()` answers only the keys it was given). Entry is on two surfaces: the build target step, whose wizard shape stores them in the setup draft's own `caps` key and `StartCareerRequest` carries them onto the created run, and the Cockpit identity form, so a ceiling corrected mid-run feeds the turn form's bound without recreating the run; a ceiling entered in the same save as the target that needs it is the bound that target is measured against. Trainer data, so no `data_sources` row and no engine write. History: `2026_10_10_140000` stored a `stat_ceilings` json bag on the same reasoning and `2026_10_10_170000` dropped it because no reader landed; this pair ships with its reader, and `StatCeilingsTest` pins the read path while `EnteredStatCapsTest` pins the boundary
 - `training_runs.scenario` is a free-text COLUMN but a validated VALUE: `StoreTrainingRunRequest` rules it against `config('scenarios.scenarios')` keys, blank normalises to null. No FK (owner ruling 2026-09-27). `TrainingRun::scenarioKey()` resolves null → `config('scenarios.baseline')`; `stripValues()` returns the latest turn's end-of-turn Energy/Fans (absolute totals, `reorder('turn','desc')` — NOT `latest()`, which the relation's ascending order would defeat) and omits keys the run has no column for
-- veterans: training_run_id FK->training_runs **unique + cascade**, tags? (json, a flat list of strings, the Trainer's own spelling), tags_normalized? (json, the same list folded to lowercase — the column the tag filter matches, so a hand-typed `speed` answers the library's `Speed` suggestion; the `Veteran` model's own saving guard folds it from `tags` on every save, and `ListVeterans` matches filter values against it — **migrated as `2026_10_08_180000`**, which also backfills rows written before it, KI-72), notes?, timestamps — the Veteran library (PRD **FR-G**, `ADR-0020` §3, under `ADR-0010`'s recording allowance; **migrated as `2026_10_05_120000`**). A Veteran is a completed run kept in the library: the run's recorded facts (trainee, final stats, skills, sparks, race record) are read back through `training_run_id`, and only the Trainer's own tags and notes are stored here. Record-only — nothing derives a Spark firing, an affinity payout or an offspring (FR-G-4). The FK is unique (one run is one Veteran, so a re-save rewrites its tags and notes) and cascades (with the run gone there is nothing to read back), the same lifetime `turn_entries`/`race_entries` have. No `is_manual` write and no `data_sources` row: a Veteran is Trainer data, not a fetched fact. `App\Actions\{RecordVeteran,ListVeterans,ShowVeteran}` are the record/list/show path; no routes or screens yet (slice D16 builds those)
+- veterans: training_run_id FK->training_runs **unique + cascade**, tags? (json, a flat list of strings, the Trainer's own spelling), tags_normalized? (json, the same list folded to lowercase — the column the tag filter matches, so a hand-typed `speed` answers the library's `Speed` suggestion; the `Veteran` model's own saving guard folds it from `tags` on every save, and `ListVeterans` matches filter values against it — **migrated as `2026_10_08_180000`**, which also backfills rows written before it, KI-72), notes?, timestamps — the Veteran library (PRD **FR-G**, `ADR-0020` §3, under `ADR-0010`'s recording allowance; **migrated as `2026_10_05_120000`**). A Veteran is a completed run kept in the library: the run's recorded facts (trainee, final stats, skills, sparks, race record) are read back through `training_run_id`, and only the Trainer's own tags and notes are stored here. Record-only — nothing derives a Spark firing, an affinity payout or an offspring (FR-G-4). The FK is unique (one run is one Veteran, so a re-save rewrites its tags and notes) and cascades (with the run gone there is nothing to read back), the same lifetime `turn_entries`/`race_entries` have. No `is_manual` write and no `data_sources` row: a Veteran is Trainer data, not a fetched fact. `App\Actions\{RecordVeteran,ListVeterans,ShowVeteran}` are the record/list/show path, and D16 built their callers: `VeteranController` (index, show, compare), `SaveVeteranController` under the run, and the `resources/js/pages/Veterans/` pages
 - turn_entries: training_run_id FK cascade, turn, speed/stamina/power/guts/wit, sp?, condition?, energy?, mood?, fans?, uniq(run, turn); stats validated 0..1200, turn >= 1 [rev 0.2 — repo #4]. **Bound corrected 2026-10-01 by a dated erratum; the `0..1200` above stands as the state as written.** `ADR-0015` (owner decision 5, 2026-09-30, landed in `8bda7db`) replaced the flat bound with the run's **own per-stat scenario ceiling** — `base_cap` (1200) plus that scenario's `cap_bonus` for that stat, clamped to the engine `hard_cap` (2000) — read through `App\Services\ScenarioCaps`, which is now the single owner of that arithmetic. So a stat is accepted to 1400 on URA Finale, to 1800 on Unity Cup Wit, to 1900 on Trackblazer Stamina and to 1600 on Our Grand Concert Speed; **1200 is the ceiling only where the run names no scenario**, which is the one case this sentence still states correctly, because `forRun()` grants no bonus to a run that chose nothing. `PRD.md` carried this supersession from the start (`:28`, `:128`); the two architecture documents did not, and this is one of the two carriers recorded as **KI-48**. **`energy_state` (string?, `exact|band|unknown`) and `energy_band` (string?, `low|mid|high`, used only when the state is `band`) migrated as `2026_10_09_170000` (`ADR-0024`)**: two columns beside `energy?` that let a turn record an Energy reading the client shows as a level rather than a number, so "near a third" is no longer stored as the same absence as "not read". Backfilled `exact` where `energy` was non-null and `unknown` where it was null; `energy` itself is unchanged. **`choice` (string(32)?), `decision_snapshot` (json?), `corrected_from` (FK->turn_entries set-null) and `superseded_by` (FK->turn_entries set-null) migrated as `2026_10_10_200000` (PRD **FR-C-2**, phase G ruling D-1a–D-1d; the ADR is drafted in `docs/research-scratch/SLICE-RECORDS.md` G2-FD4 and **not yet filed**)**: the action noun the turn write used to drop. `choice` holds a value of `App\Enums\TurnChoice`, whose seven cases are the literals this application already emits (`training-<Stat>` per `config('scenarios.stat_order')`, plus `rest` and `mood` from `TrainingRunController::turnChoices()`); no duel, race, event or purchase case exists because no write path posts `choice` for those. `decision_snapshot` is the advisor's payload at the moment of the action, written by the server before the row exists and never updated, never validated, so no client can supply one. The pair of self-referencing FKs is the correction link in both directions. **The same migration swaps the index**: `uniq(run, turn)` becomes a partial unique over `(training_run_id, turn) WHERE corrected_from IS NULL`, because an append cannot supersede the row it replaces before inserting itself, and a predicate over the current row therefore refuses every correction. Consequence at `down()`: a database holding a correction cannot have the plain unique recreated, so `down()` counts multi-row turns first and **refuses before mutating anything** rather than deleting history; measured on scratch, an unmigrated database also refuses the *write* (`table turn_entries has no column named choice`), so the dev file must be migrated before a turn can be logged. **`facility_speed`/`stamina`/`power`/`guts`/`wit` (unsigned tinyint?, migrated as `2026_10_09_170000`)**: the facility levels a turn was trained at, from the UX walk's Phase 12; five columns rather than one JSON blob because each is a bounded 1..5 integer, and a per-column bound is the schema saying so. Null is "the Trainer did not read that facility", the ordinary case for a turn logged from the rail. **The write path is not wired yet** — `TrainingRunController::turnAttributes()` does not whitelist them — so the columns and their request rules land while the form that would collect them waits. **`failure_rate` (unsigned tinyint?) and `preview_gains` (json?, migrated as `2026_10_09_180000`)**: the failure percentage and the six-value preview row the client shows before a turn resolves, both **readings the Trainer transcribes** and never figures this tool computes (`ADR-0016`, `ADR-0020` §3, `PRD.md` §6.11); `failure_rate` is a bounded percentage so it is a column with a ceiling, `preview_gains` is six values keyed by stat and skill points so it is a payload. No ADR is filed for either group; they are recorded here as implemented schema, not as authorized scope.
 - run_skills pivot: status (Suggested|Acquired|Skipped), turn_acquired? — Suggested = planned pre-run [rev 0.2 — repo #4]
 - race_entries: training_run_id FK cascade, scenario_slot_id? FK set-null, race_catalog_slot_id? FK set-null, scenario_race_id? FK set-null, **turn_entry_id? FK set-null (KI-17, Slice 15)**, status, placement?, fans_gain?, objective_index?, circles?, **grade_points_earned? (KI-10's figure, Slice 15)** — four nullable pointers because one entry can be authored four ways (seeded slot, career calendar, legacy scenario race, Trainer-typed free race), and an entry with no slot is still a logged race (R2). `turn_entry_id` is the turn the Trainer names the race having happened on; it is entered, never derived from a race date (D-270). `grade_points_earned` is written by a model guard from the tier (`race_catalog_slots` first, `scenario_slots` second) and the placement, and a Trainer-entered figure outranks the derived one; null means no source prices that finish, which is not zero (KI-10's ratio half stays open). Recorded here because the digest carried no `race_entries` line before these columns were added
@@ -108,16 +176,56 @@ pre-2.0 shape._
 
 ## Directory delta
 
-- app/{Actions, Console/Commands, Enums, Services/DataPipeline(+Contracts)}
-- app/Http/{Controllers(+Api/V1), Requests, Resources}
-- app/Models/{Umamusume, UmamusumeAlias, Skill, TrainingRun, TurnEntry, DataSource, MatchCandidate, RunSkill (pivot), Preference}
-- config/uma.php; config/scenarios.php; database/{factories, migrations, seeders}; storage/app/private/snapshots (gitignored)
-- resources/views/components/{stat-band, resource-strip, race-calendar, guided-step, layout}; resources/views/vendor/pagination (token override)
-- tests/Feature/{Catalog, TrainingRun, ApiV1, FetchPipeline, CrossReferenceMatcher, Adr0003Schema, DesignTokens, ResourceStrip, ResourceStripOnRunDetail, GuidedStepScenarioComposition}; tests/Unit/NameNormalizer (pure)
+```text
+app/
+  Actions/            15 verbs: RecordVeteran, ListVeterans, ShowVeteran, CreateSnapshotRun,
+                      ImportHistoricalRun, PromoteMatchedRecord, ResolveMatchCandidate,
+                      StoreCharacterCards, StoreCharacterProfiles, StoreRaceCatalogSlots, StoreSkills,
+                      StoreSupportCards, StoreSupportEffects, StoreTraineeGoals, BackupDatabase
+  Console/Commands/   UmaFetch, UmaReparse, UmaFetchArt, UmaImportSupportCards, UmaBackup,
+                      UmaDbGuard, ManageSkills
+  Domain/Career/      CareerPosition, CareerPositionCast
+  Domain/Training/    StatCeilings
+  Enums/              24 backed enums (ReleaseStatus, RunStatus, SkillAcquisition, MatchTier,
+                      CandidateStatus, AliasLanguage, CardRarity, EnergyState, MoodTier, ...)
+  Http/Controllers/   Catalog, Database, Dashboard, Legacy, Preference, Review, Skill, SupportCard,
+                      TrainingRun, Veteran, ArtworkAsset + Career/ (18 career controllers)
+  Http/Requests/      25 Form Requests
+  Http/Resources/     UmamusumeResource, TrainingRunResource, TurnEntryResource, SupportCardResource
+  Models/             25 models: catalog, trainer data, scenario, legacy
+  Services/           Advisor/ (TrainerAdvisor), Career/ (SetupDraft, CareerCalendar),
+                      DataPipeline/ (+ Parsers/, Contracts/), DatabaseSafety/ (DatabaseGuard),
+                      Legacy/ (AncestryGraph, VeteranRow), Scenario/ (FinaleReader),
+                      SkillExecutor, SkillMatcher, SkillRegistry, ScenarioCaps, DeckAnalysis,
+                      RaceFacts, FanLadder, PageSize, SupportCardEffects, SkillSpendCoverage
+config/                15 files: scenarios.php, uma.php, advisor.php, database-safety.php, reference.php, ...
+database/
+  factories/          per model
+  migrations/         62 files
+  seeders/            catalog and trainer seeds
+resources/
+  js/components/      shared UI: ui/ (FormField, DataTable, Combobox, Select, ...), scenario/
+                      (ScenarioPanel, UnityCupPanel, TrackblazerPanel, UraDuelPanel, registry.ts),
+                      career/, catalog/, database/, legacy/, review/, skills/, support/, Form/,
+                      plus the standalone pieces (ResourceStrip, AptitudeGrid, EnergyGauge, ...)
+  js/composables/     useLayout, useRole, useTheme, useVisitState
+  js/domain/          turnEntryFields, veteranNote
+  js/layouts/         AppLayout, SetupLayout, CareerLayout
+  js/pages/           49 pages: Career/ (incl. Cockpit/Panels/ and Snapshot/), Catalog/, Database/,
+                      Legacy/, Preferences/, Review/, Runs/, Skills/, Support/, SupportCards/, Veterans/
+  views/              app.blade.php (the Inertia shell) + errors/{404,419,500}.blade.php
+routes/                web.php, api.php, console.php
+storage/app/private/   snapshots/ and artwork/ (both gitignored)
+tests/
+  Feature/            201 files
+  Unit/               8 files (NameNormalizer and other pure units)
+  browser/            80 Playwright specs
+  Fixtures/            stored source bodies
+```
 
 ## Phase-1 non-goals (do not build without new PRD scope)
 
-- Auth/multi-user; SPA; breeding engine (inheritance = 2 nullable parent FKs only); EAV; Excel; event calendar; legacy DB import; MySQL/PG; support-card **collection**; deploy paths
+- Auth/multi-user; a **second** client stack (Inertia + Vue 3 is the shipped surface, `ADR-0020` §1); an inheritance engine (inheritance = 2 nullable parent FKs only); EAV; Excel; event calendar; legacy DB import; MySQL/PG; support-card **collection**; deploy paths
 - [rev 0.2 — repo #4] race simulation/predictions/snapshots; dual storage modes or browser-side authoritative data; trainee image uploads; DB-level enum columns. **Uploads stay cut**; `ADR-0021` authorizes a different object (art the tool fetches itself by id), see "Artwork" under Fetch engine above and PRD OQ-6
 - Support cards split in two, 2026-09-30. `ADR-0014` supersedes `ADR-0005` (DECLINED, owner ruling R37) and authorizes `support_cards`, `support_effects` and `deck_slots` — reference data plus the six cards a run was equipped with, per `PRD.md` **FR-A-8**, **FR-A-9**, **FR-C-6**, **US-12**. `ADR-0005`'s re-verification already exercised the cross-reference these deferral text named, on all 559 records. What stays cut is the collection: no `user_support_cards`, no level, limit break or Unique Perk state. Card **tier** labels are held for want of a current Global source, not for want of authorization; `ADR-0014` records that R75 governs race tiers and does not reach this.
 - `deck_slots` gains a nullable `ownership`, 2026-10-09. `ADR-0023` (Proposed, D3 of the Rice Shower / Unity Cup remediation) records one `OWNED` / `RENTED` value per slot, written by both deck writers and never derived from the player's inventory; null means nobody recorded it. It amends `ADR-0014`'s "the deck records card *identity*, not ownership state" by dated erratum, and the collection (`user_support_cards`, level, breaks, perk level) stays cut.
