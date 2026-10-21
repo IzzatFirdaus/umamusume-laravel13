@@ -163,7 +163,32 @@ test('gates Resolve on a chosen verdict, and names the reason once', async ({ pa
     await expect(verdict).toHaveClass(/text-ink-strong/);
 });
 
+test('lines the three controls up on one baseline', async ({ page }) => {
+    seedPendingCandidates(1);
+
+    await page.goto('/review');
+    await page.locator('#app > *').first().waitFor();
+
+    const row = page.getByTestId('review-form-row').first();
+
+    // The id field's "(optional)" hint used to render below its own input, and the row aligned the
+    // columns' bottoms, so that one control sat 20px above the other two. The hint is a caption row
+    // now and the controls share a top edge; this is the measurement, not the class name.
+    const tops = await row.locator('select, input').evaluateAll((elements) =>
+        elements.map((element) => element.getBoundingClientRect().top),
+    );
+
+    expect(tops.length, 'the row renders the three controls').toBeGreaterThanOrEqual(3);
+    expect(Math.max(...tops) - Math.min(...tops), 'form controls share a baseline').toBeLessThanOrEqual(1);
+
+    // The caption still says what the field is, and it is a caption rather than a control label.
+    await expect(row.getByText('(optional)', { exact: true })).toBeAttached();
+});
+
 test('passes an axe scan at WCAG A and AA', async ({ page }) => {
+    seedPendingCandidates(3, { suggested: true });
+    seedPendingCandidates(2);
+
     await page.goto('/review');
     await page.locator('#app > *').first().waitFor();
 

@@ -52,12 +52,18 @@ function submit(): void {
 </script>
 
 <template>
+    <!-- Three columns on one grid, so the three controls share a baseline. The previous row was
+         `flex items-end`: the id field's "(optional)" hint renders BELOW its input, so aligning the
+         columns' bottoms lifted that one control 20px above its neighbours and the row read as three
+         different baselines. The hint now sits in its own caption row under the grid, which is what
+         makes the controls line up without pinning heights on controls that may need more. -->
     <form
-        class="mt-3 flex flex-wrap items-end gap-x-3 gap-y-2"
+        class="mt-3 grid grid-cols-1 items-start gap-x-3 gap-y-1 sm:grid-cols-[11rem_11rem_11rem_auto]"
+        data-testid="review-form-row"
         :aria-busy="form.processing ? 'true' : null"
         @submit.prevent="submit"
     >
-        <div class="w-44">
+        <div>
             <BaseSelect
                 :id="statusId"
                 name="status"
@@ -72,7 +78,13 @@ function submit(): void {
             />
         </div>
 
-        <div class="w-44">
+        <!-- `pt-1` is the one alignment offset in the row, and it is measured rather than guessed:
+             BaseSelect is a `flex flex-col gap-1` (label, 4px gap, select with its own `mt-1`),
+             while BaseInput's label wraps the input directly, so the input's top lands 4px above
+             the selects'. The padding restores it. It is padding and not a height because the
+             controls' own floor is the tree's 44px and neither control should be resized to fit
+             this row. -->
+        <div class="pt-1">
             <BaseInput
                 :id="umamusumeId"
                 name="umamusume_id"
@@ -80,7 +92,6 @@ function submit(): void {
                 type="number"
                 label="Umamusume id"
                 :aria-label="`Umamusume id for ${candidate.proposed_name}`"
-                hint="(optional)"
                 title="The catalog row's id to merge into. Leave empty to use the suggestion."
                 :error="form.errors.umamusume_id"
                 :disabled="form.processing"
@@ -88,7 +99,7 @@ function submit(): void {
             />
         </div>
 
-        <div class="w-44">
+        <div>
             <BaseSelect
                 :id="aliasId"
                 name="alias_language"
@@ -103,24 +114,33 @@ function submit(): void {
             />
         </div>
 
-        <!-- The visible word stays in the name (WCAG 2.5.3, Label in Name). The verdict gate is the
-             shape `Veterans/Compare.vue` ships: the control is disabled until a verdict is picked,
-             so a Trainer meets the requirement rather than a dead button. The reason is stated once
-             for the whole queue (the page's own line) instead of on every row: twenty-five copies
-             of one sentence is noise, and the disabled state plus that line is the same instruction.
-             The request's own required rule still backs it up server-side. The disabled styling is
-             the house idiom `Pagination.vue` uses, so a disabled Resolve reads as unavailable
-             rather than merely quiet. -->
-        <button
-            type="submit"
-            :aria-label="`Resolve ${candidate.proposed_name}`"
-            :disabled="form.processing || form.status === ''"
-            class="inline-flex min-h-11 items-center rounded-full px-3 font-semibold transition-colors duration-150 ease-out disabled:opacity-50 disabled:cursor-not-allowed"
-            :class="accented
-                ? 'bg-primary-action text-on-primary-action'
-                : 'border border-rule bg-raised text-ink-strong hover:bg-panel'"
-        >
-            Resolve
-        </button>
+        <!-- The action rides the control row, so it sits on the same line as the controls it
+             commits. The optional hint is a caption, not a label of its own. -->
+        <div>
+            <!-- The visible word stays in the name (WCAG 2.5.3, Label in Name). The verdict gate is
+                 the shape `Veterans/Compare.vue` ships: the control is disabled until a verdict is
+                 picked, so a Trainer meets the requirement rather than a dead button. The reason is
+                 stated once for the whole queue (the page's own line) instead of on every row:
+                 twenty-five copies of one sentence is noise, and the disabled state plus that line
+                 is the same instruction. The request's own required rule still backs it up
+                 server-side. The disabled styling is the house idiom `Pagination.vue` uses, so a
+                 disabled Resolve reads as unavailable rather than merely quiet. -->
+            <button
+                type="submit"
+                :aria-label="`Resolve ${candidate.proposed_name}`"
+                :disabled="form.processing || form.status === ''"
+                class="inline-flex min-h-11 w-full items-center justify-center rounded-full px-3 font-semibold transition-colors duration-150 ease-out disabled:opacity-50 disabled:cursor-not-allowed"
+                :class="accented
+                    ? 'bg-primary-action text-on-primary-action'
+                    : 'border border-rule bg-raised text-ink-strong hover:bg-panel'"
+            >
+                Resolve
+            </button>
+        </div>
+
+        <span class="hidden text-xs text-ink-muted sm:block" aria-hidden="true">&nbsp;</span>
+        <span class="hidden text-xs text-ink-muted sm:block" aria-hidden="true">(optional)</span>
+        <span class="hidden text-xs text-ink-muted sm:block" aria-hidden="true">&nbsp;</span>
+        <span class="hidden sm:block" aria-hidden="true"></span>
     </form>
 </template>
