@@ -151,7 +151,7 @@ it('carries the dual-value readout on the advised training action, each figure w
         // The team figure is the reported rank letter mapped through the config ladder.
         ->and($byLabel->get('Team value')['value'])->toBe('Team rank A, facility level 4')
         ->and($byLabel->get('Team value')['badge'])->toBe('calculated')
-        ->and($byLabel->get('Team value')['title'])->toContain('team_rank_ladder');
+        ->and($byLabel->get('Team value')['title'])->toContain("the scenario's own rank ladder");
 });
 
 it('gives the team figure no value and no badge until the run reports a rank', function (): void {
