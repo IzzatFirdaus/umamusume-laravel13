@@ -28,6 +28,14 @@ interface Props {
     ariaDescribedby?: string;
     labelId?: string;
     error?: string;
+    /**
+     * Renders the select's own ink muted while it holds the unset value, and strong once a value is
+     * chosen. Opt-in rather than the default: several call sites use an empty string as a real
+     * value (a filter's "all"), where muting would read as "nothing chosen" when something is. The
+     * review queue's two verdict selects are the case it exists for: "Not set" is the quietest
+     * thing in the row and a chosen verdict is not.
+     */
+    mutedWhenEmpty?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -40,6 +48,13 @@ const emit = defineEmits<{
 
 const selectId = props.id ?? props.name;
 const labelId = props.labelId ?? `${selectId}-label`;
+// The select's own ink is what a closed native select paints, so "is it set?" has to be answered
+// here rather than on the `<option>`: Chromium ignores colour on an option in the closed control.
+const inkClass = computed(() =>
+    props.mutedWhenEmpty && (props.modelValue === null || props.modelValue === '')
+        ? 'text-ink-muted'
+        : 'text-ink-strong',
+);
 const describedBy = computed(() => {
     // When there's an error, return ONLY the error ID to match the old inline behavior
     // where aria-describedby was exactly the error ID (e.g., "error-targets_Speed").
@@ -89,7 +104,7 @@ function onFocus(event: FocusEvent): void {
             @change="onChange"
             @blur="onBlur"
             @focus="onFocus"
-            class="mt-1 block w-full min-h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring transition-colors duration-150 ease-out disabled:bg-sunken disabled:text-ink-muted disabled:cursor-not-allowed"
+            :class="['mt-1 block w-full min-h-11 rounded-md border border-rule bg-raised px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring transition-colors duration-150 ease-out disabled:bg-sunken disabled:text-ink-muted disabled:cursor-not-allowed', mutedWhenEmpty ? inkClass : 'text-ink']"
         >
             <option v-if="placeholder" value="" disabled selected>{{ placeholder }}</option>
             <option
@@ -116,7 +131,7 @@ function onFocus(event: FocusEvent): void {
         @change="onChange"
         @blur="onBlur"
         @focus="onFocus"
-        class="mt-1 block w-full min-h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring transition-colors duration-150 ease-out disabled:bg-sunken disabled:text-ink-muted disabled:cursor-not-allowed"
+        :class="['mt-1 block w-full min-h-11 rounded-md border border-rule bg-raised px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring transition-colors duration-150 ease-out disabled:bg-sunken disabled:text-ink-muted disabled:cursor-not-allowed', mutedWhenEmpty ? inkClass : 'text-ink']"
     >
         <option v-if="placeholder" value="" disabled selected>{{ placeholder }}</option>
         <option

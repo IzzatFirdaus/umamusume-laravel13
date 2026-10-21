@@ -67,6 +67,7 @@ function submit(): void {
                 :options="verdictOptions"
                 :error="form.errors.status"
                 :disabled="form.processing"
+                muted-when-empty
                 @update:model-value="(v) => (form.status = v === null ? '' : String(v))"
             />
         </div>
@@ -97,27 +98,29 @@ function submit(): void {
                 :options="aliasOptions"
                 :error="form.errors.alias_language"
                 :disabled="form.processing"
+                muted-when-empty
                 @update:model-value="(v) => (form.alias_language = v === null ? '' : String(v))"
             />
         </div>
 
         <!-- The visible word stays in the name (WCAG 2.5.3, Label in Name). The verdict gate is the
-             shape `Veterans/Compare.vue` ships: the control is disabled and a sibling line names the
-             reason, so a Trainer meets the requirement rather than a dead button. The request's own
-             required rule still backs it up server-side. -->
+             shape `Veterans/Compare.vue` ships: the control is disabled until a verdict is picked,
+             so a Trainer meets the requirement rather than a dead button. The reason is stated once
+             for the whole queue (the page's own line) instead of on every row: twenty-five copies
+             of one sentence is noise, and the disabled state plus that line is the same instruction.
+             The request's own required rule still backs it up server-side. The disabled styling is
+             the house idiom `Pagination.vue` uses, so a disabled Resolve reads as unavailable
+             rather than merely quiet. -->
         <button
             type="submit"
             :aria-label="`Resolve ${candidate.proposed_name}`"
             :disabled="form.processing || form.status === ''"
-            class="inline-flex min-h-11 items-center rounded-full px-3 font-semibold transition-colors duration-150 ease-out disabled:opacity-60 disabled:cursor-wait"
+            class="inline-flex min-h-11 items-center rounded-full px-3 font-semibold transition-colors duration-150 ease-out disabled:opacity-50 disabled:cursor-not-allowed"
             :class="accented
                 ? 'bg-primary-action text-on-primary-action'
                 : 'border border-rule bg-raised text-ink-strong hover:bg-panel'"
         >
             Resolve
         </button>
-        <p v-if="form.status === ''" class="text-xs text-ink-muted">
-            Choose a verdict first.
-        </p>
     </form>
 </template>

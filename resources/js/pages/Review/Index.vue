@@ -100,6 +100,12 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
             <p class="mt-2 text-xs text-ink-muted">
                 No suggestion means the source name does not fuzzy-match any trainee.
             </p>
+            <!-- The verdict gate's reason, once. Every card's Resolve stays disabled until its own
+                 verdict is set; a copy of this sentence on each of twenty-five rows said it
+                 twenty-five times and buried the buttons it was about. -->
+            <p class="mt-1 text-xs text-ink-muted">
+                Set a verdict on any row to enable its resolve.
+            </p>
 
             <ul class="mt-3 space-y-3">
                 <li

@@ -1,10 +1,24 @@
 import { test, expect } from '@playwright/test';
 import { expectTapTargets } from '../utils/tap-targets';
 import { buildAxe, openAllDisclosures } from '../utils/accessibility';
+import { clearPendingCandidates, seedPendingCandidates } from '../utils/review-candidates';
 
 // Rendered-copy and accessibility evidence for the ported Review queue (SCR-REV-001, F14).
 // The server-side ReviewFormAccessibilityTest asserts the props; here the browser computes the
 // accessible names, which is the DOM relation the a11y gate is about.
+//
+// Fixture strategy: the queue is filled by the match pipeline, which needs the network, so a seeded
+// scratch database holds no rows and every case here used to skip. `tests/utils/review-candidates.ts`
+// writes the pending rows the page reads and removes them afterwards, so each case exercises a real
+// queue instead of reporting "no pending candidates".
+
+test.beforeEach(() => {
+    clearPendingCandidates();
+});
+
+test.afterEach(() => {
+    clearPendingCandidates();
+});
 
 test('every verdict control is named after its own candidate', async ({ page }) => {
     await page.goto('/review');
@@ -114,7 +128,9 @@ test('lists the rows the engine could suggest before the ones it could not', asy
     await expect(page.locator('main ul > li').first()).toContainText('Suggested id:');
 });
 
-test('gates Resolve on a chosen verdict, and names the reason', async ({ page }) => {
+test('gates Resolve on a chosen verdict, and names the reason once', async ({ page }) => {
+    seedPendingCandidates(3);
+
     await page.goto('/review');
     await page.locator('#app > *').first().waitFor();
 
@@ -127,15 +143,24 @@ test('gates Resolve on a chosen verdict, and names the reason', async ({ page })
     const verdict = card.getByLabel(/^Verdict for /);
     const resolve = card.getByRole('button', { name: /^Resolve / });
 
-    // The verdict starts unset, so the commit is refused at the control and the card says why.
+    // The verdict starts unset, so the commit is refused at the control, and the disabled control
+    // is styled as unavailable (the house idiom Pagination.vue uses) rather than merely quiet.
     await expect(verdict).toHaveValue('');
     await expect(resolve).toBeDisabled();
-    await expect(card.getByText('Choose a verdict first.')).toBeVisible();
+    await expect(resolve).toHaveClass(/disabled:opacity-50/);
 
-    // A deliberate pick enables it and retires the reason.
+    // The reason is stated once for the queue, not once per card: the page carries it and no card
+    // does. Twenty-five copies of one sentence was the wall this replaced.
+    await expect(page.getByText('Set a verdict on any row to enable its resolve.')).toBeVisible();
+    await expect(page.getByText('Choose a verdict first.')).toHaveCount(0);
+
+    // The unset verdict is the quietest thing in the row; a chosen one is not.
+    await expect(verdict).toHaveClass(/text-ink-muted/);
+
+    // A deliberate pick enables the commit.
     await verdict.selectOption('Rejected');
     await expect(resolve).toBeEnabled();
-    await expect(card.getByText('Choose a verdict first.')).toHaveCount(0);
+    await expect(verdict).toHaveClass(/text-ink-strong/);
 });
 
 test('passes an axe scan at WCAG A and AA', async ({ page }) => {
