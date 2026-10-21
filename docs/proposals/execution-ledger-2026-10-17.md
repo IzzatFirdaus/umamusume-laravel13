@@ -4996,3 +4996,65 @@ DEFERRED:
 - #11 the border-rule token (DESIGN.md is signed; a token edit needs a Track 2 amendment).
 - #12 sidebar grouping (a shell restructure, not a dashboard fix).
 - #4, #5, #7, #9 and #10 (design changes or re-scopes; see the measure section).
+
+
+## 61. Dispatch 54 - Wide dashboard: four UI changes, one real defect, 2026-10-21
+
+Grid un-capped at Wide, 72 turn marks (total_turns added to the controller), weight-emphasis,
+Verified moved to the header. Fixed: turn progress measured against 24 turns (one career year)
+instead of 72 (full career).
+
+### Measure
+
+- The dispatch's "24 discrete turn marks" was measured before any edit and did not survive: the
+  client's grid is TrainingRun::TURNS_PER_YEAR (24) turns per career year over the three career
+  years, and TrainingRun::nextTurnToPlay() ends the career at turn 72. The old denominator was
+  24, which is one career YEAR, so the bar read as a hundred percent from turn twenty-four
+  onward in a seventy-two turn career. The controller now reads total_turns from those
+  constants, so the rail and the model cannot disagree. The mark count is 72, not the 24 the
+  dispatch named.
+- RaceCatalogSlot::YEARS counts four, because YEAR_FINALE is the post-December block that sits
+  outside the 24-turn year grid. The first expression used it and the test caught 96 marks; the
+  model's own YEAR_SENIOR clamp is the authority.
+- The dispatch's :465 pin measured the shell's #main width, not the grid's, so it needed no
+  change; the grid pin was at :352. A geometric pin was added instead: at a 1920 viewport the
+  grid's width and the shell's content width must agree within a pixel. It is measured at 1920
+  on purpose, because at the default 1280 viewport the shell is narrower than the old cap and the
+  two widths agree either way.
+- PageHeader carries a description prop (class locked to text-sm text-ink) and an #actions slot;
+  the freshness line went in the slot, because it has to stay the muted text-xs it was in the
+  card. PageHeader itself was not restructured.
+
+### Apply
+
+- d43352cd - the active career's name goes from text-lg font-semibold to text-3xl font-bold and
+  the Japanese name from text-sm to text-xl; the card heading and the other two cards' headings
+  stay at text-lg font-semibold, and the grid is untouched. The bg-primary-action count in
+  Dashboard.vue is 0 before and after.
+- 2e066c66 - the progressbar becomes a list of 72 marks (role=list, aria-label="Career progress"),
+  the mark the career stands on carrying aria-current="step", with "Turn 3 of 72" and "69 turns
+  to go" beside it. The controller sends total_turns.
+- 71f1dcf2 - the grid's max-w-6xl self-cap is removed. The cap lived on Dashboard.vue, so this
+  is the page's change and not the shell's; AppLayout.vue and useLayout.ts are untouched.
+- bc57a9aa - the Verified line moves out of the Data Status card to the page header.
+
+### Failability
+
+- Four changes, four phases each: revert the source, keep the test, rebuild, run.
+  - d43352cd: toHaveClass(/text-3xl/) fails.
+  - 2e066c66: toHaveCount(72) reports "Expected: 72, Received: 0".
+  - 71f1dcf2: not.toHaveClass(/max-w-6xl/) fails, and the geometric pin reports "Expected: <= 1,
+    Received: 320" (1472 - 1152).
+  - bc57a9aa: toHaveCount(0) reports "Expected: 0, Received: 1".
+- The 1920 case's failure in the batched revert was a CASCADE: the wide case resets the layout
+  preference at the end of its body, which its early failure skipped, so the next case's
+  standard phase found wide set. Run alone, the geometric pin reds on its own.
+- Restored: npx playwright test tests/browser/dashboard.spec.ts - 16 passed.
+
+### Gates
+
+- npm run typecheck clean; npm run lint:ui clean; npm run build exit 0.
+- vendor/bin/pint --test --format agent app/Http/Controllers/DashboardController.php passed;
+  vendor/bin/phpstan analyse --no-progress --memory-limit=1G - no errors.
+- Walk: npx playwright test tests/browser/dashboard.spec.ts --workers=1 - 16 passed, on a
+  session-private port and scratch database.
