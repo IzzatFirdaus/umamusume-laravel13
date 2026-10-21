@@ -118,54 +118,62 @@ decision. The distribution:
 
 ## The rail, the marks, and the way back
 
-Three things the app has and this set did not, added 2026-10-21.
+Three things the app has and this set did not, added 2026-10-21 and corrected 2026-10-22.
 
 ### The rail collapses
 
-The app's global navigation can be collapsed to marks instead of words, and the
-wireframe now does the same. Mirroring `resources/js/layouts/AppLayout.vue:191-233` and its template
+The app's global navigation collapses to marks instead of words, and the wireframe now
+does the same. Mirroring `resources/js/layouts/AppLayout.vue:191-233` and its template
 at `:286-345`:
 
-- **Collapsed is marks; expanded is words.** Never both, because a mark beside the word it stands
-  for is two things competing for the same space.
+- **Collapsed is marks; expanded is words.** Never both, and never at the same width. The glyph is
+  `display:none` at every width except the collapsed one, so an expanded rail shows a word and a
+  collapsed rail shows a mark.
 - **The word never leaves the DOM.** It moves to `sr-only`, so every destination keeps its
   accessible name, and the item gains a `title` carrying it too.
 - **The active destination keeps `aria-current="page"`** plus a left rule on top of its fill,
   because state may never ride on colour alone.
-- **The control lives in the top bar**, not in the column. The bar is the one row present at every
-  width, so the control that resizes the rail belongs beside the product name rather than inside
-  the thing it resizes.
-- **The collapsed column keeps a short `TD` mark**, so the rail does not float without a top edge.
+- **The brand stays.** The original `TD` mark and the `TRAINER DESK` word are both in the column
+  again; collapsed, the word goes to `sr-only` and the mark stays, so the rail keeps its identity.
+- **The control is with the sidebar**, at the head of the column, and it is an **icon**: a chevron
+  that points the way the rail will move. The word is `sr-only`, so the icon is not the accessible
+  name. It was in the top bar before, which put the control that resizes the rail far from the rail.
+- **The collapsed column stacks its head**, so the mark and the control both fit 56px.
 - **The choice is `localStorage`, not a Preference row.** `Preference::KEYS` is exactly `theme`
   and `failure_estimate`, so a third stored key would widen product scope. The cost, stated rather
   than hidden: the rail follows this browser, not this Trainer, and it does not appear on Settings.
 
 The key and the two values are the app's: `trainer-desk.nav-rail`, `compact` and `wide`.
 
+**The collapse changes `--rail-w`, not the rail's width.** `.app` is a grid whose first column is
+`--rail-w`, so narrowing the rail inside a column that stayed 236px left the content starting 180px
+to the right of the marks: a negative space with nothing in it. Changing the variable moves the grid
+column, the rail and the top bar's width together, because the top bar lives in the same column, so
+the content fills what the rail gives back.
+
 ### The stat and type marks
 
-The five discipline glyphs are the client's own objects and the only icons with a fixed identity
-(`DESIGN-CORPUS.md:609`, and the fixed assignment table at `:617-635`): running shoe (Speed),
-heart (Stamina), flexed arm (Power), flame (Guts), graduation cap (Wit). **Pal** is a single figure
-and **Group** is a pair, which is what the client's own support-card type chips wear.
+**The marks are the owner's, and the wireframes reference them.**
+`docs/design-research/icons_svg/{speed,stamina,power,guts,wit,pal,group}.svg` each remade from
+the client's own type chip: a rounded tile in that type's gradient with the white client glyph on
+it, with the original PNG beside it in `source/`. The pages carry an `<img>` to those files, so
+there is one copy and the file stays the source of truth. An SVG `<use>` across files would not
+have worked: it is blocked under `file://` and would have rendered blank.
 
-"Remade" is the operative word. The client's originals are small 3D renders, and `DESIGN-CORPUS.md:607`
-forbids 3D renders and clip-art imitating the client's art in this system, and `:605` forbids mixing
-a hairline set with a solid set. So the marks are redrawn on one 24 grid, one stroke weight, one
-family, in the same style as the navigation marks. The paths are in `assets/stat-icons.svg`, and
-each page carries the sprite inline, because an SVG `<use>` across files is blocked under `file://`
-and would render blank.
-
-**The colours are the client's support-card TYPE CHIP colours**, read from the legend row in
-`155016`: the blue boot, the pink flame, the red heart, the brown flexed arm, the dark-green cap,
-the olive figure and the green pair. The corpus records the chip fills as indicative until measured,
-and the glyph identities as not in doubt.
+**The colours are the owner's, and they correct the corpus.** The corpus recorded the legend-row
+chip fills as indicative until measured, and it read them as a "brown flexed arm", a "dark-green
+cap" and an "olive figure". Measured from the source, they are **amber** `#FFA834`, **green**
+`#30CB93` and **gold** `#FFC94D`. Speed is blue `#2F94EE`, Stamina is red `#F05B4F`, Guts is
+pink `#F45E96`, Group is green `#26B864`.
 
 **They are not a stat hue, and that is the part worth being careful about.**
 `DESIGN-CORPUS.md:371-393` is explicit: the five stats carry **no saturated identity colour**, a hue
 per stat collides with the semantic roles (a Guts delta tinted like a validation error is a defect
-waiting to ship), and a stat's identity is its **glyph plus a whisper of band tint**. So the icon is
-coloured and the band tint stays a tint. The tints are in the stylesheet, with their own dark values.
+waiting to ship), and a stat's identity is its **glyph plus a whisper of band tint**. So the chip is
+the client's own coloured tile, and the band tint stays a tint, with its own dark values.
+
+**The chip keeps its word.** The mark alone would break WCAG 1.4.1, and the tile is already a
+colour, so the word is what carries the name.
 
 Two collisions the corpus records as **unresolved** are carried here unresolved: Mood against the
 friend chip, and Fans against the group chip.
@@ -178,28 +186,54 @@ brand-blue chrome at 0.9 opacity with no underline, so the link reads as a word 
 link, and a Trainer looking for the way back finds the global rail instead.
 
 Two changes fix it. A **sub-navigation strip** of the nine areas now sits at the top of the canvas on
-every Database and library page, with the current one marked, so "where am I in the reference data"
-and "where else can I go" are answered in one row. And the breadcrumb's "Database" is now visibly a
-link.
+every Database and library page, with the current one marked by a word weight AND a fill. And the
+breadcrumb's "Database" is now visibly a link.
 
 This is Information Architecture principle 7 (focused navigation: the nine areas are one family, so
 they are grouped as one family) and principle 5 (front doors: a Trainer who arrives at a library
 page directly finds the whole reference set, not a dead end).
 
+**One list, once.** `catalog.html` already carried a "Database areas" stepper that listed the same
+nine, so it had the sub-nav **and** the stepper. The stepper went: the same list twice on one screen,
+with two different labels for the same place, is the defect the wizard had.
+
 ### One place for the position and the action
 
 The wizard carried "Step 1 of 6" in the save bar at the bottom of the page while the stepper sat at
 the top, so a Trainer was told where they were twice, in two places, one of them below the fold.
-Across the seven wizard pages the position appeared in three different places: the save bar, the
-breadcrumb, and nowhere at all.
+Across the seven wizard pages the position appeared in **three** different places: the save bar, the
+breadcrumb, and nowhere at all. The action buttons were in the save bar on four pages, in the page
+head on two, and down in a "Commit" card on one.
 
-**The position now lives in one place, the page head**, on the title row above the rule, next to the
-stepper's own reading. The breadcrumb keeps the trail and loses the step, because a trail and a
-position are different facts. The save bar keeps the action and the status.
+**Every wizard page now carries ONE row, in the page head, on the title row above the rule: the
+position, then the actions.** The breadcrumb keeps the trail and loses the step, because a trail and
+a position are different facts. The save bar is gone from the wizard pages.
+
+The position text is also repaired. It read "Step 1 6" and "3 6 · targets entered", because the word
+"of" was lost when the pages were first generated, and that defect was still in the committed set.
+It reads "Step 1 of 6" and "Step 3 of 6 · targets entered" now.
 
 **On Settings, the save action moved up too.** "Save changes" belongs beside the page's position,
 because the page's whole job is that one action, so the save bar leaves the page head and the status
 line moves with it.
+
+A wizard is the one flow where the action must never be below the fold, and this is the WCAG 2.4.1
+and Shneiderman 4 (closure) case for it: the position, the action and the page title are read in one
+glance.
+
+### The re-check, and the two tools that run it
+
+`docs/proposals/design-framework-index-2026-10-21.md` is the checklist a change is held against
+before it is committed, and it names the procedure. Two scripts run the mechanical part of it:
+
+- `framework-check.mjs` — the checkable rules, over all 49 pages and the stylesheet.
+- `link-check.mjs` — every internal link and image, resolved against the page's own directory.
+
+Both are in this directory and both are run before a commit. On 2026-10-22 the first run of
+`framework-check.mjs` found a real regression: the CSS edit that moved the rail's control had
+dropped the `.rail.is-collapsed .nav-label` rule, so the word would have stayed visible beside the
+mark in a 56px column. It also found the sub-navigation items at 34px, under the 44px target rule,
+and a bare "Continue" that did not name its destination.
 
 ## The seven frameworks this set answers to
 
@@ -391,6 +425,13 @@ second source of truth. That is a wireframe workaround, not a proposal.
   uses a mark carries the sprite inline, because an SVG `<use>` across files is blocked under `file://`
   and would render blank.
 - `assets/shell.js` — the navigation's destination list, the single place the ten destinations live.
+- `../icons_svg/*.svg` — **the stat and type marks, and they are the owner's.** Seven files, each
+  remade from the client's own type chip, with the original PNG beside each in `source/`. The pages
+  reference them by `<img>`, so there is one copy.
+- `framework-check.mjs` — the checkable rules from the design-framework index, over all 49 pages and
+  the stylesheet. Run before a commit.
+- `link-check.mjs` — every internal link and image, resolved against the page's own directory. Run
+  before a commit.
 - `build-index.js` — the generator that wrote the pages. It is a record of how they were made, not a
   build step: re-running it would overwrite the annotated pages, so the pages are the artefact and this
   is the history.

@@ -242,6 +242,8 @@ moved, 13 buckets, the two executor defects fixed first) is the dated status not
 | Design-research CONSTRAINTS (D-rules)                                                                                                                                                             | `DESIGN-CORPUS.md` (CONSTRAINTS section)                                                                                                                                                                                                                                                                                                        |
 | Nielsen's ten usability heuristics, how each maps to the D-rules, and the H3/H7/H10 gap register | `docs/proposals/usability-heuristics-2026-10-21.md`, with the per-screen evaluation in `UX-DELIVERABLES.md` (Part 3) |
 | The design-framework index: which framework to cite, and the seven conflicts between them | `docs/proposals/design-framework-index-2026-10-21.md` |
+| The Laws of UX, all 29 entries, and what each one decides here | `docs/proposals/laws-of-ux-2026-10-21.md` |
+| The Laws of UI, all 13 entries, and what each one decides here | `docs/proposals/uilaws-2026-10-21.md` |
 | Shneiderman's eight Golden Rules, and how many consistency exceptions are tolerable | `docs/proposals/shneiderman-golden-rules-2026-10-21.md` |
 | Tognazzini's sixteen First Principles: the latency budget, target sizes, undo, session state | `docs/proposals/tognazzini-first-principles-2026-10-21.md` |
 | Gerhardt-Powals' ten cognitive engineering principles: whether the product left work in the user's head | `docs/proposals/gerhardt-powals-principles-2026-10-21.md` |

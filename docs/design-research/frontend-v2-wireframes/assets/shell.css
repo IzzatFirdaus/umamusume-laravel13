@@ -29,6 +29,9 @@
   /* scale */
   --r-sm:6px; --r-md:10px; --r-lg:14px; --r-xl:16px; --r-pill:999px;
   --rail-w:236px;
+  /* The collapsed measure. 56px is the app's `w-14` (AppLayout.vue:289), and the
+     change is to the VARIABLE, so the grid column follows it. */
+  --rail-w-collapsed:56px;
   --shadow-overlay:0 4px 12px rgb(0 0 0 / .18);
   /* ==========================================================================
      LAYOUT WIDTH — the app's three shell measures, verbatim.
@@ -128,25 +131,51 @@ button{font-family:inherit}
    The choice lives in localStorage, not a Preference row: `Preference::KEYS` is
    exactly `theme` and `failure_estimate`, so a third stored key would widen product
    scope. The cost, stated rather than hidden: the rail follows this browser, not
-   this Trainer, and it does not appear on the Settings page. */
+   this Trainer, and it does not appear on the Settings page.
+
+   THE COLLAPSE CHANGES --rail-w, NOT THE RAIL'S WIDTH. `.app` is a grid whose
+   FIRST COLUMN is --rail-w, so narrowing the rail inside a column that stayed
+   236px left the content starting 180px to the right of the marks: a negative
+   space with nothing in it. Changing the variable moves the grid column, the rail
+   and the top bar's own width together, so the content fills what the rail gives
+   back. */
 .rail{background:var(--panel);border-right:1px solid var(--rule-soft);
   display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
   width:var(--rail-w);flex:none;transition:width .18s ease}
-.rail.is-collapsed{width:56px}
+.rail.is-collapsed{width:var(--rail-w-collapsed)}
 @media (prefers-reduced-motion: reduce){.rail{transition:none}}
-.rail-top{padding:14px 10px 6px}
-.rail-brand{display:flex;align-items:center;gap:9px;padding:6px 10px 14px}
+/* The grid column follows, and so does everything to the right of the rail, top
+   bar included, because the top bar lives in the same column. */
+html.rail-collapsed{--rail-w:var(--rail-w-collapsed)}
+
+.rail-top{display:flex;align-items:center;gap:8px;padding:12px 10px 8px}
+.rail-brand{display:flex;align-items:center;gap:9px;min-width:0;flex:1}
 .rail-brand .mk{width:22px;height:22px;border-radius:var(--r-sm);background:var(--brand-chrome);
-  display:grid;place-items:center;color:#fff;font-size:11px;font-weight:900}
-.rail-brand .tx{font-size:12px;font-weight:900;letter-spacing:.10em;color:var(--ink-strong)}
-/* The collapsed rail's own label rule, so the rail keeps its top edge and does not
-   float without one. The product name left this column when it moved to the bar. */
-.rail-mark{display:none;align-items:center;justify-content:center;border-bottom:1px solid var(--rule);
-  padding:12px 8px;font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--ink-strong)}
-.rail.is-collapsed .rail-mark{display:flex}
+  display:grid;place-items:center;color:#fff;font-size:11px;font-weight:900;flex:none}
+.rail-brand .tx{font-size:12px;font-weight:900;letter-spacing:.10em;color:var(--ink-strong);
+  white-space:nowrap;overflow:hidden}
+/* Collapsed: the mark stays, the word goes to `sr-only`, and the head stacks so
+   the mark and the control both fit a 56px column. */
+.rail.is-collapsed .rail-top{flex-direction:column;gap:2px;padding:10px 0 6px}
+.rail.is-collapsed .rail-brand{justify-content:center;flex:none}
+.rail.is-collapsed .rail-brand .tx{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* The control sits WITH the sidebar, as an icon. The word is `sr-only`, so the
+   icon is not the accessible name. */
+.rail-toggle{display:inline-flex;align-items:center;justify-content:center;flex:none;
+  min-height:44px;min-width:44px;padding:0;border-radius:var(--r-sm);border:0;
+  background:transparent;color:var(--ink-muted);cursor:pointer}
+.rail-toggle:hover{background:var(--sunken);color:var(--ink-strong)}
+.rail-toggle:focus-visible{outline:3px solid var(--ring);outline-offset:2px}
+/* The chevron points the way the rail will move: right when it is collapsed and
+   can only go right, left when it is open and can go left. */
+.rail-chevron{display:inline-flex}
+.rail-chevron svg{transform:rotate(0deg)}
+.rail.is-collapsed .rail-chevron svg{transform:rotate(180deg)}
 .rail-group{padding:12px 22px 5px;font-size:10px;font-weight:800;letter-spacing:.13em;
   text-transform:uppercase;color:var(--ink-faint)}
 .rail.is-collapsed .rail-group{display:none}
+.rail-nav{flex:1;overflow-y:auto}
 .nav-item{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 11px;margin:1px 4px;
   border-radius:var(--r-sm);color:var(--ink);font-size:13.5px;font-weight:500;position:relative;
   text-decoration:none}
@@ -156,28 +185,25 @@ button{font-family:inherit}
   border-radius:0 3px 3px 0;background:var(--brand-chrome)}
 .nav-item .dot{width:6px;height:6px;border-radius:50%;background:var(--ink-faint);flex:none}
 .nav-item.active .dot{background:var(--brand-chrome)}
-/* The word moves to `sr-only` when the rail collapses, so the destination keeps its
-   accessible name and the `title` carries it too. The mark and the word are never
-   both visible. */
+/* THE MARK AND THE WORD ARE NEVER BOTH VISIBLE. The glyph is display:none at every
+   width except the collapsed one, so an expanded rail is words only. The path
+   data is the app's own, from NavGlyph.vue:24-72. */
+.glyph{display:none;flex:none;width:20px;height:20px;align-items:center;justify-content:center}
+.rail.is-collapsed .glyph{display:inline-flex}
+.glyph svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+.rail.is-collapsed .glyph svg{width:18px;height:18px}
+/* The word moves to `sr-only` when the rail collapses, so the destination keeps
+   its accessible name and the `title` carries it too. Without this the mark and
+   the word would both be visible in a 56px column, and the word would be the one
+   that did not fit. */
 .rail.is-collapsed .nav-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
   overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .rail.is-collapsed .nav-item{justify-content:center;padding:0}
 .rail.is-collapsed .nav-item .dot{display:none}
-/* The marks. One family, one grid, one stroke weight, drawn as paths rather than
-   glyphs, so the rail reads as the same family as the chrome above it. The path
-   data is the app's own, from NavGlyph.vue:24-72. */
-.glyph{display:inline-flex;flex:none;width:20px;height:20px;align-items:center;justify-content:center}
-.glyph svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;
-  stroke-linecap:round;stroke-linejoin:round}
 /* The rail's own control, in the top bar. Text only, no chevron: the word is the
    action and the accessible name is always the action, so a glyph added nothing a
    screen reader could use. */
-.rail-toggle{display:inline-flex;align-items:center;justify-content:center;min-height:44px;
-  min-width:44px;padding:0 10px;border-radius:var(--r-sm);border:1px solid transparent;
-  background:transparent;color:var(--on-brand-chrome);font-size:12px;font-weight:800;
-  cursor:pointer;text-decoration:none}
-.rail-toggle:hover{background:rgba(255,255,255,.16)}
-.rail-toggle:focus-visible{outline:3px solid var(--on-brand-chrome);outline-offset:2px}
 .rail-foot{margin-top:auto;border-top:1px solid var(--rule-soft);padding:11px 22px;
   font-size:12px;color:var(--ink-muted);text-decoration:underline}
 .rail.is-collapsed .rail-foot{padding:11px 0;text-align:center}
@@ -524,13 +550,13 @@ table.t tr.is-current td{font-weight:700;color:var(--ink-strong)}
    --------------------------------------------------------------------------- */
 .subnav{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:16px;
   padding:5px;border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised)}
-.subnav-hub{display:inline-flex;align-items:center;min-height:34px;padding:0 11px;
+.subnav-hub{display:inline-flex;align-items:center;min-height:44px;padding:0 11px;
   border-radius:var(--r-sm);background:var(--brand-chrome);color:var(--on-brand-chrome);
   font-size:12px;font-weight:800;text-decoration:none;white-space:nowrap}
 .subnav-hub:hover{filter:brightness(1.08)}
 .subnav-hub:focus-visible{outline:3px solid var(--ring);outline-offset:2px}
 .subnav-sep{width:1px;align-self:stretch;margin:0 5px;background:var(--rule-soft)}
-.subnav-item{display:inline-flex;align-items:center;min-height:34px;padding:0 11px;
+.subnav-item{display:inline-flex;align-items:center;min-height:44px;padding:0 11px;
   border-radius:var(--r-sm);color:var(--ink-muted);font-size:12px;font-weight:700;
   text-decoration:none;white-space:nowrap}
 .subnav-item:hover{background:var(--sunken);color:var(--ink-strong)}

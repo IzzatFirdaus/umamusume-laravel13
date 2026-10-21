@@ -11,9 +11,18 @@
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <div class="app">
-  <aside class="rail" id="primary-nav-rail" aria-label="Primary">
-    <div class="rail-top">
-      <div class="rail-mark" aria-hidden="true">TD</div>
+  <aside class="rail" id="primary-nav-rail" aria-label="Global navigation">
+<div class="rail-top">
+      <div class="rail-brand">
+        <span class="mk" aria-hidden="true">TD</span>
+        <span class="tx">TRAINER DESK</span>
+      </div>
+      <button class="rail-toggle" type="button" data-rail-toggle aria-expanded="true" aria-controls="primary-nav-rail" title="Collapse navigation">
+        <span class="sr-only" data-rail-verb>Collapse navigation</span>
+        <span class="glyph glyph-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></span>
+      </button>
+    </div>
+      <nav class="rail-nav" aria-label="Primary">
       <div class="rail-group">Play</div>
       <a class="nav-item" href="index.html" title="Dashboard"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7"/><path d="M6.6 9.6V20h10.8V9.6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Dashboard</span></a>
       <a class="nav-item" href="career-scenario.html" title="New Career"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.4v17.2"/><path d="M6 4.6h11l-2.7 3.5L17 11.6H6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">New Career</span></a>
@@ -24,11 +33,11 @@
       <a class="nav-item" href="review.html" title="Review"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5 20.6 19H3.4z"/><path d="M12 10.2v3.6"/><path d="M12 16.4h.01"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Review</span></a>
       <div class="rail-group">Library</div>
       <a class="nav-item" href="support-cards.html" title="Support Cards"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.4 4.6h8v10h-8z"/><path d="M5 8.6h9.4v10.8H5z"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Support Cards</span></a>
-      <a class="nav-item active" href="skills.html" aria-current="page" aria-current="page" title="Skills"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span><span class="nav-label">Skills</span></a>
+      <a class="nav-item active" href="skills.html" aria-current="page" title="Skills"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span><span class="nav-label">Skills</span></a>
       <div class="rail-group">System</div>
       <a class="nav-item" href="database.html" title="Database"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.6C10 5.1 7 4.7 4.2 5.3v13C7 17.7 10 18.1 12 19.6"/><path d="M12 6.6c2-1.5 5-1.9 7.8-1.3v13C17 17.7 14 18.1 12 19.6"/><path d="M12 6.6v13"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Database</span></a>
       <a class="nav-item" href="preferences.html" title="Settings"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6z"/><path d="M12 3.6v2.2"/><path d="M12 18.2v2.2"/><path d="M3.6 12h2.2"/><path d="M18.2 12h2.2"/><path d="M6.1 6.1l1.6 1.6"/><path d="M16.3 16.3l1.6 1.6"/><path d="M17.9 6.1l-1.6 1.6"/><path d="M7.7 16.3l-1.6 1.6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Settings</span></a>
-    </div>
+    </nav>
     <a class="rail-foot" href="database-sources.html">Data sources</a>
   </aside>
 
@@ -37,10 +46,6 @@
       <div class="topbar-in">
         <span class="crumb">Library · <b>Skills</b></span>
         <span class="proto" title="Structure, states and labels are real; the controls are not wired except the Settings page.">Static wireframe</span><span class="spacer"></span>
-        <button class="rail-toggle" type="button" data-rail-toggle aria-expanded="true" aria-controls="primary-nav-rail" title="Collapse navigation">
-          <span class="sr-only" data-rail-verb>Collapse navigation</span>
-          <span aria-hidden="true" data-rail-label>Collapse</span>
-        </button>
         <span class="who"><span class="pill pill-outline">1,910 skills</span></span>
       <div class="toputils"><a class="iconbtn" href="help.html" title="Help and documentation"><span aria-hidden="true">?</span><span class="lbl">Help</span></a></div>
         </div>
@@ -87,21 +92,21 @@
             </tr>
             <tr>
               <td><b>A final-straight speed skill</b><br><span style="color:var(--ink-muted)">Rare · late-stage velocity</span></td>
-              <td><span class="type-chip stat-speed"><span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-speed"/></svg></span>Speed</span></td>
+              <td><span class="type-chip"><img class="type-icon" src="../icons_svg/speed.svg" alt="" width="18" height="18">Speed</span></td>
               <td class="mono" style="font-size:11.5px">is_last_straight==1</td>
               <td class="n mono">200</td>
               <td class="n"><a class="btn btn-sm" href="skill-detail.html">Open</a></td>
             </tr>
             <tr>
               <td><b>A last-spurt skill</b><br><span style="color:var(--ink-muted)">Normal · acceleration</span></td>
-              <td><span class="type-chip stat-speed"><span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-speed"/></svg></span>Speed</span></td>
+              <td><span class="type-chip"><img class="type-icon" src="../icons_svg/speed.svg" alt="" width="18" height="18">Speed</span></td>
               <td class="mono" style="font-size:11.5px">is_lastspurt==1</td>
               <td class="n mono">160</td>
               <td class="n"><a class="btn btn-sm" href="skill-detail.html">Open</a></td>
             </tr>
             <tr>
               <td><b>A phase-conditional skill</b><br><span style="color:var(--ink-muted)">Rare · random phase</span></td>
-              <td><span class="type-chip stat-wit"><span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-wit"/></svg></span>Wit</span></td>
+              <td><span class="type-chip"><img class="type-icon" src="../icons_svg/wit.svg" alt="" width="18" height="18">Wit</span></td>
               <td class="mono" style="font-size:11.5px">phase&ge;2 &amp;&amp; phase_random</td>
               <td class="n mono">180</td>
               <td class="n"><a class="btn btn-sm" href="skill-detail.html">Open</a></td>
@@ -154,7 +159,12 @@
 <script>
 /* The collapsible rail, mirroring resources/js/layouts/AppLayout.vue:191-233.
    The key and the two values are the app's, so a Trainer who collapses the rail in
-   the app and then opens a wireframe sees the same shape. */
+   the app and then opens a wireframe sees the same shape.
+
+   The collapse changes --rail-w, not the rail's width, because .app is a grid whose
+   FIRST COLUMN is --rail-w. Narrowing the rail inside a column that stayed 236px
+   left the content starting 180px to the right of the marks, which is the negative
+   space this replaces. */
 (function(){
   var KEY = 'trainer-desk.nav-rail';
   var rail = document.getElementById('primary-nav-rail');
@@ -165,9 +175,9 @@
   var collapsed = stored === 'compact';
   function paint(){
     rail.classList.toggle('is-collapsed', collapsed);
+    document.documentElement.classList.toggle('rail-collapsed', collapsed);
     toggle.setAttribute('aria-expanded', String(!collapsed));
     toggle.setAttribute('aria-label', collapsed ? 'Expand navigation' : 'Collapse navigation');
-    toggle.querySelector('[data-rail-label]').textContent = collapsed ? 'Expand' : 'Collapse';
     toggle.querySelector('[data-rail-verb]').textContent = collapsed ? 'Expand navigation' : 'Collapse navigation';
   }
   toggle.addEventListener('click', function(){
@@ -178,35 +188,5 @@
   paint();
 })();
 </script>
-<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-speed" viewBox="0 0 24 24">
-    <path d="M3 15.5c2.2 0 3.4-.9 4.3-2.4l1-1.7 3.2 1.1.7 2.6c1.4.6 3.4 1 5.3 1.2 1.5.2 2.5.9 2.5 2 0 .6-.5 1-1.4 1H4.4c-1 0-1.4-.4-1.4-1.1Z"/>
-    <path d="M8.3 11.4 6.7 7.2M11.5 12.5l-1-3.1M15 13.4l-.6-2.2"/>
-  </symbol><symbol id="i-stamina" viewBox="0 0 24 24">
-    <path d="M12 20.3S3.8 15.4 3.8 9.6a4.4 4.4 0 0 1 8.2-2.2 4.4 4.4 0 0 1 8.2 2.2c0 5.8-8.2 10.7-8.2 10.7Z"/>
-  </symbol><symbol id="i-power" viewBox="0 0 24 24">
-    <path d="M7.4 20.2v-4.9c-1.4-1-2.2-2.6-2.2-4.4V7.6a1.5 1.5 0 0 1 3 0v2.6"/>
-    <path d="M8.2 10.2V6.1a1.5 1.5 0 0 1 3 0v4.1"/>
-    <path d="M11.2 10.2V7a1.5 1.5 0 0 1 3 0v3.2"/>
-    <path d="M14.2 10.2V8.4a1.5 1.5 0 0 1 3 0v5.3c0 3.5-2.6 6.5-6.4 6.5"/>
-  </symbol><symbol id="i-guts" viewBox="0 0 24 24">
-    <path d="M12 3.2c.6 3 2.3 4 3.6 5.6a6.4 6.4 0 1 1-7.2 9.7 5 5 0 0 1 1.5-7.1c.6 1 1.1 1.6 1.9 2 .3-3.6 1.4-6.4 3.4-8.6"/>
-    <path d="M12 20.2a3.2 3.2 0 0 1-2.4-5.4c.9 1 1.5 1.2 2.4 1.3.8-1.1 1-2.3 1-3.6 1.4 1.3 2.2 2.9 2.2 4.6a3.2 3.2 0 0 1-3.2 3.1Z"/>
-  </symbol><symbol id="i-wit" viewBox="0 0 24 24">
-    <path d="M12 4 2.8 8.2 12 12.4l9.2-4.2Z"/>
-    <path d="M6.4 10.4v4.8c0 1.4 2.5 2.6 5.6 2.6s5.6-1.2 5.6-2.6v-4.8"/>
-    <path d="M20.4 9v5.2"/>
-  </symbol><symbol id="i-pal" viewBox="0 0 24 24">
-    <circle cx="12" cy="7.6" r="3.4"/>
-    <path d="M5.4 20.4c0-3.6 2.9-6 6.6-6s6.6 2.4 6.6 6"/>
-  </symbol><symbol id="i-group" viewBox="0 0 24 24">
-    <circle cx="9" cy="8" r="3.1"/>
-    <circle cx="16.4" cy="9.4" r="2.4"/>
-    <path d="M3.4 20.2c0-3.2 2.5-5.4 5.6-5.4s5.6 2.2 5.6 5.4"/>
-    <path d="M14.4 20.2c0-2.2 1.1-3.8 3-3.8s3 1.6 3 3.8"/>
-  </symbol><symbol id="i-sp" viewBox="0 0 24 24">
-    <path d="M12 6.6C10 5.1 7 4.7 4.2 5.3v13C7 17.7 10 18.1 12 19.6"/>
-    <path d="M12 6.6c2-1.5 5-1.9 7.8-1.3v13C17 17.7 14 18.1 12 19.6"/>
-    <path d="M12 6.6v13"/>
-  </symbol></svg>
 </body>
 </html>
