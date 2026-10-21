@@ -62,6 +62,40 @@ Added 2026-10-21, so this set matches the v2 frontend set and the app.
   `td-wireframe-layout`) because a static artifact has no database. The app stores both server-side;
   `PRD.md` §6.12 cuts browser storage as a second source of truth.
 
+## Laws applied, and the rules each page had to satisfy
+
+| Law or rule | Where it shows |
+| --- | --- |
+| **Goal-Gradient (18)** | The scenario's one dated obligation is in the first viewport on all four cockpits: the finale countdown, the Grade Point deadline, the concert countdown. |
+| **Hick's Law (4)** | One recommended action and one alternative per cockpit, not six buttons. The advisor's priority order is stated once. |
+| **Miller's Law (5)** | Stat bands are five plus four tiles. Teammate rosters chunk by distance. |
+| **Von Restorff (15)** | One filled action per screen. An unmarked figure is the norm; only exceptions carry a provenance mark. |
+| **Selective Attention (33) / D-259** | Mood renders `GREAT ↑ +20%` — tier, arrow and percentage. The arrow is the only part carrying ordinal direction, because the five pill colours sit at equal luminance and `GOOD`/`BAD` are 3.3 degrees of hue apart (`DESIGN-CORPUS.md:2469`). |
+| **Fitts's Law (3)** | 44px minimum on every control, matching the app's `h-11`. |
+| **D-220 / D-241 — scenario composition** | Each cockpit renders only the widgets its scenario owns. URA Finale has no Team Rank gauge or shop; Trackblazer has no race calendar; Our Grand Concert degrades to baseline plus known caps rather than inventing chrome. |
+| **D-222 — a level chip names its cause** | Unity Cup's facility level comes from team stat rank (`G/F=1 … S=5`), Trackblazer's from repetition plus purchased levels, URA's from repetition alone. The identical label `Lv 5` means different things, so each says which. |
+| **D-223 — Spirit Burst is a six-state machine** | `spent` is not terminal: chargeable → charged → held → normal spent → Extreme chargeable → Extreme spent. |
+| **D-232 — two countdowns on one strip** | Trackblazer shows both the 6-turn shop rotation and the Grade Point deadline, and states that surplus does not carry over. |
+| **D-81 — an inert control says so** | Every page carries a `Static wireframe` chip. Only the theme and layout-width controls are live anywhere in the set. |
+
+## Where the facts come from
+
+| Kind | Source |
+| --- | --- |
+| Live run and dashboard values | Inertia props read from `http://127.0.0.1:8000` on 2026-10-21 |
+| Per-scenario mechanics | `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` (GameTora, uma.guide, Game8 sections) |
+| Scenario rules and caps | `docs/UMAMUSUME_REFERENCE.md` §1.3.4, §2.2.1–2.2.4; the four `docs/proposals/*-plan.md` |
+| Scenario configuration matrix | `docs/research-scratch/DESIGN-CORPUS.md` §10n |
+| Support cards, skills, sparks | `docs/research-scratch/SUPPORT-CARDS.md`, `SKILLS-MECHANICS.md` |
+| Tokens | `resources/css/app.css` `@theme static` (read 2026-10-21) |
+
+## Two disputed figures these pages print as disputed
+
+The repository records these as unresolved, so a wireframe must not pick one silently.
+
+- **Trackblazer's Akikawa bond gates** — uma.guide reads `19 / 31 / 51`, GameWith reads `15 / 30 / 50`. The fan figures are not disputed; the bond figures are. Both readings belong on the surface.
+- **Trackblazer's grade objectives for a limited-turf-range trainee** — GameTora says `60 / 200 / 300`, uma.guide says such a trainee follows the dirt track at `30 / 200 / 300` (KI-15). The repo renders only the `standard` profile.
+
 ## Token source, and one divergence worth knowing
 
 Values come from `resources/css/app.css` `@theme static`, read 2026-10-21, because that is what the app

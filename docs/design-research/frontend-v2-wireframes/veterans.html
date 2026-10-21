@@ -35,7 +35,7 @@
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">My data · <b>Veterans</b></span>
-        <span class="spacer"></span>
+        <span class="proto" title="Structure, states and labels are real; the controls are not wired except the Settings page.">Static wireframe</span><span class="spacer"></span>
         <span class="who"><span class="pill pill-outline">7 banked</span></span>
       </div>
     </header>
@@ -114,14 +114,16 @@
           <table class="t">
             <thead><tr><th>Family</th><th>Carries</th></tr></thead>
             <tbody>
-              <tr><td>Blue</td><td>Cap. +16 per ★3 at each inheritance moment.</td></tr>
-              <tr><td>Pink</td><td>Aptitude shift. +5 / +12 / +21 by grade.</td></tr>
-              <tr><td>Unique</td><td>The trainee's own skill, carried into inheritance.</td></tr>
+              <tr><td>Blue · stat</td><td>One stat +5 / +12 / +21 at career start, for ★1 / ★2 / ★3.</td></tr>
+              <tr><td>Pink · aptitude</td><td>+1 / +2 / +3 / +4 grades at ★1 / 4 / 7 / 10–18.</td></tr>
+              <tr><td>Green · unique</td><td>The trainee's own skill, as 1–3 hint levels.</td></tr>
+              <tr><td>White · skill or competition</td><td>Mid-run hint +1…+5, or 3 / 6 / 9 stat from a G1 win. Never fires at career start.</td></tr>
             </tbody>
           </table>
           <p class="note" style="margin-top:9px"><span class="g">○</span><span>
-            An ultimate-factor research item can push a graduated Umamusume's factor to ★3, but <b>cannot push a factor past ★4</b>.
-            A veteran record therefore carries the grades it was banked with.
+            <b>Three stars is the ceiling on Global.</b> The ★4 cap is the JP-only factor-research item, which
+            cannot push past ★4 and does not exist here. The +16-per-★3 cap raise is the breakthrough mechanic,
+            not the Blue spark — a Blue spark moves the stat, the breakthrough moves its ceiling.
           </span></p>
         </div>
 
@@ -145,11 +147,11 @@
           <li><b>Three grade columns, not a total.</b> A veteran's value for inheritance is which family carries which grade; collapsing them into one number would hide the only decision a Trainer makes here.</li>
           <li><b>The two Vokda rows are real duplicates.</b> Two separate careers can produce two identical records, and the list says so rather than deduplicating them — they are different runs, not one row shown twice.</li>
           <li><b>Team eligibility is arithmetic the page does for you.</b> Seven registered, three needed, two teams available. That is the Goal-Gradient frame on a library screen with no other goal.</li>
-          <li><b>The ★4 ceiling is stated.</b> It bounds what a veteran can ever become, which is the fact that decides whether to spend a research report on it.</li>
+          <li><b>The star ceiling is stated, and it is three on Global.</b> It bounds what a veteran can become. The ★4 cap is the JP-only factor-research item and is named as such rather than printed as if it applied here.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. The 7 count and three real veteran rows are the live dashboard payload's;
-          factor grades are illustrative. The ★4 ceiling and team rule are sourced (<code>UMAMUSUME_REFERENCE.md</code> §1.3.6).
+          factor grades are illustrative. The ★3 Global ceiling, the ★4 JP-only cap and the team rule are sourced (<code>UMAMUSUME_REFERENCE.md</code> §1.5.3, §1.3.6).
         </p>
       </div>
 

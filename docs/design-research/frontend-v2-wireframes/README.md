@@ -31,11 +31,11 @@ ones:
 
 | Law | How the wireframes apply it |
 | --- | --- |
+| **Fitts's Law (3)** | **Every control is 44px minimum.** The app ships `h-11` for all of them (`CapsuleHeader.vue`, `TraineeCombobox.vue:467`, `VeteranRow.vue:79`) and `SLICE-RECORDS.md:4716-4730` measures 44px in a browser rather than reading it. An earlier draft of this sheet used 40px for `.btn`, 32px for `.btn-sm` and 34px for `.step`, all below the contract; they are 44px now. |
 | **Goal-Gradient (18)** | The career goal is in the first viewport on every run screen. The build-target step exists so that bar has a denominator; today every target is `null`. |
 | **Hick's Law (4)** | Four scenario cards, not a dropdown. Ten nav destinations grouped into four bands. |
 | **Miller's Law (5)** | Three aptitude letters per card on an index, nine on the detail. Chunked, not trimmed. |
-| **Von Restorff (15)** | One filled action per screen. The nine saturated lime section bars the external review measured are gone; headings are ink plus a rule. |
-| **Fitts's Law (3)** | Every control is at least 40px, most 44px. |
+| **Von Restorff (15)** | One filled action per screen. The nine saturated lime section bars the external review measured are gone; headings are ink plus a rule. An unmarked figure is the norm, so only exceptions carry a provenance mark. |
 | **Serial Position (16)** | The primary action leads; destructive actions sit last, behind a disclosure. |
 | **Peak-End (17)** | The result screen leads with the outcome and states the honest finding. |
 | **Doherty Threshold (23)** | Every write has a pending label and a saved confirmation. |
@@ -43,20 +43,59 @@ ones:
 | **Prägnanz (10)** | One vocabulary, one owner: Performance types come from the enum, not from the template. |
 | **Occam's Razor (21)** | One save bar, one verb. Seven save verbs in four styles is the defect this replaces. |
 | **Law of Common Region (8)** | One field grid, one left edge, three fieldsets. |
+| **Selective Attention (33)** | The goal-relevant datum wins. The mood readout is word + arrow + percentage because at equal luminance `GOOD` and `BAD` are 3.3 degrees of hue apart, so colour alone cannot order them (`DESIGN-CORPUS.md:2469`, D-259). |
+| **Law of Prägnanz + D-259** | Mood renders `GREAT ↑ +20%`, not `GREAT` and not a colour. The arrow is the only part carrying the ordinal direction. |
+| **Nielsen H1 / H9 (D-45)** | Four states on every data view: empty, loading, populated, error. `.state`, `.skel` and `.state-error` are the primitives. |
 | **Skill: Consistency** (uilaws) | One selection grammar — radio, pick border, tint — on every picker in the set. |
 | **Skill: Contrast** (uilaws) | Colour never carries meaning alone. Every tint has a word beside it. |
+
+## Two rules this set had to be corrected against
+
+Both were real defects found by reading the sources, not styling preferences.
+
+**D-81 — a prototype control either works or says it does not.** Only the Settings page's theme and
+layout-width controls are live. Every other control in this set is a drawing, so every page carries a
+`Static wireframe` chip in its top bar. A control that looks live and is not is the
+mockup-wearing-a-product tell (`DESIGN-CORPUS.md:1992`).
+
+**The four-value trust vocabulary, and `confirmed` renders nothing.** `ProvenanceMark.vue:46-53` defines
+exactly `confirmed | calculated | estimated | unknown`, and `:52` returns `null` for `confirmed` — "only
+the exceptions are marked, so the eye lands on the exception". An earlier draft printed a `confirmed`
+chip on five figures and invented `rule`, `source` and `found` as if they were trust states. Those chips
+are gone: an unmarked figure is confirmed, and only `Calculated`, `Estimated` and `Unknown` carry a glyph.
 
 ## Where the data comes from
 
 | Kind | Source |
 | --- | --- |
 | Live run and dashboard values | Inertia props read from `http://127.0.0.1:8000` on 2026-10-21 |
-| Scenario rules, caps, mechanics | `docs/UMAMUSUME_REFERENCE.md`, the four `docs/proposals/*-plan.md` files |
+| Scenario rules, caps, mechanics | `docs/UMAMUSUME_REFERENCE.md`; `docs/proposals/URA-Finale-plan.md`, `Unity-Cup-plan.md`, `Trackblazer-plan.md` |
+| Scenario mechanics, per-scenario | `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` (the GameTora and uma.guide sections) |
+| Support cards, the 35-effect dictionary | `docs/research-scratch/SUPPORT-CARDS.md` |
+| Character and catalog fields | `docs/research-scratch/CHARACTERS-SOURCE.md` |
+| Skills, hint ladder, acquisition paths | `docs/research-scratch/SKILLS-MECHANICS.md` |
+| Import format and field honesty | `docs/research-scratch/TRAINING-RUN-IMPORTS.md` |
+| Component shapes, heuristics, states | `docs/research-scratch/UX-DELIVERABLES.md` |
+| Design contract, D-rules, scenario matrix | `docs/research-scratch/DESIGN-CORPUS.md` |
+| Law inventory and audit method | `docs/research-scratch/PLANS-AND-BRIEFS.md`, `PROCESS-PLANS.md` |
+| Race and slice research | `docs/research-scratch/RACE-AND-SLICE-RESEARCH.md`, `SLICE-RECORDS.md` |
 | Tokens | `resources/css/app.css` `@theme static`, light theme |
 
 Three of the four cockpits carry a **MOCK DATA** banner, because the dev database holds one Unity Cup
 run and ten URA Finale runs, and nothing for Trackblazer or Our Grand Concert. The banner is on the
 page, not buried here.
+
+## Factual corrections this pass made
+
+Recorded because each was a wrong claim in an earlier draft, not a restyle.
+
+| Page | Was | Now |
+| --- | --- | --- |
+| `legacy` | Blue spark = `+16 cap`, Pink = `+5/+12/+21` | **Blue is the stat spark** (`+5/+12/+21` at ★1/★2/★3) and **Pink is the aptitude spark** (`+1/+2/+3/+4` grade at ★1/4/7/10-18). The `+16` cap raise is the breakthrough mechanic, a different thing entirely (`UMAMUSUME_REFERENCE.md` §1.5.2, §1.3.4). |
+| `veterans` | The `★4` ceiling stated as fact | **Three stars is the Global ceiling.** The `★4` cap is the JP-only factor-research item and is named as such (`UMAMUSUME_REFERENCE.md` §1.5.3, §1.3.6). |
+| `training-decision` | Unity Cup run carrying URA Finale's gain and energy figures | **Unity Cup's own Lv 1 base**: Speed `+8/+4 Power/+2 SP/−19`, Stamina `+7/+3/+2/−17`, Power `+4 Stamina/+6/+2/−18`, Guts `+3 Speed/+3 Power/+6/+2/−20`, Wit `+2 Speed/+6 Wit/+3 SP/+5` (`SCENARIO-PUBLISHER-REFERENCES.md` GameTora). |
+| `training-decision` | Rest `+30 on a normal result` | **`+50` is modal at 58.1%**, `+70` 25.4%, `+30` 12.8%, `+30` + Late-Night Feeling 3.7% (n=3,833). `+30` was the failure outcome printed as the normal one. |
+| `training-decision` | Energy `50 advisory line` tagged `confirmed` | Tagged as an **editorial heuristic**, because no tier-A source publishes a failure table by energy level (`UMAMUSUME_REFERENCE.md` §2.6). |
 
 ## Token divergence you should know about
 

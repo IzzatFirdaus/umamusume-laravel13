@@ -275,6 +275,17 @@ table.caps td.overc{font-weight:800;color:var(--risk)}
 .keybox thead th{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)}
 .badge-ok{color:var(--green-deep);font-weight:800}
 .badge-no{color:var(--risk);font-weight:800}
+
+/* D-259: mood is tier + arrow + percentage. The arrow is the only part carrying the
+   ordinal direction, because the five pill colours sit at equal luminance and two pairs
+   of opposite meaning therefore render as one colour. Tier alone is not the readout. */
+.arrow{font-size:11px;line-height:1;margin-left:3px}
+.pct{font-weight:700;opacity:.85;margin-left:4px;font-size:.88em}
+/* D-81: only the theme and layout controls are live; every other control is a drawing. */
+.proto{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;
+  letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.72);
+  border:1px dashed rgba(255,255,255,.45);border-radius:999px;padding:2px 8px;margin-right:10px}
+.proto::before{content:"";width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.72)}
 </style>
 </head>
 <body>
@@ -282,7 +293,7 @@ table.caps td.overc{font-weight:800;color:var(--risk)}
 <div class="topbar">
   <div class="shell">
     <span class="brand">TRAINER DESK</span>
-    <span class="who"><span class="pill" style="border:1px solid rgba(255,255,255,.5)">Unity Cup</span></span>
+    <span class="proto" title="Structure, states and labels are real; the controls are not wired except the Settings page.">Static wireframe</span><span class="who"><span class="pill" style="border:1px solid rgba(255,255,255,.5)">Unity Cup</span></span>
   </div>
 </div>
 
@@ -337,7 +348,7 @@ table.caps td.overc{font-weight:800;color:var(--risk)}
     <div class="p-strip">
       <div class="cell"><div class="k">Turn</div><div class="v mono">67</div></div>
       <div class="cell"><div class="k">Energy</div><div class="v">Low <span class="u">band</span></div></div>
-      <div class="cell"><div class="k">Mood</div><div class="v">GREAT</div></div>
+      <div class="cell"><div class="k">Mood</div><div class="v">GREAT<span class="arrow" aria-hidden="true">&#8593;</span><span class="pct">+20%</span></div></div>
       <div class="cell"><div class="k">Fans</div><div class="v mono">209,245</div></div>
       <div class="cell"><div class="k">Skill points</div><div class="v mono">173</div></div>
     </div>
@@ -438,7 +449,7 @@ table.caps td.overc{font-weight:800;color:var(--risk)}
         <h4 style="margin:14px 0 4px;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-muted)">State</h4>
         <div class="grid2">
           <div class="f"><span class="k">Energy</span><div class="in">Low band</div></div>
-          <div class="f"><span class="k">Mood <span class="anno">13</span></span><div class="in">GREAT</div></div>
+          <div class="f"><span class="k">Mood <span class="anno">13</span></span><div class="in">GREAT<span class="arrow" aria-hidden="true">&#8593;</span><span class="pct">+20%</span></div></div>
           <div class="f"><span class="k">Fans</span><div class="in mono">209,245</div></div>
           <div class="f"><span class="k">Skill points</span><div class="in mono">173</div></div>
         </div>

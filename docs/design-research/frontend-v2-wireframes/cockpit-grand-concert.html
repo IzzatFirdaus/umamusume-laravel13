@@ -36,7 +36,7 @@
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">Example Trainee · <b>Our Grand Concert</b> · Cockpit</span>
-        <span class="spacer"></span>
+        <span class="proto" title="Structure, states and labels are real; the controls are not wired except the Settings page.">Static wireframe</span><span class="spacer"></span>
         <span class="who"><span class="pill pill-positive">Turn 62 · Active</span></span>
       </div>
     </header>
@@ -46,7 +46,7 @@
       <div class="hrow">
         <div>
           <h1>Example Trainee</h1>
-          <p class="lede">Senior Year · Early October · Turn 62. Energy 58, Mood GREAT, Fans 84,600, Skill Points 190.</p>
+          <p class="lede">Senior Year · Early October · Turn 62. Energy 58, Mood <span class="mood mood-up">GREAT <span class="arrow">&#8593;</span> <span class="pct">+20%</span></span>, Fans 84,600, Skill Points 190.</p>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <a class="btn" href="runs-index.html">All careers</a>
@@ -108,10 +108,15 @@
               <span style="font-size:12px;color:var(--ink-muted)">Ten turns to the concert</span>
             </div>
             <ul style="margin:11px 0 0;padding-left:18px;font-size:12.5px;line-height:1.6">
-              <li>A lesson raises Performance and spends one turn. <span class="tag">confirmed</span></li>
-              <li>Ten turns remain before the concert. <span class="tag auto">calculated</span></li>
-              <li>The guide says to focus on training rather than stacking races. <span class="tag">source</span></li>
+              <li>A lesson raises Performance and spends one turn.</li>
+              <li>Ten turns remain before the concert. <span class="trust trust-calculated"><span class="g">∑</span>Calculated</span></li>
+              <li>The guide says to focus on training rather than stacking races.</li>
             </ul>
+            <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+              An unmarked figure is <b>confirmed</b>. The app draws no badge for that state
+              (<code>ProvenanceMark.vue:18</code>: "only the exceptions are marked"), so only
+              calculated, estimated and unknown carry a glyph.
+            </span></p>
           </div>
 
           <div class="card">

@@ -35,7 +35,7 @@
     <header class="topbar">
       <div class="topbar-in">
         <span class="crumb">Rice Shower · Unity Cup · <b>Training</b></span>
-        <span class="spacer"></span>
+        <span class="proto" title="Structure, states and labels are real; the controls are not wired except the Settings page.">Static wireframe</span><span class="spacer"></span>
         <span class="who"><span class="pill pill-positive">Turn 67</span></span>
       </div>
     </header>
@@ -73,7 +73,7 @@
         <div>
           <div class="card" style="margin:0">
             <h2>Disciplines</h2>
-            <p class="sub">Energy 58 · Mood GREAT (+20% training yield) · Wit costs no Energy.</p>
+            <p class="sub">Energy 58 · Mood <span class="mood mood-up">GREAT <span class="arrow">&#8593;</span> <span class="pct">+20%</span></span> training yield · Wit costs no Energy. Figures are Unity Cup's Lv 1 base, before multipliers.</p>
 
             <div style="display:flex;flex-direction:column;gap:9px">
 
@@ -81,58 +81,58 @@
                 <input type="radio" name="pick" aria-label="Speed training" style="width:16px;height:16px">
                 <div style="flex:1 1 190px;min-width:0">
                   <div style="font-weight:800;color:var(--ink-strong)">Speed</div>
-                  <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Power · Lv 3 · 3% failure</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Power · Lv 1 base · 3% failure</div>
                 </div>
                 <div class="mono" style="text-align:right;font-size:12.5px;color:var(--ink-strong)">
-                  +12 Speed<br><span style="color:var(--ink-muted);font-weight:600">+5 Power · +2 SP</span>
+                  +8 Speed<br><span style="color:var(--ink-muted);font-weight:600">+4 Power · +2 SP</span>
                 </div>
-                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--down);font-weight:800">−23 Energy</div>
+                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--down);font-weight:800">−19 Energy</div>
               </div>
 
               <div style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:13px;align-items:center;flex-wrap:wrap">
                 <input type="radio" name="pick" aria-label="Stamina training" style="width:16px;height:16px">
                 <div style="flex:1 1 190px;min-width:0">
                   <div style="font-weight:800;color:var(--ink-strong)">Stamina</div>
-                  <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Guts · Lv 2 · 1% failure</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Guts · Lv 1 base · 1% failure</div>
                 </div>
                 <div class="mono" style="text-align:right;font-size:12.5px;color:var(--ink-strong)">
-                  +11 Stamina<br><span style="color:var(--ink-muted);font-weight:600">+4 Guts · +2 SP</span>
+                  +7 Stamina<br><span style="color:var(--ink-muted);font-weight:600">+3 Guts · +2 SP</span>
                 </div>
-                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--down);font-weight:800">−21 Energy</div>
+                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--down);font-weight:800">−17 Energy</div>
               </div>
 
               <div style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:13px;align-items:center;flex-wrap:wrap">
                 <input type="radio" name="pick" aria-label="Power training" style="width:16px;height:16px">
                 <div style="flex:1 1 190px;min-width:0">
                   <div style="font-weight:800;color:var(--ink-strong)">Power</div>
-                  <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Stamina · Lv 3 · 2% failure</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Stamina · Lv 1 base · 2% failure</div>
                 </div>
                 <div class="mono" style="text-align:right;font-size:12.5px;color:var(--ink-strong)">
-                  +10 Power<br><span style="color:var(--ink-muted);font-weight:600">+5 Stamina · +2 SP</span>
+                  +6 Power<br><span style="color:var(--ink-muted);font-weight:600">+4 Stamina · +2 SP</span>
                 </div>
-                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--down);font-weight:800">−22 Energy</div>
+                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--down);font-weight:800">−18 Energy</div>
               </div>
 
               <div style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:13px;align-items:center;flex-wrap:wrap">
                 <input type="radio" name="pick" aria-label="Guts training" style="width:16px;height:16px">
                 <div style="flex:1 1 190px;min-width:0">
                   <div style="font-weight:800;color:var(--ink-strong)">Guts</div>
-                  <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Speed and Power · Lv 2 · 5% failure</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Speed and Power · Lv 1 base · 5% failure</div>
                 </div>
                 <div class="mono" style="text-align:right;font-size:12.5px;color:var(--ink-strong)">
-                  +10 Guts<br><span style="color:var(--ink-muted);font-weight:600">+4 Speed · +4 Power · +2 SP</span>
+                  +6 Guts<br><span style="color:var(--ink-muted);font-weight:600">+3 Speed · +3 Power · +2 SP</span>
                 </div>
-                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--down);font-weight:800">−24 Energy</div>
+                <div class="mono" style="text-align:right;font-size:12.5px;color:var(--down);font-weight:800">−20 Energy</div>
               </div>
 
               <div style="border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--raised);padding:11px 13px;display:flex;gap:13px;align-items:center;flex-wrap:wrap">
                 <input type="radio" name="pick" aria-label="Wit training" style="width:16px;height:16px">
                 <div style="flex:1 1 190px;min-width:0">
                   <div style="font-weight:800;color:var(--ink-strong)">Wit <span class="tag auto">no Energy</span></div>
-                  <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Speed · Lv 3 · no failure figure printed</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">Feeds Speed · Lv 1 base · no failure figure printed</div>
                 </div>
                 <div class="mono" style="text-align:right;font-size:12.5px;color:var(--ink-strong)">
-                  +11 Wit<br><span style="color:var(--ink-muted);font-weight:600">+2 Speed · +4 SP</span>
+                  +6 Wit<br><span style="color:var(--ink-muted);font-weight:600">+2 Speed · +3 SP</span>
                 </div>
                 <div class="mono" style="text-align:right;font-size:12.5px;color:var(--up);font-weight:800">+5 Energy</div>
               </div>
@@ -140,10 +140,12 @@
             </div>
 
             <p class="note" style="margin-top:11px"><span class="g">○</span><span>
-              <b>Gains shown are the session's before multipliers</b> and they are illustrative here. The client prints a
-              static failure percentage per tile; Guts read highest at 5% and Stamina lowest at 1% on the one turn
-              captured, and the Wit tile printed none — a blank, not a zero
-              (<code>UMAMUSUME_REFERENCE.md</code> §1.1.5).
+              <b>Unity Cup's own base values at Lv 1, before multipliers</b>
+              (<code>SCENARIO-PUBLISHER-REFERENCES.md</code> GameTora, and <code>Unity-Cup-plan.md</code> §5).
+              These are lower than URA Finale's, so a tile carrying URA's numbers on a Unity Cup run would
+              overstate every session. The percentage beside each discipline is the client's own static figure
+              from one captured turn — Guts read highest at 5% and Stamina lowest at 1%, and the Wit tile
+              printed none, which is a blank rather than a zero (<code>UMAMUSUME_REFERENCE.md</code> §1.1.5).
             </span></p>
           </div>
 
@@ -154,7 +156,7 @@
                 <input type="radio" name="pick" checked aria-label="Rest">
                 <div>
                   <div style="font-weight:800;color:var(--ink-strong)">Rest <span class="pill pill-positive" style="vertical-align:2px">Recommended</span></div>
-                  <div style="font-size:11.5px;color:var(--ink-muted)">+30 Energy · free turn</div>
+                  <div style="font-size:11.5px;color:var(--ink-muted)">+50 typical · +70 · +30 · 1 turn</div>
                 </div>
               </label>
               <label style="border:1px solid var(--rule-soft);border-radius:var(--r-md);padding:10px 12px;display:flex;gap:9px;align-items:center;cursor:pointer">
@@ -179,10 +181,11 @@
           <div class="card" style="margin:0">
             <h2>Why Rest</h2>
             <ul style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.6">
-              <li>Energy is recorded as a <b>low band</b>, below the 50 advisory line. <span class="tag">confirmed</span></li>
-              <li>Rest recovers <b>+30</b> on a normal result, +50 modal, +70 on a big success. <span class="tag">confirmed</span></li>
-              <li>Unity Cup is <b>5 turns away</b>. <span class="tag auto">calculated</span></li>
-              <li>This rest uses <b>1 of the 5 remaining turns</b>. <span class="tag auto">calculated</span></li>
+              <li>Energy is recorded as a <b>low band</b>, below the 50 advisory line. <span class="tag auto">editorial heuristic</span></li>
+              <li>Rest pays <b>+50 on 58.1%</b> of results, +70 on 25.4%, +30 on 12.8%, and +30 with
+                <b>Late-Night Feeling</b> on 3.7% (n=3,833). </li>
+              <li>Unity Cup is <b>5 turns away</b>. <span class="trust trust-calculated"><span class="g">∑</span>Calculated</span></li>
+              <li>This rest uses <b>1 of the 5 remaining turns</b>. <span class="trust trust-calculated"><span class="g">∑</span>Calculated</span></li>
             </ul>
             <p class="note" style="margin-top:10px"><span class="g">○</span><span>
               Below 50 Energy the failure curve changes character rather than degrading linearly, which is why the
@@ -218,7 +221,7 @@
         <h2>Annotation key · Training decision</h2>
         <ol>
           <li><b>Five disciplines, one row each, gains right-aligned in monospace.</b> Comparable numbers in a column is Fitts and Miller working together: the eye compares five gain figures in one vertical scan instead of five paragraphs.</li>
-          <li><b>Energy is signed and coloured, and the sign carries the meaning.</b> "−23 Energy" is a loss (blue, per DESIGN.md: down is blue, never red); "+5 Energy" on Wit is a gain (orange). The word and the sign inform; colour reinforces.</li>
+          <li><b>Energy is signed and coloured, and the sign carries the meaning.</b> "−19 Energy" is a loss (blue, per DESIGN.md: down is blue, never red); "+5 Energy" on Wit is a gain (orange). The word and the sign inform; colour reinforces.</li>
           <li><b>Wit is marked "no Energy" with a tag, not just a plus sign.</b> It is the one discipline that refunds, and the plan makes it the low-risk filler when resting is not wanted.</li>
           <li><b>The recommendation is chosen by default but not hidden.</b> Rest is preselected and marked, yet the five disciplines stay fully selectable: the advisor advises, it does not act (design-2.0 §2, player agency).</li>
           <li><b>The outcome fields are separate from the choice.</b> Choosing a discipline and recording what the client showed are two facts; merging them would invite the tool to invent a reading.</li>

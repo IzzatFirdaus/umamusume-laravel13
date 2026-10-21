@@ -158,6 +158,17 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
 .flag.fixed{color:var(--green-deep);border-color:var(--green-deep)}
 .sect{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:26px 0 0}
 .sect h2{margin:0;font-size:17px;color:var(--ink-strong)}
+
+/* D-259: mood is tier + arrow + percentage. The arrow is the only part carrying the
+   ordinal direction, because the five pill colours sit at equal luminance and two pairs
+   of opposite meaning therefore render as one colour. Tier alone is not the readout. */
+.arrow{font-size:11px;line-height:1;margin-left:3px}
+.pct{font-weight:700;opacity:.85;margin-left:4px;font-size:.88em}
+/* D-81: only the theme and layout controls are live; every other control is a drawing. */
+.proto{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;
+  letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.72);
+  border:1px dashed rgba(255,255,255,.45);border-radius:999px;padding:2px 8px;margin-right:10px}
+.proto::before{content:"";width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.72)}
 </style>
 </head>
 <body>
@@ -168,7 +179,7 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
     <nav aria-label="Primary">
       <a href="#">Dashboard</a><a href="#">Runs</a><a href="#" aria-current="page">Cockpit</a><a href="#">Catalog</a>
     </nav>
-    <span class="who"><span class="pill ghost">URA Finale</span><span class="pill done">Completed</span></span>
+    <span class="proto" title="Structure, states and labels are real; the controls are not wired except the Settings page.">Static wireframe</span><span class="who"><span class="pill ghost">URA Finale</span><span class="pill done">Completed</span></span>
   </div>
 </div>
 
@@ -182,7 +193,7 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
     <div class="facts">
       <div class="fact"><span class="k">Turn</span><span class="v mono">75</span></div>
       <div class="fact"><span class="k">Energy</span><span class="v mono">25</span></div>
-      <div class="fact"><span class="k">Mood</span><span class="v"><span class="moodpill">GREAT</span></span></div>
+      <div class="fact"><span class="k">Mood</span><span class="v"><span class="moodpill">GREAT<span class="arrow" aria-hidden="true">&#8593;</span><span class="pct">+20%</span></span></span></div>
       <div class="fact"><span class="k">Fans</span><span class="v mono">not recorded</span></div>
       <div class="fact"><span class="k">Skill Points</span><span class="v mono">34</span></div>
     </div>
@@ -225,7 +236,7 @@ h4{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-tr
         <h4>State</h4>
         <dl class="meta" style="margin:0">
           <div class="t"><dt>Energy</dt><dd class="mono">25</dd></div>
-          <div class="t"><dt>Mood</dt><dd><span class="moodpill">GREAT</span></dd></div>
+          <div class="t"><dt>Mood</dt><dd><span class="moodpill">GREAT<span class="arrow" aria-hidden="true">&#8593;</span><span class="pct">+20%</span></span></dd></div>
           <div class="t"><dt>Fans</dt><dd style="color:var(--ink-muted)">not recorded</dd></div>
           <div class="t"><dt>Skill Points</dt><dd class="mono">34</dd></div>
         </dl>
