@@ -315,6 +315,12 @@ The skill registry's machine half is **`.agents/skills.json`**; the hand-maintai
 | C-8   | Dependencies      | No new package without approval; `composer audit` / `npm audit` no critical/high   | `composer audit`; `npm audit --omit=dev`                                                |
 | C-9   | TypeScript        | Zero errors from `tsc --noEmit` (`strict: true`, `noEmit: true`)                   | `npm run typecheck`                                                                     |
 
+**What the C-7 review checklist is, recorded 2026-10-21.** The checklist is Nielsen's ten usability
+heuristics, stated verbatim in `docs/proposals/usability-heuristics-2026-10-21.md` together with the
+per-heuristic detail, the mapping onto the D-rules, and the H3 / H7 / H10 gap register. A C-7 verdict
+therefore cites a heuristic and the D-rule that implements it. A FAIL that a ratified D-rule already
+covers is filed against the D-rule, so the same defect does not arrive twice under two names.
+
 #### 9.1 Floor (Never, in Any Change)
 
 - No new suppressions: `@phpstan-ignore`, `@phpstan-` escapes, `eslint-disable`, `@ts-ignore`, `# noqa`

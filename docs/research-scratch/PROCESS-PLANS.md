@@ -13697,15 +13697,25 @@ scans pages against `wcag2a`, `wcag2aa`, and `wcag21aa`. Manual pass per screen:
 
 ### 13. Laws of UX applied
 
-The 30 laws at lawsofux.com, mapped to concrete decisions. A slice cites the rows that govern its screen;
-a screen that violates Hick's, Miller's, Jakob's, or Fitts's law, or that shows state through colour
-alone, is not done.
+The **29 entries at lawsofux.com**: its 28-entry index plus the Zeigarnik Effect, which has its own page
+but is truncated out of the index listing. Mapped to concrete decisions. A slice cites the rows that
+govern its screen; a screen that violates Hick's, Miller's, Jakob's, or Fitts's law, or that shows state
+through colour alone, is not done.
+
+`Working Memory` appears in the table below but is **not** one of the 29: it is an adjacent principle the
+audit added, and it is marked as such so the count is not inflated by it. `Cognitive Bias` joined the
+index after this table was first written and is recorded here as awareness rather than as an applied
+rule, because every real interface use of it is either an honest warning or a dark pattern.
+
+The usability heuristics these laws operationalise are stated separately, with their NN/g-sourced
+detail and their D-rule mapping, in `docs/proposals/usability-heuristics-2026-10-21.md`.
 
 | Law                            | Where it binds        | Concrete decision                                                                              |
 | ------------------------------ | --------------------- | ---------------------------------------------------------------------------------------------- |
 | Aesthetic-Usability Effect     | every screen          | Clean tokens make the tool feel reliable, but polish never substitutes for a sourced number.   |
 | Choice Overload                | SCREEN-002, Cockpit   | Four scenario cards, not a matrix; the action grid stays short.                                |
 | Chunking                       | Cockpit               | Three columns; the stat panel groups five stats and four meta values.                          |
+| Cognitive Bias                 | every screen          | Awareness only, not an applied rule. No anchoring in a preview, no default that flatters a guess, no framing that changes what a number appears to mean. |
 | Cognitive Load                 | all data screens      | Progressive disclosure (design-2.0 §35): the card shows three facts, expand for modifiers.     |
 | Doherty Threshold              | catalog reads         | Local-first, `Cache::remember`; skeletons only for a user-initiated async action.              |
 | Fitts's Law                    | shell, Cockpit        | 44px targets, the primary action nearest the decision, mobile bottom nav.                      |
@@ -13730,7 +13740,7 @@ alone, is not done.
 | Serial Position Effect         | action grid           | Primary action first, summary last.                                                            |
 | Tesler's Law                   | advisor               | The engine absorbs the complexity; the player sees a band and a reason line.                   |
 | Von Restorff Effect            | action grid           | One `RECOMMENDED` marker, not an accent on every card.                                         |
-| Working Memory                 | setup wizard          | Never ask the player to recall a value from a prior screen; carry it (3.3.7).                  |
+| Working Memory **[not a lawsofux entry]** | setup wizard | Never ask the player to recall a value from a prior screen; carry it (3.3.7). An adjacent principle, listed because it binds the wizard, not because lawsofux.com publishes it. |
 | Zeigarnik Effect               | targets, timeline     | Incomplete states are shown, not hidden, so progress stays visible.                            |
 
 **Deliberately traded.** Occam's Razor yields to completeness in the Database area (a reference table is

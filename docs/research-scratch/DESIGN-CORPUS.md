@@ -1728,6 +1728,15 @@ Scope: the user-facing layer of Umamusume Trainer Companion. Applies to Blade vi
 
 Status: contract for review. No production UI code exists yet, so nothing here has been violated yet either.
 
+**Where the usability heuristics sit, added 2026-10-21.** The D-rules below are the ratified
+implementation of two upstream layers. The first is the Laws of UX and Laws of UI inventory recorded in
+`PLANS-AND-BRIEFS.md` (§ux-laws-audit-plan) and audited here. The second is Nielsen's ten usability
+heuristics, recorded verbatim in `docs/proposals/usability-heuristics-2026-10-21.md`, together with the
+per-heuristic detail, the mapping onto these D-rules, and the H3 / H7 / H10 gap register. A review
+therefore cites a D-rule as the operative clause and the upstream heuristic only as its justification;
+where a D-rule and a heuristic appear to disagree, the D-rule governs and the disagreement is recorded
+rather than resolved silently.
+
 ---
 
 ### 1. Token contract

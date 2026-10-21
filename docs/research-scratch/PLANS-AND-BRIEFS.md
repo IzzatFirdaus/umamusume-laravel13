@@ -59,6 +59,18 @@ This document consolidates the following source files verbatim (no summarization
   - The other five files of this round landed in `PROCESS-PLANS.md` (one), `SLICE-RECORDS.md` (one) and
     `AUDIT-AND-VERIFICATION.md` (two), with one refreshed in place in `DESIGN-CORPUS.md`; the routing
     table for all eight is in `docs/research-scratch/INDEX.md` §Round 18.
+- **Round 19 (2026-10-21, owner-ordered): no consolidation.** One new live `docs/proposals/` file was
+  added and deliberately left in place: `docs/proposals/usability-heuristics-2026-10-21.md`. It records
+  Nielsen's ten usability heuristics verbatim from NN/g, the per-heuristic detail articles, the mapping
+  onto the D-rules, and the H3 / H7 / H10 gap register.
+
+  Why it is not embedded here. This section's `## ux-laws-audit-plan-2026-10-13.md` is the **Laws of
+  UX and Laws of UI** checklist and stays the authority for those. The new file is a different
+  collection with a different authority structure: NN/g revises the heuristics (the page was last
+  reviewed 2024-01-30, and its own text changed), so the file has to stay a single citable copy that can
+  be re-read against the source. Embedding it would create the second copy that a revision then has to
+  chase. `INDEX.md` routing row carries it, `UX-DELIVERABLES.md` Part 3 defers to it for the statements
+  and keeps the ratings, and `GOVERNANCE.md` §9 records it as the C-7 review checklist.
 
 
 ---

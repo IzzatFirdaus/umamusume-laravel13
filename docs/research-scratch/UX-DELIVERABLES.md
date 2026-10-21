@@ -1728,6 +1728,13 @@ END: Goddess activated, bonuses applied
 
 ## PART 3: HEURISTIC EVALUATION
 
+> **Canonical reference, added 2026-10-21.** The ten heuristics this Part evaluates against are recorded
+> in full, verbatim from NN/g, in `docs/proposals/usability-heuristics-2026-10-21.md`. That file is the
+> authority for what each heuristic says, its per-heuristic detail articles, its mapping onto the
+> repository's D-rules, and the H3 / H7 / H10 gap register. This Part remains the authority for the
+> **per-screen evaluation and the ratings**; where the two disagree about what a heuristic requires,
+> the proposals file wins, because it quotes the source rather than summarising it.
+
 ### Methodology
 
 This evaluation assesses *Umamusume: Pretty Derby* against Nielsen's 10 Usability Heuristics, supplemented by 5 game-specific heuristics. Each heuristic is rated 0–10, with specific mechanical examples, identified issues, severity ratings, and actionable recommendations. Severity scale: 0 (cosmetic) → 4 (catastrophic).
