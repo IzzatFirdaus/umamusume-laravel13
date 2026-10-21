@@ -59,6 +59,30 @@ This document consolidates the following source files verbatim (no summarization
   - The other five files of this round landed in `PROCESS-PLANS.md` (one), `SLICE-RECORDS.md` (one) and
     `AUDIT-AND-VERIFICATION.md` (two), with one refreshed in place in `DESIGN-CORPUS.md`; the routing
     table for all eight is in `docs/research-scratch/INDEX.md` §Round 18.
+- **Round 20 (2026-10-21, owner-ordered): seven more frameworks, also not consolidated.**
+  One live `docs/proposals/` file was added per framework, deliberately left in place like the
+  Round 19 file:
+
+  | File | Framework |
+  | --- | --- |
+  | `docs/proposals/design-framework-index-2026-10-21.md` | the entry point |
+  | `docs/proposals/usability-heuristics-2026-10-21.md` | Nielsen's ten |
+  | `docs/proposals/shneiderman-golden-rules-2026-10-21.md` | eight rules |
+  | `docs/proposals/tognazzini-first-principles-2026-10-21.md` | sixteen principles |
+  | `docs/proposals/gerhardt-powals-principles-2026-10-21.md` | ten cognitive engineering principles |
+  | `docs/proposals/information-architecture-principles-2026-10-21.md` | Dan Brown's eight |
+  | `docs/proposals/gestalt-principles-2026-10-21.md` | twelve Gestalt principles |
+  | `docs/proposals/norman-interaction-principles-2026-10-21.md` | Norman's six, the two gulfs, the seven stages |
+  | `docs/proposals/wcag-2.2-accessibility-2026-10-21.md` | WCAG 2.2 AA |
+
+  The same reason as Round 19 applies, and more strongly: three of these had a **blocked or partial
+  primary source** (Gerhardt-Powals is paywalled, Dan Brown's article is behind a Cloudflare
+  interstitial, and Norman's book is not fetchable), and each file records that at the top of itself.
+  A single citable copy that can be re-read against its source is the point; embedding would create
+  the second copy a source revision then has to chase. `INDEX.md` carries the routing rows,
+  `DESIGN-CORPUS.md` names the layering, and `GOVERNANCE.md` §9 records which of them the C-7
+  review actually uses.
+
 - **Round 19 (2026-10-21, owner-ordered): no consolidation.** One new live `docs/proposals/` file was
   added and deliberately left in place: `docs/proposals/usability-heuristics-2026-10-21.md`. It records
   Nielsen's ten usability heuristics verbatim from NN/g, the per-heuristic detail articles, the mapping

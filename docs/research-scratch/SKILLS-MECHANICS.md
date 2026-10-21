@@ -1637,7 +1637,19 @@ either width, and zero elements crossing the right edge (the KI-25 class of defe
 assumed absent). Tab order is skip link → Catalog → **Skills** → Training runs → Review → search → type →
 unique → Filter → pagination pages, every control reachable, and each stop computes
 `outline: solid 2px` (green `rgb(127,204,9)` on the screen's own controls, `rgb(78,121,6)` on the shell's) —
-D-13 measured, not inherited from a class name. Contrast: `ink-muted` on `raised` **5.78:1**, on the page
+> **The interface contract behind these mechanics, added 2026-10-21.** This file owns the
+> *mechanics*: what a skill does, what it costs, and what fires it. Where it touches a rendered
+> surface, the operative contract is the design corpus and the framework set, not this file:
+> `docs/proposals/wcag-2.2-accessibility-2026-10-21.md` for the normative contrast and target
+> requirements, and `docs/proposals/gestalt-principles-2026-10-21.md` for why a chip that reads as a
+> group is a group. A measured pair such as the one below is recorded against WCAG 1.4.3 (Minimum),
+> whose 4.5:1 applies to text and whose exceptions for inactive components, decoration and logotypes
+> are worth reading before a pair is judged.
+>
+> A contrast figure that was measured in a browser and one that was computed from token values are not
+> the same kind of claim, and the tree records which is which.
+
+D-13 measured, not inherited from a class name.D-13 measured, not inherited from a class name. Contrast: `ink-muted` on `raised` **5.78:1**, on the page
 **5.15:1**, `h1` **11.79:1**, badge **10.74:1**, all above 4.5 at the 12–14px sizes actually used (light
 theme; the screen has no in-page theme control, so dark is unmeasured). The `Unspecified` facet returns
 **288 of 623** and the facet survives paging (`?type=Unspecified&page=2`, still 288) — the count G-SK-18

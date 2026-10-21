@@ -315,6 +315,30 @@ The skill registry's machine half is **`.agents/skills.json`**; the hand-maintai
 | C-8   | Dependencies      | No new package without approval; `composer audit` / `npm audit` no critical/high   | `composer audit`; `npm audit --omit=dev`                                                |
 | C-9   | TypeScript        | Zero errors from `tsc --noEmit` (`strict: true`, `noEmit: true`)                   | `npm run typecheck`                                                                     |
 
+**The full framework set, recorded 2026-10-21.** C-7's checklist is Nielsen's ten usability
+heuristics, and it is one of **eight** framework documents now in `docs/proposals/`, each quoted from
+its source:
+
+| Framework | File | What it is for |
+| --- | --- | --- |
+| Nielsen's ten usability heuristics | `usability-heuristics-2026-10-21.md` | **The C-7 checklist.** Ten questions every screen is asked. |
+| Shneiderman's 8 Golden Rules | `shneiderman-golden-rules-2026-10-21.md` | How a flow behaves from open to close, and how many consistency exceptions are tolerable. |
+| Tognazzini's 16 First Principles | `tognazzini-first-principles-2026-10-21.md` | The millisecond and the millimetre: latency budgets, target sizes, undo, session state. |
+| Gerhardt-Powals' 10 cognitive engineering principles | `gerhardt-powals-principles-2026-10-21.md` | Whether the product left work in the user's head. |
+| Dan Brown's 8 IA principles | `information-architecture-principles-2026-10-21.md` | The space between screens: objects, classification, disclosure, growth. |
+| Gestalt principles | `gestalt-principles-2026-10-21.md` | Perception: whether two things will be read as one group. |
+| Norman's interaction principles | `norman-interaction-principles-2026-10-21.md` | Affordance versus signifier, and the two gulfs. |
+| WCAG 2.2 AA | `wcag-2.2-accessibility-2026-10-21.md` | The only **normative** one. |
+
+`docs/proposals/design-framework-index-2026-10-21.md` maps a question to the narrowest framework that
+decides it, and records the seven conflicts between them and the ruling on each. A review cites that
+ruling rather than filing a contradiction as a defect.
+
+**A C-7 verdict cites a success criterion where one applies, never a principle or a guideline.** WCAG's
+own structure says only the success criteria are testable. And a rule that depends on a rendered frame
+is reported as **unmeasured** rather than passed, because Chromium cannot launch under this repository's
+sandbox: no contrast ratio, target size or reflow behaviour in this tree has been measured in a browser.
+
 **What the C-7 review checklist is, recorded 2026-10-21.** The checklist is Nielsen's ten usability
 heuristics, stated verbatim in `docs/proposals/usability-heuristics-2026-10-21.md` together with the
 per-heuristic detail, the mapping onto the D-rules, and the H3 / H7 / H10 gap register. A C-7 verdict

@@ -1728,6 +1728,36 @@ Scope: the user-facing layer of Umamusume Trainer Companion. Applies to Blade vi
 
 Status: contract for review. No production UI code exists yet, so nothing here has been violated yet either.
 
+**Where the seven frameworks sit, added 2026-10-21.** The D-rules below are the ratified
+implementation of three upstream layers, and a review cites a D-rule as the operative clause and the
+upstream framework only as its justification.
+
+1. The **Laws of UX** and **Laws of UI** inventory, audited in `PLANS-AND-BRIEFS.md`
+   (§ux-laws-audit-plan). Twenty-nine entries at lawsofux.com and thirteen at uilaws.com.
+2. **Nielsen's ten usability heuristics**, stated verbatim in
+   `docs/proposals/usability-heuristics-2026-10-21.md`. The per-screen evaluation and ratings live in
+   `UX-DELIVERABLES.md` Part 3, which defers to that file for what each heuristic *requires*.
+3. **Six further frameworks**, one file each in `docs/proposals/`, read from source on 2026-10-21:
+   Shneiderman's eight Golden Rules, Tognazzini's sixteen First Principles, Gerhardt-Powals' ten
+   cognitive engineering principles, Dan Brown's eight information architecture principles, the twelve
+   Gestalt principles, and Norman's interaction principles with the two gulfs and the seven stages.
+   `docs/proposals/design-framework-index-2026-10-21.md` is the entry point, and it records the seven
+   places where these frameworks contradict each other and how each was settled.
+
+**WCAG 2.2 Level AA is the one normative layer.** It is not a framework in the same sense: a review
+cites a success criterion, never a principle. Two consequences are recorded in
+`docs/proposals/wcag-2.2-accessibility-2026-10-21.md` and are worth repeating here, because both have
+been got wrong in this tree before:
+
+- The **44px target exceeds WCAG 2.5.8 (Minimum)**, which requires 24x24 CSS px. It comes from the
+  app's `h-11` and from Fitts's Law, and it is never 2.5.8 compliance.
+- **No contrast ratio in this tree has been measured in a browser.** `app.css` records intended ratios
+  and the G-18 gate measures nothing yet, which this file already records. So 1.4.3 and 1.4.11 are
+  unverified, and the tree should say so rather than claim conformance.
+
+**Where a D-rule and a framework appear to disagree, the D-rule governs**, and the disagreement is
+recorded rather than resolved silently.
+
 **Where the usability heuristics sit, added 2026-10-21.** The D-rules below are the ratified
 implementation of two upstream layers. The first is the Laws of UX and Laws of UI inventory recorded in
 `PLANS-AND-BRIEFS.md` (§ux-laws-audit-plan) and audited here. The second is Nielsen's ten usability

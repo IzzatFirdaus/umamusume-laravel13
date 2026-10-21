@@ -13749,6 +13749,37 @@ to no-false-precision: polish never adds a number the corpus lacks.
 
 ---
 
+### 13a. The other frameworks, and what each one decides
+
+Added 2026-10-21. Section 13 above is the **Laws of UX** checklist and stays the authority for
+those twenty-nine entries. Six further frameworks were read from source on the same day and
+recorded in `docs/proposals/`, each in its own file, with the index at
+`docs/proposals/design-framework-index-2026-10-21.md`.
+
+This section says what each adds that the Laws of UX table does not, and which decision in the
+product it settles. A review cites the narrowest framework that decides the question.
+
+| Framework | File | What it decides here |
+| --- | --- | --- |
+| **Nielsen's ten usability heuristics** | `usability-heuristics-2026-10-21.md` | The review spine. Ten questions every screen is asked. The per-screen evaluation and ratings live in `UX-DELIVERABLES.md` Part 3, which defers to the proposals file for what each heuristic *says*. |
+| **Shneiderman's 8 Golden Rules** | `shneiderman-golden-rules-2026-10-21.md` | How a flow behaves from open to close, and **how many consistency exceptions are tolerable**. That last clause is the licence the dark theme's three named deviations and the Database area's density use, and no other framework in the set grants it. |
+| **Tognazzini's 16 First Principles** | `tognazzini-first-principles-2026-10-21.md` | The millisecond and the millimetre. The **50ms click-acknowledgement budget** (§10) and the **double-click trap** (§10) are here and nowhere else; so is **Multiple Fitts** (§8, reduce the *count* of targets, not only their size), and the argument that **not supporting undo forces a pile of "are you really sure" dialogs** (§7). |
+| **Gerhardt-Powals' 10 cognitive engineering principles** | `gerhardt-powals-principles-2026-10-21.md` | Whether the product left work in the user's head. **Automate unwanted workload** (§1) is why the Grade Point runway computes the shortfall, and **fuse data** (§3) is why a stat is a number with a denominator rather than a list of per-turn gains to add up. |
+| **Dan Brown's 8 IA principles** | `information-architecture-principles-2026-10-21.md` | The space *between* screens. **Objects** (§1) makes a run and a veteran objects with lifecycles. **Multiple classification** (§6) means a library is browsable by more than one axis. **Growth** (§8) is what makes a fifth scenario cost configuration rather than layout. |
+| **Gestalt principles** | `gestalt-principles-2026-10-21.md` | Perception rather than behaviour. **Common Fate** forbids decorative motion, which is why there is exactly one `animate-pulse` in the tree. **Closure** is permitted visually and forbidden informationally. |
+| **Norman's interaction principles** | `norman-interaction-principles-2026-10-21.md` | Affordance versus **signifier**, and the **two gulfs**. The gulfs are the only instrument in the set that separates "I could not act" from "I could not tell what it did", so every screen review answers both separately. |
+| **WCAG 2.2 AA** | `wcag-2.2-accessibility-2026-10-21.md` | The only **normative** framework. A review cites a success criterion, never a principle, and the proposal file records the five criteria new in 2.2 and the withdrawal of 4.1.1. |
+
+**Two things this corrects in the existing plan.**
+
+The **44px target** is a house rule that **exceeds** WCAG 2.5.8 (Minimum), which requires 24x24 CSS px.
+It comes from the app's `h-11` and from Fitts's Law, and it must never be described as 2.5.8
+compliance.
+
+**No contrast ratio has been measured in a browser.** `app.css` records intended ratios and the
+G-18 gate measures nothing yet, which `DESIGN.md` §2.1 already records. So 1.4.3 and 1.4.11 are
+**unverified**, and the framework file says so rather than claiming conformance.
+
 ### 14. Phase A0 — 2.0.0 remediation
 
 The 2.0.0 frontend ships in tandem with the rewrite, so it must meet the same WCAG 2.2 AA bar and the
