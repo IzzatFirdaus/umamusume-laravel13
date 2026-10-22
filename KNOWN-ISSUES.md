@@ -3284,6 +3284,8 @@ tree-wide divergence.
 108. The two lines are the whole finding: the gate strips the comment forms a view can hide prose in and
 reports the files that still carry a dash in rendered copy. After the fix:
 `php artisan test --compact --filter="RenderedCopyHygiene|UiHygiene"` -> 12 passed (42 assertions), exit 0.
+The full suite, after the whole audit pass landed: `php artisan test --compact` -> **1949 passed (31769
+assertions)**, exit 0, 683.00s.
 `npm run typecheck` exit 0. `npm run lint:ui` -> `ui-lint: clean`. `npm run build` -> exit 0. The browser
 proof, on a session-private pair (`PLAYWRIGHT_PORT=8163 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/antislop-audit/browser-8163.sqlite`):
 `npx playwright test tests/browser/skills.spec.ts tests/browser/database.spec.ts` -> 36 passed (2.3m),
