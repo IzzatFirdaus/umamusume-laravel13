@@ -12,7 +12,7 @@ defineProps<{
 </script>
 
 <template>
-    <div v-if="enabled" class="rounded-md border border-rule bg-panel p-3">
+    <div v-if="enabled" class="card p-3">
         <CapsuleHeader title="Team Rank" class="mb-3" />
 
         <p v-if="current === null" class="text-sm text-ink">
