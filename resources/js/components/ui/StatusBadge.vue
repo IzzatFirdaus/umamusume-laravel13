@@ -63,7 +63,7 @@ const tone = computed<string>(() => (isKnown(props.state) ? TONES[props.state] :
 <template>
     <span
         v-if="word !== null"
-        class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold"
+        class="pill"
         :class="tone"
         :title="props.title"
     >
