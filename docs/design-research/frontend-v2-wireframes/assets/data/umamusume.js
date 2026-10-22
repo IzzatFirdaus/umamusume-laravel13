@@ -2,16 +2,6 @@
    TRAINER DESK v2.0.0 HFW — the trainee roster.
    GENERATED FILE. Do not hand-edit; run `php build-data.php` to regenerate.
    
-   FROZEN 2026-10-23 · capture 2026-10-23T05:50:00+08:00 · source commit 55f67f1e
-   Seed identity (sha256, first 12 hex, of database/seeders/data/*.json):
-     characters.c6676539.json 4f3523ea4301 · gametora-characters.e9e9ee6d.json e9e9ee6d5246
-     race-tier-labels-2026-09-29.json 7ee30f0ee28e · races.json 55dde7c90921
-     race_instances.json 294424fc78e0 · skills.609afe88.json 609afe887a29
-     support-cards.88dea522.json 88dea5221217 · support_effects.ca447e53.json ca447e53c376
-     ura-objectives.ead4bbfe.json ead4bbfefb44 · ura-races.json c12e8867d550
-   Ageing rule: see README.md in this directory. A capture older than the seed set it
-   was built from is stale, and the figure that dates it is the one above.
-   
    The catalogue's own roster: every trainee the `umamusume` table holds, each
    one with the card forms joined on, the growth row and the star-breakthrough
    rows the export states, the nine aptitude grades the catalogue keeps, and the
@@ -24,6 +14,19 @@
    The growth row is the source's `stat_bonus`, which the client reads as the
    Growth Rate row (`docs/UMAMUSUME_REFERENCE.md` §1.3.5). A zero is a real
    figure and is printed as `+0%`, never as a blank.
+   FROZEN 2026-10-22 · capture 2026-10-22T21:52:29+00:00 · source commit e6d63d3d
+   Seed identity (sha256, first 12 hex, of database/seeders/data/*.json):
+     characters.c6676539.json 4f3523ea4301
+     gametora-characters.e9e9ee6d.json e9e9ee6d5246
+     race-tier-labels-2026-09-29.json 7ee30f0ee28e
+     race_instances.json 294424fc78e0
+     races.json 55dde7c90921
+     skills.609afe88.json 609afe887a29
+     support-cards.88dea522.json 88dea5221217
+     support_effects.ca447e53.json ca447e53c376
+     ura-objectives.ead4bbfe.json ead4bbfefb44
+     ura-races.json c12e8867d550
+   Ageing rule: see README.md in this directory.
    ============================================================================ */
 
 (function (root, factory) {
