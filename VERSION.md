@@ -1,10 +1,10 @@
 # VERSION
 
-Current version: `2.0.0`, pre-release. Not tagged: the only tag in the repository is `0.1.0`.
+Current version: `2.0.1`, pre-release. Not tagged: the only tag in the repository is `0.1.0`.
 
 | Field            | Value                         | Measured                                                                      |
 | ---------------- | ----------------------------- | ----------------------------------------------------------------------------- |
-| Version          | `2.0.0`                       | decision recorded in `docs/adr/0019-semver-label-tag-and-release-branch.md`   |
+| Version          | `2.0.1`                       | PATCH, per `docs/adr/0019-semver-label-tag-and-release-branch.md`'s fix rule; bumped from `2.0.0` by the 2026-10-22 UX-audit fix pass (corrects semantics and accessibility, adds no capability) |
 | Pre-release      | yes                           | GitHub Release flag, not a semver hyphen identifier                           |
 | Git tags         | `0.1.0`                       | `git tag`, `git ls-remote --tags origin`; no `2.0.0` tag exists locally or on the remote |
 | Release commit   | not fixed                     | see Release state below                                                       |

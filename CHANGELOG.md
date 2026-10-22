@@ -11,6 +11,49 @@ This file starts empty on purpose. The repository's whole history predates it, t
 mean writing claims about commits that were never recorded as changes, which `AGENTS.md` §5 forbids.
 Entries below are written at the time of the change, not back-filled.
 
+## [2.0.1] - 2026-10-22
+
+A fixes-only release: it corrects semantics and accessibility and adds no capability. Label per
+`docs/adr/0019-semver-label-tag-and-release-branch.md`'s PATCH rule. That ADR is **Proposed**, so it does
+not bind; the label is applied because the owner directed this pass to ship as its own release under it.
+
+### Fixed
+
+- **A provenance state outside the union crashed the page.** `ProvenanceMark.vue` indexed its mark map with
+  no fallback, and `defineProps` validates nothing at runtime, so an out-of-vocabulary `state` in
+  `config/reference.php` rendered `undefined` and threw on `mark.glyph`, taking the whole Database page with
+  it. It degrades to no mark now, as `confirmed` already did. `tests/browser/provenance-mark.spec.ts`.
+- **The Cockpit's ruleset absence was hover-only.** `N/A` carried its reason in a `title`; it renders through
+  `AbsenceValue`'s disclosure now, so the reason is the summary's accessible name and opens without a script.
+  `tests/browser/scenario-panel.spec.ts`.
+- **`/database/sources` had no door.** The page is registered and served, and the Database hub — the only
+  index of Database screens — did not link it, so it was reachable only by typing the URL. The hub carries a
+  ninth area. `tests/Feature/DatabaseHubSourcesLinkTest.php`.
+- **The Cockpit's section nav rendered an unreachable tab as a focusable `role="link"` with `aria-disabled`**
+  and its reason in a `title`, which announces a state without cancelling activation. It is non-focusable
+  text now, with its reason as visible prose. `tests/browser/career-section-nav.spec.ts`.
+- **`Start career` was enabled while the screen forbade it.** It carried `aria-disabled` and a click guard
+  instead of the native `disabled` attribute, so assistive tech and keyboard activation still reached the
+  handler. It is natively disabled, with its reason printed beside it.
+  `tests/browser/career-preflight.spec.ts`.
+- **The review queue labelled one tier fact twice**: a `StatusBadge` "No match" and a `ProvenanceBadge`
+  "Unknown" on the same row. The badge is the single owner of the state word, so the duplicate pill is gone.
+  `tests/browser/review.spec.ts`.
+- **Absent cells and tiles stated their reason in a `title` only.** `DataTable` and `SubCell` render
+  `AbsenceValue` now, and six sites in the scenario and Cockpit panels lost a redundant `title` where the
+  reason was already printed. `tests/browser/data-table.spec.ts`, `tests/browser/sub-cell.spec.ts`, and
+  `tests/Feature/AbsenceChannelTest.php`, which also ratchets the 74 measured sites still outstanding.
+- **`DESIGN.md`'s §10 enforcement index described a tree that no longer exists.** The token count is 81 (not
+  60 or 59), the D-288/G-18 block is implemented rather than two `markTestIncomplete` stubs, and §8's "zero
+  `transition-*`" claim was false. Corrected by dated notes and pinned by
+  `tests/Feature/DesignDocEnforcementTest.php`.
+
+### Changed
+
+- `VERSION.md` to `2.0.1`.
+- `SCREEN_SPEC.md`: the Database hub's area count, dated notes on `SCR-REV-001`, `SCR-CAR-010`,
+  `SCR-CAR-011`, and a new `§7-38` register entry.
+
 ## [Unreleased]
 
 ### Added
