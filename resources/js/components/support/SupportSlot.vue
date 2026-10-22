@@ -89,7 +89,7 @@ function focusRow(): void {
     <li
         :id="`deck-slot-${position}`"
         tabindex="-1"
-        class="card flex flex-wrap items-start gap-x-4 gap-y-2 px-3 py-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
+        class="card flex flex-wrap items-start gap-x-4 gap-y-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
     >
         <ArtworkSlot
             v-if="card"
@@ -103,7 +103,7 @@ function focusRow(): void {
 
         <div class="flex min-w-0 flex-1 flex-col gap-1">
             <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <span class="font-semibold text-ink-strong">{{ label }}</span>
+                <span class="font-semibold text-[var(--color-ink-strong)]">{{ label }}</span>
                 <span v-if="is_friend" class="pill pill-neutral">
                     Friend slot
                 </span>
@@ -111,14 +111,14 @@ function focusRow(): void {
 
             <!-- An empty slot is a deliberate statement a Trainer makes, so it reads as a statement
                  rather than as a blank control: the card is not equipped, and here is where to put it. -->
-            <p v-if="!card" class="text-ink-muted">
+            <p v-if="!card" class="text-[var(--color-ink-muted)]">
                 Empty.
             </p>
 
             <template v-else>
                 <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <a :href="card.url" class="font-semibold text-ink hover:underline transition-colors duration-150 ease-out">{{ card.name }}</a>
-                    <span class="font-mono text-xs text-ink-muted">{{ card.rarity_word }}</span>
+                    <a :href="card.url" class="font-semibold text-[var(--color-ink)] hover:underline transition-colors duration-150 ease-out">{{ card.name }}</a>
+                    <span class="font-mono text-xs text-[var(--color-ink-muted)]">{{ card.rarity_word }}</span>
                     <SupportTypeMark :type="card.type" :label="card.type_label" />
                 </div>
 
@@ -133,13 +133,13 @@ function focusRow(): void {
                     </span>
                     <span
                         v-else-if="card.scenario_link === 'not_linked'"
-                        class="text-ink-muted"
+                        class="text-[var(--color-ink-muted)]"
                     >
                         Not a Scenario Link
                     </span>
                     <span
                         v-else
-                        class="text-ink-muted"
+                        class="text-[var(--color-ink-muted)]"
                         :title="card.scenario_link_note ?? 'The Scenario Link badge cannot be derived for this card.'"
                     >
                         Scenario Link: N/A
@@ -148,7 +148,7 @@ function focusRow(): void {
 
                 <p
                     v-if="card.effects.length > 0"
-                    class="flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-xs text-ink-muted"
+                    class="flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-xs text-[var(--color-ink-muted)]"
                 >
                     <!-- D-20: an absent dictionary row is marked by the source's own id, never labelled
                          with an invented word. -->
@@ -167,12 +167,12 @@ function focusRow(): void {
                 role="group"
                 :aria-label="`Ownership of ${label}`"
             >
-                <span class="text-xs text-ink-muted">Ownership</span>
+                <span class="text-xs text-[var(--color-ink-muted)]">Ownership</span>
                 <!-- Neither button pressed and the value named as absent: the state is in words, not in an
                      unfilled control a Trainer has to interpret. -->
                 <span
                     v-if="ownership === null"
-                    class="text-xs text-ink-muted"
+                    class="text-xs text-[var(--color-ink-muted)]"
                     title="No ownership has been recorded for this slot yet."
                 >N/A</span>
                 <div class="flex gap-1">
@@ -180,11 +180,11 @@ function focusRow(): void {
                         v-for="option in (['OWNED', 'RENTED'] as const)"
                         :key="option"
                         type="button"
-                        class="min-h-11 rounded-md border border-rule px-3 text-xs font-semibold"
+                        class="min-h-11 rounded-[var(--radius-md)] border border-[var(--color-rule)] px-3 text-xs font-semibold"
                         :class="
                             ownership === option
-                                ? 'bg-raised text-ink-strong underline decoration-2 underline-offset-4'
-                                : 'bg-transparent text-ink-muted hover:bg-sunken'
+                                ? 'bg-[var(--color-raised)] text-[var(--color-ink-strong)] underline decoration-2 underline-offset-4'
+                                : 'bg-transparent text-[var(--color-ink-muted)] hover:bg-[var(--color-sunken)]'
                         "
                         :aria-pressed="ownership === option"
                         @click="emit('ownership', position, option)"
@@ -196,7 +196,7 @@ function focusRow(): void {
 
             <button
                 type="button"
-                class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
+                class="min-h-11 rounded-[var(--radius-pill)] border border-[var(--color-rule)] px-3 text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-sunken)] focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
                 :aria-label="card ? `Replace the card in ${label}` : `Choose a card for ${label}`"
                 @click="emit('replace', position, $event)"
             >
@@ -205,6 +205,6 @@ function focusRow(): void {
             </button>
         </div>
 
-        <p v-if="error" role="alert" class="w-full text-xs text-risk">{{ error }}</p>
+        <p v-if="error" role="alert" class="w-full text-xs text-[var(--color-risk)]">{{ error }}</p>
     </li>
 </template>
