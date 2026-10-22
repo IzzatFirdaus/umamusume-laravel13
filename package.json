@@ -6,7 +6,7 @@
         "build": "vite build",
         "dev": "vite",
         "typecheck": "tsc --noEmit",
-        "lint:ui": "node tools/ui-lint.mjs",
+        "lint:ui": "node tools/ui-framework-check.mjs",
         "test:a11y": "playwright test accessibility.spec.ts",
         "test:browser": "playwright test"
     },
