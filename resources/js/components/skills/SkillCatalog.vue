@@ -198,7 +198,7 @@ function goToPage(page: number): void {
             >
                 <!-- The hit area is the link's own: the row is not a target (no `rowHref`, no row
                      handler), so the name link is the only way into the detail. `min-h-11` grows that
-                     target to the house 44px bar (DESIGN.md Â§12, KI-29) without touching the type. -->
+                     target to the house 44px bar (DESIGN.md §12, KI-29) without touching the type. -->
                 <Link :href="`/skills/${skill.id}`" class="inline-flex min-h-11 items-center font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">{{ skill.name }}</Link>
 
                 <!-- 18 of the 623 [Global] rows store the same string in both name columns, so the
