@@ -478,7 +478,7 @@ if (restored !== null) {
             v-show="open"
             role="listbox"
             aria-label="Trainees and costume cards"
-            class="mt-1 max-h-72 overflow-y-auto rounded-md border border-rule bg-raised"
+            class="card mt-1 max-h-72 overflow-y-auto bg-raised"
         >
             <template v-for="segment in segments" :key="segment.key">
                 <!-- Presentation, not role="group": a group names nothing unless it owns its options,
