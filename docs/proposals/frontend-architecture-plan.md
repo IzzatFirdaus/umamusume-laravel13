@@ -312,6 +312,8 @@ The app has *stronger* verification overall (200 Feature tests, 77 browser specs
 
 1. **ADR-0006 governs.** `DESIGN.md` owns the visual system; this plan is how a *proposed* `DESIGN.md` §3 (the component inventory) becomes the *enforced* one. An architecture change of this size needs an ADR recording the decision and its rollback, not a silent rewrite.
 2. **One source of truth per layer.** Tokens stay in `app.css`'s `@theme static`; primitives become named classes there; components stop inventing one-off utility spells.
+
+   > **Amended 2026-10-23 (CQ-01=C).** A single-use component that encapsulates its utility chain **is a primitive at the component layer**. The rule "components stop inventing one-off utility spells" applies to *templated page code*, not to the component that IS the primitive. `Form/*.vue` is the canonical case — seven components after the count correction at `82c94f8b`, plus the `ui/` field wrappers (`TextInput`, `Textarea`, `Select`, `Checkbox`, `FormField`) that re-use them; each carries its token utilities once, in one file, in one place, and a `.field` CSS class on top would add indirection, not remove it. The Phase 3 gate note's *"form controls … were read and confirmed clean"* already recorded this reading; the amendment makes it explicit and gives it a reason. `Form/*.vue` are **accepted, not re-spelled**, at Phase 3.
 3. **A rule with teeth, or no rule.** Every invariant the HFW checks gets a check that can fail; a check that cannot fail is deleted.
 4. **The lore gate and the quality bar are not touchable.** No suppression, no weakening, no new `@phpstan-ignore` / `eslint-disable` / arbitrary value.
 5. **Strangler, not big-bang.** The app keeps serving; pages migrate one at a time behind the same routes.
