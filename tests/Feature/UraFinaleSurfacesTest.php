@@ -300,10 +300,10 @@ it('stops claiming that no source publishes a Happy Meek reward table', function
 
 it('keeps the gate figures and the win-chance vocabulary out of the components that draw them', function (): void {
     $surfaces = [
-        resource_path('js/components/scenario/UraMilestoneTracker.vue'),
-        resource_path('js/components/scenario/UraDuelPanel.vue'),
         resource_path('js/components/scenario/UraPreFinalReview.vue'),
         // Phase 7A.1: UraPanel was archived; its extracted panels are checked individually above.
+        // FQ-12 (2026-10-23): UraMilestoneTracker and UraDuelPanel were deleted, so their
+        // entries left this list. The guard itself stays for the surface that survives.
     ];
 
     foreach ($surfaces as $file) {
@@ -377,9 +377,9 @@ it('emits no unknown provenance badge on any absence payload or absence surface'
     // citation-strength mark for an available row, which `config/reference.php` still carries.
     $controller = (string) file_get_contents(app_path('Http/Controllers/Career/CockpitController.php'));
 
+    // FQ-12 (2026-10-23): UraDuelPanel was deleted, so its assertion left this chain. The
+    // remaining surfaces are still read: the guard is about the badge, not about that file.
     expect(substr_count($controller, "'badge' => 'unknown'"))->toBe(0)
-        ->and((string) file_get_contents(resource_path('js/components/scenario/UraDuelPanel.vue')))
-        ->not->toContain('state="unknown"')
         ->and((string) file_get_contents(resource_path('js/components/scenario/UraPreFinalReview.vue')))
         ->not->toContain('state="unknown"')
         ->and((string) file_get_contents(resource_path('js/components/scenario/UnityCupTournamentReadiness.vue')))
