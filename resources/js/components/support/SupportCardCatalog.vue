@@ -121,7 +121,7 @@ function goToPage(page: number): void {
     <!-- The heading names the catalog this component lists, and it must differ from the page's own
          h1: the hosts are titled "Support cards" and "Support Cards", and a screen that says the
          same thing twice is the defect `tests/browser/ui-hygiene.spec.ts` reads every route for. -->
-    <h2 class="text-lg font-semibold text-ink-strong">Support card catalog</h2>
+    <h2 class="text-lg font-semibold text-[var(--color-ink-strong)]">Support card catalog</h2>
 
     <!-- Control height is `h-11`, the value DESIGN.md §6.14 fixes for a form input and the one
          skills/index already carries, so the two filter surfaces measure the same in a browser. -->
@@ -174,7 +174,7 @@ function goToPage(page: number): void {
 
     </div>
 
-    <p v-if="loading" role="status" class="mt-4 text-sm text-ink-muted">Loading results…</p>
+    <p v-if="loading" role="status" class="mt-4 text-sm text-[var(--color-ink-muted)]">Loading results…</p>
 
     <template v-if="cards.data.length === 0">
         <!-- The state a Trainer meets before a fetch, stated as itself rather than as an empty result.
@@ -199,9 +199,9 @@ function goToPage(page: number): void {
     </template>
 
     <template v-else>
-        <p class="mt-6 text-sm text-ink-muted">{{ cards.total }} of {{ totalCount }} support cards</p>
+        <p class="mt-6 text-sm text-[var(--color-ink-muted)]">{{ cards.total }} of {{ totalCount }} support cards</p>
 
-        <ul id="support-card-results" class="card mt-2 divide-y divide-rule">
+        <ul id="support-card-results" class="card mt-2 divide-y divide-[var(--color-rule)]">
             <li
                 v-for="card in cards.data"
                 :key="card.id"
@@ -239,7 +239,7 @@ function goToPage(page: number): void {
                 <!-- The hit area is the link's own: the row is not a target (no `rowHref`, no row
                      handler), so the name link is the only way into the detail. `min-h-11` grows that
                      target to the house 44px bar (DESIGN.md §12, KI-29) without touching the type. -->
-                <Link :href="card.url" class="inline-flex min-h-11 items-center font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">{{ card.name }}</Link>
+                <Link :href="card.url" class="inline-flex min-h-11 items-center font-semibold text-[var(--color-ink-strong)] hover:underline transition-colors duration-150 ease-out">{{ card.name }}</Link>
 
                 <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
 
@@ -248,11 +248,11 @@ function goToPage(page: number): void {
 
                 <!-- The word carries the state on its own, so no colour role and no tooltip: the
                      column already states it in the client's own terms. -->
-                <span class="ml-auto text-xs text-ink-muted">{{ card.release_status }}</span>
+                <span class="ml-auto text-xs text-[var(--color-ink-muted)]">{{ card.release_status }}</span>
 
                 <span
                     v-if="card.effects.length > 0"
-                    class="flex w-full flex-wrap gap-x-3 gap-y-0.5 font-mono text-xs text-ink-muted"
+                    class="flex w-full flex-wrap gap-x-3 gap-y-0.5 font-mono text-xs text-[var(--color-ink-muted)]"
                 >
                     <!-- A dictionary row that is absent is marked, not labelled: the id is the
                          source's own number, so naming it states a fact rather than inventing a word. -->
@@ -274,7 +274,7 @@ function goToPage(page: number): void {
         />
     </template>
 
-    <p class="mt-6 max-w-3xl text-xs text-ink-muted">
+    <p class="mt-6 max-w-3xl text-xs text-[var(--color-ink-muted)]">
         Effect figures are each effect's highest stated anchor, not an interpolation, and the anchor a card
         stops at is not always level 50. The type word is the client's: the source's key for Wit is
         <code>intelligence</code> and for Pal is <code>friend</code>.
