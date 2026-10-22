@@ -72,7 +72,7 @@ const open = ref(false);
             role="img"
             :aria-label="name"
             tabindex="0"
-            class="inline-flex items-center gap-1 rounded-full bg-sunken px-2 py-0.5 text-xs font-semibold text-ink-strong focus:outline-2 focus:outline-offset-2"
+            class="pill pill-neutral focus:outline-2 focus:outline-offset-2"
             @mouseenter="open = true"
             @mouseleave="open = false"
             @focus="open = true"
@@ -87,7 +87,7 @@ const open = ref(false);
         <span
             v-if="props.title && open"
             role="tooltip"
-            class="absolute bottom-full left-0 z-10 mb-1 w-max max-w-xs rounded-md border border-rule bg-raised px-2 py-1 text-xs font-normal text-ink shadow-overlay"
+            class="card absolute bottom-full left-0 z-10 mb-1 w-max max-w-xs bg-raised px-2 py-1 text-xs font-normal text-ink shadow-overlay"
         >
             {{ props.title }}
         </span>
