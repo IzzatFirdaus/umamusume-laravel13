@@ -1,9 +1,0 @@
-ding.
-- Never commit `vendor/`, `node_modules/`, `storage/` snapshots or backups, `.env`, or
-  `public/build/`.
-- Deleting or skipping a test needs owner approval and a stated reason in the commit.
-- There is no changelog or version file to bump.
-
-## 15. Definition of done
-
-A change is done when all
