@@ -105,6 +105,28 @@
           </div>
 
           <div class="card">
+            <h2>Effects, when no row is stated at the top anchor</h2>
+            <p class="sub">A second card, held beside the first: its export states every effect at a later level and none at the top one. The rows below are the same eight effects with their first anchor absent.</p>
+            <table class="t">
+              <thead>
+                <tr><th>Effect</th><th class="mono">Stated at</th><th class="n">Cap</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Friendship Bonus</td><td class="mono">1: Not recorded · 25: 15% · 45: 20%</td><td class="n mono"><b>20%</b> · Lv45</td></tr>
+                <tr><td>Mood Effect</td><td class="mono">1: Not recorded · 30: 40% · 50: 60%</td><td class="n mono"><b>60%</b> · Lv50</td></tr>
+                <tr><td>Training Effectiveness</td><td class="mono">1: Not recorded · 45: 5% · 50: 10%</td><td class="n mono"><b>10%</b> · Lv50</td></tr>
+                <tr><td>Hint Frequency</td><td class="mono">1: Not recorded · 25: 30% · 45: 40%</td><td class="n mono"><b>40%</b> · Lv45</td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:10px"><span class="g" aria-hidden="true">○</span><span>
+              Every row is absent at the top anchor, and the absence is spelled rather than left blank. A blank cell would read
+              as a missing column; <b>Not recorded</b> says the source states this effect only from a later level, which is a
+              different claim from a level-1 value of zero. The cap cell still prints, because the cap is stated even where the
+              first anchor is not.
+            </span></p>
+          </div>
+
+          <div class="card">
             <h2>Events</h2>
             <p class="sub">Card events are where Pal cards earn their slot.</p>
             <table class="t">
