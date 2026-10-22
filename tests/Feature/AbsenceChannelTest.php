@@ -142,7 +142,8 @@ it('never adds a new N/A whose reason is only on a title', function (): void {
     $migrated = [
         'resources/js/components/scenario/TrackblazerFatiguePanel.vue',
         'resources/js/components/scenario/TrackblazerRoutePlanner.vue',
-        'resources/js/components/scenario/UraMilestoneTracker.vue',
+        // FQ-12 (2026-10-23): UraMilestoneTracker.vue was deleted; its entry left this list
+        // with it. The disclosure channel it was migrated to is unchanged on every other site.
         'resources/js/pages/Career/Cockpit/Panels/CareerGoalsPanel.vue',
         'resources/js/pages/Career/Cockpit/Panels/TeamRankLadderPanel.vue',
         'resources/js/pages/Career/Cockpit/Panels/UraMandatoryLadder.vue',
