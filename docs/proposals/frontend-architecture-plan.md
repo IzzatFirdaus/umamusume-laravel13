@@ -529,6 +529,12 @@ In `primitive-reconciliation.md §7`:
 - Do not rename or renumber anything in §11's namespaces.
 
 
+
+> **Phase 0 gate — closed 2026-10-23.** ADR-0028 accepted (2026-10-22).
+> Parity classification at `primitive-reconciliation.md §7` (§7.1 selector axis from 2026-10-22,
+> §7.2 component axis re-derived on 2026-10-23 over 96 SFCs). `DESIGN.md §3` cites it.
+> Phase 1 opens; no owner rulings block it.
+
 ### Phase 1 — Foundation: the check harness and token parity
 
 1. **Port the three static checks into `tools/`.** `framework-check` becomes `tools/ui-framework-check.mjs`, scanning the Vue tree the way it scans the HTML set: it reads `resources/css/app.css` and the component tree, and fails on (a) an arbitrary value outside the approved debt list, (b) a `dark:` utility, (c) a Card inside a Card, (d) a primitive used with no docstring.
