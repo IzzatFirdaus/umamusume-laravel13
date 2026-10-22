@@ -786,6 +786,16 @@ Owner ruling 5: the dataset is a **frozen dated snapshot**, not a second source 
 
 **Gate:** the captured date is present in all five locations; `node data-check.mjs` is green; no page in the set implies its figures are live.
 
+> **Phase 5 gate — closed 2026-10-23.** All five locations carry the capture (`e6d63d3d`): the four
+> generated files and `assets/data/README.md`. Each header states the capture instant in ISO 8601 with its
+> offset (`2026-10-23T05:53:07+08:00`), the source commit the inputs were read at, and a sha256 digest per
+> seed file in `database/seeders/data/`; the README carries the ageing rule and says explicitly that
+> staleness is a fact about the (capture, seed set) pair, not about age. The record is written by the
+> generator rather than by hand (`5a634f4d`, corrected to the display zone at `5f1da6a6`), so a
+> regeneration restamps it and a hand-edited header is a defect. `node data-check.mjs` is green on the
+> regenerated set: 67 trainees, 106 forms, 559 support cards, 35 effects, 1,910 skills, and the four files
+> still load as classic scripts under `file://`. No page in the set claims its figures are live.
+
 > **Amended 2026-10-22 (correction pass, D1 / authoritative A11, A13, A14, A15).** Four corrections. The gate above stands as written.
 >
 > **A11 — the 71-vs-67 difference is a test artifact, not a product defect, and it is not a seeder.** Measured on `15f7ee1b`: the four extra trainees are created by `tests/Feature/CatalogRosterTreeTest.php:212` (`Form Counted N`) and `tests/Feature/CareerTraineeSelectTest.php:227` (`Form Counted 1`), and the twelve `[Sample Form]` cards by `database/factories/CharacterCardFactory.php:27`. They are **factories invoked from Feature tests that run against the dev database**, not seeder rows — so `migrate:fresh --seed` alone does not reproduce them, and "name the seeder" has no correct answer: there isn't one. Two consequences: a production database reads **67**, which is the correct figure; and **freezing the catalogue does not close this** — the contamination recurs on the next Feature run against the dev database. Closing it is a test-isolation fix (point the suite at a scratch database, which `tests/browser/global-setup.ts` already does for the browser suite), and that is not this plan's scope.
