@@ -45,11 +45,12 @@ const WORDS: Record<KnownState, string> = {
 /*
  * Tone per state, as complete literals rather than concatenated class names: Tailwind scans source
  * for whole class strings, so `bg-exception-${state}` would compile to nothing.
+ * Mapped to named primitives: pill provides the layout, pill-neutral provides the tone.
  */
 const TONES: Record<KnownState, string> = {
-    estimated: 'bg-sunken text-ink-strong border-rule',
-    unknown: 'bg-sunken text-ink-muted border-rule',
-    unconfirmed: 'bg-sunken text-ink-strong border-rule',
+    estimated: 'pill pill-neutral',
+    unknown: 'pill pill-neutral',
+    unconfirmed: 'pill pill-neutral',
 };
 
 const isKnown = (value: string): value is KnownState => (KNOWN as readonly string[]).includes(value);
@@ -63,7 +64,6 @@ const tone = computed<string>(() => (isKnown(props.state) ? TONES[props.state] :
 <template>
     <span
         v-if="word !== null"
-        class="pill"
         :class="tone"
         :title="props.title"
     >
