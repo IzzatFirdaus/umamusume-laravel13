@@ -43,7 +43,7 @@ const groupName = `segmented-${useId()}`;
         <legend :class="hideLegend ? 'sr-only' : 'mb-1 text-sm font-medium text-ink'">
             {{ legend }}
         </legend>
-        <div class="card inline-flex flex-wrap gap-1 bg-sunken p-1">
+        <div class="inline-flex flex-wrap gap-1 rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-[var(--color-sunken)] p-1">
             <template v-for="option in options" :key="option.value">
                 <input
                     :id="`${groupName}-${option.value}`"
