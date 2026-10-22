@@ -679,6 +679,37 @@ In `primitive-reconciliation.md §7`:
 > **The gate is nonetheless not closed, because the browser suite is red.** `npm run test:browser` was run against this tree: **316 passed, 45 failed** across 21 spec files before the run was stopped at test 361 so the result could be reported. Failing specs, most-affected first: `review` 13, `career-legacy-deck-steps` 6, `career-cockpit` 5, `containment` 2, `career-section-nav` 2, `career-build-target` 2, then one each in `flash-name-{probe-settled,mechanism,first}`, `rice-shower-unity-cup`, `page-header`, `full-career-journey`, `navigation-determinism`, `career-scenario-select`, `career-surface-cutover`, `accessibility`, `card-section`, `choices-so-far`, `data-table`, `career-trainee-select`, `catalog-to-wizard`.
 >
 > None of the 45 sits in a file this pass touched (two unused components deleted, two guard blocks narrowed, one JSON allowlist, three plan notes), so the red is inherited rather than introduced — but inherited red is still red. **Phase 4b stays blocked until the suite is green.** The failure list above is the next pass's work list; it is recorded, not fixed, per this pass's stop conditions.
+> **Phase 3.13 triage — 2026-10-23. Gate closed for Phase 3's own scope; the suite is not green.**
+> The full Playwright run recorded **456 tests, 404 passed, 52 failed** across 25 spec files before it
+> was stopped (a 2-minute per-test bound was in force, so the count is a near-total, not the loop
+> floor the previous inline run produced). Every failing spec was then re-run in a worktree at
+> **`b75921b4`** — the last commit before the Phase 3 deletion and cleanup work — with
+> `node_modules`, `vendor`, `storage`, `bootstrap/cache` and `public/build` linked in:
+> **155 tests, 102 passed, 53 failed**.
+>
+> Matching failures by `file:line:column`: **51 of the 52 are PRE-EXISTING** — they fail identically at
+> the base commit, so no Phase 3 commit caused them. The 52nd, `runs.spec.ts:41` ("renders the run list,
+> and says what happens next when it is empty"), fails in both full-suite orders and **passes when run
+> alone at head**, so it is order-dependent rather than caused by a commit. **Zero failures are
+> attributable to Phase 3 work.**
+>
+> Pre-existing failures, by spec: `review` 13, `career-legacy-deck-steps` 6, `career-cockpit` 5,
+> `support-deck` 3, `career-build-target` 2, `career-section-nav` 2, `containment` 2,
+> `rice-shower-unity-cup` 2, and one each in `accessibility`, `card-section`,
+> `career-scenario-select`, `career-surface-cutover`, `career-trainee-select`, `catalog-to-wizard`,
+> `choices-so-far`, `data-table`, `flash-name-first`, `flash-name-mechanism`,
+> `flash-name-probe-settled`, `full-career-journey`, `navigation-determinism`, `page-header`,
+> `runs` (order-dependent), `scratch-phase1-screenshots` and `screen-speed`.
+>
+> Artifacts: `.scratch-uma/phase313/head-results.jsonl`, `base-results.jsonl`, `triaged.md` (the
+> per-test table), plus the two run logs. The base worktree was removed after the run.
+>
+> **What "closed" means here, exactly.** The Phase 3 completion criterion (CQ-05) is met at 95/95, and
+> no Phase 3 commit is responsible for any failing test. It does **not** mean the browser suite passes:
+> 51 pre-existing failures remain, they predate this phase, and they are the next pass's work list. The
+> gate note above (line 671) and this one are the record; a future suite run that comes back green
+> retires the list, and one that comes back with a new failure is a regression this triage can now
+> name.
 
 ### Phase 7 — Agent ergonomics (the transition tooling; runs alongside Phase 3)
 
