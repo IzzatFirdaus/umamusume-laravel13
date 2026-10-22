@@ -96,7 +96,7 @@ function statusVariant(status: string): 'info' | 'success' | 'warning' | 'neutra
                     <span
                         v-for="tag in props.veteran.tags"
                         :key="tag"
-                        class="rounded-full bg-sunken px-2 py-0.5 text-ink-strong"
+                        class="pill pill-neutral"
                         title="A tag you typed on this record. Tags are the Trainer's own words, not client vocabulary."
                     >
                         {{ tag }}
