@@ -131,7 +131,7 @@ const incompleteData = computed(
 </script>
 
 <template>
-    <div class="rounded-xl border border-rule bg-raised p-4">
+    <div class="card rounded-xl p-4">
         <section v-if="hasObjectives" aria-labelledby="career-objectives-heading">
             <h3 id="career-objectives-heading" class="text-lg font-semibold text-ink-strong">
                 Objectives
