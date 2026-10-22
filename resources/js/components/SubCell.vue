@@ -34,7 +34,7 @@ const isAbsent = (value: string | number): boolean => String(value) === ABSENT;
     <!-- The root is the `<dl>` the `<dt>`/`<dd>` pair requires (WCAG 1.3.1, axe `dlitem`): the same
          self-contained fix `KpiCard.vue` got, so every host stays valid without remembering a parent.
          Both call sites (the Dashboard career strip, the Runs list row) already sit inside plain divs. -->
-    <dl data-stat-tile class="rounded-md border border-rule bg-raised p-3 min-w-0">
+    <dl data-stat-tile class="card p-3 min-w-0">
         <dt class="text-xs font-medium text-ink-muted">{{ props.label }}</dt>
         <dd
             data-stat-value
