@@ -14,6 +14,12 @@ import { test, expect } from '@playwright/test';
  *
  * Every assertion reads an attribute or computed style, never a screenshot (Rule 5). A capture cannot
  * distinguish `title="…"` from its absence, which is exactly the mistake §16 records.
+ *
+ * The route names are the app's own: `/umamusume` is the trainee catalog and `/support-cards` is the
+ * card catalog. The list carried `/catalog` and `/support-decks`, which the app does not serve, and a
+ * 404 answers with no mounted app, so each of those two cases burned the whole test timeout and said
+ * nothing. The status is asserted before the wait below, so a dead route names itself in one line
+ * instead of timing out in silence.
  */
 
 const ROUTES = [
@@ -24,14 +30,15 @@ const ROUTES = [
     '/database',
     '/review',
     '/preferences',
-    '/support-decks',
-    '/catalog',
+    '/support-cards',
+    '/umamusume',
     '/training-runs/create',
 ];
 
 for (const route of ROUTES) {
     test(`${route} keeps the one-arrival contract`, async ({ page }) => {
-        await page.goto(route, { waitUntil: 'domcontentloaded' });
+        const response = await page.goto(route, { waitUntil: 'domcontentloaded' });
+        expect(response?.status(), `${route} must be a live route`).toBe(200);
         await page.locator('#app > *').first().waitFor();
 
         // 1. One h1, and it is not duplicated as an h2.

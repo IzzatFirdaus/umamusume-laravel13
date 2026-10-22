@@ -109,7 +109,10 @@ function goToPage(page: number): void {
 </script>
 
 <template>
-    <h2 class="text-lg font-semibold text-ink-strong">Skill search</h2>
+    <!-- The heading names the catalog this component lists, and it must differ from the page's own
+         h1: the hosts are titled "Skill search" and "Skills", and a screen that says the same thing
+         twice is the defect `tests/browser/ui-hygiene.spec.ts` reads every route for. -->
+    <h2 class="text-lg font-semibold text-ink-strong">Skill catalog</h2>
 
     <!-- Control sizes are measured, not assumed (DESIGN.md §6.14 fixes a form input at 44px,
          and `h-11` is this repository's idiom for it). The checkbox is the WCAG 2.2 AA floor

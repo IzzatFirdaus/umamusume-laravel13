@@ -118,7 +118,10 @@ function goToPage(page: number): void {
 </script>
 
 <template>
-    <h2 class="text-lg font-semibold text-ink-strong">Support cards</h2>
+    <!-- The heading names the catalog this component lists, and it must differ from the page's own
+         h1: the hosts are titled "Support cards" and "Support Cards", and a screen that says the
+         same thing twice is the defect `tests/browser/ui-hygiene.spec.ts` reads every route for. -->
+    <h2 class="text-lg font-semibold text-ink-strong">Support card catalog</h2>
 
     <!-- Control height is `h-11`, the value DESIGN.md §6.14 fixes for a form input and the one
          skills/index already carries, so the two filter surfaces measure the same in a browser. -->

@@ -23,8 +23,8 @@ import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 
 const AREAS: { url: string; heading: string; title: string }[] = [
     { url: '/database/trainees', heading: 'Umamusume catalog', title: 'Trainees' },
-    { url: '/database/supports', heading: 'Support cards', title: 'Support Cards' },
-    { url: '/database/skills', heading: 'Skill search', title: 'Skills' },
+    { url: '/database/supports', heading: 'Support card catalog', title: 'Support Cards' },
+    { url: '/database/skills', heading: 'Skill catalog', title: 'Skills' },
 ];
 
 test('the hub lists the eight areas and no deferred section', async ({ page }) => {
