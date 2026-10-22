@@ -8,9 +8,7 @@
   open: the parity classification is deferred to D2 for every component a concurrent fix pass is changing; the primitive-to-token map's CONFLICT rows are owner questions FQ-01 to FQ-09 and none is resolved here; docs/proposals/PARITY.md does not exist yet
 -->
 
-Status: **Proposed** — drafted 2026-10-22. The Architect accepts; an agent cannot accept an ADR
-(`ADR-0027` records the same constraint). This body is the record of what the proposal asserts on
-its date; later corrections go to `## Ledger`, never into `## Decision`.
+Status: **Accepted (2026-10-22)** — drafted 2026-10-22, accepted by the owner.
 
 ## Context
 
