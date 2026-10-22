@@ -84,19 +84,19 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
 <template>
     <!-- The node. `<li>` because every node in this graph is one item of the parent's list, and the
          browser's own list semantics are then the graph's semantics. -->
-    <li class="card rounded-lg p-3">
-        <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ label }}</p>
+    <li class="card rounded-[var(--radius-lg)] p-3">
+        <p class="text-xs font-semibold uppercase tracking-wide text-[var(--color-ink-muted)]">{{ label }}</p>
 
-        <p class="mt-1 text-sm font-semibold text-ink-strong">
+        <p class="mt-1 text-sm font-semibold text-[var(--color-ink-strong)]">
             <!-- The absent name is a named absence, never a dash and never a default (AGENTS.md §5).
                  `title` says which of the two absences it is: not chosen, or not read. -->
             <span v-if="name">{{ name }}</span>
-            <span v-else class="text-ink-muted" title="No Umamusume chosen for this node yet.">
+            <span v-else class="text-[var(--color-ink-muted)]" title="No Umamusume chosen for this node yet.">
                 Not chosen
             </span>
         </p>
 
-        <div class="mt-0.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-xs text-ink-muted">
+        <div class="mt-0.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-xs text-[var(--color-ink-muted)]">
             <!-- The letter rank the Trainer read, or the named absence. The star count is the numeric
                  `rank` beside it: two fields, because the client shows two. -->
             <span :title="rank === null ? 'You have not recorded a star count for this parent.' : undefined">
@@ -116,7 +116,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
             </li>
         </ul>
 
-        <p v-else class="mt-2 text-xs text-ink-muted" title="No Sparks recorded for this node.">
+        <p v-else class="mt-2 text-xs text-[var(--color-ink-muted)]" title="No Sparks recorded for this node.">
             No Sparks recorded.
         </p>
 
@@ -126,7 +126,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
             would come from exist in the corpus only as a wiki pair flagged stale (§1.5.3), and the
             plan's rule for a silent corpus is that the screen renders absence, never a number.
         -->
-        <div class="mt-2 text-xs text-ink-muted">
+        <div class="mt-2 text-xs text-[var(--color-ink-muted)]">
             Spark chance
             <AbsenceValue :reason="probability.title" compact />
         </div>
@@ -134,7 +134,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
         <!-- The assignment control. Present only where the screen assigns; the compare surface renders
              the same node with no picker, so the two cannot disagree about what a node is. -->
         <div v-if="assignable" class="mt-3">
-            <label class="block text-xs font-medium text-ink" :for="controlName">
+            <label class="block text-xs font-medium text-[var(--color-ink)]" :for="controlName">
                 Assign to {{ label }}
             </label>
             <BaseSelect
