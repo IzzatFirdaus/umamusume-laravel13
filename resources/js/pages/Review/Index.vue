@@ -3,7 +3,6 @@ import AppLayout from '../../layouts/AppLayout.vue';
 import CandidateForm from '../../components/review/CandidateForm.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import StatusPill from '../../components/StatusPill.vue';
-import StatusBadge from '../../components/ui/StatusBadge.vue';
 import SuggestionHint from '../../components/review/SuggestionHint.vue';
 import Pagination from '../../components/ui/Pagination.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
@@ -184,9 +183,12 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                                 <div class="flex flex-wrap items-center gap-2">
                                     <span class="font-medium text-ink-strong">{{ candidate.proposed_name }}</span>
                                     <!-- "Fuzzy match" stays a StatusPill because it is a softer warning
-                                         rather than an absence; "No match" is the absence and is
-                                         StatusBadge's `unknown` case (plan 1.6). -->
+                                         rather than an absence. "No match" does NOT: DESIGN.md §5 (b)'s
+                                         2026-10-17 amendment makes `ProvenanceBadge` the single owner of
+                                         the state word, and for that tier the badge already says it. The
+                                         pill and the badge carried one fact twice. -->
                                     <StatusPill
+                                        v-if="candidate.match_tier === 'Fuzzy'"
                                         :label="pillFor(candidate.match_tier).label"
                                         :variant="pillFor(candidate.match_tier).variant"
                                         size="sm"
@@ -247,7 +249,10 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                                     <span v-if="candidate.proposed_name_ja" lang="ja" class="text-ink-muted">
                                         {{ candidate.proposed_name_ja }}
                                     </span>
-                                    <StatusBadge state="unknown" label="No match" />
+                                    <!-- DESIGN.md §5 (b), 2026-10-17: `ProvenanceBadge` is the single
+                                         owner of the state word, and on this row it already says the
+                                         state. The "No match" badge beside it stated one fact twice, so
+                                         it is gone; the badge on the right carries it. -->
                                     <!-- The disclosure rides the header row so a collapsed card is one
                                          line: name, state, and the control that opens it. -->
                                     <CandidateForm

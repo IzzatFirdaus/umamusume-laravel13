@@ -96,6 +96,18 @@ test('each card explains itself: count, pill, badge, reason, and one primary-act
     // names the id it does suggest.
     await expect(card.getByText(/No suggestion:|Suggested id:/)).toBeVisible();
 
+    // DESIGN.md §5 (b), 2026-10-17: one provenance-state label per fact, and `ProvenanceBadge` is the
+    // single owner of the state word. Before this case a no-match row rendered both
+    // `StatusBadge("No match")` and the badge's `Unknown` for the same tier fact — two labels, one
+    // state. A `toHaveCount(0)` on the pill would pass on a card that never had one, so this asserts
+    // the badge is still present (the state word survives) and the duplicate word is gone.
+    await expect(card.locator('[role="img"]').first()).toBeVisible();
+    // The badge is the one label left, so its state word is the card's state word. Asserted on the
+    // badge's accessible name rather than on visible text: the state is spelled in the badge's
+    // `aria-label`, and the duplicate pill was the only visible copy of it.
+    await expect(card.locator('[role="img"]').first()).toHaveAttribute('aria-label', /^(Unknown|Estimated|Calculated)/);
+    await expect(card.getByText('No match', { exact: true })).toHaveCount(0);
+
     // 6A.4: exactly one accented primary for the screen, on the topmost card; the other cards'
     // Resolve buttons render secondary.
     await expect(page.locator('.bg-primary-action')).toHaveCount(1);
@@ -208,10 +220,13 @@ test('splits the queue into the decidable half and the research half', async ({ 
     expect(decidableHeading).toBe(`Needs a decision (${decidableCards})`);
     expect(researchHeading).toBe(`No fuzzy match (${researchCards})`);
 
-    // The membership rule: a suggestion in the first half, none in the second.
+    // The membership rule: a suggestion in the first half, none in the second. The second half's
+    // state word is the badge's now, not the removed "No match" pill (DESIGN.md §5 (b)), so it is
+    // counted on the badge's accessible name.
     await expect(decidable.getByText('Suggested id:')).toHaveCount(decidableCards);
     await expect(research.getByText('Suggested id:')).toHaveCount(0);
-    await expect(research.getByText('No match')).toHaveCount(researchCards);
+    await expect(research.locator('[role="img"][aria-label^="Unknown"]')).toHaveCount(researchCards);
+    await expect(research.getByText('No match', { exact: true })).toHaveCount(0);
 });
 
 test('shows review progress and keeps the pager reachable', async ({ page }) => {
