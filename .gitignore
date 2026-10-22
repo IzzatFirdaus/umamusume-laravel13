@@ -61,6 +61,7 @@ CLAUDE.local.md
 /.copilot/
 /.crush/
 /.crushrc
+/.dsh-vision-toolkit/
 /.factory/
 /.gemini/
 /.hermes/
