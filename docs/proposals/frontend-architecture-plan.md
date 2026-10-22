@@ -1729,3 +1729,58 @@ The five: `dashboard.spec.ts:147`; `career-cockpit.spec.ts:566`; `career-legacy-
 ---
 
 *This document proposes the architecture and records the owner's scope rulings. It does not itself decide the architecture: the Phase 0 ADR, the `DESIGN.md` §3 refresh, and the gate evidence at each phase are what turn it into work.*
+
+---
+
+## Question register (consolidated 2026-10-23)
+
+Every question asked by a reconciliation pass, answered or open. `FQ-15` is reserved and empty.
+`EQ-` remains empty — the map's causes are `FQ-01` through `FQ-05`. `CQ-` items number from `CQ-01`.
+The four earlier registers (FQ, BQ, EQ, CQ) above are preserved as written; this is their single home
+going forward, and each row names where its answer landed.
+
+### Answered
+
+| id | question | answer | landed at | named assertion |
+|---|---|---|---|---|
+| FQ-01 | `--rule-soft` promote, or re-spell every use? | B — re-spell to `--color-rule`; no new token | `22d09b9f` | `rule on page` passes both themes |
+| FQ-02 | may selection state be a `box-shadow`? | A — re-spell to `--color-pick-line` at 2px | `22d09b9f` | `pick-line on raised` at 3:1 |
+| FQ-03 | may the save bar carry elevation? | A — drop the shadow | `22d09b9f` | zero `box-shadow` in `.savebar` |
+| FQ-04 | what ink on the risk fill? | A — mint `--color-on-risk` | `22d09b9f` | `on-risk on risk` at 4.5:1 |
+| FQ-05 | seven stat colours, or re-point the `type-*` set? | A — mint seven `--color-stat-*` | `22d09b9f` | seven `stat-* on raised` at 3:1 |
+| FQ-10 | `review-detail` as its own route? | A — amend `SCREEN_SPEC.md` §4.5 | ruled; route **not yet shipped** | pending 4b.2 |
+| FQ-12 | five components with no production call site? | URA pair deleted; three UI kept (cited by fixtures) | `e7621467`, `f69cf1c1`, `681e8b70` | `UraFinale` + `AbsenceChannel` green |
+| FQ-14 | `@vue/compiler-sfc` — promote or resolve via the plugin? | A — promote, pinned `3.5.43` | `f38c7558` | `npm ls` shows it direct |
+| FQ-16 | Snapshot rows and §4 sections? | A — both together | `96eca6f6` | registry consistent |
+| FQ-17 | Dashboard and Run detail? | split — Dashboard drawn; Run detail out of scope | `04387fd6` + `96eca6f6` | set at 56 pages |
+| FQ-18 | how does the pair list grow? | C — two-part rulings, per-theme rows | `b91090f0` | 41 pairs asserted |
+| BQ-02 | `AGENTS.md`'s `title`-only absence idiom | corrected to a disclosure channel | `ef3f2828` | no bare "renders as N/A with a title" |
+| BQ-03 | Preflight focus path | C — native `disabled`, visible reason, separate focus-mover | carried in `Career/Preflight.vue` | — |
+| D-1 | which pairs does the list carry? | defined per FQ-01..05; the scrim pair withdrawn | `b91090f0`, `45adcab9` | 41 pairs, 245 assertions |
+| D-2 | may white ink sit on the nine grade fills? | A — test the ban | `b91090f0` | `#FFFFFF`-fails assertions present |
+| CQ-01 | are `Form/*.vue` primitives? | C — amend Principle 2 | `21018672` | Form/ accepted, not re-spelled |
+| CQ-02 | `CandidateForm`'s grid arbitrary value | B — allowlist | `b098d584` | `ui-framework-check` exit 0 |
+| CQ-03 | the two `SparkChip` components | **reversed** — both live, keep both, no rename | `24f50a0c` | ten production importers |
+| CQ-04 | URA deletion ordering | A — guard config first, then retire guards, then delete | `e7621467`, `f69cf1c1`, `681e8b70` | suite green at each step |
+| CQ-05 | Phase 3 completion criterion | rule 7 + rule 8 | `a441638d` | 96/96 by criterion |
+| CQ-06 | the post-CQ-05 remainder | measured, not decreed — 23 values, all allowlisted | `b7f74d88` | `count: 0` |
+| ADR-0019 | status | Advisory — labelling is owner-directed | `79e7aae6` | `grep "^Status:"` reads Advisory |
+| ADR-0028 | status | Accepted (2026-10-22) | owner-applied | `grep "^Status:"` reads Accepted |
+
+### Open
+
+| id | question | why open | next test |
+|---|---|---|---|
+| FQ-10 (delivery) | the `review.detail` route is ruled but not shipped | 4b.2 has not run; the answer is recorded, the code is not | `review-detail.spec.ts` proving one rendering |
+| N-1 (map §7.2) | 70 of 96 components are `unclassified` on the signature axis | CQ-05 accepted utility-only spellings, so the axis lost its bite | a rendered app-vs-set comparison, both themes |
+| N-7 (§7.2) | the set's dark `primary-action` is its light one | the port could not close it and Phase 2 minted no token for it | correct `shell.css`'s dark block, or record the divergence beside the dark baseline |
+| 7.3 (exit) | the screenshot-diff baseline does not exist | `--write primitives` has never run against a committed gallery | write the baseline, commit it, then `--check` |
+| 6.1 (release) | the browser suite carries 51 pre-existing failures | proven at `b75921b4`; none caused by Phase 3 | fix them, then cut 2.1.0 |
+
+### Empty namespaces
+
+- **`EQ-`** — no map cause exists outside `FQ-01` through `FQ-05`; recorded once here rather than
+  re-deriving an empty list per pass.
+- **`FQ-15`** — reserved and unused. A `.slot-*` question was considered and found to have only one
+  defensible resolution (re-spell to the existing token, which `--radius-sm` already carries), so it did
+  not merit an owner question. The id is not reused.
