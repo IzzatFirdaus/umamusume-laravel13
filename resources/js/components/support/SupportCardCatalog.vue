@@ -125,7 +125,7 @@ function goToPage(page: number): void {
 
     <!-- Control height is `h-11`, the value DESIGN.md §6.14 fixes for a form input and the one
          skills/index already carries, so the two filter surfaces measure the same in a browser. -->
-    <div class="mt-4 rounded-md border border-rule bg-raised p-4">
+    <div class="card mt-4">
         <form
             class="flex flex-wrap items-end gap-3 text-sm"
             :aria-busy="loading ? 'true' : null"
@@ -183,7 +183,7 @@ function goToPage(page: number): void {
              tree, so a second database asked the same day is told "unchanged" and stays empty. KI-27. -->
         <p
             v-if="totalCount === 0"
-            class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
+            class="note mt-8"
         >
             The support-card catalog holds no rows yet. Run <code>php artisan uma:fetch gametora-support-cards</code>
             to fill it, or <code>php artisan uma:reparse gametora-support-cards</code> if a fetch says the document
@@ -191,7 +191,7 @@ function goToPage(page: number): void {
         </p>
         <p
             v-else
-            class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
+            class="note mt-8"
         >
             Nothing matches {{ askedFor }}. If a card you expect is not in the support-card catalog,
             that is a gap in the fetched data rather than a mistake in the query.
@@ -201,7 +201,7 @@ function goToPage(page: number): void {
     <template v-else>
         <p class="mt-6 text-sm text-ink-muted">{{ cards.total }} of {{ totalCount }} support cards</p>
 
-        <ul id="support-card-results" class="mt-2 divide-y divide-rule rounded-md border border-rule bg-raised">
+        <ul id="support-card-results" class="card mt-2 divide-y divide-rule">
             <li
                 v-for="card in cards.data"
                 :key="card.id"
