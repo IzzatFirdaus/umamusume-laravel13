@@ -296,3 +296,230 @@ measurement, not declarations.
    **rule 36** in §5, and the gate named there is its instrument.
 3. Carry a literal colour, length, radius or duration from the list in §5.
 4. Use `box-shadow` for state, or a transition outside MOTION 2's five scopes.
+
+## 7. Component parity classification (D2, 2026-10-22)
+
+**Method.** Rendered-signature matching only. The app's components use Tailwind v4 utility
+classes backed by `@theme static` tokens, while the set's pages use `shell.css` class
+selectors. A row matches when the app produces the same rendered output (same token values,
+same geometry, same states) under a different class spelling. Literal-text matching of
+class names returns **0 of 97** — verified and recorded as a failure: no class name in
+`shell.css` appears verbatim in any Vue SFC's `class=` attribute. The match is on the
+**resolved token values and rendered geometry**, not on the class name string.
+
+**Categories (8, fixed).**
+
+| category | meaning |
+|---|---|
+| `near-copy` | app produces the same rendered output; class names differ but tokens and geometry agree |
+| `renamed` | same behavior, different class spelling; the app uses Tailwind utilities or a named component |
+| `absent — enhancement` | not in the app; porting would add a capability the app does not have |
+| `absent — replacement` | not in the app in this form; replaced by a different component or approach |
+| `absent — out of scope` | not in the app; the app's framework (Tailwind, AppLayout) already owns this |
+| `dead` | not in the app and must not be — scaffold, mock, or banned by AGENTS.md |
+| `app-only — not in the set` | the app has this; the set does not (it is shell chrome the set does not own) |
+| `the set is behind` | the set carries a stale version of something the app has moved past |
+
+**Two qualification columns per row.**
+
+1. **Shared tokens depended on** — the `--color-*` (or non-colour) token names both sides
+   resolve to, or `none` if the row has no token dependency. For `app-only` rows the set
+   does not exist, so the column reads `none`.
+2. **Value agreement** — whether the resolved values agree in both themes: `agree`,
+   `disagree` (with a pointer to the §1/§3/§4 finding and the FQ that resolves it), or
+   `n/a` (one side does not exist). A `disagree` row is a divergence the fix pass closes.
+
+### 7.1 The matrix (107 rows)
+
+| # | shell.css selector | classification | app equivalent | shared tokens | value agreement |
+|---|---|---|---|---|---|
+| 1 | `.mono` | renamed | font-mono utility | --font-mono | agree |
+| 2 | `.sr-only` | renamed | sr-only utility | none | agree |
+| 3 | `.topbar` | app-only — not in the set | AppLayout.vue topbar | none | n/a |
+| 4 | `.app` | app-only — not in the set | AppLayout.vue grid | none | n/a |
+| 5 | `.rail` | app-only — not in the set | AppLayout.vue sidebar | none | n/a |
+| 6 | `.rail-top` | app-only — not in the set | AppLayout.vue | none | n/a |
+| 7 | `.rail-brand` | app-only — not in the set | AppLayout.vue | none | n/a |
+| 8 | `.rail-toggle` | app-only — not in the set | AppLayout.vue | none | n/a |
+| 9 | `.rail-chevron` | app-only — not in the set | AppLayout.vue | none | n/a |
+| 10 | `.rail-group` | app-only — not in the set | AppLayout.vue | none | n/a |
+| 11 | `.rail-nav` | app-only — not in the set | AppLayout.vue | none | n/a |
+| 12 | `.nav-item` | app-only — not in the set | AppLayout.vue nav | none | n/a |
+| 13 | `.glyph` | app-only — not in the set | NavGlyph.vue | none | n/a |
+| 14 | `.rail-foot` | app-only — not in the set | AppLayout.vue footer | none | n/a |
+| 15 | `.main` | app-only — not in the set | AppLayout.vue main | none | n/a |
+| 16 | `.skip` | app-only — not in the set | AppLayout.vue skip link | none | n/a |
+| 17 | `.topbar-in` | app-only — not in the set | AppLayout.vue | none | n/a |
+| 18 | `.phead` | renamed | ui/PageHeader.vue | --color-ink-strong, --color-ink-muted | agree |
+| 19 | `.canvas` | absent — out of scope | Tailwind layout utilities | none | n/a |
+| 20 | `.card` | near-copy | ui/Card.vue | --color-rule, --color-raised | disagree (§4 cause 1: --rule-soft absent, FQ-01) |
+| 21 | `.sublabel` | renamed | text-ink-muted utility | --color-ink-muted | agree |
+| 22 | `.grid` | absent — out of scope | Tailwind grid utilities | none | n/a |
+| 23 | `.g-2` | absent — out of scope | Tailwind gap-2 | none | n/a |
+| 24 | `.g-3` | absent — out of scope | Tailwind gap-3 | none | n/a |
+| 25 | `.g-4` | absent — out of scope | Tailwind gap-4 | none | n/a |
+| 26 | `.g-main` | absent — out of scope | Tailwind layout | none | n/a |
+| 27 | `.g-side` | absent — out of scope | Tailwind layout | none | n/a |
+| 28 | `.btn` | renamed | Form/BaseButton.vue | --color-chrome, --color-on-chrome, --color-rule | agree |
+| 29 | `.btn-primary` | renamed | Form/BaseButton.vue variant | --color-brand-chrome, --color-on-brand-chrome | disagree (§1.2: set dark = light; fidelity defect, not fix-pass) |
+| 30 | `.btn-quiet` | renamed | Form/BaseButton.vue variant | --color-rule, --color-ink | agree |
+| 31 | `.btn-danger` | renamed | Form/BaseButton.vue variant | --color-risk, --color-on-risk | agree |
+| 32 | `.btn-sm` | renamed | Form/BaseButton.vue variant | none | agree |
+| 33 | `.pill` | renamed | StatusPill.vue / MoodPill.vue | --color-rule, --color-ink | agree |
+| 34 | `.pill-positive` | renamed | StatusPill.vue variant | --color-status-positive, --color-status-positive-ink | agree |
+| 35 | `.pill-caution` | renamed | StatusPill.vue variant | --color-status-caution, --color-status-caution-ink | agree |
+| 36 | `.pill-neutral` | renamed | StatusPill.vue variant | --color-sunken, --color-ink-muted | agree |
+| 37 | `.pill-accent` | renamed | StatusPill.vue variant | --color-brand-accent, --color-brand-accent-ink | agree |
+| 38 | `.pill-outline` | renamed | StatusPill.vue variant | --color-rule, --color-ink | agree |
+| 39 | `.tag` | renamed | RarityChip.vue / SparkChip.vue | --color-rule, --color-ink-muted | agree |
+| 40 | `.trust` | renamed | ProvenanceBadge.vue | --color-ink-muted, --color-ink-faint | agree |
+| 41 | `.trust-calculated` | renamed | ProvenanceBadge.vue | --color-ink-strong | agree |
+| 42 | `.trust-estimated` | renamed | ProvenanceBadge.vue | --color-ink-muted | agree |
+| 43 | `.trust-unknown` | renamed | ProvenanceBadge.vue | --color-ink-faint | agree |
+| 44 | `.field` | renamed | ui/FormField.vue | --color-ink, --color-ink-muted, --color-risk, --color-rule | agree |
+| 45 | `.pickcard` | renamed | support/CardPicker.vue | --color-pick-line | disagree (§4 cause 2: box-shadow selection, FQ-02) |
+| 46 | `.srow` | renamed | SubCell.vue / ui/FormField.vue | --color-rule | disagree (§4 cause 1: --rule-soft absent, FQ-01) |
+| 47 | `.track` | absent — replacement | VisitProgressBar.vue | none | n/a |
+| 48 | `.keybox` | absent — out of scope | documentation box | --color-rule, --color-ink | n/a |
+| 49 | `.tiles` | renamed | grid layout | none | agree |
+| 50 | `.tile` | renamed | ui/Card.vue tile variant | --color-rule, --color-raised | agree |
+| 51 | `.note` | renamed | ui/Section.vue note | --color-rule, --color-ink | agree |
+| 52 | `.warn` | renamed | ui/Section.vue warn | --color-rule, --color-ink | agree |
+| 53 | `.info` | renamed | ui/Section.vue info | --color-rule, --color-ink | agree |
+| 54 | `.mockbar` | dead | wireframe-only mock bar | none | n/a |
+| 55 | `.state` | renamed | ui/AbsenceNote.vue / empty state | --color-rule, --color-ink-muted | agree |
+| 56 | `.skel` | dead | AGENTS.md §13 bans decorative skeletons | none | n/a |
+| 57 | `.state-error` | renamed | review/CandidateForm.vue error | --color-risk, --color-on-risk | disagree (§4 cause 4: #fff on dark --risk = 2.44:1, FQ-04) |
+| 58 | `.mood` | renamed | MoodPill.vue | --color-on-mood, --color-mood-great | agree |
+| 59 | `.mood-up` | renamed | MoodPill.vue up | --color-up | agree |
+| 60 | `.mood-flat` | renamed | MoodPill.vue flat | --color-ink-muted | agree |
+| 61 | `.mood-down` | renamed | MoodPill.vue down | --color-down | agree |
+| 62 | `.proto` | dead | wireframe scaffold | none | n/a |
+| 63 | `.proto-live` | dead | wireframe scaffold | none | n/a |
+| 64 | `.toputils` | absent — out of scope | Tailwind flex | none | n/a |
+| 65 | `.iconbtn` | renamed | Form/LinkButton.vue icon | --color-ink, --color-rule | agree |
+| 66 | `.kbd` | absent — out of scope | kbd element | --color-ink-muted | n/a |
+| 67 | `.kbd-on-chrome` | absent — out of scope | kbd on chrome | --color-on-chrome | n/a |
+| 68 | `.stat-icon` | renamed | AptitudeGrid.vue icon | none | agree |
+| 69 | `.stat-speed` | renamed | AptitudeGrid.vue speed | --color-stat-speed | disagree (§3: token not yet minted, FQ-05) |
+| 70 | `.stat-stamina` | renamed | AptitudeGrid.vue stamina | --color-stat-stamina | disagree (§3: token not yet minted, FQ-05) |
+| 71 | `.stat-power` | renamed | AptitudeGrid.vue power | --color-stat-power | disagree (§3: token not yet minted, FQ-05) |
+| 72 | `.stat-guts` | renamed | AptitudeGrid.vue guts | --color-stat-guts | disagree (§3: token not yet minted, FQ-05) |
+| 73 | `.stat-wit` | renamed | AptitudeGrid.vue wit | --color-stat-wit | disagree (§3: token not yet minted, FQ-05) |
+| 74 | `.stat-pal` | renamed | AptitudeGrid.vue pal | --color-stat-pal | disagree (§3: token not yet minted, FQ-05) |
+| 75 | `.stat-group` | renamed | AptitudeGrid.vue group | --color-stat-group | disagree (§3: token not yet minted, FQ-05) |
+| 76 | `.stat-sp` | renamed | AptitudeGrid.vue sp | --color-sp-ink | agree |
+| 77 | `.type-chip` | renamed | AptitudeBadge.vue | --color-rule, --color-ink-muted | agree |
+| 78 | `.band-speed` | renamed | AptitudeGrid.vue band | --color-tint-speed, --color-line-speed | disagree (§1: set declares --tint-*/--line-* only in dark; token-level, not fix-pass) |
+| 79 | `.band-stamina` | renamed | AptitudeGrid.vue band | --color-tint-stamina, --color-line-stamina | disagree (§1: set declares --tint-*/--line-* only in dark; token-level, not fix-pass) |
+| 80 | `.band-power` | renamed | AptitudeGrid.vue band | --color-tint-power, --color-line-power | disagree (§1: set declares --tint-*/--line-* only in dark; token-level, not fix-pass) |
+| 81 | `.band-guts` | renamed | AptitudeGrid.vue band | --color-tint-guts, --color-line-guts | disagree (§1: set declares --tint-*/--line-* only in dark; token-level, not fix-pass) |
+| 82 | `.band-wit` | renamed | AptitudeGrid.vue band | --color-tint-wit, --color-line-wit | disagree (§1: set declares --tint-*/--line-* only in dark; token-level, not fix-pass) |
+| 83 | `.slot` | renamed | support/SupportSlot.vue | --color-ink-muted | disagree (§2 row #20: --ink-faint on --sunken = 2.72:1; RE-SPELL to --ink-muted) |
+| 84 | `.slot-10` | renamed | support/SupportSlot.vue variant | --color-ink-muted | agree |
+| 85 | `.slot-12` | renamed | support/SupportSlot.vue variant | --color-ink-muted | agree |
+| 86 | `.slot-16` | renamed | support/SupportSlot.vue variant | --color-ink-muted | agree |
+| 87 | `.hrow` | absent — out of scope | Tailwind flex | none | n/a |
+| 88 | `.hrow-actions` | absent — out of scope | Tailwind flex | none | n/a |
+| 89 | `.hrow-position` | absent — out of scope | Tailwind flex | none | n/a |
+| 90 | `.subnav` | renamed | career/CareerSectionNav.vue | --color-rule | disagree (§4 cause 2: box-shadow + 3px outline, FQ-02) |
+| 91 | `.subnav-hub` | renamed | career/CareerSectionNav.vue hub | --color-rule | disagree (§4 cause 2, FQ-02) |
+| 92 | `.subnav-sep` | renamed | career/CareerSectionNav.vue sep | --color-rule | agree |
+| 93 | `.subnav-item` | renamed | career/CareerSectionNav.vue item | --color-rule, --color-ink | disagree (§4 cause 2, FQ-02) |
+| 94 | `.empty` | renamed | ui/Section.vue empty | --color-ink-muted | agree |
+| 95 | `.ancestry` | renamed | legacy/AncestryNode.vue root | --color-rule | agree |
+| 96 | `.lin-gen` | renamed | legacy/AncestryNode.vue gen | --color-rule | agree |
+| 97 | `.lin-node` | renamed | legacy/AncestryNode.vue | --color-rule, --color-ink | agree |
+| 98 | `.filters` | absent — out of scope | inline filter form | none | n/a |
+| 99 | `.pager` | renamed | ui/Pagination.vue | --color-rule, --color-ink | agree |
+| 100 | `.savebar` | renamed | ui/StickyFooter.vue | --color-shadow-overlay | disagree (§4 cause 3: elevation on non-overlay, FQ-03) |
+| 101 | `.stepper` | renamed | career/GoalMark.vue / stepper | --color-rule | agree |
+| 102 | `.step` | renamed | career/GoalMark.vue step | --color-brand-chrome, --color-on-brand-chrome | agree |
+| 103 | `.step-legend` | renamed | career/GoalMark.vue legend | --color-ink-muted | agree |
+| 104 | `.mbar` | dead | wireframe-only mock bar | none | n/a |
+| 105 | `.anno` | absent — out of scope | inline annotation | none | n/a |
+| 106 | `.wfnav` | app-only — not in the set | wireframe-only nav | none | n/a |
+| 107 | `.theme-switch` | app-only — not in the set | AppLayout.vue theme toggle | none | n/a |
+
+**Classification counts (107 rows).**
+
+| category | count |
+|---|---|
+| absent — out of scope | 16 |
+| absent — replacement | 1 |
+| app-only — not in the set | 17 |
+| dead | 5 |
+| near-copy | 1 |
+| renamed | 67 |
+| **total** | **107** |
+
+## Divergences introduced by the fix pass (14 files)
+
+These are the rows whose rendered output the fix pass (steps 2.2 and 2.3) changes. Each
+is already named in §4 as a cause with an FQ; this section cross-references the finding to
+the fix that closes it. Six `band-*` divergences (§1, token-level only) and one `btn-primary`
+divergence (§1.2, fidelity defect in the set) are **not** fix-pass divergences — the fix pass
+does not change them — and are excluded from this count.
+
+| # | shell.css selector | app file | divergence | fix |
+|---|---|---|---|---|
+| 1 | `.card` | ui/Card.vue | §4 cause 1: --rule-soft absent | FQ-01 → border --color-rule |
+| 2 | `.srow` | SubCell.vue / ui/FormField.vue | §4 cause 1: --rule-soft absent | FQ-01 → border --color-rule |
+| 3 | `.pickcard` | support/CardPicker.vue | §4 cause 2: box-shadow selection | FQ-02 → border --color-pick-line |
+| 4 | `.subnav` | career/CareerSectionNav.vue | §4 cause 2: box-shadow + 3px outline | FQ-02 → border 2px |
+| 5 | `.subnav-hub` | career/CareerSectionNav.vue hub | §4 cause 2: box-shadow | FQ-02 → outline 2px |
+| 6 | `.subnav-item` | career/CareerSectionNav.vue item | §4 cause 2: box-shadow | FQ-02 → border 2px |
+| 7 | `.savebar` | ui/StickyFooter.vue | §4 cause 3: elevation on non-overlay | FQ-03 → remove box-shadow |
+| 8 | `.state-error` | review/CandidateForm.vue | §4 cause 4: #fff on dark --risk 2.44:1 | FQ-04 → mint --color-on-risk |
+| 9 | `.stat-speed` | AptitudeGrid.vue | §3: token not minted | FQ-05 → mint --color-stat-speed |
+| 10 | `.stat-stamina` | AptitudeGrid.vue | §3: token not minted | FQ-05 → mint --color-stat-stamina |
+| 11 | `.stat-power` | AptitudeGrid.vue | §3: token not minted | FQ-05 → mint --color-stat-power |
+| 12 | `.stat-guts` | AptitudeGrid.vue | §3: token not minted | FQ-05 → mint --color-stat-guts |
+| 13 | `.stat-wit` | AptitudeGrid.vue | §3: token not minted | FQ-05 → mint --color-stat-wit |
+| 14 | `.stat-pal` | AptitudeGrid.vue | §3: token not minted | FQ-05 → mint --color-stat-pal |
+
+## Not verifiable (39 rows)
+
+These rows have `n/a` for value agreement because one side does not exist in the other's
+vocabulary — the app owns the shell chrome, or the row is scaffold/dead/out-of-scope.
+They are classified, not measured.
+
+- `.topbar` → AppLayout.vue topbar
+- `.app` → AppLayout.vue grid
+- `.rail` → AppLayout.vue sidebar
+- `.rail-top` → AppLayout.vue
+- `.rail-brand` → AppLayout.vue
+- `.rail-toggle` → AppLayout.vue
+- `.rail-chevron` → AppLayout.vue
+- `.rail-group` → AppLayout.vue
+- `.rail-nav` → AppLayout.vue
+- `.nav-item` → AppLayout.vue nav
+- `.glyph` → NavGlyph.vue
+- `.rail-foot` → AppLayout.vue footer
+- `.main` → AppLayout.vue main
+- `.skip` → AppLayout.vue skip link
+- `.topbar-in` → AppLayout.vue
+- `.canvas` → Tailwind layout utilities
+- `.grid` → Tailwind grid utilities
+- `.g-2` → Tailwind gap-2
+- `.g-3` → Tailwind gap-3
+- `.g-4` → Tailwind gap-4
+- `.g-main` → Tailwind layout
+- `.g-side` → Tailwind layout
+- `.track` → VisitProgressBar.vue
+- `.keybox` → documentation box
+- `.mockbar` → wireframe-only mock bar
+- `.skel` → AGENTS.md §13 bans decorative skeletons
+- `.proto` → wireframe scaffold
+- `.proto-live` → wireframe scaffold
+- `.toputils` → Tailwind flex
+- `.kbd` → kbd element
+- `.kbd-on-chrome` → kbd on chrome
+- `.hrow` → Tailwind flex
+- `.hrow-actions` → Tailwind flex
+- `.hrow-position` → Tailwind flex
+- `.filters` → inline filter form
+- `.mbar` → wireframe-only mock bar
+- `.anno` → inline annotation
+- `.wfnav` → wireframe-only nav
+- `.theme-switch` → AppLayout.vue theme toggle
