@@ -738,6 +738,26 @@ The migration is executed largely by coding agents, and five optimisations were 
 4. **Extend two HFW pages with edge-case states** instead of adding Storybook: `catalog-detail.html` gains a null-profile form and `support-card-detail.html` gains a card whose effect rows are all absent at the top anchor. Both enter `framework-check` like any other content, so the null-state rendering is law-checked rather than merely visible.
 
 **Phase 7 gate.** `npm run typecheck`; `node tools/ui-framework-check.mjs` clean on the migrated tree; `node tools/ui-screenshot-diff.mjs --check primitives` green against the committed baseline; `node tools/ui-codemod.mjs --dry-run` reports zero auto-applicable rewrites remaining; and the `AGENTS.md` ruleblock present with its dated banner.
+> **Phase 7 exit gate — 2026-10-23: three of four conditions hold; the gate remains open.**
+> Measured at `ef3f2828`:
+>
+> - **`ui-framework-check` clean on the migrated tree — yes.** `node tools/ui-framework-check.mjs` exits 0,
+>   rule 7 has no `resources/js` finding, and rule 8 is at **zero unallowlisted debt** with all 23 remaining
+>   values named in `tools/ui-lint-baseline.json` (`count: 0`, `b7f74d88`).
+> - **`ui-codemod --dry-run` reports zero auto-applicable rewrites — yes.** 97 files scanned, `APPLIED (0)`;
+>   the refusals are exact-set misses against a zero-entry map and `:class` bindings, which is the
+>   refusal-generator shape A23 predicted.
+> - **The `AGENTS.md` ruleblock is present — yes** (`ef3f2828`), with its dated banner, both rules and the
+>   `ponytail:` escape hatch; BQ-02's wording is corrected in the same commit.
+> - **`node tools/ui-screenshot-diff.mjs --check primitives` — not run, and cannot pass.** The tool exists
+>   (`1a8cd5b0`) and its baseline discipline is written (per-primitive baselines only, committed only for
+>   the primitive gallery), but **no baseline image is committed**: `--write primitives` has never been
+>   run against a committed gallery entry. A `--check` with no baseline is a comparison against nothing,
+>   so reporting it green would be the vacuous pass the tool was written to avoid.
+>
+> **The gate therefore stays open on one condition**, and the work is small and named: run
+> `--write primitives` against the primitive gallery once the app renders, commit the baseline, and run
+> `--check` against it. Everything else Phase 7 promised is measured and in place.
 
 > **Amended 2026-10-22 (correction pass, D1 / authoritative A2, A3, A19, A22, A23).** Four corrections and one move. The text above stands as written.
 >
