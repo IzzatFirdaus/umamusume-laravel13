@@ -386,7 +386,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
         <section
             v-if="props.name === 'grade_objectives'"
             :aria-labelledby="gradeHeadingId"
-            class="flex flex-col gap-3 rounded-md border border-rule bg-panel p-4"
+            class="flex flex-col gap-3 card p-4"
         >
             <h3 :id="gradeHeadingId" tabindex="-1" class="text-lg font-semibold text-ink-strong">
                 Grade Point
@@ -396,7 +396,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                 <p>No scenario is set for this run, so no grade-point meter is composed.</p>
             </div>
             <template v-else>
-                <div class="rounded-md border border-rule bg-raised p-3">
+                <div class="card p-3">
                     <p
                         v-if="currentPeriod === null"
                         class="text-sm text-ink"
@@ -464,7 +464,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                     </template>
                 </div>
 
-                <p class="rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink">
+                <p class="card px-3 py-2 text-sm text-ink">
                     <span class="font-semibold text-ink-strong">Surplus does not carry over.</span>
                     Each of these is judged on its own, so whatever is left over at one deadline
                     is not available at the next.
@@ -474,7 +474,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                     <li
                         v-for="(objective, index) in props.scenario.grade.objectives"
                         :key="objective.index"
-                        class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 rounded-md border border-rule bg-raised px-3 py-2 text-sm"
+                        class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 card px-3 py-2 text-sm"
                     >
                         <span class="font-medium text-ink">{{ objective.name }}</span>
                         <span class="font-mono text-xs tabular-nums text-ink-muted">
@@ -555,7 +555,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
         <section
             v-else-if="props.name === 'shop'"
             :aria-labelledby="shopHeadingId"
-            class="flex flex-col gap-3 rounded-md border border-rule bg-panel p-4"
+            class="flex flex-col gap-3 card p-4"
         >
             <h3
                 :id="shopHeadingId"
@@ -570,7 +570,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                 <p>No scenario is set for this run, so no Pro Shop is composed.</p>
             </div>
             <template v-else>
-                <div class="rounded-md border border-rule bg-raised p-3 text-sm">
+                <div class="card p-3 text-sm">
                     <p class="text-ink">
                         <span class="font-semibold text-ink-strong">Rotation:</span>
                         <template v-if="props.scenario.shop.rotation_resets_in === null">
@@ -606,7 +606,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                         <li
                             v-for="row in catalogue"
                             :key="row.name"
-                            class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 rounded-md border border-rule bg-raised px-3 py-2 text-sm"
+                            class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 card px-3 py-2 text-sm"
                         >
                             <span class="min-w-0 flex-1">
                                 <span class="font-semibold text-ink-strong">{{ row.name }}</span>
@@ -621,7 +621,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
 
                 <p
                     v-if="props.scenario.shop.purchases.length === 0"
-                    class="rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink-muted"
+                    class="card px-3 py-2 text-sm text-ink-muted"
                     role="status"
                 >
                     No purchases recorded for this run.
@@ -630,7 +630,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                     <li
                         v-for="(purchase, index) in props.scenario.shop.purchases"
                         :key="`${purchase.turn}-${purchase.item}-${index}`"
-                        class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 rounded-md border border-rule bg-raised px-3 py-2 text-sm"
+                        class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 card px-3 py-2 text-sm"
                     >
                         <span class="min-w-0 flex-1">
                             <span class="font-semibold text-ink-strong">{{ purchase.item }}</span>
@@ -661,7 +661,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                 <form
                     method="POST"
                     :action="props.scenario.shop.fill"
-                    class="mt-3 flex max-w-3xl flex-wrap items-end gap-3 rounded-md border border-rule bg-raised p-3 text-sm"
+                    class="mt-3 flex max-w-3xl flex-wrap items-end gap-3 card p-3 text-sm"
                     @submit.prevent="purchaseForm.post(props.scenario.shop.fill, { preserveScroll: true })"
                 >
                     <div class="flex flex-col gap-1">
@@ -753,7 +753,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
         <section
             v-else-if="props.name === 'epithet_routes'"
             :aria-labelledby="epithetHeadingId"
-            class="flex flex-col gap-3 rounded-md border border-rule bg-panel p-4"
+            class="flex flex-col gap-3 card p-4"
         >
             <h3 :id="epithetHeadingId" tabindex="-1" class="text-lg font-semibold text-ink-strong">
                 Epithet routes
