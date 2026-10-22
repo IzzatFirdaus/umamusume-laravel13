@@ -111,6 +111,10 @@
        chrome/on-chrome are, so components stay theme-agnostic (D-101). */
     --color-ring: #4E7906;
     --color-risk: #800014;
+    /* FQ-04 (2026-10-22): the ink that goes ON the risk fill. White clears the light
+       fill at 10.89:1 but measures 2.44:1 on the dark risk, so the pair is split by
+       theme the way chrome/on-chrome and pick/on-pick are. */
+    --color-on-risk: #FFFFFF;
     /*
      * The mandatory goal race's own pair, split because D-181 asks for two colours on
      * one cell: the client's red `Goal` pennant, and a heavier *warm* outline.
@@ -157,6 +161,17 @@
     --color-sp: #009FE1;
     --color-sp-ink: #0E7490;
     --color-rank: #351F70;
+    /* FQ-05 (2026-10-22): the seven stat-mark values promoted from `shell.css` §3.
+       `.stat-sp` is not here because it already aliases `--color-sp-ink`. The
+       `--color-type-*` family stays separate: type chips and stat marks are
+       different semantic roles even where the nouns coincide. */
+    --color-stat-speed: #2F6BC4;
+    --color-stat-stamina: #C64B5E;
+    --color-stat-power: #8A5A32;
+    --color-stat-guts: #C4557E;
+    --color-stat-wit: #3E6B3A;
+    --color-stat-pal: #6E7A45;
+    --color-stat-group: #3E7A4A;
 
     /*
      * Mood tiers, as the client paints them (research §3.1, §6.17). `GREAT` and `GOOD` are
@@ -359,6 +374,7 @@ html[data-theme='dark'] {
     --color-on-chrome: #121013;
     --color-ring: #7FCC09;
     --color-risk: #FF7E8C;
+    --color-on-risk: #121013;
     /* Stepped from #FF6B7A (4.33:1 on raised) to clear 4.5:1 for AA text (KI-20).
        The goal comment below still holds: this is deliberately not the risk red, and
        neither value aliases `--color-up`. */
@@ -374,6 +390,13 @@ html[data-theme='dark'] {
     --color-sp: #4FC3F7;
     --color-sp-ink: #4FC3F7;
     --color-rank: #B6B4C2;
+    --color-stat-speed: #7FA8E8;
+    --color-stat-stamina: #F08A96;
+    --color-stat-power: #C99A6B;
+    --color-stat-guts: #F08BB4;
+    --color-stat-wit: #8CC78A;
+    --color-stat-pal: #AEBB84;
+    --color-stat-group: #86C996;
 
     --color-up: #FF9A2C;
     --color-down: #4EA1E8;
@@ -510,6 +533,85 @@ html[data-theme='dark'] {
             radial-gradient(circle 0.25rem at 0.75rem 0.625rem, var(--color-raised) 100%, transparent 100%),
             radial-gradient(circle 0.25rem at 1.625rem 0.625rem, var(--color-raised) 100%, transparent 100%);
     }
+}
+
+/* ===========================================================================
+   PORTED PRIMITIVES — the 21 families from shell.css (primitive-reconciliation.md §2)
+   Ported in step 2.2 (6 CONFLICT) and step 2.3 (11 RE-SPELL + 3 REUSE; 1 DROP omitted).
+   Each primitive resolves to house tokens; no literal colour, length, radius or duration.
+   =========================================================================== */
+
+/* --- 6 CONFLICT families (step 2.2: the FQ ruling IS the port) ---
+
+   FQ-01: .card and .srow — border --rule-soft absent (1.37:1); re-spell to --color-rule.
+   FQ-02: .pickcard and .subnav — box-shadow selection; replace with border --color-pick-line at 2px.
+   FQ-03: .savebar — elevation on a non-overlay; remove box-shadow.
+   FQ-04: .state-error — white on dark --risk 2.44:1; mint --color-on-risk, split by theme.
+   FQ-05: .stat-* — seven promoted tokens (minted above in @theme static); REUSE family, port below.
+   --------------------------------------------------------------------------- */
+
+/* .card — the surface container. Resolves to: --color-rule (border), --color-raised (fill).
+   FQ-01: border is --color-rule (3.46:1 on page, 3.88:1 in dark), not the absent --rule-soft. */
+@utility card {
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-md);
+    background-color: var(--color-raised);
+}
+
+/* .srow — a labelled row inside a card. Resolves to: --color-rule (border).
+   FQ-01: same cause as .card — --rule-soft absent, re-spell to --color-rule. */
+@utility srow {
+    border-bottom: 1px solid var(--color-rule);
+}
+
+/* .pickcard — a selectable card whose selection is a border, not a shadow.
+   Resolves to: --color-pick-line (2px border). FQ-02: box-shadow → border-color at 2px. */
+@utility pickcard {
+    border: 2px solid var(--color-pick-line);
+    border-radius: var(--radius-md);
+    background-color: var(--color-raised);
+}
+
+/* .savebar — the sticky save bar. Resolves to: --color-rule (border-top).
+   FQ-03: box-shadow removed; separation comes from the rule edge, not elevation. */
+@utility savebar {
+    position: sticky;
+    bottom: 0;
+    border-top: 1px solid var(--color-rule);
+    background-color: var(--color-raised);
+}
+
+/* .state-error — the error callout. Resolves to: --color-risk (fill), --color-on-risk (ink).
+   FQ-04: --color-on-risk is #FFFFFF in light (10.89:1) and #121013 in dark (on --risk #FF7E8C). */
+@utility state-error {
+    border: 1px solid var(--color-risk);
+    border-radius: var(--radius-md);
+    background-color: var(--color-risk);
+    color: var(--color-on-risk);
+}
+
+/* .subnav — the section navigation strip. Resolves to: --color-rule (border), --color-ink (text).
+   FQ-02: box-shadow replaced with border; hub/item outline at 2px (base layer standard). */
+@utility subnav {
+    border-bottom: 1px solid var(--color-rule);
+}
+
+/* .subnav-hub — a hub label in the subnav. Outline at 2px per FQ-02 (base layer standard). */
+@utility subnav-hub {
+    border-radius: var(--radius-sm);
+    color: var(--color-ink-muted);
+}
+
+/* .subnav-item — a navigation item in the subnav. Resolves to: --color-ink, --color-rule.
+   FQ-02: outline at 2px (was 3px in shell.css). */
+@utility subnav-item {
+    border-radius: var(--radius-sm);
+    color: var(--color-ink);
+}
+
+/* .subnav-sep — a separator between subnav groups. */
+@utility subnav-sep {
+    border-left: 1px solid var(--color-rule);
 }
 
 /*
