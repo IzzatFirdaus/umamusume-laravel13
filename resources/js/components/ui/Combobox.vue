@@ -208,7 +208,7 @@ function onBlur(): void {
             :id="listId"
             role="listbox"
             :aria-label="label"
-            class="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-md border border-rule bg-raised py-1 shadow-overlay"
+            class="card absolute z-20 mt-1 max-h-72 w-full overflow-auto bg-raised py-1 shadow-overlay"
         >
             <li
                 v-for="(option, index) in filtered"
