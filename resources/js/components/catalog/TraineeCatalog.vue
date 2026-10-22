@@ -110,7 +110,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
 </script>
 
 <template>
-    <h2 class="text-lg font-semibold text-ink-strong">Umamusume catalog</h2>
+    <h2 class="text-lg font-semibold text-[var(--color-ink-strong)]">Umamusume catalog</h2>
 
     <div class="card mt-4">
         <form
@@ -119,7 +119,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
             @submit.prevent="applyFilters"
         >
             <label class="flex flex-col gap-1">
-                <span class="text-ink-muted">Search</span>
+                <span class="text-[var(--color-ink-muted)]">Search</span>
                 <BaseInput
                     v-model="search"
                     type="text"
@@ -130,7 +130,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                 />
             </label>
             <label class="flex flex-col gap-1">
-                <span class="text-ink-muted">Release status</span>
+                <span class="text-[var(--color-ink-muted)]">Release status</span>
                 <BaseSelect
                     v-model="status"
                     id="trainee-status"
@@ -157,7 +157,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
         </form>
     </div>
 
-    <p v-if="loading" role="status" class="mt-4 text-sm text-ink-muted">Loading results…</p>
+    <p v-if="loading" role="status" class="mt-4 text-sm text-[var(--color-ink-muted)]">Loading results…</p>
 
     <!-- Two different absences, in the two shapes the skill and support siblings already use: an empty
          catalog is a mirror nobody has fetched, an empty result is a question the data cannot answer. -->
@@ -180,7 +180,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
     </template>
 
     <template v-else>
-        <p class="mt-6 text-sm text-ink-muted">{{ umamusumes.total }} of {{ totalCount }} trainees</p>
+        <p class="mt-6 text-sm text-[var(--color-ink-muted)]">{{ umamusumes.total }} of {{ totalCount }} trainees</p>
 
         <ul class="mt-2 space-y-4">
             <li v-for="trainee in umamusumes.data" :key="trainee.id" class="card">
@@ -205,14 +205,14 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                              way into the detail. `min-h-11` grows that target to the house 44px bar
                              (DESIGN.md §12, KI-29) without touching the type. This one is arc-class
                              rather than an AA failure: it measured 28px, above the 24px floor. -->
-                        <Link :href="`/umamusume/${trainee.slug}`" class="inline-flex min-h-11 items-center text-lg font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">
+                        <Link :href="`/umamusume/${trainee.slug}`" class="inline-flex min-h-11 items-center text-lg font-semibold text-[var(--color-ink-strong)] hover:underline transition-colors duration-150 ease-out">
                             {{ trainee.name }}
-                            <span v-if="trainee.name_ja" lang="ja" class="ml-2 text-sm font-normal text-ink-muted">
+                            <span v-if="trainee.name_ja" lang="ja" class="ml-2 text-sm font-normal text-[var(--color-ink-muted)]">
                                 {{ trainee.name_ja }}
                             </span>
                         </Link>
                     </span>
-                    <span class="flex items-baseline gap-3 text-xs text-ink-muted">
+                    <span class="flex items-baseline gap-3 text-xs text-[var(--color-ink-muted)]">
                         <template v-if="trainee.max_rarity">
                             <RarityChip :label="trainee.max_rarity.label" :stars="trainee.max_rarity.stars" />
                             <SparkChip :label="`${trainee.form_count} ${formCountLabel(trainee.form_count)}`" variant="consumable" size="sm" />
@@ -226,16 +226,16 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                     </span>
                 </h3>
 
-                <details v-if="trainee.cards.length > 0" class="border-t border-rule">
+                <details v-if="trainee.cards.length > 0" class="border-t border-[var(--color-rule)]">
                     <!-- The trainee's own header stays visible; only the costume-form rows fold. A
                          roster of 67 trainees each printing every form made the list unscannable, and
                          the count is already on the header, so the summary repeats it rather than
                          naming her a second time. -->
-                    <summary class="min-h-11 cursor-pointer px-4 py-2 text-sm text-ink-muted">
+                    <summary class="min-h-11 cursor-pointer px-4 py-2 text-sm text-[var(--color-ink-muted)]">
                         {{ trainee.cards.length }} {{ formCountLabel(trainee.cards.length) }}
                     </summary>
 
-                    <ul class="divide-y divide-rule">
+                    <ul class="divide-y divide-[var(--color-rule)]">
                         <li
                             v-for="card in trainee.cards"
                             :key="card.id"
@@ -250,12 +250,12 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                                  is a trainee portrait, so the name lives in the header, not here. -->
                             <div class="flex items-center gap-3">
                                 <ArtworkSlot :url="card.artworkURL" alt="" size="size-10" reserve />
-                                <h4 class="text-lg font-semibold text-ink">{{ card.title }}</h4>
+                                <h4 class="text-lg font-semibold text-[var(--color-ink)]">{{ card.title }}</h4>
                             </div>
-                            <span class="flex items-baseline gap-3 text-xs text-ink-muted">
+                            <span class="flex items-baseline gap-3 text-xs text-[var(--color-ink-muted)]">
                                 <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
                                 <span v-if="card.is_debut_form">debut form</span>
-                                <span v-if="card.unconfirmed" class="font-semibold text-risk">
+                                <span v-if="card.unconfirmed" class="font-semibold text-[var(--color-risk)]">
                                     Not confirmed by two sources
                                 </span>
                                 <time v-if="card.global_release_date" :datetime="card.global_release_date">
