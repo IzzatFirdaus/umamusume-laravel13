@@ -13,7 +13,7 @@
    the absent levels are left out and `cap` names the last anchor the source
    states. `type` is the export's key and `typeWord` is the client's word for
    it (`intelligence` is Wit, `friend` is Pal).
-   FROZEN 2026-10-22 · capture 2026-10-22T21:52:30+00:00 · source commit e6d63d3d
+   FROZEN 2026-10-23 · capture 2026-10-23T05:53:07+08:00 · source commit fa394329
    Seed identity (sha256, first 12 hex, of database/seeders/data/*.json):
      characters.c6676539.json 4f3523ea4301
      gametora-characters.e9e9ee6d.json e9e9ee6d5246

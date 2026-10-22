@@ -16,7 +16,7 @@
    only: `mult` on the friendship bonus, the mood effect and one more, and
    `add` on the specialty priority. Where the source states no mode the field
    is null, because naming a fourth mode would state a rule no source holds.
-   FROZEN 2026-10-22 · capture 2026-10-22T21:52:30+00:00 · source commit e6d63d3d
+   FROZEN 2026-10-23 · capture 2026-10-23T05:53:07+08:00 · source commit fa394329
    Seed identity (sha256, first 12 hex, of database/seeders/data/*.json):
      characters.c6676539.json 4f3523ea4301
      gametora-characters.e9e9ee6d.json e9e9ee6d5246

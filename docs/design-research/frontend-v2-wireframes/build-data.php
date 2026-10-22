@@ -645,8 +645,15 @@ $frozenRecord = static function () use ($here): string {
     }
     sort($seeds);
 
+    /*
+     * One instant, one zone. The host PHP default is UTC, so `date('c')` alone stamps a capture that
+     * reads as the previous day beside every dated note in this repository (all of which are written in
+     * the display zone). The offset is printed rather than implied, so the instant stays unambiguous.
+     */
+    $now = new DateTimeImmutable('now', new DateTimeZone('Asia/Kuala_Lumpur'));
+
     $lines = [
-        '   FROZEN '.date('Y-m-d').' · capture '.date('c').' · source commit '.$commit,
+        '   FROZEN '.$now->format('Y-m-d').' · capture '.$now->format(DATE_ATOM).' · source commit '.$commit,
         '   Seed identity (sha256, first 12 hex, of database/seeders/data/*.json):',
     ];
     foreach ($seeds as $seed) {

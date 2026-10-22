@@ -14,7 +14,7 @@
    The growth row is the source's `stat_bonus`, which the client reads as the
    Growth Rate row (`docs/UMAMUSUME_REFERENCE.md` §1.3.5). A zero is a real
    figure and is printed as `+0%`, never as a blank.
-   FROZEN 2026-10-22 · capture 2026-10-22T21:52:29+00:00 · source commit e6d63d3d
+   FROZEN 2026-10-23 · capture 2026-10-23T05:53:07+08:00 · source commit fa394329
    Seed identity (sha256, first 12 hex, of database/seeders/data/*.json):
      characters.c6676539.json 4f3523ea4301
      gametora-characters.e9e9ee6d.json e9e9ee6d5246
