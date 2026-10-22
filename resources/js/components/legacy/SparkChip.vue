@@ -47,7 +47,7 @@ const accessibleName = computed(() => {
          the count in words, and a screen reader that read "black star" before every number would make
          the column slower to scan for no gain. A sighted Trainer still gets the shape. -->
     <span
-        class="inline-flex items-center gap-1.5 rounded-full border border-rule bg-sunken px-2 py-0.5 text-xs text-ink"
+        class="pill pill-neutral"
     >
         <span aria-hidden="true" class="font-mono text-[0.65rem] font-bold text-ink-strong">
             {{ kindLabel.slice(0, 1) }}
