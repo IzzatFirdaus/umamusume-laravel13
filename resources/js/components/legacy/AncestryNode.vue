@@ -116,11 +116,21 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
             </li>
         </ul>
 
+        <p v-else class="mt-2 text-xs text-ink-muted" title="No Sparks recorded for this node.">
+            No Sparks recorded.
+        </p>
+
         <!--
             The chance a Spark rolls. Always `N/A` from the controller, and the disclosure says why, so
             the cell is a disclosure rather than a blank. The brief asks for `~10% ★★★`; the odds it
             would come from exist in the corpus only as a wiki pair flagged stale (§1.5.3), and the
             plan's rule for a silent corpus is that the screen renders absence, never a number.
+        -->
+        <div class="mt-2 text-xs text-ink-muted">
+            Spark chance
+            <AbsenceValue :reason="probability.title" compact />
+        </div>
+
         <!-- The assignment control. Present only where the screen assigns; the compare surface renders
              the same node with no picker, so the two cannot disagree about what a node is. -->
         <div v-if="assignable" class="mt-3">

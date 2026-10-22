@@ -80,7 +80,10 @@ test.describe('Setup step 4 — Legacy', () => {
         // Scoped to the name fields: a grandparent now carries her own rank inputs too, and those ids
         // start with `ancestor-` as well (R3-09).
         await expect(page.locator('input[id^="ancestor-parent_"]')).toHaveCount(4);
-        await expect(page.getByText('N/A, not chosen')).toHaveCount(2);
+        // The absent name is scoped by its own title, not by its words: the pick control's own
+        // "Not chosen" option carries the same words, so a text query matched four elements where
+        // the two absent names were meant.
+        await expect(page.locator('[title="No Umamusume chosen for this node yet."]')).toHaveCount(2);
         await expect(page.getByText('No Sparks recorded.')).toHaveCount(4);
 
         // The chance a Spark rolls is a named absence on each parent node, and the reason is on the
