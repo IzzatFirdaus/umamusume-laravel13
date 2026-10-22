@@ -481,6 +481,14 @@ function g18ContractPairs(): array
         // that is neither text nor boundary. It owes no WCAG threshold but must not
         // vanish against the chrome it sits on.
         'brand-accent on brand-chrome' => ['foreground' => 'brand-accent', 'background' => 'brand-chrome', 'type' => 'hairline'],
+
+        // D-1's second hairline row (1.2:1). `--color-scrim` is the modal overlay
+        // fill declared in app.css (light :272, dark :438); it is neither text nor a
+        // boundary, so it owes no WCAG threshold, but an overlay that reads at the
+        // page's own luminance would be invisible as an overlay. The pair was
+        // described in the docstring above since 2026-10-22 but never added to this
+        // array, so the gate asserted 41 rows over a ruling that bound 42.
+        'scrim on page' => ['foreground' => 'scrim', 'background' => 'page', 'type' => 'hairline'],
     ];
 }
 
@@ -671,7 +679,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         $pairs = g18ContractPairs();
         $badges = g18GradeBadgeTokens();
 
-        expect($pairs)->toHaveCount(41)
+        expect($pairs)->toHaveCount(42)
             ->and($badges)->toHaveCount(9)
             ->and(array_keys($pairs))->toBe([
                 'ink on panel', 'ink on raised', 'ink-muted on sunken', 'ink-muted on raised', 'ink-muted on panel',
@@ -687,7 +695,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
                 'brand-accent-ink on brand-accent-soft',
                 'status-positive-ink on status-positive', 'status-caution-ink on status-caution',
                 'ink-muted on brand-accent-soft', 'ink-strong on brand-accent-soft',
-                'brand-accent on brand-chrome',
+                'brand-accent on brand-chrome', 'scrim on page',
             ]);
 
         $roles = collect($pairs)
