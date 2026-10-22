@@ -79,7 +79,7 @@ Attribution corrections carried here:
 | **Aesthetic-Usability (1)** | lawsofux | Hierarchy and spacing are deliberate, but polish never substitutes for a sourced number. |
 | **Flow (26)** | lawsofux | One screen carries the run; the career nav is a stepper, not a second tab bar. |
 | **Closure (12)** | uilaws | Partial indicators stay honest. An empty grandparent slot reads "slot open" rather than being closed up or hidden. |
-| **Typography Hierarchy** | uilaws | Three steps: 28px page title, 15px card heading, 13px sub-heading, 12.5-13px body. The shipped app's 75 headers at `text-base` is the defect this avoids. |
+| **Typography Hierarchy** | uilaws | Three steps, and three is the measured count: 28px page title, 15px section heading, 12.5-13px body. A card's sub-label is a labelled paragraph, not a heading, and an empty state's heading is the page's `h2`, so no fourth step exists. The shipped app's 75 headers at `text-base` is the defect this avoids. |
 | **Consistency / Contrast** | uilaws | One selection grammar on every picker; colour never carries meaning alone. |
 | **D-45 (Nielsen H1/H9)** | — | Four states on every data view: empty, loading, populated, error. `.state`, `.skel` and `.state-error` are the primitives. |
 | **D-259** | — | Mood renders `GREAT ↑ +20%`. The arrow is the only part carrying ordinal direction. |
@@ -138,6 +138,9 @@ at `:286-345`:
 - **The control is with the sidebar**, at the head of the column, and it is an **icon**: a chevron
   that points the way the rail will move. The word is `sr-only`, so the icon is not the accessible
   name. It was in the top bar before, which put the control that resizes the rail far from the rail.
+  The mark is the control's own class, not a `.glyph`: the nav glyphs are hidden at every width
+  except the collapsed one, so a `.glyph` mark left the control empty while the rail was open. The
+  chevron points LEFT when the rail is open and can only go left, RIGHT when it is collapsed.
 - **The collapsed column stacks its head**, so the mark and the control both fit 56px.
 - **The choice is `localStorage`, not a Preference row.** `Preference::KEYS` is exactly `theme`
   and `failure_estimate`, so a third stored key would widen product scope. The cost, stated rather
@@ -150,6 +153,15 @@ The key and the two values are the app's: `trainer-desk.nav-rail`, `compact` and
 to the right of the marks: a negative space with nothing in it. Changing the variable moves the grid
 column, the rail and the top bar's width together, because the top bar lives in the same column, so
 the content fills what the rail gives back.
+
+**And the column is what animates.** `.app` transitions `grid-template-columns` and the rail
+stretches to whatever the column measures. Animating the rail's own `width` instead left it 236px
+wide inside a 56px column for the length of the transition, so the rail was painted OVER the
+content: a measured 180px of overlap. The overlap is now zero at every frame.
+
+**The ten words are one column, and the dot holds them there.** Every destination carries the dot,
+the active one among them, so no word is out of line with the others. The group headings take the
+same x as the words, so a heading names the group it sits over.
 
 ### The stat and type marks
 
@@ -177,6 +189,47 @@ colour, so the word is what carries the name.
 
 Two collisions the corpus records as **unresolved** are carried here unresolved: Mood against the
 friend chip, and Fans against the group chip.
+
+### The image slots
+
+**The app puts pictures on eleven of these screens, and this set drew none of them.** The app
+renders a mirrored file in a square beside a name: a trainee portrait (`card_portrait`) or a
+support-card thumbnail (`support_thumb`), at 40px, 48px or 64px. This set has no mirror and no
+database, so each of those cells is now **drawn** as a dashed frame carrying the subject, at the
+size the app uses.
+
+| Page | The slot | Size |
+| --- | --- | --- |
+| `index` | the active career's portrait; each recent veteran | 64px, 40px |
+| `career-trainee` | each trainee row | 40px |
+| `career-profile` | the trainee's portrait; each costume form | 64px, 40px |
+| `career-deck` | each card in a slot | 48px |
+| `run-deck` | each card in a slot | 48px |
+| `catalog` | each trainee card | 48px |
+| `catalog-detail` | the form in view | 64px |
+| `support-cards` | each card row | 48px |
+| `support-card-detail` | the card | 64px |
+| `veterans` | each veteran row | 48px |
+| `veteran-detail` | the veteran | 48px |
+
+**A slot the app does not have is not invented.** The catalog index's costume-form row and the
+deck picker's option list both carry a 40px frame in the app, and neither has a counterpart on
+the wireframe pages that draw those lists, so neither is drawn. An empty deck slot carries no
+frame either, because there is no card to picture.
+
+**The frame is a drawing, and the product paints no frame at all.** `DESIGN.md` §4.7 is
+explicit: when the mirror holds no file, `ArtworkSlot.vue` renders **nothing** — no grey box, no
+placeholder glyph, no broken frame — because absence is a normal state and a broken visual
+would claim a defect the tool does not have. So the frame here is `aria-hidden` (the app's own
+alt is empty wherever the name prints beside it), the subject inside it is the only thing it
+says, and every page that draws one states the rule in its own annotation key.
+
+**The checks own the registry.** `framework-check.mjs` carries the expected set per page, so a
+slot that goes missing, a slot on a page that should have none, a wrong kind, a wrong size, a
+slot that is not `aria-hidden`, and a page that draws a slot without naming the file it stands
+for are all findings. `render-check.mjs` measures the frame in Chromium: a square of 40, 48 or
+64, a painted border, and a caption that fits inside it. Each rule was proven to have teeth by
+reverting it in turn and watching the check fail with the finding it was written for.
 
 ### The way back to the Database hub
 
@@ -224,16 +277,93 @@ glance.
 ### The re-check, and the two tools that run it
 
 `docs/framework-ui-ux/design-framework-index-2026-10-21.md` is the checklist a change is held against
-before it is committed, and it names the procedure. Two scripts run the mechanical part of it:
+before it is committed, and it names the procedure. Four scripts run the mechanical part of it:
 
 - `framework-check.mjs` — the checkable rules, over all 49 pages and the stylesheet.
 - `link-check.mjs` — every internal link and image, resolved against the page's own directory.
+- `render-check.mjs` — the rules a static read cannot decide, measured in a rendered frame.
+- `framework-audit.mjs` — the framework's own rules that only a painted frame can decide: contrast
+  per text node in both themes, the effective 44px target, the heading ladder, the accent dose,
+  reflow at 320px, text resize and spacing, and focus visible measured by tabbing.
 
-Both are in this directory and both are run before a commit. On 2026-10-22 the first run of
+All four are in this directory and all four are run before a commit. On 2026-10-22 the first run of
 `framework-check.mjs` found a real regression: the CSS edit that moved the rail's control had
 dropped the `.rail.is-collapsed .nav-label` rule, so the word would have stayed visible beside the
 mark in a 56px column. It also found the sub-navigation items at 34px, under the 44px target rule,
 and a bare "Continue" that did not name its destination.
+
+### The full framework audit (2026-10-22)
+
+`docs/framework-ui-ux/` is ten documents. Every one of them records the same limit in its own words:
+"Chromium cannot launch under this repository's sandbox (`spawn EPERM`), so no verdict in this file
+or the files it feeds is a rendered observation." **That limit is false on this host.** Chromium
+launches and a `file://` page loads without a server, so the rules the framework left unmeasured
+were measured, and the ones that failed were fixed rather than filed as unverified.
+
+`framework-audit.mjs` is the result. It renders all 49 pages in **both themes** and reports:
+
+```
+=== FAILURES ===
+none
+=== 49 pages x 2 themes, 0 findings ===
+```
+
+What it found, and what changed. Every one of these was invisible to `framework-check.mjs`, which
+reads markup and CSS as text:
+
+| Rule | Measured before | Root cause | Now |
+| --- | --- | --- | --- |
+| **WCAG 1.4.3** text contrast | **18 distinct failures, 303 page-hits** | `--ink-faint` carried LABELS in seven places. The app's own stylesheet says that token "must never carry a label" (`resources/css/app.css:88-92`); it measures 3.07:1 on the panel. The worst was the "Static wireframe" chip at **1.74:1** on the chrome. | 0. Labels take `--ink-muted` (5.17:1); the chrome chip takes `--on-brand-chrome` (5.51:1) |
+| **WCAG 1.4.10** reflow | **45 of 49 pages scrolled sideways at 320px** | the top bar was `flex-wrap:nowrap` with four fixed children, measuring 360px in a 320px viewport. The table cards were `overflow:visible`, so a 454px table pushed the page to 487px. | 0. The bar wraps and drops its annotation chip and status pill below 520px; a card with a table scrolls it inside itself |
+| **WCAG 2.4.7** focus visible | **bare inputs, selects and a textarea painted nothing** | the set had per-component focus rules and not the app's base rule (`resources/css/app.css:524-528`). A `textarea` also carried an inline `outline:none`, which suppresses the browser's own fallback ring. | 0. A base `:focus-visible` rule, plus the chrome's white ring on the chrome |
+| **UX-1** 44px targets | `.rail-foot` 41px, `.skip` 37.5px, `btn-sm` 38.2px wide, field controls 19.5px, radios 13-16px | the app uses `min-h-11` on each of these (`AppLayout.vue:341`, `BaseInput.vue:105`, `BaseRadio.vue:72`); the set used padding and inline sizes instead | every effective target is 44px or more |
+| **UI-1** three type sizes | **four steps**, and the third was the same size as the body | a card's `h3` sat at 13px, the body's own size | the ladder is three: `h1 28px`, `h2 15px`, body. A card's sub-label is a labelled paragraph; an empty state's heading is the page's `h2` |
+| **UI-7** one accent per screen | **the accent did three jobs on 22 pages** | it filled the active destination, marked the provenance chip, and marked the recommendation | one accent element on every page. Selection wears the chrome's 10% tint (`AppLayout.vue:239`); provenance wears ink weight |
+
+Three **false claims** in the set contradicted its own render and were corrected:
+
+- `index.html` said "'Open cockpit' is the only filled button in the top region" while "New career"
+  was also `btn-primary` 150px above it. Two filled actions make the accent mean "a button" rather
+  than "the button", which is the page's own Von Restorff argument. "New career" is now secondary.
+- All 49 annotation keys said "The control is in the top bar because the bar is the one row present
+  at every width". The control moved into the rail's head; the claim was stale on every page.
+- The "Accent discipline" line described three roles and left out the accent's own three.
+
+**Every rule in `framework-audit.mjs` was proven to have teeth**: reverting each fix in turn makes the
+audit fail with that rule's own finding. One case taught something worth recording — removing a focus
+ring is *not* a 2.4.7 defect, because the browser falls back to its own `outline: auto`. The defect is
+`outline: none`, which suppresses that fallback, which is why the rule is written to ask whether
+anything is PAINTED rather than whether `:focus-visible` matches.
+
+
+### The rail, audited in a rendered frame (2026-10-22)
+
+**Chromium launches in this tree.** The framework index records that "Chromium cannot launch under
+this repository's sandbox (`spawn EPERM`)" and that every rule depending on a rendered frame was
+therefore unmeasured. That is not true on this host: Playwright's bundled Chromium runs, and the
+49 pages render. The rail was rendered and measured, and **five defects were found that the static
+check could not see**, because each one is a fact about a painted frame rather than about markup:
+
+| Defect | Measured | Root cause |
+| --- | --- | --- |
+| **The collapse control rendered empty.** With the rail open the control was a 44px box with no mark in it, on all 49 pages. | the mark's box was 0x0 | the mark was a `.glyph`, and the nav glyphs are `display:none` at every width except the collapsed one. The control needs a mark class of its own. |
+| **The rail was painted over the content while it resized.** | 180px of overlap at t=1ms | the rail animated its own `width` inside a column that had already moved to 56px. The COLUMN has to animate and the rail stretch to it. |
+| **The active destination's word was 16px left of the other nine.** | active word at x=15, the rest at x=31 | the active item's dot had been dropped from the markup, and the dot is what holds the words in one column. |
+| **"Data sources" wrapped onto three lines in the collapsed column** and overflowed its 59px box. | 3 lines, 58px of content in a 59px box | the collapsed rule targeted `.rail-foot a`, an anchor INSIDE `.rail-foot`, and the markup is a single anchor that IS `.rail-foot`, so the rule never matched. |
+| **The collapse control's tooltip never changed.** | it said "Collapse" while the action was "Expand" | the `title` was hard-coded in the markup and the script updated `aria-label` and the `sr-only` word but not the title. |
+
+Two smaller ones: the group headings sat 31px left of the words they name, and the chevron pointed
+the wrong way (it was drawn to the right, so the OPEN rail needed the 180° rotation, not the
+collapsed one).
+
+**The fixes are in `assets/shell.css` and in the 49 pages**, and every one of them is now a rule in
+`framework-check.mjs` or `render-check.mjs`. Each new rule was proven to have teeth: reverting each
+fix in turn makes the check fail with the finding it was written for. A check that cannot fail is
+not a check.
+
+**`render-check.mjs` reports UNVERIFIED, never "fine", when it cannot run.** Where Chromium cannot
+launch it says the rail was never rendered and the rules are unmeasured, because a check that cannot
+run and still passes is worse than no check.
 
 ## The seven frameworks this set answers to
 
@@ -320,6 +450,49 @@ exactly `confirmed | calculated | estimated | unknown`, and `:52` returns `null`
 the exceptions are marked, so the eye lands on the exception". An earlier draft printed a `confirmed`
 chip on five figures and invented `rule`, `source` and `found` as if they were trust states. Those chips
 are gone: an unmarked figure is confirmed, and only `Calculated`, `Estimated` and `Unknown` carry a glyph.
+
+## The mock catalogue
+
+**The pages are static HTML with no database behind them, so the content they draw has to come from
+somewhere. It comes from `assets/data/`.**
+
+Four files, the catalogue the app already holds, shaped for a page to read, with no figure invented
+for it: the trainee roster (67 trainees, 106 card forms), the support cards (559), the support-effect
+dictionary (35) and the skills (1,910). Each is a classic script, because the pages are opened under
+`file://` and a module loaded from `file://` is blocked by the browser, and each publishes its data
+and its schema into one namespace, `window.TRAINER_DESK_DATA`.
+
+```html
+<script src="assets/data/umamusume.js"></script>
+<script src="assets/data/support-cards.js"></script>
+<script src="assets/data/support-effects.js"></script>
+<script src="assets/data/skills.js"></script>
+```
+
+**The schema is in the data.** Each file carries a schema object beside its records: every field,
+what it means, and where the value comes from, so a consumer reads the absences as deliberately and
+prints the right empty state. `assets/data/README.md` is the long form: the field-by-field tables, the
+join between a card's effect row and the dictionary, and the six rules a consumer inherits.
+
+**Three things are worth knowing before a page uses it.**
+
+1. **A skill carries no description, and that is the ruling, not an omission.** No client-vocabulary
+   description for a skill exists in this repository, and adding one is held against until a
+   client-string source exists (G-SK-20, `docs/research-scratch/SKILLS-MECHANICS.md`). The export's
+   English is the publisher's, not the client's, and it is carried beside the field as `sourceText`:
+   reference material, not copy. A surface that binds to `description` prints the **"no client
+   string"** state that `skill-detail.html` already draws.
+2. **The numbers stay numbers.** A skill's `rarity` is the source's class code and names no tier, and
+   the effect codes inside a condition are the engine's own. The dataset attaches no meaning to
+   either, because none is established.
+3. **The dev database holds four rows the game does not** — trainees named "Form Counted 1" to "Form
+   Counted 4" and twelve "[Sample Form]" cards, written by a test against the `.test` host. The app's
+   own counters include them, which is why the live dashboard reads **71 trainees** where the
+   catalogue holds **67**. The dataset's rule is a join, not a name filter, and the generator checks
+   that every row the join left out was a row that was never sourced.
+
+The generator is `build-data.php`, the check is `data-check.mjs`, and both are described in
+`assets/data/README.md`.
 
 ## Where the data comes from
 
@@ -411,10 +584,19 @@ second source of truth. That is a wireframe workaround, not a proposal.
 
 ## What is not verified
 
-- **No rendered screenshots.** Chromium cannot launch under this sandbox (`spawn EPERM`). Structure was
-  validated by tag-balance checks across all 47 files; the pages were never seen.
-- **No contrast arithmetic.** The pages use the runtime tokens; no pair was re-measured.
-- **No 390px measurement.** The shell carries a mobile bar below 760px, but nothing was measured on it.
+- **Contrast, targets, the type ladder, the accent dose, reflow, text resize, text spacing and focus
+  visible are now MEASURED**, in both themes, by `framework-audit.mjs`. The earlier note that they
+  were unverified rested on "Chromium cannot launch under this sandbox (`spawn EPERM`)", which is
+  false on this host. The audit's table above records what that measurement found and fixed.
+- **The result is a rendered observation, not a conformance claim.** WCAG 2.2 has 87 success
+  criteria; this set measures the ones a rendered frame can decide and the framework file maps to a
+  rule id. Criteria about timing, motion sensitivity, captions, authentication or error prevention
+  are out of its reach, and `prefers-reduced-motion` is honoured in the stylesheet but not asserted.
+- **No 390px measurement beyond overflow.** The shell carries a mobile bar below 760px, and the
+  pages were checked for a sideways scroll at 320, 360 and 390px, but the bar's own touch targets
+  and its five-item order were not measured.
+- **The generated content is not exercised.** The wireframes are static: no copy action fires, no
+  keyboard contract runs, and no state transition is driven beyond the rail's collapse.
 - **The cockpit set is split.** The rich treatments live in `../cockpit-wireframes-2026-10-21/`; the
   `cockpit-*.html` files here are the same records at shell density and link back to them.
 
@@ -425,11 +607,30 @@ second source of truth. That is a wireframe workaround, not a proposal.
   uses a mark carries the sprite inline, because an SVG `<use>` across files is blocked under `file://`
   and would render blank.
 - `assets/shell.js` — the navigation's destination list, the single place the ten destinations live.
+- `assets/data/*.js` — **the mock catalogue**: the trainee roster, the support cards, the
+  support-effect dictionary and the skills, each with its schema, published into
+  `window.TRAINER_DESK_DATA`. Generated by `build-data.php`; checked by `data-check.mjs`.
+  `assets/data/README.md` is the schema in long form.
+- `build-data.php` — the generator that writes the catalogue. It reads the dev database and the
+  committed export bodies, and refuses to write a dataset whose growth rows, base rows, counts or
+  joins do not match the catalogue.
+- `data-check.mjs` — the catalogue's own check: the counts, the effect join, the growth and base
+  sums, the exclusion of the test-fixture rows, the null descriptions, the schema's coverage of
+  every field, and the classic-script load under `file://` in Chromium. Run before a commit.
 - `../icons_svg/*.svg` — **the stat and type marks, and they are the owner's.** Seven files, each
   remade from the client's own type chip, with the original PNG beside each in `source/`. The pages
   reference them by `<img>`, so there is one copy.
 - `framework-check.mjs` — the checkable rules from the design-framework index, over all 49 pages and
   the stylesheet. Run before a commit.
+- `render-check.mjs` — the rules a static read cannot decide, measured in a rendered frame: whether
+  the collapse control paints a mark, whether the ten words share one x, whether the rail is painted
+  over the content while it resizes. Needs Playwright's Chromium; where it cannot launch it reports
+  the rules as UNVERIFIED rather than passing them. Run before a commit.
+- `framework-audit.mjs` — the framework's own rules that need a painted frame, over all 49 pages in
+  both themes: contrast per text node (WCAG 1.4.3), the effective 44px target (UX-1), the heading
+  ladder (UI-1), the accent dose (UI-7), reflow at 320px and text resize and spacing (1.4.10, 1.4.4,
+  1.4.12), and focus visible measured by tabbing (2.4.7). Needs Playwright's Chromium; reports
+  UNVERIFIED where it cannot launch. Run before a commit.
 - `link-check.mjs` — every internal link and image, resolved against the page's own directory. Run
   before a commit.
 - `build-index.js` — the generator that wrote the pages. It is a record of how they were made, not a
