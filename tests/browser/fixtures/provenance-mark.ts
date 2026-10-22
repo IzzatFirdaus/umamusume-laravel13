@@ -20,5 +20,11 @@ createApp({
             h('div', { id: 'mark-reason', class: 'mt-24' }, [
                 h(ProvenanceMark, { state: 'estimated', title: 'Averaged across three recorded turns.' }),
             ]),
+            // An out-of-vocabulary state, as a config string could supply one. `defineProps` does not
+            // validate at runtime, so the component is the only guard: it must paint nothing rather
+            // than dereference a map entry that does not exist.
+            h('div', { id: 'mark-out-of-vocabulary' }, [
+                h(ProvenanceMark, { state: 'derived' as never }),
+            ]),
         ]),
 }).mount('#provenance-mark-mount');

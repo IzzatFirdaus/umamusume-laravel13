@@ -49,8 +49,14 @@ const MARKS: Record<'calculated' | 'estimated' | 'unknown', { glyph: string; wor
     unknown: { glyph: '?', word: 'Unknown' },
 };
 
-/** `null` for `confirmed`, which suppresses the whole mark. */
-const mark = computed(() => (props.state === 'confirmed' ? null : MARKS[props.state]));
+/**
+ * `null` for `confirmed`, which suppresses the whole mark, and `null` for any state the map does not
+ * hold. `defineProps` validates nothing at runtime and `config/reference.php` carries the state as a
+ * plain string, so an out-of-vocabulary value is a production input: without the `?? null` it reached
+ * `MARKS[state]`, and the template threw on `mark.glyph` during render, taking the whole page with it.
+ * An unknown state now draws nothing, which is how `confirmed` already degrades.
+ */
+const mark = computed(() => (props.state === 'confirmed' ? null : (MARKS[props.state] ?? null)));
 
 const name = computed(() => (props.title ? `${mark.value?.word}: ${props.title}` : (mark.value?.word ?? '')));
 

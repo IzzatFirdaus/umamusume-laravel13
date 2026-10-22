@@ -95,6 +95,20 @@ test('keyboard focus reveals the reason, and the reason is in the name either wa
     await expect(host.locator('[role="tooltip"]')).toHaveCount(0);
 });
 
+test('an out-of-vocabulary state paints no mark instead of failing the render', async ({ page }) => {
+    const failures: string[] = [];
+    page.on('pageerror', (error) => failures.push(error.message));
+
+    await open(page);
+
+    // `defineProps` does not validate at runtime and `config/reference.php` is an unchecked string, so
+    // a state outside the union is a production input. It must degrade to no mark, exactly as
+    // `confirmed` does, rather than reach `MARKS[state]` and throw during render on a Database page.
+    await expect(page.locator('#fixture-main')).toBeVisible();
+    await expect(page.locator('#mark-out-of-vocabulary [role="img"]')).toHaveCount(0);
+    expect(failures).toEqual([]);
+});
+
 test('hover reveals the reason too', async ({ page }) => {
     await open(page);
 
