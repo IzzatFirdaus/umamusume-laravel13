@@ -734,6 +734,8 @@ With the primitive layer in place, build the eight absent components and **all s
 
 **Gate:** the HFW's `framework-check` / `link-check` / `render-check` run clean on the now-complete 55-page set; the parity matrix in `DESIGN.md` §3 shows zero `absent` rows; the `review-detail` route has its own browser spec and its `SCREEN_SPEC.md` row; the 77 existing browser specs stay green.
 
+> **Phase 4a gate — closed 2026-10-23.** All five set checks clean at **56 pages**: `framework-check` (56 pages, 0 findings), `link-check` (1,547 references, no broken references), `render-check` (56 pages rendered, 0 findings), `data-check` (67 trainees, 106 forms, 559 support cards, 35 effects, 1,910 skills), `framework-audit` (56 pages × 2 themes, 0 findings). Two UI-1 heading-ladder findings fixed at `9d4c91be` (`career-race-planner.html`) and `0f2524a1` (`catalog-detail.html`); the second entered with `28692b4e`, so it is a Phase 4a regression rather than pre-existing debt. The set grew 49 → 56 (seven pages, not the eight A7 names: `run-detail` is out of scope under FQ-17).
+
 > **Amended 2026-10-22 (correction pass, D1 / authoritative A7, A8, A9, A10, A12 at this site, A17, A21).** Phase 4 as written is one phase with one gate doing two different jobs, one of them held by the owner. It splits, and five of its instructions are restated. The text above stands as written.
 >
 > **A7 — the split. A phase that draws static pages and edits the app cannot have one gate.** Phase 4 becomes two sub-phases:
