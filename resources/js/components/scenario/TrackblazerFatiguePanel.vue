@@ -54,7 +54,7 @@ const chains = computed((): string[] => Object.keys(props.fatigue.table));
 </script>
 
 <template>
-    <section :aria-labelledby="headingId" class="flex flex-col gap-3 rounded-md border border-rule bg-panel p-4">
+    <section :aria-labelledby="headingId" class="card flex flex-col gap-3 p-4">
         <h4 :id="headingId" class="text-lg font-semibold text-ink-strong">
             Race fatigue
         </h4>
@@ -81,7 +81,7 @@ const chains = computed((): string[] => Object.keys(props.fatigue.table));
             the 44px contract.
         -->
         <details :open="props.fatigue.row !== null" class="flex flex-col gap-2">
-            <summary class="min-h-11 cursor-pointer select-none rounded-md border border-rule bg-raised px-3 py-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            <summary class="card min-h-11 cursor-pointer select-none px-3 py-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
                 <template v-if="props.fatigue.chain_label !== null">
                     Odds at {{ props.fatigue.chain_label }}
                 </template>
@@ -92,7 +92,7 @@ const chains = computed((): string[] => Object.keys(props.fatigue.table));
 
             <dl
                 v-if="props.fatigue.row !== null && props.fatigue.chain_label !== null"
-                class="grid grid-cols-1 gap-x-3 gap-y-1 rounded-md border border-rule bg-raised p-3 @3xl:grid-cols-[minmax(0,12rem)_minmax(0,1fr)]"
+                class="card grid grid-cols-1 gap-x-3 gap-y-1 p-3 @3xl:grid-cols-[minmax(0,12rem)_minmax(0,1fr)]"
             >
                 <!-- Each `dt` is followed by its `dd` and the pairs are the `dl`'s own children: a heading
                      `dt` with no value beside it fails axe's `definition-list` rule, which is why the label
@@ -105,7 +105,7 @@ const chains = computed((): string[] => Object.keys(props.fatigue.table));
 
             <div
                 v-else
-                class="overflow-x-auto rounded-md border border-rule bg-raised p-3"
+                class="card overflow-x-auto p-3"
                 role="region"
                 tabindex="0"
                 aria-label="Fatigue measures by chain"
