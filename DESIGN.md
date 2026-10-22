@@ -1083,6 +1083,38 @@ work in that "single change" is the assertion body, which a peer session holds u
 second move (the Inertia page set as the assertion base, the `dark:` and skeleton-palette sweep, the 44px
 floor and reflow checks in the browser specs) stands exactly as written._
 
+*Dated update 2026-10-23 (Phase 6 close-out; the table and every dated read above are preserved as written).*
+The enforcement story this table records has moved again, and this time the moves are measurements rather
+than re-reads.
+
+- **The token count is 89, and it is enforced.** `DesignTokensTest.php` resolves
+  `themeStaticColorTokens()` and asserts `toHaveCount(89)`; the eight added since the 81-figure reads above
+  are the seven `--color-stat-*` and `--color-on-risk` minted in Phase 2.2. The token row's "60" and the
+  2026-10-22 note's "81" are both superseded.
+- **D-288 and G-18 are live and green, in both themes.** `php artisan test --filter='browser contrast'` runs
+  three cases over **245 assertions** and exits 0: every declared token resolves non-empty in light and dark,
+  and `g18ContractPairs()` carries **41 pairs** plus the **9** grade fills. The threshold model is
+  three-way — text 4.5:1, boundary 3.0:1, hairline 1.2:1 — and the hairline branch is exercised by
+  `brand-accent on brand-chrome`.
+- **One pair was withdrawn after being added, and the reason is a measurement defect rather than a colour.**
+  `scrim on page` was added at `1fc3cba0` and failed in dark at 1.0451:1 (`45adcab9`). The cause is the
+  instrument, not the token: `parseComputedColor()` reads an `rgba()` as three channels and drops alpha, so a
+  62%-black overlay was compared to a near-black page as if it were opaque. An overlay separates from the
+  content it covers, not from the page beneath it, so a contrast pair is the wrong instrument for this token.
+  The token is still declared, and `--shadow-overlay` plus its `toContain` assertion at
+  `DesignTokensTest.php:324` keep the overlay treatment enforced.
+- **Three previously uncovered colours are covered**: `--color-risk`, `--color-pick-line` and `--color-ring`
+  each resolve to a colour in both themes as named tokens, alongside the pairs that use them.
+- **§8's "zero `transition-*`/`duration-*`" is false and was already corrected above** at the 2026-10-22
+  re-read: 92 such utilities ship, in the `duration-150 ease-out` form with `motion-reduce:transition-none`
+  beside them. The §11 question 3 that rests on it is therefore not open for the reason it states.
+- **Rule 8 is at zero unallowlisted debt, not zero arbitrary values.** `tools/ui-lint-baseline.json` sets
+  `count: 0` and names all **23** remaining values individually (`b7f74d88`); a new arbitrary value in any
+  file now fails at 0 + 1 rather than hiding under a ceiling. Three of the 23 are deferred with a named
+  intent rather than retired: `[40rem]` (4 sites) as a `--measure-md` token candidate,
+  `[minmax(0,Nrem)_minmax(0,1fr)]` (6 sites) as a `--grid-sidebar-main` candidate, and `[26rem]` as a
+  sibling of the measure. The other 12 are one-offs (viewport heights, layout fixes, a vendor selector).
+
 ## 11. Open questions for the owner
 
 Not defects; decisions this file cannot make for itself.
