@@ -623,12 +623,47 @@ if ($problems !== []) {
  * ============================================================================
  */
 
-$header = static function (string $title, string $body): string {
+/*
+ * The freeze record. Every generated file carries the inputs it was built from, so a reader can tell
+ * a current capture from a stale one without opening the seed set: the commit the inputs were read
+ * at, the capture instant, and a sha256 digest per seed file (the seed files are already named by
+ * content hash, so a renamed-then-edited seed shows here as a changed digest rather than as the same
+ * filename with different content). A capture older than the seed set it was built from is stale -
+ * see assets/data/README.md's ageing rule.
+ */
+$frozenRecord = static function () use ($here): string {
+    $root = dirname($here, 3);
+
+    $commit = trim((string) @shell_exec('git -C '.escapeshellarg($root).' rev-parse --short HEAD 2>&1'));
+    if (preg_match('/^[0-9a-f]{7,40}$/', $commit) !== 1) {
+        $commit = 'unavailable (git not runnable here)';
+    }
+
+    $seeds = [];
+    foreach (glob($root.'/database/seeders/data/*.json') ?: [] as $seed) {
+        $seeds[] = basename($seed).' '.substr((string) hash_file('sha256', $seed), 0, 12);
+    }
+    sort($seeds);
+
+    $lines = [
+        '   FROZEN '.date('Y-m-d').' · capture '.date('c').' · source commit '.$commit,
+        '   Seed identity (sha256, first 12 hex, of database/seeders/data/*.json):',
+    ];
+    foreach ($seeds as $seed) {
+        $lines[] = '     '.$seed;
+    }
+    $lines[] = '   Ageing rule: see README.md in this directory.';
+
+    return implode("\n", $lines)."\n";
+};
+
+$header = static function (string $title, string $body) use ($frozenRecord): string {
     return "/* ============================================================================\n".
         "   TRAINER DESK v2.0.0 HFW — {$title}.\n".
         "   GENERATED FILE. Do not hand-edit; run `php build-data.php` to regenerate.\n".
         "   \n".
         "{$body}\n".
+        $frozenRecord().
         "   ============================================================================ */\n";
 };
 
