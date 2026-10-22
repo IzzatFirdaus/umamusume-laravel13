@@ -586,7 +586,22 @@ No security document exists; the model is `ARCHITECTURE.md` §8.
 - Design tokens only; no `dark:` utilities; no decorative skeletons.
 - Every data view renders its empty, loading/refresh, and error states (ADR-0007: a custom
   loading state is required only for user-initiated async actions).
-- Unrecorded values render as `N/A` with a `title`, never a default.
+- Unrecorded values render as `N/A` with a **disclosure channel**, never a default.
+
+- *The migration ruleblock (dated banner: applies while the named-primitive migration is open; removed
+  at Phase 6 exit, re-validated by 2026-12-31 at the latest).*
+  **When you spell a component, use the primitive that already exists.** Look it up in `DESIGN.md` §3,
+  then `resources/css/app.css`, then
+  `docs/design-research/frontend-v2-wireframes/assets/shell.css`. Never invent a class, an arbitrary
+  value, or a `dark:` utility when a named primitive exists.
+  **A component re-spell changes the class spell and nothing else.** Do not change props, emits, slot
+  names, `aria-*` attributes, or the markup tree in the same commit; those carry their own spec.
+  The escape hatch: a `ponytail:` comment naming the ceiling is the only sanctioned way to leave a
+  utility in place, and `tools/ui-framework-check.mjs` counts them.
+
+  *Dated correction 2026-10-23 (BQ-02).* The bullet above said "with a `title`"; a title is not a
+  channel a keyboard or touch reader can use. The corrected wording is the one `DESIGN.md` §5 (a)
+  already requires: the reason is visible text, or a `title` mirrored by an `sr-only` sibling.
 - Print the Global client vocabulary only (`lang/en/uma.php` is the terms map; `Wit` and
   `Mood` are client words, and their wiki glosses are banned by `lore-code`).
 - Keep the established accessibility behavior: keyboard paths, target sizes, and the
