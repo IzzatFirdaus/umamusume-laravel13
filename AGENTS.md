@@ -450,10 +450,27 @@ refuses markers outside `docs/` on purpose. The hit stays in the count and carri
 ruling.
 
 `npm run lint:ui` (plan slice 1.12) fails a Card inside a Card and any new arbitrary Tailwind value
-(`bg-[#…]`, `w-[37px]`). Arbitrary values predate the guard in two files and are listed in
-`tools/ui-lint.mjs`; that list is debt, not a place to add. The identifier and bare-`N/A` rules are
-enforced by `tests/Feature/UiHygieneTest.php`, and the one-`h1`-per-route rule by
-`tests/browser/ui-hygiene.spec.ts`.
+`bg-[#…]`, `w-[37px]`). The check is `tools/ui-framework-check.mjs` — `tools/ui-lint.mjs` was retired
+in Phase 1.6 and its two rules absorbed as rules 8 and 10 there. Arbitrary values are enumerated in
+`tools/ui-lint-baseline.json`, which sets `count: 0`: every remaining value is named individually, so
+any new one fails at 0 + 1. That list is deferred debt with a named intent, not a place to add. The
+identifier and bare-`N/A` rules are enforced by `tests/Feature/UiHygieneTest.php`, and the
+one-`h1`-per-route rule by `tests/browser/ui-hygiene.spec.ts`.
+
+*Dated addition 2026-10-23 (Phase 6, from two measured findings).* Two requirements the gate list did
+not carry, both proven on this host:
+
+- **The D-288/G-18 browser gate needs an unwritable-by-default path.** `php artisan test --filter='browser
+  contrast'` makes `pest-plugin-browser` write
+  `vendor/pestphp/pest-plugin-browser/.temp/playwright-server.json` before it starts a browser. Under a
+  workspace-write sandbox that write is denied, and the run fails as `ErrorException … Permission denied`
+  with **0 assertions** — never as a contrast verdict. A run that reports zero assertions has measured
+  nothing; give that gate unrestricted filesystem access or do not report it as passed.
+- **The browser suite is one process at a time, dispatched rather than run inline.** A single slow spec can
+  consume a whole inline run: the 2026-10-23 attempt was stopped at test 361 and its `45 failed` was a
+  floor, not a total. Dispatch specs as background tasks or subagents and serialise them with a lock
+  directory (`.scratch-uma/<session>/playwright.lock`, acquired with `mkdir`, released with `rmdir`),
+  so a slow spec times out only itself and the count that lands is the real one.
 
 **Never `pint --dirty` in this tree (KI-75).** `--dirty` collects every file that differs from
 `HEAD`, and several sessions share one worktree (KI-70, KI-71), so the dirty set is not the slice's own
