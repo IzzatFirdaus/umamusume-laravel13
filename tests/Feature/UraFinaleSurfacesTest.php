@@ -331,6 +331,34 @@ it('holds the fan gates and the three unpublished duel figures in the matrix alo
         ->and(config('scenarios.scenarios.ura_finale.duel.spark_rate'))->toBeNull();
 });
 
+it('keeps the win-chance vocabulary and the unknown badge out of the scenario matrix', function (): void {
+    /*
+     * FQ-12's deletion of the two URA panels retires the component-source guards at
+     * :301-319 and :345-364. This is the guard that remains, on the file the matrix says
+     * owns the figures.
+     *
+     * Two of the retired patterns are deliberately not carried across, because carrying
+     * them would assert the opposite of what the matrix is for:
+     *
+     *  - `/60,?000|70,000|120,?000/` -- those gate figures ARE the matrix's own values;
+     *    the fan-gate test above asserts them here on purpose ("The numbers live in
+     *    config/scenarios.php, which is where the matrix says they belong", :312-313).
+     *  - `/ura_finale|URA Finale/` -- `ura_finale` is this file's own config key.
+     *
+     * What survives is what a config can still get wrong: the win-chance vocabulary
+     * FQ-12 keeps out of the tree, and the `state="unknown"` badge the absence contract
+     * retired (owner ruling 2a).
+     */
+    $source = (string) file_get_contents(config_path('scenarios.php'));
+    $lower = strtolower($source);
+
+    expect($lower)->not->toContain('win chance')
+        ->and($lower)->not->toContain('win probability')
+        ->and($lower)->not->toContain('likelihood')
+        ->and($lower)->not->toContain('recommended stat')
+        ->and($source)->not->toContain('state="unknown"');
+});
+
 it('hands the three surfaces to every cockpit as part of the section contract', function (): void {
     $run = g3Run();
 
