@@ -24,7 +24,7 @@ const sizeClasses = {
 
 <template>
     <span
-        class="inline-flex items-center rounded-full border font-medium"
+        class="pill"
         :class="[variantClasses[props.variant ?? 'neutral'], sizeClasses[props.size ?? 'md']]"
     >
         {{ props.label }}
