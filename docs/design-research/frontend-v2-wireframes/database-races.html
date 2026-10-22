@@ -19,7 +19,7 @@
       </div>
       <button class="rail-toggle" type="button" data-rail-toggle aria-expanded="true" aria-controls="primary-nav-rail" title="Collapse navigation">
         <span class="sr-only" data-rail-verb>Collapse navigation</span>
-        <span class="glyph glyph-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></span>
+        <span class="rail-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></span>
       </button>
     </div>
       <nav class="rail-nav" aria-label="Primary">
@@ -35,10 +35,10 @@
       <a class="nav-item" href="support-cards.html" title="Support Cards"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.4 4.6h8v10h-8z"/><path d="M5 8.6h9.4v10.8H5z"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Support Cards</span></a>
       <a class="nav-item" href="skills.html" title="Skills"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Skills</span></a>
       <div class="rail-group">System</div>
-      <a class="nav-item active" href="database.html" aria-current="page" title="Database"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.6C10 5.1 7 4.7 4.2 5.3v13C7 17.7 10 18.1 12 19.6"/><path d="M12 6.6c2-1.5 5-1.9 7.8-1.3v13C17 17.7 14 18.1 12 19.6"/><path d="M12 6.6v13"/></svg></span><span class="nav-label">Database</span></a>
+      <a class="nav-item active" href="database.html" aria-current="page" title="Database"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.6C10 5.1 7 4.7 4.2 5.3v13C7 17.7 10 18.1 12 19.6"/><path d="M12 6.6c2-1.5 5-1.9 7.8-1.3v13C17 17.7 14 18.1 12 19.6"/><path d="M12 6.6v13"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Database</span></a>
       <a class="nav-item" href="preferences.html" title="Settings"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6z"/><path d="M12 3.6v2.2"/><path d="M12 18.2v2.2"/><path d="M3.6 12h2.2"/><path d="M18.2 12h2.2"/><path d="M6.1 6.1l1.6 1.6"/><path d="M16.3 16.3l1.6 1.6"/><path d="M17.9 6.1l-1.6 1.6"/><path d="M7.7 16.3l-1.6 1.6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Settings</span></a>
     </nav>
-    <a class="rail-foot" href="database-sources.html">Data sources</a>
+    <a class="rail-foot" href="database-sources.html" title="Data sources"><span class="rail-foot-word">Data sources</span></a>
   </aside>
 
   <main class="main" id="main">
@@ -87,15 +87,15 @@
             <tr><td><b>Dirt Dash</b></td><td>Hanshin</td><td>OP</td><td>Dirt</td><td class="n mono">1,400 m</td><td>Mile*</td><td class="n mono">—</td></tr>
           </tbody>
         </table>
-        <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+        <p class="note" style="margin-top:10px"><span class="g" aria-hidden="true">○</span><span>
           <b>*1400 m is an open conflict.</b> Game8 places it in Sprint; the data export files every 1400 m course under
           <code>distance</code> code 2, which reads as Mile, and the client's "(Mile)"-tagged skills gate on
           <code>distance_type==2</code>. The app must not encode a winner here.
         </span></p>
         <div class="pager">
           <span>Catalog · page 1 of 9</span>
-          <button class="btn btn-sm" disabled>Previous</button>
-          <button class="btn btn-sm">Next</button>
+          <button class="btn btn-sm" disabled type="button">Previous</button>
+          <button class="btn btn-sm" type="button">Next</button>
         </div>
       </div>
 
@@ -111,7 +111,7 @@
               <tr><td>Long</td><td class="n mono">≥ 2401</td></tr>
             </tbody>
           </table>
-          <p class="note" style="margin-top:9px"><span class="g">○</span><span>The 1400 m boundary is the source of the conflict noted above.</span></p>
+          <p class="note" style="margin-top:9px"><span class="g" aria-hidden="true">○</span><span>The 1400 m boundary is the source of the conflict noted above.</span></p>
         </div>
 
         <div class="card" style="margin:0">
@@ -124,7 +124,7 @@
               <tr><td>OP · Pre-OP</td><td class="n mono">+5</td><td class="n mono">+30</td></tr>
             </tbody>
           </table>
-          <p class="note" style="margin-top:9px"><span class="g">○</span><span>
+          <p class="note" style="margin-top:9px"><span class="g" aria-hidden="true">○</span><span>
             First place at 0 Race Bonus in the standard career families. <b>Trackblazer pays the same stat gain at a lower SP figure</b>
             (G1 +35, G2–G3 +25, OP–Pre-OP +20). Second and third are not published.
           </span></p>
@@ -140,7 +140,7 @@
                   <li><b>Closure (uilaws) requires a derived value to show where it came from.</b> The band column is computed from distance, so the screen labels it as derived. A derived cell presented as a stored fact closes a gap the reader was never shown.</li>
                   <li><b>Heuristic coverage.</b> H1. The derived band says it is derived, so the system’s own inference is visible as an inference.</li>
                   <li><b>Framework coverage.</b> Gerhardt-Powals 2 on reducing uncertainty and Information architecture 4 on exemplars. The derived band says it is derived, and the row shows the distance the band was read from.</li>
-                  <li><li><b>The rail collapses, and the word never leaves the DOM.</b> The app can collapse its global navigation to marks instead of words, and this set does the same (<code>AppLayout.vue:191-233</code>). A collapsed destination moves its label to <code>sr-only</code> and gains a <code>title</code>, so it keeps its accessible name; the active one keeps <code>aria-current="page"</code> and a left rule, so state never rides on colour alone. The control is in the top bar because the bar is the one row present at every width. The choice is <code>localStorage</code>, not a Preference row, because <code>Preference::KEYS</code> is exactly <code>theme</code> and <code>failure_estimate</code>.</li></li>
+                  <li><li><b>The rail collapses, and the word never leaves the DOM.</b> The app can collapse its global navigation to marks instead of words, and this set does the same (<code>AppLayout.vue:191-233</code>). A collapsed destination moves its label to <code>sr-only</code> and gains a <code>title</code>, so it keeps its accessible name; the active one keeps <code>aria-current="page"</code> and a left rule, so state never rides on colour alone. The control is at the head of the rail, where DESIGN.md §2.2 puts a control that belongs to a pane: the penalty for a distant control is exactly why the top-bar version was wrong. The choice is <code>localStorage</code>, not a Preference row, because <code>Preference::KEYS</code> is exactly <code>theme</code> and <code>failure_estimate</code>.</li></li>
                   <li><li><b>The way back to the hub is a strip, not a word in a corner.</b> The breadcrumb linked "Database", but it sits in the top bar on the brand-blue chrome with no underline, so it read as a word rather than as a link and a Trainer looking for the way back found the global rail instead. The nine areas are one family, so they are grouped as one family: a sub-navigation strip of the nine, with the current one marked, and the breadcrumb link now visibly a link. Information Architecture principle 7 (focused navigation) and principle 5 (front doors).</li></li>
         </ol>
       </div>
@@ -178,6 +178,7 @@
     document.documentElement.classList.toggle('rail-collapsed', collapsed);
     toggle.setAttribute('aria-expanded', String(!collapsed));
     toggle.setAttribute('aria-label', collapsed ? 'Expand navigation' : 'Collapse navigation');
+    toggle.setAttribute('title', collapsed ? 'Expand navigation' : 'Collapse navigation');
     toggle.querySelector('[data-rail-verb]').textContent = collapsed ? 'Expand navigation' : 'Collapse navigation';
   }
   toggle.addEventListener('click', function(){

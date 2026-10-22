@@ -68,6 +68,71 @@ const WIZARD = [
     'career-preflight.html',
 ];
 
+/**
+ * THE IMAGE SLOTS, as the app has them.
+ *
+ * The app renders a mirrored file in a square beside a name (`ArtworkSlot.vue`,
+ * `DESIGN.md` §4.7, `ADR-0021`). There are two kinds and three sizes, and both
+ * are the app's own vocabulary: `card_portrait` and `support_thumb`, at
+ * `size-10` (40px), `size-12` (48px) and `size-16` (64px).
+ *
+ * The wireframes have no mirror and no database, so each of those cells is
+ * DRAWN as a dashed frame. The drawing has to be honest about three things, or
+ * it misstates the product: which file belongs in the cell, how big the cell is,
+ * and that absence renders NOTHING (no grey box, no placeholder glyph, and the
+ * row keeps its text).
+ *
+ * So the expected set is written down per page, and it is checked three ways:
+ * a slot that is not in the registry, a registry entry with no slot, a wrong
+ * kind or a wrong size, a slot that is not `aria-hidden`, and a page that draws
+ * a slot without naming the file it stands for in its own annotation key, are
+ * all findings. The registry is the one place the answer lives, so a slot
+ * cannot drift away from the app without the check noticing.
+ *
+ * A slot the app does not have is not invented here. The catalog index's
+ * costume-form row and the deck picker's option list both carry a `size-10`
+ * frame in the app, and neither has a counterpart on the wireframe pages that
+ * draw those lists, so neither is drawn.
+ */
+const ARTWORK = {
+    'index.html': ['card_portrait:64', 'card_portrait:40', 'card_portrait:40', 'card_portrait:40'],
+    'career-trainee.html': ['card_portrait:40', 'card_portrait:40', 'card_portrait:40'],
+    'career-profile.html': ['card_portrait:64', 'card_portrait:40'],
+    'career-deck.html': ['support_thumb:48', 'support_thumb:48', 'support_thumb:48', 'support_thumb:48'],
+    'catalog.html': [
+        'card_portrait:48',
+        'card_portrait:48',
+        'card_portrait:48',
+        'card_portrait:48',
+        'card_portrait:48',
+        'card_portrait:48',
+    ],
+    'catalog-detail.html': ['card_portrait:64'],
+    'support-cards.html': [
+        'support_thumb:48',
+        'support_thumb:48',
+        'support_thumb:48',
+        'support_thumb:48',
+        'support_thumb:48',
+        'support_thumb:48',
+        'support_thumb:48',
+    ],
+    'support-card-detail.html': ['support_thumb:64'],
+    'veterans.html': [
+        'card_portrait:48',
+        'card_portrait:48',
+        'card_portrait:48',
+        'card_portrait:48',
+        'card_portrait:48',
+    ],
+    'veteran-detail.html': ['card_portrait:48'],
+    'run-deck.html': ['support_thumb:48', 'support_thumb:48', 'support_thumb:48', 'support_thumb:48'],
+};
+/** The two kinds the asset host declares (`ArtworkAssetController.php:22`). */
+const ART_KINDS = ['card_portrait', 'support_thumb'];
+/** The three sizes, as the app's own class names and their pixel measures. */
+const ART_SIZES = { '.slot-10': 40, '.slot-12': 48, '.slot-16': 64 };
+
 const fails = [];
 const unverifiable = [];
 const fail = (f, id, msg) => fails.push(`${f}: ${id} - ${msg}`);
@@ -111,6 +176,58 @@ if (!has('html.rail-collapsed', '--rail-w:var(--rail-w-collapsed)')) {
     fails.push('styles: UX-1 - the grid column does not follow the collapse, so the content leaves a gap');
 }
 
+// 1 / 9 THE CONTROL'S MARK IS VISIBLE AT BOTH WIDTHS. The nav glyphs are
+// display:none at every width except the collapsed one, so the control's mark
+// cannot be a `.glyph`: it rendered as an empty 44px box while the rail was
+// open, on all 49 pages. The control carries its own class, and that class
+// paints it at both widths.
+if (!has('.rail-chevron', 'display:inline-flex')) {
+    fails.push('styles: UX-1 - the collapse control has no mark class of its own, so the control renders empty');
+}
+if (!has('.rail-chevron svg', 'transform:rotate(180deg)')) {
+    fails.push('styles: UX-1 - the chevron does not point the way the open rail moves (left)');
+}
+if (!has('.rail.is-collapsed .rail-chevron svg', 'transform:rotate(0deg)')) {
+    fails.push('styles: UX-1 - the chevron does not point the way the collapsed rail moves (right)');
+}
+
+// 1 / 9 THE GRID COLUMN IS WHAT ANIMATES. Animating the rail's own width
+// leaves it 236px wide inside a 56px column for the length of the transition,
+// so the rail is painted over the content (measured: 180px of overlap). The
+// column animates and the rail stretches to it.
+if (!has('.app', 'transition:grid-template-columns')) {
+    fails.push('styles: UX-1 - the grid column does not animate, so the rail is painted over the content while it resizes');
+}
+if (!has('.rail', 'width:auto')) {
+    fails.push('styles: UX-1 - the rail does not stretch to the grid column, so it overhangs the content');
+}
+if (has('.rail', 'transition:width')) {
+    fails.push('styles: UX-1 - the rail animates its own width, which paints it over the content');
+}
+
+// 3 COLOUR / 1.3.1 THE COLLAPSED FOOT. The rule has to match the MARKUP:
+// the anchor IS `.rail-foot`, so a rule that targets an `<a>` inside it never
+// matched, and "Data sources" wrapped onto three lines in a 56px column.
+if (!has('.rail.is-collapsed .rail-foot .rail-foot-word', 'clip:rect')) {
+    fails.push('styles: WCAG 1.3.1 - the collapsed foot word does not move to sr-only');
+}
+
+// THE IMAGE SLOT'S GEOMETRY. The app's three sizes are the only ones the
+// component's type union allows (`ArtworkSlot.vue:59`), so a fourth measure
+// here would be a geometry the product does not have.
+for (const [sel, want] of Object.entries(ART_SIZES)) {
+    const w = px(sel, 'width');
+    const h = px(sel, 'height');
+    if (w === null || h === null) {
+        fails.push(`styles: ${sel} has no recorded width and height, so an image slot has no geometry`);
+    } else if (w !== want || h !== want) {
+        fails.push(`styles: ${sel} is ${w}x${h}, and the app's ${sel.replace('.slot-', 'size-')} is ${want}x${want}`);
+    }
+}
+if (!has('.slot', 'border:1px dashed')) {
+    fails.push('styles: DESIGN §4.7 - the image slot is not a dashed frame, so it reads as content rather than as a drawing');
+}
+
 // --- each page ---
 
 for (const f of files) {
@@ -129,6 +246,38 @@ for (const f of files) {
     }
     if (!/data-rail-toggle[^>]*aria-controls="primary-nav-rail"/.test(c)) {
         fail(f, 'WCAG 4.1.2', 'the collapse control does not point at the rail it resizes');
+    }
+    // The control's mark carries its own class, not `.glyph`: the nav glyphs are
+    // hidden at every width except the collapsed one, so a `.glyph` mark left the
+    // control empty while the rail was open.
+    if (!/data-rail-toggle[\s\S]{0,400}class="rail-chevron"/.test(c)) {
+        fail(f, 'UX-1 / WCAG 1.4.1', 'the collapse control has no visible mark of its own');
+    }
+    // The tooltip follows the state. A hard-coded title said "Collapse" on a
+    // control whose action was "Expand".
+    if (!/toggle\.setAttribute\('title'/.test(c)) {
+        fail(f, 'WCAG 4.1.2 / H1', 'the collapse control tooltip does not follow the rail state');
+    }
+    // The collapsed foot. The anchor IS `.rail-foot`, so the word needs a class
+    // the collapsed rule can target.
+    if (!/class="rail-foot-word"/.test(c)) {
+        fail(f, 'WCAG 1.3.1', 'the collapsed foot has no class to move its word to sr-only');
+    }
+
+    // 3 COLOUR / 1.3.1 EVERY WORD IS IN ONE COLUMN. The ten destinations are a
+    // column, so the dot's job is to hold each word at the same x. The active
+    // item's dot was dropped, which pulled the active word 16px left of the
+    // other nine: the one destination the eye is on was the one out of line.
+    const navItems = [...c.matchAll(/<a class="nav-item([^"]*)"[^>]*>([\s\S]*?)<\/a>/g)];
+    for (const [, attrs, inner] of navItems) {
+        if (!inner.includes('class="dot"')) {
+            const active = attrs.includes('active');
+            fail(
+                f,
+                'UX-3 / Gestalt 1 / WCAG 1.4.1',
+                `the ${active ? 'active ' : ''}nav item has no dot, so its word does not line up with the other nine`
+            );
+        }
     }
 
     // 3 COLOUR. A type chip carries the mark AND the word.
@@ -206,6 +355,68 @@ for (const f of files) {
     for (const m of c.matchAll(/<a class="btn btn-primary"[^>]*>\s*([^<]*?)\s*<\/a>/g)) {
         if (m[1] === 'Continue') {
             fail(f, 'D-79', 'the primary action is a bare "Continue", which does not name its destination');
+        }
+    }
+
+    // THE IMAGE SLOTS. The registry is the answer; the page is checked against it.
+    const slotTags = [...c.matchAll(/<span class="slot[^"]*"[^>]*>/g)].map((m) => m[0]);
+    const drawn = slotTags
+        .map((a) => {
+            const kind = (a.match(/data-art="([^"]+)"/) || [])[1] || 'none';
+            // The class carries the app's own size name (`slot-12` is the app's
+            // `size-12`), and the registry records the measure it stands for.
+            const cls = (a.match(/class="[^"]*\bslot-(\d+)\b/) || [])[1];
+            const size = cls ? ART_SIZES[`.slot-${cls}`] ?? 'none' : 'none';
+            return `${kind}:${size}`;
+        })
+        .sort();
+    const expected = (ARTWORK[f] || []).slice().sort();
+    if (JSON.stringify(drawn) !== JSON.stringify(expected)) {
+        fail(
+            f,
+            'DESIGN §4.7 / ADR-0021',
+            `the image slots are [${drawn.join(', ') || 'none'}]; the registry says [${expected.join(', ') || 'none'}]`
+        );
+    }
+    if (!(f in ARTWORK) && drawn.length) {
+        fail(f, 'DESIGN §4.7', 'the page draws an image slot, and it is not in the artwork registry');
+    }
+    for (const a of slotTags) {
+        const kind = (a.match(/data-art="([^"]+)"/) || [])[1];
+        if (!kind || !ART_KINDS.includes(kind)) {
+            fail(
+                f,
+                'DESIGN §4.7',
+                `an image slot names no artwork kind the asset host declares (${kind || 'none'})`
+            );
+        }
+        if (!/aria-hidden="true"/.test(a)) {
+            fail(
+                f,
+                'WCAG 1.1.1 / DESIGN §4.7',
+                'an image slot is not aria-hidden, so the drawing is read as content rather than as a slot'
+            );
+        }
+        if (!/title="(card_portrait|support_thumb) · \d+px"/.test(a)) {
+            fail(f, 'DESIGN §4.7', 'an image slot does not carry its kind and its measure in its title');
+        }
+    }
+    // A page that draws a slot must say what the slot is, in its own words, and
+    // must cite the section that owns the rule. The annotation is where the
+    // drawing is made honest: the product paints no frame when the mirror misses.
+    const keybox = (c.match(/<div class="keybox">([\s\S]*?)<\/div>/) || [])[1] || '';
+    if (drawn.length) {
+        for (const kind of new Set(drawn.map((d) => d.split(':')[0]))) {
+            if (!keybox.includes(kind)) {
+                fail(f, 'DESIGN §4.7', `the page draws a ${kind} slot, and its annotation key never names it`);
+            }
+        }
+        if (!keybox.includes('4.7')) {
+            fail(
+                f,
+                'DESIGN §4.7',
+                'the page draws a slot, and its annotation key does not cite the section that owns the rule'
+            );
         }
     }
 

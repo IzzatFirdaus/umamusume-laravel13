@@ -19,7 +19,7 @@
       </div>
       <button class="rail-toggle" type="button" data-rail-toggle aria-expanded="true" aria-controls="primary-nav-rail" title="Collapse navigation">
         <span class="sr-only" data-rail-verb>Collapse navigation</span>
-        <span class="glyph glyph-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></span>
+        <span class="rail-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></span>
       </button>
     </div>
       <nav class="rail-nav" aria-label="Primary">
@@ -33,12 +33,12 @@
       <a class="nav-item" href="review.html" title="Review"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5 20.6 19H3.4z"/><path d="M12 10.2v3.6"/><path d="M12 16.4h.01"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Review</span></a>
       <div class="rail-group">Library</div>
       <a class="nav-item" href="support-cards.html" title="Support Cards"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.4 4.6h8v10h-8z"/><path d="M5 8.6h9.4v10.8H5z"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Support Cards</span></a>
-      <a class="nav-item active" href="skills.html" aria-current="page" title="Skills"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span><span class="nav-label">Skills</span></a>
+      <a class="nav-item active" href="skills.html" aria-current="page" title="Skills"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Skills</span></a>
       <div class="rail-group">System</div>
       <a class="nav-item" href="database.html" title="Database"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.6C10 5.1 7 4.7 4.2 5.3v13C7 17.7 10 18.1 12 19.6"/><path d="M12 6.6c2-1.5 5-1.9 7.8-1.3v13C17 17.7 14 18.1 12 19.6"/><path d="M12 6.6v13"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Database</span></a>
       <a class="nav-item" href="preferences.html" title="Settings"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6z"/><path d="M12 3.6v2.2"/><path d="M12 18.2v2.2"/><path d="M3.6 12h2.2"/><path d="M18.2 12h2.2"/><path d="M6.1 6.1l1.6 1.6"/><path d="M16.3 16.3l1.6 1.6"/><path d="M17.9 6.1l-1.6 1.6"/><path d="M7.7 16.3l-1.6 1.6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Settings</span></a>
     </nav>
-    <a class="rail-foot" href="database-sources.html">Data sources</a>
+    <a class="rail-foot" href="database-sources.html" title="Data sources"><span class="rail-foot-word">Data sources</span></a>
   </aside>
 
   <main class="main" id="main">
@@ -55,8 +55,8 @@
       <div class="eyebrow">Skill</div>
       <div class="hrow">
         <div>
-          <h1>Corner Recovery ○</h1>
-          <p class="lede">Recovery · Pace Chaser · corners. Base cost 130 Skill Points before any hint discount.</p>
+          <h1>Corner Recovery ○ <span style="font-size:16px;font-weight:600;color:var(--ink-muted)">コーナー回復○</span></h1>
+          <p class="lede">Recovery · 170 Skill Points at base. A learnable skill, with no running-style precondition of its own.</p>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <a class="btn" href="skills.html">Back to search</a>
@@ -80,14 +80,14 @@
             <p class="sub">Shown as-is. These are the export's tokens, not client labels.</p>
             <table class="t">
               <tbody>
-                <tr><td>Condition</td><td class="mono" style="font-size:11.5px">corner_random!=0</td></tr>
-                <tr><td>Precondition</td><td class="mono" style="font-size:11.5px">phase&ge;2</td></tr>
-                <tr><td>Base cost</td><td class="mono">130 SP</td></tr>
-                <tr><td>Rarity</td><td>Normal</td></tr>
-                <tr><td>Running style</td><td>Pace Chaser</td></tr>
+                <tr><td>Condition</td><td class="mono" style="font-size:11.5px">phase==1&amp;corner!=0</td></tr>
+                <tr><td>Precondition</td><td class="mono" style="font-size:11.5px">none stated</td></tr>
+                <tr><td>Effects</td><td class="mono" style="font-size:11.5px">type 9: 150</td></tr>
+                <tr><td>Base cost</td><td class="mono">170 SP</td></tr>
+                <tr><td>Class code</td><td>1 · learnable, carries a cost</td></tr>
               </tbody>
             </table>
-            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+            <p class="note" style="margin-top:10px"><span class="g" aria-hidden="true">○</span><span>
               <b>The expressions and effect codes above are the source's own engine data, not client labels.</b>
               A tracker that "cleaned" them into prose would lose the one representation that can be diffed against the export.
             </span></p>
@@ -98,18 +98,19 @@
             <table class="t">
               <thead><tr><th>Hint</th><th class="n">Discount</th><th class="n">Displayed cost</th></tr></thead>
               <tbody>
-                <tr><td>None</td><td class="n mono">0%</td><td class="n mono">130</td></tr>
-                <tr><td>Lv1</td><td class="n mono">10%</td><td class="n mono">117</td></tr>
-                <tr><td>Lv2</td><td class="n mono">20%</td><td class="n mono">104</td></tr>
-                <tr class="is-current"><td><b>Lv3</b></td><td class="n mono">30%</td><td class="n mono"><b>91</b></td></tr>
-                <tr><td>Lv4</td><td class="n mono">35%</td><td class="n mono">84</td></tr>
-                <tr><td>Lv Max</td><td class="n mono">40%</td><td class="n mono">78</td></tr>
+                <tr><td>None</td><td class="n mono">0%</td><td class="n mono">170</td></tr>
+                <tr><td>Lv1</td><td class="n mono">10%</td><td class="n mono">153</td></tr>
+                <tr><td>Lv2</td><td class="n mono">20%</td><td class="n mono">136</td></tr>
+                <tr class="is-current"><td><b>Lv3</b></td><td class="n mono">30%</td><td class="n mono"><b>119</b></td></tr>
+                <tr><td>Lv4</td><td class="n mono">35%</td><td class="n mono">110</td></tr>
+                <tr><td>Lv Max</td><td class="n mono">40%</td><td class="n mono">102</td></tr>
               </tbody>
             </table>
-            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
-              The displayed cost is <code>base × (1 − discount)</code>, floored. This is a measured example:
-              130 → 104 / 91 / 84 reconciles exactly, and 130 × 0.65 = 84.5 is the one observed rounding case,
-              shown as 84 (<code>UMAMUSUME_REFERENCE.md</code> §1.1.4).
+            <p class="note" style="margin-top:10px"><span class="g" aria-hidden="true">○</span><span>
+              The displayed cost is <code>base × (1 − discount)</code>, floored. The rule is measured on a 130-point skill:
+              130 → 104 / 91 / 84 reconciles exactly, and 130 × 0.65 = 84.5 is the one observed rounding case, shown as 84
+              (<code>UMAMUSUME_REFERENCE.md</code> §1.1.4). The column here applies the same rule to this skill's own base
+              of 170, which is the catalogue's figure.
             </span></p>
           </div>
         </div>
@@ -117,12 +118,15 @@
         <div>
           <div class="card" style="margin:0">
             <h2>Readable description</h2>
-            <p style="font-size:13px;color:var(--ink);line-height:1.6;margin:0">
-              Recovers stamina when the runner takes a corner, for Pace Chaser runners.
+            <p style="font-size:13px;color:var(--ink-muted);line-height:1.6;margin:0">
+              No client string.
             </p>
-            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+            <p class="note" style="margin-top:10px"><span class="g" aria-hidden="true">○</span><span>
               The plain description is a convenience reading of the tokens above, never a replacement for them.
               Where a client string exists it is printed verbatim; where none does, this block says "no client string".
+              <b>For a skill, none does.</b> The export's English is the publisher's rather than the client's, and no
+              client-string source for descriptions exists in this repository, so the field is empty by ruling
+              (G-SK-20, <code>docs/research-scratch/SKILLS-MECHANICS.md</code>) rather than by an omission.
             </span></p>
           </div>
 
@@ -130,12 +134,17 @@
             <h2>Related</h2>
             <table class="t">
               <tbody>
-                <tr><td>Same condition</td><td class="n">3 skills</td></tr>
-                <tr><td>Same running style</td><td class="n">42 skills</td></tr>
-                <tr><td>Same rarity and type</td><td class="n">18 skills</td></tr>
+                <tr><td>Same condition</td><td class="n">7 skills</td></tr>
+                <tr><td>Same class code</td><td class="n">9 skills</td></tr>
+                <tr><td>Same class code and type</td><td class="n">30 skills</td></tr>
               </tbody>
             </table>
             <a class="btn btn-sm" href="skills.html" style="margin-top:10px">Search with these filters</a>
+            <p class="note" style="margin-top:9px"><span class="g" aria-hidden="true">○</span><span>
+              The three counts are read off the catalogue: seven skills share this exact condition, nine carry this
+              skill's gate keys, and thirty share its class code and its type. A running style is not a skill property,
+              so it is not offered as a grouping here: it lives inside the condition, which is what the first row counts.
+            </span></p>
           </div>
 
           <div class="card">
@@ -166,7 +175,8 @@
       <div class="keybox">
         <h2>Annotation key · Skill detail</h2>
         <ol>
-          <li><b>Engine tokens first, prose second.</b> The condition table is the primary content and the readable sentence is a labelled convenience. Reversing that order would make the screen un-diffable against the export.</li>
+          <li><b>Engine tokens first, prose second, and here the prose is an empty state.</b> The condition table is the primary content and the readable sentence is a labelled convenience. Reversing that order would make the screen un-diffable against the export. The convenience block reads <b>"No client string."</b> because no client-vocabulary description for a skill exists in this repository; a paraphrase of the export's English would put the publisher's wording where the client's belongs (G-SK-20).</li>
+          <li><b>This row is the catalogue's, and the price ladder is its own base.</b> <code>Corner Recovery ○</code> is a real skill: class code 1, 170 SP, one effect of type 9 at 150, and the condition <code>phase==1&amp;corner!=0</code> with no precondition. The name, Japanese name, cost, condition, effect and the three related counts are read from <code>assets/data/skills.js</code>; the discount rule is the measured one, applied to this base.</li>
           <li><b>The full price ladder is computed and shown.</b> One row per hint level, so a Trainer sees exactly what earning one more hint buys before spending SP on it.</li>
           <li><b>The rounding case is displayed, not hidden.</b> 84.5 floored to 84 is the only rounding observed, and printing it is cheaper than a Trainer filing a bug.</li>
           <li><b>Hints are per-run.</b> The "In your runs" block keeps a run-scoped fact out of a catalogue fact, which is the same separation the cockpit's entered ceiling versus scenario cap needs.</li>
@@ -174,7 +184,7 @@
                   <li><b>Cognitive Load: the condition table is the primary content.</b> Engine tokens lead and the readable sentence labels them, so the reader recognises the gate instead of recalling what a phase number means. Prose alone would hide the exact boundary the skill fires on.</li>
                   <li><b>Heuristic coverage.</b> H6. The condition table is primary and the sentence labels it, so the gate is recognised rather than reconstructed from prose.</li>
                   <li><b>Framework coverage.</b> Information architecture 3 on disclosure and Gerhardt-Powals 4 on aids to interpretation. The condition table is primary and the readable sentence labels it, so the gate is recognised rather than reconstructed from prose.</li>
-                  <li><li><b>The rail collapses, and the word never leaves the DOM.</b> The app can collapse its global navigation to marks instead of words, and this set does the same (<code>AppLayout.vue:191-233</code>). A collapsed destination moves its label to <code>sr-only</code> and gains a <code>title</code>, so it keeps its accessible name; the active one keeps <code>aria-current="page"</code> and a left rule, so state never rides on colour alone. The control is in the top bar because the bar is the one row present at every width. The choice is <code>localStorage</code>, not a Preference row, because <code>Preference::KEYS</code> is exactly <code>theme</code> and <code>failure_estimate</code>.</li></li>
+                  <li><li><b>The rail collapses, and the word never leaves the DOM.</b> The app can collapse its global navigation to marks instead of words, and this set does the same (<code>AppLayout.vue:191-233</code>). A collapsed destination moves its label to <code>sr-only</code> and gains a <code>title</code>, so it keeps its accessible name; the active one keeps <code>aria-current="page"</code> and a left rule, so state never rides on colour alone. The control is at the head of the rail, where DESIGN.md §2.2 puts a control that belongs to a pane: the penalty for a distant control is exactly why the top-bar version was wrong. The choice is <code>localStorage</code>, not a Preference row, because <code>Preference::KEYS</code> is exactly <code>theme</code> and <code>failure_estimate</code>.</li></li>
                   <li><li><b>The way back to the hub is a strip, not a word in a corner.</b> The breadcrumb linked "Database", but it sits in the top bar on the brand-blue chrome with no underline, so it read as a word rather than as a link and a Trainer looking for the way back found the global rail instead. The nine areas are one family, so they are grouped as one family: a sub-navigation strip of the nine, with the current one marked, and the breadcrumb link now visibly a link. Information Architecture principle 7 (focused navigation) and principle 5 (front doors).</li></li>
         </ol>
       </div>
@@ -212,6 +222,7 @@
     document.documentElement.classList.toggle('rail-collapsed', collapsed);
     toggle.setAttribute('aria-expanded', String(!collapsed));
     toggle.setAttribute('aria-label', collapsed ? 'Expand navigation' : 'Collapse navigation');
+    toggle.setAttribute('title', collapsed ? 'Expand navigation' : 'Collapse navigation');
     toggle.querySelector('[data-rail-verb]').textContent = collapsed ? 'Expand navigation' : 'Collapse navigation';
   }
   toggle.addEventListener('click', function(){

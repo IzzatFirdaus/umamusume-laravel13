@@ -19,12 +19,12 @@
       </div>
       <button class="rail-toggle" type="button" data-rail-toggle aria-expanded="true" aria-controls="primary-nav-rail" title="Collapse navigation">
         <span class="sr-only" data-rail-verb>Collapse navigation</span>
-        <span class="glyph glyph-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></span>
+        <span class="rail-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></span>
       </button>
     </div>
       <nav class="rail-nav" aria-label="Primary">
       <div class="rail-group">Play</div>
-      <a class="nav-item active" href="index.html" aria-current="page" title="Dashboard"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7"/><path d="M6.6 9.6V20h10.8V9.6"/></svg></span><span class="nav-label">Dashboard</span></a>
+      <a class="nav-item active" href="index.html" aria-current="page" title="Dashboard"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7"/><path d="M6.6 9.6V20h10.8V9.6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Dashboard</span></a>
       <a class="nav-item" href="career-scenario.html" title="New Career"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.4v17.2"/><path d="M6 4.6h11l-2.7 3.5L17 11.6H6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">New Career</span></a>
       <div class="rail-group">My data</div>
       <a class="nav-item" href="runs-index.html" title="Careers"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h12"/><path d="M8 12h12"/><path d="M8 17h12"/><path d="M4.4 7h.01"/><path d="M4.4 12h.01"/><path d="M4.4 17h.01"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Careers</span></a>
@@ -38,7 +38,7 @@
       <a class="nav-item" href="database.html" title="Database"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.6C10 5.1 7 4.7 4.2 5.3v13C7 17.7 10 18.1 12 19.6"/><path d="M12 6.6c2-1.5 5-1.9 7.8-1.3v13C17 17.7 14 18.1 12 19.6"/><path d="M12 6.6v13"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Database</span></a>
       <a class="nav-item" href="preferences.html" title="Settings"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6z"/><path d="M12 3.6v2.2"/><path d="M12 18.2v2.2"/><path d="M3.6 12h2.2"/><path d="M18.2 12h2.2"/><path d="M6.1 6.1l1.6 1.6"/><path d="M16.3 16.3l1.6 1.6"/><path d="M17.9 6.1l-1.6 1.6"/><path d="M7.7 16.3l-1.6 1.6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Settings</span></a>
     </nav>
-    <a class="rail-foot" href="database-sources.html">Data sources</a>
+    <a class="rail-foot" href="database-sources.html" title="Data sources"><span class="rail-foot-word">Data sources</span></a>
   </aside>
 
   <main class="main" id="main">
@@ -59,8 +59,8 @@
           <p class="lede">One active career, ten finished runs, and four permanent Global scenarios.</p>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <a class="btn btn-primary" href="career-scenario.html">New career</a>
-          <a class="btn" href="runs-index.html">All careers</a>
+          <a class="btn" href="career-scenario.html">New career</a>
+          <a class="btn btn-quiet" href="runs-index.html">All careers</a>
         </div>
       </div>
       <div class="hr"></div>
@@ -72,6 +72,7 @@
         <div class="card" style="margin:0">
           <h2>Pick up where you left off</h2>
           <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:2px 0 6px">
+            <span class="slot slot-16" data-art="card_portrait" aria-hidden="true" title="card_portrait · 64px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="4.8" width="17.6" height="14.4" rx="2.4"/><circle cx="8.8" cy="9.8" r="1.5"/><path d="M4.2 17.4 9.4 12.4l3.5 3.3 2.7-2.4 4.2 4.1"/></svg><span class="cap">portrait</span></span>
             <div style="flex:1 1 250px;min-width:0">
               <div style="font-size:19px;font-weight:800;color:var(--ink-strong)">Rice Shower
                 <span class="pill pill-accent" style="vertical-align:3px">Unity Cup</span>
@@ -98,7 +99,7 @@
             </div>
           </div>
 
-          <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+          <p class="note" style="margin-top:10px"><span class="g" aria-hidden="true">○</span><span>
             No logged turn has reported Energy or a team rank yet.
             <b>A turn is counted from the turns recorded, not from the position the run was imported at.</b>
             This run's cockpit reports turn 67 from its imported position; the strip here counts one recorded
@@ -158,11 +159,11 @@
           <table class="t">
             <thead><tr><th>Trainee</th><th>Scenario</th><th>Saved</th><th class="n"></th></tr></thead>
             <tbody>
-              <tr><td><b>Vodka</b> <span style="color:var(--ink-muted)">ウオッカ</span></td><td>URA Finale</td><td class="mono">2026-10-15</td>
+              <tr><td><span style="display:flex;align-items:center;gap:9px"><span class="slot slot-10" data-art="card_portrait" aria-hidden="true" title="card_portrait · 40px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="4.8" width="17.6" height="14.4" rx="2.4"/><circle cx="8.8" cy="9.8" r="1.5"/><path d="M4.2 17.4 9.4 12.4l3.5 3.3 2.7-2.4 4.2 4.1"/></svg><span class="cap">portrait</span></span><span><b>Vodka</b> <span style="color:var(--ink-muted)">ウオッカ</span></span></span></td><td>URA Finale</td><td class="mono">2026-10-15</td>
                 <td class="n"><a class="btn btn-sm" href="veteran-detail.html">Open</a></td></tr>
-              <tr><td><b>Vodka</b> <span style="color:var(--ink-muted)">ウオッカ</span></td><td>URA Finale</td><td class="mono">2026-10-15</td>
+              <tr><td><span style="display:flex;align-items:center;gap:9px"><span class="slot slot-10" data-art="card_portrait" aria-hidden="true" title="card_portrait · 40px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="4.8" width="17.6" height="14.4" rx="2.4"/><circle cx="8.8" cy="9.8" r="1.5"/><path d="M4.2 17.4 9.4 12.4l3.5 3.3 2.7-2.4 4.2 4.1"/></svg><span class="cap">portrait</span></span><span><b>Vodka</b> <span style="color:var(--ink-muted)">ウオッカ</span></span></span></td><td>URA Finale</td><td class="mono">2026-10-15</td>
                 <td class="n"><a class="btn btn-sm" href="veteran-detail.html">Open</a></td></tr>
-              <tr><td><b>Daiwa Scarlet</b> <span style="color:var(--ink-muted)">ダイワスカーレット</span></td><td>URA Finale</td><td class="mono">2026-10-15</td>
+              <tr><td><span style="display:flex;align-items:center;gap:9px"><span class="slot slot-10" data-art="card_portrait" aria-hidden="true" title="card_portrait · 40px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="4.8" width="17.6" height="14.4" rx="2.4"/><circle cx="8.8" cy="9.8" r="1.5"/><path d="M4.2 17.4 9.4 12.4l3.5 3.3 2.7-2.4 4.2 4.1"/></svg><span class="cap">portrait</span></span><span><b>Daiwa Scarlet</b> <span style="color:var(--ink-muted)">ダイワスカーレット</span></span></span></td><td>URA Finale</td><td class="mono">2026-10-15</td>
                 <td class="n"><a class="btn btn-sm" href="veteran-detail.html">Open</a></td></tr>
             </tbody>
           </table>
@@ -180,7 +181,7 @@
             <a class="btn" href="preferences.html">Open settings</a>
             <a class="btn" href="database.html">Database hub</a>
           </div>
-          <p class="note" style="margin-top:11px"><span class="g">○</span><span>Four destinations. The running app's sidebar carries ten flat items; this dashboard is the same set, grouped, with one primary action.</span></p>
+          <p class="note" style="margin-top:11px"><span class="g" aria-hidden="true">○</span><span>Four destinations. The running app's sidebar carries ten flat items; this dashboard is the same set, grouped, with one primary action.</span></p>
         </div>
       </div>
 
@@ -192,11 +193,12 @@
           <li><b>Absence keeps its tile.</b> Energy and team rank say "not recorded" rather than dropping the row. The external prototype review's "drop the row" rule is applied to explanation paragraphs, not to a value the screen claims to report.</li>
           <li><b>Nav taxonomy, two levels.</b> Ten destinations grouped as Play / My data / Library / System. The running sidebar is one flat list of ten, which breaches the "at or under eight" target recorded in <code>AppLayout.vue:178</code>; grouping fixes it without deleting a destination.</li>
           <li><b>Mobile is a different shape.</b> Below 760px the sidebar becomes design-2.0 §41's bottom bar: Home / Career / Legacy / Deck / More.</li>
-          <li><b>Accent discipline.</b> The status lime appears once (the "1 active career" pill), the action blue once (the primary), the risk red once (the data-status edge). Section headings are ink plus a rule. That is the fix for the nine saturated lime bars the external review measured.</li>
+          <li><b>Accent discipline, measured.</b> Three different roles were drawing on one accent before this pass: the current destination's fill, the provenance chip, and the recommendation pill. Each now has its own token. The status lime appears once (the "1 active career" pill), the action blue once (the primary), the risk red once (the data-status edge), and the brand accent once (the recommendation). The current destination wears the chrome's 10% tint (<code>AppLayout.vue:239</code>), and provenance wears ink weight rather than hue, so the accent means "this is the recommendation" and nothing else. Section headings are ink plus a rule. That is the fix for the nine saturated lime bars the external review measured.</li>
                   <li><b>Von Restorff on the primary action.</b> "Open cockpit" is the only filled button in the top region, so the page has exactly one accented element competing for the next click. Two filled actions would make the accent mean "a button" instead of "the button".</li>
                   <li><b>Heuristic coverage.</b> H8. One primary action and a dashboard of what changed, with the long tail behind links.</li>
                   <li><b>Framework coverage.</b> Tognazzini 10 on latency and Shneiderman 3 on proportional feedback. One filled action in the top region, so the page has exactly one thing to acknowledge when it answers, and the acknowledgment is the whole of the top region.</li>
-                  <li><li><b>The rail collapses, and the word never leaves the DOM.</b> The app can collapse its global navigation to marks instead of words, and this set does the same (<code>AppLayout.vue:191-233</code>). A collapsed destination moves its label to <code>sr-only</code> and gains a <code>title</code>, so it keeps its accessible name; the active one keeps <code>aria-current="page"</code> and a left rule, so state never rides on colour alone. The control is in the top bar because the bar is the one row present at every width. The choice is <code>localStorage</code>, not a Preference row, because <code>Preference::KEYS</code> is exactly <code>theme</code> and <code>failure_estimate</code>.</li></li>
+                  <li><li><b>The rail collapses, and the word never leaves the DOM.</b> The app can collapse its global navigation to marks instead of words, and this set does the same (<code>AppLayout.vue:191-233</code>). A collapsed destination moves its label to <code>sr-only</code> and gains a <code>title</code>, so it keeps its accessible name; the active one keeps <code>aria-current="page"</code> and a left rule, so state never rides on colour alone. The control is at the head of the rail, where DESIGN.md §2.2 puts a control that belongs to a pane: the penalty for a distant control is exactly why the top-bar version was wrong. The choice is <code>localStorage</code>, not a Preference row, because <code>Preference::KEYS</code> is exactly <code>theme</code> and <code>failure_estimate</code>.</li></li>
+                  <li><b>The picture slots are drawings, and absence is a normal state.</b> The app renders a mirrored <code>card_portrait</code> beside the career name at 64px and beside each veteran at 40px (<code>ArtworkSlot.vue</code>, <code>DESIGN.md</code> §4.7). A file the mirror does not hold renders <b>nothing</b> — no grey box, no placeholder glyph — and the row keeps its text. The dashed frame here marks a cell the picture would occupy, and the subject in it names the picture that belongs there.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. Values are the live dashboard payload read from <code>http://127.0.0.1:8000/</code>
@@ -238,6 +240,7 @@
     document.documentElement.classList.toggle('rail-collapsed', collapsed);
     toggle.setAttribute('aria-expanded', String(!collapsed));
     toggle.setAttribute('aria-label', collapsed ? 'Expand navigation' : 'Collapse navigation');
+    toggle.setAttribute('title', collapsed ? 'Expand navigation' : 'Collapse navigation');
     toggle.querySelector('[data-rail-verb]').textContent = collapsed ? 'Expand navigation' : 'Collapse navigation';
   }
   toggle.addEventListener('click', function(){

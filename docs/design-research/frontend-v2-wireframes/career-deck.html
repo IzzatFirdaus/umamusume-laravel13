@@ -19,13 +19,13 @@
       </div>
       <button class="rail-toggle" type="button" data-rail-toggle aria-expanded="true" aria-controls="primary-nav-rail" title="Collapse navigation">
         <span class="sr-only" data-rail-verb>Collapse navigation</span>
-        <span class="glyph glyph-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></span>
+        <span class="rail-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></span>
       </button>
     </div>
       <nav class="rail-nav" aria-label="Primary">
       <div class="rail-group">Play</div>
       <a class="nav-item" href="index.html" title="Dashboard"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7"/><path d="M6.6 9.6V20h10.8V9.6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Dashboard</span></a>
-      <a class="nav-item active" href="career-scenario.html" aria-current="page" title="New Career"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.4v17.2"/><path d="M6 4.6h11l-2.7 3.5L17 11.6H6"/></svg></span><span class="nav-label">New Career</span></a>
+      <a class="nav-item active" href="career-scenario.html" aria-current="page" title="New Career"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.4v17.2"/><path d="M6 4.6h11l-2.7 3.5L17 11.6H6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">New Career</span></a>
       <div class="rail-group">My data</div>
       <a class="nav-item" href="runs-index.html" title="Careers"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h12"/><path d="M8 12h12"/><path d="M8 17h12"/><path d="M4.4 7h.01"/><path d="M4.4 12h.01"/><path d="M4.4 17h.01"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Careers</span></a>
       <a class="nav-item" href="legacy.html" title="Legacy Lab"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h.01"/><path d="M18 7h.01"/><path d="M12 17h.01"/><path d="M6.5 7.7 11.3 16"/><path d="M17.5 7.7 12.7 16"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Legacy Lab</span></a>
@@ -38,7 +38,7 @@
       <a class="nav-item" href="database.html" title="Database"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.6C10 5.1 7 4.7 4.2 5.3v13C7 17.7 10 18.1 12 19.6"/><path d="M12 6.6c2-1.5 5-1.9 7.8-1.3v13C17 17.7 14 18.1 12 19.6"/><path d="M12 6.6v13"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Database</span></a>
       <a class="nav-item" href="preferences.html" title="Settings"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6z"/><path d="M12 3.6v2.2"/><path d="M12 18.2v2.2"/><path d="M3.6 12h2.2"/><path d="M18.2 12h2.2"/><path d="M6.1 6.1l1.6 1.6"/><path d="M16.3 16.3l1.6 1.6"/><path d="M17.9 6.1l-1.6 1.6"/><path d="M7.7 16.3l-1.6 1.6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Settings</span></a>
     </nav>
-    <a class="rail-foot" href="database-sources.html">Data sources</a>
+    <a class="rail-foot" href="database-sources.html" title="Data sources"><span class="rail-foot-word">Data sources</span></a>
   </aside>
 
   <main class="main" id="main">
@@ -96,11 +96,14 @@
 
             <div style="border:1px solid var(--rule-soft);border-radius:var(--r-sm);background:var(--raised);padding:10px">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-                <div>
-                  <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Speed card</div>
-                  <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Speed</div>
+                <div style="display:flex;align-items:center;gap:9px">
+                  <span class="slot slot-12" data-art="support_thumb" aria-hidden="true" title="support_thumb · 48px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="4.8" width="17.6" height="14.4" rx="2.4"/><circle cx="8.8" cy="9.8" r="1.5"/><path d="M4.2 17.4 9.4 12.4l3.5 3.3 2.7-2.4 4.2 4.1"/></svg><span class="cap">thumb</span></span>
+                  <div>
+                    <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Speed card</div>
+                    <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Speed</div>
+                  </div>
                 </div>
-                <button class="btn btn-quiet btn-sm" aria-label="Remove Speed card"><span aria-hidden="true">✕</span><span class="sr-only">Remove Speed card</span></button>
+                <button class="btn btn-quiet btn-sm" aria-label="Remove Speed card" type="button"><span aria-hidden="true">✕</span><span class="sr-only">Remove Speed card</span></button>
               </div>
               <div class="track" style="margin-top:8px"><i style="width:80%"></i></div>
               <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-muted);margin-top:3px">
@@ -110,11 +113,14 @@
 
             <div style="border:1px solid var(--rule-soft);border-radius:var(--r-sm);background:var(--raised);padding:10px">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-                <div>
-                  <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Speed card</div>
-                  <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Speed</div>
+                <div style="display:flex;align-items:center;gap:9px">
+                  <span class="slot slot-12" data-art="support_thumb" aria-hidden="true" title="support_thumb · 48px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="4.8" width="17.6" height="14.4" rx="2.4"/><circle cx="8.8" cy="9.8" r="1.5"/><path d="M4.2 17.4 9.4 12.4l3.5 3.3 2.7-2.4 4.2 4.1"/></svg><span class="cap">thumb</span></span>
+                  <div>
+                    <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Speed card</div>
+                    <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Speed</div>
+                  </div>
                 </div>
-                <button class="btn btn-quiet btn-sm" aria-label="Remove second Speed card"><span aria-hidden="true">✕</span><span class="sr-only">Remove second Speed card</span></button>
+                <button class="btn btn-quiet btn-sm" aria-label="Remove second Speed card" type="button"><span aria-hidden="true">✕</span><span class="sr-only">Remove second Speed card</span></button>
               </div>
               <div class="track" style="margin-top:8px"><i style="width:80%"></i></div>
               <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-muted);margin-top:3px">
@@ -124,11 +130,14 @@
 
             <div style="border:1px solid var(--rule-soft);border-radius:var(--r-sm);background:var(--raised);padding:10px">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-                <div>
-                  <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Power card</div>
-                  <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Power</div>
+                <div style="display:flex;align-items:center;gap:9px">
+                  <span class="slot slot-12" data-art="support_thumb" aria-hidden="true" title="support_thumb · 48px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="4.8" width="17.6" height="14.4" rx="2.4"/><circle cx="8.8" cy="9.8" r="1.5"/><path d="M4.2 17.4 9.4 12.4l3.5 3.3 2.7-2.4 4.2 4.1"/></svg><span class="cap">thumb</span></span>
+                  <div>
+                    <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Power card</div>
+                    <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Power</div>
+                  </div>
                 </div>
-                <button class="btn btn-quiet btn-sm" aria-label="Remove Power card"><span aria-hidden="true">✕</span><span class="sr-only">Remove Power card</span></button>
+                <button class="btn btn-quiet btn-sm" aria-label="Remove Power card" type="button"><span aria-hidden="true">✕</span><span class="sr-only">Remove Power card</span></button>
               </div>
               <div class="track" style="margin-top:8px"><i style="width:55%"></i></div>
               <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-muted);margin-top:3px">
@@ -138,11 +147,14 @@
 
             <div style="border:1px solid var(--rule-soft);border-radius:var(--r-sm);background:var(--raised);padding:10px">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-                <div>
-                  <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Pal card</div>
-                  <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Pal</div>
+                <div style="display:flex;align-items:center;gap:9px">
+                  <span class="slot slot-12" data-art="support_thumb" aria-hidden="true" title="support_thumb · 48px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="4.8" width="17.6" height="14.4" rx="2.4"/><circle cx="8.8" cy="9.8" r="1.5"/><path d="M4.2 17.4 9.4 12.4l3.5 3.3 2.7-2.4 4.2 4.1"/></svg><span class="cap">thumb</span></span>
+                  <div>
+                    <div style="font-weight:800;color:var(--ink-strong);font-size:13.5px">Pal card</div>
+                    <div style="font-size:11.5px;color:var(--ink-muted)">SSR · Pal</div>
+                  </div>
                 </div>
-                <button class="btn btn-quiet btn-sm" aria-label="Remove Pal card"><span aria-hidden="true">✕</span><span class="sr-only">Remove Pal card</span></button>
+                <button class="btn btn-quiet btn-sm" aria-label="Remove Pal card" type="button"><span aria-hidden="true">✕</span><span class="sr-only">Remove Pal card</span></button>
               </div>
               <div style="font-size:11px;color:var(--ink-muted);margin-top:8px">
                 Event effectiveness · failure protection · event recovery. <b>No friendship bonus</b> — Pal cards earn their slot through events.
@@ -153,10 +165,10 @@
 
           <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
             <a class="btn btn-primary" href="support-cards.html">Add a card</a>
-            <button class="btn">Suggest for Medium front-runner</button>
+            <button class="btn" type="button">Suggest for Medium front-runner</button>
           </div>
 
-          <p class="note" style="margin-top:12px"><span class="g">○</span><span>
+          <p class="note" style="margin-top:12px"><span class="g" aria-hidden="true">○</span><span>
             <b>Two rainbow cards on one tile is the largest multiplier in a turn.</b> Bonuses multiply rather than add,
             so a +25% and a +30% card give 1.25 × 1.30 = <b>1.625</b>, not +55%
             (<code>UMAMUSUME_REFERENCE.md</code> §1.1.3).
@@ -176,7 +188,7 @@
                 <tr><td>Scenario link on a card</td><td class="mono">0</td></tr>
               </tbody>
             </table>
-            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+            <p class="note" style="margin-top:10px"><span class="g" aria-hidden="true">○</span><span>
               A card reaches friendship training at gauge <b>80</b>, which the client draws as the fourth mark and
               colours orange. The gauge rises about +5 per joint training, so a card with no head start needs most
               of a run to get there — which is why the "Initial Friendship Gauge" effect is the one that matters.
@@ -210,8 +222,9 @@
                   <li><b>Miller’s Law bounds what is held, not what is shown.</b> The deck is six slots because the client caps it at six, so the screen never asks a Trainer to weigh more than six cards at once. The pool behind it is filtered rather than scrolled, which keeps the choice count inside the same limit.</li>
                   <li><b>Heuristic coverage.</b> H6. Six slots with the type of each, so the deck is recognised as a shape rather than recalled as a list.</li>
                   <li><b>Framework coverage.</b> Norman on constraints, and Tognazzini 9 on human-interface objects. The picker offers no card that is already in the deck, so the client rule is expressed by the control instead of by a message after the fact. The remove control carries its visible glyph inside its accessible name, so a voice-control user can say what they see.</li>
-                  <li><li><b>The rail collapses, and the word never leaves the DOM.</b> The app can collapse its global navigation to marks instead of words, and this set does the same (<code>AppLayout.vue:191-233</code>). A collapsed destination moves its label to <code>sr-only</code> and gains a <code>title</code>, so it keeps its accessible name; the active one keeps <code>aria-current="page"</code> and a left rule, so state never rides on colour alone. The control is in the top bar because the bar is the one row present at every width. The choice is <code>localStorage</code>, not a Preference row, because <code>Preference::KEYS</code> is exactly <code>theme</code> and <code>failure_estimate</code>.</li></li>
+                  <li><li><b>The rail collapses, and the word never leaves the DOM.</b> The app can collapse its global navigation to marks instead of words, and this set does the same (<code>AppLayout.vue:191-233</code>). A collapsed destination moves its label to <code>sr-only</code> and gains a <code>title</code>, so it keeps its accessible name; the active one keeps <code>aria-current="page"</code> and a left rule, so state never rides on colour alone. The control is at the head of the rail, where DESIGN.md §2.2 puts a control that belongs to a pane: the penalty for a distant control is exactly why the top-bar version was wrong. The choice is <code>localStorage</code>, not a Preference row, because <code>Preference::KEYS</code> is exactly <code>theme</code> and <code>failure_estimate</code>.</li></li>
                   <li><li><b>The type is a chip, and the chip is never the mark alone.</b> The client identifies a support card by the chip it wears, so the type column carries the client's own glyphs in the client's own chip colours. The word stays beside the mark, because a mark alone breaks WCAG 1.4.1 and because a stat carries no saturated identity hue (<code>DESIGN-CORPUS.md:371-393</code>): the identity is the glyph plus a whisper of band tint, and the hue is spent on meaning.</li></li>
+                  <li><b>The picture slots are drawings, and absence is a normal state.</b> The app renders a mirrored <code>support_thumb</code> beside each card in a slot at 48px (<code>SupportSlot.vue</code>, <code>DESIGN.md</code> §4.7). A file the mirror does not hold renders <b>nothing</b> — no grey box, no placeholder glyph — and the slot keeps its name. An empty slot carries no frame at all, because there is no card to picture. The dashed frames here mark cells the picture would occupy, and the subject inside each names the picture that belongs there.</li>
         </ol>
       </div>
 
@@ -248,6 +261,7 @@
     document.documentElement.classList.toggle('rail-collapsed', collapsed);
     toggle.setAttribute('aria-expanded', String(!collapsed));
     toggle.setAttribute('aria-label', collapsed ? 'Expand navigation' : 'Collapse navigation');
+    toggle.setAttribute('title', collapsed ? 'Expand navigation' : 'Collapse navigation');
     toggle.querySelector('[data-rail-verb]').textContent = collapsed ? 'Expand navigation' : 'Collapse navigation';
   }
   toggle.addEventListener('click', function(){

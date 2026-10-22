@@ -19,7 +19,7 @@
       </div>
       <button class="rail-toggle" type="button" data-rail-toggle aria-expanded="true" aria-controls="primary-nav-rail" title="Collapse navigation">
         <span class="sr-only" data-rail-verb>Collapse navigation</span>
-        <span class="glyph glyph-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></span>
+        <span class="rail-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></span>
       </button>
     </div>
       <nav class="rail-nav" aria-label="Primary">
@@ -36,9 +36,9 @@
       <a class="nav-item" href="skills.html" title="Skills"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Skills</span></a>
       <div class="rail-group">System</div>
       <a class="nav-item" href="database.html" title="Database"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.6C10 5.1 7 4.7 4.2 5.3v13C7 17.7 10 18.1 12 19.6"/><path d="M12 6.6c2-1.5 5-1.9 7.8-1.3v13C17 17.7 14 18.1 12 19.6"/><path d="M12 6.6v13"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Database</span></a>
-      <a class="nav-item active" href="preferences.html" aria-current="page" title="Settings"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6z"/><path d="M12 3.6v2.2"/><path d="M12 18.2v2.2"/><path d="M3.6 12h2.2"/><path d="M18.2 12h2.2"/><path d="M6.1 6.1l1.6 1.6"/><path d="M16.3 16.3l1.6 1.6"/><path d="M17.9 6.1l-1.6 1.6"/><path d="M7.7 16.3l-1.6 1.6"/></svg></span><span class="nav-label">Settings</span></a>
+      <a class="nav-item active" href="preferences.html" aria-current="page" title="Settings"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6z"/><path d="M12 3.6v2.2"/><path d="M12 18.2v2.2"/><path d="M3.6 12h2.2"/><path d="M18.2 12h2.2"/><path d="M6.1 6.1l1.6 1.6"/><path d="M16.3 16.3l1.6 1.6"/><path d="M17.9 6.1l-1.6 1.6"/><path d="M7.7 16.3l-1.6 1.6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Settings</span></a>
     </nav>
-    <a class="rail-foot" href="database-sources.html">Data sources</a>
+    <a class="rail-foot" href="database-sources.html" title="Data sources"><span class="rail-foot-word">Data sources</span></a>
   </aside>
 
   <main class="main" id="main">
@@ -60,7 +60,7 @@
         </div>
         <div class="hrow-actions">
           <span class="hrow-position" role="status">All changes saved</span>
-          <button class="btn btn-primary" disabled>Save changes</button>
+          <button class="btn btn-primary" disabled type="button">Save changes</button>
         </div>
       </div>
       <div class="hr"></div>
@@ -97,7 +97,7 @@
                 </div>
               </label>
             </div>
-            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+            <p class="note" style="margin-top:10px"><span class="g" aria-hidden="true">○</span><span>
               The widths are the ratified ones: 768 / 1152 / 1536. Below 1280px the wide shell collapses to the
               standard breakpoints, so choosing wide on a laptop changes nothing.
             </span></p>
@@ -157,7 +157,7 @@
                 </div>
               </label>
             </div>
-            <p class="note" style="margin-top:10px"><span class="g">○</span><span>
+            <p class="note" style="margin-top:10px"><span class="g" aria-hidden="true">○</span><span>
               This is the app’s only theme control — a three-option choice, not a two-way switch. It is a
               <strong>select</strong> in the running Preferences page; it is drawn as radios here so the three
               options read side by side. There is no per-page switching anywhere else in the product.
@@ -200,7 +200,7 @@
                   <li><b>Jakob’s Law for the shape, Occam’s Razor for the verbs.</b> Preferences look like preferences: labelled controls, one save model, a bar that stays disabled while clean. The screen exists because the cockpit shipped seven save verbs in four styles.</li>
                   <li><b>Heuristic coverage.</b> H4. One save model across the screen, matching the convention a settings page is expected to follow.</li>
                   <li><b>Framework coverage.</b> Shneiderman 1 on consistency and Tognazzini 5 on defaults. One save model across the screen, and a missing preference reads as the neutral default rather than as an error.</li>
-                  <li><li><b>The rail collapses, and the word never leaves the DOM.</b> The app can collapse its global navigation to marks instead of words, and this set does the same (<code>AppLayout.vue:191-233</code>). A collapsed destination moves its label to <code>sr-only</code> and gains a <code>title</code>, so it keeps its accessible name; the active one keeps <code>aria-current="page"</code> and a left rule, so state never rides on colour alone. The control is in the top bar because the bar is the one row present at every width. The choice is <code>localStorage</code>, not a Preference row, because <code>Preference::KEYS</code> is exactly <code>theme</code> and <code>failure_estimate</code>.</li></li>
+                  <li><li><b>The rail collapses, and the word never leaves the DOM.</b> The app can collapse its global navigation to marks instead of words, and this set does the same (<code>AppLayout.vue:191-233</code>). A collapsed destination moves its label to <code>sr-only</code> and gains a <code>title</code>, so it keeps its accessible name; the active one keeps <code>aria-current="page"</code> and a left rule, so state never rides on colour alone. The control is at the head of the rail, where DESIGN.md §2.2 puts a control that belongs to a pane: the penalty for a distant control is exactly why the top-bar version was wrong. The choice is <code>localStorage</code>, not a Preference row, because <code>Preference::KEYS</code> is exactly <code>theme</code> and <code>failure_estimate</code>.</li></li>
         </ol>
       </div>
 
@@ -260,6 +260,7 @@
     document.documentElement.classList.toggle('rail-collapsed', collapsed);
     toggle.setAttribute('aria-expanded', String(!collapsed));
     toggle.setAttribute('aria-label', collapsed ? 'Expand navigation' : 'Collapse navigation');
+    toggle.setAttribute('title', collapsed ? 'Expand navigation' : 'Collapse navigation');
     toggle.querySelector('[data-rail-verb]').textContent = collapsed ? 'Expand navigation' : 'Collapse navigation';
   }
   toggle.addEventListener('click', function(){
