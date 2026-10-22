@@ -3245,8 +3245,74 @@ absence to be stated on the summary.
 only the branch that has conditions is exercised: the `v-else` absence paragraph has no browser case, and
 this entry did not add one, so that branch is covered by the guard alone. Second, `AGENTS.md` §5 also says
 "No em dashes in shipped copy", and 47 `.vue` files under `resources/js` carry one, this summary's own
-`Raw engine data - the source's own expressions` among them; the only gate for that rule reads `.blade.php`
+`Raw engine data — the source's own expressions` among them; the only gate for that rule reads `.blade.php`
 files, which the Vue port retired, so nothing enforces it. This closure did not touch the em dash, because
 the tree-wide divergence is a separate decision and not a defect this entry owns. Third, `G-SK-20` is the
 identifier the guard's goal pattern does not match (`/\bG-\d+\b/` does not match `G-SK-20`), so a future
 copy pass could reintroduce it and the gate would stay green.
+
+**Correction (2026-10-22, anti-slop audit pass; the text above is left as filed, except that the quotation in
+the second item now reads the em dash the source actually carried).** The second item under "What closure
+does not cover" is wrong on all three of its claims, and one of them was load-bearing.
+
+First, the count. "47 `.vue` files under `resources/js` carry one" counted an em dash anywhere in a `.vue`
+file, comments and script blocks included, which is not what the rule governs. The rule governs rendered
+copy. Measured against the rendered copy only, two lines in two files carried a dash: this page's summary
+and `Database/Scenarios.vue:142`.
+
+Second, "the only gate for that rule reads `.blade.php` files, which the Vue port retired, so nothing
+enforces it" is wrong. `tests/Feature/RenderedCopyHygieneTest.php` reads both trees
+(`shippedCopySources()`, `resources/views` and `resources/js`), strips the comment forms a view can hide
+prose in, and fails on any em or en dash that would reach a Trainer. The rule was enforced. The gate was
+red: the full suite on 2026-10-22 read 1 failed, 1948 passed, and the failure was this one, on both lines
+named above.
+
+Third, "This closure did not touch the em dash" was true of `6ca8d9a` and is no longer true of the tree.
+The audit pass that corrected this entry also fixed both lines, in `KI-113`, and the gate now reads green.
+The deferral was a misreading of the gate, not a decision to defer: the sweep was two lines, not a
+tree-wide divergence.
+
+**KI-113** carries the dash defect itself, with the two root causes and the closure.
+
+### KI-113 The R-02 em dash gate was red at HEAD on two rendered lines, so the copy rule the owner ruled on in 2026-09-28 was not enforced for two days - FILED 2026-10-22 (anti-slop audit pass), CLOSED 2026-10-22
+
+**Status: CLOSED** by `fafd613` ("fix(copy): remove the em dash from the two rendered lines R-02 bans").
+
+**Proving command.** Before: `php artisan test --compact` -> 1 failed, 1948 passed (31769 assertions) in
+511.46s, the failure being `RenderedCopyHygieneTest.php:202` with
+`resources/js/pages/Database/Scenarios.vue` at line 142 and `resources/js/pages/Skills/Show.vue` at line
+108. The two lines are the whole finding: the gate strips the comment forms a view can hide prose in and
+reports the files that still carry a dash in rendered copy. After the fix:
+`php artisan test --compact --filter="RenderedCopyHygiene|UiHygiene"` -> 12 passed (42 assertions), exit 0.
+`npm run typecheck` exit 0. `npm run lint:ui` -> `ui-lint: clean`. `npm run build` -> exit 0. The browser
+proof, on a session-private pair (`PLAYWRIGHT_PORT=8163 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/antislop-audit/browser-8163.sqlite`):
+`npx playwright test tests/browser/skills.spec.ts tests/browser/database.spec.ts` -> 36 passed (2.3m),
+including the scenario matrix case whose assertion changed.
+
+**How it happened.** Two separate commits, and neither was the copy pass that introduced the rule.
+`c61ef815` (2026-10-20) wrote the skill detail's disclosure summary as
+`Raw engine data — the source's own expressions and codes, not client labels`, and its own message shows
+the dash was in the string from the first version of that line. `41a1ff2e` (2026-10-20) added the panel
+state column to `Database/Scenarios.vue` with a tick for "on" and a dash for "off", each with the word
+beside it for a screen reader. The gate was in force throughout (`RenderedCopyHygieneTest` reads
+`resources/views` and `resources/js` and has since the Inertia port), so the tree was red from the moment
+the first dash landed and nobody ran the suite.
+
+**The repair.** The summary reads with a colon. The panel state cell prints the word and drops the glyph
+pair: a tick beside the word was decoration, the dash is banned, and the word alone is the state, which is
+the pattern `StatusBadge` already uses. The browser case now asserts the word is **visible** where it
+asserted the word was **attached** and the glyph was a tick or a dash, so the case is stronger than the one
+it replaces.
+
+**What closure does not cover.** Three things. First, the em dash in the two lines was the whole rendered
+copy finding, but the rule is wider than the gate: the gate reads `.blade.php` and `.vue` under
+`resources/views` and `resources/js`, and the shipped vocabulary in `lang/en/uma.php` and any string a
+controller hands to a view is outside it, so a dash there would not be caught. Second, the gate reports the
+files and the lines, not the class of the dash, so a dash that is a glyph rather than prose is caught the
+same way as one in a sentence; this entry removed both because the rule has no exemption for glyphs, and a
+future case may need one, which is a ruling for the owner rather than a defect to file. Third, the two
+defects in this pair of entries shared a shape, and the shape is not closed: a browser case can assert a
+thing that a copy gate forbids, and nothing in the tree resolves the conflict automatically. `skills.spec.ts`
+asserted an `ADR-0011` citation on screen against the identifier gate (KI-112) and `database.spec.ts`
+asserted a tick-or-dash glyph against the dash gate (here). Both were resolved by re-pointing the browser
+case at the substance, and both needed a person to notice.
