@@ -89,7 +89,7 @@ const kindVisible = (entry: Entry): boolean =>
 <template>
     <ol v-if="entries.some(kindVisible)" class="flex flex-col gap-3" aria-label="Career timeline">
         <li v-for="entry in entries" :key="entry.key" v-show="kindVisible(entry)">
-            <details class="rounded-md border border-rule bg-panel">
+            <details class="card">
                 <summary
                     class="flex min-h-11 cursor-pointer flex-wrap items-baseline gap-3 px-3 py-2 text-sm [&::-webkit-details-marker]:hidden"
                     :aria-label="`Turn ${entry.turn}: ${entry.action_label}`"
