@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
+import Flash from '../components/ui/Flash.vue';
 import NavGlyph from '../components/NavGlyph.vue';
 import VisitProgressBar from '../components/VisitProgressBar.vue';
 import { useLayout } from '../composables/useLayout';
@@ -25,48 +26,10 @@ const page = usePage();
  * `LAYOUT_WIDTH_CLASSES`, so the shell and the wizard share one source of truth.
  */
 const { layoutWidthClass } = useLayout();
+// The banner itself lives in `ui/Flash.vue`: the region is always mounted, it arms its own
+// five-second timer, and it keys on `page.props` identity rather than on the message text, so two
+// saves in a row flash twice. This layout only hands it the current status.
 const flashStatus = computed(() => page.props.flash?.status ?? null);
-
-// The banner dismisses itself after five seconds and can be dismissed by hand (plan 6B.6).
-// The watch keys on `page.props` identity, not on the message text: two saves in a row flash
-// the same sentence, and a watch on the text alone would miss the second one after a dismiss.
-const FLASH_DISMISS_MS = 5000;
-const visibleFlash = ref<string | null>(flashStatus.value);
-let flashTimer: ReturnType<typeof setTimeout> | undefined;
-
-function scheduleFlashDismiss(): void {
-    if (flashTimer !== undefined) {
-        clearTimeout(flashTimer);
-    }
-
-    if (visibleFlash.value === null) {
-        return;
-    }
-
-    flashTimer = setTimeout(() => {
-        visibleFlash.value = null;
-    }, FLASH_DISMISS_MS);
-}
-
-if (visibleFlash.value !== null) {
-    scheduleFlashDismiss();
-}
-
-watch(
-    () => page.props,
-    () => {
-        visibleFlash.value = flashStatus.value;
-        scheduleFlashDismiss();
-    },
-);
-
-function dismissFlash(): void {
-    visibleFlash.value = null;
-
-    if (flashTimer !== undefined) {
-        clearTimeout(flashTimer);
-    }
-}
 
 // The mobile bar's More disclosure. `<details>` is the native widget, so the expanded state, the
 // `aria-expanded` announcement and the keyboard path come from the platform rather than from focus code
@@ -420,32 +383,8 @@ const moreIsCurrent = computed(() =>
                  silently restoring nothing. Making sticky work here is a design decision, not a
                  cleanup. -->
             <main id="main" data-layout-container class="@container" :class="['mx-auto min-w-0 w-full flex-1 px-4 py-6 pb-24 md:px-8 md:pb-6', layoutWidthClass]">
-                <!-- The flash region is always mounted and carries only its text (WCAG 4.1.3): a live
-                     region announces what changes inside it, so a region created in the same tick as its
-                     message may never be announced. Empty, it is sr-only and says nothing; the classes
-                     that paint the banner arrive with the message. The dismiss button is a sibling of
-                     the region, never inside it: `role="status"` is read as its own text, and a control
-                     in the region would join the announcement. -->
-                <div
-                    class="flex items-center justify-between gap-2"
-                    :class="visibleFlash ? 'mb-4 rounded-md border border-rule bg-raised px-3 py-2' : ''"
-                >
-                    <p
-                         role="status"
-                         :class="visibleFlash ? 'text-sm text-ink' : 'sr-only'"
-                     >
-                         {{ visibleFlash ?? '' }}
-                     </p>
-                    <button
-                        v-if="visibleFlash"
-                        type="button"
-                        aria-label="Dismiss"
-                        class="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-ink-muted hover:text-ink-strong transition-colors duration-150 ease-out"
-                        @click="dismissFlash"
-                    >
-                        ✕
-                    </button>
-                </div>
+                <!-- Always mounted, so the live region exists before its message does (WCAG 4.1.3). -->
+                <Flash :status="flashStatus" :token="page.props" />
                 <slot />
             </main>
         </div>
