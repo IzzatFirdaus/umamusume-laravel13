@@ -523,3 +523,248 @@ They are classified, not measured.
 - `.anno` → inline annotation
 - `.wfnav` → wireframe-only nav
 - `.theme-switch` → AppLayout.vue theme toggle
+
+### §7.2 Component-side re-derivation (D2, 2026-10-23)
+
+**Why a second matrix rather than an edit.** §7.1 above classifies the **set's selectors** (107 rows:
+`shell.css` selector → app equivalent). The D2 brief also asks for one row per **app component**. Those
+are two views of one classification, and §7.1 is untouched: it remains authoritative for the selector
+axis. This section is the component axis, measured after Phase 3 closed.
+
+**Tree at measure time.** `46a154d9` on `master`, `git status --short` clean. Measured by reading the
+tree, not by rendering it.
+
+| measure | value | note |
+|---|---|---|
+| SFCs in tree | **96** | 97 − the two URA files deleted at `681e8b70` = 95, **+ `ui/Flash.vue` added at `ae715f7a`**. The brief's 95 predates the flash extraction; 96 is the tree |
+| colour tokens pinned | **89** | 81 base + seven `--color-stat-*` + `--color-on-risk` (Phase 2.2); asserted at `DesignTokensTest.php` `toHaveCount(89)` |
+| HFW pages | **56** | 49 base + 7 drawn in Phase 4a |
+| page files | **57** | 49 route-served + 8 Cockpit panels |
+| browser specs | **77** | `tests/browser/*.spec.ts` |
+| Feature files | **203** top-level / **206** recursive | the 3-file delta is `tests/Feature/Schema/` |
+| Phase 3 state | **50** re-spelled / **7** accepted under CQ-01 / **39** accepted under CQ-05 | 50 + 7 + 39 = 96 |
+
+**Method.** Rendered-signature proxies, in the order the brief fixes them: the **primitive class
+families** a component emits (the 35 names the primitive layer declares), and its **aria tokens**
+(`aria-label` / `aria-labelledby` / `aria-describedby`) matched against the page that shares the most
+with it. Node counts are the element count inside `<template>`. Literal-text matching of class names
+against the set returns **0 of 96** — the same failure §7.1 records; it was not retried.
+
+**The discrimination limit, stated up front, because it shapes the counts.** CQ-05 accepted utility-only
+spellings, so **50 of the 96 components emit no primitive class at all** — they are token utilities by
+ruling. A further **20** emit primitive families but carry no aria token to compare names with. Those
+**70 rows are `unclassified`**, each with its reason, rather than guessed into a category. That is the
+honest consequence of closing Phase 3 on rules 7 and 8: the axis the D2 brief was written against has
+less to bite on than it did on 2026-10-22.
+
+**Classification counts.** `near-copy` **7** · `renamed` **19** · `unclassified` **70** (50 with no
+primitive class, 20 with primitives but no aria token) · `app-only — not in the set` **0** ·
+`dead` **0**. No component is marked `dead`: the plan's Phase 3 gate note already records that form
+controls and layout components were "read and confirmed clean", and an inherited "dead" claim is exactly
+what §7.1's disposition rule forbids.
+
+### The matrix (96 rows)
+
+| component | category | rendered signature (primitives · elements) | aria tokens | HFW counterpart | shared tokens | value agreement |
+|---|---|---|---|---|---|---|
+| `AbsenceValue.vue` | unclassified | — · 4 elements | — | `career-deck.html` | — | n-a |
+| `AptitudeBadge.vue` | unclassified | — · 6 elements | — | `career-deck.html` | — | n-a |
+| `AptitudeGrid.vue` | unclassified | — · 7 elements | — | `career-deck.html` | — | n-a |
+| `ArtworkSlot.vue` | unclassified | — · 4 elements | 1 aria | `career-deck.html` | — | n-a |
+| `CapsuleHeader.vue` | unclassified | — · 2 elements | — | `career-deck.html` | — | n-a |
+| `EnergyGauge.vue` | unclassified | — · 10 elements | — | `career-deck.html` | — | n-a |
+| `Form/BaseButton.vue` | unclassified | — · 2 elements | 1 aria | `career-deck.html` | — | n-a |
+| `Form/BaseCheckbox.vue` | unclassified | — · 8 elements | 1 aria | `career-deck.html` | — | n-a |
+| `Form/BaseInput.vue` | unclassified | — · 5 elements | 2 aria | `career-deck.html` | — | n-a |
+| `Form/BaseRadio.vue` | unclassified | — · 8 elements | 1 aria | `career-deck.html` | — | n-a |
+| `Form/BaseSelect.vue` | unclassified | — · 11 elements | 2 aria | `career-deck.html` | — | n-a |
+| `Form/BaseTextarea.vue` | unclassified | — · 5 elements | 1 aria | `career-deck.html` | — | n-a |
+| `Form/LinkButton.vue` | unclassified | — · 2 elements | — | `career-deck.html` | — | n-a |
+| `KpiCard.vue` | unclassified | card · 8 elements | — | `career-deck.html` | card | n-a |
+| `MoodPill.vue` | unclassified | mood · 3 elements | — | `cockpit-grand-concert.html` | mood | n-a |
+| `NavGlyph.vue` | unclassified | — · 2 elements | — | `career-deck.html` | — | n-a |
+| `ProvenanceBadge.vue` | unclassified | — · 1 elements | — | `career-deck.html` | — | n-a |
+| `ProvenanceMark.vue` | near-copy | card pill pill-neutral · 5 elements | 1 aria | `career-legacy.html` | card pill pill-neutral | n-a |
+| `RarityChip.vue` | unclassified | — · 2 elements | 1 aria | `career-deck.html` | — | n-a |
+| `ResourceStrip.vue` | unclassified | card · 12 elements | — | `career-deck.html` | card | n-a |
+| `SkillRow.vue` | unclassified | pill pill-neutral · 7 elements | — | `career-legacy.html` | pill pill-neutral | n-a |
+| `SparkChip.vue` | unclassified | — · 1 elements | — | `career-deck.html` | — | n-a |
+| `SpiritBurstRoster.vue` | renamed | card · 7 elements | 1 aria | `career-deck.html` | card | n-a |
+| `StatusPill.vue` | unclassified | pill · 1 elements | — | `career-deck.html` | pill | n-a |
+| `SubCell.vue` | unclassified | card · 8 elements | — | `career-deck.html` | card | n-a |
+| `TeamRacePanel.vue` | near-copy | card · 15 elements | 1 aria | `career-scenario.html` | card | n-a |
+| `TeamRankGauge.vue` | renamed | card · 14 elements | 1 aria | `career-deck.html` | card | n-a |
+| `TraineeCombobox.vue` | renamed | card · 10 elements | 3 aria | `career-deck.html` | card | n-a |
+| `VeteranRow.vue` | unclassified | pill pill-neutral · 20 elements | — | `career-legacy.html` | pill pill-neutral | n-a |
+| `VisitProgressBar.vue` | unclassified | — · 2 elements | 1 aria | `career-deck.html` | — | n-a |
+| `career/AcquisitionStatusEditor.vue` | renamed | card · 29 elements | 1 aria | `career-deck.html` | card | n-a |
+| `career/ActionGrid.vue` | renamed | card · 11 elements | 1 aria | `career-deck.html` | card | n-a |
+| `career/AdvisorRail.vue` | renamed | card · 4 elements | 1 aria | `career-deck.html` | card | n-a |
+| `career/CareerSectionNav.vue` | near-copy | card · 16 elements | 2 aria | `career-deck.html` | card | n-a |
+| `career/CareerStatePanel.vue` | renamed | card · 29 elements | 1 aria | `career-deck.html` | card | n-a |
+| `career/CareerTimeline.vue` | near-copy | card · 56 elements | 1 aria | `timeline.html` | card | n-a |
+| `career/ChoicesSoFar.vue` | unclassified | — · 8 elements | — | `career-deck.html` | — | n-a |
+| `career/CockpitIdentityCard.vue` | renamed | card · 38 elements | 1 aria | `career-deck.html` | card | n-a |
+| `career/EventCard.vue` | unclassified | card · 22 elements | — | `career-deck.html` | card | n-a |
+| `career/GoalMark.vue` | unclassified | — · 3 elements | — | `career-deck.html` | — | n-a |
+| `career/NextDecision.vue` | renamed | card · 46 elements | 1 aria | `career-deck.html` | card | n-a |
+| `career/ObjectiveRow.vue` | unclassified | — · 11 elements | — | `career-deck.html` | — | n-a |
+| `career/RaceCard.vue` | unclassified | card · 53 elements | — | `career-deck.html` | card | n-a |
+| `career/RacePlanList.vue` | renamed | note · 11 elements | 1 aria | `career-deck.html` | note | n-a |
+| `career/RecordedActionCard.vue` | unclassified | — · 35 elements | 1 aria | `career-deck.html` | — | n-a |
+| `career/RunRaceStrip.vue` | unclassified | — · 40 elements | 3 aria | `career-deck.html` | — | n-a |
+| `career/SkillPlanRow.vue` | unclassified | card · 23 elements | — | `career-deck.html` | card | n-a |
+| `career/StatSummary.vue` | unclassified | — · 17 elements | 1 aria | `career-deck.html` | — | n-a |
+| `career/TrainingCard.vue` | unclassified | card · 102 elements | — | `career-deck.html` | card | n-a |
+| `career/UnityCupEditor.vue` | unclassified | — · 27 elements | — | `career-deck.html` | — | n-a |
+| `catalog/FormDetail.vue` | unclassified | card · 12 elements | — | `career-deck.html` | card | n-a |
+| `catalog/FormTabs.vue` | unclassified | — · 5 elements | 1 aria | `catalog-detail.html` | — | n-a |
+| `catalog/TraineeCatalog.vue` | unclassified | card note · 47 elements | — | `career-deck.html` | card note | n-a |
+| `database/ReferenceDrawer.vue` | renamed | card · 6 elements | 1 aria | `career-deck.html` | card | n-a |
+| `database/SourceNote.vue` | unclassified | — · 5 elements | — | `career-deck.html` | — | n-a |
+| `legacy/AncestryNode.vue` | unclassified | card · 19 elements | — | `career-deck.html` | card | n-a |
+| `legacy/SparkChip.vue` | unclassified | pill pill-neutral · 7 elements | — | `career-legacy.html` | pill pill-neutral | n-a |
+| `review/CandidateForm.vue` | unclassified | — · 15 elements | — | `career-deck.html` | — | n-a |
+| `review/SuggestionHint.vue` | unclassified | — · 2 elements | — | `career-deck.html` | — | n-a |
+| `scenario/AlertRow.vue` | unclassified | — · 4 elements | — | `career-deck.html` | — | n-a |
+| `scenario/RaceCalendarNote.vue` | unclassified | — · 1 elements | — | `career-deck.html` | — | n-a |
+| `scenario/ResourceMeter.vue` | unclassified | — · 6 elements | 1 aria | `career-deck.html` | — | n-a |
+| `scenario/ScenarioPanel.vue` | unclassified | — · 44 elements | — | `career-deck.html` | — | n-a |
+| `scenario/ScenarioStatusBadge.vue` | unclassified | pill · 3 elements | — | `career-deck.html` | pill | n-a |
+| `scenario/TrackblazerFatiguePanel.vue` | renamed | card · 39 elements | 4 aria | `career-deck.html` | card | n-a |
+| `scenario/TrackblazerPanel.vue` | near-copy | card · 120 elements | 8 aria | `database-scenarios.html` | card | n-a |
+| `scenario/TrackblazerRaceCalendar.vue` | renamed | card · 25 elements | 2 aria | `career-deck.html` | card | n-a |
+| `scenario/TrackblazerResourceLedger.vue` | renamed | card · 31 elements | 2 aria | `career-deck.html` | card | n-a |
+| `scenario/TrackblazerRoutePlanner.vue` | renamed | card · 58 elements | 4 aria | `career-deck.html` | card | n-a |
+| `scenario/UnityCupPanel.vue` | renamed | card · 67 elements | 1 aria | `career-deck.html` | card | n-a |
+| `scenario/UnityCupTeamBoard.vue` | renamed | card · 16 elements | 1 aria | `career-deck.html` | card | n-a |
+| `scenario/UnityCupTournamentReadiness.vue` | renamed | card · 17 elements | 1 aria | `career-deck.html` | card | n-a |
+| `scenario/UraPreFinalReview.vue` | unclassified | — · 32 elements | 1 aria | `career-deck.html` | — | n-a |
+| `scenario/WidgetFallback.vue` | unclassified | — · 1 elements | — | `career-deck.html` | — | n-a |
+| `skills/SkillCatalog.vue` | unclassified | card note · 34 elements | — | `career-deck.html` | card note | n-a |
+| `support/CardPicker.vue` | unclassified | note · 21 elements | — | `career-deck.html` | note | n-a |
+| `support/DeckAnalysis.vue` | renamed | card note · 40 elements | 5 aria | `career-deck.html` | card note | n-a |
+| `support/SupportCardCatalog.vue` | unclassified | card note · 30 elements | — | `career-deck.html` | card note | n-a |
+| `support/SupportSlot.vue` | unclassified | card pill pill-accent pill-neutral · 27 elements | — | `cockpit-unity-cup.html` | card pill pill-accent pill-neutral | n-a |
+| `support/SupportTypeMark.vue` | unclassified | — · 13 elements | — | `career-deck.html` | — | n-a |
+| `ui/AbsenceNote.vue` | unclassified | — · 1 elements | — | `career-deck.html` | — | n-a |
+| `ui/Card.vue` | unclassified | — · 2 elements | — | `career-deck.html` | — | n-a |
+| `ui/Checkbox.vue` | unclassified | — · 3 elements | 1 aria | `career-deck.html` | — | n-a |
+| `ui/Combobox.vue` | near-copy | card · 8 elements | 2 aria | `career-deck.html` | card | n-a |
+| `ui/DataTable.vue` | near-copy | card · 18 elements | 2 aria | `skills-planner.html` | card | n-a |
+| `ui/Flash.vue` | unclassified | — · 3 elements | 1 aria | `career-deck.html` | — | n-a |
+| `ui/FormField.vue` | unclassified | — · 6 elements | — | `career-deck.html` | — | n-a |
+| `ui/PageHeader.vue` | unclassified | — · 7 elements | — | `career-deck.html` | — | n-a |
+| `ui/Pagination.vue` | unclassified | — · 7 elements | 1 aria | `career-trainee.html` | — | n-a |
+| `ui/Section.vue` | unclassified | — · 4 elements | 3 aria | `database-shop-items.html` | — | n-a |
+| `ui/SegmentedControl.vue` | unclassified | — · 7 elements | — | `career-deck.html` | — | n-a |
+| `ui/Select.vue` | unclassified | — · 1 elements | 1 aria | `career-deck.html` | — | n-a |
+| `ui/StatusBadge.vue` | unclassified | — · 4 elements | — | `career-deck.html` | — | n-a |
+| `ui/StickyFooter.vue` | unclassified | — · 7 elements | — | `career-deck.html` | — | n-a |
+| `ui/TextInput.vue` | unclassified | — · 1 elements | 1 aria | `career-deck.html` | — | n-a |
+| `ui/Textarea.vue` | unclassified | — · 1 elements | 1 aria | `career-deck.html` | — | n-a |
+
+### Counts, and what the 70 unclassified rows mean
+
+| category | rows |
+|---|---|
+| `near-copy` | 7 |
+| `renamed` | 19 |
+| `unclassified` — no primitive class (utility-only under CQ-05) | 50 |
+| `unclassified` — primitives but no aria token to compare | 20 |
+| `app-only — not in the set` | 0 |
+| `dead` | 0 |
+| **total** | **96** |
+
+`unclassified: 70, reason: the rendered-signature axis cannot separate these rows.` The 50 carry only
+token utilities by CQ-05's ruling, so they emit no class family the set also declares; the 20 emit a
+primitive family but no accessible name, so "same signature, different name" and "different signature"
+are indistinguishable from source. Both groups need a rendered comparison (a browser pass over the app
+pages beside the set pages), which this pass did not run.
+
+## Divergences introduced by the fix pass — re-measured 2026-10-23
+
+The 14-file list below is the brief's, and the narrative version is §"Divergences introduced by the fix
+pass (14 files)" above; this table is that list re-measured against the post-Phase-3 tree. The set is **static and was drawn from the pre-fix app**, so a signature change can open a divergence
+the inherited matrix could not contain. The list is the brief's 14 files. "Still matches" is measured on
+the same proxies as the matrix, and every row that could not be measured says so.
+
+| # | file | HFW counterpart (best match) | shared families | still matches | what differs |
+|---|---|---|---|---|---|
+| 1 | `components/ProvenanceMark.vue` | `career-legacy.html` | `pill pill-neutral card` + 1 aria | yes (proxy) | no measured divergence |
+| 2 | `components/SubCell.vue` | `career-deck.html` | `card` | unmeasured | no aria token to compare |
+| 3 | `components/ui/DataTable.vue` | `skills-planner.html` | `card` + 1 aria | yes (proxy) | no measured divergence |
+| 4 | `components/scenario/ScenarioPanel.vue` | none | none | unmeasured | utility-only (CQ-05); no signature to compare |
+| 5 | `components/scenario/TrackblazerRoutePlanner.vue` | `career-deck.html` | `card` | unmeasured | no aria token to compare |
+| 6 | `components/scenario/TrackblazerFatiguePanel.vue` | `career-deck.html` | `card` | unmeasured | no aria token to compare |
+| 7 | `components/scenario/UraMilestoneTracker.vue` | — | — | **deleted** | removed at `681e8b70`; the divergence is moot, not fixed |
+| 8 | `components/career/CareerSectionNav.vue` | `career-deck.html` | `card` + 1 aria | yes (proxy) | the §7.1 note already records the app has a seven-anchor nav none of the four cockpit pages draws — that is `the set is behind`, carried here rather than lost |
+| 9 | `pages/Career/Cockpit/Panels/CareerGoalsPanel.vue` | none | none | unmeasured | utility-only (CQ-05) |
+| 10 | `pages/Career/Cockpit/Panels/TeamRankLadderPanel.vue` | none | none | unmeasured | utility-only (CQ-05) |
+| 11 | `pages/Career/Cockpit/Panels/UraMandatoryLadder.vue` | none | none | unmeasured | utility-only (CQ-05) |
+| 12 | `pages/Career/Preflight.vue` | none | none | unmeasured | utility-only (CQ-05) |
+| 13 | `pages/Review/Index.vue` | none | none | unmeasured | utility-only (CQ-05); its inline detail is the one sanctioned behaviour change (FQ-10) and has not shipped |
+| 14 | `pages/Database/Sources.vue` | none | none | unmeasured | utility-only (CQ-05); the screen is now registered at `SCR-SYS-011` |
+
+**The one divergence routed rather than absorbed.** The set's dark `primary-action` is a literal
+`#2255FF` and its dark block never redeclares it, so the set's dark primary fill is its light one, while
+the app's `--color-brand-chrome` resolves to `#1A3FCC` in dark (§1.2 above). The port could not close it
+and Phase 2 minted no token to paper over it. **Route: D3 registers it as a question with two options** —
+(1) correct the set's dark block to the app's `#1A3FCC`, which makes the set an accurate drawing of the
+app and invalidates any dark-baseline screenshot taken before the change; (2) accept the divergence and
+record it beside the dark baseline, which keeps the frozen set frozen and leaves the set misrepresenting
+the app's primary action in dark. The consequence of (1) is a one-line `shell.css` change plus a
+re-baseline; the consequence of (2) is that every future dark comparison carries a known false positive.
+
+## Not verifiable — re-derived 2026-10-23
+
+The earlier `## Not verifiable (39 rows)` above routes the *selector* axis; this list routes the
+*component* axis and the Phase 3 outcomes, which that list predates. Each item is a question with two options and the consequence of each, ready for D3 to number as
+`CQ-nn`.
+
+**N-1. The 70 `unclassified` rows (§7.2).** Option (1): accept the proxy classification and ship the
+matrix as a component inventory without parity claims; consequence — the map stops asserting parity it
+cannot measure, and the 70 rows stay explicitly open. Option (2): run a rendered comparison (app pages
+beside set pages in both themes); consequence — real parity evidence, but it needs a browser pass the
+set's checks cannot provide and a stable app build to diff against.
+
+**N-2. `FQ-16`'s Snapshot rows.** Option (1): rows and §4 sections both land (done at `96eca6f6`);
+consequence — the registry is internally consistent and §7-25 closes. Option (2): rows only, sections
+deferred under a dated §7-25 note; consequence — the registry has rows pointing at no section, which
+breaks the file's own convention. Landed as (1).
+
+**N-3. `FQ-17`'s Run detail.** Option (1): Run detail stays out of scope; consequence — the set draws 56
+pages and the registry claim says so, and `SCR-RUN-003` is implemented-but-undrawn. Option (2): draw it;
+consequence — a 57th page and a re-run of all five set checks. Landed as (1).
+
+**N-4. `SCREEN_SPEC.md` §7-25.** The four Snapshot routes appeared in no §3 row and no §4 section.
+Closed at `96eca6f6` by rows + sections. Residual question: whether the assigned ids (`SCR-CAR-025`
+through `027`) are the spec owner's numbers. Option (1): keep them, they are the next free in sequence;
+consequence — none. Option (2): renumber to the owner's scheme; consequence — one doc edit and a
+cross-reference sweep.
+
+**N-5. `SCREEN_SPEC.md` §7-27.** `Database/Sources` shipped without a registry row. Closed at
+`96eca6f6` with `SCR-SYS-011`. Same numbering question as N-4.
+
+**N-6. The five test-referenced components.** See the disposition section below. `UraDuelPanel` and
+`UraMilestoneTracker` are deleted (not classified). `Checkbox`, `Combobox` and `SegmentedControl` are
+live and cited by browser fixtures — they are classified `unclassified` in the matrix for the same reason
+as the other 69, and no disposition beyond "kept, cited" was taken.
+
+**N-7. The dark `primary-action` divergence.** Two options in the section above; the outcome changes
+whether a committed dark screenshot baseline can exist at all.
+
+## Disposition evidence for the five test-referenced components
+
+| component | state at measure time | evidence | disposition |
+|---|---|---|---|
+| `scenario/UraDuelPanel.vue` | **deleted** at `681e8b70` | `git grep` over `resources app routes config database lang` returned no production importer before deletion; its guard vocabulary moved to `config/scenarios.php` at `e7621467` | deleted, not classified |
+| `scenario/UraMilestoneTracker.vue` | **deleted** at `681e8b70` | same; its `AbsenceChannelTest` entry was removed with it | deleted, not classified |
+| `ui/Checkbox.vue` | live | cited by `tests/browser/fixtures/form-field.ts`; emits no primitive family and no aria token → `unclassified` in the matrix | kept |
+| `ui/Combobox.vue` | live | cited by `tests/browser/fixtures/combobox.ts` and `combobox.spec.ts`; `:class` bindings, no primitive family → `unclassified` | kept |
+| `ui/SegmentedControl.vue` | live | cited by `tests/browser/fixtures/form-field.ts`; `:class` bindings → `unclassified` | kept |
+
+`Checkbox`, `Combobox` and `SegmentedControl` are classified `unclassified` rather than `near-copy`
+because none of them emits a primitive family the set also declares, so the signature axis has nothing
+to compare. Calling them `near-copy` would be an inherited claim, which is the failure mode §7.1's
+disposition rule exists to prevent.
