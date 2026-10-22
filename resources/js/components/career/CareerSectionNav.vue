@@ -152,7 +152,7 @@ const showTraineeJa = computed<boolean>(
 </script>
 
 <template>
-    <section aria-label="Career" class="mb-4 rounded-md border border-rule bg-panel">
+    <section aria-label="Career" class="card mb-4">
         <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-4 py-2">
             <p class="text-sm font-semibold text-ink-strong">
                 {{ props.trainee }}
