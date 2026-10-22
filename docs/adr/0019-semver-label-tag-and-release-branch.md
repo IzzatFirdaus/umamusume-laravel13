@@ -8,7 +8,8 @@
   open: the AGENTS.md §14 and §3 correction is owed and not landed; the pre-release mechanism (GitHub flag vs hyphenated suffix) is the one choice left open
 -->
 
-Status: **Proposed** (drafted 2026-10-04, no owner ruling recorded). The owner set the version number
+Status: **Advisory** — labelling is owner-directed per release; the rule below is the guidance two
+releases followed (drafted 2026-10-04 as `Proposed`, corrected 2026-10-23 by owner ruling). The owner set the version number
 (`2.0.0`) and the constraint that the release must not target `master`. The remaining choices — the
 pre-release mechanism, the tag/branch scheme, and the correction owed to `AGENTS.md` §14 — await that ruling.
 Nothing was tagged and nothing was published while this was written.
