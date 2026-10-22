@@ -539,80 +539,11 @@ html[data-theme='dark'] {
    PORTED PRIMITIVES — the 21 families from shell.css (primitive-reconciliation.md §2)
    Ported in step 2.2 (6 CONFLICT) and step 2.3 (11 RE-SPELL + 3 REUSE; 1 DROP omitted).
    Each primitive resolves to house tokens; no literal colour, length, radius or duration.
+   The 6 CONFLICT families carry the FQ-01..FQ-05 rulings in their .class definitions
+   below (lines 740+); the @utility duplicates that were here are removed to avoid
+   token-value conflicts (e.g., @utility card used --color-raised while .card uses
+   --color-panel). The .class selectors are the authoritative port.
    =========================================================================== */
-
-/* --- 6 CONFLICT families (step 2.2: the FQ ruling IS the port) ---
-
-   FQ-01: .card and .srow — border --rule-soft absent (1.37:1); re-spell to --color-rule.
-   FQ-02: .pickcard and .subnav — box-shadow selection; replace with border --color-pick-line at 2px.
-   FQ-03: .savebar — elevation on a non-overlay; remove box-shadow.
-   FQ-04: .state-error — white on dark --risk 2.44:1; mint --color-on-risk, split by theme.
-   FQ-05: .stat-* — seven promoted tokens (minted above in @theme static); REUSE family, port below.
-   --------------------------------------------------------------------------- */
-
-/* .card — the surface container. Resolves to: --color-rule (border), --color-raised (fill).
-   FQ-01: border is --color-rule (3.46:1 on page, 3.88:1 in dark), not the absent --rule-soft. */
-@utility card {
-    border: 1px solid var(--color-rule);
-    border-radius: var(--radius-md);
-    background-color: var(--color-raised);
-}
-
-/* .srow — a labelled row inside a card. Resolves to: --color-rule (border).
-   FQ-01: same cause as .card — --rule-soft absent, re-spell to --color-rule. */
-@utility srow {
-    border-bottom: 1px solid var(--color-rule);
-}
-
-/* .pickcard — a selectable card whose selection is a border, not a shadow.
-   Resolves to: --color-pick-line (2px border). FQ-02: box-shadow → border-color at 2px. */
-@utility pickcard {
-    border: 2px solid var(--color-pick-line);
-    border-radius: var(--radius-md);
-    background-color: var(--color-raised);
-}
-
-/* .savebar — the sticky save bar. Resolves to: --color-rule (border-top).
-   FQ-03: box-shadow removed; separation comes from the rule edge, not elevation. */
-@utility savebar {
-    position: sticky;
-    bottom: 0;
-    border-top: 1px solid var(--color-rule);
-    background-color: var(--color-raised);
-}
-
-/* .state-error — the error callout. Resolves to: --color-risk (fill), --color-on-risk (ink).
-   FQ-04: --color-on-risk is #FFFFFF in light (10.89:1) and #121013 in dark (on --risk #FF7E8C). */
-@utility state-error {
-    border: 1px solid var(--color-risk);
-    border-radius: var(--radius-md);
-    background-color: var(--color-risk);
-    color: var(--color-on-risk);
-}
-
-/* .subnav — the section navigation strip. Resolves to: --color-rule (border), --color-ink (text).
-   FQ-02: box-shadow replaced with border; hub/item outline at 2px (base layer standard). */
-@utility subnav {
-    border-bottom: 1px solid var(--color-rule);
-}
-
-/* .subnav-hub — a hub label in the subnav. Outline at 2px per FQ-02 (base layer standard). */
-@utility subnav-hub {
-    border-radius: var(--radius-sm);
-    color: var(--color-ink-muted);
-}
-
-/* .subnav-item — a navigation item in the subnav. Resolves to: --color-ink, --color-rule.
-   FQ-02: outline at 2px (was 3px in shell.css). */
-@utility subnav-item {
-    border-radius: var(--radius-sm);
-    color: var(--color-ink);
-}
-
-/* .subnav-sep — a separator between subnav groups. */
-@utility subnav-sep {
-    border-left: 1px solid var(--color-rule);
-}
 
 /*
  * The surfaces nobody drew. Before this block, focus rings, selection, and the text caret
