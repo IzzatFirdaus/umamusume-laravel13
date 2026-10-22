@@ -16,10 +16,15 @@
  *
  * **An unreachable section is not a link.** DESIGN.md §5's 2026-10-17 amendment: `aria-disabled`
  * announces a state but does not cancel activation, and a `<Link>` navigates regardless of the
- * attribute. So an unreachable section renders as a focusable
- * `<span role="link" aria-disabled="true" tabindex="0">` carrying a `title` that names when it
- * arrives, and — this is the load-bearing half — no click handler and no href at all. Tab reaches it,
- * the state is announced, and Enter/Space do nothing.
+ * attribute.
+ *
+ * *Dated correction 2026-10-22 (UX audit F-04): the paragraph above stood, and the shape the next
+ * sentence prescribed did not.* It read: an unreachable section renders as a focusable
+ * `<span role="link" aria-disabled="true" tabindex="0">` carrying a `title`. §5 names that exactly as
+ * the thing not to do — "`aria-disabled` alone is not that shape and never may be used as one" — and it
+ * put the reason behind a `title`, which is the hover-only channel §5 (a) supersedes. The ruled shape
+ * is non-focusable text naming the absence, so the unavailable tab is a plain `<span>` with no role,
+ * no `tabindex`, no `title`, and its reason printed as visible muted prose beside it.
  *
  * **The status pill is `StatusPill`, not `StatusBadge`, and that is measured.** `StatusBadge`'s
  * runtime `KNOWN` set is `estimated | unknown | unconfirmed` (provenance states) and its own docblock
@@ -123,6 +128,14 @@ const UNAVAILABLE_TITLE = 'Available when the career is completed';
 const unavailableTitle = (key: string): string =>
     key === 'training' ? 'The career has ended, so no turns are left to decide' : UNAVAILABLE_TITLE;
 
+/**
+ * The sections this career cannot reach, so the missing ones are named in prose rather than by a
+ * `title` on a control. Empty on the safe default, where the caller did not say.
+ */
+const unreachableTabs = computed<{ key: string; label: string }[]>(() =>
+    TABS.filter((tab) => !reachable(tab.key)).map((tab) => ({ key: tab.key, label: tab.label })),
+);
+
 const TAB =
     'inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
 const TAB_CURRENT = 'bg-raised font-bold text-ink-strong';
@@ -168,18 +181,21 @@ const showTraineeJa = computed<boolean>(
                     >
                         {{ tab.label }}
                     </Link>
-                    <span
-                        v-else
-                        role="link"
-                        aria-disabled="true"
-                        tabindex="0"
-                        :title="unavailableTitle(tab.key)"
-                        :class="TAB_DISABLED"
-                    >
+                    <!-- DESIGN.md §5 (a), 2026-10-17: an unreachable destination is non-focusable text.
+                         No `role="link"`, no `tabindex`, no `title`: those were the shape §5 forbids,
+                         and the reason is the visible line under the tab row. -->
+                    <span v-else :class="TAB_DISABLED">
                         {{ tab.label }}
                     </span>
                 </li>
             </ul>
+            <!-- DESIGN.md §5 (a): the reason an unreachable section is absent, as visible prose in the
+                 same sentence voice as the tabs, and reachable without a mouse. It replaces the
+                 `title` the unreachable tab used to carry. Each unavailable section gets its own
+                 sentence, because one line covering two tabs would attach the reason to neither. -->
+            <p v-for="tab in unreachableTabs" :key="tab.key" class="px-2 pb-1 text-xs text-ink-muted" data-absence>
+                {{ tab.label }}: {{ unavailableTitle(tab.key) }}.
+            </p>
         </nav>
     </section>
 </template>

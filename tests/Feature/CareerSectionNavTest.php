@@ -17,34 +17,52 @@ declare(strict_types=1);
  * property of the source, and it is the property the browser case cannot run to prove today.
  */
 
-it('renders an unreachable section as a span that cannot navigate', function (): void {
+it('renders an unreachable section as non-focusable text, not a link wearing aria-disabled', function (): void {
     $source = (string) file_get_contents(base_path('resources/js/components/career/CareerSectionNav.vue'));
 
-    // The disabled branch names the state and nothing else: role, aria-disabled, tabindex and title.
-    expect($source)->toContain('role="link"')
-        ->and($source)->toContain('aria-disabled="true"')
-        ->and($source)->toContain('tabindex="0"')
-        // The title is per-tab since 1e3c5075: the training section is non-live on an ended
-        // career and says so, while every other section carries the general reason. The
-        // constant is still what the helper falls back to, so both halves are asserted.
-        ->and($source)->toContain(':title="unavailableTitle(tab.key)"')
-        ->and($source)->toContain('const UNAVAILABLE_TITLE =');
+    /*
+     * DESIGN.md §5 (a)'s 2026-10-17 amendment names the shape this case used to pin as the defect:
+     * "`aria-disabled` alone is not that shape and never may be used as one, because it announces a
+     * state without cancelling activation". The unreachable tab is now plain text, and its reason is
+     * visible prose under the tab row rather than a `title` — which the same amendment supersedes as
+     * the hover-only channel.
+     *
+     * Corrected 2026-10-22 (UX audit F-04). The assertions are the inverse of the originals on
+     * purpose: the old three attributes are exactly what must not come back.
+     */
+    // The assertions read the TEMPLATE, not the whole file: the component's dated correction has to
+    // name the attributes it retired in order to explain them, so a whole-file check would fail on its
+    // own documentation.
+    $templateAt = strpos($source, '<template>');
+    expect($templateAt)->not->toBeFalse();
 
-    // It is a span, it carries NO href, and it has NO click handler. The branch is located by the
-    // `<span` that owns the `v-else` (the tag opener precedes the directive, so a window starting at
-    // `v-else` would miss the tag itself), and a later edit that turns it into a Link reds here.
+    // Comments are stripped as well as the script block: the retired attributes are named in the
+    // correction prose precisely so a reader sees what not to reintroduce, and prose is not markup.
+    $template = preg_replace('/<!--.*?-->/s', '', substr($source, (int) $templateAt)) ?? '';
+
+    expect($template)->not->toContain('role="link"')
+        ->and($template)->not->toContain('aria-disabled')
+        ->and($template)->not->toContain('tabindex="0"')
+        ->and($template)->not->toContain(':title="unavailableTitle(tab.key)"')
+        // The helper survives, because the reason it words is now printed as prose.
+        ->and($template)->toContain('unavailableTitle(tab.key)')
+        ->and($template)->toContain('unreachableTabs');
+
+    // The unreachable branch is still a span, and still carries NO href and NO click handler, so a
+    // later edit that turns it into a Link reds here.
     $elseAt = strpos($source, 'v-else');
     expect($elseAt)->not->toBeFalse();
 
     $spanAt = strrpos(substr($source, 0, (int) $elseAt), '<span');
     expect($spanAt)->not->toBeFalse();
 
-    $branch = substr($source, (int) $spanAt, 500);
+    $branch = substr($source, (int) $spanAt, 300);
 
     expect($branch)->toContain('<span')
-        ->and($branch)->toContain('role="link"')
         ->and($branch)->not->toContain(':href')
-        ->and($branch)->not->toContain('@click');
+        ->and($branch)->not->toContain('@click')
+        ->and($branch)->not->toContain('role=')
+        ->and($branch)->not->toContain('tabindex');
 });
 
 it('marks exactly one live section with aria-current', function (): void {

@@ -34,11 +34,14 @@ test('renders the run identity strip and the nine sections on the Cockpit', asyn
     const nav = page.getByRole('navigation', { name: 'Career sections' });
     await expect(nav).toBeVisible();
 
-    // Nine sections, in the order the career walks them. Each live one is a real link.
-    for (const label of TABS) {
+    // Nine sections, in the order the career walks them. A live one is a real link; the one an active
+    // career cannot reach is a named absence with no link semantics at all (DESIGN.md §5 (a), and the
+    // case below owns that shape in full). The loop therefore excludes Result, which the sibling case
+    // asserts is not a link on this same run — asserting both would be asserting a contradiction.
+    for (const label of TABS.filter((tab) => tab !== 'Result')) {
         await expect(nav.getByRole('link', { name: label, exact: true })).toHaveCount(1);
     }
-    await expect(nav.getByRole('link')).toHaveCount(TABS.length);
+    await expect(nav.getByRole('link')).toHaveCount(TABS.length - 1);
 
     // The live section is marked, and it is the Cockpit on this screen.
     await expect(nav.getByRole('link', { name: 'Cockpit', exact: true })).toHaveAttribute('aria-current', 'page');
@@ -47,20 +50,26 @@ test('renders the run identity strip and the nine sections on the Cockpit', asyn
     await expect(page.getByRole('region', { name: 'Career' })).toBeVisible();
 });
 
-test('an unreachable Result tab is a focusable non-navigating span', async ({ page }) => {
+test('an unreachable Result tab is a named absence, not a focusable link', async ({ page }) => {
     createdRunUrls.push(await startCareer(page, 'unity_cup'));
 
     const nav = page.getByRole('navigation', { name: 'Career sections' });
-    const result = nav.getByRole('link', { name: 'Result', exact: true });
 
-    // DESIGN.md §5's 2026-10-17 amendment: `aria-disabled` announces a state and does not cancel
-    // activation, so an unreachable section must not be an `<a>` at all. It is a span that looks like
-    // a link, says so, takes focus, and has no href.
-    await expect(result).toHaveAttribute('aria-disabled', 'true');
-    await expect(result).toHaveAttribute('tabindex', '0');
-    await expect(result).toHaveAttribute('title', 'Available when the career is completed');
-    await expect(result).not.toHaveAttribute('href');
-    expect(await result.evaluate((el) => el.tagName)).toBe('SPAN');
+    // DESIGN.md §5's 2026-10-17 (a) amendment: "`aria-disabled` alone is not that shape and never may
+    // be used as one". The tab used to be `<span role="link" aria-disabled="true" tabindex="0">` with
+    // its reason in a `title`, which announced a link, took focus, and reached its reason by hover only.
+    // The ruled shape is non-focusable text naming the absence, so this asserts the absence of every
+    // part of the old shape rather than its presence.
+    await expect(nav.getByRole('link', { name: 'Result', exact: true })).toHaveCount(0);
+    await expect(nav.locator('[aria-disabled="true"]')).toHaveCount(0);
+    await expect(nav.locator('[role="link"]')).toHaveCount(0);
+
+    // The section is still named, and the reason is visible prose rather than a `title`.
+    const result = nav.getByText('Result', { exact: true });
+    await expect(result).toBeVisible();
+    await expect(result).not.toHaveAttribute('tabindex');
+    await expect(result).not.toHaveAttribute('title');
+    await expect(nav.getByText(/Available when the career is completed/)).toBeVisible();
 });
 
 test('a completed career reaches its Result tab', async ({ page }) => {
@@ -85,27 +94,21 @@ test('a completed career reaches its Result tab', async ({ page }) => {
     expect(await result.evaluate((el) => el.tagName)).toBe('A');
 });
 
-test('clicking or activating the unreachable Result tab changes no URL', async ({ page }) => {
-    // Un-skipped 2026-10-19: the isolated worktree carries a fresh bundle, so the case this spec was
-    // written for can finally run. It was the load-bearing assertion of slice 4.1 and had been
-    // test.skip'd for a stale-bundle block only, never for a doubt about the behaviour.
+test('an unreachable Result tab cannot be activated by pointer or keyboard', async ({ page }) => {
     createdRunUrls.push(await startCareer(page, 'unity_cup'));
 
-    const result = page.getByRole('navigation', { name: 'Career sections' }).getByRole('link', { name: 'Result', exact: true });
+    const nav = page.getByRole('navigation', { name: 'Career sections' });
     const before = page.url();
 
-    // `force`, and for the same reason the Preflight slice recorded: Playwright's actionability check
-    // reads `aria-disabled="true"` as "not enabled" and would never dispatch the click, so a plain
-    // `click()` times out after 180s without the product having done anything. That guard is a harness
-    // artifact here, not the behaviour under test — the assertion is that activation leaves the URL
-    // alone, which only means something if the click is actually delivered.
-    await result.click({ force: true });
-    await expect(page).toHaveURL(before);
+    // Nothing to activate: the tab is plain text, so there is no tab stop to reach it with and no
+    // element to force a click onto. The old case needed `click({ force: true })` because Playwright
+    // reads `aria-disabled="true"` as "not enabled" and would not dispatch — that harness workaround
+    // existed only because the forbidden shape was shipped.
+    const result = nav.getByText('Result', { exact: true });
+    await expect(result).toBeVisible();
+    await expect(nav.locator('[role="link"], [tabindex="0"]')).toHaveCount(0);
 
-    await result.focus();
-    await page.keyboard.press('Enter');
-    await expect(page).toHaveURL(before);
-    await page.keyboard.press('Space');
+    await page.keyboard.press('Tab');
     await expect(page).toHaveURL(before);
 });
 
