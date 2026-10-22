@@ -124,3 +124,21 @@ before any merge of that branch.
 | Sourced artwork is mirrored locally and derived from ids | fetch half built (`uma:fetch-art`); display half built (`ArtworkSlot.vue`, `artwork.show`) | 0021 | `ArtworkMirrorTest`; `uma:fetch-art --dry-run` | 0021 §Decision |
 | No uploads | `PRD.md` §6.13 untouched | 0021 | — | 0021 §Preserves |
 | **Do not** cite 0016 as permission to build readiness | 0016 is an OPEN QUESTION, held | 0016, 0020 | — | 0016 §Status |
+
+## 10. Framework check (2026-10-22)
+
+The ADR set was checked against `docs/framework-ui-ux/` (the ten-framework corpus and its re-check
+table). These are the facts the check established; the reasoning is in each ADR's ledger, and the rule
+ids are the corpus's own.
+
+| Fact | Value | decision | code | owner |
+|---|---|---|---|---|
+| The client-side visit's loading signal is owned by no ADR | `VisitProgressBar.vue` discharges ADR-0007's clause 2 on the Inertia surface; the ruling that made the surface an SPA never revisited it | 0007, 0020 | `resources/js/components/VisitProgressBar.vue` | 0007 §Ledger, 0020 §Ledger |
+| **Do not** read ADR-0007 clause 1 as covering a client-side visit | it describes a server-rendered first navigation; on an Inertia visit the previous screen stays on screen | 0007, 0020 | `resources/js/spa.ts` | 0007 §Ledger |
+| The deck picker's one-copy rule is refused after the write, not by the control | the picker offers a card already equipped in another slot; `StoreDeckRequest` refuses the duplicate | 0014 | `DeckSelectController::picker()`; `StoreDeckRequest` | 0014 §Ledger |
+| A committed turn's correction is an in-place update | `runs.turns.update` writes the row in place; ADR-0027's `corrected_from`/`superseded_by` have no writer, and the Timeline reads `updated_at` | 0027 | `TrainingRunController::updateTurn()`; `Career/TimelineController` | 0027 §Ledger |
+| The two-marker ceiling condition is unbuilt | no shipped component draws the 1,200 halved-gains line or the ceiling marker | 0002 | `docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md`; `CareerStatePanel.vue` | 0002 §Ledger |
+| The design-authority ruling predates the framework corpus | `docs/framework-ui-ux/` states visual rules of its own (type scale, one accent, 44px) and no document says which wins | 0006 | `docs/framework-ui-ux/design-framework-index-2026-10-21.md` | 0006 §Ledger |
+| **Do not** read the SPA accessibility carry-across as covering contrast | ADR-0020 names four behaviours and cites no success criterion; no contrast pair is measured | 0020 | `DESIGN.md` §2.1; gate G-18 | 0020 §Ledger |
+| **Do not** read ADR-0021's pre-run pick blocker as a control-type problem | the pick screen mounts `TraineeCombobox`; the blocker is that it renders no frame | 0021 | `resources/js/pages/Runs/Create.vue` | 0021 §Ledger |
+| The filter refusal is presented in text and announced | `role="alert"`, `aria-invalid` and `aria-describedby` on the picker; the Decision pins the landing place, not the presentation | 0018 | `resources/js/components/catalog/TraineeCatalog.vue`; `Form/BaseSelect.vue` | 0018 §Ledger |

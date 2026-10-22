@@ -11619,3 +11619,68 @@ four-backtick fence rather than an info-bearing one: `tools/md_fence_check.py`
 reads an info-bearing opener as owning the block and then reports the
 source's own ` ```vue ` as an invalid closer. The bare wrapper keeps the
 checker's stack balanced and CommonMark-correct.
+
+### 63. Dispatch 55 - the `docs/framework-ui-ux/` re-check run over `docs/adr` - 2026-10-22
+
+The owner dispatched the framework corpus's own re-check procedure against the ADR set: every
+decision that binds a Trainer-visible surface was read against the ten frameworks in
+`docs/framework-ui-ux/`, and the ADRs were edited where the check found a gap. The corpus
+was read first, in full, including its conflicts table, because the index says a review
+cites the narrowest framework that decides the question and that a contradiction between
+frameworks is not a finding.
+
+#### Method
+
+| Step | What was done |
+|---|---|
+| Corpus read | all ten files under `docs/framework-ui-ux/` (Laws of UX 29, Laws of UI 13, Heuristics 10, Shneiderman 8, Tognazzini 16, Gerhardt-Powals 10, IA 8, Gestalt 12, Norman, WCAG 2.2 AA) with their derived rule ids (`UX-`, `UI-`, `SHR-`, `TOG-`, `GP-`, `IA-`, `GT-`, `NRM-`, `WCAG-`, `H1`-`H10`) |
+| Corpus applied | the index's ten-row re-check table, question by question, to each ADR that decides something a Trainer sees |
+| ADRs read | all 27 bodies, plus `CURRENT.md`, `README.md`, `ADR-TEMPLATE.md` and `tools/adr-check.py` for the contract and the body caps |
+| Code checked | each finding was read against the shipped code before it was recorded; a finding the code disproved was dropped |
+| Edits | dated ledger entries (append-only, newest first) and `open` field updates; no ruling body was rewritten |
+
+#### Findings
+
+Ten ADRs carry a finding. Every other ADR checked clean against the rules that touch it, and
+got no edit.
+
+| ADR | Finding | Rules |
+|---|---|---|
+| 0002 (with 0015, 0025) | The two-marker ceiling condition has no surface: `StatBand.vue` was deleted in the frontend cutover (`b30906a`), the panel that replaced it is target-shaped by design, and `ScenarioCaps::ceilingsForRun()` is called only by its test. The supersession is recorded in `docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md` and not in the ADR set | UX-2, UI-3, GT-6, WCAG 1.4.11 |
+| 0006 | The design-authority ruling predates the framework corpus, which states visual house rules of its own (three type sizes, one accent, 44px) and settles rule conflicts against a third document; no document says which wins | SHR-1, UI-1, UI-7, UX-1 |
+| 0007 (with 0020) | The loading ruling was never carried across the SPA rewrite: a client-side visit has no blank-to-paint, and the component that discharges it (`resources/js/components/VisitProgressBar.vue`) is named in no ADR | H1, TOG-1, TOG-3, NRM-6, GT-2 |
+| 0014 | The deck picker's one-copy rule is refused after the write, not by the control: the picker offers a card already equipped in another slot, and `StoreDeckRequest` refuses it afterwards | NRM-2, NRM-3, H5, NRM-4, GT-2 |
+| 0018 | The refusal is presented correctly (`role="alert"`, `aria-invalid`, `aria-describedby`), but the Decision pins the landing place and not the presentation; the consequence also names a Blade file that no longer exists | H9, NRM-2, WCAG 3.3.1, 3.3.3, 4.1.3 |
+| 0020 | The accessibility carry-across names four behaviours and cites no success criterion, and the contrast pair it inherits was never measured (the G-18 gate measures nothing) | WCAG-1, WCAG-2, WCAG-8 |
+| 0021 | The open item's premise is stale: the pre-run pick screen mounts `TraineeCombobox`, not a native `<select>`; the blocker is that it renders no frame | TOG-3, NRM-1, IA-5 |
+| 0027 | The four columns have no writer: the correction path (`runs.turns.update` -> `updateTurn`) updates the row in place, so `corrected_from`/`superseded_by` stay null and the Timeline reads `updated_at` | H3, SHR-6, TOG-6, NRM-6 |
+
+Seventeen ADRs checked clean: 0001, 0003, 0004, 0005, 0008, 0009, 0010, 0011, 0012, 0013,
+0016, 0017, 0019, 0022, 0023, 0024, 0026.
+
+#### Edits
+
+Ten ADR files (0002, 0006, 0007, 0014, 0015, 0018, 0020, 0021, 0025, 0027), one new
+`## 10. Framework check (2026-10-22)` section in `docs/adr/CURRENT.md`, and the generated
+index in `docs/adr/README.md`. Each ADR edit is a dated ledger entry plus, where the finding
+is unresolved, an `open` field that names it - the index's "Still open" column is the
+visible channel, so a finding is not buried in a ledger. Three owner rulings are named in
+the ledgers and are not taken by this dispatch: the loading scope for a client-side visit,
+whether the deck picker's set is narrowed, and who writes a correction row.
+
+#### Gates
+
+| Gate | Result |
+|---|---|
+| `python tools/adr-index.py docs/adr --write` | index regenerated from 27 ADR files |
+| `python tools/adr-check.py docs/adr` | **1 finding**, pre-existing at HEAD: ADR-0026's Decision is 529 words against the 500-word cap. The pre-existing ASYM finding on ADR-0027 (a hard verb within 90 characters of an `ADR-0010` mention) was cleared by moving one Links line. No hard finding; exit 0 |
+| `python tools/md_fence_check.py docs/adr` | 0 invalid closing fences |
+| `php tools/lore.php` | 513 hits / 75 exempt lines, docs mode. **Zero hits in the files this dispatch touched**; the recorded 2026-10-20 figure was 478 hits / 75 exempt, so the delta is corpus growth this slice did not make |
+| `php tools/lore.php code` | 188 hits; the recorded figure was 182. No code was touched by this dispatch |
+| `php artisan test --filter="LoreGateParityTest\|DocSchemaDriftTest"` | 18 passed (52 assertions) |
+
+#### Deferred
+
+1. **ADR-0026's Decision is 529 words against the cap.** The cap and the template's "the Decision is the immutable ruling" rule cannot both hold here, and trimming an immutable section is the owner's call. Left as it stands, and reported.
+2. **The framework corpus's own WCAG gap register is partly stale.** It records the `line-*` tokens as carrying no contrast claim, while `DESIGN.md` now measures `--color-pick-line` at 6.24 light and 8.46 dark against 1.4.11's 3:1; `--color-goal-line` still carries none. The corpus is outside this dispatch's scope, so the entry is reported rather than edited.
+3. **No ruling was taken and no code was changed.** Every finding is a record; the three owner decisions the ledgers name are open.

@@ -114,9 +114,20 @@ is a bug with a date on it.
 - `App\Services\ScenarioCaps`; `config/scenarios.php`; `GametoraScenarioParser`
 - `tests/Feature/StatCeilingsTest.php`, `tests/Feature/StatDenominatorConsistencyTest.php`,
   `tests/Feature/ScenarioCapParityTest.php`
+- `docs/framework-ui-ux/design-framework-index-2026-10-21.md` (the re-check table); rules UX-2, UI-3,
+  GT-6, NRM-4
 
 ## Ledger
 
+- 2026-10-22 · **framework check against `docs/framework-ui-ux/` — the UI condition this ADR keeps is
+  unbuilt.** The sentence above, "ADR-0002's UI condition is untouched", stands as a statement about the
+  decision and is not changed by this entry. What the check found is that the condition has no surface:
+  the component that drew the two markers, `StatBand.vue`, was deleted in the frontend cutover
+  (`b30906a`), and the stat panel that replaced it, `resources/js/components/career/CareerStatePanel.vue`,
+  is target-shaped by design. The condition is therefore a requirement on a future band, not a
+  description of the shipped one. The full finding, the framework rules it binds (**UX-2**, **UI-3**,
+  **GT-6**, WCAG 1.4.11's 3:1 for a graphical object) and the pointer to the audit that records the
+  supersession are in `ADR-0002`'s ledger.
 - 2026-10-01 · **erratum — the first consequence did not hold.** The consequence asserted "The bound a
   Trainer sees as a bar end is the bound the form enforces. One owner, `ScenarioCaps`." **That sentence was
   written on 2026-09-30 and it was false on the no-scenario branch until `04658f2` landed on 2026-10-01. It is

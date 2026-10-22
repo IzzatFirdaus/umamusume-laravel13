@@ -5,7 +5,7 @@
   code: superseded — ADR-0015 replaced the bound with the per-stat scenario cap (App\Services\ScenarioCaps)
   superseded-by: —
   amended-by: 0015 (bound superseded), 0003 (item 6); reaffirmed unchanged by 0004, 0012 and 0025
-  open: option A's per-scenario table is the shipped shape (ADR-0015); the UI condition (1,200 line + scenario ceiling as two markers) still binds
+  open: option A's per-scenario table is the shipped shape (ADR-0015); the UI condition (1,200 line + scenario ceiling as two markers) still binds as a requirement and is unbuilt — no shipped component draws either marker (2026-10-22 framework check)
 -->
 
 Status: **accepted** (owner ruling 2026-09-27). **Its validation bound is superseded by `ADR-0015`**,
@@ -68,9 +68,29 @@ is asserted by `tests/Feature/ScenarioCapParityTest.php`; it is not restated her
 - `config/scenarios.php` (`base_cap`, `cap_bonus`, `hard_cap`); `App\Services\ScenarioCaps`
 - `docs/UMAMUSUME_REFERENCE.md` §1.3.4, §1.5, §1.6.1; `DESIGN.md` §6.5
 - `docs/research-scratch/DESIGN-CORPUS.md` D-31, D-160..D-165, G-15a..c
+- `docs/framework-ui-ux/design-framework-index-2026-10-21.md` (the re-check table); rules UX-2, UI-3,
+  GT-6, WCAG-2
 
 ## Ledger
 
+- 2026-10-22 · **framework check against `docs/framework-ui-ux/` — the UI condition this ADR carries is
+  unbuilt, and the present tense in three ADRs reads as a claim about a surface that is gone.** The
+  re-check table asks a change that moves a progress indicator or a boundary against **UX-2** (a progress
+  indicator states distance to the goal, not only the current value) and **GT-6** (a sequence keeps an
+  unbroken spine); the condition above is this repository's own instance of both, and the framework
+  agrees with it. **The condition is sound and it is not withdrawn — it has no surface.** The component
+  that drew it, `StatBand.vue`, was deleted in the frontend cutover (`b30906a`), and the run record
+  screen that hosted it was retired with it. The panel that replaced it,
+  `resources/js/components/career/CareerStatePanel.vue`, is target-shaped by design and says so in its
+  own header comment: the ceiling band "with the 1,200 halved-gains marker" was "deliberately not
+  reused". `ScenarioCaps::ceilingsForRun()` still computes the known and the potential level, and its
+  only callers are `tests/Feature/StatCeilingsTest.php`. **The supersession is recorded** in
+  `docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md` ("Stat-ceiling fourth marker —
+  Landed-superseded") **and not in this ADR set**, which is why `ADR-0015` and `ADR-0025` still read as
+  if the two markers were on screen. What the framework adds for whoever rebuilds the band: the two
+  markers are **graphical objects**, so WCAG 1.4.11's 3:1 attaches to each against the surface it is
+  drawn on, and they must be tellable apart **without colour** (**UI-3**), which "differently-drawn" by
+  itself does not guarantee.
 - 2026-09-27 · **amendment 1, after reading the URA Finale guide** — the framing treated 1200 as an
   arbitrary app constant. Two facts changed the recommendation: 1200 is a genuine in-game soft cap
   (training gains halve beyond it), and a scenario ceiling is `1200 base + scenario bonus`, a sum. The bar

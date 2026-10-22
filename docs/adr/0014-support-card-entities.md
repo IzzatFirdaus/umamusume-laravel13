@@ -5,7 +5,7 @@
   code: built — migrations 2026_09_30_142618, 2026_09_30_151945; DeckSlot::booted(); StoreSupportCardsTest; SupportCardTest
   superseded-by: —
   amended-by: 0023 (adds a nullable deck_slots.ownership recording owned-or-rented per slot), 0005 (its recommended split is the one taken)
-  open: card levels and limit breaks are still unrecorded, and the run's reached effect values are still unrecorded — the builder's analysis continues to use catalog anchors
+  open: card levels and limit breaks are still unrecorded, and the run's reached effect values are still unrecorded — the builder's analysis continues to use catalog anchors; the deck picker's offered set still includes a card already equipped in another slot, so the one-copy rule is refused after the write instead of by the control (2026-10-22 framework check)
 -->
 
 Status: **ACCEPTED** (owner ruling 2026-09-30, Slice 2 authorization). Supersedes `ADR-0005`.
@@ -155,9 +155,29 @@ surface.
   `tests/Feature/SupportDeckBuilderTest.php`, `tests/Feature/ApiV1ValidationEnvelopeTest.php`
 - `docs/UMAMUSUME_REFERENCE.md` §1.4, §1.4.1, §1.4.2, §1.4.3, §1.4.4, §1.4.7, §1.4.8; `config/scenarios.php`
   (`scenario_links`)
+- `docs/framework-ui-ux/design-framework-index-2026-10-21.md` (the re-check table); rules NRM-3, NRM-4, H5,
+  GT-2
 
 ## Ledger
 
+- 2026-10-22 · **framework check against `docs/framework-ui-ux/` — the deck's one-copy rule is expressed
+  by a message after the fact, not by the control.** The re-check table asks a change that adds or moves
+  a control against **Hick** (the option count) and, where a rule the client enforces is concerned,
+  **NRM-3** ("a rule the system enforces is expressed by the control, not by a message after it") with
+  **H5** (prevent the error rather than report it). The framework's Norman file names this exact case:
+  *"the client forbids two copies of one card in a deck; the deck picker should express that by not
+  offering the same card twice, not by validating after the fact."* **What the check found is that the
+  deck decision above owns the picker's offered set and does not decide the constraint's expression
+  point.** `DeckSelectController::picker()` offers the Global releases **plus any card the draft already
+  holds**, and does not narrow the set by the cards sitting in the *other* slots; the duplicate is then
+  refused on write by `StoreDeckRequest`, which adds "The same card cannot be equipped twice. Break the
+  duplicate instead." to the `deck` error bag. So the Trainer can pick a card the deck already carries,
+  press Equip, and read why afterwards. **The refusal itself is right** — the client forbids the
+  duplicate, and the write is where the whole deck is known — and the decision above stands as written.
+  What is owed is a ruling on whether the picker's set is narrowed, and the framework's answer is
+  already recorded: an unavailable action should not be offered at all (**NRM-2**, **NRM-3**). The other
+  rules this decision touches pass: the role belongs to the slot and the label follows it (**NRM-4**,
+  mappings), and the empty panel names the absence instead of drawing six empty frames (**GT-2**).
 - 2026-10-01 · **correction against the source data and the shipped schema** — the paragraph on `char_id`
   first cited `characters.json` and its 163 records. That file is not the trainee feed and it does hold a
   block of 9000-series ids; the measurement was taken against an `id` key the file does not have, so every row

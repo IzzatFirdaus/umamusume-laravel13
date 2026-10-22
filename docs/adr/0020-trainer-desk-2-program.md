@@ -5,7 +5,7 @@
   code: built — resources/js/ (Inertia + Vue 3); App\Services\Advisor\TrainerAdvisor; App\Models\Advisor\BuildTargetPayload; tests/Feature/CareerCockpitTest.php, TrainerAdvisorTest
   superseded-by: —
   amended-by: 0001 (its §6.11 lift is widened here), 0010 (its §6.3 recording allowance is built on), 0016 (reaffirmed, not reopened)
-  open: each subsystem still needs its own design, spec and plan — this file authorizes scope only, no code
+  open: each subsystem still needs its own design, spec and plan — this file authorizes scope only, no code; the accessibility carry-across names four behaviours and cites no success criterion, and the contrast pair it inherits was never measured (2026-10-22 framework check); the loading-state ruling in ADR-0007 was never revisited for this frontend
 -->
 
 Status: **Accepted** (owner ruling 2026-10-04). Drafted by the Architect and recorded here because it
@@ -119,3 +119,29 @@ shape 1 and is a separate, later slice; **it is not authorized by this ADR.**
 - `docs/research-scratch/PROCESS-PLANS.md` section `## trainer-advisor.md` (subsystem 1 spec)
 - `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md`, `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` (2.0 design target, reference-only)
 - `docs/UMAMUSUME_REFERENCE.md` §1.1 (Energy constants), §1.5 (Sparks/affinity)
+- `docs/framework-ui-ux/design-framework-index-2026-10-21.md` (the re-check table); rules WCAG-1, WCAG-2,
+  WCAG-8, H1, TOG-1, NRM-6
+
+## Ledger
+
+- 2026-10-22 · **framework check against `docs/framework-ui-ux/` — two gaps in the carry-across
+  obligation, and one surface this ruling left behind.** The framework's re-check table asks a change
+  that touches a control whether the accessibility contract travels with it; the answer here is that
+  the obligation is written but under-specified. **First, it names four behaviours and no success
+  criterion.** WCAG-1 is explicit that a review cites a criterion and never a principle, and the
+  framework's own gap register records that **no contrast pair has been measured** in this repository:
+  `DESIGN.md` §2.1 says so and the G-18 gate measures nothing, while WCAG 1.4.3 (4.5:1 text, 3:1 large
+  text) and 1.4.11 (3:1 non-text) are the two criteria a token rewrite touches first. The carry-across
+  list in this ADR names keyboard paths, target sizes, review-form labels and focusable scroll
+  regions, so a rewrite that drops a contrast value breaks no named obligation. **Second, nothing in the
+  list requires the rewrite to report an unmeasured criterion as unmeasured** (WCAG-8), which is the
+  clause that keeps "inherited, never measured" from reading as "passed". **Third, and the larger gap:
+  this ruling replaced the whole web surface and did not revisit the loading-state ruling.** The
+  loading obligation that `ADR-0007` scoped lives in clauses written for server-rendered views; on a
+  client-side visit the previous screen stays on screen and no blank-to-paint happens, so the
+  obligation is discharged by `resources/js/components/VisitProgressBar.vue` — a native `<progress>`
+  with an accessible name, indeterminate on purpose, rendering nothing when idle. **The component is in
+  no ADR**, and the rule that governs it (H1, TOG-1, NRM-6) is in the framework corpus, not in the
+  decision set. **No ruling is taken here.** The three items above are recorded as owed: an owner
+  ruling that names the criteria the rewrite must meet, a ruling on whether the client-side visit falls
+  inside `ADR-0007`'s scope, and the record of who owns the visit indicator.

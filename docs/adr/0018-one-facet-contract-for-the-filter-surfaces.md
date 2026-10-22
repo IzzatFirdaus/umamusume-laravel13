@@ -94,3 +94,27 @@ error can be rendered beside the picker that caused it, and `previous()` cannot 
   `tests/Feature/CatalogCacheRenderTest.php`, `tests/Feature/ApiV1ValidationEnvelopeTest.php`
 - `ADR-0011` (the skill-type derivation), `ADR-0014` (the availability column), `ADR-0022` (the all-of
   narrowing the tag filter keeps)
+- `docs/framework-ui-ux/design-framework-index-2026-10-21.md` (the re-check table); rules H9, NRM-2,
+  WCAG-1, UX-8
+
+## Ledger
+
+- 2026-10-22 · **framework check against `docs/framework-ui-ux/` — the refusal is presented correctly, and
+  the decision pins where it lands rather than how it looks.** The re-check table asks a change that moves
+  a filter against **H9** (say the problem close to its source, in plain language, never by colour alone),
+  **NRM-2** (a control that cannot do what was asked says why) and **WCAG-1** (cite a success criterion,
+  never a principle): 3.3.1 identifies an error in text, 3.3.3 suggests the correction, 4.1.3 exposes a
+  status message without moving focus. **The shipped surfaces meet all of them.** The decision's own
+  requirement — that a refusal must land where the field error can be rendered beside the picker that
+  caused it — is what makes that true: `resources/js/components/catalog/TraineeCatalog.vue` reads
+  `page.props.errors` and hands `errors.status` to `BaseSelect`, whose error line is a `<p>` carrying
+  `role="alert"`, with `aria-invalid` on the control and `aria-describedby` pointing at the message. The
+  sibling surfaces (`skills/SkillCatalog.vue`, `support/SupportCardCatalog.vue`) read the same bag the same
+  way. **Two things the Decision does not pin, recorded so a later session does not read the pass as a
+  guarantee.** First, the presentation half — in text, announced, with a suggestion — is nowhere in the
+  Decision; it is held by the component and by `tests/Feature/UiHygieneTest.php` and the browser
+  accessibility specs, so a rewrite of the filter surface could satisfy this ADR's letter and drop it.
+  Second, **the consequence above names a file that no longer exists**: `resources/views/catalog/
+  index.blade.php` was retired with the Blade surface in the frontend rewrite, and the `@error('status')`
+  line it gained is now rendered by the Vue filter component named above. The decision and its reasoning
+  stand unchanged; the file reference is a snapshot of the surface at the date it was written.

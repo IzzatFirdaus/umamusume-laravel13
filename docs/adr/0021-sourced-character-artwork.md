@@ -5,7 +5,7 @@
   code: built — app/Services/DataPipeline/ArtworkMirror.php; SourceFetcher::fetchAsset(); tests/Feature/ArtworkMirrorTest.php; ArtworkSlot.vue + the loopback artwork.show route
   superseded-by: —
   amended-by: 0012 (its Decision 2's blocker is obsolete; see Erratum 4 there)
-  open: which screens carry a frame is PRD.md OQ-6; the pre-run pick screen cannot host one while its trainee picker is a native select, and skill icons have no stored column
+  open: which screens carry a frame is PRD.md OQ-6; the pre-run pick screen still carries no frame, and the reason recorded here is stale — its trainee picker is the TraineeCombobox component, not a native select (2026-10-22 framework check); skill icons have no stored column
 -->
 
 Status: **Accepted** (owner ruling 2026-10-05). The owner chose "A then C": record the findings, then build
@@ -68,9 +68,24 @@ its app contains zero outbound HTTP calls. It is the feature `PRD.md` §6.13 cut
 - `app/Services/DataPipeline/ArtworkMirror.php`, `SourceFetcher::fetchAsset()`,
   `tests/Feature/ArtworkMirrorTest.php`, `resources/js/components/ArtworkSlot.vue`
 - `config/uma.php` (the allowlist); `php artisan uma:fetch-art --dry-run` (the live id count)
+- `docs/framework-ui-ux/design-framework-index-2026-10-21.md` (the re-check table); rules TOG-3, NRM-1,
+  IA-5
 
 ## Ledger
 
+- 2026-10-22 · **framework check against `docs/framework-ui-ux/` — no rule is broken, and one premise in
+  the open item is stale.** The rules that touch this decision are **TOG-3** (status may be stale or
+  absent, but never wrong), **NRM-1** (every available action carries a visible signifier) and **IA-5**
+  (an empty state shows an example of what would fill it). On the first two the decision passes: the
+  mirror's emptiness is an absence, not a false claim, and the slot's own space is reserved by
+  `ArtworkSlot`'s `reserve` prop rather than silently collapsing. **The premise that needed correcting
+  is in this ADR's own open item.** It reads "the pre-run pick screen cannot host a frame while its
+  trainee picker is a native `<select>`", and the pick screen — `resources/js/pages/Runs/Create.vue`,
+  the "New career" form — mounts `TraineeCombobox`, not a native select; the component is a combobox
+  with its own listbox and its own key handling. **The conclusion still holds and the reason has
+  changed:** the screen carries no frame, because neither the combobox nor the form renders one. The
+  reason mattered because it pointed at the next piece of work — a control type that could not host a
+  frame — and that work is no longer what blocks it.
 - 2026-10-05 · **Erratum 1 — the live pass has been run, and the falsifier named in the first draft did not
   fire.** The status asserted "No pass has been run against the live host, so the mirror is empty on this
   tree". **665 files, 45 MB**, in `storage/app/private/artwork/` with a sibling `manifest.json`. What the

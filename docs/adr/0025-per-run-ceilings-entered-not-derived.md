@@ -110,3 +110,19 @@ held last month.
   (`ENTERED_CAPS`, `forRun()`); `App\Http\Requests\Concerns\ValidatesEnteredCaps`
 - `tests/Feature/EnteredStatCapsTest.php`, `tests/Feature/StatCeilingsTest.php`
 - `docs/audits/rice-shower-unity-cup-ux-walk.md` §1.2 and §1.5 (the run report's own correction)
+- `docs/framework-ui-ux/design-framework-index-2026-10-21.md` (the re-check table); rules UX-4, UX-2,
+  GP-2, TOG-3
+
+## Ledger
+
+- 2026-10-22 · **framework check against `docs/framework-ui-ux/` — the last bullet of the Decision keeps a
+  condition that is unbuilt.** "ADR-0002's UI condition holds: the halved-gains marker and the run's ceiling
+  stay two separate visible markers" stands as a requirement and is not changed by this entry. What the
+  check found is that no shipped component draws either marker: the component that did, `StatBand.vue`,
+  was deleted in the frontend cutover (`b30906a`), and the stat panel that replaced it is target-shaped by
+  design. The rules this decision otherwise meets are worth recording too, because they are the reason
+  the override is safe to read: **UX-4** (the provenance mark sits beside the number it labels — the
+  published scenario figure is printed next to the entered one), **GP-2** (a derived figure states the
+  rule that produced it) and **TOG-3** (status may be stale or absent, but never wrong — an empty field
+  reverts to the scenario's figure rather than zeroing it). The full finding and the framework rules the
+  condition binds are in `ADR-0002`'s ledger.
