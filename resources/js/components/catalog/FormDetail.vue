@@ -23,21 +23,21 @@ defineProps<{
 <template>
     <div class="card">
         <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-            <h3 class="text-lg font-semibold text-ink-strong">{{ card.title }}</h3>
-            <span class="flex flex-wrap items-baseline gap-3 text-xs text-ink-muted">
+            <h3 class="text-lg font-semibold text-[var(--color-ink-strong)]">{{ card.title }}</h3>
+            <span class="flex flex-wrap items-baseline gap-3 text-xs text-[var(--color-ink-muted)]">
                 <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
                 <span v-if="card.is_debut_form">debut form</span>
-                <span v-if="card.unconfirmed" class="font-semibold text-risk">Not confirmed by two sources</span>
+                <span v-if="card.unconfirmed" class="font-semibold text-[var(--color-risk)]">Not confirmed by two sources</span>
                 <time :datetime="card.global_release_date">
                     Released (Global) {{ card.global_release_date_display }}
                 </time>
             </span>
         </div>
 
-        <p class="mt-2 text-xs text-ink-muted">
+        <p class="mt-2 text-xs text-[var(--color-ink-muted)]">
             from
             <template v-if="card.snapshot_path">{{ card.snapshot_path }} ·</template>
-            <a :href="card.source_url" class="text-ink-strong underline">{{ card.source_url }}</a>
+            <a :href="card.source_url" class="text-[var(--color-ink-strong)] underline">{{ card.source_url }}</a>
             <template v-if="card.fetched_at_display">· read {{ card.fetched_at_display }}</template>
         </p>
     </div>
