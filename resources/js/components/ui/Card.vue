@@ -27,7 +27,7 @@ withDefaults(
     <component
         :is="as"
         :class="[
-            'rounded-md border border-rule bg-raised',
+            'card',
             padding === 'lg' ? 'p-5' : 'p-4',
         ]"
     >
