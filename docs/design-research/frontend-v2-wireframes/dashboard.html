@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard · Trainer Desk wireframe</title>
+<link rel="stylesheet" href="assets/shell.css">
+<!-- pre-paint resolution: theme + layout width -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="app">
+  <aside class="rail" id="primary-nav-rail" aria-label="Global navigation">
+<div class="rail-top">
+      <div class="rail-brand">
+        <span class="mk" aria-hidden="true">TD</span>
+        <span class="tx">TRAINER DESK</span>
+      </div>
+      <button class="rail-toggle" type="button" data-rail-toggle aria-expanded="true" aria-controls="primary-nav-rail" title="Collapse navigation">
+        <span class="sr-only" data-rail-verb>Collapse navigation</span>
+        <span class="rail-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></span>
+      </button>
+    </div>
+      <nav class="rail-nav" aria-label="Primary">
+      <div class="rail-group">Play</div>
+      <a class="nav-item active" href="index.html" aria-current="page" title="Dashboard"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7"/><path d="M6.6 9.6V20h10.8V9.6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Dashboard</span></a>
+      <a class="nav-item" href="career-scenario.html" title="New Career"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.4v17.2"/><path d="M6 4.6h11l-2.7 3.5L17 11.6H6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item" href="runs-index.html" title="Careers"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h12"/><path d="M8 12h12"/><path d="M8 17h12"/><path d="M4.4 7h.01"/><path d="M4.4 12h.01"/><path d="M4.4 17h.01"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Careers</span></a>
+      <a class="nav-item" href="legacy.html" title="Legacy Lab"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h.01"/><path d="M18 7h.01"/><path d="M12 17h.01"/><path d="M6.5 7.7 11.3 16"/><path d="M17.5 7.7 12.7 16"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Legacy Lab</span></a>
+      <a class="nav-item" href="veterans.html" title="Veterans"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v4.2a4 4 0 0 1-8 0z"/><path d="M8 5H5.6a2.4 2.4 0 0 0 2.4 3.9"/><path d="M16 5h2.4a2.4 2.4 0 0 1-2.4 3.9"/><path d="M12 12.4v2.8"/><path d="M8.6 20h6.8"/><path d="M12 15.2a3 3 0 0 0-3.4 4.8h6.8a3 3 0 0 0-3.4-4.8"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Veterans</span></a>
+      <a class="nav-item" href="review.html" title="Review"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5 20.6 19H3.4z"/><path d="M12 10.2v3.6"/><path d="M12 16.4h.01"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="support-cards.html" title="Support Cards"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.4 4.6h8v10h-8z"/><path d="M5 8.6h9.4v10.8H5z"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Support Cards</span></a>
+      <a class="nav-item" href="skills.html" title="Skills"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="database.html" title="Database"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.6C10 5.1 7 4.7 4.2 5.3v13C7 17.7 10 18.1 12 19.6"/><path d="M12 6.6c2-1.5 5-1.9 7.8-1.3v13C17 17.7 14 18.1 12 19.6"/><path d="M12 6.6v13"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Database</span></a>
+      <a class="nav-item" href="preferences.html" title="Settings"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6z"/><path d="M12 3.6v2.2"/><path d="M12 18.2v2.2"/><path d="M3.6 12h2.2"/><path d="M18.2 12h2.2"/><path d="M6.1 6.1l1.6 1.6"/><path d="M16.3 16.3l1.6 1.6"/><path d="M17.9 6.1l-1.6 1.6"/><path d="M7.7 16.3l-1.6 1.6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Settings</span></a>
+    </nav>
+    <a class="rail-foot" href="database-sources.html" title="Data sources"><span class="rail-foot-word">Data sources</span></a>
+  </aside>
+
+  <main class="main" id="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb"><b>Dashboard</b></span>
+        <span class="proto" title="Structure, states and labels are real; the controls are not wired except the Settings page.">Static wireframe</span><span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">1 active career</span></span>
+      <div class="toputils"><a class="iconbtn" href="help.html" title="Help and documentation"><span aria-hidden="true">?</span><span class="lbl">Help</span></a></div>
+        </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Overview</div>
+      <div class="hrow">
+        <div>
+          <h1>Dashboard</h1>
+          <p class="lede">One active career, ten finished runs and four Global scenarios. Verified 2026-09-27 · GameTora scenarios.json.</p>
+        </div>
+        <div class="hrow-actions">
+          <a class="btn btn-primary" href="career-scenario.html">New career</a>
+          <a class="btn" href="runs-index.html">All careers</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="grid g-side" style="margin-bottom:14px">
+        <div class="card" style="margin:0">
+          <h2>Active Career</h2>
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:2px 0 6px">
+            <div style="flex:1 1 250px;min-width:0">
+              <div style="font-size:19px;font-weight:800;color:var(--ink-strong)">Rice Shower
+                <span class="pill pill-accent" style="vertical-align:3px">Unity Cup</span>
+              </div>
+              <div style="font-size:12.5px;color:var(--ink-muted);margin-top:3px">
+                ライスシャワー · Senior Year · Early October
+              </div>
+            </div>
+            <a class="btn btn-primary" href="cockpit-unity-cup.html">Resume career</a>
+          </div>
+
+          <div class="grid g-3" style="margin-top:6px">
+            <div class="tile">
+              <div class="k">Turn</div>
+              <div class="v mono">67 <span style="font-size:11px;font-weight:600;color:var(--ink-muted)">of 72</span></div>
+            </div>
+            <div class="tile">
+              <div class="k">Energy</div>
+              <div class="v na" title="No logged turn has recorded Energy for this career.">N/A</div>
+            </div>
+            <div class="tile">
+              <div class="k">Team Rank</div>
+              <div class="v na" title="No logged turn has reported a team rank yet.">N/A</div>
+            </div>
+          </div>
+
+          <div style="margin-top:14px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;font-size:12px">
+              <span style="font-weight:800;color:var(--ink-strong)">Turn 67 of 72</span>
+              <span style="color:var(--ink-muted)">5 turns to go</span>
+            </div>
+            <ol role="list" aria-label="Career progress" style="list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(72,minmax(0,1fr));gap:1px">
+<li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)"></li><li style="height:10px;border-radius:2px;background:var(--primary-action)" aria-current="step"></li><li style="height:10px;border-radius:2px;border:1px solid var(--rule)"></li><li style="height:10px;border-radius:2px;border:1px solid var(--rule)"></li><li style="height:10px;border-radius:2px;border:1px solid var(--rule)"></li><li style="height:10px;border-radius:2px;border:1px solid var(--rule)"></li><li style="height:10px;border-radius:2px;border:1px solid var(--rule)"></li>
+            </ol>
+          </div>
+
+          <p class="note" style="margin-top:10px"><span class="g" aria-hidden="true">○</span><span>
+            The rail is one mark per career turn: seventy-two marks, the client's twenty-four turns a year over three years.
+            Energy and Team Rank print <b>N/A</b> because no logged turn has recorded them yet.
+          </span></p>
+        </div>
+
+        <div class="card" style="margin:0">
+          <h2>Quick Actions</h2>
+          <nav aria-label="Quick actions" style="display:flex;flex-direction:column;gap:8px">
+            <a class="btn" href="import.html">Import a historical career</a>
+            <a class="btn" href="review.html">Review queue</a>
+            <a class="btn" href="preferences.html">Open settings</a>
+            <a class="btn" href="database.html">Database hub</a>
+          </nav>
+          <p style="font-size:12px;color:var(--ink-muted);margin:9px 0 0">
+            Jump to a task the sidebar does not carry. Partway through a career?
+            <a href="career-snapshot-entry.html" style="text-decoration:underline">Import an existing career</a> instead.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid g-3" style="margin-bottom:14px">
+        <div class="tile">
+          <div class="k">Trainees</div>
+          <div class="v mono">67</div>
+        </div>
+        <div class="tile">
+          <div class="k">Skills</div>
+          <div class="v mono">1,910</div>
+        </div>
+        <div class="tile">
+          <div class="k">Support cards</div>
+          <div class="v mono">559</div>
+        </div>
+      </div>
+
+      <div class="grid g-side" style="margin-bottom:14px">
+        <div class="card" style="margin:0">
+          <h2>Roster</h2>
+          <p class="sub">Every trainee the catalogue holds, with the forms joined on.</p>
+          <div class="grid g-3">
+            <div class="tile"><div class="k">Trainees</div><div class="v mono">67</div></div>
+            <div class="tile"><div class="k">Forms</div><div class="v mono">106</div></div>
+            <div class="tile"><div class="k">Release</div><div class="v">Global</div></div>
+          </div>
+          <a class="btn btn-sm" href="catalog.html" style="margin-top:10px">Browse catalog</a>
+        </div>
+
+        <div class="card" style="margin:0">
+          <h2>Data Status</h2>
+          <p style="margin:6px 0 0;font-size:13px">
+            <b style="color:var(--ink-strong)">GLOBAL DATA</b>
+            <span aria-hidden="true" style="color:var(--green-deep)">●</span>
+            <span>Current</span>
+          </p>
+          <p style="font-size:12px;color:var(--ink-muted);margin:6px 0 0">Verified 2026-09-27 · GameTora scenarios.json</p>
+          <p style="font-size:12px;color:var(--ink-muted);margin:6px 0 0">
+            Ruleset version: <span class="mono" title="No source defines a Global ruleset version, so this tool states none.">N/A</span>
+          </p>
+          <a href="database-sources.html" style="font-size:12px;text-decoration:underline;color:var(--ink-strong)">Source ledger</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Recent Veterans</h2>
+        <table class="t">
+          <thead><tr><th>Trainee</th><th>Scenario</th><th>Saved</th><th class="n"></th></tr></thead>
+          <tbody>
+            <tr><td><b>Vodka</b> <span style="color:var(--ink-muted)">ウオッカ</span></td><td>URA Finale</td><td class="mono">2026-10-15</td><td class="n"><a class="btn btn-sm" href="veteran-detail.html">Open</a></td></tr>
+            <tr><td><b>Daiwa Scarlet</b> <span style="color:var(--ink-muted)">ダイワスカーレット</span></td><td>URA Finale</td><td class="mono">2026-10-14</td><td class="n"><a class="btn btn-sm" href="veteran-detail.html">Open</a></td></tr>
+            <tr><td><b>Special Week</b> <span style="color:var(--ink-muted)">スペシャルウィーク</span></td><td>URA Finale</td><td class="mono">2026-10-12</td><td class="n"><a class="btn btn-sm" href="veteran-detail.html">Open</a></td></tr>
+          </tbody>
+        </table>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+          <span style="font-size:12px;color:var(--ink-muted)">3 most recent shown</span>
+          <a class="btn btn-sm" href="veterans.html">All veterans</a>
+        </div>
+      </div>
+
+      <div class="keybox">
+        <h2>Annotation key · Dashboard</h2>
+        <ol>
+          <li><b>One primary action.</b> "Resume career" is the only filled button in the resume card; every other action is an outline or a link. That is one filled action per screen, so the accent means "this is the next click".</li>
+          <li><b>The rail is discrete marks, not a bar.</b> At turn 67 of 72 a bar would read as a fraction; seventy-two marks let the eye count what is left. The length is the model's own 72-turn career grid.</li>
+          <li><b>Absence is printed, not dropped.</b> Energy and Team Rank keep their tiles and print N/A with the reason in the title, because the controller reports a null rather than a zero.</li>
+          <li><b>Counts are the catalogue's.</b> 67 trainees, 106 forms, 1,910 skills and 559 support cards are the counts <code>assets/data/*.js</code> holds; the running app's trainee counter reads 71 because the dev database also holds four test-fixture trainees the catalogue excludes.</li>
+          <li><b>Region order matches the app.</b> Active Career, Quick Actions, Recent Veterans and Data Status are the four regions <code>Dashboard.vue</code> composes, in its reading order.</li>
+        </ol>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="index.html" class="active"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="runs-index.html"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="review.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+<script>
+/* The collapsible rail, mirroring resources/js/layouts/AppLayout.vue:191-233. */
+(function(){
+  var KEY = 'trainer-desk.nav-rail';
+  var rail = document.getElementById('primary-nav-rail');
+  var toggle = document.querySelector('[data-rail-toggle]');
+  if(!rail || !toggle){ return; }
+  var stored = null;
+  try { stored = localStorage.getItem(KEY); } catch (e) {}
+  var collapsed = stored === 'compact';
+  function paint(){
+    rail.classList.toggle('is-collapsed', collapsed);
+    document.documentElement.classList.toggle('rail-collapsed', collapsed);
+    toggle.setAttribute('aria-expanded', String(!collapsed));
+    toggle.setAttribute('aria-label', collapsed ? 'Expand navigation' : 'Collapse navigation');
+    toggle.setAttribute('title', collapsed ? 'Expand navigation' : 'Collapse navigation');
+    toggle.querySelector('[data-rail-verb]').textContent = collapsed ? 'Expand navigation' : 'Collapse navigation';
+  }
+  toggle.addEventListener('click', function(){
+    collapsed = !collapsed;
+    try { localStorage.setItem(KEY, collapsed ? 'compact' : 'wide'); } catch (e) {}
+    paint();
+  });
+  paint();
+})();
+</script>
+</body>
+</html>
