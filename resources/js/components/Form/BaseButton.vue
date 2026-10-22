@@ -37,7 +37,6 @@ function onClick(event: MouseEvent): void {
         :class="classes"
         :data-variant="variant"
     >
-        <span v-if="loading" class="mr-2" aria-hidden="true">⏳</span>
         <slot />
     </button>
 </template>

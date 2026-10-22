@@ -46,35 +46,35 @@ const sourceReason: Record<string, string> = {
         <!-- The reference-data sentence moved into the PageHeader's description, so it is stated
              once at the top rather than as a loose paragraph that reads as a second title. -->
 
-         <nav aria-label="Database areas" class="mt-6">
-             <!-- One card per area, so each dataset is a destination of its own rather than a row
-                  in a list that has to be scanned to find the one you want. The card is the list
-                  item, so the list a screen reader hears is the list the page shows. -->
-             <ul class="grid gap-3 @2xl:grid-cols-2 @4xl:grid-cols-3">
-                 <Card
-                     v-for="area in props.areas"
-                     :key="area.label"
-                     as="li"
-                     class="flex items-center gap-x-4"
-                 >
-                     <!-- The source cell sits beside the link, not inside it: a link's accessible name is
-                          its contents, and the hub's rows are addressed by their exact label elsewhere
-                          (`database.spec.ts`); "Events Source Transcribed" would be a different name. -->
-                     <Link
-                         :href="area.url"
-                         :prefetch="'hover'"
-                         class="flex min-h-11 flex-1 items-center text-sm font-medium text-ink-strong hover:bg-panel transition-colors duration-150 ease-out"
-                     >
-                         {{ area.label }}
-                     </Link>
-                     <SubCell
-                         label="Source"
-                         :value="area.source"
-                         value-class="font-mono text-sm text-ink-strong"
-                         :title="sourceReason[area.source]"
-                     />
-                 </Card>
-             </ul>
-         </nav>
+        <nav aria-label="Database areas" class="mt-6">
+            <!-- One card per area, so each dataset is a destination of its own rather than a row
+                 in a list that has to be scanned to find the one you want. The card is the list
+                 item, so the list a screen reader hears is the list the page shows. -->
+            <ul class="grid gap-3 @2xl:grid-cols-2 @4xl:grid-cols-3">
+                <Card
+                    v-for="area in props.areas"
+                    :key="area.label"
+                    as="li"
+                    class="flex items-center gap-x-4"
+                >
+                    <!-- The source cell sits beside the link, not inside it: a link's accessible name is
+                         its contents, and the hub's rows are addressed by their exact label elsewhere
+                         (`database.spec.ts`); "Events Source Transcribed" would be a different name. -->
+                    <Link
+                        :href="area.url"
+                        :prefetch="'hover'"
+                        class="flex min-h-11 flex-1 items-center text-sm font-medium text-ink-strong hover:bg-panel transition-colors duration-150 ease-out"
+                    >
+                        {{ area.label }}
+                    </Link>
+                    <SubCell
+                        label="Source"
+                        :value="area.source"
+                        value-class="font-mono text-sm text-ink-strong"
+                        :title="sourceReason[area.source]"
+                    />
+                </Card>
+            </ul>
+        </nav>
     </AppLayout>
 </template>

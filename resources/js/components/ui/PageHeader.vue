@@ -36,8 +36,10 @@ withDefaults(
                 {{ eyebrow }}
             </p>
             <!-- `tabindex="-1"` so a route change can move focus here rather than leaving it on the
-                 link that was clicked; the heading is not in the tab order otherwise (WCAG 2.4.3). -->
-            <h1 tabindex="-1" class="truncate text-3xl font-semibold text-ink-strong focus:outline-none">
+                 link that was clicked; the heading is not in the tab order otherwise (WCAG 2.4.3).
+                 No `focus:outline-none`: a focused element must never lose its indicator (WCAG 2.4.7),
+                 and the app-wide `:focus-visible` ring in app.css already draws it. -->
+            <h1 tabindex="-1" class="truncate text-3xl font-semibold text-ink-strong">
                 {{ title }}
             </h1>
             <p v-if="description" class="mt-1 text-sm text-ink">

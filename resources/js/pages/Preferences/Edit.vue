@@ -289,7 +289,7 @@ function runBackup(): void {
                     :aria-controls="`settings-panel-${category.id}`"
                     :tabindex="activeCategory === category.id ? 0 : -1"
                     @click="selectCategory(category.id)"
-                    class="inline-flex min-h-11 items-center border-b-2 px-4 py-2 text-sm font-medium focus:outline-none transition-colors duration-150 ease-out"
+                    class="inline-flex min-h-11 items-center border-b-2 px-4 py-2 text-sm font-medium transition-colors duration-150 ease-out"
                     :class="
                         activeCategory === category.id
                             ? 'border-pick-line text-ink-strong'
@@ -356,14 +356,14 @@ function runBackup(): void {
                     hint="This build is Global-labelled only: the corpus holds no other language's strings, so there is nothing to switch to."
                 />
 
-<BaseSelect
-  v-model="form.settings.default_scenario"
-  :id="controlId('settings.default_scenario')"
-  name="settings[default_scenario]"
-  label="Default scenario"
-  :options="[{ value: '', label: 'No default' }, ...scenarioOptions.map(o => ({ value: o.value, label: o.label }))]"
-  :aria-describedby="describedBy('settings.default_scenario')"
-/>
+                <BaseSelect
+                    v-model="form.settings.default_scenario"
+                    :id="controlId('settings.default_scenario')"
+                    name="settings[default_scenario]"
+                    label="Default scenario"
+                    :options="[{ value: '', label: 'No default' }, ...scenarioOptions.map(o => ({ value: o.value, label: o.label }))]"
+                    :aria-describedby="describedBy('settings.default_scenario')"
+                />
                 <!-- Outside the label: a label's text becomes the control's accessible name, and a
                      hint is not part of that name. The errors render in one block below the panels. -->
                 <p class="-mt-2 text-xs text-ink-muted">
@@ -463,15 +463,15 @@ function runBackup(): void {
             >
                 <p class="text-sm text-ink-muted">Advisor defaults and stat-target pre-fills.</p>
 
-<BaseSelect
-  v-model="form.settings.recommendation_aggressiveness"
-  :id="controlId('settings.recommendation_aggressiveness')"
-  name="settings[recommendation_aggressiveness]"
-  label="Recommendation aggressiveness"
-  :options="[{ value: '', label: 'Not set' }, ...aggressivenessOptions.map(o => ({ value: o.value, label: o.label }))]"
-  :aria-describedby="describedBy('settings.recommendation_aggressiveness')"
-  title="Stored now; the advisor reads it in a follow-up slice."
-/>
+                <BaseSelect
+                    v-model="form.settings.recommendation_aggressiveness"
+                    :id="controlId('settings.recommendation_aggressiveness')"
+                    name="settings[recommendation_aggressiveness]"
+                    label="Recommendation aggressiveness"
+                    :options="[{ value: '', label: 'Not set' }, ...aggressivenessOptions.map(o => ({ value: o.value, label: o.label }))]"
+                    :aria-describedby="describedBy('settings.recommendation_aggressiveness')"
+                    title="Stored now; the advisor reads it in a follow-up slice."
+                />
 
                 <fieldset class="space-y-2">
                     <legend class="text-lg font-semibold text-ink-strong">Stat-target defaults</legend>
