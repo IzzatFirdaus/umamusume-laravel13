@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from '@playwright/test';
-import { scratchDatabasePath } from '../browser/global-setup';
+import { SCRATCH_DATABASE } from '../browser/global-setup';
 import { deleteRun } from './delete-run';
 
 /*
@@ -20,7 +20,7 @@ import { deleteRun } from './delete-run';
  * inside one file shares the single seeded set.
  */
 function seededRunIds(): number[] {
-    const db = new DatabaseSync(scratchDatabasePath());
+    const db = new DatabaseSync(SCRATCH_DATABASE);
 
     try {
         return db
@@ -74,7 +74,7 @@ const FIND = `
 `;
 
 export function uraCompletedRun(): number {
-    const path = scratchDatabasePath();
+    const path = SCRATCH_DATABASE;
 
     const find = (): number | undefined => {
         const db = new DatabaseSync(path);
