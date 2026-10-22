@@ -83,8 +83,8 @@ const when = (iso: string | null): string => {
 
 <template>
     <section
-        class="rounded-md border-2 p-4"
-        :class="props.actual === null ? 'border-rule bg-sunken' : 'border-pick-line bg-raised'"
+        class="p-4"
+        :class="props.actual === null ? 'rounded-md border-2 border-rule bg-sunken' : 'pickcard'"
         aria-labelledby="recorded-action-heading"
     >
         <h3
