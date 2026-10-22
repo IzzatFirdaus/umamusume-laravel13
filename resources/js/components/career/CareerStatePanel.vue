@@ -112,7 +112,7 @@ const denominator = (stat: Stat): number | null =>
 </script>
 
 <template>
-    <section aria-labelledby="career-state-heading" class="rounded-lg border border-rule bg-panel p-4">
+    <section aria-labelledby="career-state-heading" class="card rounded-lg p-4">
         <h2 id="career-state-heading" class="text-lg font-semibold text-ink-strong">Stats and state</h2>
 
         <p v-if="targetCaption !== null" class="mt-3 text-sm text-ink-muted">{{ targetCaption }}</p>
