@@ -27,7 +27,7 @@ const AREAS: { url: string; heading: string; title: string }[] = [
     { url: '/database/skills', heading: 'Skill catalog', title: 'Skills' },
 ];
 
-test('the hub lists the eight areas and no deferred section', async ({ page }) => {
+test('the hub lists the nine areas and no deferred section', async ({ page }) => {
     await page.goto('/database', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
@@ -40,13 +40,18 @@ test('the hub lists the eight areas and no deferred section', async ({ page }) =
     // too, so a page-wide link query is a strict-mode violation rather than a missing link.
     const areas = page.getByRole('navigation', { name: 'Database areas' });
 
-    for (const label of ['Trainees', 'Support Cards', 'Skills', 'Races', 'Events', 'Scenarios', 'Shop Items', 'Sparks']) {
+    // Nine, not eight: "Data sources" joined on 2026-10-22 (UX audit F-14). The page was registered
+    // and served but had no door, so it was reachable only by typing the URL.
+    for (const label of ['Trainees', 'Support Cards', 'Skills', 'Races', 'Events', 'Scenarios', 'Shop Items', 'Sparks', 'Data sources']) {
         await expect(areas.getByRole('link', { name: label, exact: true })).toBeVisible();
     }
 
     // One card per area, and the card IS the list item, so the list a screen reader hears is the
     // list the page shows.
-    await expect(areas.getByRole('listitem')).toHaveCount(8);
+    await expect(areas.getByRole('listitem')).toHaveCount(9);
+
+    // The door the audit found missing, asserted on its destination rather than on existing at all.
+    await expect(areas.getByRole('link', { name: 'Data sources', exact: true })).toHaveAttribute('href', /\/database\/sources$/);
 
     // The three areas that were once "Not in this build" are destinations now, so the section that
     // named them absent is deleted rather than softened: a heading saying otherwise would be false.

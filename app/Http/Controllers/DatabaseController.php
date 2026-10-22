@@ -28,6 +28,11 @@ class DatabaseController extends Controller
     /**
      * The hub: the eight areas the Database screen lists, all read-only.
      *
+     * *Dated correction 2026-10-22 (UX audit F-14): the number above was already off by one when it was
+     * written — the list held eight and omitted `/database/sources`, which `routes/web.php:301` serves
+     * through `sources()` below. A ninth row is added, so "eight" is now nine. The count is not restated
+     * here as the authority; `DatabaseHubSourcesLinkTest` pins that the payload carries the door.*
+     *
      * No counts on the area links. Each area's own page states how many rows it holds, and the
      * catalog's first screen is filtered to `[Global]` while `umamusume` also holds JP-only rows, so a
      * hub number would be a figure no area corroborates on arrival.
@@ -53,6 +58,10 @@ class DatabaseController extends Controller
                 ['label' => 'Scenarios', 'url' => route('database.scenarios'), 'source' => 'Config'],
                 ['label' => 'Shop Items', 'url' => route('database.shop-items'), 'source' => 'Transcribed'],
                 ['label' => 'Sparks', 'url' => route('database.sparks'), 'source' => 'Transcribed'],
+                // The ninth area, and the one that had no door (UX audit F-14): `/database/sources`
+                // is a registered screen serving the fetch and transcription record, and the hub is
+                // the only index of Database screens, so leaving it out made the page URL-only.
+                ['label' => 'Data sources', 'url' => route('database.sources'), 'source' => 'Config'],
             ],
         ]);
     }

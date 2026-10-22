@@ -18,23 +18,27 @@ use Inertia\Testing\AssertableInertia as Assert;
  * Slice 3.1: Config → badge index validation. Every `state` value in config/reference.php must be one
  * of the four ProvenanceBadge states: confirmed, calculated, estimated, unknown.
  */
-it('renders the Database hub with links to the eight areas', function (): void {
+it('renders the Database hub with links to the nine areas', function (): void {
     $this->get('/database')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Database/Index')
-            ->has('areas', 8)
+            // Nine since 2026-10-22 (UX audit F-14): `GET /database/sources` was registered and served
+            // and had no door, so the hub — the only index of Database screens — could not reach it.
+            ->has('areas', 9)
             // The three areas that were once "Not in this build" are live destinations now, in the
             // brief's own order (Trainees, Support Cards, Skills, Races, Events, Scenarios, Shop
-            // Items, Sparks).
+            // Items, Sparks), with Data sources appended last.
             ->where('areas.4.label', 'Events')
             ->where('areas.6.label', 'Shop Items')
             ->where('areas.7.label', 'Sparks')
+            ->where('areas.8.label', 'Data sources')
             // Each door carries the source arm its own view states (Slice 3.2): the fetched catalog
             // tables, the config matrix, or the reference-guide transcriptions.
             ->where('areas.0.source', 'Fetched')
             ->where('areas.4.source', 'Transcribed')
-            ->where('areas.5.source', 'Config'));
+            ->where('areas.5.source', 'Config')
+            ->where('areas.8.source', 'Config'));
 });
 
 it('validates the config → badge index for reference views', function (): void {

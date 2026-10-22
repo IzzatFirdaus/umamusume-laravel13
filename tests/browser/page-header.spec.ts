@@ -25,6 +25,11 @@ const PILOTS: { url: string; title: string; eyebrow: string }[] = [
     { url: '/skills', title: 'Skill search', eyebrow: 'Reference' },
     { url: '/veterans', title: 'Veteran library', eyebrow: 'Library' },
     { url: '/database', title: 'Database', eyebrow: 'Data Quality' },
+    // Not a PageHeader pilot in the plan's sense: this page is on the list because it was the one
+    // Database screen that rendered its own in-body `<h1>` at `text-2xl` instead of filling the shell's
+    // `#title`. It is held to the same property, and passing here is what proves the shell emits the
+    // page's only title.
+    { url: '/database/sources', title: 'Data sources', eyebrow: 'Data Quality' },
 ];
 
 for (const pilot of PILOTS) {

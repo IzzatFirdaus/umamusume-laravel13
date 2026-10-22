@@ -47,7 +47,7 @@ const props = defineProps<{
     <AppLayout>
         <Head title="Data sources" />
 
-        <h1 class="text-2xl font-semibold text-ink-strong">Data sources</h1>
+        <template #title>Data sources</template>
 
         <p class="mt-2 max-w-3xl text-sm text-ink-muted">
             Every table in this tool comes from one of two places: a document this tool fetches, or
