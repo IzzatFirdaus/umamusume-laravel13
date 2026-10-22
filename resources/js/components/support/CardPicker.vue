@@ -90,16 +90,16 @@ defineExpose({ open });
 <template>
     <dialog
         ref="dialog"
-        class="w-full max-w-2xl rounded-lg border border-rule bg-panel p-4 text-ink backdrop:bg-black/40"
+        class="w-full max-w-2xl rounded-[var(--radius-lg)] border border-[var(--color-rule)] bg-[var(--color-panel)] p-4 text-[var(--color-ink)] backdrop:bg-black/40"
         :aria-label="`Choose a card for ${slotLabel}`"
         @close="closed"
     >
         <form method="dialog" class="flex items-center justify-between gap-3">
-            <h2 class="text-lg font-semibold text-ink-strong">Choose a card for {{ slotLabel }}</h2>
+            <h2 class="text-lg font-semibold text-[var(--color-ink-strong)]">Choose a card for {{ slotLabel }}</h2>
             <BaseButton type="submit" variant="secondary">Close</BaseButton>
         </form>
 
-        <p class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
+        <p class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--color-ink-muted)]">
             <span class="text-xs font-semibold uppercase tracking-wide">The seven support types</span>
             <span v-for="kind in types" :key="kind.key" class="inline-flex items-center gap-1">
                 <SupportTypeMark :type="kind.key" :label="kind.label" />
@@ -128,12 +128,12 @@ defineExpose({ open });
             <li
                 v-for="option in options"
                 :key="option.id"
-                class="flex items-center gap-3 rounded-md border border-rule p-2"
+                class="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-rule)] p-2"
             >
                 <ArtworkSlot :url="option.artworkURL" alt="" size="size-10" reserve />
                 <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-semibold text-ink-strong">{{ option.name }}</p>
-                    <p v-if="option.name_ja" lang="ja" class="truncate text-xs text-ink-muted">{{ option.name_ja }}</p>
+                    <p class="truncate text-sm font-semibold text-[var(--color-ink-strong)]">{{ option.name }}</p>
+                    <p v-if="option.name_ja" lang="ja" class="truncate text-xs text-[var(--color-ink-muted)]">{{ option.name_ja }}</p>
                 </div>
                 <SupportTypeMark :type="option.type" :label="option.type_label" />
                 <BaseButton variant="secondary" @click="equip(option.id)">Equip</BaseButton>
