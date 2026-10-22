@@ -1105,6 +1105,14 @@ Same widening ask as SCR-SUP-001; group-card scenario-link miss is a known-and-a
 
 ### SCR-REV-001 — Match review queue
 
+**Dated note 2026-10-22 (UX audit F-06).** The no-fuzzy-match row rendered **two** provenance-shaped
+labels for one tier fact: a `StatusBadge` reading "No match" and a `ProvenanceBadge` reading "Unknown".
+`DESIGN.md` §5 (b)'s 2026-10-17 amendment makes `ProvenanceBadge` the single owner of the state word, so
+the badge stays and the duplicate pill is deleted; the `Fuzzy match` pill is kept because it is a softer
+warning rather than the absence. `review.spec.ts` counts one state label per card and asserts the
+duplicate word is gone. The section's state tables are unchanged: no state was added or removed, only
+the number of labels that name it.
+
 #### Purpose
 
 The human half of the cross-reference engine: Fuzzy and None fetch results land here as pending candidates; the Trainer confirms (merge or create), aliases, or rejects. **The engine never merges without this decision** (PRD US-5, FR-B-3).
@@ -1211,6 +1219,16 @@ authorises a redirect, so the pages render in place and `database.spec.ts` asser
 | Screen | State | Behavior |
 | --- | --- | --- |
 | Hub | Rendered | Eight area links, `prefetch: 'hover'`, each `min-h-11`. The "Not in this build" section that once named Events, Shop Items and Sparks as absences is **deleted**, not softened: all three are destinations now, and a row saying otherwise would be false. |
+
+**Dated note 2026-10-22 (UX audit F-14): the hub carries nine area links, and `GET /database/sources`
+is one of them.** The row above says eight and the count was already short by one: `database.sources`
+(route `routes/web.php:301`, controller `sources()`) renders the fetch and transcription record, and the
+hub — the only index of Database screens — did not link it, so the page was reachable only by typing
+the URL. `DatabaseController::index()` gains a ninth area, **Data sources**, sourced as `Config`; the
+controller's docblock count is corrected beside it and `DatabaseHubSourcesLinkTest` pins that the
+payload carries the door. `database.spec.ts`'s hub case now asserts nine list items and the link's
+`href`, so the screen cannot lose its door silently again. The row above stands as written; this note
+supersedes its number.
 | Hub | Loading / error | None of its own: the hub is one server render with no user-initiated async action (`ADR-0007`), and a failed visit is the shell's. |
 | Trainees, Supports, Skills | Rendered | The shared component's own states, unchanged from the original screens (search, filters, `Loading results…` `role="status"`, the catalog empty state, pagination clamped 1..100 by `PageSize::clamp`). |
 | Races (`SCR-SYS-006`) | Empty, unseeded | "The race database is offline", why it matters (no turn number, distance, surface or fan gate to plan against), and the two commands that fill it: `php artisan uma:fetch gametora-race-catalog`, or `uma:reparse` when a fetch reports the document unchanged. No placeholder row. |
@@ -1786,6 +1804,17 @@ Implemented 2026-10-05 (slice D6, run-scoped, commit `05e9584`); row and section
 
 ### SCR-CAR-010 — Review and start, "Preflight" (setup wizard step 6)
 
+**Dated note 2026-10-22 (UX audit F-05).** `Start career` carried `aria-disabled` and a click guard
+rather than the native `disabled` attribute, so a control the screen forbade still activated and was
+refused in the handler. `DESIGN.md` §5 (b)'s 2026-10-17 amendment rules native `disabled` or a named
+absence, "never as an enabled control whose label promises what the product cannot perform". The button
+is now natively `disabled` until the scenario and the trainee are both entered, and the reason it needs
+them is printed beside it whether or not it is pressed. The focus-the-first-missing-row-on-refusal
+behaviour retires with the enabled shape: a disabled control cannot be pressed, so there is no attempted
+click to answer, and the rows that are missing are already on screen. `career-preflight.spec.ts` asserts
+the DOM `disabled` flag and the absence of `aria-disabled`, which is the pair a matcher reading
+`aria-disabled` as "not enabled" could not tell apart.
+
 `GET /career/setup/preflight` name `career.preflight`, and the wizard's one write: `PUT /career/setup/preflight` name `career.preflight.store`, both in `App\Http\Controllers\Career\PreflightController`. The brief's title for the screen is "Career Contract"; the heading and the step label read "Review and start" and "Preflight" (retitled 2026-10-19, note below). Reached from `SetupLayout`'s step nav (step 6) and by URL.
 
 The page composes the five entered steps into **one `contract` prop**: Build (trainee, scenario, your target, the six-node ancestry with its Affinity), Support deck (the six positions with the D6 analysis beside them) and Target (the five stats, the race profile, the skill priorities, and the ruleset snapshot). Nothing is re-asked (WCAG 3.3.7): every fact is read from `session('career.setup')` through `SetupDraft`, and each Edit link returns to the step that owns it.
@@ -1800,6 +1829,13 @@ The page composes the five entered steps into **one `contract` prop**: Build (tr
 | The two required steps            | `Start career` carries `aria-disabled="true"` while the scenario or the trainee is absent, and a sentence in the footer names which of the two is missing and why the career cannot start without it. The attribute rather than `disabled`, because a `disabled` control dispatches no click and the focus move below needs one; `disabled` is reserved for the in-flight guard. |
 | Attempted start while blocked     | The press creates nothing, leaves the URL unchanged, and moves focus to the first missing row (`document.activeElement` is that row). |
 | Deck analysis                     | Moved. The six positions and the D6 counts render on the deck step (`SCR-CAR-009`) and on `SCR-CAR-007`; this page counts the equipped positions in words and links back to the step that owns them. |
+
+**Dated supersession 2026-10-22 (UX audit F-05): the two rows above that describe `aria-disabled` and the focus move are both now false, and this note is the record of what replaced them.**
+
+- **"The two required steps" (row above).** The control no longer carries `aria-disabled="true"`; it carries the native `disabled` attribute while the scenario or the trainee is absent, and it keeps that attribute while the write is in flight. `DESIGN.md` §5 (b)'s 2026-10-17 amendment rules exactly this and names the previous shape as the defect: "a reachable action the screen forbids renders with a native disabled state or as a named absence with its reason, never as an enabled control whose label promises what the product cannot perform." The row's second sentence — "The attribute rather than `disabled`, because a `disabled` control dispatches no click and the focus move below needs one" — is withdrawn with it. The sentence naming which of the two entries is missing stays, and still prints beside the button whether or not it is pressed.
+- **"Attempted start while blocked" (row above).** There is no longer an attempted press to answer, because a natively disabled control cannot be pressed by pointer, keyboard or assistive tech. The focus-the-first-missing-row behaviour retires with the enabled shape; nothing creates a run, and the URL does not move, but the "moves focus" clause does not hold and is superseded here rather than deleted.
+- **Evidence.** `career-preflight.spec.ts` asserts the DOM `disabled` property and the *absence* of `aria-disabled`, on the attributes rather than through `toBeDisabled()` — which honours `aria-disabled` and therefore cannot tell the two shapes apart. Two of its cases were rewritten in the same change.
+- **Open question, recorded not resolved: BQ-03.** The retired behaviour carried a WCAG 2.2 SC 3.3.1 argument — an attempted press put focus on the first field to fix. A disabled control cannot serve that. The two options for the owner are (a) accept the loss, because the reason and the missing rows are already on screen before the press, or (b) restore a non-button affordance (a link or a summary) that carries the Trainer to the missing row. (b) is a design decision with its own 44px and focus-order consequences, so it is not taken here.
 | Loading                           | The submit button reads "Starting…" and is truly `disabled` while the PUT is in flight (ADR-0007: `Start career` is user-initiated). There is no cold-load skeleton.                                                                                                                                                    |
 | Error (a refused write)           | A `role="alert"` block with `tabindex="-1"` names the section and focuses itself; the message is the failing step's own message plus the instruction to reopen that step. Nothing was created.                                                                                                                        |
 | After a successful write          | One transaction creates the run, its six `deck_slots` rows, the `legacy_selection` json with the two `inheritance_parent_*` ids and the `build_target` json; the draft is then reset and the response redirects to `runs.cockpit` for the new run (`SCR-CAR-011`), which is where a career is read from every turn, with a `role="status"` flash reading "Career started for {name}". |
@@ -1848,6 +1884,14 @@ Implemented 2026-10-06 (slice D7).
 ---
 
 ### SCR-CAR-011 — Career Cockpit
+
+**Dated note 2026-10-22 (UX audit F-04).** The section nav rendered an unreachable tab as
+`<span role="link" aria-disabled="true" tabindex="0" :title>`. `DESIGN.md` §5 (a)'s 2026-10-17 amendment
+names that as the shape not to use: `aria-disabled` announces a state without cancelling activation, and
+a `title` is the hover-only channel the same amendment supersedes. The unreachable tab is now a plain
+`<span>` with no role, no `tabindex` and no `title`, and its reason is printed as visible muted prose
+under the tab row. `career-section-nav.spec.ts` asserts the absence of every part of the old shape, that
+no link navigates on Enter, and that the reason is visible prose.
 
 `GET /training-runs/{run}/cockpit` name `runs.cockpit`, `App\Http\Controllers\Career\CockpitController`. SCREEN-009, plan §8 D8. The screen a Trainer reads on every turn. It descends from the run's own URL, as the brief says it does, and it is **read-only except one write it does not own**: the manual correction posts to the existing `runs.turns.update` and its `StoreTurnEntryRequest` (design-2.0 §38). No new route for a turn, no new column, no migration.
 
@@ -3806,7 +3850,49 @@ left.
     the labelled one and the bare one, which is the one the Snapshot form renders - and records why
     the assertion is on the rendered attribute rather than on the accessibility tree.
 
-## 8. Source of Truth
+26. **Three register entries move, and one is measured larger.** Appended 2026-10-22 (UX-audit fix pass),
+    in the register's own form. Each bullet states what closed and what the evidence is; none of the
+    sections above is rewritten.
+
+- **F-14, the Database hub's missing door — CLOSED by code.** `GET /database/sources` was registered
+  and served and had no link anywhere in the app. `DatabaseController::index()` now lists it as a ninth
+  area; `DatabaseHubSourcesLinkTest` fails if the payload loses it, and `database.spec.ts` asserts the
+  rendered link and its `href`. The SCR-SYS table row is corrected by the dated note in §4.
+- **The absence channel on the Cockpit and scenario panels — REDUCED, not closed.** The audit's
+  §7-17 single-line sweep reported 17 sites across 9 files. That sweep was incomplete in a way this
+  pass measured: a source scan that reads each element's own text finds **74** elements that render
+  `N/A` and carry its reason only in a `title`. Six are migrated here (`ScenarioPanel`, the Trackblazer
+  route planner's floor cell) or have the redundant `title` removed where the reason was already
+  printed (`TrackblazerFatiguePanel`, `UraMilestoneTracker`, `CareerGoalsPanel`, `TeamRankLadderPanel`,
+  `UraMandatoryLadder`); `DataTable` and `SubCell` — the two components that stood in for the whole
+  pattern — now render `AbsenceValue`, which is where the remaining hosts would land.
+  `tests/Feature/AbsenceChannelTest.php` pins the migrated set and ratchets the remaining 74 so the
+  backlog cannot grow while it waits. **The register's "17 sites" figure is superseded by 74+6.**
+- **§7-24, the five dead panel keys — unchanged.** Re-read on this tree and still accurate: five keys
+  registered in `components/scenario/ScenarioPanel.vue:74-78`, absent from `config/scenarios.php`'s
+  `panel_labels` (`:79-87`), composed by no scenario's `panels` block. No fix attempted.
+
+27. **`/database/sources` is a live screen with no `SCR-*` row, and that is a second instance of the
+    §7-25 class.** Measured 2026-10-22, while filing §7-26's first bullet. `routes/web.php:301` registers
+    `database.sources` (`GET /database/sources`), `DatabaseController::sources()` serves it, and
+    `resources/js/pages/Database/Sources.vue` renders it — so it is in scope under §1, which puts every
+    `routes/web.php` screen in this file. It has **no row in §2's inventory, no row in §3's matrix, and no
+    §4 section**; its only coverage in this file is the hub note that now links to it. `grep -n "Data
+    sources" SCREEN_SPEC.md` before this pass returned nothing but the hub prose.
+    *Type:* Documentation Gap, and the same class as §7-25's four Snapshot routes.
+    **It also perturbs a figure another document reasons from.** `docs/proposals/frontend-architecture-plan.md:506`
+    (A15) states the corrected coverage claim as "**55 pages: 50 registry screens, 3 error documents,
+    `index`, and `help`**", with 50 of 50 drawn. If `/database/sources` is a live screen with no registry
+    row, then "50 of 50" undercounts by this screen — and by the four Snapshot routes §7-25 records — so
+    the registry total is at least 55 screens if all five are in scope. That document is held by another
+    session and is not edited here; the arithmetic is recorded so its owner can reconcile it against this
+    item and §7-25 together. **D2's parity matrix and the "50 registry screens" set both depend on the
+    answer**, which is why this is filed rather than left in the audit report.
+    **Open question (owner): does the screen get its own `SCR-SYS-*` row, or is the hub's row widened to
+    cover its sub-pages?** Widening would retroactively cover the five reference views too, which the
+    current `SCR-SYS-005/006/007/008/009/010` heading already bundles. This file records the gap and does
+    not author the row: authoring a screen section is a documentation pass, exactly as §7-25 records.
+
 
 | Question                                                      | Authority                                                                                                                                                                                                       | Corroboration                                                                                                                             |
 | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -3843,6 +3929,7 @@ left.
 | 2026-10-07   | New screen `SCR-CAR-015` (Inheritance Event, SCREEN-013) with its §3 row and §4 section (states, data, inputs, actions, validation, accessibility, responsive, navigation, dependencies, implementation references), inserted before §4.15. The Cockpit action grid's Inheritance entry (gap §4-1656 item 1) updated to link to `runs.inheritance` (`SCR-CAR-015`) instead of `legacy.builder`. The `TurnEventType` enum gained the `Inheritance` case. `LegacySelectionPayload` gained `sparkKindLabels()`. No other screen section, state table, workflow or §8 authority row changed. | Slice D12 built the Inheritance Event record-only screen (`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §8). The predicted section shows sourced Spark probabilities and star-roll odds; the observed section records Trainer-entered inspiration outcomes via TurnEvent. The "expected inheritance" renders `N/A` with a `title` citing ADR-0020 §3. The three inheritance milestones (turns 1, 31, 55) come from UMAMUSUME_REFERENCE.md §1.5.1. |
 | 2026-10-07   | New screen `SCR-CAR-023` (Scenario Race Planner, SCREEN-017) with its §3 row and §4 section (the four group rules, the comparison and alignment tables, the held figures, the states, the gaps, the implementation references), inserted before §5. `SCR-CAR-013`'s §4 section gained the "Plan the whole calendar" door, and its props gained `planner_url`. The ten-field race fact list moved from `RaceDecisionController` to `App\Services\RaceFacts`, so the two screens that print it share one owner. No other screen section, state table, workflow or §8 authority row changed. | Slice E5 built the planner (`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §9.5). Plan §11 risk 5 requires Phase E screens to get their `SCR-*` entries with their first slice, and §10 requires the screen's state table to agree with the view. The brief's win probability, expected risk, recommendation block and "no deadline will be missed" sentence are held or unsourced, which the section records with citations; the rival group has no source at all, and says so. |
 | 2026-10-07   | New screen `SCR-CAR-024` (Our Grand Concert baseline strip, the brief's `SCR-017`) with its §3 row and §4 section (purpose, location, layout, provenance, states, gaps, implementation references), inserted before §5. `SCR-CAR-019`'s status cell gained the dated note that the badge's partial arm is now reachable and which key drives it. No other screen section, state table, workflow or §8 authority row changed. | Slice E6 built the strip the panel region draws when a scenario composes no panel (`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §9 E6). Plan §11 risk 5 requires Phase E screens to get their `SCR-*` entries with their first slice, and §10 requires the screen's state table to agree with the view. The dispatch brief's premises were stale in three places, recorded in the slice plan: `documented` reads `true`, `docs/scenarios/07-grand-concert.md` is a sourced guide rather than a stub, and the badge key was the owner's ruling of 2026-10-07 (plan §4.1 item 6), which this slice applies. The row is `SCR-CAR-024` because `SCR-CAR-023` is E5's Scenario Race Planner. |
+| 2026-10-22   | UX-audit fix pass. `SCR-SYS-005/006/007/008/009/010`'s hub table row gained a dated note: the hub now carries **nine** area links, adding **Data sources** for `GET /database/sources`, which was served but had no door. §7 gained §7-38 recording three register entries (F-14 closed by code; the absence-channel backlog re-measured at 74+6 rather than 17; §7-24 re-read and unchanged). `SCR-CAR-011`'s section nav, `SCR-CAR-010`'s Start-career control and `SCR-REV-001`'s no-match row changed shape in the views (non-focusable absence; native `disabled`; one provenance label) and are recorded there. No screen was added or removed. | Five defects from the read-only UX audit: `DrawerShell` aside, these are the ones whose fix changes a rendered shape, so the §4 rows and the register move with them. The three shape changes are contract-driven rather than cosmetic — `DESIGN.md` §5's 2026-10-17 amendments (a) and (b) define the absence shape and the disabled shape, and §5 (b)'s one-label rule removes the review queue's duplicate state word. The absence backlog figure is the pass's own measurement, which is larger than the register's because the earlier sweep was single-line only. No token, radius, motion tier or §8 authority row changed. |
 | 2026-10-08   | Documentation-sync pass: §7 gap 13 gained its B1 deletion close-out, §7 gap 6 gained the E3 dated note, §7 gap 12 gained the audit re-read summary, and `SCR-RUN-003`'s Gaps list gained dated notes re-reading each item against the tree. No §3 row, §4 section state table or workflow changed; the screen set was already complete with `SCR-CAR-024` (E6) filed 2026-10-07, so this pass records statuses, not screens. | Owner asked for the documentation set to be brought into agreement with the completion of Phases A–E. The gap statuses this pass touched are the ones the slice landings changed; each original sentence is preserved and a dated note is appended beside it, per this file's established pattern. This pass did not run `npm run test:browser`; the browser-gate claims it quotes are the slices' own. |
 | 2026-10-08   | Three shipped behaviors recorded that this register did not carry, from the Impeccable design pass: `SCR-CAR-006` gains the browse-facet refusal row, `SCR-CAR-010` gains the deck ownership note and the `h3` to `h2` heading correction, `SCR-CAR-011` records the advisor card's block title as **Recommendation** rather than the brief's "Best action" eyebrow. No §3 row and no other state table changed. | Each fix is a screen agreeing with a ruling it already cites: a refusal made invisible (`ADR-0018`), an entered fact displayed at the commitment screen that is never written (`ADR-0014`, `ADR-0020` §3), and a superlative the advisor's own arithmetic cannot support (`ADR-0020` §2, `PRD.md` FR-F-3). `npm run typecheck` and `npm run build` are green; `composer lore` and `composer lore-code` are unchanged at 258 and 120 hits. `npm run test:browser` was attempted twice on isolated ports against a `VACUUM INTO` database copy and is reported **not run**, not passed: the suite died at its own setup helper's first `page.goto`. *Corrected the same day, second pass: the cause was misdiagnosed. `public/hot` named `http://[::1]:5173` and a Vite dev server **was** listening there with live connections; the IPv4 `curl` that reported it dead was the wrong instrument, and the hang was a cold, session-shared Vite transform that never finished inside the 180s test timeout. The gate was closed the next pass by serving a scratch app-root whose copied `public/` has no `hot` file (see the row below).* |
 | 2026-10-08   | `SCR-CAR-011` gains the dated note that Energy, Mood, Fans and Skill Points print once, in `CareerStatePanel.vue`, and that no prop moved. `SCR-CAR-003` and `SCR-CAR-009` refusals now name the control or the slot in the words the screen already prints, never the validation key (`aptitude_speed`, `deck.3.ownership`). No §3 row changed. | Continuation of the Impeccable design pass on the owner's brief. The duplicated readings were two renderings of one fact, which is the shape a later disagreement is written into; the error keys were implementation vocabulary reaching the Trainer at the moment they were already confused. `npm run typecheck` and `npm run build` are green, `tests/Feature/CareerCockpitTest`, `CareerTraineeSelectTest`, `CareerLegacyDeckStepsTest` and `CareerPreflightTest` pass together at 45 tests / 1,027 assertions, and both lore gates hold at 258 and 120 hits. `npm run test:browser` stays not-run: `public/hot` names a Vite dev server that answers nothing on `:5173`, so a page load hangs before any assertion of mine executes. |

@@ -209,6 +209,15 @@ decisions, they are token families whose contract lives in their own `app.css` c
 | Grade badges   | 9 `grade-*`                                            | 9 letters × 2 themes, white letters banned on the light fills                                                                           |
 | Identity       | `rank`, `lattice`, `anchor`, `scrim`                   | one-off roles; `scrim` is the only overlay treatment                                                                                    |
 
+> **Re-measured 2026-10-22 (UX audit F-08): the number in the paragraph above and in its erratum is
+> stale again, and the test already says so.** Measured on `2b29a4a3`: the `@theme static` block
+> declares **146** `--color-*` lines resolving to **81** unique names, which is the number
+> `tests/Feature/DesignTokensTest.php:271` asserts. The 22 tokens added since the 2026-10-14 erratum are
+> the seven `--color-type-*` glyph fills (`:252-256`), the nine Track 2-D brand and status roles plus the
+> four `--color-mark-*` glyph roles (`:258-264`), and the primary-action pair (`:266-268`). The identity
+> table above documents 21 of them, so **60 declared roles have no row above, not 40**. The sentences
+> above stand as written; this note supersedes their number only. `--color-on-green` remains retired.
+
 **Intended:** the test's own comment says a new role is added "here and in DESIGN.md
 §3.1 together", but this file has no §3.1 — the token table is §2.1. The citation
 inside the test is stale, not the table's location.
@@ -281,6 +290,10 @@ external fonts (offline constraint + C-8 dependency gate).
 > > **Amended 2026-10-17 (design-contract pass, plan slice 0.3, owner instruction): the primary action's Critical-tier membership is weight, position and target size, not ink.**
 > >
 > > The 2026-10-15 tier table places "the primary action" in a row whose colour column reads `text-ink-strong`, and for the one filled action on a screen that cell is superseded: a filled primary carries its own pair, `--color-primary-action` with `--color-on-primary-action`. That pair is not pending: it landed with the 2026-10-15 Track 2-D ruling in `resources/css/app.css:292` (aliased from the brand-chrome pair) and reads 29 `bg-primary-action` consumers across `resources/js` measured on 2026-10-17. What the Critical tier owns for the primary action is its weight, its once-per-screen position under §2.3's structure rule, and the house 44px target; the status lime (`--color-status-positive`) never fills it, exactly as §2.1's guard (b) rules. The 2026-10-17 UX audit measured the one-filled-primary convention holding across all 48 routes (finding X-4). Its "lime primary" phrasing on the Cockpit rows echoes the 2026-10-12 audit's pre-Track-2-D screenshots and is superseded by the landed token, not by a re-style.
+> >
+> > **Re-measured 2026-10-22 (UX audit F-20): 33 consumers, not 29** — `bg-primary-action` counted over
+> > `resources/js/**/*.{vue,ts}` on this tree. The rest of the paragraph stands; only the count moved,
+> > which is what a dated number does. Nothing here is a contract row, so no pair list changes.
 
 - The research package's rounded display-font proposal ("M PLUS Rounded 1s" /
    self-hosted Nunito) stays parked: it needs a C-8 dependency approval and
@@ -599,6 +612,15 @@ disclosure wording. Filed as KI-35.
 
 ### 4.5 Review queue `/review`
 
+> **Dated note 2026-10-22 (UX audit F-06): "tier badge (Fuzzy/None) and source key always visible" holds,
+> but the two halves are no longer carried by the same component.** A no-match row rendered a
+> `StatusPill` reading "No match" *and* a `ProvenanceBadge` reading "Unknown" for one tier fact, which
+> §5 (b)'s 2026-10-17 amendment forbids — `ProvenanceBadge` is the single owner of the state word. The
+> badge keeps the "None" half and the pill keeps only the "Fuzzy match" half, so **every row still
+> states its tier and its source key**, and the density claim stands. What changed is the number of
+> labels, not the facts they carry. `review.spec.ts` asserts one state label per card and that the
+> duplicate word is gone. The row above stands as written.
+
 - Queue density: newest candidates first; tier badge (Fuzzy/None) and source
   key always visible; resolve controls inline per card (no detail page).
 - Resolved rows leave the view (Pending filter); history is the row status,
@@ -756,6 +778,17 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
   caller owns its sentence and passes it through. This is deliberately not the unresolved provenance
   vocabulary question — that one is recorded in `PRODUCT.md` under "Open" and stays the owner's, and
   nothing here re-badges a figure.
+
+> **Corrected 2026-10-22 (UX audit F-01, F-18): the pointers in the paragraph above are stale, and the
+> unsound index it describes has moved and been guarded.** `ProvenanceBadge.vue` is now a 29-line
+> compatibility alias: the canonical union lives in `resources/js/types.ts`, the three exception marks
+> live in `ProvenanceMark.vue`, and the `BADGES[props.state]` index this paragraph names is
+> `ProvenanceMark.vue:53`. That index was genuinely unsound in the way described — `defineProps`
+> validates nothing at runtime, so an out-of-vocabulary `state` produced `undefined` and the template
+> threw on `mark.glyph`, taking the whole Database page with it. It now carries `?? null` and degrades
+> to no mark, as `confirmed` already did, and `tests/browser/provenance-mark.spec.ts` pins an
+> out-of-vocabulary state. The paragraph's two standing claims are unchanged and still true: the type is
+> shared where the meaning is not, and nothing validates a config string at build time.
 
 - **The four trust labels carry two axes, and the axis is set by surface class** (owner ruling 2026-10-09,
   recorded in `docs/research-scratch/PLANS-AND-BRIEFS.md` §"provenance-and-absence-contracts.md" §9). On the Trainer Advisor's surfaces the
@@ -976,6 +1009,28 @@ repo, and it is the finding most worth carrying out of this audit.
 | Rendered copy: `N/A` for absence, never a dash, no `Unknown`                     | `RenderedCopyHygieneTest`, view tests          | **passing**                                                 |
 | Flash banners use tokens                                                         | `FlashBannerTokensTest`                        | **passing**                                                 |
 | 768px minimum width is safe                                                      | nothing                                        | **Unverified** — see §2.3's held proposal                   |
+
+> **Re-read 2026-10-22 (UX audit F-07, F-08): four rows above describe a tree that no longer exists,
+> and the erratum text is right about the tree it was written against and wrong about this one.**
+> Measured on `2b29a4a3` by reading the committed files, not by running the gate:
+>
+> - **The count row's number is 81.** `tests/Feature/DesignTokensTest.php:271` asserts
+>   `toHaveCount(81)`, and §2.1's own note carries the measurement. "59" anywhere above is superseded.
+> - **The D-288 row and the G-18 row are no longer `markTestIncomplete` and no longer unimplemented.**
+>   The block at `DesignTokensTest.php:549-760` resolves each token through a probe element, fails on an
+>   empty value, and computes WCAG ratios in PHP (`relativeLuminance()`/`contrastRatio()`); the pair list
+>   is `g18ContractPairs()` at `:373-427` with **31** pairs, and `g18GradeBadgeTokens()` at `:439-445`
+>   supplies the 9 grade fills. `markTestIncomplete` appears **zero** times anywhere in `tests/`. So the
+>   "19 pairs" figure was a doc-carried number; the committed gate carries 31.
+> - **Their state is neither `passing` nor `skipped` on this tree: it is `Unknown`.** The assertion body
+>   exists, but this host cannot run a browser test — the sandbox denies the write that
+>   `pest-plugin-browser` makes to `vendor/pestphp/pest-plugin-browser/.temp/playwright-server.json`, and
+>   the run reports `ErrorException … Permission denied` on every case in the block. The gate is
+>   *implemented and unrun here*, which is a third state this table does not have. Every ratio in §2.1
+>   therefore stays **documented, not re-verified** — for the reason just given, not for the reason the
+>   rows above give.
+> - **§8's "zero `transition-*`, `duration-*`"** is false: 92 such utilities ship across `resources/js`,
+>   in MOTION 2's `duration-150 ease-out` form with `motion-reduce:transition-none` beside them.
 | Every ratio quoted in this file                                                  | research-phase measurement, files absent       | **documented, not reproducible here**                       |
 
 _Dated correction 2026-10-09: the "no `Unknown`" clause of the rendered-copy row above is not enforced by
@@ -1101,6 +1156,18 @@ system owns.
   (§5, §6).
 
 ## Change log
+
+- **2026-10-22** — UX-audit fix pass: the absence channel and the §10 enforcement index. Six `N/A`
+  markers whose reason was reachable only by a `title` moved to `AbsenceValue` or to visible prose
+  (`ScenarioPanel.vue`, `TrackblazerRoutePlanner.vue`, plus the redundant `title` removed where the
+  reason was already printed — `TrackblazerFatiguePanel`, `UraMilestoneTracker`, `CareerGoalsPanel`,
+  `TeamRankLadderPanel`, `UraMandatoryLadder`); `DataTable.vue` and `SubCell.vue` gained the same
+  disclosure for their absent cells, and `ProvenanceMark.vue` stopped throwing on an out-of-vocabulary
+  state. §10 gained a 2026-10-22 re-read note replacing three stale rows (the count is 81, the D-288
+  and G-18 rows are implemented rather than `markTestIncomplete`, and their state on this host is
+  `Unknown` because the browser gate cannot run here), §2.1's token count was re-measured to 81, and
+  §2.2's primary-action count was re-measured to 33. Doc and test now agree by gate:
+  `tests/Feature/DesignDocEnforcementTest.php`. No token, radius, motion tier or colour role changed.
 
 - **2026-10-05** — §4.7 and §3 corrected after the artwork slots moved from Blade to Vue. The two
   rows the read-half entry below added named `x-character-portrait` and `x-support-thumb`; both
