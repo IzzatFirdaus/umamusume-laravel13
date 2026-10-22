@@ -21,7 +21,7 @@ defineProps<{
 </script>
 
 <template>
-    <div class="rounded-md border border-rule bg-raised p-4">
+    <div class="card">
         <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
             <h3 class="text-lg font-semibold text-ink-strong">{{ card.title }}</h3>
             <span class="flex flex-wrap items-baseline gap-3 text-xs text-ink-muted">
