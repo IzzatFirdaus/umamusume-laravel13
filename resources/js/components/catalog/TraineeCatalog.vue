@@ -112,7 +112,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
 <template>
     <h2 class="text-lg font-semibold text-ink-strong">Umamusume catalog</h2>
 
-    <div class="mt-4 rounded-md border border-rule bg-raised p-4">
+    <div class="card mt-4">
         <form
             class="flex flex-wrap items-end gap-3 text-sm"
             :aria-busy="loading ? 'true' : null"
@@ -164,7 +164,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
     <template v-if="umamusumes.data.length === 0">
         <p
             v-if="totalCount === 0"
-            class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
+            class="note mt-8"
         >
             The trainee catalog holds no rows yet. Run <code>php artisan uma:fetch</code> to fill it, or
             <code>php artisan uma:reparse gametora-character-cards</code> if a fetch says the document is
@@ -172,7 +172,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
         </p>
         <p
             v-else
-            class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
+            class="note mt-8"
         >
             No Umamusume match. Nothing matches {{ askedFor }}. If a trainee you expect is not in the
             catalog, that is a gap in the fetched data rather than a mistake in the query.
@@ -183,7 +183,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
         <p class="mt-6 text-sm text-ink-muted">{{ umamusumes.total }} of {{ totalCount }} trainees</p>
 
         <ul class="mt-2 space-y-4">
-            <li v-for="trainee in umamusumes.data" :key="trainee.id" class="rounded-md border border-rule bg-raised">
+            <li v-for="trainee in umamusumes.data" :key="trainee.id" class="card">
                 <h3 class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 py-3">
                     <!-- Frame and name are one group, not two siblings of a `justify-between` row.
                          With three children that class distributed the leftover space and floated
