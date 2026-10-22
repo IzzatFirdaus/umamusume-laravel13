@@ -74,7 +74,7 @@ function atLimit(id: number): boolean {
 
         <p
             v-if="props.group.empty !== null"
-            class="mt-2 rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink"
+            class="note mt-2 p-4 text-sm text-ink"
         >
             {{ props.group.empty }}
         </p>
