@@ -32,7 +32,7 @@ const treatments: Record<BurstState, { mark: string; treat: string }> = {
 </script>
 
 <template>
-    <div v-if="enabled" class="rounded-md border border-rule bg-panel p-3">
+    <div v-if="enabled" class="card p-3">
         <CapsuleHeader title="Spirit Burst" class="mb-3" />
 
         <p v-if="roster.length === 0" class="text-sm text-ink-muted" role="status">
@@ -43,7 +43,7 @@ const treatments: Record<BurstState, { mark: string; treat: string }> = {
             <li
                 v-for="row in roster"
                 :key="row.teammate"
-                class="flex items-baseline justify-between gap-3 rounded-md border border-rule bg-raised px-3 py-2 text-sm"
+                class="flex items-baseline justify-between gap-3 card px-3 py-2 text-sm"
             >
                 <span class="font-semibold text-ink-strong">{{ row.teammate }}</span>
                 <span class="shrink-0 rounded-md px-2 py-0.5 font-mono text-xs font-bold" :class="treatments[row.state].treat">
