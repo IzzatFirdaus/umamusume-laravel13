@@ -9,8 +9,19 @@ click from the dashboard reaches the whole surface.
 
 ## What this set covers
 
-49 screens: the 48 that match `SCREEN_SPEC.md`'s registry rather than a hand-picked subset, plus
-`help`, which the usability heuristics required and the registry does not yet carry.
+56 pages: 55 that match `SCREEN_SPEC.md`'s registry rather than a hand-picked subset, plus `help`,
+which the usability heuristics required and the registry does not yet carry.
+
+*Dated update 2026-10-23 (Phase 4a closure, FQ-17).* The set grew 49 → 56 at Phase 4a: seven registry
+screens drawn (`dashboard`, `runs-create`, `career-save-veteran`, `career-race-planner`, and the three
+Snapshot screens), plus the two edge-case states added to existing pages at Phase 7.2 (a null-profile
+form on `catalog-detail`, an all-absent effect table on `support-card-detail`). Two coverage facts are
+recorded here rather than implied:
+
+- **Run detail is out of scope.** `SCR-RUN-003` is registered and implemented in the app, and no page
+  of this set draws it. That is a decision (FQ-17), not an omission to be closed by a later sweep.
+- **Database / Sources is drawn and registered.** The page existed before its registry row; the row
+  landed at `SCR-SYS-011` (2026-10-23), so the set no longer draws a screen the registry excludes.
 
 | Group | Screens |
 | --- | --- |

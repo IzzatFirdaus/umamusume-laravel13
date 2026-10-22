@@ -86,6 +86,9 @@ Navigation shell: `resources/js/layouts/AppLayout.vue`, the Inertia SPA shell (`
 | SCR-CAR-022 | Trackblazer panel (SCREEN-016)                  | Career        | Trainer | none required              | mounted by `SCR-CAR-019` inside the Cockpit's scenario region, reached by the `grade_objectives`, `shop` and `epithet_routes` flags; no route of its own                                                               | Built 2026-10-07 (slice E4); read-only mirror of `TurnEvents\ShopPurchasePayload` for purchases, of `TrainingRun::gradePeriods()` for grade rows, and of `TrainingRun::epithetProgress()` for the checklist. Catalogue is config order; no `recommended` flag, no "best value" sort, no default selection, and the shop rotation is named absent in copy. The Cockpit's action area gains a "Shop" button (Trackblazer only) that scrolls and focuses the Shop heading. The official finale name "Twinkle Star Climax" is §7 conflict row 31 (UNVERIFIED) and renders as a named absence, never as a string.                                                                                                                                                    |
 | SCR-CAR-023 | Scenario Race Planner (SCREEN-017)              | Career        | Trainer | none required              | `GET /training-runs/{run}/races/planner` (`runs.races.planner`), the one write posting to `POST /training-runs/{run}/races` (`runs.races.store`)                                                                       | Implemented 2026-10-07 (slice E5); the whole calendar in four groups (mandatory / upcoming / optional / rival, the last a named absence because no column marks a rival race), a reward comparison of up to four selected races with the ten aligned rows, and the target alignment in plain words with no score and no percentage. Win probability and expected risk render `N/A` with the `ADR-0016` blocker in the `title`; the brief's recommendation block is not built, and the deadline region states the next obligation and its turn rather than promising none will be missed                                                                                                                                                                         |
 | SCR-CAR-024 | Our Grand Concert baseline strip (SCR-017)      | Career        | Trainer | none required              | mounted by `SCR-CAR-019` inside the Cockpit's scenario region, drawn where every panel flag is off; no route of its own                                                                                                | Built 2026-10-07 (slice E6); the strip the panel region draws when a scenario composes no panel, which is the fourth `[Global]` scenario's whole surface. The badge reads `partially_documented` (owner ruling 2026-10-07), the five published caps render as base + bonus + cap through `ScenarioCaps`, and the scenario's own one-line reason its panels are off comes from config. No song, lesson or token string renders: the mechanics are sourced, the client's screen text is not measured                                                                                                                                                                                                                                                              |
+| SCR-CAR-025 | Career Snapshot — entry                      | Career        | Trainer | none required              | `GET /career/snapshot` (`career.snapshot`)                                                                                                             | Implemented 2026-10-23 (FQ-16=A); a second door beside the wizard's: a career that is already under way enters at its own snapshot's position rather than replaying steps 1–3. Read-only until the POST below it commits |
+| SCR-CAR-026 | Career Snapshot — setup                      | Career        | Trainer | none required              | `GET /career/snapshot/setup` (`career.snapshot.setup`)                                                                                                 | Implemented 2026-10-23 (FQ-16=A); the position and current state the entry reads, edited on their own screen |
+| SCR-CAR-027 | Career Snapshot — review                     | Career        | Trainer | none required              | `GET /career/snapshot/review` (`career.snapshot.review`)                                                                                               | Implemented 2026-10-23 (FQ-16=A); the last read before `store` commits the snapshot. The three rows above were drawn in the HFW at Phase 4a and unregistered until now (§7-25) |
 | SCR-SYS-001 | Page not found (404)                            | System        | Trainer | none required              | error rendering for any 404                                                                                                                                                                                            | Implemented                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | SCR-SYS-002 | Preferences                                     | System        | Trainer | none required              | `GET /preferences` (`preferences.edit`), written by `PUT /preferences` (`preferences.update`); Export by `GET /preferences/export` (`preferences.export`), Backup by `POST /preferences/backup` (`preferences.backup`) | Implemented 2026-10-04; extended 2026-10-07 (D18) with category shell and Game version panel (§7-5); extended 2026-10-08 (D18b) with the four stored preferences in one `settings` row, the Export stream and the server-side Backup, and the absence reasons named per class (Units is a sourcing absence, not a schema one)                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | SCR-SYS-003 | Session expired (419)                           | System        | Trainer | none required              | error rendering for any 419                                                                                                                                                                                            | Implemented 2026-10-04 (§7-8)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
@@ -97,6 +100,7 @@ Navigation shell: `resources/js/layouts/AppLayout.vue`, the Inertia SPA shell (`
 | SCR-SYS-008 | Events reference                                | System        | Trainer | none required              | `GET /database/events` (`database.events`)                                                                                                                                                                             | Implemented 2026-10-08; ten recurring event types read from `config/reference.php`, transcribed from `docs/UMAMUSUME_REFERENCE.md` §4.4. Read-only, no write path, no filter. Server tags print as bracketed text, each row carries a `ProvenanceBadge`, and the §48 metadata row names the doc section, the anchor date and how to re-check it. Not an ingest: the config is a dated snapshot the tool never refreshes.                                                                                                                                                                                                                                                                                                                                        |
 | SCR-SYS-009 | Shop Items reference                            | System        | Trainer | none required              | `GET /database/shop-items` (`database.shopItems`)                                                                                                                                                                      | Implemented 2026-10-08; ten catalogue rows from §1.6.10 (eight consumables plus the two currency items that section describes in prose), with kind and spend-site as words. The Trackblazer Pro Shop block below them is the same `config/scenarios.php` data the scenario matrix prints, reused rather than retyped, so the two destinations cannot disagree. No purchase form and no prices this tool did not record.                                                                                                                                                                                                                                                                                                                                         |
 | SCR-SYS-010 | Sparks reference                                | System        | Trainer | none required              | `GET /database/sparks` (`database.sparks`)                                                                                                                                                                             | Implemented 2026-10-08; six Spark categories from §1.5.2 with their record counts, the JP name in a `lang="ja"` span, and the three-band star-roll odds table from §1.5.3/§1.5.4 inside its own focusable scroll region. Odds are printed as the source words them ("about 50%"), never as a computed probability. No `factor` in any displayed string (`lore-code`).                                                                                                                                                                                                                                                                                                                                                                                           |
+| SCR-SYS-011 | Sources reference                               | System        | Trainer | none required              | `GET /database/sources` (`database.sources`)                                                                                                            | Implemented; the per-dataset provenance view: which source body a catalogue row was read from, the anchor date and how to re-check it. Registered 2026-10-23 (§7-27) — the screen shipped without a row, which §7-27 recorded as an omission rather than a deliberate exclusion |
 
 Action endpoints (no screens of their own, owned by the screens that host their forms): `runs.store`, `runs.update`, `runs.destroy`, `runs.export/{format}`, `runs.turns.store`, `runs.turns.update`, `runs.turns.destroy`, `runs.skills.sync`, `runs.deck.sync`, `runs.races.store`, `runs.purchases.store`, `runs.import.store`, `review.resolve`, `preferences.update`. As of 2026-10-04 every one of these has a form posting to it; the two that did not, `runs.turns.update` and `runs.turns.destroy`, gained the turn-row editor (§7-2).
 
@@ -3262,6 +3266,70 @@ about the corpus was not printable; and the badge key was the owner's ruling, no
    captured, the scenario gains surfaces by a config edit plus new widget renderers, never by editing the
    strip: a widget key reaches `ResourceMeter` or a registered renderer through the existing chain, and a
    flag reaches the registry. `panel_absence` is what should be dropped at that point.
+
+### 4.21 SCR-SYS-011 — Sources reference
+
+**Purpose.** Name, per dataset, where a catalogue row was read from and how to re-check it (FR-C provenance, §48). Read-only: the view prints the sources the pipeline recorded and invents none.
+
+#### Route / Location
+
+`GET /database/sources`, name `database.sources` (`App\Http\Controllers\DatabaseController::sources`). Reached from the Database hub's area list.
+
+#### States
+
+Each dataset row prints its source body, the anchor date the body was captured, and the re-check instruction. A dataset with no recorded source prints the absence with its reason rather than an empty row.
+
+#### Tests
+
+`tests/browser/database.spec.ts` covers the hub and its children, including this view.
+
+### 4.22 SCR-CAR-025 — Career Snapshot: entry
+
+**Purpose.** A second door beside the wizard's: a career already under way enters at its own position and current state instead of replaying scenario, trainee and build steps (plan Phase 4 step 3, FQ-16=A).
+
+#### Route / Location
+
+`GET /career/snapshot`, name `career.snapshot` (`App\Http\Controllers\Career\SnapshotController::entry`).
+
+#### States
+
+Read-only. The screen states the position it will enter at; nothing is written until `POST /career/snapshot` (`career.snapshot.store`) commits. A refused or stale submission returns to this screen with its errors attached to the field that failed.
+
+#### Tests
+
+`tests/browser/career-snapshot.spec.ts`.
+
+### 4.23 SCR-CAR-026 — Career Snapshot: setup
+
+**Purpose.** Edit the position and current state the entry screen reads, on their own screen, so the entry stays a reading rather than a form.
+
+#### Route / Location
+
+`GET /career/snapshot/setup`, name `career.snapshot.setup` (`SnapshotController::setup`).
+
+#### States
+
+Prefilled from the request the setup step carried, and validated by `StoreSnapshotRequest` — the same Form Request the review and store steps use, so the three screens cannot disagree about what a valid snapshot is.
+
+#### Tests
+
+`tests/browser/career-snapshot.spec.ts`.
+
+### 4.24 SCR-CAR-027 — Career Snapshot: review
+
+**Purpose.** The last read before the snapshot is stored: the whole position and state in one place, with the commit affordance beside it.
+
+#### Route / Location
+
+`GET /career/snapshot/review`, name `career.snapshot.review` (`SnapshotController::review`). The write is `POST /career/snapshot` (`SnapshotController::store`), which redirects into the run.
+
+#### States
+
+Complete and refused. A refusal re-renders this screen with the stacked error list, and no run is created.
+
+#### Tests
+
+`tests/browser/career-snapshot.spec.ts`.
 
 ## 5. Workflow Specifications
 
