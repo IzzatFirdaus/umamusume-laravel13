@@ -1,8 +1,29 @@
 {
-    "count": 23,
+    "count": 0,
     "allowlist": [
         "resources/js/components/Form/BaseTextarea.vue|[88px]",
+        "resources/js/components/career/AdvisorRail.vue|[calc(100svh-1rem)]",
+        "resources/js/components/career/CareerTimeline.vue|[&::-webkit-details-marker]",
+        "resources/js/components/career/NextDecision.vue|[minmax(0,9rem)_minmax(0,1fr)]",
+        "resources/js/components/legacy/SparkChip.vue|[0.65rem]",
+        "resources/js/components/review/CandidateForm.vue|[11rem_11rem_11rem_auto]",
+        "resources/js/components/scenario/TrackblazerFatiguePanel.vue|[26rem]",
+        "resources/js/components/scenario/TrackblazerFatiguePanel.vue|[minmax(0,12rem)_minmax(0,1fr)]",
+        "resources/js/components/scenario/TrackblazerResourceLedger.vue|[minmax(0,10rem)_minmax(0,1fr)]",
+        "resources/js/components/scenario/TrackblazerRoutePlanner.vue|[minmax(0,8rem)_minmax(0,1fr)]",
+        "resources/js/components/scenario/UnityCupTournamentReadiness.vue|[minmax(0,10rem)_minmax(0,1fr)]",
+        "resources/js/components/support/CardPicker.vue|[50vh]",
         "resources/js/components/support/SupportTypeMark.vue|[18px]",
-        "resources/js/components/review/CandidateForm.vue|[11rem_11rem_11rem_auto]"
+        "resources/js/layouts/AppLayout.vue|[60vh]",
+        "resources/js/pages/Career/Cockpit.vue|[1fr_2.5fr_1.5fr]",
+        "resources/js/pages/Career/Cockpit.vue|[2fr_1fr]",
+        "resources/js/pages/Career/InheritanceEvent.vue|[0.6rem]",
+        "resources/js/pages/Career/InheritanceEvent.vue|[10rem]",
+        "resources/js/pages/Career/InheritanceEvent.vue|[7rem]",
+        "resources/js/pages/Career/RacePlanner.vue|[40rem]",
+        "resources/js/pages/Database/Races.vue|[40rem]",
+        "resources/js/pages/Legacy/Compare.vue|[40rem]",
+        "resources/js/pages/Review/Index.vue|[width]",
+        "resources/js/pages/Support/Builder.vue|[minmax(0,2fr)_minmax(0,3fr)]"
     ]
 }
