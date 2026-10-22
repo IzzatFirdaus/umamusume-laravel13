@@ -497,6 +497,13 @@ delete it. A component that exists only as an unimplemented decision is the chea
 thing in the tree to keep and the most expensive to leave, because a future author will
 read it as the pattern.
 
+### 3.x Parity classification (2026-10-22)
+
+§3 remains the durable component inventory. The per-component parity classification is derived
+and lives at `primitive-reconciliation.md §7`; it is revised whenever either side moves, so
+where the two disagree, §3 is the inventory and §7 is the classification — a disagreement
+signals that §7 must be re-derived, not that §3 must be rewritten.
+
 ## 4. Surface specifications
 
 ### 4.1 Catalog index `/umamusume` (first surface, owner priority)
