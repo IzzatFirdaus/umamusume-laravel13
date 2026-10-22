@@ -78,7 +78,7 @@ const hasTraineeIdentity = computed(
 </script>
 
 <template>
-    <section aria-labelledby="career-header-heading" class="rounded-lg border border-rule bg-panel p-4">
+    <section aria-labelledby="career-header-heading" class="card rounded-lg p-4">
         <h2
             id="career-header-heading"
             class="text-lg font-semibold text-ink-strong"
