@@ -83,7 +83,7 @@ const captionId = `datatable-caption-${useId()}`;
         role="region"
         tabindex="0"
         :aria-label="caption"
-        class="@container w-full min-w-0 overflow-x-auto rounded-md border border-rule focus:outline-2 focus:outline-offset-2"
+        class="@container card w-full min-w-0 overflow-x-auto focus:outline-2 focus:outline-offset-2"
     >
         <table :aria-labelledby="captionId" class="w-full border-collapse text-sm">
             <!-- The caption names the table and is sr-only, because the page above it already shows
