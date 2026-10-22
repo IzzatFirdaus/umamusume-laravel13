@@ -33,7 +33,7 @@ onMounted(async () => {
         role="dialog"
         aria-labelledby="reference-drawer-title"
         tabindex="-1"
-        class="mt-3 rounded-md border border-rule bg-panel p-4"
+        class="card mt-3"
         @keydown.esc="emit('close')"
     >
         <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
