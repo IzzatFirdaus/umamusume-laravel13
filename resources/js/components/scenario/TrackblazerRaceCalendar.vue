@@ -84,7 +84,7 @@ const groups = computed((): { label: string; rows: CalendarRow[] }[] => {
 </script>
 
 <template>
-    <section :aria-labelledby="headingId" class="flex flex-col gap-3 rounded-md border border-rule bg-panel p-4">
+    <section :aria-labelledby="headingId" class="card flex flex-col gap-3 p-4">
         <h4 :id="headingId" class="text-lg font-semibold text-ink-strong">
             Races ahead
         </h4>
@@ -108,7 +108,7 @@ const groups = computed((): { label: string; rows: CalendarRow[] }[] => {
                     <li
                         v-for="row in group.rows"
                         :key="`${row.year_label}-${row.turn}-${row.title}`"
-                        class="rounded-md border border-rule bg-raised px-3 py-2"
+                        class="card px-3 py-2"
                     >
                         <p class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                             <span class="text-sm font-medium text-ink-strong">{{ row.title }}</span>
