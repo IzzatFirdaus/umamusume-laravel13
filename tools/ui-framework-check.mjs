@@ -150,10 +150,15 @@ for (const file of walk(JS_ROOT, '.vue')) {
         const classAttr = line.match(/(?<!:)class="([^"]*)"/);
         if (classAttr !== null) {
             const classes = classAttr[1];
+            for (const colour of classes.match(/\b(?:bg|text|border)-\[#[0-9a-fA-F]{3,8}\]/g) ?? []) {
+                add('literal-colour', rel, lineNo, `${colour} is a literal colour in a class attribute`);
+            }
             for (const value of classes.match(/\[[^\]]+\]/g) ?? []) {
-                arbitraryCount++;
                 const key = `${rel}|${value}`;
-                if (!ALLOWLIST.has(key)) add('arbitrary-value', rel, lineNo, `${value} bypasses the token layer`);
+                if (!ALLOWLIST.has(key)) {
+                    arbitraryCount++;
+                    add('arbitrary-value', rel, lineNo, `${value} bypasses the token layer`);
+                }
             }
             if (/\bdark:/.test(classes)) add('dark-utility', rel, lineNo, 'dark: utility');
         }
