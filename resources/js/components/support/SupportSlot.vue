@@ -89,7 +89,7 @@ function focusRow(): void {
     <li
         :id="`deck-slot-${position}`"
         tabindex="-1"
-        class="flex flex-wrap items-start gap-x-4 gap-y-2 rounded-lg border border-rule bg-raised px-3 py-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
+        class="card flex flex-wrap items-start gap-x-4 gap-y-2 px-3 py-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
     >
         <ArtworkSlot
             v-if="card"
@@ -104,7 +104,7 @@ function focusRow(): void {
         <div class="flex min-w-0 flex-1 flex-col gap-1">
             <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <span class="font-semibold text-ink-strong">{{ label }}</span>
-                <span v-if="is_friend" class="rounded-full bg-sunken px-2 py-0.5 text-xs text-ink-strong">
+                <span v-if="is_friend" class="pill pill-neutral">
                     Friend slot
                 </span>
             </div>
@@ -127,7 +127,7 @@ function focusRow(): void {
                 <p class="flex flex-wrap items-baseline gap-x-2 text-xs">
                     <span
                         v-if="card.scenario_link === 'linked'"
-                        class="rounded-full bg-green-tint px-2 py-0.5 font-semibold text-ink-strong"
+                        class="pill pill-accent"
                     >
                         Scenario Link
                     </span>
