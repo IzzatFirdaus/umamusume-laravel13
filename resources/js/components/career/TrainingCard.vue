@@ -424,7 +424,7 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                         <div
                             v-for="(card, cardIndex) in props.option.supports"
                             :key="`${card.name}-${cardIndex}`"
-                            class="rounded-md border border-rule bg-raised px-3 py-2"
+                            class="card px-3 py-2"
                         >
                             <span class="block font-semibold text-ink-strong">{{ card.name }}</span>
                             <ul v-if="card.effects.length > 0" class="mt-1 space-y-0.5">
