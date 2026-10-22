@@ -23,7 +23,7 @@ const props = defineProps<Props>();
 </script>
 
 <template>
-    <article class="rounded-md border border-rule bg-raised p-3">
+    <article class="card p-3">
         <header class="flex flex-wrap items-start justify-between gap-2">
             <div class="flex flex-wrap items-baseline gap-2">
                 <span class="inline-flex min-h-11 items-center rounded-md bg-pick px-2 text-xs font-semibold text-on-pick">
