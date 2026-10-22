@@ -69,7 +69,7 @@ async function move(delta: number): Promise<void> {
 </script>
 
 <template>
-    <li class="rounded-md border border-rule bg-raised p-3">
+    <li class="card p-3">
         <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
             <h4 class="text-lg font-semibold text-ink-strong">
                 {{ props.row.name }}
@@ -109,7 +109,7 @@ async function move(delta: number): Promise<void> {
             </div>
         </dl>
 
-        <p v-if="props.row.note !== null" class="mt-2 rounded-md border border-rule bg-panel p-2 text-xs text-ink">
+        <p v-if="props.row.note !== null" class="card mt-2 p-2 text-xs text-ink">
             {{ props.row.note }}
         </p>
 
