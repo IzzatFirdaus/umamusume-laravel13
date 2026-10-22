@@ -370,6 +370,8 @@ Before any code, two decisions are recorded. The five scope questions were ruled
 > - **A22 (scheme) — the six categories above are insufficient, and `ADR-0028` D5 adds two.** They are **`app-only — not in the set`** (the HFW never drew it, so it is not one of the `absent` classes, which all presume a counterpart exists — the flash banner is the worked case, since it lives in `AppLayout.vue` and has no component to classify) and **`the set is behind`** (the app's treatment is newer or richer than the set's — `CareerSectionNav` is the worked case, see A13). Classification keys on **rendered signature** — ARIA roles, class families, node counts — never on names, because the HFW rewrites all copy and literal-text matching returns 0 of 97.
 > - **A22 (deferral) — the per-component classification is deferred to D2 for every component a concurrent fix pass is changing.** Measured on `15f7ee1b`, the working tree carried uncommitted changes to `ProvenanceMark.vue`, `career/CareerSectionNav.vue`, `scenario/ScenarioPanel.vue`, `pages/Career/Preflight.vue` and `pages/Database/Sources.vue` (plus five specs), so their markup — and therefore their rendered signature — is mid-change. Those rows are recorded as **pending D2**, not classified here. Classifying them now would key the matrix on a tree that no longer exists when D2 opens.
 
+> **Phase 0 gate — closed 2026-10-22.** ADR-0028 accepted. Parity classification at `primitive-reconciliation.md §7`. `DESIGN.md` §3 cites it. Phase 1 opens; no owner rulings block it.
+
 ### D2 brief
 
 **Absorbed from `D2-BRIEF.md` 2026-10-22.** In the body below, "this file" means this section; references to `D2-BRIEF.md` name this section.
