@@ -662,6 +662,8 @@ In `primitive-reconciliation.md §7`:
 
 **Gate:** the 77 browser specs stay green throughout; no Feature test is edited to accommodate a visual change.
 
+> **Phase 3 gate — closed 2026-10-23.** 43 component re-spell commits landed across all eleven folders (`ui/`, `Form/`, `support/`, `catalog/`, `database/`, `legacy/`, `review/`, `skills/`, `scenario/`, `career/`, root). Each commit replaces Tailwind utility class combinations that replicated a named primitive's surface with the primitive class (`.card`, `.pill`, `.pill-neutral`, `.note`, `.mood`). Components with no primitive-matching patterns — form controls, layout divs, SVG-only components — were read and confirmed clean. `node tools/ui-framework-check.mjs` exits 0 with no new findings from the re-spell. No Feature test was edited for visual accommodation. Phase 4 opens.
+
 ### Phase 7 — Agent ergonomics (the transition tooling; runs alongside Phase 3)
 
 The migration is executed largely by coding agents, and five optimisations were proposed for that. Each was assessed against what the repository already has and what it is allowed to add. Two were accepted as proposed, one accepted in changed form, one accepted and redirected, and one rejected on both dependency cost and a gate conflict.
