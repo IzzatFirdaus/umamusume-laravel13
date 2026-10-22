@@ -163,14 +163,28 @@ test('names the active career and resumes it from the keyboard', async ({ page }
     // A brand-new run has logged nothing, so the position and Energy are absent states: N/A with a
     // reason, never a zero and never Early January (D-220).
     await expect(card.getByTitle(/not standing anywhere on the calendar yet/)).toHaveText('N/A');
-    await expect(card.getByTitle(/No logged turn has recorded Energy/)).toHaveText('N/A');
+
+    /*
+     * Energy, Team Rank and the rest of the career strip render through `SubCell`, which carries an
+     * absence on `AbsenceValue`'s disclosure since 2026-10-22 (DESIGN.md §5 (a): a `title` is
+     * reachable with a pointer and by nothing else). The old probe located the reason by its
+     * `title`, so it matched nothing once the marker became a disclosure. Located by the reason's
+     * own text instead, which is the same idiom `career-build-target.spec.ts` records.
+     */
+    const energyAbsence = card.locator('details').filter({ hasText: /No logged turn has recorded Energy/ });
+    await expect(energyAbsence).toBeVisible();
+    await expect(energyAbsence).toContainText('N/A');
 
     // Team Rank has its own row now (Slice 1.1), read through the model's one owner
     // (`latestTeamRank()`): a brand-new run has nothing reported, so it is N/A with the reason
     // attached. Unity Cup's config widget IS the rank, so the resource slot defers to this row
     // rather than printing a second, permanently-absent Team Rank cell beside it.
-    await expect(card.getByText('Team Rank')).toBeVisible();
-    await expect(card.getByTitle(/No logged turn has reported a team rank yet/)).toHaveText('N/A');
+    // `first()`: the phrase appears in the tile's label and in the reasons beside it, so an
+    // unscoped match is a strict-mode collision rather than a missing fact.
+    await expect(card.getByText('Team Rank').first()).toBeVisible();
+    const rankAbsence = card.locator('details').filter({ hasText: /No logged turn has reported a team rank yet/ });
+    await expect(rankAbsence).toBeVisible();
+    await expect(rankAbsence).toContainText('N/A');
 
     // R2-04: this is the state the snapshot door exists for. A Trainer already partway through a
     // career in the client is the one who has a career to resume here, so the door has to be on the
