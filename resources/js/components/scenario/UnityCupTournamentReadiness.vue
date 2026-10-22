@@ -52,7 +52,7 @@ function anchorLine(): string {
 
 <template>
     <section
-        class="rounded-md border border-rule bg-panel p-3"
+        class="card p-3"
         :aria-labelledby="headingId"
     >
         <h4 :id="headingId" class="text-lg font-semibold text-ink-strong">
