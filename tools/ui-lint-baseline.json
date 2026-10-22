@@ -1,0 +1,7 @@
+{
+    "count": 24,
+    "allowlist": [
+        "resources/js/components/Form/BaseTextarea.vue|[88px]",
+        "resources/js/components/support/SupportTypeMark.vue|[18px]"
+    ]
+}

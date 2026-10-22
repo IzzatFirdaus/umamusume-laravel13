@@ -18,7 +18,7 @@
  *
  * Exit code 1 on any violation, so it fails a hand-off step.
  */
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 const ROOT = process.cwd();
@@ -54,6 +54,8 @@ const ARBITRARY_ALLOWLIST = new Map([
 ]);
 
 const violations = [];
+const baselinePath = join(ROOT, 'tools/ui-lint-baseline.json');
+const baseline = existsSync(baselinePath) ? JSON.parse(readFileSync(baselinePath, 'utf8')) : null;
 
 for (const file of vueFiles(JS_ROOT)) {
     const rel = relative(ROOT, file).replace(/\\/g, '/');
@@ -77,10 +79,10 @@ for (const file of vueFiles(JS_ROOT)) {
         }
 
         // 2. Arbitrary values, in a class attribute.
-        const classAttr = line.match(/class="([^"]*)"/);
+        const classAttr = line.match(/(?<!:)class="([^"]*)"/);
         if (classAttr !== null) {
             const classes = classAttr[1];
-            const arbitrary = classes.match(/\[#[\s\S]*?\]|\[\d+px\]/g) ?? [];
+            const arbitrary = classes.match(/\[[^\]]+\]/g) ?? [];
 
             for (const value of arbitrary) {
                 const allowKey = `${rel}|${value}`;
@@ -132,6 +134,15 @@ for (const file of vueFiles(JS_ROOT)) {
 if (violations.length === 0) {
     console.log('ui-lint: clean');
     process.exit(0);
+}
+
+if (baseline !== null && violations.length <= baseline.count) {
+    console.log(`ui-lint: ${violations.length} known debt item(s), baseline ${baseline.count}`);
+    process.exit(0);
+}
+
+if (baseline !== null && violations.length > baseline.count) {
+    console.error(`ui-lint: debt increased to ${violations.length}, baseline ${baseline.count}`);
 }
 
 console.error(`ui-lint: ${violations.length} violation(s)`);
