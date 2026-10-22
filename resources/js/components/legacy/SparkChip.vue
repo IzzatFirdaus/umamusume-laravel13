@@ -49,12 +49,12 @@ const accessibleName = computed(() => {
     <span
         class="pill pill-neutral"
     >
-        <span aria-hidden="true" class="font-mono text-[0.65rem] font-bold text-ink-strong">
+        <span aria-hidden="true" class="font-mono text-[0.65rem] font-bold text-[var(--color-ink-strong)]">
             {{ kindLabel.slice(0, 1) }}
         </span>
         <span class="font-medium">{{ kindLabel }}</span>
-        <span v-if="target" class="text-ink-muted">{{ target }}</span>
-        <span aria-hidden="true" class="text-pick-line">★</span>
+        <span v-if="target" class="text-[var(--color-ink-muted)]">{{ target }}</span>
+        <span aria-hidden="true" class="text-[var(--color-pick-line)]">★</span>
         <span class="font-mono tabular-nums">{{ stars ?? 'N/A' }}</span>
         <span class="sr-only">{{ accessibleName }}</span>
     </span>
