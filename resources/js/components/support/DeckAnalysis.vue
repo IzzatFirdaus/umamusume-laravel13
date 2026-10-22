@@ -65,7 +65,7 @@ defineProps<{
                     v-for="(category, key) in categories"
                     :key="key"
                     :aria-labelledby="`deck-category-${key}`"
-                    class="rounded-md border border-rule bg-raised p-3"
+                    class="card p-3"
                 >
                     <h4 :id="`deck-category-${key}`" class="text-lg font-semibold text-ink-strong">
                         {{ category.label }}
@@ -127,7 +127,7 @@ defineProps<{
             </section>
 
             <div class="mt-5 grid gap-4 @4xl:grid-cols-2">
-                <section class="rounded-md border border-rule bg-raised p-3" aria-labelledby="deck-strengths">
+                <section class="card p-3" aria-labelledby="deck-strengths">
                     <h4 id="deck-strengths" class="text-lg font-semibold text-ink-strong">What the deck covers</h4>
                     <ul v-if="strengths.length > 0" class="mt-2 list-disc space-y-1 pl-5 text-sm text-ink-muted">
                         <li v-for="line in strengths" :key="line">{{ line }}</li>
@@ -137,7 +137,7 @@ defineProps<{
                     </p>
                 </section>
 
-                <section class="rounded-md border border-rule bg-raised p-3" aria-labelledby="deck-weaknesses">
+                <section class="card p-3" aria-labelledby="deck-weaknesses">
                     <h4 id="deck-weaknesses" class="text-lg font-semibold text-ink-strong">What the deck carries nothing in</h4>
                     <ul v-if="weaknesses.length > 0" class="mt-2 list-disc space-y-1 pl-5 text-sm text-ink-muted">
                         <li v-for="line in weaknesses" :key="line">{{ line }}</li>
@@ -151,7 +151,7 @@ defineProps<{
             <!-- The brief asks for a recommended replacement. It is not built, and saying so is the
                  honest rendering: naming a card to swap would be a judgement the corpus cannot source,
                  and a deck has no optimal arrangement this tool is permitted to claim. -->
-            <section class="mt-4 rounded-md border border-dashed border-rule bg-raised p-3" aria-labelledby="deck-replacement">
+            <section class="note mt-4" aria-labelledby="deck-replacement">
                 <h4 id="deck-replacement" class="text-lg font-semibold text-ink-strong">Recommended replacement</h4>
                 <p class="mt-1 text-sm text-ink-muted">
                     Not built. No source states which card belongs in a slot, so a recommended replacement
