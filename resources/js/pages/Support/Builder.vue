@@ -269,8 +269,6 @@ function save(): void {
         <Head title="Support deck" />
         <template #title>Support deck</template>
 
-        <h2 class="text-lg font-semibold text-ink-strong">Support deck</h2>
-
         <p class="mt-1 text-sm text-ink-muted">
             <template v-if="run.name">
                 {{ run.name }} &middot; {{ run.status_label }} &middot;

@@ -168,7 +168,7 @@ test('the Shop Items view renders the catalogue and the reused Pro Shop block', 
     await page.goto('/database/shop-items', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByRole('heading', { name: 'Shop items', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Shop Items', level: 1 })).toBeVisible();
     await expect(page.getByText('10 catalogue rows')).toBeVisible();
     await expect(page.getByText('Alarm Clock', { exact: true })).toBeVisible();
 
@@ -196,7 +196,7 @@ test('the Sparks view renders the categories and the star-roll odds table', asyn
     await page.goto('/database/sparks', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByRole('heading', { name: 'Sparks', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sparks', level: 1 })).toBeVisible();
     await expect(page.getByText('6 Spark categories')).toBeVisible();
     await expect(page.getByText('Blue Sparks', { exact: true })).toBeVisible();
 

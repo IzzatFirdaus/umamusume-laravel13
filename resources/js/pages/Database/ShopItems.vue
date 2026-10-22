@@ -105,8 +105,6 @@ const close = async (): Promise<void> => {
         <Head title="Shop Items" />
         <template #title>Shop Items</template>
 
-        <h2 class="text-lg font-semibold text-ink-strong">Shop items</h2>
-
         <p class="mt-4 max-w-3xl text-sm text-ink-muted">
             Consumables and currencies, with the client's own effect string and where each is actually
             spent. Spendable items are not support effects: the spend site column is what tells a Career

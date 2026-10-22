@@ -117,8 +117,6 @@ const close = async (): Promise<void> => {
         <Head title="Sparks" />
         <template #title>Sparks</template>
 
-        <h2 class="text-lg font-semibold text-ink-strong">Sparks</h2>
-
         <p class="mt-4 max-w-3xl text-sm text-ink-muted">
             The Spark categories a finished Umamusume can carry, and the odds a Spark rolls at one,
             two or three stars. The inventory is the reference guide's own count; roll odds follow
