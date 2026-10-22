@@ -120,12 +120,23 @@
         <div>
           <div class="card" style="margin:0">
             <h2>Costumes</h2>
+            <nav aria-label="Costume forms" style="display:flex;flex-wrap:wrap;gap:6px;margin:0 0 9px">
+              <a class="btn btn-sm" href="?form=1" aria-current="page"><span aria-hidden="true">●</span> Form 1 · [Starry Nocturne]</a>
+            </nav>
             <table class="t">
               <thead><tr><th>Title</th><th>Rarity</th><th>Growth</th></tr></thead>
               <tbody>
                 <tr class="is-current"><td><b>[Starry Nocturne]</b><br><span style="color:var(--ink-muted)">Debut form · 2026-03-05</span></td><td>★★★</td><td class="mono">SPD +10% · POW +20%</td></tr>
               </tbody>
             </table>
+            <section aria-labelledby="active-form-detail" style="margin-top:9px">
+              <h3 id="active-form-detail" style="margin:0 0 4px;font-size:13px;color:var(--ink-strong)">Active form · [Starry Nocturne] ★★★ SSR</h3>
+              <p style="margin:0;font-size:12.5px;color:var(--ink-muted)">
+                Debut form, released 2026-03-05. Base 450 at native rank, 500 at ★4 and 550 at ★5; growth
+                <b style="color:var(--ink)">SPD +10%</b> · <b style="color:var(--ink)">POW +20%</b>, the 30-point row.
+                The five base values are the base-stats table above.
+              </p>
+            </section>
             <p class="note" style="margin-top:9px"><span class="g" aria-hidden="true">○</span><span>
               The growth row <b>varies by costume</b>, so a character-wide value cannot exist. This trainee has one form;
               a trainee with three shows three different rows, and a costume's own rarity is not always the trainee's best:
@@ -181,6 +192,7 @@
                   <li><li><b>The type is a chip, and the chip is never the mark alone.</b> The client identifies a support card by the chip it wears, so the type column carries the client's own glyphs in the client's own chip colours. The word stays beside the mark, because a mark alone breaks WCAG 1.4.1 and because a stat carries no saturated identity hue (<code>DESIGN-CORPUS.md:371-393</code>): the identity is the glyph plus a whisper of band tint, and the hue is spent on meaning.</li></li>
                   <li><b>The picture slot is a drawing, and absence is a normal state.</b> The app renders a mirrored <code>card_portrait</code> for the form in view at 64px (<code>Catalog/Show.vue</code>, <code>DESIGN.md</code> §4.7), and the index shows the debut form's own portrait instead. A file the mirror does not hold renders <b>nothing</b> — no grey box, no placeholder glyph — and the heading keeps its text. The dashed frame here marks a cell the picture would occupy, and the subject inside it names the picture that belongs there.</li>
                   <li><b>The per-stat figures are now on the payload, so the cells no longer state an absence.</b> The earlier read of this screen printed <code>—</code> in every base cell because the live Inertia payload carried the total and not the five values. The catalogue now holds them, so the table prints <b>96 / 79 / 108 / 69 / 98</b> for <code>[Starry Nocturne]</code> and the ★4 and ★5 columns beside them, and the five cells sum to 450, 500 and 550 as the total row says. Source: <code>assets/data/umamusume.js</code>, built from the app's own tables.</li>
+          <li><b>The costume-form strip is a location control, and the table keeps every form.</b> The strip's <code>?form=</code> links mark the active form with <code>aria-current="page"</code>; the flat table below still lists every form with the active row marked, and the section below the table reads the active form back. That is the conservative reading of FQ-11: the strip says where you are, the table says what exists, and the two cannot disagree about which form is active.</li>
         </ol>
         <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
           Wireframe only. Admire Vega's identity, aptitude grades, base values, breakthrough rows and growth are the

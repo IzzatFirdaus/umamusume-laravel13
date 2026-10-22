@@ -20,7 +20,12 @@ for (const f of files) {
     for (const m of c.matchAll(/(?:href|src)="([^"]+)"/g)) {
         const ref = m[1];
         if (/^(?:https?:|mailto:|#|data:)/.test(ref)) continue;
-        const target = path.resolve(DIR, ref);
+        // A query or fragment is a location, not part of the file name: `?form=1` is the
+        // catalog detail's costume-form strip, and resolving it as a path named "?form=1"
+        // reported it broken. Strip both before resolving, and skip a bare query.
+        const clean = ref.split('#')[0].split('?')[0];
+        if (clean === '') continue;
+        const target = path.resolve(DIR, clean);
         checked++;
         if (!fs.existsSync(target)) {
             broken.push(`${f} -> ${ref}`);
