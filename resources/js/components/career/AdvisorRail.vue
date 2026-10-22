@@ -33,7 +33,7 @@ const props = withDefaults(
          region already does. -->
     <section
         aria-labelledby="career-advisor-heading"
-        class="rounded-lg border border-rule bg-panel p-4 lg:max-h-[calc(100svh-1rem)] lg:overflow-y-auto"
+        class="card rounded-lg p-4 lg:max-h-[calc(100svh-1rem)] lg:overflow-y-auto"
         tabindex="0"
     >
         <h2 id="career-advisor-heading" class="text-lg font-semibold text-ink-strong">Advisor</h2>
