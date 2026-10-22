@@ -151,17 +151,13 @@ const panelRows = (scenario: Scenario): Record<string, unknown>[] =>
                                 :columns="panelColumns"
                                 :rows="panelRows(scenario)"
                             >
-                                <!-- The tick and the dash carry the state, and the word beside them
-                                     carries it for a screen reader, so the state never rides on the
-                                     glyph or on colour alone. -->
+                                <!-- The word is the state, so the state never rides on a glyph or on
+                                     colour alone. A tick used to sit beside the word and an em dash
+                                     stood for "off"; the dash is banned in shipped copy (R-02,
+                                     D-79) and the tick was decoration, so the word is printed. -->
                                 <template #cell-state="{ row }">
-                                    <span v-if="row.enabled" class="text-ink-strong">
-                                        <span aria-hidden="true">✓</span>
-                                        <span class="sr-only">on</span>
-                                    </span>
-                                    <span v-else class="text-ink-muted">
-                                        <span aria-hidden="true">—</span>
-                                        <span class="sr-only">off</span>
+                                    <span :class="row.enabled ? 'text-ink-strong' : 'text-ink-muted'">
+                                        {{ row.enabled ? 'on' : 'off' }}
                                     </span>
                                 </template>
                             </DataTable>

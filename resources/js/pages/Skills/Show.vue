@@ -112,17 +112,16 @@ const conditions = computed(() => props.skill.condition_groups ?? []);
                      holds and whose data it is before it is opened, and the ruling that keeps the
                      description absent is on screen either way.
 
-                     The ruling is `ADR-0011` (accepted in part, 2026-09-29): the import carries what
-                     the export states and renders no description, because no client-string source for
-                     one exists. The citation lives HERE and not on the screen. A repository identifier
-                     in shipped copy is what `tests/Feature/UiHygieneTest.php` reads every template
-                     for, and a pointer to a decision is not what a Trainer needs; the summary states
-                     the ruling's substance instead, so the fact is on screen and the trace is in the
-                     source.
+                     The ruling is `ADR-0011`: the import renders no description, because no
+                     client-string source for one exists. The citation lives HERE and not on the
+                     screen, because a repository identifier in shipped copy is what
+                     `tests/Feature/UiHygieneTest.php` reads every template for, and a pointer to a
+                     decision is not what a Trainer needs. The summary states the ruling's substance
+                     instead.
                  -->
                 <details class="mt-3">
                     <summary class="cursor-pointer list-item text-sm font-semibold text-ink-strong">
-                        Raw engine data — the source's own expressions and codes, not client labels.
+                        Raw engine data: the source's own expressions and codes, not client labels.
                         The description is not recorded.
                     </summary>
 

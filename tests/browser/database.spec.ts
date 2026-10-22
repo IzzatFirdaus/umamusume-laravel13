@@ -317,15 +317,15 @@ test('the scenario matrix prints config/scenarios.php, verification date and all
     // Exactly one scenario is partially documented, and the flag comes from config, not from a name test.
     await expect(page.getByText('PARTIALLY DOCUMENTED')).toHaveCount(1);
 
-    // Panel state is a tick or a dash with the word beside it for a screen reader, so the state
-    // never rides on the glyph or on colour alone (design-2.0 §42). The panels are a table, and the
-    // caps beside them are another one.
+    // Panel state is the word itself, so the state never rides on a glyph or on colour alone
+    // (design-2.0 §42). A tick used to sit beside the word and an em dash stood for "off"; the
+    // dash is banned in shipped copy (R-02, D-79) and the tick was decoration, so the word is
+    // printed and the glyph pair is gone.
     const panels = page.getByRole('table', { name: /panels$/ }).first();
     await expect(panels).toBeVisible();
-    await expect(panels.getByText('on', { exact: true }).first()).toBeAttached();
+    await expect(panels.getByText('on', { exact: true }).first()).toBeVisible();
     // Some scenario has an off panel, and its word is in that table for a screen reader to read.
-    await expect(page.getByText('off', { exact: true }).first()).toBeAttached();
-    await expect(panels.locator('[aria-hidden="true"]').first()).toHaveText(/^[✓—]$/);
+    await expect(page.getByText('off', { exact: true }).first()).toBeVisible();
 
     const caps = page.getByRole('table', { name: 'URA Finale stat caps' });
     await expect(caps).toBeVisible();
