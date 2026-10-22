@@ -120,7 +120,7 @@ const currentMark = '◉';
 </script>
 
 <template>
-    <section :aria-labelledby="headingId" class="flex flex-col gap-3 rounded-md border border-rule bg-panel p-4">
+    <section :aria-labelledby="headingId" class="card flex flex-col gap-3 p-4">
         <h4 :id="headingId" class="text-lg font-semibold text-ink-strong">
             Race plan
         </h4>
@@ -212,7 +212,7 @@ const currentMark = '◉';
         <!-- The gate is its own labelled group, not a bare list: the flag row above names the same
              event, so an assertion inside this region has to say which one it means. -->
         <div v-if="props.planning.year_end !== null" role="group" aria-label="Year-end gate">
-            <dl class="grid grid-cols-1 gap-x-3 gap-y-2 rounded-md border border-rule bg-raised p-3 @3xl:grid-cols-[minmax(0,8rem)_minmax(0,1fr)]">
+            <dl class="card grid grid-cols-1 gap-x-3 gap-y-2 p-3 @3xl:grid-cols-[minmax(0,8rem)_minmax(0,1fr)]">
                 <dt class="text-xs text-ink-muted">Assessment</dt>
                 <dd class="text-sm text-ink" :title="props.planning.year_end.timing">
                     {{ props.planning.year_end.gate_label }} · {{ props.planning.year_end.timing }}
