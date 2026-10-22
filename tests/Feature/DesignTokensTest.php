@@ -356,7 +356,9 @@ function themeStaticBlock(): string
  * `text` marks a pair that carries copy, which owes WCAG 2.1 AA at 4.5:1 (D-10). The
  * pairs that do not carry copy owe 1.4.11's 3:1 instead: a selection boundary, a
  * progress fill and a state outline are information, but they are not text, and
- * holding them to 4.5:1 would fail every hairline in the system.
+ * holding them to 4.5:1 would fail every hairline in the system. A third threshold —
+ * `hairline` at 1.2:1 — covers decorative overlays and brand-tint fills that are
+ * neither text nor boundary: they owe no WCAG threshold but must not be invisible.
  *
  * Membership is the recovered R9 browser pass: the pairs `DESIGN-CORPUS.md` §3.4
  * and §3.7 list as approved, the calendar, capsule and stat-band rows measured in
@@ -368,61 +370,93 @@ function themeStaticBlock(): string
  * counted was 19 rather than 20; 2026-10-13 adds `ink-muted on raised` and
  * `ink-muted on panel` (cockpit/wizard UI audit 2026-10-12 §2.9), making it 21.
  *
- * @return array<string, array{foreground: string, background: string, text: bool}>
+ * 2026-10-22: FQ-01..FQ-05 extend the list. FQ-01 (re-spell) adds no new pair —
+ * `rule on page` is already here at 3:1. FQ-02 adds `pick-line on raised` at 3:1
+ * (boundary). FQ-04 adds `on-risk on risk` at 4.5:1 (text; `--color-on-risk` is
+ * minted in step 2.2). FQ-05 adds seven `stat-* on raised` pairs at 3:1 (boundary;
+ * the seven `--color-stat-*` tokens are minted in step 2.2). Two hairline rows are
+ * added: `brand-accent on brand-chrome` at 1.2:1 and `scrim on page` at 1.2:1.
+ *
+ * @return array<string, array{foreground: string, background: string, type: string}>
  */
 function g18ContractPairs(): array
 {
     return [
         // Body ink on the surfaces it is set on.
-        'ink on panel' => ['foreground' => 'ink', 'background' => 'panel', 'text' => true],
-        'ink on raised' => ['foreground' => 'ink', 'background' => 'raised', 'text' => true],
-        'ink-muted on sunken' => ['foreground' => 'ink-muted', 'background' => 'sunken', 'text' => true],
+        'ink on panel' => ['foreground' => 'ink', 'background' => 'panel', 'type' => 'text'],
+        'ink on raised' => ['foreground' => 'ink', 'background' => 'raised', 'type' => 'text'],
+        'ink-muted on sunken' => ['foreground' => 'ink-muted', 'background' => 'sunken', 'type' => 'text'],
         // 2026-10-13: the muted tier's heaviest consumers print on raised and panel
         // (raised-cell labels, panel sub-copy), so both pairings join the contract
         // (cockpit/wizard UI audit 2026-10-12 §2.9) instead of staying hand-computed.
-        'ink-muted on raised' => ['foreground' => 'ink-muted', 'background' => 'raised', 'text' => true],
-        'ink-muted on panel' => ['foreground' => 'ink-muted', 'background' => 'panel', 'text' => true],
+        'ink-muted on raised' => ['foreground' => 'ink-muted', 'background' => 'raised', 'type' => 'text'],
+        'ink-muted on panel' => ['foreground' => 'ink-muted', 'background' => 'panel', 'type' => 'text'],
 
         // Per-stat band tints: wayfinding, never identity (D-113, D-114).
-        'ink on tint-speed' => ['foreground' => 'ink', 'background' => 'tint-speed', 'text' => true],
-        'ink on tint-stamina' => ['foreground' => 'ink', 'background' => 'tint-stamina', 'text' => true],
-        'ink on tint-power' => ['foreground' => 'ink', 'background' => 'tint-power', 'text' => true],
-        'ink on tint-guts' => ['foreground' => 'ink', 'background' => 'tint-guts', 'text' => true],
-        'ink on tint-wit' => ['foreground' => 'ink', 'background' => 'tint-wit', 'text' => true],
-        'ink on tint-sp' => ['foreground' => 'ink', 'background' => 'tint-sp', 'text' => true],
+        'ink on tint-speed' => ['foreground' => 'ink', 'background' => 'tint-speed', 'type' => 'text'],
+        'ink on tint-stamina' => ['foreground' => 'ink', 'background' => 'tint-stamina', 'type' => 'text'],
+        'ink on tint-power' => ['foreground' => 'ink', 'background' => 'tint-power', 'type' => 'text'],
+        'ink on tint-guts' => ['foreground' => 'ink', 'background' => 'tint-guts', 'type' => 'text'],
+        'ink on tint-wit' => ['foreground' => 'ink', 'background' => 'tint-wit', 'type' => 'text'],
+        'ink on tint-sp' => ['foreground' => 'ink', 'background' => 'tint-sp', 'type' => 'text'],
 
         // Fills with their own ink, the pair each one exists for.
-        'ink on green-tint' => ['foreground' => 'ink', 'background' => 'green-tint', 'text' => true],
-        'ink-strong on raised' => ['foreground' => 'ink-strong', 'background' => 'raised', 'text' => true],
-        'on-chrome on chrome' => ['foreground' => 'on-chrome', 'background' => 'chrome', 'text' => true],
-        'on-pick on pick' => ['foreground' => 'on-pick', 'background' => 'pick', 'text' => true],
-        'on-pick on green' => ['foreground' => 'on-pick', 'background' => 'green', 'text' => true],
+        'ink on green-tint' => ['foreground' => 'ink', 'background' => 'green-tint', 'type' => 'text'],
+        'ink-strong on raised' => ['foreground' => 'ink-strong', 'background' => 'raised', 'type' => 'text'],
+        'on-chrome on chrome' => ['foreground' => 'on-chrome', 'background' => 'chrome', 'type' => 'text'],
+        'on-pick on pick' => ['foreground' => 'on-pick', 'background' => 'pick', 'type' => 'text'],
+        'on-pick on green' => ['foreground' => 'on-pick', 'background' => 'green', 'type' => 'text'],
+
+        // FQ-04: white ink on the themed risk fill. `--color-on-risk` is minted in
+        // step 2.2; in light it is #FFFFFF (10.89:1 on dark --risk) and in dark it
+        // is #121013 (on light --risk #FF7E8C). Both clear 4.5:1 once the token exists.
+        'on-risk on risk' => ['foreground' => 'on-risk', 'background' => 'risk', 'type' => 'text'],
 
         // Deltas and the goal cell: never colour-only (D-12, §6.16b).
-        'up on panel' => ['foreground' => 'up', 'background' => 'panel', 'text' => true],
-        'down on raised' => ['foreground' => 'down', 'background' => 'raised', 'text' => true],
-        'goal on raised' => ['foreground' => 'goal', 'background' => 'raised', 'text' => false],
-        'goal-line on raised' => ['foreground' => 'goal-line', 'background' => 'raised', 'text' => false],
+        'up on panel' => ['foreground' => 'up', 'background' => 'panel', 'type' => 'text'],
+        'down on raised' => ['foreground' => 'down', 'background' => 'raised', 'type' => 'text'],
+        'goal on raised' => ['foreground' => 'goal', 'background' => 'raised', 'type' => 'boundary'],
+        'goal-line on raised' => ['foreground' => 'goal-line', 'background' => 'raised', 'type' => 'boundary'],
 
         // The progress fill on its own track, the one repair the pass caught.
-        'green-deep on sunken' => ['foreground' => 'green-deep', 'background' => 'sunken', 'text' => false],
+        'green-deep on sunken' => ['foreground' => 'green-deep', 'background' => 'sunken', 'type' => 'boundary'],
 
         // Card boundary: border-rule on page (WCAG 1.4.11 non-text, 3:1).
-        'rule on page' => ['foreground' => 'rule', 'background' => 'page', 'text' => false],
+        'rule on page' => ['foreground' => 'rule', 'background' => 'page', 'type' => 'boundary'],
+
+        // FQ-02: the selection boundary on a raised surface. `--color-pick-line` is
+        // the gold hairline that marks the live pick; it is a non-text boundary at 3:1.
+        'pick-line on raised' => ['foreground' => 'pick-line', 'background' => 'raised', 'type' => 'boundary'],
+
+        // FQ-05: seven stat-colour boundaries on a raised surface. The seven
+        // `--color-stat-*` tokens are minted in step 2.2 at the §3 values; each is
+        // a non-text boundary at 3:1 (computed 4.24–6.23:1 in §3).
+        'stat-speed on raised' => ['foreground' => 'stat-speed', 'background' => 'raised', 'type' => 'boundary'],
+        'stat-stamina on raised' => ['foreground' => 'stat-stamina', 'background' => 'raised', 'type' => 'boundary'],
+        'stat-power on raised' => ['foreground' => 'stat-power', 'background' => 'raised', 'type' => 'boundary'],
+        'stat-guts on raised' => ['foreground' => 'stat-guts', 'background' => 'raised', 'type' => 'boundary'],
+        'stat-wit on raised' => ['foreground' => 'stat-wit', 'background' => 'raised', 'type' => 'boundary'],
+        'stat-pal on raised' => ['foreground' => 'stat-pal', 'background' => 'raised', 'type' => 'boundary'],
+        'stat-group on raised' => ['foreground' => 'stat-group', 'background' => 'raised', 'type' => 'boundary'],
 
         // Track 2-D brand and status additions (Phase 11.16). Each new role owes a
         // measured G-18 pair; values are the ruling's starting draft and these rows
         // are the gate. Failures here mean a token needs stepping, never that a row
         // is removed (addendum prohibition 1).
-        'on-brand-chrome on brand-chrome' => ['foreground' => 'on-brand-chrome', 'background' => 'brand-chrome', 'text' => true],
-        'brand-accent-ink on page' => ['foreground' => 'brand-accent-ink', 'background' => 'page', 'text' => true],
-        'brand-accent-ink on raised' => ['foreground' => 'brand-accent-ink', 'background' => 'raised', 'text' => true],
-        'brand-accent-ink on sunken' => ['foreground' => 'brand-accent-ink', 'background' => 'sunken', 'text' => true],
-        'brand-accent-ink on brand-accent-soft' => ['foreground' => 'brand-accent-ink', 'background' => 'brand-accent-soft', 'text' => true],
-        'status-positive-ink on status-positive' => ['foreground' => 'status-positive-ink', 'background' => 'status-positive', 'text' => true],
-        'status-caution-ink on status-caution' => ['foreground' => 'status-caution-ink', 'background' => 'status-caution', 'text' => true],
-        'ink-muted on brand-accent-soft' => ['foreground' => 'ink-muted', 'background' => 'brand-accent-soft', 'text' => true],
-        'ink-strong on brand-accent-soft' => ['foreground' => 'ink-strong', 'background' => 'brand-accent-soft', 'text' => true],
+        'on-brand-chrome on brand-chrome' => ['foreground' => 'on-brand-chrome', 'background' => 'brand-chrome', 'type' => 'text'],
+        'brand-accent-ink on page' => ['foreground' => 'brand-accent-ink', 'background' => 'page', 'type' => 'text'],
+        'brand-accent-ink on raised' => ['foreground' => 'brand-accent-ink', 'background' => 'raised', 'type' => 'text'],
+        'brand-accent-ink on sunken' => ['foreground' => 'brand-accent-ink', 'background' => 'sunken', 'type' => 'text'],
+        'brand-accent-ink on brand-accent-soft' => ['foreground' => 'brand-accent-ink', 'background' => 'brand-accent-soft', 'type' => 'text'],
+        'status-positive-ink on status-positive' => ['foreground' => 'status-positive-ink', 'background' => 'status-positive', 'type' => 'text'],
+        'status-caution-ink on status-caution' => ['foreground' => 'status-caution-ink', 'background' => 'status-caution', 'type' => 'text'],
+        'ink-muted on brand-accent-soft' => ['foreground' => 'ink-muted', 'background' => 'brand-accent-soft', 'type' => 'text'],
+        'ink-strong on brand-accent-soft' => ['foreground' => 'ink-strong', 'background' => 'brand-accent-soft', 'type' => 'text'],
+
+        // Hairline rows (1.2:1): decorative overlays and brand-tint fills that are
+        // neither text nor boundary. They owe no WCAG threshold but must not vanish.
+        'brand-accent on brand-chrome' => ['foreground' => 'brand-accent', 'background' => 'brand-chrome', 'type' => 'hairline'],
+        'scrim on page' => ['foreground' => 'scrim', 'background' => 'page', 'type' => 'hairline'],
     ];
 }
 
@@ -613,19 +647,23 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         $pairs = g18ContractPairs();
         $badges = g18GradeBadgeTokens();
 
-        expect($pairs)->toHaveCount(31)
+        expect($pairs)->toHaveCount(42)
             ->and($badges)->toHaveCount(9)
             ->and(array_keys($pairs))->toBe([
                 'ink on panel', 'ink on raised', 'ink-muted on sunken', 'ink-muted on raised', 'ink-muted on panel',
                 'ink on tint-speed', 'ink on tint-stamina', 'ink on tint-power', 'ink on tint-guts', 'ink on tint-wit',
                 'ink on tint-sp', 'ink on green-tint', 'ink-strong on raised', 'on-chrome on chrome',
-                'on-pick on pick', 'on-pick on green', 'up on panel', 'down on raised',
+                'on-pick on pick', 'on-pick on green', 'on-risk on risk', 'up on panel', 'down on raised',
                 'goal on raised', 'goal-line on raised', 'green-deep on sunken', 'rule on page',
+                'pick-line on raised',
+                'stat-speed on raised', 'stat-stamina on raised', 'stat-power on raised',
+                'stat-guts on raised', 'stat-wit on raised', 'stat-pal on raised', 'stat-group on raised',
                 'on-brand-chrome on brand-chrome', 'brand-accent-ink on page',
                 'brand-accent-ink on raised', 'brand-accent-ink on sunken',
                 'brand-accent-ink on brand-accent-soft',
                 'status-positive-ink on status-positive', 'status-caution-ink on status-caution',
                 'ink-muted on brand-accent-soft', 'ink-strong on brand-accent-soft',
+                'brand-accent on brand-chrome', 'scrim on page',
             ]);
 
         $roles = collect($pairs)
@@ -655,7 +693,15 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
 
             foreach ($pairs as $label => $pair) {
                 $ratio = contrastRatio($colors[$pair['foreground']], $colors[$pair['background']]);
-                $threshold = $pair['text'] ? 4.5 : 3.0;
+
+                // Three-way threshold model (FQ-01..FQ-05, 2026-10-22):
+                // text → 4.5:1 (WCAG 2.1 AA), boundary → 3:1 (WCAG 1.4.11 non-text),
+                // hairline → 1.2:1 (decorative; owes no WCAG threshold but must not vanish).
+                $threshold = match ($pair['type']) {
+                    'text' => 4.5,
+                    'boundary' => 3.0,
+                    'hairline' => 1.2,
+                };
 
                 expect($ratio)->toBeGreaterThanOrEqual($threshold, sprintf(
                     '%s theme: the contract pair "%s" (--color-%s on --color-%s) measures %.2f:1, under the %.1f:1 %s'
@@ -666,7 +712,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
                     $pair['background'],
                     $ratio,
                     $threshold,
-                    $pair['text'] ? 'text' : 'non-text boundary',
+                    $pair['type'],
                 ));
             }
 
@@ -679,6 +725,55 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
                     $theme,
                     $badge,
                     $ratio,
+                ));
+            }
+
+            // D-2 (owner ruling A, 2026-10-22): #FFFFFF must fail on the nine grade
+            // fills. White on these light fills measures 1.20–1.44:1, far below the
+            // 4.5:1 text threshold, which is why the badge ink is `ink-strong` and
+            // not white. This assertion proves the ban is not a preference: if white
+            // ever cleared 4.5:1, the ban would be wrong and the ink would need
+            // revisiting. It fails by construction, and the failure is the evidence.
+            $whiteRgb = [255, 255, 255];
+
+            foreach ($badges as $badge) {
+                $whiteRatio = contrastRatio($whiteRgb, $colors[$badge]);
+
+                expect($whiteRatio)->toBeLessThan(4.5, sprintf(
+                    '%s theme: white on grade badge "%s" measures %.2f:1, at or above 4.5:1. This would mean the'
+                    .' G-47 ban on white ink is wrong and the badge ink should be revisited.',
+                    $theme,
+                    $badge,
+                    $whiteRatio,
+                ));
+            }
+        }
+
+        // Named-token coverage: --color-risk, --color-pick-line, and --color-ring
+        // are referenced by the new pairs above and by the focus-ring base rule.
+        // Each must resolve to a colour in both themes — an unresolved name would
+        // inherit silently (D-288, rule 36), so these are resolved alongside the
+        // contract pairs rather than assumed.
+        $namedTokens = ['--color-risk', '--color-pick-line', '--color-ring'];
+
+        foreach (['light', 'dark'] as $theme) {
+            /** @var array<string, array{raw: string, resolved: string}> $resolved */
+            $resolved = (array) $page->script(resolvedTokenScript($namedTokens, $theme));
+
+            foreach ($namedTokens as $name) {
+                $value = $resolved[$name]['raw'] ?? '';
+
+                expect($value)->not->toBe('', sprintf(
+                    '%s theme: %s resolved to an empty string. It is declared in app.css and must resolve.',
+                    $theme,
+                    $name,
+                ));
+
+                expect(parseComputedColor($resolved[$name]['resolved'] ?? ''))->not->toBeNull(sprintf(
+                    '%s theme: %s resolved to "%s", which is not a colour.',
+                    $theme,
+                    $name,
+                    $value,
                 ));
             }
         }
