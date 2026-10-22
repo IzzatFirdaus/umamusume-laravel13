@@ -285,3 +285,28 @@ Each rule was proven to have teeth by mutating the data and watching the check f
 finding the rule was written for: a growth row changed, a base stat changed, a breakthrough row
 changed, an effect removed from the dictionary, a description added to a skill, a field removed
 from the schema, and a test-fixture trainee added back.
+
+## The ageing rule, and this capture's identity
+
+**Frozen 2026-10-23.** The four generated files carry the same header block, and it is the thing to
+read before trusting a figure they carry:
+
+- **capture** — `2026-10-23T05:50:00+08:00`, ISO 8601 with the offset, so a reader in another zone
+  reads the same instant.
+- **source commit** — `55f67f1e`, the tree the inputs were read at. A catalogue rebuilt from a
+  different tree is a different catalogue even when every count matches.
+- **seed identity** — the ten `database/seeders/data/*.json` files, each named with the first twelve
+  hex of its SHA-256. The seed files are named by content hash already, so a renamed-then-edited seed
+  shows up as a changed digest here rather than as the same filename with different content.
+
+**The rule.** A capture is stale once any seed digest above differs from the file on disk, or once a
+page reads a figure the app's own tables no longer hold. Staleness is a fact about the pair (capture,
+seed set), not about age: a week-old capture over an unchanged seed set is current, and a one-minute-old
+capture over an edited seed is stale. Re-freeze by regenerating with `php build-data.php` and
+re-stamping the header in all five places, not by editing the figures by hand.
+
+**Where the figures come from.** `build-data.php` reads the dev database joined with the committed
+GameTora export bodies and refuses to write a dataset whose growth rows do not sum to 30, whose base
+rows do not sum to 450/425/400, or whose effect join does not resolve. Nothing in this directory is a
+number a page invented; the four files are the app's own rows, shaped for a static page to read.
+

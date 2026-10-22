@@ -2,6 +2,16 @@
    TRAINER DESK v2.0.0 HFW — the support cards.
    GENERATED FILE. Do not hand-edit; run `php build-data.php` to regenerate.
    
+   FROZEN 2026-10-23 · capture 2026-10-23T05:50:00+08:00 · source commit 55f67f1e
+   Seed identity (sha256, first 12 hex, of database/seeders/data/*.json):
+     characters.c6676539.json 4f3523ea4301 · gametora-characters.e9e9ee6d.json e9e9ee6d5246
+     race-tier-labels-2026-09-29.json 7ee30f0ee28e · races.json 55dde7c90921
+     race_instances.json 294424fc78e0 · skills.609afe88.json 609afe887a29
+     support-cards.88dea522.json 88dea5221217 · support_effects.ca447e53.json ca447e53c376
+     ura-objectives.ead4bbfe.json ead4bbfefb44 · ura-races.json c12e8867d550
+   Ageing rule: see README.md in this directory. A capture older than the seed set it
+   was built from is stale, and the figure that dates it is the one above.
+   
    The support-card catalogue: every card the `support_cards` table holds, with
    its effect rows resolved against the effect dictionary, so a surface can
    print the effect's name and its unit beside the number.
