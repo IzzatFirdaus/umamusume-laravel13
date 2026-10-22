@@ -46,16 +46,16 @@ defineProps<{
 </script>
 
 <template>
-    <section class="mt-6 rounded-lg border border-rule bg-panel p-4" aria-labelledby="deck-analysis-heading">
-        <h3 id="deck-analysis-heading" class="text-lg font-semibold text-ink-strong">Deck analysis</h3>
+    <section class="mt-6 rounded-[var(--radius-lg)] border border-[var(--color-rule)] bg-[var(--color-panel)] p-4" aria-labelledby="deck-analysis-heading">
+        <h3 id="deck-analysis-heading" class="text-lg font-semibold text-[var(--color-ink-strong)]">Deck analysis</h3>
 
-        <p v-if="covered === 0" class="mt-3 rounded-lg border border-dashed border-rule bg-raised p-4 text-sm text-ink-muted">
+        <p v-if="covered === 0" class="mt-3 rounded-[var(--radius-lg)] border border-dashed border-[var(--color-rule)] bg-[var(--color-raised)] p-4 text-sm text-[var(--color-ink-muted)]">
             Nothing to analyse yet. The analysis reads the effects the six cards state, so it is blank
             until the deck has at least one card in it. Fill a slot on the left and this fills in with it.
         </p>
 
         <template v-else>
-            <p class="mt-2 text-sm text-ink-muted">
+            <p class="mt-2 text-sm text-[var(--color-ink-muted)]">
                 Every figure is an effect's highest stated anchor, the value the source publishes at its
                 top level, and never an interpolation for a level this deck holds.
             </p>
@@ -67,32 +67,32 @@ defineProps<{
                     :aria-labelledby="`deck-category-${key}`"
                     class="card p-3"
                 >
-                    <h4 :id="`deck-category-${key}`" class="text-lg font-semibold text-ink-strong">
+                    <h4 :id="`deck-category-${key}`" class="text-lg font-semibold text-[var(--color-ink-strong)]">
                         {{ category.label }}
                     </h4>
 
-                    <p v-if="category.blank" class="mt-2 text-sm text-ink-muted">
+                    <p v-if="category.blank" class="mt-2 text-sm text-[var(--color-ink-muted)]">
                         No card in the deck carries an effect here.
                     </p>
 
                     <ul v-else class="mt-2 space-y-3">
                         <li v-for="effect in category.effects" :key="effect.effect_id">
-                            <p class="text-sm font-semibold text-ink">
+                            <p class="text-sm font-semibold text-[var(--color-ink)]">
                                 {{ effect.name ?? `[Unverified] effect ${effect.effect_id}` }}
                             </p>
 
                             <!-- Each card's own figure, with the card it came from. The value is printed
                                  before the total, so the total is never the only number on the line. -->
-                            <ul class="mt-1 space-y-0.5 text-xs text-ink-muted">
+                            <ul class="mt-1 space-y-0.5 text-xs text-[var(--color-ink-muted)]">
                                 <li v-for="card in effect.cards" :key="card.card_name + card.display">
                                     <span class="font-mono">{{ card.display }}</span>
                                     <span> &middot; {{ card.card_name }}</span>
                                 </li>
                             </ul>
 
-                            <p v-if="effect.total" class="mt-1 text-sm text-ink">
+                            <p v-if="effect.total" class="mt-1 text-sm text-[var(--color-ink)]">
                                 <span class="font-mono font-semibold">{{ effect.total.display }}</span>
-                                <span class="text-ink-muted">
+                                <span class="text-[var(--color-ink-muted)]">
                                     {{ effect.total.basis }} across the {{ effect.cards.length }} card{{
                                         effect.cards.length === 1 ? '' : 's'
                                     }} carrying it
@@ -104,7 +104,7 @@ defineProps<{
                                 />
                             </p>
 
-                            <p v-else class="mt-1 text-xs text-ink-muted">
+                            <p v-else class="mt-1 text-xs text-[var(--color-ink-muted)]">
                                 The export marks this effect as multiplicative, so the values above are
                                 listed separately rather than added into a figure the client does not state.
                             </p>
@@ -117,9 +117,9 @@ defineProps<{
                  otherwise lose a number the source publishes. §1.4.8 records nine such effects as
                  carried by no card at all, so this is empty on every deck the catalogue holds today. -->
             <section v-if="uncategorised.length > 0" class="mt-4" aria-labelledby="deck-uncategorised">
-                <h4 id="deck-uncategorised" class="text-lg font-semibold text-ink-strong">Effects outside the six categories</h4>
+                <h4 id="deck-uncategorised" class="text-lg font-semibold text-[var(--color-ink-strong)]">Effects outside the six categories</h4>
                 <ul class="mt-2 space-y-2">
-                    <li v-for="effect in uncategorised" :key="effect.effect_id" class="text-sm text-ink">
+                    <li v-for="effect in uncategorised" :key="effect.effect_id" class="text-sm text-[var(--color-ink)]">
                         {{ effect.name ?? `[Unverified] effect ${effect.effect_id}` }}
                         <span class="font-mono">{{ effect.cards.map((card) => card.display).join(', ') }}</span>
                     </li>
@@ -128,21 +128,21 @@ defineProps<{
 
             <div class="mt-5 grid gap-4 @4xl:grid-cols-2">
                 <section class="card p-3" aria-labelledby="deck-strengths">
-                    <h4 id="deck-strengths" class="text-lg font-semibold text-ink-strong">What the deck covers</h4>
-                    <ul v-if="strengths.length > 0" class="mt-2 list-disc space-y-1 pl-5 text-sm text-ink-muted">
+                    <h4 id="deck-strengths" class="text-lg font-semibold text-[var(--color-ink-strong)]">What the deck covers</h4>
+                    <ul v-if="strengths.length > 0" class="mt-2 list-disc space-y-1 pl-5 text-sm text-[var(--color-ink-muted)]">
                         <li v-for="line in strengths" :key="line">{{ line }}</li>
                     </ul>
-                    <p v-else class="mt-2 text-sm text-ink-muted">
+                    <p v-else class="mt-2 text-sm text-[var(--color-ink-muted)]">
                         No card in the deck carries an effect in any of the six categories yet.
                     </p>
                 </section>
 
                 <section class="card p-3" aria-labelledby="deck-weaknesses">
-                    <h4 id="deck-weaknesses" class="text-lg font-semibold text-ink-strong">What the deck carries nothing in</h4>
-                    <ul v-if="weaknesses.length > 0" class="mt-2 list-disc space-y-1 pl-5 text-sm text-ink-muted">
+                    <h4 id="deck-weaknesses" class="text-lg font-semibold text-[var(--color-ink-strong)]">What the deck carries nothing in</h4>
+                    <ul v-if="weaknesses.length > 0" class="mt-2 list-disc space-y-1 pl-5 text-sm text-[var(--color-ink-muted)]">
                         <li v-for="line in weaknesses" :key="line">{{ line }}</li>
                     </ul>
-                    <p v-else class="mt-2 text-sm text-ink-muted">
+                    <p v-else class="mt-2 text-sm text-[var(--color-ink-muted)]">
                         Every category has at least one card carrying an effect in it.
                     </p>
                 </section>
@@ -152,8 +152,8 @@ defineProps<{
                  honest rendering: naming a card to swap would be a judgement the corpus cannot source,
                  and a deck has no optimal arrangement this tool is permitted to claim. -->
             <section class="note mt-4" aria-labelledby="deck-replacement">
-                <h4 id="deck-replacement" class="text-lg font-semibold text-ink-strong">Recommended replacement</h4>
-                <p class="mt-1 text-sm text-ink-muted">
+                <h4 id="deck-replacement" class="text-lg font-semibold text-[var(--color-ink-strong)]">Recommended replacement</h4>
+                <p class="mt-1 text-sm text-[var(--color-ink-muted)]">
                     Not built. No source states which card belongs in a slot, so a recommended replacement
                     here would be this tool's own opinion dressed as a fact. The category figures above are
                     what a Trainer has to weigh it against.

@@ -201,7 +201,7 @@ function goToPage(page: number): void {
     <template v-else>
         <p class="mt-6 text-sm text-[var(--color-ink-muted)]">{{ cards.total }} of {{ totalCount }} support cards</p>
 
-        <ul id="support-card-results" class="card mt-2 divide-y divide-[var(--color-rule)]">
+        <ul id="support-card-results" class="card mt-2 divide-y divide-rule">
             <li
                 v-for="card in cards.data"
                 :key="card.id"
