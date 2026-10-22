@@ -117,7 +117,7 @@ function goToPage(page: number): void {
     <!-- Control sizes are measured, not assumed (DESIGN.md §6.14 fixes a form input at 44px,
          and `h-11` is this repository's idiom for it). The checkbox is the WCAG 2.2 AA floor
          of 24px, with the label carrying the rest of the click area. -->
-    <div class="mt-4 rounded-md border border-rule bg-raised p-4">
+    <div class="card mt-4">
         <form
             class="flex flex-wrap items-end gap-3 text-sm"
             :aria-busy="loading ? 'true' : null"
@@ -172,14 +172,14 @@ function goToPage(page: number): void {
     <template v-if="skills.data.length === 0">
         <p
             v-if="totalCount === 0"
-            class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
+            class="note mt-8"
         >
             The skill catalog holds no rows yet. Run <code>php artisan uma:fetch gametora-skills</code> to fill it,
             or <code>php artisan uma:reparse gametora-skills</code> if a fetch says the document is unchanged.
         </p>
         <p
             v-else
-            class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
+            class="note mt-8"
         >
             Nothing matches {{ askedFor }}.
             <template v-if="searchKey !== null">
@@ -193,7 +193,7 @@ function goToPage(page: number): void {
     <template v-else>
         <p class="mt-6 text-sm text-ink-muted">{{ skills.total }} of {{ totalCount }} skills available on [Global]</p>
 
-        <ul id="skill-results" class="mt-2 divide-y divide-rule rounded-md border border-rule bg-raised">
+        <ul id="skill-results" class="card mt-2 divide-y divide-rule">
             <li
                 v-for="skill in skills.data"
                 :key="skill.id"
