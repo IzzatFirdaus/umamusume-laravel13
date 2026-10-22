@@ -14,10 +14,18 @@
  * reads at the commitment screen, and the detail lives one click away on the step that owns it.
  *
  * **`Start career` is the page's only primary, and it is honest about what it needs.** A career needs a
- * scenario and a trainee, which is exactly what `StartCareerRequest` refuses without, so the button carries
- * `aria-disabled` and a click guard rather than the `disabled` attribute: a `disabled` control dispatches no
- * click at all, so the plan's "focus the first missing row on an attempted click" is unreachable behind it.
- * The reason is printed beside the button whether or not it is pressed.
+ * scenario and a trainee, which is exactly what `StartCareerRequest` refuses without, so the button is
+ * natively `disabled` until both are entered, and the reason is printed beside it whether or not it is
+ * pressed.
+ *
+ * *Dated correction 2026-10-22 (UX audit F-05): the paragraph above used to say the button carries
+ * `aria-disabled` and a click guard "rather than the `disabled` attribute", so that the plan's "focus
+ * the first missing row on an attempted click" stayed reachable. `DESIGN.md` §5 (b)'s 2026-10-17
+ * amendment names that shape as the defect — an enabled control whose label promises what the product
+ * cannot perform — and rules native `disabled` or a named absence. The focus-on-refusal path is
+ * removed with it: a disabled control cannot be pressed, so there is no attempted click to answer, and
+ * the reason and the missing rows are already on screen before the press. The button is truly disabled
+ * while the write is in flight as well, as before.*
  *
  * **The primary action creates the run.** The write re-runs every step's own Form Request server-side
  * before it creates anything, so this page's rendering is never the trust boundary. While the write is in
@@ -276,14 +284,6 @@ const start = (): void => {
         return;
     }
 
-    if (!canStart.value) {
-        // The first missing row is the first thing to fix, and it is where the press puts focus
-        // (WCAG 2.2, SC 3.3.1: the error's own location, not a message somewhere else on the page).
-        document.getElementById(`preflight-step-${missing.value[0]?.key ?? 'scenario'}`)?.focus();
-
-        return;
-    }
-
     form.put(props.startAction);
 };
 </script>
@@ -380,9 +380,8 @@ const start = (): void => {
             <template #right>
                 <button
                     type="button"
-                    class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-5 text-sm font-semibold text-on-primary-action disabled:opacity-60 aria-disabled:opacity-60"
-                    :disabled="form.processing"
-                    :aria-disabled="!canStart || form.processing"
+                    class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-5 text-sm font-semibold text-on-primary-action disabled:opacity-60"
+                    :disabled="!canStart || form.processing"
                     @click="start"
                 >
                     {{ form.processing ? 'Starting…' : 'Start career' }}

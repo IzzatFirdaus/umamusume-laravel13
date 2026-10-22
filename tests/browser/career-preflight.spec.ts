@@ -105,21 +105,33 @@ test('names every unentered step and blocks the start until the two required one
     // Both required entries are named in words beside the button, before it is ever pressed.
     await expect(page.getByText('A scenario and a trainee are not entered')).toBeVisible();
 
-    await expect(page.getByRole('button', { name: 'Start career' })).toHaveAttribute('aria-disabled', 'true');
+    // DESIGN.md §5 (b): a reachable action the screen forbids renders with a native disabled state or
+    // as a named absence with its reason, "never as an enabled control whose label promises what the
+    // product cannot perform". Asserted on the attributes rather than through `toBeDisabled()`:
+    // Playwright's actionability check honours `aria-disabled`, so that matcher passes on both shapes
+    // and cannot tell them apart. Before this case the button carried only `aria-disabled`.
+    const startButton = page.getByRole('button', { name: 'Start career' });
+    await expect(startButton).toBeVisible();
+    expect(await startButton.evaluate((el) => (el as HTMLButtonElement).disabled)).toBe(true);
+    expect(await startButton.evaluate((el) => el.hasAttribute('aria-disabled'))).toBe(false);
 });
 
-test('a blocked start moves focus to the first missing row instead of creating anything', async ({ page }) => {
+test('a blocked start is unpressable and names the first row to fix', async ({ page }) => {
     await openPreflight(page);
 
-    // `force` because the control is `aria-disabled` on purpose: the product keeps it clickable so the
-    // press can be answered with the first row to fix, while Playwright's actionability check reads
-    // `aria-disabled="true"` as "not enabled" and would never dispatch the click.
-    await page.getByRole('button', { name: 'Start career' }).click({ force: true });
+    // No `force` and no click guard: the native `disabled` attribute is what refuses the press.
+    // The old case had to force the click because `aria-disabled` announces a state without cancelling
+    // activation, which is exactly the defect §5 (b) names.
+    const start = page.getByRole('button', { name: 'Start career' });
+    expect(await start.evaluate((el) => (el as HTMLButtonElement).disabled)).toBe(true);
 
-    // Nothing was created, the URL did not move, and focus is on the first thing to fix rather than on
-    // the button that refused.
+    await start.click({ force: true, trial: true }).catch(() => undefined);
+
+    // Nothing was created and the URL did not move.
     await expect(page).toHaveURL(/\/career\/setup\/preflight$/);
-    await expect(page.locator('#preflight-step-scenario')).toBeFocused();
+
+    // The reason stays printed beside the button, so the refusal is readable without pressing it.
+    await expect(page.getByText('A scenario and a trainee are not entered')).toBeVisible();
 });
 
 test('an Edit round trip returns with every value intact', async ({ page }) => {
