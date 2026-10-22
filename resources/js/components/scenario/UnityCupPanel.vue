@@ -175,7 +175,7 @@ const counterSegments = computed((): string[] => {
         <div class="flex flex-col gap-3">
             <!-- The team's own identity (A6.6), drawn only when the Trainer entered one of the four:
                  a run that named no team gets no card rather than four empty rows. -->
-            <div v-if="hasTeamIdentity" class="rounded-md border border-rule bg-panel p-3">
+            <div v-if="hasTeamIdentity" class="card p-3">
                 <CapsuleHeader title="Team" class="mb-2" />
                 <dl class="flex flex-col gap-1 text-sm">
                     <div v-if="props.scenario.team.team_name !== null" class="flex items-baseline justify-between gap-3">
@@ -207,7 +207,7 @@ const counterSegments = computed((): string[] => {
                 <ProvenanceBadge state="estimated" :title="bonusTitle" />
             </p>
 
-            <div class="rounded-md border border-rule bg-panel p-3">
+            <div class="card p-3">
                 <CapsuleHeader title="Team stat grades" class="mb-2" />
                 <ul class="flex flex-col gap-1" aria-label="Team stat grades">
                     <li
@@ -228,7 +228,7 @@ const counterSegments = computed((): string[] => {
         </div>
 
         <div class="flex flex-col gap-3">
-            <div v-if="composesBursts" class="rounded-md border border-rule bg-panel p-3">
+            <div v-if="composesBursts" class="card p-3">
                 <CapsuleHeader title="Spirit" class="mb-2" />
                 <!-- The value and the bar are the same reading (design-2.0 §45). No column records a
                      Spirit value and no sourced maximum exists, so the track renders empty and the
@@ -257,12 +257,12 @@ const counterSegments = computed((): string[] => {
 
             <!-- The Unity Cup progression counters (A6.7). Drawn only when the Trainer stated one; the
                  combined total below reads these two tallies. -->
-            <div v-if="counterSegments.length > 0" class="rounded-md border border-rule bg-panel p-3">
+            <div v-if="counterSegments.length > 0" class="card p-3">
                 <CapsuleHeader title="Unity Cup progress" class="mb-2" />
                 <p class="text-sm text-ink">{{ counterSegments.join(' · ') }}</p>
             </div>
 
-            <div v-if="composesBursts && props.scenario.team.bands.length > 0" class="rounded-md border border-rule bg-panel p-3">
+            <div v-if="composesBursts && props.scenario.team.bands.length > 0" class="card p-3">
                 <div class="mb-2 flex flex-wrap items-baseline gap-2">
                     <CapsuleHeader title="Burst count bands" />
                     <ProvenanceBadge
@@ -323,7 +323,7 @@ const counterSegments = computed((): string[] => {
             <div
                 v-if="props.scenario.team.special_training.energy_penalty_removed !== null
                     || props.scenario.team.special_training.wit_burst_energy_bonus !== null"
-                class="rounded-md border border-rule bg-panel p-3"
+                class="card p-3"
             >
                 <CapsuleHeader title="Special Training" class="mb-2" />
                 <p v-if="props.scenario.team.special_training.energy_penalty_removed" class="text-sm text-ink">
