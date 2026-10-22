@@ -729,3 +729,909 @@ html[data-theme='dark'] {
         color: var(--color-ink-muted);
     }
 }
+
+/* @primitives
+ * Primitive layer ported 2026-10-22 from shell.css (map section 2: 3 REUSE, 11 RE-SPELL,
+ * 6 CONFLICT, 1 DROP). CONFLICT families carry the FQ-01..FQ-04 rulings; .skel is
+ * deliberately absent (AGENTS.md section 13 bans decorative skeletons). Every
+ * var() resolves to an app token, and every rule carries its docstring.
+ */
+/* .card: ported from shell.css; resolves to house tokens. */
+.card {
+    background:var(--color-panel);
+    border:1px solid var(--color-rule);
+    border-radius:var(--radius-md);
+    padding:14px 16px;
+}
+
+/* .card + .card: ported from shell.css; resolves to house tokens. */
+.card + .card {
+    margin-top:14px;
+}
+
+/* .card > h2: ported from shell.css; resolves to house tokens. */
+.card > h2 {
+    margin:0;
+    font-size:15px;
+    font-weight:800;
+    color:var(--color-ink-strong);
+    padding-bottom:9px;
+    margin-bottom:12px;
+    border-bottom:1px solid var(--color-rule);
+}
+
+/* .card > h3: ported from shell.css; resolves to house tokens. */
+.card > h3 {
+    margin:0 0 8px;
+    font-size:13px;
+    font-weight:800;
+    color:var(--color-ink-strong);
+}
+
+/* .card .sub: ported from shell.css; resolves to house tokens. */
+.card .sub {
+    margin:-6px 0 10px;
+    font-size:12px;
+    color:var(--color-ink-muted);
+}
+
+/* .pill: ported from shell.css; resolves to house tokens. */
+.pill {
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    border-radius:var(--radius-pill);
+    padding:3px 10px;
+    font-size:11.5px;
+    font-weight:800;
+    line-height:1.45;
+}
+
+/* .pill-positive: ported from shell.css; resolves to house tokens. */
+.pill-positive {
+    background:var(--color-status-positive);
+    color:var(--color-status-positive-ink);
+}
+
+/* .pill-caution: ported from shell.css; resolves to house tokens. */
+.pill-caution {
+    background:var(--color-status-caution);
+    color:var(--color-status-caution-ink);
+}
+
+/* .pill-neutral: ported from shell.css; resolves to house tokens. */
+.pill-neutral {
+    background:var(--color-sunken);
+    color:var(--color-ink-muted);
+}
+
+/* .pill-accent: ported from shell.css; resolves to house tokens. */
+.pill-accent {
+    background:var(--color-brand-accent-soft);
+    color:var(--color-brand-accent-ink);
+}
+
+/* .pill-outline: ported from shell.css; resolves to house tokens. */
+.pill-outline {
+    border:1px solid var(--color-rule);
+    background:var(--color-raised);
+    color:var(--color-ink-muted);
+}
+
+/* .tag: ported from shell.css; resolves to house tokens. */
+.tag {
+    display:inline-block;
+    border-radius:var(--radius-sm);
+    padding:1px 6px;
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:.03em;
+    border:1px solid var(--color-rule);
+    background:var(--color-raised);
+    color:var(--color-ink-muted);
+}
+
+/* .tag.auto: ported from shell.css; resolves to house tokens. */
+.tag.auto {
+    color:var(--color-ink-muted);
+    border-color:var(--color-rule);
+}
+
+/* .tag.you: ported from shell.css; resolves to house tokens. */
+.tag.you {
+    color:var(--color-ink-strong);
+    border-color:var(--color-rule);
+    background:var(--color-sunken);
+}
+
+/* .trust: ported from shell.css; resolves to house tokens. */
+.trust {
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:.03em;
+    border-radius:var(--radius-sm);
+    padding:1px 6px;
+    border:1px solid transparent;
+}
+
+/* .trust .g: ported from shell.css; resolves to house tokens. */
+.trust .g {
+    font-size:11px;
+    line-height:1;
+}
+
+/* .trust-calculated: ported from shell.css; resolves to house tokens. */
+.trust-calculated {
+    color:var(--color-sp-ink);
+    border-color:var(--color-sp-ink);
+}
+
+/* .trust-estimated: ported from shell.css; resolves to house tokens. */
+.trust-estimated {
+    color:var(--color-up);
+    border-color:var(--color-up);
+}
+
+/* .trust-unknown: ported from shell.css; resolves to house tokens. */
+.trust-unknown {
+    color:var(--color-ink-muted);
+    border-color:var(--color-rule);
+}
+
+/* .pickcard: ported from shell.css; resolves to house tokens. */
+.pickcard {
+    position:relative;
+    cursor:pointer;
+    min-height:44px;
+}
+
+/* .pickcard:hover: ported from shell.css; resolves to house tokens. */
+.pickcard:hover {
+    border-color:var(--color-rule);
+}
+
+/* .pickcard:has(input:checked): ported from shell.css; resolves to house tokens. */
+.pickcard:has(input:checked) {
+    border-color:var(--color-brand-chrome);
+    box-shadow:inset 0 0 0 1px var(--color-brand-chrome);
+}
+
+/* .pickcard:has(input:focus-visible): ported from shell.css; resolves to house tokens. */
+.pickcard:has(input:focus-visible) {
+    outline:2px solid var(--color-ring);
+    outline-offset:2px;
+}
+
+/* .pickcard input[type="radio"]: ported from shell.css; resolves to house tokens. */
+.pickcard input[type="radio"] {
+    flex:none;
+}
+
+/* .srow: ported from shell.css; resolves to house tokens. */
+.srow {
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:3px 10px;
+    align-items:baseline;
+    padding:7px 0;
+    border-bottom:1px solid var(--color-rule);
+}
+
+/* .srow:last-of-type: ported from shell.css; resolves to house tokens. */
+.srow:last-of-type {
+    border-bottom:0;
+}
+
+/* .srow .k: ported from shell.css; resolves to house tokens. */
+.srow .k {
+    font-size:13px;
+    font-weight:700;
+    color:var(--color-ink-strong);
+}
+
+/* .srow .k em: ported from shell.css; resolves to house tokens. */
+.srow .k em {
+    font-style:normal;
+    font-size:11px;
+    font-weight:600;
+    color:var(--color-ink-muted);
+    margin-left:4px;
+}
+
+/* .srow .v: ported from shell.css; resolves to house tokens. */
+.srow .v {
+    font-size:13px;
+    font-weight:800;
+    color:var(--color-ink-strong);
+}
+
+/* .srow .v s: ported from shell.css; resolves to house tokens. */
+.srow .v s {
+    text-decoration:none;
+    font-size:11px;
+    font-weight:600;
+    color:var(--color-ink-muted);
+}
+
+/* .card:has(> table.t): ported from shell.css; resolves to house tokens. */
+.card:has(> table.t) {
+    overflow-x:auto;
+}
+
+/* .tiles: ported from shell.css; resolves to house tokens. */
+.tiles {
+    display:grid;
+    gap:9px;
+}
+
+/* .tile: ported from shell.css; resolves to house tokens. */
+.tile {
+    border:1px solid var(--color-rule);
+    border-radius:var(--radius-sm);
+    background:var(--color-raised);
+    padding:8px 10px;
+}
+
+/* .tile .k: ported from shell.css; resolves to house tokens. */
+.tile .k {
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--color-ink-muted);
+}
+
+/* .tile .v: ported from shell.css; resolves to house tokens. */
+.tile .v {
+    font-size:16px;
+    font-weight:800;
+    color:var(--color-ink-strong);
+    line-height:1.3;
+}
+
+/* .tile .v.na: ported from shell.css; resolves to house tokens. */
+.tile .v.na {
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--color-ink-muted);
+}
+
+/* .note: ported from shell.css; resolves to house tokens. */
+.note {
+    display:flex;
+    gap:9px;
+    align-items:flex-start;
+    border:1px dashed var(--color-rule);
+    border-radius:var(--radius-sm);
+    background:var(--color-raised);
+    padding:9px 11px;
+    font-size:12px;
+    color:var(--color-ink-muted);
+    line-height:1.45;
+}
+
+/* .note .g: ported from shell.css; resolves to house tokens. */
+.note .g {
+    color:var(--color-ink-muted);
+    font-weight:800;
+    flex:none;
+}
+
+/* .note b: ported from shell.css; resolves to house tokens. */
+.note b {
+    color:var(--color-ink-strong);
+}
+
+/* .warn: ported from shell.css; resolves to house tokens. */
+.warn {
+    display:flex;
+    gap:9px;
+    align-items:flex-start;
+    border:1px solid var(--color-rule);
+    border-left:3px solid var(--color-risk);
+    border-radius:var(--radius-sm);
+    background:var(--color-raised);
+    padding:9px 11px;
+    font-size:12.5px;
+    color:var(--color-ink-strong);
+    font-weight:600;
+}
+
+/* .info: ported from shell.css; resolves to house tokens. */
+.info {
+    display:flex;
+    gap:9px;
+    align-items:flex-start;
+    border:1px solid var(--color-rule);
+    border-left:3px solid var(--color-primary-action);
+    border-radius:var(--radius-sm);
+    background:var(--color-raised);
+    padding:9px 11px;
+    font-size:12.5px;
+    color:var(--color-ink-strong);
+}
+
+/* .state: ported from shell.css; resolves to house tokens. */
+.state {
+    border:1px dashed var(--color-rule);
+    border-radius:var(--radius-md);
+    background:var(--color-panel);
+    padding:26px 22px;
+    text-align:center;
+}
+
+/* .state h3: ported from shell.css; resolves to house tokens. */
+.state h3 {
+    margin:0 0 6px;
+    font-size:14px;
+    color:var(--color-ink-strong);
+}
+
+/* .state p: ported from shell.css; resolves to house tokens. */
+.state p {
+    margin:0 auto;
+    max-width:52ch;
+    font-size:12.5px;
+    color:var(--color-ink-muted);
+}
+
+/* .state .act: ported from shell.css; resolves to house tokens. */
+.state .act {
+    margin-top:12px;
+}
+
+/* .state-error: ported from shell.css; resolves to house tokens. */
+.state-error {
+    border:1px solid var(--color-rule);
+    border-left:3px solid var(--color-risk);
+    border-radius:var(--radius-md);
+    background:var(--color-panel);
+    padding:20px 22px;
+    text-align:left;
+}
+
+/* .state-error .hd: ported from shell.css; resolves to house tokens. */
+.state-error .hd {
+    display:flex;
+    align-items:center;
+    gap:9px;
+    font-weight:800;
+    color:var(--color-ink-strong);
+    font-size:13.5px;
+}
+
+/* .state-error .hd .ic: ported from shell.css; resolves to house tokens. */
+.state-error .hd .ic {
+    flex:none;
+    width:20px;
+    height:20px;
+    border-radius:var(--radius-sm);
+    display:grid;
+    place-items:center;
+    background:var(--color-risk);
+    color:#fff;
+    font-size:13px;
+    font-weight:900;
+}
+
+/* .state-error p: ported from shell.css; resolves to house tokens. */
+.state-error p {
+    margin:7px 0 0;
+    font-size:12.5px;
+    color:var(--color-ink-muted);
+    max-width:62ch;
+}
+
+/* .state-error .src: ported from shell.css; resolves to house tokens. */
+.state-error .src {
+    font-family:var(--font-mono, ui-monospace, monospace);
+    font-size:11.5px;
+    color:var(--color-ink-muted);
+}
+
+/* .state-error .act: ported from shell.css; resolves to house tokens. */
+.state-error .act {
+    margin-top:12px;
+}
+
+/* .mood: ported from shell.css; resolves to house tokens. */
+.mood {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-weight:800;
+}
+
+/* .mood .arrow: ported from shell.css; resolves to house tokens. */
+.mood .arrow {
+    font-size:13px;
+    line-height:1;
+}
+
+/* .mood-up .arrow: ported from shell.css; resolves to house tokens. */
+.mood-up .arrow {
+    color:var(--color-green-deep);
+}
+
+/* .mood-flat .arrow: ported from shell.css; resolves to house tokens. */
+.mood-flat .arrow {
+    color:var(--color-ink-muted);
+}
+
+/* .mood-down .arrow: ported from shell.css; resolves to house tokens. */
+.mood-down .arrow {
+    color:var(--color-risk);
+}
+
+/* .mood .pct: ported from shell.css; resolves to house tokens. */
+.mood .pct {
+    font-weight:700;
+    color:var(--color-ink-muted);
+}
+
+/* .stat-icon: ported from shell.css; resolves to house tokens. */
+.stat-icon {
+    display:inline-flex;
+    flex:none;
+    width:18px;
+    height:18px;
+    vertical-align:-3px;
+}
+
+/* .stat-icon svg: ported from shell.css; resolves to house tokens. */
+.stat-icon svg {
+    width:18px;
+    height:18px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.7;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+/* .stat-speed: ported from shell.css; resolves to house tokens. */
+.stat-speed {
+    color:#2F6BC4;
+}
+
+/* .stat-stamina: ported from shell.css; resolves to house tokens. */
+.stat-stamina {
+    color:#C64B5E;
+}
+
+/* .stat-power: ported from shell.css; resolves to house tokens. */
+.stat-power {
+    color:#8A5A32;
+}
+
+/* .stat-guts: ported from shell.css; resolves to house tokens. */
+.stat-guts {
+    color:#C4557E;
+}
+
+/* .stat-wit: ported from shell.css; resolves to house tokens. */
+.stat-wit {
+    color:#3E6B3A;
+}
+
+/* .stat-pal: ported from shell.css; resolves to house tokens. */
+.stat-pal {
+    color:#6E7A45;
+}
+
+/* .stat-group: ported from shell.css; resolves to house tokens. */
+.stat-group {
+    color:#3E7A4A;
+}
+
+/* .stat-sp: ported from shell.css; resolves to house tokens. */
+.stat-sp {
+    color:#0E7490;
+}
+
+/* .type-chip: ported from shell.css; resolves to house tokens. */
+.type-chip {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.02em;
+    border:1px solid var(--color-rule);
+    border-radius:var(--radius-sm);
+    padding:1px 7px;
+    background:var(--color-raised);
+}
+
+/* .type-chip .stat-icon: ported from shell.css; resolves to house tokens. */
+.type-chip .stat-icon {
+    width:14px;
+    height:14px;
+    vertical-align:-2px;
+}
+
+/* .type-chip .stat-icon svg: ported from shell.css; resolves to house tokens. */
+.type-chip .stat-icon svg {
+    width:14px;
+    height:14px;
+    stroke-width:1.9;
+}
+
+/* .slot: ported from shell.css; resolves to house tokens. */
+.slot {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:1px;
+    flex:none;
+    padding:2px;
+    border:1px dashed var(--color-rule);
+    border-radius:var(--radius-md);
+    background:var(--color-sunken);
+    color:var(--color-ink-faint);
+    overflow:hidden;
+}
+
+/* .slot-10: ported from shell.css; resolves to house tokens. */
+.slot-10 {
+    width:40px;
+    height:40px;
+}
+
+/* .slot-12: ported from shell.css; resolves to house tokens. */
+.slot-12 {
+    width:48px;
+    height:48px;
+}
+
+/* .slot-16: ported from shell.css; resolves to house tokens. */
+.slot-16 {
+    width:64px;
+    height:64px;
+}
+
+/* .slot svg: ported from shell.css; resolves to house tokens. */
+.slot svg {
+    width:15px;
+    height:15px;
+    flex:none;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.7;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+/* .slot-10 svg: ported from shell.css; resolves to house tokens. */
+.slot-10 svg {
+    width:12px;
+    height:12px;
+}
+
+/* .slot .cap: ported from shell.css; resolves to house tokens. */
+.slot .cap {
+    font-size:8px;
+    font-weight:700;
+    letter-spacing:.02em;
+    line-height:1.15;
+    text-align:center;
+    white-space:nowrap;
+    color:var(--color-ink-muted);
+}
+
+/* .subnav: ported from shell.css; resolves to house tokens. */
+.subnav {
+    display:flex;
+    align-items:center;
+    gap:4px;
+    flex-wrap:wrap;
+    margin-bottom:16px;
+    padding:5px;
+    border:1px solid var(--color-rule);
+    border-radius:var(--radius-md);
+    background:var(--color-raised);
+}
+
+/* .subnav-hub: ported from shell.css; resolves to house tokens. */
+.subnav-hub {
+    display:inline-flex;
+    align-items:center;
+    min-height:44px;
+    padding:0 11px;
+    border-radius:var(--radius-sm);
+    background:var(--color-brand-chrome);
+    color:var(--color-on-brand-chrome);
+    font-size:12px;
+    font-weight:800;
+    text-decoration:none;
+    white-space:nowrap;
+}
+
+/* .subnav-hub:hover: ported from shell.css; resolves to house tokens. */
+.subnav-hub:hover {
+    filter:brightness(1.08);
+}
+
+/* .subnav-hub:focus-visible: ported from shell.css; resolves to house tokens. */
+.subnav-hub:focus-visible {
+    outline:3px solid var(--color-ring);
+    outline-offset:2px;
+}
+
+/* .subnav-sep: ported from shell.css; resolves to house tokens. */
+.subnav-sep {
+    width:1px;
+    align-self:stretch;
+    margin:0 5px;
+    background:var(--color-rule);
+}
+
+/* .subnav-item: ported from shell.css; resolves to house tokens. */
+.subnav-item {
+    display:inline-flex;
+    align-items:center;
+    min-height:44px;
+    padding:0 11px;
+    border-radius:var(--radius-sm);
+    color:var(--color-ink-muted);
+    font-size:12px;
+    font-weight:700;
+    text-decoration:none;
+    white-space:nowrap;
+}
+
+/* .subnav-item:hover: ported from shell.css; resolves to house tokens. */
+.subnav-item:hover {
+    background:var(--color-sunken);
+    color:var(--color-ink-strong);
+}
+
+/* .subnav-item:focus-visible: ported from shell.css; resolves to house tokens. */
+.subnav-item:focus-visible {
+    outline:3px solid var(--color-ring);
+    outline-offset:2px;
+}
+
+/* .subnav-item.is-current: ported from shell.css; resolves to house tokens. */
+.subnav-item.is-current {
+    background:color-mix(in srgb,var(--color-brand-chrome) 10%,var(--color-raised));
+    color:var(--color-ink-strong);
+    font-weight:800;
+    box-shadow:inset 0 -2px 0 var(--color-brand-chrome);
+}
+
+/* .subnav: ported from shell.css; resolves to house tokens. */
+.subnav {
+    overflow-x:auto;
+    flex-wrap:nowrap;
+}
+
+/* .empty: ported from shell.css; resolves to house tokens. */
+.empty {
+    border:1px dashed var(--color-rule);
+    border-radius:var(--radius-md);
+    background:var(--color-panel);
+    padding:26px 22px;
+    text-align:center;
+}
+
+/* .empty h2: ported from shell.css; resolves to house tokens. */
+.empty h2 {
+    margin:0 0 6px;
+    font-size:15px;
+    font-weight:800;
+    color:var(--color-ink-strong);
+}
+
+/* .empty p: ported from shell.css; resolves to house tokens. */
+.empty p {
+    margin:0 auto;
+    max-width:52ch;
+    font-size:12.5px;
+    color:var(--color-ink-muted);
+}
+
+/* .empty .act: ported from shell.css; resolves to house tokens. */
+.empty .act {
+    margin-top:12px;
+}
+
+/* .savebar: ported from shell.css; resolves to house tokens. */
+.savebar {
+    position:sticky;
+    bottom:0;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:14px;
+    padding:10px 12px;
+    border:1px solid var(--color-rule);
+    border-radius:var(--radius-md);
+    background:var(--color-raised);
+    box-shadow:var(--shadow-overlay);
+    flex-wrap:wrap;
+}
+
+/* .savebar .dirty: ported from shell.css; resolves to house tokens. */
+.savebar .dirty {
+    margin-right:auto;
+    font-size:12px;
+    font-weight:700;
+    color:var(--color-ink-muted);
+}
+
+/* .savebar .dirty: ported from shell.css; resolves to house tokens. */
+.savebar .dirty {
+    margin-right:0;
+    flex:1 0 100%;
+}
+
+/* .savebar .btn: ported from shell.css; resolves to house tokens. */
+.savebar .btn {
+    flex:1 1 auto;
+}
+
+/* .stepper: ported from shell.css; resolves to house tokens. */
+.stepper {
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+    align-items:center;
+}
+
+/* .step: ported from shell.css; resolves to house tokens. */
+.step {
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    min-height:44px;
+    padding:0 12px;
+    border-radius:var(--radius-pill);
+    font-size:12px;
+    font-weight:700;
+    border:1px solid var(--color-rule);
+    background:var(--color-raised);
+    color:var(--color-ink-muted);
+}
+
+/* .step .n: ported from shell.css; resolves to house tokens. */
+.step .n {
+    display:grid;
+    place-items:center;
+    width:17px;
+    height:17px;
+    border-radius:50%;
+    background:var(--color-sunken);
+    color:var(--color-ink-muted);
+    font-size:10px;
+    font-weight:900;
+}
+
+/* .step.is-empty .n: ported from shell.css; resolves to house tokens. */
+.step.is-empty .n {
+    background:transparent;
+    border:1px dashed var(--color-rule);
+    color:var(--color-ink-muted);
+}
+
+/* .step.is-partial: ported from shell.css; resolves to house tokens. */
+.step.is-partial {
+    border-color:var(--color-rule);
+    color:var(--color-ink);
+}
+
+/* .step.is-partial .n: ported from shell.css; resolves to house tokens. */
+.step.is-partial .n {
+    background:var(--color-raised);
+    border:1px solid var(--color-rule);
+    color:var(--color-ink-muted);
+}
+
+/* .step.is-partial .n::after: ported from shell.css; resolves to house tokens. */
+.step.is-partial .n::after {
+    content:"";
+    position:absolute;
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:var(--color-status-caution-ink);
+    transform:translate(9px,-9px);
+}
+
+/* .step.is-partial .n: ported from shell.css; resolves to house tokens. */
+.step.is-partial .n {
+    position:relative;
+}
+
+/* .step.is-done: ported from shell.css; resolves to house tokens. */
+.step.is-done {
+    color:var(--color-ink-muted);
+}
+
+/* .step.is-done .n: ported from shell.css; resolves to house tokens. */
+.step.is-done .n {
+    background:var(--color-status-positive);
+    color:var(--color-status-positive-ink);
+    font-size:0;
+}
+
+/* .step.is-done .n::before: ported from shell.css; resolves to house tokens. */
+.step.is-done .n::before {
+    content:"\2713";
+    font-size:10px;
+    line-height:1;
+    color:var(--color-status-positive-ink);
+}
+
+/* .step[aria-current="step"]: ported from shell.css; resolves to house tokens. */
+.step[aria-current="step"] {
+    border-color:var(--color-pick-line);
+    color:var(--color-ink-strong);
+    background:var(--color-green-tint);
+}
+
+/* .step[aria-current="step"] .n: ported from shell.css; resolves to house tokens. */
+.step[aria-current="step"] .n {
+    background:var(--color-brand-chrome);
+    color:#fff;
+    font-size:10px;
+}
+
+/* .step[aria-current="step"] .n::before, .step[aria-current="step"] .n::after: ported from shell.css; resolves to house tokens. */
+.step[aria-current="step"] .n::before, .step[aria-current="step"] .n::after {
+    content:none;
+}
+
+/* .step-legend: ported from shell.css; resolves to house tokens. */
+.step-legend {
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    font-size:11px;
+    color:var(--color-ink-muted);
+    margin:-6px 0 12px;
+}
+
+/* .step-legend span: ported from shell.css; resolves to house tokens. */
+.step-legend span {
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+}
+
+/* .step-legend i: ported from shell.css; resolves to house tokens. */
+.step-legend i {
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    display:inline-block;
+    font-style:normal;
+}
+
+/* .step-legend .l-empty: ported from shell.css; resolves to house tokens. */
+.step-legend .l-empty {
+    background:transparent;
+    border:1px dashed var(--color-rule);
+}
+
+/* .step-legend .l-partial: ported from shell.css; resolves to house tokens. */
+.step-legend .l-partial {
+    background:var(--color-raised);
+    border:1px solid var(--color-rule);
+}
+
+/* .step-legend .l-done: ported from shell.css; resolves to house tokens. */
+.step-legend .l-done {
+    background:var(--color-status-positive);
+}
+
+/* .step-legend .l-current: ported from shell.css; resolves to house tokens. */
+.step-legend .l-current {
+    background:var(--color-brand-chrome);
+}
+
