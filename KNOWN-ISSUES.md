@@ -3211,3 +3211,42 @@ closers in `UMAMUSUME_REFERENCE.md` (lines 133, 2683, 2691) and 2 in `docs/resea
 from each closing fence and leave the fence bare. The class is entirely mechanical: no file needed a closer
 added, and no tagged line turned out to be an opener rather than a closer. Re-run the checker on the file
 until it reports zero findings for it, then tree-wide until it exits 0.
+
+### KI-112 The skill detail shipped `ADR-0011` on screen, so the copy gate that reads every template for a repository identifier was red at HEAD - FILED 2026-10-22 (copy-gate close-out), CLOSED 2026-10-22
+
+**Status: CLOSED** by `6ca8d9a` ("fix(skills): keep the ADR citation out of the skill detail copy").
+
+**Proving command.** Before: `php artisan test --compact --filter="UiHygiene"` -> 1 failed, 53 passed (597
+assertions), with `resources/js/pages/Skills/Show.vue:118` and `:160` reported as "carries an ADR citation".
+The file is at HEAD state, so the failure belongs to a committed change and not to a peer edit. After:
+the same filter -> 4 passed (4 assertions), exit 0. `php artisan test --compact --filter="Skill"` -> 134
+passed (2474 assertions), exit 0. `npm run typecheck` exits 0. `npm run lint:ui` -> `ui-lint: clean`.
+`npm run build` -> exit 0, 1072 modules transformed. The browser proof, on a session-private pair
+(`PLAYWRIGHT_PORT=8163 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/ui-hygiene-fix/browser-8163.sqlite`):
+`npx playwright test tests/browser/skills.spec.ts` -> 10 passed (1.7m), including the two cases whose
+assertions changed.
+
+**How it happened.** `aaf2fe69` (2026-10-18, "chore(copy): remove the eight residual developer identifiers")
+removed `ADR-0011` and `G-SK-20` from this page's shipped copy on purpose, and the gate
+`tests/Feature/UiHygieneTest.php` was already in force. `c61ef815` (2026-10-20) put `(ADR-0011)` back into
+the disclosure summary and the absence paragraph, and its own message says why: `skills.spec.ts` asserted
+the citation was on screen and neither mechanics branch had named it since the drop. So the browser spec and
+the copy gate were made to disagree, and the browser spec won by two days. The two cannot both hold: the
+guard reads every `.vue` template for `/\bADR-\d+/` and `AGENTS.md` §5 says a repository identifier never
+reaches a Trainer.
+
+**The repair.** The ruling's substance rides on the summary in words a Trainer can read, so the fact is
+still on the summary and not only inside the fold, which is what the browser spec was written to hold; the
+citation moved to the template comment, where the guard's own docblock says a maintainer trace belongs. The
+three spec assertions were re-pointed at the substance rather than deleted, and both cases still require the
+absence to be stated on the summary.
+
+**What closure does not cover.** Three things. First, the spec's comment said "both mechanics branches", but
+only the branch that has conditions is exercised: the `v-else` absence paragraph has no browser case, and
+this entry did not add one, so that branch is covered by the guard alone. Second, `AGENTS.md` §5 also says
+"No em dashes in shipped copy", and 47 `.vue` files under `resources/js` carry one, this summary's own
+`Raw engine data - the source's own expressions` among them; the only gate for that rule reads `.blade.php`
+files, which the Vue port retired, so nothing enforces it. This closure did not touch the em dash, because
+the tree-wide divergence is a separate decision and not a defect this entry owns. Third, `G-SK-20` is the
+identifier the guard's goal pattern does not match (`/\bG-\d+\b/` does not match `G-SK-20`), so a future
+copy pass could reintroduce it and the gate would stay green.
