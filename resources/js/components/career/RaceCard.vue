@@ -141,7 +141,7 @@ const folds = computed<boolean>(
 </script>
 
 <template>
-    <li class="rounded-lg border border-rule bg-panel p-4">
+    <li class="card rounded-lg p-4">
         <!-- A slot rather than a prop, because the only caller that fills it is the planner's
              comparison picker (`RacePlanList.vue`), and a card with no selection control must render
              exactly as D10 left it. Unfilled, this contributes nothing. -->
