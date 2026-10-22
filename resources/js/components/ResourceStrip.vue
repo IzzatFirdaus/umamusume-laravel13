@@ -111,7 +111,7 @@ function present(widget: Widget): Box {
                 <span class="mt-1 block text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ box.label }}</span>
                 <span v-if="box.sub !== null" class="block text-xs text-ink-muted">{{ box.sub }}</span>
             </div>
-            <div v-else class="min-w-36 flex-1 rounded-md border border-rule bg-raised px-3 py-2">
+            <div v-else class="min-w-36 flex-1 card px-3 py-2">
                 <span class="block text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ box.label }}</span>
                 <span
                     class="block font-mono text-xl font-extrabold tabular-nums text-ink-strong"
