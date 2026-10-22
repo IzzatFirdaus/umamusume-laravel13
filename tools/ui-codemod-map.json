@@ -1,0 +1,3 @@
+{
+    "_schema": "normalised class set -> primitive name. Tokens whitespace-split, lexicographically sorted, rejoined with a single space. The codemod normalises before lookup."
+}
