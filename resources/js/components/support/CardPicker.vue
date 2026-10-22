@@ -140,7 +140,7 @@ defineExpose({ open });
             </li>
         </ul>
 
-        <p v-else class="mt-3 rounded-md border border-dashed border-rule p-4 text-sm text-ink-muted">
+        <p v-else class="note mt-3">
             No support card matches that filter.
         </p>
     </dialog>
