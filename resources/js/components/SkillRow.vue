@@ -16,7 +16,7 @@ defineProps<{
 
         <span
             v-if="skill.is_unique"
-            class="rounded-full bg-sunken px-2 py-0.5 text-xs text-ink-strong"
+            class="pill pill-neutral"
             title="Marked from the source's skill class code, not from a card's own skill list."
         >✦ Unique</span>
 
