@@ -413,6 +413,8 @@ Before any code, two decisions are recorded. The five scope questions were ruled
 | `tests/Feature` files | **203** top-level / **206** recursive | **re-derived**: top-level `.php` 203, recursive 206, tracked at HEAD 206, the 3-file difference being `tests/Feature/Schema/` |
 | colour tokens pinned | **81** | `DesignTokensTest.php:271` (`toHaveCount(81)`), re-asserted at `:571` |
 
+**Corrected 2026-10-23 (Phase 3 continuation).** The three folder counts above over-count. Measured against the filesystem at `45adcab9`: **ui 15** not 17, **Form 7** not 9, **scenario 17** not 18. **Total 97**, not 102. A name-based check also double-counts `SparkChip.vue`, which exists at both root and `legacy/` — match by path, not name. The other folder counts (root 23, career 20, support 5, catalog 3, database 2, review 2, legacy 2, skills 1) are correct; with the three above corrected, the table sums to Total **97**.
+
 **Do not inherit a count from `frontend-architecture-plan.md` or from `DESIGN.md`.** The plan's Part I still carries pre-release figures with dated corrections beside them; the corrected value is the one above.
 
 ---
