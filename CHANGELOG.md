@@ -11,6 +11,34 @@ This file starts empty on purpose. The repository's whole history predates it, t
 mean writing claims about commits that were never recorded as changes, which `AGENTS.md` §5 forbids.
 Entries below are written at the time of the change, not back-filled.
 
+## [2.0.2] - 2026-10-22
+
+A PATCH on top of 2.0.1. It corrects one stale browser expectation that 2.0.1's absence-channel
+change invalidated, and records what 2.0.1's verification established. No product behaviour changes.
+
+### Fixed
+
+- 	ests/browser/dashboard.spec.ts located the Dashboard's Energy and Team Rank absences by
+  getByTitle(...). SubCell renders those reasons on AbsenceValue's disclosure since 2.0.1, so
+  the probe matched nothing and the case failed with "element(s) not found". The expectation now
+  reads the reason off the details, the idiom career-build-target.spec.ts already records. The
+  position line keeps its getByTitle because that tile is a plain span. 16 passed.
+
+### Verification recorded
+
+- Full Pest suite at 2.0.1: **1953 passed (31795 assertions)**, 0 incomplete, 0 skipped,
+  0 markTestIncomplete in the log. The D-288/G-18 browser block **ran**: it is included in that
+  count and passes on its own at 3 passed / 184 assertions.
+- The G-18 gate resolves **computed styles in a real browser** (Playwright), not the stylesheet's
+  declared values, so its ratios are rendered measurements. It asserts 31 text/boundary pairs plus
+  9 grade-badge fills, in both themes, and fails on any declared token that resolves empty.
+- The gate does **not** cover the two pairs the FQ register's FQ-01 and FQ-04 concern
+  (--rule-soft and a white-on---risk dark pair): neither token appears in its pair list. A pass
+  therefore does not mean those two pass.
+- career-cockpit.spec.ts fails without PLAYWRIGHT_SCRATCH_DB because SCRATCH_DATABASE is a
+  module-level constant and the worker recomputes it, diverging from the path global-setup
+  migrated. It passes with the override set. The defect predates 2.0.1; 2.0.1's harness change is
+  necessary but not sufficient, and the structural fix is to publish the path from global-setup.
 ## [2.0.1] - 2026-10-22
 
 A fixes-only release: it corrects semantics and accessibility and adds no capability. Label per

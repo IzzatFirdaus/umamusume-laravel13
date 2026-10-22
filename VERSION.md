@@ -1,10 +1,10 @@
 # VERSION
 
-Current version: `2.0.1`, pre-release. Not tagged: the only tag in the repository is `0.1.0`.
+Current version: `2.0.2`, pre-release. Tagged: `0.1.0`, `2.0.1`, `2.0.2`.
 
 | Field            | Value                         | Measured                                                                      |
 | ---------------- | ----------------------------- | ----------------------------------------------------------------------------- |
-| Version          | `2.0.1`                       | PATCH, per `docs/adr/0019-semver-label-tag-and-release-branch.md`'s fix rule; bumped from `2.0.0` by the 2026-10-22 UX-audit fix pass (corrects semantics and accessibility, adds no capability) |
+| Version          | `2.0.2`                       | PATCH, per `docs/adr/0019-semver-label-tag-and-release-branch.md`'s fix rule. `2.0.1` carried the 2026-10-22 UX-audit fixes; `2.0.2` corrects one stale browser expectation that `2.0.1`'s `SubCell` change invalidated. No capability added by either |
 | Pre-release      | yes                           | GitHub Release flag, not a semver hyphen identifier                           |
 | Git tags         | `0.1.0`                       | `git tag`, `git ls-remote --tags origin`; no `2.0.0` tag exists locally or on the remote |
 | Release commit   | not fixed                     | see Release state below                                                       |
@@ -45,8 +45,8 @@ questions in `PRD.md` are closed, the `/api/v1` response shapes are declared in 
 No commit has been chosen for `2.0.0`, and no `2.0.0` tag exists: `git tag` and `git ls-remote --tags
 origin` both list only `0.1.0`. `master` is ahead of `origin/master` and behind by nothing (23 commits
 ahead at the 2026-10-19 measurement; the count grows with each landed commit). Documentation files may
-be uncommitted. This application runs on loopback and is not deployable. `AGENTS.md` §1 and `PRD.md`
-§6.10 keep it there.
+be uncommitted. This application runs on loopback and is not deployable. `AGENTS.md` Â§1 and `PRD.md`
+Â§6.10 keep it there.
 
 ## Phase 1 exit criteria (owner ruling 2026-10-18)
 
@@ -58,7 +58,7 @@ taken on that date, and each names the command or the file that produced it.
 
 | Criterion | Description | Current status |
 |-----------|-------------|----------------|
-| (a) US-1..US-3 pass with pipeline test | US-1 (catalog browse), US-2 (fetch cross-reference), US-3 (training run with turn logging) all pass end-to-end against seeded data, including a pipeline test with a faked HTTP source. | Not satisfied — each story has a passing test of its own (US-1 `CatalogRosterTreeTest`, US-2 `FetchPipelineTest` with a faked HTTP source, US-3 `TrainingRunTest` and `TurnEntryFieldSourceTest`; 57 passed / 390 assertions, measured 2026-10-19), but no single gate measures all three end-to-end against seeded data, which is what this criterion asks for. |
-| (b) Known gaps recorded in KNOWN-ISSUES.md | The NFR-20 gaps — no page request triggers background work, loading/error state termination, the refresh test, and the refresh navigation determinism issue — are recorded with status. | Satisfied — every one is recorded in `KNOWN-ISSUES.md` with a status: background-work termination as the 2026-10-19 entry KI-102, loading/error-state termination as the 2026-10-19 entry KI-103, the refresh navigation-determinism red case as the 2026-10-19 entry KI-101 (open, blocked on the owner trace), and the refresh test state registered in the same register. Measured 2026-10-19. |
-| (c) ADR-0025 accepted | The per-run entered ceilings decision is accepted and binding. | **Satisfied** — ADR-0025 accepted in commit `docs(adr): accept ADR-0025 to match CHANGELOG and PRD requirements` (2ff8c3e); its status line still reads "Accepted (2026-10-18) — the owner has approved the wording; migration and tests are built." Measured 2026-10-19. |
-| (d) Doc ratchet at acceptable level | DocCitationParity count at or below the 708 baseline, or the limit raised with a written reason. | **Satisfied** — 698 (698 GONE, 0 UNTRACKED) in a clean clone of HEAD against a 708 baseline; `DocCitationParityTest` passes, 2 passed / 5 assertions, exit 0. The limit was not raised: ten citations that no reader could follow were repointed, and the gate's own ledger Section 39 records the reconciliation. Measured 2026-10-19. The working-tree number reads lower at the same moment, because another session's uncommitted markdown edits are in the tree too; the committed number is the one that ships. |
+| (a) US-1..US-3 pass with pipeline test | US-1 (catalog browse), US-2 (fetch cross-reference), US-3 (training run with turn logging) all pass end-to-end against seeded data, including a pipeline test with a faked HTTP source. | Not satisfied â€” each story has a passing test of its own (US-1 `CatalogRosterTreeTest`, US-2 `FetchPipelineTest` with a faked HTTP source, US-3 `TrainingRunTest` and `TurnEntryFieldSourceTest`; 57 passed / 390 assertions, measured 2026-10-19), but no single gate measures all three end-to-end against seeded data, which is what this criterion asks for. |
+| (b) Known gaps recorded in KNOWN-ISSUES.md | The NFR-20 gaps â€” no page request triggers background work, loading/error state termination, the refresh test, and the refresh navigation determinism issue â€” are recorded with status. | Satisfied â€” every one is recorded in `KNOWN-ISSUES.md` with a status: background-work termination as the 2026-10-19 entry KI-102, loading/error-state termination as the 2026-10-19 entry KI-103, the refresh navigation-determinism red case as the 2026-10-19 entry KI-101 (open, blocked on the owner trace), and the refresh test state registered in the same register. Measured 2026-10-19. |
+| (c) ADR-0025 accepted | The per-run entered ceilings decision is accepted and binding. | **Satisfied** â€” ADR-0025 accepted in commit `docs(adr): accept ADR-0025 to match CHANGELOG and PRD requirements` (2ff8c3e); its status line still reads "Accepted (2026-10-18) â€” the owner has approved the wording; migration and tests are built." Measured 2026-10-19. |
+| (d) Doc ratchet at acceptable level | DocCitationParity count at or below the 708 baseline, or the limit raised with a written reason. | **Satisfied** â€” 698 (698 GONE, 0 UNTRACKED) in a clean clone of HEAD against a 708 baseline; `DocCitationParityTest` passes, 2 passed / 5 assertions, exit 0. The limit was not raised: ten citations that no reader could follow were repointed, and the gate's own ledger Section 39 records the reconciliation. Measured 2026-10-19. The working-tree number reads lower at the same moment, because another session's uncommitted markdown edits are in the tree too; the committed number is the one that ships. |
