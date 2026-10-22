@@ -3316,3 +3316,64 @@ thing that a copy gate forbids, and nothing in the tree resolves the conflict au
 asserted an `ADR-0011` citation on screen against the identifier gate (KI-112) and `database.spec.ts`
 asserted a tick-or-dash glyph against the dash gate (here). Both were resolved by re-pointing the browser
 case at the substance, and both needed a person to notice.
+
+### KI-114 Two browser files still drive the deck picker the wizard used to have, so eleven cases are red against a picker that no longer exists - FILED 2026-10-22 (anti-slop audit pass)
+
+**Status: OPEN.** Not fixed here, and the reason is in "What this entry does not do" below.
+
+**Symptom, observed.** `npx playwright test tests/browser/career-legacy-deck-steps.spec.ts
+tests/browser/support-deck.spec.ts` on a session-private pair (`PLAYWRIGHT_PORT=8172
+PLAYWRIGHT_SCRATCH_DB=.scratch-uma/antislop-audit/browser-8172.sqlite`) -> **10 passed, 11 failed** in 20.8
+minutes. The eleven, by cause:
+
+1. `career-legacy-deck-steps.spec.ts:212` reads `getByText(/Grandparent A1:\s*Daiwa Scarlet\s*Rank UG/)` on
+   `/career/setup/preflight`. The page renders no ancestor summary any more: the `ancestors` prop is still
+   declared at `pages/Career/Preflight.vue:70` and nothing in the template reads it, and the words
+   "Grandparent" are gone from the frontend.
+2. `career-legacy-deck-steps.spec.ts:229` and `support-deck.spec.ts:56` read the slot's absence as
+   `Not equipped`. The slot now prints `Empty.` (`components/support/SupportSlot.vue:115`).
+3. `career-legacy-deck-steps.spec.ts:267` and `:343` and `support-deck.spec.ts:113`, `:148`, `:250` drive the
+   picker through controls that are gone: `#deck-pick` (a `<select>`), `getByRole('button', { name: /^Equip to
+   Slot N/ })`, `Equip owned to Slot 1`, `The picker writes to Slot 1.`, `Deck saved.`, `select[name="rarity"]`,
+   `select[name="type"]`, `select[name="query"]`, and `#deck-picker-results > li`. The picker is now a
+   `<dialog>` (`components/support/CardPicker.vue`) listing cards, each with an `Equip` button, filtered by a
+   type select and a name input; the slot's own button is `Choose a card in Slot N` when the slot is empty and
+   `Replace the card in Slot N` when it is not.
+4. `career-legacy-deck-steps.spec.ts:306` and `:327` and `support-deck.spec.ts:91` size and reflow the same
+   controls, so they fail on the same absent elements.
+
+**Cause, measured.** `5f2bfde4` (2026-10-19, "feat(wizard): step 5 uses per-slot pickers and segmented
+ownership") replaced the picker's `<select>` with the per-slot dialog and renamed the slot's empty state and
+button labels. `6717c7c8` (2026-10-13, "feat(cockpit): anchor sections on-page nav") is the commit that
+carries the preflight page's ancestor summary. Neither commit updated the two browser files, and neither landed
+a register entry, so the red was invisible: no gate reads these files, and the full PHP suite cannot see a
+browser case.
+
+**What was fixed here, and what was not.** The product defect underneath the first six step-4 cases was fixed
+and is recorded as `9eb7bb6`: `bbc1814f` had removed the "No Sparks recorded." paragraph and the Spark chance
+disclosure from `components/legacy/AncestryNode.vue` while leaving the prop, the import, the comment and the
+compare surface in place, and the six step-4 cases are green on the current tree. One assertion in the file was
+re-pointed at the shipped copy (the absent name is scoped by its own `title` now, because the pick control's
+"Not chosen" option carries the same words). What is left is the picker migration itself.
+
+**What this entry does not do.** It does not migrate the two files, and the reason is that the migration is a
+rewrite of the interaction model rather than a string swap: nine distinct controls the cases drive are gone and
+their replacements live in a dialog, so every case that touches the picker has to be re-written and re-proved,
+and the file's seven failing cases each burn a 180-second timeout while they fail. Half-migrating would leave a
+file that is red in a new way and reads as if the screen had changed again, which is a worse signal than a red
+file with a filed reason. The peer that built the picker owns that migration.
+
+**How to close it.** For each failing case, the new path is: click the slot's `Choose a card in Slot N`
+button, read the card list inside the dialog, click the row's `Equip` button, and then assert the slot's own
+text. The filters move to `#deck-filter-type` and `#deck-filter-search`, the results list is the dialog's
+`ul[role="list"]` (it has no id, so a locator needs one that does not assume one), and the empty-filter message
+is `No support card matches that filter.` The `ownership` absence's `title` is `No ownership been recorded for
+slot yet.`. The preflight case needs the ancestor summary's new home, or a ruling that the preflight does not
+carry one.
+
+**What closure does not cover.** The two files are the browser gate for the deck picker, and until they are
+migrated that gate does not exist: eleven cases have been red since 2026-10-19 without an entry, which is the
+process gap `AGENTS.md` §9's failure-classification rule names. The `No Sparks recorded.` paragraph this entry
+restores was removed with the same class of accident, and nothing in the tree would have noticed its absence
+except a browser case; a static gate that reads the shipped copy for a cell the screen is supposed to carry
+would have caught it, and no such gate exists.
