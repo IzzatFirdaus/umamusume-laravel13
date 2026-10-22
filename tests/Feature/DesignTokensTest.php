@@ -268,9 +268,33 @@ it('counts every colour token the static theme declares', function (): void {
     // brand-chrome pair, so both resolve in both themes with no dark re-declaration of their own.
     $tokens = themeStaticColorTokens();
 
-    expect($tokens)->toHaveCount(81)
+    expect($tokens)->toHaveCount(89)
         ->and($tokens)->toContain('--color-goal')
-        ->and($tokens)->toContain('--color-goal-line');
+        ->and($tokens)->toContain('--color-goal-line')
+        ->and($tokens)->toContain('--color-on-risk')
+        ->and($tokens)->toContain('--color-stat-speed')
+        ->and($tokens)->toContain('--color-stat-group');
+});
+
+/*
+ * Rule 36 (primitive-reconciliation.md section 5): every `var(--...)` in app.css names a
+ * custom property app.css declares. An undefined custom property inherits rather than
+ * errors, so this is a source-level guard for the same failure the rendered gate catches
+ * for declared names. Added 2026-10-22 (Phase 2.4).
+ */
+it('resolves every var() reference in app.css to a declared custom property', function (): void {
+    $css = (string) file_get_contents(base_path('resources/css/app.css'));
+    $css = (string) preg_replace('#/\*.*?\*/#s', '', $css);
+
+    preg_match_all('/--([a-z0-9-]+)\s*:/', $css, $declared);
+    preg_match_all('/var\(\s*(--[a-z0-9-]+)/', $css, $used);
+
+    $declaredNames = array_unique($declared[1]);
+    $usedNames = array_unique(array_map(static fn (string $name): string => substr($name, 2), $used[1]));
+
+    $unresolved = array_values(array_diff($usedNames, $declaredNames));
+
+    expect($unresolved)->toBe([], 'app.css references a custom property it never declares: '.implode(', ', $unresolved));
 });
 
 /**
@@ -602,7 +626,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         $page = visit('/umamusume');
         $names = themeStaticColorTokens();
 
-        expect($names)->toHaveCount(81);
+        expect($names)->toHaveCount(89);
 
         foreach (['light', 'dark'] as $theme) {
             /** @var array<string, array{raw: string, resolved: string}> $resolved */
