@@ -37,20 +37,20 @@ onMounted(async () => {
         @keydown.esc="emit('close')"
     >
         <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
-            <h3 id="reference-drawer-title" class="text-lg font-semibold text-ink-strong">
+            <h3 id="reference-drawer-title" class="text-lg font-semibold text-[var(--color-ink-strong)]">
                 {{ title }}
             </h3>
 
             <button
                 type="button"
-                class="inline-flex min-h-11 items-center rounded-full border border-rule px-3 text-sm font-medium text-ink-strong"
+                class="inline-flex min-h-11 items-center rounded-[var(--radius-pill)] border border-[var(--color-rule)] px-3 text-sm font-medium text-[var(--color-ink-strong)]"
                 @click="emit('close')"
             >
                 Close
             </button>
         </div>
 
-        <div class="mt-3 space-y-2 text-sm text-ink">
+        <div class="mt-3 space-y-2 text-sm text-[var(--color-ink)]">
             <slot />
         </div>
     </section>
