@@ -111,11 +111,19 @@ const conditions = computed(() => props.skill.condition_groups ?? []);
                      summary carries the provenance and the label, so the disclosure states what it
                      holds and whose data it is before it is opened, and the ruling that keeps the
                      description absent is on screen either way.
+
+                     The ruling is `ADR-0011` (accepted in part, 2026-09-29): the import carries what
+                     the export states and renders no description, because no client-string source for
+                     one exists. The citation lives HERE and not on the screen. A repository identifier
+                     in shipped copy is what `tests/Feature/UiHygieneTest.php` reads every template
+                     for, and a pointer to a decision is not what a Trainer needs; the summary states
+                     the ruling's substance instead, so the fact is on screen and the trace is in the
+                     source.
                  -->
                 <details class="mt-3">
                     <summary class="cursor-pointer list-item text-sm font-semibold text-ink-strong">
-                        Raw engine data — the source's own expressions and codes, not client labels
-                        (ADR-0011)
+                        Raw engine data — the source's own expressions and codes, not client labels.
+                        The description is not recorded.
                     </summary>
 
                     <div v-for="(group, index) in conditions" :key="index" class="mt-3 min-w-0 rounded-md border border-rule bg-panel p-3 text-sm">
@@ -148,8 +156,8 @@ const conditions = computed(() => props.skill.condition_groups ?? []);
                     </div>
 
                     <p class="mt-2 text-xs text-ink-muted">
-                        The description is not recorded: no client-string source for it exists, and no
-                        awakening threshold is kept either.
+                        No client-string source for a skill description exists, and no awakening
+                        threshold is kept either.
                     </p>
                 </details>
             </template>
@@ -157,7 +165,7 @@ const conditions = computed(() => props.skill.condition_groups ?? []);
             <p v-else class="mt-2 text-sm text-ink-muted">
                 Activation conditions, effect values and distance or style qualifiers are not
                 recorded. This tool's skills source stores no description it may render, and no
-                awakening thresholds are kept (ADR-0011).
+                awakening thresholds are kept.
             </p>
         </section>
 

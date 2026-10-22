@@ -76,8 +76,13 @@ test('follows a search row to the detail page and states the absences there', as
     await expect(page.getByRole('heading', { name: 'Mechanics', level: 2 })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Held by trainees', level: 2 })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Provenance', level: 2 })).toBeVisible();
-    // Both mechanics branches name the ruling that keeps the description absent.
-    await expect(page.getByText(/ADR-0011/)).toBeVisible();
+    // The mechanics branch states that the description is not recorded. The ruling behind it
+    // (`ADR-0011`) is deliberately NOT on the screen: a repository identifier in shipped copy is
+    // what `tests/Feature/UiHygieneTest.php` reads every template for, and a pointer to a decision
+    // is not what a Trainer needs. The substance is on screen and the trace is in the source.
+    await expect(
+        page.locator('section[aria-labelledby="mechanics"] summary'),
+    ).toContainText('The description is not recorded');
     await expect(page.getByRole('link', { name: 'Back to skill search' })).toBeVisible();
 });
 
@@ -94,10 +99,10 @@ test('the skill detail holds the engine data in one labelled disclosure', async 
     const disclosure = page.locator('section[aria-labelledby="mechanics"] details');
     await expect(disclosure).toHaveCount(1);
     await expect(disclosure.locator('summary')).toContainText('Raw engine data');
-    await expect(disclosure.locator('summary')).toContainText('ADR-0011');
+    await expect(disclosure.locator('summary')).toContainText('not client labels');
 
-    // The ruling that keeps the description absent is on the summary, not only inside the fold.
-    await expect(page.getByText(/ADR-0011/)).toBeVisible();
+    // The fact that keeps the description absent is on the summary, not only inside the fold.
+    await expect(disclosure.locator('summary')).toContainText('The description is not recorded');
 });
 
 test('the skill index states the page it is showing', async ({ page }) => {
