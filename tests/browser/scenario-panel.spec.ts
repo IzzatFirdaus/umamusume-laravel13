@@ -142,6 +142,22 @@ test('states the scenario, its documentation and the ruleset absence in the base
     // opened with `Ruleset:` until the rename, so it cannot pass by matching nothing.
     await expect(section.getByText(/^\s*Ruleset version:/)).toBeVisible();
     await expect(section.getByText(/^\s*Ruleset:/)).toHaveCount(0);
+
+    // DESIGN.md §5 (a), 2026-10-17: one absence channel, and it is reachable without a mouse. The
+    // marker was a `<span title>` and the sentence followed it as loose text, so a screen reader heard
+    // "N/A" and a keyboard user got nothing. It is now `AbsenceValue`'s `<details>`, whose summary
+    // carries the reason as its accessible name and which opens with no script. Red before this case:
+    // the strip rendered no `<summary>` at all.
+    const marker = section.locator('summary').first();
+    await expect(marker).toContainText('N/A');
+    await expect(marker).toHaveAccessibleName(/No source defines a Global ruleset version/);
+
+    // Keyboard-reachable and it actually opens: the reason is a visible statement, not a tooltip.
+    await marker.focus();
+    await expect(marker).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(section.locator('details[open]').first()).toBeVisible();
+    await expect(section.locator('details[open]').first()).toContainText(/No source defines a Global ruleset version/);
 });
 
 test('renders only the baseline strip for a scenario that composes no panel', async ({ page }) => {

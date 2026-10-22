@@ -29,6 +29,7 @@
  * dropping the term role Chromium would need. Narrow screens stack the value under its label.
  */
 import { computed } from 'vue';
+import AbsenceValue from '../AbsenceValue.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import type { ProvenanceState } from '../../types';
 
@@ -181,7 +182,7 @@ const currentMark = '◉';
                             <span v-if="period.floor_second !== null" class="font-mono text-sm tabular-nums text-ink">
                                 {{ period.floor_second }} / {{ period.floor_third }}
                             </span>
-                            <span v-else class="text-sm text-ink-muted" :title="period.floor_title">N/A</span>
+                            <AbsenceValue v-else compact :reason="period.floor_title" />
                         </dd>
                     </dl>
                 </li>

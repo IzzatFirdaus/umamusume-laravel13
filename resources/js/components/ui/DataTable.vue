@@ -14,6 +14,7 @@
  * on the region is what makes that possible; a region without it cannot receive the keystrokes.
  */
 import { useId } from 'vue';
+import AbsenceValue from '../AbsenceValue.vue';
 import type { DataTableColumn, SortDirection } from './data-table-types';
 
 /*
@@ -146,11 +147,14 @@ const captionId = `datatable-caption-${useId()}`;
                             :value="row[column.key]"
                         />
                         <template v-else-if="isMissing(row[column.key])">
-                            <!-- DESIGN.md §5's N/A-not-a-dash rule: an unrecorded cell prints the
-                                 word with the reason on the title, never a dash glyph. The word is
-                                 real copy, so the screen reader reads it and no `sr-only` twin is
-                                 needed beside it. -->
-                            <span title="Not recorded">N/A</span>
+                            <!-- DESIGN.md §5 (a), 2026-10-17: one absence channel, reachable without a
+                                 mouse. This was `title="Not recorded"` on a bare span — a reason that
+                                 only a pointer could reach, and the note that used to sit here claimed
+                                 an `sr-only` twin that was never rendered. `AbsenceValue`'s `<details>`
+                                 is flow content, so a cell is a container its contract allows; the
+                                 summary carries the reason as its accessible name and opens on Enter.
+                                 `compact` is the dense-row form the component documents for a cell. -->
+                            <AbsenceValue compact reason="Not recorded" />
                         </template>
                         <a
                             v-else-if="columnIndex === 0 && rowHref && rowHref(row) !== null"

@@ -36,6 +36,7 @@
  */
 import type { Component } from 'vue';
 import { computed } from 'vue';
+import AbsenceValue from '../AbsenceValue.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import AlertRow from './AlertRow.vue';
 import RaceCalendarNote from './RaceCalendarNote.vue';
@@ -231,10 +232,15 @@ const emptyText = computed<string>(() =>
             <ScenarioStatusBadge :documented="props.scenario.documented" />
         </div>
 
+        <!-- DESIGN.md §5 (a), 2026-10-17: one absence channel, reachable without a mouse. The reason
+             used to ride a `title` on the marker plus a loose sentence after it, so the sentence was
+             printed twice and the marker itself announced nothing. `AbsenceValue` owns it now: the
+             summary carries the reason as its accessible name and the disclosure opens with no
+             script. The sentence is no longer repeated beside the marker, because the marker states
+             it. -->
         <p class="text-xs text-ink-muted">
             Ruleset version:
-            <span :title="props.scenario.version_title">N/A</span>.
-            {{ props.scenario.version_title }}
+            <AbsenceValue compact :reason="props.scenario.version_title" />.
         </p>
 
         <!-- The scenario's own ruleset date: a sourced fact per scenario (its launch or rework

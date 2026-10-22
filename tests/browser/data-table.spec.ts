@@ -62,26 +62,29 @@ test('is a real table: thead, th[scope="col"], and a caption that names it', asy
     await expect(page.locator(`#${labelledBy}`)).toHaveText('Races this career can enter');
 });
 
-test('renders a missing value as an en dash and the words "Not recorded", never as blank', async ({ page }) => {
+test('renders a missing value as N/A with its reason, never as a dash', async ({ page }) => {
     await open(page);
 
     const table = page.locator('#table-plain');
 
     // Row 2 has a null fan gate, row 3 an empty string. Both are absences.
+    //
+    // DESIGN.md §10's rendered-copy row and AGENTS.md's copy rule both say "`N/A` for absence, never
+    // a dash", and this case previously pinned the opposite: an `aria-hidden` en dash with the words
+    // beside it. The dash is gone, and the reason is inside `AbsenceValue`'s summary rather than in a
+    // sibling span, so it is reachable on focus as well as on hover.
     const absent = table.locator('tbody tr').nth(1).locator('td').nth(2);
-    await expect(absent).toContainText('Not recorded');
-    await expect(absent.locator('span[aria-hidden="true"]')).toHaveText('–');
+    await expect(absent).toContainText('N/A');
+    await expect(absent.locator('summary')).toHaveAccessibleName(/Not recorded/);
+    await expect(absent).not.toContainText('–');
 
     const emptyString = table.locator('tbody tr').nth(2).locator('td').nth(2);
-    await expect(emptyString).toContainText('Not recorded');
+    await expect(emptyString.locator('summary')).toHaveAccessibleName(/Not recorded/);
 
     // A zero is a value, not an absence: rendering it as a dash would be a lie about the data.
     const zero = table.locator('tbody tr').nth(3).locator('td').nth(2);
     await expect(zero).not.toContainText('Not recorded');
     await expect(zero).toHaveText('0');
-
-    // And the dash is never read aloud on its own; the words carry the fact.
-    await expect(absent.locator('span[aria-hidden="true"]')).toHaveAttribute('aria-hidden', 'true');
 });
 
 test('the wrapper is a focusable region named after the table', async ({ page }) => {
@@ -129,6 +132,29 @@ test('a sortable header carries aria-sort and a button, and reports the click', 
 
     await fanGate.getByRole('button').click();
     await expect(fanGate).toHaveAttribute('aria-sort', 'ascending');
+});
+
+test('an unrecorded cell states its absence in text a keyboard can reach', async ({ page }) => {
+    await open(page);
+
+    // DESIGN.md §5 (a), 2026-10-17: one absence channel per component, and the reason is reachable
+    // without a mouse. The cell used to carry `title="Not recorded"` on a bare span — a constant
+    // reason with no `sr-only` twin, despite this file's own note claiming one. `<details>` is flow
+    // content, so a `td` is exactly the container the component's contract allows for it.
+    const absent = page.locator('#table-plain tbody tr').nth(1).locator('td').nth(2);
+
+    const summary = absent.locator('summary');
+    await expect(summary).toContainText('N/A');
+    await expect(summary).toHaveAccessibleName(/Not recorded/);
+
+    // The hover-only channel is gone.
+    await expect(absent.locator('[title]')).toHaveCount(0);
+
+    // And it opens from the keyboard, which is the whole point of the migration.
+    await summary.focus();
+    await expect(summary).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(absent.locator('details[open]')).toContainText('Not recorded');
 });
 
 test('pagination names the range, the page count, and marks the current page', async ({ page }) => {

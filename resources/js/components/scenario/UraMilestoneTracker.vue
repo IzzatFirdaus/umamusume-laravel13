@@ -83,7 +83,7 @@ const marked = (state: string): boolean => glyphs[state] !== undefined;
                         <span aria-hidden="true" class="font-mono text-ink">{{ glyphs[row.state] }}</span>
                         <span class="text-xs text-ink-muted" :title="row.title">{{ words[row.state] }}</span>
                     </template>
-                    <span v-else class="text-xs text-ink-muted" :title="row.title">N/A</span>
+                    <span v-else class="text-xs text-ink-muted">N/A</span>
 
                     <span class="text-sm font-medium text-ink-strong">{{ row.label }}</span>
 

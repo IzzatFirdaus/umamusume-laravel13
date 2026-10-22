@@ -66,7 +66,7 @@ const chains = computed((): string[] => Object.keys(props.fatigue.table));
                 {{ props.fatigue.chain }}
                 <span class="font-sans text-xs text-ink-muted">({{ props.fatigue.chain_label }})</span>
             </span>
-            <span v-else class="text-ink-muted" :title="props.fatigue.chain_title">N/A</span>
+            <span v-else class="text-ink-muted">N/A</span>
         </p>
 
         <p v-if="props.fatigue.chain === null" class="text-xs text-ink-muted">

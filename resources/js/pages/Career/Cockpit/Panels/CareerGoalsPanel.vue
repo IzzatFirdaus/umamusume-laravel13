@@ -119,7 +119,7 @@ const deadlineTitle = (row: GoalRow): string | undefined =>
                     </span>
 
                     <template v-else>
-                        <span class="text-xs text-ink-muted" :title="row.absence ?? undefined">N/A</span>
+                        <span class="text-xs text-ink-muted">N/A</span>
                         <span v-if="row.absence !== null" class="w-full text-xs text-ink-muted">
                             {{ row.absence }}
                         </span>

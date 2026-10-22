@@ -297,8 +297,14 @@ it('never renders a visible N/A without a title, and never as a disclosure summa
             //    the line AFTER the marker, and `UnityCupTeamBoard` puts one sentence under a table.
             //
             // The visible sentence must be an interpolation of the data's own reason binding, named
-            // `*_title` or `*_reason`: any `{{ }}` at all would let an unrelated expression satisfy
-            // the rule, which is the weakening this check exists to prevent.
+            // `*_title`, `*_reason` or `*_absence`: any `{{ }}` at all would let an unrelated
+            // expression satisfy the rule, which is the weakening this check exists to prevent.
+            //
+            // `_absence` joined the list on 2026-10-22 (UX audit F-11). The three Cockpit panels print
+            // the reason as `{{ row.absence }}` directly under the marker, which is the shape
+            // `DESIGN.md` §5 names as sufficient — "a caller that already prints the reason as visible
+            // prose beside the marker keeps doing that and needs no component" — and the suffix list
+            // simply did not name it, so a conformant screen read as a violation.
             $lines = preg_split('/\R/', $template['text']) ?: [];
             $context = implode("\n", array_slice($lines, max(0, $index - 2), 9));
 
@@ -306,7 +312,7 @@ it('never renders a visible N/A without a title, and never as a disclosure summa
                 continue;
             }
 
-            if (preg_match('/\{\{\s*[\w.$]*(?:_title|_reason)\s*\}\}/', $context) === 1) {
+            if (preg_match('/\{\{\s*[\w.$]*(?:_title|_reason|_absence|\.absence)\s*\}\}/', $context) === 1) {
                 continue;
             }
 
@@ -317,7 +323,7 @@ it('never renders a visible N/A without a title, and never as a disclosure summa
             // cell, `</section>` or `</template>` otherwise.
             $tail = implode("\n", array_slice($lines, $index, 25));
 
-            if (preg_match('/\{\{\s*[\w.$]*(?:_title|_reason)\s*\}\}/', $tail) === 1) {
+            if (preg_match('/\{\{\s*[\w.$]*(?:_title|_reason|_absence|\.absence)\s*\}\}/', $tail) === 1) {
                 continue;
             }
 
