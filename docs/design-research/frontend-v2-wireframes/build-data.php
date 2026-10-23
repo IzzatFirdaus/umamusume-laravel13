@@ -248,6 +248,7 @@ foreach (rows($db, 'select * from umamusume order by id') as $trainee) {
 
     if ($sourceId === null || ! isset($characterDocument[$sourceId])) {
         $excludedTrainees[] = ['id' => $id, 'name' => $trainee['name'], 'reference' => $reference];
+
         continue;
     }
 
@@ -285,6 +286,7 @@ foreach (rows($db, 'select * from umamusume order by id') as $trainee) {
                 'title' => $card['title'],
                 'sourceUrl' => $card['source_url'],
             ];
+
             continue;
         }
         $evolution = [];
@@ -545,7 +547,7 @@ foreach ($excludedForms as $row) {
 // the unsourced rows are taken out.
 $sourcedTrainees = (int) $db->query('select count(*) from umamusume where external_ref is not null')->fetchColumn();
 if (count($roster) !== $sourcedTrainees) {
-    $problems[] = "the roster holds ".count($roster)." trainees, the catalogue holds {$sourcedTrainees} sourced ones";
+    $problems[] = 'the roster holds '.count($roster)." trainees, the catalogue holds {$sourcedTrainees} sourced ones";
 }
 
 $formCount = 0;
@@ -559,7 +561,7 @@ if ($formCount !== $sourcedCards) {
 
 $supportCount = (int) $db->query('select count(*) from support_cards')->fetchColumn();
 if (count($cards) !== $supportCount) {
-    $problems[] = "the dataset holds ".count($cards)." support cards, the table holds {$supportCount}";
+    $problems[] = 'the dataset holds '.count($cards)." support cards, the table holds {$supportCount}";
 }
 
 // Every effect a card carries must be in the dictionary, or a surface that joins
@@ -578,7 +580,7 @@ if (count($supportEffectRows) !== (int) $db->query('select count(*) from support
 
 $skillCount = (int) $db->query('select count(*) from skills')->fetchColumn();
 if (count($skills) !== $skillCount) {
-    $problems[] = "the dataset holds ".count($skills)." skills, the table holds {$skillCount}";
+    $problems[] = 'the dataset holds '.count($skills)." skills, the table holds {$skillCount}";
 }
 
 // The growth row is 30 points on every card, in 5-point steps (1.3.5). A row
@@ -587,6 +589,7 @@ foreach ($roster as $trainee) {
     foreach ($trainee['forms'] as $form) {
         if ($form['growthRate'] === null) {
             $problems[] = "{$form['id']} carries no growth row";
+
             continue;
         }
         $total = array_sum($form['growthRate']);
@@ -602,6 +605,7 @@ foreach ($roster as $trainee) {
     foreach ($trainee['forms'] as $form) {
         if ($form['baseStats'] === null) {
             $problems[] = "{$form['id']} carries no base stats";
+
             continue;
         }
         $total = array_sum($form['baseStats']);
@@ -757,8 +761,8 @@ $files = [
         "    root.TRAINER_DESK_DATA.umamusumeSchema = data.umamusumeSchema;\n".
         "})(typeof globalThis !== 'undefined' ? globalThis : this, function () {\n".
         "    'use strict';\n\n".
-        "    var UMAMUSUME = ".jsRecords($roster).";\n\n".
-        "    var UMAMUSUME_SCHEMA = ".js([
+        '    var UMAMUSUME = '.jsRecords($roster).";\n\n".
+        '    var UMAMUSUME_SCHEMA = '.js([
             'entity' => 'Umamusume (a trainee)',
             'count' => count($roster),
             'source' => 'the catalogue\'s own `umamusume` table, joined with the committed GameTora export body',
@@ -802,8 +806,8 @@ $files = [
         "    root.TRAINER_DESK_DATA.supportCardsSchema = data.supportCardsSchema;\n".
         "})(typeof globalThis !== 'undefined' ? globalThis : this, function () {\n".
         "    'use strict';\n\n".
-        "    var SUPPORT_CARDS = ".jsRecords($cards).";\n\n".
-        "    var SUPPORT_CARDS_SCHEMA = ".js([
+        '    var SUPPORT_CARDS = '.jsRecords($cards).";\n\n".
+        '    var SUPPORT_CARDS_SCHEMA = '.js([
             'entity' => 'Support card',
             'count' => count($cards),
             'source' => 'the catalogue\'s own `support_cards` table, with the effect rows resolved against the `support_effects` dictionary',
@@ -842,8 +846,8 @@ $files = [
         "    root.TRAINER_DESK_DATA.supportEffectsSchema = data.supportEffectsSchema;\n".
         "})(typeof globalThis !== 'undefined' ? globalThis : this, function () {\n".
         "    'use strict';\n\n".
-        "    var SUPPORT_EFFECTS = ".jsRecords($supportEffectRows).";\n\n".
-        "    var SUPPORT_EFFECTS_SCHEMA = ".js([
+        '    var SUPPORT_EFFECTS = '.jsRecords($supportEffectRows).";\n\n".
+        '    var SUPPORT_EFFECTS_SCHEMA = '.js([
             'entity' => 'Support effect',
             'count' => count($supportEffectRows),
             'source' => 'the catalogue\'s own `support_effects` table',
@@ -869,8 +873,8 @@ $files = [
         "    root.TRAINER_DESK_DATA.skillsSchema = data.skillsSchema;\n".
         "})(typeof globalThis !== 'undefined' ? globalThis : this, function () {\n".
         "    'use strict';\n\n".
-        "    var SKILLS = ".jsRecords($skills).";\n\n".
-        "    var SKILLS_SCHEMA = ".js([
+        '    var SKILLS = '.jsRecords($skills).";\n\n".
+        '    var SKILLS_SCHEMA = '.js([
             'entity' => 'Skill',
             'count' => count($skills),
             'source' => 'the catalogue\'s own `skills` table, joined with the committed GameTora export body',
