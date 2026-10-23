@@ -2,10 +2,6 @@
 
 A local-only Laravel 13 tool for Trainers of the Global English version of *Umamusume Pretty Derby*. It consolidates four legacy apps (three trackers plus a career-run planner) into one machine: browse a catalog of Umamusume whose JP and Global data is cross-referenced by a fetch engine, log training runs turn by turn, compare planned vs actual skills, and export. SQLite only, single user, no accounts, no telemetry.
 
-Product name confirmed 2026-09-27 (PRD OQ-1 closed). Visual system: `DESIGN.md`.
-
-The characters are Umamusume, a humanoid race. Repository text and code never use equine vocabulary for them (lore gate, `docs/research-scratch/GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar, C-1 to C-9)" C-4).
-
 ## Overview
 
 - **Catalog**: Inertia + Vue 3 screens over data the fetch engine cross-references between JP and Global sources. Every engine-written fact carries provenance (source URL, fetched timestamp, raw snapshot on disk).
