@@ -891,6 +891,25 @@ With the primitive layer in place, build the eight absent components and **all s
 >
 > **A21 — `review-detail`'s blast radius is a hard gate, not a risk row.** The risk table's mitigation becomes an exit condition: **one route, one controller action, one page, one browser spec, one `SCREEN_SPEC.md` row, and the queue's inline detail removed in the same commit** — verified by the spec asserting the detail exists exactly once in the rendered tree.
 
+> **Phase 4b gate — closed 2026-10-23.** `npm run typecheck` clean. `review.spec.ts` (queue, nine cases)
+> and `review-detail.spec.ts` (new, six cases) are green on a fresh `npm run build`: **15 passed
+> (22.1 s)**. `php artisan test --filter='ReviewFormAccessibility'` → 2 passed (29 assertions).
+>
+> The seven assertions the queue trim broke are all handled: five **moved** with the form to
+> `review-detail.spec.ts` (`:23`, `:46`, `:140`, `:175`, and `:76`'s accent half — bodies unchanged,
+> page changed) and two **rewritten** against the summary-plus-link shape (`:302`, `:334` — the
+> disclosure they drove is removed by the trim, so they now prove the row is one measured line, that its
+> link names its own candidate, and that no queue row carries a form at all; one claim is stronger than
+> before, none is weaker). No test was deleted and no assertion was weakened.
+>
+> Landed: the route, page and controller at `065753f0`; the queue trim and the re-scope at `d7801605`;
+> the `SCREEN_SPEC.md` amendment at `fb8ccea2` (FQ-10). The review fixture that made any of this
+> measurable was fixed first, at `16185919` — the 13-case cluster was harness-caused, not rendering.
+>
+> **4b.3 substance landed under CQ-04** at `e7621467` (config guard), `f69cf1c1` (URA panel source
+> guards retired), `681e8b70` (URA panel components deleted). The reference counts this gate leans on
+> are `primitive-reconciliation.md §7.4`.
+
 ### Phase 5 — Freeze the catalogue
 
 > **Site note 2026-10-22 (close-out pass, D1 / A29 co-location).** A concurrent session rewrote **this heading** in place. It originally read *"### Phase 5 — The mock catalogue graduates to the app"*; the phase body below was rewritten at the same time from a promotion plan into a freeze plan. The retitle follows owner ruling 5, which reversed promotion in favour of a frozen dated snapshot, so it is substantively correct. **No ruling on the rewrite is recorded, and D1 has not restored the original.** **Full record: `### Owner rulings (2026-10-22)` in Part II**, entry 4. **Sanctioned 2026-10-22 (bounded); see `### Owner rulings (2026-10-22)` above for the citation and ADR-0028 for the authority.**
