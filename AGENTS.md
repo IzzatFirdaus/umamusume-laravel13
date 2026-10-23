@@ -1,14 +1,97 @@
-# AGENTS.md
+# Cloud Development Setup & Secrets Handling
 
-Operational contract for coding agents working in this repository. It answers: how to
-orient, what may not be touched, what must be run, and what "done" means here. It is not
-a product spec, an architecture document, or a tutorial. Those live in the files named in
-§3 and are linked rather than restated.
+This document explains how to set up a development environment in any cloud IDE (GitHub Codespaces, Cursor Cloud Agents, or similar) and provides guidance on secrets management.
 
-Read `docs/research-scratch/GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar, C-1 to C-9)" before writing code. It is a pointer stub now; the binding quality
-bar (the C-1..C-9 table, the Floor list, the C-4 lore rules, and the hand-off verification
-sequence) lives in `docs/research-scratch/GOVERNANCE.md`, section "CONSTRAINTS.md (root
-quality bar, C-1 to C-9)". Do not weaken a threshold to make a change pass.
+## Quick Start in the Cloud
+
+### GitHub Codespaces
+1. Click **"Code"** → **"Codespaces"** tab → **"+ New codespace"**
+2. The dev container will automatically provision with:
+   - PHP 8.3+ with SQLite support
+   - Node.js 20.x
+   - All dependencies installed via `composer install` and `npm install`
+   - Database initialized (`database/database.sqlite`)
+   - Application key generated
+   - Initial migrations run
+   - Frontend assets built
+
+### Cursor Cloud Agent
+1. Open the repository in Cursor
+2. When prompted about dev containers, select **"Use Dev Container"**
+3. Follow the same setup as GitHub Codespaces above
+
+The [`devcontainer.json`](../.devcontainer/devcontainer.json) configuration ensures that every developer and AI agent gets an identical, reproducible environment.
+
+## What Gets Set Up Automatically
+
+The `.devcontainer/devcontainer.json` configuration includes:
+
+- **Base image**: Laravel 13 + PHP 8.3 Docker image
+- **Node.js**: Version 20.x with npm
+- **Docker-in-Docker**: For testing against Docker services (optional)
+- **Post-create commands**: Runs Composer install, artisan key generation, database migration, and frontend build
+- **VS Code extensions**: Common Laravel development tools (Pint, Blade formatter, Tailwind IntelliSense, etc.)
+- **Port forwarding**: 
+  - Port `8000` (Laravel development server)
+  - Port `5173` (Vite dev server)
+
+## Secrets Management Best Practices
+
+**This application is local-only and does not require any production secrets.** However, when working with cloud environments or adding new features, follow these guidelines:
+
+### ⚠️ Never Commit Actual Secrets
+
+1. **Environment variables go in `.env` only** - This file is gitignored (see `.gitignore:21-23`). Always create `.env.example` templates instead.
+   
+2. **Use cloud platform secret storage**:
+   - **GitHub Codespaces**: Use GitHub Repository Secrets (`Settings → Secrets and variables → Actions`)
+   - **Cursor Cloud**: Use Cursor's built-in secret management
+   - Other platforms: Use their native secret management APIs
+
+3. **Example secure workflow**:
+   ```bash
+   # ❌ DO NOT do this:
+   echo "API_KEY=sk_live_12345secret" >> .env
+   git add .env
+   
+   # ✅ DO THIS instead:
+   # Create template in .env.example
+   echo "# API_KEY=(set via GitHub secrets)" >> .env.example
+   
+   # In GitHub Actions or cloud config, inject at runtime:
+   # env:
+   #   API_KEY: ${{ secrets.API_KEY }}
+   ```
+
+4. **Common patterns to avoid**:
+   - Hardcoded API keys in config files
+   - Comments with example credentials
+   - `.env.local` or other local config files committed
+   - Credentials in code comments or documentation
+
+### Current Application Security Model
+
+**Important**: This application has **no authentication surface** by design ([PRD](../PRD.md) §6, [ARCHITECTURE.md](../ARCHITECTURE.md) §8). It runs locally on loopback only and never exposes credentials. Any secrets that may be added in the future should follow the principles above.
+
+### Testing with Secrets Locally
+
+When testing locally, you can use shell environment variables without modifying `.env`:
+
+```bash
+# Export before running commands
+export MY_SECRET_VAR="value"
+php artisan your:command
+
+# Or inline
+MY_SECRET_VAR="value" php artisan your:command
+```
+
+For CI/testing, GitHub provides `secrets.GITHUB_TOKEN` and custom repository secrets. Refer to platform-specific docs.
+
+---
+
+See [README.md](../README.md) for local development instructions.
+
 
 ## 1. What this repository is
 

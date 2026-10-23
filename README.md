@@ -12,6 +12,15 @@ The characters are Umamusume, a humanoid race. Repository text and code never us
 - **Training runs**: Trainer-owned CRUD. Per-turn stat logging, skill states `Suggested` / `Acquired` / `Skipped`, equipped support-card deck, race entries, and shop purchases. Export is CSV or JSON; historical runs re-import from this app's own CSV export.
 - **Review queue**: fuzzy or unmatched source records go to `/review` for the Trainer to confirm, alias, or reject. The engine proposes, the Trainer disposes; the engine never overwrites a row flagged `is_manual`.
 
+## Quick Start with Cloud Development
+
+For a fully configured cloud development environment:
+
+1. **GitHub Codespaces**: Click **"Code"** → **"Codespaces"** tab → **"+ New codespace"**
+2. **Cursor Cloud Agent**: Open repository in Cursor and select "Use Dev Container"
+
+The dev container automatically sets up your environment including PHP, Node.js, Composer dependencies, database initialization, and frontend assets. See [AGENTS.md](AGENTS.md#cloud-development-setup--secrets-handling) for detailed setup instructions.
+
 ## Current Status
 
 Phase 1 of `PRD.md`, substantially implemented and in active development (one release tag, `0.1.0`; the current label `2.0.0` is untagged, see `VERSION.md`; local deliverable only). The catalog, fetch engine, review queue, training-run domain, support-card deck surface, import/export, and the read-only `/api/v1` are built and covered by the Pest suite. Feature status and non-goals are authoritative in `PRD.md` §6; open decisions are tracked there (§7) and in `docs/adr/` (notably `ADR-0016`, next-race readiness, is an open question).
@@ -33,9 +42,18 @@ Deliberately absent (PRD §6): auth packages, Livewire, Excel export, Redis, MyS
 
 ## Requirements
 
+### Local Development
 - PHP >= 8.3 with `pdo_sqlite` and `intl` (`intl` is used by `App\Services\DataPipeline\NameNormalizer`)
 - Composer and Node.js with npm (Vite build)
 - No database server: SQLite is the only supported driver
+
+### Cloud Development (GitHub Codespaces / Cursor Cloud)
+See [AGENTS.md](AGENTS.md#cloud-development-setup--secrets-handling) for quick start instructions. The dev container will automatically provision:
+- PHP 8.3+ with SQLite support
+- Node.js 20.x
+- All dependencies and extensions
+- Database initialization
+- Frontend assets built
 
 ## Installation
 

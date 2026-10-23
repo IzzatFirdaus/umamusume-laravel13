@@ -1,0 +1,87 @@
+{
+  "name": "Laravel 13 + Node.js",
+  "image": "mcr.microsoft.com/vscode/devcontainers/laravel:1-12-bookworm",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+
+  "forwardPorts": [
+    8000,
+    5173
+  ],
+
+  "postCreateCommand": "sudo chown -R $UID:$(id -gn $UID) /usr/local/lib/node_modules 2>/dev/null || true && composer install --no-interaction --prefer-dist && php artisan key:generate --ansi && touch database/database.sqlite && php artisan migrate --force && npm install && npm run build",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bmewburn.vscode-intellij-idea-keybindings",
+        "esbenp.prettier-vscode",
+        "felixfbecker.php-intellisense",
+        "iamgreenbaum.laravel-blade-formatter",
+        "mikestead.dotenv",
+        "naive-waifu.tailwindcss-intelliSense",
+        "onecentlin.laravel5-snippets",
+        "onecentlin.laravel-blade",
+        "onecentlin.laravel-ui",
+        "phprose.auto-import",
+        "shufo.vscode-blade-formatter",
+        "stkb.rewrap",
+        "streetsidesoftware.code-spell-checker",
+        "visualstudio.vscode-typescript-next",
+        "zyyadams.vscode-pint",
+        "zyyadoms.tslint"
+      ]
+    }
+  },
+
+  "settings": {
+    "files.eol": "\n",
+    "files.trimTrailingWhitespace": true,
+    "editor.tabSize": 4,
+    "editor.formatOnSave": false,
+    "editor.insertSpaces": true,
+    "php.validate.suggestions": true,
+    "terminal.integrated.profiles.linux": {
+      "bash": {
+        "path": "/bin/bash"
+      },
+      "zsh": {
+        "path": "/bin/zsh"
+      }
+    },
+    "[html]": {
+      "editor.defaultFormatter": null
+    },
+    "[javascript]": {
+      "editor.defaultFormatter": null
+    },
+    "[markdown]": {
+      "editor.defaultFormatter": null
+    },
+    "[typescript]": {
+      "editor.defaultFormatter": null
+    },
+    "files.watcherExclude": {
+      "**/node_modules/**": true,
+      "**/vendor/**": true,
+      "**/.git/**": true
+    }
+  },
+
+  "remoteUser": "$USER",
+  "hostRequirements": {
+    "memory": "8gb"
+  },
+
+  "mounts": [
+    "source=${localEnv:HOME}/.composer,target=/home/vscode/.composer,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.npm,target=/home/vscode/.npm,type=bind,consistency=cached"
+  ],
+  
+  "updateContentCommand": "git rev-parse --show-toplevel"
+}
