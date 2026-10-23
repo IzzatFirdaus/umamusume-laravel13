@@ -45,7 +45,7 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
     <Head :title="`Review ${props.candidate.proposed_name}`" />
 
     <AppLayout>
-        <div class="mx-auto w-full max-w-3xl">
+        <div class="w-full">
             <nav aria-label="Breadcrumb" class="text-sm">
                 <Link href="/review" class="text-ink-muted hover:text-ink-strong transition-colors duration-150 ease-out">
                     ← Review queue
