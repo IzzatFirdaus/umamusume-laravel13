@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
-import CandidateForm from '../../components/review/CandidateForm.vue';
+// FQ-10: `CandidateForm` renders on `Review/Detail.vue`; the queue links to it instead.
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import StatusPill from '../../components/StatusPill.vue';
 import SuggestionHint from '../../components/review/SuggestionHint.vue';
@@ -132,7 +132,7 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                  verdict is set; a copy of this sentence on each of twenty-five rows said it
                  twenty-five times and buried the buttons it was about. -->
             <p class="mt-1 text-xs text-ink-muted">
-                Set a verdict on any row to enable its resolve.
+                Open a row to set its verdict and resolve it.
             </p>
 
             <template v-if="candidates.data.length > 0">
@@ -212,12 +212,16 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                                 :source-key="candidate.source_key"
                             />
 
-                            <CandidateForm
-                                :candidate="candidate"
-                                :alias-languages="aliasLanguages"
-                                :accented="index === 0"
-                                :default-expanded="true"
-                            />
+                            <!-- FQ-10: the verdict form lives on the detail page. The card keeps the
+                                 comparison — pill, badge, reason — and hands the decision over. -->
+                            <Link
+                                :href="`/review/${candidate.id}`"
+                                :aria-label="`Review ${candidate.proposed_name}`"
+                                data-testid="review-detail-link"
+                                class="mt-3 inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm font-medium text-ink hover:text-ink-strong transition-colors duration-150 ease-out"
+                            >
+                                Review and resolve
+                            </Link>
                         </li>
                     </ul>
                 </section>
@@ -255,12 +259,16 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                                          it is gone; the badge on the right carries it. -->
                                     <!-- The disclosure rides the header row so a collapsed card is one
                                          line: name, state, and the control that opens it. -->
-                                    <CandidateForm
-                                        :candidate="candidate"
-                                        :alias-languages="aliasLanguages"
-                                        :accented="false"
-                                        :default-expanded="false"
-                                    />
+                                    <!-- A no-match row is one line: the name, its state, and the link
+                                         that opens the page where it is decided. -->
+                                    <Link
+                                        :href="`/review/${candidate.id}`"
+                                        :aria-label="`Review ${candidate.proposed_name}`"
+                                        data-testid="review-detail-link"
+                                        class="inline-flex min-h-11 items-center rounded-md px-2 text-xs font-medium text-ink-muted hover:text-ink-strong transition-colors duration-150 ease-out"
+                                    >
+                                        Review and resolve
+                                    </Link>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <ProvenanceBadge

@@ -20,44 +20,11 @@ test.afterEach(() => {
     clearPendingCandidates();
 });
 
-test('every verdict control is named after its own candidate', async ({ page }) => {
-    await page.goto('/review');
-    await page.locator('#app > *').first().waitFor();
+// MOVED (FQ-10): "every verdict control is named after its own candidate" now asserts on the detail
+// page, where the controls render — see tests/browser/review-detail.spec.ts.
 
-    // With no pending candidates the queue shows its empty state; the naming assertions need one.
-    const empty = page.getByText('Nothing pending.');
-    if (await empty.isVisible().catch(() => false)) {
-        test.skip(true, 'No pending candidates in the scratch database to name.');
-    }
-
-    // Each control is reachable by the name that carries its candidate - the F14 contract.
-    const status = page.getByLabel(/^Verdict for /).first();
-    await expect(status).toBeVisible();
-
-    const resolve = page.getByRole('button', { name: /^Resolve / }).first();
-    await expect(resolve).toBeVisible();
-    await expect(resolve).toHaveText(/Resolve/);
-
-    // The alias-language control offers the language options.
-    const alias = page.getByLabel(/^Alias language for /).first();
-    await expect(alias.locator('option')).not.toHaveCount(0);
-});
-
-test('a failed verdict shows its message on the card', async ({ page }) => {
-    await page.goto('/review');
-    await page.locator('#app > *').first().waitFor();
-
-    const empty = page.getByText('Nothing pending.');
-    if (await empty.isVisible().catch(() => false)) {
-        test.skip(true, 'No pending candidates in the scratch database.');
-    }
-
-    // An Aliased verdict with no language is the D-2 case: the message must reach the card.
-    await page.getByLabel(/^Verdict for /).first().selectOption('Aliased');
-    await page.getByRole('button', { name: /^Resolve / }).first().click();
-
-    await expect(page.getByRole('alert').first()).toContainText(/language/i);
-});
+// MOVED (FQ-10): "a failed verdict shows its message" now asserts on the detail page — the form that
+// refuses the submission renders there. See tests/browser/review-detail.spec.ts.
 
 test('every control on the queue meets the 44px floor', async ({ page }) => {
     await page.goto('/review');
@@ -108,18 +75,12 @@ test('each card explains itself: count, pill, badge, reason, and one primary-act
     await expect(card.locator('[role="img"]').first()).toHaveAttribute('aria-label', /^(Unknown|Estimated|Calculated)/);
     await expect(card.getByText('No match', { exact: true })).toHaveCount(0);
 
-    // 6A.4: exactly one accented primary for the screen, on the topmost card; the other cards'
-    // Resolve buttons render secondary.
-    await expect(page.locator('.bg-primary-action')).toHaveCount(1);
-    await expect(card.getByRole('button', { name: /^Resolve / })).toHaveClass(/bg-primary-action/);
-
-    // 6A.3: the verdict control carries a visible label, not an sr-only one (the aria-label still
-    // names the candidate; "Verdict" here is the label's own text content).
-    await expect(page.getByText('Verdict', { exact: true }).first()).toBeVisible();
-
-    // 6A.10: nothing is busy on a cold load. The list's states are the two empty variants and the
-    // per-card refusal alert; loading exists only while a verdict is in flight (ADR-0007).
-    await expect(page.locator('form[aria-busy]')).toHaveCount(0);
+    // 6A.4, 6A.3 and 6A.10 moved to review-detail.spec.ts with the form: the accented primary, the
+    // visible "Verdict" label and the `aria-busy` form are the detail page's now (FQ-10).
+    //
+    // What the queue still owns is the identity it always carried: the card explains itself, and the
+    // row it summarises links to the page that decides.
+    await expect(card.getByTestId('review-detail-link')).toBeVisible();
 });
 
 test('lists the rows the engine could suggest before the ones it could not', async ({ page }) => {
@@ -137,62 +98,11 @@ test('lists the rows the engine could suggest before the ones it could not', asy
     await expect(page.locator('main ul > li').first()).toContainText('Suggested id:');
 });
 
-test('gates Resolve on a chosen verdict, and names the reason once', async ({ page }) => {
-    seedPendingCandidates(3);
+// MOVED (FQ-10): "gates Resolve on a chosen verdict" now asserts on the detail page, where the verdict
+// control and its Resolve button live. See tests/browser/review-detail.spec.ts.
 
-    await page.goto('/review');
-    await page.locator('#app > *').first().waitFor();
-
-    const empty = page.getByText('Nothing pending.');
-    if (await empty.isVisible().catch(() => false)) {
-        test.skip(true, 'No pending candidates in the scratch database.');
-    }
-
-    const card = page.locator('main ul > li').first();
-    const verdict = card.getByLabel(/^Verdict for /);
-    const resolve = card.getByRole('button', { name: /^Resolve / });
-
-    // The verdict starts unset, so the commit is refused at the control, and the disabled control
-    // is styled as unavailable (the house idiom Pagination.vue uses) rather than merely quiet.
-    await expect(verdict).toHaveValue('');
-    await expect(resolve).toBeDisabled();
-    await expect(resolve).toHaveClass(/disabled:opacity-50/);
-
-    // The reason is stated once for the queue, not once per card: the page carries it and no card
-    // does. Twenty-five copies of one sentence was the wall this replaced.
-    await expect(page.getByText('Set a verdict on any row to enable its resolve.')).toBeVisible();
-    await expect(page.getByText('Choose a verdict first.')).toHaveCount(0);
-
-    // The unset verdict is the quietest thing in the row; a chosen one is not.
-    await expect(verdict).toHaveClass(/text-ink-muted/);
-
-    // A deliberate pick enables the commit.
-    await verdict.selectOption('Rejected');
-    await expect(resolve).toBeEnabled();
-    await expect(verdict).toHaveClass(/text-ink-strong/);
-});
-
-test('lines the three controls up on one baseline', async ({ page }) => {
-    seedPendingCandidates(1);
-
-    await page.goto('/review');
-    await page.locator('#app > *').first().waitFor();
-
-    const row = page.getByTestId('review-form-row').first();
-
-    // The id field's "(optional)" hint used to render below its own input, and the row aligned the
-    // columns' bottoms, so that one control sat 20px above the other two. The hint is a caption row
-    // now and the controls share a top edge; this is the measurement, not the class name.
-    const tops = await row.locator('select, input').evaluateAll((elements) =>
-        elements.map((element) => element.getBoundingClientRect().top),
-    );
-
-    expect(tops.length, 'the row renders the three controls').toBeGreaterThanOrEqual(3);
-    expect(Math.max(...tops) - Math.min(...tops), 'form controls share a baseline').toBeLessThanOrEqual(1);
-
-    // The caption still says what the field is, and it is a caption rather than a control label.
-    await expect(row.getByText('(optional)', { exact: true })).toBeAttached();
-});
+// MOVED (FQ-10): "lines the three controls up on one baseline" now asserts on the detail page, where
+// `review-form-row` renders. See tests/browser/review-detail.spec.ts.
 
 test('splits the queue into the decidable half and the research half', async ({ page }) => {
     seedPendingCandidates(2, { suggested: true });
@@ -299,7 +209,7 @@ test('measures the queue against the shell gutter', async ({ page }) => {
     expect(edges.mainPaddingLeft, 'the shell gutter is the only inset').toBeLessThanOrEqual(96);
 });
 
-test('collapses a no-match row to one line and opens it on click', async ({ page }) => {
+test('summarises a no-match row on one line and links to the page that decides', async ({ page }) => {
     seedPendingCandidates(1, { suggested: true });
     seedPendingCandidates(3);
 
@@ -309,29 +219,31 @@ test('collapses a no-match row to one line and opens it on click', async ({ page
     const research = page.locator('section[aria-labelledby="review-without-suggestion"]');
     const decidable = page.locator('section[aria-labelledby="review-with-suggestion"]');
 
-    // The decidable half is the primary decision surface: its form is open without a click.
+    // FQ-10 moved the verdict form to its own page. Both halves therefore summarise and link: the
+    // decidable half keeps its comparison, the research half keeps its one line.
     const openCard = decidable.locator('ul > li').first();
-    await expect(openCard.getByLabel(/^Verdict for /)).toBeVisible();
+    await expect(openCard.getByTestId('review-detail-link')).toBeVisible();
 
-    // A no-match row renders collapsed. The form stays in the DOM (`v-show`) so its `useForm` keeps
-    // whatever the Trainer typed, so the assertion is visibility, not presence.
-    const collapsed = research.locator('ul > li').first();
-    const toggle = collapsed.getByRole('button', { name: /the verdict form for / });
-    await expect(toggle).toBeVisible();
-    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    await expect(collapsed.getByLabel(/^Verdict for /)).toBeHidden();
+    const row = research.locator('ul > li').first();
 
-    // Clicking the row's own control reveals it in place.
-    await toggle.click();
-    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    await expect(collapsed.getByLabel(/^Verdict for /)).toBeVisible();
+    // The disclosure the old case drove is gone, not merely hidden: there is no toggle to expand.
+    await expect(row.getByRole('button', { name: /the verdict form for / })).toHaveCount(0);
+    await expect(row.getByTestId('review-detail-link')).toBeVisible();
 
-    // And it closes again, which is what makes it a disclosure rather than a one-way reveal.
-    await toggle.click();
-    await expect(collapsed.getByLabel(/^Verdict for /)).toBeHidden();
+    // One line still means one line. The old case proved it by opening and closing a disclosure; the
+    // new shape proves the same user-visible fact by measuring the row it now renders.
+    const height = await row.evaluate((element) => element.getBoundingClientRect().height);
+    expect(height, 'the research row is a single summary line').toBeLessThanOrEqual(64);
+
+    // The link names the row's own candidate, so twenty of them stay distinguishable by a screen reader.
+    await expect(row.getByTestId('review-detail-link')).toHaveAttribute('aria-label', /^Review /);
+
+    // And it goes where it says it goes: the page that decides.
+    await row.getByTestId('review-detail-link').click();
+    await expect(page.getByTestId('review-detail')).toHaveCount(1);
 });
 
-test('the collapsed queue fits on one screen', async ({ page }) => {
+test('the summarised queue fits on one screen', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     seedPendingCandidates(2, { suggested: true });
     seedPendingCandidates(22);
@@ -350,10 +262,10 @@ test('the collapsed queue fits on one screen', async ({ page }) => {
             decidableHeight: Math.round((document.querySelector('section[aria-labelledby="review-with-suggestion"]') as HTMLElement | null)?.getBoundingClientRect().height ?? 0),
             pageChrome: Math.round(document.querySelector('main')!.getBoundingClientRect().top) + 134,
             cardHeights: cards.slice(0, 3).map((c) => Math.round(c.getBoundingClientRect().height)),
-            hiddenForms: cards.filter((c) => {
-                const form = c.querySelector('form');
-                return form !== null && getComputedStyle(form).display === 'none';
-            }).length,
+            // FQ-10 removed every inline form, so "collapsed" is no longer a `display:none` form to
+            // count: the evidence is that no row carries a form at all, and that the row it does render
+            // is one summary line.
+            forms: cards.filter((c) => c.querySelector('form') !== null).length,
             cardCount: cards.length,
         };
     });
@@ -361,19 +273,21 @@ test('the collapsed queue fits on one screen', async ({ page }) => {
     console.log(
         `REVIEW-COLLAPSE total=${measured.height}px research=${measured.sectionHeight}px `
         + `decidable=${measured.decidableHeight}px row=${measured.cardHeights[0]}px `
-        + `hidden=${measured.hiddenForms}/${measured.cardCount}`,
+        + `forms=${measured.forms}/${measured.cardCount}`,
     );
 
     // Before the collapse the same 25 cards measured 4,949px, because every no-match row carried
     // three controls plus a Resolve button. The mechanism is now measured directly: every no-match
     // form is display:none.
     expect(measured.cards, 'the queue is paginated at 25').toBe(25);
-    expect(measured.hiddenForms, 'every no-match form is collapsed').toBe(measured.cardCount);
+    // The old case proved "every no-match form is collapsed"; FQ-10 removed the forms, so the same
+    // claim is proved one step stronger — no row on this page carries a form at all.
+    expect(measured.forms, 'no queue row carries a verdict form').toBe(0);
 
     // The acceptance is per-row, and that is the honest unit. A page-level number also encodes the
     // seed's mix (the decidable section is expanded by design) and the shell chrome, neither of
     // which the collapse governs. A collapsed row is one 44px control plus the card's own padding.
-    expect(measured.cardHeights[0], 'a collapsed row is one line, not a form').toBeLessThanOrEqual(56);
+    expect(measured.cardHeights[0], 'a summarised row is one line, not a form').toBeLessThanOrEqual(56);
 
     // The page still moves a long way down from where it started: 4,949 -> under 2,700. It does not
     // reach the proposal's ~1,000-1,400 estimate, and cannot without breaking the tree's 44px tap
