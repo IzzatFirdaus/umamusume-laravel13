@@ -748,6 +748,10 @@ In `primitive-reconciliation.md §7`:
 > only the verdict, or 6.1's "zero regressions" is a claim about the wrong thing. Known causes among the
 > 38: `career-cockpit.spec.ts:566` (`PLAYWRIGHT_SCRATCH_DB` harness, prior record) and
 > `data-table.spec.ts:160` (U+2013 versus "26 to 50", content). The rest are unclassified.
+> **Superseded 2026-10-23 (matched-build reference).** The 38-failure count above was measured on a
+> stale `public/build`. The reference count is `primitive-reconciliation.md §7.4` — **46 failures**,
+> matched-build comparison at `b75921b4`: 45 PRE-EXISTING, 1 order-dependent (`runs.spec.ts:41`, passes
+> standalone), 0 CAUSED-BY-RECENT-WORK. See working convention 5 (`ec6c6b65`), build-before-measure.
 > **Correction 2026-10-23 (the browser suite measures `public/build`, not the tree).** The counts in
 > this note and in the triage above were measured with a **stale bundle**. `public/build` is
 > git-ignored, was last written at **01:36**, and the tree's newest `resources/js` commit before the
