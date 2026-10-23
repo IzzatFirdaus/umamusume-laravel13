@@ -50,6 +50,8 @@ Counts per status: `current` 19 / `historical-verified` 2 / `historical-divergen
 
 The ledger is at `.scratch-uma/fact-check-readme/claims.jsonl` (gitignored; the counts above are the durable record).
 
+The prior plan/map fact-check (2026-10-24, `80a4f1c9`) reported 6 findings; the `fact-check-2026-10-24` ledger holds 4 `superseded-silent` + 2 `false` = 6 rows, which are 3 distinct findings (`77`→`78` browser specs, `57`→`58` page files, tag `87c123e6`→`c590186f`), each cited at two sites, plus one row (`Plan at 1,458 lines`) whose claim appears in neither document and so owes no note. All 3 distinct findings are covered by the commit's dated notes. The report's "6" counted ledger rows, not distinct findings.
+
 ## Commit consolidation notes
 
 2026-10-24 README edit landed finding 6 ("move process documentation") in two commits — `04f2eb3b` (README, partial CONTRIBUTING) and `f7ce24b8` (CONTRIBUTING completion) — because a cross-backend write/stage race left the CONTRIBUTING write on disk uncommitted. Both commits belong to finding 6; reverting finding 6 means `git revert 04f2eb3b f7ce24b8`. This is recorded so a future revert does not undo only half the change.
