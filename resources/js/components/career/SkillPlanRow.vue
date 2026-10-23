@@ -113,7 +113,7 @@ async function move(delta: number): Promise<void> {
             {{ props.row.note }}
         </p>
 
-        <div v-if="props.movable" class="mt-2 flex gap-2">
+        <div v-if="props.movable" class="mt-2 flex flex-wrap items-center gap-2">
             <button
                 ref="upButton"
                 type="button"
@@ -134,6 +134,7 @@ async function move(delta: number): Promise<void> {
             >
                 Move down
             </button>
+            <span v-if="atTop || atBottom" class="text-xs text-ink-muted">{{ atTop ? 'First in the plan' : 'Last in the plan' }}</span>
         </div>
     </li>
 </template>
