@@ -83,7 +83,9 @@ Homestead.yaml
 /.windsurf/
 /skills-lock.json
 /kilo.json
-/.github/
+/.github/*
+!/.github/workflows/
+!/.github/workflows/*.yml
 
 # Local-only artifacts (this app is never deployed; PRD NFR-1)
 /research-scratch/
