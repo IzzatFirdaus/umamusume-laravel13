@@ -11,6 +11,97 @@ This file starts empty on purpose. The repository's whole history predates it, t
 mean writing claims about commits that were never recorded as changes, which `AGENTS.md` §5 forbids.
 Entries below are written at the time of the change, not back-filled.
 
+## [2.1.0] - 2026-10-23
+
+A MINOR release. The frontend architecture migrates to named primitives; one behaviour change ships
+(`review-detail` as its own route). No new screens, no new API fields, no schema change.
+
+### Added
+
+- **Primitive layer.** 21 named semantic families in `resources/css/app.css` (`card`, `tile`, `pill`,
+  `tag`, `type-chip`, `stat-icon`, `state`, `empty`, `warn`, `note`, `info`, `srow`, `pickcard`,
+  `subnav`, `stepper`, `step`, `savebar`, `trust-*`, `mood-*`, `slot-*`, `stat-*`). `.skel` not
+  ported (`AGENTS.md` bans decorative skeletons).
+- **`Flash.vue`** — the write-confirmation strip extracted from `AppLayout.vue` to a component;
+  `role="status"` with a sibling dismiss and the 5 s auto-dismiss moved inside it.
+- **`review.detail` route** — `GET /review/{candidate}`, rendering `Review/Detail`. The queue keeps the
+  comparison it always made (pill, provenance badge, fetch date, the reason a row has no suggestion) and
+  links to the page that decides. The only behaviour change in this release.
+- **Seven HFW registry screens** — Dashboard, Runs/Create, SaveVeteran, RacePlanner, Snapshot Entry,
+  Setup, Review. Set at 56 pages. Two edge-case states added to existing pages (null-profile form;
+  all-absent-at-top-anchor effect table).
+- **`@vue/compiler-sfc`** promoted to `devDependencies` (FQ-14=A), and `tools/ui-codemod.mjs` with its
+  declarative map: refusal-by-default, exact-set matches only.
+- **`tests/baselines/primitives-root.png`** — the primitive gallery baseline, written after a fresh
+  build. `ui-screenshot-diff` now defaults to a committed directory, because a baseline only its own
+  session can see is not a baseline.
+
+### Changed
+
+- **95 SFCs re-spelled under the CQ-05 criterion.** 50 re-spelled to named primitives; 7 accepted under
+  CQ-01 (`Form/*.vue` are primitives at the component layer); 39 accepted under CQ-05 (rule-7 + rule-8
+  compliant token utilities). `SparkChip.vue` exists twice on purpose: two live components with
+  different props, sharing only a filename (CQ-03 reversed).
+- **Contrast gate extended** — 41 pairs + 9 grade badges, both themes, three-way threshold
+  (`text 4.5` / `non-text 3.0` / `hairline 1.2`). `--color-risk`, `--color-pick-line` and
+  `--color-ring` now covered by name. 89 colour tokens (was 81).
+- **The scrim pair was withdrawn** (`45adcab9`): `parseComputedColor()` drops alpha, so a 62 %-black
+  overlay was compared to a near-black page as if opaque and measured 1.05:1. The token stays; the
+  overlay treatment is enforced by `--shadow-overlay` and its `toContain` assertion.
+
+### Fixed
+
+- **UI-1 heading ladder** on `career-race-planner.html` and `catalog-detail.html`, both themes
+  (`9d4c91be`, `0f2524a1`).
+- **The review queue fixture resolved a different scratch database than the suite migrated**
+  (`16185919`). `scratchDatabasePath()` stamps pid and load-time millisecond, so all 13 review cases
+  died in `beforeEach` with "no such table". The fix publishes the migrated path once from
+  `global-setup`; third instance of that family, after `b6a7d0f0` and the `SCRATCH_DATABASE` fix.
+- **`RouteCoverageTest` route coverage** for the new detail route (`a3332d1c`): a literal navigation and
+  an axe scan, with the fixture resetting `sqlite_sequence` so the seeded row has a reproducible id.
+
+### Removed
+
+- **`UraDuelPanel.vue`, `UraMilestoneTracker.vue`** — no production call site; their guard vocabulary
+  moved to a `config/scenarios.php` test first, so nothing was lost with them.
+
+### Verification
+
+Full Pest, full Playwright (fresh `npm run build`, before the run and again for the base comparison),
+PHPStan L6, `pint --test` scoped to the release-touched paths, `typecheck`, `lint:ui`, the lore gates,
+`composer audit` and `npm audit --omit=dev` — all run at tag; outputs under `.scratch-uma/p6/`.
+
+- **Pest:** 1,956 passed, 31,878 assertions, 0 failed.
+- **Playwright:** 547 tests, **501 passed, 46 failed** — and all 46 are exactly the reference set at
+  `primitive-reconciliation.md §7.4`, compared by `file:line` against that run: **0 new failures,
+  0 caused by this release**. §7.4's counts were measured on a matching build at both ends; the
+  comparison is in `.scratch-uma/p6/playwright-full.log`.
+- **Audits:** `composer audit` clean, `npm audit --omit=dev` clean, after the version bumps below.
+- **Lore gates:** `composer lore` 515 docs hits / 75 exempt lines; `composer lore-code` 189 hits. Both
+  advisory; every hit is pre-existing and carries the ruling its register records.
+
+### Deferred — pre-existing Playwright failures (46)
+
+The 46 failures in `primitive-reconciliation.md §7.4` remain: **rendering 40, timeout 5, harness 1**.
+None is caused by this release; each fails at `b75921b4` with a matching build. Largest blocks are the
+scenario panels (`ura-panel` 8, `career-legacy-deck-steps` 6, `support-deck` 5, `unity-cup-panel` 3),
+which no phase of this work claimed to finish. The single harness row is
+`full-career-journey.spec.ts`: it refuses to run without `PLAYWRIGHT_PORT` and `PLAYWRIGHT_SCRATCH_DB`.
+
+### Deferred — peer-side pint formatting (3)
+
+Per the release bar's scoping, `pint --test` was run on the release-touched paths (0 failures). These
+files fail `pint --test` at tag and are not part of this release's change set, so they are recorded
+rather than reformatted: `tests/Feature/FinaleReportingTest.php`,
+`tests/Feature/TraineeGoalGrainTest.php`, `tests/Feature/TraineeGoalReaderTest.php`. Reformatting
+another session's files is the KI-75 damage pattern this repository has already paid for.
+
+### Deferred — dependency advisories
+
+None outstanding. `league/commonmark` 2.10.1 → 2.10.2 closes GHSA-3q6v-r5mr-hxv8 (high), `vite`
+7.0.7 → 7.3.7 closes its three high advisories, and `npm audit fix` resolved the
+`follow-redirects` and `source-map-js` transitives.
+
 ## [2.0.2] - 2026-10-22
 
 A PATCH on top of 2.0.1. It corrects one stale browser expectation that 2.0.1's absence-channel
@@ -398,48 +489,3 @@ Moved out of non-goal 3, verbatim:
 recorded Legacy selection data, and no inheritance computation.
 
 ### 2026-09-29 — D-1 amended and D-3 added by `ADR-0011`; A-6 provenance history
-
-Moved out of D-1 and D-3, verbatim:
-
-> [amended 2026-09-29 by `ADR-0011`] adds **`rarity`**, **the export's own skill id**, and the provenance
-> columns `ADR-0004` requires.
-
-> D-3 [added 2026-09-29, `ADR-0011`]
-
-Moved out of A-6's provenance parenthetical, verbatim:
-
-> Provenance is inline on the card row, as the sibling reference tables do (`ADR-0003` Amendment R3;
-> `scenario_races`, `scenario_slots` and `race_catalog_slots` carry all four fields, `scenarios` predates the
-> set and carries three)
-
-The four provenance field names, the card-level `is_manual` and B-4's role stay in A-6; the sibling-table
-comparison and `ADR-0003` Amendment R3 are this entry's record. `ADR-0008` is the ruling A-6 cites today.
-
-### 2026-09-28 — OQ-2 partially resolved, and its original wording
-
-Moved out of OQ-2, verbatim:
-
-> Original wording: candidates observed in legacy docs were community wikis (GamePress, umamusume.wiki) and
-> the official JP site; each addition stays a legal/robots.txt review plus one parser class, and the Trainer
-> picks.
-
-The standing rule inside that wording — a new source is a legal/robots.txt review plus one parser class, and
-the Trainer picks the sources — is current and stays in OQ-2 and in `AGENTS.md` §11.
-
-### 2026-09-27 — OQ-1 and OQ-4 closed by the owner; US-11's key set authorized
-
-Moved out of OQ-4, the closure framing that narrates the decision rather than stating it:
-
-> OQ-4 [rev 0.2 — repo #4]: **Closed 2026-09-27 by the owner: enters as engine-owned facts with provenance.**
-
-Moved out of US-11, the authorization the story line carried:
-
-> Authorized 2026-09-27 for two keys only: the theme (`light` / `dark` / follow the OS) and the numeric
-> failure-estimate toggle (off by default, `ADR-0001` §3).
-
-The two-key contract and the off-by-default toggle are current and stay in US-11 and in non-goal 12's
-no-browser-storage rule; the date and the `ADR-0001` §3 authority are this entry's record.
-
-OQ-1's closure ("Product name is **Trainer Desk**, owner decision 2026-09-27, closing OQ-1") stays in the
-one-line closed entry, because the name is a live requirement, not history. `APP_NAME` in `.env` matching it
-at the next config change is still an unexecuted instruction and is recorded as such.
