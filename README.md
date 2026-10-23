@@ -41,13 +41,13 @@ git clone <repo> && cd umamusume-laravel13
 # 1. Configure the environment BEFORE running setup. The skeleton .env.example
 #    defaults to the Sail MySQL connection; this app is SQLite only, and
 #    `composer setup` will not overwrite an existing .env.
-Copy-Item .env.example .env
+cp .env.example .env
 #    then set in .env:
 #      DB_CONNECTION=sqlite
 #      DB_DATABASE=database/database.sqlite
 
 # 2. Create the database file.
-New-Item -ItemType File database/database.sqlite   # or: touch database/database.sqlite (Git Bash)
+touch database/database.sqlite
 
 # 3. One-command setup: composer install, artisan key:generate, migrate,
 #    npm install, npm run build.
@@ -55,6 +55,13 @@ composer setup
 
 # 4. Populate the catalog offline from the committed source bodies.
 php artisan migrate:fresh --seed
+```
+
+#### On Windows
+
+```powershell
+Copy-Item .env.example .env                                # step 1
+New-Item -ItemType File database/database.sqlite            # step 2
 ```
 
 Seeding reads `database/seeders/data/` (the committed copies of each source document) and fills the reference tables with no network: the roster, cards, 1,910 skills (623 `[Global]`, as of the `609afe88` snapshot), 559 support cards, scenario slots. Trainer-facing surfaces only show rows passing `Skill::availableOnGlobal()` (release status `GlobalReleased` **and** `name_is_client`), per `ADR-0011`.
