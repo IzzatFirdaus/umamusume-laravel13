@@ -544,6 +544,13 @@ tree, not by rendering it.
 | Feature files | **203** top-level / **206** recursive | the 3-file delta is `tests/Feature/Schema/` |
 | Phase 3 state | **50** re-spelled / **7** accepted under CQ-01 / **39** accepted under CQ-05 | 50 + 7 + 39 = 96 |
 
+> **Corrected 2026-10-24 (fact-check).** Two rows of the table above are superseded by Phase 4b's
+> `review-detail` landing, and no dated note beside either flags it. Re-derived on the current tree
+> (`002ab54a`) and at the 2.1.0 tag (`87c123e6`): **browser specs = 78**, not 77 — the 78th is
+> `tests/browser/review-detail.spec.ts` (`d7801605`) — and **page files = 58**, not 57 — the 58th is
+> `pages/Review/Detail.vue` (`065753f0`). Both were 77 and 57 at `e3ac31bd` (2.0.2). The rows stand as
+> written.
+
 **Method.** Rendered-signature proxies, in the order the brief fixes them: the **primitive class
 families** a component emits (the 35 names the primitive layer declares), and its **aria tokens**
 (`aria-label` / `aria-labelledby` / `aria-describedby`) matched against the page that shares the most

@@ -17,6 +17,13 @@
 > - **A1 — browser specs are 77, not 76.** `tests/browser/*.spec.ts` = **77**, and **77** of them are tracked at HEAD. So **this note's "76" was a `15f7ee1b` reading**, taken before the fix pass added `tests/browser/sub-cell.spec.ts`. **Superseded: 77.** The consequence is worth stating because it inverts the earlier correction: the plan's Phase 3 gate, Phase 4 gate, risks row and Ruling-1 bullet all say **77**, and those are **correct as written** — it was M-01 and M-13 (which restates the figure as "there are 76 (A2)") that carried the stale number. A later pass reading only the dated notes would have "corrected" a correct document.
 > - **A2 — `tests/Feature` is 203 top-level and 206 recursive, not 200 and 203.** Top-level `.php` = **203**; recursive = **206**, the difference being `tests/Feature/Schema/` (3 files); **206** are tracked at HEAD. So this note's "200 top-level / 203 recursive" was also a `15f7ee1b` reading, taken before the fix pass added `AbsenceChannelTest.php`, `DatabaseHubSourcesLinkTest.php` and `DesignDocEnforcementTest.php`. **Superseded: 203 / 206.**
 
+> **Corrected 2026-10-24 (fact-check).** Two counts carried by the A1 bullet and by the sentence above are
+> themselves superseded by Phase 4b's `review-detail` landing, and no dated note beside either flags it.
+> Re-derived on the current tree (`002ab54a`) and at the 2.1.0 tag (`87c123e6`): **browser specs = 78**,
+> not 77 — the 78th is `tests/browser/review-detail.spec.ts` (`d7801605`) — and **page files = 58**, not
+> 57 — the 58th is `pages/Review/Detail.vue` (`065753f0`). Both were 77 and 57 at `e3ac31bd` (2.0.2). The
+> A1 note above stands as written: it records the 76→77 move, not the 77→78 one.
+
 **Status vocabulary.** This is a design plan, not a roadmap. Proposals carry `proposed` (nothing is built yet), `verified` (established in the repository), or **`open question` (needs an owner ruling)**. No slice status (`COMPLETE` / `BLOCKED BY EVIDENCE`) is used, and no feature level (`Implemented` / `Verified`) is claimed for anything the plan proposes.
 
 > **Reverted 2026-10-22 (Group B).** The peer rewrite replaced `open question` with `ruled`; that is reverted because the general `ruled` vocabulary sits above the FQ acceptance mechanism (`answered = named assertion passes`), which is currently unsatisfiable for every `FQ-01`…`FQ-05`. The five 2026-10-22 scope rulings are cited below from `ADR-0028`, not asserted by this vocabulary.
@@ -1021,6 +1028,12 @@ Owner ruling 5: the dataset is a **frozen dated snapshot**, not a second source 
 > were dead in `beforeEach` and read as pre-existing rendering debt.
 >
 > Tag `2.1.0` on the release commit `87c123e6`.
+
+> **Corrected 2026-10-24 (fact-check).** The tag `2.1.0` resolves to `c590186f`, not `87c123e6`.
+> `87c123e6` ("docs: release notes for 2.1.0") is an ancestor of the tag; the tag itself sits on
+> `c590186f` ("docs(changelog): record the tagged-tree Playwright re-run - 501/46, zero new failures"),
+> four commits later, after the re-run recorded at `CHANGELOG.md` (2026-10-24 01:02). The sentence above
+> stands as written.
 
 ### Risks and mitigations
 
