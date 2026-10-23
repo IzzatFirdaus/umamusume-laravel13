@@ -1116,6 +1116,16 @@ the badge stays and the duplicate pill is deleted; the `Fuzzy match` pill is kep
 warning rather than the absence. `review.spec.ts` counts one state label per card and asserts the
 duplicate word is gone. The section's state tables are unchanged: no state was added or removed, only
 the number of labels that name it.
+**Dated amendment 2026-10-23 (FQ-10).** The "resolve controls inline per card (no detail page)" rule is
+**withdrawn**. A detail route is permitted and now ships: `GET /review/{candidate}` name `review.detail`
+(`ReviewController::show`), rendering `Review/Detail`. The queue keeps the comparison each card makes —
+pill, provenance badge, fetch date, the reason it has no suggestion or the id it suggests — and adds a
+one-line summary with a link that carries the candidate's own accessible name. The verdict form
+(`CandidateForm`), the per-card stacked errors (now one stacked list), the first-row accent and the
+collapsed-row disclosure move to the detail page; the disclosure is **removed rather than relocated**,
+because there is no longer an inline form for it to reveal. `review.spec.ts` keeps nine cases and
+`review-detail.spec.ts` carries six: five assertions moved with the form (their bodies unchanged) and
+two were rewritten against the summary-plus-link shape (same user-visible claims, new mechanism).
 
 #### Purpose
 
