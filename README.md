@@ -321,6 +321,10 @@ No security document exists; the model is documented in `ARCHITECTURE.md` §8:
 - Phase 1 has no secrets; any future key goes through `.env` only.
 - `composer audit` and `npm audit --omit=dev` before tagging a build.
 
+### Cloud workspace secrets
+
+If you run this repository in cloud workspaces (for example GitHub Codespaces or cloud agents), keep sensitive values in the platform secret store and inject them as environment variables at runtime. Do not commit credentials, API keys, tokens, or private endpoints to `.env`, `.env.example`, source code, tests, or docs.
+
 ## Deployment
 
 There is none, by decision (PRD §6.10): no hosting, deployment, or cloud path. The deliverable is a local `composer dev`. Do not expose this app.
