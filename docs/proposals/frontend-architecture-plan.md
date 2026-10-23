@@ -133,6 +133,7 @@ not run; agent 1's gates carry that."* and the run was added as a dated note abo
 described a change to a sentence rather than quoting it, and a reader acting on it would have restored
 text that had never been removed. Quote first; describe only what the quote shows.
 
+> **App-audit record 2026-10-23.** The app-wide frontend audit against `docs/framework-ui-ux/` (167 files, 73 rules) is recorded durably at `primitive-reconciliation.md §8`. Findings D1–D9, the D3 wiring fix at `52625c8a`, and the N2 ruling's fixes at `b0cf49e4`/`dc00dff9` are documented there. §8.5 carries the `CHANGELOG ## Deferred` entries the 2.1.0 release note should paste.
 
 ## Part I — Findings and observations
 
