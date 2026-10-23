@@ -813,6 +813,16 @@ The migration is executed largely by coding agents, and five optimisations were 
 > **The gate therefore stays open on one condition**, and the work is small and named: run
 > `--write primitives` against the primitive gallery once the app renders, commit the baseline, and run
 > `--check` against it. Everything else Phase 7 promised is measured and in place.
+>
+> **Phase 7 exit gate — closed 2026-10-23.** The fourth condition is met: `tests/baselines/primitives-root.png`
+> is committed (`46a0f16c`) and `node tools/ui-screenshot-diff.mjs --check primitives` reports **clean,
+> exit 0** against it. The tool's default snapshot directory moved from the git-ignored
+> `.scratch-uma/snap` to `tests/baselines`, because a baseline only its own session can see is not a
+> baseline — a `--check` in any later session compared against nothing. The image was written after a
+> fresh `npm run build`, so it is the current application rather than the previous bundle. The other
+> three conditions stand as recorded above: `ui-framework-check` exit 0 with rule 8 at zero
+> unallowlisted debt, `ui-codemod --dry-run` reporting `APPLIED (0)`, and the `AGENTS.md` §13 ruleblock
+> present with its dated banner (`ef3f2828`).
 
 > **Amended 2026-10-22 (correction pass, D1 / authoritative A2, A3, A19, A22, A23).** Four corrections and one move. The text above stands as written.
 >
