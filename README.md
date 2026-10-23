@@ -10,7 +10,7 @@ A local-only Laravel 13 tool for Trainers of the Global English version of *Umam
 
 ## Current Status
 
-Phase 1 of `PRD.md`, substantially implemented and in active development (one release tag, `0.1.0`; the current label `2.0.0` is untagged, see `VERSION.md`; local deliverable only). The catalog, fetch engine, review queue, training-run domain, support-card deck surface, import/export, and the read-only `/api/v1` are built and covered by the Pest suite. Feature status and non-goals are authoritative in `PRD.md` §6; open decisions are tracked there (§7) and in `docs/adr/` (notably `ADR-0016`, next-race readiness, is an open question).
+Current version: `2.1.0`, pre-release (see `VERSION.md`). Phase 1 of `PRD.md` is substantially implemented and in active development; the tool is a local deliverable only. The catalog, fetch engine, review queue, training-run domain, support-card deck surface, import/export, and the read-only `/api/v1` are built and covered by the Pest suite. Feature status and non-goals are authoritative in `PRD.md` §6; open decisions are tracked there (§7) and in `docs/adr/` (notably `ADR-0016`, next-race readiness, is an open question).
 
 ## Technology Stack
 
