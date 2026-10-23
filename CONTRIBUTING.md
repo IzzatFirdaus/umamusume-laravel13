@@ -50,6 +50,10 @@ Counts per status: `current` 19 / `historical-verified` 2 / `historical-divergen
 
 The ledger is at `.scratch-uma/fact-check-readme/claims.jsonl` (gitignored; the counts above are the durable record).
 
+## Commit consolidation notes
+
+2026-10-24 README edit landed finding 6 ("move process documentation") in two commits — `04f2eb3b` (README, partial CONTRIBUTING) and `f7ce24b8` (CONTRIBUTING completion) — because a cross-backend write/stage race left the CONTRIBUTING write on disk uncommitted. Both commits belong to finding 6; reverting finding 6 means `git revert 04f2eb3b f7ce24b8`. This is recorded so a future revert does not undo only half the change.
+
 ## Cloud workspaces
 
 If you run this repository in cloud workspaces (for example GitHub Codespaces or cloud agents), keep
