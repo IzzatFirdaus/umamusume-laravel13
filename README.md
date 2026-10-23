@@ -229,7 +229,7 @@ tools/                    lore.php (lore gate), gate.py (design-artifact gate), 
 | `docs/research-scratch/GOVERNANCE.md`   | The binding quality bar (C-1 to C-9) as its CONSTRAINTS.md section, plus the gate registry, pre-mortem risk record, and the consolidated design/governance masters |
 | `AGENTS.md`                             | Agent roles, escalation paths, practical build notes                                                                                  |
 | `CLAUDE.md`                             | Coding rules for assistants                                                                                                           |
-| `KNOWN-ISSUES.md`                       | Pointer; defect register KI-01..KI-56 under `docs/research-scratch/AUDIT-AND-VERIFICATION.md`. New entries append to the root file.   |
+| `KNOWN-ISSUES.md`                       | Pointer; defect register KI-01..KI-56 is archived in `docs/research-scratch/AUDIT-AND-VERIFICATION.md`; the root file carries KI-57 onward.   |
 | `docs/adr/README.md`                    | ADR index (`ADR-0001` to `ADR-0027`; 0027 is Proposed) with the errata convention                                                                       |
 | `MCP_SETUP.md`                         | MCP client configuration: where each client reads its servers, and the host gotchas that make a correct-looking config fail silently     |
 | `docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md` | The append-only dispatch ledger: one numbered section per dispatch, with the gates run, the decisions taken and what was deferred |
