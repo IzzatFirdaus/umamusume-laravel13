@@ -737,6 +737,23 @@ In `primitive-reconciliation.md §7`:
 > only the verdict, or 6.1's "zero regressions" is a claim about the wrong thing. Known causes among the
 > 38: `career-cockpit.spec.ts:566` (`PLAYWRIGHT_SCRATCH_DB` harness, prior record) and
 > `data-table.spec.ts:160` (U+2013 versus "26 to 50", content). The rest are unclassified.
+> **Correction 2026-10-23 (the browser suite measures `public/build`, not the tree).** The counts in
+> this note and in the triage above were measured with a **stale bundle**. `public/build` is
+> git-ignored, was last written at **01:36**, and the tree's newest `resources/js` commit before the
+> triage was `ae715f7a` at **07:10** — with the peer session's ten re-spell commits between 05:34 and
+> 05:38 also unbuilt. Playwright serves that directory, so every browser result recorded before
+> 18:40 measured output that predates roughly a dozen component commits.
+>
+> Proven, not inferred: trimming the queue's inline form changed seven `review.spec.ts` cases **only
+> after `npm run build`**; against the stale bundle the same spec reported 13/13 pass with the form
+> already removed from source. The suite was reporting the old build.
+>
+> **What this does and does not invalidate.** The 13/13 review result stands — it was re-run after a
+> fresh build (13 passed, 21.4 s). The 51→38 pre-existing reconciliation is **provisional**: those
+> failures were observed against the stale bundle, so some may be stale-bundle artifacts rather than
+> rendering defects, and the true set is unknown until the full suite is re-run on a fresh build.
+> **6.1 must rebuild before it trusts any browser count**, and any pass that changes `resources/js`
+> must run `npm run build` before it runs a browser spec or it is measuring the previous change.
 
 ### Phase 7 — Agent ergonomics (the transition tooling; runs alongside Phase 3)
 
