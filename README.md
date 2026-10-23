@@ -283,16 +283,15 @@ There is none, by decision (PRD §6.10): no hosting, deployment, or cloud path. 
 
 ## Known Limitations
 
-Evidence-backed current state, distinct from the PRD non-goals in §6:
+What the tool does not do yet, distinct from the PRD non-goals in §6:
 
-- Next-race readiness is not a shipped judgement: fatigue data is recorded but the threshold is an open question (`ADR-0016`).
-- Support cards are reference data and per-run deck only; card collection state (ownership, levels, limit breaks) is cut (`ADR-0014`). Card tier labels are held for want of a Global source.
-- Sourced artwork is authorized and **built** (`ADR-0021`, 2026-10-05): `uma:fetch-art` mirrors id-addressable game art from an allowlisted host into a gitignored local mirror, and `ArtworkSlot.vue` renders it on the catalog and support-card surfaces; an absent file paints nothing (`DESIGN.md` §4.7). Which further screens get a slot is the open placement remainder (PRD OQ-6). There are still no trainee image uploads (PRD §6.13).
-- The GameTora robots.txt / rate-limit verification is formally outstanding (PRD OQ-2); sources are bounded by config politeness settings instead.
-- Fetch scheduling is manual; the scheduler default is open (PRD OQ-3).
-- Aptitude letters and per-scenario caps are engine-owned facts (`ADR-0004`); growth rates and base stats are not implemented (PRD OQ-4 scope).
+- Next-race readiness is not judged automatically: fatigue data is recorded, but the readiness threshold is an open question (`ADR-0016`).
+- Support cards are reference data plus a per-run deck only; there is no card collection (ownership, levels, limit breaks) and no card tier labels.
+- No trainee image uploads (`PRD.md` §6.13). Sourced game art is mirrored locally (`uma:fetch-art`) and rendered where a screen carries a frame; an absent file paints nothing. Which further screens get a frame is open (PRD OQ-6).
+- Fetch scheduling is manual, and the GameTora robots.txt / rate-limit verification is outstanding (PRD OQ-2, OQ-3); sources are bounded by config politeness settings instead.
+- Growth rates and base stats are not implemented; aptitude letters and per-scenario caps are engine-owned reference data (`ADR-0004`).
 - The framework-default `users` table and `User` model exist but are unused.
-- The live defect register is `KNOWN-ISSUES.md` -> `docs/research-scratch/AUDIT-AND-VERIFICATION.md` (KI-01..KI-56 in the master, KI-57..KI-106 in the root file); `tools/gate.py`'s hex allowlist defect (KI-58) closed on 2026-10-09 at `7d8b62a`, and the live item on the same gate is its mirror case, KI-83, where three tracked prototypes render four raw hexes the shipped theme no longer declares.
+- Defects and history are tracked in `KNOWN-ISSUES.md` (pointer: `docs/research-scratch/AUDIT-AND-VERIFICATION.md`).
 
 ## License
 
