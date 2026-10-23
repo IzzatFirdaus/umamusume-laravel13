@@ -38,7 +38,7 @@ Deliberately absent (PRD §6): auth packages, Livewire, Excel export, Redis, MyS
 ## Installation
 
 ```bash
-git clone <repo> && cd umamusume-laravel13
+git clone https://github.com/IzzatFirdaus/umamusume-laravel13.git && cd umamusume-laravel13
 
 # 1. Configure the environment BEFORE running setup. The skeleton .env.example
 #    defaults to the Sail MySQL connection; this app is SQLite only, and
@@ -263,12 +263,6 @@ No security document exists; the model is documented in `ARCHITECTURE.md` §8:
 - Trainer forms go through Form Requests.
 - Phase 1 has no secrets; any future key goes through `.env` only.
 - `composer audit` and `npm audit --omit=dev` before tagging a build.
-
-### Cloud workspace secrets
-
-If you run this repository in cloud workspaces (for example GitHub Codespaces or cloud agents), keep sensitive values in the platform secret store and inject them as environment variables at runtime. Do not commit credentials, API keys, tokens, or private endpoints to `.env`, `.env.example`, source code, tests, or docs.
-
-Codex CLI has no path-based ignore file; do not run it against a working tree that contains secrets. Claude Code reads the deny rules in `.claude/settings.json`. That directory is local and gitignored (`AGENTS.md` §11), so the tracked template is `tools/claude-settings.json`: the dev container copies it during setup, and a local checkout needs `mkdir -p .claude && cp tools/claude-settings.json .claude/settings.json` once.
 
 ## Deployment
 

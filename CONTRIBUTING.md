@@ -42,3 +42,16 @@ sessions' work. `tests/Feature/DocCitationParityTest.php` is the gate.
 - **This tree holds other sessions' uncommitted work.** Do not revert it, reformat it, or commit it. Scope
   your edits and your tools to your own files, and if a file you need is held by another session, skip it
   and say so in the report.
+
+## Cloud workspaces
+
+If you run this repository in cloud workspaces (for example GitHub Codespaces or cloud agents), keep
+sensitive values in the platform secret store and inject them as environment variables at runtime. Do not
+commit credentials, API keys, tokens, or private endpoints to `.env`, `.env.example`, source code, tests,
+or docs.
+
+Codex CLI has no path-based ignore file; do not run it against a working tree that contains secrets.
+Claude Code reads the deny rules in `.claude/settings.json`. That directory is local and gitignored
+(`AGENTS.md` §11), so the tracked template is `tools/claude-settings.json`: the dev container copies it
+during setup, and a local checkout needs
+`mkdir -p .claude && cp tools/claude-settings.json .claude/settings.json` once.
