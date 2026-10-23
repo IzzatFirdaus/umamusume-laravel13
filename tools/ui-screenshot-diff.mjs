@@ -10,8 +10,11 @@
  *   node tools/ui-screenshot-diff.mjs --check primitives
  *
  * URLs: UI_DIFF_BASE_URL (default http://127.0.0.1:8000), UI_DIFF_URLS (default /).
- * Snapshots: UI_DIFF_DIR or .scratch-uma/<session>/snap. An absent Playwright install
- * exits 2 with UNVERIFIED, never 0.
+ * Snapshots: UI_DIFF_DIR or tests/baselines. The default is a **committed** directory, because a
+ * `--check` against a per-session file compares against nothing and reports "no baseline" to every
+ * run but the one that wrote it. Baselines are committed only for the primitive gallery, never per
+ * page: per-page baselines rot with the data. An absent Playwright install exits 2 with UNVERIFIED,
+ * never 0.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -35,7 +38,7 @@ try {
 
 const BASE = process.env.UI_DIFF_BASE_URL ?? 'http://127.0.0.1:8000';
 const urls = (process.env.UI_DIFF_URLS ?? '/').split(',').map((s) => s.trim()).filter(Boolean);
-const DIR = process.env.UI_DIFF_DIR ?? join('.scratch-uma', 'snap');
+const DIR = process.env.UI_DIFF_DIR ?? join('tests', 'baselines');
 mkdirSync(DIR, { recursive: true });
 
 let browser;
