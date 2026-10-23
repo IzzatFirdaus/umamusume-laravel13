@@ -116,6 +116,17 @@ time, and a line number measured in one session is not a location in another.
    owner. A document that contradicts the tagged state is filed as a measured correction, never edited
    inside the pass that found it.
 
+
+5. **Build before measure (2026-10-23).** The browser suite serves `public/build`, which is
+   git-ignored and is therefore whatever was last built — not what the tree holds. Every Playwright
+   run must be preceded by `npm run build` **on the tree under test**, and a base-tree comparison must
+   rebuild the base tree too. A browser result without a fresh build is a measurement of the previous
+   build, not of the code: the 2026-10-23 pass demonstrated it by deleting a component's form from
+   source and watching its thirteen specs still pass until `npm run build` ran, then fail seven of
+   thirteen immediately after. This rule narrows rule 2 rather than contradicting it: rule 2 forbids
+   building while another session's work is uncommitted, because the build then describes a moving
+   tree. Both hold — commit or report, then build.
+
 **Worked example (2026-10-22).** The A7 note's summary said the G-18 audit's status line was
 "re-scoped" to read "read this audit". The sentence was intact: it still read *"Read-only. The test was
 not run; agent 1's gates carry that."* and the run was added as a dated note above it. The paraphrase
