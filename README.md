@@ -46,16 +46,15 @@ cp .env.example .env
 #      DB_CONNECTION=sqlite
 #      DB_DATABASE=database/database.sqlite
 
-# 2. Create the database file.
+# 2. Create the database file (setup's migrate step needs it).
 touch database/database.sqlite
 
 # 3. One-command setup: composer install, artisan key:generate, migrate,
 #    npm install, npm run build.
 composer setup
-
-# 4. Populate the catalog offline from the committed source bodies.
-php artisan migrate:fresh --seed
 ```
+
+Seed the catalog offline next — see Database & Data Setup.
 
 #### On Windows
 
