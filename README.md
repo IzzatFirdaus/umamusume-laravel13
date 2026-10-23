@@ -325,6 +325,8 @@ No security document exists; the model is documented in `ARCHITECTURE.md` §8:
 
 If you run this repository in cloud workspaces (for example GitHub Codespaces or cloud agents), keep sensitive values in the platform secret store and inject them as environment variables at runtime. Do not commit credentials, API keys, tokens, or private endpoints to `.env`, `.env.example`, source code, tests, or docs.
 
+Codex CLI has no path-based ignore file; do not run it against a working tree that contains secrets. Claude Code reads the deny rules in `.claude/settings.json`. That directory is local and gitignored (`AGENTS.md` §11), so the tracked template is `tools/claude-settings.json`: the dev container copies it during setup, and a local checkout needs `mkdir -p .claude && cp tools/claude-settings.json .claude/settings.json` once.
+
 ## Deployment
 
 There is none, by decision (PRD §6.10): no hosting, deployment, or cloud path. The deliverable is a local `composer dev`. Do not expose this app.

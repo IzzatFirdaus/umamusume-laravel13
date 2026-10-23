@@ -7,7 +7,7 @@
         }
     },
     "forwardPorts": [8000, 5173],
-    "postCreateCommand": "bash -lc 'if [ ! -f .env ]; then cp .env.example .env; fi; sed -i \"s/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/\" .env; sed -i \"s|^DB_DATABASE=.*|DB_DATABASE=database/database.sqlite|\" .env; mkdir -p database; touch database/database.sqlite; composer install --no-interaction --prefer-dist; npm install'",
+    "postCreateCommand": "bash -lc 'set -e; if [ ! -f .env ]; then cp .env.example .env; fi; sed -i \"s/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/\" .env; sed -i \"s|^DB_DATABASE=.*|DB_DATABASE=database/database.sqlite|\" .env; mkdir -p database; touch database/database.sqlite; mkdir -p .claude; cp tools/claude-settings.json .claude/settings.json; php -m | grep -qi pdo_sqlite || { echo \"FATAL: pdo_sqlite missing\"; exit 1; }; composer install --no-interaction --prefer-dist; npm install; grep -q \"^APP_KEY=base64:\" .env || php artisan key:generate --force; php artisan migrate --force; npm run build; bash tools/smoke-test.sh'",
     "customizations": {
         "vscode": {
             "extensions": [
