@@ -96,6 +96,18 @@ rather than reformatted: `tests/Feature/FinaleReportingTest.php`,
 `tests/Feature/TraineeGoalGrainTest.php`, `tests/Feature/TraineeGoalReaderTest.php`. Reformatting
 another session's files is the KI-75 damage pattern this repository has already paid for.
 
+> **Dated note 2026-10-24 (verification gap, disclosed).** Three peer commits landed **during** this
+> release's Playwright run — `52625c8a` (CSS: wire the `.stat-*` primitives to their tokens, 23:08),
+> `b0cf49e4` and `dc00dff9` (a11y: visible reasons on disabled controls, 23:09–23:10). The browser suite
+> that produced the figures above started at 22:57 and built its bundle then, so those three commits are
+> inside the tag but were **not** measured by it. The Pest run that closed at 23:44 did include them
+> (1,956 passed, 0 failed); the browser-side coverage of the CSS change is the open question.
+>
+> A full Playwright re-run against the tagged tree was started at 00:07 and its result supersedes the
+> 501/46 figures once it lands; until then the exposure is one CSS commit touching every surface that
+> renders a stat colour, plus two a11y commits whose specs are in the suite. This note exists so the gap
+> is on the record rather than discovered later by whoever reads the tag.
+
 ### Deferred — dependency advisories
 
 None outstanding. `league/commonmark` 2.10.1 → 2.10.2 closes GHSA-3q6v-r5mr-hxv8 (high), `vite`
