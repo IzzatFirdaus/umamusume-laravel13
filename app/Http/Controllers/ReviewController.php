@@ -63,6 +63,38 @@ class ReviewController extends Controller
     }
 
     /**
+     * One candidate on its own page (FQ-10, plan 4b.2).
+     *
+     * The queue used to render a verdict form inside every row; the form moves here so the queue is a
+     * list a Trainer scans and this is the screen they decide on. The props are the row's own shape plus
+     * the alias languages `CandidateForm` offers, so the form receives exactly what the inline form did.
+     */
+    public function show(MatchCandidate $candidate): Response
+    {
+        $candidate->loadMissing('suggestedUmamusume');
+
+        return Inertia::render('Review/Detail', [
+            'candidate' => [
+                'id' => $candidate->id,
+                'proposed_name' => $candidate->proposed_name,
+                'proposed_name_ja' => $candidate->proposed_name_ja,
+                'match_tier' => $candidate->match_tier->value,
+                'match_tier_label' => $candidate->match_tier->label(),
+                'source_key' => $candidate->source_key,
+                'created_at' => $candidate->created_by_fetch_at->toDateString(),
+                'suggestion' => $candidate->suggestedUmamusume?->name,
+                'suggested_umamusume_id' => $candidate->suggested_umamusume_id,
+            ],
+            'aliasLanguages' => collect(AliasLanguage::cases())
+                ->map(fn (AliasLanguage $language): array => [
+                    'value' => $language->value,
+                    'label' => $language->label(),
+                ])
+                ->all(),
+        ]);
+    }
+
+    /**
      * Applies the Trainer's verdict (see the ResolveMatchCandidate action for
      * what each status does) and returns to the queue.
      */

@@ -209,6 +209,9 @@ Route::post('/training-runs/{run}/purchases', [TrainingRunController::class, 'st
 Route::put('/training-runs/{run}/build-target', [TrainingRunController::class, 'updateBuildTarget'])->name('runs.build-target.update');
 
 Route::get('/review', [ReviewController::class, 'index'])->name('review.index');
+// The detail route is declared before the POST so the GET is not shadowed by the verb-less match a
+// reader might expect; the two differ by method, and either order binds the same `{candidate}`.
+Route::get('/review/{candidate}', [ReviewController::class, 'show'])->name('review.detail');
 Route::post('/review/{candidate}', [ReviewController::class, 'resolve'])->name('review.resolve');
 
 /*

@@ -27,3 +27,26 @@ it('passes the queue its candidates and the alias languages the controls need', 
             ->has('candidates.data', 2)
             ->has('aliasLanguages'));
 });
+
+it('passes the detail page the one candidate the verdict form is about', function (): void {
+    $candidate = MatchCandidate::factory()->create([
+        'proposed_name' => 'Unmatched One',
+        'source_key' => 'fixture',
+    ]);
+
+    test()->get('/review/'.$candidate->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Review/Detail')
+            // The shape the inline form used to receive from the queue row, now delivered by the route:
+            // `CandidateForm` reads `id`, `proposed_name` and `suggested_umamusume_id` off it, and the
+            // page's own header reads the rest.
+            ->where('candidate.id', $candidate->id)
+            ->where('candidate.proposed_name', 'Unmatched One')
+            ->where('candidate.source_key', 'fixture')
+            ->has('candidate.match_tier')
+            ->has('candidate.match_tier_label')
+            ->has('candidate.suggested_umamusume_id')
+            ->has('aliasLanguages'));
+});
+
