@@ -996,6 +996,32 @@ Owner ruling 5: the dataset is a **frozen dated snapshot**, not a second source 
 > - **"the three static checks" is five**: `framework-check`, `link-check`, `render-check`, `data-check`, `framework-audit` — and the ported `framework-audit` must report `UNVERIFIED` and exit non-zero when its driver is absent, never exit 0 (its current `:31-34` behaviour, which would make this clause true while nothing was measured).
 > - **"the dead code is gone" cannot be a finishing condition**, because D1 measured that none of the five components is dead: all five are referenced by a Feature test or a browser fixture. The clause becomes "**every component's disposition is recorded and owner-ruled per `SCREEN_SPEC.md` §7-13**" — which can be true with five components held in place (FQ-12).
 
+> **Phase 6 — 2.1.0 released 2026-10-23.** Definition of done satisfied. Token layer one source of
+> truth (89 colour names, all resolving in both themes); 96/96 SFCs complete under CQ-05; five HFW checks
+> green at 56 pages; parity classification at `primitive-reconciliation.md §7` (§7.1 selector axis,
+> §7.2 component axis); five-component disposition ruled (URA pair deleted, three UI kept); seven
+> registry screens drawn; catalogue frozen and date-stamped with the generator writing the record;
+> `review.detail` is the only behaviour change and it ships with its own route, its two specs and its
+> `SCREEN_SPEC.md` amendment.
+>
+> **Level 3 sweep — every gate ran, and its output is attached.** Playwright: 547 tests, **501 passed,
+> 46 failed**, all 46 exactly the §7.4 reference set compared by `file:line` (**0 new, 0 caused by this
+> release**). Pest: **1,956 passed, 31,878 assertions, 0 failed**. PHPStan L6, `typecheck`, `lint:ui`,
+> `composer audit` and `npm audit --omit=dev` all exit 0; the two audits are clean only after the
+> `league/commonmark` → 2.10.2 and `vite` → 7.3.7 bumps at `1e58f352`. `pint --test` was scoped to the
+> release-touched paths (0 failures) and the three peer-side files are named in the CHANGELOG rather than
+> reformatted — that scoping is the KI-75 lesson applied, not an exception. Lore gates ran; both are
+> advisory and their hit counts are recorded. Logs under `.scratch-uma/p6/`.
+>
+> Two measurement corrections this release paid for, both now standing conventions: **build before
+> measure** (the browser suite serves `public/build`, so a run without a rebuild measures the previous
+> change — convention 5, `ec6c6b65`), and **the fixture publishes one scratch path** rather than each
+> consumer computing its own (`16185919`). Without the first, the 46 would have been measured against a
+> 5-hour-stale bundle and nine of them would have been artefacts; without the second, 13 review cases
+> were dead in `beforeEach` and read as pre-existing rendering debt.
+>
+> Tag `2.1.0` on the release commit `87c123e6`.
+
 ### Risks and mitigations
 
 | Risk | Mitigation |
