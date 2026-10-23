@@ -43,6 +43,13 @@ sessions' work. `tests/Feature/DocCitationParityTest.php` is the gate.
   your edits and your tools to your own files, and if a file you need is held by another session, skip it
   and say so in the report.
 
+## README fact-check (2026-10-24)
+
+27 claims verified against the tree when the README was last edited.
+Counts per status: `current` 19 / `historical-verified` 2 / `historical-divergent` 0 / `superseded-ok` 0 / `superseded-silent` 3 / `false` 3 / `skipped` 0.
+
+The ledger is at `.scratch-uma/fact-check-readme/claims.jsonl` (gitignored; the counts above are the durable record).
+
 ## Cloud workspaces
 
 If you run this repository in cloud workspaces (for example GitHub Codespaces or cloud agents), keep
