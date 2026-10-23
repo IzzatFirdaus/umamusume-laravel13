@@ -847,3 +847,259 @@ whether a committed dark screenshot baseline can exist at all.
 because none of them emits a primitive family the set also declares, so the signature axis has nothing
 to compare. Calling them `near-copy` would be an inherited claim, which is the failure mode §7.1's
 disposition rule exists to prevent.
+
+## 8. App-audit record (2026-10-23)
+
+The app-wide frontend audit against `docs/framework-ui-ux/` — 167 files, 73 rules, walk by
+walk. This section is the durable record; the working notes (`scope.md`, `ledger.md`,
+`followup.md`, `scan.mjs`, log files) were scratch under
+`.scratch-uma/app-audit-2026-10-23/` and are not retained.
+
+**Not to be confused with §7.4.** §7.4 counts Playwright test pass/fail rows from the
+fresh-build reconciliation; §8 counts checklist-rule compliance across the app's UI files.
+Different instruments, different counts, no overlap.
+
+### 8.1 Scope and method
+
+**Files walked — 167.**
+
+| family | count |
+|---|---|
+| `resources/js/components/**` | 96 SFCs + 5 `.ts` (the `.ts` are `Form/buttonStyles.ts`, `Form/index.ts`, `scenario/registry.ts`, `ui/combobox-types.ts`, `ui/data-table-types.ts`) |
+| `resources/js/pages/**` | 58 SFCs (incl. 8 Cockpit panels, 3 Snapshot screens) |
+| `resources/js/layouts/**` | 3 (`AppLayout`, `CareerLayout`, `SetupLayout`) |
+| `resources/css/app.css` | 1 (1,568 lines at measure time) |
+| `resources/views/**` | 4 (Inertia root + 404/419/500) |
+
+**Rules — 73 across 11 framework files** in `docs/framework-ui-ux/`. Classification for this
+pass: **45 code-readable / 3 partial / 25 render-required**. The rule list itself is not
+reproduced here — the framework files are the authoritative source and are tracked in the
+repository.
+
+**Method.** A mechanical scan (`.scratch-uma/app-audit-2026-10-23/scan.mjs`) over every file
+for the code-readable patterns — snake_case in visible text, filler copy, `:disabled` without
+an adjacent reason, single-character key handlers, `aria-valuenow`/`<progress>`,
+`role="status"` presence, error strings, destructive-primary pairings, SVG/filter colour
+literals, empty-state copy, input constraints, help links, `lang`/`title` in Blade — followed
+by manual deep reads of the highest-risk files: the three layouts, `app.css`, the four Blade
+views, `ui/Flash.vue`, `VisitProgressBar.vue`, `Career/Cockpit.vue`, `Career/RacePlanner.vue`
+with `RacePlanList.vue`, `SkillPlanRow.vue`, `AcquisitionStatusEditor.vue`, and the provenance
+surfaces (`Skills/Show.vue`, `Catalog/Show.vue`).
+
+**In-flight exclusions at pass time:** `pages/Review/Index.vue`, `pages/Review/Detail.vue`
+(peer-owned; `Index.vue` was modified by the peer mid-pass, so its ledger row is stale by
+design), plus the P5/P6 file set (`VERSION.md`, `CHANGELOG.md`, `docs/proposals/*`,
+`.scratch-uma/<session>/`).
+
+### 8.2 Findings summary
+
+Nine findings, two `no-action` items. Every one is a checklist-rule finding; none was edited
+during the audit itself (each fix landed in a later pass, below).
+
+| id | rule | file | decision | state |
+|---|---|---|---|---|
+| D1 | WCAG-4 + H10 | `AppLayout.vue` (whole shell) + `routes/web.php` | deferred | **open** — no help mechanism; gap already registered at `usability-heuristics-2026-10-21.md:233` |
+| D2 | IA-2 | `AppLayout.vue:260-300` | deferred | **open** — flat rail of ten destinations; owner ruling already routed by the in-code comment at `AppLayout.vue:140-142` |
+| D3 | UI-2 | `app.css` (`--color-stat-*`) | deferred → verified → **fixed** | see §8.3 |
+| D4 | UI-2 / UI-1 | `app.css` | deferred | **open** — 230 `literal-colour`/`literal-length` findings outside `@theme static`; tracked by `ui-framework-check` |
+| D5 | IA-5 | set-wide empty states (58 files) | deferred | **open** — HFW cross-ref: the checklist's own gap register, HFW audit F7/D4 |
+| D6 | UI-1 | `app.css` + shell headings | deferred | **open** — HFW cross-ref: HFW audit F4/D1 interpretation ruling |
+| D7 | (25 render-required rules) | app-wide | deferred | see §8.7 |
+| D8 | all rules, 2 files | `pages/Review/*` | deferred | **in-flight** — peer-owned; revisit after 4b.2 |
+| D9 | (check-script citations) | — | deferred | HFW cross-ref: HFW audit F5 (withdrawn WCAG 4.1.1) and F6 (nonexistent SHR-8) |
+
+| id | rule | file | decision | reason |
+|---|---|---|---|---|
+| N1 | H2 | `Skills/Show.vue:193`, `Catalog/Show.vue:361` | **no-action** | Provenance footnotes name storage lists (`skills_unique`, …) in muted microcopy. The words are the client's own skill categories, and GP-2 requires a derived figure to name its source — rewording would weaken the source claim. H2 governs the interface's vocabulary, not source citations. |
+| N2 | NRM-2 | `SkillPlanRow.vue:121,131`; `AcquisitionStatusEditor.vue:168` | **no-action → reclassified → ruled → fixed** | see §8.4 |
+
+### 8.3 D3 lifecycle — the finding whose shape changed under verification
+
+**Original classification.** Deferred, described as a "dead saturated identity-hue family"
+contradicting `DESIGN.md:208`.
+
+**Verification (four greps, all recorded).**
+
+| grep | result |
+|---|---|
+| declarations in `app.css` | **14 sites** = **7 names × 2 theme blocks** (light `@theme` 168-174, dark override 393-399) |
+| `var(--color-stat-` in `app.css` | **0** |
+| `color-stat-` in `resources/js` | **0** |
+| Tailwind utility spellings (`text/border/…-stat-*`) in `resources/js` | **0** — closes the loophole that a token could be consumed without the literal string `color-stat-` |
+| anywhere else (`app/`, `resources/views/`, `config/`, `database/`, `lang/`, `routes/`) | **4 matches, all `tests/Feature/DesignTokensTest.php`** — the family is asserted, not consumed |
+
+**Two corrections to the original framing.**
+
+1. **Not an identity-hue violation.** `app.css:164-167` records the family as "seven stat-mark
+   values promoted from `shell.css` §3", and `DesignTokensTest.php:455-457` measures them as
+   **non-text boundaries at 3:1** (FQ-05, "computed 4.24–6.23:1"). The role is stat mark /
+   boundary, not identity; `DESIGN.md:208`'s tint ruling is not contradicted.
+2. **The finding the audit missed.** The `.stat-*` primitives at `app.css:1126-1164` existed
+   and hardcoded the identical hexes — `.stat-speed { color:#2F6BC4; }` against
+   `--color-stat-speed: #2F6BC4` — under comments claiming to "resolve to house tokens", with
+   **no dark override**. So the dark values at `app.css:393-399` were unreachable and the
+   primitives painted the light hex in dark mode.
+
+**The correct classification** is therefore *minted, measured, never wired*: token-count
+asserted (`DesignTokensTest.php:275-276`), contrast-contracted (FQ-05), and unread by the
+layer that should consume it — a Phase 2.2/2.4 wiring gap, not a leftover.
+
+**Fix landed.** `52625c8a` replaced the seven literals with `var(--color-stat-<name>)`
+(`.stat-sp` deliberately untouched — it already aliases `--color-sp-ink`).
+`ui-framework-check` findings dropped **328 → 314**, i.e. **14 fewer**: seven `[literal-colour]`
+and seven `[colour-var]` findings resolved, zero added.
+
+**Rendered delivery pending** the next Playwright window; no spec covers the `.stat-*` classes
+today (see §8.7).
+
+### 8.4 N2 lifecycle — rule → classification → challenge → ruling → fix
+
+**Original classification: `no-action`.** The audit reasoned that a top-of-list disable is
+self-evident from the visible ordered list and that `aria-label` carries "position N of M" for
+assistive technology.
+
+**Challenge.** The audit's own decision table says a rule with two defensible readings is
+`deferred`; `no-action` was chosen on the report's authority rather than stated as a ruling.
+
+**Owner ruling: Reading A (strict → edit).** Two reasons: (1) the rule as written requires the
+*control's visible presentation* to say why, and `aria-label` reaches assistive technology only;
+(2) the codebase already meets the strict reading elsewhere — `RacePlanner.vue:265-267` prints
+`{{ chosen.length }} of {{ LIMIT }} chosen` beside the compare controls — so the three sites are
+outliers, not an idiom. Reading B was rejected because it would require a named, bounded
+exception under `SHR-1` (`shneiderman-golden-rules-2026-10-21.md:135`), which is a document
+edit the audit pass could not make.
+
+**Fixes landed.**
+
+| commit | file | change |
+|---|---|---|
+| `b0cf49e4` | `SkillPlanRow.vue` | container gains `flex-wrap items-center`; a muted span after "Move down" reads `First in the plan` / `Last in the plan`, keyed on `atTop \|\| atBottom` (unconditional on `movable` — position context is useful in a read-only view) |
+| `dc00dff9` | `AcquisitionStatusEditor.vue` | muted paragraph after the save button: "Nothing has changed yet, so there is nothing to save.", keyed on `touched.length === 0 && !form.processing` so it does not compete with the button's own "Saving…" label |
+
+No prop/emit/slot/`aria-*` change in either file.
+
+**Spec coverage.** `career-build-target.spec.ts` (accessible-name lookups, focus,
+`toBeDisabled`, a 44px height sweep, a 320px document-overflow check) and
+`career-skills-planner.spec.ts` (aria-label lookups, focus, `role="status"` announcement, a
+44px height sweep, 390/768px overflow checks) — every assertion that touches the move buttons
+was read; none asserts row width or `nowrap`, and `flex-wrap` can only reduce horizontal
+overflow. Site 3 is covered by `rice-shower-unity-cup.spec.ts:153`
+(`planner.saveAcquisitionStatus`).
+
+**Rendered delivery pending** the next Playwright window.
+
+### 8.5 `CHANGELOG ## Deferred` handoff
+
+The 2.1.0 release note should carry these entries. D3's clause reflects the post-`52625c8a`
+state.
+
+```markdown
+### Deferred — app-shell debt (app-audit D1, D2)
+
+- **D1 — No help mechanism.** The app shell carries no `?` help affordance and
+  `routes/web.php` has no help route, so the product has no in-product help surface.
+  Checklist rules: WCAG-4 (`wcag-2.2-accessibility-2026-10-21.md:208`, "A help mechanism
+  sits in the same relative order on every page") and H10
+  (`usability-heuristics-2026-10-21.md:178-180`, help and documentation). The gap is
+  already recorded in the checklist's own register (`usability-heuristics:233`). Deferred to
+  a post-2.1.0 help-surface addition; needs a route and a page, which is a scope decision.
+- **D2 — Flat primary rail.** `resources/js/layouts/AppLayout.vue` renders one unbanded
+  `<ul class="space-y-1">` of ten destinations (template at `:260-300`), while IA-2
+  (`information-architecture-principles-2026-10-21.md:143`) requires navigation "banded by
+  task, never one flat list". The ten-destination count breach is already routed to an owner
+  ruling by the in-code comment at `AppLayout.vue:140-142`; `SHR-1`
+  (`shneiderman-golden-rules-2026-10-21.md:135`, "A consistency exception must be named in a
+  document and be few") requires any accepted exception to be named. Deferred to post-2.1.0
+  layout work.
+
+### Deferred — stylesheet debt (app-audit D3, D4)
+
+- **D3 — `--color-stat-*` minted, measured, never wired.** Seven token names declared twice
+  (light `@theme` block `app.css:168-174`, dark override `app.css:393-399`) = 14 declaration
+  sites. The seven `.stat-*` primitives that should have consumed them hardcoded identical
+  hexes until `52625c8a` wired them to `var(--color-stat-*)` — which also made the
+  previously-unreachable dark values resolve. The wiring's rendered delivery is unverified
+  until the next Playwright window (no spec covers the `.stat-*` classes today). The
+  pre-wiring history is in `primitive-reconciliation.md` §8.3; the token was never an
+  identity-hue violation of `DESIGN.md:208`, it was a minted-and-measured-but-unwired layer
+  (contrast-contracted as non-text boundaries, FQ-05,
+  `tests/Feature/DesignTokensTest.php:275-276,455-464`).
+- **D4 — Stylesheet literal debt.** `node tools/ui-framework-check.mjs` reports 230
+  `literal-colour` / `literal-length` findings in `resources/css/app.css` outside
+  `@theme static`. Pre-existing debt, tracked by the check itself; deferred to a stylesheet
+  pass.
+
+### Deferred — HFW cross-references
+
+- **IA-5 empty states** — app-side instances of the checklist-registered exemplar gap
+  (58 files; `information-architecture-principles-2026-10-21.md:125,146`). Same record as
+  the HFW audit's D4/F7; no new entry.
+- **UI-1 type scale** — app-side instance of the HFW audit's F4/D1 interpretation ruling.
+- **Check-script citation defects** — the HFW audit's F5 (`framework-check.mjs` cites
+  withdrawn WCAG 4.1.1) and F6 (cites nonexistent SHR-8) stand as recorded there.
+```
+
+**If `CHANGELOG.md` was already cut for 2.1.0, do not retro-edit it** — land a correction
+commit or defer these to 2.1.1.
+
+### 8.6 Coverage proof
+
+**167 files walked against the 45 code-readable rules.** Distribution: 101 components
+(96 SFC + 5 `.ts`), 58 pages, 3 layouts, 4 views, 1 `app.css`. Every row resolved to either
+"clean vs code-readable rules" or "N findings, triaged per scan-rule key". Findings are listed
+in §8.2; **no other file raised a finding.**
+
+The per-file clean rows rest on the mechanical scan's zero-hit (or a per-rule triage that
+cleared the hit). **19 files were additionally deep-read manually** — the three layouts,
+`app.css`, the four Blade views, `ui/Flash.vue`, `VisitProgressBar.vue`, `Career/Cockpit.vue`,
+`Career/RacePlanner.vue`, `RacePlanList.vue`, `SkillPlanRow.vue`,
+`AcquisitionStatusEditor.vue`, `Skills/Show.vue`, `Catalog/Show.vue`,
+`Form/BaseCheckbox.vue`, `ui/Checkbox.vue`, `AppLayout.vue`'s rail/topbar. The audit does not
+claim a clean-file *read* where only the scan ran.
+
+**Two cosmetic defects in the working ledger** (recorded, not fixed, since the ledger is
+ephemeral): its "Total rows: 166 scanned files + app.css = 166" line has the arithmetic wrong
+(166 + 1 = 167) and glued the `app.css` row onto it; and one dispatch check pointed at
+`scope.md`, which never carried that line.
+
+### 8.7 Render-required deferrals — the 25 rules
+
+`WCAG-2` (contrast), `WCAG-6` (focus not obscured), `UX-2` (progress distance), `UX-3`
+(incomplete vs saved), `UX-6`/`UI-7` (one accent per screen), `UX-8` (Postel on inputs), `UX-9`
+(figure framing), `UI-1` (three type sizes), `UI-6`/`GT-1` (space vs border), `IA-3` (multiple
+browse axes), `IA-6` (scenario growth by config), `GT-3` (one glyph one meaning), `GT-5`
+(decorative motion), `TOG-1` (50ms acknowledgement), `TOG-2` (double-click trap), `TOG-5`
+(target count before size), `TOG-6` (undo debt named), `TOG-7` (session resumption), `SHR-1`
+(named exceptions); plus the render-confirmation halves of `UX-1` (44px), `UX-7` (actions at
+series ends) and `SHR-4` (flow closure).
+
+```bash
+npx playwright test                                        # full app suite
+node tools/ui-screenshot-diff.mjs --check primitives       # primitive geometry
+node docs/design-research/frontend-v2-wireframes/framework-audit.mjs
+```
+
+**`.stat-*` rendering coverage — none exists.** `grep -rn "stat-speed|stat-stamina|stat-power|
+stat-guts|stat-wit|stat-pal|stat-group|\.stat-" tests/browser/` returns **no matches**. Three
+specs mention "five stats" in prose (`career-save-veteran.spec.ts:140`,
+`career-training-detail.spec.ts:93`, `grand-concert-panel.spec.ts:57`) but none asserts a
+`.stat-*` class, a computed colour, or a screenshot of the stat marks. **The D3 fix is
+unverified until visual inspection or a new spec covers it** — and if a dark-theme assertion
+ever fails on a stat-mark surface after `52625c8a`, that failure is the fix working (dark hexes
+now resolve), not a regression.
+
+### 8.8 Parallel-safety disclosure
+
+- **Peer files at start and end:** `AGENTS.md`, `CLAUDE.md` (both dirty throughout; neither
+  read for this record, neither touched).
+- **Mtime movement on the audit's targets:** none — every target was re-mtimed immediately
+  before its edit and matched the precondition record.
+- **Checks not run:** Playwright, Pest, `npm run build`, `framework-audit.mjs` (contended;
+  render-required rules deferred per §8.7).
+- **Checks run:** `ui-framework-check` four times (328 baseline → 314 after the D3 wiring →
+  314 → 314) and `typecheck` four times (exit 0 each). The peer's mid-pass `Review/Index.vue`
+  edit moved the check count by zero.
+
+**Durability.** The audit's working tree (`.scratch-uma/app-audit-2026-10-23/`) is gitignored
+(`.gitignore:93`), so `git clean -fdx` or a fresh checkout would lose it. This section is the
+durable copy, per the owner ruling of 2026-10-23.
