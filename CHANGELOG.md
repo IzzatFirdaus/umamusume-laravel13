@@ -107,6 +107,12 @@ another session's files is the KI-75 damage pattern this repository has already 
 > 501/46 figures once it lands; until then the exposure is one CSS commit touching every surface that
 > renders a stat colour, plus two a11y commits whose specs are in the suite. This note exists so the gap
 > is on the record rather than discovered later by whoever reads the tag.
+>
+> **Resolved 2026-10-24 01:02.** The re-run finished against the tagged tree: **547 tests, 501 passed,
+> 46 failed** — the same total, and all 46 are again exactly the §7.4 reference set compared by
+> `file:line` (**0 new**). The three mid-pass commits changed no browser outcome, so the figures above
+> stand and the gap is closed by measurement rather than by argument. Log:
+> `.scratch-uma/p6/playwright-tagged.log`.
 
 ### Deferred — dependency advisories
 
