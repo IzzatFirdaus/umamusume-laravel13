@@ -1845,6 +1845,10 @@ The five: `dashboard.spec.ts:147`; `career-cockpit.spec.ts:566`; `career-legacy-
 
 Every question asked by a reconciliation pass, answered or open. `FQ-15` is reserved and empty.
 `EQ-` remains empty — the map's causes are `FQ-01` through `FQ-05`. `CQ-` items number from `CQ-01`.
+
+*Dated note 2026-10-24.* `CQ-01` through `CQ-06` are answered; `CQ-07` (section measures),
+`CQ-08` (large-file truncation) and `CQ-09` (`composer require` rewrites `AGENTS.md`) are filed and
+owe a ruling. **The next new `CQ-` is `CQ-10`.**
 The four earlier registers (FQ, BQ, EQ, CQ) above are preserved as written; this is their single home
 going forward, and each row names where its answer landed.
 
@@ -1907,3 +1911,85 @@ A fifteenth page the audit named, `Career/RacePlanner.vue`, was re-read on this 
 **Ruling landing.** Each ruling is one word per page (`follow` / `keep`) recorded in the table's decision column. A follow-up pass then applies the changes — one commit per page for `follow`; no change for `keep`; a dated note in `working conventions` records the shape (if `keep` dominates, the exception is a class of measure; if `follow` dominates, the narrow-measure pattern is a defect).
 
 **Blocks nothing currently.** Phase 6 has already shipped the layout fix that mattered (the root-level `Review/Detail` cap at `e8117e44`); the section-measure questions are refinements to the layout contract, not release blockers.
+
+### CQ-08 — anchored edits on large files can truncate silently (2026-10-24)
+
+**The finding.** The 2.1.0 release pass twice rewrote a document from a bounded read and truncated it:
+the plan by **−1,517 lines** and the CHANGELOG by **−372**. Both were caught by the post-commit stat,
+restored from `HEAD`, and re-applied with anchored edits. No net loss — but the pattern is a class, not
+an incident: an edit whose read did not cover the file's full extent writes the read's scope back, and
+only a line-count delta catches it.
+
+**The specific shape.** A bounded read returns part of a large file. An edit that assumes the read was
+complete writes that part back as the whole. The delta's magnitude is the only reliable signal — and it
+is only a signal if someone looks at it. The release pass looked because the commit stat printed
+`1,517 deletions` next to an insertion-only change; had it printed 40, the truncation could have shipped.
+
+**Options.**
+
+- **A — count both sides on every anchored edit to a file over 500 lines, and refuse the commit when the
+  delta exceeds the write's intended scope.** Consequence: the class is caught mechanically, one command
+  per large-file edit, and the discipline lives in `## Working conventions` beside the other five rules.
+  The cost is a command; the benefit is that the check belongs to the operation rather than to the
+  author's care.
+- **B — trust the existing append-only rule plus the commit stat.** Consequence: no new step; a
+  truncation with a small delta (say under 100 lines) can pass uncaught, and the protection reduces to
+  the author noticing. The release pass's own recovery is evidence for what that is worth under load,
+  not against it.
+
+**Recommendation.** **A.** The finding already proves the failure mode is real in this tree and in this
+session; the mitigation is one command per large-file edit, not a tool to build or a convention to
+trust.
+
+**Ruling landing.** The chosen option lands as a new entry in `## Working conventions` — a rule 6, or an
+extension of rule 5 (build before measure), which is already the measure-the-instrument-first rule.
+`A` adds the concrete gate; `B` records that the risk is accepted with `A`'s rationale written down.
+**Not applied by this pass** — the rule lands when the owner rules.
+### CQ-09 — composer require rewrites AGENTS.md (2026-10-24)
+
+**The finding.** During the 2.1.0 release pass, `composer require "league/commonmark:^2.10.2"` triggered
+Laravel Boost's post-update hook, which rewrote `AGENTS.md` — three hundred lines of the operational
+contract dropped, from 641 to roughly 320 — and turned `DocAccuracyTest`'s "it pins every file path
+named in AGENTS.md §6 repository structure block" into a no-assertion **risky** test rather than a red
+one. The release pass restored the file from `HEAD`; the test then asserted 17 times.
+
+**The mechanism, quoted.** `composer.json` carries the hook explicitly:
+
+```json
+"scripts": {
+    "post-update-cmd": [
+        "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
+        "@php artisan boost:update --ansi"
+    ],
+```
+
+`composer.json:79` is `"@php artisan boost:update --ansi"`, inside `scripts.post-update-cmd` — not
+`post-install-cmd`, which is why `composer require` (which runs update) fires it while a bare
+`composer install` on a locked tree does not.
+
+**Why this is a class, not an incident.** Every future `composer require`, `composer update` or
+dependency bump re-runs it. The rewrite is silent: the command succeeds, prints "Boost guidelines and
+skills updated successfully", and says nothing about the contract it just replaced. The only detector is
+a test whose failure mode is a risky status, which most runs treat as a warning. A gate that reports
+green while the operational contract has been overwritten is the worst shape a gate can take.
+
+**Options.**
+
+- **A — remove or pin the hook in `composer.json`.** Drop `"@php artisan boost:update --ansi"` from
+  `scripts.post-update-cmd`, or gate it behind an opt-in script the owner runs deliberately.
+  Consequence: `AGENTS.md` stops changing without a commit that says so; Boost's regeneration becomes a
+  manual step. Boost is a development convenience, not load-bearing for the application — nothing in
+  `app/` depends on it.
+- **B — accept the rewrite and reconcile it on every bump.** Re-anchor `AGENTS.md` after each `composer`
+  invocation, and rework `DocAccuracyTest` so an unable-to-assert state fails red instead of reporting
+  risky. Consequence: the tooling is untouched, every dependency operation gains a reconciliation step,
+  and the test needs a rework whose failure mode is currently the only thing standing between a green
+  suite and a shortened contract.
+
+**Recommendation.** **A.** The file is the repository's operational contract — the document `CLAUDE.md`
+defers to and `AGENTS.md` §2 makes the precedence authority — not generated boilerplate. A hook that
+overwrites it on every dependency bump is a hazard with a helpful-sounding message.
+
+**Ruling landing.** `A` lands as one `composer.json` edit plus a `## Working conventions` note recording
+the decision. `B` lands as a `DocAccuracyTest` rework. **`composer.json` is not edited by this pass** —
+filed only.
