@@ -170,6 +170,7 @@ function save(): void {
             >
                 {{ form.processing ? 'Saving…' : 'Save acquisition status' }}
             </button>
+            <p v-if="touched.length === 0 && !form.processing" class="mt-2 text-xs text-ink-muted">Nothing has changed yet, so there is nothing to save.</p>
         </template>
     </section>
 </template>
