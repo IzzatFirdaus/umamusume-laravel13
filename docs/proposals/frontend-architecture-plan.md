@@ -716,6 +716,27 @@ In `primitive-reconciliation.md §7`:
 > gate note above (line 671) and this one are the record; a future suite run that comes back green
 > retires the list, and one that comes back with a new failure is a regression this triage can now
 > name.
+>
+> **Corrected 2026-10-23 (harness, not page).** This note records the `review` cluster as PRE-EXISTING.
+> The verdict was right — the 13 failures were identical at `b75921b4` and at head — but the **cause was
+> a harness defect, not a rendering defect**. `tests/utils/review-candidates.ts:38` called
+> `scratchDatabasePath()` at use time; that function stamps `process.pid` and `Date.now()`, so each call
+> opened a fresh empty database and every case died in `beforeEach` with
+> `no such table: match_candidates`. The family also reached `tests/utils/ura-completed-run.ts` (41
+> `no such table: training_runs` lines in the base-tree log). Fixed at `16185919` by publishing the
+> migrated path once from `global-setup` and resolving it through `resolvedScratchDatabase()` in both
+> helpers — the class, not one consumer. Third instance of the family, after `b6a7d0f0` and the
+> `SCRATCH_DATABASE`-per-process fix in `CHANGELOG.md`.
+>
+> **Post-fix run at head: 13 of 13 pass** (`npx playwright test tests/browser/review.spec.ts` →
+> `13 passed (48.0s)`). **Zero of the 13 were genuine rendering failures.**
+>
+> **The 51-failure reconciliation therefore shrinks to 38**, and that number is what 6.1 inherits. The
+> remaining 38 still fail at `b75921b4`, so their verdict is unchanged; what changes is the standard the
+> reconciliation must meet — it has to carry the **cause** per spec (harness / content / rendering), not
+> only the verdict, or 6.1's "zero regressions" is a claim about the wrong thing. Known causes among the
+> 38: `career-cockpit.spec.ts:566` (`PLAYWRIGHT_SCRATCH_DB` harness, prior record) and
+> `data-table.spec.ts:160` (U+2013 versus "26 to 50", content). The rest are unclassified.
 
 ### Phase 7 — Agent ergonomics (the transition tooling; runs alongside Phase 3)
 
