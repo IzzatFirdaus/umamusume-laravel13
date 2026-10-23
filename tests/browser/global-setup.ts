@@ -1,5 +1,7 @@
 import { execSync } from 'node:child_process';
-import { rmSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -61,6 +63,58 @@ export function removeScratchDatabase(path: string): void {
 export const SCRATCH_DATABASE = scratchDatabasePath();
 
 /**
+ * Where this repository's setup publishes the path it resolved.
+ *
+ * `scratchDatabasePath()` is **per process**, not per run: it stamps `process.pid` and the load-time
+ * millisecond. The config, the setup and every worker are separate processes, so three of them
+ * compute three different paths — and `DatabaseSync` on a path that does not exist creates an empty
+ * database rather than failing, so a fixture reading the wrong path reports "no such table" against a
+ * file it just invented.
+ *
+ * This has now been paid for three times: `ura-completed-run.ts` (the `SCRATCH_DATABASE`-per-process
+ * fix recorded in `CHANGELOG.md`), `b6a7d0f0` (the dashboard absence probe), and
+ * `tests/utils/review-candidates.ts`, which called the function at use time and so opened a fresh empty
+ * file on every call.
+ *
+ * The fix is one published value rather than three smarter consumers: setup writes the path it
+ * migrated, and every helper reads `resolvedScratchDatabase()`. The pointer lives in the OS temp
+ * directory, keyed by this repository's root, so two clones cannot collide and nothing is added to
+ * the tree.
+ */
+function pointerPath(): string {
+    const key = createHash('sha1').update(repoRoot).digest('hex').slice(0, 12);
+
+    return join(tmpdir(), `trainer-desk-playwright-scratch-${key}.path`);
+}
+
+/**
+ * The scratch path the current suite actually migrated.
+ *
+ * Resolution order: `PLAYWRIGHT_SCRATCH_DB` (a named path wins, as it always has) → the pointer the
+ * setup wrote → the per-process default. The last fallback keeps a bare import working outside a
+ * Playwright run (a unit test, an ad-hoc script); inside a run the pointer is always present.
+ */
+export function resolvedScratchDatabase(env: NodeJS.ProcessEnv = process.env): string {
+    const named = env.PLAYWRIGHT_SCRATCH_DB;
+
+    if (named !== undefined && named !== '') {
+        return isAbsolute(named) ? named : resolve(repoRoot, named);
+    }
+
+    try {
+        const published = readFileSync(pointerPath(), 'utf8').trim();
+
+        if (published !== '') {
+            return published;
+        }
+    } catch {
+        // No setup has run in this checkout yet; fall through to the per-process default.
+    }
+
+    return scratchDatabasePath(env);
+}
+
+/**
  * The browser role runs with Inertia DevTools switched off (R3-32).
  *
  * `DevToolsServiceProvider::register()` flushes and then prunes its entry cache inside the handled
@@ -106,6 +160,10 @@ export default async function globalSetup(): Promise<void> {
             + `got: ${devtoolsState.trim()}`,
         );
     }
+
+    // Publish the path before it is used, so every worker and fixture resolves this one file rather
+    // than computing a pid-stamped path of its own (see `resolvedScratchDatabase`).
+    writeFileSync(pointerPath(), SCRATCH_DATABASE);
 
     // Only this invocation's path is removed. The KI-80 defect was this step reaching a shared file.
     removeScratchDatabase(SCRATCH_DATABASE);

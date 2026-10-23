@@ -1,5 +1,5 @@
 import { DatabaseSync } from 'node:sqlite';
-import { scratchDatabasePath } from '../browser/global-setup';
+import { resolvedScratchDatabase } from '../browser/global-setup';
 
 /*
  * Pending review candidates, written straight into the suite's scratch database.
@@ -35,7 +35,7 @@ function firstTraineeId(db: DatabaseSync): number | null {
  */
 export function seedPendingCandidates(count: number, options: { suggested?: boolean; prefix?: string } = {}): SeededCandidate[] {
     const { suggested = false, prefix = 'Fixture' } = options;
-    const db = new DatabaseSync(scratchDatabasePath());
+    const db = new DatabaseSync(resolvedScratchDatabase());
     const traineeId = suggested ? firstTraineeId(db) : null;
     const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
     const seeded: SeededCandidate[] = [];
@@ -73,7 +73,7 @@ export function seedPendingCandidates(count: number, options: { suggested?: bool
 
 /** Remove exactly the rows this fixture wrote, so the queue is left as the suite found it. */
 export function clearPendingCandidates(): void {
-    const db = new DatabaseSync(scratchDatabasePath());
+    const db = new DatabaseSync(resolvedScratchDatabase());
 
     try {
         db.prepare("DELETE FROM match_candidates WHERE source_key = 'fixture'").run();
