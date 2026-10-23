@@ -2006,3 +2006,32 @@ overwrites it on every dependency bump is a hazard with a helpful-sounding messa
 **Ruling landing.** `A` lands as one `composer.json` edit plus a `## Working conventions` note recording
 the decision. `B` lands as a `DocAccuracyTest` rework. **`composer.json` is not edited by this pass** —
 filed only.
+
+### CQ-10 — shared-worktree commit family (2026-10-24)
+
+**The finding.** The 2026-10-24 fact-check pass ran a `git commit --amend` that briefly folded a peer's
+uncommitted `README.md` into the commit. It was caught by the post-commit `--stat` (26 deletions appeared
+beside an insertions-only change), reset, and re-landed clean. The pattern is not one incident: `git add .`,
+`git add -A`, `git add -p`, `git commit --amend`, and `git commit -a` all have working-tree scope. In a tree
+with peer work in flight, each can silently capture a peer's file.
+
+**The standing rule already exists.** `## Working conventions` rule 1 says *"`git add <named path>` only —
+never `.` or `-A` or `-p`"*. The rule held at discipline level (the agent caught the failure and recovered)
+but not at mechanical level (the tooling permitted it).
+
+**Options.**
+
+- **A — add a pre-commit hook that refuses a commit whose `--stat` includes files outside the declared path
+  set.** One-time setup; the hook runs `git diff --cached --name-only` against a `.git/commit-paths` file the
+  agent writes per pass. Consequence: the failure mode becomes mechanically impossible; one extra setup step
+  per pass; a legitimate multi-path commit must declare its paths first.
+- **B — trust the existing rule plus a post-commit `--stat` check.** Consequence: no tooling change; the
+  failure mode recurred twice in this session (once in the 2.1.0 release pass truncation incident, once
+  here) — discipline caught both, but only because the deltas were visible.
+
+**Recommendation.** A — the failure recurred twice in one session; a mechanical gate closes the class
+rather than relying on an agent noticing a delta.
+
+**Ruling landing.** Option A adds a pre-commit hook script (`.git/hooks/pre-commit` or
+`scripts/pre-commit.sh`) plus a note in `## Working conventions` rule 1. Option B records the accepted risk
+with A's rationale written down. **Not applied by this pass** — filed only.
