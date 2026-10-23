@@ -2,7 +2,7 @@
 
 A local-only Laravel 13 tool for Trainers of the Global English version of *Umamusume Pretty Derby*. It consolidates four legacy apps (three trackers plus a career-run planner) into one machine: browse a catalog of Umamusume whose JP and Global data is cross-referenced by a fetch engine, log training runs turn by turn, compare planned vs actual skills, and export. SQLite only, single user, no accounts, no telemetry.
 
-![Trainer Desk dashboard](docs/screenshots/dashboard.png)
+<!-- TODO: dashboard screenshot — see the plan's Playwright window; placeholder until docs/screenshots/dashboard.png exists -->
 
 ## Overview
 
