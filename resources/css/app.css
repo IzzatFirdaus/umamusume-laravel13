@@ -1125,37 +1125,37 @@ html[data-theme='dark'] {
 
 /* .stat-speed: ported from shell.css; resolves to house tokens. */
 .stat-speed {
-    color:#2F6BC4;
+    color:var(--color-stat-speed);
 }
 
 /* .stat-stamina: ported from shell.css; resolves to house tokens. */
 .stat-stamina {
-    color:#C64B5E;
+    color:var(--color-stat-stamina);
 }
 
 /* .stat-power: ported from shell.css; resolves to house tokens. */
 .stat-power {
-    color:#8A5A32;
+    color:var(--color-stat-power);
 }
 
 /* .stat-guts: ported from shell.css; resolves to house tokens. */
 .stat-guts {
-    color:#C4557E;
+    color:var(--color-stat-guts);
 }
 
 /* .stat-wit: ported from shell.css; resolves to house tokens. */
 .stat-wit {
-    color:#3E6B3A;
+    color:var(--color-stat-wit);
 }
 
 /* .stat-pal: ported from shell.css; resolves to house tokens. */
 .stat-pal {
-    color:#6E7A45;
+    color:var(--color-stat-pal);
 }
 
 /* .stat-group: ported from shell.css; resolves to house tokens. */
 .stat-group {
-    color:#3E7A4A;
+    color:var(--color-stat-group);
 }
 
 /* .stat-sp: ported from shell.css; resolves to house tokens. */
