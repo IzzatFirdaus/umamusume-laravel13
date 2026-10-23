@@ -27,6 +27,8 @@ test.afterEach(() => {
 // refuses the submission renders there. See tests/browser/review-detail.spec.ts.
 
 test('every control on the queue meets the 44px floor', async ({ page }) => {
+    seedPendingCandidates(2, { suggested: true });
+    seedPendingCandidates(2);
     await page.goto('/review');
     await page.locator('#app > *').first().waitFor();
 
@@ -41,6 +43,8 @@ test('every control on the queue meets the 44px floor', async ({ page }) => {
 });
 
 test('each card explains itself: count, pill, badge, reason, and one primary-action accent', async ({ page }) => {
+    seedPendingCandidates(2, { suggested: true });
+    seedPendingCandidates(2);
     await page.goto('/review');
     await page.locator('#app > *').first().waitFor();
 
@@ -84,6 +88,8 @@ test('each card explains itself: count, pill, badge, reason, and one primary-act
 });
 
 test('lists the rows the engine could suggest before the ones it could not', async ({ page }) => {
+    seedPendingCandidates(1, { suggested: true });
+    seedPendingCandidates(2);
     await page.goto('/review');
     await page.locator('#app > *').first().waitFor();
 
@@ -245,8 +251,10 @@ test('summarises a no-match row on one line and links to the page that decides',
 
 test('the summarised queue fits on one screen', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
+    // 25 rows exactly: the paginator's page size. The fixture now clears the whole table, so the seeded
+    // count IS the row count — the previous 2 + 22 reached 25 only with another case's leftovers.
     seedPendingCandidates(2, { suggested: true });
-    seedPendingCandidates(22);
+    seedPendingCandidates(23);
 
     await page.goto('/review');
     await page.locator('#app > *').first().waitFor();

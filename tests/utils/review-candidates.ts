@@ -76,7 +76,29 @@ export function clearPendingCandidates(): void {
     const db = new DatabaseSync(resolvedScratchDatabase());
 
     try {
-        db.prepare("DELETE FROM match_candidates WHERE source_key = 'fixture'").run();
+        /*
+         * Every row, not only this fixture's. The queue is populated by the match pipeline, which no
+         * spec runs, so a row in this table during a browser run is a fixture row by construction —
+         * and leaving another case's rows behind keeps the rowid high-water mark high, which is what
+         * makes a literal detail URL impossible (see the sequence reset below).
+         */
+        db.prepare('DELETE FROM match_candidates').run();
+
+        /*
+         * Reset the table's rowid high-water mark, so the next fixture insert gets id 1 again.
+         *
+         * Without this the ids climb monotonically across a run (the migration declares
+         * `primary key autoincrement`, so SQLite never reuses a rowid), and a spec cannot name a
+         * detail URL literally — which `RouteCoverageTest` requires: it reads `page.goto('<literal>')`
+         * from the spec source to decide which routes the corpus visits and scans. A reproducible id
+         * is what lets `/review/1` be the row a fixture just wrote.
+         *
+         * `sqlite_sequence` only exists once an autoincrement table has held a row, so its absence is
+         * not an error.
+         */
+        db.prepare("DELETE FROM sqlite_sequence WHERE name = 'match_candidates'").run();
+    } catch {
+        // A scratch database without the sequence table yet: nothing to reset.
     } finally {
         db.close();
     }

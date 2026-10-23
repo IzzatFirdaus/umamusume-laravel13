@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { buildAxe } from '../utils/accessibility';
 import { clearPendingCandidates, seedPendingCandidates } from '../utils/review-candidates';
 
 /*
@@ -120,4 +121,21 @@ test('carries the one accented primary and the visible Verdict label the queue u
 
     // 6A.10: nothing is busy on a cold load.
     await expect(page.locator('form[aria-busy]')).toHaveCount(0);
+});
+test('passes an axe scan at WCAG A and AA on the literal detail URL', async ({ page }) => {
+    // The rowid reset in `clearPendingCandidates` makes this fixture's row id 1, so the URL can be
+    // written literally. `RouteCoverageTest` decides which routes the corpus visits and scans by
+    // reading `page.goto('<literal>')` out of the spec source; a template literal is invisible to it,
+    // and a parameterised route with no literal navigation reads as uncovered.
+    const [candidate] = seedPendingCandidates(1, { suggested: true });
+    expect(candidate.id, 'the fixture row is the first id in a reset table').toBe(1);
+
+    await page.goto('/review/1');
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByTestId('review-detail')).toHaveCount(1);
+
+    const results = await buildAxe(page).analyze();
+
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });
