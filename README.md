@@ -120,32 +120,13 @@ Adding a source requires owner approval plus a robots/rate-limit review and one 
 
 ## Web Surface
 
-Verified against `php artisan route:list`:
+Verified against `php artisan route:list`. Main areas, grouped by feature:
 
-| Route                                                 | Purpose                                                                                                                                                                                                                  |                                      |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
-| `/` (`home`)                                         | the Dashboard, the Inertia landing screen (`SCR-CAR-001`)                                                                                                                                                                |                                      |
-| `/umamusume`, `/umamusume/{slug}`                     | catalog index (release-status filter, normalized search) and detail with aliases, cards, and provenance                                                                                                                  |                                      |
-| `/skills`, `/skills/{skill}`                          | skill search (Screen D) and detail; Global-filtered, paginated                                                                                                                                                           |                                      |
-| `/support-cards`, `/support-cards/{card}`             | support-card catalog (reference data only, no collection state)                                                                                                                                                          |                                      |
-| `/training-runs` (+ `/create`, PUT, DELETE) | Trainer run CRUD. `GET /training-runs/{run}` is a compatibility redirect to the Career Cockpit: `SCR-RUN-003` (the 2.0.0 run-detail page) is retired (F2), so it is not a normal-navigation destination. |                                      |
-| `/training-runs/{run}/turns[/{turn}]`                 | per-turn stat logging; stats validate against the run's scenario ceiling (`base_cap` + `cap_bonus`, clamped to `hard_cap`, via `App\Services\ScenarioCaps`; `ADR-0015`). A run with no scenario keeps the 1200 base cap. |                                      |
-| `/training-runs/{run}/skills`                         | skill states Suggested / Acquired / Skipped                                                                                                                                                                              |                                      |
-| `/training-runs/{run}/deck`                           | the six support cards the run was equipped with                                                                                                                                                                          |                                      |
-| `/training-runs/{run}/races`, `.../purchases`         | race entries and shop purchases per turn                                                                                                                                                                                 |                                      |
-| `/training-runs/import` (+ preview, store)            | historical-run import from this app's own CSV export (`ADR-0017`)                                                                                                                                                        |                                      |
-| `/training-runs/{run}/export/{format}`                | run download (`csv`/`json`), no data lock-in (US-6)                                                                                                                                                                      |                                      |
-| `/review`, `POST /review/{candidate}`                 | match review queue                                                                                                                                                                                                       |                                      |
-| `/career/setup/{scenario,trainee,target,legacy,deck,preflight}` | the six-step career setup wizard (`SCR-CAR-002`–`SCR-CAR-010`), session draft until Preflight creates the run                                                                                                 |                                      |
-| `/training-runs/{run}/cockpit`                        | the run-scoped Career Cockpit (`SCR-CAR-011`)                                                                                                                                                                            |                                      |
-| `/training-runs/{run}/{training,races,events,inheritance,skills,timeline,result,races/planner}` | the career detail screens (`SCR-CAR-012`–`SCR-CAR-023`): training, race decision and planner, event decision, inheritance, skills planner, timeline, result |                                      |
-| `/training-runs/{run}/veteran`                        | Save Veteran (write half of the library, `SCR-VET-003`)                                                                                                                                                                  |                                      |
-| `/veterans` (+ `/compare`, `/{veteran}`)              | Veteran library, comparison and detail (`SCR-VET-001`/`002`/`004`)                                                                                                                                                        |                                      |
-| `/database` (+ `/trainees/supports/skills/races/scenarios`) | the Database hub (`SCR-SYS-005`–`007`), read-only reference surfaces                                                                                                              |                                      |
-| `/legacy` (+ `/compare`, `/{run}`)                    | the run-scoped Legacy Lab (`SCR-CAR-006`), record-only                                                                                                                                                                    |                                      |
-| `/up`                                                 | framework health route                                                                                                                                                                                                   |                                      |
-
-The former `/design-preview` route has been deleted; component review now happens on the real screens and their tests.
+- **Catalog** — `/umamusume`, `/skills`, `/support-cards` (index and detail each); release-status filters, normalized search, and provenance on every engine row.
+- **Training runs** — `/training-runs` (list, create), per-run turn logging, skills, deck, races, purchases, import (`/training-runs/import`), and export (`/training-runs/{run}/export/{format}`), centred on the run-scoped Career Cockpit (`/training-runs/{run}/cockpit`).
+- **Career setup** — the six-step wizard at `/career/setup/{scenario,trainee,target,legacy,deck,preflight}`.
+- **Review queue** — `/review` for unmatched and fuzzy source records.
+- **Veterans, Legacy Lab, Database hub** — `/veterans` (+ compare, detail), `/legacy` (+ compare, builder), and `/database` (+ trainees, supports, skills, races, scenarios).
 
 ## Local API (read-only)
 
@@ -168,36 +149,10 @@ List shape: `{ "data": [...], "pagination": { "page", "pageSize", "totalItems", 
 | Static analysis                                     | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` (level 6; `composer analyse` omits the flag and can OOM a 128M CLI default)       |
 | TS type check                                       | `npm run typecheck`                                                                                                                            |
 | Accessibility                                       | `npm run test:a11y` (Playwright + `@axe-core/playwright`, WCAG 2.1 AA ruleset)                                                                 |
-| Lore grep                                           | `composer lore` and `composer lore-code` (extended, includes untracked files and Global client terminology); each hit needs a context ruling   |
+| Lore grep                                           | `composer lore` and `composer lore-code` — report-only, always exit 0; each hit needs a context ruling   |
 | Dependency audit                                    | `composer audit` and `npm audit --omit=dev` (the `Makefile` `audit` target wraps both; make itself is unavailable, KI-4)                       |
 
 Tests use Pest 4, feature-first, with a global `TestCase` + `RefreshDatabase` binding in `tests/Pest.php`. All fetcher/pipeline tests use `Http::fake` against stored bodies in `tests/Fixtures`; no test touches the network. The test database is in-memory SQLite (`phpunit.xml` forces it). The full quality bar, including the no-suppression floor, is `docs/research-scratch/GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar, C-1 to C-9)".
-
-### Documentation gates
-
-Two gates, to run before pushing. This repository has no CI: `.github/workflows/` is absent, so nothing
-verifies a change that is not verified locally.
-
-- `php artisan test --filter=DocCitationParity` - fails when dead markdown citations exceed the recorded
-  baseline. The limit is `DOC_CITATION_BASELINE` in `tests/Feature/DocCitationParityTest.php`.
-- `php artisan test --filter=DocAccuracyTest` - must be 3 passed / 80 assertions / 0 risky.
-
-Two diagnostics, which report where the dead targets are rather than gating on them:
-
-- `python tools/doc_census.py` - prints the citation census and exits 0 whatever it finds. GONE is a
-  citation to a file that is absent from the measured subject; UNTRACKED is a citation to a file that is
-  on disk but not in git, which works locally and breaks on a fresh clone, and which the working-tree
-  view alone reports.
-- `python tools/md_fence_check.py <files>` - fenced-code sanity for Markdown.
-
-Constitution greps: `composer lore` and `composer lore-code` - both must exit 0.
-
-**The census measures a git ref, so its number is reproducible.** `tools/doc_census.py` measures `HEAD` by
-default and prints the subject it measured on its first line, so a number is never quoted without it.
-`python tools/doc_census.py --working-tree` measures the working tree instead, which is the view that
-shows what your own uncommitted edits do to the count. In a shared tree the two differ, and the
-difference is the other sessions' work. The census is what says which files hold the dead targets;
-`tests/Feature/DocCitationParityTest.php` is the gate, and its number is the one that must pass.
 
 ## Common Commands
 
@@ -211,7 +166,6 @@ difference is the other sessions' work. The census is what says which files hold
 | Fetch / replay / backup           | `php artisan uma:fetch`, `uma:reparse <source>`, `uma:backup`                                       |
 | Mirror catalog artwork            | `php artisan uma:fetch-art` (options `--kind`, `--dry-run`, `--refetch`); manual only, `ADR-0021`   |
 | Route list                        | `php artisan route:list`                                                                            |
-| Backup before experimenting       | `php artisan uma:backup` (writes to `storage/app/backups/`)                                         |
 
 ## Database & Data Setup
 
@@ -290,28 +244,13 @@ When documents disagree: `docs/research-scratch/GOVERNANCE.md` §"CONSTRAINTS.md
 
 ## Contribution
 
-No dedicated `CONTRIBUTING.md` exists. Actual practice, from `AGENTS.md` and the gates above:
+See `CONTRIBUTING.md` for repository conventions, the documentation gates, and the commit/ledger rules. Core practice, from `AGENTS.md`:
 
 - Behavior changes start with a failing Pest test (`php artisan make:test --pest {Name}`); models come from factories.
 - Form Requests for all validation, thin controllers, logic in Actions/Services, named routes, API Resources for JSON, `declare(strict_types=1)` and explicit types everywhere, `#[Fillable]`/`#[Hidden]` attributes, `casts()` as a method.
-- Before hand-off: targeted tests green, `vendor/bin/pint --test --format agent <paths>` (never `--dirty`, KI-75), PHPStan level 6 clean, `composer lore-code` run (it is report-only and always exits 0; the hand-off quotes the hit count and its delta from the baseline, and every hit carries a context ruling).
+- Before hand-off: targeted tests green, `vendor/bin/pint --test --format agent <paths>` (never `--dirty`, KI-75), PHPStan level 6 clean, and `composer lore-code` run — the hand-off quotes the hit count and its delta from the baseline, and every hit carries a context ruling.
 - Schema or pipeline changes need a migration, a PRD citation (FR-x / US-x), and a decision recorded as an ADR with a dated erratum rather than a silent rewrite.
 - Scope changes never happen silently: `PRD.md` §6 non-goals are owner territory (`AGENTS.md` escalation paths).
-
-Repository practice that the code does not show:
-
-- **Commit subjects** are `type(scope): summary`: lowercase, imperative, one line. The last 60 commits are
-  39 `docs`, 9 `feat`, 4 `fix`, 4 `test`, 3 `chore` and 1 `refactor`.
-- **Documentation-only changes ship without a test**; a behaviour change ships with one. A doc commit still
-  runs the documentation gates above, and it still carries the lore gate.
-- **`AGENTS.md` §11 owns the protected list, and the root document set is closed.** No new markdown file is
-  created in the repository root; new documentation content goes into a `docs/research-scratch/` master or
-  into `KNOWN-ISSUES.md`, and `PRODUCT.md` is regenerated rather than hand-edited.
-- **`docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md` is append-only.** One numbered section per dispatch, an
-  earlier section is never edited, and a correction is a new dated section that names what it supersedes.
-- **This tree holds other sessions' uncommitted work.** Do not revert it, reformat it, or commit it. Scope
-  your edits and your tools to your own files, and if a file you need is held by another session, skip it and
-  say so in the report.
 
 ## Security
 
