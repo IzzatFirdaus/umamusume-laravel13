@@ -1893,3 +1893,17 @@ going forward, and each row names where its answer landed.
 - **`FQ-15`** — reserved and unused. A `.slot-*` question was considered and found to have only one
   defensible resolution (re-spell to the existing token, which `--radius-sm` already carries), so it did
   not merit an owner question. The id is not reused.
+
+### Section-measure rulings (`CQ-07`, 2026-10-24)
+
+The layout-fidelity audit (`primitive-reconciliation.md` §9 — *not yet created; the audit's report lives in the pass report, not the map*) found **14** pages whose section caps render below the shell's resolved width in one or more of `compact | standard | wide`. Each is a deliberate narrow measure; none is a wrong root class. The owner owes one ruling per item, deciding whether the measure is a sanctioned reading-measure exception to the layout contract, or a defect that should follow the shell.
+
+A fifteenth page the audit named, `Career/RacePlanner.vue`, was re-read on this pass and **reclassified `follows`**: its two `max-w-3xl` classes sit on conditional empty-state `<p>` notes ("No calendar at all", "Nothing to compare yet"), not on content sections, so they are the reading-measure class the audit already exempted.
+
+**The 14 items and their two options are in the audit follow-up's ruling table.** Full evidence per item: page, class, width, configs affected, option A / option B with consequences, and (for the two named below) the source-evidence recommendation.
+
+**The two named items** — `Career/DeckSelect.vue` and `Career/LegacySelect.vue`. `SetupLayout.vue`'s deck docblock names only the deck ("the deck's master/detail … get the wide screen"), and the deck page contradicts it (the picker is a modal, not a master/detail split). The legacy step is not named by the docblock at all. See the follow-up's Task 3 for the full evidence chain.
+
+**Ruling landing.** Each ruling is one word per page (`follow` / `keep`) recorded in the table's decision column. A follow-up pass then applies the changes — one commit per page for `follow`; no change for `keep`; a dated note in `working conventions` records the shape (if `keep` dominates, the exception is a class of measure; if `follow` dominates, the narrow-measure pattern is a defect).
+
+**Blocks nothing currently.** Phase 6 has already shipped the layout fix that mattered (the root-level `Review/Detail` cap at `e8117e44`); the section-measure questions are refinements to the layout contract, not release blockers.
