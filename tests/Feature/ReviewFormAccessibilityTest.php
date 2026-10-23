@@ -49,4 +49,3 @@ it('passes the detail page the one candidate the verdict form is about', functio
             ->has('candidate.suggested_umamusume_id')
             ->has('aliasLanguages'));
 });
-
