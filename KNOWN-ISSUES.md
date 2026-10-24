@@ -3379,3 +3379,94 @@ process gap `AGENTS.md` §9's failure-classification rule names. The `No Sparks 
 restores was removed with the same class of accident, and nothing in the tree would have noticed its absence
 except a browser case; a static gate that reads the shipped copy for a cell the screen is supposed to carry
 would have caught it, and no such gate exists.
+### KI-115 Per-run aptitude letters are not stored, and that is correct (Group A / A-0.2) - FILED 2026-10-24 (Group A + B audit pass)
+
+**Status: CLOSED - does not reproduce.** The aptitudes are catalog facts, not run facts.
+
+**Current state.** Aptitude grades live on the `umamusume` catalog table (migration `2026_09_27_090000_add_aptitude_grades_to_umamusume_table.php`); `TrainingRun` carries no aptitude columns (`app/Models/TrainingRun.php`). Walk-1 finding D8 already verified the catalog letters are authoritative and the frame that disagreed was wrong (`docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md:44,156`). Ruling A-0.2 (2026-10-24): catalog-only, no per-run storage.
+
+**What this does not cover.** A post-inheritance aptitude drift carried by a Spark is not representable on a run; if that is ever wanted it is a new column set and an ADR, not a display gap.
+
+---
+
+### KI-116 The run's reached per-card effect values are unrecorded (Group A / A-0.4) - FILED 2026-10-24 (Group A + B audit pass)
+
+**Status: OPEN - blocked on A-0.5.** The builder's analysis uses catalog maxima.
+
+**Current state.** `ADR-0014:8` states the reached effect values are still unrecorded and the deck analysis uses catalog anchors. A per-run reached value needs a card level first (A-0.5) plus an effect lookup.
+
+**Ruling.** A-0.4 ruling (2026-10-24): deferred to A-0.5. See `docs/proposals/group-ab-rulings-owed.md#a-04`.
+
+**What closure would need.** The A-0.5 per-run `deck_slots.card_level` column and an ADR, then a derivation from level to effect values.
+
+---
+
+### KI-117 The run's per-run card level is not stored (Group A / A-0.5) - FILED 2026-10-24 (Group A + B audit pass)
+
+**Status: OPEN - blocked: ADR.** A per-run card level is a migration; §11 needs an ADR first.
+
+**Current state.** `ADR-0014:24` declines the collection half (`user_support_cards` - level, breaks, perk) as the §6.9-cut feature; `ADR-0014:8` leaves "card levels and limit breaks are still unrecorded" open. `deck_slots` carries `support_card_id`, `slot_position`, `ownership` and no level column.
+
+**Ruling.** A-0.5 ruling (2026-10-24): accepted as a per-run `deck_slots.card_level` column, distinct from collection ownership. The ADR is the first artefact; the slice is its own small pass. See `docs/proposals/group-ab-rulings-owed.md#a-05`.
+
+**What closure would need.** A one-page ADR saying a per-run card level is stored on `deck_slots` and does not contradict ADR-0014's decline of `user_support_cards`, then the migration and the deck surfaces.
+
+---
+
+### KI-118 Team stat grades have no column (Group B / B-0.5, R4-12) - FILED 2026-10-24 (Group A + B audit pass)
+
+**Status: OPEN - blocked: ADR.** A team-grades column is a migration.
+
+**Current state.** `TeamPanelBuilder::teamSection()` hard-codes `grade => null` for every stat (`app/Services/Career/TeamPanelBuilder.php:501-506`); `UnityCupPanel.vue` prints the five-row absence. Ruling B-0.5 (2026-10-24): accepted; ADR first. See `docs/proposals/group-ab-rulings-owed.md#b-05`.
+
+**What closure would need.** An ADR, a `team_stat_grades` column (or table), the digest line, and the editor field.
+
+---
+
+### KI-119 The Current Spirit gauge has no column (Group B / B-0.6, R4-14) - FILED 2026-10-24 (Group A + B audit pass)
+
+**Status: OPEN - blocked: ADR.** A Spirit value is a migration.
+
+**Current state.** `UnityCupPanel.vue:231-241` mounts `ResourceMeter` with `value: null, max: null` and the absence sentence; no column or payload reader. Ruling B-0.6 (2026-10-24): accepted; ADR first. See `docs/proposals/group-ab-rulings-owed.md#b-06`.
+
+**What closure would need.** An ADR, a `current_spirit` column, the digest line, and a writer.
+
+---
+
+### KI-120 Skill levels have no column or table (Group B / B-0.7, R4-16) - FILED 2026-10-24 (Group A + B audit pass)
+
+**Status: OPEN - blocked: ADR.** Skill levels are a migration.
+
+**Current state.** `SkillsPlannerController` carries acquisition state only (`app/Http/Controllers/Career/SkillsPlannerController.php:216-228`); no level column exists and `SkillAcquisition` has no level member. Ruling B-0.7 (2026-10-24): accepted; ADR first. See `docs/proposals/group-ab-rulings-owed.md#b-07`.
+
+**What closure would need.** An ADR, a `skill_levels` table (or per-run level column), the digest line, and the planner field.
+
+---
+
+### KI-121 The borrowed card's source-account identity is not recorded, and that is correct (Group B / B-0.8, R4-18) - FILED 2026-10-24 (Group A + B audit pass)
+
+**Status: CLOSED - ruled out.** A loopback, single-Trainer tool has no second account identity to record.
+
+**Current state.** `deck_slots.ownership` (migration `2026_10_09_120000_add_ownership_to_deck_slots_table.php:24`) records `OWNED` / `RENTED` / nothing - the borrowed flag, which is the distinction that matters. Ruling B-0.8 (2026-10-24): will not add. See `docs/proposals/group-ab-rulings-owed.md#b-08`.
+
+**What this does not cover.** If the tool ever supported more than one Trainer, the account identity would become a real column; that is out of scope by design.
+
+---
+
+### KI-122 A Unity Cup mandatory list naming the shared finals rounds is correct, not a leak (Group B / B-0.1, R4-06) - FILED 2026-10-24 (Group A + B audit pass)
+
+**Status: CLOSED - does not reproduce.** The R4-06 premise that a Unity Cup run is shown URA-specific rounds is contradicted by the source.
+
+**Current state.** `docs/scenarios/09-global-race-calendar.md:105` states the three URA Finals rounds are shared and only the Final row forks per scenario; lines 632-633 name Unity Cup's final as Final (Aoharu). The seeded mandatory rows match: `Junior Make Debut` (null), `URA Finals Qualifier` and `URA Finals Semifinal` (null, shared), and the four scenario finals, with `final_aoharu` scoped to `unity_cup`. `RaceCatalogSlot::scopeForScenario()` (`app/Models/RaceCatalogSlot.php:136-140`) already keeps null-scoped rows plus the run's own key, so a Unity Cup run correctly sees the shared qualifier/semifinal and its own Aoharu final. An owner filter that removed every "URA Finals" title would delete legitimate shared obligations. No code change made; recorded so the finding is not re-opened.
+
+**What this does not cover.** If the shared qualifier/semifinal are ever established to be URA-only, that is a parser mapping change (`GametoraRaceCatalogParser::GLOBAL_FINALS_BY_SLOT`) and a re-seed, not a render filter.
+
+---
+
+### KI-123 The snapshot door already records year, month and phase (Group B / B-0.3, R4-08) - FILED 2026-10-24 (Group A + B audit pass)
+
+**Status: CLOSED - does not reproduce.** The snapshot form already carries the date input.
+
+**Current state.** `resources/js/pages/Career/Snapshot/Setup.vue:165-186` renders Year, Month and Phase selects (`career_year`, `career_month`, `career_phase`); `StoreSnapshotRequest:45-47` requires them; `CreateSnapshotRun:58-79` writes `career_position` with `career_position_source = imported`. The R4-08 note that "the date is not an input on either path" is stale at HEAD. Ruling B-0.3 (2026-10-24) chose the snapshot date field, which already exists. No code change made.
+
+**What this does not cover.** The separate R4-08 question - a pending-turn state on the guided turn form - is a different shape and is not addressed here.

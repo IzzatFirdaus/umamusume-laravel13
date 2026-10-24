@@ -137,6 +137,22 @@ records their landing commits and nothing is re-litigated.
   screen, or route); `VERSION.md` bumps if a release is cut; the pass report is
   `docs/audits/group-ab-pass-2026-10-24.md`.
 
+## KNOWN-ISSUES filed (2026-10-24)
+
+| Item | Entry | Status |
+|---|---|---|
+| A-0.2 | `KI-115` | ruled-out (catalog-only, D8) |
+| A-0.4 | `KI-116` | blocked: A-0.5 |
+| A-0.5 | `KI-117` | blocked: ADR |
+| B-0.5 | `KI-118` | blocked: ADR |
+| B-0.6 | `KI-119` | blocked: ADR |
+| B-0.7 | `KI-120` | blocked: ADR |
+| B-0.8 | `KI-121` | ruled-out (loopback will-not-add) |
+| B-0.1 | `KI-122` | does not reproduce (shared rounds correct, `09:105`) |
+| B-0.3 | `KI-123` | does not reproduce (snapshot form has the date) |
+
+All entries live at the end of `KNOWN-ISSUES.md`.
+
 ## Definition of done
 
 - Phase 0: `docs/audits/group-ab-audit-2026-10-24.md` exists with 19 classified items; no source file
