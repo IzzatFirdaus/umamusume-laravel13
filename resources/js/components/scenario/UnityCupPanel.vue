@@ -195,9 +195,18 @@ const counterSegments = computed((): string[] => {
                      progress, Spirit, Spirit Burst, Burst count bands, Special Training and Team race
                      coverage therefore leave the grid entirely when their data is absent, and the row
                      packs without them.
-                     Spans keep each row whole: a cell only spans the tracks its row has left, so no row
-                     ends holding a gap at the end. -->
-                <div class="@3xl:col-span-3 @5xl:col-span-12">
+                     Spans are chosen so each row's cells sum to the track count, which is what closes a
+                     row: 12 tracks take Team Race 12; Spirit 4, Team Rank 4, stat grades 4; burst bands
+                     8, Spirit Burst 4; Special Training 4, coverage 8; shape 12. Six tracks take Race 4,
+                     Team 2, Spirit 2, Rank 2, grades 2, bands 4, Spirit Burst 2, Special 2, coverage 4,
+                     shape 6. A short panel beside a tall one leaves space under the short one by design;
+                     that is `items-start` doing its job, not a hole to be packed away. Measured at 1440
+                     on a fresh run: five rows, all 12/12. At 1280 the same fresh run leaves one row at
+                     4/6, because the absent Team cell leaves a 2-track hole in a sum that is otherwise
+                     exactly 30 tracks with Team present, and 28 without it. Do not fix that with
+                     `grid-auto-flow: dense`: the flow is not sparse, the spans are exact, and `dense` would
+                     reorder cells against the DOM order this panel is required to keep. -->
+                <div class="@3xl:col-span-4 @5xl:col-span-12">
                     <TeamRacePanel
                         v-if="composesRacePanel && props.scenario.team.race_guidance !== null"
                         :enabled="true"
@@ -236,7 +245,7 @@ const counterSegments = computed((): string[] => {
             </div>
             </div>
 
-            <div v-if="composesBursts" class="@3xl:col-span-3 @5xl:col-span-4">
+            <div v-if="composesBursts" class="@3xl:col-span-2 @5xl:col-span-4">
             <div class="card p-3">
                 <CapsuleHeader title="Spirit" class="mb-2" />
                 <!-- The value and the bar are the same reading (design-2.0 §45). No column records a
@@ -267,7 +276,7 @@ const counterSegments = computed((): string[] => {
 
             <!-- The Unity Cup progression counters (A6.7). Drawn only when the Trainer stated one; the
                  combined total below reads these two tallies. -->
-            <div class="@3xl:col-span-3 @5xl:col-span-8">
+            <div class="@3xl:col-span-2 @5xl:col-span-4">
             <TeamRankGauge :enabled="true" :current="current" :ladder="props.scenario.team.ladder" />
 
             <!-- The +30 is the figure the recorded client shows, and it was read beside the S
@@ -279,14 +288,14 @@ const counterSegments = computed((): string[] => {
             </p>
             </div>
 
-            <div v-if="counterSegments.length > 0" class="@3xl:col-span-3 @5xl:col-span-4">
+            <div v-if="counterSegments.length > 0" class="@3xl:col-span-2 @5xl:col-span-4">
             <div class="card p-3">
                 <CapsuleHeader title="Unity Cup progress" class="mb-2" />
                 <p class="text-sm text-ink">{{ counterSegments.join(' · ') }}</p>
             </div>
             </div>
 
-            <div class="@3xl:col-span-6 @5xl:col-span-4">
+            <div class="@3xl:col-span-2 @5xl:col-span-4">
             <div class="card p-3">
                 <CapsuleHeader title="Team stat grades" class="mb-2" />
                 <ul class="flex flex-col gap-1" aria-label="Team stat grades">
@@ -305,7 +314,7 @@ const counterSegments = computed((): string[] => {
             </div>
             </div>
 
-            <div v-if="composesBursts && props.scenario.team.bands.length > 0" class="@3xl:col-span-6 @5xl:col-span-8">
+            <div v-if="composesBursts && props.scenario.team.bands.length > 0" class="@3xl:col-span-4 @5xl:col-span-8">
             <div class="card p-3">
                 <div class="mb-2 flex flex-wrap items-baseline gap-2">
                     <CapsuleHeader title="Burst count bands" />
@@ -365,14 +374,14 @@ const counterSegments = computed((): string[] => {
             </div>
             </div>
 
-            <div v-if="composesBursts" class="@3xl:col-span-3 @5xl:col-span-4">
+            <div v-if="composesBursts" class="@3xl:col-span-2 @5xl:col-span-4">
                 <SpiritBurstRoster :enabled="composesBursts" :roster="props.scenario.team.roster" />
             </div>
 
             <div
                 v-if="props.scenario.team.special_training.energy_penalty_removed !== null
                     || props.scenario.team.special_training.wit_burst_energy_bonus !== null"
-                class="@3xl:col-span-3 @5xl:col-span-4"
+                class="@3xl:col-span-2 @5xl:col-span-4"
             >
             <div class="card p-3">
                 <CapsuleHeader title="Special Training" class="mb-2" />
@@ -393,11 +402,11 @@ const counterSegments = computed((): string[] => {
                  them: the board draws the team race's five categories, which appear nowhere else on the
                  screen, and the shape block states the cadence and the published reward. Neither adds
                  a focusable control, which is what the panel's own keyboard case pins. -->
-            <div v-if="props.scenario.team.coverage !== null" class="@3xl:col-span-6 @5xl:col-span-6">
+            <div v-if="props.scenario.team.coverage !== null" class="@3xl:col-span-4 @5xl:col-span-8">
                 <UnityCupTeamBoard :coverage="props.scenario.team.coverage" />
             </div>
 
-            <div v-if="props.scenario.team.tournament !== null" class="@3xl:col-span-6 @5xl:col-span-6">
+            <div v-if="props.scenario.team.tournament !== null" class="@3xl:col-span-6 @5xl:col-span-12">
                 <UnityCupTournamentReadiness :tournament="props.scenario.team.tournament" />
             </div>
     </div>
