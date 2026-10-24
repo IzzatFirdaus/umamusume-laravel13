@@ -239,8 +239,8 @@ test('renders the scenario matrix published row when the turn records a facility
     const runUrl = await newCareerWithTurn(page);
 
     // Turn 2, recorded with the facility levels the client's ladder showed, so the published
-    // per-level table has a level to key to. The five inputs sit behind the record form's own
-    // disclosure, which this case opens; the first case's walk leaves them blank on purpose.
+    // per-level table has a level to key to. The five inputs render above the cards (R4-26), so the
+    // walk fills them directly; the first case's walk leaves them blank on purpose.
     await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     const speedCard = page.getByRole('article').filter({ hasText: /^Speed/ });
@@ -254,7 +254,6 @@ test('renders the scenario matrix published row when the turn records a facility
     await page.locator('input[name="energy"]').fill('40');
     await page.locator('select[name="outcome"]').selectOption('Success');
 
-    await page.locator('details').filter({ hasText: 'Facility levels this turn' }).locator('summary').click();
     for (const stat of ['speed', 'stamina', 'power', 'guts', 'wit']) {
         await page.locator(`input[name="facility_${stat}"]`).fill('3');
     }
