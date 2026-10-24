@@ -3538,6 +3538,9 @@ block the round-4 screenshot showed.
 (`UnityCupTeamBoard.vue`, `UnityCupTournamentReadiness.vue`). This panel is a third surface with its own
 heading hierarchy; folding it in would have made one commit cover two different shapes.
 
+**2026-10-24 — KI-127 framing correction.** KI-127 recorded the facility panel as "the only scenario panel with no .card wrapper and no CapsuleHeader" alongside eight composed panels. The panel is a **dead registration**: it is registered in ScenarioPanel.vue:74-78 but is not enabled by any scenario's `panels` block in config/scenarios.php and receives no `facilities` payload from ScenarioSectionBuilder. It does not compose live on the cockpit or any other scenario surface, so "beside eight that do" overstated the visual gap — the eight composed panels are beside five uncarded-and-uncomposed panels, per SCREEN_SPEC.md:3892-3901 item 24. The `.card` + CapsuleHeader wrap landed at 1119e437 via an isolated fixture (tests/browser/team-race-facility-panel.spec.ts). The composed-surface pin is deferred until the panel composes.
+
+
 ---
 
 ### KI-128 `Delete this career` sits inside the `Races in this run` region - FILED 2026-10-24 (capsule pass)
