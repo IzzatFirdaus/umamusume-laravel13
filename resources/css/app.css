@@ -83,44 +83,66 @@
      * (#63637A, violet-grey) as the consequence move that keeps 4.5:1 on the tinted surfaces;
      * every G-18 pair is re-measured in the pass report. The amendment is recorded in DESIGN.md
      * §2.1 and DESIGN-CORPUS.md P1 under the same date.
+     *
+     * 2026-10-24 (second ruling, reference palette replaces the derived one). The pink/lavender
+     * values above were derived, not referenced, and the owner rejected them. Every value below is
+     * now an exact pixel sampled from docs/design-research/HLF_reference/ (light) and its
+     * dark_mode/ folder (dark); the sample coordinate for each is in the pass report. Light page
+     * #F7F5FF, panel #FFFEFF, raised #FFFFFF, sunken #EEEBFF, idle #D8D3F5; ink #24243A, muted
+     * #5C607B. The reference's own hairlines (#ECE9F8 light, #28282A dark) measure 1.10:1 and
+     * 1.26:1, below G-18's 3:1 card boundary, so `rule` uses the reference's muted slate text
+     * colour instead. Accent fills are identical in both themes (owner rule); see the dark block
+     * for the full note.
      */
-    --color-page: #F8E9F1;
-    --color-panel: #F4F5FE;
+    --color-page: #F7F5FF;
+    --color-panel: #FFFEFF;
     --color-raised: #FFFFFF;
-    --color-sunken: #F4E7F9;
-    --color-idle: #D0D6EC;
-    --color-disabled: #D0D1D0;
-    --color-ink: #6A5641;
-    --color-ink-strong: #482720;
-    --color-ink-muted: #63637A;
+    --color-sunken: #EEEBFF;
+    --color-idle: #D8D3F5;
+    --color-disabled: #ECE9F8;
+    --color-ink: #24243A;
+    --color-ink-strong: #24243A;
+    --color-ink-muted: #5C607B;
     /* ink-faint is a non-text token: borders, hairline ticks, disabled glyphs.
        Measured as body-size text it lands at 3.18 on white and 2.58 on the sunken
        surface, so it must never carry a label. The accessible subordinate tier is
-       ink-muted, which clears 4.5 on every surface in both themes. */
-    --color-ink-faint: #988F87;
+       ink-muted, which clears 4.5 on every surface in both themes.
+       2026-10-24: sampled from the reference's violet step (#D8D3F5, the same pixel as
+       `idle`); HLF shows no separate faint tier. Non-text, so no pair is owed. */
+    --color-ink-faint: #D8D3F5;
     /* Hairline. 2026-10-15 (Phase 11R.2): the light step was #6E6C73, the same value the dark
        override carries, so a card edge and a status-pill border read as a dark-mode line on the
        light field. Lightened to the palest grey that still clears G-18's `rule on page` 3:1 for a
        non-text boundary: 3.46:1 on `page`, 3.66:1 on `panel`. Dark keeps #6E6C73 (3.82:1).
        2026-10-24 (owner ruling): the grey becomes a muted violet #7A6E96 — chromatic, not grey —
        measuring 3.98:1 on the new `page`, 4.30:1 on `panel`, 4.67:1 on `raised`, 3.92:1 on
-       `sunken`. */
-    --color-rule: #7A6E96;
+       `sunken`.
+       2026-10-24 (second ruling, HLF reference): #5C607B, the reference's muted slate text
+       colour, sampled from HLF_reference/screencapture-...-22_38_43.png at (602,2191). The
+       reference's own card hairline (#ECE9F8) measures 1.10:1 on #F7F5FF and cannot clear G-18's
+       3:1; this value measures 5.70:1 on page, 6.11:1 on panel. Dark uses the same role,
+       #90A1B9 (HLF dark muted slate), at 7.82:1 on #0B0B0D. */
+    --color-rule: #5C607B;
 
     /* Semantic roles. Amended 2026-10-15: green is a STATUS colour only — the positive status pill,
        and nothing else. Green is never the primary action fill, which is `--color-primary-action`
-       (blue). This supersedes the pre-2026-10-15 rule that made green the action colour. */
-    --color-green: #7FCC09;
-    --color-green-deep: #4E7906;
-    --color-green-tint: #F0F8EC;
-    --color-green-line: #C6E5B3;
-    --color-chrome: #4E7906;
-    --color-on-chrome: #FFFFFF;
+       (blue). This supersedes the pre-2026-10-15 rule that made green the action colour.
+       2026-10-24 (second ruling, HLF reference): the lime family is sampled from the reference, not
+       the client corpus — #AEE327 (fill) with #20300D (the olive ink the reference prints on its
+       lime buttons), plus #F2F5EE (pale green panel) and #D1F490 (lime rule). The reference has one
+       lime, so `green`, `chrome` and `status-positive` now share the sampled fill and differ only
+       by role. */
+    --color-green: #AEE327;
+    --color-green-deep: #20300D;
+    --color-green-tint: #F2F5EE;
+    --color-green-line: #D1F490;
+    --color-chrome: #AEE327;
+    --color-on-chrome: #20300D;
     /* Keyboard-focus ring. A separate token because no single green clears WCAG 1.4.11's
-       3:1 for non-text boundaries in both themes: `green` #7FCC09 is 1.88 on the light panel,
-       and `chrome` #4E7906 is 2.93 on the dark raised surface. Split per theme the same way
-       chrome/on-chrome are, so components stay theme-agnostic (D-101). */
-    --color-ring: #4E7906;
+       3:1 for non-text boundaries in both themes. 2026-10-24: sampled per theme — light
+       #20300D (the reference's olive) and dark #BBF451 (the reference's dark lime), the
+       only functional per-theme accent, because a focus ring that disappears is a defect. */
+    --color-ring: #20300D;
     --color-risk: #800014;
     /* FQ-04 (2026-10-22): the ink that goes ON the risk fill. White clears the light
        fill at 10.89:1 but measures 2.44:1 on the dark risk, so the pair is split by
@@ -153,10 +175,11 @@
      * pennant, not by lightness. D-12 holds because both states also carry words.
      */
     --color-pick-line: #7A5C10;
-    /* The ink that goes ON the gold selection. Not `ink-strong`: that is #482720 here but
-       #FFFFFF in the dark override, and white on amber measures 1.75:1. Selection keeps a
-       dark ink in both themes, so it needs its own token (D-288: declared in `@theme static`
-       so Tailwind cannot prune it, and overridden below with the rest of the dark set). */
+    /* The ink that goes ON the gold selection. Not `ink-strong`: that is #24243A here and
+       #F1F5F9 in the dark override, and one ink cannot sit on the gold in both themes.
+       Selection keeps a dark ink in both themes, so it needs its own token (D-288: declared in
+       `@theme static` so Tailwind cannot prune it). Since the second ruling of 2026-10-24 it is
+       NOT overridden: the gold fill and this ink are identical in both themes. */
     --color-on-pick: #482720;
     /*
      * Skill Points cyan, split in two because the corpus mandates one value and measures
@@ -166,8 +189,9 @@
      * fail. So text uses `--color-sp-ink`, the same hue family stepped to cyan-700 until it
      * clears 4.5:1 on page, panel and raised (4.77 / 5.05 / 5.36). Precedent for the split is
      * `--color-green` versus `--color-chrome`, and for the step the delta pair above.
-     * The dark override keeps the client's lighter cyan for both roles: it measures 9.45:1
-     * as text there, so no split is needed and `--color-sp-ink` aliases to it.
+     * Second ruling 2026-10-24: `--color-sp` is a fill and is identical in both themes; only
+     * `--color-sp-ink` is stepped (the dark block keeps the client's lighter cyan, 9.45:1 there),
+     * because a cyan that clears 4.5:1 on #FFFEFF cannot clear it on #303032.
      */
     --color-sp: #009FE1;
     --color-sp-ink: #0E7490;
@@ -305,8 +329,8 @@
      * primary button never share a fill (Phase 11.11-11.12). Every new role owes a measured G-18
      * pair; values here are the ruling's starting draft and `DesignTokensTest` is the gate.
      */
-    --color-brand-chrome: #2255FF;
-    --color-on-brand-chrome: #FFFFFF;
+    --color-brand-chrome: #2D51EF;
+    --color-on-brand-chrome: #FFFEFF;
     --color-brand-accent: #FF77CC;
     --color-brand-accent-ink: #6554E0;
     --color-brand-accent-soft: #EEEBFF;
@@ -317,8 +341,8 @@
        `--color-brand-chrome` and both roles follow. */
     --color-primary-action: var(--color-brand-chrome);
     --color-on-primary-action: var(--color-on-brand-chrome);
-    --color-status-positive: #BBDD11;
-    --color-status-positive-ink: #0D0C0F;
+    --color-status-positive: #AEE327;
+    --color-status-positive-ink: #20300D;
     --color-status-caution: #FFE9A8;
     --color-status-caution-ink: #6A4A00;
 
@@ -371,40 +395,48 @@ html[data-theme='dark'] {
      * and the hairline becomes a neon violet #8A7BD0 (5.31:1 on the new page, 3.80:1 on
      * panel, so the card boundary stays well past WCAG 1.4.11). Accent tokens are
      * unchanged: the glow is box-shadow at the usage sites below, never a token fork.
+     *
+     * 2026-10-24 (second ruling, HLF reference): every surface and ink below is an exact
+     * pixel from docs/design-research/HLF_reference/dark_mode/ (file + coordinate in the
+     * pass report): page #0B0B0D, panel #28282A, raised #303032, sunken #171719,
+     * idle #232325, rule #90A1B9 (7.82:1 on page), ink #F1F5F9, muted #90A1B9.
+     * The reference's own panel #111113 measures 1.04:1 on its #0B0B0D page, below
+     * G-18's 1.25 dark step, so `panel` uses the smallest sampled surface that clears
+     * it (#28282A, 1.34:1). Accent FILLS are not overridden here and are therefore
+     * identical to light (owner rule): brand-chrome #2D51EF with #FFFEFF ink, the lime
+     * #AEE327 with its olive #20300D, gold #EFC96A with #482720, caution amber, the
+     * brand pink. The neon glow is removed. Tokens that sit ON a surface keep a
+     * per-theme value because one hex cannot clear 4.5:1 on both #FFFEFF and
+     * #303032 (and the reference's own dark lime steps #AEE327 -> #BBF451): ink*,
+     * rule, up #B89825, down #97D1F9, goal, goal-line, green-deep #BBF451,
+     * pick-line #E3B977, risk #FF7E8C, brand-accent-ink #9F8FFF, brand-accent-soft
+     * #1D1D62, sp-ink, rank, anchor, ring, stat-*, and the tint/grade surface fills.
      */
-    --color-page: #120A26;
-    --color-panel: #332650;
-    --color-raised: #362D50;
-    --color-sunken: #1C1433;
-    --color-idle: #2A2447;
-    --color-disabled: #2C2A38;
-    --color-ink: #ECEAF2;
-    --color-ink-strong: #FFFFFF;
-    --color-ink-muted: #AAABB5;
-    --color-ink-faint: #7C7D87;
-    --color-rule: #8A7BD0;
+    --color-page: #0B0B0D;
+    --color-panel: #28282A;
+    --color-raised: #303032;
+    --color-sunken: #171719;
+    --color-idle: #232325;
+    --color-disabled: #2E2E30;
+    --color-ink: #F1F5F9;
+    --color-ink-strong: #F1F5F9;
+    --color-ink-muted: #90A1B9;
+    --color-ink-faint: #90A1B9;
+    --color-rule: #90A1B9;
 
-    --color-green-deep: #9BE83A;
-    --color-green-tint: #1F2A12;
-    --color-green-line: #3D5A18;
-    --color-chrome: #7FCC09;
-    --color-on-chrome: #121013;
-    --color-ring: #7FCC09;
+    --color-green-deep: #BBF451;
+    --color-green-tint: #19191B;
+    --color-ring: #BBF451;
     --color-risk: #FF7E8C;
-    --color-on-risk: #121013;
-    /* Stepped from #FF6B7A (4.33:1 on raised) to clear 4.5:1 for AA text (KI-20).
-       The goal comment below still holds: this is deliberately not the risk red, and
-       neither value aliases `--color-up`. */
+    --color-on-risk: #131315;
+    /* Per-theme foreground steps (see the block note above). The goal line is the
+       reference's sampled amber #B89825; the selection boundary its sampled gold
+       #E3B977. `--color-pick`, `--color-on-pick`, `--color-sp` and `--color-chrome`
+       are deliberately NOT overridden here: they are fills, so they inherit the light
+       values exactly and the pair inside each fill is identical in both themes. */
     --color-goal: #F2555A;
-    --color-goal-line: #E8912B;
-    --color-pick: #F5B73C;
-    /* Aliases to `--color-pick` here on purpose. The defect was light-only: this gold
-       already measures 8.46 on the dark `raised` surface, well past the 3:1 a
-       boundary needs. The token still exists as its own name so a component never
-       has to know which theme it is in, the same way `--color-sp-ink` aliases below. */
-    --color-pick-line: #F5B73C;
-    --color-on-pick: #121013;
-    --color-sp: #4FC3F7;
+    --color-goal-line: #B89825;
+    --color-pick-line: #E3B977;
     --color-sp-ink: #4FC3F7;
     --color-rank: #B6B4C2;
     --color-stat-speed: #7FA8E8;
@@ -415,91 +447,62 @@ html[data-theme='dark'] {
     --color-stat-pal: #AEBB84;
     --color-stat-group: #86C996;
 
-    --color-up: #FF9A2C;
-    --color-down: #4EA1E8;
+    --color-up: #B89825;
+    --color-down: #97D1F9;
 
-    --color-tint-speed: #252C42;
-    --color-tint-stamina: #3B2736;
-    --color-tint-power: #312C2A;
-    --color-tint-guts: #3F272B;
-    --color-tint-wit: #26302A;
-    --color-tint-sp: #242E35;
-    --color-line-speed: #252C42;
-    --color-line-stamina: #3B2736;
-    --color-line-power: #312C2A;
-    --color-line-guts: #3F272B;
-    --color-line-wit: #26302A;
-    --color-line-sp: #242E35;
+    /* Stat band fills, dark theme: the reference's own dark surface tones, sampled
+       (#1C1C1E, #232325, #2A2826, #1E1E20, #19191B, #171719). The line tokens mirror
+       them as they did before. */
+    --color-tint-speed: #1C1C1E;
+    --color-tint-stamina: #232325;
+    --color-tint-power: #2A2826;
+    --color-tint-guts: #1E1E20;
+    --color-tint-wit: #19191B;
+    --color-tint-sp: #171719;
+    --color-line-speed: #1C1C1E;
+    --color-line-stamina: #232325;
+    --color-line-power: #2A2826;
+    --color-line-guts: #1E1E20;
+    --color-line-wit: #19191B;
+    --color-line-sp: #171719;
 
-    /* Support-type badge tiles, dark theme. The client's chip hues hold on the charcoal
-     * raised surface (--color-raised #24262A); the badge glyph is white in both themes, so
-     * the tiles carry the identity rather than washing the seven to one ink. */
-    --color-type-speed: #4FA9F0;
-    --color-type-stamina: #F57265;
-    --color-type-power: #F79A2A;
-    --color-type-guts: #F679A6;
-    --color-type-wit: #2BBE89;
-    --color-type-friend: #FBB345;
-    --color-type-group: #45C97E;
+    /* Support-type badge tiles: NOT overridden (second ruling, 2026-10-24). The light
+       chip hues are the accent identity, and the owner's rule is that the light accents
+       apply in dark too; the white glyph keeps its contrast on both. */
 
-    --color-grade-g: #2C3A2F;
-    --color-grade-f: #38343F;
-    --color-grade-e: #3E2A4A;
-    --color-grade-d: #263A4F;
-    --color-grade-c: #2F4220;
-    --color-grade-b: #4A2838;
-    --color-grade-a: #4A3520;
-    --color-grade-s: #4A3F22;
-    --color-grade-ss: #55481F;
+    /* Grade badge fills, dark theme: the reference's dark surface ladder, sampled
+       (#1E1E20, #232325, #2A2826, #1C1C1E, #19191B, #2E2E30, #303032, #343435, #343436).
+       `ink-strong` #F1F5F9 clears 11.4:1 on the lightest of them. */
+    --color-grade-g: #1E1E20;
+    --color-grade-f: #232325;
+    --color-grade-e: #2A2826;
+    --color-grade-d: #1C1C1E;
+    --color-grade-c: #19191B;
+    --color-grade-b: #2E2E30;
+    --color-grade-a: #303032;
+    --color-grade-s: #343435;
+    --color-grade-ss: #343436;
 
     --color-scrim: rgba(0, 0, 0, 0.62);
     --color-anchor: #8FC4EE;
 
     /*
-     * Brand and status dark overrides (Track 2-D amendments 2026-10-14/15). Each is the same hue
-     * stepped until it clears the same threshold the light value cleared, so a non-conditional
-     * component survives both themes without forking.
+     * Accent tokens that are INK on a surface keep a per-theme value (see the block note).
+     * `--color-brand-accent-soft` is the chip background, so it takes a sampled dark
+     * violet tone (#1D1D62) and its ink #9F8FFF. Brand chrome, the brand pink, the lime
+     * and its olive ink, the cautious amber and the gold are NOT overridden: they are
+     * identical in both themes.
      */
-    --color-brand-chrome: #1A3FCC;
-    --color-on-brand-chrome: #FFFFFF;
-    --color-brand-accent: #CC5FA8;
     --color-brand-accent-ink: #9F8FFF;
-    --color-brand-accent-soft: #2A2640;
-    --color-status-positive: #8FBF09;
-    --color-status-positive-ink: #0D0C0F;
-    /* Caution is deliberately NOT overridden: the light pair measures 6.74:1, and the amber pill is a
-       chrome colour the client paints the same in either theme, the same reasoning `--color-mood-*`
-       carries. The draft's dark pair measured 3.92:1 and the gate would not have it. */
+    --color-brand-accent-soft: #1D1D62;
     --shadow-overlay: 0 6px 16px rgb(0 0 0 / 0.32);
 }
 
 /*
- * Neon glow (owner ruling 2026-10-24: "neon lights in the city night"). Dark-only halos mixed
- * from each element's own accent token at ~30%, so a status pill or the one action button reads
- * as a light source against the violet surfaces rather than a flat chip. Scoped to
- * `html[data-theme='dark']` exactly the way the token overrides are; no `dark:` utility, no new
- * token (D-101, G-19). The halo is decoration and carries no information, so it owes no
- * contrast row (the words and fills inside it already clear theirs).
+ * Neon glow removed 2026-10-24 (second ruling, HLF reference): accent tokens are identical in
+ * both themes and carry no theme-only treatment, so the dark-only halos that the first pass
+ * added are gone. A pill reads by its own fill and ink exactly as it does in light.
  */
-html[data-theme='dark'] .pill-positive {
-    box-shadow: 0 0 10px color-mix(in srgb, var(--color-status-positive) 30%, transparent);
-}
-
-html[data-theme='dark'] .pill-caution {
-    box-shadow: 0 0 10px color-mix(in srgb, var(--color-status-caution) 30%, transparent);
-}
-
-html[data-theme='dark'] .pill-accent {
-    box-shadow: 0 0 10px color-mix(in srgb, var(--color-brand-accent-ink) 30%, transparent);
-}
-
-html[data-theme='dark'] .subnav-hub {
-    box-shadow: 0 0 12px color-mix(in srgb, var(--color-brand-chrome) 30%, transparent);
-}
-
-html[data-theme='dark'] .bg-primary-action {
-    box-shadow: 0 0 12px color-mix(in srgb, var(--color-brand-chrome) 30%, transparent);
-}
 
 /*
  * Franchise motifs as named utilities, so a component references a meaning instead of

@@ -626,24 +626,24 @@ test('no stat value overflows its tile', async ({ page }) => {
  * fails the moment a token drifts back toward white. Values are the ruling's own, recorded in
  * `DESIGN.md` §2.1 and `DESIGN-CORPUS.md` P1 amendments of the same date.
  */
-test('paints the shell page and the active-career card from the colourful surface tokens', async ({ page }) => {
+test('paints the shell page and the active-career card from the HLF reference surface tokens', async ({ page }) => {
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
 
-    // The shell's page field: the pink tint, not white.
-    await expect(page.locator('.bg-page').first()).toHaveCSS('background-color', 'rgb(248, 233, 241)');
+    // The shell's page field: the reference's lavender-white (#F7F5FF), not white.
+    await expect(page.locator('.bg-page').first()).toHaveCSS('background-color', 'rgb(247, 245, 255)');
 
-    // A card on the panel fill: the pale lavender, distinct from both the page and white.
+    // A card on the panel fill: the reference's card white (#FFFEFF), distinct from the page.
     await createActiveRun(page, 'unity_cup');
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
-    await expect(page.locator('[data-card="active_career"]')).toHaveCSS('background-color', 'rgb(244, 245, 254)');
+    await expect(page.locator('[data-card="active_career"]')).toHaveCSS('background-color', 'rgb(255, 254, 255)');
 });
 
-test('paints the dark shell with the neon violet page', async ({ page }) => {
+test('paints the dark shell with the reference near-black page', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.locator('.bg-page').first()).toHaveCSS('background-color', 'rgb(18, 10, 38)');
+    await expect(page.locator('.bg-page').first()).toHaveCSS('background-color', 'rgb(11, 11, 13)');
 });

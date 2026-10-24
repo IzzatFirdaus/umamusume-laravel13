@@ -85,6 +85,11 @@ A Trainer who has spent 400 hours in the client should be able to open this tool
 > spent only where it carries information") still holds for accents: colour on the page is not
 > "meaningless" colour — it is the page's identity, and the owner has chosen a colourful page.
 
+> **2026-10-24 — reference palette.** The override of P1's near-white surfaces now stands on the
+> HLF reference, not on an independently derived shift. Light surfaces and inks are sampled from
+> `docs/design-research/HLF_reference/`, dark ones from `HLF_reference/dark_mode/`; accent tokens
+> are unchanged between themes.
+
 **P2. Preview before commit — informed risk-taking.** The client never lets you fire a decision blind: the Choices panel shows each option's outcome before you accept, and acceptance is a separate action (RAW-FINDINGS §5.1). Every destructive or irreversible-feeling action in this tool gets the same two-step shape. This is also what makes the guided turn flow feel like the game rather than like a form.
 
 The name matters, and it is borrowed: an external mechanics write-up calls this principle **informed risk-taking**, and the phrase is worth adopting because it describes the Trainer's act rather than the UI's (`CONSTRAINTS.md` D-283 governs what else may be taken from that source). A preview whose job is stated as *reducing risk* would soften the number, hide the cost, or recommend a safer option. Its actual job is to make the risk known and leave the decision alone — which is the same boundary P6 draws around predictions. The under-50 Energy caution at the Confirm control (§6.21, D-171) is this principle at the point of commitment rather than a second, kinder preview.

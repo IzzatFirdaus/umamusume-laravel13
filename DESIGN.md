@@ -193,6 +193,23 @@ and the corpus-transcription caveat above holds. Replacing those two stubs is th
 > `#E7E7EC`) are superseded twice: first by the Track 2-D repair (`63d1cdd2`), then by this
 > ruling. The table is left as it was written; the current values are in `resources/css/app.css`.
 
+> **2026-10-24 — second ruling: reference palette replaces derived palette.** Owner ruled the
+> `e30763dc` pastel palette rejected as off-reference. The tokens now come from
+> `docs/design-research/HLF_reference/` (light) and `docs/design-research/HLF_reference/dark_mode/`
+> (dark), sampled directly (file + pixel coordinate per value in the pass report). Accent tokens
+> are identical in both themes: they do not shift between light and dark. The current values are:
+> `--color-page: #F7F5FF / #0B0B0D`, `--color-panel: #FFFEFF / #28282A`, `--color-raised:
+> #FFFFFF / #303032`, `--color-sunken: #EEEBFF / #171719`, `--color-rule: #5C607B / #90A1B9`,
+> `--color-ink: #24243A / #F1F5F9`, `--color-ink-strong: #24243A / #F1F5F9`, `--color-ink-muted:
+> #5C607B / #90A1B9`, `--color-ink-faint: #D8D3F5 / #90A1B9`. Accent fills are not overridden in
+> the dark block: `--color-brand-chrome: #2D51EF`, `--color-status-positive: #AEE327` (ink
+> `#20300D`), `--color-pick: #EFC96A` and the rest are identical in both themes. The reference's
+> own panel (`#111113`) and hairlines (`#ECE9F8`, `#28282A`) measure below G-18's 1.25 surface
+> step and 3:1 card boundary, so `panel` uses the smallest sampled surface that clears the step
+> and `rule` uses the reference's muted slate text colour; both are recorded in `app.css`. The
+> tokens that sit ON a surface keep a per-theme step because no single hex clears 4.5:1 on both
+> `#FFFEFF` and `#303032`; the list is in the `app.css` dark-block note.
+
 Status badges (release status is the catalog's load-bearing signal) render through
 `--color-green` / `--color-sp` / `--color-pick` and their ink partners rather than
 literal hexes, so they follow the active theme instead of pinning one.
