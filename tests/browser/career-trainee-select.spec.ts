@@ -290,7 +290,7 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(page.getByText('Hitomi Sasaki')).toBeVisible();
 
         // Aptitude appears once for the trainee: ten letters, none of them per costume form.
-        const grid = page.locator('dl').filter({ hasText: 'End closer' });
+        const grid = page.locator('section[aria-labelledby="aptitudes"]');
         await expect(grid.locator('dt')).toHaveCount(10);
         await expect(grid.locator('dd')).toHaveCount(10);
 
