@@ -12,6 +12,7 @@ use App\Models\SupportCard;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Models\Veteran;
+use App\Services\Career\CareerPositionLabel;
 use App\Services\Legacy\VeteranRow;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -46,16 +47,6 @@ class DashboardController extends Controller
      * full, filterable list is `/legacy` and the panel links to it.
      */
     private const RECENT_VETERANS = 3;
-
-    /**
-     * The month names the career grid counts in. Twelve turns per year is two per month, Early and
-     * Late, which is the client's own grid (`TrainingRun::careerYearForTurn`). The data-pipeline
-     * parser carries its own copy for race dates; this one names the turn a career is standing on.
-     */
-    private const MONTHS = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December',
-    ];
 
     public function index(ListVeterans $veterans): Response
     {
@@ -137,15 +128,7 @@ class DashboardController extends Controller
      */
     private function positionLabel(int $turn): ?string
     {
-        if ($turn < 1) {
-            return null;
-        }
-
-        $year = TrainingRun::careerYearForTurn($turn);
-        $position = (($turn - 1) % TrainingRun::TURNS_PER_YEAR) + 1;
-
-        return (RaceCatalogSlot::YEARS[$year] ?? (string) $year).' Year · '
-            .($position % 2 === 1 ? 'Early ' : 'Late ').self::MONTHS[intdiv($position - 1, 2)];
+        return CareerPositionLabel::forTurn($turn);
     }
 
     /**

@@ -11,6 +11,8 @@ use App\Enums\SnapshotFieldState;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSnapshotRequest;
 use App\Models\Umamusume;
+use App\Services\Career\CareerPositionLabel;
+use App\Services\CareerCalendar;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -98,9 +100,29 @@ class SnapshotController extends Controller
         return Inertia::render('Career/Snapshot/Review', [
             'fields' => $this->reviewFields($data),
             'payload' => $data,
+            // The position the snapshot names, through the same owner the race header and the
+            // Dashboard use, so the read-back and the cockpit cannot spell it two ways.
+            'position_label' => $this->positionLabel($data),
             'action' => route('career.snapshot.store'),
             'back' => route('career.snapshot.setup'),
         ]);
+    }
+
+    /**
+     * The position in the client's own words. A snapshot arrives as year/month/phase, so the turn is
+     * derived once here and handed to the shared label; nothing about the wording lives in this class.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function positionLabel(array $data): string
+    {
+        $turn = CareerCalendar::turnIndexFor(
+            CareerYear::from((int) $data['career_year']),
+            (int) $data['career_month'],
+            CareerPhase::from((string) $data['career_phase']),
+        );
+
+        return (string) CareerPositionLabel::forTurn($turn);
     }
 
     public function store(StoreSnapshotRequest $request): RedirectResponse

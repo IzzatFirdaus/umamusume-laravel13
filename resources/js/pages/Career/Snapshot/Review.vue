@@ -27,6 +27,8 @@ interface ReviewField {
 const props = defineProps<{
     fields: ReviewField[];
     payload: Record<string, unknown>;
+    /** The position the snapshot names, in the client's words; null only if the form carried none. */
+    position_label?: string | null;
     action: string;
     back: string;
 }>();
@@ -73,6 +75,10 @@ const treatment = (state: string): string => {
             This is exactly what will be written. Read it back: a field marked Unknown is one the client
             did not show, and a field marked Not provided is one you left alone. They are different
             statements, and the run keeps them apart.
+        </p>
+
+        <p v-if="props.position_label" class="mt-2 max-w-3xl text-sm font-medium text-ink-strong">
+            Position: {{ props.position_label }}
         </p>
 
         <section aria-labelledby="snapshot-review-heading" class="mt-6 max-w-3xl rounded-md border border-rule bg-panel p-4">

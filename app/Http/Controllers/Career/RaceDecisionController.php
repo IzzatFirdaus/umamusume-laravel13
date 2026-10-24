@@ -13,6 +13,7 @@ use App\Models\ScenarioSlot;
 use App\Models\TraineeGoal;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use App\Services\Career\CareerPositionLabel;
 use App\Services\RaceFacts;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -122,10 +123,10 @@ class RaceDecisionController extends Controller
         }
 
         return [
-            'year_label' => (RaceCatalogSlot::YEARS[$next['year']] ?? (string) $next['year']).' Year',
+            'year_label' => CareerPositionLabel::forYear($next['year']),
             'turn' => $next['turn'],
             'turn_index' => $next['turn_index'],
-            'position_label' => ($next['turn'] % 2 === 1 ? 'Early ' : 'Late ').self::MONTHS[intdiv($next['turn'] - 1, 2)],
+            'position_label' => CareerPositionLabel::forPosition($next['turn']),
         ];
     }
 
@@ -380,10 +381,4 @@ class RaceDecisionController extends Controller
 
         return 'No race on this scenario\'s calendar falls at this turn. The race calendar on the Cockpit header shows which turns carry one.';
     }
-
-    /** The twelve month names, as the client's own Early/Late halves divide them. */
-    private const MONTHS = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December',
-    ];
 }

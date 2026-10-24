@@ -138,6 +138,14 @@ test.describe('Snapshot setup', () => {
 });
 
 test.describe('Snapshot review', () => {
+    test('names the reviewed career position in the client\'s own words', async ({ page }) => {
+        // R4-08 date half: the read-back states the position the Trainer entered, using the same
+        // derivation the race header uses for the run the write creates.
+        await fillSetupAndReview(page);
+
+        await expect(page.getByText(/Position: Senior Year . Early October/)).toBeVisible();
+    });
+
     test('reads the three states back apart and offers one commit', async ({ page }) => {
         await fillSetupAndReview(page);
 

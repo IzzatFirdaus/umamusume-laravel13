@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\CreateSnapshotRun;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -96,4 +97,42 @@ it('refuses a snapshot missing a required field at the review step', function ()
 
     $this->get(route('career.snapshot.review', $payload))
         ->assertSessionHasErrors('career_phase');
+});
+
+it('names the snapshot position through the same owner the race header reads', function (): void {
+    // R4-08 date half: the read-back names the position the Trainer entered, and the cockpit reads the
+    // same words for the run it writes, so the two cannot spell the month two ways.
+    // All five core stats known, so the write logs a turn entry at 67 and the dashboard reads the
+    // same turn the review named.
+    $payload = reviewPayload([
+        'guts' => 500,
+        'wit' => 500,
+        'field_states' => [
+            'speed' => 'known',
+            'stamina' => 'known',
+            'power' => 'known',
+            'guts' => 'known',
+            'wit' => 'known',
+            'energy' => 'not_provided',
+            'fans' => 'not_provided',
+            'skill_points' => 'not_provided',
+        ],
+    ]);
+
+    $this->get(route('career.snapshot.review', $payload))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/Snapshot/Review')
+            ->where('position_label', "Senior Year \u{00B7} Early October"));
+
+    $run = (new CreateSnapshotRun)->handle($payload);
+
+    // The race header splits the same label into its two halves; composed, they must read exactly
+    // as the review's single sentence. The Dashboard is not a valid comparison: its
+    // `position_label` is built from the logged-turn count, not the career position.
+    $this->get(route('runs.races.decision', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('nextTurn.year_label', 'Senior Year')
+            ->where('nextTurn.position_label', 'Early October'));
 });
