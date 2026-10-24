@@ -58,6 +58,17 @@ function traineeChoice(page: import('@playwright/test').Page) {
 }
 
 test.describe('Trainee Selection and Profile', () => {
+    test('exposes a forward control at the end of the table', async ({ page }) => {
+        // R4-22: the picker's only forward control was the wizard rail at the top, so a Trainer who
+        // scrolled to the end of the roster had to scroll back to advance.
+        await page.goto('/career/setup/trainee');
+        await page.locator('#app > *').first().waitFor();
+
+        const forward = page.getByRole('link', { name: 'Continue to Your target' });
+        await expect(forward).toBeVisible();
+        await expect(forward).toHaveAttribute('href', /\/career\/setup\/target$/);
+    });
+
     test('renders the roster with the wizard shell and no implied choice', async ({ page }) => {
         await page.goto('/career/setup/trainee');
         await page.locator('#app > *').first().waitFor();

@@ -138,6 +138,7 @@ class TraineeSelectController extends Controller
             // UnityCupEditor.vue:20 already receive URLs. No Ziggy dependency is introduced.
             'action' => route('career.trainee.store'),
             'rosterUrl' => route('career.trainee'),
+            'targetUrl' => route('career.target'),
         ]);
     }
 

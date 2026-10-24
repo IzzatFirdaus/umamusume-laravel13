@@ -109,6 +109,8 @@ const props = defineProps<{
     action: string;
     /** `route('career.trainee')`, supplied by the server so the filter never hard-codes the URL. */
     rosterUrl: string;
+    /** `route('career.target')`, the step this screen advances to. */
+    targetUrl: string;
 }>()
 
 const page = usePage();
@@ -459,5 +461,17 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
                 <span v-else class="px-3 py-1 text-ink-muted" v-html="link.label" />
             </template>
         </nav>
+
+        <!-- The picker's only forward control used to be the wizard rail at the top, so a Trainer who
+             scrolled to the end of the roster had to scroll back up to advance (R4-22). The same
+             destination, at the point the choice is made. -->
+        <div class="mt-4 flex justify-end">
+            <a
+                :href="props.targetUrl"
+                class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 text-sm font-bold text-on-primary-action"
+            >
+                Continue to Your target
+            </a>
+        </div>
     </SetupLayout>
 </template>
