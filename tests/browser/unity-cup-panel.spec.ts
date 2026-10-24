@@ -293,6 +293,35 @@ test('states the team race shape and prints no opponent projection, no chance an
     expect(text.toLowerCase()).not.toContain('probability');
 });
 
+test('heads every Scenario panel with the documented capsule', async ({ page }) => {
+    await openUnityCupCockpit(page);
+
+    const section = page.getByRole('region', { name: 'Scenario' });
+
+    // Every panel-level card under Scenario carries the capsule (DESIGN.md §2.3): the owner's rule is
+    // that everything in this section looks like everything else in it. Only top-level cards count; a
+    // card nested inside a panel is that panel's own notice, not a peer panel (Team Race's
+    // "No team races recorded" empty state is one).
+    const panels = await section.evaluate((el) => {
+        const cards = Array.from(el.querySelectorAll<HTMLElement>('.card'));
+
+        return cards
+            .filter((card) => card.parentElement?.closest('.card') === null)
+            .map((card) => ({
+                capsule: card.querySelector('.lattice-bleed') !== null,
+                title: (card.querySelector('.lattice-bleed')?.textContent
+                    ?? card.querySelector('h1,h2,h3,h4,h5,h6')?.textContent
+                    ?? '').trim(),
+            }));
+    });
+
+    // Nine panels render on a fresh Unity Cup run; the Team and Unity Cup progress cards are
+    // conditional on data this run does not carry. A count drop below nine means a panel stopped
+    // rendering, which this case also refuses to pass silently.
+    expect(panels.length, JSON.stringify(panels)).toBeGreaterThanOrEqual(9);
+    expect(panels.filter((panel) => !panel.capsule), JSON.stringify(panels)).toEqual([]);
+});
+
 test('heads both scenario blocks with the documented capsule and keeps the region name', async ({ page }) => {
     await openUnityCupCockpit(page);
 
