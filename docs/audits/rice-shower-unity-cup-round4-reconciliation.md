@@ -387,3 +387,21 @@ under test is unnameable in the UI.
 - [ ] A current-build browser re-read of R4-31 and R4-08 — **not done**; it needs a browser run this
       read-only pass did not perform.
 - [ ] No gate run — stated, not implied away.
+
+## Dated correction, 2026-10-24 — R4-06 and R4-08 register rows
+
+R4-06 (F-05) and R4-08 (F-07) still read as live findings in the register above. Their
+dispositions were recorded at KI-122 and KI-123; the register rows predate those
+recordings. Per the append-only rule, this note closes the gap without editing the rows.
+
+**R4-06 / F-05.** Ruled out. The three URA Finals rounds are shared across scenarios; only
+the Final forks (Unity Cup's is Aoharu). The current mandatory list is correct, and the
+proposed owner filter would have deleted legitimate shared obligations. Evidence:
+`docs/scenarios/09-global-race-calendar.md:105,632-633`. See KI-122.
+
+**R4-08 / F-07 (date half only).** Does not reproduce. `Snapshot/Setup.vue:165-186` already
+renders Year/Month/Phase, and `CreateSnapshotRun:58-79` writes `career_position`. The date
+input existed at the audit's own commit. The date half closed further at `499e0105`, which
+extracted the position label to one owner (`app/Services/Career/CareerPositionLabel.php`)
+and made the snapshot review name the position the Trainer entered. The pending-turn-state
+half named in KI-123 remains a separate question. See KI-123.
