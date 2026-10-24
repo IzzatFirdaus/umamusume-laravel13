@@ -93,23 +93,32 @@
      * 1.26:1, below G-18's 3:1 card boundary, so `rule` uses the reference's muted slate text
      * colour instead. Accent fills are identical in both themes (owner rule); see the dark block
      * for the full note.
+     *
+     * 2026-10-24 (Umamusume brand palette, light): the light theme is the brand's crisp base —
+     * page #F8F9FD (cool white with a lavender wash), panel and raised #FFFFFF, sunken #EDE6E3,
+     * idle #E2E4F0, disabled #D1D3E0, ink #141414, strong #000000, muted #625D7D, faint #8C8A9A,
+     * royal blue #2A5DFA, hot pink #FF3276, turf green #69C10C, purple pick #8C83FF, alert red
+     * #FF4400, focus ring #FF3276. The given hairline #D1D3E0 measures 1.41:1 on the page and is
+     * stepped to #8C8A9A for the 3:1 card boundary; white-on-green and white-on-red inks are
+     * stepped to #141414 for 4.5:1. See the token comments for each forced step.
      */
-    --color-page: #F7F5FF;
-    --color-panel: #FFFEFF;
+    --color-page: #F8F9FD;
+    --color-panel: #FFFFFF;
     --color-raised: #FFFFFF;
-    --color-sunken: #EEEBFF;
-    --color-idle: #D8D3F5;
-    --color-disabled: #ECE9F8;
-    --color-ink: #24243A;
-    --color-ink-strong: #24243A;
-    --color-ink-muted: #5C607B;
+    --color-sunken: #EDE6E3;
+    --color-idle: #E2E4F0;
+    --color-disabled: #D1D3E0;
+    --color-ink: #141414;
+    --color-ink-strong: #000000;
+    --color-ink-muted: #625D7D;
     /* ink-faint is a non-text token: borders, hairline ticks, disabled glyphs.
        Measured as body-size text it lands at 3.18 on white and 2.58 on the sunken
        surface, so it must never carry a label. The accessible subordinate tier is
        ink-muted, which clears 4.5 on every surface in both themes.
-       2026-10-24: sampled from the reference's violet step (#D8D3F5, the same pixel as
-       `idle`); HLF shows no separate faint tier. Non-text, so no pair is owed. */
-    --color-ink-faint: #D8D3F5;
+       2026-10-24 (Umamusume brand palette): #8C8A9A, the brand's soft purple-grey;
+       also used as the light `rule` because the given hairline #D1D3E0 measures
+       1.41:1 on the page, under G-18's 3:1 card boundary. */
+    --color-ink-faint: #8C8A9A;
     /* Hairline. 2026-10-15 (Phase 11R.2): the light step was #6E6C73, the same value the dark
        override carries, so a card edge and a status-pill border read as a dark-mode line on the
        light field. Lightened to the palest grey that still clears G-18's `rule on page` 3:1 for a
@@ -118,36 +127,35 @@
        measuring 3.98:1 on the new `page`, 4.30:1 on `panel`, 4.67:1 on `raised`, 3.92:1 on
        `sunken`.
        2026-10-24 (second ruling, HLF reference): #5C607B, the reference's muted slate text
-       colour, sampled from HLF_reference/screencapture-...-22_38_43.png at (602,2191). The
-       reference's own card hairline (#ECE9F8) measures 1.10:1 on #F7F5FF and cannot clear G-18's
-       3:1; this value measures 5.70:1 on page, 6.11:1 on panel. Dark uses the same role,
-       #90A1B9 (HLF dark muted slate), at 7.82:1 on #0B0B0D. */
-    --color-rule: #5C607B;
+       colour, sampled from HLF_reference/screencapture-...-22_38_43.png at (602,2191).
+       2026-10-24 (Umamusume brand palette): the brand hairline #D1D3E0 measures 1.41:1 on the new
+       page and cannot clear the 3:1 card boundary, so `rule` uses the brand's own muted step
+       #8C8A9A (3.19:1 on page, 3.36:1 on panel). */
+    --color-rule: #8C8A9A;
 
     /* Semantic roles. Amended 2026-10-15: green is a STATUS colour only — the positive status pill,
        and nothing else. Green is never the primary action fill, which is `--color-primary-action`
        (blue). This supersedes the pre-2026-10-15 rule that made green the action colour.
-       2026-10-24 (second ruling, HLF reference): the lime family is sampled from the reference, not
-       the client corpus — #AEE327 (fill) with #20300D (the olive ink the reference prints on its
-       lime buttons), plus #F2F5EE (pale green panel) and #D1F490 (lime rule). The reference has one
-       lime, so `green`, `chrome` and `status-positive` now share the sampled fill and differ only
-       by role. */
+       2026-10-24 (second ruling, HLF reference): the lime family is sampled from the reference.
+       2026-10-24 (Umamusume brand palette): `status-positive` moved to the brand turf green
+       #69C10C; `green` and `chrome` (the capsule motif and its ink) stay on the reference lime
+       because the capsule is a decorative motif, not a status fill. */
     --color-green: #AEE327;
     --color-green-deep: #20300D;
     --color-green-tint: #F2F5EE;
     --color-green-line: #D1F490;
     --color-chrome: #AEE327;
     --color-on-chrome: #20300D;
-    /* Keyboard-focus ring. A separate token because no single green clears WCAG 1.4.11's
-       3:1 for non-text boundaries in both themes. 2026-10-24: sampled per theme — light
-       #20300D (the reference's olive) and dark #BBF451 (the reference's dark lime), the
-       only functional per-theme accent, because a focus ring that disappears is a defect. */
-    --color-ring: #20300D;
-    --color-risk: #800014;
-    /* FQ-04 (2026-10-22): the ink that goes ON the risk fill. White clears the light
-       fill at 10.89:1 but measures 2.44:1 on the dark risk, so the pair is split by
-       theme the way chrome/on-chrome and pick/on-pick are. */
-    --color-on-risk: #FFFFFF;
+    /* Keyboard-focus ring. A separate token because no single colour clears WCAG 1.4.11's
+       3:1 for non-text boundaries in both themes. 2026-10-24 (Umamusume brand palette):
+       the brand pink #FF3276 here; the dark block uses the light blue #5B85FF. */
+    --color-ring: #FF3276;
+    --color-risk: #FF4400;
+    /* FQ-04 (2026-10-22): the ink that goes ON the risk fill. White on the brand red
+       measures 3.45:1, under the 4.5:1 the pair needs, so the ink is the brand body text
+       #141414 instead. Note: the same #FF4400 as error TEXT on the white panel is 3.45:1 —
+       flagged for an owner ruling; the palette supplies no darker red. */
+    --color-on-risk: #141414;
     /*
      * The mandatory goal race's own pair, split because D-181 asks for two colours on
      * one cell: the client's red `Goal` pennant, and a heavier *warm* outline.
@@ -159,28 +167,23 @@
      */
     --color-goal: #C81D25;
     --color-goal-line: #B45309;
-    --color-pick: #EFC96A;
+    --color-pick: #8C83FF;
     /*
      * The selection BOUNDARY, split from `--color-pick` because the two jobs pull
-     * in opposite directions. As a fill behind `--color-on-pick` the gold is right
-     * (that pair measures 8.34 here, 10.57 in dark). As a 2px outline on a `raised` surface it
-     * measures 1.59:1, and WCAG 1.4.11 wants 3:1 for a boundary someone has to see
-     * to know which row is live — the ladder's current step, the calendar's next
-     * race, the selected guided step. This is the deep end of the same gold hue, so
-     * a selection still reads as gold, at 6.24 on `raised` and 5.89 on `panel`.
+     * in opposite directions. As a fill behind `--color-on-pick` the brand purple is right.
+     * As a 2px outline on a `raised` surface the brand pick #8C83FF measures 3.07:1 as a
+     * fill but is too light for the 3:1 boundary, so the boundary is the brand's muted step
+     * #625D7D (6.34:1 on raised, 5.86:1 on panel). 2026-10-24 (Umamusume brand palette).
      *
      * Known weakness, recorded rather than hidden: it sits 1.24:1 from
      * `--color-goal-line` #B45309 in luminance, so a goal cell and a current cell in
      * the same grid are separated by hue (41° against 27°) and by the goal's red
      * pennant, not by lightness. D-12 holds because both states also carry words.
      */
-    --color-pick-line: #7A5C10;
-    /* The ink that goes ON the gold selection. Not `ink-strong`: that is #24243A here and
-       #F1F5F9 in the dark override, and one ink cannot sit on the gold in both themes.
-       Selection keeps a dark ink in both themes, so it needs its own token (D-288: declared in
-       `@theme static` so Tailwind cannot prune it). Since the second ruling of 2026-10-24 it is
-       NOT overridden: the gold fill and this ink are identical in both themes. */
-    --color-on-pick: #482720;
+    --color-pick-line: #625D7D;
+    /* The ink that goes ON the selection. The brand purple #8C83FF needs a dark ink to clear
+       4.5:1, so the body text #141414 is used. 2026-10-24 (Umamusume brand palette). */
+    --color-on-pick: #141414;
     /*
      * Skill Points cyan, split in two because the corpus mandates one value and measures
      * another. `--color-sp` is the client's identity colour (research §3.1, §3.3) and stays
@@ -329,10 +332,10 @@
      * primary button never share a fill (Phase 11.11-11.12). Every new role owes a measured G-18
      * pair; values here are the ruling's starting draft and `DesignTokensTest` is the gate.
      */
-    --color-brand-chrome: #2D51EF;
-    --color-on-brand-chrome: #FFFEFF;
-    --color-brand-accent: #FF77CC;
-    --color-brand-accent-ink: #6554E0;
+    --color-brand-chrome: #2A5DFA;
+    --color-on-brand-chrome: #FFFFFF;
+    --color-brand-accent: #FF3276;
+    --color-brand-accent-ink: #625D7D;
     --color-brand-accent-soft: #EEEBFF;
 
     /* The one filled action on a screen. An alias, not a new colour: the action role and the
@@ -341,8 +344,8 @@
        `--color-brand-chrome` and both roles follow. */
     --color-primary-action: var(--color-brand-chrome);
     --color-on-primary-action: var(--color-on-brand-chrome);
-    --color-status-positive: #AEE327;
-    --color-status-positive-ink: #20300D;
+    --color-status-positive: #69C10C;
+    --color-status-positive-ink: #141414;
     --color-status-caution: #FFE9A8;
     --color-status-caution-ink: #6A4A00;
 
@@ -411,32 +414,45 @@ html[data-theme='dark'] {
      * rule, up #B89825, down #97D1F9, goal, goal-line, green-deep #BBF451,
      * pick-line #E3B977, risk #FF7E8C, brand-accent-ink #9F8FFF, brand-accent-soft
      * #1D1D62, sp-ink, rank, anchor, ring, stat-*, and the tint/grade surface fills.
+     *
+     * 2026-10-24 (Umamusume brand palette): the dark theme is the brand's near-black ramp —
+     * page #121212, sunken #0D0D0D, panel #2A2A2A, raised #333333, idle #404040,
+     * disabled #4D4D4D, rule #666666, ink #EAEAEA, muted #A0A0A0, faint #666666, with the
+     * royal blue #2A5DFA, hot pink #FF3276, turf green #69C10C and orange #FF7500 accents.
+     * Two given values are stepped to satisfy G-18: panel #1E1E1E measures 1.12:1 on the
+     * page (below the 1.25 dark floor), so panel takes the given raised #2A2A2A and the ramp
+     * shifts up one step (raised #333333, idle #404040, disabled #4D4D4D); and rule #333333
+     * measures 1.48:1 on the page, so rule takes the faint #666666 (3.26:1). on-risk is the
+     * dark surface #121212 because white on #FF4400 is 3.45:1.
      */
-    --color-page: #0B0B0D;
-    --color-panel: #28282A;
-    --color-raised: #303032;
-    --color-sunken: #171719;
-    --color-idle: #232325;
-    --color-disabled: #2E2E30;
-    --color-ink: #F1F5F9;
-    --color-ink-strong: #F1F5F9;
-    --color-ink-muted: #90A1B9;
-    --color-ink-faint: #90A1B9;
-    --color-rule: #90A1B9;
+    --color-page: #121212;
+    --color-panel: #2A2A2A;
+    --color-raised: #333333;
+    --color-sunken: #0D0D0D;
+    --color-idle: #404040;
+    --color-disabled: #4D4D4D;
+    --color-ink: #EAEAEA;
+    --color-ink-strong: #FFFFFF;
+    --color-ink-muted: #A0A0A0;
+    --color-ink-faint: #666666;
+    --color-rule: #666666;
 
     --color-green-deep: #BBF451;
     --color-green-tint: #19191B;
-    --color-ring: #BBF451;
-    --color-risk: #FF7E8C;
-    --color-on-risk: #131315;
+    --color-ring: #5B85FF;
+    --color-risk: #FF4400;
+    --color-on-risk: #121212;
     /* Per-theme foreground steps (see the block note above). The goal line is the
-       reference's sampled amber #B89825; the selection boundary its sampled gold
-       #E3B977. `--color-pick`, `--color-on-pick`, `--color-sp` and `--color-chrome`
-       are deliberately NOT overridden here: they are fills, so they inherit the light
-       values exactly and the pair inside each fill is identical in both themes. */
+       sampled amber #B89825; the selection boundary its sampled gold #E3B977.
+       2026-10-24 (Umamusume brand palette): the dark pick is the brand orange #FF7500
+       with the dark surface #121212 as its ink, and the turf green keeps the dark ink
+       #121212 too (white on #69C10C is 2.26:1). */
     --color-goal: #F2555A;
     --color-goal-line: #B89825;
+    --color-pick: #FF7500;
+    --color-on-pick: #121212;
     --color-pick-line: #E3B977;
+    --color-status-positive-ink: #121212;
     --color-sp-ink: #4FC3F7;
     --color-rank: #B6B4C2;
     --color-stat-speed: #7FA8E8;

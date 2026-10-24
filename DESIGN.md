@@ -218,6 +218,19 @@ and the corpus-transcription caveat above holds. Replacing those two stubs is th
 > `rule on page` (`#65508E` on `#1A1025`, 2.70:1) is the one owner-accepted exception and is
 > omitted for that theme only.
 
+> **2026-10-24 — Umamusume Pretty Derby brand palette.** Light and dark are replaced with the
+> brand's own set; `eva01` is untouched. Light: page `#F8F9FD`, panel/raised `#FFFFFF`, sunken
+> `#EDE6E3`, ink `#141414`, muted `#625D7D`, royal blue `#2A5DFA`, hot pink `#FF3276`, turf green
+> `#69C10C`, purple pick `#8C83FF`, alert red `#FF4400`, focus ring `#FF3276`. Dark: page
+> `#121212`, panel `#2A2A2A`, raised `#333333`, sunken `#0D0D0D`, ink `#EAEAEA`, muted `#A0A0A0`,
+> the same blue/pink/green accents plus orange pick `#FF7500`, focus ring `#5B85FF`. Four given
+> values are stepped to clear G-18 (each recorded in `app.css`): the light hairline `#D1D3E0`
+> (1.41:1) becomes `#8C8A9A`; the light white-on-green and white-on-red inks become `#141414`;
+> the dark panel `#1E1E1E` (1.12:1 step) shifts the dark ramp up to `#2A2A2A`/`#333333`/`#404040`;
+> the dark hairline `#333333` (1.48:1) becomes `#666666`. Known residual: `risk` `#FF4400` as
+> error text on the white panel is 3.45:1 — flagged for a ruling; the palette supplies no darker
+> red.
+
 Status badges (release status is the catalog's load-bearing signal) render through
 `--color-green` / `--color-sp` / `--color-pick` and their ink partners rather than
 literal hexes, so they follow the active theme instead of pinning one.
