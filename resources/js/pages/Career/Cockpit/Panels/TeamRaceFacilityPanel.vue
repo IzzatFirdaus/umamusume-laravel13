@@ -7,6 +7,7 @@
  */
 
 import AlertRow from '../../../../components/scenario/AlertRow.vue';
+import CapsuleHeader from '../../../../components/CapsuleHeader.vue';
 import StatusPill from '../../../../components/StatusPill.vue';
 import SubCell from '../../../../components/SubCell.vue';
 
@@ -48,53 +49,57 @@ const statusVariant = (state: string | null): 'info' | 'success' | 'warning' | '
 </script>
 
 <template>
-    <div class="flex flex-col gap-4">
-        <AlertRow
-            v-for="alert in props.scenario.alerts"
-            :key="alert.text"
-            glyph="▲"
-            :text="`${alert.level}: ${alert.text}`"
-            :detail="alert.detail"
-            tone="critical"
-        />
+    <div class="card p-3">
+        <CapsuleHeader :title="props.label" class="mb-3" />
 
-        <section
-            v-for="group in props.scenario.facilities"
-            :key="group.group"
-            class="flex flex-col gap-2"
-            :aria-labelledby="headingId(group.group)"
-        >
-            <h3
-                :id="headingId(group.group)"
-                class="text-lg font-semibold text-ink-strong"
+        <div class="flex flex-col gap-4">
+            <AlertRow
+                v-for="alert in props.scenario.alerts"
+                :key="alert.text"
+                glyph="▲"
+                :text="`${alert.level}: ${alert.text}`"
+                :detail="alert.detail"
+                tone="critical"
+            />
+
+            <section
+                v-for="group in props.scenario.facilities"
+                :key="group.group"
+                class="flex flex-col gap-2"
+                :aria-labelledby="headingId(group.group)"
             >
-                {{ group.group }}
-            </h3>
-
-            <p v-if="group.rows.length === 0" class="text-sm text-ink-muted">
-                {{ group.empty_note ?? 'No facility data recorded for this scenario yet.' }}
-            </p>
-
-            <ul v-else class="flex flex-col gap-2">
-                <li
-                    v-for="row in group.rows"
-                    :key="row.label"
-                    class="flex flex-wrap items-baseline gap-3 text-sm text-ink"
+                <h3
+                    :id="headingId(group.group)"
+                    class="text-lg font-semibold text-ink-strong"
                 >
-                    <SubCell
-                        :label="row.label"
-                        :value="row.value === null ? 'N/A' : String(row.value)"
-                        value-class="font-mono text-base tabular-nums text-ink-strong"
-                        :title="row.absence ?? (row.value === null ? 'No reading was recorded for this facility.' : undefined)"
-                    />
-                    <StatusPill
-                        v-if="row.state !== null"
-                        :label="row.state"
-                        :variant="statusVariant(row.state)"
-                        size="sm"
-                    />
-                </li>
-            </ul>
-        </section>
+                    {{ group.group }}
+                </h3>
+
+                <p v-if="group.rows.length === 0" class="text-sm text-ink-muted">
+                    {{ group.empty_note ?? 'No facility data recorded for this scenario yet.' }}
+                </p>
+
+                <ul v-else class="flex flex-col gap-2">
+                    <li
+                        v-for="row in group.rows"
+                        :key="row.label"
+                        class="flex flex-wrap items-baseline gap-3 text-sm text-ink"
+                    >
+                        <SubCell
+                            :label="row.label"
+                            :value="row.value === null ? 'N/A' : String(row.value)"
+                            value-class="font-mono text-base tabular-nums text-ink-strong"
+                            :title="row.absence ?? (row.value === null ? 'No reading was recorded for this facility.' : undefined)"
+                        />
+                        <StatusPill
+                            v-if="row.state !== null"
+                            :label="row.state"
+                            :variant="statusVariant(row.state)"
+                            size="sm"
+                        />
+                    </li>
+                </ul>
+            </section>
+        </div>
     </div>
 </template>
