@@ -95,7 +95,7 @@ interface TeamSection {
 
 const props = defineProps<{
     /** The shell passes the whole §49 section; this renderer reads its `team` key only. */
-    scenario: { widgets: string[]; team: TeamSection };
+    scenario: { widgets: string[]; team: TeamSection; panels: Record<string, { on: boolean }> };
     label: string;
     kind: 'panel';
     name: string;
@@ -103,6 +103,14 @@ const props = defineProps<{
 
 const isTeamPanel = computed(() => props.name === 'team_rank_ladder');
 const isRacePanel = computed(() => props.name === 'team_race');
+
+/**
+ * Which of the two team flags this scenario composes. When both are on, the team registration draws
+ * the whole system including the race panel, so the race registration draws nothing rather than
+ * rendering a second copy above the bento (the owner asked for one grid).
+ */
+const composesRacePanel = computed(() => props.scenario.panels['team_race']?.on === true);
+const composesTeamPanel = computed(() => props.scenario.panels['team_rank_ladder']?.on === true);
 
 /** The burst machine's regions ride the matrix's own widget membership, not a scenario name. */
 const composesBursts = computed(() => props.scenario.widgets.includes('spirit_bursts'));
@@ -156,28 +164,40 @@ const counterSegments = computed((): string[] => {
     <!-- The `team_race` registration: the ported race panel, guidance and margin word included.
          A matrix that turns the flag on without a margin gets the absence, never a printed 0. -->
     <TeamRacePanel
-        v-if="isRacePanel && props.scenario.team.race_guidance !== null"
+        v-if="isRacePanel && !composesTeamPanel && props.scenario.team.race_guidance !== null"
         :enabled="true"
         :guidance="props.scenario.team.race_guidance"
         :entries="props.scenario.team.race_entries"
     />
     <AlertRow
-        v-else-if="isRacePanel"
+        v-else-if="isRacePanel && !composesTeamPanel"
         glyph="○"
         text="This scenario turns the team race panel on, but its matrix states no circle margin, so none is printed."
         detail="The margin is a config fact (`team_race.circles_guidance`). A recorded race list without a stated margin would leave the at-or-below comparison to invent, so the panel is withheld rather than guessed at."
         tone="note"
     />
-
-    <!-- The `team_rank_ladder` registration: the Team Panel itself, as one bento grid. Order follows the
-         owner's read of the section: team race (its own registration above), then Team, Spirit, Team
-         Rank, Unity Cup progress, stat grades, burst bands, Spirit Burst, Special Training, and the two
-         team-race blocks. Spans vary at desktop so the table and the prose get width and the small
-         tallies do not. -->
     <div v-else-if="isTeamPanel" class="grid grid-cols-1 gap-3 @3xl:grid-cols-2 @5xl:grid-cols-12">
-            <!-- The team's own identity (A6.6), drawn only when the Trainer entered one of the four:
-                 a run that named no team gets no card rather than four empty rows. -->
-            <div class="order-1 @5xl:col-span-4">
+                <!-- The `team_rank_ladder` registration: the Team Panel itself, as one bento grid. Team
+                     Race leads the grid (it used to be a separate registration rendered above), then the
+                     owner's order: Team, Spirit, Team Rank, Unity Cup progress, stat grades, burst bands,
+                     Spirit Burst, Special Training, and the two team-race blocks. Spans vary so the table
+                     and the prose get width and the small tallies do not. -->
+                <div class="@3xl:col-span-2 @5xl:col-span-12">
+                    <TeamRacePanel
+                        v-if="composesRacePanel && props.scenario.team.race_guidance !== null"
+                        :enabled="true"
+                        :guidance="props.scenario.team.race_guidance"
+                        :entries="props.scenario.team.race_entries"
+                    />
+                    <AlertRow
+                        v-else-if="composesRacePanel"
+                        glyph="○"
+                        text="This scenario turns the team race panel on, but its matrix states no circle margin, so none is printed."
+                        detail="The margin is a config fact (`team_race.circles_guidance`). A recorded race list without a stated margin would leave the at-or-below comparison to invent, so the panel is withheld rather than guessed at."
+                        tone="note"
+                    />
+                </div>
+                <div class="@5xl:col-span-4">
             <div v-if="hasTeamIdentity" class="card p-3">
                 <CapsuleHeader title="Team" class="mb-2" />
                 <dl class="flex flex-col gap-1 text-sm">
@@ -201,42 +221,7 @@ const counterSegments = computed((): string[] => {
             </div>
             </div>
 
-            <div class="order-3 @5xl:col-span-4">
-            <TeamRankGauge :enabled="true" :current="current" :ladder="props.scenario.team.ladder" />
-
-            <!-- The +30 is the figure the recorded client shows, and it was read beside the S
-                 emblem. Other ranks pay something this corpus does not state, so the line renders
-                 only where the observation applies. -->
-            <p v-if="props.scenario.team.rank === 'S'" class="flex flex-wrap items-center gap-2 text-sm text-ink">
-                <span class="font-semibold text-ink-strong">Team Ranking Bonus: All Attributes +30</span>
-                <ProvenanceBadge state="estimated" :title="bonusTitle" />
-            </p>
-            </div>
-
-            <div class="order-5 @3xl:col-span-2 @5xl:col-span-4">
-            <div class="card p-3">
-                <CapsuleHeader title="Team stat grades" class="mb-2" />
-                <ul class="flex flex-col gap-1" aria-label="Team stat grades">
-                    <li
-                        v-for="grade in props.scenario.team.stat_grades"
-                        :key="grade.key"
-                        class="flex items-baseline justify-between gap-3 text-sm"
-                    >
-                        <span class="text-ink">{{ grade.label }}</span>
-                        <span
-                            class="font-mono tabular-nums text-ink-strong"
-                            title="No column records a team stat grade. The client prints these letters on its Team Info panel, and this tool has no input that stores them."
-                        >N/A</span>
-                    </li>
-                </ul>
-            </div>
-            </div>
-
-            <div class="order-7 @5xl:col-span-4">
-                <SpiritBurstRoster :enabled="composesBursts" :roster="props.scenario.team.roster" />
-            </div>
-
-            <div class="order-2 @5xl:col-span-4">
+            <div class="@5xl:col-span-4">
             <div v-if="composesBursts" class="card p-3">
                 <CapsuleHeader title="Spirit" class="mb-2" />
                 <!-- The value and the bar are the same reading (design-2.0 §45). No column records a
@@ -267,14 +252,45 @@ const counterSegments = computed((): string[] => {
 
             <!-- The Unity Cup progression counters (A6.7). Drawn only when the Trainer stated one; the
                  combined total below reads these two tallies. -->
-            <div class="order-4 @5xl:col-span-4">
+            <div class="@5xl:col-span-4">
+            <TeamRankGauge :enabled="true" :current="current" :ladder="props.scenario.team.ladder" />
+
+            <!-- The +30 is the figure the recorded client shows, and it was read beside the S
+                 emblem. Other ranks pay something this corpus does not state, so the line renders
+                 only where the observation applies. -->
+            <p v-if="props.scenario.team.rank === 'S'" class="flex flex-wrap items-center gap-2 text-sm text-ink">
+                <span class="font-semibold text-ink-strong">Team Ranking Bonus: All Attributes +30</span>
+                <ProvenanceBadge state="estimated" :title="bonusTitle" />
+            </p>
+            </div>
+
+            <div class="@5xl:col-span-4">
             <div v-if="counterSegments.length > 0" class="card p-3">
                 <CapsuleHeader title="Unity Cup progress" class="mb-2" />
                 <p class="text-sm text-ink">{{ counterSegments.join(' · ') }}</p>
             </div>
             </div>
 
-            <div class="order-6 @3xl:col-span-2 @5xl:col-span-8">
+            <div class="@3xl:col-span-2 @5xl:col-span-4">
+            <div class="card p-3">
+                <CapsuleHeader title="Team stat grades" class="mb-2" />
+                <ul class="flex flex-col gap-1" aria-label="Team stat grades">
+                    <li
+                        v-for="grade in props.scenario.team.stat_grades"
+                        :key="grade.key"
+                        class="flex items-baseline justify-between gap-3 text-sm"
+                    >
+                        <span class="text-ink">{{ grade.label }}</span>
+                        <span
+                            class="font-mono tabular-nums text-ink-strong"
+                            title="No column records a team stat grade. The client prints these letters on its Team Info panel, and this tool has no input that stores them."
+                        >N/A</span>
+                    </li>
+                </ul>
+            </div>
+            </div>
+
+            <div class="@3xl:col-span-2 @5xl:col-span-8">
             <div v-if="composesBursts && props.scenario.team.bands.length > 0" class="card p-3">
                 <div class="mb-2 flex flex-wrap items-baseline gap-2">
                     <CapsuleHeader title="Burst count bands" />
@@ -334,7 +350,11 @@ const counterSegments = computed((): string[] => {
             </div>
             </div>
 
-            <div class="order-8 @5xl:col-span-4">
+            <div class="@5xl:col-span-4">
+                <SpiritBurstRoster :enabled="composesBursts" :roster="props.scenario.team.roster" />
+            </div>
+
+            <div class="@5xl:col-span-4">
             <div
                 v-if="props.scenario.team.special_training.energy_penalty_removed !== null
                     || props.scenario.team.special_training.wit_burst_energy_bonus !== null"
@@ -358,11 +378,11 @@ const counterSegments = computed((): string[] => {
                  them: the board draws the team race's five categories, which appear nowhere else on the
                  screen, and the shape block states the cadence and the published reward. Neither adds
                  a focusable control, which is what the panel's own keyboard case pins. -->
-            <div class="order-9 @3xl:col-span-2 @5xl:col-span-8">
+            <div class="@3xl:col-span-2 @5xl:col-span-8">
                 <UnityCupTeamBoard v-if="props.scenario.team.coverage !== null" :coverage="props.scenario.team.coverage" />
             </div>
 
-            <div class="order-10 @3xl:col-span-2 @5xl:col-span-12">
+            <div class="@3xl:col-span-2 @5xl:col-span-12">
                 <UnityCupTournamentReadiness
                     v-if="props.scenario.team.tournament !== null"
                     :tournament="props.scenario.team.tournament"
