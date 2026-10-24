@@ -150,12 +150,12 @@
        3:1 for non-text boundaries in both themes. 2026-10-24 (Umamusume brand palette):
        the brand pink #FF3276 here; the dark block uses the light blue #5B85FF. */
     --color-ring: #FF3276;
-    --color-risk: #FF4400;
-    /* FQ-04 (2026-10-22): the ink that goes ON the risk fill. White on the brand red
-       measures 3.45:1, under the 4.5:1 the pair needs, so the ink is the brand body text
-       #141414 instead. Note: the same #FF4400 as error TEXT on the white panel is 3.45:1 —
-       flagged for an owner ruling; the palette supplies no darker red. */
-    --color-on-risk: #141414;
+    --color-risk: #D32F2F;
+    /* FQ-04 (2026-10-22): the ink that goes ON the risk fill. The brand red #FF4400 measures
+       3.45:1 as error text on the white panel, so the light red is stepped darker to #D32F2F
+       (4.98:1 on white) and the given white ink returns (4.98:1 on the fill). Owner-approved
+       override 2026-10-24; the dark theme keeps the given #FF4400 with the dark surface ink. */
+    --color-on-risk: #FFFFFF;
     /*
      * The mandatory goal race's own pair, split because D-181 asks for two colours on
      * one cell: the client's red `Goal` pennant, and a heavier *warm* outline.

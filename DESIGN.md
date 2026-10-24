@@ -231,6 +231,11 @@ and the corpus-transcription caveat above holds. Replacing those two stubs is th
 > error text on the white panel is 3.45:1 — flagged for a ruling; the palette supplies no darker
 > red.
 
+> **2026-10-24 — risk red accessibility override.** The light `--color-risk` is stepped from the
+> brand `#FF4400` (3.45:1 as error text on white) to `#D32F2F`, and `--color-on-risk` returns to
+> the given white; both pairs measure 4.98:1. The dark theme keeps the given `#FF4400` with its
+> dark surface ink, per the owner's approval. This closes the residual flagged in the note above.
+
 Status badges (release status is the catalog's load-bearing signal) render through
 `--color-green` / `--color-sp` / `--color-pick` and their ink partners rather than
 literal hexes, so they follow the active theme instead of pinning one.
