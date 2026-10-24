@@ -155,7 +155,7 @@ class CockpitController extends Controller
         $needsEvents = $run->composesPanel('team_rank_ladder')
             || in_array('spirit_bursts', (array) config('scenarios.scenarios.'.$run->scenarioKey().'.widgets', []), true);
 
-        $run->load(['umamusume', 'characterCard', 'turnEntries', 'raceEntries.raceCatalogSlot', 'raceEntries.scenarioSlot', 'raceEntries.turnEntry']);
+        $run->load(['umamusume', 'characterCard', 'turnEntries', 'raceEntries.raceCatalogSlot', 'raceEntries.scenarioSlot', 'raceEntries.turnEntry', 'deckSlots.supportCard']);
 
         if ($needsEvents) {
             $run->load('turnEvents');
@@ -190,6 +190,8 @@ class CockpitController extends Controller
             // The cap arithmetic's recorded inputs (§1.2): the caps the run states beside the blue
             // sparks its Legacy tree carries, with the source's own non-reconciliation named.
             'capComposition' => $this->capCompositionSection($run),
+            // A-0.6: the derived team roster — the six deck cards' characters — as a read-out, no column.
+            'roster' => $this->rosterSection($run),
             'state' => $this->stateSection($run, $latest),
             'actions' => $this->actionSection($run, $advice),
             'advisor' => $this->advisorSection($advice, $run),
@@ -487,6 +489,37 @@ class CockpitController extends Controller
                 .'The source records that they do not reconcile (§1.2): the six blue sparks account for '
                 .'the Guts extra and nothing else, so this panel shows the inputs without claiming one '
                 .'derives the other.',
+        ];
+    }
+
+    /**
+     * A-0.6: the derived team roster — the six deck cards' characters, read off the run's own
+     * `deck_slots` (`characters` + deck cards, per the ruling), with no stored roster and no column.
+     *
+     * A slot the Trainer equipped but never classified keeps `ownership` null, which the row renders
+     * as an absence rather than as owned (D-220). An empty deck names the absence instead of drawing
+     * six empty rows (C-7).
+     *
+     * @return array{rows: list<array{slot: int, name: string|null, friend: bool, ownership: string|null}>, empty: string|null}
+     */
+    private function rosterSection(TrainingRun $run): array
+    {
+        $rows = [];
+
+        foreach ($run->deckSlots->sortBy('slot_position') as $slot) {
+            $rows[] = [
+                'slot' => $slot->slot_position,
+                'name' => $slot->supportCard?->displayName(),
+                'friend' => $slot->isFriendSlot(),
+                'ownership' => $slot->ownership,
+            ];
+        }
+
+        return [
+            'rows' => $rows,
+            'empty' => $rows === []
+                ? 'No deck card is equipped on this run, so no team roster is derived.'
+                : null,
         ];
     }
 

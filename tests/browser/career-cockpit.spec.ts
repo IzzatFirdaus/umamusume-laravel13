@@ -722,3 +722,14 @@ test('shows the cap composition panel and its non-reconciliation note', async ({
     await expect(panel.getByText(/do not reconcile/)).toBeVisible();
     await expect(panel.getByRole('term').first()).toBeVisible();
 });
+
+test('shows the derived team roster from the deck cards', async ({ page }) => {
+    // A-0.6 (Group A): the roster is derived from the six deck cards, not a stored table. This case
+    // proves the section renders with the equipped deck; the derivation is pinned by `CockpitRosterTest`.
+    await newCareer(page);
+    await page.locator('#app > *').first().waitFor();
+
+    const panel = page.getByRole('region', { name: 'Team roster' });
+    await expect(panel).toBeVisible();
+    await expect(panel.locator('li').first()).toBeVisible();
+});
