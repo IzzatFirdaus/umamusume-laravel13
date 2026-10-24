@@ -31,13 +31,14 @@ class PreferenceController extends Controller
 {
     public function edit(): Response
     {
-        // The same rule the layout composer applies: a stored value outside the two resolved
+        // The same rule the layout composer applies: a stored value outside the resolved
         // themes is not a theme, so it must not come back preselected as if it were.
+        // `eva01` is a resolved theme (owner request 2026-10-24).
         $theme = Preference::get('theme');
         $settings = Preference::settings();
 
         return Inertia::render('Preferences/Edit', [
-            'theme' => in_array($theme, ['light', 'dark'], true) ? $theme : null,
+            'theme' => in_array($theme, ['light', 'dark', 'eva01'], true) ? $theme : null,
             'failureEstimate' => Preference::get('failure_estimate') ?? 'off',
             // D18 (SCREEN-024): Settings categories gained a Data panel and a Game-version panel.
             // `verified_at` is a config fact, not a literal, so the badge cannot drift from the

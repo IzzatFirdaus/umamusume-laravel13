@@ -210,6 +210,14 @@ and the corpus-transcription caveat above holds. Replacing those two stubs is th
 > tokens that sit ON a surface keep a per-theme step because no single hex clears 4.5:1 on both
 > `#FFFEFF` and `#303032`; the list is in the `app.css` dark-block note.
 
+> **2026-10-24 — third theme: eva01.** A standalone palette, selectable from `/preferences`'
+> Theme control as "Evangelion Unit-01" and applied by `html[data-theme='eva01']`: page
+> `#1A1025`, panel `#2A1C3B`, raised `#36254A`, sunken `#110A1A`, ink `#F0E6FF`, neon-lime
+> action `#6EB72D` with black ink, status lime `#AEE327`, mechanical orange `pick #DE9C4E`.
+> Light and dark are unchanged. The G-18 browser gate now measures all three themes; eva01's
+> `rule on page` (`#65508E` on `#1A1025`, 2.70:1) is the one owner-accepted exception and is
+> omitted for that theme only.
+
 Status badges (release status is the catalog's load-bearing signal) render through
 `--color-green` / `--color-sp` / `--color-pick` and their ink partners rather than
 literal hexes, so they follow the active theme instead of pinning one.

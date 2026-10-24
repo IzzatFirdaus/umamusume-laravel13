@@ -19,8 +19,9 @@ use Illuminate\Validation\Validator;
  * on believing the preference had been stored. The migration's own docblock says a third key is a
  * PRD change, and this is the boundary that enforces that.
  *
- * `theme` carries three authorized values and the third is expressed as no value at all, which
- * the controller stores as the absence of a row. `failure_estimate` is the on/off pair, off by
+ * `theme` carries three stored values plus the absence of a row: light, dark, and the
+ * standalone `eva01` palette (owner request 2026-10-24). The absence is follow-the-OS, which
+ * the controller stores as no row at all. `failure_estimate` is the on/off pair, off by
  * default (`ADR-0001` §3).
  *
  * `settings` is the structured preferences' one key (SCREEN-024, the D18b slice plan): one JSON
@@ -48,8 +49,8 @@ class UpdatePreferenceRequest extends FormRequest
             // `present` plus `nullable` because follow-the-OS has to be writable. The form sends
             // it as `theme=`, and the framework's ConvertEmptyStringsToNull middleware turns that
             // into null before this list is read, so null is the stated answer and a key nobody
-            // sent is not. `required` would reject the third authorized value as if it were missing.
-            'theme' => ['present', 'nullable', Rule::in(['light', 'dark'])],
+            // sent is not. `required` would reject follow-the-OS as if it were missing.
+            'theme' => ['present', 'nullable', Rule::in(['light', 'dark', 'eva01'])],
             'failure_estimate' => ['present', Rule::in(['off', 'on'])],
             // `present` for the same reason theme is, and the screen sends the blob it renders.
             // Null is the stated answer for "store no structured preferences", which the

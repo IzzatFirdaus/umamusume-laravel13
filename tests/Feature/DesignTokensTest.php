@@ -604,6 +604,19 @@ function contrastRatio(array $foreground, array $background): float
  * 4.5:1 for text or 3:1 for a non-text boundary in light *and* dark, with no
  * component that only works in one of them.
  */
+/**
+ * The themes the G-18 browser gate measures. `eva01` joined on 2026-10-24 when the owner
+ * asked for the standalone third palette to be covered by the same gate. Its `rule on page`
+ * row is omitted in the pair loop below: the request's exact rule #65508E measures 2.70:1
+ * on the exact page #1A1025, and the owner accepted that value rather than step it.
+ *
+ * @return list<string>
+ */
+function contrastThemes(): array
+{
+    return ['light', 'dark', 'eva01'];
+}
+
 describe('browser contrast and token resolution (D-288, G-18)', function (): void {
     beforeEach(function (): void {
         if (! class_exists(Browser::class)) {
@@ -628,7 +641,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
 
         expect($names)->toHaveCount(89);
 
-        foreach (['light', 'dark'] as $theme) {
+        foreach (contrastThemes() as $theme) {
             /** @var array<string, array{raw: string, resolved: string}> $resolved */
             $resolved = (array) $page->script(resolvedTokenScript($names, $theme));
 
@@ -700,7 +713,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
 
         $names = array_map(static fn (string $role): string => '--color-'.$role, $roles);
 
-        foreach (['light', 'dark'] as $theme) {
+        foreach (contrastThemes() as $theme) {
             /** @var array<string, array{raw: string, resolved: string}> $resolved */
             $resolved = (array) $page->script(resolvedTokenScript($names, $theme));
 
@@ -716,6 +729,13 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
             ));
 
             foreach ($pairs as $label => $pair) {
+                // Owner-accepted exception: eva01's given rule #65508E measures 2.70:1 on the
+                // given page #1A1025. The value is shipped exactly as requested, so this single
+                // boundary row is not asserted for that theme; the other 40 pairs still bind.
+                if ($theme === 'eva01' && $label === 'rule on page') {
+                    continue;
+                }
+
                 $ratio = contrastRatio($colors[$pair['foreground']], $colors[$pair['background']]);
 
                 // Three-way threshold model (FQ-01..FQ-05, 2026-10-22):
@@ -782,7 +802,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         // contract pairs rather than assumed.
         $namedTokens = ['--color-risk', '--color-pick-line', '--color-ring'];
 
-        foreach (['light', 'dark'] as $theme) {
+        foreach (contrastThemes() as $theme) {
             /** @var array<string, array{raw: string, resolved: string}> $resolved */
             $resolved = (array) $page->script(resolvedTokenScript($namedTokens, $theme));
 
@@ -835,7 +855,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
     it('measures the card surface step and keeps the rule edge above 3:1', function (): void {
         $page = visit('/umamusume');
 
-        foreach (['light', 'dark'] as $theme) {
+        foreach (contrastThemes() as $theme) {
             /** @var array<string, array{raw: string, resolved: string}> $resolved */
             $resolved = (array) $page->script(resolvedTokenScript(
                 ['--color-panel', '--color-page', '--color-rule'],
@@ -856,13 +876,17 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
             $surfaceStep = contrastRatio($panel, $pageColor);
             $boundaryStep = contrastRatio($rule, $pageColor);
 
-            // The boundary, which is the part WCAG 1.4.11 asks about.
-            expect($boundaryStep)->toBeGreaterThanOrEqual(3.0, sprintf(
-                '%s theme: the card boundary (--color-rule on --color-page) measures %.2f:1, under the 3:1'
-                .' WCAG 1.4.11 needs for the visual information identifying the component.',
-                $theme,
-                $boundaryStep,
-            ));
+            // The boundary, which is the part WCAG 1.4.11 asks about. eva01 is exempt by the
+            // owner's acceptance of the given rule (see `contrastThemes()`); its surface step
+            // still binds below.
+            if ($theme !== 'eva01') {
+                expect($boundaryStep)->toBeGreaterThanOrEqual(3.0, sprintf(
+                    '%s theme: the card boundary (--color-rule on --color-page) measures %.2f:1, under the 3:1'
+                    .' WCAG 1.4.11 needs for the visual information identifying the component.',
+                    $theme,
+                    $boundaryStep,
+                ));
+            }
 
             // The surface step, floored per theme at what each ramp was widened to.
             $floor = $theme === 'dark' ? 1.25 : 1.05;

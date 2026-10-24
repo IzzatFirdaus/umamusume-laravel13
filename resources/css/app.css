@@ -549,6 +549,9 @@ html[data-theme='eva01'] {
     --color-green-line: #6EB72D;
     --color-pick: #DE9C4E;
     --color-on-pick: #1A1025;
+    /* The inherited brand pink measures 1.03:1 on the given green chrome (the G-18 hairline
+       row wants 1.2). The theme's own accent is the given lime, so the highlight chip takes it. */
+    --color-brand-accent: #AEE327;
     /* Keyboard-focus ring: neon green, as the request names. 7.4:1 on page, 5.5:1 on raised. */
     --color-ring: #6EB72D;
 

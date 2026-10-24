@@ -10,13 +10,14 @@ test('Preferences renders its heading, both controls and the shell nav', async (
 
     await expect(page.getByRole('heading', { name: 'Preferences', level: 2 })).toBeVisible();
 
-    // The theme control offers the three authorized values (follow-the-OS, light, dark).
+    // The theme control offers the three stored values (light, dark, eva01) plus follow-the-OS.
     const theme = page.getByLabel('Theme');
     await expect(theme).toBeVisible();
     await expect(theme.locator('option')).toHaveText([
         'Follow the system',
         'Light',
         'Dark',
+        'Evangelion Unit-01',
     ]);
 
     await expect(page.getByRole('checkbox', { name: 'Numeric failure estimate' })).toBeVisible();
@@ -24,6 +25,36 @@ test('Preferences renders its heading, both controls and the shell nav', async (
 
     // The shell's navigation is present (the sidebar on desktop).
     await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible();
+});
+
+test('selecting Evangelion Unit-01 persists, reads back and renders the third palette', async ({ page }) => {
+    await page.goto('/preferences');
+    await page.locator('#app > *').first().waitFor();
+
+    await page.getByLabel('Theme').selectOption('eva01');
+    await page.getByRole('button', { name: 'Save preferences' }).click();
+    // The theme-change flash carries the extra "shows on your next reload" sentence.
+    await expect(page.getByRole('status')).toContainText('Preferences saved.');
+
+    // Persisted server-side: a reload prints the attribute on the first paint and the control
+    // comes back preselected, so this is the stored value rather than a client-only flip.
+    await page.reload();
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'eva01');
+    await expect(page.getByLabel('Theme')).toHaveValue('eva01');
+
+    // The palette resolves through the shell: the page field is the requested #1A1025, not the
+    // light #F7F5FF and not the dark #0B0B0D.
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.locator('.bg-page').first()).toHaveCSS('background-color', 'rgb(26, 16, 37)');
+
+    // Reset to follow-the-system so no later spec inherits a stored theme.
+    await page.goto('/preferences');
+    await page.locator('#app > *').first().waitFor();
+    await page.getByLabel('Theme').selectOption('');
+    await page.getByRole('button', { name: 'Save preferences' }).click();
+    await expect(page.getByRole('status')).toContainText('Preferences saved.');
 });
 
 test('the shell navigation reaches Settings and carries no form', async ({ page }) => {

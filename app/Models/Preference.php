@@ -84,14 +84,16 @@ class Preference extends Model
 
     /**
      * The stored theme, or null when the stored value is not a theme. PRD US-11 authorises light,
-     * dark and follow-the-OS, and the third is the absence of a row: any other value must not reach
-     * the document as `data-theme="system"`, which would match no stylesheet and silently pin light.
+     * dark and follow-the-OS, and the third is the absence of a row. The owner added the
+     * standalone `eva01` palette on 2026-10-24, so it is a resolved value too; any other value
+     * must not reach the document as `data-theme="system"`, which would match no stylesheet and
+     * silently pin light.
      */
     public static function resolvedTheme(): ?string
     {
         $theme = static::get('theme');
 
-        return in_array($theme, ['light', 'dark'], true) ? $theme : null;
+        return in_array($theme, ['light', 'dark', 'eva01'], true) ? $theme : null;
     }
 
     public static function put(string $key, string $value): void

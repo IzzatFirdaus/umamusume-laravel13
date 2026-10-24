@@ -6,7 +6,7 @@ import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { computed, nextTick, onUnmounted, ref } from 'vue';
 
 const props = defineProps<{
-    theme: 'light' | 'dark' | null;
+    theme: 'light' | 'dark' | 'eva01' | null;
     failureEstimate: 'on' | 'off';
     verifiedAt: string | null;
     importUrl: string;
@@ -311,7 +311,8 @@ function runBackup(): void {
                 <p class="text-sm text-ink-muted">Appearance, language and default scenario.</p>
 
                 <!-- The third authorized value is the absence of a row, so "follow the system"
-                     writes nothing rather than storing the word `system`. -->
+                     writes nothing rather than storing the word `system`. `eva01` is a standalone
+                     third palette (owner request 2026-10-24). -->
                 <BaseSelect
                     :model-value="form.theme"
                     :id="controlId('theme')"
@@ -321,6 +322,7 @@ function runBackup(): void {
                         { value: '', label: 'Follow the system' },
                         { value: 'light', label: 'Light' },
                         { value: 'dark', label: 'Dark' },
+                        { value: 'eva01', label: 'Evangelion Unit-01' },
                     ]"
                     :aria-describedby="describedBy('theme')"
                     @update:model-value="(v: string | number | null) => (form.theme = String(v ?? ''))"

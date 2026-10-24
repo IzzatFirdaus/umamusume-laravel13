@@ -61,6 +61,27 @@ it('writes the theme through the control and renders it on the next request', fu
     test()->get('/umamusume')->assertOk()->assertSee('data-theme="dark"', false);
 });
 
+it('writes the eva01 theme, returns it to the control and renders it on the next request', function (): void {
+    // The third palette is a stored theme, not a client-only attribute: it round-trips through
+    // the same key the other two use (owner request 2026-10-24).
+    test()->put('/preferences', ['theme' => 'eva01', 'failure_estimate' => 'off', 'settings' => []])
+        ->assertRedirect();
+
+    expect(Preference::get('theme'))->toBe('eva01')
+        ->and(Preference::resolvedTheme())->toBe('eva01');
+
+    // The control reads it back preselected, so a reload does not silently fall to light.
+    test()->get('/preferences')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('theme', 'eva01'));
+
+    // First paint: the attribute is printed by the shell, and no pre-paint script can override it.
+    $html = test()->get('/umamusume')->assertOk()->getContent();
+
+    expect($html)->toContain('data-theme="eva01"')
+        ->and($html)->not->toContain('prefers-color-scheme');
+});
+
 it('switches the theme back to following the system by dropping the row', function (): void {
     Preference::put('theme', 'light');
 
