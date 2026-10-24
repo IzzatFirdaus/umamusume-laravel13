@@ -174,3 +174,11 @@ test('passes an axe scan at WCAG A and AA', async ({ page }) => {
 
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });
+
+test('names an un-entered calendar race as scheduled, not yet run', async ({ page }) => {
+    // B-0.4 (Group B): a calendar race with no recorded entry is derived as scheduled-but-not-run,
+    // never stored as a status value (the owner ruled the derived line, not an enum change).
+    await openDecision(page);
+    // The fixture's decision lands on Junior turn 12 (the debut), which no entry records yet.
+    await expect(page.getByText('Scheduled, not yet run.').first()).toBeVisible();
+});

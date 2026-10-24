@@ -184,6 +184,11 @@ const folds = computed<boolean>(
             <template v-if="props.race.fans_gain !== null"> · {{ group(props.race.fans_gain) }} fans</template>
             <template v-if="props.race.grade_points !== null"> · {{ group(props.race.grade_points) }} Grade Points</template>
         </p>
+        <!-- A-0.4 / B-0.4: a calendar race with no recorded entry is scheduled but not yet run. Derived
+             from the slot + the absence of an entry, never stored as a status value. -->
+        <p v-else class="mt-2 text-sm text-ink-muted">
+            Scheduled, not yet run.
+        </p>
 
         <dl v-if="!folds" class="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm @3xl:grid-cols-3">
             <div v-for="fact in props.race.facts" :key="fact.key" class="flex flex-col">
