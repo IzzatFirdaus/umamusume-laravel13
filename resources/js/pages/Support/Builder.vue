@@ -3,6 +3,7 @@ import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import AppLayout from '../../layouts/AppLayout.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
+import CareerSectionNav from '../../components/career/CareerSectionNav.vue';
 import DeckAnalysis from '../../components/support/DeckAnalysis.vue';
 import SupportSlot from '../../components/support/SupportSlot.vue';
 import SupportTypeMark from '../../components/support/SupportTypeMark.vue';
@@ -268,6 +269,16 @@ function save(): void {
     <AppLayout>
         <Head title="Support deck" />
         <template #title>Support deck</template>
+
+        <CareerSectionNav
+            :trainee="run.name ?? ''"
+            :scenario-label="run.scenario_label ?? 'No scenario chosen'"
+            :status-label="run.status_label"
+            :status="run.status_label.toLowerCase()"
+            :run-url="run.run_url"
+            current="deck"
+            class="mt-3"
+        />
 
         <p class="mt-1 text-sm text-ink-muted">
             <template v-if="run.name">

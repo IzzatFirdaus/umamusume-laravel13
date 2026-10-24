@@ -112,6 +112,22 @@ test('an unreachable Result tab cannot be activated by pointer or keyboard', asy
     await expect(page).toHaveURL(before);
 });
 
+test('renders on the run deck page with a run-scoped Legacy link', async ({ page }) => {
+    createdRunUrls.push(await startCareer(page, 'unity_cup'));
+    const runId = createdRunUrls[0].split('/').pop();
+
+    // Navigate to the Deck page.
+    await page.goto(`${createdRunUrls[0]}/deck`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const nav = page.getByRole('navigation', { name: 'Career sections' });
+    await expect(nav).toBeVisible();
+
+    // The Legacy link on the deck page must be run-scoped, not the global /legacy.
+    const legacy = nav.getByRole('link', { name: 'Legacy', exact: true });
+    await expect(legacy).toHaveAttribute('href', `/legacy/${runId}`);
+});
+
 test('the old per-screen door pair is gone and Training Detail marks its own tab', async ({ page }) => {
     createdRunUrls.push(await startCareer(page, 'unity_cup'));
 
