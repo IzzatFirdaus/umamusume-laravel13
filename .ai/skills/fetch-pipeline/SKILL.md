@@ -79,7 +79,7 @@ catalog or run table; so is `uma:fetch-art` (artwork mirroring, ADR-0021). Do no
 - `php artisan uma:backup` — before anything that touches `database/database.sqlite` destructively.
 - `php artisan config:show uma.sources` — verify the registry as loaded.
 - `vendor/bin/pest tests/Feature/FetchPipelineTest.php` (and the `{Source}ParserTest` sibling) — narrow first.
-- `php artisan test --compact` — full suite after a cross-stage change; `vendor/bin/pint --dirty --format agent`;
+- `php artisan test --compact` — full suite at the Level 3 checkpoint after a cross-stage change; `vendor/bin/pint --test --format agent <paths>` (never `--dirty`, KI-75);
   `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`; `composer lore` and `composer lore-code`.
 
 ## Completion Criteria

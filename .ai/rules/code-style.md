@@ -5,7 +5,7 @@ These rules record the formatting and style conventions this project commits to.
 ## Formatting Standards
 
 - **Formatter:** Laravel Pint with the default `Laravel` preset (PSR-12 based).
-- Run `vendor/bin/pint --dirty --format agent` after every PHP file change before finalizing.
+- Run `vendor/bin/pint --test --format agent <explicit paths>` on the files the change touches before finalizing. Never use `--dirty` in this shared worktree (AGENTS.md §9, KI-75).
 - Indentation: **4 spaces**. No tabs.
 - Line ending: **LF** (see `.editorconfig`).
 - Files must end with a single newline; no trailing whitespace (except Markdown files).

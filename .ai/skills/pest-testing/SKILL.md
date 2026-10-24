@@ -27,34 +27,21 @@ User requests: "write a test", "add a test", "test this", "run the tests", "refa
 <code-snippet name="feature-test" lang="php">
 <?php
 
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Pest\TestCases\TestCase;
+declare(strict_types=1);
 
-class UserIndexTest extends TestCase
-{
+use App\Models\Scenario;
 
-```text
-use RefreshDatabase;
+it('lists the scenario catalog', function (): void {
+    Scenario::factory()->count(3)->create();
 
-public function test_users_can_be_listed(): void
-{
-    User::factory()->count(3)->create();
-
-    $response = $this->get(route('users.index'));
-
-    $response->assertOk();
-    $response->assertJsonPath('data.0.id', User::first()->id);
-}
-```
-
-}
+    $this->get(route('database.scenarios'))->assertOk();
+});
 </code-snippet>
 
 ## Database Testing
 
-- Always use the `RefreshDatabase` trait in feature tests.
-- Create models via **factories**: `User::factory()->count(3)->create()`.
+- Feature tests get `TestCase` and `RefreshDatabase` from the global binding in `tests/Pest.php`; never add `uses()` or `RefreshDatabase` to an individual file.
+- Create models via **factories**: `Scenario::factory()->count(3)->create()`.
 - Use `$this->faker` or `fake()` for data generation.
 - Assert state with `assertDatabaseCount()`, `assertDatabaseMissing()`.
 
@@ -72,10 +59,10 @@ $this->app->instance(SomeService::class, $mock);
 ## Assertions
 
 - Response status: `$response->assertOk()`, `$response->assertNotFound()`.
-- JSON structure: `$response->assertJsonPath('data.0.name', 'John')`.
-- Database state: `$this->assertDatabaseCount('users', 3)`.
+- JSON structure: assert the decoded shape with `assertJsonPath()` or `assertJsonStructure()`.
+- Database state: `$this->assertDatabaseCount('scenarios', 3)`.
 
 ## Running
 
-- Narrow scope: `php artisan test --filter=test_users_can_be_listed`.
-- Full suite: `php artisan test --compact`.
+- Narrow scope: `php artisan test --filter="lists the scenario catalog"`.
+- Checkpoint suite: `php artisan test --compact`, used at the Level 3 points in `AGENTS.md` §9, not after every edit.

@@ -12,7 +12,7 @@ This project uses **Pest 4** as its test runner. All tests live under `tests/Uni
 
 - Run the narrowest set that covers the change: `php artisan test --filter=testName` or `vendor/bin/pest tests/Feature/SomeFeatureTest.php`.
 - Rerun tests after each change to them.
-- After feature tests pass, ask the user to run the full suite with `php artisan test --compact`.
+- After the focused tests pass, escalate to the related regression and checkpoint runs in `AGENTS.md` §9. The agent runs the required gate and reports its output; it does not ask the owner to run a routine verification step.
 
 ## Database & Transactions
 

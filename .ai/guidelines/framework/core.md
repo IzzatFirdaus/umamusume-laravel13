@@ -61,6 +61,10 @@ public function index(): JsonResponse
 
 ## Frontend
 
-- Use **Vite** with `@tailwindcss/vite` and **Tailwind CSS v4**. Assets are referenced via `@vite(['resources/css/app.css', 'resources/js/app.js'])`.
-- Blade templates live in `resources/views/`. Use the `layout` Blade component for shared wrappers.
+- Use **Vite** with `@tailwindcss/vite` and **Tailwind CSS v4**. `vite.config.ts` declares two entries: `resources/css/app.css` and `resources/js/spa.ts` (the Inertia + Vue shell). There is no `resources/js/app.js`.
+- `resources/views/` holds only `app.blade.php` and `errors/`; pages are Vue single-file components under `resources/js/pages/`, not Blade templates (`AGENTS.md` §1).
 - For Tailwind-specific guidance, activate the `tailwindcss-development` skill.
+
+## Task Workflow
+
+- Task execution follows `AGENTS.md` §2a: establish the goal, scope, acceptance criteria, ordered TODOs, verification and risks before implementation; maintain the TODOs and verify the result before reporting completion.

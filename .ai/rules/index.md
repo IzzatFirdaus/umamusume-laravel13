@@ -1,6 +1,8 @@
 # Project Rules Index
 
 Before planning or editing, find the row whose globs match the file's path and read that rule file.
+The planning step itself follows `AGENTS.md` §2a: publish the goal, scope, acceptance criteria,
+ordered TODOs, verification and risks before the first edit, and keep the TODOs current.
 
 | Glob               | Rule file                                      |
 | ------------------ | ---------------------------------------------- |

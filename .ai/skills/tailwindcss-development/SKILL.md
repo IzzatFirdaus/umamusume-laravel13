@@ -1,6 +1,6 @@
 ---
 name: tailwindcss-development
-description: "Trigger when the user mentions 'tailwind' in any form, or when building responsive grid layouts, styling UI components, adding dark mode, or fixing spacing/typography in Blade templates or CSS files."
+description: "Trigger when the user mentions 'tailwind' in any form, or when building responsive grid layouts, styling UI components, or fixing spacing/typography in Vue components or CSS files."
 disable-model-invocation: false
 license: MIT
 metadata:
@@ -14,30 +14,29 @@ Write and fix Tailwind CSS v4 styles in this project.
 
 ## Trigger Criteria
 
-User message includes "tailwind", or the task involves: responsive grids, flex/grid layouts, component styling (cards, tables, navbars, forms, badges), dark mode, spacing, or typography.
+User message includes "tailwind", or the task involves: responsive grids, flex/grid layouts, component styling (cards, tables, navbars, forms, badges), spacing, or typography.
 
 ## Setup
 
 - **Tailwind version:** v4 via `@tailwindcss/vite`.
 - **Entry point:** `resources/css/app.css`.
-- **Vite plugin:** `@tailwindcss/vite` (configured in `resources/js/app.js`).
+- **Vite plugin:** `@tailwindcss/vite` (configured in `vite.config.ts`).
+- **Markup:** Vue single-file components under `resources/js/pages/` and `resources/js/components/`; `resources/views/` holds only the Inertia shell and error pages.
 
 ## Utility-First Approach
 
-- Use Tailwind utility classes. Avoid custom CSS in component files unless a design token is missing.
-- Extract repeated utility patterns into Blade components (`<x-card />`) or `@layer` component classes in `app.css`.
+- Use design tokens (`bg-page`, `text-ink`, `border-rule`, ...) before raw utilities (`AGENTS.md` §13).
+- Avoid custom CSS in component files unless a design token is missing.
+- Extract repeated utility patterns into Vue components under `resources/js/components/` or `@layer` component classes in `app.css`. Do not add Blade view components; `resources/views/components/` is empty.
 
 ## Responsive Breakpoints
 
 - Mobile-first: `sm:` (640px), `md:` (768px), `lg:` (1024px), `xl:` (1280px).
 
-## Dark Mode
+## Theme
 
-- Default: `prefers-color-scheme`. For manual toggle, add a custom variant:
-
-<code-snippet name="dark-variant" lang="css">
-@custom-variant dark (&:where(.dark, .dark *));
-</code-snippet>
+- Light and dark palettes are token ramps gated on `html[data-theme='dark']`, resolved by the shell and `resources/js/composables/useTheme.ts`.
+- Zero `dark:` utilities and no custom `dark` variant: a theme change edits the token ramps in `resources/css/app.css`, not component classes (`AGENTS.md` §13).
 
 ## State Variants
 

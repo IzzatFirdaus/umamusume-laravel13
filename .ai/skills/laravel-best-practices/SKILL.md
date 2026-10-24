@@ -1,6 +1,6 @@
 ---
 name: laravel-best-practices
-description: "Trigger when writing, reviewing, or refactoring Laravel PHP code. Covers controllers, models, migrations, form requests, policies, jobs, scheduled commands, service classes, and Eloquent queries. Activated for N+1 issues, caching, authorization, validation, queue, routing, and architectural decisions."
+description: "Trigger when writing, reviewing, or refactoring Laravel PHP code. Covers controllers, models, migrations, form requests, jobs, scheduled commands, service classes, and Eloquent queries. Activated for N+1 issues, caching, validation, queue, routing, and architectural decisions; this repository has no authorization layer."
 disable-model-invocation: false
 license: MIT
 metadata:
@@ -14,7 +14,7 @@ Apply Laravel idioms when writing or reviewing PHP code in this project.
 
 ## Trigger Criteria
 
-User requests: "write a controller", "add a job", "create a policy", "refactor this model", "fix N+1", "add validation", "set up caching", "review this code".
+User requests: "write a controller", "add a job", "refactor this model", "fix N+1", "add validation", "set up caching", "review this code".
 
 ## Controllers
 
@@ -103,13 +103,12 @@ protected function casts(): array
 ## Caching
 
 - Cache expensive queries with `Cache::remember()` and a sensible TTL.
-- Use tags for grouped cache invalidation when using Redis.
+- This repository has no Redis. Catalog reads invalidate through the `catalog:version` counter bumped on promotion (`AGENTS.md` §8).
 
 ## Authorization
 
-- Policies in `app/Policies/` for object-level checks.
-- Gates for global, non-model rules.
-- Use the `authorize()` helper or `Gate::allows()` in controllers.
+- There is no authorization layer, and that is the design (`PRD.md` NFR-1, `ARCHITECTURE.md` §8). The app is loopback-only and single-Trainer.
+- Do not add policies, gates or `Auth::user()` flows unless the work explicitly asks for one (`AGENTS.md` §12).
 
 ## Architecture
 

@@ -12,6 +12,11 @@ metadata:
 
 Deploy and manage this Laravel application on Laravel Cloud.
 
+> **Not applicable to Trainer Desk.** This repository has no deployment path: it is
+> loopback-only and public deploy is a PRD §6 non-goal (`AGENTS.md` §1 and §12). Do not run
+> these steps, add a Cloud config, or create hosting resources here. The skill is retained
+> for reference only.
+
 ## Trigger Criteria
 
 User requests: "deploy", "ship to Cloud", "create Cloud environment", "configure Cloud resources", "check billing", "set up production", "Laravel Cloud".

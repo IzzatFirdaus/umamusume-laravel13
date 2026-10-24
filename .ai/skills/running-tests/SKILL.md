@@ -18,22 +18,22 @@ User requests: "run the tests", "run this test", "debug failing test", "check te
 
 ## Commands
 
-- **Full suite:** `php artisan test --compact`
+- **Checkpoint suite:** `php artisan test --compact` (Level 3 only, per `AGENTS.md` §9)
 - **Single file:** `vendor/bin/pest tests/Feature/SomeFeatureTest.php`
-- **Filter by test name:** `php artisan test --filter=test_something`
+- **Filter by name:** `php artisan test --filter=Name`
 - **Direct Pest:** `vendor/bin/pest`
 
 ## Strategy
 
-- Run the narrowest set that covers the change. Pass a file path or `--filter=testName`.
+- Run the narrowest set that covers the change. Pass a file path or `--filter=Name`.
 - Rerun a test after each change to it.
-- After feature tests pass, ask the user to run the complete suite with `php artisan test --compact`.
+- Escalate through the Level 1, 2 and 3 runs in `AGENTS.md` §9. The agent runs the required gate and reports the observed output; it does not ask the owner to run a routine verification step.
 
 ## Debugging
 
 - Use `--filter` to isolate a failing test.
 - Use `dump()` or `dumpNow()` for output during a test run (Pest supports both).
-- For database state issues, ensure `RefreshDatabase` is present in the feature test.
+- Feature tests inherit `TestCase` and `RefreshDatabase` from the global binding in `tests/Pest.php`; do not add either to the individual file.
 - Check `storage/logs/laravel.log` for uncaught exceptions during tests.
 
 ## Configuration

@@ -139,8 +139,8 @@ Run `php artisan make:seeder {Model}Seeder --no-interaction`. Use `Model::factor
 
 ## Emitted Events
 
-- Do not dispatch events from the model itself. Dispatch from the calling Action class or controller.
-- If the model should trigger events, register a model observer at `app/Providers/EventServiceProvider.php`.
+- Do not dispatch events from the model or the controller. Dispatch from the calling Action or Service class (`AGENTS.md` §8).
+- If the model should trigger events, register a model observer in a service provider under `app/Providers/`. This tree has `AppServiceProvider`; there is no `EventServiceProvider`.
 
 ## Expected Outputs
 

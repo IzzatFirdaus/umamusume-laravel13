@@ -10,6 +10,9 @@ initialization:
     - action: "load_skill_system"
       path: ".agents/"
       description: "Load Laravel skill automation framework from .agents/"
+    - action: "read_plan_first_contract"
+      path: "AGENTS.md"
+      description: "Follow the plan-first contract in AGENTS.md section 2a before executing any skill."
     - action: "inform_user"
       message: "Skill automation ready. Will auto-invoke skills for development tasks."
 
