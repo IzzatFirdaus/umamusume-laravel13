@@ -193,6 +193,12 @@ class CockpitController extends Controller
             // A-0.6: the derived team roster — the six deck cards' characters — as a read-out, no column.
             'roster' => $this->rosterSection($run),
             'state' => $this->stateSection($run, $latest),
+            // A-0.11: the client's Mood Effect headline (great tier: +20% training, +4% running),
+            // sourced from `UMAMUSUME_REFERENCE.md` §1.1.6 into `config('uma.mood_effect')`.
+            'moodEffect' => [
+                'training' => (int) config('uma.mood_effect.training'),
+                'running' => (int) config('uma.mood_effect.running'),
+            ],
             'actions' => $this->actionSection($run, $advice),
             'advisor' => $this->advisorSection($advice, $run),
             'raceStrip' => $this->raceStrip->raceStripSection($run, $this->obligationSlots($run)),

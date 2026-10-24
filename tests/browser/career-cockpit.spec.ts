@@ -733,3 +733,16 @@ test('shows the derived team roster from the deck cards', async ({ page }) => {
     await expect(panel).toBeVisible();
     await expect(panel.locator('li').first()).toBeVisible();
 });
+
+test('shows the sourced mood effect headline beside the mood', async ({ page }) => {
+    // A-0.11 (Group A): the Mood Effect headline (+20% training, +4% running) renders beside the mood
+    // tier, sourced from config('uma.mood_effect') (UMAMUSUME_REFERENCE.md §1.1.6).
+    const cockpitUrl = await newCareer(page);
+    const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+    await recordTurns(page, runId, 1, { mood: 'GREAT' });
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const state = page.getByRole('region', { name: 'Stats and state' });
+    await expect(state.getByText(/training \+20%, running \+4%/)).toBeVisible();
+});

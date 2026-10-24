@@ -62,6 +62,12 @@ const props = defineProps<{
      * guess: one screen's denominator printed under the other's name is the defect this closes (R2-09).
      */
     denominatorLabel: 'target' | 'cap';
+    /**
+     * A-0.11: the client's Mood Effect headline (the `GREAT` tier's +20% training / +4% running),
+     * sourced from `config('uma.mood_effect')` (`UMAMUSUME_REFERENCE.md` §1.1.6). Rendered beside the
+     * mood readout; null when a caller does not carry the figure, so no percentage is invented.
+     */
+    moodEffect?: { training: number; running: number } | null;
 }>();
 
 const group = (n: number): string => n.toLocaleString('en-US');
@@ -161,7 +167,13 @@ const denominator = (stat: Stat): number | null =>
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ row.label }}</dt>
                 <dd class="mt-1 text-sm text-ink-strong">
                     <EnergyGauge v-if="row.key === 'energy'" :energy="row.value as number | null" :band-text="row.band_text ?? null" />
-                    <MoodPill v-else-if="row.key === 'mood'" :tier="row.value as string | null" unrecorded="N/A, not recorded" />
+                    <template v-else-if="row.key === 'mood'">
+                        <MoodPill :tier="row.value as string | null" unrecorded="N/A, not recorded" />
+                        <!-- A-0.11: the client's Mood Effect headline beside the tier (great tier). -->
+                        <span v-if="props.moodEffect" class="ml-1 text-xs text-ink-muted">
+                            (training +{{ props.moodEffect.training }}%, running +{{ props.moodEffect.running }}%)
+                        </span>
+                    </template>
                     <AbsenceValue
                         v-else-if="row.value === null"
                         class="font-mono tabular-nums"

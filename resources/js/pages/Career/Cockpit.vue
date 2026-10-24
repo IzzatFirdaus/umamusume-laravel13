@@ -152,6 +152,8 @@ const props = defineProps<{
         stats: { key: string; label: string; current: number | null; target: number | null; cap: number }[];
         meta: { key: string; label: string; value: number | string | null }[];
     };
+    /** A-0.11: the client's Mood Effect headline (great tier: +20% training, +4% running). */
+    moodEffect: { training: number; running: number };
     actions: { key: string; label: string; href: string; recommended: boolean; note: string }[];
     // The decision's own shape is declared at `components/career/NextDecision.vue`, the one place that
     // reads it, and forwarded untouched the way the scenario section is (FD-2, plan §9a). `finale` stays
@@ -835,6 +837,7 @@ const jumpToShop = (): void => {
                     :meta="props.state.meta"
                     :growth-rate="props.identity.growth_rate"
                     :fan-ladder="props.identity.fan_ladder"
+                    :mood-effect="props.moodEffect"
                     denominator-label="target"
                 />
 

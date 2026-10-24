@@ -493,4 +493,17 @@ return [
         ['class' => 'Star', 'from' => 0, 'to' => 240000],
     ],
 
+    /*
+     * The client's Mood Effect headline, read from its Mood Effect panel (UMAMUSUME_REFERENCE.md §1.1.6,
+     * client capture 2026-09-27): the `GREAT` tier's training bonus is +20% and its pre-race bonus is
+     * +4%. Kept as one sourced figure rather than the full ten-cell per-tier table the reference also
+     * carries (A-0.11, owner ruling 2026-10-24: one config entry, no table).
+     *
+     * @var array{training: int, running: int}
+     */
+    'mood_effect' => [
+        'training' => 20,
+        'running' => 4,
+    ],
+
 ];
