@@ -12,6 +12,7 @@
  */
 
 import AlertRow from '../../../../components/scenario/AlertRow.vue';
+import CapsuleHeader from '../../../../components/CapsuleHeader.vue';
 import ProvenanceBadge from '../../../../components/ProvenanceBadge.vue';
 import SubCell from '../../../../components/SubCell.vue';
 import type { ProvenanceState } from '../../types';
@@ -87,13 +88,14 @@ const deadlineTitle = (row: GoalRow): string | undefined =>
         <section
             v-for="group in props.scenario.objectives"
             :key="group.group"
-            class="flex flex-col gap-2"
+            class="card flex flex-col gap-2 p-3"
             :aria-labelledby="headingId(group.group)"
             :data-ladder-group="group.group"
         >
+            <CapsuleHeader :title="group.group" class="mb-3" />
             <h3
                 :id="headingId(group.group)"
-                class="text-lg font-semibold text-ink-strong"
+                class="sr-only"
             >
                 {{ group.group }}
             </h3>

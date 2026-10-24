@@ -322,6 +322,39 @@ test('heads every Scenario panel with the documented capsule', async ({ page }) 
     expect(panels.filter((panel) => !panel.capsule), JSON.stringify(panels)).toEqual([]);
 });
 
+test('capsules the four Scenario panels that sat outside the card pattern', async ({ page }) => {
+    await openUnityCupCockpit(page);
+
+    const section = page.getByRole('region', { name: 'Scenario' });
+
+    const panels = await section.evaluate((el) => {
+        const cards = Array.from(el.querySelectorAll<HTMLElement>('.card'));
+
+        return cards
+            .filter((card) => card.parentElement?.closest('.card') === null)
+            .map((card) => ({
+                capsule: card.querySelector('.lattice-bleed') !== null,
+                title: (card.querySelector('.lattice-bleed')?.textContent
+                    ?? card.querySelector('h1,h2,h3,h4,h5,h6')?.textContent
+                    ?? '').trim(),
+            }));
+    });
+
+    const titles = panels.map((panel) => panel.title);
+
+    // The four panels the owner named. Before this slice they were bare sections with plain
+    // headings, so they were not `.card`s at all and never reached the capsule assertion below.
+    for (const name of ['Trainee goals', 'Mandatory races', 'Unity Cup', 'Published stat caps']) {
+        expect(titles, JSON.stringify(panels)).toContain(name);
+    }
+
+    expect(panels.filter((panel) => !panel.capsule), JSON.stringify(panels)).toEqual([]);
+
+    // Nine cards rendered before this slice (Team and Unity Cup progress are data-conditional) plus
+    // the four added here.
+    expect(panels.length, JSON.stringify(panels)).toBeGreaterThanOrEqual(13);
+});
+
 test('heads both scenario blocks with the documented capsule and keeps the region name', async ({ page }) => {
     await openUnityCupCockpit(page);
 

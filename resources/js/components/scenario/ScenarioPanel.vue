@@ -37,6 +37,7 @@
 import type { Component } from 'vue';
 import { computed } from 'vue';
 import AbsenceValue from '../AbsenceValue.vue';
+import CapsuleHeader from '../CapsuleHeader.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import AlertRow from './AlertRow.vue';
 import RaceCalendarNote from './RaceCalendarNote.vue';
@@ -227,9 +228,11 @@ const emptyText = computed<string>(() =>
              the floor a fifth scenario gets for one config entry. The heading says "version" because the
              scenario's own rule family is a different fact, printed under that name on the setup
              wizard's card (R2-05); this strip holds only the version, which no source defines. -->
-        <div data-region="scenario" class="flex flex-wrap items-baseline gap-2">
-            <p class="text-sm font-medium text-ink-strong">{{ props.scenario.label }}</p>
-            <ScenarioStatusBadge :documented="props.scenario.documented" />
+        <div data-region="scenario" class="card p-3">
+            <CapsuleHeader :title="props.scenario.label" class="mb-3" />
+            <div class="flex flex-wrap items-baseline gap-2">
+                <ScenarioStatusBadge :documented="props.scenario.documented" />
+            </div>
         </div>
 
         <!-- DESIGN.md §5 (a), 2026-10-17: one absence channel, reachable without a mouse. The reason
@@ -289,14 +292,15 @@ const emptyText = computed<string>(() =>
                  the cap is their sum through `ScenarioCaps`, never a collapsed number. Drawn only for
                  a scenario the run declared, because lending an undeclared run the baseline entry's
                  caps would state a composition nobody chose. -->
-            <section v-if="props.scenario.declared" class="flex flex-col gap-2">
-                <h3 class="flex flex-wrap items-baseline gap-2 text-lg font-semibold text-ink-strong">
-                    Published stat caps
+            <section v-if="props.scenario.declared" class="card flex flex-col gap-2 p-3">
+                <CapsuleHeader title="Published stat caps" class="mb-3" />
+                <h3 class="sr-only">Published stat caps</h3>
+                <p class="text-xs text-ink-muted">
                     <span
                         class="text-xs font-normal normal-case tracking-normal"
                         title="The date the scenario matrix was last checked against its sources. Nothing here was fetched on it."
                     >Verified {{ props.scenario.caps.verified_at }}</span>
-                </h3>
+                </p>
                 <!-- ADR-0001 §2 puts the constants behind a number wherever the number appears, so the
                      matrix this read from is named on the row rather than only in the badge's `title`. -->
                 <p class="text-xs text-ink-muted">{{ props.scenario.caps.source_title }}</p>
