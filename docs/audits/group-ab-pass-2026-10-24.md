@@ -115,3 +115,23 @@ two-option write-ups remain at `docs/proposals/group-ab-rulings-owed.md`.
 - The full browser suite was not run as a whole (cost-aware escalation, `AGENTS.md` §9); the new cases were
   run focused and are green.
 - S2b (R4-03) and S11 (R4-13) remain their own slices, not opened here.
+
+## Dated addition 2026-10-24 (release review, pre-push)
+
+**Tag position.** `2.1.1` is tagged at `cb19af5e`, not at `41290a48` (the changelog commit). The tag was
+first placed on `90be90fa` (this report), then re-pointed to `cb19af5e` when A-0.10's test-assertion
+correction landed after the report was cut. `41290a48` (CHANGELOG) and `dfdd7088` (`VERSION.md`) are
+ancestors of the tag; the tag ships the changelog, this report, and the test fix together. `2.1.1` has
+never been pushed, so the re-point is local only.
+
+**Corrections to the release notes found in review.** Two gaps in the 2.1.1 notes were closed in a follow-up
+commit before push: the entry now records the R4 Phase 1 fixes (`d8aaeb27` and the eight commits before it)
+that this tag is the first to ship, and carries a `Verification` section stating the bar honestly (Pest and
+the new browser cases green; the browser suite not run as a whole; two pre-existing reds unchanged).
+
+**External state anomalies observed, not acted on.** In this worktree the remote `refs/tags/2.1.0` resolves
+through tag object `48ed53e9` (tagger 2026-10-24 15:12 +0800) to `d8aaeb27` - this pass's A-0.11 commit -
+not to the historical 2.1.0 release commit; `origin/master` was also already at `cb19af5e` and
+`origin/release/2.1.0` at `d8aaeb27` without a push from this session. No tag or ref was moved by this pass
+for `2.1.0`; the re-point is reported for the owner to verify against `c590186f` before any push, because
+moving a published release tag is irreversible.

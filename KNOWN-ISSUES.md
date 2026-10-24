@@ -3457,6 +3457,11 @@ would have caught it, and no such gate exists.
 
 **Status: CLOSED - does not reproduce.** The R4-06 premise that a Unity Cup run is shown URA-specific rounds is contradicted by the source.
 
+*Dated note 2026-10-24 (release review).* The owner's Phase 3 ruling (B-0.1, "filter mandatory races by
+scenario key") was withdrawn on this evidence: implementing it would have deleted the shared qualifier and
+semifinal from every run. R4-06 moves to `ruled-out`, with `docs/scenarios/09-global-race-calendar.md:105`
+as the reference; walk-4 finding F-05 was itself wrong, not only the app.
+
 **Current state.** `docs/scenarios/09-global-race-calendar.md:105` states the three URA Finals rounds are shared and only the Final row forks per scenario; lines 632-633 name Unity Cup's final as Final (Aoharu). The seeded mandatory rows match: `Junior Make Debut` (null), `URA Finals Qualifier` and `URA Finals Semifinal` (null, shared), and the four scenario finals, with `final_aoharu` scoped to `unity_cup`. `RaceCatalogSlot::scopeForScenario()` (`app/Models/RaceCatalogSlot.php:136-140`) already keeps null-scoped rows plus the run's own key, so a Unity Cup run correctly sees the shared qualifier/semifinal and its own Aoharu final. An owner filter that removed every "URA Finals" title would delete legitimate shared obligations. No code change made; recorded so the finding is not re-opened.
 
 **What this does not cover.** If the shared qualifier/semifinal are ever established to be URA-only, that is a parser mapping change (`GametoraRaceCatalogParser::GLOBAL_FINALS_BY_SLOT`) and a re-seed, not a render filter.
@@ -3466,6 +3471,11 @@ would have caught it, and no such gate exists.
 ### KI-123 The snapshot door already records year, month and phase (Group B / B-0.3, R4-08) - FILED 2026-10-24 (Group A + B audit pass)
 
 **Status: CLOSED - does not reproduce.** The snapshot form already carries the date input.
+
+*Dated note 2026-10-24 (release review).* The owner's Phase 3 ruling (B-0.3, "add a snapshot date field")
+was satisfied before it was made: `Snapshot/Setup.vue:165-186` renders Year/Month/Phase and
+`CreateSnapshotRun:58-79` writes `career_position`. R4-08's date-input half is `landed`; walk-4 missed the
+existing input. The separate pending-turn-state question remains open and is not covered here.
 
 **Current state.** `resources/js/pages/Career/Snapshot/Setup.vue:165-186` renders Year, Month and Phase selects (`career_year`, `career_month`, `career_phase`); `StoreSnapshotRequest:45-47` requires them; `CreateSnapshotRun:58-79` writes `career_position` with `career_position_source = imported`. The R4-08 note that "the date is not an input on either path" is stale at HEAD. Ruling B-0.3 (2026-10-24) chose the snapshot date field, which already exists. No code change made.
 

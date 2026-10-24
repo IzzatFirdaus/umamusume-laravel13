@@ -59,6 +59,18 @@ Post-ruling counts: openable 5 (A-0.1, A-0.6, A-0.8, A-0.10, A-0.11) · ruled-ou
 blocked 5 (A-0.4, A-0.5, B-0.5, B-0.6, B-0.7) · Phase 3 openable 4 (B-0.1, B-0.2, B-0.3, B-0.4) ·
 landed 3 (A-0.3, A-0.7, A-0.9).
 
+*Dated addition 2026-10-24 (release review).* Two of the owner's Phase 3 rulings were corrected by the
+evidence at HEAD, and both are recorded rather than re-opened:
+
+- **B-0.1** was ruled "filter mandatory races by scenario key". The audit's implementation found
+  `docs/scenarios/09-global-race-calendar.md:105,632-633` states the three URA Finals rounds are **shared**
+  across scenarios and only the Final forks (Unity Cup's is Aoharu), so the current mandatory list is correct
+  and the ruled filter would have deleted legitimate shared obligations. B-0.1 is `ruled-out` (does not
+  reproduce); see `KI-122`.
+- **B-0.3** was ruled "add a snapshot date field". `resources/js/pages/Career/Snapshot/Setup.vue:165-186`
+  already renders Year/Month/Phase and `CreateSnapshotRun:58-79` writes `career_position`, so the date input
+  was already present. B-0.3 is `landed` (does not reproduce); see `KI-123`.
+
 ## 3. Slice order (openable Group A)
 
 Ordered cheapest + highest-signal + highest-confidence first.

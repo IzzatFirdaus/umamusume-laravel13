@@ -36,6 +36,30 @@ one config entry, and one write affordance. No new route, screen, API field, or 
   loopback), four blocked on an ADR (A-0.5, B-0.5, B-0.6, B-0.7), one blocked on A-0.5 (A-0.4), and two
   that do not reproduce (B-0.1 shared finals rounds, B-0.3 snapshot date field).
 
+### Fixed (R4 Phase 1, also first shipped in this tag)
+
+*Dated addition 2026-10-24 (review of the 2.1.1 release): `2.1.1` is the first tag that ships the R4
+Phase 1 pass (`d8aaeb27` and the eight commits before it). That work landed after `2.1.0` and had no
+changelog entry of its own, so it is recorded here rather than left invisible.*
+
+- **Run id** shipped on the runs list and the cockpit header (R4-01, R4-02).
+- **Preflight** step count reconciled and the unofferable purpose copy dropped (R4-04, R4-05, R4-24).
+- **Race header** prints the absolute turn; the hardcoded Careers row is gone (R4-09, R4-30).
+- **Run deck** renders the career nav (R4-29).
+- **Deck picker** names the ownership default (R4-20), matches the composed label and stays open across a
+  filter (R4-21).
+- **Trainee picker** gains a forward control at the bottom (R4-22) and preserves the filter through the
+  select redirect (R4-23).
+- **Runs list** breaks the `created_at` tie in its order (`d41d5dc2`).
+
+### Verification
+
+Pest: 96 passed (1371 assertions) on the eight touched and nearby feature files at `cb19af5e`. Typecheck:
+`tsc --noEmit` exit 0. Build: `npm run build` clean. Pint: `--test` passed on every changed PHP file.
+Browser: the newly added cases are green in focused session-private runs (five Group A cases, two Group B
+cases); the browser suite was **not** run as a whole, and two pre-existing reds recorded in the R4 Phase 1
+pass report are unchanged and not addressed here.
+
 ## [2.1.0] - 2026-10-23
 
 A MINOR release. The frontend architecture migrates to named primitives; one behaviour change ships
