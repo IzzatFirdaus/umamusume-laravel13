@@ -505,6 +505,109 @@ html[data-theme='dark'] {
  */
 
 /*
+ * Third theme: Eva-01 (owner request 2026-10-24). A standalone mecha-register palette — deep
+ * Unit-01 purples for surfaces, neon lime for accents and active states, mechanical orange for
+ * highlights. Applied only through the `data-theme="eva01"` attribute; the light `@theme static`
+ * block and the dark `html[data-theme="dark"]` block are not touched.
+ *
+ * [given] marks the requester's exact hexes. Families the request does not name carry the
+ * already-vetted dark-theme values [dark] instead of inheriting light ones, because a light
+ * accent on these near-black purples is unreadable (light `text-risk` #800014 measures 1.2:1 on
+ * `panel`, light `stat-speed` 1.5:1 on `raised`). Those carried values are not new colours; they
+ * are the shipped dark block's own.
+ *
+ * Measured (WCAG 2.1, script in the pass report): ink on page 15.3, ink-muted on page 6.7,
+ * brand-chrome on page 7.4, black on brand-chrome 8.6, status-positive on page 12.3, pick on
+ * page 7.7, ink on panel 13.6, ink on raised 12.7. One given value sits below a G-18 floor:
+ * `--color-rule` #65508E on `--color-page` #1A1025 measures 2.69:1, short of the 3:1 card
+ * boundary. Shipped exactly as given; stepping the rule is the owner's call.
+ */
+html[data-theme='eva01'] {
+    color-scheme: dark;
+
+    /* Surfaces [given] */
+    --color-page: #1A1025;
+    --color-panel: #2A1C3B;
+    --color-raised: #36254A;
+    --color-sunken: #110A1A;
+    --color-idle: #4B3663;
+    --color-disabled: #3A2C4F;
+    --color-rule: #65508E;
+
+    /* Ink [given] */
+    --color-ink: #F0E6FF;
+    --color-ink-strong: #FFFFFF;
+    --color-ink-muted: #A695C4;
+    --color-ink-faint: #65508E;
+
+    /* Accents [given] */
+    --color-brand-chrome: #6EB72D;
+    --color-on-brand-chrome: #000000;
+    --color-status-positive: #AEE327;
+    --color-status-positive-ink: #1A1025;
+    --color-green-tint: #1E2912;
+    --color-green-line: #6EB72D;
+    --color-pick: #DE9C4E;
+    --color-on-pick: #1A1025;
+    /* Keyboard-focus ring: neon green, as the request names. 7.4:1 on page, 5.5:1 on raised. */
+    --color-ring: #6EB72D;
+
+    /* The green boundary on the sunken well: the inherited light #20300D measures 1.4:1 on
+       #110A1A. The given lime does the job (12.8:1 on sunken). */
+    --color-green-deep: #AEE327;
+
+    /* Families the request does not name: dark-theme values [dark], carried so components that
+       use them stay readable on purple. */
+    --color-risk: #FF7E8C;
+    --color-on-risk: #131315;
+    --color-goal: #F2555A;
+    --color-goal-line: #B89825;
+    --color-pick-line: #E3B977;
+    --color-sp-ink: #4FC3F7;
+    --color-rank: #B6B4C2;
+    --color-anchor: #8FC4EE;
+    --color-stat-speed: #7FA8E8;
+    --color-stat-stamina: #F08A96;
+    --color-stat-power: #C99A6B;
+    --color-stat-guts: #F08BB4;
+    --color-stat-wit: #8CC78A;
+    --color-stat-pal: #AEBB84;
+    --color-stat-group: #86C996;
+
+    --color-up: #B89825;
+    --color-down: #97D1F9;
+
+    --color-tint-speed: #1C1C1E;
+    --color-tint-stamina: #232325;
+    --color-tint-power: #2A2826;
+    --color-tint-guts: #1E1E20;
+    --color-tint-wit: #19191B;
+    --color-tint-sp: #171719;
+    --color-line-speed: #1C1C1E;
+    --color-line-stamina: #232325;
+    --color-line-power: #2A2826;
+    --color-line-guts: #1E1E20;
+    --color-line-wit: #19191B;
+    --color-line-sp: #171719;
+
+    --color-grade-g: #1E1E20;
+    --color-grade-f: #232325;
+    --color-grade-e: #2A2826;
+    --color-grade-d: #1C1C1E;
+    --color-grade-c: #19191B;
+    --color-grade-b: #2E2E30;
+    --color-grade-a: #303032;
+    --color-grade-s: #343435;
+    --color-grade-ss: #343436;
+
+    --color-brand-accent-ink: #9F8FFF;
+    --color-brand-accent-soft: #1D1D62;
+
+    --color-scrim: rgba(0, 0, 0, 0.62);
+    --shadow-overlay: 0 6px 16px rgb(0 0 0 / 0.32);
+}
+
+/*
  * Franchise motifs as named utilities, so a component references a meaning instead of
  * a pile of arbitrary values. DESIGN.md §2.3 amendment; research §6.1 and §6.3.
  */
