@@ -376,6 +376,15 @@ it('caps the page size through the shared rule rather than trusting the query', 
         ->assertInertia(fn (Assert $page) => $page->where('trainees.per_page', 100));
 });
 
+it('preserves the picker filter through a select redirect', function (): void {
+    // R4-23: selecting a trainee redirected to the bare picker route, discarding search/sort and
+    // reloading all 67 rows.
+    $trainee = rosterTrainee('Tokai Teio', ['turf' => 'A']);
+
+    $this->put('/career/setup/trainee?search=Tokai&sortBy=name&direction=asc', ['umamusume_id' => $trainee->id])
+        ->assertRedirect(route('career.trainee', ['search' => 'Tokai', 'sortBy' => 'name', 'direction' => 'asc']));
+});
+
 it('stores the chosen trainee in the draft and reads her back after navigation', function (): void {
     $trainee = rosterTrainee('Tokai Teio', ['turf' => 'A']);
 

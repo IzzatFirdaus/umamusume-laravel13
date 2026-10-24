@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -157,7 +158,7 @@ class TraineeSelectController extends Controller
         if ($traineeId === null) {
             SetupDraft::write(['umamusume_id' => null, 'character_card_id' => null]);
 
-            return redirect()->route('career.trainee')->with('status', 'Trainee cleared.');
+            return redirect()->route('career.trainee', $this->filterQuery($request))->with('status', 'Trainee cleared.');
         }
 
         // The form travels with the trainee it belongs to, so re-picking a trainee without naming a form
@@ -172,8 +173,26 @@ class TraineeSelectController extends Controller
         $trainee = Umamusume::find((int) $traineeId);
 
         return redirect()
-            ->route('career.trainee')
+            ->route('career.trainee', $this->filterQuery($request))
             ->with('status', $trainee === null ? 'Trainee set.' : "Trainee set: {$trainee->name}.");
+    }
+
+    /**
+     * The picker's own filter, carried through the write's redirect (R4-23).
+     *
+     * Selecting a trainee used to send the Trainer back to the bare picker route, discarding the search
+     * and sort they had narrowed the roster with and reloading all 67 rows. The three keys are the ones
+     * the picker's GET states; empty and absent values are dropped so a clear still lands on the bare
+     * route.
+     *
+     * @return array<string, string>
+     */
+    private function filterQuery(Request $request): array
+    {
+        /** @var array<string, string|null> $query */
+        $query = $request->only(['search', 'sortBy', 'direction']);
+
+        return array_filter($query, static fn (?string $value): bool => $value !== null && $value !== '');
     }
 
     /**
