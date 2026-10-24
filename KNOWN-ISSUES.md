@@ -3583,3 +3583,41 @@ panels and amend `DESIGN.md` section 2.3 in the same commit.
 
 **Why it is not landed here.** Only the owner can choose between (a), (b) and (c), and (c) changes a
 documented design decision.
+
+
+---
+
+### KI-130 Five scenario panels are registered as renderers but never composed by any scenario - FILED 2026-10-24 (frontend pass)
+
+**Status: OPEN - blocked: owner ruling (config-side only).** No shipped screen lies today; the panel map never receives the keys.
+
+**Current state.** `resources/js/components/scenario/ScenarioPanel.vue:75-79` registers renderers for
+`ura_mandatory_ladder`, `happy_meek`, `career_milestones`, `pre_final_review` and `team_race_facility`
+(the `resources/js/pages/Career/Cockpit/Panels/` components landed with the Phase 7A.1 extraction). No
+scenario's `panels` block in `config/scenarios.php` carries any of the five keys, and `panel_labels`
+(`config/scenarios.php:79-87`) omits all five. The row's prior citation of `ScenarioPanel.vue:74-78` is
+one line stale; the registrations are `:75-79` at this HEAD.
+
+**Evidence.**
+- `resources/js/components/scenario/ScenarioPanel.vue:75-79` (the five `registerPanel` calls)
+- `config/scenarios.php:79-87` (`panel_labels` holds seven flags; none of the five appears)
+- `app/Services/Career/ScenarioSectionBuilder.php:68,87-124` (flags are built only from `panel_labels`)
+- `SCREEN_SPEC.md:3892-3901` item 24, measured 2026-10-17 (records the same state as an owner-gated item)
+- `git grep` of the five keys across `config/scenarios.php` and `app/` returns no other consumer
+
+**Why it is not landed here.** The repair is config-side and needs a product decision, not a frontend
+change: composing a panel means choosing which scenario carries it and what payload feeds it. The
+`team_race_facility` panel's own card + capsule wrap landed at `1119e437` and is pinned by an isolated
+fixture (`tests/browser/team-race-facility-panel.spec.ts`), so the component is ready if the ruling is to
+compose it.
+
+**Two directions.**
+- **Compose the five.** Add the missing `panels` keys to the scenarios that should carry them, the
+  matching `panel_labels` entries, and a `facilities` payload where the panel needs one. Backend slice;
+  owner ruling first.
+- **Retire the registrations.** Remove the five `registerPanel` calls and delete the five components.
+  Frontend slice, but each component is recorded intent and has its own spec, so retirement discards
+  designed surfaces.
+
+Recommended: compose. The components exist, are specified, and three of the five carry shipped content
+that no other surface renders.
