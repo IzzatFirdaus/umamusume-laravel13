@@ -105,6 +105,19 @@ it('exposes the run id and distinguishes two runs of the same trainee', function
             ->where('runs.data.1.name', 'Rice Shower'));
 });
 
+it('does not render a hardcoded turn for an active run', function (): void {
+    // R4-30: the Careers row printed `Turn ~11 / 24` and `width: 45%` for every Active run,
+    // regardless of the run's actual position. The row now ships the real turn_index.
+    $run = TrainingRun::factory()->create(['status' => \App\Enums\RunStatus::Active]);
+
+    test()->get('/training-runs')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('runs.data', 1)
+            ->where('runs.data.0.turn_index', 0)
+            ->where('runs.data.0.turn_count', 72));
+});
+
 it('orders two runs created in the same second by id, newest first', function (): void {
     $first = TrainingRun::factory()->create(['created_at' => '2026-10-24 12:00:00']);
     $second = TrainingRun::factory()->create(['created_at' => '2026-10-24 12:00:00']);

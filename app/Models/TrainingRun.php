@@ -635,7 +635,7 @@ class TrainingRun extends Model
      * Late December, and the turn after it is Classic Early January, which sits on the
      * tab the Trainer is not looking at.
      *
-     * @return array{year: int, turn: int}|null
+     * @return array{year: int, turn: int, turn_index: int}|null
      */
     public function nextTurnToPlay(): ?array
     {
@@ -652,6 +652,7 @@ class TrainingRun extends Model
         return [
             'year' => self::careerYearForTurn($next),
             'turn' => ((($next - 1) % self::TURNS_PER_YEAR) + 1),
+            'turn_index' => $next,
         ];
     }
 
@@ -664,7 +665,7 @@ class TrainingRun extends Model
      * points at the turn after the last one logged (the client marks the turn being played, not the
      * one just logged).
      *
-     * @return array{year: int, turn: int}|null
+     * @return array{year: int, turn: int, turn_index: int}|null
      */
     public function decisionTurn(): ?array
     {
@@ -674,10 +675,17 @@ class TrainingRun extends Model
             return [
                 'year' => $position->year->value,
                 'turn' => (($position->turnIndex - 1) % self::TURNS_PER_YEAR) + 1,
+                'turn_index' => $position->turnIndex,
             ];
         }
 
-        return $this->nextTurnToPlay();
+        $next = $this->nextTurnToPlay();
+
+        if ($next !== null) {
+            $next['turn_index'] = $this->nextTurnNumber();
+        }
+
+        return $next;
     }
 
     /**

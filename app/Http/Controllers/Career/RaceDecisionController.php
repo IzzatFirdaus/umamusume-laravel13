@@ -112,8 +112,8 @@ class RaceDecisionController extends Controller
      * `nextTurnToPlay()` for a new career; both are real states and neither is pointed at a default
      * turn (D-220).
      *
-     * @param  array{year: int, turn: int}|null  $next
-     * @return array{year_label: string, turn: int, position_label: string}|null
+     * @param  array{year: int, turn: int, turn_index: int}|null  $next
+     * @return array{year_label: string, turn: int, turn_index: int, position_label: string}|null
      */
     private function nextTurnSection(?array $next): ?array
     {
@@ -124,6 +124,7 @@ class RaceDecisionController extends Controller
         return [
             'year_label' => (RaceCatalogSlot::YEARS[$next['year']] ?? (string) $next['year']).' Year',
             'turn' => $next['turn'],
+            'turn_index' => $next['turn_index'],
             'position_label' => ($next['turn'] % 2 === 1 ? 'Early ' : 'Late ').self::MONTHS[intdiv($next['turn'] - 1, 2)],
         ];
     }

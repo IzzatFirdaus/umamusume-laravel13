@@ -35,6 +35,7 @@ use App\Models\TurnEvents\PerformancePayload;
 use App\Models\TurnEvents\ShopPurchasePayload;
 use App\Models\Umamusume;
 use App\Services\Advisor\NextDecision;
+use App\Services\CareerCalendar;
 use App\Services\DataPipeline\ArtworkMirror;
 use App\Services\DeckAnalysis;
 use App\Services\PageSize;
@@ -56,9 +57,19 @@ class TrainingRunController extends Controller
 {
     public function index(): InertiaResponse
     {
+        // The row's own position: the latest logged turn, and the career's length on its calendar. A
+        // run that has logged nothing ships turn 0 rather than a placeholder, and the page prints the
+        // absence for it (R4-30: the row used to print a hardcoded `Turn ~11 / 24`).
+        $latest = TurnEntry::query()
+            ->selectRaw('training_run_id, max(turn) as latest_turn')
+            ->groupBy('training_run_id')
+            ->pluck('latest_turn', 'training_run_id');
+
         return Inertia::render('Runs/Index', [
             'runs' => TrainingRun::with('umamusume')->latest('created_at')->latest('id')->paginate(25)
                 ->through(static fn (TrainingRun $run): array => [
+                    // R4-01/R4-02: the run is named by its id, so two careers of the same trainee in
+                    // the same scenario are two rows a Trainer can tell apart.
                     'id' => $run->id,
                     'name' => $run->umamusume->name,
                     // The scenario key is a storage value; the label is config's, so the payload
@@ -69,6 +80,8 @@ class TrainingRunController extends Controller
                         : null,
                     'status_label' => $run->status->label(),
                     'created_date' => $run->created_at->toDateString(),
+                    'turn_index' => (int) ($latest[$run->id] ?? 0),
+                    'turn_count' => CareerCalendar::TURNS_PER_CAREER,
                     // The Cockpit is the canonical career destination (F1, plan §9's 2.0 line):
                     // selecting a career from the list must not route through the 2.0.0 run-detail
                     // page. `runs.show` stays a compatibility doorway until the redirect ruling.

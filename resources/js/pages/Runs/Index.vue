@@ -11,6 +11,10 @@ interface Run {
     scenario_label: string | null;
     status_label: string;
     created_date: string;
+    /** The latest turn the run has logged, 0 when it has logged none. */
+    turn_index: number;
+    /** The career's length on the client's calendar. */
+    turn_count: number;
     url: string;
 }
 
@@ -110,15 +114,24 @@ const statusVariant = (status: string): 'info' | 'success' | 'warning' | 'neutra
                         />
                     </div>
 
-                    <!-- Progress bar for Active runs -->
+                    <!-- Progress bar for Active runs, from the run's own logged turns. A run that has
+                         logged none names the absence rather than a figure nobody recorded (R4-30:
+                         this row used to print a hardcoded `Turn ~11 / 24`). -->
                     <div v-if="run.status_label === 'Active'" class="w-full mt-2 lg:mt-0 lg:w-48 shrink-0">
-                        <div class="h-2 w-full overflow-hidden rounded-md bg-sunken" aria-hidden="true">
-                            <span
-                                class="block h-full bg-chrome"
-                                style="width: 45%"
-                            ></span>
-                        </div>
-                        <p class="mt-1 text-xs text-ink-muted text-center">Turn ~11 / 24</p>
+                        <template v-if="run.turn_index > 0">
+                            <div class="h-2 w-full overflow-hidden rounded-md bg-sunken" aria-hidden="true">
+                                <span
+                                    class="block h-full bg-chrome"
+                                    :style="{ width: `${Math.round((run.turn_index / run.turn_count) * 100)}%` }"
+                                ></span>
+                            </div>
+                            <p class="mt-1 text-xs text-ink-muted text-center">
+                                Turn {{ run.turn_index }} / {{ run.turn_count }}
+                            </p>
+                        </template>
+                        <p v-else class="text-xs text-ink-muted text-center" title="No turn has been logged on this run yet.">
+                            Progress: N/A — no turn logged yet
+                        </p>
                     </div>
                 </li>
             </ul>

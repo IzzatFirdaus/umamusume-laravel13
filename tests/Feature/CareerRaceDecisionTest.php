@@ -104,6 +104,21 @@ it('renders the races at the turn being decided, with every brief field present 
             ->where('planner_url', route('runs.races.planner', $run)));
 });
 
+it('prints the absolute turn beside the within-year position', function (): void {
+    // R4-09: a run at turn 67 printed `Turn 20` because the header showed the within-year number
+    // derived from `((turnIndex - 1) % 24) + 1` under the absolute `Turn` label.
+    $run = raceRun(turns: 67);
+    raceSlot();
+
+    $this->get(route('runs.races.decision', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            // Within-year position on the 24-turn grid: ((68 - 1) % 24) + 1 = 20.
+            ->where('nextTurn.turn', 20)
+            // Absolute turn: the next turn after 67 logged.
+            ->where('nextTurn.turn_index', 68));
+});
+
 it('states the fields the corpus holds and names the reason for each one it does not', function (): void {
     $run = raceRun(turns: 12);
     raceSlot();

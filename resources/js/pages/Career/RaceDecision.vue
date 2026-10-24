@@ -152,7 +152,8 @@ function submitManual(): void {
             <p v-if="props.nextTurn !== null" class="mt-1 text-sm text-ink">
                 {{ props.nextTurn.year_label }} ·
                 {{ props.nextTurn.position_label }} ·
-                <span class="font-mono tabular-nums">Turn {{ props.nextTurn.turn }}</span>
+                <span class="font-mono tabular-nums">Turn {{ props.nextTurn.turn_index }}</span>
+                <span class="text-ink-muted">({{ props.nextTurn.turn }} of the year)</span>
             </p>
             <p v-else class="mt-1 text-sm text-ink" title="No turn is being decided on this run.">N/A</p>
         </section>
