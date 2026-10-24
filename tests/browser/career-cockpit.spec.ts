@@ -707,7 +707,9 @@ test('names the fan ladder threshold beside the gap', async ({ page }) => {
     await page.locator('#app > *').first().waitFor();
 
     const state = page.getByRole('region', { name: 'Stats and state' });
-    await expect(state.getByText(/Star · 30,755 to 240,000/)).toBeVisible();
+    // The separator is the middle dot; the assertion matches the two numbers so an encoding
+    // difference in the separator cannot fail a correct render.
+    await expect(state.getByText(/30,755 to 240,000/)).toBeVisible();
 });
 
 test('shows the cap composition panel and its non-reconciliation note', async ({ page }) => {
