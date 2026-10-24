@@ -182,3 +182,13 @@ test('names an un-entered calendar race as scheduled, not yet run', async ({ pag
     // The fixture's decision lands on Junior turn 12 (the debut), which no entry records yet.
     await expect(page.getByText('Scheduled, not yet run.').first()).toBeVisible();
 });
+
+test('offers a record-result path on a race card', async ({ page }) => {
+    // B-0.2 (Group B): a completed race with a placement is the write path the trainee's goals read.
+    // This case proves the control is reachable in the drawer; the derivation is pinned by
+    // `CockpitGoalFromCompletedRaceTest`.
+    await openDecision(page);
+    await page.getByRole('button', { name: /Details and actions for/ }).first().click();
+    await page.getByText('Record a result').first().click();
+    await expect(page.getByRole('button', { name: 'Record completed race' })).toBeVisible();
+});

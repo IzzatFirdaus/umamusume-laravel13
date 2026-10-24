@@ -122,6 +122,22 @@ function enter(): void {
 
 const group = (n: number): string => n.toLocaleString('en-US');
 
+// B-0.2: an outcome is a completed race with an optional placement. `TraineeGoal` derives progress
+// from completed `race_entries`, so this is the write path that clears a goal the race satisfies.
+const resultForm = useForm({ placement: '' });
+
+function recordResult(): void {
+    resultForm
+        .transform(() => ({
+            entry_mode: 'calendar',
+            race_catalog_slot_id: String(props.race.id),
+            status: 'Completed',
+            placement: resultForm.placement === '' ? null : Number(resultForm.placement),
+            turn_entry_id: form.turn_entry_id === '' ? null : form.turn_entry_id,
+        }))
+        .post(props.entry.action, { preserveScroll: true });
+}
+
 /**
  * Whether this card shows the ten-row fact grid or folds to one line (R2-12).
  *
@@ -297,9 +313,43 @@ const folds = computed<boolean>(
 
                     <p class="text-xs text-ink-muted">
                         Skip records nothing and returns to the Cockpit. A finish, a fan gain and a
-                        placement are outcomes rather than decisions, so they are recorded there.
+                        placement are outcomes rather than decisions, so they are recorded below.
                     </p>
                 </form>
+
+                <!-- B-0.2: record the race as run, with its placement. A completed entry is what the
+                     trainee's goals read, so this is the write path that clears them. -->
+                <details class="rounded-md border border-rule bg-raised p-3">
+                    <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
+                        Record a result
+                    </summary>
+                    <form class="mt-2 flex flex-col gap-3" @submit.prevent="recordResult">
+                        <BaseSelect
+                            v-model="resultForm.placement"
+                            name="placement"
+                            label="Placement (optional)"
+                            :options="[{ value: '', label: 'No placement' }, { value: '1', label: '1st' }, { value: '2', label: '2nd' }, { value: '3', label: '3rd' }, { value: '4', label: '4th' }, { value: '5', label: '5th' }]"
+                        />
+                        <p
+                            v-if="resultForm.hasErrors"
+                            role="alert"
+                            class="rounded-md border border-risk bg-raised p-2 text-sm text-risk"
+                        >
+                            <span v-for="(message, key) in resultForm.errors" :key="key" class="block">{{ message }}</span>
+                        </p>
+                        <button
+                            type="submit"
+                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-semibold text-ink disabled:opacity-60"
+                            :disabled="resultForm.processing"
+                        >
+                            {{ resultForm.processing ? 'Recording…' : 'Record completed race' }}
+                        </button>
+                        <p class="text-xs text-ink-muted">
+                            Records this race as run, with its placement. The trainee's goals are read
+                            from completed races, so this is what clears them.
+                        </p>
+                    </form>
+                </details>
             </div>
         </dialog>
     </li>
