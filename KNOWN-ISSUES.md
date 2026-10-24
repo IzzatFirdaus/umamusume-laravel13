@@ -3480,3 +3480,42 @@ existing input. The separate pending-turn-state question remains open and is not
 **Current state.** `resources/js/pages/Career/Snapshot/Setup.vue:165-186` renders Year, Month and Phase selects (`career_year`, `career_month`, `career_phase`); `StoreSnapshotRequest:45-47` requires them; `CreateSnapshotRun:58-79` writes `career_position` with `career_position_source = imported`. The R4-08 note that "the date is not an input on either path" is stale at HEAD. Ruling B-0.3 (2026-10-24) chose the snapshot date field, which already exists. No code change made.
 
 **What this does not cover.** The separate R4-08 question - a pending-turn state on the guided turn form - is a different shape and is not addressed here.
+### KI-124 Training-tile banner and the three card avatars are not stored (Group A / A-0.12) - FILED 2026-10-24 (audit addendum)
+
+**Status: OPEN - blocked: ADR.** A turn-level banner and a card-avatar list are both migrations.
+
+**Current state.** `app/Models/TurnEntry.php:61` `Fillable` stores the facility levels, `preview_gains` and
+`failure_rate`, but no facility banner and no list of the cards whose avatars the tile showed;
+`TrainingDetail.vue` renders neither. Walk-1 §1.7 records "Speed facility Lv4 with the banner 'Floor
+Cleaning', three card avatars on the tile".
+
+**Blocker.** `needs-schema`: a `facility_banner` string and a `training_card_ids` list (or join table) on
+`turn_entries`, each needing an ADR, an `ARCHITECTURE-ESSENTIALS.md` digest line, and a PRD citation before
+code.
+
+---
+
+### KI-125 The 20/20 team-members counter has no stored roster to count (Group A / A-0.13) - FILED 2026-10-24 (audit addendum)
+
+**Status: OPEN - blocked: ADR.** The counter rides the stored-roster blocker A-0.6 was ruled to derive around.
+
+**Current state.** The landed A-0.6 roster (`Cockpit.vue:862-869`, `CockpitController::rosterSection()`)
+renders the six deck cards' names and states with no "N of 20" counter; `TeamPanelBuilder.php:442-507`
+derives a second roster from `spiritBurstRoster()` with no counter either. The source's 18 named members
+against a 20/20 counter (§1.9) is a count of a stored roster the tool does not hold (the derived deck
+roster is 6, not 18).
+
+**Blocker.** `needs-schema`: a stored roster (or team-membership table) to count against 20.
+
+---
+
+### KI-126 Guest skill lists on the roster are not stored or derivable (Group A / A-0.14) - FILED 2026-10-24 (audit addendum)
+
+**Status: OPEN - blocked: ADR.** A member's skill list needs a character-to-skill link or stored per-roster skills.
+
+**Current state.** The A-0.6 derived roster carries each member's name and state only. `app/Models/Skill.php:39,58`
+marks `is_unique` as a bare boolean with no character link, so a roster member's own skills cannot be
+resolved from the catalogue the way a support card's `hint_skills`/`event_skills` can. Walk-1 §1.9 records
+"the 18-member roster and the guests' skill lists".
+
+**Blocker.** `needs-schema`: a character-to-skill link (or per-roster-member skill storage).
