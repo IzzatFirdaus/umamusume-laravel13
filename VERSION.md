@@ -1,12 +1,12 @@
 # VERSION
 
-Current version: `2.1.0`, pre-release. Tagged: `0.1.0`, `2.0.1`, `2.0.2`, `2.1.0`.
+Current version: `2.1.1`, pre-release. Tagged: `0.1.0`, `2.0.1`, `2.0.2`, `2.1.0`, `2.1.1`.
 
 | Field            | Value                         | Measured                                                                      |
 | ---------------- | ----------------------------- | ----------------------------------------------------------------------------- |
-| Version          | `2.1.0`                       | MINOR: `review-detail` ships as a new route, which is a capability rather than a fix. `2.0.1` carried the 2026-10-22 UX-audit fixes; `2.0.2` corrected one stale browser expectation that `2.0.1`'s `SubCell` change invalidated. `ADR-0019` is **Advisory** (owner ruling 2026-10-22): labelling is owner-directed per release, and this one is labelled MINOR for the new route |
-| Pre-release      | yes                           | GitHub Release flag, not a semver hyphen identifier                           |
-| Git tags         | `0.1.0`, `2.0.1`, `2.0.2`, `2.1.0` | `git tag`, `git ls-remote --tags origin`; no `2.0.0` tag exists locally or on the remote. `2.0.0` was passed over; `2.0.1` is `da15a5ba`, `2.0.2` is `e3ac31bd`, and `2.1.0` is annotated on its release commit. |
+| Version          | `2.1.1`                       | PATCH: the 2026-10-24 Group A + Group B pass adds read-only panels, one config entry and one write affordance on existing screens; no new route, screen, API field, or schema change. `2.1.0` was MINOR for the `review-detail` route; `2.0.1`/`2.0.2` were the 2026-10-22 UX-audit fixes. `ADR-0019` is **Advisory** (owner ruling 2026-10-22) |
+| Pre-release      | yes           | GitHub Release flag, not a semver hyphen identifier                           |
+| Git tags         | `0.1.0`, `2.0.1`, `2.0.2`, `2.1.0`, `2.1.1` | `git tag`, `git ls-remote --tags origin`; no `2.0.0` tag exists locally or on the remote. `2.0.1` is `da15a5ba`, `2.0.2` is `e3ac31bd`, and `2.1.0` is annotated on its release commit. |
 | Release commit   | not fixed                     | see Release state below                                                       |
 | Framework        | `laravel/framework` 13.32.0   | `composer.lock`, constraint `^13.0`                                           |
 | PHP              | 8.5.8                         | runtime, against `require.php: ^8.3`                                          |
