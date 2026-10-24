@@ -320,3 +320,84 @@ the two plan docs.
   `tests/Feature/ZzProbeOrderTest.php`. No peer work entangled.
 - **Gates run this phase.** `vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` → 3 passed (44
   assertions); `npm run typecheck` → exit 0. No source file touched, no commit made.
+## Addendum, 2026-10-24 — cross-check against every walk's unrepresented-source-data register
+
+Re-read at `04c16a22` (`HEAD`; the tree moved past the `3cdc466c` this audit was written against when
+`04c16a22` `test(ZzProbeOrder): add placeholder for future test implementation` landed). A cross-check of
+the walk-1/2/3/4 "unrepresented source data" registers against the `A-0.1..A-0.11` / `B-0.1..B-0.8` rows
+above surfaced four candidates no existing row covers. Each was verified at HEAD. Append-only: no earlier
+row, table, or prose was changed.
+
+### Candidate verdicts
+
+| Candidate | Verdict | Settling evidence |
+|---|---|---|
+| 1 — training-tile banner + three card avatars | genuinely missing | `TurnEntry.php:61` `Fillable` carries facilities, preview, failure, choice — no banner and no card-avatar list; `TrainingDetail.vue` renders no banner or avatar |
+| 2 — green-factor unique-skill spark | covered (does not reproduce) | all six green factor names exact-match `skills`; `LegacySelectController.php:127-131` ships them via `sparkTargets.Skill` = every skill name |
+| 3 — 20/20 members counter | genuinely missing | `Cockpit.vue:862-869` (the A-0.6 roster) renders names/states only; `TeamPanelBuilder.php:442-507` derives a burst roster with no counter |
+| 4 — guest skill lists on the roster | genuinely missing | `Skill.php:39,58` marks `is_unique` with no character link; the A-0.6 roster carries name/friend/ownership only |
+
+Three genuinely-missing items below. None is `openable`: each needs a column or a stored roster, so none
+opens a Phase 3 slice.
+
+### A-0.12 — Training-tile banner and the three card avatars
+
+- **First doc.** Walk-1 §1.7 (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:249-250`) records, on the observed
+  training tile, "Speed facility **Lv4** with the banner 'Floor Cleaning', three card avatars on the tile".
+- **Source.** §1.7 line 249-250.
+- **Code state at HEAD.** The turn write stores the facility levels (`facility_speed` … `facility_wit`), the
+  `preview_gains`, and `failure_rate` (`app/Models/TurnEntry.php:61` `Fillable`). There is no column for the
+  facility banner name and no column for the three support cards whose avatars the tile showed;
+  `TrainingDetail.vue` renders neither. `StoreTurnEntryRequest` accepts neither field.
+- **Classification.** `needs-schema`. Two turn-level columns: a `facility_banner` string and a
+  `training_card_ids` list (or a join table), each a migration requiring an ADR, digest line, and PRD
+  citation before code.
+
+### A-0.13 — 20/20 members counter
+
+- **First doc.** The `A-0.6` source text names "18 named roster members against a 20/20 counter" (§1.9);
+  walk-1 §1.9 and walk-3 P8 list the 18-member roster.
+- **Source.** §1.9.
+- **Code state at HEAD.** The landed `A-0.6` (`d6c30475`) ships a roster derived from the six deck slots
+  (`app/Http/Controllers/Career/CockpitController.php` `rosterSection()`; `Cockpit.vue:862-869`) — names,
+  friend flag, ownership, slot. It renders no "N of 20" counter. `TeamPanelBuilder.php:442-507` derives a
+  second roster from `spiritBurstRoster()` with no counter either. Neither surface counts against the
+  source's 20-member team capacity.
+- **Classification.** `needs-schema`. The 20/20 counter counts a stored roster the tool does not hold (the
+  derived deck roster is 6, not 18); it rides the same stored-roster blocker that `A-0.6` was ruled to
+  derive around. Blocked until a roster is stored (ADR).
+
+### A-0.14 — Guest skill lists on the roster
+
+- **First doc.** Walk-1 §1.9 records "the 18-member roster and the guests' skill lists".
+- **Source.** §1.9.
+- **Code state at HEAD.** The `A-0.6` derived roster carries each member's name and state only — no skill
+  list. `Skill.php` has no character link (`is_unique` is a bare boolean, `Skill.php:39,58`), so a member's
+  skills cannot be resolved from the catalogue the way a support card's `hint_skills`/`event_skills` can.
+- **Classification.** `needs-schema`. Either a character-to-skill link or per-roster-member skill storage;
+  a migration and ADR before code.
+
+### Addendum classification table
+
+| Item | State | Evidence |
+|---|---|---|
+| A-0.12 | needs-schema | `TurnEntry.php:61` — no banner/avatar columns |
+| A-0.13 | needs-schema | `Cockpit.vue:862-869` + `TeamPanelBuilder.php:442-507` — roster without a counter |
+| A-0.14 | needs-schema | `Skill.php:39,58` — no character link; roster without skill lists |
+
+### Candidate 2, expanded — the green-factor sparks reproduce, so no item is filed
+
+Walk-4 S05 (`rice-shower-unity-cup-ux-walk-4.md:246`) claims "the spark form's `Kind = Green` has `Applies
+to` set to Stat/Aptitude/Skill and a target, but no field for a unique-skill name paired with a star grade".
+That does not reproduce at HEAD. The six green factors the walk names (§8.5 lines 1191-1197) — Cut and
+Drive!, Angling and Scheming, Resplendent Red Ace, Red Shift/LP1211-M, Shooting for Victory! — each
+exact-match a `skills` row (probed against the dev database; `Red Shift/LP1211-M` is stored with its slash
+and card-code suffix verbatim), and `LegacySelectController.php:127-131` ships every skill name as
+`sparkTargets.Skill`. Selecting `Applies to = Skill` turns the target field into a `<select>` of those names
+(`LegacySelect.vue:427-429`), and the write boundary accepts a Skill target as a verbatim string
+(`StoreLegacySelectionRequest.php:178-180`). So a Green / Skill / unique-name / ★1..3 spark is writable
+through the UI.
+
+The mechanism the owner flagged is real — `6fa0d01` replaced the free-text `Applies to` with typed selects —
+but the functional gap is closed: every documented green factor is selectable, so the free-text → typed
+change did not remove a value the source records. No `A-0.x` row is added for it.
