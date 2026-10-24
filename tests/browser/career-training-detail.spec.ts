@@ -89,6 +89,25 @@ async function openTrainingDetail(page: import('@playwright/test').Page): Promis
     return runUrl;
 }
 
+test('shows the facility inputs above the training cards', async ({ page }) => {
+    // R4-26: the five facility-level inputs lived inside the turn form below the cards, so a Trainer
+    // reading Expected gains had to scroll past the cards to the ladder and back.
+    await openTrainingDetail(page);
+
+    const facility = page.locator('#turn-facility_speed');
+    await expect(facility).toBeVisible();
+
+    const cardsHeading = page.getByRole('heading', { name: 'Training options' });
+    await expect(cardsHeading).toBeVisible();
+
+    const facilityBox = await facility.boundingBox();
+    const cardsBox = await cardsHeading.boundingBox();
+
+    expect(facilityBox).not.toBeNull();
+    expect(cardsBox).not.toBeNull();
+    expect(facilityBox!.y).toBeLessThan(cardsBox!.y);
+});
+
 /**
  * A career with one logged turn that carries NO Energy reading and five stats AT the target.
  *

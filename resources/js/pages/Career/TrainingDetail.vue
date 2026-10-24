@@ -453,6 +453,33 @@ const capFor = (label: string): number =>
             </p>
         </section>
 
+        <!-- The five facility levels the client's ladder shows beside each training, above the cards
+             whose Expected gains they describe. They used to sit inside "Record the turn" below the
+             cards, so the preview was unreachable until the Trainer scrolled past it (R4-26). Optional
+             by design: a turn logged without reading the ladder records no level, and a zero would
+             claim a facility at its floor. -->
+        <section aria-labelledby="facility-levels-heading" class="mt-6 rounded-md border border-rule bg-panel p-4">
+            <h2 id="facility-levels-heading" class="text-lg font-semibold text-ink-strong">Facility levels this turn</h2>
+            <p class="mt-1 text-sm text-ink-muted">
+                One to five, the ladder's own range. Leave a facility blank when this turn did not read it.
+            </p>
+            <div class="mt-2 grid grid-cols-2 gap-3 @4xl:grid-cols-5">
+                <label v-for="field in facilityFields" :key="field.name" class="flex flex-col gap-1">
+                    <span class="text-ink-muted">{{ field.label }}</span>
+                    <BaseInput
+                        :id="`turn-${field.name}`"
+                        v-model="form[field.name]"
+                        type="number"
+                        :name="field.name"
+                        min="1"
+                        max="5"
+                        :aria-describedby="describedBy(field.name)"
+                        :error="errorOf(field.name)"
+                    />
+                </label>
+            </div>
+        </section>
+
         <section aria-labelledby="training-options-heading">
             <h2 id="training-options-heading" class="text-lg font-semibold text-ink-strong">Training options</h2>
 
@@ -692,35 +719,6 @@ const capFor = (label: string): number =>
                         />
                     </label>
                 </template>
-
-                <!-- The five facility levels the client's ladder shows beside each training. Optional by
-                     design: a turn logged without reading the ladder records no level, and a zero would
-                     claim a facility at its floor. Behind a disclosure because it is five inputs most
-                     turns do not need, and a collapsed `details` keeps them out of the tab order. -->
-<details class="rounded-md border border-rule bg-raised p-3 @4xl:col-span-3">
-                    <summary class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong">
-                        Facility levels this turn
-                    </summary>
-                    <div class="mt-2 grid grid-cols-2 gap-3 @4xl:grid-cols-5">
-                        <label v-for="field in facilityFields" :key="field.name" class="flex flex-col gap-1">
-                            <span class="text-ink-muted">{{ field.label }}</span>
-                            <BaseInput
-                                :id="`turn-${field.name}`"
-                                v-model="form[field.name]"
-                                type="number"
-                                :name="field.name"
-                                min="1"
-                                max="5"
-                                :aria-describedby="describedBy(field.name)"
-                                :error="errorOf(field.name)"
-                            />
-                        </label>
-                    </div>
-                    <p class="mt-2 text-xs text-ink-muted">
-                        One to five, the ladder's own range. Leave a facility blank when this turn did
-                        not read it.
-                    </p>
-                </details>
 
                 <!-- The two readings the client prints before a turn resolves: the failure rate and the
                      preview gains. Transcribed, not computed: the tool stores what the Trainer read
