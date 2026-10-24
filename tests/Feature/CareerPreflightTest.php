@@ -314,7 +314,22 @@ it('names the trainee in the flash that answers Start career', function (): void
 
     test()->put(route('career.preflight.store'))
         ->assertRedirect()
-        ->assertSessionHas('status', 'Career started for '.$fixture['trainee']->name);
+        ->assertSessionHas('status', fn (string $status): bool => str_starts_with($status, 'Career started for '.$fixture['trainee']->name));
+});
+
+it('names the run id in the creation flash', function (): void {
+    // R4-01: the one line that answers Start career said whose career exists but not which one, so a
+    // Trainer holding two careers of the same trainee could not tell the new row from the old.
+    $fixture = preflightFixture();
+    session([SetupDraft::SESSION_KEY => preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'])]);
+
+    test()->put(route('career.preflight.store'))
+        ->assertRedirect()
+        ->assertSessionHas('status', fn (string $status): bool => str_starts_with($status, 'Career started for '.$fixture['trainee']->name.', run #'));
+
+    $run = TrainingRun::query()->where('umamusume_id', $fixture['trainee']->id)->sole();
+
+    expect(session('status'))->toBe('Career started for '.$fixture['trainee']->name.', run #'.$run->id.'.');
 });
 
 it('refuses a draft whose support card no longer exists, creating nothing', function (): void {

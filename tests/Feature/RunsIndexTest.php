@@ -86,6 +86,25 @@ it('sends newest first', function (): void {
             ->where('runs.data.1.url', route('runs.cockpit', $older)));
 });
 
+it('exposes the run id and distinguishes two runs of the same trainee', function (): void {
+    // R4-01/R4-02: run 26 appeared only in the URL. Two careers of the same trainee in the same scenario
+    // rendered two rows a Trainer could not tell apart, because `id` was never shipped.
+    $umamusume = Umamusume::factory()->create(['name' => 'Rice Shower']);
+    $first = TrainingRun::factory()->create(['umamusume_id' => $umamusume->id, 'scenario' => 'unity_cup']);
+    $second = TrainingRun::factory()->create(['umamusume_id' => $umamusume->id, 'scenario' => 'unity_cup']);
+
+    test()->get('/training-runs')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('runs.data', 2)
+            ->where('runs.data.0.id', $second->id)
+            ->where('runs.data.1.id', $first->id)
+            // The two rows are the same trainee, scenario and status, so the id is the only thing that
+            // can tell them apart.
+            ->where('runs.data.0.name', 'Rice Shower')
+            ->where('runs.data.1.name', 'Rice Shower'));
+});
+
 it('orders two runs created in the same second by id, newest first', function (): void {
     $first = TrainingRun::factory()->create(['created_at' => '2026-10-24 12:00:00']);
     $second = TrainingRun::factory()->create(['created_at' => '2026-10-24 12:00:00']);

@@ -86,9 +86,12 @@ const statusVariant = (status: string): 'info' | 'success' | 'warning' | 'neutra
                     <a
                         :href="run.url"
                         class="font-semibold text-ink hover:underline transition-colors duration-150 ease-out min-w-0 flex-1"
-                        :aria-label="`${run.name} · ${run.scenario_label ?? 'no scenario'} · ${run.status_label} · ${run.created_date}`"
+                        :aria-label="`${run.name} · #${run.id} · ${run.scenario_label ?? 'no scenario'} · ${run.status_label} · ${run.created_date}`"
                     >
                         {{ run.name }}
+                        <!-- R4-01/R4-02: the id is the row's identity. Two careers of one trainee in
+                             one scenario are otherwise two identical rows. -->
+                        <span class="ml-2 font-mono text-sm font-normal text-ink-muted">#{{ run.id }}</span>
                     </a>
 
                     <!-- Sub-cells for scenario, status, date -->
