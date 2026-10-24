@@ -335,8 +335,8 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                      the career starts (`ADR-0023`, D3). -->
                 <p class="mt-3 rounded-md border border-dashed border-rule bg-panel p-3 text-xs text-ink-muted">
                     The owned or rented flag is kept in this setup draft, and Preflight writes it onto the run
-                    as one value per slot, where it stays after a reload. A slot you have not classified reads
-                    as N/A rather than as Owned.
+                    as one value per slot, where it stays after a reload. Equipping a card records it as Owned
+                    unless you mark it Rented. A slot you have not classified reads as N/A rather than as Owned.
                 </p>
 
                 <form class="mt-4 flex flex-wrap items-center gap-3" @submit.prevent="save()">

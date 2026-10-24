@@ -76,3 +76,7 @@ test('hides the deck analysis until a card is equipped', async ({ page }) => {
     // A fresh draft holds no card, so the panel that counts a deck has nothing to count.
     await expect(page.getByRole('heading', { name: /deck analysis/i })).toHaveCount(0);
 });
+
+test('shows the ownership default in the picker copy', async ({ page }) => {
+    await expect(page.getByText(/Equipping a card records it as Owned unless you mark it Rented/)).toBeVisible();
+});
