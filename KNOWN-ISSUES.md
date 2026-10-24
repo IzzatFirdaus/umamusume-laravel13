@@ -3519,3 +3519,64 @@ resolved from the catalogue the way a support card's `hint_skills`/`event_skills
 "the 18-member roster and the guests' skill lists".
 
 **Blocker.** `needs-schema`: a character-to-skill link (or per-roster-member skill storage).
+---
+
+### KI-127 The team race facility panel is the only scenario panel with no card wrapper and no capsule header - FILED 2026-10-24 (capsule pass)
+
+**Status: OPEN - not landed here.** A separate panel, not either block the capsule pass fixed.
+
+**Current state.** `resources/js/pages/Career/Cockpit/Panels/TeamRaceFacilityPanel.vue:51` renders a bare
+`<div class="flex flex-col gap-4">` holding `AlertRow`s and one `<section>` per facility group with an
+`<h3>` heading (`:61-72`). It carries no `.card` and no `CapsuleHeader`. It is registered against the
+`team_race_facility` flag (`resources/js/components/scenario/ScenarioPanel.vue:55,79`) and is not either
+block the round-4 screenshot showed.
+
+**Natural home of the fix.** Wrap the root in `.card p-3` and add `CapsuleHeader :title="props.label"`
+(the component already receives `label` from the composition), keeping the per-facility `<h3>` groups.
+
+**Why it is not landed here.** `05aefea4` closed the two visible blocks
+(`UnityCupTeamBoard.vue`, `UnityCupTournamentReadiness.vue`). This panel is a third surface with its own
+heading hierarchy; folding it in would have made one commit cover two different shapes.
+
+---
+
+### KI-128 `Delete this career` sits inside the `Races in this run` region - FILED 2026-10-24 (capsule pass)
+
+**Status: OPEN - owner placement decision.** A run-level destructive control in a per-race container.
+
+**Current state.** The danger-zone `<details data-region="danger-zone">` (`resources/js/pages/Career/Cockpit.vue:1157-1188`)
+renders at the bottom of the section whose heading is `Races in this run` (`:1108-1111`, section
+`aria-labelledby="career-timeline-heading"`), below the race strip and the Timeline and Career Result doors.
+Its blast radius is the whole run (turns, races, events, skills, deck slots, linked Veteran record), which
+is not what the surrounding region describes.
+
+**Natural home.** The `Run identity` section (`:610-611`, `h3#cockpit-header-edit`), where status and
+scenario are already edited.
+
+**Why it is not landed here.** Moving a destructive control's placement is an owner call, not a visual
+consistency fix, and it was not part of the capsule change.
+
+---
+
+### KI-129 Capsule headers are used only in the Scenario section - FILED 2026-10-24 (capsule pass)
+
+**Status: OPEN - owner design call.** Affirm, extend, or remove.
+
+**Current state, measured.** `CapsuleHeader` is imported by six files and called eleven times, every one a
+scenario panel: `UnityCupPanel.vue` (six), `UnityCupTeamBoard.vue`, `UnityCupTournamentReadiness.vue`,
+`SpiritBurstRoster.vue`, `TeamRacePanel.vue`, `TeamRankGauge.vue`. No cockpit card outside the Scenario
+section uses it; neither the Timeline nor the Catalog imports it (the round-4 note that they do is wrong).
+Every other cockpit card group (`Run identity`, Actions, Advisor, `Races in this run`, stats) uses `.card`
+with a plain `<h*>` heading.
+
+**Documented position.** `DESIGN.md:398,488-493` records the argyle lattice capsule as an intentional
+measured motif on capsule headers, and `BrowserSpecClassAssertionsTest` plus `DesignTokensTest` pin the
+class and token side of it, so the usage is not a defect on its face. Whether the Scenario section should
+look structurally distinct from the rest of the cockpit has not been ruled for this surface.
+
+**Owner actions, one line each.** (a) Affirm the current design (the scenario section is thematically
+differentiated) and close. (b) Extend the capsule to every cockpit card. (c) Remove it from the scenario
+panels and amend `DESIGN.md` section 2.3 in the same commit.
+
+**Why it is not landed here.** Only the owner can choose between (a), (b) and (c), and (c) changes a
+documented design decision.
