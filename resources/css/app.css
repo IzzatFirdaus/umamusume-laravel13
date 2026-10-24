@@ -101,14 +101,25 @@
      * #FF4400, focus ring #FF3276. The given hairline #D1D3E0 measures 1.41:1 on the page and is
      * stepped to #8C8A9A for the 3:1 card boundary; white-on-green and white-on-red inks are
      * stepped to #141414 for 4.5:1. See the token comments for each forced step.
+     *
+     * 2026-10-24 (synthesis: mockups + web refs + stat SVGs). Page is the mockups' warm cream
+     * #FAF7F2 (screen-c-event-resolution-v3.png), panels pure white, primary text the mockups'
+     * warm dark #322A2F (screen-b-guided-strategy-v8.png), footer/well #F6F5F2. Brand chrome is
+     * the sampled official blue #2756FA (references/web/en-home-hero.png), accent the official hot
+     * pink #FF3276, success/active the mockups' deep grass green #5D8F03 (screen-a-trainers-
+     * dashboard-v3.png). `--color-stat-*` are the icons_svg gradients: speed #2F94EE, stamina
+     * #F05B4F, power #F7820C, guts #F45E96, wit #1AAE77, pal #F9A31C, group #26B864 — the four
+     * that fall under 3:1 on white (power, wit, pal, group) are darkened along the same hue to
+     * #E2770B / #19A772 / #CA8417 / #23A85B. Idle/disabled/muted/faint keep their validated
+     * values because the mockups supply no distinct tier for them.
      */
-    --color-page: #F8F9FD;
+    --color-page: #FAF7F2;
     --color-panel: #FFFFFF;
     --color-raised: #FFFFFF;
-    --color-sunken: #EDE6E3;
+    --color-sunken: #F6F5F2;
     --color-idle: #E2E4F0;
     --color-disabled: #D1D3E0;
-    --color-ink: #141414;
+    --color-ink: #322A2F;
     --color-ink-strong: #000000;
     --color-ink-muted: #625D7D;
     /* ink-faint is a non-text token: borders, hairline ticks, disabled glyphs.
@@ -136,10 +147,10 @@
     /* Semantic roles. Amended 2026-10-15: green is a STATUS colour only — the positive status pill,
        and nothing else. Green is never the primary action fill, which is `--color-primary-action`
        (blue). This supersedes the pre-2026-10-15 rule that made green the action colour.
-       2026-10-24 (second ruling, HLF reference): the lime family is sampled from the reference.
-       2026-10-24 (Umamusume brand palette): `status-positive` moved to the brand turf green
-       #69C10C; `green` and `chrome` (the capsule motif and its ink) stay on the reference lime
-       because the capsule is a decorative motif, not a status fill. */
+       2026-10-24 (synthesis): status-positive carries the mockups' deep grass green #5D8F03
+       (screen-a-trainers-dashboard-v3.png) for success/active states. The capsule lime
+       `green`/`chrome` is deliberately left unchanged: eva01 inherits these three tokens from
+       this block and must stay byte-identical/rendered-identical, so they cannot move here. */
     --color-green: #AEE327;
     --color-green-deep: #20300D;
     --color-green-tint: #F2F5EE;
@@ -149,7 +160,7 @@
     /* Keyboard-focus ring. A separate token because no single colour clears WCAG 1.4.11's
        3:1 for non-text boundaries in both themes. 2026-10-24 (Umamusume brand palette):
        the brand pink #FF3276 here; the dark block uses the light blue #5B85FF. */
-    --color-ring: #FF3276;
+    --color-ring: #2756FA;
     --color-risk: #D32F2F;
     /* FQ-04 (2026-10-22): the ink that goes ON the risk fill. The brand red #FF4400 measures
        3.45:1 as error text on the white panel, so the light red is stepped darker to #D32F2F
@@ -199,17 +210,19 @@
     --color-sp: #009FE1;
     --color-sp-ink: #0E7490;
     --color-rank: #351F70;
-    /* FQ-05 (2026-10-22): the seven stat-mark values promoted from `shell.css` §3.
-       `.stat-sp` is not here because it already aliases `--color-sp-ink`. The
-       `--color-type-*` family stays separate: type chips and stat marks are
-       different semantic roles even where the nouns coincide. */
-    --color-stat-speed: #2F6BC4;
-    --color-stat-stamina: #C64B5E;
-    --color-stat-power: #8A5A32;
-    --color-stat-guts: #C4557E;
-    --color-stat-wit: #3E6B3A;
-    --color-stat-pal: #6E7A45;
-    --color-stat-group: #3E7A4A;
+    /* FQ-05 (2026-10-22): the seven stat-mark values. 2026-10-24 (synthesis): taken from
+       docs/design-research/icons_svg/*.svg — the gradient stop that reads as the base hue.
+       Four of them (power, wit, pal, group) fall under 3:1 on the white raised surface, so
+       they are darkened along the same hue (source hue -> light step): power #F7820C ->
+       #E2770B, wit #1AAE77 -> #19A772, pal #F9A31C -> #CA8417, group #26B864 -> #23A85B.
+       Speed, stamina and guts pass unchanged. The dark block uses the exact SVG hexes. */
+    --color-stat-speed: #2F94EE;
+    --color-stat-stamina: #F05B4F;
+    --color-stat-power: #E2770B;
+    --color-stat-guts: #F45E96;
+    --color-stat-wit: #19A772;
+    --color-stat-pal: #CA8417;
+    --color-stat-group: #23A85B;
 
     /*
      * Mood tiers, as the client paints them (research §3.1, §6.17). `GREAT` and `GOOD` are
@@ -332,7 +345,7 @@
      * primary button never share a fill (Phase 11.11-11.12). Every new role owes a measured G-18
      * pair; values here are the ruling's starting draft and `DesignTokensTest` is the gate.
      */
-    --color-brand-chrome: #2A5DFA;
+    --color-brand-chrome: #2756FA;
     --color-on-brand-chrome: #FFFFFF;
     --color-brand-accent: #FF3276;
     --color-brand-accent-ink: #625D7D;
@@ -344,7 +357,7 @@
        `--color-brand-chrome` and both roles follow. */
     --color-primary-action: var(--color-brand-chrome);
     --color-on-primary-action: var(--color-on-brand-chrome);
-    --color-status-positive: #69C10C;
+    --color-status-positive: #5D8F03;
     --color-status-positive-ink: #141414;
     --color-status-caution: #FFE9A8;
     --color-status-caution-ink: #6A4A00;
@@ -424,22 +437,40 @@ html[data-theme='dark'] {
      * shifts up one step (raised #333333, idle #404040, disabled #4D4D4D); and rule #333333
      * measures 1.48:1 on the page, so rule takes the faint #666666 (3.26:1). on-risk is the
      * dark surface #121212 because white on #FF4400 is 3.45:1.
+     *
+     * 2026-10-24 (synthesis: mockups + web refs + stat SVGs). The dark ramp is the mockups'
+     * charcoal (screen-f-legacy-select-v1.png, screen-e-run-completion-v1.png): page #09090B,
+     * sunken #050406, ink #FCFCFC, muted #A0A0A0, faint/rule #605F5F. The mockup's own panel
+     * #121415 measures 1.06:1 on its page, below G-18's 1.25 dark floor, so panel uses the
+     * smallest sampled step that clears it (#2A2A2A), with raised #333333, idle #1D1E20 and
+     * disabled #38383A. Brand chrome shifts to the bright grass green #83B503
+     * (screen-c-event-resolution-v3.png) with the dark ink #121212; hot pink stays #FF3276.
+     * Stat marks are the exact icons_svg hexes (bright on the dark raised surface).
      */
-    --color-page: #121212;
+    --color-page: #09090B;
     --color-panel: #2A2A2A;
     --color-raised: #333333;
-    --color-sunken: #0D0D0D;
-    --color-idle: #404040;
-    --color-disabled: #4D4D4D;
-    --color-ink: #EAEAEA;
+    --color-sunken: #050406;
+    --color-idle: #1D1E20;
+    --color-disabled: #38383A;
+    --color-ink: #FCFCFC;
     --color-ink-strong: #FFFFFF;
     --color-ink-muted: #A0A0A0;
-    --color-ink-faint: #666666;
-    --color-rule: #666666;
+    --color-ink-faint: #605F5F;
+    --color-rule: #605F5F;
 
-    --color-green-deep: #BBF451;
+    /* Bright grass action, dark only (the mockup's lime CTA). */
+    --color-brand-chrome: #83B503;
+    --color-on-brand-chrome: #121212;
+    --color-green: #83B503;
+    --color-chrome: #83B503;
+    --color-on-chrome: #121212;
+    --color-green-line: #83B503;
+    --color-status-positive: #83B503;
+
+    --color-green-deep: #83B503;
     --color-green-tint: #19191B;
-    --color-ring: #5B85FF;
+    --color-ring: #83B503;
     --color-risk: #FF4400;
     --color-on-risk: #121212;
     /* Per-theme foreground steps (see the block note above). The goal line is the
@@ -455,13 +486,13 @@ html[data-theme='dark'] {
     --color-status-positive-ink: #121212;
     --color-sp-ink: #4FC3F7;
     --color-rank: #B6B4C2;
-    --color-stat-speed: #7FA8E8;
-    --color-stat-stamina: #F08A96;
-    --color-stat-power: #C99A6B;
-    --color-stat-guts: #F08BB4;
-    --color-stat-wit: #8CC78A;
-    --color-stat-pal: #AEBB84;
-    --color-stat-group: #86C996;
+    --color-stat-speed: #2F94EE;
+    --color-stat-stamina: #F05B4F;
+    --color-stat-power: #F7820C;
+    --color-stat-guts: #F45E96;
+    --color-stat-wit: #1AAE77;
+    --color-stat-pal: #F9A31C;
+    --color-stat-group: #26B864;
 
     --color-up: #B89825;
     --color-down: #97D1F9;

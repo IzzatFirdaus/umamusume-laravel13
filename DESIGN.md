@@ -236,6 +236,22 @@ and the corpus-transcription caveat above holds. Replacing those two stubs is th
 > the given white; both pairs measure 4.98:1. The dark theme keeps the given `#FF4400` with its
 > dark surface ink, per the owner's approval. This closes the residual flagged in the note above.
 
+> **2026-10-24 — synthesis from the local sources.** Light and dark are re-cut from three
+> in-repo sources rather than web extraction; `eva01` is untouched (block byte-identical, render
+> hash unchanged). Light: warm cream page `#FAF7F2` and warm ink `#322A2F` from
+> `docs/design-research/mockups/screen-c-event-resolution-v3.png` /
+> `screen-b-guided-strategy-v8.png`, white panels, grass success `#5D8F03` from
+> `screen-a-trainers-dashboard-v3.png`, official blue `#2756FA` from
+> `docs/design-research/_scratch/references/web/en-home-hero.png`, hot pink `#FF3276`. Dark:
+> charcoal page `#09090B` and ink `#FCFCFC` from `mockups/screen-f-legacy-select-v1.png`, bright
+> grass action `#83B503` from `screen-c-event-resolution-v3.png`. `--color-stat-*` are the exact
+> `docs/design-research/icons_svg/*.svg` hues (speed `#2F94EE`, stamina `#F05B4F`, power
+> `#F7820C`, guts `#F45E96`, wit `#1AAE77`, pal `#F9A31C`, group `#26B864`); power/wit/pal/group
+> are darkened in light only (`#E2770B`/`#19A772`/`#CA8417`/`#23A85B`) to clear the 3:1 raised
+> boundary. The dark panel is lifted to `#2A2A2A` because the mockup's own `#121415` measures
+> 1.06:1 on its page, under G-18's 1.25 floor. `green`/`chrome` stay on the client lime (eva01
+> inherits them); `status-positive` carries the grass green.
+
 Status badges (release status is the catalog's load-bearing signal) render through
 `--color-green` / `--color-sp` / `--color-pick` and their ink partners rather than
 literal hexes, so they follow the active theme instead of pinning one.
