@@ -42,6 +42,9 @@ final class SkillsPlannerController extends Controller
             'run' => $this->runSection($run),
             'target' => $this->targetSection($run, $target),
             'coverage' => $this->coverageSection($run, $required),
+            // A-0.8: the priced skills the run has not acquired, sorted by cost, with the sum and the
+            // shortfall against the run's recorded SP (§2.2/§2.3).
+            'purchasable' => $this->purchasableSection($run),
             'groups' => $this->groupRows($run, $required, $target),
             // F2, plan §9.6 ruling 5: the acquired/skipped status write now lives on the Skills
             // Planner rather than the 2.0.0 run-detail screen. The route and Form Request are the
@@ -72,6 +75,64 @@ final class SkillsPlannerController extends Controller
             'status_label' => $run->status->label(),
             'run_url' => route('runs.cockpit', $run),
             'skills_sync_url' => route('runs.skills.sync', $run),
+        ];
+    }
+
+    /**
+     * A-0.8: the priced skills the run has not acquired, sorted by cost, with the sum and the shortfall
+     * against the run's recorded SP (§2.2's "purchasable at or under N SP", §2.3's recommended spend).
+     *
+     * Read-only and catalogue-only: the `skills` table carries `sp_cost`, so no schema is involved. A
+     * skill already acquired is excluded — its SP is spent, not still to buy — and an unpriced row is
+     * excluded rather than summed as zero (D-220). The sum prices every skill at its base; the client
+     * pays less with hints, which no column holds (G-SK-3), so the figure is the honest one. With no
+     * recorded SP (`sp` null) the pool still lists and sums, and the shortfall is null rather than a
+     * claim the run cannot afford.
+     *
+     * @return array{rows: list<array{id: int, name: string, sp_cost: int}>, total: int, count: int, sp: int|null, shortfall: int|null}
+     */
+    private function purchasableSection(TrainingRun $run): array
+    {
+        $acquired = $run->skills
+            ->filter(static fn (Skill $skill): bool => $skill->pivot->status === SkillAcquisition::Acquired->value)
+            ->pluck('id')
+            ->all();
+
+        /** @var list<array{id: int, name: string, sp_cost: int}> $rows */
+        // ponytail: the payload is capped at the 100 cheapest rows; the seeded Global catalogue prices
+        // over a thousand skills and shipping all of them is a slow page for a reference list. The full
+        // pool size travels as `count` so the panel can say "cheapest 100 of N". Upgrade path: paginate
+        // the list if the panel ever needs the whole pool at once.
+        $base = Skill::query()
+            ->availableOnGlobal()
+            ->whereNotIn('id', $acquired)
+            ->whereNotNull('sp_cost');
+
+        $count = (clone $base)->count();
+
+        $rows = $base
+            ->orderBy('sp_cost')
+            ->orderBy('name')
+            ->limit(100)
+            ->get(['id', 'name', 'sp_cost'])
+            ->map(static fn (Skill $skill): array => [
+                'id' => (int) $skill->id,
+                'name' => (string) $skill->name,
+                'sp_cost' => (int) $skill->sp_cost,
+            ])
+            ->values()
+            ->all();
+
+        $total = array_sum(array_column($rows, 'sp_cost'));
+        $latest = $run->turnEntries->sortByDesc('turn')->first();
+        $sp = $latest?->sp;
+
+        return [
+            'rows' => $rows,
+            'total' => $total,
+            'count' => $count,
+            'sp' => $sp,
+            'shortfall' => $sp === null ? null : max(0, $total - $sp),
         ];
     }
 

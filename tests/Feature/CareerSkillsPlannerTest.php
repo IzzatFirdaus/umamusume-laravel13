@@ -623,6 +623,47 @@ final class CareerSkillsPlannerTest extends TestCase
         ])->assertSessionHasErrors('skills.1.skill_id');
     }
 
+    /**
+     * A-0.8: the purchasable pool — priced skills the run has not acquired, sorted by cost, with the
+     * sum and the shortfall against the run's SP (§2.2/§2.3).
+     */
+    public function test_lists_the_purchasable_pool_with_prices_and_the_shortfall(): void
+    {
+        $run = $this->plannerRun();
+        $cheap = $this->skill('Cheap Buy', 30);
+        $mid = $this->skill('Mid Buy', 100);
+        $learned = $this->skill('Already Learned', 50);
+
+        // An unpriced Global row is excluded rather than summed as zero (D-220).
+        Skill::factory()->create([
+            'name' => 'No Price',
+            'sp_cost' => null,
+            'release_status' => ReleaseStatus::GlobalReleased,
+            'name_is_client' => true,
+        ]);
+
+        $run->setSkillStatus($learned, SkillAcquisition::Acquired, 1);
+
+        TurnEntry::factory()->create([
+            'training_run_id' => $run->id,
+            'turn' => 1,
+            'sp' => 120,
+        ]);
+
+        $this->get(route('runs.skills.planner', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                // Sorted ascending by base cost; the learned skill and the unpriced row are excluded.
+                ->where('purchasable.rows.0.name', 'Cheap Buy')
+                ->where('purchasable.rows.0.sp_cost', 30)
+                ->where('purchasable.rows.1.name', 'Mid Buy')
+                ->where('purchasable.rows', fn (Collection $rows): bool => $rows->pluck('name')->all() === ['Cheap Buy', 'Mid Buy'])
+                ->where('purchasable.count', 2)
+                ->where('purchasable.total', 130)
+                ->where('purchasable.sp', 120)
+                ->where('purchasable.shortfall', 10));
+    }
+
     private function plannerRun(): TrainingRun
     {
         return TrainingRun::factory()->create(['scenario' => 'unity_cup']);

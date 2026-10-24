@@ -72,6 +72,17 @@ const props = defineProps<{
         warn: boolean;
         text: string;
     };
+    /**
+     * A-0.8: the priced skills the run has not acquired, sorted by cost, with the sum and the
+     * shortfall against the run's recorded SP (§2.2/§2.3).
+     */
+    purchasable: {
+        rows: { id: number; name: string; sp_cost: number }[];
+        total: number;
+        count: number;
+        sp: number | null;
+        shortfall: number | null;
+    };
     groups: Group[];
     acquisition_options: { value: string; label: string }[];
     /** Slice 10: the Global catalogue skills this run does not hold yet, `{id, name}` each. */
@@ -281,6 +292,36 @@ const coverageConstants = computed(() =>
             <p v-else-if="props.coverage.text !== ''" class="mt-2 text-sm text-ink">
                 {{ props.coverage.text }}
             </p>
+        </section>
+
+        <!-- A-0.8: the priced skills the run has not acquired, sorted by cost, with the sum and the
+             shortfall against the run's SP (§2.2's "purchasable at or under N SP", §2.3's recommended
+             spend). Read-only; the catalogue carries every base price. -->
+        <section aria-labelledby="skills-purchasable-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
+            <h2 id="skills-purchasable-heading" class="flex items-center gap-2 text-lg font-semibold text-ink-strong">
+                Purchasable skills
+                <ProvenanceBadge state="calculated" title="Every priced skill the run has not acquired, sorted by base SP cost, against the last recorded Skill Point total." />
+            </h2>
+            <p class="mt-1 text-sm text-ink">
+                <span v-if="props.purchasable.count > props.purchasable.rows.length">Showing the cheapest </span>
+                <span class="font-mono tabular-nums">{{ props.purchasable.rows.length }}</span>
+                <span v-if="props.purchasable.count > props.purchasable.rows.length">
+                    of <span class="font-mono tabular-nums">{{ props.purchasable.count }}</span>
+                </span>
+                priced skills not yet acquired cost
+                <span class="font-mono tabular-nums">{{ props.purchasable.total }}</span> SP in total<template
+                    v-if="props.purchasable.sp !== null"
+                >, and the run holds <span class="font-mono tabular-nums">{{ props.purchasable.sp }}</span> SP<template
+                    v-if="props.purchasable.shortfall !== null && props.purchasable.shortfall > 0"
+                >, a shortfall of <span class="font-mono tabular-nums">{{ props.purchasable.shortfall }}</span> SP</template></template>.
+            </p>
+            <ol v-if="props.purchasable.rows.length > 0" class="mt-2 max-h-72 space-y-1 overflow-y-auto text-sm">
+                <li v-for="skill in props.purchasable.rows" :key="skill.id" class="flex items-baseline justify-between gap-3">
+                    <span class="text-ink">{{ skill.name }}</span>
+                    <span class="font-mono tabular-nums text-ink-strong">{{ skill.sp_cost }} SP</span>
+                </li>
+            </ol>
+            <p v-else class="mt-1 text-sm text-ink">The catalogue prices no skill this run has not already acquired.</p>
         </section>
 
         <!-- The hint discounts are not modelled: no column holds a hint level, so nothing the run

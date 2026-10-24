@@ -281,3 +281,16 @@ test('adds a catalogue skill to a run that holds none (Slice 10)', async ({ page
     await expect(page.getByLabel(`Change status for ${name}`)).toHaveCount(1);
     await expect(page).toHaveURL(/\/skills$/);
 });
+
+test('lists the purchasable pool with prices and the shortfall against the recorded SP', async ({ page }) => {
+    // A-0.8 (Group A): the priced skills the run has not acquired, sorted by cost, with the sum and
+    // the shortfall against the recorded SP (§2.2/§2.3). This case proves the panel renders; the
+    // arithmetic is pinned by `CareerSkillsPlannerTest`.
+    await openPlanner(page);
+
+    const panel = page.getByRole('region', { name: 'Purchasable skills' });
+    await expect(panel).toBeVisible();
+    // The fixture logs 100 SP; the catalogue prices skills above it, so the shortfall is named.
+    await expect(panel.getByText(/the run holds/)).toBeVisible();
+    await expect(panel.getByText(/\d+ SP/).first()).toBeVisible();
+});
