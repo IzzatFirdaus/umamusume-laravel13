@@ -11,6 +11,31 @@ This file starts empty on purpose. The repository's whole history predates it, t
 mean writing claims about commits that were never recorded as changes, which `AGENTS.md` §5 forbids.
 Entries below are written at the time of the change, not back-filled.
 
+## [2.1.1] - 2026-10-24
+
+A PATCH release from the Group A + Group B audit pass. Read-only panels and copy on existing screens,
+one config entry, and one write affordance. No new route, screen, API field, or schema change.
+
+### Added
+
+- **Cockpit cap composition** (A-0.1) - the caps the run states beside the blue sparks its Legacy carries,
+  with the source's §1.2 non-reconciliation named.
+- **Cockpit team roster** (A-0.6) - derived from the six deck cards, with no stored roster.
+- **Top Star threshold** (A-0.10) - 240,000 named beside the fan gap.
+- **Mood Effect headline** (A-0.11) - the great tier's +20% training / +4% running beside the mood,
+  sourced from `config('uma.mood_effect')` (`UMAMUSUME_REFERENCE.md` §1.1.6).
+- **Purchasable skill pool** (A-0.8) - the priced skills not yet acquired, sorted by cost, with the sum and
+  the shortfall against the recorded SP.
+- **Completed-race recording** (B-0.2) - the race card's drawer records a completed race with its
+  placement, the write path the trainee-goal ladder reads.
+- **Scheduled-not-run line** (B-0.4) - an un-entered calendar race states that it is scheduled, not run.
+
+### Known issues filed
+
+- `KI-115`..`KI-123` - Group A and Group B items not landed: two ruled out (A-0.2 catalog-only, B-0.8
+  loopback), four blocked on an ADR (A-0.5, B-0.5, B-0.6, B-0.7), one blocked on A-0.5 (A-0.4), and two
+  that do not reproduce (B-0.1 shared finals rounds, B-0.3 snapshot date field).
+
 ## [2.1.0] - 2026-10-23
 
 A MINOR release. The frontend architecture migrates to named primitives; one behaviour change ships
