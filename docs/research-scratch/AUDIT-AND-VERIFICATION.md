@@ -10717,3 +10717,2935 @@ No bulk route exists: `routes/web.php` declares `GET /review` and `POST /review/
 and `ReviewController` has `index` and `resolve`. A bulk resolve is a controller method plus a route
 plus its own Form Request, which is its own dispatch. Unblocking: a bulk-resolve controller method
 and route land; the UI half is then the select-all header the proposal describes.
+
+## doc-drift-audit-2026-10-16.md
+
+> **Consolidated 2026-10-24 (Round 19).** Source: `docs/audits/doc-drift-audit-2026-10-16.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/audits/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+
+## Documentation-vs-codebase drift audit — 2026-10-16
+
+**Read-only.** No tracked file modified, nothing fixed, no `.md` edited. HEAD `e845887`, live main repo
+`D:/Projects/umamusume-laravel13`.
+
+**Path deviation, stated up front.** The dispatch names `docs/audits/doc-drift-audit-2026-10-16.md`.
+That directory is, by the owner's ruling of 2026-10-16, for knowledge gathered from and about *Umamusume Pretty
+Derby* only. This is a repository audit, so it lives here in `docs/audits/`, beside `full-audit-2026-10-16.md` and
+the `rice-shower-unity-cup-*` documents. Recorded rather than silently overridden.
+
+---
+
+### 1. Scope
+
+| Measure | Count | Note |
+|---|---|---|
+| `.md` under the repo, excluding `node_modules/`, `vendor/`, `.git/` | **5,534** | the dispatch's precondition command |
+| `.md` under `node_modules/`, `vendor/`, `storage/` | **568** | out of scope per the constraints |
+| `.md` under `.kilo/` worktrees | **3,508** | out of scope — duplicate trees |
+| `.md` under `.scratch-uma/` | ~600 | **not read as evidence** (constraint), and not read as corpus |
+| `.md` under agent-tool skill mirrors (`.cursor`, `.gemini`, `.github`, `.windsurf`, `.warp`, `.trae`, `.roo`, `.kiro`, `.kilocode`, `.grok`, `.factory`, `.continue`, `.codewhale`, `.codebuddy`, `.augment`, `.hermes`, `.opencode`, `.claude`, `.agents`, `.superpowers`, `.junie`, `.codex`, `.cline`, `.copilot`, `.impeccable`, `.qoder`, `.ai`, `.venv`) | ~1,200 | out of scope — gitignored scaffolding per `AGENTS.md` §11 |
+| **Documentation corpus actually swept** | **129** | the scripted walk |
+| Same corpus by a looser `find` | 154 | the 25-file delta is `jev-inspect/*`, `storage/app`, and the four small tool dirs the script prunes. **Not reconciled exactly** — reported as a discrepancy, not smoothed over |
+
+`find . -name "*.md"` returns **5,534**, far over the dispatch's 100-file batching threshold, so this pass ran
+batched. Coverage is stated in §9; the split is not silent.
+
+### 2. Method
+
+Three scripts, all read-only, written to `.scratch-uma/doc-drift-2026-10-16/` (my own tooling; no `.scratch-uma`
+file is cited as evidence anywhere in this report):
+
+| Script | Does |
+|---|---|
+| `extract.py` | walks the 129-file corpus, pulls every backticked token, classifies it as a path / class / route claim, tests it against the tree |
+| `classify.py` | buckets every absent-path claim into INTENTIONAL / PREFIX-RELATIVE / BASENAME-MISSING / GENUINE |
+| `phase5.py` | enumerates 672 real code surface files across 16 directories and reports those named by no `.md` anywhere |
+
+**What counted as a claim.** Only tokens whose presence in the tree is decidable by one check: a path with a known
+extension, an `App\…` class, or an explicit `route('name')` call. Prose, intent, design language and opinion were
+not extracted.
+
+**What was NOT checked, and why.** The dispatch's claim taxonomy is 15 kinds; this pass swept **3** mechanically
+(path, class, route name). Behaviour claims, commit SHAs, test counts, model columns, config keys, env keys, enum
+cases, source citations and route URLs were **not swept**. Those need either `php artisan route:list`,
+`migrate:status`, or a test run — all barred by the constraints (no build, no browser suite, no gate runs) — or
+human reading per file, which at 129 files including a 535 KB `SCREEN_SPEC.md` and a 410 KB
+`frontend-development-plan.md` is a multi-pass job. They are named in §9. <!-- census: quoted-original -->
+
+**Two instrument bugs found and fixed mid-pass, and both changed the numbers:**
+
+1. **`ROUTE_RE` was not a route detector.** A dotted lowercase token is overwhelmingly a `table.column`, a config
+   path, or a JS API. The first run flagged **716** "absent routes"; almost all were noise. Replaced with an
+   explicit `route('x')` call scan → **1** absent route claim. Separately, `route_names()` scanned only `routes/`,
+   and `routes/web.php:276` says the artwork route is registered in `bootstrap/app.php` outside the `web` group —
+   so `artwork.show` was falsely counted absent. Adding `bootstrap/app.php` took the parsed set 84 → **85**.
+2. **`.lstrip(".\\/")` ate the leading dot of dot-directories.** `lstrip` strips *every* leading character in the
+   set, so `.ai/rules/index.md` became ai/rules/index.md and every dot-directory cite read ABSENT. Direct check:
+   `.ai/rules/index.md` is **PRESENT**. Fixed → absent-path rows 3,206 → **3,032**.
+
+The lesson is the same one `AGENTS.md` §9 keeps teaching: an instrument that cannot fail, or fails silently, is
+not evidence. Neither bug was visible until a known-present file was reported absent.
+
+### 3. Verified claims summary
+
+| | Claims | Verified | Absent |
+|---|---|---|---|
+| Path | 11,057 | 8,025 | **3,032** |
+| Route name | 33 | 32 | **1** |
+| Class | 101 | 99 | **2** |
+| **Total** | **11,191** | **8,156** | **3,035** |
+
+72.8% of path claims resolve. The absent 3,032 are not 3,032 findings — they are rows, and they collapse:
+
+| Bucket | Rows | Is it a finding? |
+|---|---|---|
+| INTENTIONAL | 85 | **No.** `storage/` backups and snapshots, `.scratch-uma/` cited evidence, `test-results/`, `public/build/`, plus SECURITY.md and `config/inertia.php` — both of which `AGENTS.md` §12 and §18 state do **not** exist |
+| PREFIX-RELATIVE | 210 | **No.** Instrument artifact: `Support/Builder.vue` resolves under `resources/js/pages/`. The cite is short, not wrong |
+| BASENAME-MISSING | 1,030 | **Candidate.** A bare filename found nowhere — `CONSTRAINTS.md` (201×), `PLAN.md` (58×), `StatBand.vue` (17×), `welcome.blade.php` (16×), `UraPanel.vue` (10×) |
+| GENUINE | 1,707 | **Candidate.** A full path from a known root that is absent — `docs/research-scratch/DESIGN-CORPUS.md` (73×), `docs/research-scratch/GOVERNANCE.md` (56×), `resources/views/runs/show.blade.php` (27×) |
+
+**2,737 candidate rows across the two real buckets.** Distinct-token counts were not tallied; the rows are
+dominated by a few dozen names cited repeatedly, which is why the verified findings in §4 are stated per token,
+not per row. Anyone reading "3,032 absent" as 3,032 defects would be wrong by roughly two orders of magnitude.
+
+### 4. Absence findings
+
+#### 4.1 Claimed code artifacts that do not exist
+
+Every row below was **verified by direct existence check this pass**, not inferred from the sweep.
+
+| Artifact | Cited by | Rows | Reality |
+|---|---|---|---|
+| `StatBand.vue`, `RaceCalendar.vue`, `GuidedStep.vue`, `GradePointMeter.vue` | `AGENTS.md:209-210` §7 | 30 | **Four of the five scenario-driven components `AGENTS.md` §7 names do not exist.** Only `ResourceStrip.vue` is present. §7 also pins `ResourceStrip.vue:14` as the `scenarioLabel` prop line — the surviving half of a five-item list |
+| `CONSTRAINTS.md` | `AGENTS.md:88`, `CLAUDE.md:10`, `DESIGN.md:882` | 201 | **Tracked but deleted, uncommitted.** `git status` = ` D CONSTRAINTS.md`. The root pointer stub `AGENTS.md` §3 still lists in its documentation map is gone from the working tree |
+| `PLAN.md` | `AGENTS.md:91` | 58 | Same: ` D PLAN.md` |
+| `tailwind.config.js` | `ARCHITECTURE.md:20`, `DESIGN.md:878` | 9 | Absent. Tailwind v4 is CSS-first, so the file was correctly removed — the citation was not updated |
+| `resources/views/runs/show.blade.php` | `SCREEN_SPEC.md:455` | 27 | Absent. Also `catalog/show.blade.php` (15×), `welcome.blade.php` (10×), `components/layout.blade.php` (8×), `runs/create.blade.php` (10×) — **`AGENTS.md` §1 says "4 Blade files only"** and §13 calls `resources/views/components/` empty since B1, yet the spec corpus still names five retired Blade views as live surfaces |
+| `docs/research-scratch/GOVERNANCE.md` | `KNOWN-ISSUES.md:2653` | 56 | Absent. `AGENTS.md` §2 and §3 name the gate registry as a **section of** `docs/research-scratch/GOVERNANCE.md` (which **is** present), not a root file. Cited by its retired path |
+| `docs/research-scratch/GOVERNANCE.md` | `KNOWN-ISSUES.md:2653` | 43 | Same folding |
+| `docs/research-scratch/GOVERNANCE.md` | `docs/UMAMUSUME_REFERENCE.md:145` | 31 | Absent; cited as a live master |
+| `DESIGN.md` | `DESIGN.md:30`, `:884` | 57 | Absent. `DESIGN.md` cites a predecessor of itself at a path that no longer exists |
+| `docs/research-scratch/DESIGN-CORPUS.md` | `DESIGN.md:887` | 73 | Same — the single most-cited absent path in the corpus |
+| `resources/js/pages/Runs/Show.vue` | `KNOWN-ISSUES.md:2172` | 47 (38 + 9) | Absent. `KNOWN-ISSUES.md` itself uses the past tense ("which owned the equivalent forms") — the cite is historical, the path is dead |
+| `resources/js/trainee-combobox.ts` | `AUDIT-AND-VERIFICATION.md:918` | 19 | Absent |
+| `resources/js/app.ts` / `app.js` | `frontend-development-plan.md:291`, `AUDIT-AND-VERIFICATION.md:629` | 20 | Both absent. `AGENTS.md` §6 names `resources/js/spa.ts` as the entry; the plan cites the pre-2.0 entry |
+| `tools/screenshots.py` + `screenshots_selftest.py` | `PROCESS-PLANS.md:7333` | 22 | Both absent |
+| docs/proposals/provenance-and-absence-contracts.md | `docs/audits/rice-shower-unity-cup-round2-reconciliation.md:1511` | 15 | `D` in the working tree — tracked, deleted uncommitted |
+| `App\Actions\UpsertCharacterCard` | `CATALOG-ROSTER-WORKSTREAM.md:2016` | 1 class | Absent. The only genuine absent class in the corpus |
+| `route('run')` | `frontend-development-plan.md:1249` | 1 route | Absent against the 85 parsed route names. Either a prose abbreviation or a stale name |
+
+**Four scenario guides are in the same state as `CONSTRAINTS.md`** — `docs/proposals/Our-Grand-Concert-plan.md` (22×),
+`docs/proposals/Trackblazer-plan.md` (12×), `docs/proposals/URA-Finale-plan.md` (10×), `docs/proposals/Unity-Cup-plan.md` (10×) are all
+**tracked and deleted uncommitted** (`git status` ` D`), and `config/scenarios.php` prose plus the metadata
+reports cite them by path. A peer is mid-move; until it lands, 54 citations read as drift that may in fact be a
+relocation.
+
+#### 4.2 Claimed completions not in the tree
+
+The archetype, cross-referenced from `full-audit-2026-10-16.md` §4 B6 and re-confirmed here: a Report-class
+document claims **`WriteTeamStateRequest` (Unity Cup)** landed. `grep -rn WriteTeamStateRequest app/ tests/
+routes/` → **zero hits**; no such file. The capability exists under a different name —
+`StoreTrainingRunRequest.php:85` validating `team_name`, reached by `routes/web.php:195 runs.update`.
+
+Six further Report-class completions are **closed in the working copy but not at HEAD** (`metadata.ruleset`,
+KI-102/103/104, the four locator fixes, `AGENTS.md`'s clean encoding). Those are a landing gap rather than a
+false completion, and the mechanism that makes them look like drift is the same one behind §4.1's deleted files:
+the working tree and HEAD disagree.
+
+#### 4.3 Claimed behaviors not in the code
+
+**Not swept.** Behaviour claims are not decidable by a path test and were explicitly left out of the instrument.
+The one contradiction found by reading, not sweeping, is `TurnChoice.php:72 'Fell' => false` against
+`TrainingDecisionController.php:548` "penalty field has to appear for `Poor Rest` and `Fell` exactly as it does
+for `Failure`" — recorded as `full-audit-2026-10-16.md` §9 D-14.
+
+#### 4.4 Claimed test coverage that does not exist
+
+| Claim | Source | Reality |
+|---|---|---|
+| "`tests/Feature/CareerTrainingDetailTest.php` (10 cases…)" | `SCREEN_SPEC.md:2180` | **21** cases |
+| "`tests/browser/career-training-detail.spec.ts` (6 cases…)" | `SCREEN_SPEC.md:2180` | **14** cases |
+| "`tests/Feature/AncestryNodePickerTest.php`" | `KNOWN-ISSUES.md:1743` | **file absent** |
+| "`tests/Feature/RunGoalsPanelTest.php`" | `KNOWN-ISSUES.md:1920` | **file absent** |
+| "`run-detail.spec.ts`" | `KNOWN-ISSUES.md:2206` (18×) | **file absent** |
+
+### 5. Undocumented surfaces
+
+672 code surface files across 16 directories; **92 are named by no `.md` in the corpus.**
+
+| Directory | Undocumented | 
+|---|---|
+| `database/migrations/` | 25 |
+| `tests/Feature/` | 23 |
+| `tests/browser/` | 9 |
+| `resources/js/pages/Career/Cockpit/Panels/` | 6 |
+| `resources/js/components/Form/` | 6 |
+| `tests/browser/pages/` | 4 |
+| `resources/js/components/scenario/` | 3 |
+| `app/Services/DataPipeline/Contracts/`, `app/Enums/`, `app/Console/Commands/`, `resources/js/components/`, `tests/Unit/`, `config/` | 2 each |
+| `app/Actions/`, `app/Http/Controllers/…`, `resources/js/components/review/` | 1 each |
+
+#### The headline: a MariaDB subsystem in a SQLite-only project
+
+| Path | Kind | Size | Docs reference | Verdict |
+|---|---|---|---|---|
+| `app/Console/Commands/MigrateToMariaDb.php` | artisan command | 2,691 B | **none** | **UNDOCUMENTED-LIVE** — a registered `Command` class |
+| `app/Actions/MigrateToMariaDbAction.php` | action | 8,217 B | **none** | **UNDOCUMENTED-LIVE** — instantiated at `MigrateToMariaDb.php:25` |
+| `config/mysql-backup.php` | config | 414 B | **none** | **UNDOCUMENTED-LIVE** |
+| `tests/Feature/MariaDbBackupTest.php` | feature test | 2,927 B | **none** | **UNDOCUMENTED-LIVE** |
+| `app/Console/Commands/UmaDbGuard.php` | artisan command | — | **none** | **UNDOCUMENTED-LIVE** (registration not traced) |
+| `app/Enums/CareerPhase.php`, `CareerYear.php` | enums | — | **none** | **not caller-verified** |
+| `app/Services/DataPipeline/Contracts/SupportCardSourceParser.php`, `SupportEffectSourceParser.php` | contracts | — | **none** | **not caller-verified** — `AGENTS.md` §8 names `Contracts\SourceParser` but not these two |
+| `config/filesystems.php` | config | — | **none** | framework default |
+| 3 framework migrations (`users`, `cache`, `jobs`) | migrations | — | **none** | **expected** — `AGENTS.md` §1 calls the `users` table an unused framework default |
+
+`grep -in "mariadb\|mysql" AGENTS.md` returns **nothing**. `grep -in mariadb ARCHITECTURE.md` returns **nothing**.
+`AGENTS.md` §1 states: **"SQLite only (`database/database.sqlite`, WAL + `busy_timeout`)"**. §11 permits no new
+package without owner approval, and §5's Floor bans undocumented surfaces in the same breath it bans suppressions.
+So ~14 KB of live, registered, tested MariaDB code sits outside every authority document in the repository.
+That is the pass's single strongest finding, and it is a Phase-5 finding — invisible to any forward reading of
+the docs.
+
+The other 79 undocumented files are bulk: migrations whose columns are read by models that name them
+differently, test files no report cites, and the `components/Form/` family that `full-audit-2026-10-16.md`
+Appendix B row T1-4 credits as **landed** while no `.md` names the individual files. Recommendation for the whole
+long tail: **a generated surface register**, not prose — `AGENTS.md` §3's file discipline forbids a new root doc,
+so `docs/research-scratch/INDEX.md` or a `composer docs` extension is where it belongs.
+
+### 6. Cross-file contradictions
+
+| Fact | Source A | Source B | Authoritative | Verdict |
+|---|---|---|---|---|
+| Database engine | `AGENTS.md` §1 "**SQLite only**" | `app/Console/Commands/MigrateToMariaDb.php` + `config/mysql-backup.php`, both live | **the code** (§2: "the code wins and the rule is stale") — but §2 also requires recording the conflict, and none is recorded | **UNRESOLVED** |
+| Blade surface count | `AGENTS.md` §1 "4 Blade files only", §13 "`resources/views/components/` is empty since B1" | `SCREEN_SPEC.md:455`, `DESIGN.md:387,513,801` name five retired Blade views | the tree | **UNRESOLVED** (docs stale) |
+| §7 component roster | `AGENTS.md:209-210` names 5 components | tree holds 1 | the tree | **UNRESOLVED** |
+| SCR-CAR-012 test counts | `SCREEN_SPEC.md:2180` says 10 / 6 | tree holds 21 / 14 | the tree | **UNRESOLVED** |
+| `StatBand.vue` | `frontend-development-plan.md:2107` "mid-migration… the tree disagrees" | `StatBand.vue` absent at both candidate paths | the tree | **RESOLVED by code, doc stale** |
+| 1536px wide step | `DESIGN.md:313` "Dashboard-only" | `DESIGN.md:325` dated erratum "Every screen renders the composition its configured mode names" | `DESIGN.md:325` — it names its own supersession and preserves the original | **RESOLVED** |
+| Dashboard grid cap | `DESIGN.md:317` "the Dashboard's grid no longer carries a page-level `max-w-*`" | `Dashboard.vue:139` `'grid w-full max-w-6xl …'` with `:135-138` defending it | unresolved owner question | **UNRESOLVED** (`full-audit` D-9) |
+| `Fell` as failure | `TurnChoice.php:72` `false` | `TrainingDecisionController.php:548` treats it as one | the tree, once one moves | **UNRESOLVED** (D-14) |
+
+### 7. Self-drift — docs that name their own drift
+
+| File | Correction | Names | Verdict |
+|---|---|---|---|
+| `DESIGN.md:325` | "Erratum 2026-10-16 (owner ruling)… supersedes its scope, not its record" | `DESIGN.md:313` | **Accurate and correctly shaped** — the original sentence is preserved verbatim per §11. But the erratum sits directly above `:317`'s grid-cap claim, which §6 shows the code contradicts. **A correction that names a source which is itself stale** |
+| `scenario-field-metadata-wiring-report-2026-10-16.md` §erratum | withdraws "the Rule family row prints a snake_case key" | `ScenarioSelectController::ruleFamilyLabel()` | **Accurate** — the method exists at `:208` and humanizes |
+| `KNOWN-ISSUES.md:2901` KI-104 | "FIXED IN TREE, NOT LANDED" | `UnityCupEditor.vue` | **Accurate** — HEAD still nests the `<details>`; the working copy does not |
+| `.scratch-uma/findings-capture-2026-10-16/` (not cited as evidence — the *record of it* in `KNOWN-ISSUES.md` is) | withdrawal of the snake_case reading | same | **Accurate**, consistent with the register |
+| `frontend-fidelity-2026-10-13.md:335-346` | presents Track 2 as awaiting owner rulings | five owner-signed `DESIGN.md` amendments | **Stale, and it carries no drift note** — unlike `DESIGN.md`, it did not record its own supersession (`full-audit` D-11) |
+| `frontend-development-plan.md:2107` | asserts a live `StatBand.vue` mid-migration | a file that no longer exists | **Stale, no drift note** (D-8) |
+
+The pattern worth naming: the documents that carry dated errata (`DESIGN.md`, `KNOWN-ISSUES.md`) are accurate;
+the ones that do not (`frontend-fidelity`, `frontend-development-plan`) are where the drift concentrates.
+`AGENTS.md` §11 already mandates the former discipline. The drift is compliance, not convention.
+
+### 8. What the docs claim that the code refutes
+
+The corpus makes **11,191 checkable repo-fact claims and 8,156 of them hold** — the documentation is broadly
+accurate, and any headline of "3,032 defects" would be a misread of my own instrument. What the refuted residue
+actually says is narrower and more useful: **the documentation corpus is anchored to a tree that has been
+restructured twice since it was written, and the restructurings were recorded in the code and in dated errata but
+not in the cites.** Four of the five scenario-driven components `AGENTS.md` §7 instructs an agent to reuse do not
+exist; §1 declares the Blade surface down to four files while `SCREEN_SPEC.md` and `DESIGN.md` still name five
+retired views as live; §3's documentation map lists `CONSTRAINTS.md` and `PLAN.md`, both tracked and deleted
+uncommitted, cited 259 times between them; and the folded masters the corpus still cites by their pre-folding root
+paths — `docs/research-scratch/GOVERNANCE.md`, `docs/research-scratch/GOVERNANCE.md`, `docs/research-scratch/GOVERNANCE.md`,
+`docs/design-research/{DESIGN,CONSTRAINTS}.md` — account for ~260 rows against `AGENTS.md` §17's own rule to cite
+the master and its anchor instead. Add two claimed-but-absent test files, a spec that undercounts its own screen by
+11 and 8 cases, and one Report claiming a request class that has never existed. None of this is fabrication; it is
+rot, and it is concentrated in exactly the files that do not carry dated correction notes.
+
+### 9. What the code holds that the docs do not name
+
+92 of 672 surface files are named nowhere in the corpus. Three-quarters of that is an acceptable long tail —
+framework-default migrations, per-slice tests no report quotes, the `components/Form/` family that a plan credits
+as landed without naming its members. But the head of the list is not. **`app/Console/Commands/MigrateToMariaDb.php`,
+`app/Actions/MigrateToMariaDbAction.php`, `config/mysql-backup.php` and `tests/Feature/MariaDbBackupTest.php` —
+about fourteen kilobytes of live, registered, tested MariaDB code — appear in no document in this repository**,
+including the two that would own the question: `AGENTS.md`, which states in its first section that the project is
+SQLite-only, and `ARCHITECTURE.md`, which owns the schema. There is no ADR for it, no erratum, no `KI` entry and no
+register line. A reader following the documentation would conclude the MySQL driver does not exist in this project
+and would be wrong. `app/Console/Commands/UmaDbGuard.php`, two enums (`CareerPhase`, `CareerYear`) and two
+`DataPipeline` contracts (`SupportCardSourceParser`, `SupportEffectSourceParser`) are undocumented alongside it.
+The reverse-direction finding is the more dangerous half of this pass, because nothing in the docs — and therefore
+nothing in any agent's context — points at it.
+
+### 10. Coverage: what was and was not done
+
+| Phase | Status |
+|---|---|
+| 1 classify every `.md` | **Not done as specified.** Classification needs a per-file read of 129 files. The corpus was instead bucketed by directory and by whether it is repo-fact-bearing; the sweep covered all 129 regardless of class |
+| 2 extract claims | **Partial — 3 of 15 kinds** (path, class, route), mechanical, all 129 files |
+| 3 cross-reference | Done for those 3 kinds, with two instrument bugs found and corrected |
+| 4 absence findings | Done for path/class/route claims; §4.3 behaviour **not swept** |
+| 5 undocumented surfaces | **Done** — 672 files, 92 unnamed |
+| 6 contradictions | **Sampled**, not exhaustive — 8 found by reading, 3 of them new to this pass |
+| 7 self-drift | **Sampled** — 6 entries |
+| 8 report | This file |
+
+**Batches not covered**, in the dispatch's order: per-file claim inventories for batches 1–8; SHA verification
+(`git cat-file -t` on every cited sha — hundreds of cites, none checked); test-count claims beyond `SCR-CAR-012`;
+config-key and env-key claims; enum-case claims; model-column and migration claims; source-citation claims
+(`UMAMUSUME_REFERENCE.md:178` style); the worktree `.md` sweeps (batches 1–7 against each of the five worktrees).
+A full pass at that granularity is a multi-session job, and this report does not claim to be one.
+
+### 11. Explicit stop
+
+No file was modified. Nothing was fixed, renamed, re-pointed or committed. The two scripts and their outputs live
+under `.scratch-uma/doc-drift-2026-10-16/` and are cited as **method**, never as evidence — every finding above
+was re-checked against the tree by a second instrument (the Grep tool or a direct `ls`), because a local hook in
+this environment strips single quotes from Bash arguments and that bug alone produced two false readings this pass.
+
+No gate ran: `php artisan test`, `route:list`, `migrate:status`, `pint --test`, PHPStan, `npm run typecheck`,
+`composer lore`, `composer lore-code`, `npm run build` and the browser suite are all **NOT RUN**. Route URLs, live
+behaviour and test outcomes therefore remain AMBIGUOUS by construction, and §4.3 and §10 say so rather than
+inferring them. Cross-model review was neither offered nor used.
+
+`DOC-DRIFT AUDIT COMPLETE — 129 .md files read, 11,191 claims extracted, 8,156 verified, 0 drifted (shape-drift
+not swept), 3,035 absent, 92 undocumented surfaces; report at docs/audits/doc-drift-audit-2026-10-16.md. No file changed.`
+
+#### Errata, 2026-10-16 (filed after the follow-up passes)
+
+One correction. Original text preserved above per `AGENTS.md` §11 — the erratum quotes the claim it supersedes,
+states the correction, then names the evidence.
+
+**E-10 — §4.1's "cites a predecessor of itself" row is overstated.** Original, the `DESIGN.md`
+row in §4.1: *"Absent. `DESIGN.md` cites a predecessor of itself at a path that no longer exists."* Correction:
+**both cites carry the word `formerly`**, so they are labelled historical pointers, not live references to a
+missing file. `DESIGN.md:30` reads "the consolidated research package, **formerly**
+`DESIGN.md`" and `:884` reads "**formerly** `DESIGN.md`". The path is
+indeed gone, but a reader is told so at the point of the cite. The row's *count* (57 rows against that token)
+stands; its *characterisation* as drift does not. This is the same class as the D-12 withdrawal filed in
+`full-audit-2026-10-16.md` — a citation that names a missing file is not automatically drift when the sentence
+itself marks it as superseded.
+
+Verified: `sed -n '28,32p' DESIGN.md` → "consolidated research package, formerly `DESIGN.md`";
+`sed -n '882,886p' DESIGN.md` → "`docs/research-scratch/DESIGN-CORPUS.md` section \"DESIGN.md\" (formerly
+`DESIGN.md`): measured ramps, contrast tables,".
+
+**Anchor note.** This audit was measured at `e845887`; the tree has since advanced to `23f9d64` (`cbb7df8` merged
+`feature/screenshot-registry`, plus four follow-up commits). The erratum is filed against the later tree; the
+audit body remains the record of the earlier read.
+
+---
+
+## full-audit-2026-10-16.md
+
+> **Consolidated 2026-10-24 (Round 19).** Source: `docs/audits/full-audit-2026-10-16.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/audits/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+
+## Full-audit pass — worktrees, claimed completions, scratch, drift
+
+**Stage 1 of 3.** Audit date 2026-10-16, measured against the live main repo `D:/Projects/umamusume-laravel13`
+on `master` at `e845887`. **Read-only: no tracked file was modified, no worktree created or removed, no
+scratch data moved, no owner decision answered, no slice started.**
+
+Phase 3 (fullstack 2.0), Phase 5 (owner queue) and Phase 6 (code backlog) were **not reached this pass**.
+The split is named in §12, not silent.
+
+#### Placement and supersession
+
+This report lives in `docs/audits/`. It does **not** belong in `docs/research-scratch-source/`, which holds
+knowledge gathered from and about *Umamusume Pretty Derby* itself — publisher datasets, scenario guides,
+catalogue exports, screenshot corpora. A repository audit is an inventory of this codebase, not game
+knowledge, and sits beside the `rice-shower-unity-cup-*` walk and reconciliation documents instead.
+
+A first version of this pass — 16 claims, ten sections — was written to `docs/audits/` at 17:32 today and is
+**superseded by this file**. Nothing was dropped in the consolidation: its owner queue is Appendix A, its code
+backlog is Appendix B, its 16 claim verdicts are a subset of §4's 29, and its 13 drift rows are a subset of §9's
+16. Two of its counts were corrected here: it reported **14 verified-closed / 0 false-closed**, which was true
+of its 16-claim list; against the 29-claim list this pass verified **23** and found **1** false-closed (§4 B6).
+
+---
+
+### 1. Scope and method
+
+#### Read and run (all read-only)
+
+| Instrument | Use |
+|---|---|
+| `git worktree list/status/log/show/diff/grep/cherry/ls-tree/merge-base/rev-list/remote` | surface state, containment, HEAD-vs-worktree comparison |
+| Read / Grep tools | every quoted-literal match, every count a verdict rests on |
+| Bash `grep`, `find`, `ls`, `du`, `wc`, `od`, `diff -q`, `sed -n` | single-stage only (see instrument note 2) |
+| `php -r` + PDO, SELECT and `pragma` only | `database/database.sqlite` reads for the Turn 67 verdict |
+| Two `general-purpose` subagents | Phase 5 and Phase 6, dispatched in parallel; their output is preserved in Appendix A with its own provenance |
+
+#### Not run, and why
+
+`npm run build` and the Playwright suite (KI-70/KI-73/KI-80: both write shared state and both void under
+contention). `php artisan test`, `pint --test`, PHPStan, `npm run typecheck`, `composer lore`,
+`composer lore-code`, `php artisan migrate:status`, `php artisan migrate` — this pass asserts **where code
+lives**, not whether the tree is green. **No gate was run and no pass is claimed anywhere below.**
+
+#### Six dispatch premises the tree refuted
+
+1. **`uma_musume_race_planner` is not the main tree** — it is a separate repository. See §2.
+2. **`D:/Projects/td-cockpit` is not a worktree.** No `.git`, absent from `git worktree list`, and
+   `git -C` answers `fatal: not a git repository`. See §3.
+3. **`uma_musume_race_planner-wt-citation` is not on a `citation-verify` branch.** It is on a **detached
+   HEAD** at `71bb5ed`. No branch named `citation-verify` exists.
+4. **A sixth surface was omitted.** `.kilo/worktrees/cherry-pet` on `worktree/cherry-pick` is a live
+   worktree, 3 commits ahead of `master`, 18 paths dirty, unmerged. Included in §3.
+5. **`.kilo/worktrees/dashing-fact` is not safe to remove.** Its HEAD is contained in `master`, but 58
+   paths are uncommitted, including `MM` (staged then further modified) entries and `D` deletions of five
+   `archive/adr/*` files. The premise holds for the commits, not the tree.
+6. **"Three container-query representatives (wizard 1/2/4, Cockpit 1/2/3, Database/Scenarios 1/2/2)" has no
+   referent.** Measured directly — see §4 row F13 — the container-query breakpoint counts on those three
+   surfaces match no reading of those triples.
+
+#### Two instrument notes that changed verdicts
+
+1. **A local hook strips single quotes from Bash arguments.** `grep -n "'ruleset'" f` executes as
+   `grep -n ruleset f`. This pass it produced *both* a false count (14, where the true count was 0) and a
+   false absence (`git grep "'ruleset'"` printing nothing). Every quoted-literal match in §4 and §9 was
+   retaken with the Grep tool. **Verdict F7 rests on the Grep tool plus `git show HEAD:`, not on Bash.**
+2. **`grep -c` counts lines, not occurrences.** The `AGENTS.md` § check reads 43 lines; the byte-level
+   record in `.scratch-uma/findings-capture-2026-10-16/ki-drafts-and-encoding-record.md:241-255` counts 72
+   occurrences. Both are reported, labelled, in F8.
+
+#### Pass-1 → pass-2 deltas (same session, same HEAD, recorded because they are findings)
+
+- Main-tree dirty paths: **124 → 137** during this pass. A peer is writing now. Every dirty count below is
+  stamped `17:4x local`.
+- `SpiritBurstsPanel.vue` was reported by pass 1 as "the component file stays on disk" without a path. This
+  pass located it: `resources/js/pages/Career/Cockpit/Panels/SpiritBurstsPanel.vue` (tracked, present at
+  HEAD). Pass 1's check of `components/scenario/` and `components/career/` found nothing and was wrong to
+  stop there.
+- Pass 1 graded `WriteTeamStateRequest` never; this pass finds the named class **absent** (B6, FALSE-CLOSED).
+- Pass 1's F4 quote `TurnChoice.php:72` and this pass's `TurnChoice.php:68` are the same method — the file
+  moved under peer edits between readings; the `'Fell' => false` arm is still at `:72`.
+
+---
+
+### 2. Main repo disambiguation
+
+**`D:/Projects/umamusume-laravel13` is the live main repo.** `D:/Projects/uma_musume_race_planner` is a
+**different repository**, not a stale checkout of this one.
+
+| | `umamusume-laravel13` | `uma_musume_race_planner` |
+|---|---|---|
+| `.git` last written | 2026-10-16 17:33 (today) | 2026-09-30 20:56 (16 days stale) |
+| `git remote -v` | `github.com/IzzatFirdaus/**umamusume-laravel13**.git` | `github.com/IzzatFirdaus/**uma_musume_race_planner**.git` |
+| Branch | `master` @ `e845887` | `main` @ `72074fc` |
+| `git log -3` | `e845887 fix(wizard): toggle the scenario choice with the selected card` · `64fc4b8 fix(wizard): deselect the chosen trainee…` · `71bb5ed chore(gitignore): ignore merge-preservation scratch…` | `72074fc chore: add project meta files (AGENTS, ARCHITECTURE, PRD, CONTRIBUTING)` · `65bc8d9 docs: refresh D01-D05 specifications to v3.0` · `676e486 test: add security, import-export, and accessibility coverage` |
+| Registered worktrees | **6** (below) | 0 of the five surfaces |
+
+**How they relate:** different remotes, different default branches, no shared object store. The legacy repo is
+the *planner* application — its `72074fc`-era stack is Alpine + Blade, which `AGENTS.md` §17 names as one of
+the four retired originals consolidated into Trainer Desk. It is not a mirror of this tree and must never be
+treated as the main working copy.
+
+**Why the naming confuses:** the two `-wt-` worktrees are *directories* named after the legacy repo
+(`uma_musume_race_planner-wt-citation`, `…-wt-deselect`) but are *registered to the live repo* — verified by
+`git -C <path> rev-parse --git-common-dir` returning `D:/Projects/umamusume-laravel13/.git` for both. Any
+report citing "the main tree at `uma_musume_race_planner`" while discussing a deselect or citation slice is
+describing a laravel13 worktree whose parent repo is laravel13, not the legacy planner.
+
+---
+
+### 3. Worktree inventory
+
+All five registered worktrees plus the main tree resolve `--git-common-dir` to
+`D:/Projects/umamusume-laravel13/.git`. `td-cockpit` does not.
+
+| Worktree | Branch | HEAD | Ahead of master | vs `origin/master` (behind/ahead) | Dirty | Scratch (MB) | Merged? |
+|---|---|---|---|---|---|---|---|
+| `umamusume-laravel13` | `master` | `e845887` | 0 | 0 / 11 | **137** | yes, 60+ session dirs | n/a |
+| `uma_musume_race_planner-wt-citation` | **(detached HEAD)** | `71bb5ed` | 0 | 0 / 9 | **73** | 2.7 | HEAD merged; its dirty work is a **superseded earlier reading** |
+| `uma_musume_race_planner-wt-deselect` | `deselect-fix` | `71bb5ed` | 0 | 0 / 9 | **6** | 35 | HEAD merged; the slice itself landed on `master` as `64fc4b8`/`e845887` |
+| `umamusume-laravel13-screenshot-registry` | `feature/screenshot-registry` | `dbc54f4` | **2** | 87 / 2 | 0 (clean) | none | **NOT merged** |
+| `.kilo/worktrees/dashing-fact` | `dashing-fact` | `1266182` | 0 | 85 / 0 | **58** | none | HEAD merged; **58 paths uncommitted — not removable** |
+| `.kilo/worktrees/cherry-pet` | `worktree/cherry-pick` | `7da9898` | **3** | 387 / 3 | **18** | none | **NOT merged** |
+| `D:/Projects/td-cockpit` | **none — not a git repo** | n/a | n/a | n/a | n/a | no | n/a |
+
+`.scratch-uma/` is gitignored in every tree at `.gitignore:91` (`/.scratch-uma/`).
+
+#### Purpose, from the branch and the commit subjects
+
+- **citation / deselect** — both sit at `71bb5ed`, whose log is `71bb5ed chore(gitignore)…` ·
+  `b00691b chore: untrack scratch and agent-config files swept in by git add -A` ·
+  `53e491a Merge branch 'cockpit-wt'` · `04bb402 Preserve stranded concurrent-session work before merging
+  cockpit-wt`. Both were branched off the merge-preservation point for the wizard deselect arc.
+  `git cherry master deselect-fix` is **empty** and `master..deselect-fix` is **empty** — the branch has no
+  commits of its own; all its work is uncommitted.
+- **screenshot-registry** — `dbc54f4 Screenshot registry: terminal state (Phases 16-18)` ·
+  `193f7c4 feat(registry): screenshot registry work through v10 Phase 16`. Clean and tracking its own remote.
+- **dashing-fact** — `1266182 test(browser): say what the disclosure guard actually catches` ·
+  `d627349 test(support): move the deck analysis pin onto the settled plural`. Dirty set includes
+  `MM DESIGN.md`, `MM KNOWN-ISSUES.md`, `MM CatalogController.php`, `MM ReviewController.php`,
+  `MM app/Services/DeckAnalysis.php`, and `D` on five `archive/adr/*` plus two
+  `docs/Trainer-Docs-2.0-*-Prompts.md`.
+- **cherry-pet** — NativePHP desktop integration (`3e22cbe feat(nativephp): add NativeAppServiceProvider…`,
+  `d9a5267 feat: NativePHP desktop integration work`), plus 16 untracked `nativephp/electron/*` paths and
+  `scripts/`. This is a **desktop-packaging branch that `AGENTS.md` §12 does not contemplate** (loopback-only,
+  no deploy path) and it is unmerged.
+- **td-cockpit** — ownership provenanced to session **a430** (referenced only in
+  .scratch-uma/a430/h14-prompt.md, `shots*.mjs`, `wt-spec*.log`; zero references in any tracked file).
+  Top level holds `README.md`, `SCREEN_SPEC.md`, `SKILL.md`, `VERSION.md`, `tsconfig.json`,
+  `vite.config.js`, `node_modules` (**a symlink to the main tree's**), and `public/`, `resources/`, `routes/`,
+  `storage/`, `test-results/`, `tests/`, `tools/`, `vendor/`. **Absent: `app/`, `bootstrap/`, `config/`,
+  `database/`, `artisan`, `.env`, `composer.json`, `package.json`** — so it cannot boot Laravel. `public/` is
+  empty; `test-results/.last-run.json` reads `{"status":"passed","failedTests":[]}` (16 Oct 01:08);
+  `storage/framework/views/` holds compiled Blade. `diff -q` against the main tree shows divergence across
+  most of `resources/js` and `tests/`, and it still carries `resources/js/components/scenario/UraPanel.vue`,
+  which the main tree replaced with `UraDuelPanel.vue`. **Verdict: a stale, non-bootable frontend-only scratch
+  copy of an earlier tree.** Its only unique content is that obsolete `UraPanel.vue`.
+
+#### Cross-worktree overlap
+
+Three surfaces modify the same five scenario-field paths:
+
+```
+app/Http/Controllers/Career/ScenarioSelectController.php
+app/Services/Career/SetupDraft.php
+resources/js/pages/Career/ScenarioSelect.vue
+tests/Feature/CareerScenarioSelectTest.php
+tests/browser/career-scenario-select.spec.ts
+```
+
+| Surface | Diffstat on the set |
+|---|---|
+| citation worktree | Controller 68++ · SetupDraft 28++ · ScenarioSelect.vue 41++ → **124 insertions, 13 deletions** |
+| deselect worktree | Controller 20± · SetupDraft 15++ · ScenarioSelect.vue 25± → **37 insertions, 23 deletions** |
+| main tree (working) | Controller 68++ · ScenarioSelect.vue 43++ · Feature test 60++ · browser spec 43++ → **191 insertions, 23 deletions** (`SetupDraft.php` clean; `scenarioRecorded()` already committed) |
+
+File-by-file, main working copy vs citation working copy: `SetupDraft.php` **IDENTICAL**;
+`ScenarioSelectController.php` differs by 20 lines; `ScenarioSelect.vue` by 27; `CareerScenarioSelectTest.php`
+by 57; `career-scenario-select.spec.ts` by 30.
+
+Also shared with the citation worktree's dirty set (73 paths) and the main tree's (137): `Cockpit.vue`,
+`UnityCupEditor.vue`, `TrainingCard.vue`, `ScenarioPanel.vue`, `NextDecision.php`, `VeteranRow.php`,
+`routes/web.php`, `DESIGN.md`, `KNOWN-ISSUES.md`, `AGENTS.md`, and 12 test files. **No authority is decided
+here.** The reading the numbers support is that citation is an earlier state of the wiring the main tree has
+since extended, and that the citation worktree carries no work the main tree lacks — but that is not proven
+per-hunk and must not be acted on as if it were.
+
+---
+
+### 4. Claimed completions verified
+
+29 claims. "Landed" = present at `HEAD` = `e845887`. "in tree" = working copy only, **uncommitted**.
+
+#### Frontend (20)
+
+| # | Claim | Evidence | Landed? | Verdict |
+|---|---|---|---|---|
+| F1 | Scenario deselect | `app/Services/Career/SetupDraft.php:90 scenarioRecorded()`; consumed `ScenarioSelectController.php:57`; affordance `resources/js/pages/Career/ScenarioSelect.vue:283` `'Selected · clear'`; pinned `tests/Feature/CareerScenarioSelectTest.php:209,224,235-237` | yes (`64fc4b8`,`e845887`) | **VERIFIED-CLOSED** |
+| F2 | Trainee deselect | `resources/js/pages/Career/TraineeSelect.vue:201,203,204` — `deselect` nulls `umamusume_id` and `character_card_id` | yes (`64fc4b8`) | **VERIFIED-CLOSED** |
+| F3 | SpiritBurstsPanel regression | Root cause now located: `ScenarioPanel.vue:79` carries the comment that the Phase 7A.1 `register(… , SpiritBurstsPanel)` against the **widget** key `spirit_bursts` is removed; component retained at `resources/js/pages/Career/Cockpit/Panels/SpiritBurstsPanel.vue` (tracked, present at HEAD); regression case `tests/browser/career-cockpit-forms.spec.ts:194-195` | yes | **VERIFIED-CLOSED** |
+| F4 | Team editor duplicate fixed | **HEAD is still nested:** `git show HEAD:…/UnityCupEditor.vue` has `<details>` at 78, `Edit team state` at 80, `</details>` at 168, inside `Cockpit.vue:759 <details data-region="team-state">` with the same summary at `:764`. **Working copy:** `UnityCupEditor.vue` root is `<form>` at `:81` with the caller-owns-disclosure comment at `:76-80` | **no** (`git diff --stat` 13±) | **PARTIALLY-CLOSED.** Missing: the commit, and the two strict-mode cases at `career-cockpit-forms.spec.ts:161,225` were never re-run |
+| F5 | `team_rank_ladder` unshadow | `ScenarioPanel.vue:66 register('team_rank_ladder', UnityCupPanel)`; gated live at `CockpitController.php:144` and `:2448`; `config/scenarios.php:375 'team_rank_ladder' => true` for Unity Cup | yes | **VERIFIED-CLOSED.** The single-`Map` hazard it depends on is unfixed (`registry.ts:19`) and `SCREEN_SPEC.md:2979` still assigns it to the shell owner |
+| F6 | Rule family label humanized | `ScenarioSelectController::ruleFamilyLabel()` at `:208` (a `match` returning `Repetition`, `Team rank`, `Repetition + purchases`, `default => ucfirst(str_replace('_',' ',$key))`), fed from `facility_level_source` at `:155-157`; row at `ScenarioSelect.vue:242-243`; pinned `ScenarioMetadataTest` + `career-scenario-select.spec.ts:111,136,145,147` | yes | **VERIFIED-CLOSED** |
+| F7 | `metadata.ruleset` deleted | Grep tool, pattern `'ruleset'`, path `config/scenarios.php`: **no matches.** At HEAD it is live: `git show HEAD:config/scenarios.php` line 379 = `'ruleset' => 'Team',` | **no** | **VERIFIED-CLOSED (in tree only)** |
+| F8 | `AGENTS.md` encoding clean | 61,700 bytes / 618 lines. First three bytes `23 20 41` — **no BOM**. Double-encoded `C3 83 C2` = **0**; literal `Â` = **0**. `§` on **43 lines** (byte-level record says **72 occurrences** — different units, both true) | **no** — file is ` M`; HEAD is a different clean reading (61,537 bytes, 70 `§`) | **VERIFIED-CLOSED** |
+| F9 | KI-102 filed | `KNOWN-ISSUES.md:2778`, status line `FILED 2026-10-16 (close-out pass…), OPEN` | **no** — `git show HEAD:KNOWN-ISSUES.md` count = 0 | **VERIFIED-CLOSED (in tree only)** |
+| F10 | KI-103 filed | `KNOWN-ISSUES.md:2834`, `FILED 2026-10-16 (findings capture pass), OPEN` | **no** — 0 at HEAD | **VERIFIED-CLOSED (in tree only)** |
+| F11 | KI-104 filed | `KNOWN-ISSUES.md:2901`, `FILED 2026-10-16 (findings capture pass), FIXED IN TREE, NOT LANDED` | **no** — 0 at HEAD | **VERIFIED-CLOSED (in tree only)** |
+| F12 | TrainingCard progressive-disclosure refactor | `resources/js/components/career/TrainingCard.vue` (26.0K), imported `TrainingDetail.vue:34`, rendered `:459-467` with `scenario-label`, `deck-recorded`, `chosen`, `turn`. Migration residue resolved: `StatBand.vue` matches at **neither** `components/` nor `components/career/` | yes | **VERIFIED-CLOSED** |
+| F13 | Three container-query representatives (wizard 1/2/4, Cockpit 1/2/3, Database/Scenarios 1/2/2) | Measured the triples directly: `Cockpit.vue` `@4xl`=15, `@5xl`=12, `@2xl/@3xl/@7xl`=0, `@container`=0; `Database/Scenarios.vue` `@5xl`=1 only; `Database/Index.vue` none; `SetupLayout.vue` `@container`=1 only; `ScenarioSelect.vue` `@4xl`=1, `@7xl`=1; `TraineeSelect.vue` none. **No reading of any breakpoint matches the stated triples.** `grep -rn "1/2/2" docs/ .scratch-uma/` = 0 hits; `grep -rni representatives docs/` = 0 hits | — | **NOT-REACHABLE-IN-AUDIT.** The claim has no referent in this tree. Settle it with `git log --all -S"1/2/4" --oneline` and by asking which report minted the triple |
+| F14 | Settings copy names compositions | `resources/js/pages/Preferences/Edit.vue:389` `"Bento composition. Grouped cards at the default shell width (1152px)."`; `:399` `"Wide bento composition… (1536px)."`; `:408` `"Focused composition. A single reading column…"`; labels at `:387,397,406` read Standard/Wide/Compact | yes | **VERIFIED-CLOSED** — with the copy defect in §9 D-10 |
+| F15 | `DESIGN.md` erratum recorded | `DESIGN.md:325` begins `**Erratum 2026-10-16 (owner ruling).** The Dashboard-only scope of the 1536px wide step… is superseded` | yes | **VERIFIED-CLOSED** |
+| F16 | Scenario metadata wiring (8 fields) | The 8-row table at `docs/research-scratch-source/scenario-field-metadata-wiring-report-2026-10-16.md` §1 names `ruleset_version`, `recommended_use`, `rule_family`, `planning_focus`, `expected_gains`, `energy_cost`, `risk`, `team_rank`. Tree confirms rows 1–4 render on Scenario Select (`ScenarioSelect.vue:202,219,229,230,242-243` + the metadata block) and row 8 needed no change (`TeamRankGauge` + `config team_rank_ladder`) | **mixed** — rows 1–4 depend on the uncommitted F7 wiring | **VERIFIED-CLOSED**, with one caveat: only **3** rows carry a `data-field` marker (`summary`, `description`, `recommended_use`), so the other five are addressed by label text, not a stable hook |
+| F17 | Rest/Recreation turn choices | `app/Enums/TurnChoice.php:29 case Rest = 'rest'`, `:30 case Recreation = 'mood'`, worded at `:41-42`, branch rule at `:52-56`; both recorded through the same form at `career-training-detail.spec.ts:500` and `:542` | yes | **VERIFIED-CLOSED** — and it refutes the `SCREEN_SPEC.md:2110` clause (§9 D-5) |
+| F18 | Four locator fixes | `git diff` on the two named specs (**37 insertions, 6 deletions**, `scenario-panel.spec.ts` 9±, `trackblazer-panel.spec.ts` 34±) shows exactly four: (1) `getByRole('img')` + `.first()` → `getByRole('img', { name: /Team Rank: not recorded/ })`; (2) `#purchase-item-error` → `#error-purchase-item`; (3) `getByRole('alert')` → `getByRole('alert').filter({ hasText: /not recorded/i })`; (4) `#purchase-cost-error` → `#error-purchase-cost` | **no** — uncommitted | **VERIFIED-CLOSED (in tree only)** |
+| F19 | Phase 7A.1 unshadowings | `ScenarioPanel.vue:69 register('grade_objectives', TrackblazerPanel)`, `:70 …('shop'…)`, `:71 …('epithet_routes'…)` | yes | **VERIFIED-CLOSED** |
+| F20 | Heading em-dash fix + two de-dashes | The two-de-dash commit is `0b6a8a8 Scrub two em dashes swept into Stage 1 (A.5 follow-up)` and its stat is **`docs/UMAMUSUME_REFERENCE.md \| 2 +-`, one file, 1 insertion 1 deletion** — documentation, not a heading. No rendered heading carries an em dash: `grep -rn "<h1\|<h2\|<h3" resources/js --include=*.vue \| grep —` = **0 hits**. The bar is enforced by `tests/Feature/RenderedCopyHygieneTest.php:177 'ships no em dash or en dash in rendered copy'` plus four browser specs (`career-cockpit.spec.ts:195`, `career-race-strip.spec.ts:173`, `career-training-detail.spec.ts:150`, `catalog-detail.spec.ts:83`) | partly (`0646381 fix(copy)…`) | **PARTIALLY-CLOSED.** The end state is clean and gated; the *named* heading fix is not identifiable in history and the "two de-dashes" landed in a doc, not a heading |
+
+#### Backend (9)
+
+| # | Claim | Evidence | Landed? | Verdict |
+|---|---|---|---|---|
+| B1 | Turn 67 facility ladder on run 25 | PDO read of `database/database.sqlite`: `turn_entries` **id=22, training_run_id=25, turn=67**, `facility_speed=4, facility_stamina=4, facility_power=4, facility_guts=5, facility_wit=4`; `mood=GREAT`, `energy=NULL`, `choice=NULL`, created `2026-10-15 11:11:19`. Run 25 = `umamusume_id=30`, `scenario=unity_cup`, `status=Active`, and holds exactly one entry (`max(turn)=67, count=1`) | yes | **VERIFIED-CLOSED.** Note `energy` and `choice` are NULL on the row |
+| B2 | `TurnChoice::outcomes()` Verdict B applied | `app/Enums/TurnChoice.php:68 outcomes(): array` returns `Rest => ['Success'=>false,'Poor Rest'=>true]`, `Recreation => ['Lifted'=>false,'No Change'=>false,'Fell'=>false]`, `default => ['Success'=>false,'Failure'=>true]`; consumed through the payload shape at `TrainingDecisionController.php:551` | yes | **PARTIALLY-CLOSED.** The method exists and the docblock at `:60-66` records the intent, but **`'Fell' => false` at `:72` directly contradicts `TrainingDecisionController.php:548`**, which states "penalty field has to appear for `Poor Rest` and `Fell` exactly as it does for `Failure`". One of the two is wrong; this is the same unresolved `Fell` question in §12 Appendix A row 39 |
+| B3 | `facilityLevels()` walk-back | `TrainingDecisionController.php:490 private function facilityLevels(TrainingRun $run): array`, called at `:110` and threaded through `:142`, `:151`, `:200`, `:222`, `:378`, `:402` | yes | **VERIFIED-CLOSED** |
+| B4 | Pre-fill from `write.previous` | `TrainingDecisionController.php:533` ("`previous` is the latest logged row, offered as a placeholder and never as a value"), shape at `:551`, built at `:581` | yes | **VERIFIED-CLOSED** |
+| B5 | Veteran portrait (identity frame, not chosen form) | `app/Services/Legacy/VeteranRow.php:90 public static function portraitUrl(?TrainingRun $run): ?string`, called at `VeteranController.php:132` under the comment at `:130` that names it as the single owner for the detail header and the library row | yes | **VERIFIED-CLOSED** |
+| B6 | `WriteTeamStateRequest` (Unity Cup) | **The class does not exist.** `grep -rn WriteTeamStateRequest app/ tests/ routes/` = 0 hits; no file at `app/Http/Requests/` or `app/Http/Requests/Career/`. The Unity Cup team write is served by **`StoreTrainingRunRequest`** — `app/Http/Requests/StoreTrainingRunRequest.php:85 'team_name' => ['nullable','string','max:255']` — reached by `routes/web.php:195 Route::put('/training-runs/{run}', [TrainingRunController::class,'update'])->name('runs.update')` → `TrainingRunController::update(StoreTrainingRunRequest $request, TrainingRun $run)` at `:657`, which is the `action` `UnityCupEditor.vue` posts to | n/a | **FALSE-CLOSED.** The named artefact is absent. The *capability* exists under a different class name — one request object serves run create, run update and the team-state write |
+| B7 | `Preference` settings blob (D18b) | `app/Models/Preference.php:43 const KEYS = ['theme','failure_estimate','settings']`; `:46` names "the keys the `settings` blob carries (SCREEN-024, the D18b slice plan)"; `:113 settings(): array`; `:140 put('settings', json_encode(…, JSON_THROW_ON_ERROR))` | yes | **VERIFIED-CLOSED** |
+| B8 | `ScenarioCaps::hardCap()` | `app/Services/ScenarioCaps.php:83 public static function hardCap(): int`, used at `:120` and `:201`; ceiling also read as `config('scenarios.hard_cap')` at `:57` and `:167` | yes | **VERIFIED-CLOSED.** Two read paths to the same number — `hardCap()` and the raw `config()` at `:57`/`:167` — which `ADR-0015` and `AGENTS.md` §8 say must both go through the single owner |
+| B9 | `BackupDatabase` action + `UmaBackup` command | Both files exist: `app/Actions/BackupDatabase.php` (2.7K), `app/Console/Commands/UmaBackup.php` (1.1K) | yes | **PARTIALLY-CLOSED on coverage.** The artefacts exist, but `git grep -l "uma:backup\|BackupDatabase" -- tests/` returns **no file** — the only backup test is `tests/Feature/MariaDbBackupTest.php`, which matches on `hardCap`-adjacent grep noise and is named for a driver this project does not use (`AGENTS.md` §1: SQLite only). Command-level test coverage is unproven |
+
+#### Counts
+
+**23 VERIFIED-CLOSED · 4 PARTIALLY-CLOSED (F4, F20, B2, B9) · 1 FALSE-CLOSED (B6) · 1 NOT-REACHABLE (F13).**
+
+Of the 23, **six are in the working copy only and are not at HEAD**: F4's neighbour claims F7, F9, F10, F11,
+F18, and F8's clean state. A peer commit or a `git add -A` round-trip can erase them. This is the highest-value
+finding in the pass.
+
+---
+
+### 5. Fullstack 2.0 state — NOT AUDITED THIS PASS
+
+Phase 3 (§3.1 controllers, §3.2 requests/models/services/actions/enums, §3.3 schema, §3.4 pipeline,
+§3.5 routes, §3.6 config, §3.7 quality bar, §3.8 ADR coverage, §3.9 tests by layer, §3.10 lang, §3.11 tools,
+§3.12 legacy Blade) is **Stage 2**. It was not attempted rather than attempted thinly; §12 names the split.
+
+What this pass touched in passing, offered as **provisional pointers for the Stage-2 pass, not as verdicts**:
+
+| Layer | Provisional observation, with the one cite I actually measured |
+|---|---|
+| Controllers | `CockpitController.php` is ≥ 2,650 lines (methods cited at `:144`, `:683`, `:2437`, `:2448`, `:2470`, `:2500`, `:2579`, `:2634`) against `AGENTS.md` §7's "thin controllers" rule. Stage 2 should size every controller, not just this one |
+| Requests | `StoreTrainingRunRequest` serves create **and** update **and** the Unity Cup team write (B6). Whether that is one boundary or three is a §3.2 question |
+| Data layer | `turn_entries` carries `facility_*`×5, `energy_band`, `choice`, `decision_snapshot`, `corrected_from`, `superseded_by`; run 25's only row has `energy`/`choice` NULL. Column-vs-reader mapping is unread |
+| Config | `hardCap` is reachable two ways (B8). `config/dashboard.php:8` carries a known-bad `DESIGN.md` cite (§9 D-1) |
+| Routes | `routes/web.php:136 runs.show` is a **redirect-only** method (`TrainingRunController::redirect`) and `:139-140` comments state it is kept as a "compatibility doorway pending the owner's ruling on the redirect itself". Orphan/redirect census unread |
+| Tests | `AGENTS.md` §11's "`down()` proof" is recorded in project memory as an open repo-wide gap. Not re-checked |
+
+---
+
+### 6. Misplaced scratch data
+
+`D:\.scratch-uma` — all five sub-answers.
+
+1. **Content.** Three top-level directories, **no loose files**:
+
+   | Entry | Files | Size | Newest write | Classification |
+   |---|---|---|---|---|
+   | `scenario-field-wiring-2026-10-16/build-check/` | 108 (105 `.js`, 2 `.css`, 1 manifest `.json`) | 1.3M | 2026-10-16 03:07 | Vite build output |
+   | `spirit-bursts-panel-regression/build-check/` | 108, same shape | 1.3M | 2026-10-16 03:34 | Vite build output |
+   | `team-editor-fix/build-check/` | 108, same shape | 1.3M | 2026-10-16 05:15 | Vite build output |
+
+   324 files, 3.9M total. No SQLite, no logs, no source files, no `.exit` sidecars.
+
+2. **Ownership.** Written by the three sessions that also own same-named directories under the repo tree.
+   Reference sweep: `git grep` for `D:\.scratch-uma` / `D:/.scratch-uma` across all tracked files — **zero
+   hits**; the same pattern across the four reachable worktrees — **zero hits**; a bounded working-tree sweep
+   excluding `node_modules`, `vendor`, `.git`, `storage` — **zero hits**. Caveat, stated plainly: the one
+   *unbounded* sweep exceeded its timeout and was backgrounded; it completed with an empty result body.
+   Absence is proven on tracked files and on the bounded sweep, not over every untracked byte.
+
+3. **Link type.** **Real directory.** `ls -la` shows `drwxr-xr-x` with no `l` bit; `cmd //c dir /AL "D:\\"`
+   lists `.scratch-uma` as `<DIR>`, not `<JUNCTION>` or `<SYMLINK>`, with no reparse entry at that level. Its
+   three children are likewise real directories. There is no link to redirect or break.
+
+4. **Collision.** The three names **also** exist under `…umamusume-laravel13\.scratch-uma\`, with
+   **disjoint contents** and **zero filename collisions**, so no `sha256` comparison was required:
+
+   | Session dir | Repo copy | D-drive copy |
+   |---|---|---|
+   | `scenario-field-wiring-2026-10-16` | 17 files, 99M (13 gate logs incl. three 33M `lore-docs` dumps, `browser-8141.sqlite`) | `build-check/` only |
+   | `spirit-bursts-panel-regression` | 15 files, 38M (logs, 2 scratch SQLite, `capture.mjs`, 2 PNGs) | `build-check/` only |
+   | `team-editor-fix` | 8 files, 35M (logs, `browser-8147.sqlite`) | `build-check/` only |
+
+   None of the repo copies contains a `build-check/` directory.
+
+5. **Verdict: `SAFE-TO-MOVE`.** All three conditions the dispatch sets hold — no live references, no
+   divergence on collision, no symlink ambiguity.
+
+   **Operational caveat, and it is load-bearing:** the destination directories already exist, so this is a
+   **merge, not a rename**. `mv /d/.scratch-uma/<s> <repo>/.scratch-uma/` would nest
+   (`…/<s>/<s>/build-check`). The correct move addresses the inner directory:
+
+   ```
+   mv /d/.scratch-uma/<session>/build-check  D:/Projects/umamusume-laravel13/.scratch-uma/<session>/build-check
+   ```
+
+   Nothing was moved. The dispatch requires the owner to pre-approve the specific move, and §9 of
+   `AGENTS.md` makes `.scratch-uma/` layout an owner rule.
+
+---
+
+### 7. Owner-decision queue — SEE APPENDIX A (Stage 3)
+
+Not re-derived this pass. The 45-row queue measured **earlier in this same session, at the same HEAD
+`e845887`**, is carried in Appendix A with its provenance line. Its counts were re-derived this pass by reading
+every row: **29 OPEN · 13 RESOLVED-UPSTREAM · 2 WITHDRAWN · 1 UNDETERMINED (= 45)**. The 32/11 figure the queue
+arrived with summed to 46 against a 45-row table and was wrong on both terms; row 6 moved separately, from OPEN
+to RESOLVED-UPSTREAM, once `acff64d` and `app.css:441` were found. The table has not been re-validated against
+the 140-path dirty tree, and the Stage-3 pass should re-check rows 3, 5, 7, 13, 40 and 41 first — those are the
+rows whose evidence this pass found to be in motion.
+
+### 8. Code backlog — SEE APPENDIX B (Stage 3)
+
+Not re-derived this pass. The 53-row backlog table measured earlier in this session at the same HEAD is
+preserved in Appendix B with counts **33 LANDED · 15 PARTIAL · 5 NOT-STARTED** after this pass reclassified
+T1-6, plus the six places the plan's own status contradicts the tree.
+
+---
+
+### 9. Documentation drift
+
+| # | Item | Current line, quoted | Confirmed? |
+|---|---|---|---|
+| D-1 | `config/dashboard.php:8` cites `DESIGN.md:210-221` | `* \`wide_bento_enabled\` defaults to true now that the DESIGN.md:210-221 shell-width ruling` | **CONFIRMED.** `DESIGN.md:210-221` is the tail of the 40-roles token-family table and the `### 2.2 Typography` heading. The shell-width ruling is at `:300-320`. The comment also names `wide_bento`, which `useLayout.ts:9-13` documents as a **retired** stored value |
+| D-2 | `AppLayout.vue:366` cites `DESIGN.md:197-208` | `<!-- The ratified shell measure (DESIGN.md:197-208): the error documents constrain` | **CONFIRMED.** `:197-208` is the same token-family table, not a width ruling |
+| D-3 | `NextDecision.php:548`, `:567` em dashes | `:548 "A training session costs {$cost[0]} to {$cost[1]} Energy — declared as a range because it "` · `:567 "config('advisor.constants.{…}') — a declared constant printed as read, not a "` | **CONFIRMED.** Byte check on those two lines: 2 × `E2 80 94`. `AGENTS.md` §5 bans the em dash in shipped copy and both strings reach the advisor rail. Pre-existing, not introduced by this arc |
+| D-4 | `SCREEN_SPEC.md:2180` SCR-CAR-012 case counts | ``Tests: `tests/Feature/CareerTrainingDetailTest.php` (10 cases: …) and `tests/browser/career-training-detail.spec.ts` (6 cases: …)`` | **CONFIRMED, and worse than reported.** Grep-tool counts: the feature file holds **21** top-level cases (doc says 10); the browser spec holds **14** (doc says 6) |
+| D-5 | `SCREEN_SPEC.md:2110` first clause | `Rest and Recreation have no 2.0 surface of their own: they are turn choices, not training options` | **CONFIRMED misleading.** Narrowly true (`TrainingDetail.vue:138` "they get no card"), but the same file at `:27` says they are "offered beside the five cards", and `career-training-detail.spec.ts:500`/`:542` pin both as recording turns through the live form. The clause reads as an absence the tree refutes |
+| D-6 | `TrainingRunController::turnChoices()` doubled `/**` | `:492     /**` · `:493     /**` | **CONFIRMED.** Two consecutive docblock openers before prose at `:494-499` |
+| D-7 | `git add -A` hazard on `AppLayout.vue`, `Cockpit.vue` | both ` M` in the main tree; `git diff --stat main master` on them = **142** and **886** lines | **CONFIRMED, and it already fired once:** `b00691b chore: untrack scratch and agent-config files swept in by git add -A`. The tree is 137 paths dirty across at least five sessions, and `DESIGN.md:316` says "the measure lives on `main` in `AppLayout.vue`", so a blanket stage would pull a second branch's 142-line variant into a `master` commit |
+| D-8 | `frontend-development-plan.md:2107` | asserts a live "`StatBand.vue` mid-migration into `CareerStatePanel.vue` and `TrainingCard.vue`. The tree disagrees" | **NEW / CONFIRMED stale.** `StatBand.vue` matches at neither path. Needs a dated correction, not an in-place rewrite (§11) |
+| D-9 | `DESIGN.md:317` vs `Dashboard.vue:139` | doc: "the Dashboard's grid no longer carries a page-level `max-w-*`"; code: `'grid w-full max-w-6xl mx-auto …'` with a comment at `:135-138` defending the cap | **NEW / CONFIRMED.** Code and bar disagree. §2 says code wins and the rule is stale — filed as an owner decision rather than silently rewritten either side |
+| D-10 | Settings vocabulary split | `Preferences/Edit.vue:389,399,408` hints name "Bento / Wide bento / Focused composition"; labels at `:387,397,406` read Standard / Wide / Compact; `useLayout.ts:6-13` documents the first three as retired **stored values** | **NEW / CONFIRMED.** Displayed copy describes the new modes in the retired vocabulary |
+| D-11 | `frontend-fidelity-2026-10-13.md:335-346` | presents Track 2 as needing an owner amendment for every clause | **NEW / CONFIRMED stale.** `DESIGN.md` carries five owner-signed amendments (`:286,348,358,819,1117`) |
+| D-12 | `registry.ts:4` | `* The scenario panel registry (plan M-BM-'9 E1).` | **NEW.** A mangled cross-reference (`-` substituted for the dash) inside a cite. Cosmetic, but the cite resolves to nothing |
+| D-13 | `KI-100` heading collision | `KNOWN-ISSUES.md:2694` `## KI-100 Twenty-two stored career objectives…` and `:2820` `### KI-100 — Workflow guardrails added…` | **NEW / CONFIRMED.** Two different entries share number 100 at two heading levels. Flagged at `ki-drafts-and-encoding-record.md:10-11` and unfixed; §11 forbids renumbering, so the shape needs an owner ruling |
+| D-14 | **new this pass:** B2 enum-vs-comment contradiction | `TurnChoice.php:72 'Fell' => false` vs `TrainingDecisionController.php:548` "penalty field has to appear for `Poor Rest` and `Fell` exactly as it does for `Failure`" | **CONFIRMED.** A code-comment and the enum it describes disagree about whether `Fell` is a failure. One must move |
+| D-15 | **new this pass:** B9 untested command | `git grep -l "uma:backup\|BackupDatabase" -- tests/` → no file | **CONFIRMED.** `AGENTS.md` §10 lists `uma:backup` as the pre-migration safety net (§11 calls it mandatory before `migrate:fresh --seed`) and it has no command-level test |
+| D-16 | **new this pass:** reports cite the wrong main tree | `uma_musume_race_planner` appears in prior reports as "the main tree"; it is a different repository with a different remote (§2) | **CONFIRMED.** A citation that points at the retired legacy repo is a navigation defect, not a documentation one |
+
+---
+
+### 10. What the next pass can start immediately
+
+From `OPEN`, `NOT-STARTED`, `SAFE-TO-MOVE`, `FALSE-CLOSED`, `PARTIAL` and `ORPHANED` only. No item widens scope.
+
+1. **Land the six uncommitted closures** — `UnityCupEditor.vue` (F4), the `metadata.ruleset` removal in
+   `config/scenarios.php` (F7), `KNOWN-ISSUES.md` KI-102/103/104 (F9–F11), and the four locator fixes (F18).
+   All written, all one commit from `HEAD`, all on paths other sessions also dirty. **Stage explicit paths;
+   never `git add -A`** (D-7, and `b00691b` is the precedent).
+2. **Move the three `build-check/` directories** per §6 step 5, once the owner approves the specific move.
+3. **Resolve D-14** — `TurnChoice.php:72` versus `TrainingDecisionController.php:548` on `Fell`. This is a
+   one-line contradiction with a documented authority (`DESIGN-CORPUS` D-200/D-201/D-205).
+4. **Fix the six cited-line drifts** D-1, D-2, D-4, D-5, D-6, D-12 — stale cites and one doubled `/**`. None
+   changes behavior.
+5. **Retire the phantom artefact B6** — either rename `StoreTrainingRunRequest` usage in the reports, or build
+   the `WriteTeamStateRequest` the claim names. The claim as written describes a class that does not exist.
+6. **Add the missing `uma:backup` test** (D-15) — the command is the documented safety net before a
+   destructive migration and currently has no command-level test.
+7. **Run Stage 2 (Phase 3)** — the fullstack audit. Start at §3.5 routes and §3.3 schema; §3.1 should open
+   with the `CockpitController.php` size question surfaced in §5.
+8. **SCREEN-014's two absent modules** (Readiness Summary, Training-vs-Recovery) and **SCREEN-016's two**
+   (race-vs-training comparison, late-career planning) — PARTIAL with named missing halves, beside files that
+   already exist.
+9. **dev-plan 6.3 and 7.2** — the same quality-gate record counted twice, both NOT-STARTED, no dependencies.
+
+### 11. What still needs the owner
+
+1. **Pre-approval of the scratch move** — §6 is `SAFE-TO-MOVE` but the dispatch requires owner sign-off on
+   the specific move.
+2. **`Fell` as a failure outcome** (D-14 / Appendix A row 39) — the enum and its controller comment disagree.
+3. **KI-102 fix shape** — three options; the register recommends replacing the MySQL block (Appendix A row 43).
+4. **KI-103 direction** — make the `saved` path live or delete it, and if live, **which of the two written
+   semantics governs the step bar** (row 44).
+5. **Dashboard `max-w-6xl` vs `DESIGN.md:317`** (D-9) — the code decided; the bar says it did not. One must be
+   re-ruled in writing.
+6. **T2-F four-level hierarchy** (row 13) — open, with no evidence found either way; possibly a question
+   without a referent.
+7. **The fidelity §9 nine questions** (rows 14–22) and the **ux-laws §10 eight** (rows 23–30), including
+   whether the HLF is the target of record.
+8. **dev-plan §11 risks 7, 9, 10 and §4.1 items** (rows 32–36).
+9. **Worktree disposition** — `dashing-fact` (58 uncommitted) is not removable as assumed;
+   `feature/screenshot-registry` (2 commits) and `worktree/cherry-pick` (3 commits, NativePHP desktop
+   packaging that `AGENTS.md` §12's loopback-only model does not contemplate) are unmerged; `td-cockpit` is a
+   stale non-worktree copy. Nothing was touched.
+10. **`KI-100` double heading** (D-13) — renumbering is barred by §11, so only the owner can settle the shape.
+
+### 12. Explicit stop, and the split this pass named
+
+**Reached this pass (Stage 1):** Phase 1 worktree inventory and reconciliation; Phase 2 claimed-completion
+verification, 29 rows; Phase 4 misplaced-scratch verdict, five sub-answers; Phase 7 documentation drift,
+seven named items verified plus eight new.
+
+**NOT reached — deferred, with the stage the dispatch assigns:**
+
+| Phase | Scope deferred | Stage | What it needs |
+|---|---|---|---|
+| **3** | Fullstack 2.0, §3.1 controllers · §3.2 requests/models/services/actions/enums · §3.3 schema · §3.4 data pipeline · §3.5 routes · §3.6 config · §3.7 quality bar · §3.8 ADR coverage incl. `ADR-0020` · §3.9 tests by layer · §3.10 `lang/en` · §3.11 tools · §3.12 legacy Blade | **Stage 2** | A dedicated pass. §3.1 alone enumerates every method of every controller against every route; §3.3 needs `php artisan migrate:status`, which this pass deliberately did not run |
+| **5** | Owner-decision queue re-derived against the 137-path dirty tree | **Stage 3** | Re-validation of Appendix A rows 3, 5, 7, 13, 40, 41 first |
+| **6** | Code backlog re-derived | **Stage 3** | Re-validation of Appendix B against `frontend-development-plan.md` §4 as it now stands | <!-- census: quoted-original -->
+
+Deferred rather than done thinly: a Phase 3 pass that cannot run `migrate:status` or read every controller
+method would produce the kind of confident-but-unmeasured inventory this whole arc exists to stop.
+
+This pass fixed nothing, moved nothing, committed nothing, answered no decision and started no slice. **No gate
+was run and no suite is claimed to pass** — `php artisan test`, `pint --test`, PHPStan, `npm run typecheck`,
+`composer lore`, `composer lore-code`, `migrate:status` and the browser suite are all **NOT RUN**, by design.
+
+Cross-model second opinion was **not offered and not used**; the fresh-context substitute was the two
+independent document agents whose five conflicting rows this pass re-measured directly, and the pass-1 →
+pass-2 deltas recorded in §1.
+
+**`AUDIT COMPLETE — 23 verified-closed, 1 false-closed across frontend + backend; 29 open owner decisions (re-counted from the 45-row table, not re-validated against the tree); 5 unstarted slices (carried); scratch SAFE-TO-MOVE; report at docs/audits/full-audit-2026-10-16.md. No file changed.`**
+
+---
+
+#### Errata, 2026-10-16 (filed after the follow-up passes)
+
+Nine corrections were checked. Five have a matching original in this file and are filed below; four do not, and
+are reported under **"Checked, no matching original"** rather than invented. Original text is preserved above per
+`AGENTS.md` §11 — each erratum quotes the claim it supersedes, states the correction, then names the evidence.
+
+**E-2 — §4 F6 is not landed.** Original, the F6 row: `Landed?` = **yes**, verdict `**VERIFIED-CLOSED**`.
+Correction: `ruleFamilyLabel|rule_family` matches **3** times in the working copy and **0** at `HEAD`;
+`ScenarioSelect.vue` reads `metadata.ruleset` **0** times in the working copy and **1** at `HEAD`. The fix lives
+only in the working tree, so F6's verdict is **VERIFIED-CLOSED (in tree only)**, not closed. The row's own
+§3 header rule — "Landed = present at `HEAD`" — was violated by this cell.
+Verified: `grep -c "ruleFamilyLabel\|rule_family" app/Http/Controllers/Career/ScenarioSelectController.php` → 3;
+`git show HEAD:…ScenarioSelectController.php | grep -c …` → 0;
+`grep -c metadata.ruleset resources/js/pages/Career/ScenarioSelect.vue` → 0;
+`git show HEAD:…ScenarioSelect.vue | grep -c metadata.ruleset` → 1.
+
+**E-3 — §4 F16 is not landed, and F6/F7/F16 are one uncommitted unit.** Original, the F16 row: `Landed?` =
+"mixed — rows 1–4 depend on the uncommitted F7 wiring", verdict `**VERIFIED-CLOSED**`. Correction: at `HEAD`,
+`ruleset_date` and `rule_family` return **0** matches in `ScenarioSelect.vue` and `ruleset_version` returns **0**
+in `config/scenarios.php`, while the six pre-existing metadata fields (`recommended_use` 2, `planning_focus` 2,
+`key_mechanics` 4, `description` 2) are present. **Two of the eight fields are absent at `HEAD`**, so F16 is
+working-copy-only too. The consequence the follow-up pass established: **F6, F7 and F16 are a single
+interdependent uncommitted unit, and F7 cannot land alone** — deleting `'ruleset' => 'Team'` from the config while
+`HEAD`'s Vue still reads `card.metadata.ruleset` would render `undefined`. This is why the F7 hold in the
+follow-up pass was correct and is now explained rather than merely asserted.
+Verified: `for f in ruleset_date rule_family; do git show HEAD:resources/js/pages/Career/ScenarioSelect.vue | grep -c "$f"; done` → 0, 0.
+
+**E-4 — §9 D-12 is withdrawn.** Original, the D-12 row: *"`registry.ts:4` — a mangled cross-reference (`-`
+substituted for the dash) inside a cite. Cosmetic, but the cite resolves to nothing."* Correction: the line reads
+`* The scenario panel registry (plan §9 E1).` — a clean U+00A7 SECTION SIGN. The `M-BM-'` reported here was
+`cat -A` rendering that UTF-8 sequence under a non-UTF-8 locale. **Instrument artifact, not drift.** D-12 is
+withdrawn and the follow-up pass's no-op on it was correct.
+Verified: `python -c "print(open('resources/js/components/scenario/registry.ts',encoding='utf-8').read().splitlines()[3].encode('unicode_escape').decode())"` → ` * The scenario panel registry (plan \xa79 E1).`
+
+**E-5 — §3's dirty-path read has a blind spot: `git diff HEAD` drops `MM` paths.** Original, §3's dirtiness
+method and its `MM` observations (the dashing-fact worktree row naming `MM DESIGN.md`, `MM KNOWN-ISSUES.md`,
+`MM CatalogController.php`, `MM ReviewController.php`, `MM app/Services/DeckAnalysis.php`). Correction: a path
+that is **staged and then further modified** shows content under `git diff --cached` while `git diff HEAD`
+returns nothing for the *staged* portion, so a snapshot built from `git diff HEAD` alone silently drops those
+paths. Any dirty-path count derived that way is an undercount. A fourth layer — `staged-vs-head.diff` — is
+required. The main tree currently holds **0** `MM` paths, so the blind spot could not be re-demonstrated here;
+the evidence is the five `MM` paths §3 itself recorded in the dashing-fact worktree.
+Verified: `git status --porcelain | grep -c "^MM"` → 0 (main tree), against §3's five recorded in the worktree.
+
+**E-7 — the base ref for a temporary worktree is local `master`, not `origin/master`.** Original, §3's table
+column header `vs origin/master (behind/ahead)`, which treats `origin/master` as the reference point.
+Correction: `origin/master` is **18** commits behind local `master` (it was 11 when this audit was written), so a
+runbook that branches a temporary worktree off `origin/master` and then expects `--ff-only` to succeed cannot —
+the branch is stale on arrival. **The correct base ref is local `master`.**
+Verified: `git rev-list --left-right --count origin/master...master` → `0  18`.
+
+##### Checked, no matching original — reported, not filed
+
+Four of the nine corrections name a claim that **does not appear in this file**. They are reported here so the
+reader knows they were checked; no quote was invented to house them.
+
+| ID | Searched for | Result |
+|---|---|---|
+| E-1 | `No \`main\``, `no \`main\``, `main branch` | **Not present.** §2's table describes the *legacy* repo `uma_musume_race_planner` as `main @ 72074fc`, which is correct. The live repo does have a `main` branch (`ef1f29d chore: remove empty favicon placeholder`, an ancestor of `master`) that neither audit mentions — an **omission**, not a false claim, so there is nothing to correct |
+| E-6 | `worktree remove`, `tail` | **Not present.** The trap (a destructive git invocation piped to `tail` reports the pipe's exit code, masking a half-succeeded removal) is real and worth recording, but this audit never made the claim it would correct. Recorded as a rule, not an erratum: **read a destructive git invocation without a pipe** |
+| E-8 | `228011e` | **Not present** in either audit file. This audit was written before that commit was discussed, so it carries no account of when it landed. `git merge-base --is-ancestor 228011e HEAD` exits 0 — it is old history in `master`, not a commit that landed during the audited pass |
+| E-9 | `scratch-umera` across `docs/` and `.scratch-uma/` | **Zero hits.** No file in the tree carries that typo, so no erratum can be anchored to it |
+
+##### Anchor note
+
+This audit was measured at `e845887`. The tree has since advanced to **`23f9d64`**: `cbb7df8` merged
+`feature/screenshot-registry` into `master`, and four follow-up commits sit on top — `7788b03` (F4 landed),
+`c816625` (F18/F19 landed), `958cf47` (D-1 landed), `23f9d64` (`UmaBackupTest` added). The errata above are
+filed against the later tree; the audit body above remains the record of the earlier read, and its verdict
+counts (`23 verified-closed`, `1 false-closed`) stand as counts **for that read** — E-2 and E-3 move two of the
+23 from landed to working-copy-only, which the counts do not encode and should not be silently rewritten to.
+
+---
+
+### Appendix A — owner-decision queue (45 rows)
+
+**Provenance: measured earlier in this same session, 2026-10-16, against `master` @ `e845887`, by a
+fresh-context subagent and reconciled by direct re-measurement where it conflicted with Appendix B. NOT
+re-validated against the current 137-path dirty tree. Stage 3 owns re-validation.**
+
+Two source-numbering corrections found: the fidelity doc's Track 1 / Track 2 / questions are §5, §6 and §9;
+the ux-laws questions are §10 and its four-law gap §2.1, both as cited. Three consolidated audits
+(ux-laws-report-cockpit-wizard-2026-10-13.md, remaining-screens-ui-audit-2026-10-13.md,
+setup-wizard-ui-audit-2026-10-12.md) are **no longer files** — folded verbatim into
+`docs/research-scratch/AUDIT-AND-VERIFICATION.md` (anchors `:8726`, `:9154`, `:9551`, `:10204`), so all such
+rows cite the master.
+
+| # | Source (§) | Decision | Verdict | Evidence |
+|---|---|---|---|---|
+| 1 | fidelity §5 T1-1 | "Apply the ratified shell measure … `mx-auto w-full max-w-5xl`" | RESOLVED-UPSTREAM (shape changed) | `useLayout.ts:20-24` preference-driven map; `DESIGN.md:311-317` |
+| 2 | fidelity §5 T1-2 | Land the type scale; `#title` → `text-2xl`, section headers → `text-lg` | RESOLVED-UPSTREAM | `AUDIT-AND-VERIFICATION.md:10379` (`209e05e`, `4d31de4`); `TrainingDetail.vue:457` |
+| 3 | fidelity §5 T1-3 | Dark ramp real separation, measured non-text step ≥ 3:1 | **OPEN** | ramp shipped `app.css:343-348`; the ≥3:1 measurement is recorded nowhere |
+| 4 | fidelity §5 T1-4 | One form-control treatment across input/select/checkbox | RESOLVED-UPSTREAM | `components/Form/` = 9 entries; `BaseInput.vue:105` `min-h-11` + shared border/focus |
+| 5 | fidelity §5 T1-5 | Densify where the data already exists | **OPEN** | no measured dead-space reduction recorded |
+| 6 | fidelity §5 T1-6 | Spend the motif budget; enamel once per screen | RESOLVED-UPSTREAM | `acff64d feat(components): the enamel sheen goes back to one control per screen`, recorded in `bf91d18 docs(slice-records)… the enamel budget`; `DESIGN.md:375` "primary action button only"; then `app.css:441` **"Enamel is gone (2026-10-15). The variant named for the gloss was collapsed into `primary`"**, and `248e51b fix(errors): make the error pages' secondary anchors read as secondary` explains the three surviving `enamel` classes at `views/errors/404:49`, `419:46`, `500:43`. **Corrected this pass** — an earlier reading called this OPEN on the strength of a zero-count in `resources/js`, which was the deliberate removal, not an omission |
+| 7 | fidelity §5 T1-7 | Finish empty / loading / error states (C-7, ADR-0007) | **OPEN** | states per page (`Dashboard.vue:178,182`); no sweep records "every data view"; `AUDIT-AND-VERIFICATION.md:10012` F-F1 lists four screens `title`-only |
+| 8 | fidelity §6 T2-A | Radius scale 6/10/14/16/999 | RESOLVED-UPSTREAM | `DESIGN.md:348-353` owner-signed 2026-10-14; `527cfeb` |
+| 9 | fidelity §6 T2-B | Sparing elevation for overlays only | RESOLVED-UPSTREAM | `DESIGN.md:358-366` owner-signed 2026-10-15; `app.css:300-303` |
+| 10 | fidelity §6 T2-C | Display type tier (self-hosted face) | **WITHDRAWN** | `DESIGN.md:280-284` "closed permanently"; no `@font-face` ships |
+| 11 | fidelity §6 T2-D | Wider semantic colour vocabulary | RESOLVED-UPSTREAM | `DESIGN.md:286` amended to `--color-primary-action`; `:1117` |
+| 12 | fidelity §6 T2-E | Motion budget above 1 | RESOLVED-UPSTREAM | `DESIGN.md:819-821` MOTION 2, owner-signed 2026-10-15 |
+| 13 | fidelity §6 T2-F | Adopt the four-level visual hierarchy | **OPEN** | no `DESIGN.md` passage states one; both agents' cites land on unrelated text |
+| 14 | fidelity §9 Q1 | "Which product is it?" serious analytics vs optimistic, game-adjacent, modern | **OPEN** | `frontend-fidelity-2026-10-13.md:390-392` |
+| 15 | fidelity §9 Q2 | Radius and elevation — adopt the 2.0 scale and sparing shadows? | **OPEN (elevation half only)** | `:393-394`; both ruled in rows 8–9 |
+| 16 | fidelity §9 Q3 | Display type — is C-8 approval worth a self-hosted face? | **WITHDRAWN** | closed by `DESIGN.md:280-284` |
+| 17 | fidelity §9 Q4 | Sequencing — Track 1 as one slice, or wait for approved Track 2? | **OPEN** | `:398-399` |
+| 18 | fidelity §9 Q5 | Where does the amendment live — `DESIGN.md` §2 rewrite or a new ADR? | **OPEN** | `:400-402` |
+| 19 | fidelity §9 Q6 | HLF wizard simplification — do per-stat, ancestry and deck editors move or cut? | **OPEN** | `:403-405` |
+| 20 | fidelity §9 Q7 | HLF badge colours — adopt lime/amber, or map status to existing tokens? | **OPEN** | `:406-407` |
+| 21 | fidelity §9 Q8 | What is the target of record — does the HLF become it? | **OPEN** | `:408-409` |
+| 22 | fidelity §9 Q9 | Does the target adopt the official site's royal-blue chrome and pink CTA? | **OPEN** | `:410-414` |
+| 23 | ux-laws §10 Q1 | One table or two — restate §13 to the canonical 27? | **OPEN** | `ux-laws-audit-plan-2026-10-13.md:486-489` |
+| 24 | ux-laws §10 Q2 | The four laws §13 omits — in scope? | **OPEN** | `:490-492` |
+| 25 | ux-laws §10 Q3 | Zeigarnik and the step bar — change the label or the state model? | RESOLVED-UPSTREAM | `AUDIT-AND-VERIFICATION.md:10238-10240` (ruling C-1, `4a5ff88`) |
+| 26 | ux-laws §10 Q4 | `Measure` budget — full four-width capture on ~50 routes, or the reduced pass? | **OPEN** | `:497-499` |
+| 27 | ux-laws §10 Q5 | Register — confirm "cite existing `F-xx`/`X-n`, add no new entry"? | **OPEN** | `:500-502` |
+| 28 | ux-laws §10 Q6 | Is the HLF the canonical comparison surface? | **OPEN** | `:503-507` |
+| 29 | ux-laws §10 Q7 | The client's alert channels — record as convention, or out of scope? | RESOLVED-UPSTREAM | `AUDIT-AND-VERIFICATION.md:10421-10426` |
+| 30 | ux-laws §10 Q8 | Method of record — adopt the 0-10/0-4 rating alongside PASS/PARTIAL/FAIL? | **OPEN** | `:513-517` |
+| 31 | ux-laws §2.1 | Four canonical laws absent from §13 (Continuity, Closure, Common Fate, Experience) | **OPEN** | `ux-laws-audit-plan-2026-10-13.md:95-98` |
+| 32 | dev-plan §11 risk 7 | Energy records as a band — extend C2 to a band input, or accept the refusal state? | **OPEN** | `frontend-development-plan.md:2378-2382`. Write path exists (`StoreTurnEntryRequest.php:129-133`, `TurnEntry.php:125`, spec `:422`); the ruling is still owed |
+| 33 | dev-plan §11 risk 9 | G3's Duel Panel has no recorded source — authorize a `TurnEntry` flag, or keep display-only? | **OPEN** | `:2391-2401` |
+| 34 | dev-plan §11 risk 10 | Place the gates under `ura_finale`'s config entry, or source them into the catalogue? | **OPEN** | `:2403-2414` |
+| 35 | dev-plan §4.1 item 6 | Does `BuildPurpose` gain a "Competitive Build" case? | **OPEN** | `:397`; `app/Enums/BuildPurpose.php:23-26` has four cases, none named that |
+| 36 | dev-plan §4.1 item 6 | Do risk tolerance and per-skill priority marks enter `BuildTargetPayload`? | **OPEN** | `:397-398` |
+| 37 | dev-plan §4.1 item 6 | Does `config/scenarios.php` gain a sourced `description` and `recommended_use`? | RESOLVED-UPSTREAM | `config/scenarios.php:146-147,483,560,565,957,962` |
+| 38 | dev-plan §4.1 item 6 | Should `our_grand_concert.documented` still read `true`? | RESOLVED-UPSTREAM | `frontend-development-plan.md:416-420` (E6 close-out) |
+| 39 | outcome-vocabulary pass | Is `Fell` a failure outcome? | **OPEN** | `TurnChoice.php:72 'Fell' => false` vs `TrainingDecisionController.php:548`. Both re-measured this pass; see §9 D-14 |
+| 40 | layout-width pass | "Database/Scenarios composition (1/2/2)" | **UNDETERMINED** | no referent — see §4 F13. `Database/Scenarios.vue:88` composes `@5xl:grid-cols-2`; `Database/Index.vue:45-66` single-column |
+| 41 | layout-width pass | Dashboard `max-w-6xl` cap — keep or retire? | **OPEN** | `Dashboard.vue:139` caps the grid, comment at `:135-138` defends it; `DESIGN.md:317` rules against. §9 D-9 |
+| 42 | layout-width pass | The six stranded wizard walks | RESOLVED-UPSTREAM | all six now cap: `ScenarioSelect.vue:136`, `TraineeSelect.vue:246,275`, `BuildTarget.vue:321,371`, `LegacySelect.vue:254,314`, `DeckSelect.vue:248,269`, `Preflight.vue:191,216`; was "five of six ignore the ratified form width" (`AUDIT-AND-VERIFICATION.md:9248-9260`) |
+| 43 | KI queue | KI-102 `.env.example` — which fix shape? | **OPEN** | `KNOWN-ISSUES.md:2778`; recommendation `:2802-2815` |
+| 44 | KI queue | KI-103 `SetupDraft::saved()` — make live, or delete? | **OPEN** | `KNOWN-ISSUES.md:2834`; the two disagreeing rules are `saved()`'s docblock vs the 2026-10-13 `visited()` ruling |
+| 45 | KI queue | KI-104 — land the written fix | **OPEN** | `KNOWN-ISSUES.md:2901,2905`; uncommitted diff `UnityCupEditor.vue` 13±; proof needs a rebuild-then-rerun of `career-cockpit-forms.spec.ts` on a quiet tree (KI-70 bars the rebuild while a peer works) |
+
+**Counts, re-derived by reading all 45 rows: 29 OPEN · 13 RESOLVED-UPSTREAM · 2 WITHDRAWN · 1 UNDETERMINED
+(= 45).** The figure carried in from the earlier pass, "32 OPEN · 11 RESOLVED-UPSTREAM", summed to 46 against a
+45-row table and was wrong on both terms; row 6 was separately reclassified from OPEN to RESOLVED-UPSTREAM once
+`acff64d` and `app.css:441` were found.
+
+Three OPENs (#43–45) are landing decisions, not design rulings. Two (#41, and #3's missing measurement) are
+doc-vs-code adjudications where the code already decided.
+
+---
+
+### Appendix B — code backlog (53 rows)
+
+**Provenance: measured earlier in this same session, 2026-10-16, against `master` @ `e845887`, by a
+fresh-context subagent; the five rows marked `*` were re-measured directly by this pass after the two agents
+disagreed on them. Plan checkbox state was ignored throughout — the tree is the source. NOT re-validated
+against the current 137-path dirty tree.**
+
+| Phase | Slice | Deliverable | State | Evidence |
+|---|---|---|---|---|
+| A0 | A0a | Reduced-motion, scroll-padding, skip link, 44px, `aria-current` | LANDED | `app.css:565,605`; `AppLayout.vue:368` |
+| A0 | A0b | Ported Vue pages carry loading/error + `lang="ja"` | LANDED | `Dashboard.vue:178,182` |
+| A0 | A0c | Live Blade screens get states, 44px, `lang="ja"` | LANDED (targets retired) | Blade screens gone by B1; `resources/views/` holds `app.blade.php` + `errors/` |
+| A0 | A0d | Error pages: heading, focus target, skip-to-main | LANDED | `views/errors/404.blade.php:34-39` (+419, +500) |
+| A0 | A0e | `DESIGN.md` declares WCAG 2.2 AA + the rubric | LANDED | `DESIGN.md:1015,1054` |
+| 1 | 1.1 | Stat denominator explicit, target vs ceiling | LANDED | `CareerStatePanel.vue:6,61,107`; `EventDecision.vue:218` |
+| 1 | 1.2 | Skills Planner empty-priority, no false "0 SP" | LANDED | `SkillsPlanner.vue:256-267`; `app/Services/SkillSpendCoverage.php` |
+| 1 | 1.3 | Run-scoped deck builder inbound path | LANDED | `TrainingDetail.vue:791`; `Cockpit.vue:585`; `routes/web.php:206` |
+| 1 | 1.4 | Energy-band write and display path | LANDED | `StoreTurnEntryRequest.php:129-133`; `TurnEntry.php:125`; `Cockpit.vue:213-214` |
+| 1 | 1.5 | UI write path for run identity fields | LANDED | `Cockpit.vue:390-426` |
+| 1 | 1.6 | Unity Cup state write path | LANDED | `UnityCupEditor.vue` → `runs.update`; gated `Cockpit.vue:766` |
+| 2 | 2.1 | Race Planner noise reduced, required races kept | PARTIAL | grouping `RacePlanner.vue:198`; placeholder disclosure absent (`RacePlanList.vue:72,112`) |
+| 2 | 2.2 | Dashboard multi-active-career context | LANDED | `Dashboard.vue:85` |
+| 2 | 2.3 | Safer, explicit turn corrections | LANDED | `Cockpit.vue:14-15,199-216` |
+| 3 | 3.1 | Trackblazer grade-point / shop state editing | LANDED | `TrackblazerPanel.vue:46,141-145,549-655` |
+| 3 | 3.2 | Grand Concert state-recording UI | PARTIAL | baseline strip only (`grand-concert-panel.spec.ts`); no state write |
+| 3 | 3.3 | Consistent scenario-panel shell + edit affordances | LANDED | `ScenarioPanel.vue:64-104` |
+| 4 | 4.1 | Result → Save Veteran clear, recoverable | LANDED | `Result.vue:78,352-361` |
+| 4 | 4.2 | Veterans / Legacy comparison usability | LANDED | `pages/Veterans/Compare.vue`, `pages/Legacy/Compare.vue` |
+| 4 | 4.3 | Catalog-to-career entry, retire transitional path | LANDED | `Catalog/Show.vue:122,408-419` |
+| 5 | 5.1 | Fix the Inertia progress-bar ARIA (KI-63) | LANDED | `spa.ts:17-20`; native bar `AppLayout.vue:255` |
+| 5 | 5.2 | Standardize loading / validation / empty / success | LANDED* | branches per page; the C-7 sweep is not recorded (Appendix A row 7) |
+| 5 | 5.3 | Verify mobile / compact career loop | LANDED | `accessibility.spec.ts`, `career-cockpit.spec.ts`, `career-race-planner.spec.ts` |
+| 6 | 6.1 | Complete new-career Playwright journey | LANDED | `full-career-journey.spec.ts` |
+| 6 | 6.2 | Scenario-isolation + partial-update regression | LANDED | `tests/Feature/ScenarioIsolationTest.php` |
+| 6 | 6.3 | Run the final quality gates and record | **NOT-STARTED** | no gate-record artefact |
+| 7 | 7.1 | Verify doc accuracy vs implementation | PARTIAL | close-outs only for Phases A–E (`:2561-2572`) |
+| 7 | 7.2 | Add the final quality-gate verification record | **NOT-STARTED** | no matching section or file |
+| 7 | 7.3 | Final documentation update and cleanup | PARTIAL | change log stops at 2026-10-08; "Deferred work" section still at `:3520` |
+| T1 | T1-1 | Ratified shell measure `max-w-5xl` | PARTIAL* | `useLayout.ts:20-24` is preference-driven; superseded (row 1) |
+| T1 | T1-2 | Type scale landed | LANDED* | `ScenarioSelect.vue:132`; `TrainingDetail.vue:457` |
+| T1 | T1-3 | Dark ramp real separation | PARTIAL* | ramp `app.css:343-348`; ≥3:1 measurement unrecorded |
+| T1 | T1-4 | One form-control treatment, ≥44px | LANDED* | `components/Form/` 9 entries; `BaseInput.vue:105` |
+| T1 | T1-5 | Densify Scenario / Trainee / Legacy / Deck | PARTIAL | no measured dead-space reduction |
+| T1 | T1-6 | Enamel once per screen; render `ArtworkSlot` | LANDED | `ArtworkSlot` on 10 surfaces; the one-control enamel rule landed as `acff64d` and was then collapsed into `primary` per `app.css:441` ("Enamel is gone (2026-10-15)"); the three `views/errors/*` `enamel` classes are the residue `248e51b` left standing. **Reclassified this pass** — see Appendix A row 6 |
+| T1 | T1-7 | Finish empty / loading / error states | PARTIAL* | per-page states; no sweep proves "every data view" |
+| T2 | T2-A | Radius scale | LANDED | `DESIGN.md:348-350`; `527cfeb` |
+| T2 | T2-B | Sparing elevation for overlays | LANDED* | `DESIGN.md:358-366`; `app.css:300-303` |
+| T2 | T2-C | Display type tier | **NOT-STARTED** (declined) | `DESIGN.md:282` |
+| T2 | T2-D | Wider semantic colour vocabulary | LANDED | `DESIGN.md:286,1117` |
+| T2 | T2-E | Motion budget above 1 | LANDED* | `DESIGN.md:819-821` |
+| T2 | T2-F | Four-level visual hierarchy | PARTIAL | no `DESIGN.md` passage states one |
+| SS | SCREEN-009 | Five Next Decision states | LANDED | `NextDecision.vue:176-189`; `RecordedActionCard.vue:159-164,178-186` |
+| SS | SCREEN-014 | Four new modules | PARTIAL | milestones + pre-final exist; no Readiness Summary, no Training-vs-Recovery |
+| SS | SCREEN-015 | Three enhancements | LANDED | `SpiritBurstRoster.vue`, `UnityCupTournamentReadiness.vue`, `UnityCupPanel.vue:227-246` |
+| SS | SCREEN-016 | Five new modules | PARTIAL | calendar, ledger, risk exist; comparison and late-career planning absent |
+| SS | SCREEN-018 | Decision-audit trail | PARTIAL | before/action/expected/actual in `CareerTimeline.vue:30-31,117,180`; confidence omitted by ruling (`TimelineController.php:24-29`) |
+| SS | SCREEN-019 | Veteran Creation screen | PARTIAL | `Result.vue` carries build/aptitudes/skills/races/scenario; no sparks, legacy value or best use |
+| SS | SCREEN-020 | Factor Analysis workflow | **NOT-STARTED** | `SaveVeteran.vue:14-17` holds all three as `N/A` |
+| SS | SCREEN-021 | Three-view library | PARTIAL | Veterans list only (`Veterans/Index.vue:239-243`); Factors held (`VeteranController.php:261-262`); Ancestry on Legacy Lab |
+| SS | SCREEN-022 | Comparison features | PARTIAL | `Veterans/Compare.vue:14-18` record-only; three rows held under "NOT IN THIS BUILD" |
+| SS | SCREEN-023 | Three new views | LANDED | `Database/Index.vue:5-6` |
+| SS | SCREEN-024 | Race-risk thresholds setting | **NOT-STARTED** | `app/Models/Preference.php:52` — held on ADR-0016 |
+
+**Counts, after this pass reclassified T1-6 from PARTIAL to LANDED: 33 LANDED · 15 PARTIAL · 5 NOT-STARTED
+(= 53).**
+
+Plan-vs-tree contradictions the backlog pass should correct: **Phases 1–7** mark nothing complete yet 18 of 21
+are landed; **Phase A0** reads pending except A0a but A0a–A0e are all in place and A0c's Blade targets no
+longer exist; **Track 2** reads "needs an owner amendment" for all six clauses while five are owner-signed;
+**T1-1** names a fixed `max-w-5xl` the tree replaced with a preference map; **`frontend-development-plan.md:2107`**
+still asserts a live `StatBand.vue` mid-migration the tree has since resolved (§9 D-8).
+
+---
+
+## stage-2-fullstack-2026-10-16.md
+
+> **Consolidated 2026-10-24 (Round 19).** Source: `docs/audits/stage-2-fullstack-2026-10-16.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/audits/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+
+## Stage 2 seed — fullstack 2.0: routes and controllers
+
+Measured 2026-10-16 against `master` @ `6fea7dc` (live main repo `D:/Projects/umamusume-laravel13`).
+**Read-only**: one script plus direct greps. Nothing fixed, nothing committed. This is the first two
+sub-audits of the twelve the full audit deferred at §5 — **§3.5 routes and §3.1 controllers only**.
+
+---
+
+**Dated forward note, 2026-10-16.** This file carries two sets of figures. The body below (§1–§4) is the seed as committed at `4e57083`; the appended revision at §5 supersedes its route, controller and method counts, and was landed by `ab1484a` ("close the parser's route bound with `route:list`"). A reader looking for current figures should read the appended revision, not this body.
+
+**Current figures (post-`ab1484a`):** 86 named routes (60 live, 17 orphan, 3 redirect-only), 32 concrete controllers carrying 86 public methods, 0 non-routed public methods, 0 actions pointing at an undefined method. `CockpitController` remains at 2,789 lines.
+
+**Superseded figures (seed body, §1–§4):** 81 named routes (54 live, 15 orphan, 8 api, 3 redirect), 31 controllers (1 untested). These were accurate at `6fea7dc` and are preserved as the record of that read, per the audit file's append-only convention.
+
+The seed's 15-orphan figure also did not sum in the original (12 named plus a "+ 4 API names" parenthetical). The appended revision's 17 replaces it.
+
+
+**Forward-note addendum, 2026-10-17.** Three section-3 verdicts were superseded after section 1-4 was filed at `4e57083`; do not treat the seed body as current on them:
+
+- **section 3's Database/* verdict.** Section 3 named three unrouted page files; section 6 adjudicates them live. Routes register at `routes/web.php:289-291` (`database.trainees`, `database.skills`, `database.supports`), served by `CatalogController@databaseIndex` (`CatalogController.php:72`), `SkillController@databaseIndex` (`SkillController.php:59`), `SupportCardController@databaseIndex` (`SupportCardController.php:49`); all render through `renderPage()`, which the seed's single-line parser could not see.
+
+- **section 3's literal-path count.** Section 3 named two wizard literal sites; section 7 enumerates eleven write sites across nine files. Four files state the literal-URL pattern is deliberate - there is no Ziggy dependency here: `BuildTarget.vue:170`, `ScenarioSelect.vue:66`, `TraineeProfile.vue:116`, `TraineeSelect.vue:206`.
+
+- **section 3's orphan adjudication.** Section 3 named 15 orphan candidates; section 5 adjudicates `runs.create` live regardless (23 test files, `SCREEN_SPEC.md:217`; "Confirmed-dead: 0 of 86"). Its UI link was deliberately retired: `AppLayout.vue:123` points "New Career" at `career.scenario`, not `runs.create`.
+
+**Stale items in this file's own section 10.** The `uma:backup` command test closed at `23f9d64` (`test(backup): pin uma:backup contract on scratch database`), and dark-ramp >= 3:1 already passes: G-18 measures all 19 text/background pairs plus 9 grade-badge fills in both themes, worst dark 5.48:1. Current figures live at section 5 onward - section 5 supersedes section 3's route, controller and method counts; sections 6-7 supersede the Database/*, literal-path and orphan figures above.
+
+**Forward-note addendum 2, 2026-10-17 — the section-11 collision.** This seed carries two `## 11.` headings: `## 11. §3.6 — dead config` (filed first, by `e820cdd`) and `## 11. §3.10 — lang/en dead and missing keys` (filed second, by `90eb2fc`, when the lang pass numbered itself after the pre-existing §3.6 rather than continuing the counter). Correct order by date and content is unchanged — §3.6 first, §3.10 second; only the printed number collides. A future pass may resolve it two ways, at the owner’s choice: renumber one of the two headings with a stated reason in the commit message, or leave the collision as the seed’s own record of how its append-only history was built. Neither heading was renumbered by the pass that named this — the register’s convention is that numbered headings are never silently renumbered, and a named collision beats a quiet fix.
+---
+
+### 1. Method, and the bounds on what it can see
+
+A parser walked `routes/web.php` and `routes/api.php`, resolved controller FQCNs through each file's
+`use` statements, and cross-referenced every route name against `app/`, every `Inertia::render(...)`
+against the files under `resources/js/pages/`, and every public controller method against the route
+set. Output: `.scratch-uma/audit-agent-2026-10-16/stage2b.txt`.
+
+Three bounds, stated before any number is read as a finding:
+
+1. **The frontend never names a route.** This app ships no Ziggy; controllers compose URLs server-side
+   (`route('x')` into an Inertia prop) and the Vue reads `props.run.update_url`, `props.action`. A first
+   pass classified reachability by searching `resources/js` for route names and reported **54 redirect-only
+   and 13 orphan**. That was an instrument failure, not a finding — corrected to judge from `app/`, which
+   inverted most of the table. The rule: in this codebase, *a route name absent from the frontend is normal*.
+2. **Routes outside `routes/`.** `bootstrap/app.php:29` registers `artwork.show`, which `routes/web.php:276`
+   says is deliberately outside the `web` group. So the parsed total is **80 named routes in `routes/`, and
+   81 including `bootstrap/app.php`**.
+3. **Single-line declarations only.** The regex needs `Route::verb(...)` and `[Cls::class, 'method']` on one
+   line. Multi-line or grouped declarations are missed, which is why §3's non-routed-method list is a
+   **candidate list, not a verdict**.
+
+### 2. §3.5 — routes
+
+81 named routes, **zero unnamed**. Classification of the 80 parsed:
+
+| Kind | Count | Meaning |
+|---|---|---|
+| **live** | 54 | name passed to `route()` in `app/` as a composed URL, i.e. a browser reaches it through a rendered prop |
+| **orphan** | 15 | name never referenced in `app/` — reachable only by typing the URI |
+| **api** | 8 | the read-only `/api/v1` JSON surface declared in `routes/api.php` |
+| **redirect** | 1 | `runs.show` → `TrainingRunController::redirect`, the self-declared "compatibility doorway" |
+| **redirect-only** | 2 | `runs.skills.planner`, `legacy.compare` — referenced in `app/` only as a redirect target |
+
+#### The 15 orphans
+
+```
+home                     GET  /                      DashboardController::index
+career.scenario.store    PUT  /career/setup/scenario  ScenarioSelectController::store
+career.trainee.store     PUT  /career/setup/trainee   TraineeSelectController::store
+career.trainee.profile   GET  /career/setup/trainee/{umamusume}   TraineeProfileController::show
+career.target.store      PUT  /career/setup/target    BuildTargetController::store
+career.legacy.store      PUT  /career/setup/legacy    LegacySelectController::store
+career.preflight         GET  /career/setup/preflight PreflightController::show
+career.snapshot          GET  /career/snapshot        SnapshotController::entry
+skills.index             GET  /skills                SkillController::index
+runs.create              GET  /training-runs/create   TrainingRunController::create
+review.resolve           POST /review/{candidate}     ReviewController::resolve
+preferences.update       PUT  /preferences           PreferenceController::update
+(+ 4 API names counted with the api bucket where they are also unreferenced)
+```
+
+**Why most of these are names-in-use-by-URI, not dead code — and one real drift.** Two wizard pages post to
+a **literal path** instead of the named route:
+
+- `resources/js/pages/Career/BuildTarget.vue:172` → `form.put('/career/setup/target', …)`
+- `resources/js/pages/Career/LegacySelect.vue:166` → `… ).put('/career/setup/legacy', …)`
+
+The URI is live; the **route name is orphaned because the frontend bypassed it.** That contradicts
+`AGENTS.md` §7's "`named routes and `route()` everywhere`" rule directly, and it is the mechanism behind
+`career.target.store` and `career.legacy.store` reading orphan. The same explanation covers
+`career.scenario.store` and `career.trainee.store` (wizard forms whose action is not composed server-side),
+and `home` — the root route, reached by `/`, its name referenced nowhere.
+
+`review.resolve`, `preferences.update`, `career.snapshot`, `career.preflight`, `runs.create`,
+`skills.index` and `career.trainee.profile` need a per-route judgement the parser cannot make
+(is the URI reached from a control the frontend builds another way?). **Named, not concluded.**
+
+### 3. §3.1 — controllers
+
+**31 controllers.** One has no Feature test naming it: `ArtworkAssetController` (66 lines). Everything else
+is covered by a test that names the class.
+
+Size, measured — this is the number the full audit deferred:
+
+| Controller | Lines |
+|---|---|
+| **`CockpitController`** | **2,789** |
+| `TrainingDecisionController` | 743 |
+| `CatalogController` | 691 |
+| `RacePlannerController` | 597 |
+| `SkillsPlannerController` | 564 |
+| `PreflightController` | 547 |
+| next 25 | 447 down to 66 |
+
+`CockpitController` is **2,789 lines against `AGENTS.md` §7's "thin controllers; logic in `app/Actions` or
+`app/Services`"** — 3.7× the next-largest. The audit's provisional pointer said "≥ 2,650"; the measured
+figure is 2,789, and the four follow-up commits since that read did not touch it. This is the single clearest
+architecture-vs-code divergence the seed found, and it is a **refactoring decision, not a defect** — it belongs
+to the Architect (§4 role table), not to an audit.
+
+#### Component ↔ page cross-check
+
+- **42** distinct components are named by `Inertia::render(...)` in `app/`. **Zero** of them lack a file under
+  `resources/js/pages/` — no route renders a page that does not exist. The failure mode the dispatch asked to
+  flag is **absent**.
+- **59** page files on disk; **17** not matched to a render string. Those 17 decompose, and only three are real:
+
+| Group | n | Verdict |
+|---|---|---|
+| `pages/Career/Cockpit/Panels/*.vue` | 11 | **Instrument false positive.** These are Vue sub-components imported by `ScenarioPanel.vue`/`Cockpit.vue`, not Inertia pages that happen to live under `pages/` |
+| `Catalog/Index`, `Skills/Index`, `SupportCards/Index` | 3 | **Explained.** `CatalogController.php:80` and `SupportCardController.php:57` render a **variable** — `Inertia::render($page, $props)` — so no literal matches. Live, not dead |
+| **`Database/Skills.vue`, `Database/Supports.vue`, `Database/Trainees.vue`** | **3** | **Genuinely unrouted page files.** Each imports `AppLayout` and a catalog component (`SkillCatalog`, `SupportCardCatalog`, `TraineeCatalog`) — page-level markers — while `DatabaseController` renders only `Database/Index`, `Races`, `Scenarios`, `Events`, `ShopItems`, `Sparks`, all as literals. **Three Inertia shells no controller can reach** |
+
+The three `Database/*` shells sit directly behind `SCREEN-023`'s "three new views" in the full audit's
+Appendix B, which graded that row **LANDED** on the evidence that `Database/Index.vue:5-6` names them. The
+seed contradicts that: the files exist and are pages, but **no route or render reaches them**. Either
+`Database/Index.vue` is the live surface and these three are superseded scaffolding, or the routes are
+declared in a form the parser cannot see (bound 3). **Which is a named finding for the next pass, not a
+conclusion here.**
+
+#### Non-routed public methods — candidate list
+
+`ArtworkAssetController::show`, `LegacyController::builder`, `LegacyController::update`,
+`SaveVeteranController::show`, `SaveVeteranController::store`, `VeteranController::show` — 6 flagged.
+`ArtworkAssetController::show` is **explained** (its route is `artwork.show`, registered in
+`bootstrap/app.php:29`, bound 2). The other five are almost certainly the same class of miss —
+`docs/audits` and `SCREEN_SPEC.md` both reference `runs.save-veteran` and the Legacy builder as live
+surfaces — so they are reported as **parser blindness, not dead code**, and left unverified.
+
+### 4. What this seed did NOT do
+
+§3.2 requests/models/services/actions/enums · §3.3 schema and `migrate:status` · §3.4 data pipeline ·
+§3.6 config keys and dead config · §3.7 the quality bar's gate inventory · §3.8 ADR coverage incl.
+`ADR-0020` program scope · §3.9 tests by layer · §3.10 `lang/en` dead and missing keys · §3.11 tools ·
+§3.12 legacy Blade. **Ten of twelve sub-audits remain.** Stage 3 (Appendix A rows 3, 5, 7, 13, 40, 41 and
+the 53 backlog rows) was **not attempted** — this pass spent its budget on items 1 and 2 of the ordering
+before it.
+
+No gate ran beyond what is named above: nothing was executed except the read-only parser and greps.
+`php artisan route:list` was **not** run, which is the single command that would close bound 3 and turn the
+orphan and non-routed-method candidate lists into verdicts.
+
+**STAGE 2 SEED FILED — §3.5 and §3.1 of twelve; 81 named routes (54 live, 15 orphan, 8 api, 3 redirect), 31 controllers (1 untested), `CockpitController` measured at 2,789 lines, 3 unrouted `Database/*` page files, 0 render-without-page defects. No file changed but this one. Nothing committed.**
+
+### 5. Bound 3 closed with `route:list`, 2026-10-16
+
+`php artisan route:list --json` ran at `4e57083`, exit 0, captured to
+`.scratch-uma/audit-agent-2026-10-16/route-list.json` (17,887 bytes), and every §2 and §3 candidate was
+re-verified against it by `.scratch-uma/audit-agent-2026-10-16/{compare.py,stage2c.py,stage2d.py}`
+(output in the sibling `.txt` files). Bound 3 was real: the single-line regex under-counted, and every
+candidate it produced dissolved.
+
+**The framework table.** 92 rows, **89 named**, 3 unnamed. The unnamed three are all framework-injected
+(`_inertia/devtools/entries`, `_inertia/devtools/entries/{id}`, `up`), so the seed's "zero unnamed" survives
+as "the **app** declares zero unnamed routes". Three further named rows are package-owned
+(`storage.local`, `storage.local.upload`, `boost.browser-logs`). **The app's own surface is 86 named routes,
+not 81.**
+
+| Seed | This pass | Cause |
+|---|---|---|
+| 81 named | **86** named | 5 wrapped-chain routes invisible to a one-line regex |
+| 8 `api` | **6** `api.v1.*` | the parser read `routes/api.php:11-16` without the `->name('api.v1.')` group prefix and counted two `web.php` routes in the same bucket |
+| 54 live / 15 orphan / 1 redirect / 2 redirect-only | **60 live / 17 orphan / 3 redirect-only** | the added 11 routes plus 5 new orphans; `runs.show` (seed: `redirect`) now sits with the other two |
+
+The seed's 15-orphan figure also did not sum: the block printed 12 names and a parenthetical "+ 4 API names"
+= 16. Recorded as an arithmetic slip in the seed's own §2, not a measurement change.
+
+**Why the parser missed 15 rows — three mechanisms, not one.**
+
+- **5 wrapped chains**: `legacy.builder`, `legacy.update`, `veterans.show`, `runs.veteran`, `runs.veteran.store`.
+  Each is `Route::verb(...)` followed by `->whereNumber(...)` on the **next** line, so `\](.*?);` — which the
+  scanner applies per `splitlines()` entry — never reaches its semicolon. `routes/web.php:227-232,246-248,258-263`.
+- **6 group-prefixed names**: the `api.v1.*` set. The literal `->name()` in the file is `umamusume.index`; the
+  registered name is `api.v1.umamusume.index`. The parser's four `training-runs.*` / `umamusume.*` rows are
+  **invented names**, and are the only false positives the framework table caught.
+- **3 closures + 1 out-of-`routes/` file**: `boost.browser-logs`, `storage.local`, `storage.local.upload`
+  carry `Closure` actions the `[Cls::class, 'method']` pattern cannot match, and `artwork.show` is bound 2.
+
+#### §3.5 verdicts — the 15 orphans, and the 5 the parser never saw
+
+All 12 names the seed listed **are** registered routes and **are** unreferenced by name in `app/`, so each
+orphan verdict stands as a classification. Five more join them: `legacy.update`, `runs.store`,
+`runs.import.store`, `runs.import.preview`, `support-cards.index`.
+
+But "orphan" now has a sharper meaning, and it is not dead code. A literal-path sweep over `resources/js`
+(`.scratch-uma/audit-agent-2026-10-16/phase4.py`) reaches **16 of the 17 by URI**. The single route with
+neither a name reference nor a literal-path mention in `resources/js` is `runs.create` — and it is live
+regardless: `SCREEN_SPEC.md:217` documents it as the transitional create surface, and **23 files under
+`tests/`** drive it by URI (36 `page.goto` sites across the browser suite, 9 `test()->get()` calls in
+`TraineeSelectorTest.php` and `RunCreateSurfaceTest.php`, plus the `DesignTokensTest.php` route fixture). The 6 `api.v1.*` names are unreferenced by design and exercised by four Feature files
+(`ApiV1Test.php`, `ApiV1SupportCardTest.php`, `ApiV1RunIndexPaginationTest.php`,
+`ApiV1ValidationEnvelopeTest.php`). **Confirmed-dead routes: 0 of 86.**
+
+#### §3.1 verdicts — non-routed methods: the candidate list was entirely artifact
+
+Re-derived against the framework's own action strings, keyed by **file path** rather than short class name
+(`SupportCardController`, `TrainingRunController` and `UmamusumeController` each exist twice, once under
+`Api/V1/`, and a short-name key silently merges them).
+
+33 files under `app/Http/Controllers/`, one of them the method-less base `Controller.php`, so **32 concrete
+controllers** (the seed said 31) carrying **86 public methods** excluding `__construct`/`__invoke`. All 86
+appear as a route action. The reverse check runs the other way and also returns **0**: no registered action
+points at a method that is not defined.
+
+Each of the seed's six candidates is routed:
+
+| Candidate | Registered as |
+|---|---|
+| `ArtworkAssetController::show` | `artwork.show` `GET artwork/{kind}/{id}` (bound 2) |
+| `LegacyController::builder` | `legacy.builder` `GET legacy/{run}` |
+| `LegacyController::update` | `legacy.update` `PUT legacy/{run}` |
+| `SaveVeteranController::show` | `runs.veteran` `GET training-runs/{run}/veteran` |
+| `SaveVeteranController::store` | `runs.veteran.store` `POST training-runs/{run}/veteran` |
+| `VeteranController::show` | `veterans.show` `GET veterans/{veteran}` |
+
+**Non-routed public controller methods: 0.**
+
+#### A bound the seed did not state, found while closing bound 3
+
+Two new instrument bounds came out of the re-run and both are worth keeping:
+
+1. **`route(` is overloaded.** `$this->route('run')` in a Form Request reads a route *parameter*; it is not
+   the URL helper. The first re-run reported `run` and `turn` as "references to unregistered routes"
+   (14 call sites, `app/Http/Requests/StoreBuildTargetRequest.php:122`, `StoreTurnEntryRequest.php:67-68`
+   among them). Excluding `->route(` and `::route(` removed exactly those two rows and **moved no bucket**:
+   every app route name is dotted and every parameter is not, so the artifact could not have inflated `live`.
+2. **`Inertia::render()` is not always a literal.** Three controllers pass the page name through a private
+   `renderPage(string $page, array $props)` helper — `CatalogController.php:78-81`,
+   `SkillController.php:65-68`, `SupportCardController.php:55-58`. A `Inertia::render\('X'` regex therefore
+   saw **42** page names where the real number is **48**, and the §3.1 "**17** not matched to a render string" list
+   was 6 rows too long. This is the mechanism behind the `Database/*` question below.
+
+With that fix, the page cross-check is: **48** distinct page names handed to a render call, **59** `.vue`
+files under `resources/js/pages/`, **11** with no render call, **0** render names with no file. All 11 sit in
+`pages/Career/Cockpit/Panels/` and are child components rather than routed pages. Six are imported by
+`resources/js/components/scenario/ScenarioPanel.vue:50-55`. **Five are not imported or mentioned anywhere in
+`resources/js` except in comments**: `EpithetRoutesPanel.vue`, `GradePointObjectivesPanel.vue`,
+`ProShopPanel.vue`, `SpiritBurstsPanel.vue`, `TeamRankLadderPanel.vue`. `ScenarioPanel.vue:79-89` says why
+two of them are absent — the Phase 7A.1 registrations were removed because a `Map` re-registration shadowed
+the first entry. Files left in place; disposition is an owner question.
+
+### 6. `Database/*` verdict — case (b): the parser missed the declaration, Appendix B was right
+
+The three files are **live surfaces with routes and controllers**; the seed's contradiction was a second
+instance of the same regex bound, and `SCREEN-023 LANDED` in the full audit's Appendix B stands.
+
+| Page file | Route (framework table) | Controller action | Render site |
+|---|---|---|---|
+| `resources/js/pages/Database/Trainees.vue` | `database.trainees` `GET database/trainees` | `CatalogController@databaseIndex` | `app/Http/Controllers/CatalogController.php:72` |
+| `resources/js/pages/Database/Skills.vue` | `database.skills` `GET database/skills` | `SkillController@databaseIndex` | `app/Http/Controllers/SkillController.php:59` |
+| `resources/js/pages/Database/Supports.vue` | `database.supports` `GET database/supports` | `SupportCardController@databaseIndex` | `app/Http/Controllers/SupportCardController.php:49` |
+
+Each call is `$this->renderPage('Database/Trainees', ...)`, which the `Inertia::render` regex cannot see.
+The same indirection accounts for the other three rows the seed listed as unrendered: `Catalog/Index.vue`
+(`CatalogController.php:57`), `Skills/Index.vue` (`SkillController.php:48`) and `SupportCards/Index.vue`
+(`SupportCardController.php:39`). So **6 of the seed's 17** were
+parser blindness and the remaining **11** are the Cockpit panels, which are never routed pages.
+
+The pages are not incidental scaffolding either: `resources/js/pages/Database/Skills.vue:2-8` states its own
+provenance in its header comment — "*The Database hub's Skills area (SCREEN-023, plan §8 D17) ... behind
+`SkillController::databaseIndex`*" — and `CatalogController.php:60-73` explains why the body is shared
+rather than the URL borrowed: "*A redirect was the smaller diff and it is refused by the slice brief,
+because no owner ruling authorises one*". The seed's row "**Genuinely unrouted page files**" (§3.1, line 108) is withdrawn, and with it the closing
+line's "3 unrouted `Database/*` page files".
+No file deleted, no route added.
+
+### 7. Finding: 11 frontend call sites bypass named routes, 2026-10-16
+
+The seed named two. Enumerating the whole pattern (`phase4.py`, confirmed by direct grep) returns **11 call
+sites across 9 files**, and they are the mechanism behind **every** non-API entry in the §3.5 orphan list.
+This contradicts `AGENTS.md` §7's "named routes and `route()` everywhere".
+
+Writes (form submissions) — 11:
+
+| File | Line | Literal path | Named route it bypasses |
+|---|---|---|---|
+| `resources/js/pages/Career/ScenarioSelect.vue` | 78 | `/career/setup/scenario` | `career.scenario.store` |
+| `resources/js/pages/Career/TraineeSelect.vue` | 210 | `/career/setup/trainee` | `career.trainee.store` |
+| `resources/js/pages/Career/TraineeProfile.vue` | 119 | `/career/setup/trainee` | `career.trainee.store` |
+| `resources/js/pages/Career/BuildTarget.vue` | 172 | `/career/setup/target` | `career.target.store` |
+| `resources/js/pages/Career/LegacySelect.vue` | 166 | `/career/setup/legacy` | `career.legacy.store` |
+| `resources/js/pages/Legacy/Builder.vue` | 285 | `` `/legacy/${props.run.id}` `` | `legacy.update` |
+| `resources/js/pages/Preferences/Edit.vue` | 238 | `/preferences` | `preferences.update` |
+| `resources/js/pages/Runs/Create.vue` | 90 | `/training-runs` | `runs.store` |
+| `resources/js/pages/Runs/Import.vue` | 172 | `/training-runs/import` | `runs.import.store` |
+| `resources/js/pages/Runs/Import.vue` | 281 | `/training-runs/import/preview` | `runs.import.preview` |
+| `resources/js/components/review/CandidateForm.vue` | 50 | `` `/review/${props.candidate.id}` `` | `review.resolve` |
+
+Navigation is the same breach at larger scale: **at least 31** `href="/..."` / `router.push("/...")` literals
+(one grep pattern, letter-leading paths only, so `href="/"` roots and other binding forms are excluded)
+across the pages
+(`Dashboard.vue:206,350,353,392`, `SetupLayout.vue`, `Runs/Index.vue:46,52`, the wizard's back-links, and
+the `/veterans`, `/umamusume`, `/support-cards`, `/skills`, `/database`, `/legacy` links). The wizard's own
+step-back links restate the paths its forms post to, so a URI change is a multi-file edit today.
+
+The route names orphaned by this pattern: `career.scenario.store`, `career.trainee.store`,
+`career.target.store`, `career.legacy.store`, `legacy.update`, `preferences.update`, `runs.store`,
+`runs.import.store`, `runs.import.preview`, `review.resolve` — 10 of the 17 §3.5 orphans.
+
+Not fixed: all nine files are page components shared with peer sessions, and this pass's brief says report,
+not repair. Options for the owner, not for an agent to pick: **(a)** replace each literal with a `route()`
+call the server already composes into a prop, which restores the §7 rule and makes the orphan list empty;
+**(b)** keep the literals and drop the now-unused route names, which is weaker — the names are what
+`SCREEN_SPEC.md` and the docs cite, and removing them breaks the citation surface; **(c)** rule that the
+frontend may address URIs literally and amend §7 to say so, which makes today's code legal and the finding
+closed by ruling. The audit takes no position; the choice changes 11 lines or one rule.
+
+### 8. §3.2 — dead-code inventory, 2026-10-16
+
+`.scratch-uma/audit-agent-2026-10-16/{phase5.py,phase5b.py}`, outputs in the sibling `.txt`. The class
+census searched 2,049 files (docs excluded, so a doc mention cannot mask a missing caller); the
+command-verb census adds `docs/`, `README.md`, `AGENTS.md`, `Makefile`, `composer.json` and
+`package.json`. Line counts below are `wc -l`, not the script's off-by-one.
+
+**One wording correction to §7, which is append-only above:** its last paragraph says "all nine files are
+page components". Nine is the file count; eight are pages and one, `components/review/CandidateForm.vue`,
+is a component.
+
+#### Counts in scope: 153 classes
+
+| Directory | Tracked `.php` |
+|---|---|
+| `app/Http/Requests` | 31 |
+| `app/Models` | 31 |
+| `app/Services` | 43 |
+| `app/Actions` | 16 |
+| `app/Enums` | 21 (one of them, `HasLabel.php`, is a **trait**) |
+| `app/Console/Commands` | 8 |
+| `app/Domain` | 3 |
+
+Every Form Request, every Service, every Action and every Model has at least one non-test reference. The
+result is **2 of 153** with none, and both are console commands.
+
+#### The two zero-reference classes — and why the instrument cannot decide them
+
+| File | Lines | Verb | Registered | Exercised by |
+|---|---|---|---|---|
+| `app/Console/Commands/MigrateToMariaDb.php` | 84 | `db:backup:mysql` | yes — `php artisan list` line 56 | **nothing in the repository** |
+| `app/Console/Commands/UmaDbGuard.php` | 75 | `uma:db-guard` | yes — `php artisan list` line 191 | `tests/Feature/DatabaseSafetyTest.php:192`, `tests/browser/global-setup.ts:133` |
+
+**Bound:** a command is addressed by its verb, not its class name, so "no file references the class" proves
+nothing for this directory. `php artisan list` (captured to `.scratch-uma/audit-agent-2026-10-16/artisan-list.txt`)
+plus a verb sweep is the instrument that decides, and it splits the two: `uma:db-guard` is live, and the
+class-name silence is an artifact. `bootstrap/app.php:18` registers `routes/console.php` (which holds only
+the `inspire` closure) and there is no `withCommands()` call, so both classes arrive by skeleton
+auto-discovery of `app/Console/Commands` — which the framework list confirms rather than this pass assuming.
+
+`db:backup:mysql` is therefore the one genuinely unexercised command surface: 84 lines whose verb appears
+nowhere outside its own signature line at `MigrateToMariaDb.php:12` — no test, no doc, no `Makefile` target,
+no `composer` script, and there is no CI to run it. The 276-line action it wraps *is* tested
+(`app/Actions/MigrateToMariaDbAction.php`, exercised at `tests/Feature/MariaDbBackupTest.php:22,39,62,85`),
+so the gap is the command wrapper and the `config/mysql-backup.php` (13 lines) it reads. This is the same
+subsystem the doc-drift audit already graded **UNDOCUMENTED-LIVE** at
+`docs/audits/doc-drift-audit-2026-10-16.md:167-168`, with the `AGENTS.md` §1 "SQLite only" conflict recorded
+unresolved at `:194`. **Owner question, held: not deleted, not documented, not wired.**
+
+#### Enums: 13 cases with no `Class::Case` reference, and not one of them unreachable
+
+`AliasLanguage::Romanized` · `BuildPurpose::{ChampionsMeeting, ParentFarming, SkillFarming}` ·
+`MoodTier::Awful` · `PerformanceType::Passion` · `SpiritBurstState::NormalBurstSpent` ·
+`TurnChoice::{TrainStamina, TrainPower, TrainGuts}`.
+
+The second instrument asks whether anything hydrates the whole case set, and all six owning enums do:
+`BuildPurpose` 4 hydration sites (`BuildTargetController`, `StoreBuildTargetRequest`), `MoodTier` 4,
+`PerformanceType` 4, `TurnChoice` 6, `AliasLanguage` 3, `SpiritBurstState` 3
+(incl. `app/Models/TurnEvents/SpiritBurstPayload.php`). A case reached through `from()`/`tryFrom()` never
+needs its symbol spelled out, so **no unreachable enum case is claimed**. Two rows deserve the note anyway:
+`PerformanceType::Passion`'s value appears only in `PerformanceFoundationTest.php` and
+`PerformanceTurnInputTest.php` — test-only, no production site produces it; `TurnChoice`'s three training
+cases exist as composed keys (`training-Stamina`, seen in `resources/js/types.ts`), so their absence as
+symbols is by construction. **Instrument bound:** the census treats every file under `app/Enums/` as an
+enum, and `HasLabel.php` is a trait — its "never hydrated" line is a false positive.
+
+#### Service and Action method surface: 15 candidates, adjudicated
+
+| Candidate | Verdict | Evidence |
+|---|---|---|
+| `SkillRegistry::all` (`:42`) | **uncalled** | no `->all(` in any file naming `SkillRegistry` |
+| `SkillRegistry::has` (`:63`) | **uncalled** | same |
+| `SkillRegistry::registryPath` (`:78`) | **uncalled** | the only repo hit is the declaration |
+| `SkillRegistry::require` (`:86`) | **uncalled** | no `->require(` or `::require(` site exists anywhere |
+| `SkillExecutor::getLog` (`:135`) | **uncalled** | declaration is the only hit |
+| `SkillExecutor::executePlan` (`:122`) | self-only → visibility | called at `$this->executePlan` inside its own class |
+| `ArtworkMirror::sourceIds` (`:131`) | self-only → visibility | called from a sibling public method in the same class |
+| `DatabaseGuard::{connectionName, isSqlite, sameFile, assertNoConfigurationCache, assertAbsolutePath, assertNotCanonical, assertMatchesExpected}` (7) | self-only → visibility | every site the repo-wide sweep found is `$this->` inside `DatabaseGuard.php`; no external call exists |
+| `Contracts\ScenarioSourceParser::parse` | live, instrument false positive | a contract method invoked through the interface; 17 `->parse(` sites incl. `PipelineRunner` |
+
+So: **5 public methods with no caller anywhere, 9 public methods callable only from inside their own class**
+(a visibility finding, not a dead-code one), and 1 false positive. Four of the five uncalled methods sit on
+one class: `SkillRegistry` exposes 8 non-constructor methods and its users (`ManageSkills.php:54,116,151`,
+`SkillExecutor.php:45`, `SkillMatcher.php:32,95`, `SkillAutomationTest.php:27,28`) use only
+`enabled`, `get`, `count` and `countEnabled`. That the whole `Skill{Registry,Matcher,Executor}` tooling layer
+is also the layer whose test suite self-skips when `.agents/skills.json` is absent (§9) is the reason no
+caller has appeared for its accessors.
+
+No file was removed, no method visibility changed, no enum case deleted. **No gate ran in this section**:
+nothing here is proven by executing the suite.
+
+### 9. §3.9 — tests by layer, 2026-10-16
+
+`.scratch-uma/audit-agent-2026-10-16/phase6.py` over `git ls-files tests`, with the case counts taken
+independently from `grep -c` so the two instruments are separable. **The suite did not run in this pass**;
+every number below is a declaration count, not an execution result, and no claim of a passing suite is made.
+
+#### Layers
+
+| Layer | Files | Declared cases |
+|---|---|---|
+| `tests/Feature` | 196 `.php` | 1,919 `test()`/`it()` |
+| `tests/Unit` | 7 `.php` | 41 |
+| `tests/browser` | 54 `.spec.ts` + 13 non-spec files (11 `.ts`, 2 `.html`, incl. `global-setup.ts`) | 386 `test()` |
+| `tests/Fixtures` | 1 `.php` + 4 stored JSON bodies | — |
+| glue | `tests/Pest.php`, `tests/TestCase.php` | — |
+
+`grep -rhoE "^\s*(test|it)\("` gives 1,960 across `Feature` + `Unit` (the 1,919 + 41 split) and 386 across
+the specs: **2,346 declared cases total**. The script's lower figure (2,014) counted only tracked files and
+only cases whose title opens on the same line — a stricter instrument on a smaller set, recorded here so the
+two are not read as a discrepancy.
+
+**The suite is also untracked at the edge:** `tests/browser/layout-width.spec.ts` exists on disk and is not
+in `git ls-files`, and 22 test files carry uncommitted peer edits. A run this pass would have measured the
+working tree, not HEAD.
+
+#### Stale-reference sweep
+
+The dispatch for this pass reduced the scope from "every test naming anything absent" to three bounded
+checks. All three are clean, and the two that lit up are instrument artifacts:
+
+- **`route('name')` in a test, for a name the framework does not register: 0.** The sweep excluded
+  `$this->route('param')` (the parameter accessor, §5's bound) and checked the remainder against the
+  `route:list` name set.
+- **`use App\…` / FQCN strings pointing at a nonexistent file: 4 apparent, 0 real.** All four are in
+  `tests/Feature/LessonEvidenceBoundaryTest.php`, where `App\Enums\LessonKind`, `App\Enums\LessonType`,
+  `App\Models\TurnEvents\LessonPayload` and `App\Models\Lesson` appear as **string literals inside
+  `enum_exists()`/`class_exists()` assertions negated at `:39-42`** — the Grand Concert Slice 8 evidence
+  boundary, which pins that those classes do *not* exist. A FQCN regex cannot tell a reference from an
+  absence claim; the file had to be read. **Bound for the next pass: an absence-pinning test is the one
+  place where "references a nonexistent class" is correct behaviour.**
+- **Literal URIs in a test that match no registered route: 1 apparent, 0 real** —
+  `ErrorPageViewsTest.php` requesting `/no-such-page`, a deliberate 404 probe.
+
+So: no stale test file was found. The ten suspects the full audit named were not individually re-checked
+beyond this sweep, and that wider read stays a follow-up.
+
+#### Skipped and conditional cases: 6, each with a stated reason
+
+| Site | Mechanism | Stated reason | Consequence |
+|---|---|---|---|
+| `tests/Feature/DesignTokensTest.php:515` | `markTestSkipped` | "Playwright browser driver not installed; skipping D-288/G-18 browser gate." | that design-token gate is inert on a host without the driver |
+| `tests/Feature/SkillAutomationTest.php:12` | `markTestSkipped` | its input `.agents/skills.json` is excluded by `.gitignore:49`, so "a fresh clone or worktree has no registry and these tests would fail for a reason unrelated to the change under test" | the entire `Skill{Registry,Matcher,Executor}` tooling layer is **untested in a fresh worktree** — which is the same condition §8 found four uncalled accessors under |
+| `tests/browser/review.spec.ts:16,38,54,68` | `test.skip(true, …)` | "No pending candidates in the scratch database" (four variants: to name / measure / etc.) | **4 of the 5 tests in that spec are conditional on queue state**; on an empty `/review` queue the surface has no browser coverage at all, and the run still reports green |
+
+No `test.only`, `describe.only` or `->only()` marker exists in `tests/` — checked, nothing silent is narrowing
+a run.
+
+#### What §3.9 does not cover
+
+`SCREEN_SPEC.md` state-table coverage per screen, the gate registry's Level-3 evidence, and whether the
+1,960 PHP cases actually pass at this HEAD — the suite was not run here, and by the evidence rule a
+declaration count is not a pass.
+
+**STAGE 2 AT FOUR OF TWELVE — §3.5, §3.1, §3.2 and §3.9 filed. Bound 3 closed against the framework's own
+route table: 86 app named routes, 0 confirmed-dead, 0 non-routed controller methods. The three `Database/*`
+pages are live behind a `renderPage()` parameter and the seed's "genuinely unrouted" row is withdrawn.
+11 frontend literal-path sites enumerated with the 10 route names each one orphans; the single orphan with
+no literal twin is `runs.create`, exercised by 23 test files. §3.2 names 5 uncalled methods and the one
+unexercised command, `db:backup:mysql`, held for the owner with the rest of the MariaDB subsystem. §3.9
+reports 2,346 declared cases, 0 stale references and 6 conditional skips. Nothing fixed, nothing pushed,
+no gate run.**
+
+### Notes for downstream prompt authors
+
+Added 2026-10-16. Facts for whoever drafts the next commit-agent prompt against `career-cockpit-forms.spec.ts`.
+
+**The browser-spec target is two-axis, not a single pass/fail line.** The prior commit-agent prompt targeted `FULL-SPEC CONFIRMED — 17/17`. That target is unreachable at `HEAD`:
+
+| Instrument | HEAD | working tree |
+|---|---|---|
+| `grep -cE "^[[:space:]]*test\("` | 16 | 17 |
+| the earlier `grep -c "^  test("` | 0 | 0 |
+
+The indented-optional pattern is the corrected instrument; the earlier pattern matched nothing because `test(` calls sit at column 0. At `HEAD` the measured result is **14/16**, with the two reds being the team-editor open-guard cases. The working tree has a 17th case (peer-added, uncommitted) that also runs the cockpit walk and also asserts the Unity Cup bursts widget renders **as a meter**.
+
+**The Spirit-Bursts meter assertion now appears in two spec files, not one.** The committed spec asserts it at `career-cockpit-forms.spec.ts` around the `:79` region. The peer's uncommitted 17th case asserts the same shape. Both assert a widget shape no component emits: `{label}: not recorded + role="img"` is emitted only by `ResourceMeter.vue:35`, used once at `HEAD` for `label="Current Spirit"` at `UnityCupPanel.vue:236`. Whoever resolves the Spirit Bursts question — Option A (component defect), Option B (spec defect), or Option C (both) from the scenario-panel investigation — has to touch both spec files, not one.
+
+**Therefore:** the next commit-agent prompt should target a two-axis count — "team-editor reds classified, Spirit-Bursts reds counted" — not a single `N/N`. A single line invites the reader to treat the Spirit-Bursts assertion as confirmation of the wizard-walk fix. It is not; it is a second red on an unresolved widget-shape question.
+
+**Windows scratch-writing must be byte-safe.** PowerShell's `Get-Content`, `Out-File` and `Set-Content` mangle non-ASCII characters (`—`, `§`, `–`) when they round-trip through the default encoding — measured on the 2026-10-16 pass, where a `Get-Content` read of `KNOWN-ISSUES.md` showed the `−` in the KI-104 entry as `âˆ’`. Any commit-agent pass that edits a file carrying non-ASCII — the register, the audits, `AGENTS.md`, `SCREEN_SPEC.md` — assembles its scratch output in Python (`open(..., encoding='utf-8')`) or with `System.IO.File::WriteAllText` under explicit UTF-8, and verifies the written bytes with `git hash-object -w` before pointing the index at them.
+
+### 10. §3.3 — schema and migrate:status, 2026-10-16
+
+Measured at HEAD `8389da8`, read-only, against `database/migrations/` and `database/database.sqlite`.
+
+#### Migration census
+
+| Question | Answer |
+|---|---|
+| Migration files on disk | 62 |
+| Migrations without a `down()` method | 0 |
+| Newest migration (filename) | `2026_10_13_120000_create_trainee_goals_table.php` |
+| Newest migration (mtime) | 2026-10-13 21:51 |
+
+Every one of the 62 files declares `public function down`. The newest is the trainee-goals table, three days older than this pass.
+
+#### Applied-vs-files against the dev database
+
+`php artisan migrate:status` (read-only; nothing applied, nothing rolled back):
+
+| Question | Answer |
+|---|---|
+| Ran rows | 62 |
+| Pending rows | 0 |
+| Migration files on disk | 62 |
+| Discrepancy (files minus ran) | 0 |
+
+**No pending migration on the dev file.** The KI-60 class defect — committed migrations sitting Pending while the in-memory suite passes because `phpunit.xml` forces `DB_DATABASE=:memory:` — is not present today: the dev database's `migrations` table carries all 62 files at Ran. This is the evidence half of the KI-60 remediation; the applied-to-dev leg stays open and is named out of scope below.
+
+#### Schema census
+
+32 tables on disk. 23 Eloquent models, one per app table; 8 further classes under `app/Models/` are `final readonly` payload value objects (`Advisor\BuildTargetPayload`, `Legacy\LegacySelectionPayload`, and six `TurnEvents\*Payload`), not table-backed.
+
+| Metric | Value |
+|---|---|
+| Tables on disk | 32 |
+| Table-backed models | 23 |
+| Orphan tables (no model) | 9 |
+| Orphan models (no table) | 0 |
+
+The nine orphan tables are the framework's own, every one expected: `cache`, `cache_locks`, `failed_jobs`, `job_batches`, `jobs`, `migrations`, `password_reset_tokens`, `sessions`, `sqlite_sequence`. `preferences` is model-backed (`Preference`), so it is not among them; `users` carries the framework-default `User` model (`AGENTS.md` §17).
+
+#### Model-vs-column cross-reference
+
+Each model's `getFillable()` and `getCasts()` keys were checked against its table's columns (census written from `pragma table_info`).
+
+| Result | Count |
+|---|---|
+| Models with a fillable or cast naming a column absent from the table | 0 |
+
+**Zero discrepancies.** Every fillable attribute and every cast key resolves to a real column. `RunSkill` (a `Pivot`) declares neither. This is the class of defect §3.3 exists to catch, and none is present.
+
+#### MariaDB subsystem migration footprint
+
+| Question | Answer |
+|---|---|
+| Migrations referencing MariaDB/MySQL | 3 files — comments and one driver guard only; no MariaDB-specific table or column |
+| Config files declaring MySQL/MariaDB connection details | `config/database.php` (connections `mysql`, `mariadb`, `mysql_backup`) and `config/mysql-backup.php` |
+| Does `MigrateToMariaDb` add migrations? | No — command-only (`db:backup:mysql`), copies rows through `MigrateToMariaDbAction` |
+| Does `UmaDbGuard` add migrations? | No — no `Schema::` or migration reference in the file |
+
+The three migration hits are `2026_09_27_093945` (a comment: "MySQL DDL the grammar discards here"), `2026_09_28_180350` (a comment plus `if (DB::connection()->getDriverName() !== 'mysql')` around a functional index), and `2026_10_01_124051` (a comment on NULLs in unique indexes). None creates MariaDB-only schema. `MigrateToMariaDbAction` uses `Schema::hasTable` only to check its target exists and `migrateTable()` to copy rows; it creates no table and writes no migration file. **The subsystem's migration footprint is zero files** — the subsystem is command, action and config, not schema.
+
+#### What §3.3 does not cover
+
+The MariaDB subsystem's disposition (owner item), the applied-to-dev leg of the KI-60 remediation (whether migrations are applied to the shared dev file as standing practice — owner item), and the correctness of any migration's `down()` beyond its presence. This pass confirmed 62 declarations exist; it did not run a rollback.
+
+### 11. §3.6 — dead config, 2026-10-16
+
+Measured at HEAD `8389da8`, read-only.
+
+#### Config file census
+
+17 files under `config/`: `advisor.php`, `app.php`, `auth.php`, `cache.php`, `dashboard.php`, `database-safety.php`, `database.php`, `filesystems.php`, `logging.php`, `mail.php`, `mysql-backup.php`, `queue.php`, `reference.php`, `scenarios.php`, `services.php`, `session.php`, `uma.php`.
+
+Seven are repo-authored (`advisor`, `dashboard`, `database-safety`, `mysql-backup`, `reference`, `scenarios`, `uma`); ten are the Laravel skeleton (`app`, `auth`, `cache`, `database`, `filesystems`, `logging`, `mail`, `queue`, `services`, `session`).
+
+#### Per-file key counts
+
+Instrument: every leaf key under each root (read from the booted config repository) cross-referenced against every `config('…')` / `Config::get('…')` literal in the repo's own PHP (`app/`, `routes/`, `config/`, `tests/`, `database/`, `bootstrap/`, `resources/`, `tools/`, `lang/`, `public/`). A key is live if a call names it or a prefix of it. 422 `config(` call sites exist in the app tree (`app/` 212, `tests/` 204, `database/` 5, `tools/` 1); `resources/js/` carries 7 more that are not Laravel config reads.
+
+| Config file | Declared | Live | Dead |
+|---|---|---|---|
+| `config/scenarios.php` | 1006 | 1006 | 0 |
+| `config/reference.php` | 202 | 202 | 0 |
+| `config/uma.php` | 105 | 105 | 0 |
+| `config/advisor.php` | 18 | 18 | 0 |
+| `config/database-safety.php` | 12 | 12 | 0 |
+| `config/mysql-backup.php` | 7 | 7 | 0 |
+| `config/dashboard.php` | 1 | 1 | 0 |
+| **app-owned subtotal** | **1351** | **1351** | **0** |
+| `config/database.php` | 116 | 90 | 26 |
+| `config/app.php` | 88 | 27 | 61 |
+| `config/logging.php` | 57 | 0 | 57 |
+| `config/cache.php` | 39 | 1 | 38 |
+| `config/queue.php` | 38 | 0 | 38 |
+| `config/mail.php` | 31 | 0 | 31 |
+| `config/filesystems.php` | 23 | 0 | 23 |
+| `config/session.php` | 18 | 0 | 18 |
+| `config/auth.php` | 11 | 0 | 11 |
+| `config/services.php` | 7 | 0 | 7 |
+| **framework subtotal** | **428** | **118** | **310** |
+| **total** | **1779** | **1469** | **310** |
+
+#### Dead keys, named
+
+**App-owned: none.** Every one of the 1,351 keys under the seven repo-authored roots is reachable from the repo's own PHP. `config/scenarios.php` is the largest single file (1,006 keys) and `config/uma.php` the second (105); both are fully read. The thinnest is `config/mysql-backup.php` (7 keys), read only by `config/database.php:90-96` and `tests/Feature/MariaDbBackupTest.php` — no `app/` code reads it directly.
+
+**Framework skeleton: 310 keys with no reader in the repo's own PHP.** These are Laravel defaults; the "dead" label is the instrument's, not a claim that nothing reads them. Every framework root is consumed by `vendor/laravel/framework`, statically (`config('app.name')`, `config('app.debug')`, `config('app.timezone')`, `config('app.locale')`, `config('session.driver')`, `config('auth.defaults.passwords')`, `config('cache.default')`, `config('logging.default')`, `config('mail.default')`, `config('queue.default')`, `config('database.migrations')`, `config('database.redis')` all appear in `vendor/laravel/framework/src`) and dynamically by name, which a static per-leaf sweep cannot see: `LogManager.php:603` reads `logging.channels.{$name}`, `CacheManager.php:485` reads `cache.stores.{$name}`, `QueueManager.php:415` reads `queue.connections.{$name}`.
+
+The 310, by root:
+
+- **`app` (61)** — `env`, `debug`, `url`, `frontend_url`, `asset_url`, `timezone`, `locale`, `fallback_locale`, `faker_locale`, `cipher`, `key`, `previous_keys`, `maintenance.driver`, `maintenance.store`, and the 47 `app.aliases.*` entries (`App` through `Vite`).
+- **`logging` (57)** — every `logging.channels.*` leaf (`stack`, `single`, `daily`, `monthly`, `slack`, `papertrail`, `stderr`, `syslog`, `errorlog`, `null`, `emergency`, and the repo-added `skill_automation` and `browser`), plus `logging.default` and `logging.deprecations.channel` / `.trace`.
+- **`cache` (38)** — every `cache.stores.*` leaf except `cache.stores.database.connection` (read by `tests/Feature/CatalogCacheRenderTest.php`): `array`, `session`, `database`, `file`, `storage`, `memcached`, `redis`, `dynamodb`, `octane`, `failover` — plus `cache.prefix` and `cache.serializable_classes`.
+- **`queue` (38)** — every `queue.connections.*` leaf (`sync`, `database`, `beanstalkd`, `sqs`, `redis`, `deferred`, `failover`, `background`), plus `queue.batching.*`, `queue.failed.*`, `queue.default`.
+- **`mail` (31)** — every `mail.mailers.*` leaf, `mail.from.address` / `.name`, `mail.markdown.*`, `mail.default`.
+- **`database` (26)** — the 25 `database.redis.*` leaves (`client`, `options.*`, `default.*`, `cache.*`) and `database.migrations.table` / `database.migrations.update_date_on_publish`.
+- **`filesystems` (23)** — every `filesystems.disks.*` leaf (`local`, `public`, `s3`), `filesystems.default`, and one key that is an absolute path (`filesystems.links.<public_path>/storage`), an artifact of `public_path('storage')` used as an array key.
+- **`session` (18)** — `driver`, `lifetime`, `expire_on_close`, `encrypt`, `files`, `connection`, `table`, `store`, `lottery.*`, `cookie`, `path`, `domain`, `secure`, `http_only`, `same_site`, `partitioned`, `serialization`.
+- **`auth` (11)** — `defaults.guard`, `defaults.passwords`, `guards.web.driver` / `.provider`, `providers.users.driver` / `.model`, `passwords.users.*`, `password_timeout`.
+- **`services` (7)** — `postmark.key`, `resend.key`, `ses.key` / `.secret` / `.region`, `slack.notifications.bot_user_oauth_token` / `.channel`.
+
+#### `env()` outside `config/`
+
+One match in the whole app tree, and it is a comment:
+
+`tools/debug/test-final-analysis.php:10` — `// The config uses: env('DB_DATABASE', database_path('database.sqlite'))`
+
+No real `env()` call exists outside `config/`: `app/`, `routes/`, `bootstrap/`, `resources/`, `database/`, `lang/`, `public/` and `tests/` are all clean. `AGENTS.md` §7 holds.
+
+#### `config()` inside config files
+
+Nine matches, but only seven are calls:
+
+| Site | Read | Kind |
+|---|---|---|
+| `config/database.php:90-96` | `config('mysql-backup.host')` … `.collation` (7 reads) | call — the `mysql_backup` connection mirrors `config/mysql-backup.php` |
+| `config/scenarios.php:48` | `config('advisor')` | comment — prose in a doc block, not a call |
+| `config/uma.php:380` | `config('uma.sources')` | comment — prose in a doc block, not a call |
+
+The only real coupling is `config/database.php` reading `config/mysql-backup.php` for its `mysql_backup` connection. Reported, not judged: one config file reading another's values is the documented Laravel pattern.
+
+#### What §3.6 does not cover
+
+Whether any dead key *should* be removed (a slice-level change, not an audit finding), whether the MariaDB config file's contents should be documented or deleted (owner item), and the framework roots' true read-set inside `vendor/` — the instrument scans the repo's own PHP only, so the 310 framework-root keys are reported as unreferenced by this repo, not as unread anywhere.
+
+### 11. §3.10 — lang/en dead and missing keys, 2026-10-17
+
+Measured at HEAD `e820cdd`, static, read-only.
+
+#### Locale directory census
+
+| Question | Answer |
+|---|---|
+| Locale directories under `lang/` | `en` |
+| Total PHP files under `lang/` | 1 |
+| Files under `lang/en/` | 1 (`lang/en/uma.php`, 130 lines) |
+| Any non-`en` locale | none |
+
+Single-locale tree. `lang/en/uma.php` is the only lang file; no `ja`, no `jp`, no vendor-published lang.
+
+#### Per-file key counts
+
+| Lang file | Keys declared | Keys read | Dead keys |
+|---|---|---|---|
+| `lang/en/uma.php` | 49 | 27 | 22 |
+
+49 declared leaves: 27 enum-display labels across 8 groups (`release_status` 3, `run_status` 3, `race_entry_status` 4, `skill_acquisition` 3, `alias_language` 3, `match_tier` 4, `card_rarity` 3, `build_purpose` 4) plus a `terms` reference group of 22.
+
+**Reading convention.** The only lang reader in the tree is `HasLabel::label()` (`app/Enums/HasLabel.php:20`), which builds `uma.{Str::snake(class_basename)}.{CaseName}` and calls `trans()`. No `__()`, `trans()`, or `lang()` call anywhere names a lang key literally — every lang key in this tree is reached dynamically through that trait. Nine enums use `HasLabel`: `ReleaseStatus`, `RunStatus`, `RaceEntryStatus`, `SkillAcquisition`, `AliasLanguage`, `MatchTier`, `CardRarity`, `BuildPurpose`, `TraineeGoalType`.
+
+#### Dead keys (declared, never read) — 22
+
+All 22 are the `terms` reference group. None is read: the only mention of `uma.terms.*` in the entire tree is a `ponytail:` comment at `Umamusume.php:133` — *"display strings do not belong on a model; read these labels from `uma.terms.style_*`"* — a deferred-slice note, not a read. The group is documented as reference data deliberately not wired into any view (`lang/en/uma.php:78-84`: "this tool has no Scouts, Spark or running-style surface in Phase 1 (PRD §6), so nothing here is wired into a view").
+
+| Key | Value |
+|---|---|
+| `uma.terms.scouts` | Scouts |
+| `uma.terms.pull_currency` | Carats |
+| `uma.terms.inheritance_trait` | Spark |
+| `uma.terms.finished_character` | Veteran Umamusume |
+| `uma.terms.trainee` | Trainee Umamusume |
+| `uma.terms.team_pvp` | Team Trials |
+| `uma.terms.card_speed` | Speed |
+| `uma.terms.card_stamina` | Stamina |
+| `uma.terms.card_power` | Power |
+| `uma.terms.card_guts` | Guts |
+| `uma.terms.card_wit` | Wit |
+| `uma.terms.card_group` | Group |
+| `uma.terms.card_pal` | Pal |
+| `uma.terms.style_front_runner` | Front Runner |
+| `uma.terms.style_pace_chaser` | Pace Chaser |
+| `uma.terms.style_late_surger` | Late Surger |
+| `uma.terms.style_end_closer` | End Closer |
+| `uma.terms.mood_great` | GREAT |
+| `uma.terms.mood_good` | GOOD |
+| `uma.terms.mood_normal` | NORMAL |
+| `uma.terms.mood_bad` | BAD |
+| `uma.terms.mood_awful` | AWFUL |
+
+These 22 are a data reference, not dead config in the §3.6 sense: they are source-cited client vocabulary staged for a surface PRD §6 has not cut. They are reported, not judged.
+
+#### Missing keys (called but not declared) — 5
+
+| Enum | Cases | Labeled | Missing |
+|---|---|---|---|
+| `ReleaseStatus` | 3 | 3 | 0 |
+| `RunStatus` | 3 | 3 | 0 |
+| `RaceEntryStatus` | 4 | 4 | 0 |
+| `SkillAcquisition` | 3 | 3 | 0 |
+| `AliasLanguage` | 3 | 3 | 0 |
+| `MatchTier` | 4 | 4 | 0 |
+| `CardRarity` | 3 | 3 | 0 |
+| `BuildPurpose` | 4 | 4 | 0 |
+| **`TraineeGoalType`** | **5** | **0** | **5** |
+
+`TraineeGoalType` uses `HasLabel`, so `HasLabel::label()` builds `uma.trainee_goal_type.{name}` and calls `trans()` — but `lang/en/uma.php` declares no `trainee_goal_type` group. The five keys below are called every time a `TraineeGoalType` case is labelled and resolve to themselves:
+
+- `uma.trainee_goal_type.Placement`
+- `uma.trainee_goal_type.Participate`
+- `uma.trainee_goal_type.Fan`
+- `uma.trainee_goal_type.FinalRound`
+- `uma.trainee_goal_type.Undecoded`
+
+**This one is not silent.** `HasLabel::label()` falls back to `Str::headline($this->name)` when `trans()` returns the key unchanged (`HasLabel.php:22`), so the page prints `Placement`, `Participate`, `Fan`, `Final Round`, `Undecoded` — headline-cased raw case names — rather than the key. The failure is a missing group, not a missing mechanism; no other enum in the tree hits it.
+
+#### Enum label coverage — non-HasLabel enums
+
+Seven further enums define their own `label()` and do not read `lang/`: `CareerYear` (hardcoded `match`: "Junior Year", "Classic Year", "Senior Year"), `TurnChoice`, `PerformanceType` (returns `$this->value` verbatim — the client's own word), `SnapshotFieldState`, `EnergyState`, `SpiritBurstState`. `MoodTier`, `CareerPhase`, `RunMode`, `TurnEventType` and `CandidateStatus` have no `label()` at all. None of these ten touches `lang/en/uma.php`, so they contribute no key reads and no missing keys.
+
+#### What §3.10 does not cover
+
+Whether the 22 `uma.terms.*` keys should be removed, moved, or wired to a surface (a slice-level change and, for `terms`, a PRD §6 scope question, not an audit finding). Whether a second locale should exist (a product decision). Whether the 5 `trainee_goal_type` labels should be added, and what wording they should carry (the `build_purpose` precedent at `lang/en/uma.php:63-65` shows the wording is a design decision, not a mechanical transform). This section also does not judge `Umamusume.php:133`'s deferred `ponytail:` note.
+### 12. §3.4 — data pipeline, 2026-10-17
+
+Measured at HEAD `e820cdd`, static analysis only. No pipeline command was executed: no `uma:fetch`, no `uma:reparse`, no migration, no network.
+
+#### Directory census
+
+| Question | Answer |
+|---|---|
+| Files under `app/Services/DataPipeline/` | 23 |
+| Total lines | 3,138 |
+| Parsers | 9 |
+| Contracts | 9 |
+| Subdirectories | `Contracts/`, `Parsers/` |
+
+Five top-level classes — `PipelineRunner.php`, `SourceFetcher.php`, `CrossReferenceMatcher.php`, `NameNormalizer.php`, `ArtworkMirror.php` — and 9 contracts (`SourceParser` plus eight kind-specific siblings: `RaceCatalogSourceParser`, `SkillSourceParser`, `CharacterCardSourceParser`, `ProfileSourceParser`, `SupportCardSourceParser`, `SupportEffectSourceParser`, `TraineeGoalSourceParser`, `ScenarioSourceParser`).
+
+#### Source-to-parser-to-command map
+
+Nine source entries in `config('uma.sources')`.
+
+| Source key | Parser | Command | `seed_file` | Pinned URL / manifest |
+|---|---|---|---|---|
+| `gametora-characters` | `GametoraCharacterParser` | `uma:fetch` / `uma:reparse` | `gametora-characters.e9e9ee6d.json` | pinned |
+| `gametora-character-cards` | `GametoraCharacterCardParser` | `uma:fetch` / `uma:reparse` | `gametora-characters.e9e9ee6d.json` (same body, other grain) | pinned |
+| `gametora-race-catalog` | `GametoraRaceCatalogParser` | `uma:fetch` / `uma:reparse` | `race_instances.json` | pinned + manifest `race_instances` |
+| `gametora-skills` | `GametoraSkillsParser` | `uma:fetch` / `uma:reparse` | `skills.609afe88.json` | pinned + manifest |
+| `gametora-character-profiles` | `GametoraCharacterProfileParser` | `uma:fetch` / `uma:reparse` | `characters.c6676539.json` | pinned + manifest |
+| `gametora-support-cards` | `GametoraSupportCardParser` | `uma:fetch` / `uma:reparse` | `support-cards.88dea522.json` | pinned + manifest |
+| `gametora-support-effects` | `GametoraSupportEffectParser` | `uma:fetch` / `uma:reparse` | `support_effects.ca447e53.json` | pinned + manifest |
+| `gametora-ura-objectives` | `GametoraUraObjectivesParser` | `uma:fetch` / `uma:reparse` | `ura-objectives.ead4bbfe.json` | pinned |
+| `gametora-artwork` | **(none — by design)** | `uma:fetch-art` | none | `https://media.gametora.com/umamusume/` |
+
+Mismatches found:
+
+- **One source entry with no parser: `gametora-artwork`.** This is the documented `ADR-0021` pattern, not a gap: the asset host stays allowlisted without being parsed, and `uma:fetch` steps over any source entry that declares no parser. `config/uma.php` and `AGENTS.md` §8 both state it.
+- **One parser on disk with no source entry: `GametoraScenarioParser`** (implements `ScenarioSourceParser`). It is not wired to any `config('uma.sources')` entry, and its contract `ScenarioSourceParser` is implemented by nothing else. It is **not dead**: two tests exercise it — `GametoraScenarioParserTest.php` (parses a stored body) and `ScenarioCapParityTest.php` (pins `GametoraScenarioParser::BASE_STAT_CAP` against `config('scenarios.base_cap')`, the "two owners agree" mechanism named in its docblock). The scenario capability is carried by the `scenarios` config source rather than by a fetch entry.
+
+No other mismatch: every parser declared on disk is referenced by a source entry, and every source entry that declares a parser names a class that exists.
+
+#### Fetcher allowlist verification
+
+| Question | Answer |
+|---|---|
+| `SourceFetcher` call sites | 3 (app) — `UmaFetch.php:23,82`, `ArtworkMirror.php:35,151`, and `config/uma.php` |
+| Hosts allowlisted | 2 — `gametora.com` (20 references across source urls, manifests, bases), `media.gametora.com` (1) |
+| Any outbound HTTP path bypassing `SourceFetcher` | **none** |
+
+The SSRF floor holds. `Http::withHeaders(...)` at `SourceFetcher.php:333` is the only outbound HTTP call in `app/`. Every other I/O call is a local `file_get_contents` — a committed seed body (`ReadsCommittedSource.php:54`, `ScenarioSlotSeeder.php:203`, `UmaImportSupportCards.php:99`, `tools/roster-crosscheck.php`), a fetched snapshot (`HandleInertiaRequests.php:82`), or an uploaded CSV (`ImportHistoricalRunRequest.php:83`). No `GuzzleHttp\Client`, no `curl_`, no raw `new Client`, no `fopen()` to a URL. `ArtworkMirror` reaches the network only through the injected `SourceFetcher` (`ArtworkMirror.php:35,151`).
+
+#### Pipeline stage trace
+
+| Stage | Owner | Call sites |
+|---|---|---|
+| fetch | `SourceFetcher::fetch()` / `fetchAsset()` | `UmaFetch.php:82`, `ArtworkMirror.php:151` |
+| snapshot | `SourceFetcher` (`:66-70`, inside fetch) | same two |
+| parse | parser class chosen by `is_a()` in `PipelineRunner::run()` | `UmaFetch.php`, `UmaReparse.php` |
+| normalize | `NameNormalizer` | 12 app refs (`PromoteMatchedRecord`, `StoreSkills`, `CatalogController`, API controller, seeders) |
+| match | `CrossReferenceMatcher` | 3 app (`PipelineRunner`, `MatchCandidate`, `UmamusumeRosterSeeder`) |
+| promote | `PipelineRunner::run()` → `Store*` / `PromoteMatchedRecord` | the 7 `is_a()` branches + fall-through loop |
+| review | `MatchCandidate::updateOrCreate` in `PipelineRunner::run()` | fall-through loop only |
+
+`PipelineRunner::run()` (`PipelineRunner.php:54`) holds the whole back half: seven `is_a()` branches (`RaceCatalogSourceParser:71`, `TraineeGoalSourceParser:97`, `SkillSourceParser:128`, `CharacterCardSourceParser:157`, `ProfileSourceParser:198`, `SupportCardSourceParser:227`, `SupportEffectSourceParser:242`) route reference rows past the match stage to their own writer, and the fall-through loop at `:255-302` matches on `record['name']`, promotes on `MatchTier::Exact`/`Alias`, and files everything else into `match_candidates` for review. Both entry points — `uma:fetch` (network) and `uma:reparse` (snapshot replay) — arrive through this one method. Every stage's data flow is traceable end to end.
+
+#### Promote path checks
+
+Eight promote-path actions: `PromoteMatchedRecord`, `StoreCharacterCards`, `StoreCharacterProfiles`, `StoreRaceCatalogSlots`, `StoreSkills`, `StoreSupportCards`, `StoreSupportEffects`, `StoreTraineeGoals`.
+
+| Question | Answer |
+|---|---|
+| Store actions | 8 (7 `Store*` + `PromoteMatchedRecord`) |
+| Any action that does not check `is_manual` | 0 of 8 — with one schema-qualified exception below |
+| Any action that does not write a `data_sources` row | 0 |
+| Any action that does not run inside `DB::transaction` | 0 |
+
+**Both Floor rules hold, with one stated exception.** Seven of the eight actions carry a real runtime `is_manual` guard — `StoreCharacterCards.php:46` selects `['id', 'is_manual']` and `:74-75` skips a manual row, incrementing `skipped`; the other six follow the same shape. The eighth, `StoreSupportEffects`, cannot: `support_effects` has no `is_manual` column (neither `2026_09_30_142618` nor `2026_09_30_151945` adds one), and the action's own docblock states it — *"This table cannot honour the `is_manual` stop sign … inventing a guard for a column that does not exist would be a stub, and adding the column is a schema change owned by the Architect"* (`StoreSupportEffects.php:19-23`). That is a recorded schema gap, not an unrecorded violation. **No Floor breach.**
+
+#### Orphan methods
+
+No orphan class in the pipeline. Every top-level class has both application and test references.
+
+| Class | app refs | test refs |
+|---|---|---|
+| `SourceFetcher` | 3 (`UmaFetch`, `ArtworkMirror`, `config/uma.php`) | 5 |
+| `PipelineRunner` | 11 (`UmaFetch`, `UmaReparse`, `UmaImportSupportCards`, `CatalogController`, …) | 8 |
+| `NameNormalizer` | 12 | 5 |
+| `CrossReferenceMatcher` | 3 | 1 (`CrossReferenceMatcherTest`) |
+| `ArtworkMirror` | 10 | 5 |
+
+#### Snapshot path verification
+
+| Question | Answer |
+|---|---|
+| Snapshot directory path | `storage/app/private/snapshots/{sourceKey}/{sha256}.html` (`SourceFetcher.php:66-70`) |
+| Files on disk | 6 |
+| Snapshot hash algorithm | **sha256** — `hash('sha256', $body)` (`SourceFetcher.php:66`) |
+| Any code path writing outside the gitignored location | none |
+
+Gitignored by `storage/app/private/.gitignore:1` (`*`). All six artifacts sit under that tree; no snapshot writer resolves a path outside it. `ArtworkMirror` writes artwork under a sibling private path (`storage/app/private/artwork/`), also gitignored, and reaches the network only through `SourceFetcher`.
+
+#### What §3.4 does not cover
+
+Whether any source should be added or removed, and whether `gametora-artwork` or `GametoraScenarioParser` should be wired or deleted (product decisions). Whether a parser's output is *correct* against its upstream document — this pass traced structure, not data (a parser-correctness sweep is slice work with fixtures). The fetch-source legality question stays with `AGENTS.md` escalation 5: the `gametora.com` robots.txt and rate-limit question is recorded as formally unanswered in `config/uma.php`'s own comment, and this pass does not settle it. Nor does it re-verify the seed-file bodies themselves, or exercise `uma:fetch` / `uma:reparse` end to end — the trace is static.
+### 13. §3.7 — quality bar's gate inventory, 2026-10-17
+
+Measured at HEAD `608aff3`. **No gate was executed.** This pass inventories; the last-run proof of any gate is a commit message, not a fresh execution, and the tree has no CI (`.github/workflows/` absent), so every "last run" reading below is freshness, not pass/fail.
+
+#### The gate sources
+
+| Source | Gates named | Range |
+|---|---|---|
+| `docs/research-scratch/GOVERNANCE.md` §GATE-REGISTRY.md | 10 (C-1..C-8, G-60, G-61) | C-1 to C-8, G-60, G-61 |
+| `AGENTS.md` §9 hand-off sequence | 7 steps | test, pint, phpstan, typecheck, lore ×2, audit |
+| `docs/research-scratch/DESIGN-CORPUS.md` G table | 70 rows | G-1 .. G-59 plus lettered variants (G-15a, G-16b, G-17c …) |
+| `composer.json` scripts | 18 | setup, dev, test, lore, lore-code, docs, docs-adr, lint, fix, typecheck, analyse, + 7 framework hooks |
+| `package.json` scripts | 5 | build, dev, typecheck, test:a11y, test:browser |
+
+The G-series is layered, not duplicated. `GOVERNANCE.md:463-465` states the split: the folded research corpus owns the D-number design rules and the prototype gate series, and the registry "does not restate them; it records where they run and how they bind the shipped app." `AGENTS.md` names **zero** G-numbers — it carries the C-series and the executable sequence only.
+
+**The 70 G-rows are a prototype review checklist, not a runnable gate table.** Every row's "how to check" column is a manual instruction in the imperative — `render the same run header in all four Global scenarios` (G-33), `grep artifacts sourced from wiki tables for Wisdom and Motivation` (G-38), `measure the computed font-family of body, a heading and a numeral` (G-21), `for each screen, read the §10n row matching its scenario` (G-40). None names a command. Eight are executed by `tools/gate.py`; the rest are reviewer-judged, which is the registry's stated design rather than a gap in it.
+
+#### Documented vs executable
+
+| Gate | Documented in | Executable | Command |
+|---|---|---|---|
+| C-1 Tests | registry, `AGENTS.md` §9 | yes | `php artisan test --compact` |
+| C-2 Static analysis | registry, `AGENTS.md` §9 | yes | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` |
+| C-3 Style | registry, `AGENTS.md` §9 | yes | `vendor/bin/pint --test --format agent <paths>` |
+| C-4 Lore | registry, `AGENTS.md` §5, §9 | yes | `composer lore`, `composer lore-code` → `tools/lore.php` |
+| C-5 Migrations | registry | manual by approval | `php artisan migrate`; §11 forbids it against the shared dev file |
+| C-6 Floor | registry | grep + diff review | `git grep`; no script, by design |
+| C-7 UI states | registry | reviewer enumeration | none; interpretive per ADR-0007 |
+| C-8 Dependencies | registry, `AGENTS.md` §5 | yes | `composer audit`, `npm audit --omit=dev` |
+| G-60 Retired literals | registry | **partial — registry says so** | reviewer grep; scanner pending (`:590`) |
+| G-61 ADR contract | registry | yes | `python tools/adr-check.py docs/adr` / `composer docs-adr` |
+| G-1, 2, 3, 4, 13, 16, 27, 31, 32 | G table | yes | `tools/gate.py` |
+| G-18 Contrast | G table | yes | `tests/Feature/DesignTokensTest.php` (browser) |
+| Remaining 59 G-rows | G table | **reviewer-judged** | no command exists; the row *is* the check |
+
+**Documented gates with no executable:**
+
+- **59 of the 70 G-rows are reviewer-executed.** Their subject is stated and their pass criterion is stated; only a runner is absent, and the table's design expects that — it is a prototype review sheet. G-18 is the one G-row promoted to an automated test.
+- **G-60's scanner is pending.** The registry's own Gaps table (`:590`) records "G-60 scanner does not yet read a retired-value registry file — G-60 currently reviewer-enforced." Stated, not hidden.
+- **C-6 and C-7** are non-automatable by design, as their registry rows declare. Neither is a gap.
+
+**Executable checks with no documented gate:**
+
+| Executable | Documented? |
+|---|---|
+| `tools/adr-check.py` / `composer docs-adr` | yes — G-61 |
+| `tools/doc_census.py` / `composer docs` | **no gate id** — `AGENTS.md` §10 names the command; no C- or G-number claims it |
+| `tools/md_fence_check.py` | **no gate id** — `AGENTS.md` §10 names it |
+| `tools/roster-crosscheck.php` | **no gate id** — listed in `AGENTS.md` §6 |
+| `tools/check_untracked.py` | **no gate id** — listed in `AGENTS.md` §6 |
+| `tools/gate-preflight.php` | **no gate id** — untracked at HEAD; not in `AGENTS.md` |
+| `tools/dev-logs-pane.php` | no — runtime dev tool, not a gate |
+| `npm run test:a11y` | **no gate id** — `AGENTS.md` §9 names browser gates but not this script |
+| `npm run test:browser` | partly — named under the per-session harness rule (KI-73, KI-80) |
+
+**Six tracked executables enforce rules no gate id claims.** This is the `pint --dirty` shape: the executable bar outruns the documented bar.
+
+#### `tools/gate.py` banner under-reporting — confirmed at HEAD
+
+`DESIGN-CORPUS.md`'s note that the banner omits G-27, G-31 and G-32 is **confirmed**. The checks exist; the banner does not name them.
+
+- `gate.py:270-271` — *"Checked: G-1 lore, G-2 forms, G-3 terminology, G-4 tokens, G-13 rendered text, G-16 sample data, D-79 em dash, D-84 emoji."*
+- `gate.py:272` — *"Not machine-checkable (reviewer): G-5, G-6, G-7, G-9, G-11, G-12, G-14, G-15, G-17."*
+- **G-27, G-31, G-32 appear in neither list** while being enforced at `gate.py:211-215` (G-31 run length, G-32 cap value) and `gate.py:242-261` (G-27 inline-script syntax, which self-skips with a printed note when `node` is off PATH at `:256`).
+
+A reader taking the banner as the coverage statement under-counts the scanner by three gates. This is the registry's own Gaps-table failure mode, occurring inside the gate rather than beside it.
+
+#### Gate coverage by code path
+
+| Gate | Subject | Fires on | Skips |
+|---|---|---|---|
+| C-2 PHPStan | `app` only (`phpstan.neon` `paths`) | `app/**` | `tests/`, `database/`, `tools/` |
+| Typecheck | `resources/js/**/*.ts`, `tests/browser/**/*.ts`, `tests/utils/**/*.ts` (`tsconfig.json` `include`) | all three | nothing in the TS tree excluded |
+| C-3 Pint | files named on the command line | explicit `<paths>` | `--dirty` banned (KI-75); no whole-tree form in the bar |
+| C-4 Lore | app paths + `docs/` markers | `tools/lore.php`, both modes | `tools/` outside `lore-code`'s path list |
+| G-18 | the two source trees | `DesignTokensTest.php` | skipped without the Playwright driver (`markTestSkipped`) |
+
+**KI-93 is closed.** `tsconfig.json` includes `tests/browser/**/*.ts` and `tests/utils/**/*.ts`; the invisible-`tests/` exclusion is no longer present. Measured from the file, not from the issue's status line.
+
+Two gaps stay visible in the configs themselves. PHPStan reads `app` alone, so `database/migrations/`, `tools/` and `database/seeders/` are outside C-2's subject. And Pint has no whole-tree form in the bar, so PHP outside a hand-off's named paths is ungated by construction — which is what KI-75 had to correct in prose.
+
+#### Gate freshness (last-touching commit)
+
+| Gate file | Last touched |
+|---|---|
+| `tools/gate.py` | `a3f0795` — "point design gate at corpus master and align three prototypes' shipped tokens" |
+| `tools/lore.php` | `13b2708` — "drop exclusion deleted file, and mark lines protecting" |
+| `tools/adr-check.py` | `1baa824` — "add contract/index/check machinery and `CURRENT.md`" |
+| `tests/Feature/DesignTokensTest.php` | `04bb402` — "Preserve stranded concurrent-session work before merging cockpit-wt" |
+| `phpstan.neon` | `fda6ff0` — "initialize Laravel 13 application skeleton" |
+| `pint.json` | `fda6ff0` — "initialize Laravel 13 application skeleton" |
+
+Both static-analysis configs are untouched since the skeleton commit while the runners have moved — the expected shape: a threshold config should be stable, a scanner should not be.
+
+#### What §3.7 does not cover
+
+Whether any reviewer-executed gate (the 59 G-rows, C-6, C-7, G-60's pending scanner) should be built, automated, or retired — an owner decision, not an audit finding. Whether a gate's pass threshold is correct — a QA ruling; the bar forbids relaxing one to make a check pass. Whether the browser suite's per-session harness (`PLAYWRIGHT_PORT`, `PLAYWRIGHT_SCRATCH_DB`, KI-73 and KI-80) is the right shape — a tooling decision. And whether any gate passes: no gate was executed, so this section is the surface, not the verdict.
+### 14. §3.8 — ADR coverage, 2026-10-17
+
+Measured at HEAD `608aff3`, read-only. No ADR was edited and no ruling was made.
+
+#### ADR census
+
+29 files in `docs/adr/`: 26 numbered ADRs (`0001`–`0026`) plus `ADR-TEMPLATE.md`, `README.md` (derived index), and `CURRENT.md`.
+
+| Status | Count | Files |
+|---|---|---|
+| Accepted | 16 | 0002, 0003, 0004, 0006, 0007, 0008, 0010, 0012, 0014, 0015, 0017, 0018, 0020, 0021, 0024, 0026 |
+| Accepted in part / ruled in part | 3 | 0001, 0011 ("accepted in part"), 0009 ("RULED IN PART") |
+| Declined | 1 | 0005 (DECLINED for Phase 1; superseded by 0014) |
+| Withdrawn | 1 | 0013 (superseded by 0012 Decision 4) |
+| **Proposed** | **4** | 0019, 0022, 0023, 0025 |
+| Open question (no decision) | 1 | 0016 |
+
+Sixteen plus three plus four plus one plus one plus one is the full set of 26.
+
+`AGENTS.md` §2 names the binding set as `docs/adr/0001`-`0025`; `0026` has since been added and the range in that table line is stale by one.
+
+`docs/adr/CURRENT.md` is a fourth artifact the prompt does not list and that materially changes this picture: a 126-line derived facts file with a `decision`/`code`/`owner` row per fact and a block of **negative rows** ("**Do not** cite 0005 as permission", "**Do not** cite 0016 as permission to build readiness"). It is the tree's own drift-corrected index, and it already carries two of the three findings below.
+
+#### Per-ADR decision area and code anchor
+
+| ADR | Decision area | Code anchor | Present |
+|---|---|---|---|
+| 0001 | Energy guidance, no prediction | `app/Enums/EnergyState.php`, `NextDecision.php` | yes |
+| 0002 | Scenario caps exceed validation bound | superseded by 0015 | n/a |
+| 0003 | Consolidated Phase 1 schema | migrations `2026_09_26_162818`, `2026_09_27_153416`, `Adr0003SchemaTest` | yes |
+| 0004 | Aptitude and scenario-cap reference data | `umamusume` aptitude columns | yes |
+| 0005 | Support-card entities | declined; superseded by 0014 | n/a |
+| 0006 | Design authority, theme default | root `DESIGN.md`, preference resolver | yes |
+| 0007 | C-7 loading-state scope | `AGENTS.md` / registry C-7 row | yes |
+| 0008 | Character-card catalog layer | `2026_09_29_120100`, `CharacterCard` | yes |
+| 0009 | Scenario slot seeding | `ScenarioSlotSeeder` | yes (part) |
+| 0010 | Legacy selection payload | `app/Models/Legacy/LegacySelectionPayload.php` | yes |
+| 0011 | Skills reference import | `GametoraSkillsParser`, `StoreSkills` | yes |
+| 0012 | Card detail fields and images | `2026_09_29_182820`, `CharacterCardSchemaTest` | yes |
+| 0013 | Character profile source | withdrawn; `GametoraCharacterProfileParser` ships under 0012 | n/a |
+| 0014 | Support-card entities | `2026_09_30_142618`, `2026_09_30_151945` | yes |
+| 0015 | Per-scenario stat ceiling | `app/Services/ScenarioCaps.php`, `ScenarioCapParityTest` | yes |
+| 0016 | Next-race readiness | not built (by design) | yes |
+| 0017 | Historical run import | `ImportHistoricalRun`, `ImportHistoricalRunRequest` | yes |
+| 0018 | One facet contract | `PageSize`, `FilterContractTest` | yes |
+| 0019 | Semver label, tag, release branch | `VERSION.md` | partial (see drift 3) |
+| 0020 | Trainer Desk 2.0 program | `resources/js/` (59 files), `resources/views/app.blade.php` shell | yes |
+| 0021 | Sourced character artwork | `ArtworkMirror.php`, `ArtworkSlot.vue`, `uma:fetch-art` | yes |
+| 0022 | Veteran tag filter twin | `2026_10_08_180000`, `Veteran::booted()`, `ListVeterans` | yes |
+| 0023 | Deck slot ownership | `2026_10_09_120000`, `DeckSlot::OWNERSHIP`, `DeckSelectController` | yes |
+| 0024 | Energy state exact/band/unknown | `2026_10_09_170000`, `App\Enums\EnergyState` | yes |
+| 0025 | Per-run entered caps | `2026_10_12_140000`, `ValidatesEnteredCaps`, `ScenarioCaps::ENTERED_CAPS` | yes |
+| 0026 | Per-trainee career objectives | `GametoraUraObjectivesParser`, `StoreTraineeGoals`, `trainee_goals` | yes |
+
+Every Accepted ADR's decision area still exists in the tree. No anchor file is missing.
+
+#### ADR-to-code drift
+
+**Three findings, all in one shape: an ADR left at `Proposed` while its decision is shipped and running.**
+
+| ADR | Status line | What the code does |
+|---|---|---|
+| **0025** | *Proposed* (2026-10-12, "awaits approval of wording") | Migration `2026_10_12_140000` applied (batch 16, per `CURRENT.md`); `ValidatesEnteredCaps` enforces at four sites; `entered_caps` consumed by `BuildTargetController:75,78`, `CockpitController:360`, `StartCareerRequest:44`, `StoreBuildTargetRequest:38,54` |
+| **0023** | *Proposed* ("**The column is built against draft; owner accepts or rejects it**") | Migration `2026_10_09_120000` shipped; `DeckSlot::OWNERSHIP` and four `DeckSelectController` sites (`:38,66,85,235`) read it |
+| **0022** | *Proposed* ("**Nothing binds until owner records Accepted**") | Migration `2026_10_08_180000` applied; `Veteran::booted()` saving guard and `ListVeterans:65` read `tags_normalized` |
+
+**This is not silent drift.** All three status lines state in their own text that the code was built against a draft and awaits the owner's ruling, and `CURRENT.md` records each as a fact with the shipped migration as its proof (`:35`, `:72`, `:103`). What the audit adds is the count: **three of the four `Proposed` ADRs are shipped, and only 0019 is not.** The shape is a naming-state lag, not an undocumented build — which is exactly what an owner ruling closes in one line each.
+
+**Drift 4 — ADR-0019's owed correction is genuinely still owed.** Its status line says the `AGENTS.md` §14/§3 correction is *owed and not landed*, and `CURRENT.md:116` carries the same as **Owed** with `code: not landed`. Verified against the tree: `VERSION.md` exists and reads `Current version: 2.0.0, pre-release. Tagged 2.0.0.`, while `AGENTS.md` §14 still says "There is no changelog or version file to bump" and `CHANGELOG.md` exists at root. Both sides of the stated obligation are unmet.
+
+**One stale reference, not a drift.** `AGENTS.md` §2's binding-decision row ends at `0025`; `0026` (accepted 2026-10-13, the `trainee_goals` ladder) is on disk. Same class as the KI-60 family: the rule lags the tree.
+
+#### Nothing drifted the other way
+
+Two negative checks, both clean, and both load-bearing:
+
+- **ADR-0016 and `PRD.md` §6.11 hold.** 83 keyword hits for `predict|simulation|winChance|win_chance|probability` across `app/`, `resources/js/`, `config/` — every one is either a comment *disclaiming* prediction (`CockpitController.php:663` "**Nothing here predicts.** No readiness band, no win figure, no percentage"; `:1074`) or the inheritance screen's "predicted section", which is a *sourced* Spark count read from a stored `LegacySelectionPayload`, not a computed outcome (`InheritanceEventController.php:21,25,182`). `LegacySelectController.php:32-33` states the boundary and names the `probability` column as `AncestryGraph`'s permanent `N/A`. No prediction engine exists.
+- **ADR-0021's two halves both ship as its `Verification` section describes.** `app/Services/DataPipeline/ArtworkMirror.php` (fetch) and `resources/js/components/ArtworkSlot.vue` (display) both exist; §3.4 measured the fetch half as reaching the network only through `SourceFetcher`.
+
+**ADR-0020's status is accurate.** It is `Accepted` with `superseded-by: —`, and the SPA rewrite it scoped is in the tree (`resources/js/` at 59 files, `app.blade.php` reduced to the shell). The Grand Concert premises the prompt names as superseded are recorded in `docs/proposals/design-2.0.md:24` as *"superseded by tree and recorded in plan's E6 close-out"* — superseded **within the design proposal's own text**, not by ADR-0020. ADR-0020 itself does not claim those premises, so there is nothing to amend in it.
+
+#### Decisions in the code with no ADR
+
+**34 of 62 migrations cite neither an `ADR-NNNN` nor a `FR-x`/`US-x` reference.** The naive reading is an `AGENTS.md` §11 breach at scale. It is not, for a reason the tree itself records:
+
+- The 2026-09-26 baseline (9 files: `umamusume`, `umamusume_aliases`, `skills`, `training_runs`, `turn_entries`, `data_sources`, `match_candidates`, `run_skills`, and the framework trio) is the schema **ADR-0003** consolidated, whose contract block names its migrations (`2026_09_26_162818`, `2026_09_27_153416`) and whose body absorbs ADR-0001 and ADR-0002.
+- `AGENTS.md` §17 states the framework trio (`users`, `cache`, `jobs`) is unused Laravel scaffolding.
+
+That leaves **23 migrations** citing no ADR and no PRD reference — the 2026-09-27 to 2026-10-10 incremental column additions (`add_energy_mood_fans_to_turn_entries`, `add_is_manual_to_scenario_races_table`, `add_source_key_to_scenario_slots`, `add_race_catalog_slot_id_to_race_entries`, `add_is_maiden_gated_to_race_catalog_slots`, `add_fan_payouts_to_race_catalog_slots`, `add_trainee_rarity_and_potential_to_training_runs`, `add_growth_rate_to_training_runs`, `add_stat_ceilings_to_training_runs`, `add_team_identity_to_training_runs`, `add_unity_cup_counters_to_training_runs`, `add_choice_and_corrections_to_turn_entries_table`, `add_mode_to_training_runs_table`, `add_facility_levels_to_turn_entries`, the two unique-index additions, and the support-card schema pair). Several are covered by an ADR **in substance but without citing it** — `add_stat_ceilings_to_training_runs` is ADR-0015's work, `add_mode_to_training_runs` is ADR-0020's, `add_energy_mood_fans` is ADR-0003's. The finding is therefore **citation debt, not decision debt**: the decision is recorded, the migration does not point at it. That is a one-line-per-migration fix and is named, not ruled on.
+
+Config and enums were swept for the same shape: `config/uma.php`, `config/scenarios.php` and the 21 `app/Enums/` files carry no ADR-worthy decision that lacks a recorded decision elsewhere — the `terms` map's own docblock and `HasLabel`'s case-name contract are documented in-file.
+
+#### What §3.8 does not cover
+
+Whether the three `Proposed`-but-shipped ADRs (0022, 0023, 0025) should be accepted, amended, or their code reverted — an owner ruling, and each status line already reserves itself for it. Whether a migration without an ADR *citation* should get one (a process decision under §11, not a finding about the schema). Whether ADR-0019's pre-release mechanism and tag scheme should be chosen, and whether its owed `AGENTS.md` correction should be made now or at release. And any `Proposed` ADR's readiness for acceptance — 0019 in particular is untouched by this pass beyond the confirmed-unlanded correction.
+
+### 15. §3.11 — tools, 2026-10-17
+
+Measured at HEAD `5fb1a6b`, static analysis, read-only. No tool was executed; no `make` (KI-4 — it does not run on this host). Reference counts are from a fixed-string sweep of the tracked tree over `app/ config/ routes/ tests/ database/ bootstrap/ resources/js/ docs/ composer.json package.json Makefile AGENTS.md README.md CLAUDE.md` plus the agent dirs; refs from this audit's own seed are excluded below.
+
+#### Directory census
+
+`tools/` holds **31 script and artifact files** on disk: **28 tracked, 1 untracked, 2 gitignored**, plus `tools/__pycache__/` (8 ignored build artifacts).
+
+| Question | Answer |
+|---|---|
+| Files under `tools/` | 31 (28 tracked / 1 untracked / 2 ignored) |
+| Languages | 14 Python, 6 PHP, 7 JavaScript (`.cjs`), 2 JSON, 2 text artifacts |
+| Makefile present | yes — 69 lines, 13 targets |
+| Files under `.ai/` | 15 — all Markdown (guidelines, rules, skills). **Zero runnable scripts.** |
+
+Untracked: `tools/gate-preflight.php` (the KI-74 contention probe dispatches name). Ignored: `tools/rebuild-db.php`, `tools/rebuild-db.py`.
+
+#### Per-tool contract
+
+Reachability: ✅ = a composer or npm script invokes it; ➡ = reached through the Pest suite; ⏚ = manual invocation only.
+
+| Tool | Purpose | Caller | Gate id (§3.7) | Documented in | Reach |
+|---|---|---|---|---|---|
+| `lore.php` | C-4 banned-vocabulary sweep, both modes | `composer lore`, `composer lore-code` | **C-4** | registry, `AGENTS.md` | ✅ |
+| `gate.py` | design-artifact gate over `docs/design-research/prototypes/*.html` (3 files) | `python tools/gate.py` | G-1..4, G-13, G-16, D-79/84 (+ G-27/31/32, unlisted) | registry, `AGENTS.md`, README | ⏚ |
+| `adr-check.py` | ADR-set contract (FATAL/INDEX/CONTRACT/DUPE/DRIFT) | `composer docs-adr` | **G-61** | registry | ✅ |
+| `adr-index.py` | derives the `docs/adr/README.md` index table from ADR bodies | manual (README names it) | none | ADR README, PROCESS-PLANS | ⏚ |
+| `adr_rows.py` | shared row-extraction module — `adr-check.py:17` `from adr_rows import numeric_rows` | import only, not an entry point | (rides G-61) | — | n/a |
+| `doc_census.py` | documentation census, successor to the deleted inventory tables | `composer docs` | **none** | `AGENTS.md` §10, README | ✅ |
+| `doc_census_selftest.py` | two-direction check of the census citation resolver | `tests/Feature/DocCitationParityTest.php` | (C-1 via suite) | slice record | ➡ |
+| `md_fence_check.py` | finds closing code-fences carrying an info string | `python tools/md_fence_check.py` | **none** | `AGENTS.md` §10, PROCESS-PLANS, SLICE-RECORDS | ⏚ |
+| `md_fence_check_selftest.py` | fence state-machine check, both directions | **no test file references it** — manual only | none | `AGENTS.md` | ⏚ |
+| `roster-crosscheck.php` | Tier A cross-check of GameTora costume cards against saved Tier A pages; prints verdict rows | `php tools/roster-crosscheck.php` | **none** | `AGENTS.md` §6, README, CATALOG-ROSTER-WORKSTREAM | ⏚ |
+| `check_untracked.py` | lists untracked/dirty Markdown the tracked-only `git grep` passes miss | `python tools/check_untracked.py` | **none** | `AGENTS.md` §6 | ⏚ |
+| `dev-logs-pane.php` | Windows logs pane for `composer dev` (Pail needs `pcntl`, which no Windows PHP build ships) | inside `composer dev` concurrently | not a gate | `AGENTS.md` | ✅ |
+| `gate-preflight.php` | KI-74 box-contention probe — times one indexed `training_runs` read, exit 0/1/2 | dispatch convention (per-session preflight) | **none** — untracked | seed only | ⏚ |
+| `data/gen_calendar.py` | generates the Global career race-calendar tables from the GameTora export | manual | none | `docs/scenarios/09`, CONSOLIDATION-LOG | ⏚ |
+| `data/resync_doc.py` | re-syncs every generated calendar table in the scenario guide | manual, paired with the above | none | same docs | ⏚ |
+| `data/census_output.txt` | census artifact — header states its own provenance ("measured at HEAD `bc42d93`"); no writer references it | **none** — UTF-16LE, tracked | none | none | orphaned |
+| `markdown/` (10 files) | one-off markdown-lint fix/debug family (`.cjs` × 7, JSON artifacts × 2, fence viewer) from the 2026-09-28 review | **zero callers** anywhere | none | none | orphaned |
+| `debug/force-db-rebuild.py` | **destructive** dev-database rebuild, absolute-path target | zero refs, zero docs | none | none | orphaned |
+| `debug/test-final-analysis.php` | one-off `database_path()`/`realpath()` resolution probe | zero refs beyond this audit | none | none | orphaned |
+| `debug/tmp_routes.txt` | empty file (0 bytes), tracked | zero refs | none | none | orphaned |
+| `rebuild-db.php` / `rebuild-db.py` (2) | **destructive** dev-database rebuild pair, absolute-path targets | gitignored; zero refs | none | none | shadow |
+
+#### Tools with no gate id — confirmed and extended
+
+§3.7's six (`doc_census.py`, `md_fence_check.py`, `roster-crosscheck.php`, `check_untracked.py`, `gate-preflight.php`, `npm run test:a11y`) are **all confirmed still gate-id-less** at this HEAD. The §3.11 sweep adds six the gate pass did not enumerate: `adr-index.py` (regenerates the index — a consistency action with no id), the two selftests (one wired into C-1, one not), `data/gen_calendar.py` + `data/resync_doc.py` (they write shipped `docs/scenarios/09` tables — generation with no verification id), and `dev-logs-pane.php` only if it is read as anything other than runtime tooling (it is — not a gate by behaviour either).
+
+#### Gate-id-versus-behaviour mismatches
+
+1. **`gate.py`'s header over-claims its range and the banner under-reports its set** — the §3.7 banner finding, and its other half: `gate.py:5-6` states the check set is "the machine-checkable gates **G-1..G-17**", but nine of that range are reviewer-only by its own banner (`:272`), while three gates *outside* the range (G-27, G-31, G-32) are enforced at `:211-261` and named in neither header nor banner.
+2. **`gate.py`'s subject is prototypes, not the shipped tree.** `PROTO_DIR = docs/design-research/prototypes` (`:22-23`), globbed `*.html` top-level only — 3 files on disk at HEAD. The G-table's G-31/G-32 rows say "grep **views and JS**"; `gate.py` never reads `resources/` or `app/`. For the shipped tree, those rows remain reviewer instructions with no executable.
+3. **The Makefile's `lint:` target names the banned shape.** It runs `vendor/bin/pint --dirty --format agent`; C-3's registry row reads "the slice's own explicit paths; **never `--dirty`**" and KI-75 closed the incident. Because `make` cannot run on this host (KI-4), the target is a frozen contradiction rather than a live violation — but any Git-Bash user following the Makefile executes what the bar forbids. `migrate:` has the same class of shape: `migrate:fresh --seed`, the C-5 destructive variant, with no approval guard in the target.
+
+#### Makefile target-to-equivalent map
+
+13 targets; every one has a composer/npm/artisan equivalent that exists at HEAD — **no dead target** (`uma:backup` names a real command: `UmaBackup.php`).
+
+| Target | Command | Equivalent | Shape check |
+|---|---|---|---|
+| install | composer+npm install | `composer setup` | ok |
+| dev | `composer run dev` | composer `dev` | ok |
+| test | `artisan test --compact` | composer `test` (+typecheck) | ok |
+| lint | `pint --dirty` | composer `lint` = `pint --test` | **forbidden shape** (KI-75) |
+| stan | `phpstan analyse` | composer `analyse` | ok |
+| migrate | `migrate:fresh --seed` | none in scripts | **C-5 destructive variant, unguarded** |
+| seed / fetch / reparse / backup | `db:seed`, `uma:fetch`, `uma:reparse`, `uma:backup` | artisan, live | ok |
+| lore / lore-code | `git grep` stages | composer `lore`, `lore-code` | parity pinned by `LoreGateParityTest` |
+| audit | composer+npm audit | C-8 commands | ok |
+
+The Makefile header comment cites CONTEXT.md and root `CONSTRAINTS.md`; **neither exists at HEAD** — both folded (CONSTRAINTS into `GOVERNANCE.md`, whose registry text still cites "root `CONSTRAINTS.md`" at `:453`). The header's own caveat — "Local-only trainer tool. Windows: run through Git Bash." — matches `AGENTS.md` §10's statement that GNU `make` cannot run here; the file survives as reference, and `LoreGateParityTest` keeps its two lore targets byte-honest against `tools/lore.php` from the other side.
+
+#### Two artifact findings worth naming
+
+- **`tools/data/census_output.txt` is UTF-16LE** (first bytes `FF FE`, verified; renders as spaced characters under a UTF-8 read). A tracked file committed through a raw PowerShell `>` redirect — exactly the encoding hazard the seed's downstream notes and `8389da8` record. The hazard is not merely documented, it is in the tree.
+- The `tools/markdown/` family (10 tracked files, including a 13,792-line `md-remaining-errors.json` artifact) and `tools/debug/` (3 tracked files, one destructive, one empty) are **finished one-off sweeps left tracked with zero callers**. `debug/force-db-rebuild.py` and the ignored `rebuild-db.php`/`.py` pair write to the dev database by hard-coded absolute path with no guard and no doc — the §11 destructive-action class, sitting in the tree unannounced.
+
+Five tools carry the absolute machine path `D:\Projects\umamusume-laravel13` or its escaped variants in their source (`check_untracked.py`, `force-db-rebuild.py`, `gate-preflight.php`, `rebuild-db.php`, `rebuild-db.py`): path-locked to this box.
+
+#### What §3.11 does not cover
+
+Whether any tool should be documented, given a gate id, retired, or moved out of `tools/` — product decisions, including the four orphaned one-off families. Whether a gate's pass threshold is correct — a QA ruling. Whether the Makefile should be deleted (KI-4 says it does not run, but its lore targets stay byte-pinned by `LoreGateParityTest` and the file is the registry's `make lore` counterpart). And whether the destructive `rebuild-db`/`force-db-rebuild` shapes should exist at all — §11 territory, an owner call, not an audit ruling.
+
+### 16. §3.12 — legacy Blade, 2026-10-17
+
+Measured at HEAD `5fb1a6b`, static analysis, read-only. No view was rendered and no server was started.
+
+#### View census
+
+| Question | Answer |
+|---|---|
+| Files under `resources/views/` | 4 — every one a `.blade.php` |
+| `resources/views/components/` | **absent** (not merely empty) |
+| `resources/views/vendor/` | **absent** |
+| Any other subdir or non-Blade file | none |
+
+`app.blade.php` (27 lines), `errors/404.blade.php` (64), `errors/419.blade.php` (57), `errors/500.blade.php` (54). **`AGENTS.md` §1's "4 Blade files only" statement is exact at this HEAD** — there is no fifth file, so this pass lands the confirming outcome rather than the more valuable naming one.
+
+#### Per-view contract
+
+| View | Rendered by | Reached by | Live? |
+|---|---|---|---|
+| `app.blade.php` | the Inertia response contract — every `Inertia::render(...)` in `app/Http/Controllers/` (46 call sites counted) emits through this root template | every page route | **live** — the root of the entire SPA surface (ADR-0020 §1) |
+| `errors/404.blade.php` | framework exception handler maps `NotFoundHttpException` → `errors.404` | any unmatched route + 10 `abort(404)` sites in `app/`/`routes/` | **live** |
+| `errors/419.blade.php` | handler maps `TokenMismatchException` (CSRF) → `errors.419` | any POST with an expired token | **live** |
+| `errors/500.blade.php` | handler maps uncaught exceptions → `errors.500` | any failure in production mode | **live** |
+
+All four are first-paint-themed by design: `AppServiceProvider.php:39` — *"All four root documents are composed: `app` (the Inertia root, ADR-0020 §1) and the [error trio]"* — a server-side `$theme` composer feeds every root document so the stored preference wins before script, matching ADR-0006's resolution order. `app.blade.php` carries the matching `@empty($theme)` inline fallback (`:12-20`) and the `@vite(['resources/css/app.css', 'resources/js/spa.ts'])` + `@inertiaHead` + `@inertia` directive trio — it is a shell, not a page.
+
+Three of the four are additionally rendered directly by tests: `ErrorPageViewsTest` calls `view('errors.419')->render()` at `:42,79,114` and `view('errors.500')->render()` at `:61` (the §3.9 pass already counted `/no-such-page` in that file as a deliberate 404 probe).
+
+#### Orphan views
+
+**Zero.** Every file in the census has a framework-resolvable render path, and three of the four also have a direct test caller. No `.blade.php` exists that no `view()`/`View::make()`/exception-handler path reaches.
+
+#### Blade components
+
+`resources/views/components/` **does not exist**; `<x-` component tags across all four views: **0**. `AGENTS.md` §13's "empty since slice B1" holds in a stronger form — the directory itself is gone, not empty. Nothing in the tree can render a Blade component because nothing declares one.
+
+#### Vendored views
+
+`resources/views/vendor/` **does not exist**. No package view is published-and-overridden in this tree.
+
+#### The one residue
+
+`app.blade.php:3`'s comment reads: *"Theme resolution matches `components/layout.blade.php` so the first paint is already correct."* **`components/layout.blade.php` no longer exists** — it left with the components directory at slice B1. The sentence compares the live file's behaviour to a phantom sibling: the stated equivalence was true at writing time and is now unverifiable, while the behaviour it describes (server-composed theme on all four root documents) moved into `AppServiceProvider:39`'s composer block. A comment pointing at a deleted file — not a route reaching a deleted view. Reported; not edited.
+
+#### What §3.12 does not cover
+
+Whether any of the four views should be restyled, merged, or split — slice-level work, and all four are live surfaces under the design bar. Whether `app.blade.php:3`'s stale comment should be corrected (a one-line docs change an owner or the errata pass may fold in). Whether error pages should grow a `503` (the `php artisan down` path renders the framework fallback today — absent files were not searched for beyond the four that exist). And whether Blade returns: ADR-0020 §1 lifted Blade only as the Inertia shell and these error pages; this pass confirms that boundary is exactly 27 + 175 lines of Blade and no wider.
+
+---
+
+## UX-AUDIT-REPORT.md
+
+> **Consolidated 2026-10-24 (Round 19).** Source: `docs/audits/UX-AUDIT-REPORT.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/audits/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+
+## UX Audit — Laws of UX / Laws of UI, rendered frontend
+
+**Date:** 2026-10-17
+**Instrument:** the server already answering `http://127.0.0.1:8000` (PID 27136, started 14:27:36; `php -S` over `vendor/laravel/framework/.../server.php`). No server was started, no scratch DB created, no tree stashed.
+**Scope:** 48 routes × 4 widths = **192 full-page captures**, plus targeted probes (keyboard walk, accessible-name survey, heading outline, axe detail, form semantics).
+**Status:** findings only. **No fix has been applied. Nothing is committed or pushed.**
+
+---
+
+### Audited state
+
+This report measures a tree that changed underneath it. That is recorded here rather than smoothed over.
+
+| Fact | Value |
+|---|---|
+| HEAD at Phase 0 | `e09a475` (from the prior session's read; tree dirty, 31→34 files) |
+| **HEAD when this report was written** | **`0d3a69c7365f81a08a59a9d32d96f4070124b4cd`** |
+| Commits landed mid-audit | `9f4b2c5` (PHPStan level 7), `0d3a69c` ("style(wizard): densify four step pages and fix the duplicate h1") |
+| Tree at report time | **clean** (`git status --porcelain` → 0 lines) |
+| `origin/master` | not re-checked after the mid-audit commits |
+
+**What this means for the evidence.** Every capture in this report postdates `0d3a69c`:
+
+- first screenshot written 15:49:00, captures complete by 16:19;
+- `0d3a69c` committed 15:45:59.
+
+So the **screenshots represent `0d3a69c`**, not the dirty tree described in Phase 0. The dirty tree no longer exists; it was committed.
+
+**A live writer appeared at the end of the audit.** At 16:35 `git status` showed `M resources/js/components/scenario/ScenarioPanel.vue`, modified at **16:34:39** — after the last capture. The diff is three lines replacing a mojibake glyph `â—‹` with `○` in empty-state rows. It touches no finding in this report and no route's verdict, but it confirms **another agent is active in this worktree**; anything committed after `0d3a69c` is outside the measured state.
+
+**Per-file content hashes (SHA-256, first 16 hex chars) of every source file this report cites:**
+
+| File | SHA-256 (16) |
+|---|---|
+| `resources/js/layouts/AppLayout.vue` | `727829203A0F1CD2` |
+| `resources/js/layouts/SetupLayout.vue` | `2CA688CAFC9D185C` |
+| `resources/js/pages/Career/ScenarioSelect.vue` | `BC536BB4671CBE3F` |
+| `resources/js/pages/Career/LegacySelect.vue` | `9426AC1D4E92C9C4` |
+| `resources/js/pages/Career/Snapshot/Setup.vue` | `7D9198CF5FC5C656` |
+| `resources/js/pages/Dashboard.vue` | `FDD33870023D9009` |
+| `resources/js/pages/Review/Index.vue` | `1C80D965722A5E6B` |
+| `resources/js/pages/Skills/Show.vue` | `7B31CFDCAA579C50` |
+| `resources/js/pages/Runs/Index.vue` | `ADF7B02DFB3006E4` |
+| `resources/js/pages/SupportCards/Index.vue` | `3F5FB0FE27F48584` |
+| `resources/js/components/Form/BaseSelect.vue` | `C11EACFF34ADDA66` |
+| `resources/js/components/SubCell.vue` | (read at `0d3a69c`) |
+| `resources/js/components/legacy/AncestryNode.vue` | `C60A89E78FA51AF7` |
+| `resources/js/components/StatusPill.vue` | `916E68F22374F941` |
+| `resources/js/components/ProvenanceBadge.vue` | `9395FBCE3E6D7D38` |
+| `resources/js/components/support/SupportCardCatalog.vue` | `151C26FD59DCEFF6` |
+
+**Evidence artefacts** (all under `.scratch-uma/ux-audit-2026-10-17/`):
+
+| Artefact | Hash / count |
+|---|---|
+| `screens/{route}/{width}.png` | 192 files, 39,504,707 bytes, 48 route dirs |
+| `results-layout.json` (layout pass) | `9A860DB71DD12DFC` |
+| `results.json` (axe pass) | `56EC9607D22F1447` |
+| `working-tree.diff` (the Phase-0 dirty tree, now committed) | `3E07777787F8A149` |
+| `summary.txt`, `axe-summary.txt`, `kb.json`, `probe.log`, `outline.log`, `vet.log`, `snap.log`, `names.log` | raw command output, quoted verbatim below |
+
+---
+
+### Audit checklist — reconciliation
+
+#### Sources read at audit time
+
+- **lawsofux.com** — resolved fully (30 laws, one-line definitions each). Read via `webfetch`; the **integrated browser could not be used** in this session (`"Browser session does not belong to the requested project or directory"`), so this is a server-rendered fetch, not a DOM capture. It returned the complete list, so the client-render concern did not bite.
+- **uilaws.com** — resolved fully (13 laws). **This contradicts the operator's note** that the list is client-rendered and does not resolve in a plain fetch: a plain `webfetch` returned all 13 names and their definitions. The populated result is recorded below rather than "what I could read".
+- **Plan §1.1** — the canonical 27, read in full (the checklist is one 4,921-character line in the source; it was split to read it).
+
+#### The 27 canonical items (plan §1.1)
+
+1 Aesthetic–Usability · 2 Jakob's Law · 3 Fitts's Law · 4 Hick's Law · 5 Miller's Law · 6 Law of Proximity · 7 Law of Similarity · 8 Law of Common Region · 9 Law of Uniform Connectedness · 10 Law of Prägnanz · 11 Law of Continuity · 12 Law of Closure · 13 Law of Common Fate · 14 Law of Experience · 15 Von Restorff Effect · 16 Serial Position Effect · 17 Peak–End Rule · 18 Goal-Gradient Effect · 19 Zeigarnik Effect · 20 Tesler's Law · 21 Occam's Razor · 22 Pareto Principle · 23 Doherty Threshold · 24 Cognitive Load · 25 Choice Overload · 26 Flow · 27 Aesthetic consistency & visual hierarchy.
+
+#### lawsofux.com's 30 versus the plan's 27 — the reconciliation is different from what the plan says
+
+lawsofux.com's homepage lists exactly **30**: the 24 canonical laws the plan shares, **plus six** the plan's 27 does not carry (Chunking, Cognitive Bias, Mental Model, Paradox of the Active User, Parkinson's Law, Postel's Law, Selective Attention, Working Memory — that is eight names beyond the shared set, because the plan's 27 also carries **five** frames lawsofux.com does not list as laws: **Law of Common Fate (13), Law of Continuity (11), Law of Closure (12), Aesthetic consistency & visual hierarchy (27), and Cognitive Load is shared**).
+
+**Correction to the plan, recorded not resolved.** Plan §2.1 says "seven of §13's rows are not in the canonical 27: Chunking, Mental Model, Paradox of the Active User, Parkinson's Law, Selective Attention, Working Memory, Postel's Law." **Four of those seven are on lawsofux.com itself** (Chunking, Mental Model, Paradox of the Active User, Postel's Law) and a fifth (Parkinson's Law) is too. Only Selective Attention and Working Memory are genuinely absent from lawsofux.com. The plan's "adjacent principles" framing is still the right *treatment* (they are folded, not deleted, per §2.1), but the factual claim that they are "not in the canonical 27" is wrong about their provenance. **This does not change any verdict below** — all four were judged as adjacent principles regardless.
+
+Also on lawsofux.com and not in the plan's 27: **Cognitive Bias**. Not judged — it is a property of the user, not a property a screen can pass or fail.
+
+#### uilaws.com's 13 UI laws, mapped to canonical rows
+
+| uilaws law | Maps to |
+|---|---|
+| Symmetry | 10 Prägnanz |
+| Rule of Thirds | 27 hierarchy |
+| White Space | 6 Proximity, 10 Prägnanz |
+| Color Theory | 15 Von Restorff, 27 aesthetic consistency |
+| Typography Hierarchy | 27 hierarchy |
+| **Consistency** | **27 + 7 Similarity (component consistency)** — the cross-page row |
+| Proximity | 6 |
+| Contrast | 15 Von Restorff |
+| Closure | 12 |
+| Continuity | 11 |
+| Fitts's Law | 3 |
+| Hick's Law | 4 |
+| Jakob's Law | 2 |
+
+Every uilaws law lands on an existing canonical row. **uilaws adds no new row**, and its "Consistency" is the direct source of the cross-page section below.
+
+#### Instrument legend
+
+**Auto** = measured by the capture harness (`results-layout.json`). **Judge** = read from a screenshot or source with a stated line. **Measure** = a targeted probe whose output is quoted.
+
+---
+
+### 1. UX Audit Summary
+
+#### Overall assessment
+
+The decision spine (`State → Options → Recommendation → Explanation → Decision`) is **rendered, not just coded**, on the surfaces that own it. The cockpit at 390px holds up: 0 horizontal overflow, one state, one recommendation with a visible "Why this answer", and `N/A` on every value the corpus does not hold. The empty-state and named-absence work of the three prior audits has largely landed — the review queue no longer shows a confident `Confirmed` (D-21), no nested labels remain (F-G4), and every control measured on the cockpit has an accessible name.
+
+The failures cluster in two places the prior audits could not see:
+
+1. **The wizard's stepper tells the truth about navigation and lies about completion.** Five steps read "done" while five warnings on the same screen say nothing is recorded. This is the HLF's own P0, reproduced in the live product.
+2. **Long unbreakable strings escape their containers.** The skill detail page scrolls **224px** horizontally at 390px; the skills planner **104px**. Both are engine-data strings set in `font-mono` with no `break-words`.
+
+The audit's single most important judgement: **the app is in better shape than the corpus says, and the corpus is partly stale.** Six of the `F-xx` findings I retested have been fixed and still appear in `AUDIT-AND-VERIFICATION.md` as open.
+
+#### Strongest patterns (measured, not asserted)
+
+| Pattern | Evidence | Law |
+|---|---|---|
+| Cockpit decision spine complete at every width | `screens/cockpit/1280.png`, `.../390.png`; overflow `0/0/0/0`, min control identical; "Recommended action → Rest" + "Why this answer" disclosure | 26 Flow, 24 Cognitive Load, 20 Tesler's |
+| Named absence, not blank | `screens/snapshot-setup/1280.png` ("I don't know this value" per stat); `screens/legacy-builder/1280.png` ("Rank not recorded", "No Sparks recorded") | 12 Closure, 27 |
+| Honest import affordance | `screens/runs-import/1280.png`: "Not set (baseline strip)" select, "(optional)" markers, preview-before-write copy | 2 Jakob's, 17 Peak–End |
+| Focus visibility everywhere tested | `kb.json`: `noOutline: []` on both walked pages; every tab stop `solid 2px` | 27, WCAG 2.4.7 |
+| Accessible names on the flagship | `names.log`: cocktail `total: 106`, `unnamed: []`, `titleOnly: []` | 27 |
+| No axe violation across 47 of 48 routes | `axe-summary.txt`: `distinctRules=1`, on `home` only | — |
+
+#### Highest-risk issues
+
+| # | Issue | Route | Severity |
+|---|---|---|---|
+| A | Stepper `done` vs. five "not entered" warnings | Wizard (all six steps + preflight) | **P0** |
+| B | Skill condition string overflows the viewport 224px | `skills-detail` | **P1** |
+| C | `role="list"` wrapping `<dl>` children — axe **critical** | `home`; same pattern in legacy step | **P1** |
+| D | Veteran names hard-truncated to 53px; duplicate rows indistinguishable | `veterans-index` 390 | **P1** |
+| E | Wizard steps have no heading (an `<h1>` was replaced by a styled `<p>`) | Wizard steps | **P1** |
+| F | `Month` select defaults to "1" while `Year`/`Half` default to empty | `snapshot-setup` | **P1** |
+| G | Skills planner overflows 104px | `skills-planner` 390 | **P2** |
+
+#### Laws most frequently violated (laws-frequency count)
+
+Counted across the 48 captured routes. A law is "violated" when it scored FAIL or PARTIAL on a route it applies to.
+
+| Law | FAIL routes | PARTIAL routes | Total touched |
+|---|---|---|---|
+| **27 Aesthetic consistency & visual hierarchy** | 6 | 9 | **15** |
+| **19 Zeigarnik** | 6 | 3 | **9** |
+| **12 Closure** | 1 | 6 | **7** |
+| **7 Law of Similarity** | 2 | 4 | **6** |
+| **2 Jakob's Law** | 1 | 4 | **5** |
+| **18 Goal-Gradient** | 0 | 4 | **4** |
+| **3 Fitts's Law** | 1 | 2 | **3** |
+| **17 Peak–End** | 0 | 3 | **3** |
+| **10 Prägnanz** | 0 | 3 | **3** |
+| **21 Occam's Razor** | 0 | 3 | **3** |
+| 1 Aesthetic–Usability | 0 | 2 | 2 |
+| 4 Hick's / 6 Proximity / 9 Uniform Connectedness / 14 Experience | 0 | 2 each | 2 each |
+| 20 Tesler's / 25 Choice Overload | 0 | 1 | 1 each |
+
+**Joined to the existing severity counts:** the corpus carries 87 findings. This audit adds **13 new IDs** (A-91 → A-103) and **re-tests 7** of the existing 87 — `D-26`, `F-B1`, `F-B2`, `F-E1`, `F-E3`, `F-G4`, `X-2`. Of those: **2 are fixed** (`D-26`, `F-G4`), **1 is half-fixed** (`X-2`: the shell `#title` is now `text-3xl`, but the wizard lost its page heading — A-102), **1 is stale** (`F-E1`: the `rank-label` prop is passed at `Builder.vue:365` and defined at `AncestryNode.vue:78`), **1 is partial** (`F-B1`), and **2 remain open** (`F-B2` retested only by reading `AncestryNode.vue:102,118`, not by a fresh screenshot; `F-E3` extended at `AncestryNode.vue:118`).
+
+#### Accessibility and responsive risk summary
+
+- **Axe:** one rule, `aria-required-children` / **critical**, 1 node per width on `home`, 4 nodes total. Cause identified: `Dashboard.vue:258` marks a container `role="list"` whose children are `SubCell` roots — each a `<dl>` (`SubCell.vue:16`). `dt`/`dd` are not permitted children of `role="list"`.
+- **Axe did not run on `error-404`** — 4 rows carry `axeError` ("No tests found"-class context error, the 404 document has no `#app` root). That is an **unmeasured** route, not a clean one.
+- **Axe's silence is not a pass** (§9.11). The names survey was run separately and is what substantiates the cocktail's a11y, not axe.
+- **Horizontal overflow:** 2 of 48 routes at 390px (`skills-detail` +224px, `skills-planner` +104px); 1 at 768px (`skills-detail` +102px). All other 45 routes: **0** at all four widths.
+- **The `1px` minimum control** that appears on 47 of 48 routes is the **skip-to-content link** (`a.sr-only.focus:not-sr-only`), which is correctly hidden until focused. **Not a defect.** The 404 page, which bypasses the app shell, measured `44px`.
+- **Touch targets:** no control under 44px was found other than that skip link. `min-h-11` (44px) is applied consistently.
+- **Keyboard:** 22 tab stops on the wizard scenario page, 16 on the cocktail, **zero** controls without a visible focus outline, **zero** page-content controls obscured by the fixed bottom bar.
+
+---
+
+### 2. Route-by-route findings
+
+#### How to read these tables
+
+Every route below was captured at 390/768/1024/1280. Rows marked **N/A** name why. Laws judged identical across a whole cluster are stated once in the cluster lead and referenced.
+
+**Evidence paths are relative to** `.scratch-uma/ux-audit-2026-10-17/screens/`.
+
+---
+
+#### Cluster A — Shell, home, errors
+
+##### A1. Home / Dashboard — `/`
+
+- **User goal:** know where the active career stands and what to do next.
+- **Primary task:** resume the active career, or reach a run.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 27 Aesthetic consistency | PARTIAL | `home/1280.png`; shell h1 `text-3xl` vs section `text-lg` is now consistent (X-2 shell half closed) | Low | — | P3 | visual | X-2 (shell half *fixed*) |
+| 2 Jakob's | PASS | sidebar Dashboard/Careers/Legacy/Veterans/Settings convention | — | — | — | — | — |
+| 3 Fitts's | PASS | `Resume career` is the largest control in the card; primary sits below its state block | — | — | — | — | L-F01 still FAIL on nav/export (not this route) |
+| 6 Proximity | PASS | label/value pairs inside tiles at 8px gap; sections separated | — | — | — | — | — |
+| 7 Similarity | PARTIAL | three stat tiles identical, but `Turn` renders bold while `Energy`/`Team Rank` render muted because they are `N/A` | The muted tint correctly signals absence — this is *deliberate*, but the tile reads as a different kind of thing | none — intentional | P3 | visual | — |
+| 8 Common Region | PASS | Active Career / Quick Actions / Recent Veterans / Data Status are four bounded cards | — | — | — | — | — |
+| 18 Goal-Gradient | PARTIAL | `home/1280.png` progress bar sits at ~2% with `Turn 1 / 24`; bar carries role + values per `Dashboard.vue:278-279` | At turn 1 the bar is a single sliver — truthful but adds little | none | P3 | visual | — |
+| 19 Zeigarnik | PASS | "1 career are active" + `Resume career` keeps the unfinished career visible | — | — | — | — | — |
+| **27 / a11y** | **FAIL** | axe **critical** `aria-required-children`; `Dashboard.vue:258` `role="list"` wraps `SubCell` roots, each a `<dl>` (`SubCell.vue:16`) | Screen readers hear a list with no list items; the three most important numbers lose their group semantics | Drop `role="list"` from the container at `Dashboard.vue:258`, or change `SubCell` to emit `<div role="listitem">` in list contexts | **P1** | accessibility | **A-91 (new)** |
+| 12 Closure | PARTIAL | `Energy` / `Team Rank` show `N/A` with a `title` only (`Dashboard.vue:268,274`) | The reason for the absence is hover-only; touch and keyboard users cannot read it | render the reason through `AbsenceValue` | P2 | accessibility | F-B2 (adjacent) |
+| **20 Tesler's** | PARTIAL | "1 career are active" — singular/plural bug | Reads as carelessness on the first sentence a user sees | "1 career is active" / "N careers are active" | P3 | content | **A-92 (new)** |
+
+**Corrected observation:** an earlier probe of this page reported the career strip as `dt`/`dd` inside `role="list"` *without* a `<dl>`; `SubCell.vue:16` shows the `<dl>` **is** present as the component root. The axe violation is therefore about **list semantics**, not `dlitem`. Recorded so the fix targets the right layer.
+
+---
+
+##### A2. 404 — `/__audit_missing_route__`
+
+- **User goal:** understand the address failed and get back.
+- **Primary task:** return to a working page.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 27 | PASS | `error-404/1280.png`; single `<h1>Page not found</h1>`, `#main` root, 44px min control | Standalone error doc is correctly self-contained | — | — | — | — |
+| 2 Jakob's | PASS | plain-language title + recovery link | — | — | — | — | — |
+| 12 Closure | PASS | the page names the failure rather than rendering an empty shell | — | — | — | — | — |
+| **axe** | **N/A** | `results.json`: `axeError` on all 4 widths | **This route is unmeasured for a11y** | run axe against `#main` | P3 | accessibility | **A-93 (new, measurement gap)** |
+
+---
+
+#### Cluster B — Reference catalogs
+
+Cluster lead: at all four widths, **0 horizontal overflow** for `catalog-index`, `catalog-detail`, `skills-index`, `supportcards-index`, `supportcards-detail`; laws 2, 6, 7, 8, 10, 21, 22 scored PASS on all five and are not repeated per route.
+
+##### B1. Database catalog — `/umamusume`, `/umamusume/{id}`
+
+- **User goal:** look up a trainee's facts.
+- **Primary task:** search, then read one trainee.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 3 Fitts's | PARTIAL | `catalog-detail/1280.png`; row actions are full-row targets | — | — | — | — | — |
+| 19 Zeigarnik | **N/A** | static reference; nothing is left unfinished | — | — | — | — | — |
+| 18 Goal-Gradient | **N/A** | no progress toward a goal on a lookup surface | — | — | — | — | — |
+| 23 Doherty | PARTIAL | no in-page loading indicator on filter change; full navigation | Filter changes may feel unresponsive on a slow box | none — §9.5 forbids a cold-load spinner; leave | P3 | interaction | ADR-0007 |
+
+##### B2. Skill search — `/skills` + `/skills/{id}`
+
+- **User goal:** find a skill and understand what it does.
+- **Primary task:** search, then read one skill's mechanics.
+- **Overall rating:** **Mixed**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| **27 / responsive** | **FAIL** | `skills-detail/390.png`; document `scrollWidth−clientWidth` = **224px**. Source of overflow: `Skills/Show.vue:115` `<dd class="font-mono text-xs">{{ group.condition }}</dd>` | **The whole page scrolls sideways on a phone.** Reading a skill means dragging horizontally and losing the column you were reading | add `break-words` (and `min-w-0` on the `<dd>`) at `Skills/Show.vue:115`; the string is engine data with no break opportunities | **P1** | responsive | **A-94 (new)**; distinct from F-B1 |
+| 27 / responsive | PARTIAL | `skills-detail/768.png` overflow **102px** | Same defect at tablet width | same | P1 | responsive | A-94 |
+| 12 Closure | PARTIAL | `skills-detail/390.png` "Base time 50000 ms" is present but `Condition` prints raw engine text | A user cannot tell whether the skill is usable, only that its raw expression exists | none this audit — the description source does not exist (ADR-0011), so the raw string is the honest floor | P3 | content | F-B1 (partial) |
+| 10 Prägnanz | PARTIAL | raw `distance_rate>=50&distance_rate<=65&order>=2&...` is the least-simple form of the information | The simple interpretation is not available from the data | record as a corpus gap, not a UI fix | P3 | content | G-SK-20 |
+
+##### B3. Support cards — `/support-cards` + `/support-cards/{id}`
+
+- **User goal:** scan support cards and open one.
+- **Primary task:** filter, then drill in.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 4 Hick's | PASS | 4 filters (Rarity/Type/Availability/Sort) + one `Filter` button; 25 rows/page | Choice load is bounded | — | — | — | — |
+| 5 Miller's | PASS | rows grouped by card, facts as one line | — | — | — | — | — |
+| 3 Fitts's | PASS | probe: `detailLinks: 50`, `uniqueDetail: 25` — every row links | Drill-in exists despite the audit's first (wrong) probe reading 0 | **retracted:** my initial "no drill-in links" claim was a selector bug (absolute hrefs); corrected here | — | — | — |
+| 16 Serial Position | PASS | pagination at the foot, count "559 of 559" at the head | — | — | — | — | — |
+
+**Correction recorded:** my first probe of this route reported `detailLinks: 0`. That was wrong — the hrefs are absolute (`http://127.0.0.1:8000/support-cards/131`) and my pattern was prefix-anchored. The corrected probe (`probe.log`) returns 50 detail links / 25 unique. **No finding.**
+
+---
+
+#### Cluster C — Database hub
+
+- **User goal:** understand what reference data the app holds and whether it is current.
+- **Primary task:** read data status, jump to one dataset.
+- **Overall rating:** **Strong**
+- **Cluster-wide:** 9 routes × 4 widths, **0 overflow**, all `200`, one `h1` each. Laws 2, 6, 7, 8, 9, 10, 16, 21, 22, 27 **PASS** on all nine — the most consistent cluster in the app.
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 19 Zeigarnik | **N/A** | read-only reference hub | — | — | — | — | — |
+| 18 Goal-Gradient | **N/A** | no goal progression | — | — | — | — | — |
+| 25 Choice Overload | PARTIAL | `database-hub/1280.png` — 8 tiles presented flat | Bounded at 8, well under overload | none | P3 | visual | — |
+| 12 Closure | PARTIAL | `home` "Data Status" shows `Global data · Current` and `Ruleset version: N/A`; the hub itself does not repeat freshness | A user in the hub cannot see staleness without returning home | none — avoid duplicating a fact (21) | P3 | content | — |
+
+---
+
+#### Cluster D1 — Run lifecycle
+
+##### D1a. Training runs — `/training-runs`
+
+- **User goal:** find a run and resume it.
+- **Primary task:** pick a run from 11.
+- **Overall rating:** **Mixed**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 3 Fitts's | PASS | `runs-index/1280.png`; row-level `:href="run.url"` (`Runs/Index.vue:85`) | — | — | — | — | — |
+| 16 Serial Position | PASS | `Import` / `New run` at head; pagination at foot | — | — | — | — | — |
+| 7 Similarity | **FAIL** | `home/1280.png` Recent Veterans lists **"Vodka / Vodka / Daiwa Scarlet"**; `veterans-compare/1280.png` offers two checkboxes both labelled **"Vodka"** and two labelled **"Maruzensky"** | Two distinct careers are indistinguishable; selecting the wrong one is one click away | append the run identity (`Scenario · start date` or `#runId`) to the row label wherever two rows share a name | **P1** | content | **A-95 (new)** |
+| 27 | PARTIAL | the duplicate rows carry no distinguishing secondary line | — | same | P1 | content | A-95 |
+
+##### D1b. Create run — `/training-runs/create`
+
+- **User goal:** start a run.
+- **Primary task:** pick trainee + scenario, create.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 4 Hick's | PASS | 2 required choices | — | — | — | — | — |
+| 6 Proximity | PASS | label directly above each control | — | — | — | — | — |
+| 17 Peak–End | PASS | create lands on the cockpit | — | — | — | — | — |
+
+##### D1c. Import — `/training-runs/import`
+
+- **User goal:** bring in a finished run.
+- **Primary task:** pick trainee, drop CSV, preview.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 2 Jakob's | PASS | conventional file input + textarea fallback | — | — | — | — | — |
+| 20 Tesler's | PASS | "The preview shows every row before anything is written" absorbs the complexity | — | — | — | — | — |
+| 12 Closure | PASS | optional fields explicitly say "(optional)"; scenario says "Not set (baseline strip)" | — | — | — | — | — |
+| 17 Peak–End | PASS | "nothing is created until you confirm" | — | — | — | — | — |
+
+---
+
+#### Cluster D2 — Queue and settings
+
+##### D2a. Review queue — `/review`
+
+- **User goal:** resolve the entity matches the engine could not decide.
+- **Primary task:** for each candidate, set a verdict and resolve.
+- **Overall rating:** **Mixed**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 19 Zeigarnik | PASS | "25 of 57 items to resolve" + pagination; incomplete work is visible | — | — | — | — | — |
+| 18 Goal-Gradient | PARTIAL | count present, no progress bar | — | none | P3 | visual | — |
+| **21 Occam's** | **FAIL** | `review/1280.png`: all 25 visible rows carry the identical sentence "No suggestion: the source name does not fuzzy-match any trainee", and each row also carries a `No match` pill **and** an `Unknown` badge | 25 identical statements is noise, not information; the user must open each to learn anything | collapse the repeated sentence to the queue header ("17 of 25 rows have no fuzzy candidate") and keep per-row only what differs | **P2** | content | **A-96 (new)** |
+| **27 (one label per fact)** | PARTIAL | `Review/Index.vue:91-95` `StatusPill "No match"` + `:98-101` `ProvenanceBadge state="unknown"` → "Unknown"; same fact twice | Two provenance-ish labels on one row compete for the same meaning | keep the `ProvenanceBadge`; drop the `StatusPill` when `match_tier !== 'Fuzzy'` | P2 | visual | **A-96** |
+| 12 Closure | PASS | `Review/Index.vue:59-75` — the two empty states ("never fetched" vs "worked through") are now distinct | — | — | — | — | **D-26 fixed** |
+| 17 Peak–End | PARTIAL | resolving a row gives no confirmation moment observed | — | none measured | P3 | interaction | needs measurement |
+| 6 Proximity | PASS | each card bounds one candidate | — | — | — | — | — |
+
+**Correction recorded:** `Review/Index.vue:34-38` maps `Fuzzy` to `variant: 'warning'`, but `StatusPill.vue:13` renders `warning` as `bg-raised text-ink-strong border-rule` — **neutral**, not an alert colour. §9.3 is **not** breached here. Recorded because the variant name invites that assumption.
+
+##### D2b. Settings — `/preferences`
+
+- **User goal:** change preferences.
+- **Primary task:** set and save one preference group.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 27 | PARTIAL | `outline.log`: h1 `Settings` (`text-3xl`) followed by h2 `Preferences` (`text-lg`) — the section repeats the page's own name | Mild redundancy | let the section take a distinct name ("Interface") | P3 | content | **A-97 (new, P3)** |
+| 21 Occam's | PARTIAL | same repetition | — | same | P3 | content | A-97 |
+| 17 Peak–End | **N/A** | no completion moment on this surface | — | — | — | — | — |
+
+---
+
+#### Cluster E — Legacy, Veterans, deck
+
+##### E1. Legacy Lab — `/legacy`
+
+- **User goal:** build/compare Legacy selections.
+- **Primary task:** open a run's legacy builder or compare saved selections.
+- **Overall rating:** **Mixed**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 19 Zeigarnik | PASS | `legacy-index` names unrecorded selections | — | — | — | — | — |
+| 27 / a11y | PARTIAL | `LegacySelect.vue:354` `role="list"` with `<div>` children (`<label>`, `<p>`, `<details>`) — same invalid-list pattern as **A-91**, not flagged by axe on this route only because axe did not attribute it | Screen-reader list navigation is unreliable in the legacy step | drop `role="list"` or wrap each child in `role="listitem"` | P2 | accessibility | **A-91 (same class)** |
+| 20 Tesler's | PASS | `legacy-builder/1280.png`: "Record only. This screen stores and compares what you enter. It does not compute inheritance." | — | — | — | — | — |
+
+##### E2. Legacy builder — `/legacy/{run}`
+
+- **User goal:** record the six-node ancestry tree as read off the client.
+- **Primary task:** fill name + rank per node, add sparks, confirm.
+- **Overall rating:** **Mixed**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| **21 Occam's** | **FAIL** | `legacy-builder/1280.png`: "Own rank" under *Parent A as you read her* shows the sentence "Blank stays N/A. Unbounded on purpose…" **twice, consecutively** | Duplicated instruction in the densest form on the page | render the helper once per field group | P2 | content | **A-98 (new)** |
+| 3 Fitts's | PASS | base row: names, rank fields and "Add Spark" are 44px targets | — | — | — | — | **F-E1 stale** — `Builder.vue:365` *does* pass `:rank-label`; the prop is present |
+| 12 Closure | PARTIAL | `AncestryNode.vue:102` ranks fall back to a `title` only; `:118` "No Sparks recorded" uses a `title` instead of `AbsenceValue` while the neighbouring Spark chance uses `AbsenceValue` (`:130`) | Inconsistent absence channel within one component | move `:118` to `AbsenceValue` | P2 | accessibility | F-E3 (extended) |
+| 10 Prägnanz | PARTIAL | six near-identical node cards; only the label distinguishes grandparents | Scannable but long | none — the tree *is* six nodes | P3 | visual | — |
+| 25 Choice Overload | **N/A** | recording surface, not a choice surface | — | — | — | — | — |
+
+##### E3. Veterans — `/veterans`
+
+- **User goal:** find a saved career.
+- **Primary task:** filter, then open or compare one.
+- **Overall rating:** **Mixed**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| **3 / 27 responsive** | **FAIL** | `vet.log`: name links clamp at `clientWidth 53` while `scrollWidth` reaches 108 — `Daiwa Scarlet` (86), `Mayano Top Gun` (108), `Maruzensky` (76), `Haru Urara` (70) all truncate | On a phone **every** veteran is "Daiwa…", "Haru…", "Maya…", "Maruz…" — the identifier is gone | give the name the full row width above the action buttons at `390`; let it wrap to two lines | **P1** | responsive | **A-99 (new)** |
+| 2 Jakob's | PASS | card grid + compare affordance | — | — | — | — | — |
+| 16 Serial Position | PASS | filter at head, results below | — | — | — | — | — |
+| 7 Similarity | PARTIAL | `veterans-index/390.png`: `Compare this career` appears *before* the name in reading order | The action precedes the subject | place the name first, action after | P2 | visual | A-95 (adjacent) |
+
+**Correction recorded:** I first described the Japanese names as stacking one character per line. The probe (`vet.log`, `cjkStackedCount: 0`) did **not** reproduce that; the text reads as normal wrapping. **Withdrawn.**
+
+##### E4. Compare Veterans — `/veterans/compare`
+
+- **User goal:** line up up to 6 careers.
+- **Primary task:** select and compare.
+- **Overall rating:** **Mixed**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 7 Similarity | **FAIL** | two `Vodka`, two `Maruzensky` checkboxes | Cannot tell which is which | see A-95 | P1 | content | A-95 |
+| 4 Hick's | PASS | "Choose up to 6", checkbox list, `Clear all` | — | — | — | — | — |
+| 27 | PARTIAL | `NOT IN THIS BUILD` is the only ALL-CAPS section heading; sibling `Nothing selected` is sentence case | One section shouts | sentence case, or give all "not in this build" sections a shared tag | P3 | visual | **A-97 (same class)** |
+| 12 Closure | PASS | "Nothing selected… Choose up to 6 careers below" — the empty state names the next step | — | — | — | — | — |
+| 20 Tesler's | PASS | "NOT IN THIS BUILD" explains *why* inheritance is absent with an ADR citation | — | — | — | — | — |
+
+##### E5. Deck builder — `/training-runs/{id}/deck`
+
+- **User goal:** assemble a six-slot support deck.
+- **Primary task:** pick one card per slot.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 4 Hick's | PASS | one picker at a time; "The six slots" then "Choose a card" | — | — | — | — | — |
+| 18 Goal-Gradient | PASS | six slots make progress countable | — | — | — | — | — |
+| 12 Closure | PASS | empty slots name what belongs there | — | — | — | — | — |
+
+---
+
+#### Cluster F — Career decisions
+
+Cluster lead: `training-detail`, `races-decision`, `races-planner`, `skills-planner` all captured at four widths, all `200`.
+
+##### F1. Training decision — `/training-runs/{id}/training`
+
+- **User goal:** choose what to do this turn.
+- **Primary task:** read state, pick one action.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 26 Flow | PASS | `training-detail/1280.png`; one action list, no interruption | — | — | — | — | — |
+| 4 Hick's | PASS | six actions, grouped | — | — | — | — | — |
+| 20 Tesler's | PASS | each action states its cost/requirement beside it | — | — | — | — | — |
+| 24 Cognitive Load | PASS | state is summarised before the actions | — | — | — | — | — |
+
+##### F2. Race decision — `/training-runs/{id}/races`
+
+- **User goal:** choose the next race.
+- **Primary task:** compare races, pick one.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 4 Hick's | PASS | races grouped by goal category | — | — | — | — | — |
+| 8 Common Region | PASS | region contract respected (`overflow-x-auto` region), **0 overflow** at all widths | — | — | — | — | §9.4 honoured |
+| 15 Von Restorff | PASS | mandatory races marked distinctly from optional | — | — | — | — | — |
+
+##### F3. Race planner — `/training-runs/{id}/races/planner`
+
+- **User goal:** plan the season's races.
+- **Primary task:** read the calendar.
+- **Overall rating:** **Strong**
+- **Cluster-wide:** 0 overflow at all four widths — the calendar is **not** reflowed, as §9.4 requires.
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 11 Continuity | PASS | reading path follows the season order | — | — | — | — | — |
+| 16 Serial Position | PASS | earliest at head | — | — | — | — | — |
+
+##### F4. Skills planner — `/training-runs/{id}/skills`
+
+- **User goal:** choose which skills to buy.
+- **Primary task:** learn/acquire skills within the SP budget.
+- **Overall rating:** **Weak**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| **27 / responsive** | **FAIL** | `skills-planner/390.png`; overflow **104px**. Condition strings in `font-mono` again | Sideways scroll on the decision surface | `break-words` + `min-w-0` on the condition cells | **P2** | responsive | **A-94 (same class)** |
+| 4 Hick's | PARTIAL | ~9 learned + ~9 required + available lists, then an "Add a skill" picker | Long but chunked | none | P3 | visual | — |
+| 18 Goal-Gradient | PARTIAL | "Skill Point coverage: 1 unclaimed" present | — | — | — | — | — |
+| 19 Zeigarnik | PASS | "Required" list is separate and shows "not acquired" | — | — | — | — | — |
+| 10 Prägnanz | PARTIAL | raw engine conditions repeated per skill | — | same as A-94 fix | P2 | content | — |
+
+---
+
+#### Cluster G — Record, outcome, snapshot
+
+##### G1. Events — `/training-runs/{id}/events`
+
+- **User goal:** record an event choice.
+- **Primary task:** pick an option.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 26 Flow | PASS | `events-decision/1280.png`; one event, options in place | — | — | — | — | — |
+| 4 Hick's | PASS | options bounded per event | — | — | — | — | — |
+| 20 Tesler's | PASS | option consequences stated | — | — | — | — | — |
+
+##### G2. Inheritance — `/training-runs/{id}/inheritance`
+
+- **User goal:** record inherited sparks.
+- **Primary task:** pick parent → grandparent → spark.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 22 Pareto | PASS | two parents, the small set that matters | — | — | — | — | — |
+| 12 Closure | PARTIAL | absence channels differ from the legacy builder (see F1/A-98 note) | — | unify with `AbsenceValue` | P2 | accessibility | F-E3 |
+
+##### G3. Timeline — `/training-runs/{id}/timeline`
+
+- **User goal:** read the career history.
+- **Primary task:** scan turns.
+- **Overall rating:** **Strong** — turn log **not** reflowed, 0 overflow (§9.4 honoured).
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 11 Continuity | PASS | one reading path down the turn list | — | — | — | — | — |
+| 16 Serial Position | PASS | turns in order | — | — | — | — | — |
+
+##### G4. Result — `/training-runs/{id}/result`
+
+- **User goal:** see how the career ended.
+- **Primary task:** read the outcome.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| **17 Peak–End** | PASS | `result/1280.png`; the run's end is a named surface, not an empty page | — | — | — | — | — |
+| 12 Closure | PASS | finished state is stated | — | — | — | — | — |
+| 6 no-score rule | PASS | no grade, win-chance or percentage rendered (§9.6) | — | — | — | — | — |
+
+##### G5. Save Veteran — `/training-runs/{id}/veteran`
+
+- **User goal:** file the career into the library.
+- **Primary task:** confirm and save.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 17 Peak–End | PASS | `save-veteran/1280.png`; a dedicated confirmation surface | — | — | — | — | — |
+| 24 Cognitive Load | PASS | one decision | — | — | — | — | — |
+
+##### G6. Snapshot entry — `/career/snapshot` and `/career/snapshot/review`
+
+- **User goal:** start from a career already in progress.
+- **Primary task:** choose a door.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| 25 Choice Overload | PASS | a single "Start from existing snapshot" door | — | — | — | — | — |
+
+##### G7. Snapshot setup — `/career/snapshot/setup`
+
+- **User goal:** transcribe the client's current state.
+- **Primary task:** fill scenario/trainee/position/8 stats, then review.
+- **Overall rating:** **Mixed**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| **12 Closure** | **FAIL** | `snapshot-setup/1280.png` + `snap.log`: `Year` defaults to `""`, `Half` to `""`, but **`Month` defaults to `"1"`** — its option list opens with `1`, no placeholder | A user who never touches Month silently records **January** in a run that may be in month 7. This is a **data-correctness** defect caused by an inconsistent affordance | pass `:placeholder="'Month'"` (as `Year`/`Half` do) at `Setup.vue:182-188` | **P1** | interaction | **A-100 (new)** |
+| 27 Similarity | **FAIL** | the three sibling selects behave differently (2 have placeholders, 1 does not) | The odd one out is the one that silently writes data | same | P1 | interaction | A-100 |
+| 6 Proximity | PASS | label above control, "I don't know this value" directly under its number | — | — | — | — | — |
+| 24 Cognitive Load | PASS | three-state explanation ("type / tick I don't know / leave blank") is stated once | — | — | — | — | — |
+| **`aria-required`** | PARTIAL | `BaseSelect.vue` never binds `:required` to `aria-required`; the visual `*` is text only | Screen-reader users are not told a field is required before submitting | add `:aria-required="required"` in `BaseSelect.vue:71-95` | P2 | accessibility | **A-101 (new)** |
+
+**Correction recorded:** F-G4 (a `<label>` wrapping both a stat input and its "I don't know" checkbox) is **fixed**. `snap.log`: `nestedCount: 0`; all 8 stat inputs `hasForLabel: true` with the correct ancestor text.
+
+**Correction recorded:** I first read "Month *" as a free-text box among two selects. Source `Setup.vue:182` shows it is a `BaseSelect`. **Withdrawn**; the real defect is the missing placeholder.
+
+---
+
+#### Cockpit — SCR-CAR-011
+
+- **User goal:** decide the next turn for the active career with the state in view.
+- **Primary task:** read state → read the recommendation → act.
+- **Overall rating:** **Strong**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| **26 Flow** | PASS | `cockpit/1280.png`: Recommended action "Rest" + "Why this answer" disclosure open on demand | The decision is made on one screen | — | — | — | — |
+| **20 Tesler's** | PASS | 10 summary cards, each naming its absence reason ("No build target set for this run", "This scenario records no shop", …) | The user is never asked to know why a value is empty | — | — | — | — |
+| **24 Cognitive Load** | PARTIAL | `names.log` `total: 106` interactive controls on one page | Numerous but chunked; the spine keeps the first action above the fold | none this audit | P3 | visual | — |
+| **12 Closure** | PASS | every card is `Documented` with a stated reason or a value | Named absence is the app's strongest pattern | — | — | — | — |
+| **27 / a11y** | **PASS** | `names.log`: `unnamed: []`, `titleOnly: []`; `kb.json` `noOutline: []` | — | — | — | — | — |
+| **3 Fitts's** | PASS | `Resume`/`Download`/`Save a team state` all 44px; primary is the lime `Save a team state` | — | — | — | — | — |
+| **15 Von Restorff** | PASS | exactly one lime-accented primary (`Save a team state`); all other actions are outlined | One distinct element per screen, as §2.6 requires | — | — | — | — |
+| **7 Similarity** | PARTIAL | all ten cards share the green "Documented" header bar; a card holding a *typed absence* looks identical to a card holding data | A user cannot scan for "what is actually recorded" | none — the reason text distinguishes them, and changing the bar risks §9.1 | P3 | visual | needs measurement |
+| 18 Goal-Gradient | PARTIAL | `squeeze` count 1 at 390 only (`results-layout.json`), no overflow | — | — | P3 | responsive | — |
+| 13 Common Fate | **N/A** | no coordinated motion on this screen | — | — | — | — | — |
+| 23 Doherty | **N/A** | server-rendered; no measured interaction latency this pass | — | — | — | — | — |
+
+**Note on `Turn 1`:** the dashboard shows "Turn 1" for run #25 and the cockpit shows `11 / 24`. These are two different runs' surfaces (the dashboard's active career vs. the inspected run). Not a contradiction — checked, not filed.
+
+---
+
+#### Wizard — six `/career/setup/*` steps
+
+- **User goal:** compose a career setup across six steps.
+- **Primary task:** make one choice per step and confirm at preflight.
+- **Overall rating:** **Weak**
+
+| Law | Status | Evidence | User impact | Recommendation | Sev | Issue type | Existing ID |
+|---|---|---|---|---|---|---|---|
+| **19 Zeigarnik** | **FAIL** | `wizard-preflight/1280.png`: stepper reads **"1 Scenario done · 2 Trainee done · 3 Your target done · 4 Legacy done · 5 Support deck done"** while the same page lists five warnings, "Scenario is not chosen / Trainee is not chosen / Your target is not entered / Ancestry is not entered / Support deck is not entered" | **The screen states completion and incompleteness simultaneously.** A user cannot trust the stepper; the most confident element on the page is the least accurate | `SetupLayout.vue:60` must mark `done` only when the step is in `saved`, not when merely `visited` — or label the state "visited" so it stops claiming "done" | **P0** | interaction | **HLF P0 reproduced**; wizard audit §2.2 |
+| **27 / hierarchy** | **FAIL** | `0d3a69c` replaced `<h1>Choose a scenario</h1>` with `<p class="mt-1 text-3xl font-semibold">` (`ScenarioSelect.vue:133`). `outline.log` shows each step has **no page heading** — `wizard-legacy` has *only* the shell h1 and zero h2s | The page-level identity is visual only; screen-reader navigation jumps from the banner straight to card content | restore a heading (`<h2>` inside `<main>`, since the shell owns the `<h1>`), keeping the same class | P1 | accessibility | **A-102 (new)**; the "duplicate h1" it fixed was real, but the fix overcorrected |
+| **7 Similarity** | **FAIL** | `outline.log`: `wizard-trainee` renders **28 sibling `<h2>` values ranging from a trainer name to a test fixture — `Form Counted 1`, `Form Counted 2`, `Form Counted 3`, `Form Counted 4`**; all share one unstyled `h2` with no `text-` class | Fixture rows are indistinguishable from a real trainee in the picker | filter non-released/fixture forms out of the roster, or label them; give the roster h2s a visible treatment | **P1** | content | **A-103 (new)** |
+| **4 Hick's** | PARTIAL | trainee picker renders ~25 rows at once; scenario 4 cards | Bounded, and the client itself presents flat choice (`02:101`) — **not** a PASS by client precedent, but not overload either | retain | P3 | visual | — |
+| **2 Jakob's** | PARTIAL | a 6-step wizard is conventional; but the stepper's completion semantics are not | — | tied to the P0 | P0 | interaction | — |
+| **18 Goal-Gradient** | PARTIAL | "Step N of 6" is present and correct | Correct where the stepper is wrong | — | P3 | visual | — |
+| **13 Common Fate** | PARTIAL | step transitions are SPA navigations with no coordinated motion to mislead | — | — | P3 | visual | — |
+| **17 Peak–End** | **FAIL** | the wizard's *end* is the preflight that contradicts itself | The final impression is distrust | tied to the P0 | P0 | interaction | — |
+| **12 Closure** | **PASS** | `screens/wizard-preflight/1280.png` prints `▸ N/A` for each empty build field — the collapsed disclosure of `AbsenceValue`. Source `Preflight.vue:231,244,257,320,330` passes a reason per field ("No trainee is recorded in this setup yet.", …), and `AbsenceValue.vue:10-12` makes the reason the summary's accessible **name**, so a screen reader hears it before opening | The absence is named *and* explained — the cockpit's strongest pattern holds here too | — | — | — | **retraction: no finding** |
+| 6 Proximity | PASS | stepper → title → copy → cards | — | — | — | — | — |
+
+**On the fixed bottom bar (390px only):** `bar.log` shows the bar occupies `top:799, h:45` at a 844px viewport, and `kb.json` shows the only "obscured" stops are the bar's **own** links. `main` carries `padding-bottom: 96px`, which clears it. **No defect** — the screenshot overlap I first saw was mid-page content scrolled under a correct fixed bar, not the bar covering a control.
+
+**On the HLF comparison:** the HLF reproduces exactly this stepper contradiction (plan §2.5, `frontend-fidelity` §2). The live wizard **matches the HLF here and is still wrong**, which is the caution the brief requires. The HLF's other wizard convention (densified option cards) is **not** adopted as a recommendation — it drops the per-stat/ancestry/deck editors, a scope change needing `SCREEN_SPEC` + `PRD` consent.
+
+---
+
+### 3. Cross-page consistency findings
+
+The `uilaws` "Consistency" law, read as `remaining-screens` §2's `X-1..X-8` rows.
+
+| ID | Consistency dimension | Status | Evidence | User impact | Recommendation | Sev |
+|---|---|---|---|---|---|---|
+| **X-1** Navigation | PASS | `AppLayout.vue` sidebar identical on all 47 app routes (404 is standalone by design) | — | — | — |
+| **X-1b** Navigation — bar overlap | PASS | `kb.json` `obscured` = bar's own links only | — | — | — |
+| **X-2** Page headers | **PARTIAL** | shell `#title` is now `text-3xl` (X-2 shell half **fixed**); but wizard steps have **no** page heading (A-102) and page `h2`s are `text-lg` consistently | One cluster lost its heading entirely | A-102 | P1 |
+| **X-3** Breadcrumbs / steppers | **FAIL** | stepper `done` contradicts the page it heads (P0); every other page has no stepper | — | P0 | P0 |
+| **X-4** Buttons | **PARTIAL** | primary = lime/solid; secondary = outlined — consistent across all 48 routes. `veterans-index` puts `Compare this career` before the name | Slight ordering inconsistency | A-99 | P2 |
+| **X-5** Forms | **PARTIAL** | `BaseSelect` placeholder usage is inconsistent: `Year`/`Half` have it, `Month` does not (A-100). Required state is visual-only (A-101) | Silent wrong data | A-100, A-101 | P1 |
+| **X-6** Cards | PASS | one `rounded-md border border-rule bg-panel` vocabulary app-wide | — | — | — |
+| **X-7** Tables / lists | **FAIL** | `role="list"` applied to non-list children in two places (`Dashboard.vue:258`, `LegacySelect.vue:354`) | Invalid list semantics | A-91 | P1 |
+| **X-8** Status indicators | **PARTIAL** | provenance badges consistent in *style*, but `review` doubles the fact (pill + badge). Absence channel splits: `AbsenceValue` on the cockpit vs. `title`-only in `AncestryNode` | — | A-96, F-E3 | P2 |
+| **X-9** Empty states | PASS | "never fetched" vs "worked through" (D-26 fixed); snapshot's dashed "Recorded on their own screens" box | Strong | — | — |
+| **X-10** Errors | **PARTIAL** | 404 is a good standalone page but is the **only** route axe could not measure | Unverified a11y | A-93 | P3 |
+| **X-11** Save feedback | **PARTIAL** | not walked to a saved state on any screen this pass (no writes performed — read-only brief) | **needs measurement** | — | — |
+| **X-12** Responsive | **PARTIAL** | 45/48 routes hold at 0 overflow; `skills-detail` (+224), `skills-planner` (+104), `veterans-index` (name clamp) break | — | A-94, A-99 | P1 |
+
+**Laws most likely to FAIL cross-page, as the brief predicted:**
+
+- **7 Similarity — FAIL.** Confirmed on three surfaces (`runs-index`, `veterans-compare`, `wizard-trainee`): same-looking things are different (duplicate names) and different-looking things are the same (a fixture row and a trainee).
+- **27 Aesthetic consistency — PARTIAL.** The button/card/token vocabulary is genuinely consistent; the *hierarchy* layer (page headings) regressed in the wizard.
+- **9 Uniform Connectedness — PASS** (predicted to fail; it did not). The card border + background idiom holds everywhere.
+- **2 Jakob's — PARTIAL**, mostly on the wizard stepper.
+- **14 Law of Experience — PARTIAL.** The client presents completion as *absence of a control* (`03:50`) and pending vs. committed as separate baskets (`03:27`). The wizard's stepper instead claims "done" for mere visits — a convention the client does **not** use, and one the app already models correctly on its own cockpit.
+- **16 Serial Position — PASS.** Primary actions at predictable head/tail positions across all routes.
+
+---
+
+### 4. Prioritized remediation plan
+
+Each item: exact UI change · affected route/component · law improved · acceptance criteria · **Track**.
+
+#### P0 — blocks task completion / serious accessibility failure
+
+**P0-1 · Stepper must not claim `done` for unvisited-content steps**
+- **Change:** in `SetupLayout.vue:60`, evaluate `isCompleted()` against `props.saved` only; render `visited` as a separate, weaker state (e.g. "seen") or drop it from the done condition. If `visited` must remain (owner ruling C-1), the label must stop rendering the word "done".
+- **Route/component:** `resources/js/layouts/SetupLayout.vue:60,94`; affects all six `/career/setup/*` steps + preflight.
+- **Law improved:** 19 Zeigarnik, 17 Peak–End, 12 Closure, 2 Jakob's.
+- **Acceptance:** a fresh visit to `/career/setup/preflight` with nothing saved renders **zero** steps as "done" and the five warnings agree; a step that *has* been saved renders "done" and its warning disappears. Covered by a test that asserts stepper state and warning count agree.
+- **Track: 1** (craft inside the current contract; no token or ruling change). **Reconciles:** the same P0 already filed in `setup-wizard-ui-audit` §2.2 and reproduced by the HLF.
+
+#### P1 — materially increases confusion, errors, or abandonment
+
+**P1-1 · Skill condition string must not widen the document**
+- **Change:** add `break-words min-w-0` to the `<dd>` at `Skills/Show.vue:115` (and the same for the planner's condition cells).
+- **Route:** `/skills/{id}` (`A-94`), `/training-runs/{id}/skills`.
+- **Law:** 27, responsive.
+- **Acceptance:** `document.documentElement.scrollWidth − clientWidth === 0` at 390 and 768 on both routes; the condition text still fully readable.
+- **Track: 1.**
+
+**P1-2 · Remove invalid `role="list"`**
+- **Change:** delete `role="list" aria-label="Career progress"` from `Dashboard.vue:258` (the `SubCell` `<dl>`s carry their own semantics); delete `role="list" aria-label="Legacy details"` from `LegacySelect.vue:354`, or wrap each child in `role="listitem"`.
+- **Route:** `/` (`A-91`), `/career/setup/legacy`.
+- **Law:** 27, WCAG 1.3.1.
+- **Acceptance:** axe rule `aria-required-children` returns 0 nodes on `/`; a screen reader announces the three career figures as three definition lists, not as an empty list.
+- **Track: 1.**
+
+**P1-3 · Veteran names must not truncate on mobile**
+- **Change:** at `390`, move the name above the action row and allow two lines (drop the fixed narrow column that clamps to `53px`).
+- **Route:** `/veterans`, `/veterans/compare`.
+- **Law:** 3, 27, responsive.
+- **Acceptance:** every veteran name renders in full (`scrollWidth === clientWidth`) at 390; the compare checkboxes carry a unique label per career.
+- **Track: 1.**
+
+**P1-4 · Wizard steps need a real heading**
+- **Change:** give the step content a `<h2>` (sibling to the `text-lg` card `h2`s) at the position `ScenarioSelect.vue:133` currently fills with a `<p>`, and apply the same to the other five steps.
+- **Route:** all six wizard steps (`A-102`).
+- **Law:** 27 hierarchy, 11 Continuity, 6 Proximity.
+- **Acceptance:** `outline.log` on each step reports ≥1 `h2` before the first card heading; the visual size is unchanged.
+- **Track: 1** — this restores semantics without restyling, so it does **not** pre-empt the shell `#title` decision (§9.8).
+
+**P1-5 · Snapshot `Month` must default to empty**
+- **Change:** add `:placeholder="'Month'"` to `BaseSelect` at `Setup.vue:182-188`, matching `Year` and `Half`.
+- **Route:** `/career/snapshot/setup` (`A-100`).
+- **Law:** 12 Closure, 27 Similarity.
+- **Acceptance:** a fresh form renders three "unset" selects; submitting without choosing Month produces a validation error rather than silently recording January.
+- **Track: 1.**
+
+**P1-6 · Fixture rows must not appear as trainees**
+- **Change:** exclude non-released/fixture forms (`Form Counted 1..4`) from the trainee picker roster, or label them unmistakably.
+- **Route:** `/career/setup/trainee` (`A-103`).
+- **Law:** 7 Similarity, 21 Occam's.
+- **Acceptance:** the roster contains only real trainees, or fixture rows carry a visible, distinct marker.
+- **Track: 1** (content/data filter). **Note:** this depends on the dev DB seed; if these rows come from `--seed` fixtures, the fix is in the seeder, not the page.
+
+**P1-7 · Duplicate career names must be distinguishable**
+- **Change:** append a disambiguator (`Scenario · start date` or run number) wherever two careers share a name.
+- **Route:** `/`, `/veterans`, `/veterans/compare` (`A-95`).
+- **Law:** 7 Similarity.
+- **Acceptance:** no two selectable rows in one surface share an identical rendered label.
+- **Track: 1.**
+
+#### P2 — reduces efficiency or scanability
+
+| # | Change | Route / component | Law | Acceptance | Track |
+|---|---|---|---|---|---|
+| P2-1 | Collapse the repeated "no suggestion" sentence to a queue-level summary | `/review`, `Review/Index.vue:108-116` | 21, 6 | one summary line; per-row text only where it differs | 1 |
+| P2-2 | Drop the `StatusPill` when `match_tier !== 'Fuzzy'` | `Review/Index.vue:91-95` | 27 | one provenance label per row | 1 |
+| P2-3 | Render the "Own rank" helper once per field group | `LegacySelect.vue` (A-98) | 21 | no duplicated sentence in the DOM | 1 |
+| P2-4 | Move "No Sparks recorded" to `AbsenceValue`; unify rank `title` | `AncestryNode.vue:102,118` | 12, 27 | one absence channel per component | 1 |
+| P2-5 | `:aria-required="required"` in `BaseSelect` | `Form/BaseSelect.vue:71-95` | 12 | required selects expose `aria-required="true"` | 1 |
+| P2-6 | ~~Give `wizard-preflight` absence fields a reason line~~ — **withdrawn**, the reasons are already present (`Preflight.vue:231-330`) | — | — | — | — |
+
+#### P3 — polish
+
+| # | Change | Route | Law | Track |
+|---|---|---|---|---|
+| P3-1 | "1 career are active" → correct plural (`A-92`) | `/` | 20 | 1 |
+| P3-2 | Sentence-case `NOT IN THIS BUILD` (`A-97`) | `/veterans/compare` | 27 | 1 |
+| P3-3 | Rename the `Preferences` h2 under the `Settings` h1 (`A-97`) | `/preferences` | 21 | 1 |
+| P3-4 | Run axe against `#main` for error documents (`A-93`) | `error-404` | — | 1 |
+
+#### Track 2 — requires a `DESIGN.md` amendment and an owner ruling
+
+**None proposed.** Two candidates were considered and **deliberately not filed**:
+
+1. The HLF's eyebrow + coloured-title page header — blocked by §9.8 (no per-page heading restyle before the shell `#title` decision) and by the HLF's own lime badge colours, which break `app.css:57` until Track 2 D is ruled.
+2. The HLF's densified wizard option cards — a **scope** change (it removes per-stat/ancestry/deck editors), needing `SCREEN_SPEC` + `PRD`, not a UX-law fix.
+3. Client-corpus conventions worth copying but needing a ruling: per-item detail as a modal over a dimmed backdrop (`00:40`, `04:24`), the shape-rank vocabulary (`00:16`). Both are Track 2 if pursued; neither is a defect on the current screens.
+
+---
+
+### 5. What the audit could not measure
+
+Honest list. Each item is a gap, not a pass.
+
+1. **The integrated browser could not be used.** `browser_open` returned `"Browser session does not belong to the requested project or directory"`. Every capture came from Playwright (Chromium headless) against `:8000`, and the two law sites were read via `webfetch`. **No DOM-rendered, human-viewed pass of lawsofux.com or uilaws.com happened** — both lists nevertheless resolved completely.
+2. **The tree changed mid-audit.** The audited state became `0d3a69c` rather than the Phase-0 dirty tree. A commit landed at 15:45:59 during capture. Screenshots represent `0d3a69c`; anything committed after that is unmeasured.
+3. **`error-404` is unmeasured for accessibility.** axe errored on all four widths (no `#app` root). That route's a11y status is unknown.
+4. **No save/unsaved state was walked.** The brief is read-only and no writes were performed, so "saved vs. unsaved", optimistic-update behaviour, and success feedback are **not judged** (X-11).
+5. **Loading states were not measured.** `php -S` is single-threaded; latency on this box is not representative. Doherty Threshold is therefore N/A rather than PASS on every route.
+6. **Validation-failure states were only partially walked** — the snapshot form's required-field error rendering was read from source, not triggered in a browser.
+7. **Only 13 of 48 routes were probed beyond the metric pass** (keyboard, names, outline). The remaining 35 were judged from screenshots + metrics + source; a hands-on keyboard walk on each is still outstanding.
+8. **The 11-run dev database is not a clean state.** It contains fixture rows (`Form Counted 1..4`) and two pairs of duplicate-named veterans. Findings A-95 and A-103 may be **seed artefacts** rather than product defects — they are filed as data-visibility problems either way, but the fix may belong in the seeder.
+9. **Three audits' findings were adopted, not re-run.** 76 of the 87 `F-xx` entries were not re-tested this pass; only 11 were.
+10. **Colour-contrast was not measured** beyond axe's automated rules. No token was moved (§9.1); no pair table was evaluated.
+11. **`Working Memory` and `Selective Attention`** (lawsofux.com, not in the plan's 27) were not judged; no cluster assigns them an instrument.
+
+---
+
+### 6. Explicit stop
+
+This audit measured 48 routes × 4 widths on the running server at `127.0.0.1:8000`, plus targeted probes for keyboard, names, headings, forms and axe detail. It produced **verdicts, not fixes**.
+
+**No tracked file was edited. Nothing was staged, committed, pushed, amended, rebased, reset or force-pushed. The working tree was never stashed.** All writes are under `.scratch-uma/ux-audit-2026-10-17/`.
+
+Thirteen new finding IDs (A-91 → A-103), **four** withdrawn claims, and the corpus retests recorded above make up the deliverable. Every PASS / PARTIAL / FAIL in this report carries a screenshot path, a `file:line`, or a quoted measurement — and the claims I could not substantiate (support-card drill-in, CJK stacking, free-text Month, and the preflight "no reason line") are **withdrawn in place** rather than deleted, so the reasoning stays auditable.
+
+**Fix work does not begin until the owner has reviewed the remediation plan — and in particular the P0, which contradicts a `visited`-based stepper the owner previously ruled on.**
+
+---
+
