@@ -83,7 +83,7 @@ test('shows the Spirit meter as text and a bar, with readiness and the held advi
     // whose title carries the ruling.
     const held = section.getByText('Recommended timing and projected benefit are not built.');
     await expect(held).toBeVisible();
-    await expect(held).toHaveAttribute('title', /ADR-0020/);
+    await expect(held).toHaveAttribute('title', /Both are advice/);
 });
 
 test('draws the rank gauge, the five stat grades and the roster as their empty states', async ({ page }) => {
