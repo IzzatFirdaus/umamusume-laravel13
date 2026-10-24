@@ -340,9 +340,18 @@ class TrainingRunController extends Controller
             ->when($rarity !== null, fn ($q) => $q->where('rarity', (int) $rarity))
             ->when($type !== null, fn ($q) => $q->where('type', $type))
             ->when($status !== null, fn ($q) => $q->where('release_status', $status))
-            ->when($search !== null, fn ($q) => $q->where(
-                fn ($inner) => $inner->where('char_name', 'like', '%'.$search.'%')->orWhere('title_en', 'like', '%'.$search.'%')
-            ))
+            ->when($search !== null, function ($q) use ($search): void {
+                // The row prints `Name [Epithet]`, which is `char_name` beside `title_en`, so a Trainer
+                // who types the printed label must match. Split on whitespace and require every term to
+                // hit one of the two fields (R4-21): `Tokai` lands in `char_name`, `[Dream` in `title_en`.
+                foreach (preg_split('/\s+/', trim($search)) ?: [] as $term) {
+                    if ($term === '') {
+                        continue;
+                    }
+
+                    $q->where(fn ($inner) => $inner->where('char_name', 'like', '%'.$term.'%')->orWhere('title_en', 'like', '%'.$term.'%'));
+                }
+            })
             // The tiebreaker is load-bearing for the same reason it is on the catalog: an order without
             // one lets pagination hand back a different half of the catalogue on each pass.
             ->orderBy('type')

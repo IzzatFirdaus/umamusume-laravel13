@@ -331,6 +331,20 @@ it('renders the deck step with six slots, no ownership invented and the seven ty
     expect(DeckSlot::count())->toBe(0);
 });
 
+it('matches a card by the composed printed label', function (): void {
+    // R4-21: the row prints `Name [Epithet]` (`char_name` beside `title_en`), but the search compared
+    // that whole string against each column separately, so the printed label matched nothing.
+    SupportCard::factory()->create(['char_name' => 'Tokai Teio', 'title_en' => '[Dream Big!]']);
+
+    $this->get(route('career.deck', ['q' => 'Tokai Teio [Dream Big!]']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/DeckSelect')
+            ->has('picker.options', 1)
+            ->where('picker.options.0.name', 'Tokai Teio [Dream Big!]')
+            ->where('picker.query', 'Tokai Teio [Dream Big!]'));
+});
+
 it('stores six slots with the flag per slot and reads the cards back on the next render', function (): void {
     $fixture = wizardFixture();
     SetupDraft::write(['scenario' => 'ura_finale']);

@@ -62,15 +62,25 @@ const query = ref('');
  * wrong slot.
  */
 function open(event: Event, filters: { type: string; query: string }): void {
-    opener.value = event.currentTarget as HTMLElement;
+    openAt(event.currentTarget as HTMLElement, filters);
+}
+
+/**
+ * Opening without a click event, for the mount path where the URL already names a slot and a filter:
+ * the dialog reopens over the refined list rather than closing on the visit (R4-21). The opener is the
+ * slot row itself so the focus return has somewhere to land.
+ */
+function openAt(element: HTMLElement | null, filters: { type: string; query: string }): void {
+    opener.value = element;
     type.value = filters.type;
     query.value = filters.query;
     dialog.value?.showModal();
 }
 
 function applyFilter(): void {
+    // No close: the parent re-fetches the options with `preserveState`, so the dialog stays open over
+    // the refined list instead of costing a click per search (R4-21).
     emit('filter', { type: type.value, query: query.value });
-    dialog.value?.close();
 }
 
 function equip(cardId: number): void {
@@ -84,7 +94,7 @@ function closed(): void {
     nextTick(() => opener.value?.focus());
 }
 
-defineExpose({ open });
+defineExpose({ open, openAt });
 </script>
 
 <template>

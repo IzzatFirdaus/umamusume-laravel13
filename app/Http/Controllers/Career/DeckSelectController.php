@@ -149,10 +149,19 @@ class DeckSelectController extends Controller
                 }
             })
             ->when($type !== null, static fn ($inner) => $inner->where('type', $type))
-            ->when($search !== null, static fn ($inner) => $inner->where(
-                static fn ($sub) => $sub->where('char_name', 'like', '%'.addcslashes($search, '%_\\').'%')
-                    ->orWhere('title_en', 'like', '%'.addcslashes($search, '%_\\').'%')
-            ))
+            ->when($search !== null, static function ($inner) use ($search): void {
+                // The row prints `Name [Epithet]`, which is `char_name` beside `title_en`, so a Trainer
+                // who types the printed label must match. Split on whitespace and require every term to
+                // hit one of the two fields (R4-21): `Tokai` lands in `char_name`, `[Dream` in `title_en`.
+                foreach (preg_split('/\s+/', trim($search)) ?: [] as $term) {
+                    if ($term === '') {
+                        continue;
+                    }
+
+                    $inner->where(static fn ($sub) => $sub->where('char_name', 'like', '%'.addcslashes($term, '%_\\').'%')
+                        ->orWhere('title_en', 'like', '%'.addcslashes($term, '%_\\').'%'));
+                }
+            })
             // The same deterministic order the catalogue and the run builder use, so a filter change cannot
             // hand back a different half of the list between two loads (KI-41's shape).
             ->orderBy('type')

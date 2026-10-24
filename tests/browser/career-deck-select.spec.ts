@@ -80,3 +80,31 @@ test('hides the deck analysis until a card is equipped', async ({ page }) => {
 test('shows the ownership default in the picker copy', async ({ page }) => {
     await expect(page.getByText(/Equipping a card records it as Owned unless you mark it Rented/)).toBeVisible();
 });
+
+test('keeps the picker open across a filter', async ({ page }) => {
+    await page.getByRole('button', { name: /Choose a card for/i }).first().click();
+
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+
+    await dialog.getByLabel('Name contains').fill('Teio');
+    await dialog.getByRole('button', { name: 'Filter' }).click();
+
+    // The round trip refines the list with `preserveState`; the dialog stays open over it rather than
+    // costing a click per search (R4-21).
+    await expect(dialog).toBeVisible();
+    await expect(page).toHaveURL(/q=Teio/);
+});
+
+test('finds a card by its printed name and epithet', async ({ page }) => {
+    await page.getByRole('button', { name: /Choose a card for/i }).first().click();
+
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+
+    // The printed label is `Name [Epithet]`; searching it whole must match (R4-21).
+    await dialog.getByLabel('Name contains').fill('Tokai Teio [Dream Big!]');
+    await dialog.getByRole('button', { name: 'Filter' }).click();
+
+    await expect(dialog.getByText('Tokai Teio [Dream Big!]', { exact: true })).toBeVisible();
+});

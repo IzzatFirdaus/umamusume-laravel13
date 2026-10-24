@@ -29,7 +29,7 @@ import SupportTypeMark from '../../components/support/SupportTypeMark.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import { BaseInput, BaseSelect, BaseButton } from '../../components/Form';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
 
 interface Effect {
     effect_id: number;
@@ -215,8 +215,28 @@ function equipCard(cardId: number): void {
 function applyPickerFilter(filters: { type: string; query: string }): void {
     type.value = filters.type;
     search.value = filters.query;
-    filter();
+    // `retarget` preserves the component so the open dialog survives the visit and shows the refined
+    // list, rather than closing on every search (R4-21).
+    filter(true);
 }
+
+/**
+ * A filter round trip remounts nothing when it preserves state, but a fresh arrival on a URL that
+ * names both a slot and a filter reopens the dialog over that list. Without it a copied or reloaded
+ * search URL lands on the slot list with the filter applied but no picker to see it in (R4-21).
+ */
+onMounted(() => {
+    if (props.picker.query === null) {
+        return;
+    }
+
+    void nextTick(() => {
+        picker.value?.openAt(
+            document.getElementById(`deck-slot-${filling.value}`),
+            { type: props.picker.type ?? '', query: props.picker.query ?? '' },
+        );
+    });
+});
 
 /** A clear is a write of its own: the slot returns to its named empty text and the flag to `N/A`. */
 function clearSlot(): void {

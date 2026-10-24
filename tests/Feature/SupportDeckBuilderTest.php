@@ -294,6 +294,20 @@ it('offers the Global releases plus any card this run already uses', function ()
         ->and($labels->contains('Japan Only Card [Tracen Academy]'))->toBeTrue();
 });
 
+it('matches a card by the composed printed label', function (): void {
+    // R4-21: the row prints `Name [Epithet]` (`char_name` beside `title_en`), but the search compared
+    // that whole string against each column separately, so the printed label matched nothing.
+    $run = builderRun();
+    SupportCard::factory()->create(['char_name' => 'Tokai Teio', 'title_en' => '[Dream Big!]']);
+
+    $labels = collect(test()->get("/training-runs/{$run->id}/deck?query=".urlencode('Tokai Teio [Dream Big!]'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('Support/Builder'))
+        ->inertiaProps('picker')['page']['data'])->pluck('name');
+
+    expect($labels->contains('Tokai Teio [Dream Big!]'))->toBeTrue();
+});
+
 it('paginates the picker at twenty-five cards, as the catalog does', function (): void {
     $run = builderRun();
 
