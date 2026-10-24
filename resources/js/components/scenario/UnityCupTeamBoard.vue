@@ -22,6 +22,7 @@
  * is the half of its purpose that matters here; the disclosure is the half this surface cannot spend.
  * `unity-cup-panel.spec.ts` counts the disclosures in the region to keep the claim honest.
  */
+import CapsuleHeader from '../CapsuleHeader.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import type { ProvenanceState } from '../../types';
 
@@ -51,7 +52,8 @@ const headingId = 'unity-cup-team-coverage';
         class="card p-3"
         :aria-labelledby="headingId"
     >
-        <h4 :id="headingId" class="text-lg font-semibold text-ink-strong">
+        <CapsuleHeader title="Team race coverage" class="mb-3" />
+        <h4 :id="headingId" class="sr-only">
             Team race coverage
         </h4>
 

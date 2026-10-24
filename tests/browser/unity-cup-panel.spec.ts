@@ -293,6 +293,28 @@ test('states the team race shape and prints no opponent projection, no chance an
     expect(text.toLowerCase()).not.toContain('probability');
 });
 
+test('heads both scenario blocks with the documented capsule and keeps the region name', async ({ page }) => {
+    await openUnityCupCockpit(page);
+
+    for (const name of ['Team race coverage', 'Team race shape']) {
+        const block = page.getByRole('region', { name });
+        await expect(block).toBeVisible();
+
+        // The documented capsule chrome (`DESIGN.md` §2.3): the lattice-bleed motif on the chrome fill,
+        // one per block, as the eight sibling scenario panels render it. Structural assertion, not a
+        // pixel colour: the class list is what a later restyle would break.
+        const capsule = block.locator('.lattice-bleed.bg-chrome');
+        await expect(capsule).toHaveCount(1);
+        await expect(capsule.getByText(name, { exact: true })).toBeVisible();
+
+        // The semantic heading survives for assistive tech (the region's accessible name still comes
+        // from it) and it is not a second visible title beside the capsule.
+        const heading = block.getByRole('heading', { name });
+        await expect(heading).toHaveCount(1);
+        await expect(heading).toHaveClass(/sr-only/);
+    }
+});
+
 test('shows no dual-value readout while the rail has nothing to rank', async ({ page }) => {
     await openUnityCupCockpit(page);
 

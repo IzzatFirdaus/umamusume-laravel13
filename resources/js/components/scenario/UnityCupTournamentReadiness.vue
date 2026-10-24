@@ -21,6 +21,7 @@
  * which is why an absent figure here is `N/A` with its sentence printed rather than an `AbsenceValue`
  * disclosure: a `<summary>` is a tab stop, and this region's keyboard case counts them.
  */
+import CapsuleHeader from '../CapsuleHeader.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import type { ProvenanceState } from '../../types';
 
@@ -55,7 +56,8 @@ function anchorLine(): string {
         class="card p-3"
         :aria-labelledby="headingId"
     >
-        <h4 :id="headingId" class="text-lg font-semibold text-ink-strong">
+        <CapsuleHeader title="Team race shape" class="mb-3" />
+        <h4 :id="headingId" class="sr-only">
             Team race shape
         </h4>
 
