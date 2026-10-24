@@ -490,7 +490,7 @@ sites that re-implemented them: eight panels hand-copied the lattice-bleed capsu
 `stat-band` carried its own copy of the nine grade fills beside its own badge span. Both are
 mounted now, so the franchise motif §2.3 rules material reaches the surfaces it was ruled for
 and the grade letters §2.1 routes through `ink-strong` have one implementation instead of two.
-`FrontendComponentLibraryTest` fails if either visual is defined a second time.
+`DesignTokensTest` (tokens) and `BrowserSpecClassAssertionsTest` (shipped class contract) fail if either visual is defined a second time.
 
 **Blade-era note (superseded by the ports):** for each of the three, either adopt the component at its call site or
 delete it. A component that exists only as an unimplemented decision is the cheapest
