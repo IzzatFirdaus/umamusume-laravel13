@@ -168,6 +168,31 @@ and the corpus-transcription caveat above holds. Replacing those two stubs is th
 
 > **Two guards bind this amendment.** (a) The brand chrome lives on the **top bar** and, amended 2026-10-15, on the primary action fill through the `--color-primary-action` alias; it is not a card or sidebar surface. The top bar's accent stripe is a **thin 2px rule at the bar's bottom edge**, not a gradient. (b) The status-positive lime is **not** an action colour: `--color-status-positive` (the status lime) is a status role, and the action fill is blue. A status pill and a primary button never render the same fill. Amended 2026-10-15: the action role is no longer `--color-green`, so the clause above reading "the action role is unchanged" is superseded, as is §2.1's pre-2026-10-15 sentence making green the action colour.
 
+> **2026-10-24 — owner ruling: surfaces carry colour.** The near-white surface
+> constraint in `DESIGN-CORPUS.md` P1 is overridden by owner direction ("i dont intend for
+> white sheet of an ui, thats tasteless. i dont even want it to be documented to just be
+> white page. it should be colourful. and in dark mode can also have some of the colours
+> showing between the dark mode like neon lights in the city night."). Surfaces now carry
+> visible chromatic tint in light mode and neon-accented depth in dark mode. The new
+> surface tokens are: `--color-page: #F8E9F1` (soft pink), `--color-panel: #F4F5FE` (pale
+> lavender), `--color-raised: #FFFFFF` (unchanged — data cells stay white),
+> `--color-sunken: #F4E7F9` (pink-violet recess), `--color-idle: #D0D6EC` (pale blue),
+> `--color-rule: #7A6E96` (muted violet; dark `#8A7BD0`, neon). Dark surfaces:
+> `--color-page: #120A26` (deep violet), `--color-panel: #332650`, `--color-raised: #362D50`,
+> `--color-sunken: #1C1433`. `--color-ink-muted` moved to `#63637A` as the consequence move
+> that keeps 4.5:1 on the tinted surfaces. The semantic/accent token set is unchanged —
+> colour still carries meaning on pills, badges, and status; it now also carries the page
+> itself. The dark neon is box-shadow glow mixed from each element's own accent token at
+> ~30% (`resources/css/app.css`), never a token fork. WCAG AA still binds; every G-18 pair
+> was re-measured against the new values in the pass report and clears, including
+> `ink-muted on page/sunken/panel` (4.98/4.91/5.38), `brand-accent-ink on page/sunken`
+> (4.60/4.53), `rule on page` (3.98 light, 5.31 dark), and the surface steps (1.08 light
+> vs the 1.05 floor; 1.40 dark vs the 1.25 floor).
+>
+> The pre-2026-10-15 values in the table above (`#F2F1F8`, `#F8F8FB`, `#6E6459`, `#E4E1EA`,
+> `#E7E7EC`) are superseded twice: first by the Track 2-D repair (`63d1cdd2`), then by this
+> ruling. The table is left as it was written; the current values are in `resources/css/app.css`.
+
 Status badges (release status is the catalog's load-bearing signal) render through
 `--color-green` / `--color-sp` / `--color-pick` and their ink partners rather than
 literal hexes, so they follow the active theme instead of pinning one.

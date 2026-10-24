@@ -75,16 +75,24 @@
      * moved instead — `panel` #F8F8FB → #FBFBFD (step 1.06:1) and `sunken` #E7E7EC → #EDEDF1
      * (pair 4.57:1). The rule edge still carries the card boundary; the surfaces only stop
      * collapsing into each other.
+     *
+     * 2026-10-24 (owner ruling, reversing P1's near-white surface clause): surfaces carry colour.
+     * Page is a soft pink (the client's mood-pink family), panel a pale lavender whose hue pulls
+     * the card away from the page, sunken a pink-violet recess, idle a pale blue, and the hairline
+     * a muted violet instead of grey. Raised stays white for data cells. Ink-muted moved darker
+     * (#63637A, violet-grey) as the consequence move that keeps 4.5:1 on the tinted surfaces;
+     * every G-18 pair is re-measured in the pass report. The amendment is recorded in DESIGN.md
+     * §2.1 and DESIGN-CORPUS.md P1 under the same date.
      */
-    --color-page: #F4F4FF;
-    --color-panel: #FBFBFD;
+    --color-page: #F8E9F1;
+    --color-panel: #F4F5FE;
     --color-raised: #FFFFFF;
-    --color-sunken: #EDEDF1;
-    --color-idle: #D2D2DB;
+    --color-sunken: #F4E7F9;
+    --color-idle: #D0D6EC;
     --color-disabled: #D0D1D0;
     --color-ink: #6A5641;
     --color-ink-strong: #482720;
-    --color-ink-muted: #6A6A75;
+    --color-ink-muted: #63637A;
     /* ink-faint is a non-text token: borders, hairline ticks, disabled glyphs.
        Measured as body-size text it lands at 3.18 on white and 2.58 on the sunken
        surface, so it must never carry a label. The accessible subordinate tier is
@@ -93,8 +101,11 @@
     /* Hairline. 2026-10-15 (Phase 11R.2): the light step was #6E6C73, the same value the dark
        override carries, so a card edge and a status-pill border read as a dark-mode line on the
        light field. Lightened to the palest grey that still clears G-18's `rule on page` 3:1 for a
-       non-text boundary: 3.46:1 on `page`, 3.66:1 on `panel`. Dark keeps #6E6C73 (3.82:1). */
-    --color-rule: #84828C;
+       non-text boundary: 3.46:1 on `page`, 3.66:1 on `panel`. Dark keeps #6E6C73 (3.82:1).
+       2026-10-24 (owner ruling): the grey becomes a muted violet #7A6E96 — chromatic, not grey —
+       measuring 3.98:1 on the new `page`, 4.30:1 on `panel`, 4.67:1 on `raised`, 3.92:1 on
+       `sunken`. */
+    --color-rule: #7A6E96;
 
     /* Semantic roles. Amended 2026-10-15: green is a STATUS colour only — the positive status pill,
        and nothing else. Green is never the primary action fill, which is `--color-primary-action`
@@ -354,18 +365,24 @@ html[data-theme='dark'] {
      * A latent inversion went with it: dark `panel` #121013 sat *below* `sunken`
      * #1A181D, while light has `panel` above `sunken`. `panel` #26262E now sits
      * between `sunken` and `raised`, mirroring the light ramp's order.
+     *
+     * 2026-10-24 (owner ruling, neon dark): the board charcoal becomes deep chromatic
+     * violet surfaces — page #120A26, panel #332650, raised #362D50, sunken #1C1433 —
+     * and the hairline becomes a neon violet #8A7BD0 (5.31:1 on the new page, 3.80:1 on
+     * panel, so the card boundary stays well past WCAG 1.4.11). Accent tokens are
+     * unchanged: the glow is box-shadow at the usage sites below, never a token fork.
      */
-    --color-page: #08070A;
-    --color-panel: #26262E;
-    --color-raised: #24262A;
-    --color-sunken: #1A181D;
-    --color-idle: #32343A;
-    --color-disabled: #3A3A40;
+    --color-page: #120A26;
+    --color-panel: #332650;
+    --color-raised: #362D50;
+    --color-sunken: #1C1433;
+    --color-idle: #2A2447;
+    --color-disabled: #2C2A38;
     --color-ink: #ECEAF2;
     --color-ink-strong: #FFFFFF;
     --color-ink-muted: #AAABB5;
     --color-ink-faint: #7C7D87;
-    --color-rule: #6E6C73;
+    --color-rule: #8A7BD0;
 
     --color-green-deep: #9BE83A;
     --color-green-tint: #1F2A12;
@@ -454,6 +471,34 @@ html[data-theme='dark'] {
        chrome colour the client paints the same in either theme, the same reasoning `--color-mood-*`
        carries. The draft's dark pair measured 3.92:1 and the gate would not have it. */
     --shadow-overlay: 0 6px 16px rgb(0 0 0 / 0.32);
+}
+
+/*
+ * Neon glow (owner ruling 2026-10-24: "neon lights in the city night"). Dark-only halos mixed
+ * from each element's own accent token at ~30%, so a status pill or the one action button reads
+ * as a light source against the violet surfaces rather than a flat chip. Scoped to
+ * `html[data-theme='dark']` exactly the way the token overrides are; no `dark:` utility, no new
+ * token (D-101, G-19). The halo is decoration and carries no information, so it owes no
+ * contrast row (the words and fills inside it already clear theirs).
+ */
+html[data-theme='dark'] .pill-positive {
+    box-shadow: 0 0 10px color-mix(in srgb, var(--color-status-positive) 30%, transparent);
+}
+
+html[data-theme='dark'] .pill-caution {
+    box-shadow: 0 0 10px color-mix(in srgb, var(--color-status-caution) 30%, transparent);
+}
+
+html[data-theme='dark'] .pill-accent {
+    box-shadow: 0 0 10px color-mix(in srgb, var(--color-brand-accent-ink) 30%, transparent);
+}
+
+html[data-theme='dark'] .subnav-hub {
+    box-shadow: 0 0 12px color-mix(in srgb, var(--color-brand-chrome) 30%, transparent);
+}
+
+html[data-theme='dark'] .bg-primary-action {
+    box-shadow: 0 0 12px color-mix(in srgb, var(--color-brand-chrome) 30%, transparent);
 }
 
 /*

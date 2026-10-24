@@ -80,6 +80,11 @@ A Trainer who has spent 400 hours in the client should be able to open this tool
 
 **P1. Light field, saturated meaning.** Surfaces are near-white and quiet. Colour is spent only where it carries information. If a coloured element does not change what the Trainer knows, it should be neutral.
 
+> **2026-10-24 — P1's "near-white surfaces" clause is overridden by owner ruling.** Surfaces
+> carry colour; see the `DESIGN.md` §2.1 amendment of the same date. The rest of P1 ("Colour is
+> spent only where it carries information") still holds for accents: colour on the page is not
+> "meaningless" colour — it is the page's identity, and the owner has chosen a colourful page.
+
 **P2. Preview before commit — informed risk-taking.** The client never lets you fire a decision blind: the Choices panel shows each option's outcome before you accept, and acceptance is a separate action (RAW-FINDINGS §5.1). Every destructive or irreversible-feeling action in this tool gets the same two-step shape. This is also what makes the guided turn flow feel like the game rather than like a form.
 
 The name matters, and it is borrowed: an external mechanics write-up calls this principle **informed risk-taking**, and the phrase is worth adopting because it describes the Trainer's act rather than the UI's (`CONSTRAINTS.md` D-283 governs what else may be taken from that source). A preview whose job is stated as *reducing risk* would soften the number, hide the cost, or recommend a safer option. Its actual job is to make the risk known and leave the decision alone — which is the same boundary P6 draws around predictions. The under-50 Energy caution at the Confirm control (§6.21, D-171) is this principle at the point of commitment rather than a second, kinder preview.

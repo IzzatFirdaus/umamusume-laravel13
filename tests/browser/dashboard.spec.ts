@@ -618,3 +618,32 @@ test('no stat value overflows its tile', async ({ page }) => {
     );
     expect(offenders).toEqual([]);
 });
+
+/*
+ * Colourful-surface pin (owner ruling 2026-10-24: surfaces carry colour).
+ *
+ * The shell's page field and the card's panel fill are read as computed styles, so the assertion
+ * fails the moment a token drifts back toward white. Values are the ruling's own, recorded in
+ * `DESIGN.md` §2.1 and `DESIGN-CORPUS.md` P1 amendments of the same date.
+ */
+test('paints the shell page and the active-career card from the colourful surface tokens', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+
+    // The shell's page field: the pink tint, not white.
+    await expect(page.locator('.bg-page').first()).toHaveCSS('background-color', 'rgb(248, 233, 241)');
+
+    // A card on the panel fill: the pale lavender, distinct from both the page and white.
+    await createActiveRun(page, 'unity_cup');
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.locator('[data-card="active_career"]')).toHaveCSS('background-color', 'rgb(244, 245, 254)');
+});
+
+test('paints the dark shell with the neon violet page', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.locator('.bg-page').first()).toHaveCSS('background-color', 'rgb(18, 10, 38)');
+});
