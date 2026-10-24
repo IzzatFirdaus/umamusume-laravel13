@@ -57,7 +57,7 @@ class TrainingRunController extends Controller
     public function index(): InertiaResponse
     {
         return Inertia::render('Runs/Index', [
-            'runs' => TrainingRun::with('umamusume')->latest()->paginate(25)
+            'runs' => TrainingRun::with('umamusume')->latest('created_at')->latest('id')->paginate(25)
                 ->through(static fn (TrainingRun $run): array => [
                     'id' => $run->id,
                     'name' => $run->umamusume->name,

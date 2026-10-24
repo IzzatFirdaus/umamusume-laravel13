@@ -86,6 +86,17 @@ it('sends newest first', function (): void {
             ->where('runs.data.1.url', route('runs.cockpit', $older)));
 });
 
+it('orders two runs created in the same second by id, newest first', function (): void {
+    $first = TrainingRun::factory()->create(['created_at' => '2026-10-24 12:00:00']);
+    $second = TrainingRun::factory()->create(['created_at' => '2026-10-24 12:00:00']);
+
+    test()->get('/training-runs')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('runs.data.0.id', $second->id)
+            ->where('runs.data.1.id', $first->id));
+});
+
 it('paginates at twenty-five and reaches a second page', function (): void {
     TrainingRun::factory()->count(26)->create();
 
