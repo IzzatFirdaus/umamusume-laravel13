@@ -187,6 +187,9 @@ class CockpitController extends Controller
             // reading sits in. Read per block on the page; the team identity rides the scenario's
             // own panel payload, where the matrix already gates it to Unity Cup.
             'identity' => $this->identitySection($run, $latest),
+            // The cap arithmetic's recorded inputs (§1.2): the caps the run states beside the blue
+            // sparks its Legacy tree carries, with the source's own non-reconciliation named.
+            'capComposition' => $this->capCompositionSection($run),
             'state' => $this->stateSection($run, $latest),
             'actions' => $this->actionSection($run, $advice),
             'advisor' => $this->advisorSection($advice, $run),
@@ -414,6 +417,76 @@ class CockpitController extends Controller
             'caps' => $caps,
             'fans' => $fans,
             'fan_ladder' => $fans === null ? null : FanLadder::fromValue((int) $fans),
+        ];
+    }
+
+    /**
+     * The cap arithmetic's recorded inputs (§1.2): the caps the run states, and the blue sparks its
+     * Legacy tree carries, read from the run's own `legacy_selection` (the same payload the Inheritance
+     * screen reads). The panel states they do not reconcile — that is the source's own open question,
+     * not a defect this tool can close (A-0.1, walk-1 Screen 4, walk-3 U-01).
+     *
+     * The caps are resolved the same way `stateSection()` resolves them (`ScenarioCaps::enteredCaps()`
+     * over `scenarioCaps()`), so the panel cannot show a ceiling the stat strip disagrees with
+     * (`ADR-0015`).
+     *
+     * @return array{caps: array<string, int>, sparks: list<array{stat: string|null, stars: int|null, source: string}>, note: string}
+     */
+    private function capCompositionSection(TrainingRun $run): array
+    {
+        $published = ScenarioCaps::scenarioCaps($run);
+        $entered = ScenarioCaps::enteredCaps($run);
+
+        $caps = [];
+
+        foreach ((array) config('scenarios.stat_order') as $stat) {
+            $caps[(string) $stat] = (int) ($entered[$stat] ?? $published[$stat]);
+        }
+
+        $legacy = $run->legacySelection();
+        $sparks = [];
+
+        if ($legacy !== null) {
+            foreach ($legacy->legacies as $index => $legacyData) {
+                $source = $index === 0 ? 'Parent A' : 'Parent B';
+
+                foreach ((array) ($legacyData['sparks'] ?? []) as $spark) {
+                    if (($spark['kind'] ?? null) !== 'blue') {
+                        continue;
+                    }
+
+                    $sparks[] = [
+                        'stat' => is_string($spark['target'] ?? null) ? $spark['target'] : null,
+                        'stars' => is_int($spark['stars'] ?? null) ? $spark['stars'] : null,
+                        'source' => $source,
+                    ];
+                }
+
+                // Grandparents' own blue sparks, aligned by ancestor index. Present only when the
+                // payload recorded them; a names-only Legacy omits the key.
+                foreach ((array) ($legacyData['ancestors_sparks'] ?? []) as $ancestorSparks) {
+                    foreach ((array) $ancestorSparks as $spark) {
+                        if (($spark['kind'] ?? null) !== 'blue') {
+                            continue;
+                        }
+
+                        $sparks[] = [
+                            'stat' => is_string($spark['target'] ?? null) ? $spark['target'] : null,
+                            'stars' => is_int($spark['stars'] ?? null) ? $spark['stars'] : null,
+                            'source' => 'Grandparent · '.$source,
+                        ];
+                    }
+                }
+            }
+        }
+
+        return [
+            'caps' => $caps,
+            'sparks' => $sparks,
+            'note' => 'The blue sparks the tree carries and the caps the run states are shown together. '
+                .'The source records that they do not reconcile (§1.2): the six blue sparks account for '
+                .'the Guts extra and nothing else, so this panel shows the inputs without claiming one '
+                .'derives the other.',
         ];
     }
 

@@ -709,3 +709,16 @@ test('names the fan ladder threshold beside the gap', async ({ page }) => {
     const state = page.getByRole('region', { name: 'Stats and state' });
     await expect(state.getByText(/Star · 30,755 to 240,000/)).toBeVisible();
 });
+
+test('shows the cap composition panel and its non-reconciliation note', async ({ page }) => {
+    // A-0.1 (Group A): the caps the run states sit beside the blue sparks its Legacy carries, and the
+    // panel states they do not reconcile (§1.2, the source's own open question). This case proves the
+    // section renders; the sparks themselves are pinned by `CockpitCapCompositionTest`.
+    await newCareer(page);
+    await page.locator('#app > *').first().waitFor();
+
+    const panel = page.getByRole('region', { name: 'Cap composition' });
+    await expect(panel).toBeVisible();
+    await expect(panel.getByText(/do not reconcile/)).toBeVisible();
+    await expect(panel.getByRole('term').first()).toBeVisible();
+});

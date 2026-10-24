@@ -130,6 +130,16 @@ const props = defineProps<{
         fans: number | null;
         fan_ladder: { class: string | null; nextThreshold: number | null; gap: number | null } | null;
     };
+    /**
+     * A-0.1: the cap arithmetic's recorded inputs (§1.2). The caps the run states, resolved the same
+     * way the stat strip resolves them, beside the blue sparks the run's Legacy tree carries. The
+     * source records that the two do not reconcile, so this is a read-out of inputs, not a derivation.
+     */
+    capComposition: {
+        caps: Record<string, number>;
+        sparks: { stat: string | null; stars: number | null; source: string }[];
+        note: string;
+    };
     state: {
         stats: { key: string; label: string; current: number | null; target: number | null; cap: number }[];
         meta: { key: string; label: string; value: number | string | null }[];
@@ -158,6 +168,20 @@ const empty = computed(() => props.header.turn === 0);
 // The door an objective can be settled at, read off the grid's own entries rather than from a second
 // route table. The grid already owns the href, and a due obligation with no door renders none.
 const raceDoor = computed(() => props.actions.find((action) => action.key === 'race')?.href ?? null);
+
+/**
+ * A-0.1: the blue sparks the tree carries, one phrase each (`Power ★ (Parent A)`), or an explicit
+ * absence when the run records no Legacy. The caps are printed as their own grid above it.
+ */
+const capSparkText = computed((): string => {
+    if (props.capComposition.sparks.length === 0) {
+        return "No blue spark is recorded in this run's Legacy.";
+    }
+
+    return props.capComposition.sparks
+        .map((spark) => `${spark.stat ?? 'Unstated'} ${'★'.repeat(spark.stars ?? 0)} (${spark.source})`)
+        .join(', ');
+});
 
 // The section nav's targets are the headings the screen already carries (audit 2026-10-12 §3.6).
 // The hrefs are fragment ids, which Inertia leaves to the browser, so these are plain anchors.
@@ -805,6 +829,24 @@ const jumpToShop = (): void => {
                     :fan-ladder="props.identity.fan_ladder"
                     denominator-label="target"
                 />
+
+                <!-- A-0.1: the cap arithmetic's recorded inputs (§1.2). The caps the run states sit
+                     beside the blue sparks its Legacy tree carries, and the panel states plainly that
+                     the two do not reconcile (the source's own open question). -->
+                <section aria-labelledby="cap-composition-heading" class="card mt-3 rounded-lg p-4">
+                    <h2 id="cap-composition-heading" class="text-lg font-semibold text-ink-strong">Cap composition</h2>
+                    <dl class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                        <div v-for="(cap, stat) in props.capComposition.caps" :key="stat" class="flex items-baseline gap-1">
+                            <dt class="text-ink-muted">{{ stat }}</dt>
+                            <dd class="font-mono tabular-nums text-ink-strong">{{ cap.toLocaleString('en-US') }}</dd>
+                        </div>
+                    </dl>
+                    <p class="mt-2 text-sm text-ink">
+                        <span class="font-semibold text-ink-strong">Blue sparks:</span>
+                        {{ capSparkText }}
+                    </p>
+                    <p class="mt-1 text-xs text-ink-muted">{{ props.capComposition.note }}</p>
+                </section>
 
                 <section v-if="props.correction !== null" aria-labelledby="career-correction-heading" class="mt-3">
                     <h3 id="career-correction-heading" class="sr-only">Correct a turn by hand</h3>
