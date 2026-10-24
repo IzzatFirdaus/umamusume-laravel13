@@ -108,7 +108,7 @@ it('exposes the run id and distinguishes two runs of the same trainee', function
 it('does not render a hardcoded turn for an active run', function (): void {
     // R4-30: the Careers row printed `Turn ~11 / 24` and `width: 45%` for every Active run,
     // regardless of the run's actual position. The row now ships the real turn_index.
-    $run = TrainingRun::factory()->create(['status' => \App\Enums\RunStatus::Active]);
+    $run = TrainingRun::factory()->create(['status' => RunStatus::Active]);
 
     test()->get('/training-runs')
         ->assertOk()
