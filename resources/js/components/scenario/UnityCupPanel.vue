@@ -176,13 +176,19 @@ const counterSegments = computed((): string[] => {
         detail="The margin is a config fact (`team_race.circles_guidance`). A recorded race list without a stated margin would leave the at-or-below comparison to invent, so the panel is withheld rather than guessed at."
         tone="note"
     />
-    <div v-else-if="isTeamPanel" class="grid grid-cols-1 gap-3 @3xl:grid-cols-2 @5xl:grid-cols-12">
+    <div v-else-if="isTeamPanel" class="grid grid-cols-1 items-start gap-3 @3xl:grid-cols-6 @5xl:grid-cols-12">
                 <!-- The `team_rank_ladder` registration: the Team Panel itself, as one bento grid. Team
                      Race leads the grid (it used to be a separate registration rendered above), then the
                      owner's order: Team, Spirit, Team Rank, Unity Cup progress, stat grades, burst bands,
-                     Spirit Burst, Special Training, and the two team-race blocks. Spans vary so the table
-                     and the prose get width and the small tallies do not. -->
-                <div class="@3xl:col-span-2 @5xl:col-span-12">
+                     Spirit Burst, Special Training, and the two team-race blocks.
+                     **Three panels per row on desktop, two on tablet, one on mobile.** The `@3xl`/`@5xl`
+                     variants are container queries against `main`, not viewport widths: `@5xl` is the
+                     64rem container size and `@3xl` the 48rem one, so the three-per-row shape needs a
+                     container at least 64rem wide and the two-per-row band a container at least 48rem
+                     wide. `items-start` keeps every panel at its own content height, so a short panel no
+                     longer inflates to its tallest sibling and the leftover reads as page margin rather
+                     than as a panel that failed to fill (the Dashboard's ruling, DESIGN.md §2.3). -->
+                <div class="@3xl:col-span-6 @5xl:col-span-12">
                     <TeamRacePanel
                         v-if="composesRacePanel && props.scenario.team.race_guidance !== null"
                         :enabled="true"
@@ -197,7 +203,7 @@ const counterSegments = computed((): string[] => {
                         tone="note"
                     />
                 </div>
-                <div class="@5xl:col-span-4">
+                <div class="@3xl:col-span-3 @5xl:col-span-4">
             <div v-if="hasTeamIdentity" class="card p-3">
                 <CapsuleHeader title="Team" class="mb-2" />
                 <dl class="flex flex-col gap-1 text-sm">
@@ -221,7 +227,7 @@ const counterSegments = computed((): string[] => {
             </div>
             </div>
 
-            <div class="@5xl:col-span-4">
+            <div class="@3xl:col-span-3 @5xl:col-span-4">
             <div v-if="composesBursts" class="card p-3">
                 <CapsuleHeader title="Spirit" class="mb-2" />
                 <!-- The value and the bar are the same reading (design-2.0 §45). No column records a
@@ -252,7 +258,7 @@ const counterSegments = computed((): string[] => {
 
             <!-- The Unity Cup progression counters (A6.7). Drawn only when the Trainer stated one; the
                  combined total below reads these two tallies. -->
-            <div class="@5xl:col-span-4">
+            <div class="@3xl:col-span-3 @5xl:col-span-4">
             <TeamRankGauge :enabled="true" :current="current" :ladder="props.scenario.team.ladder" />
 
             <!-- The +30 is the figure the recorded client shows, and it was read beside the S
@@ -264,14 +270,14 @@ const counterSegments = computed((): string[] => {
             </p>
             </div>
 
-            <div class="@5xl:col-span-4">
+            <div class="@3xl:col-span-3 @5xl:col-span-4">
             <div v-if="counterSegments.length > 0" class="card p-3">
                 <CapsuleHeader title="Unity Cup progress" class="mb-2" />
                 <p class="text-sm text-ink">{{ counterSegments.join(' · ') }}</p>
             </div>
             </div>
 
-            <div class="@3xl:col-span-2 @5xl:col-span-4">
+            <div class="@3xl:col-span-3 @5xl:col-span-4">
             <div class="card p-3">
                 <CapsuleHeader title="Team stat grades" class="mb-2" />
                 <ul class="flex flex-col gap-1" aria-label="Team stat grades">
@@ -290,7 +296,7 @@ const counterSegments = computed((): string[] => {
             </div>
             </div>
 
-            <div class="@3xl:col-span-2 @5xl:col-span-8">
+            <div class="@3xl:col-span-3 @5xl:col-span-4">
             <div v-if="composesBursts && props.scenario.team.bands.length > 0" class="card p-3">
                 <div class="mb-2 flex flex-wrap items-baseline gap-2">
                     <CapsuleHeader title="Burst count bands" />
@@ -350,11 +356,11 @@ const counterSegments = computed((): string[] => {
             </div>
             </div>
 
-            <div class="@5xl:col-span-4">
+            <div class="@3xl:col-span-3 @5xl:col-span-4">
                 <SpiritBurstRoster :enabled="composesBursts" :roster="props.scenario.team.roster" />
             </div>
 
-            <div class="@5xl:col-span-4">
+            <div class="@3xl:col-span-3 @5xl:col-span-4">
             <div
                 v-if="props.scenario.team.special_training.energy_penalty_removed !== null
                     || props.scenario.team.special_training.wit_burst_energy_bonus !== null"
@@ -378,11 +384,11 @@ const counterSegments = computed((): string[] => {
                  them: the board draws the team race's five categories, which appear nowhere else on the
                  screen, and the shape block states the cadence and the published reward. Neither adds
                  a focusable control, which is what the panel's own keyboard case pins. -->
-            <div class="@3xl:col-span-2 @5xl:col-span-8">
+            <div class="@3xl:col-span-3 @5xl:col-span-4">
                 <UnityCupTeamBoard v-if="props.scenario.team.coverage !== null" :coverage="props.scenario.team.coverage" />
             </div>
 
-            <div class="@3xl:col-span-2 @5xl:col-span-12">
+            <div class="@3xl:col-span-6 @5xl:col-span-12">
                 <UnityCupTournamentReadiness
                     v-if="props.scenario.team.tournament !== null"
                     :tournament="props.scenario.team.tournament"
