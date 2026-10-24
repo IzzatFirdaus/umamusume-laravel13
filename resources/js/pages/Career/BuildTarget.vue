@@ -440,14 +440,8 @@ function removeAt(index: number): void {
                     class="mt-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-ink"
                 >{{ errorOf('style') }}</p>
 
-                <!-- The design brief names six purposes and the stored enum holds four: one design
-                     name maps onto a stored case (per the enum's own docblock), and one more this
-                     tool does not record. The gap is stated rather than filled with an option the
-                     write would refuse. -->
-                <p class="mt-3 text-xs text-ink-muted">
-                    The design also names a fifth purpose, Competitive Build, which this tool does not
-                    record yet.
-                </p>
+                <!-- The design brief names six purposes and the stored enum holds four. The gap
+                     is stated rather than filled with an option the write would refuse. -->
             </fieldset>
 
             <fieldset class="rounded-lg border border-rule bg-panel p-4">

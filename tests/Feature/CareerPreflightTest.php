@@ -373,6 +373,32 @@ it('refuses a draft with no trainee, creating nothing', function (): void {
     expect(TrainingRun::count())->toBe($before);
 });
 
+it('renders a heading whose count matches the rendered step rows', function (): void {
+    $fixture = preflightFixture();
+    session([SetupDraft::SESSION_KEY => preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'])]);
+
+    test()->get(route('career.preflight'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/Preflight')
+            // The checklist renders one row per build section (scenario, trainee, target, legacy)
+            // plus the deck section, for a total of five.
+            ->has('contract.build', 4)
+            ->has('contract.deck.slots', 6));
+});
+
+it('does not name a purpose the select cannot offer', function (): void {
+    test()->get(route('career.target'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/BuildTarget')
+            ->has('purposeOptions', 4)
+            ->where('purposeOptions.0.label', 'Story Clear')
+            ->where('purposeOptions.1.label', 'Champions Meeting')
+            ->where('purposeOptions.2.label', 'Parent Farming')
+            ->where('purposeOptions.3.label', 'Skill Farming'));
+});
+
 it('survives all three child reruns with every merged key intact on an Inertia JSON PUT', function (): void {
     // The exact attack surface that once produced `"" is not a valid backing value for RunStatus`:
     // an Inertia JSON PUT whose child FormRequests hydrated via createFrom() shared the parent's

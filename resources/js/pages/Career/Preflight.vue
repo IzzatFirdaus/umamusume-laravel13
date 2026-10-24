@@ -248,7 +248,7 @@ const attention = computed((): string => {
     const count = missing.value.length;
 
     if (count === 0) {
-        return 'All five entered steps are recorded.';
+        return `All ${rows.value.length} entered steps are recorded.`;
     }
 
     return count === 1 ? '1 step needs attention' : `${count} steps need attention`;
@@ -316,7 +316,7 @@ const start = (): void => {
 
         <section class="mx-auto w-full max-w-4xl" aria-labelledby="checklist-heading">
             <h2 id="checklist-heading" class="text-lg font-semibold text-ink-strong">
-                The five entered steps
+                The {{ rows.length }} entered steps
             </h2>
             <p role="status" class="mt-1 text-sm text-ink">{{ attention }}</p>
 
