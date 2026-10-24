@@ -695,3 +695,17 @@ test('names no component by the retired name its rename replaced', async () => {
     // perfectly clean tree while reporting a message that reads like a survivor list. Caught by running it.
     expect(offenders, `the retired name survives in ${offenders.join(', ')}`).toEqual([]);
 });
+
+test('names the fan ladder threshold beside the gap', async ({ page }) => {
+    // A-0.10 (Group A): the fan line names the class and the gap, and the threshold the gap points at.
+    // `FanLadder::fromValue()` already ships `nextThreshold`; this case proves the renderer prints it
+    // rather than leaving the reader to know 240,000 from outside (walk-1 Screen 8, walk-4 S11).
+    const cockpitUrl = await newCareer(page);
+    const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+    await recordTurns(page, runId, 1, { fans: '209245' });
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const state = page.getByRole('region', { name: 'Stats and state' });
+    await expect(state.getByText(/Star · 30,755 to 240,000/)).toBeVisible();
+});

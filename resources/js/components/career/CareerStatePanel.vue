@@ -72,16 +72,18 @@ const growthFor = (stat: Stat): number | null => {
     return typeof value === 'number' ? value : null;
 };
 
-// `Star · 30,755 to next`, the ladder's own two facts in one suffix; null when the ladder does not
-// resolve, so the row prints the bare count rather than a class nobody sourced (D-220).
+// `Star · 30,755 to 240,000`: the ladder's own three facts. The gap and the threshold are shipped
+// together by `FanLadder::fromValue()` so they cannot come from different bands; the row names the
+// threshold so a reader does not need to know 240,000 from outside (A-0.10, walk-1 Screen 8). Null when
+// the ladder does not resolve, so the row prints the bare count rather than a class nobody sourced (D-220).
 const fanSuffix = computed((): string | null => {
     const ladder = props.fanLadder;
 
-    if (ladder === null || ladder === undefined || ladder.class === null || ladder.gap === null) {
+    if (ladder === null || ladder === undefined || ladder.class === null || ladder.gap === null || ladder.nextThreshold === null) {
         return null;
     }
 
-    return `${ladder.class} · ${group(ladder.gap)} to next`;
+    return `${ladder.class} · ${group(ladder.gap)} to ${group(ladder.nextThreshold)}`;
 });
 
 const currentHint = (stat: Stat): string => (stat.current === null ? 'No turn has recorded this stat yet.' : `Entered: ${group(stat.current)}.`);
