@@ -175,3 +175,19 @@ All entries live at the end of `KNOWN-ISSUES.md`.
   commit and passes at its own, plus a browser case.
 - Phase 4: every non-landed item is filed as a `KI-nn` entry.
 - Phase 5: CHANGELOG entry, pass report.
+## Addendum, 2026-10-24 — A-0.12..A-0.14 (audit cross-check)
+
+Three items the original audit's `A-0.1..A-0.11` / `B-0.1..B-0.8` rows did not cover, found by
+cross-checking the walk registers against HEAD `04c16a22`. All three are `needs-schema`; none is `openable`,
+so none opens a slice in this pass.
+
+| Item | State | Where |
+|---|---|---|
+| A-0.12 training-tile banner + card avatars | needs-schema | `KI-124` |
+| A-0.13 20/20 members counter | needs-schema | `KI-125` |
+| A-0.14 guest skill lists | needs-schema | `KI-126` |
+
+A fourth candidate — the green-factor unique-skill spark — was verified and does not reproduce: the typed
+Skill target select already ships every green factor name (`LegacySelectController.php:127-131`), so a
+Green / Skill / unique-name / star spark is writable through the UI. No row and no KI is filed for it; the
+verdict is recorded in the audit's addendum section.
