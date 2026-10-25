@@ -82,8 +82,12 @@ const heldTitle = 'Counted from this run\'s recorded purchases, against the cap 
             >
                 <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                     <span class="text-sm font-semibold text-ink-strong">{{ item.name }}</span>
-                    <span class="font-mono text-xs tabular-nums text-ink">
-                        {{ item.held }} of {{ item.cap }}
+                    <span class="flex flex-wrap items-baseline gap-x-2">
+                        <!-- A sum over stored purchases is assembled, not a stored fact (`ADR-0020` §2). -->
+                        <ProvenanceBadge state="calculated" :title="heldTitle" />
+                        <span class="font-mono text-xs tabular-nums text-ink">
+                            {{ item.held }} of {{ item.cap }}
+                        </span>
                     </span>
                 </div>
 

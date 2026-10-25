@@ -72,6 +72,8 @@ const emit = defineEmits<{
     /** The Trainer asked to replace this slot's card. The page turns it into a query-string change. */
     (event: 'replace', position: number, opener: Event): void;
     (event: 'ownership', position: number, ownership: 'OWNED' | 'RENTED'): void;
+    /** The Trainer asked to empty this slot; the page writes the blank position. */
+    (event: 'clear', position: number): void;
 }>();
 
 /**
@@ -112,7 +114,7 @@ function focusRow(): void {
             <!-- An empty slot is a deliberate statement a Trainer makes, so it reads as a statement
                  rather than as a blank control: the card is not equipped, and here is where to put it. -->
             <p v-if="!card" class="text-[var(--color-ink-muted)]">
-                Empty.
+                Not equipped.
             </p>
 
             <template v-else>
@@ -202,6 +204,16 @@ function focusRow(): void {
             >
                 {{ card ? 'Replace' : 'Choose a card' }}
                 <span class="sr-only"> in {{ label }}</span>
+            </button>
+
+            <button
+                v-if="card"
+                type="button"
+                class="min-h-11 rounded-[var(--radius-pill)] border border-[var(--color-rule)] px-3 text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-sunken)] focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
+                :aria-label="`Set ${label} to not equipped`"
+                @click="emit('clear', position)"
+            >
+                Remove
             </button>
         </div>
 

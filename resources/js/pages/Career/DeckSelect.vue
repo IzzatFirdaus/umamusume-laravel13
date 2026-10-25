@@ -239,9 +239,11 @@ onMounted(() => {
 });
 
 /** A clear is a write of its own: the slot returns to its named empty text and the flag to `N/A`. */
-function clearSlot(): void {
-    form.deck[filling.value] = { support_card_id: '', ownership: '' };
-    save();
+function clearSlot(position: number): void {
+    filling.value = position;
+    form.deck_slot = position;
+    form.deck[position] = { support_card_id: '', ownership: '' };
+    save(position);
 }
 
 /**
@@ -328,6 +330,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                         :filling-slot="filling"
                         @replace="replace"
                         @ownership="setOwnership"
+                        @clear="clearSlot"
                     />
                 </ul>
 

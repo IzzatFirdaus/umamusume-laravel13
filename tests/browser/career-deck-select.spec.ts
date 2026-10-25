@@ -21,19 +21,24 @@ test('lays the six slots out as three columns, measured', async ({ page }) => {
     const measured = await grid.evaluate((el) => {
         const style = getComputedStyle(el);
         const children = Array.from(el.children) as HTMLElement[];
-        const firstRowTop = children[0]?.getBoundingClientRect().top;
+        // Column membership by left offset, not by row: `.card + .card` in `app.css` adds a 14px
+        // margin-top to every child after the first, so equal `top` put one slot per row and counted 1
+        // against a correct three-column grid. Six slots over three distinct left offsets is two full
+        // rows of three, which is the layout this case names.
+        const lefts = children.map((child) => Math.round(child.getBoundingClientRect().left));
 
         return {
             display: style.display,
             columns: style.gridTemplateColumns.split(' ').filter(Boolean).length,
-            perRow: children.filter((child) => child.getBoundingClientRect().top === firstRowTop).length,
+            tracks: new Set(lefts).size,
             children: children.length,
         };
     });
 
     expect(measured.display, 'the slot list is a grid').toBe('grid');
     expect(measured.children, 'six slots').toBe(6);
-    expect(measured.perRow, 'three slots to a row at desktop width').toBe(3);
+    expect(measured.columns, 'three tracks at desktop width').toBe(3);
+    expect(measured.tracks, 'the six slots stand on three distinct columns').toBe(3);
 });
 
 test('opens the picker as a modal dialog and closes it with Escape', async ({ page }) => {

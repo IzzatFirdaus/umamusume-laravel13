@@ -316,6 +316,7 @@ function save(): void {
                         :error="slotError(slot.position)"
                         @replace="startReplace"
                         @ownership="(position, value) => (form.deck[position].ownership = value)"
+                        @clear="clearSlot"
                     />
                 </ul>
 
