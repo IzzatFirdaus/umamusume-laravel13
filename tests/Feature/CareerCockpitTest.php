@@ -875,3 +875,59 @@ it('does not hand a re-logged turn the failed chip of the turn that used the num
 
     expect(TurnEvent::query()->where('training_run_id', $run->id)->where('turn', 5)->count())->toBe(0);
 });
+
+/*
+ * R4-01 / R4-02, the Cockpit half. `TrainingRunController::index()` ships the run's `id` and the
+ * Careers row prints it, but no career screen names the run: `CareerSectionNav` prints the trainee,
+ * the scenario, the status and the position, and the id lived only in the URL. Two careers of Rice
+ * Shower in one scenario were therefore indistinguishable once a Trainer was inside either of them,
+ * which is exactly the walk-4 finding (E-11).
+ *
+ * The nav already derives the id from `runUrl` for its run-scoped Legacy href, so this is one
+ * rendering change and no payload change. The assertion is on the rendered source because the header
+ * is markup the Inertia props cannot prove: `run.id` in the payload was never the missing part.
+ */
+it('names the run in the career header, not only in the URL', function (): void {
+    $nav = (string) file_get_contents(base_path('resources/js/components/career/CareerSectionNav.vue'));
+
+    // The format is the Careers row's and the Legacy builder's: `#{{ id }}`, one spelling for one fact.
+    expect($nav)->toContain('Run #{{ runId }}')
+        // Beside the trainee, in the strip's first line, not buried in the nav row below it.
+        ->and($nav)->toContain('{{ props.trainee }}');
+
+    // The id lives inside the identity paragraph that also prints the trainee, so it is header
+    // furniture rather than a line under the nine tabs. Bounded by markup, not by a byte count: the
+    // trainee line is the `card` section's first <p>, and it closes before the nav element opens.
+    $headerAt = strpos($nav, 'aria-label="Career"');
+    $navAt = strpos($nav, 'aria-label="Career sections"');
+    $idAt = strpos($nav, 'Run #{{ runId }}');
+
+    expect($headerAt)->not->toBeFalse()
+        ->and($navAt)->not->toBeFalse()
+        ->and($idAt)->not->toBeFalse()
+        ->and((int) $idAt)->toBeGreaterThan((int) $headerAt)
+        ->and((int) $idAt)->toBeLessThan((int) $navAt);
+});
+
+it('gives two careers of one trainee two different header identities', function (): void {
+    $trainee = Umamusume::factory()->create(['name' => 'Rice Shower']);
+
+    $first = TrainingRun::factory()->create([
+        'umamusume_id' => $trainee->id,
+        'scenario' => 'unity_cup',
+        'status' => RunStatus::Active,
+    ]);
+    $second = TrainingRun::factory()->create([
+        'umamusume_id' => $trainee->id,
+        'scenario' => 'unity_cup',
+        'status' => RunStatus::Active,
+    ]);
+
+    // The two runs differ only by id, which is the whole point: the header must be able to say so.
+    $this->get(route('runs.cockpit', $first))->assertOk();
+    $this->get(route('runs.cockpit', $second))->assertOk();
+
+    expect($first->id)->not->toBe($second->id)
+        // The id the header prints is derived from `runUrl`, so the two URLs must not collapse to one.
+        ->and(route('runs.cockpit', $first))->not->toBe(route('runs.cockpit', $second));
+});

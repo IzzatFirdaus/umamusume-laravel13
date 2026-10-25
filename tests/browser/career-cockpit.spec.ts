@@ -714,7 +714,7 @@ test('names the fan ladder threshold beside the gap', async ({ page }) => {
 
 test('shows the cap composition panel and its non-reconciliation note', async ({ page }) => {
     // A-0.1 (Group A): the caps the run states sit beside the blue sparks its Legacy carries, and the
-    // panel states they do not reconcile (§1.2, the source's own open question). This case proves the
+    // panel states they do not reconcile (ï¿½1.2, the source's own open question). This case proves the
     // section renders; the sparks themselves are pinned by `CockpitCapCompositionTest`.
     await newCareer(page);
     await page.locator('#app > *').first().waitFor();
@@ -738,7 +738,7 @@ test('shows the derived team roster from the deck cards', async ({ page }) => {
 
 test('shows the sourced mood effect headline beside the mood', async ({ page }) => {
     // A-0.11 (Group A): the Mood Effect headline (+20% training, +4% running) renders beside the mood
-    // tier, sourced from config('uma.mood_effect') (UMAMUSUME_REFERENCE.md §1.1.6).
+    // tier, sourced from config('uma.mood_effect') (UMAMUSUME_REFERENCE.md ï¿½1.1.6).
     const cockpitUrl = await newCareer(page);
     const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
     await recordTurns(page, runId, 1, { mood: 'GREAT' });
@@ -747,4 +747,25 @@ test('shows the sourced mood effect headline beside the mood', async ({ page }) 
 
     const state = page.getByRole('region', { name: 'Stats and state' });
     await expect(state.getByText(/training \+20%, running \+4%/)).toBeVisible();
+});
+
+test('names the run in the career header', async ({ page }) => {
+    // R4-01/R4-02: the id lived only in the URL, so two careers of one trainee in one scenario were
+    // two identical headers. The strip prints it beside the trainee, in the same `Run #N` spelling the
+    // Legacy builder uses, and this case is the one that proves it reached the rendered DOM rather
+    // than only the component source.
+    await openCockpit(page);
+
+    const id = page.url().match(/\/training-runs\/(\d+)\/cockpit$/)?.[1] ?? '';
+    expect(id, 'the cockpit URL names no run id').not.toBe('');
+
+    const career = page.getByRole('region', { name: 'Career', exact: true });
+    await expect(career.getByText(`Run #${id}`, { exact: true })).toBeVisible();
+
+    // It is header furniture, not a line under the tabs: the id sits above the section nav.
+    const identityBox = await career.getByText(`Run #${id}`, { exact: true }).boundingBox();
+    const navBox = await page.getByRole('navigation', { name: 'Career sections' }).boundingBox();
+    expect(identityBox, 'the run id is not rendered').not.toBeNull();
+    expect(navBox, 'the section nav is not rendered').not.toBeNull();
+    expect(identityBox!.y, 'the run id renders below the section nav').toBeLessThan(navBox!.y);
 });

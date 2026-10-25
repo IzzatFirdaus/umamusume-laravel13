@@ -159,6 +159,10 @@ const showTraineeJa = computed<boolean>(
                 <span v-if="showTraineeJa" lang="ja" class="ml-2 text-sm font-normal text-ink-muted">
                     {{ props.traineeJa }}
                 </span>
+                <!-- R4-01/R4-02: the run is named by its id, the same spelling the Careers row and the
+                     Legacy builder use. Two careers of one trainee in one scenario were two identical
+                     headers before this line, and the id they differ by lived only in the URL. -->
+                <span v-if="runId" class="ml-2 font-mono text-sm font-normal text-ink-muted">Run #{{ runId }}</span>
             </p>
             <p class="flex flex-wrap items-baseline gap-x-2 text-sm text-ink-muted">
                 <span>{{ props.scenarioLabel }}</span>
