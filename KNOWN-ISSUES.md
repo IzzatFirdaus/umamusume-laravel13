@@ -3621,3 +3621,46 @@ compose it.
 
 Recommended: compose. The components exist, are specified, and three of the five carry shipped content
 that no other surface renders.
+
+### KI-131 Two visible "Legacy"/"Deck" links on the run deck share an accessible name at mobile width - FILED 2026-10-25 (R4-29 residual)
+**Status: OPEN - openable. Copy-only; no schema, no ruling, no new dependency.**
+**Current state.** `/training-runs/{run}/deck` renders two navigation regions: `AppLayout`'s global
+bar (`resources/js/layouts/AppLayout.vue`) and `CareerSectionNav`'s career tab row
+(`resources/js/components/career/CareerSectionNav.vue`). At desktop the global entry prints its
+`label`, which is `Legacy Lab`, so the two are already distinguishable. **At mobile width the global
+bar prints `mobileLabel` instead** (`AppLayout.vue:409,412,415` render
+`{{ item.mobileLabel ?? item.label }}`), and that value is `Legacy` - the same visible string the
+career tab prints. `Support Cards` has `mobileLabel: 'Deck'`, which collides the same way with the
+career nav's `Deck` tab. Neither link carries an `aria-label`, so visible text is the accessible name
+and a screen reader announces the same word twice with no way to tell which one keeps the Trainer
+inside the run. The collision is therefore **mobile-width only** at the visible-text level; at desktop
+the two `aria-label` regions (`Career` and `Career sections`) already disambiguate for a reader who
+navigates by region.
+**Evidence.**
+- `resources/js/layouts/AppLayout.vue:133` - `{ label: 'Legacy Lab', mobileLabel: 'Legacy', to: '/legacy', inBar: true }`
+- `resources/js/layouts/AppLayout.vue:135` - `{ label: 'Support Cards', mobileLabel: 'Deck', to: '/support-cards', inBar: true }`
+- `resources/js/layouts/AppLayout.vue:409,412,415` - the `mobileLabel` fallback is VISIBLE text, not an `aria-label`
+- `resources/js/layouts/AppLayout.vue:130-137` - the only four `inBar: true` entries are Home, Career, Legacy and Deck; the two that collide are the last two
+- `resources/js/components/career/CareerSectionNav.vue:77-78` - career tabs `Legacy` (run-scoped, `/legacy/<id>`) and `Deck`
+- `resources/js/components/career/CareerSectionNav.vue` template - neither tab sets an `aria-label`
+- Walk 4 `R4-29` originally reported the career Legacy as pointing at `/legacy`. That cause was a
+  misread and is closed at `daae65dd`: the career link IS run-scoped, and the auditor read the global
+  one. What that correction explicitly did **not** claim to fix is the shared visible name.
+- `tests/browser/support-deck.spec.ts`, case `carries the career nav with a run-scoped Legacy link`
+  (`7722165d`), pins the career link's `href` and `aria-current` and addresses the nav region by name,
+  so it does not distinguish the two links by accessible name.
+**Not a regression.** The collision predates the 2.0 UI pass; no commit introduced it, and the desktop
+label has read `Legacy Lab` throughout.
+**Direction options, measured against the reads above.**
+1. Change `AppLayout`'s label to `Legacy Lab` - already true, and it only helps desktop because the
+   mobile bar prints `mobileLabel`. A variant that also sets `mobileLabel: 'Legacy Lab'` would lose the
+   short-form benefit on a narrow bar.
+2. Change the career tab's label to `This Run's Legacy` - fixes the collision at every width, at the
+   cost of a longer string in a nine-tab row with a fixed visual budget.
+3. Add an `aria-label` to the career tab only (`This run's Legacy`, `This run's Deck`) - fixes the
+   accessible-name collision at every width, leaves visible text and the tab row's width untouched.
+   **Recommended: smallest surface.** The visible short label then stays honest on mobile, where the
+   bar needs it.
+**Why this is filed rather than fixed.** The sibling `Deck` collision was not in the original finding,
+and the three options trade a visible-string change against an invisible one. That is an owner call
+about the career vocabulary (`lang/en/uma.php` owns displayed words), not a drive-by edit.
