@@ -3399,7 +3399,7 @@ would have caught it, and no such gate exists.
 
 **Current state.** `ADR-0014:8` states the reached effect values are still unrecorded and the deck analysis uses catalog anchors. A per-run reached value needs a card level first (A-0.5) plus an effect lookup.
 
-**Ruling.** A-0.4 ruling (2026-10-24): deferred to A-0.5. See `docs/proposals/group-ab-rulings-owed.md#a-04`.
+**Ruling.** A-0.4 ruling (2026-10-24): deferred to A-0.5. See `docs/research-scratch/PLANS-AND-BRIEFS.md`, section `## group-ab-rulings-owed.md`, item `A-0.4`.
 
 **What closure would need.** The A-0.5 per-run `deck_slots.card_level` column and an ADR, then a derivation from level to effect values.
 
@@ -3413,7 +3413,7 @@ would have caught it, and no such gate exists.
 
 **Current state.** `ADR-0014:24` declines the collection half (`user_support_cards` - level, breaks, perk) as the §6.9-cut feature; `ADR-0014:8` leaves "card levels and limit breaks are still unrecorded" open. `deck_slots` carries `support_card_id`, `slot_position`, `ownership` and no level column.
 
-**Ruling.** A-0.5 ruling (2026-10-24): accepted as a per-run `deck_slots.card_level` column, distinct from collection ownership. The ADR is the first artefact; the slice is its own small pass. See `docs/proposals/group-ab-rulings-owed.md#a-05`.
+**Ruling.** A-0.5 ruling (2026-10-24): accepted as a per-run `deck_slots.card_level` column, distinct from collection ownership. The ADR is the first artefact; the slice is its own small pass. See `docs/research-scratch/PLANS-AND-BRIEFS.md`, section `## group-ab-rulings-owed.md`, item `A-0.5`.
 
 **What closure would need.** A one-page ADR saying a per-run card level is stored on `deck_slots` and does not contradict ADR-0014's decline of `user_support_cards`, then the migration and the deck surfaces.
 
@@ -3425,7 +3425,7 @@ would have caught it, and no such gate exists.
 
 **Status: OPEN - blocked: ADR.** A team-grades column is a migration.
 
-**Current state.** `TeamPanelBuilder::teamSection()` hard-codes `grade => null` for every stat (`app/Services/Career/TeamPanelBuilder.php:501-506`); `UnityCupPanel.vue` prints the five-row absence. Ruling B-0.5 (2026-10-24): accepted; ADR first. See `docs/proposals/group-ab-rulings-owed.md#b-05`.
+**Current state.** `TeamPanelBuilder::teamSection()` hard-codes `grade => null` for every stat (`app/Services/Career/TeamPanelBuilder.php:501-506`); `UnityCupPanel.vue` prints the five-row absence. Ruling B-0.5 (2026-10-24): accepted; ADR first. See `docs/research-scratch/PLANS-AND-BRIEFS.md`, section `## group-ab-rulings-owed.md`, item `B-0.5`.
 
 **What closure would need.** An ADR, a `team_stat_grades` column (or table), the digest line, and the editor field.
 
@@ -3439,7 +3439,7 @@ would have caught it, and no such gate exists.
 
 **Status: OPEN - blocked: ADR.** A Spirit value is a migration.
 
-**Current state.** `UnityCupPanel.vue:231-241` mounts `ResourceMeter` with `value: null, max: null` and the absence sentence; no column or payload reader. Ruling B-0.6 (2026-10-24): accepted; ADR first. See `docs/proposals/group-ab-rulings-owed.md#b-06`.
+**Current state.** `UnityCupPanel.vue:231-241` mounts `ResourceMeter` with `value: null, max: null` and the absence sentence; no column or payload reader. Ruling B-0.6 (2026-10-24): accepted; ADR first. See `docs/research-scratch/PLANS-AND-BRIEFS.md`, section `## group-ab-rulings-owed.md`, item `B-0.6`.
 
 **What closure would need.** An ADR, a `current_spirit` column, the digest line, and a writer.
 
@@ -3453,7 +3453,7 @@ would have caught it, and no such gate exists.
 
 **Status: OPEN - blocked: ADR.** Skill levels are a migration.
 
-**Current state.** `SkillsPlannerController` carries acquisition state only (`app/Http/Controllers/Career/SkillsPlannerController.php:216-228`); no level column exists and `SkillAcquisition` has no level member. Ruling B-0.7 (2026-10-24): accepted; ADR first. See `docs/proposals/group-ab-rulings-owed.md#b-07`.
+**Current state.** `SkillsPlannerController` carries acquisition state only (`app/Http/Controllers/Career/SkillsPlannerController.php:216-228`); no level column exists and `SkillAcquisition` has no level member. Ruling B-0.7 (2026-10-24): accepted; ADR first. See `docs/research-scratch/PLANS-AND-BRIEFS.md`, section `## group-ab-rulings-owed.md`, item `B-0.7`.
 
 **What closure would need.** An ADR, a `skill_levels` table (or per-run level column), the digest line, and the planner field.
 
@@ -3465,7 +3465,7 @@ would have caught it, and no such gate exists.
 
 **Status: CLOSED - ruled out.** A loopback, single-Trainer tool has no second account identity to record.
 
-**Current state.** `deck_slots.ownership` (migration `2026_10_09_120000_add_ownership_to_deck_slots_table.php:24`) records `OWNED` / `RENTED` / nothing - the borrowed flag, which is the distinction that matters. Ruling B-0.8 (2026-10-24): will not add. See `docs/proposals/group-ab-rulings-owed.md#b-08`.
+**Current state.** `deck_slots.ownership` (migration `2026_10_09_120000_add_ownership_to_deck_slots_table.php:24`) records `OWNED` / `RENTED` / nothing - the borrowed flag, which is the distinction that matters. Ruling B-0.8 (2026-10-24): will not add. See `docs/research-scratch/PLANS-AND-BRIEFS.md`, section `## group-ab-rulings-owed.md`, item `B-0.8`.
 
 **What this does not cover.** If the tool ever supported more than one Trainer, the account identity would become a real column; that is out of scope by design.
 

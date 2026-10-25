@@ -99,7 +99,7 @@ The three addendum items (`A-0.12`, `A-0.13`, `A-0.14`) and the four prior `bloc
 
 ## Links
 
-- Audit rows: `docs/audits/group-ab-audit-2026-10-24.md` — `A-0.4`, `A-0.5`, `B-0.5`, `B-0.6`, `B-0.7`, and the 2026-10-24 addendum's `A-0.12`, `A-0.13`, `A-0.14`
+- Audit rows: `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## group-ab-audit-2026-10-24.md` — `A-0.4`, `A-0.5`, `B-0.5`, `B-0.6`, `B-0.7`, and the 2026-10-24 addendum's `A-0.12`, `A-0.13`, `A-0.14`
 - Defect register: `KNOWN-ISSUES.md` — `KI-116` through `KI-126`; `KI-115` for the aptitude ruling
 - Source: `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md` §1.3, §1.4, §1.7, §1.8, §1.9
 - PRD: `PRD.md` — `US-3`, `US-4`, `US-12`; `FR-C-1`, `FR-C-2`, `FR-C-3`, `FR-C-6`; §6.9, §6.11
@@ -110,8 +110,8 @@ The three addendum items (`A-0.12`, `A-0.13`, `A-0.14`) and the four prior `bloc
 - 2026-10-24 · **drafted** — `Proposed` by the Group A/B audit reconciliation pass. Authorises the eight per-run measurement facts as storage and builds none of them. The collection decline, the catalogue-aptitude rule, the R37 hint-pool cut, the held win-probability question and the §6.11 hold are all left standing; none of the ADRs this document references was edited, and no PRD requirement was re-typed.
 
 - 2026-10-25 · **amended** (`amended-by: 2026-10-25 consolidation reconciliation`) — three disagreements
-  surfaced against `docs/proposals/remaining-work-roadmap.md` by
-  `docs/proposals/group-ab-consolidated-plan.md`, each ruled in this ADR's favour, plus one correction to
+  surfaced against `docs/research-scratch/PROCESS-PLANS.md`, section `## remaining-work-roadmap.md` by
+  `docs/research-scratch/PROCESS-PLANS.md`, section `## group-ab-consolidated-plan.md`, each ruled in this ADR's favour, plus one correction to
   this ADR's own A-0.4 reasoning. Status stays `Proposed`.
 
 - 2026-10-25 · **accepted** (owner ruling R4) — Status flipped to accepted 2026-10-25 by owner ruling R4.
@@ -123,8 +123,8 @@ The three addendum items (`A-0.12`, `A-0.13`, `A-0.14`) and the four prior `bloc
 
 ## Dated note · 2026-10-25 · consolidated-plan reconciliation
 
-A consolidation pass (`docs/proposals/group-ab-consolidated-plan.md`) surfaced three disagreements between
-this ADR and `docs/proposals/remaining-work-roadmap.md`. All three are ruled in this ADR's favour. The
+A consolidation pass (`docs/research-scratch/PROCESS-PLANS.md`, section `## group-ab-consolidated-plan.md`) surfaced three disagreements between
+this ADR and `docs/research-scratch/PROCESS-PLANS.md`, section `## remaining-work-roadmap.md`. All three are ruled in this ADR's favour. The
 roadmap rows are left as written; this note is the correction.
 
 1. **A-0.4's storage shape.** This ADR (D2): nothing stored, derived from `deck_slots.card_level`. Roadmap

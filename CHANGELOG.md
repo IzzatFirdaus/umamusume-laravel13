@@ -274,11 +274,11 @@ not bind; the label is applied because the owner directed this pass to ship as i
 - Seven `.ai/skills/*/SKILL.md` files gained the trailing newline `code-style.md` §Formatting Standards
   requires. Content is unchanged, and the copies now match `.agents/skills/` byte for byte.
 
-- `SKILL.md` renamed to `SKILL_REGISTRY.md` 2026-10-19 and restructured: frontmatter removed (a
+- `SKILL.md` renamed to `SKILL_REGISTRY.md` 2026-10-19 and restructured: frontmatter removed (a <!-- census: quoted-original -->
   repository root is not one of the five skill scopes, so the file never loaded as a skill), body cut
   to the six-section skeleton (run first, reading the output, coverage gaps, installed/scanned/
   available, violations and `--repair`, provenance), and the seven-row coverage table moved to
-  `coverage.md`. History moved out with it: the 2026-10-02 and 2026-10-11 rewrite record, the pinned
+  `coverage.md`. History moved out with it: the 2026-10-02 and 2026-10-11 rewrite record, the pinned <!-- census: quoted-original -->
   example totals it once carried as warnings (each stale within days of being written - deleted
   rather than relocated, git history keeps them), and the rebuttal paragraphs against `AGENTS.md` §3
   and `GOVERNANCE.md` §6, replaced in the file by one provenance line pointing at `AGENTS.md` §2 (the

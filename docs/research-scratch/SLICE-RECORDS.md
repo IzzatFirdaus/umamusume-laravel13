@@ -9959,7 +9959,7 @@ labels its output "measured at HEAD" while measuring the working tree, and its `
 whatever it finds, so it is a diagnostic and not a gate.
 
 AGENTS.md was the dispatch's first choice for an agent-facing copy. It was peer-dirty at dispatch open -
-the peer was renaming SKILL.md to `SKILL_REGISTRY.md` - and became clean mid-dispatch when the peer
+the peer was renaming SKILL.md to `SKILL_REGISTRY.md` - and became clean mid-dispatch when the peer <!-- census: quoted-original -->
 committed `8e30714`. The copy was still not added there: the slice's acceptance is met by the README
 testing section, and adding a second copy after the hard stop fired would have expanded scope. Recorded
 here rather than silently skipped.

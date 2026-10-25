@@ -817,7 +817,7 @@ stale-spec pins, not component defects: R4-24's removed copy, the per-slot picke
 "Not equipped" copy. Four are real component defects (BuildTarget summary gate, SupportSlot copy +
 Remove control, TrackblazerResourceLedger badge). The "all 46 are real rendering defects" claim is
 corrected to "at least 13 of the 28 are stale assertions." See
-`docs/audits/phase-8.1-browser-triage-2026-10-25.md`.
+`docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## phase-8.1-browser-triage-2026-10-25.md`.
 
 **Artifacts.** `.scratch-uma/p1/head-fresh.log`, `base-fresh.log`, `head-results-fresh.jsonl`,
 `base-results-fresh.jsonl`, `reconciled.jsonl`, `head-errors.jsonl`.

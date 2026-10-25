@@ -24,11 +24,13 @@ binding text is section 7 above. The gate precedence chain is unchanged (R-6 sti
 first); it resolves through the stub. The `AGENTS.md` line "Read `CONSTRAINTS.md` before writing <!-- census: quoted-original -->
 code" reaches the rules one hop later than before and reaches all of them.
 
+- **Round 21 (2026-10-26, owner-ordered): the two root skill-registry files.** `SKILL_REGISTRY.md` (108 lines, 82/82 verified) and `coverage.md` (24 lines, 20/20 verified) were folded in as the sections `## SKILL_REGISTRY.md` and `## coverage.md` at the end of this file and deleted from the repository root, which is where §File discipline's standing-set table had never listed them. This master already owned the subject: §6 and the authority table name the skill registry, and both pointers now resolve to the sections here. `AGENTS.md` §3 and §14 were corrected forward in the same pass. <!-- census: quoted-original -->
+
 ---
 
 ## SOURCE-OF-TRUTH.md
 
-**Governance infrastructure for the Umamusume Trainer Desk repository.** This document consolidates the binding rules from `PRD.md`, `ARCHITECTURE.md`, `CLAUDE.md`, the root quality bar (this document's section "CONSTRAINTS.md (root quality bar, C-1 to C-9)"), `AGENTS.md`, `UMAMUSUME_REFERENCE.md`, and `SKILL_REGISTRY.md` into a single source of truth for agents and human developers. Violations are hard failures.
+**Governance infrastructure for the Umamusume Trainer Desk repository.** This document consolidates the binding rules from `PRD.md`, `ARCHITECTURE.md`, `CLAUDE.md`, the root quality bar (this document's section "CONSTRAINTS.md (root quality bar, C-1 to C-9)"), `AGENTS.md`, `UMAMUSUME_REFERENCE.md`, and this file's section `## SKILL_REGISTRY.md` into a single source of truth for agents and human developers. Violations are hard failures.
 
 > ### Derivation and regeneration trigger
 >
@@ -47,7 +49,7 @@ code" reaches the rules one hop later than before and reaches all of them.
 > | 10. ADR-0002 row | "Validation bound widened to 0..2000" | Accepted as a decision and **not implemented**: `app/Http/Requests/StoreTurnEntryRequest.php:49-50` still validates `between:0,1200` |
 > | 12. Scenario guides | `docs/scenarios/01`–`08` | Nine files. `09-global-race-calendar.md` is 751 lines and is the read path the race grid and picker now use |
 > | 12. Lore rules | `AGENTS.md` §5, `CONSTRAINTS.md` C-4 | The rules live in `AGENTS.md` §5 "Non-negotiables" and in this file's §2 C-4. `CLAUDE.md` held a lore section until `228011e` (2026-10-04) and has not held the rules since | <!-- census: quoted-original -->
-> | 12. Skill registry | `.agents/skills.json` (machine), `SKILL_REGISTRY.md` (human summary) | `.agents/` is ignored, and root `SKILL_REGISTRY.md` is a hand-maintained pointer |
+> | 12. Skill registry | `.agents/skills.json` (machine), `SKILL_REGISTRY.md` (human summary) | `.agents/` is ignored, and root `SKILL_REGISTRY.md` is a hand-maintained pointer | <!-- census: quoted-original -->
 > | 12. Migrations | `2026_09_26_162814`–`2026_09_27_121500` | 34 migration files are tracked, running to `2026_09_29_182820_create_umamusume_profiles_table.php` |
 >
 > Section 12's "46 conflict rows" claim about `docs/UMAMUSUME_REFERENCE.md` was not verified by the
@@ -246,9 +248,9 @@ Per `UMAMUSUME_REFERENCE.md` source registry (Section 8, preamble):
 
 ### 6. Skill Registry — **POINTER CORRECTED**
 
-The skill registry's machine half is **`.agents/skills.json`**; the hand-maintained pointer is `SKILL_REGISTRY.md`.
+The skill registry's machine half is **`.agents/skills.json`**; the hand-maintained pointer is this file's section `## SKILL_REGISTRY.md`.
 
-- `SKILL_REGISTRY.md` is a human-readable pointer; the machine-readable file is `.agents/skills.json`.
+- This file's section `## SKILL_REGISTRY.md` is the human-readable pointer; the machine-readable file is `.agents/skills.json`.
 - Agents MUST read `skills.json` via the `using-agent-skills` skill (§1.2, §1.4.4 of that skill) to discover and invoke skills.
 - Local project skills at `.agents/skills/` take precedence over global installs when both exist.
 
@@ -439,7 +441,7 @@ covers is filed against the D-rule, so the same defect does not arrive twice und
 | Quality bar            | this file (root bar), `docs/research-scratch/DESIGN-CORPUS.md` (additive)                                                                                        |
 | Agent roles            | `AGENTS.md`                                                                                                                                                   |
 | Lore rules             | `AGENTS.md` §5, this file's §"CONSTRAINTS.md" C-4                                                                                                             |
-| Skill registry         | `.agents/skills.json` (machine), `SKILL_REGISTRY.md` (human summary)                                                                                            |
+| Skill registry         | `.agents/skills.json` (machine), this file's `## SKILL_REGISTRY.md` (human summary)                                                                                            |
 | ADRs                   | `docs/adr/0001`–`0006`                                                                                                                                        |
 | Fetch pipeline         | `app/Services/DataPipeline/` (Contracts, Parsers, PipelineRunner, SourceFetcher, CrossReferenceMatcher, NameNormalizer)                                       |
 | Models                 | `app/Models/{Umamusume,UmamusumeAlias,Skill,TrainingRun,TurnEntry,Scenario,DataSource,MatchCandidate,RunSkill,ScenarioRace,RaceEntry,TurnEvent,Preference}`   |
@@ -1555,3 +1557,163 @@ Source: `docs/research-scratch/DESIGN-CORPUS.md:2501-2503` (originally `docs/res
 3. `vendor/bin/pint --test --format agent <paths>` (the slice's own explicit paths; never `--dirty`)
 4. `vendor/bin/phpstan analyse --no-progress`
 5. `composer lore` and `composer lore-code` (GNU `make` cannot run on this host; KI-4; `make lore` and `make lore-code` run the same greps where GNU make is available — `tools/lore.php` is the runner and `LoreGateParityTest` keeps its list equal to the Makefile's)
+
+---
+
+## SKILL_REGISTRY.md
+
+> **Consolidated 2026-10-26 (Round 21, owner-ordered).** Source: `SKILL_REGISTRY.md` (108 lines), <!-- census: quoted-original -->
+> reproduced verbatim below with headings demoted one level. The original was deleted from the tree
+> after every non-blank line was found here (82/82); the fold, the pointers repointed
+> and the disposition of the originals are recorded in `docs/research-scratch/INDEX.md`
+> section `### Round 21`. Read the sibling sections in these masters rather than looking for the
+> old paths: the group-ab and remaining-work plans are in `PROCESS-PLANS.md`, the two rulings-owed
+> briefs in `PLANS-AND-BRIEFS.md`, the three audits in `AUDIT-AND-VERIFICATION.md`, and the two root skill-registry files in
+> `GOVERNANCE.md`.
+
+## Skill Registry
+
+A pointer, not a roster: the commands below print the inventory, and the prose says which roots they
+reach. No hand-counted table lives here — every figure that appears sits beside the command that
+re-derives it.
+
+### 1. Run first
+
+Run from the repository root so the project scopes resolve: `--project <path>` defaults to the
+current directory, so it does not need spelling out.
+
+```bash
+node "$HOME/.qoder/skills/refresh-skill-registry/scripts/scan-skills.cjs" --names
+node "$HOME/.qoder/skills/refresh-skill-registry/scripts/scan-skills.cjs" --violations
+```
+
+`--names` prints the roster grouped by scope; `--violations` prints only the skills with problems,
+each finding marked `E` error, `W` warning, `i` informational. The summary line reads
+`SKILLS total=N errors=E warnings=W`. Both read each skill's own `SKILL.md` frontmatter from disk, so
+they cannot drift.
+
+Distinct skills rather than directories:
+
+```bash
+node "$HOME/.qoder/skills/refresh-skill-registry/scripts/scan-skills.cjs" --json \
+  | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const a=JSON.parse(s);console.log(a.length+" directories,",new Set(a.map(r=>r.name)).size+" unique names")})'
+```
+
+`--help` is the authority on the remaining flags: `--roster` for names with descriptions, `--json`
+and `--pretty` for machine-readable rows, `--strict` for errors only, `--scope` for a
+comma-separated list of scope ids (for example `--scope user-global,user-qoder` scans both),
+`--desc <n>` and `--limit <n>` for output width, and `--repair` with `--repair --yes` for the one
+frontmatter normalisation described in section 5. Raise `--limit` before reading an empty section as
+"nothing here".
+
+### 2. Reading the output
+
+The five scopes and their roots:
+
+| Scope id | Root |
+|---|---|
+| `user-global` | `~/.claude/skills` |
+| `user-qoder` | `~/.qoder/skills` |
+| `project-agents` | `<repo>/.agents/skills` |
+| `project-qoder` | `<repo>/.qoder/skills` |
+| `plugins` | `<installPath>/skills` for each entry in `~/.qoder/plugins/installed_plugins_v2.json` |
+
+- **Directories vs unique names.** The total counts directories, so a skill installed into two roots
+  is counted twice; the dedupe pipe in section 1 prints both figures side by side.
+- **Symlink counting.** A skill installed as a symlink or junction is counted once, in the root
+  holding the link, and reported as `installer-managed -> <target>`; `--repair` never writes to
+  those.
+- `<repo>/.qoder/skills` does not exist on this tree, so that scope contributes zero here.
+  **A scope printing nothing means an absent root, not an empty machine, and never means "nothing
+  installed."**
+- The scanner total is a **lower bound**: quote it as "the five scopes", never as "all skills
+  installed".
+
+### 3. Coverage gaps
+
+Seven classes of location sit outside the scopes; check each with the command in its row:
+[coverage.md](#coverage-md).
+
+### 4. Installed, scanned, available
+
+Three questions, three instruments:
+
+- **Installed**: a directory holding a `SKILL.md` exists on disk. The commands in [coverage.md](#coverage-md)
+  answer this, root by root.
+- **Scanned**: it lives in one of the five scope roots, so the scanner prints it.
+- **Available**: the agent answering you loaded it. Only that agent's own skill listing says so. Qoder
+  offers a plugin's skills only when the plugin is both listed in
+  `~/.qoder/plugins/installed_plugins_v2.json` and enabled in the user's Qoder settings; Claude Code
+  reads its own plugin config; skills that live only under `~/.agents/skills` are available in this
+  session while invisible to the scanner; `.ai/skills` reach only a host configured to read `.ai/`;
+  `<repo>/.claude/skills` serves only Claude Code run against this repository.
+
+Answer "can agent X use skill Y?" from agent X's own skill listing — a disk listing answers only
+installed and scanned. The reverse also holds: one agent's listing is no inventory either, since a
+skill available to one host can be absent from another on the same machine.
+
+### 5. Frontmatter violations and `--repair`
+
+Run `--violations` first; each finding's `E`/`W`/`i` marker says how badly it breaks a reader.
+
+`--repair` normalises exactly one frontmatter hazard: a `description` that a strict YAML parser can
+misread — a wrapped plain scalar, or an unquoted value containing `": "`. Name problems are reported,
+never rewritten (folder-vs-name is a human call), and plugin cache and installer-managed symlinks are
+never touched. `--repair` is a dry run; `--repair --yes` applies it and backs originals up under
+`~/.qoder/tmp`.
+
+When the scanner itself is in question:
+
+```bash
+node "$HOME/.qoder/skills/refresh-skill-registry/scripts/self-check.cjs"
+```
+
+It asserts 21 expectations over fixture skills and passes on this host.
+
+### 6. Provenance
+
+- Hand-maintained documentation: no generator writes this path; the scanner's boundary is chat
+  output, and it writes no registry file.
+- Not generated, whatever `AGENTS.md` §3 says: that rule is stale — `AGENTS.md` §2 (the code wins)
+  governs, so agents edit this file when its claims go wrong.
+- Renamed from `SKILL.md` with its frontmatter removed (a repository root is not one of the five
+  skill scopes); the rewrite history lives in [CHANGELOG.md](../../CHANGELOG.md), and the coverage table
+  lives in [coverage.md](#coverage-md).
+
+---
+
+## coverage.md
+
+> **Consolidated 2026-10-26 (Round 21, owner-ordered).** Source: `coverage.md` (24 lines), <!-- census: quoted-original -->
+> reproduced verbatim below with headings demoted one level. The original was deleted from the tree
+> after every non-blank line was found here (20/20); the fold, the pointers repointed
+> and the disposition of the originals are recorded in `docs/research-scratch/INDEX.md`
+> section `### Round 21`. Read the sibling sections in these masters rather than looking for the
+> old paths: the group-ab and remaining-work plans are in `PROCESS-PLANS.md`, the two rulings-owed
+> briefs in `PLANS-AND-BRIEFS.md`, the three audits in `AUDIT-AND-VERIFICATION.md`, and the two root skill-registry files in
+> `GOVERNANCE.md`.
+
+## Coverage gaps: locations the skill-registry scanner cannot reach
+
+Seven classes of location sit outside the five scopes; check each with the command in its row. Every
+figure below comes from the command(s) in its own row on this host — re-run that row's commands
+before quoting a number. This file is the repository's versioned copy of the general form installed
+with the `skill-registry` skill; it specialises that form and is authoritative for this repository.
+Derived values are permitted: a figure computed from other figures in its own row is sourced when
+the commands producing its inputs are in that row.
+
+| Root | Why the total misses it | Check it with |
+|---|---|---|
+| `~/.agents/skills` | Not a scope. The agent-neutral store: its 60 `SKILL.md` files are counted by the first command, 47 distinct skills are reached through the links from `~/.qoder/skills`, and the other 13 sit in no scanned root at all | `find "$HOME/.agents/skills" -mindepth 2 -maxdepth 2 -name SKILL.md \| wc -l`<br>`find "$HOME/.qoder/skills" -type l -exec readlink {} \; \| grep -c "^$HOME/.agents/skills/[^/]*$"` |
+| Plugin packages that lay skills out anywhere but `<installPath>/skills` | 6 of the 15 manifest entries contribute zero to the plugin scope, and the cache tree holds 153 `SKILL.md` files against the 48 that scope prints (the cache keeps every downloaded version, so neither figure is a count of installed skills) | `find "$HOME/.qoder/plugins/cache" -name SKILL.md \| wc -l`<br>`node "$HOME/.qoder/skills/refresh-skill-registry/scripts/scan-skills.cjs" --json \| node -e 'const os=require("os");let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const rows=JSON.parse(s);const m=require(os.homedir()+"/.qoder/plugins/installed_plugins_v2.json");const ids=Object.keys(m.plugins).map(k=>k.split("@")[0]);const ps=rows.filter(r=>r.scope==="plugins");const have=new Set(ps.map(r=>r.plugin));console.log(ids.length+" manifest entries, "+ids.filter(i=>!have.has(i)).length+" contributing zero, "+ps.length+" plugin-scope skills")})'` |
+| Other user-level agent roots | The scanner names `~/.claude` and `~/.qoder` only, and these three carry 19 skills between them | `find "$HOME/.codex/skills" "$HOME/.gemini/skills" "$HOME/.opencode/skills" -mindepth 2 -maxdepth 2 -name SKILL.md \| wc -l` |
+| Other repository-level agent roots | Only `<repo>/.agents/skills` and `<repo>/.qoder/skills` are scanned. This repo carries 28 `*/skills` roots, and `<repo>/.claude/skills` holds a skill (`playwright-cli`) that appears in no scanned root and nowhere else within four levels of the repo root | `find . -mindepth 2 -maxdepth 2 -type d -name skills \| wc -l`<br>`find . -maxdepth 4 -type d -name playwright-cli` |
+| `.ai/skills` | The repository's own tracked skills are not a scope; eight here | `git ls-files .ai/skills \| wc -l` |
+| `<repo>/skills/` and `skills-lock.json` | The lock is gitignored and present, and its `skillPath` values point into `skills/`; the `skills/` tree itself is absent, so none of those paths resolve | `git check-ignore -v skills-lock.json`<br>`test -d skills && echo PRESENT || echo ABSENT`<br>`node -e 'const l=require("./skills-lock.json");console.log(Object.values(l.skills).map(s=>s.skillPath).join("\n"))'` |
+| IDE extension bundles | Extensions ship skills to their own hosts; nothing here scans them | `find "$HOME/.vscode/extensions" -maxdepth 4 -name SKILL.md \| wc -l` |
+
+A scanner total is a **lower bound**: quote it as "the five scopes", never as "all skills installed".
+
+WSL is not installed on this host — `wsl --status` reports "The Windows Subsystem for Linux is not
+installed" — so there is no Linux-side root to include or rule out. On a host that has distros, the
+skill roots inside them fall outside every command above as well.

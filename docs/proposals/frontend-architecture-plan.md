@@ -929,7 +929,7 @@ Owner ruling 5: the dataset is a **frozen dated snapshot**, not a second source 
 1. **Date-stamp it.** `assets/data/README.md` and each generated file's header carry the capture date; the set's README states that the numbers are a dated observation and not current.
 2. **Keep `data-check.mjs`** as the catalogue's invariant test. Its counts and sums are checks the app does not run, and they are cheap to keep.
 3. **Do not point `build-data.php` at the live pipeline.** Regeneration happens only when the set is revised, and the header date moves with it.
-4. **State the ageing rule** in the set's README: a reader must not quote a catalogue figure as current without re-deriving it, the same rule `coverage.md` already carries for host-local figures.
+4. **State the ageing rule** in the set's README: a reader must not quote a catalogue figure as current without re-deriving it, the same rule `docs/research-scratch/GOVERNANCE.md`, section `## coverage.md` already carries for host-local figures.
 
 **Gate:** the captured date is present in all five locations; `node data-check.mjs` is green; no page in the set implies its figures are live.
 
@@ -1045,7 +1045,7 @@ Owner ruling 5: the dataset is a **frozen dated snapshot**, not a second source 
 | The check harness false-positives on legacy pages | the harness runs clean on the un-migrated tree (Phase 1) before anything is rewritten |
 | A ruling is reversed later | the ADR records the decision and its rollback; reverting `app.css` and the migrated components restores the prior architecture |
 | **The `review-detail` route changes behaviour** (owner ruling 3) | one route, one controller action, one page, one browser spec, one `SCREEN_SPEC.md` row; the queue's inline detail is removed in the same commit so there is never a second rendering, and the revert is one commit |
-| **The frozen catalogue ages into a false claim** (owner ruling 5) | the capture date sits in five places and the set README states the figures are a dated observation; a reader must re-derive before quoting, the rule `coverage.md` already carries |
+| **The frozen catalogue ages into a false claim** (owner ruling 5) | the capture date sits in five places and the set README states the figures are a dated observation; a reader must re-derive before quoting, the rule `docs/research-scratch/GOVERNANCE.md`, section `## coverage.md` already carries |
 | **Six new pages multiply the check surface** (owner ruling 4) | each new page enters the four checks on the commit that adds it, not at the end; the set is green at 55 pages or the phase is not done |
 | **A codemod rewrites something it did not understand** (Phase 7 item 2) | it rewrites only exact-set matches, refuses everything else with a file and line, writes no partially-rewritten file, and runs `--dry-run` first |
 | **A screenshot baseline rots and blesses a regression** (Phase 7 item 1) | baselines exist only for the primitive gallery, never per app page; the diff is a Level 1 signal, and the app's browser specs remain the authority |

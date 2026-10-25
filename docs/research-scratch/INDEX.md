@@ -232,6 +232,9 @@ moved, 13 buckets, the two executor defects fixed first) is the dated status not
 | Characters source probe, profile fields                                                                                                                                                           | `CHARACTERS-SOURCE.md`                                                                                                                                                                                                                                                                                                                          |
 | va_en defect, race filter, port history                                                                                                                                                           | `CHARACTERS-SOURCE.md` (port-and-cleanup section)                                                                                                                                                                                                                                                                                               |
 | Slice verification records                                                                                                                                                                        | `SLICE-RECORDS.md`                                                                                                                                                                                                                                                                                                                              |
+| Round 21 thread: the Group A + Group B audit, pass report and Phase 8.1 browser triage | `AUDIT-AND-VERIFICATION.md`, sections `## group-ab-audit-2026-10-24.md`, `## group-ab-pass-2026-10-24.md`, `## phase-8.1-browser-triage-2026-10-25.md` |
+| Round 21 thread: the plans, the roadmap and the two rulings-owed briefs | `PROCESS-PLANS.md`, sections `## group-ab-plan.md`, `## group-ab-consolidated-plan.md`, `## remaining-work-roadmap.md`; `PLANS-AND-BRIEFS.md`, sections `## group-ab-rulings-owed.md`, `## remaining-work-rulings-owed.md` |
+| The skill-registry pointer and the scanner coverage table | `GOVERNANCE.md`, sections `## SKILL_REGISTRY.md` and `## coverage.md` |
 | Mood-pill colours request                                                                                                                                                                         | `DESIGN-AND-MECHANICS-REQUESTS.md`                                                                                                                                                                                                                                                                                                              |
 | Create-run flow, Legacy Select                                                                                                                                                                    | `DESIGN-AND-MECHANICS-REQUESTS.md`                                                                                                                                                                                                                                                                                                              |
 | Scratch-tree reorganization                                                                                                                                                                       | `PROCESS-PLANS.md`                                                                                                                                                                                                                                                                                                                              |
@@ -519,6 +522,55 @@ a dead path as history: the routing tables and the per-round records in this fil
 a file and a line, measured at the time of the audit. The census prints every skipped line, so an opt-out
 is never invisible.
 
+### Round 21 (2026-10-26, owner-ordered) — ten documents into the masters that own their subject, two of them root files
+
+The owner named ten paths, ordered them consolidated into this directory and the originals deleted from
+their locations. Eight were the 2026-10-24/25 Group A + Group B and remaining-work thread: three audits,
+three plans or roadmaps, two rulings-owed briefs. The other two were root files, `SKILL_REGISTRY.md` and <!-- census: quoted-original -->
+`coverage.md`, which §File discipline's standing-set table never listed at all, so they were <!-- census: quoted-original -->
+unconsolidated by definition from the day they were added; this round clears that standing violation as
+well as absorbing the sources.
+
+| Absorbed file                                                     | Lines | New home                                                                              | Why there                                                                       |
+| ----------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `docs/audits/group-ab-audit-2026-10-24.md`                        | 402   | `AUDIT-AND-VERIFICATION.md`, section `## group-ab-audit-2026-10-24.md`                 | An audit, so the audits master. 19 items classified, plus the A-0.12..A-0.14 addendum | <!-- census: quoted-original -->
+| `docs/audits/group-ab-pass-2026-10-24.md`                         | 136   | `AUDIT-AND-VERIFICATION.md`, section `## group-ab-pass-2026-10-24.md`                   | That audit's pass report: what landed, the SHAs, the gate output                  | <!-- census: quoted-original -->
+| `docs/audits/phase-8.1-browser-triage-2026-10-25.md`              | 80    | `AUDIT-AND-VERIFICATION.md`, section `## phase-8.1-browser-triage-2026-10-25.md`        | A per-failure triage record with its landing record                               | <!-- census: quoted-original -->
+| `docs/proposals/group-ab-plan.md`                                 | 192   | `PROCESS-PLANS.md`, section `## group-ab-plan.md`                                       | A work order, so the plans master                                                 | <!-- census: quoted-original -->
+| `docs/proposals/group-ab-consolidated-plan.md`                    | 283   | `PROCESS-PLANS.md`, section `## group-ab-consolidated-plan.md`                          | Its successor work order, and the record of the three disagreements it ruled       | <!-- census: quoted-original -->
+| `docs/proposals/remaining-work-roadmap.md`                        | 182   | `PROCESS-PLANS.md`, section `## remaining-work-roadmap.md`                              | The 2.1.1-to-2.2.0 phased roadmap                                                  | <!-- census: quoted-original -->
+| `docs/proposals/group-ab-rulings-owed.md`                         | 223   | `PLANS-AND-BRIEFS.md`, section `## group-ab-rulings-owed.md`                            | Two-option write-ups awaiting an owner call, the class this master holds           | <!-- census: quoted-original -->
+| `docs/proposals/remaining-work-rulings-owed.md`                   | 305   | `PLANS-AND-BRIEFS.md`, section `## remaining-work-rulings-owed.md`                      | The same class: `R1`..`R8`, each with options and a recommendation                 | <!-- census: quoted-original -->
+| `SKILL_REGISTRY.md` (root)                                        | 108   | `GOVERNANCE.md`, section `## SKILL_REGISTRY.md`                                         | This file's §6 and its authority table already owned the skill registry            | <!-- census: quoted-original -->
+| `coverage.md` (root)                                              | 24    | `GOVERNANCE.md`, section `## coverage.md`                                               | The coverage table the registry section points at, so it travels with it           | <!-- census: quoted-original -->
+
+Numbered 21 because 19 and 20 are already claimed: `AUDIT-AND-VERIFICATION.md` carries four
+`Consolidated 2026-10-24 (Round 19)` banners and `PLANS-AND-BRIEFS.md:62-86` records both Round 19 and
+Round 20 of the framework corpus.
+
+Verification, per the discipline's line-by-line rule, ran before the delete: every non-blank source line
+was found in its appended region, in order, with one-level heading demotion
+(337/337, 114/114, 69/69, 159/159, 219/219, 131/131, 184/184, 217/217, 82/82, 20/20 — 1,532 lines,
+0 missing in each), and each appended block was read back byte-identical from the master before anything
+was removed. The four masters took 2,080 added lines and **zero** deleted lines.
+
+**One approved departure from verbatim**, exactly as Round 18 recorded it. The sources' own
+cross-references were repointed inside the embedded bodies, so no citation rots: 31 scripted
+substitutions, each asserting its own occurrence count before it was applied, across
+`KNOWN-ISSUES.md` (the six “See …” ruling pointers into `## group-ab-rulings-owed.md`),
+`docs/adr/0029-per-run-measurement-columns.md` (five), `docs/proposals/primitive-reconciliation.md` (one),
+`docs/proposals/frontend-architecture-plan.md` (two `coverage.md` mentions), the two root skill files' own <!-- census: quoted-original -->
+sibling links (`[coverage.md](coverage.md)` ×3, `[CHANGELOG.md](CHANGELOG.md)` → `../../`), and the
+nineteen intra-thread pointers in the bodies here. `GOVERNANCE.md`'s four live skill-registry pointers
+(§SOURCE-OF-TRUTH header, §6 twice, the authority table) were repointed by hand; the 2026-09-30 drift row
+that records `root SKILL_REGISTRY.md is a hand-maintained pointer` is a dated measurement and stays
+verbatim with the census's own `<!-- census: quoted-original -->` flag, which is what the tool documents
+for a line that quotes a dead path as history.
+
+**Disposition of the originals.** Deleted from the working tree in this round, after the verification
+above. All ten are tracked, so each is recoverable at the commit the delete lands on; `CHANGELOG.md`'s
+2026-10-19 rows about the `SKILL.md` → `SKILL_REGISTRY.md` rename are dated history and were left alone. <!-- census: quoted-original -->
+
 ### Deliberate exceptions, outside the masters
 
 Three entries stay outside `docs/research-scratch/` on purpose. They are listed here so a future pass
@@ -539,6 +591,12 @@ Future agents must update these master files instead of creating new top-level m
 Content that does not fit any existing master should be proposed to the owner with a recommendation for which master to extend, rather than creating a new file. The Provenance section of each master should be updated whenever new content is appended to record the addition.
 
 ### Root directory (owner instruction 2026-10-02; corrected 2026-10-12)
+
+> **Corrected 2026-10-26 (Round 21).** Two files this table never classified — `SKILL_REGISTRY.md` and <!-- census: quoted-original -->
+> `coverage.md`, both added to the root after the 2026-10-12 count was taken — were folded into <!-- census: quoted-original -->
+> `GOVERNANCE.md` as the sections `## SKILL_REGISTRY.md` and `## coverage.md` and deleted from the root, so
+> the root markdown set is 14 files. Thirteen are classified above; the fourteenth, `CONTRIBUTING.md`,
+> is a gap this table has never closed and this round did not open.
 
 No new documentation file is created in the repository root, and no new documentation content is added
 there either: it goes into the relevant master above. The root markdown files form a standing set
