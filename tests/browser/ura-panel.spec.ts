@@ -20,6 +20,12 @@ import { expectTapTargets } from '../utils/tap-targets';
  * the other career specs assume a seeded `Rice Shower`.
  *
  * Glyphs are `aria-hidden`, so every state assertion reads the **word**, never the mark.
+ *
+ * Dated note 2026-10-25 (owner ruling A): the URA-only panel registrations were retired. This file
+ * keeps the surfaces that render through `career_goals` — the Trainee goals, Mandatory races and
+ * Happy Meek groups — plus the flag-off composition case. The removed cases tested `UraDuelPanel`
+ * (deleted by FQ-12), the `career_milestones` flag, the `pre_final_review` flag, and the separate
+ * `happy_meek` panel; no scenario's matrix can compose any of those.
  */
 
 const WRITE = { timeout: 60_000 } as const;
@@ -162,9 +168,12 @@ test('renders each Happy Meek field as an unrecorded reading with its own reason
     await expect(region.getByText('Potential reward')).toBeVisible();
     await expect(region.getByText('Final-race contribution')).toBeVisible();
 
-    // Nothing is stored, so every one of the four prints N/A rather than a figure the tool measured.
-    const naCells = region.locator('span[title]:has-text("N/A")');
-    expect(await naCells.count()).toBeGreaterThanOrEqual(4);
+    // Nothing is stored, so every one of the four prints N/A with its reason as visible prose. The
+    // rows render inside the Happy Meek group `career_goals` composes; the separate `happy_meek`
+    // panel flag was retired (owner ruling A, 2026-10-25).
+    const happyMeek = region.getByRole('region', { name: 'Happy Meek' });
+    await expect(happyMeek.getByText('N/A', { exact: true })).toHaveCount(4);
+    await expect(happyMeek.getByText(/No column stores a Happy Meek level/)).toBeVisible();
 });
 
 test('raises the Critical alert as rendered copy when the debut turn has arrived', async ({ page }) => {
@@ -272,137 +281,4 @@ test('passes the axe A + AA scan with the URA panel mounted', async ({ page }) =
     await openUraCockpit(page, DEBUT_TURN - 1);
 
     await buildAxe(page).analyze();
-});
-
-/*
- * G3: the three decision surfaces. `UraFinaleSurfacesTest` pins the payload; these cases assert what
- * only a browser reaches — the state word beside its mark in an ordered list, the duel panel's
- * keyboard path, and the pre-final section's appearance and disappearance on the turn the run is on.
- *
- * The turns are written as a single POST each rather than as a sequence: a gate's `missed` state needs
- * the career *past* the 72-turn grid, and seventy-two round trips would be the slowest test in the
- * file for one row of copy. The store route validates a unique turn number, not a run of them.
- */
-
-/** The milestone list, found through the section's own accessible name rather than through its text. */
-function milestoneList(region: import('@playwright/test').Locator): import('@playwright/test').Locator {
-    return region.getByRole('region', { name: 'Career milestones' }).getByRole('list');
-}
-
-test('draws the three fan gates as an ordered list, each with its state word and both figures', async ({ page }) => {
-    const region = await openUraCockpit(page, DEBUT_TURN - 1);
-
-    const list = milestoneList(region);
-    await expect(region.getByRole('heading', { name: 'Career milestones' })).toBeVisible();
-    await expect(list.getByRole('listitem')).toHaveCount(3);
-
-    // The figures the matrix publishes, both of them, because no column says which one binds.
-    await expect(list.getByText('60,000 Turf / 40,000 Dirt')).toBeVisible();
-    await expect(list.getByText('120,000 Turf / 80,000 Dirt')).toBeVisible();
-
-    // Glyphs are aria-hidden, so the state is asserted as the word beside them.
-    await expect(list.getByText('Upcoming')).toHaveCount(3);
-
-    // Each row is reachable by keyboard through its own door, and no turn is invented for it.
-    await expect(list.getByRole('link', { name: 'Race options for this gate' })).toHaveCount(3);
-    await expect(list.getByText('turn N/A').first()).toBeVisible();
-});
-
-test('leaves a gate whose state depends on an unrecorded track as N/A with the sentence', async ({ page }) => {
-    const runUrl = await createUraRun(page);
-    await postTurn(page, runIdOf(runUrl), { turn: '20', fans: '50000' });
-    const region = await openScenarioRegion(page, runUrl);
-
-    const valentines = milestoneList(region).getByRole('listitem').filter({ hasText: 'Valentine' });
-    await expect(valentines.getByText('N/A').first()).toBeVisible();
-    await expect(valentines.getByText(/whether this trainee races on turf or dirt/)).toBeVisible();
-
-    // The two gates far enough above the reading settle on the bounds without naming a track.
-    await expect(milestoneList(region).getByText('Upcoming')).toHaveCount(2);
-});
-
-test('marks a gate missed once the finale block is behind the run', async ({ page }) => {
-    const runUrl = await createUraRun(page);
-    // Turn 72 is the last of the 24-turn Senior year, so the block after it has arrived.
-    await postTurn(page, runIdOf(runUrl), { turn: '72', fans: '10000' });
-    const region = await openScenarioRegion(page, runUrl);
-
-    await expect(milestoneList(region).getByText('Missed')).toHaveCount(3);
-});
-
-test('opens and closes the duel panel by keyboard and returns focus to the door', async ({ page }) => {
-    const region = await openUraCockpit(page, DEBUT_TURN - 1);
-
-    const door = region.getByRole('button', { name: 'Happy Meek duel panel' });
-    await door.focus();
-    await expect(door).toBeFocused();
-    await door.press('Enter');
-
-    const dialog = page.getByRole('dialog');
-    await expect(dialog).toBeVisible();
-    await expect(dialog.getByText('Past My Limits, 200 or more Skill Points')).toBeVisible();
-    await expect(dialog.getByRole('heading', { name: 'Racing Spirit hints' })).toBeVisible();
-
-    // Nothing on this surface prints a percentage, and the empty figures say why.
-    const text = await dialog.innerText();
-    expect(text).not.toContain('%');
-    await expect(dialog.getByText('N/A').first()).toBeVisible();
-
-    // Ruling 2a: every absence in the dialog is `N/A` plus its reason with no provenance badge —
-    // `unknown` beside an absence was retired, so no Unknown chip may appear on any of the rows.
-    await expect(dialog.getByRole('img', { name: /^Unknown/ })).toHaveCount(0);
-
-    // Escape is the platform's own close for a modal dialog; the return is this component's.
-    await page.keyboard.press('Escape');
-    await expect(dialog).toBeHidden();
-    await expect(door).toBeFocused();
-});
-
-test('keeps the duel dialog usable at 320 px and clears the 44 px floor inside it', async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 700 });
-    const region = await openUraCockpit(page, DEBUT_TURN - 1);
-
-    await region.getByRole('button', { name: 'Happy Meek duel panel' }).click();
-    const dialog = page.getByRole('dialog');
-    await expect(dialog).toBeVisible();
-
-    const overflow = await page.evaluate(
-        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    );
-    expect(overflow, 'the duel dialog scrolls the page sideways at 320px').toBeLessThanOrEqual(1);
-
-    // The drawer's own control, measured rather than assumed: it is not in `main`, so the page-wide
-    // sweep above never sees it.
-    const close = dialog.getByRole('button', { name: 'Close' });
-    const box = await close.boundingBox();
-    expect(box, 'the dialog renders no Close control').not.toBeNull();
-    expect((box as { height: number }).height).toBeGreaterThanOrEqual(44);
-});
-
-test('passes the axe A + AA scan with the duel dialog open', async ({ page }) => {
-    const region = await openUraCockpit(page, DEBUT_TURN - 1);
-
-    await region.getByRole('button', { name: 'Happy Meek duel panel' }).click();
-    await expect(page.getByRole('dialog')).toBeVisible();
-
-    await buildAxe(page).analyze();
-});
-
-test('shows the pre-final review only inside the window the advisor looks ahead', async ({ page }) => {
-    const region = await openUraCockpit(page, DEBUT_TURN - 1);
-
-    // Eleven turns in, the finale is nowhere near, and the section is absent rather than empty.
-    await expect(region.getByRole('heading', { name: 'Pre-final review' })).toHaveCount(0);
-
-    const runUrl = await createUraRun(page);
-    await postTurn(page, runIdOf(runUrl), { turn: '70', fans: '50000', speed: '620' });
-    const near = await openScenarioRegion(page, runUrl);
-
-    const section = near.getByRole('heading', { name: 'Pre-final review' });
-    await expect(section).toBeVisible();
-    await expect(near.getByText(/Senior turn|in 2 turns/)).toBeVisible();
-    await expect(near.getByText('around 800 Speed, or an A rank')).toBeVisible();
-    // The hedge stays with the figure, and the run's own shortfall reads as arithmetic, not a rule.
-    await expect(near.getByText('180 short of the approximation')).toBeVisible();
-    await expect(near.getByText('This run\'s finale distance')).toBeVisible();
 });

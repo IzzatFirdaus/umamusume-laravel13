@@ -3622,6 +3622,16 @@ compose it.
 Recommended: compose. The components exist, are specified, and three of the five carry shipped content
 that no other surface renders.
 
+**Dated addendum 2026-10-25 (owner ruling A).** URA-only panel registrations retired per owner ruling
+A, 2026-10-25. FQ-12 already deleted the duel panel (`681e8b70`); the remaining four
+(`ura_mandatory_ladder`, `happy_meek`, `career_milestones`, `pre_final_review`) are retired on the
+same basis: no scenario's `panels` block can set them and `panel_labels` omits them, so the registry
+must not carry them. `career_goals` is untouched and still renders the URA goals ladder;
+`team_race_facility` stays registered behind its own isolated fixture
+(`tests/browser/team-race-facility-panel.spec.ts`). `tests/browser/ura-panel.spec.ts` is narrowed to
+the surfaces that render today. Restoring any URA surface is a separate compose pass with PRD §6
+stories for each panel, not a re-registration.
+
 ### KI-131 Two visible "Legacy"/"Deck" links on the run deck share an accessible name at mobile width - FILED 2026-10-25 (R4-29 residual)
 **Status: OPEN - openable. Copy-only; no schema, no ruling, no new dependency.**
 **Current state.** `/training-runs/{run}/deck` renders two navigation regions: `AppLayout`'s global

@@ -49,10 +49,6 @@ import WidgetFallback from './WidgetFallback.vue';
 import { registerPanel, resolvePanel, resolveWidget } from './registry';
 
 // Phase 7A.1: Cockpit panel components — registered against matrix flag keys
-import UraMandatoryLadder from '@/Pages/Career/Cockpit/Panels/UraMandatoryLadder.vue';
-import HappyMeekPanel from '@/Pages/Career/Cockpit/Panels/HappyMeekPanel.vue';
-import CareerMilestonesPanel from '@/Pages/Career/Cockpit/Panels/CareerMilestonesPanel.vue';
-import PreFinalReviewPanel from '@/Pages/Career/Cockpit/Panels/PreFinalReviewPanel.vue';
 import TeamRaceFacilityPanel from '@/Pages/Career/Cockpit/Panels/TeamRaceFacilityPanel.vue';
 import CareerGoalsPanel from '@/Pages/Career/Cockpit/Panels/CareerGoalsPanel.vue';
 
@@ -73,10 +69,10 @@ registerPanel('shop', TrackblazerPanel);
 registerPanel('epithet_routes', TrackblazerPanel);
 
 // Phase 7A.1: Cockpit panel components — each flag maps to its own component
-registerPanel('ura_mandatory_ladder', UraMandatoryLadder);
-registerPanel('happy_meek', HappyMeekPanel);
-registerPanel('career_milestones', CareerMilestonesPanel);
-registerPanel('pre_final_review', PreFinalReviewPanel);
+// The four URA-only registrations (ura_mandatory_ladder, happy_meek, career_milestones,
+// pre_final_review) were retired 2026-10-25 by owner ruling A: no scenario's `panels` block can set
+// those keys, and `panel_labels` omits them (KI-130). `career_goals` still draws the URA goals
+// ladder, and team_race_facility stays registered behind its own isolated fixture.
 registerPanel('team_race_facility', TeamRaceFacilityPanel);
 // The Phase 7A.1 registration of SpiritBurstsPanel against `spirit_bursts` is removed: that key
 // is a WIDGET, not a panel flag, so the panel-shaped component received the widget shape and its
