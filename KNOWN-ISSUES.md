@@ -1848,6 +1848,8 @@ were not read for this entry. It does not reopen the Songs, Lessons, Live Bonus 
 which §7-19, §7-21, §7-22 and §7-23 leave blocked. And it does not make the finale *state* uncertain:
 that foundation landed at `2c7bb3e`.
 
+**2026-10-25 — half the claim superseded.** Only the "URA Finals" half of the title is unmeasured. The "Grand Concert" half is measured from `[Global]` notice 905 (2026-07-22), which prints "Four Promo Concerts and one Grand Concert are held" and resolves the title toward "Brighter Together! Our Grand Concert" (UMAMUSUME_REFERENCE.md §2.9, §7 row 52).
+
 ### KI-83 Three tracked design prototypes render four raw hexes that are not shipped theme tokens, and two of the four are the values KI-58's folded document leg once carried - FILED 2026-10-09 (provenance/absence contract pass, on the owner's §11 dispensation), FIXED IN TREE 2026-10-09, NOT CLOSED
 
 **Status: CLOSED 2026-10-09.** Found while dispositioning the `python tools/gate.py` failure that
@@ -3387,6 +3389,8 @@ would have caught it, and no such gate exists.
 
 **What this does not cover.** A post-inheritance aptitude drift carried by a Spark is not representable on a run; if that is ever wanted it is a new column set and an ADR, not a display gap.
 
+**2026-10-25 — schema statement corrected.** The aptitudes column lives on `character_cards`, not `umamusume`. Alternate-costume cards carry per-card aptitudes that differ from the debut form (UMAMUSUME_REFERENCE.md §3.2, §3.3). The KI's conclusion — that no per-run aptitude storage is needed — is unchanged, because the catalog grain is per card and the picker already reads the card. Only the migration name and table cited in the KI were wrong.
+
 ---
 
 ### KI-116 The run's reached per-card effect values are unrecorded (Group A / A-0.4) - FILED 2026-10-24 (Group A + B audit pass)
@@ -3421,6 +3425,8 @@ would have caught it, and no such gate exists.
 
 **What closure would need.** An ADR, a `team_stat_grades` column (or table), the digest line, and the editor field.
 
+**2026-10-25 — added detail.** Per-stat grades are `G/F/E/D/C/B/A/S` (UMAMUSUME_REFERENCE.md §2.2.2). `S+` is the *overall* team rank (added 2026-07-01) and never a per-stat value. Any per-stat select or validation must reject `S+`; the B-0.5 migration contract (ADR-0029 D5, R10) pins this.
+
 ---
 
 ### KI-119 The Current Spirit gauge has no column (Group B / B-0.6, R4-14) - FILED 2026-10-24 (Group A + B audit pass)
@@ -3430,6 +3436,8 @@ would have caught it, and no such gate exists.
 **Current state.** `UnityCupPanel.vue:231-241` mounts `ResourceMeter` with `value: null, max: null` and the absence sentence; no column or payload reader. Ruling B-0.6 (2026-10-24): accepted; ADR first. See `docs/proposals/group-ab-rulings-owed.md#b-06`.
 
 **What closure would need.** An ADR, a `current_spirit` column, the digest line, and a writer.
+
+**2026-10-25 — B-0.6 ruling superseded.** The "accepted; ADR first" framing for a run-level `current_spirit` column no longer holds. The gauge is per team member, not per run, with no published numeric maximum; the burst is a once-per-member availability (UMAMUSUME_REFERENCE.md §2.2.2). The run-level shape is superseded by KI-133, which files the shape decision (per-member table vs. explicitly-labelled manual proxy) as blocked on the roster table (A-0.13, declined per R8 → B). B-0.6 stays closed as a run-level-column slice.
 
 ---
 
