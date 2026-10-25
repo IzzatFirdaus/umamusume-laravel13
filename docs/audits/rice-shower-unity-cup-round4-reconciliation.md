@@ -433,3 +433,14 @@ navs again. S5 is withdrawn from the slice list rather than left pending.
 renders two links with the same visible word and no distinguishing accessible name. That is a real
 copy weakness even though the entry it was attributed to is correct; if a later pass wants to spend a
 slice on it, the fix is a distinguishable name on the global link, not a nav on the deck.
+
+**2026-10-25 — commit `2e752896` content note.** That commit's message reads
+`test(deck): measure the slot grid by column offset, not by row top (R5b)`, and it carries six files:
+the deck-select spec change this pass intended, plus five files of a concurrent peer session's component
+work (`SupportSlot.vue`, `DeckSelect.vue`, `Support/Builder.vue`, `BuildTarget.vue`,
+`TrackblazerResourceLedger.vue`). The five were swept in because a bare `git commit -F` ran against a
+tree that carried the peer's staged work; a `git reset --soft` recovery was then overtaken by the peer
+committing on top, so splitting the commit now would rewrite their base. **The content is correct and is
+in HEAD** — nothing was lost or reordered — and only the message under-describes it. Rewriting history
+with a live peer is unsafe, so this note is the correction. Commits in this worktree now use
+`git commit -- <named paths>` so the pathspec bounds what lands.
