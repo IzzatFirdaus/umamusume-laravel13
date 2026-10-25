@@ -278,3 +278,5 @@ draft here if it is recovered; this fragment is the record that it existed and w
 To un-decline: the ruling would need to reverse KI-130 back to compose, and a roster editor would need a
 composed `team_roster` panel registration and PRD §6 story. That is a new pass, not a reopen of this
 one.
+
+**2026-10-25 (later) — superseded.** R4 landed at `f3ca8813` (ADR-0029 accepted). R7 landed at `06d9515e` (US-12 narrowed). R8 landed at `c734a280` (A-0.13/A-0.14 declined, KI-130 retire). None are outstanding.
