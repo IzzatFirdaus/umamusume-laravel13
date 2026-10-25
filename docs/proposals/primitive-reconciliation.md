@@ -811,6 +811,14 @@ assertions across 24 specs, 5 undiagnosed interaction timeouts, 1 environment-ga
 blocks — `ura-panel` 8, `career-legacy-deck-steps` 6, `support-deck` 5, `unity-cup-panel` 3 — are the
 scenario panels, which no phase of this plan claimed to finish.
 
+**2026-10-25 — Phase 8.1 sweep correction.** The sweep found 13 of 28 Phase 8.1 failures are
+stale-spec pins, not component defects: R4-24's removed copy, the per-slot picker migration
+(`5f2bfde4`), the `AbsenceValue` floor cells, the closed-dialog controls, and the "Empty." /
+"Not equipped" copy. Four are real component defects (BuildTarget summary gate, SupportSlot copy +
+Remove control, TrackblazerResourceLedger badge). The "all 46 are real rendering defects" claim is
+corrected to "at least 13 of the 28 are stale assertions." See
+`docs/audits/phase-8.1-browser-triage-2026-10-25.md`.
+
 **Artifacts.** `.scratch-uma/p1/head-fresh.log`, `base-fresh.log`, `head-results-fresh.jsonl`,
 `base-results-fresh.jsonl`, `reconciled.jsonl`, `head-errors.jsonl`.
 
