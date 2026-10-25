@@ -221,6 +221,8 @@ the working form is `grep -cE "^### KI-" KNOWN-ISSUES.md`.
 | B-0.7 | B | blocked: ADR | `KI-120` | 4 |
 | B-0.8 | B | ruled out | `KI-121` | 6 |
 
+**2026-10-25 — landed rows corrected.** A-0.5 landed at `df624cca`; B-0.5 at `005561c1`; B-0.7 at `b102581a`. The three rows above still read "blocked: ADR" as written; this dated note supersedes that state. A-0.4 is code-open; A-0.12 awaits an owner ruling; A-0.13/A-0.14 are declined per R8.
+
 **Ledger.** 2026-10-25 · consolidated at HEAD `92cdfec6`. Absorbs the audit, the original plan, the pass
 report, the rulings-owed document, ADR-0029's `Proposed` decision table, and the remaining-work roadmap.
 No source file, test, migration, config, or ADR was edited; this document is the only file written.
