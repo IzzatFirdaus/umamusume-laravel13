@@ -54,12 +54,27 @@ class DashboardController extends Controller
             'activeCareer' => $this->activeCareer(),
             // More than one Active run is reachable and this screen resumes only the newest, so the
             // page says how many are live and hands over the full list. Count-only: no models load,
-            // and the newest-run pick above is unchanged.
+            // and the newest-run pick above is unchanged. The shell's own pill reads the same figure
+            // from `HandleInertiaRequests`, so the two cannot drift by a query.
             'activeCareerCount' => TrainingRun::query()->where('status', RunStatus::Active)->count(),
+            // The page lede's other two live figures (HFW index.html `.lede`): finished runs, and
+            // the scenarios the Global client carries (a config entry with `live_on_global`).
+            'finishedRunCount' => TrainingRun::query()->where('status', RunStatus::Completed)->count(),
+            'globalScenarioCount' => count(array_filter(
+                (array) config('scenarios.scenarios'),
+                fn (array $scenario): bool => isset($scenario['live_on_global']),
+            )),
             'careersUrl' => route('runs.index'),
             'recentVeterans' => $this->recentVeterans($veterans),
             'quickActions' => $this->quickActions(),
+            /*
+             * The HFW's KPI row (index.html `.g-4`) leads with "Careers running", which is the same
+             * count the card and the shell pill print, then the three catalogue figures. The turns
+             * recorded figure is NOT here: the HFW's fifth number was a static capture, and no page
+             * rule in this repo lets a dashboard invent one.
+             */
             'counts' => [
+                'careersRunning' => TrainingRun::query()->where('status', RunStatus::Active)->count(),
                 'trainees' => Umamusume::count(),
                 'skills' => Skill::count(),
                 'supportCards' => SupportCard::count(),
@@ -96,6 +111,7 @@ class DashboardController extends Controller
 
         $strip = $run->stripValues();
         $turn = (int) $strip['turn'];
+        $decisionTurn = $run->decisionTurn();
 
         return [
             'run_id' => $run->id,
@@ -104,6 +120,11 @@ class DashboardController extends Controller
             'scenario_label' => $this->scenarioLabel($run),
             'position_label' => $this->positionLabel($turn),
             'turn' => $turn,
+            // The cockpit's own standing (`decisionTurn()`: the imported position for a snapshot
+            // run, else the turn after the last one logged). The page prints it beside `turn` only
+            // when the two disagree — the strip counts recorded turns while the cockpit stands at
+            // the imported position, a known defect (HFW index.html:102-107), not a rendering choice.
+            'position_turn' => $decisionTurn['turn_index'] ?? null,
             // The career's own length, for the turn rail: the client's grid is
             // `TrainingRun::TURNS_PER_YEAR` turns per career year over the three career years
             // (`RaceCatalogSlot::YEAR_JUNIOR` to `RaceCatalogSlot::YEAR_SENIOR`), which is the

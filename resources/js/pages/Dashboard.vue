@@ -62,6 +62,12 @@ interface ActiveCareer {
     /** Logged turns, the same reading the run page's resource strip takes. */
     turn: number;
     /**
+     * The cockpit's own standing (`decisionTurn()`'s `turn_index`): the imported position for a
+     * snapshot run, else the turn after the last one logged. Printed beside `turn` only when the
+     * two disagree (HFW index.html:102-107, known defect, not a rendering choice).
+     */
+    position_turn: number | null;
+    /**
      * The career's own length in turns. The client's grid is 24 turns to a career year over three
      * career years, so a career is 72. The controller reads the number from the model's constants.
      */
@@ -90,10 +96,14 @@ const props = defineProps<{
     activeCareer: ActiveCareer | null;
     /** Live Active runs. More than one is reachable; the card above features only the newest. */
     activeCareerCount: number;
+    /** Completed runs, for the page lede. */
+    finishedRunCount: number;
+    /** Scenarios live on the Global client (config entries carrying `live_on_global`). */
+    globalScenarioCount: number;
     careersUrl: string;
     recentVeterans: { rows: VeteranRow[]; total: number; limit: number; library_url: string };
     quickActions: { label: string; to: string }[];
-    counts: { trainees: number; skills: number; supportCards: number };
+    counts: { careersRunning: number; trainees: number; skills: number; supportCards: number };
     dataStatus: { label: string; state: string; verified_at: string | null; source: string };
 }>();
 
@@ -118,7 +128,7 @@ function isCardHidden(cardId: string): boolean {
 }
 
 // The four regions this screen composes. `next_best_action` is gone: its sentence and its button
-// now live inside Active Career, so one career has one door (Hick + Von Restorff, one filled
+// now live inside Pick up where you left off, so one career has one door (Hick + Von Restorff, one filled
 // primary per page). All hidden is a state of its own (DL.5): the grid renders one empty-state card
 // rather than a blank page.
 const DASHBOARD_CARD_IDS: ReadonlyArray<string> = [
@@ -187,8 +197,8 @@ function cardSpan(cardId: string): string {
         return '';
     }
     // Two columns in the brief's 2fr + 1fr ratio, expressed on the existing 12-track grid so no new
-    // token is needed. The DOM stays in reading order (Active Career, Quick Actions, Recent
-    // Veterans, Data Status) and the explicit starts place them, so the tab order matches the
+    // token is needed. The DOM stays in reading order (Pick up where you left off, Quick actions, Recent
+    // Veterans, Needs you) and the explicit starts place them, so the tab order matches the
     // visual order at every width and no row is left with an untiled cell.
     const spans: Record<string, string> = {
         active_career: 'col-span-1 xl:col-span-8 @7xl:col-start-1 @7xl:row-start-1',
@@ -201,22 +211,30 @@ function cardSpan(cardId: string): string {
 
 const { visiting, visitFailed } = useVisitState();
 
+// The page lede (HFW index.html `.lede`): the three live figures, never the static capture's numbers.
+const lede = computed<string>(
+    () =>
+        `${props.activeCareerCount} active career${props.activeCareerCount === 1 ? '' : 's'}, ` +
+        `${props.finishedRunCount} finished run${props.finishedRunCount === 1 ? '' : 's'}, and ` +
+        `${props.globalScenarioCount} permanent Global scenarios.`,
+);
+
 const group = (n: number): string => n.toLocaleString('en-US');
 
-const cardBase = 'rounded-md border border-rule bg-panel p-4';
-const emptyCardBase = 'rounded-md border border-dashed border-rule bg-raised p-4';
+const cardBase = 'rounded-md border border-rule bg-panel p-4 self-start';
+const emptyCardBase = 'rounded-md border border-dashed border-rule bg-raised p-4 self-start';
 const subCellStrong = 'font-mono text-xl tabular-nums text-ink-strong';
 const subCellDefault = 'font-mono text-xl tabular-nums';
-const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
+const kpiValueClass = 'font-mono text-xl tabular-nums text-ink-strong';
 </script>
 
 <template>
     <AppLayout>
         <Head title="Dashboard" />
         <template #head>
-            <PageHeader eyebrow="Overview" title="Dashboard">
+            <PageHeader eyebrow="Overview" title="Dashboard" :description="lede">
                 <!--
-                    Data freshness is a page-level fact, not a card-level one: the Data Status card
+                    Data freshness is a page-level fact, not a card-level one: the Needs you card
                     carries the live state and the ruleset version, and this line says when the
                     matrix behind them was last verified. It sits beside the page title, muted, and
                     it keeps the card's own line about the ruleset a single thing to read.
@@ -267,7 +285,7 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                 </LinkButton>
             </section>
 
-            <!-- ACTIVE CAREER (col-span-8 on xl) or EMPTY STATE -->
+            <!-- PICK UP WHERE YOU LEFT OFF (col-span-8 on xl) or EMPTY STATE -->
             <section
                 v-if="props.activeCareer && !isCardHidden('active_career')"
                 role="region"
@@ -275,7 +293,7 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                 data-card="active_career" :class="[cardBase, cardSpan('active_career')]"
             >
                 <h2 id="active-career-heading" class="text-lg font-semibold text-ink-strong">
-                    Active Career
+                    Pick up where you left off
                 </h2>
 
                 <div class="mt-2 flex items-start gap-3">
@@ -334,11 +352,35 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                     />
                 </div>
 
+                <!-- The two turn readings, labelled (HFW index.html:102-107): this screen counts
+                     recorded turns while the cockpit stands at the imported position, and the gap
+                     on a snapshot run is a known defect, not a rendering choice. Prints only on a
+                     real disagreement; a played-from-turn-one run's cockpit stands one past the
+                     count, which is the normal reading, not a defect. -->
+                <p
+                    v-if="
+                        props.activeCareer.position_turn !== null &&
+                        props.activeCareer.position_turn !== props.activeCareer.turn + 1
+                    "
+                    class="mt-3 rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink"
+                >
+                    This screen counts {{ props.activeCareer.turn }} recorded turn{{
+                        props.activeCareer.turn === 1 ? '' : 's'
+                    }}; the cockpit stands at turn {{ props.activeCareer.position_turn }} from the
+                    position the run was imported at. The disagreement is a known defect, not a
+                    rendering choice.
+                </p>
+
                 <!-- The turn rail. One mark per career turn, filled up to the last logged one, and
                      the mark the career stands on carries `aria-current`, so the position is named
                      rather than implied. A list of marks and not a progressbar: the marks are
                      discrete, and a bar measured against one career year sat at a hundred percent
-                     from turn twenty-four onward. -->
+                     from turn twenty-four onward.
+
+                     DOMAIN OVERRIDE (plan §13 DM-1): the career is exactly 72 turns and the URA
+                     finale block sits OUTSIDE that grid, so `total_turns` is 72 and the finale is a
+                     separate phase — it is never shown as turns 73-78. The denominator comes from
+                     `TrainingRun::TURNS_PER_YEAR * RaceCatalogSlot::YEAR_SENIOR`, never a literal. -->
                 <div class="mt-4">
                     <div class="flex items-baseline justify-between text-xs">
                         <span class="font-semibold text-ink-strong">
@@ -413,7 +455,7 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                 data-card="active_career" :class="[emptyCardBase, cardSpan('active_career')]"
             >
                 <h2 id="active-career-empty-heading" class="text-lg font-semibold text-ink-strong">
-                    Active Career
+                    Pick up where you left off
                 </h2>
                 <p class="mt-2 text-sm text-ink">No active career. Start a new career.</p>
                 <p class="mt-2 max-w-3xl text-sm text-ink-muted">
@@ -450,7 +492,7 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                 data-card="quick_actions" :class="[cardBase, cardSpan('quick_actions')]"
             >
                 <h2 id="quick-actions-heading" class="text-lg font-semibold text-ink-strong">
-                    Quick Actions
+                    Quick actions
                 </h2>
 
                 <!-- Every destination is a live route; a destination whose slice had not
@@ -467,13 +509,12 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                     </ul>
                 </nav>
 
-                <p class="mt-3 text-xs text-ink-muted">
-                    Jump to a task the sidebar does not carry.
-                </p>
                 <!-- The snapshot door stays here so the Trainer who already has a career to resume
-                     still sees it (R2-04); it moved out of Active Career, which now owns the
-                     empty-state import instead. Two short lines, not one three-line paragraph. -->
-                <p class="mt-2 text-xs text-ink-muted">
+                     still sees it (R2-04); it moved out of Pick up where you left off, which now owns the
+                     empty-state import instead. The "jump to a task" line above it is gone: it
+                     described the list instead of adding a destination, and it cost a row in the
+                     compact stack, whose content height is a gate. -->
+                <p class="mt-3 text-xs text-ink-muted">
                     Partway through a career?
                     <Link href="/career/snapshot" class="underline font-medium text-ink">Import an existing career</Link>
                     instead.
@@ -540,7 +581,7 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                 </template>
             </section>
 
-            <!-- DATA STATUS (col-span-4 on xl) -->
+            <!-- NEEDS YOU (col-span-4 on xl): the data-status tile and the KPI cells -->
             <section
                 v-show="!isCardHidden('data_status')"
                 role="region"
@@ -548,7 +589,7 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                 data-card="data_status" :class="[cardBase, cardSpan('data_status')]"
             >
                 <h2 id="data-status-heading" class="text-lg font-semibold text-ink-strong">
-                    Data Status
+                    Needs you
                 </h2>
 
                 <p class="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
@@ -572,12 +613,23 @@ const kpiValueClass = 'font-mono text-kpi tabular-nums text-ink-strong';
                     >N/A</span>
                 </p>
 
-                <!-- KPI stat cells -->
-                <div class="mt-4 grid grid-cols-tiles gap-3">
+                <!-- KPI stat cells: the HFW's four-tile row (index.html `.g-4`). "Careers" leads
+                     because it is the figure the card above features; the other three are the catalogue
+                     counts. Two across, not four: `KpiCard` truncates its value, and the tile-overflow
+                     gate reads `scrollWidth > clientWidth`, so a four-up row reports every clipped
+                     figure as an overflow by construction. -->
+                <div class="mt-3 grid grid-cols-2 gap-2">
+                    <KpiCard label="Careers" :value="group(props.counts.careersRunning)" :value-class="kpiValueClass" />
                     <KpiCard label="Trainees" :value="group(props.counts.trainees)" :value-class="kpiValueClass" />
                     <KpiCard label="Skills" :value="group(props.counts.skills)" :value-class="kpiValueClass" />
                     <KpiCard label="Support cards" :value="group(props.counts.supportCards)" :value-class="kpiValueClass" />
                 </div>
+
+                <!-- "Needs you" (HFW index.html right-hand card) is carried by the two cards that
+                     already own its facts: the Review queue row is in Quick Actions below, and the
+                     Veteran count is the Recent Veterans card's own total. Repeating them here grew
+                     the compact stack past its content budget without adding a fact, so the tiles are
+                     not drawn a third time. -->
 
                 <!-- Recent Builds footnote (PLAN 6B.13, frontend-fidelity §5 T1-5): the standalone
                      empty-state card is collapsed into this card's footnote. There is no build record

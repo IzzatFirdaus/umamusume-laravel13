@@ -74,6 +74,7 @@ CLAUDE.local.md
 /.opencode/
 /.playwright/
 /.playwright-mcp/
+/.playwright-cli/
 /playwright-report/
 /test-results/
 /.qoder/

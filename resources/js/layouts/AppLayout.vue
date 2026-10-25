@@ -9,12 +9,14 @@ import { useLayout } from '../composables/useLayout';
 const page = usePage();
 
 /*
- * The bar carries the product name and the collapse control, and nothing else. The build's version
- * string used to sit on the right, which made an implementation detail the last thing a Trainer read
- * on every screen; the footer's "Local data · Trainer Desk" line names the build's nature without
- * printing a number. `page.props.app` still arrives from `HandleInertiaRequests` for any screen that
- * wants it (the Settings screen reports it among its own facts); the shell just stops spending the
- * header on it.
+ * The bar carries the breadcrumb and the live-career pill, and nothing else: the product name and
+ * the rail's collapse control moved to the rail head (HFW index.html annotation 10 — the control
+ * belongs to the pane it resizes, and a global row owning a local width was plan 1.2's mistake).
+ * The build's version string used to sit on the right, which made an implementation detail the last
+ * thing a Trainer read on every screen; the footer's "Local data · Trainer Desk" line names the
+ * build's nature without printing a number. `page.props.app` still arrives from
+ * `HandleInertiaRequests` for any screen that wants it (the Settings screen reports it among its
+ * own facts); the shell just stops spending the header on it.
  */
 
 /*
@@ -26,6 +28,37 @@ const page = usePage();
  * `LAYOUT_WIDTH_CLASSES`, so the shell and the wizard share one source of truth.
  */
 const { layoutWidthClass } = useLayout();
+
+/*
+ * The bar's crumb (HFW `.topbar > .crumb`). A page may pass its own trail — `Database / Sources` is
+ * the shape the database area uses — and a page that passes nothing gets the destination the rail is
+ * already marking current. The fallback is read from the same `isCurrent()` test the rail uses, so the
+ * crumb and the `aria-current` item cannot disagree.
+ */
+const props = withDefaults(
+    defineProps<{
+        /** Optional explicit trail. The last part is the current screen and renders unlinked. */
+        breadcrumb?: { label: string; href?: string }[];
+    }>(),
+    { breadcrumb: () => [] },
+);
+
+const breadcrumbParts = computed<{ label: string; href?: string }[]>(() => {
+    if (props.breadcrumb.length > 0) {
+        return props.breadcrumb;
+    }
+
+    const current = items.find((item) => item.to !== null && isCurrent(item.to));
+
+    return current ? [{ label: current.label }] : [];
+});
+
+// The topbar pill's count, shared by `HandleInertiaRequests` so the shell does not query per page.
+const activeCareerCount = computed<number>(() => {
+    const count = (page.props as { activeCareerCount?: number }).activeCareerCount;
+
+    return typeof count === 'number' ? count : 0;
+});
 // The banner itself lives in `ui/Flash.vue`: the region is always mounted, it arms its own
 // five-second timer, and it keys on `page.props` identity rather than on the message text, so two
 // saves in a row flash twice. This layout only hands it the current status.
@@ -126,23 +159,54 @@ interface NavItem {
     icon: string;
 }
 
-const items: NavItem[] = [
-    { label: 'Dashboard', mobileLabel: 'Home', to: '/', spa: true, inBar: true, prefetches: true, icon: 'home' },
-    { label: 'New Career', mobileLabel: null, to: '/career/setup/scenario', spa: true, inBar: false, prefetches: false, icon: 'flag' },
-    { label: 'Careers', mobileLabel: 'Career', to: '/training-runs', spa: true, inBar: true, prefetches: true, icon: 'list' },
-    { label: 'Legacy Lab', mobileLabel: 'Legacy', to: '/legacy', spa: true, inBar: true, prefetches: true, icon: 'network' },
-    { label: 'Veterans', mobileLabel: null, to: '/veterans', spa: true, inBar: false, prefetches: true, icon: 'trophy' },
-    { label: 'Support Cards', mobileLabel: 'Deck', to: '/support-cards', spa: true, inBar: true, prefetches: true, icon: 'cards' },
-    { label: 'Skills', mobileLabel: null, to: '/skills', spa: true, inBar: false, prefetches: true, icon: 'spark' },
-    { label: 'Review', mobileLabel: null, to: '/review', spa: true, inBar: false, prefetches: true, icon: 'triangle' },
-    // /database, not /umamusume: the Database hub (SCREEN-023, plan §8 D17) is the label's
-    // destination, and /umamusume is one of its five areas. Repointed rather than added, so this slice
-    // contributes no destination. The count is ten live items with zero named absences, which is above
-    // `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` §13's "at or under eight"; the breach predates D17 and its repair is
-    // the owner's ruling, not a quiet merge of two entries.
-    { label: 'Database', mobileLabel: null, to: '/database', spa: true, inBar: false, prefetches: true, icon: 'book' },
-    { label: 'Settings', mobileLabel: null, to: '/preferences', spa: true, inBar: false, prefetches: true, icon: 'gear' },
+/*
+ * The HFW's grouped rail (docs/design-research/frontend-v2-wireframes/assets/shell.js `NAV`):
+ * Play / My data / Library / System. Grouping is how the ten flat items meet the "at or under
+ * eight" target without deleting a destination — the HFW's own ruling for that breach, recorded as
+ * annotation 4 on index.html. The group label is a heading for the eye; the collapsed rail hides it
+ * because a heading over marks is noise at 56px.
+ */
+interface NavGroup {
+    label: string;
+    items: NavItem[];
+}
+
+const groups: NavGroup[] = [
+    {
+        label: 'Play',
+        items: [
+            { label: 'Dashboard', mobileLabel: 'Home', to: '/', spa: true, inBar: true, prefetches: true, icon: 'home' },
+            { label: 'New Career', mobileLabel: null, to: '/career/setup/scenario', spa: true, inBar: false, prefetches: false, icon: 'flag' },
+        ],
+    },
+    {
+        label: 'My data',
+        items: [
+            { label: 'Careers', mobileLabel: 'Career', to: '/training-runs', spa: true, inBar: true, prefetches: true, icon: 'list' },
+            { label: 'Legacy Lab', mobileLabel: 'Legacy', to: '/legacy', spa: true, inBar: true, prefetches: true, icon: 'network' },
+            { label: 'Veterans', mobileLabel: null, to: '/veterans', spa: true, inBar: false, prefetches: true, icon: 'trophy' },
+            { label: 'Review', mobileLabel: null, to: '/review', spa: true, inBar: false, prefetches: true, icon: 'triangle' },
+        ],
+    },
+    {
+        label: 'Library',
+        items: [
+            { label: 'Support Cards', mobileLabel: 'Deck', to: '/support-cards', spa: true, inBar: true, prefetches: true, icon: 'cards' },
+            { label: 'Skills', mobileLabel: null, to: '/skills', spa: true, inBar: false, prefetches: true, icon: 'spark' },
+        ],
+    },
+    {
+        label: 'System',
+        items: [
+            // /database, not /umamusume: the Database hub (SCREEN-023, plan §8 D17) is the label's
+            // destination, and /umamusume is one of its five areas.
+            { label: 'Database', mobileLabel: null, to: '/database', spa: true, inBar: false, prefetches: true, icon: 'book' },
+            { label: 'Settings', mobileLabel: null, to: '/preferences', spa: true, inBar: false, prefetches: true, icon: 'gear' },
+        ],
+    },
 ];
+
+const items: NavItem[] = groups.flatMap((group) => group.items);
 
 // design-2.0 §41: "Use a bottom navigation bar: Home, Career, Legacy, Deck, More" and "Do not attempt to
 // shrink the desktop sidebar onto mobile." The ten-row sidebar used to render whole, which is the shape
@@ -161,9 +225,9 @@ const moreItems = items.filter((item) => !item.inBar);
  * it (design-2.0 §42, "text alternatives for icons"), and the active destination keeps
  * `aria-current="page"` plus a left rule on top of its fill because state may never ride on colour alone.
  *
- * The control that collapses it lives in the bar, not in this column (plan 1.2): the bar is the one
- * row present at every width, so the control that resizes the rail belongs beside the product name
- * rather than inside the thing it resizes. It is hidden below `md`, where the column is hidden too.
+ * The control that collapses it lives in the rail head beside the brand (HFW index.html annotation
+ * 10): the control belongs to the pane it resizes, and plan 1.2's placement in the 48px bar made a
+ * global row own a local width. It is hidden below `md`, where the column is hidden too.
  * The collapsed column keeps a short `TD` mark so the rail does not float without a top edge.
  *
  * The choice lives in `localStorage`, not in a Preference row. `App\Models\Preference::KEYS` is exactly
@@ -252,51 +316,78 @@ const moreIsCurrent = computed(() =>
                 railCollapsed ? 'w-14' : 'w-64',
             ]"
         >
-            <!-- The product name left this column when it moved to the bar. What stays is the
-                 collapsed rail's own label rule, so the rail keeps its top edge and does not float. -->
-            <div v-if="railCollapsed" class="flex items-center justify-center border-b border-rule px-2 py-3 text-xs font-bold tracking-wide text-ink-strong">
-                TD
+            <!-- The rail head carries the brand and the control that resizes this pane, because the
+                 control belongs to the thing it resizes (HFW index.html annotation 10; the earlier
+                 placement in the 48px bar made a global row own a local width). Collapsed, the
+                 wordmark shortens to the `TD` mark and the toggle keeps its icon; the accessible
+                 name stays the action either way (WCAG 2.5.3). -->
+            <div class="flex items-center gap-2 border-b border-rule px-2 py-2">
+                <span
+                    class="flex min-w-0 items-center gap-2 px-1 text-xs font-bold tracking-wide text-ink-strong"
+                >
+                    <span aria-hidden="true">TD</span>
+                    <span :class="railCollapsed ? 'sr-only' : 'truncate'">TRAINER DESK</span>
+                </span>
+                <button
+                    type="button"
+                    class="ml-auto inline-flex min-h-11 shrink-0 items-center justify-center rounded-md px-2 text-xs font-medium text-ink hover:bg-raised hover:text-ink-strong transition-colors duration-150 ease-out"
+                    :aria-expanded="!railCollapsed"
+                    aria-controls="primary-nav-rail"
+                    :title="railCollapsed ? 'Expand navigation' : undefined"
+                    @click="toggleRail"
+                >
+                    <span class="sr-only">{{ railCollapsed ? 'Expand navigation' : 'Collapse navigation' }}</span>
+                    <span aria-hidden="true">{{ railCollapsed ? '›' : '‹' }}</span>
+                </button>
             </div>
-            <nav id="primary-nav" aria-label="Primary" class="flex-1 p-2">
-                <ul class="space-y-1">
-                    <li v-for="item in items" :key="item.label">
-                        <Link
-                            v-if="item.spa"
-                            :href="item.to as string"
-                            :class="[
-                                linkClass,
-                                railCollapsed ? 'justify-center px-0' : '',
-                                isCurrent(item.to as string) ? activeClass : '',
-                                isCurrent(item.to as string) && railCollapsed ? activeRailRuleCollapsed : '',
-                                isCurrent(item.to as string) && !railCollapsed ? activeRailRule : '',
-                            ]"
-                            :aria-current="isCurrent(item.to as string) ? 'page' : undefined"
-                            :title="railCollapsed ? item.label : undefined"
-                            :prefetch="item.prefetches ? 'hover' : false"
-                        >
-                            <NavGlyph v-if="railCollapsed" :name="item.icon" />
-                            <span :class="railCollapsed ? 'sr-only' : ''">{{ item.label }}</span>
-                        </Link>
-                        <a
-                            v-else-if="item.to"
-                            :href="item.to"
-                            :class="[linkClass, railCollapsed ? 'justify-center px-0' : '']"
-                            :title="railCollapsed ? item.label : undefined"
-                        >
-                            <NavGlyph v-if="railCollapsed" :name="item.icon" />
-                            <span :class="railCollapsed ? 'sr-only' : ''">{{ item.label }}</span>
-                        </a>
-                        <span
-                            v-else
-                            :class="[disabledClass, railCollapsed ? 'justify-center px-0' : '']"
-                            title="Coming with Trainer Desk 2.0"
-                        >
-                            <NavGlyph v-if="railCollapsed" :name="item.icon" />
-                            <span :class="railCollapsed ? 'sr-only' : ''">{{ item.label }}</span>
-                            <span v-if="!railCollapsed" class="ml-2 text-xs">not built</span>
-                        </span>
-                    </li>
-                </ul>
+            <nav id="primary-nav-rail" aria-label="Global navigation" class="flex-1 overflow-y-auto p-2">
+                <div v-for="group in groups" :key="group.label" class="mb-2">
+                    <p
+                        :class="[
+                            'px-3 pb-1 pt-2 text-[11px] font-bold uppercase tracking-wider text-ink-muted',
+                            railCollapsed ? 'sr-only' : '',
+                        ]"
+                    >{{ group.label }}</p>
+                    <ul class="space-y-1">
+                        <li v-for="item in group.items" :key="item.label">
+                            <Link
+                                v-if="item.spa"
+                                :href="item.to as string"
+                                :class="[
+                                    linkClass,
+                                    railCollapsed ? 'justify-center px-0' : '',
+                                    isCurrent(item.to as string) ? activeClass : '',
+                                    isCurrent(item.to as string) && railCollapsed ? activeRailRuleCollapsed : '',
+                                    isCurrent(item.to as string) && !railCollapsed ? activeRailRule : '',
+                                ]"
+                                :aria-current="isCurrent(item.to as string) ? 'page' : undefined"
+                                :title="railCollapsed ? item.label : undefined"
+                                :prefetch="item.prefetches ? 'hover' : false"
+                            >
+                                <NavGlyph v-if="railCollapsed" :name="item.icon" />
+                                <span :class="railCollapsed ? 'sr-only' : ''">{{ item.label }}</span>
+                            </Link>
+                            <a
+                                v-else-if="item.to"
+                                :href="item.to"
+                                :class="[linkClass, railCollapsed ? 'justify-center px-0' : '']"
+                                :title="railCollapsed ? item.label : undefined"
+                            >
+                                <NavGlyph v-if="railCollapsed" :name="item.icon" />
+                                <span :class="railCollapsed ? 'sr-only' : ''">{{ item.label }}</span>
+                            </a>
+                            <span
+                                v-else
+                                :class="[disabledClass, railCollapsed ? 'justify-center px-0' : '']"
+                                title="Coming with Trainer Desk 2.0"
+                            >
+                                <NavGlyph v-if="railCollapsed" :name="item.icon" />
+                                <span :class="railCollapsed ? 'sr-only' : ''">{{ item.label }}</span>
+                                <span v-if="!railCollapsed" class="ml-2 text-xs">not built</span>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
             </nav>
             <div class="border-t border-rule px-2 py-3 text-xs text-ink-muted">
                 <Link
@@ -308,8 +399,8 @@ const moreIsCurrent = computed(() =>
         </aside>
 
         <div class="flex min-w-0 flex-1 flex-col">
-            <!-- The bar is chrome, not a title block: one 48px row, the product name on the left and
-                 the rail control on the right, closed by a 2px accent rule as its only ornament. It
+            <!-- The bar is chrome, not a title block: one 48px row, the breadcrumb on the left and
+                 the live-career pill on the right, closed by a 2px accent rule as its only ornament. It
                  must not carry the page `h1`: DESIGN.md §2.2's owner-signed 2026-10-17 amendment puts
                  the `h1` in the shell's `#title`, and one bar cannot be both 48px and hold an eyebrow
                  over a 30px heading. The heading therefore sits immediately below, as its own band on
@@ -319,27 +410,34 @@ const moreIsCurrent = computed(() =>
                  it is gone. The footer's "Local data · Trainer Desk" line names the build's nature, and
                  a number a Trainer cannot act on is not worth a permanent slot in the chrome. -->
             <header role="banner" class="flex flex-col">
-                <div class="flex h-12 shrink-0 items-center justify-between gap-4 border-b-2 border-brand-chrome bg-panel px-4 text-ink md:px-8">
-                    <span class="truncate text-sm font-semibold tracking-wide text-ink-strong">TRAINER DESK</span>
-                    <!-- Rail control, desktop only. The sidebar is hidden below `md`, where the bottom
-                         bar carries navigation, so a control that only resizes the sidebar has nothing
-                         to act on at that width. The name is always the action and the visible word is
-                         a substring of it (WCAG 2.5.3), exactly as the sidebar's own button was. -->
-                    <!-- Text only, no chevron. The word is the action and the accessible name is
-                         always the action, so the glyph added nothing a screen reader could use and
-                         read as a stray "<" beside the word (1.3 screenshot inspection). The
-                         5.5rem-ish width is stable because the two words are near enough in length. -->
-                    <button
-                        type="button"
-                        class="hidden min-h-11 shrink-0 items-center rounded-md px-2 text-xs font-medium text-ink hover:bg-raised hover:text-ink-strong transition-colors duration-150 ease-out md:inline-flex"
-                        :aria-expanded="!railCollapsed"
-                        aria-controls="primary-nav"
-                        :title="railCollapsed ? 'Expand navigation' : undefined"
-                        @click="toggleRail"
-                    >
-                        <span class="sr-only">{{ railCollapsed ? 'Expand navigation' : 'Collapse navigation' }}</span>
-                        <span aria-hidden="true">{{ railCollapsed ? 'Expand' : 'Collapse' }}</span>
-                    </button>
+                <div class="flex h-12 shrink-0 items-center gap-4 border-b-2 border-brand-chrome bg-panel px-4 text-ink md:px-8">
+                    <!-- The crumb names where the Trainer is, not the product. The product name lives in
+                         the rail head now (HFW shell), so the bar spends its width on the one fact the
+                         rail cannot carry: the section path. A page passes `breadcrumb`; the fallback
+                         names the layout's own destination so the bar is never empty. -->
+                    <span class="min-w-0 truncate text-sm text-ink-muted" data-shell-crumb>
+                        <template v-if="breadcrumbParts.length">
+                            <template v-for="(part, index) in breadcrumbParts" :key="`${part.label}-${index}`">
+                                <span v-if="index > 0" aria-hidden="true" class="px-1">/</span>
+                                <Link
+                                    v-if="part.href"
+                                    :href="part.href"
+                                    class="underline hover:text-ink-strong"
+                                >{{ part.label }}</Link>
+                                <span v-else class="font-semibold text-ink-strong">{{ part.label }}</span>
+                            </template>
+                        </template>
+                        <span v-else class="font-semibold text-ink-strong">Trainer Desk</span>
+                    </span>
+                    <span class="flex-1" />
+                    <!-- The live-career pill. Count only, shared from the middleware so every screen
+                         can state it without a per-controller query. Absent at zero: no career is a
+                         normal state, not a warning. -->
+                    <span
+                        v-if="activeCareerCount > 0"
+                        class="inline-flex shrink-0 items-center rounded-full bg-positive/10 px-2 py-0.5 text-xs font-semibold text-positive"
+                        data-shell-career-pill
+                    >{{ activeCareerCount }} active career{{ activeCareerCount === 1 ? '' : 's' }}</span>
                 </div>
                 <!-- The title band. Pages that render `PageHeader` in `#head` supply their own `h1`
                      there and leave this band empty, so exactly one `h1` reaches the document; the
@@ -395,7 +493,7 @@ const moreIsCurrent = computed(() =>
              desktop sidebar onto mobile") and the reason nothing at 320px looked scrollable: a
              horizontal-only scroller under a vertical gesture offers no affordance and answers no wheel. -->
         <nav
-            aria-label="Bottom navigation"
+            aria-label="Primary mobile"
             class="fixed inset-x-0 bottom-0 z-40 flex border-t border-rule bg-panel md:hidden"
         >
             <template v-for="item in barItems" :key="item.label">

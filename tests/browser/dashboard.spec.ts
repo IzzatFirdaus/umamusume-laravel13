@@ -71,7 +71,7 @@ test('states the empty career in words a Trainer can act on', async ({ page }) =
     // button (asserted on the next line) and the Quick Actions paragraph link that has carried it
     // since R2-04. The unscoped role query would resolve to both, so this one reads the card.
     await expect(
-        page.getByRole('region', { name: 'ACTIVE CAREER' }).getByRole('link', { name: 'Import an existing career' }),
+        page.getByRole('region', { name: 'PICK UP WHERE YOU LEFT OFF' }).getByRole('link', { name: 'Import an existing career' }),
     ).toBeVisible();
     await expect(page.getByRole('link', { name: 'Import an existing career' })).toHaveCount(2);
 
@@ -83,7 +83,7 @@ test('states the empty career in words a Trainer can act on', async ({ page }) =
         await expect(quickActions.getByRole('link', { name: label })).toBeVisible();
     }
     // `New Career` and the two sidebar destinations are gone at the source, in
-    // `DashboardController::quickActions()`: with no career live, Active Career's own primary is the
+    // `DashboardController::quickActions()`: with no career live, Pick up where you left off's own primary is the
     // only start-a-career door on the screen (Hick, Occam).
     await expect(quickActions.getByRole('link', { name: 'New Career' })).toHaveCount(0);
 
@@ -100,7 +100,7 @@ test('reads the data-status badge and the named ruleset, and the freshness line 
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
 
-    const status = page.getByRole('region', { name: 'DATA STATUS' });
+    const status = page.getByRole('region', { name: 'NEEDS YOU' });
 
     // Glyph plus text: the bullet is `aria-hidden` and the word "Current" carries the state, so
     // nothing here is shown through colour alone (WCAG 1.4.1).
@@ -150,7 +150,7 @@ test('names the active career and resumes it from the keyboard', async ({ page }
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
 
-    const card = page.getByRole('region', { name: 'ACTIVE CAREER' });
+    const card = page.getByRole('region', { name: 'PICK UP WHERE YOU LEFT OFF' });
 
     // The trainee, with her Japanese name in its own language (WCAG 3.1.2).
     await expect(card.getByText(TRAINEE)).toBeVisible();
@@ -212,7 +212,7 @@ test('weight-emphasizes the active career name over the other card headings', as
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
 
-    const card = page.getByRole('region', { name: 'ACTIVE CAREER' });
+    const card = page.getByRole('region', { name: 'PICK UP WHERE YOU LEFT OFF' });
 
     // Von Restorff by weight, not by restructure: the trainee's name is the largest thing in the
     // card, and the grid it sits in is the one the two-column layout already established.
@@ -227,8 +227,8 @@ test('weight-emphasizes the active career name over the other card headings', as
 
     // The card's own heading and the other two cards' headings do not move with it: the
     // emphasis is the name inside the card, not a louder set of headings.
-    await expect(card.getByRole('heading', { name: 'Active Career' })).toHaveClass(/text-lg/);
-    for (const region of ['QUICK ACTIONS', 'DATA STATUS']) {
+    await expect(card.getByRole('heading', { name: 'Pick up where you left off' })).toHaveClass(/text-lg/);
+    for (const region of ['QUICK ACTIONS', 'NEEDS YOU']) {
         await expect(page.getByRole('region', { name: region }).getByRole('heading')).toHaveClass(/text-lg/);
     }
 });
@@ -281,11 +281,11 @@ test('names the multi-career count only when a second career is live', async ({ 
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
 
-    const notice = page.getByRole('region', { name: 'ACTIVE CAREER' }).getByText(/careers are active/);
+    const notice = page.getByRole('region', { name: 'PICK UP WHERE YOU LEFT OFF' }).getByText(/careers are active/);
     await expect(notice).toBeVisible();
     // `route()` hands the page an absolute URL, so the assertion is the destination, not the origin.
     await expect(notice.getByRole('link', { name: /^View all careers/ })).toHaveAttribute('href', /\/training-runs$/);
-    await expect(page.getByRole('region', { name: 'ACTIVE CAREER' }).getByText(TRAINEE)).toBeVisible();
+    await expect(page.getByRole('region', { name: 'PICK UP WHERE YOU LEFT OFF' }).getByText(TRAINEE)).toBeVisible();
 });
 
 // The case above cannot see this one: its regex is plural-only (`/careers are active/`), so
@@ -298,7 +298,7 @@ test('renders no multi-career notice while exactly one career is live', async ({
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
 
-    const card = page.getByRole('region', { name: 'ACTIVE CAREER' });
+    const card = page.getByRole('region', { name: 'PICK UP WHERE YOU LEFT OFF' });
 
     // The card still features the one career it has...
     await expect(card.getByRole('link', { name: 'Resume career' })).toBeVisible();
@@ -380,7 +380,7 @@ test('honours the dashboard layout preference: bento by default, focused single-
     // Default is bento: the grid carries the bento layout and the four always-present regions show.
     const grid = page.locator('[data-layout]');
     await expect(grid).toHaveAttribute('data-layout', 'standard');
-    for (const name of ['ACTIVE CAREER', 'QUICK ACTIONS', 'RECENT VETERANS', 'DATA STATUS']) {
+    for (const name of ['PICK UP WHERE YOU LEFT OFF', 'QUICK ACTIONS', 'RECENT VETERANS', 'NEEDS YOU']) {
         await expect(page.getByRole('region', { name })).toBeVisible();
     }
 
@@ -523,8 +523,8 @@ test('measures the three shell widths, the bento shape and the card voids at a 1
     expect(await firstCardShare()).toBeGreaterThanOrEqual(55);
     expect(await firstCardShare()).toBeLessThanOrEqual(70);
     expect(await maxCardVoid()).toBeLessThanOrEqual(24);
-    expect(await tallestCell('Data Status')).toBeGreaterThanOrEqual(88);
-    // No Active Career stat-cell assertion here: this screen's career strip is `v-if` on an active
+    expect(await tallestCell('Needs you')).toBeGreaterThanOrEqual(88);
+    // No Pick up where you left off stat-cell assertion here: this screen's career strip is `v-if` on an active
     // run and the suite's scratch database holds none, so a check on it would skip on every run.
     // `names the active career and resumes it from the keyboard` owns the with-career state.
     await page.screenshot({ path: testInfo.outputPath('dashboard-standard-1920.png'), fullPage: true });
@@ -554,7 +554,7 @@ test('measures the three shell widths, the bento shape and the card voids at a 1
     expect(await firstCardShare()).toBeGreaterThanOrEqual(55);
     expect(await firstCardShare()).toBeLessThanOrEqual(70);
     expect(await maxCardVoid()).toBeLessThanOrEqual(24);
-    expect(await tallestCell('Data Status')).toBeGreaterThanOrEqual(88);
+    expect(await tallestCell('Needs you')).toBeGreaterThanOrEqual(88);
     await page.screenshot({ path: testInfo.outputPath('dashboard-wide-1920.png'), fullPage: true });
 
     await page.goto('/preferences');
@@ -620,30 +620,30 @@ test('no stat value overflows its tile', async ({ page }) => {
 });
 
 /*
- * Colourful-surface pin (owner ruling 2026-10-24: surfaces carry colour).
- *
- * The shell's page field and the card's panel fill are read as computed styles, so the assertion
- * fails the moment a token drifts back toward white. Values are the ruling's own, recorded in
- * `DESIGN.md` §2.1 and `DESIGN-CORPUS.md` P1 amendments of the same date.
+ * Colourful-surface pin. Surfaces carry colour; the values below are the owner-supplied definitive
+ * palette recorded in `DESIGN.md` §2.1 ("2026-10-25 — definitive synthesized palette", shipped by
+ * 9fa70510), which replaced the 2026-10-24 second ruling these assertions originally pinned. The
+ * shell's page field and the card's panel fill are read as computed styles, so the assertion fails
+ * the moment a token drifts away from the palette.
  */
-test('paints the shell page and the active-career card from the HLF reference surface tokens', async ({ page }) => {
+test('paints the shell page and the active-career card from the definitive palette surfaces', async ({ page }) => {
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
 
-    // The shell's page field: the reference's lavender-white (#F7F5FF), not white.
-    await expect(page.locator('.bg-page').first()).toHaveCSS('background-color', 'rgb(247, 245, 255)');
+    // The shell's page field: the definitive palette's light page (#F4F5F9), not white.
+    await expect(page.locator('.bg-page').first()).toHaveCSS('background-color', 'rgb(244, 245, 249)');
 
-    // A card on the panel fill: the reference's card white (#FFFEFF), distinct from the page.
+    // A card on the panel fill: the palette's white panel (#FFFFFF), distinct from the page.
     await createActiveRun(page, 'unity_cup');
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
-    await expect(page.locator('[data-card="active_career"]')).toHaveCSS('background-color', 'rgb(255, 254, 255)');
+    await expect(page.locator('[data-card="active_career"]')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
 });
 
-test('paints the dark shell with the reference near-black page', async ({ page }) => {
+test('paints the dark shell with the definitive palette near-black page', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.locator('.bg-page').first()).toHaveCSS('background-color', 'rgb(11, 11, 13)');
+    await expect(page.locator('.bg-page').first()).toHaveCSS('background-color', 'rgb(9, 9, 11)');
 });

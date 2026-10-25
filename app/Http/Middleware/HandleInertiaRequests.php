@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\RunStatus;
 use App\Models\Preference;
+use App\Models\TrainingRun;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -64,6 +66,12 @@ class HandleInertiaRequests extends Middleware
             'dashboard' => [
                 'wide_bento_enabled' => (bool) config('dashboard.wide_bento_enabled'),
             ],
+            // The shell's active-career pill (HFW `.topbar > .who`). Shared rather than passed by each
+            // controller: the bar renders on every screen and the count is one indexed COUNT, so the
+            // alternative is the same query duplicated in eleven controllers.
+            'activeCareerCount' => fn (): int => TrainingRun::query()
+                ->where('status', RunStatus::Active)
+                ->count(),
         ];
     }
 

@@ -6,7 +6,8 @@ import { test, expect } from '@playwright/test';
  *
  * What is asserted is the part of 1.2 that does not contradict an owner-signed rule:
  *
- *   1. The product bar is 48px tall (`BAR`), with the product name left and the rail control right.
+ *   1. The product bar is 48px tall (`BAR`), with the section crumb left and the live-career pill
+ *      right; the product name and rail control sit in the rail head (HFW shell, annotation 10).
  *   2. Its accent rule is 2px along the bottom edge.
  *   3. The build's version string is gone from the chrome.
  *   4. The active destination carries `aria-current="page"` and a 3px left rule in the rail.
@@ -40,9 +41,12 @@ test('the product bar is 48px with a 2px stripe and no version string', async ({
     //    same defect.
     await expect(page.getByRole('banner')).not.toContainText(/\bv\d+\.\d+\.\d+/);
 
-    // 4. The product name is the bar's left-hand text, and the bar carries no heading of its own.
-    await expect(bar).toContainText('TRAINER DESK');
+    // 4. The bar carries the section crumb; the product name and the rail control live in the rail
+    //    head (HFW index.html annotation 10). The bar itself carries no heading of its own.
+    await expect(bar).toContainText('Dashboard');
+    await expect(bar).not.toContainText('TRAINER DESK');
     await expect(bar.getByRole('heading')).toHaveCount(0);
+    await expect(page.locator('aside')).toContainText('TRAINER DESK');
 
     // 5. One h1 on the page, in the banner band below the bar (not in the 48px row itself).
     await expect(page.locator('h1')).toHaveCount(1);
@@ -53,7 +57,7 @@ test('the active destination is marked with aria-current and a left rule', async
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    const primary = page.getByRole('navigation', { name: 'Primary' });
+    const primary = page.getByRole('navigation', { name: 'Global navigation' });
     const current = primary.locator('[aria-current="page"]');
 
     await expect(current).toHaveCount(1);

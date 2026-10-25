@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Domain\Career\CareerPosition;
+use App\Enums\RunMode;
 use App\Enums\RunStatus;
 use App\Enums\TurnEventType;
 use App\Models\TrainingRun;
@@ -91,6 +93,9 @@ it('names the active career with its scenario, position, turn, energy and primar
             // per month, Early then Late.
             ->where('activeCareer.position_label', 'Junior Year · Early July')
             ->where('activeCareer.turn', 13)
+            // The cockpit's standing for a played-from-turn-one run: one past the count, which is
+            // the normal reading the discrepancy note must not fire on.
+            ->where('activeCareer.position_turn', 14)
             ->where('activeCareer.energy', 72)
             // Unity Cup's one widget beyond the baseline three is `team_rank`, and the rank now has
             // its own row with a real owner (`teamRank()` reads `latestTeamRank()`), so the resource
@@ -99,6 +104,26 @@ it('names the active career with its scenario, position, turn, energy and primar
             ->where('activeCareer.team_rank.value', null)
             ->where('activeCareer.team_rank.value_hint', 'No logged turn has reported a team rank yet.')
             ->where('activeCareer.resume_url', route('runs.cockpit', $run)));
+});
+
+it('hands over both turn readings when a snapshot stands ahead of its recorded log', function (): void {
+    // The HFW's labelled defect (index.html:102-107): a snapshot holds one entry but stands at the
+    // position it was imported at, so the page prints the count and the cockpit's turn side by side.
+    $run = TrainingRun::factory()->create([
+        'scenario' => 'unity_cup',
+        'status' => RunStatus::Active,
+        'mode' => RunMode::Snapshot,
+        'career_position' => CareerPosition::fromTurnIndex(67),
+        'career_position_source' => 'imported',
+    ]);
+
+    TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 67]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('activeCareer.turn', 1)
+            ->where('activeCareer.position_turn', 67));
 });
 
 it('reads the reported team rank onto the active career card', function (): void {

@@ -29,7 +29,7 @@ test.describe('Mobile navigation', () => {
         await page.goto('/');
         await page.locator('#app > *').first().waitFor();
 
-        const bar = page.getByRole('navigation', { name: 'Bottom navigation' });
+        const bar = page.getByRole('navigation', { name: 'Primary mobile' });
 
         // The four destinations, and More as the disclosure. The brief's word for the slot is the
         // accessible name, so the count is the claim rather than a label list kept in two places. `More`
@@ -54,7 +54,7 @@ test.describe('Mobile navigation', () => {
         await page.goto('/');
         await page.locator('#app > *').first().waitFor();
 
-        const bottom = page.getByRole('navigation', { name: 'Bottom navigation' });
+        const bottom = page.getByRole('navigation', { name: 'Primary mobile' });
         const more = bottom.getByText('More');
 
         // Closed by default, and the hidden destinations are not in the tab order while it is shut.
@@ -163,7 +163,7 @@ test('says the library holds nothing filed rather than showing a blank list', as
         // Anchored on the region it controls rather than on its own name, because the name is the action
         // and the action changes when the rail collapses: a locator by "Collapse navigation" dissolves the
         // moment it succeeds.
-        const toggle = page.locator('button[aria-controls="primary-nav"]');
+        const toggle = page.locator('button[aria-controls="primary-nav-rail"]');
 
         await toggle.focus();
         await expect(toggle).toHaveAccessibleName('Collapse navigation');

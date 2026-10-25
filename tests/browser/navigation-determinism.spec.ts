@@ -14,7 +14,7 @@ import { test, expect, type Page } from '@playwright/test';
  * the slow routes are held with `page.route`, so no run is created and nothing is written.
  */
 
-const SIDEBAR = '#primary-nav';
+const SIDEBAR = '#primary-nav-rail';
 
 async function ready(page: Page, path = '/'): Promise<void> {
     await page.goto(path);

@@ -63,7 +63,7 @@ test('the shell navigation reaches Settings and carries no form', async ({ page 
     await page.goto('/umamusume');
     await page.locator('#app > *').first().waitFor();
 
-    const nav = page.getByRole('navigation', { name: 'Primary' }).first();
+    const nav = page.getByRole('navigation', { name: 'Global navigation' }).first();
     await expect(nav.getByRole('link', { name: 'Settings' })).toBeVisible();
     await expect(nav.locator('form')).toHaveCount(0);
     await expect(nav.locator('input[name="failure_estimate"]')).toHaveCount(0);
@@ -431,7 +431,7 @@ test('the General category offers Layout width and Show on Dashboard controls', 
 
     // Show on Dashboard: five checkboxes, all checked by default (none hidden).
     await expect(page.getByText('Show on Dashboard')).toBeVisible();
-    for (const label of ['Active Career', 'Quick Actions', 'Recent Veterans', 'Data Status']) {
+    for (const label of ['Pick up where you left off', 'Quick actions', 'Recent Veterans', 'Needs you']) {
         await expect(page.getByRole('checkbox', { name: label })).toBeVisible();
         await expect(page.getByRole('checkbox', { name: label })).toBeChecked();
     }
@@ -443,7 +443,7 @@ test('the saved dashboard layout and hidden cards survive a reload and reflect o
 
     // Switch to Focused layout and hide the Data Status card.
     await page.getByRole('radio', { name: 'Compact' }).check();
-    await page.getByRole('checkbox', { name: 'Data Status' }).uncheck();
+    await page.getByRole('checkbox', { name: 'Needs you' }).uncheck();
     await page.getByRole('button', { name: 'Save preferences' }).click();
     await expect(page.getByRole('status')).toHaveText('Preferences saved.');
 
@@ -451,20 +451,20 @@ test('the saved dashboard layout and hidden cards survive a reload and reflect o
     await page.reload();
     await page.locator('#app > *').first().waitFor();
     await expect(page.getByRole('radio', { name: 'Compact' })).toBeChecked();
-    await expect(page.getByRole('checkbox', { name: 'Data Status' })).not.toBeChecked();
+    await expect(page.getByRole('checkbox', { name: 'Needs you' })).not.toBeChecked();
 
     // The Dashboard reads the same stored preferences: Data Status region is gone, and the
     // grid container carries the focused class (single column, centred).
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
-    await expect(page.getByRole('region', { name: 'DATA STATUS' })).toHaveCount(0);
+    await expect(page.getByRole('region', { name: 'NEEDS YOU' })).toHaveCount(0);
 
     // Reset: back to Bento, all cards shown. The shared dev database must not hold the test
     // mutation, so the next spec sees the default grid.
     await page.goto('/preferences');
     await page.locator('#app > *').first().waitFor();
     await page.getByRole('radio', { name: 'Standard', exact: true }).check();
-    await page.getByRole('checkbox', { name: 'Data Status' }).check();
+    await page.getByRole('checkbox', { name: 'Needs you' }).check();
     await page.getByRole('button', { name: 'Save preferences' }).click();
     await expect(page.getByRole('status')).toHaveText('Preferences saved.');
 });
@@ -475,7 +475,7 @@ test('Reset layout to defaults restores bento and every card with a two-click co
 
     // Move away from the defaults first, so the reset has something to undo.
     await page.getByRole('radio', { name: 'Compact' }).check();
-    await page.getByRole('checkbox', { name: 'Data Status' }).uncheck();
+    await page.getByRole('checkbox', { name: 'Needs you' }).uncheck();
     await page.getByRole('button', { name: 'Save preferences' }).click();
     await expect(page.getByRole('status')).toHaveText('Preferences saved.');
 
@@ -486,7 +486,7 @@ test('Reset layout to defaults restores bento and every card with a two-click co
     // Second click commits: Bento is selected again and every card is shown.
     await page.getByRole('button', { name: 'Reset?' }).click();
     await expect(page.getByRole('radio', { name: 'Standard', exact: true })).toBeChecked();
-    for (const label of ['Active Career', 'Quick Actions', 'Recent Veterans', 'Data Status']) {
+    for (const label of ['Pick up where you left off', 'Quick actions', 'Recent Veterans', 'Needs you']) {
         await expect(page.getByRole('checkbox', { name: label })).toBeChecked();
     }
     await expect(page.getByRole('status').filter({ hasText: 'Layout width reset to defaults.' })).toBeAttached();

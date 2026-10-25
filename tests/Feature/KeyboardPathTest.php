@@ -83,7 +83,7 @@ it('collapses the rail to marks without removing any destination name', function
     // behaviour the case protects (a named toggle that reports expanded/collapsed) is unchanged.
     expect($layout)->toMatch('/<button[^>]*type="button"[^>]*class="[^"]*min-h-11[^"]*"/')
         ->and($layout)->toMatch('/:aria-expanded="(!railCollapsed|railCollapsed \? \'false\' : \'true\')"/')
-        ->and($layout)->toContain('aria-controls="primary-nav"')
+        ->and($layout)->toContain('aria-controls="primary-nav-rail"')
         ->and($layout)->toContain('@click="toggleRail"');
 
     // Collapsing hides the word visually and keeps it in the accessibility tree. This is the whole
