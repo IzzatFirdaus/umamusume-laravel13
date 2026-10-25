@@ -168,3 +168,5 @@ member (deck supports + story characters + joiners), has no published numeric ma
 icon), and the burst is a once-per-member availability with a ~40% per-turn chance. Storing one number
 for the run fabricates the wrong model. B-0.6's column shape is withdrawn; its replacement is a shape
 decision filed as KI-133. The other seven items in this ADR stand unchanged.
+
+**2026-10-25 (later) — superseded.** R4 landed at `f3ca8813` (ADR-0029 accepted). R7 landed at `06d9515e` (US-12 narrowed). R8 landed at `c734a280` (A-0.13/A-0.14 declined, KI-130 retire). None are outstanding.
