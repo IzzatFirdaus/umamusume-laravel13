@@ -3706,3 +3706,28 @@ incidental.
 
 **Closure:** none. This entry closes when the chosen path's slice lands and a payload round-trip test
 proves complete, partial and absent targets all read back.
+
+### KI-133 B-0.6 `current_spirit` shape wrong - the Spirit gauge is per team member, not per run - FILED 2026-10-25 (R9)
+**Status: OPEN - blocked: shape decision + A-0.13.** No column ships; both candidate shapes are recorded here.
+
+**Current state.** ADR-0029's B-0.6 authorises `current_spirit` integer plus `current_spirit_max` on
+`training_runs`. The verified game model is different: the Spirit gauge is **per team member** (deck
+supports, story characters, joiners), has **no published numeric max** (a bar with a flame icon), and the
+burst is a **once-per-member availability** with roughly a **40% per-turn chance** once full. A single
+run-level number stores one value for a multi-member, non-numeric, fuzzy-threshold state and would read as
+a game value it does not represent. Source: `docs/UMAMUSUME_REFERENCE.md` §2.2.2's 2026-10-25 note
+(GameTora, Game8 545572/563657, uma.guide).
+
+**Two shapes, both honest.**
+- **`spirit_gauges` table:** `training_run_id`, `roster_member_slot`, `is_ready` boolean. Models the
+  "available once per member" reality and invents no maximum. Blocked on A-0.13's roster, which R8
+  declined (R8 → B); do not reopen R8 without an owner ruling.
+- **Manual proxy:** `current_spirit_proxy` integer on `training_runs`, labelled "manual proxy, not a game
+  value" in the UI and the migration comment. Fake-but-labelled beats fake-but-unlabelled, but it is a
+  compromise, not the right model.
+
+**Current classification:** `blocked: shape decision + A-0.13`. R8 declined the roster table; B-0.6 depends
+on it. Reopen R8 only if the roster is reopened at the same time.
+
+**Closure:** none. Closes when the chosen shape lands and a test proves the per-member state (or the
+explicitly-labelled proxy) round-trips.
