@@ -405,3 +405,31 @@ input existed at the audit's own commit. The date half closed further at `499e01
 extracted the position label to one owner (`app/Services/Career/CareerPositionLabel.php`)
 and made the snapshot review name the position the Trainer entered. The pending-turn-state
 half named in KI-123 remains a separate question. See KI-123.
+
+## Dated correction, 2026-10-25 — R4-29 (S5) does not reproduce
+
+R4-29 (F-11) reads: "the career nav's `Legacy` on the run deck points at `/legacy`, losing the run",
+with the proposed slice "render the career nav on the deck builder". The first half was a walk-path
+artefact and the second half is already true.
+
+**What the code says.** `resources/js/pages/Support/Builder.vue:273` mounts `CareerSectionNav`, and
+`resources/js/components/career/CareerSectionNav.vue` builds the Legacy href as `/legacy/${runId}`
+from `runUrl`. The deck's payload carries `run.id` and `run.run_url`
+(`TrainingRunController::deck()`). Two `Legacy` links therefore render on that page: the career
+nav's, which is run-scoped, and `AppLayout`'s global `Legacy Lab`, which is not. Walk 4 read the
+global one and reported it as the career nav.
+
+**Evidence, at the previous commit.** `tests/browser/support-deck.spec.ts`, case
+`carries the career nav with a run-scoped Legacy link`, was run against `f2114c88` before any
+application change: the `href` and `aria-current` assertions **passed**, and the only failing
+assertion in that case was one this pass added for R4-01's header line, which the S1-residual commit
+supplies. A RED that appears only on a different slice's assertion is not evidence for this row.
+
+**Disposition.** R4-29 closes as **Does not reproduce**. No source change was made for S5; the
+browser case lands as a characterization pin (`7722165d`) so the next walk cannot conflate the two
+navs again. S5 is withdrawn from the slice list rather than left pending.
+
+**Root cause of the misread, kept so the next pass does not repeat it.** The audit read a page that
+renders two links with the same visible word and no distinguishing accessible name. That is a real
+copy weakness even though the entry it was attributed to is correct; if a later pass wants to spend a
+slice on it, the fix is a distinguishable name on the global link, not a nav on the deck.
