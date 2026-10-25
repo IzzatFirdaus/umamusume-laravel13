@@ -42,20 +42,35 @@ test('renders the run list, and says what happens next when it is empty', async 
     await page.goto('/training-runs');
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByRole('heading', { name: 'Careers', level: 1 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Training runs', level: 1 })).toBeVisible();
 
     // An empty list is a real state, not a failure, so it names what happens next rather than
     // reading as "no data".
     await expect(page.getByText('No runs yet')).toBeVisible();
     await expect(page.getByText(/nothing to list until you start one/)).toBeVisible();
 
-    // The empty state still offers both ways in. Import sits beside New career because it creates a run
-    // too, and a Trainer with a finished career in a file has to find it on the same glance. Both
-    // locators are scoped to `main`: the nav also carries a "New Career" link, and an unscoped name
-    // match resolves to two elements under strict mode.
-    const main = page.locator('main');
-    await expect(main.getByRole('link', { name: 'New career' })).toBeVisible();
-    await expect(main.getByRole('link', { name: 'Import a historical career' })).toBeVisible();
+    // The empty state still offers both ways in. The page actions render in the PageHeader band
+    // (inside `[role="banner"]`), while the nav also carries a "New Career" link, so both locators
+    // are scoped to the page head rather than the document.
+    const head = page.locator('[role="banner"]');
+    await expect(head.getByRole('link', { name: 'New career' })).toBeVisible();
+    await expect(head.getByRole('link', { name: 'Import a run' })).toBeVisible();
+
+    // The filter row is one inline form (HFW annotation 1): the three fields and Clear travel
+    // together above the table.
+    const filters = page.getByRole('search', { name: 'Filter careers' });
+    await expect(filters.getByLabel('Search trainee')).toBeVisible();
+    await expect(filters.getByLabel('Scenario')).toBeVisible();
+    await expect(filters.getByLabel('Status')).toBeVisible();
+    await expect(filters.getByRole('link', { name: 'Clear' })).toBeVisible();
+});
+
+test('a filtered empty list names the filter rather than reading as an empty library', async ({ page }) => {
+    await page.goto('/training-runs?status=Retired');
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByText('No careers match these filters')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Clear filters' })).toBeVisible();
 });
 
 test('sizes the create form controls to the 44px contract', async ({ page }) => {

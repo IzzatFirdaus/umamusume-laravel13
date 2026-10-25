@@ -56,14 +56,60 @@ it('sends a null scenario label for a run that has none, rather than a blank one
             ->where('runs.data.0.scenario_label', null));
 });
 
-it('sends the status word and the created date on the row', function (): void {
+it('sends the status value and word plus both row doors', function (): void {
     $run = TrainingRun::factory()->create(['status' => RunStatus::Completed]);
 
     test()->get('/training-runs')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
+            ->where('runs.data.0.status', RunStatus::Completed->value)
             ->where('runs.data.0.status_label', $run->status->label())
-            ->where('runs.data.0.created_date', $run->created_at->toDateString()));
+            ->where('runs.data.0.url', route('runs.cockpit', $run))
+            ->where('runs.data.0.result_url', route('runs.result', $run)));
+});
+
+it('filters by status, scenario and trainee search, and treats all as unfiltered', function (): void {
+    $rice = Umamusume::factory()->create(['name' => 'Rice Shower']);
+    $vodka = Umamusume::factory()->create(['name' => 'Vodka']);
+
+    $active = TrainingRun::factory()->create([
+        'umamusume_id' => $rice->id,
+        'scenario' => 'unity_cup',
+        'status' => RunStatus::Active,
+    ]);
+    $finished = TrainingRun::factory()->create([
+        'umamusume_id' => $vodka->id,
+        'scenario' => 'ura_finale',
+        'status' => RunStatus::Completed,
+    ]);
+
+    test()->get('/training-runs?status=Completed')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('runs.data', 1)
+            ->where('runs.data.0.id', $finished->id)
+            ->where('filters.status', 'Completed'));
+
+    test()->get('/training-runs?scenario=unity_cup')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('runs.data', 1)
+            ->where('runs.data.0.id', $active->id));
+
+    test()->get('/training-runs?search=Vodka')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('runs.data', 1)
+            ->where('runs.data.0.id', $finished->id));
+
+    test()->get('/training-runs?status=all&scenario=all&search=')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->has('runs.data', 2));
+});
+
+it('refuses a status outside the enum and returns to the list', function (): void {
+    test()->get('/training-runs?status=Gone')
+        ->assertRedirect(route('runs.index'));
 });
 
 it('links each row to the run', function (): void {

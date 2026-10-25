@@ -15,6 +15,7 @@ use App\Enums\TurnChoice;
 use App\Enums\TurnEventType;
 use App\Http\Requests\DeckPickerSearchRequest;
 use App\Http\Requests\ImportHistoricalRunRequest;
+use App\Http\Requests\RunSearchRequest;
 use App\Http\Requests\StoreBuildTargetRequest;
 use App\Http\Requests\StoreDeckRequest;
 use App\Http\Requests\StoreRaceEntryRequest;
@@ -35,6 +36,7 @@ use App\Models\TurnEvents\PerformancePayload;
 use App\Models\TurnEvents\ShopPurchasePayload;
 use App\Models\Umamusume;
 use App\Services\Advisor\NextDecision;
+use App\Services\Career\CareerPositionLabel;
 use App\Services\CareerCalendar;
 use App\Services\DataPipeline\ArtworkMirror;
 use App\Services\DeckAnalysis;
@@ -55,7 +57,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class TrainingRunController extends Controller
 {
-    public function index(): InertiaResponse
+    public function index(RunSearchRequest $request): InertiaResponse
     {
         // The row's own position: the latest logged turn, and the career's length on its calendar. A
         // run that has logged nothing ships turn 0 rather than a placeholder, and the page prints the
@@ -65,28 +67,80 @@ class TrainingRunController extends Controller
             ->groupBy('training_run_id')
             ->pluck('latest_turn', 'training_run_id');
 
+        $filters = $request->validated();
+        $search = $filters['search'] ?? null;
+        $scenario = $filters['scenario'] ?? null;
+        $status = $filters['status'] ?? null;
+
         return Inertia::render('Runs/Index', [
-            'runs' => TrainingRun::with('umamusume')->latest('created_at')->latest('id')->paginate(25)
-                ->through(static fn (TrainingRun $run): array => [
-                    // R4-01/R4-02: the run is named by its id, so two careers of the same trainee in
-                    // the same scenario are two rows a Trainer can tell apart.
-                    'id' => $run->id,
-                    'name' => $run->umamusume->name,
-                    // The scenario key is a storage value; the label is config's, so the payload
-                    // never carries the slug (hasScenario() is the model's one ruling: a blank
-                    // scenario is no scenario, not a name to print).
-                    'scenario_label' => $run->hasScenario()
-                        ? (config('scenarios.scenarios.'.$run->scenario.'.label') ?? $run->scenario)
-                        : null,
-                    'status_label' => $run->status->label(),
-                    'created_date' => $run->created_at->toDateString(),
-                    'turn_index' => (int) ($latest[$run->id] ?? 0),
-                    'turn_count' => CareerCalendar::TURNS_PER_CAREER,
-                    // The Cockpit is the canonical career destination (F1, plan §9's 2.0 line):
-                    // selecting a career from the list must not route through the 2.0.0 run-detail
-                    // page. `runs.show` stays a compatibility doorway until the redirect ruling.
-                    'url' => route('runs.cockpit', $run),
-                ]),
+            'runs' => TrainingRun::query()
+                ->with(['umamusume', 'characterCard'])
+                // One inline filter row (HFW runs-index annotation 1). `all` and an absent key are
+                // the same answer: no filter.
+                ->when($search !== null, fn ($query) => $query->whereHas(
+                    'umamusume',
+                    fn ($inner) => $inner
+                        ->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('name_ja', 'like', '%'.$search.'%'),
+                ))
+                ->when(
+                    $scenario !== null && $scenario !== RunSearchRequest::ALL,
+                    fn ($query) => $query->where('scenario', $scenario),
+                )
+                ->when(
+                    $status !== null && $status !== RunSearchRequest::ALL,
+                    fn ($query) => $query->where('status', $status),
+                )
+                ->latest('created_at')
+                ->latest('id')
+                ->paginate(25)
+                // A filtered page keeps its query string, so page two of a filter is the same filter.
+                ->withQueryString()
+                ->through(function (TrainingRun $run) use ($latest): array {
+                    $turn = (int) ($latest[$run->id] ?? 0);
+                    // A snapshot's named position wins over the count of rows it holds
+                    // (`careerPosition()`), and a played-from-turn-one run derives the same turn it
+                    // last logged. No query: the imported branch reads the stored position only.
+                    $positionTurn = $run->hasImportedPosition()
+                        ? $run->careerPosition()?->turnIndex
+                        : ($turn > 0 ? $turn : null);
+
+                    return [
+                        // R4-01/R4-02: the run is named by its id, so two careers of the same trainee
+                        // in the same scenario are two rows a Trainer can tell apart.
+                        'id' => $run->id,
+                        'name' => $run->umamusume->name,
+                        'trainee_ja' => $run->umamusume->name_ja,
+                        'card_title' => $run->characterCard?->title,
+                        'rarity' => $run->trainee_rarity ?? $run->characterCard?->rarity,
+                        // The scenario key is a storage value; the label is config's, so the payload
+                        // never carries the slug (hasScenario() is the model's one ruling: a blank
+                        // scenario is no scenario, not a name to print).
+                        'scenario_label' => $run->hasScenario()
+                            ? (config('scenarios.scenarios.'.$run->scenario.'.label') ?? $run->scenario)
+                            : null,
+                        'status' => $run->status->value,
+                        'status_label' => $run->status->label(),
+                        'turn_index' => $turn,
+                        'turn_count' => CareerCalendar::TURNS_PER_CAREER,
+                        'position_label' => $positionTurn !== null
+                            ? CareerPositionLabel::forTurn($positionTurn)
+                            : null,
+                        // The Cockpit is the canonical career destination (F1, plan §9's 2.0 line):
+                        // selecting a career from the list must not route through the 2.0.0
+                        // run-detail page. `runs.show` stays a compatibility doorway until the
+                        // redirect ruling. A finished run's door is its Result screen instead.
+                        'url' => route('runs.cockpit', $run),
+                        'result_url' => route('runs.result', $run),
+                    ];
+                }),
+            'filters' => [
+                'search' => $search,
+                'scenario' => $scenario,
+                'status' => $status,
+            ],
+            'scenarios' => $this->scenarioLabels(),
+            'statuses' => $this->statusLabels(),
         ]);
     }
 

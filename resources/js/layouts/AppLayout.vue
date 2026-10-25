@@ -435,7 +435,7 @@ const moreIsCurrent = computed(() =>
                          normal state, not a warning. -->
                     <span
                         v-if="activeCareerCount > 0"
-                        class="inline-flex shrink-0 items-center rounded-full bg-positive/10 px-2 py-0.5 text-xs font-semibold text-positive"
+                        class="inline-flex shrink-0 items-center rounded-full bg-status-positive/10 px-2 py-0.5 text-xs font-semibold text-status-positive"
                         data-shell-career-pill
                     >{{ activeCareerCount }} active career{{ activeCareerCount === 1 ? '' : 's' }}</span>
                 </div>
