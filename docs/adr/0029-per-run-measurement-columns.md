@@ -1,14 +1,14 @@
 # ADR-0029: Per-run measurement facts — the eight the source reads and the tree cannot store
 
 <!-- ADR-CONTRACT
-  decision: proposed — authorise eight per-run measurement facts as storage, one column or table each, with deck_slots.card_level holding the numerator only; the owner flips this to Accepted
+  decision: accepted (owner ruling R4, 2026-10-25) — authorise eight per-run measurement facts as storage, one column or table each, with deck_slots.card_level holding the numerator only
   code: not built — no column or table for any of the eight exists: deck_slots carries support_card_id, slot_position and ownership only; turn_entries carries no facility_banner and no training_card_ids; training_runs carries no team_stat_grades and no current_spirit; there is no team_roster, no skill_levels and no roster-skill table
   superseded-by: —
   amended-by: —
   open: the eight storages are authorised but unbuilt, so every audit row stays blocked until a slice migrates it; A-0.4 stores nothing and is computed from A-0.5's column, and its lookup prerequisite is the anchor vector already stored on support_cards.effects and named by support_effects — what does not exist is a reader that answers at an arbitrary level rather than only at cap (see the 2026-10-25 note); A-0.13 and A-0.14 have no PRD anchor and are marked needs-PRD-citation; US-12's sentence "no card level, limit break or Unique Perk state is stored anywhere" needs a dated travel note if this ADR is accepted
 -->
 
-Status: **Proposed** — drafted 2026-10-24 for the owner's review. The agent drafts an ADR; the owner accepts it. Nothing here builds a column, a table, a model, or a slice.
+Status: **accepted** (owner ruling R4, 2026-10-25). Drafted 2026-10-24 for the owner's review; the agent drafts an ADR, the owner accepts it. Nothing here builds a column, a table, a model, or a slice.
 
 ## Context
 
@@ -113,6 +113,13 @@ The three addendum items (`A-0.12`, `A-0.13`, `A-0.14`) and the four prior `bloc
   surfaced against `docs/proposals/remaining-work-roadmap.md` by
   `docs/proposals/group-ab-consolidated-plan.md`, each ruled in this ADR's favour, plus one correction to
   this ADR's own A-0.4 reasoning. Status stays `Proposed`.
+
+- 2026-10-25 · **accepted** (owner ruling R4) — Status flipped to accepted 2026-10-25 by owner ruling R4.
+  This supersedes the two sentences above and below it that read "Status stays `Proposed`" and "this ADR
+  remains `Proposed`": both were true of the consolidation note they belong to, and the owner's acceptance
+  is later. The eight storages are now authorised to be built; none is built by this flip, and the
+  prerequisites named in `open` are unchanged — `A-0.5` and the level-parameterised reader for `A-0.4` come
+  first, and the `US-12` travel note (R7) and the roster PRD citation (R8) remain outstanding.
 
 ## Dated note · 2026-10-25 · consolidated-plan reconciliation
 
