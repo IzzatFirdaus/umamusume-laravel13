@@ -56,6 +56,8 @@ interface Slot {
     card: Card | null;
     /** The flag the slot records, or null when nobody has said (`ADR-0023`). */
     ownership: 'OWNED' | 'RENTED' | null;
+    /** ADR-0029 D1's per-run numerator: the level the card was at in this run, or null. */
+    card_level: number | null;
 }
 
 interface Paginator<T> {
@@ -138,9 +140,13 @@ const form = useForm({
     deck: Object.fromEntries(
         props.slots.map((slot) => [
             slot.position,
-            { support_card_id: slot.selected, ownership: slot.ownership },
+            {
+                support_card_id: slot.selected,
+                ownership: slot.ownership,
+                card_level: slot.card_level === null ? '' : String(slot.card_level),
+            },
         ]),
-    ) as Record<number, { support_card_id: string; ownership: 'OWNED' | 'RENTED' | null }>,
+    ) as Record<number, { support_card_id: string; ownership: 'OWNED' | 'RENTED' | null; card_level: string }>,
 });
 
 /*
@@ -242,6 +248,9 @@ function startReplace(position: number): void {
 function equip(cardId: number): void {
     const slot = pickerSlot();
 
+    // A different card's level is not this card's; the level starts unrecorded for the new pick.
+    form.deck[slot].card_level = '';
+
     go(
         { ...filterQuery(), slot },
         { ...deckQuery(), [slot]: String(cardId) },
@@ -250,6 +259,8 @@ function equip(cardId: number): void {
 }
 
 function clearSlot(position: number): void {
+    form.deck[position].card_level = '';
+
     const deck = deckQuery();
     delete deck[position];
 
@@ -312,11 +323,13 @@ function save(): void {
                         :key="slot.position"
                         v-bind="slot"
                         :ownership="form.deck[slot.position].ownership"
+                        :card-level="form.deck[slot.position].card_level"
                         :filling-slot="picker.fillingSlot"
                         :error="slotError(slot.position)"
                         @replace="startReplace"
                         @ownership="(position, value) => (form.deck[position].ownership = value)"
                         @clear="clearSlot"
+                        @level="(position, value) => (form.deck[position].card_level = value)"
                     />
                 </ul>
 

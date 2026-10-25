@@ -59,6 +59,9 @@ class StoreDeckRequest extends FormRequest
             // draft until Preflight creates that row (`StoreDraftDeckRequest::payload()`).
             // `nullable` because a slot the Trainer cleared carries no flag at all.
             'deck.*.ownership' => ['nullable', 'string', Rule::in(DeckSlot::OWNERSHIP)],
+            // ADR-0029 D1: the level the equipped card was at in this run, numerator only. The cap
+            // and the limit-break count are collection state declined by ADR-0014.
+            'deck.*.card_level' => ['nullable', 'integer', 'min:1', 'max:50'],
         ];
     }
 
@@ -73,6 +76,9 @@ class StoreDeckRequest extends FormRequest
             'deck.*.support_card_id.required' => 'Pick a card for this slot, or set it to "Not equipped".',
             'deck.*.support_card_id.exists' => 'That card is not in the catalogue. Import the support cards first.',
             'deck.*.ownership.in' => 'A slot holds a card you own or one you rented, and nothing else.',
+            'deck.*.card_level.integer' => 'A card level is a whole number between 1 and 50.',
+            'deck.*.card_level.min' => 'A card level is at least 1.',
+            'deck.*.card_level.max' => 'A card level is at most 50.',
         ];
     }
 
@@ -126,5 +132,31 @@ class StoreDeckRequest extends FormRequest
         }
 
         return $ownership;
+    }
+
+    /**
+     * The per-run card level per position, for the rows that posted the key.
+     *
+     * An explicit null clears the slot's level; a row that omits the key keeps whatever the row already
+     * records, the same absent-versus-null distinction `ownershipByPosition()` draws.
+     *
+     * @return array<int, int|null>
+     */
+    public function cardLevelByPosition(): array
+    {
+        $deck = (array) ($this->validated()['deck'] ?? []);
+        $levels = [];
+
+        foreach ($deck as $position => $row) {
+            if (! array_key_exists('card_level', $row)) {
+                continue;
+            }
+
+            $level = $row['card_level'];
+
+            $levels[(int) $position] = $level === null || $level === '' ? null : (int) $level;
+        }
+
+        return $levels;
     }
 }

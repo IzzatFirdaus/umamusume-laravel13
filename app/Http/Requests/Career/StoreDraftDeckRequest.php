@@ -64,7 +64,7 @@ class StoreDraftDeckRequest extends StoreDeckRequest
      * field; the draft needs the gap, so the six rows are rebuilt from `DeckSlot::POSITIONS` rather than
      * from whatever the form happened to post.
      *
-     * @return list<array{position: int, support_card_id: int|null, ownership: string|null}>
+     * @return list<array{position: int, support_card_id: int|null, ownership: string|null, card_level: int|null}>
      */
     public function payload(): array
     {
@@ -82,6 +82,9 @@ class StoreDraftDeckRequest extends StoreDeckRequest
                 'ownership' => $row === null || ! isset($row['ownership'])
                     ? null
                     : (string) $row['ownership'],
+                'card_level' => $row === null || ! isset($row['card_level']) || $row['card_level'] === ''
+                    ? null
+                    : (int) $row['card_level'],
             ];
         }
 

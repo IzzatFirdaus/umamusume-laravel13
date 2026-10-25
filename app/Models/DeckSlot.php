@@ -24,12 +24,13 @@ use InvalidArgumentException;
  * @property int $support_card_id
  * @property int $slot_position one to six: guarded on saving and by the column's CHECK
  * @property string|null $ownership `OWNED` or `RENTED`, or null when nobody has recorded it
+ * @property int|null $card_level the level the equipped card was at in this run, or null when unrecorded
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read TrainingRun $trainingRun
  * @property-read SupportCard $supportCard
  */
-#[Fillable(['training_run_id', 'support_card_id', 'slot_position', 'ownership'])]
+#[Fillable(['training_run_id', 'support_card_id', 'slot_position', 'ownership', 'card_level'])]
 class DeckSlot extends Model
 {
     /** @use HasFactory<DeckSlotFactory> */
@@ -76,6 +77,7 @@ class DeckSlot extends Model
     {
         return [
             'slot_position' => 'integer',
+            'card_level' => 'integer',
         ];
     }
 

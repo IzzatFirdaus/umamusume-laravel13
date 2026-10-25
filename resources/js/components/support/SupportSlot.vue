@@ -58,6 +58,8 @@ const props = defineProps<{
      * renders as `N/A` with a `title` rather than as a default (AGENTS.md §5).
      */
     ownership: 'OWNED' | 'RENTED' | null;
+    /** ADR-0029 D1's per-run numerator: the level the card was at in this run, or null. */
+    cardLevel: number | string | null;
     /** Which slot the picker's Equip buttons write to, for the button's own label. */
     fillingSlot: number;
     /**
@@ -74,7 +76,13 @@ const emit = defineEmits<{
     (event: 'ownership', position: number, ownership: 'OWNED' | 'RENTED'): void;
     /** The Trainer asked to empty this slot; the page writes the blank position. */
     (event: 'clear', position: number): void;
+    /** The Trainer entered the level the card was at in this run. */
+    (event: 'level', position: number, value: string): void;
 }>();
+
+function onLevel(event: Event): void {
+    emit('level', props.position, (event.target as HTMLInputElement).value);
+}
 
 /**
  * The focus target a replacement returns to, so a keyboard user is put back on the row they just
@@ -162,6 +170,21 @@ function focusRow(): void {
         </div>
 
         <div class="flex shrink-0 flex-col items-end gap-2">
+            <!-- ADR-0029 D1: the level the card was at in this run, a numerator only. The cap and the
+                 limit-break count are collection state ADR-0014 declines and this control never asks for. -->
+            <div v-if="card" class="flex flex-col gap-1">
+                <span class="text-xs text-ink-muted">Level</span>
+                <input
+                    type="number"
+                    min="1"
+                    max="50"
+                    class="min-h-11 w-20 rounded-[var(--radius-md)] border border-rule bg-raised px-2 text-sm text-ink"
+                    :value="cardLevel ?? ''"
+                    :aria-label="`Level for ${label}`"
+                    @input="onLevel"
+                />
+            </div>
+
             <!-- Ownership: two buttons, each with its word on it. `aria-pressed` carries the state for a
                  screen reader while the words carry it for everyone, and neither is a colour. -->
             <div

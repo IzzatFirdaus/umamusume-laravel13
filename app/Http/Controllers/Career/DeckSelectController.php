@@ -83,6 +83,7 @@ class DeckSelectController extends Controller
                     'is_friend' => $slot['position'] === DeckSlot::MAX_POSITION,
                     'selected' => (string) ($slot['support_card_id'] ?? ''),
                     'ownership' => $slot['ownership'],
+                    'card_level' => $slot['card_level'] ?? null,
                     'card' => $this->cardRow($cards->get((int) $slot['support_card_id']), $scenarioKey, $dictionary),
                 ],
                 $draft,
@@ -247,6 +248,7 @@ class DeckSelectController extends Controller
                 'position' => $position,
                 'support_card_id' => null,
                 'ownership' => null,
+                'card_level' => null,
             ],
             DeckSlot::POSITIONS,
         );

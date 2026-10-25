@@ -297,3 +297,19 @@ test('carries the career nav with a run-scoped Legacy link', async ({ page }) =>
     // Deck is the live section on the deck screen.
     await expect(nav.getByRole('link', { name: 'Deck', exact: true })).toHaveAttribute('aria-current', 'page');
 });
+
+test('stores the per-run card level on the run deck and reads it back', async ({ page }) => {
+    const url = await builderUrl(page, 'ura_finale');
+
+    await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
+    await page.getByRole('button', { name: /^Equip to Slot 1/ }).first().click();
+    await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped');
+
+    await page.getByLabel('Level for Slot 1').fill('35');
+    await page.getByRole('button', { name: 'Confirm deck' }).click();
+    await page.waitForURL(/\/cockpit$/);
+
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.getByLabel('Level for Slot 1')).toHaveValue('35');
+});

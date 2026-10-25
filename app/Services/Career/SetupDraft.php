@@ -208,6 +208,8 @@ final class SetupDraft
                 'position' => (int) ($slot['position'] ?? 0),
                 'support_card_id' => isset($slot['support_card_id']) ? (int) $slot['support_card_id'] : null,
                 'ownership' => isset($slot['ownership']) && is_string($slot['ownership']) ? $slot['ownership'] : null,
+                // ADR-0029 D1's numerator, or null when the Trainer has not recorded it.
+                'card_level' => isset($slot['card_level']) && is_numeric($slot['card_level']) ? (int) $slot['card_level'] : null,
             ];
         }
 

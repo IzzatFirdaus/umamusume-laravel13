@@ -282,6 +282,8 @@ class TrainingRunController extends Controller
                 // The flag the slot records, or null when nobody has said (ADR-0023). It is the run's
                 // own fact, read from `deck_slots`, never derived from the player's current inventory.
                 'ownership' => $stored->get($position)?->ownership,
+                // ADR-0029 D1: the level the card was at in this run, numerator only.
+                'card_level' => $stored->get($position)?->card_level,
             ];
         }
 
@@ -1030,6 +1032,9 @@ class TrainingRunController extends Controller
             /** @var array<int, string|null> $existing */
             $existing = $run->deckSlots()->pluck('ownership', 'slot_position')->all();
             $posted = $request->ownershipByPosition();
+            /** @var array<int, int|null> $existingLevels */
+            $existingLevels = $run->deckSlots()->pluck('card_level', 'slot_position')->all();
+            $postedLevels = $request->cardLevelByPosition();
 
             $run->deckSlots()->delete();
 
@@ -1038,6 +1043,10 @@ class TrainingRunController extends Controller
                     'support_card_id' => $cardId,
                     'slot_position' => (int) $position,
                     'ownership' => $posted[(int) $position] ?? $existing[(int) $position] ?? null,
+                    // An explicit null clears the level; an omitted key keeps the slot's existing value.
+                    'card_level' => array_key_exists((int) $position, $postedLevels)
+                        ? $postedLevels[(int) $position]
+                        : ($existingLevels[(int) $position] ?? null),
                 ]);
             }
         });

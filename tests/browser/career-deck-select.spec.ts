@@ -113,3 +113,27 @@ test('finds a card by its printed name and epithet', async ({ page }) => {
 
     await expect(dialog.getByText('Tokai Teio [Dream Big!]', { exact: true })).toBeVisible();
 });
+
+test('stores the per-run card level and reads it back after a reload', async ({ page }) => {
+    // The level belongs to a slot that holds a card, so equip one first; the control appears with it.
+    await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('button', { name: 'Equip', exact: true }).first().click();
+    await expect(page.getByText('Deck saved.')).toBeVisible();
+
+    const level = page.getByLabel('Level for Slot 1');
+    await expect(level).toBeVisible();
+    await level.fill('35');
+
+    await Promise.all([
+        page.waitForResponse(
+            (response) => response.url().includes('/career/setup/deck') && response.request().method() === 'PUT',
+        ),
+        page.getByRole('button', { name: 'Save deck' }).click(),
+    ]);
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.getByLabel('Level for Slot 1')).toHaveValue('35');
+});

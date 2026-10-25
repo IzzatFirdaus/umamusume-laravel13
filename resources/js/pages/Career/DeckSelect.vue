@@ -58,6 +58,7 @@ interface Slot {
     is_friend: boolean;
     selected: string;
     ownership: 'OWNED' | 'RENTED' | null;
+    card_level: number | null;
     card: SlotCard | null;
 }
 
@@ -111,8 +112,9 @@ const form = useForm({
         props.slots.map((slot) => [slot.position, {
             support_card_id: slot.selected,
             ownership: slot.ownership ?? '',
+            card_level: slot.card_level === null ? '' : String(slot.card_level),
         }]),
-    ) as Record<number, { support_card_id: string; ownership: string }>,
+    ) as Record<number, { support_card_id: string; ownership: string; card_level: string }>,
     deck_slot: props.picker.fillingSlot,
 });
 
@@ -207,7 +209,7 @@ function save(after?: number): void {
 function equipCard(cardId: number): void {
     const ownership = form.deck[filling.value]?.ownership || 'OWNED';
 
-    form.deck[filling.value] = { support_card_id: String(cardId), ownership };
+    form.deck[filling.value] = { support_card_id: String(cardId), ownership, card_level: '' };
     save();
 }
 
@@ -242,7 +244,7 @@ onMounted(() => {
 function clearSlot(position: number): void {
     filling.value = position;
     form.deck_slot = position;
-    form.deck[position] = { support_card_id: '', ownership: '' };
+    form.deck[position] = { support_card_id: '', ownership: '', card_level: '' };
     save(position);
 }
 
@@ -327,10 +329,12 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                         :is_friend="slot.is_friend"
                         :card="slot.card"
                         :ownership="slot.ownership"
+                        :card-level="form.deck[slot.position].card_level"
                         :filling-slot="filling"
                         @replace="replace"
                         @ownership="setOwnership"
                         @clear="clearSlot"
+                        @level="(position, value) => (form.deck[position].card_level = value)"
                     />
                 </ul>
 
