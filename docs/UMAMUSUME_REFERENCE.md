@@ -169,6 +169,14 @@ community wiki's **max 40%** is the top caption rather than a fifth equal step, 
 past Lv3** (+5, then +5). §8.4 cites this subsection for the closed per-level-discount gap, so the values sit
 here and conflict row 16 records what superseded it.
 
+**Unique-skill levels, verified 2026-10-25.** A Unique skill levels during a run, not only when it is
+acquired: the Senior-Year fan thresholds raise it, and a star unlock at 3★ or above adds one. The levels run
+1 to 6, so Lv 3 is a normal mid-run state rather than a ceiling. The thresholds are the URA-shaped set the
+Grand Concert section records (60,000 / 70,000 / 120,000 for a turf trainee; 40,000 / 60,000 / 80,000 for a
+dirt-leaning one). This is a different quantity from the hint level above (Unique-skill level vs hint
+Lv1-Lv5); the two must not be summed or converted. Source: [Game8 Unique Skill
+guide 537920](https://game8.co/games/Umamusume-Pretty-Derby/archives/537920), fetched 2026-10-25.
+
 #### 1.1.5 Training failure risk and mitigation
 
 Failure probability scales inversely with Energy: 「体力が低いほどトレーニングで失敗する確率が高くなります」 [Game8 (2026-09-10)](https://game8.jp/umamusume/372572). A failure resolves into one of three penalties, in that guide's words 「体力低下・やる気低下・ケガ（能力低下）のいずれかのペナルティが発生します」 [Game8 (2026-09-10)](https://game8.jp/umamusume/372572): Energy loss, mood loss, or an injury that lowers a stat. [GameWith, ⚠️ STALE: 2023-02-25](https://gamewith.jp/uma-musume/article/show/257432) records the older measured range for the stat hit at −5 to −10, plus a random negative label.
@@ -493,6 +501,8 @@ Rarity is R, SR, SSR on `[Both]` (export `rarity` 1/2/3, confirmed by the Game8 
 `[Global]` keeps the original upgrade model. A card takes four breaks by consuming copies of itself, so a fully broken card is five copies, and two identical copies cannot sit in one deck, which is why duplicates are spent instead of equipped. English guides say Limit Break and score at "Max Limit Break (MLB/4LB)"; official `[Global]` tutorial material names the item path "Support Cards and Uncap Crystals", matching the export entries Rainbow Uncap Crystal and Gold Uncap Crystal, described as "Uncaps an SSR Support Card" and "Uncaps an SR Support Card" `[Global]`.
 
 `[Global]` level caps per break are **confirmed from the client** as of 2026-09-27, closing the gap this line carried. The deck editor draws four diamonds on every card slot and fills one per completed break, and the level readout next to them is `30 + 5 × breaks` for SSR: in `Screenshot 2026-07-15 155016.png` three cards show ◇◇◇◇ at `Lvl 30`, two show ◆◇◇◇ at `Lvl 35`, and one shows ◆◆◆◆ at `Lvl 50`. That matches the 2021 guide's +5-per-break rule and its ceiling set of SSR 50 / SR 45 / R 40, and it is corroborated independently by the export: the effect-value ladder in 1.4.7 stops at level 50 for `rarity` 3, at 45 for `rarity` 2 and at 40 for `rarity` 1, which is only possible if those are the three rarities' caps. The unbroken bases are therefore SSR 30, SR 25, R 20.
+
+**Explicit cap sets and Unity Cup's teammate rule, verified 2026-10-25.** The per-rarity ladders are SSR 30 / 35 / 40 / 45 / 50, SR 25 / 30 / 35 / 40 / 45, and R 20 / 25 / 30 / 35 / 40, base plus four breaks at +5, which is the rule the client measurement above confirms. GameTora's Unity Cup page states that a Unity Cup teammate's initial and maximum stats do **not** depend on support-card level or limit break, so the level stored here matters for support effects (A-0.4's interpolation), not for teammate stats. Sources: [Game8 uncap guide 541847](https://game8.co/games/Umamusume-Pretty-Derby/archives/541847) and [GameTora Unity Cup](https://gametora.com/umamusume/unity-cup), fetched 2026-10-25.
 
 `[JP]` replaced that model at the 2025-10-07 maintenance: card levels and the Support Pt currency were removed, Support Pt was refunded as money, 上限解放 was renamed 性能解放, and a duplicate now applies the release stage automatically. Effect values at a given stage equal what the old fully levelled card produced, the level-40 gate on a card's unique bonus is gone, and the team arena bonus scales off rarity plus release stage instead of levels. Current `[JP]` guides still score 無凸 (no break) to 完凸 (four breaks) without quoting levels, which confirms the four-stage ceiling survived the change.
 
@@ -957,6 +967,19 @@ Game8 scenario pages, with the source noted per claim.
   November of Senior year, chosen by the team's highest stat rank.
 * **Cap shape.** Wit is the outlier at 1800 against 1300 elsewhere, which is the mechanical reason a
   Wit-forward deck is unusually strong here.
+
+**Per-stat ranks and the Spirit gauge, verified 2026-10-25.** Team Rank is per stat, one letter each for
+Speed, Stamina, Power, Guts and Wit, and the set the game prints is **`G / F / E / D / C / B / A / S`**.
+`S+` is the **overall** team rank added by the 2026-07-01 update, not a per-stat value; a per-stat select
+must not offer it. Facility level follows the per-stat rank: **F/G → 1, D/E → 2, B/C → 3, A → 4, S → 5**.
+The Spirit gauge is **per team member**, not per run: every member of the Unity team (deck supports, story
+characters, joiners) carries their own gauge, a burst becomes available once per member, and it fires once.
+No source publishes a numeric maximum: the client shows a bar with a flame icon, and a full gauge gives
+roughly a 40% chance per turn for the burst to appear. A single run-level `current_spirit` number is
+therefore not a game value. Sources: [GameTora Unity Cup](https://gametora.com/umamusume/unity-cup),
+[Game8 Unity Cup 545572](https://game8.co/games/Umamusume-Pretty-Derby/archives/545572),
+[Game8 update guide 563657](https://game8.co/games/Umamusume-Pretty-Derby/archives/563657), and
+[uma.guide Unity Cup](https://uma.guide/guides/unity-cup-career-guide), fetched 2026-10-25.
 
 #### 2.2.3 Trackblazer `[Global]`
 
