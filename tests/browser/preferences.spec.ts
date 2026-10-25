@@ -431,7 +431,7 @@ test('the General category offers Layout width and Show on Dashboard controls', 
 
     // Show on Dashboard: five checkboxes, all checked by default (none hidden).
     await expect(page.getByText('Show on Dashboard')).toBeVisible();
-    for (const label of ['Pick up where you left off', 'Quick actions', 'Recent Veterans', 'Needs you']) {
+    for (const label of ['Pick up where you left off', 'Quick actions', 'Recent veterans', 'Needs you']) {
         await expect(page.getByRole('checkbox', { name: label })).toBeVisible();
         await expect(page.getByRole('checkbox', { name: label })).toBeChecked();
     }
@@ -486,7 +486,7 @@ test('Reset layout to defaults restores bento and every card with a two-click co
     // Second click commits: Bento is selected again and every card is shown.
     await page.getByRole('button', { name: 'Reset?' }).click();
     await expect(page.getByRole('radio', { name: 'Standard', exact: true })).toBeChecked();
-    for (const label of ['Pick up where you left off', 'Quick actions', 'Recent Veterans', 'Needs you']) {
+    for (const label of ['Pick up where you left off', 'Quick actions', 'Recent veterans', 'Needs you']) {
         await expect(page.getByRole('checkbox', { name: label })).toBeChecked();
     }
     await expect(page.getByRole('status').filter({ hasText: 'Layout width reset to defaults.' })).toBeAttached();

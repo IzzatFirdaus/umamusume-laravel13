@@ -380,7 +380,7 @@ test('honours the dashboard layout preference: bento by default, focused single-
     // Default is bento: the grid carries the bento layout and the four always-present regions show.
     const grid = page.locator('[data-layout]');
     await expect(grid).toHaveAttribute('data-layout', 'standard');
-    for (const name of ['PICK UP WHERE YOU LEFT OFF', 'QUICK ACTIONS', 'RECENT VETERANS', 'NEEDS YOU']) {
+    for (const name of ['PICK UP WHERE YOU LEFT OFF', 'QUICK ACTIONS', 'Recent veterans', 'NEEDS YOU']) {
         await expect(page.getByRole('region', { name })).toBeVisible();
     }
 

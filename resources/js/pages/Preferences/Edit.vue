@@ -56,7 +56,7 @@ const form = useForm({
 const DASHBOARD_CARDS: ReadonlyArray<{ id: string; label: string }> = [
     { id: 'active_career', label: 'Pick up where you left off' },
     { id: 'quick_actions', label: 'Quick actions' },
-    { id: 'recent_veterans', label: 'Recent Veterans' },
+    { id: 'recent_veterans', label: 'Recent veterans' },
     { id: 'data_status', label: 'Needs you' },
 ];
 

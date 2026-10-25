@@ -529,7 +529,7 @@ const kpiValueClass = 'font-mono text-xl tabular-nums text-ink-strong';
                 data-card="recent_veterans" :class="[cardBase, cardSpan('recent_veterans')]"
             >
                 <h2 id="recent-veterans-heading" class="text-lg font-semibold text-ink-strong">
-                    Recent Veterans
+                    Recent veterans
                 </h2>
 
                 <template v-if="props.recentVeterans.total === 0">
@@ -627,7 +627,7 @@ const kpiValueClass = 'font-mono text-xl tabular-nums text-ink-strong';
 
                 <!-- "Needs you" (HFW index.html right-hand card) is carried by the two cards that
                      already own its facts: the Review queue row is in Quick Actions below, and the
-                     Veteran count is the Recent Veterans card's own total. Repeating them here grew
+                     Veteran count is the Recent veterans card's own total. Repeating them here grew
                      the compact stack past its content budget without adding a fact, so the tiles are
                      not drawn a third time. -->
 
