@@ -3513,6 +3513,8 @@ code.
 
 **2026-10-25 — awaiting ruling, not ADR.** A-0.12's mechanism per ADR-0029 line 88 is a dated travel note on FR-C-2, not a new PRD story. The choice is travel-note (permissive) vs. decline (closes the KI), and both are lighter than a schema ADR. Awaiting owner ruling.
 
+**2026-10-25 — travel note landed (R13).** FR-C-2 now permits the two columns without obligating them. A-0.12 remains `openable but unopened`; open the slice only when a Trainer decision changes based on the banner or avatars, otherwise the KI moves to `wontfix` at the next audit. No schema change is owed by this note.
+
 ---
 
 ### KI-125 The 20/20 team-members counter has no stored roster to count (Group A / A-0.13) - FILED 2026-10-24 (audit addendum)
