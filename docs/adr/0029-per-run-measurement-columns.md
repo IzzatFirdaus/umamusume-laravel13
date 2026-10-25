@@ -5,7 +5,7 @@
   code: not built — no column or table for any of the eight exists: deck_slots carries support_card_id, slot_position and ownership only; turn_entries carries no facility_banner and no training_card_ids; training_runs carries no team_stat_grades and no current_spirit; there is no team_roster, no skill_levels and no roster-skill table
   superseded-by: —
   amended-by: —
-  open: the eight storages are authorised but unbuilt, so every audit row stays blocked until a slice migrates it; A-0.4 stores nothing and is computed from A-0.5's column; A-0.13 and A-0.14 have no PRD anchor and are marked needs-PRD-citation; US-12's sentence "no card level, limit break or Unique Perk state is stored anywhere" needs a dated travel note if this ADR is accepted
+  open: the eight storages are authorised but unbuilt, so every audit row stays blocked until a slice migrates it; A-0.4 stores nothing and is computed from A-0.5's column, and its lookup prerequisite is the anchor vector already stored on support_cards.effects and named by support_effects — what does not exist is a reader that answers at an arbitrary level rather than only at cap (see the 2026-10-25 note); A-0.13 and A-0.14 have no PRD anchor and are marked needs-PRD-citation; US-12's sentence "no card level, limit break or Unique Perk state is stored anywhere" needs a dated travel note if this ADR is accepted
 -->
 
 Status: **Proposed** — drafted 2026-10-24 for the owner's review. The agent drafts an ADR; the owner accepts it. Nothing here builds a column, a table, a model, or a slice.
@@ -37,7 +37,7 @@ Eight facts, eight storages. Each row authorises a column or a table; none build
 
 | Item | KI | Storage | Type | Semantics | PRD anchor |
 |---|---|---|---|---|---|
-| A-0.4 | KI-116 | none — computed from `deck_slots.card_level` and `support_effects` | derived read-out | computed, never stored | FR-C-6, US-12 |
+| A-0.4 | KI-116 | none — computed from `deck_slots.card_level` and the anchors on `support_cards.effects`, named by `support_effects`; prerequisite: a level-parameterised reader, which does not exist (only `SupportCardEffects::atCap()`) | derived read-out | computed, never stored | FR-C-6, US-12 |
 | A-0.5 | KI-117 | `deck_slots.card_level` | integer, nullable | **numerator only** | FR-C-6, US-12 (travel note) |
 | A-0.12 | KI-124 | `turn_entries.facility_banner`, `turn_entries.training_card_ids` | string; list or join table | entered | FR-C-2, US-3 (travel note) |
 | A-0.13 | KI-125 | `team_roster` | table | counted roster | needs-PRD-citation |
@@ -48,7 +48,7 @@ Eight facts, eight storages. Each row authorises a column or a table; none build
 
 **D1 — A-0.5 stores the numerator only.** `deck_slots.card_level` holds the level the card was at in this run, as the client showed it at record time. It is not the cap, not the limit-break count, not the perk level. Those three are collection state, and the collection stays declined by `ADR-0014`. A slice that wants the cap returns for a new ruling.
 
-**D2 — A-0.4 is a derivation, not a column.** The reached effect values are computed from `deck_slots.card_level` and the catalog anchors, with floor-interpolation between them, exactly as `ADR-0005` correction 4 already ruled. No per-level effect table is authorised.
+**D2 — A-0.4 is a derivation, not a column.** The reached effect values are computed from `deck_slots.card_level` and the catalog anchors, with floor-interpolation between them, exactly as `ADR-0005` correction 4 already ruled. No per-level effect table is authorised. The anchors this reads are already stored — one row per effect on `support_cards.effects`, eleven values at levels 1/5/10/15/20/25/30/35/40/45/50 with `-1` meaning "no anchor at that level", named by `support_effects` (`SupportCardEffects`, which reads the whole vector and joins the dictionary). What the tree lacks is a **reader that answers at an arbitrary level**: `SupportCardEffects::atCap()` deliberately takes the last non-`-1` anchor and never interpolates. A-0.4's prerequisite is therefore that reader, not a table — see the 2026-10-25 note.
 
 **D3 — B-0.6 stores the reading, not the band.** `training_runs.current_spirit` holds the integer the client showed. It carries no maximum, because no source states one; the gauge's maximum stays null and the panel keeps saying so. No readiness band is derived.
 
@@ -108,3 +108,42 @@ The three addendum items (`A-0.12`, `A-0.13`, `A-0.14`) and the four prior `bloc
 ## Ledger
 
 - 2026-10-24 · **drafted** — `Proposed` by the Group A/B audit reconciliation pass. Authorises the eight per-run measurement facts as storage and builds none of them. The collection decline, the catalogue-aptitude rule, the R37 hint-pool cut, the held win-probability question and the §6.11 hold are all left standing; none of the ADRs this document references was edited, and no PRD requirement was re-typed.
+
+- 2026-10-25 · **amended** (`amended-by: 2026-10-25 consolidation reconciliation`) — three disagreements
+  surfaced against `docs/proposals/remaining-work-roadmap.md` by
+  `docs/proposals/group-ab-consolidated-plan.md`, each ruled in this ADR's favour, plus one correction to
+  this ADR's own A-0.4 reasoning. Status stays `Proposed`.
+
+## Dated note · 2026-10-25 · consolidated-plan reconciliation
+
+A consolidation pass (`docs/proposals/group-ab-consolidated-plan.md`) surfaced three disagreements between
+this ADR and `docs/proposals/remaining-work-roadmap.md`. All three are ruled in this ADR's favour. The
+roadmap rows are left as written; this note is the correction.
+
+1. **A-0.4's storage shape.** This ADR (D2): nothing stored, derived from `deck_slots.card_level`. Roadmap
+   slice 1.2: a `deck_slots.reached_effects` JSON column. **Ruled: derive.** A stored blob denormalises what
+   the anchor vector already holds and needs its own writer kept in step with every level edit.
+
+   **Correction to this ADR's own reasoning.** The prerequisite is *not* a missing lookup table. Verified at
+   this HEAD: `support_cards.effects` stores one row per effect as eleven values at levels
+   1/5/10/15/20/25/30/35/40/45/50 with `-1` for "no anchor at that level"; `support_effects` names those
+   rows; `App\Services\SupportCardEffects` already reads the whole vector and joins the dictionary. What does
+   not exist is a reader answering **at an arbitrary level** — `SupportCardEffects::atCap()` takes the last
+   non-`-1` anchor and states plainly that it does not interpolate. A-0.4 is therefore blocked on `A-0.5`
+   *plus a level-parameterised reader method*, not on a table. An earlier draft of this pass asserted the
+   lookup was unbuilt; that was wrong, and it is corrected here rather than dropped.
+
+2. **Column and table names.** This ADR: `turn_entries.facility_banner`, `turn_entries.training_card_ids`,
+   `team_roster` (table). Roadmap: `tile_banner`, `tile_card_avatars`, `training_runs.team_member_count*`.
+   **Ruled: this ADR's names.** `facility_banner` names what the facility showed, not what the tile renders;
+   `training_card_ids` is the same grain as `preview_gains`. A `team_roster` table derives its own count by
+   `count(*)`, whereas a pair of count columns cannot derive the roster — so the columns would lose what the
+   source reads (section 1.9's eighteen named members).
+
+3. **Referenced spec filename and register gate.** `career-cockpit.spec.ts` carries the Group A cases (lines
+   699, 715, 728, 739); `career-cockpit-forms.spec.ts` is a different, existing file. **Ruled: the former** —
+   the roadmap's reference was stale. The register gate is `grep -cE "^### KI-" KNOWN-ISSUES.md`, measured at
+   **71** on 2026-10-25.
+
+Nothing here changes the status: this ADR remains `Proposed`, and the owner's acceptance (R4), the `US-12`
+travel note (R7) and the roster PRD citation (R8) are all still outstanding.
