@@ -3674,3 +3674,35 @@ label has read `Legacy Lab` throughout.
 **Why this is filed rather than fixed.** The sibling `Deck` collision was not in the original finding,
 and the three options trade a visible-string change against an invisible one. That is an owner call
 about the career vocabulary (`lang/en/uma.php` owns displayed words), not a drive-by edit.
+
+### KI-132 Slice 2.4 (R1 = A) deferred - R1 requires a payload contract change, not a two-key workaround - FILED 2026-10-25 (R8/C.4 close-out)
+**Status: OPEN - blocked: own pass.** No workaround ships; the behaviour change waits for a contract pass.
+
+**Current state.** R1 = A ruled "ceilings-only save stores a target with unset fields named." The ruling
+is about the target itself being partial, not about storing its parts in a sibling key.
+`BuildTargetPayload::fromArray()` (`app/Models/Advisor/BuildTargetPayload.php:64`) calls
+`assertKeys($raw, self::KEYS, 'A build target')` (`:66`; six top-level keys, `purpose` among them) and
+`assertKeys($targets, $order, 'A build target targets')` (`:140`; all five stat keys), throwing
+`InvalidArgumentException` otherwise. A partial payload stored in `build_target` throws on read in
+`TrainingRun::buildTarget()` (`app/Models/TrainingRun.php:267`), i.e. on every cockpit render of that
+run. Satisfying R1 = A therefore requires the payload class to model complete/partial/absent and every
+consumer to handle a null purpose: `TrainerAdvisor::advise()`
+(`app/Services/Advisor/TrainerAdvisor.php:77`), `NextDecision`
+(`app/Services/Advisor/NextDecision.php:70,280,522`), and the controllers that read `buildTarget()`
+(`CockpitController:165,547`, `RacePlannerController:415,463`, `EventDecisionController:110`,
+`PreflightController:172`). That is a contract change, not the "three controllers/services" the
+ruling's cost estimate assumed.
+
+**Two paths, both require their own pass.**
+- **Contract change (R1 = A as ruled).** New ADR (ADR-0030) for the payload's three-state contract, then
+  a slice. High fidelity to the ruling; medium scope.
+- **Two-key split.** `build_target` unchanged; ceilings and priorities go in a sibling `target_meta`
+  draft key. Small scope; but satisfies the behavior without changing the contract. Reads as a
+  workaround, not R1 = A.
+
+**Current classification:** `blocked: own pass`. Recommend the contract-change path if the owner wants
+R1 = A honoured literally; the two-key path if the *behavior* was the point and the JSON shape was
+incidental.
+
+**Closure:** none. This entry closes when the chosen path's slice lands and a payload round-trip test
+proves complete, partial and absent targets all read back.
