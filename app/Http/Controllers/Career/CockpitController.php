@@ -458,8 +458,8 @@ class CockpitController extends Controller
             foreach ($legacy->legacies as $index => $legacyData) {
                 $source = $index === 0 ? 'Parent A' : 'Parent B';
 
-                foreach ((array) ($legacyData['sparks'] ?? []) as $spark) {
-                    if (($spark['kind'] ?? null) !== 'blue') {
+                foreach ((array) $legacyData['sparks'] as $spark) {
+                    if ($spark['kind'] !== 'blue') {
                         continue;
                     }
 
@@ -474,7 +474,7 @@ class CockpitController extends Controller
                 // payload recorded them; a names-only Legacy omits the key.
                 foreach ((array) ($legacyData['ancestors_sparks'] ?? []) as $ancestorSparks) {
                     foreach ((array) $ancestorSparks as $spark) {
-                        if (($spark['kind'] ?? null) !== 'blue') {
+                        if ($spark['kind'] !== 'blue') {
                             continue;
                         }
 
@@ -515,7 +515,7 @@ class CockpitController extends Controller
         foreach ($run->deckSlots->sortBy('slot_position') as $slot) {
             $rows[] = [
                 'slot' => $slot->slot_position,
-                'name' => $slot->supportCard?->displayName(),
+                'name' => $slot->supportCard->displayName(),
                 'friend' => $slot->isFriendSlot(),
                 'ownership' => $slot->ownership,
             ];

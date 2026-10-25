@@ -98,8 +98,7 @@ final class SkillsPlannerController extends Controller
             ->pluck('id')
             ->all();
 
-        /** @var list<array{id: int, name: string, sp_cost: int}> $rows */
-        // ponytail: the payload is capped at the 100 cheapest rows; the seeded Global catalogue prices
+                // ponytail: the payload is capped at the 100 cheapest rows; the seeded Global catalogue prices
         // over a thousand skills and shipping all of them is a slow page for a reference list. The full
         // pool size travels as `count` so the panel can say "cheapest 100 of N". Upgrade path: paginate
         // the list if the panel ever needs the whole pool at once.
