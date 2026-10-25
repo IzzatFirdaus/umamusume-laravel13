@@ -154,6 +154,14 @@ const save = (): void => {
                 />
             </label>
 
+            <!-- R4-13 / ruling R2 (2026-10-25): the editor offers no rank input, and silence about that
+                 leaves a Trainer who read the client's rank with no path from this panel. The rank has an
+                 owner already — a turn's team-race event records it — so the fix is this sentence rather
+                 than a second writer for one fact. -->
+            <p class="text-xs text-ink-muted @3xl:col-span-2">
+                Team Rank is recorded through a turn's team-race event, not through this editor.
+            </p>
+
             <div class="flex flex-col gap-1">
                 <button
                     type="submit"

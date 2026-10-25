@@ -42,6 +42,14 @@ use Inertia\Testing\AssertableInertia as Assert;
  * Its badges are the two states the advisor's axis allows (`resources/js/types.ts:60-66`, owner ruling
  * 2a): a value with no reading carries **no badge at all**, because a badge qualifies a displayed value
  * and `unknown` beside an absence was retired here rather than on the panels.
+ *
+ * **Corrected 2026-10-25 (owner ruling R3): the first sentence above is superseded.** The 2026-10-11
+ * "no focusable control in the Scenario panel region" ruling was amended in `DESIGN.md` §5(a) to permit
+ * `AbsenceValue`'s disclosure there, and its premise was wrong on the tree: `TeamRankLadderPanel` renders
+ * one "Record this race" link per ladder row, so the region was never control-free and the browser guard
+ * at `unity-cup-panel.spec.ts` never pinned a zero. This file's two source scans are unchanged by that —
+ * they covered `UnityCupTeamBoard.vue` and `UnityCupTournamentReadiness.vue`, neither of which renders a
+ * control — and the guard now asks what a stop can do instead of how many there are.
  */
 
 /**
@@ -284,6 +292,16 @@ it('keeps the refused vocabulary and every number out of the two new components'
             // Owner ruling 1: the panel region carries no focusable control.
             ->and($source)->not->toMatch('/<(button|a\s|details|input|select|textarea)|tabindex=/');
     }
+});
+
+it('says where Team Rank is recorded rather than leaving the editor silent (R4-13, ruling R2)', function (): void {
+    $source = (string) file_get_contents(resource_path('js/components/career/UnityCupEditor.vue'));
+
+    // R2 = A: copy-only. The rank already has a writer — a turn's team-race event — so the defect is
+    // that the editor does not say so, not that it lacks an input. A rank field appearing here would be
+    // a second writer for one fact, which is what this case fails on.
+    expect($source)->toContain("Team Rank is recorded through a turn's team-race event, not through this editor.")
+        ->and($source)->not->toMatch('/name=\"team_rank\"|id=\"team_rank\"/');
 });
 
 it('leaves the ranking engine alone and reads a stat through the model rather than a new map', function (): void {
