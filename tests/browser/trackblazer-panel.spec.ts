@@ -239,9 +239,13 @@ test('the race plan prints three periods, their published figures and the gap th
     await expect(periods.getByText('300', { exact: true })).toHaveCount(2);
 
     // Nothing is entered against any period on a fresh run, so the plan column is N/A and the floor
-    // that depends on it is N/A too: three periods, six absences, each with its reason printed.
+    // that depends on it is N/A too: three periods, six absences. The plan cells are plain N/A spans;
+    // the floor cells go through `AbsenceValue`, whose summary carries the reason in its accessible
+    // name, so an exact "N/A" match counts only the three plan cells and the disclosures are counted
+    // by their own element.
     await expect(plan.getByText('Entered races')).toHaveCount(3);
-    await expect(plan.getByText('N/A', { exact: true })).toHaveCount(6);
+    await expect(plan.getByText('N/A', { exact: true })).toHaveCount(3);
+    await expect(plan.locator('details')).toHaveCount(3);
     await expect(plan.getByText(/No race is entered against this period/)).toHaveCount(3);
 
     // The first checkpoint is ahead of the run, so the list is unfolded.
@@ -376,12 +380,12 @@ test('the ledger names what this run holds, against the cap, with the publisher 
     await expect(held.getByText(/1 of 5/)).toBeVisible();
 
     // The publisher's rating is a separate line from the count, and its state is the word Estimated:
-    // ProvenanceBadge carries the state as its accessible name, so the name is what is asserted. One
-    // badge per held item, plus the reserve's own Estimated badge, which lives in the ledger's grid
-    // rather than in this list.
+    // ProvenanceBadge carries the state as its accessible name, so the name is what is asserted. The
+    // count itself is a sum over stored purchases, so its state is Calculated (`ADR-0020` §2), and the
+    // reserve's own Estimated badge lives in the ledger's grid rather than in this list.
     await expect(held.getByText('Must Buy')).toBeVisible();
     await expect(held.getByRole('img', { name: /^Estimated/ })).toHaveCount(1);
-    await expect(held.getByRole('img', { name: /^Confirmed/ })).toHaveCount(1);
+    await expect(held.getByRole('img', { name: /^Calculated/ })).toHaveCount(1);
     await expect(ledger.getByRole('img', { name: /^Estimated/ })).toHaveCount(2);
 });
 

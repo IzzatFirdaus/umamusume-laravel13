@@ -65,7 +65,7 @@ test('renders six slots, each with a labelled ownership toggle, and the seventh-
 
     // A slot with no card states the gap and offers the way to fill it, rather than showing a blank.
     await expect(page.locator('#deck-slot-1')).toContainText('Not equipped');
-    await expect(page.getByRole('button', { name: 'Replace the card in Slot 1' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Choose a card for Slot 1' })).toBeVisible();
 
     // Ownership is a two-button group per slot, each button carrying its word. The state is never a
     // filled box or a colour, which is what `design-2.0` §17 forbids.
@@ -103,7 +103,7 @@ test('sizes every control on the screen to the 44px contract', async ({ page }) 
         ['button:has-text("Filter")', 'Filter'],
         ['button:has-text("Confirm deck")', 'Confirm deck'],
         ['button:has-text("Owned")', 'an Owned toggle'],
-        ['button:has-text("Replace")', 'a Replace button'],
+        ['button:has-text("Choose a card")', 'a Choose a card button'],
     ] as const) {
         const box = await page.locator(selector).first().boundingBox();
         expect(box?.height ?? 0, `${what} is not sized to the 44px contract`).toBeGreaterThanOrEqual(44);
@@ -113,9 +113,10 @@ test('sizes every control on the screen to the 44px contract', async ({ page }) 
 test('replaces a slot with the keyboard alone and returns focus to the slot it changed', async ({ page }) => {
     await builderUrl(page, 'ura_finale');
 
-    // The path a keyboard user has: focus the Replace button, press it, then reach the picker's Equip
-    // button. No drag, and no per-slot select holding five hundred options.
-    const replace = page.getByRole('button', { name: 'Replace the card in Slot 2' });
+    // The path a keyboard user has: focus the slot's fill button (an empty slot's control says
+    // "Choose a card"), press it, then reach the picker's Equip button. No drag, and no per-slot
+    // select holding five hundred options.
+    const replace = page.getByRole('button', { name: 'Choose a card for Slot 2' });
     await replace.focus();
     await page.keyboard.press('Enter');
 
@@ -153,7 +154,7 @@ test('shows the analysis figures with their labels and no bar', async ({ page })
     await expect(page.getByText('Nothing to analyse yet.')).toBeVisible();
 
     // Put one card in so the analysis has something to read.
-    await page.getByRole('button', { name: 'Replace the card in Slot 1' }).click();
+    await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
     await page.getByRole('button', { name: /^Equip to Slot 1/ }).first().click();
     await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped');
 
@@ -250,7 +251,7 @@ test('never paints a placeholder frame or a stranded anchor in the picker', asyn
 test('narrowing the picker leaves the six picks exactly where they were', async ({ page }) => {
     await builderUrl(page, 'ura_finale');
 
-    await page.getByRole('button', { name: 'Replace the card in Slot 1' }).click();
+    await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
     await page.getByRole('button', { name: /^Equip to Slot 1/ }).first().click();
     await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped');
 

@@ -32,6 +32,14 @@ import { buildAxe } from '../utils/accessibility';
 const RECORD_ONLY_NOTICE =
     'Record only. This screen stores and compares what you enter. It does not compute inheritance.';
 
+test.beforeEach(async ({ page }) => {
+    // The deck picker renders up to 25 thumbnails, and `artisan serve` is one process: the queue turns
+    // a page view into ~50 s and stretched two cases in this file to the 180 s timeout. No assertion
+    // here reads a decoded image, so refuse them at the browser; `support-deck.spec.ts` documents the
+    // same lever for the same reason.
+    await page.route('**/artwork/**', (route) => route.abort());
+});
+
 async function hydrate(page: import('@playwright/test').Page, url: string): Promise<void> {
     await page.goto(url, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
@@ -219,9 +227,13 @@ test.describe('Setup step 4 — Legacy', () => {
         await page.getByRole('button', { name: 'Save Legacy' }).click();
         await expect(page.getByText('Legacy recorded.')).toBeVisible();
 
-        await hydrate(page, '/career/setup/preflight');
-
-        await expect(page.getByText(/Grandparent A1:\s*Daiwa Scarlet\s*Rank UG/)).toBeVisible();
+        // The stored read-back is the browser-observable half of R3-09: the rank letter the Trainer
+        // read off the client is now a field the step re-seeds from the draft. Preflight prints the
+        // parent count and the Affinity grade, not each grandparent's rank, so this case reads the
+        // rank where the screen actually renders it; the payload half is `CareerLegacyDeckStepsTest`'s.
+        await hydrate(page, '/career/setup/legacy');
+        await expect(page.locator('#ancestor-rank-letter-parent_a-0')).toHaveValue('UG');
+        await expect(page.locator('#ancestor-parent_a-0')).toHaveValue('Daiwa Scarlet');
     });
 });
 
@@ -235,9 +247,12 @@ test.describe('Setup step 5 — Support deck', () => {
             page.getByRole('navigation', { name: 'Setup steps' }).getByRole('link', { name: 'Support deck' }),
         ).toHaveAttribute('aria-current', 'step');
 
-        // No scenario in the draft yet, and the page says so with its reason rather than defaulting
-        // to the baseline the planner's composition fallback would lend (`ADR-0020` §2).
-        await expect(page.getByText('Scenario: N/A')).toBeVisible();
+        // No scenario in the draft yet, and the page says so through `AbsenceValue`'s disclosure:
+        // the summary carries the reason and the marker is inside it, so there is no bare
+        // "Scenario: N/A" text node to read (`DESIGN.md` §5(a)).
+        const scenarioAbsence = page.locator('details').filter({ hasText: /so a card's Scenario Link cannot be checked/ });
+        await expect(scenarioAbsence).toBeVisible();
+        await expect(scenarioAbsence).toContainText('N/A');
 
         // Six named positions, the friend role on position six whatever card may sit there
         // (`ADR-0014` correction 1), and an empty slot stated as a statement rather than a blank.
@@ -267,17 +282,20 @@ test.describe('Setup step 5 — Support deck', () => {
     test('equips from the picker, marks the flag, and reads each write back from the session', async ({ page }) => {
         await hydrate(page, '/career/setup/deck');
 
-        // Server-resolved picker aim: with an empty draft the first write targets the first slot,
-        // and the equip buttons carry that slot in their own label.
-        await expect(page.getByText('The picker writes to Slot 1.')).toBeVisible();
+        // The slot owns the picker aim: the empty slot's own button opens the dialog for Slot 1
+        // (R4-20/R4-21 moved this off the page-level select the older case drove).
+        await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
+        const dialog = page.getByRole('dialog', { name: 'Choose a card for Slot 1' });
+        await expect(dialog).toBeVisible();
 
-        await page.locator('input[name="q"]').fill('Agnes Digital');
-        await page.getByRole('button', { name: 'Filter' }).click();
+        await dialog.locator('input[name="q"]').fill('Agnes Digital');
+        await dialog.getByRole('button', { name: 'Filter' }).click();
         await expect(page).toHaveURL(/q=Agnes(\+|%20)Digital/);
-        await expect(page.getByText(/match any type and a name containing Agnes Digital/)).toBeVisible();
+        const agnes = dialog.locator('ul > li').filter({ hasText: 'Agnes Digital' }).first();
+        await expect(agnes).toBeVisible();
 
-        await page.selectOption('#deck-pick', { index: 1 });
-        await page.getByRole('button', { name: 'Equip owned to Slot 1' }).click();
+        // The dialog's own Equip button names the card it equips, so there is no select to read back.
+        await agnes.getByRole('button', { name: 'Equip', exact: true }).click();
         await expect(page.getByText('Deck saved.')).toBeVisible();
 
         const slot1 = page.locator('#deck-slot-1');
@@ -306,7 +324,11 @@ test.describe('Setup step 5 — Support deck', () => {
     test('sizes the deck-step controls to the 44px contract', async ({ page }) => {
         await hydrate(page, '/career/setup/deck');
 
-        for (const selector of ['#deck-pick', 'select[name="type"]', 'input[name="q"]']) {
+        // The picker's controls live inside its dialog, so they have no box until the dialog is open.
+        await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
+        await expect(page.getByRole('dialog', { name: 'Choose a card for Slot 1' })).toBeVisible();
+
+        for (const selector of ['select[name="type"]', 'input[name="q"]']) {
             await assertMinHeight(page, selector);
         }
 
@@ -318,8 +340,8 @@ test.describe('Setup step 5 — Support deck', () => {
             expect(box?.height ?? 0, 'a submit control is not sized to the 44px contract').toBeGreaterThanOrEqual(44);
         }
 
-        for (const label of ['Equip owned to Slot 1', 'Equip rented to Slot 1', 'Set Slot 1 to not equipped']) {
-            const box = await page.getByRole('button', { name: label }).boundingBox();
+        for (const label of ['Choose a card for Slot 1', 'Owned', 'Rented']) {
+            const box = await page.getByRole('button', { name: label, exact: true }).first().boundingBox();
             expect(box?.height ?? 0, `"${label}" is not sized to the 44px contract`).toBeGreaterThanOrEqual(44);
         }
     });
@@ -332,7 +354,11 @@ test.describe('Setup step 5 — Support deck', () => {
         // WCAG 1.4.10 Reflow: the two-column grid stacks, and the document itself never scrolls
         // sideways.
         await expect(page.getByRole('heading', { name: 'The six slots' })).toBeVisible();
-        await expect(page.getByRole('heading', { name: 'Choose a card' })).toBeVisible();
+
+        // The picker is a dialog opened by a slot, so its heading is asserted where the page renders
+        // it: open the dialog and measure the document with it up.
+        await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
+        await expect(page.getByRole('heading', { name: 'Choose a card for Slot 1' })).toBeVisible();
 
         const overflow = await page.evaluate(
             () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
@@ -353,8 +379,10 @@ test.describe('Setup step 5 — Support deck', () => {
         await page.getByRole('link', { name: 'Next: Support deck' }).click();
         await page.locator('#app > *').first().waitFor();
         await expect(page).toHaveURL(/\/career\/setup\/deck/);
-        await page.selectOption('#deck-pick', { index: 1 });
-        await page.getByRole('button', { name: 'Equip owned to Slot 1' }).click();
+        await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
+        const dialog = page.getByRole('dialog', { name: 'Choose a card for Slot 1' });
+        await expect(dialog).toBeVisible();
+        await dialog.getByRole('button', { name: 'Equip', exact: true }).first().click();
         await expect(page.getByText('Deck saved.')).toBeVisible();
         // The card's name comes off the slot's own text link: the artwork frame beside it is also an
         // anchor carrying the card's name as `aria-label` but no text content, so an anchor with text

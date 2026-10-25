@@ -50,11 +50,12 @@ test.describe('Build Target and the provenance badge', () => {
             await expect(page.getByLabel(stat, { exact: true })).toHaveValue('');
         }
 
-        // The four stored purposes, and the fifth the tool does not record stated in one line.
+        // The four stored purposes. R4-24 removed the line that named a fifth (Competitive Build):
+        // the select cannot offer it, so no shipped string may name it.
         for (const label of ['Story Clear', 'Champions Meeting', 'Parent Farming', 'Skill Farming']) {
             await expect(page.getByLabel('Purpose').locator('option', { hasText: label })).toHaveCount(1);
         }
-        await expect(page.getByText('The design also names a fifth purpose, Competitive Build')).toBeVisible();
+        await expect(page.getByText('Competitive Build')).toHaveCount(0);
         await expect(page.getByText('A risk tolerance and per-skill marks')).toBeVisible();
 
         // The summary names every absence rather than omitting it.

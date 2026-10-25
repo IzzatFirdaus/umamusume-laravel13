@@ -47,6 +47,12 @@ test.afterEach(async ({ page }) => {
     }
 });
 
+test.beforeEach(async ({ page }) => {
+    // The cockpit and deck surfaces request artwork thumbnails, and `artisan serve` is one process;
+    // no assertion in this file reads a decoded image, so refuse them at the browser.
+    await page.route('**/artwork/**', (route) => route.abort());
+});
+
 async function createRun(page: Page): Promise<string> {
     const setup = new SnapshotSetupPage(page);
     const runUrl = await setup.createRiceShowerSnapshot();
@@ -75,7 +81,7 @@ test.describe('Starting state', () => {
         // The Unity Cup scenario panel renders config facts and refuses to invent recorded values.
         const scenario = cockpit.region('Scenario');
         await expect(scenario).toBeVisible();
-        await expect(scenario.getByText(/Unity Cup/)).toBeVisible();
+        await expect(scenario.getByText('Unity Cup', { exact: true })).toBeVisible();
 
         // The team facts the run never recorded are rendered as absences, never as the report's
         // values. A Cockpit that printed any of these would be inventing a record (report §1.8;

@@ -18,7 +18,12 @@ export class DeckBuilderPage {
      */
     public async equipCard(position: number, card: SupportCardFixture): Promise<void> {
         const slot = this.slot(position);
-        await slot.getByRole('button', { name: `Replace the card in Slot ${position}` }).click();
+        // An empty slot's control says "Choose a card for …"; a filled one says "Replace the card
+        // in …". `slot` labels can carry a suffix ("Slot 6 · Friends"), so the match is on the
+        // position's word boundary rather than on an exact label.
+        await slot
+            .getByRole('button', { name: new RegExp(`^(?:Choose a card for|Replace the card in) Slot ${position}\\b`) })
+            .click();
 
         // `startReplace` is an async Inertia navigation that carries `slot=<position>` in the query
         // string; the picker's Equip buttons only target this slot once it has landed. Filtering
