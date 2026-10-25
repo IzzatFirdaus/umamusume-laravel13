@@ -357,9 +357,9 @@ it('stores six slots with the flag per slot and reads the cards back on the next
     // Six rows in position order, the two blanks kept: a cleared slot is a statement the Trainer made, and
     // a row the run table has no column for (ADR-0014), which is why it lives here and not in `deck_slots`.
     expect($draft)->toHaveCount(6)
-        ->and($draft[0])->toBe(['position' => 1, 'support_card_id' => $fixture['cards'][0], 'ownership' => 'OWNED'])
-        ->and($draft[1])->toBe(['position' => 2, 'support_card_id' => $fixture['cards'][1], 'ownership' => 'RENTED'])
-        ->and($draft[5])->toBe(['position' => 6, 'support_card_id' => null, 'ownership' => null]);
+        ->and($draft[0])->toBe(['position' => 1, 'support_card_id' => $fixture['cards'][0], 'ownership' => 'OWNED', 'card_level' => null])
+        ->and($draft[1])->toBe(['position' => 2, 'support_card_id' => $fixture['cards'][1], 'ownership' => 'RENTED', 'card_level' => null])
+        ->and($draft[5])->toBe(['position' => 6, 'support_card_id' => null, 'ownership' => null, 'card_level' => null]);
 
     expect(DeckSlot::count())->toBe(0);
 
