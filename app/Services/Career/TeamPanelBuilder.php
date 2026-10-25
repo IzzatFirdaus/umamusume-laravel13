@@ -40,10 +40,10 @@ use Illuminate\Support\Collection;
  *     rank: string|null,
  *     facility_level: int|null,
  *     ladder: list<array{rank: string, level: int}>,
- *     stat_grades: list<array{key: string, label: string, grade: null}>,
+ *     stat_grades: list<array{key: string, label: string, grade: string|null}>,
  *     roster: list<array{teammate: string, state: string, stateLabel: string}>,
  *     race_guidance: int|null,
- *     race_entries: list<array{title: string|null, tier: string|null, circles: int|null, placement: int|null}>,
+ *     race_entries: list<array{title: string, tier: string|null, circles: int|null, placement: int|null}>,
  *     bands: list<array{total: string, reward: string}>,
  *     payout_timing: string|null,
  *     special_training: array{energy_penalty_removed: bool|null, wit_burst_energy_bonus: int|null},
@@ -422,8 +422,8 @@ final class TeamPanelBuilder
      * Each recorded half is gated the way the run record screen's own payloads are: the ladder on
      * `composesPanel('team_rank_ladder')`, the roster on `spirit_bursts` widget membership
      * (D-221, gate G-34), the race entries on `composesPanel('team_race')`. The rank letter is the
-     * one reading a payload already holds; per-stat team grades have no writer, so all five rows
-     * are absences and stay that way until a source records one.
+     * one reading a payload already holds; per-stat team grades carry the value the Trainer entered,
+     * or null where none was recorded.
      *
      * @return TeamSectionShape
      */
@@ -494,26 +494,32 @@ final class TeamPanelBuilder
             ? $run->spirit_bursts_count + $run->extreme_bursts_count
             : null;
 
+        // The stored per-stat rank, or null when the Trainer has not recorded one (D-220); the
+        // labels ride config so the renderer never invents one.
+        /** @var array<string, string> $teamStatGrades */
+        $teamStatGrades = is_array($run->team_stat_grades) ? $run->team_stat_grades : [];
+
+        /** @var list<array{total: string, reward: string}> $bands */
+        $bands = $composesBursts
+            ? array_values((array) config('scenarios.scenarios.'.$run->scenarioKey().'.spirit_burst_bands', []))
+            : [];
+
         return [
             'rank' => $rank,
             'facility_level' => $run->facilityLevel($rank),
             'ladder' => $ladder,
-            // The stored per-stat rank, or null when the Trainer has not recorded one (D-220); the
-            // labels ride config so the renderer never invents one.
             'stat_grades' => array_map(
                 static fn (string $stat): array => [
                     'key' => $stat,
                     'label' => $stat,
-                    'grade' => ($run->team_stat_grades ?? [])[$stat] ?? null,
+                    'grade' => $teamStatGrades[$stat] ?? null,
                 ],
                 $order
             ),
             'roster' => $roster,
             'race_guidance' => is_numeric($margin) ? (int) $margin : null,
             'race_entries' => $entries,
-            'bands' => $composesBursts
-                ? array_values((array) config('scenarios.scenarios.'.$run->scenarioKey().'.spirit_burst_bands', []))
-                : [],
+            'bands' => $bands,
             'payout_timing' => $composesBursts && isset($def['burst_payout_timing'])
                 ? (string) $def['burst_payout_timing']
                 : null,

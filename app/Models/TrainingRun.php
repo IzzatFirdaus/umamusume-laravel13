@@ -73,6 +73,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $team_motto the team's motto; null until stated
  * @property int|null $team_league_placement the team's league placement (1..99); null until stated
  * @property int|null $team_preseason_wins preseason rounds won (0..4); null until stated
+ * @property array<string, string>|null $team_stat_grades the five per-stat team ranks, or null until stated
  * @property int|null $unity_trainings_count Unity Trainings run, as the Trainer reports the tally;
  *                                           null until stated, never counted from turn entries
  * @property int|null $spirit_bursts_count Spirit Bursts earned; null until stated
