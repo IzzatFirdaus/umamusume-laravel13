@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\ListVeterans;
 use App\Enums\RunStatus;
+use App\Models\CharacterCard;
 use App\Models\RaceCatalogSlot;
 use App\Models\Skill;
 use App\Models\SupportCard;
@@ -84,6 +85,8 @@ class DashboardController extends Controller
                 'careersRunning' => TrainingRun::query()->where('status', RunStatus::Active)->count(),
                 'trainees' => Umamusume::count(),
                 'catalogueTrainees' => Umamusume::query()->whereNotNull('external_ref')->count(),
+                // The Roster card's second figure: the costume forms joined onto the roster.
+                'forms' => CharacterCard::count(),
                 'skills' => Skill::count(),
                 'supportCards' => SupportCard::count(),
             ],

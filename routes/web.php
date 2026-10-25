@@ -23,6 +23,7 @@ use App\Http\Controllers\Career\TrainingDecisionController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DatabaseController;
+use App\Http\Controllers\HelpController;
 use App\Http\Controllers\LegacyController;
 use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ReviewController;
@@ -269,6 +270,12 @@ Route::post('/training-runs/{run}/veteran', [SaveVeteranController::class, 'stor
 // because writing a preference is one action on the store rather than one action per key.
 Route::get('/preferences', [PreferenceController::class, 'edit'])->name('preferences.edit');
 Route::put('/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
+
+/**
+ * Help (HFW help.html, plan Slice 11). Reachable from the topbar's `?` on every screen and
+ * deliberately absent from the rail, which already carries ten destinations.
+ */
+Route::get('/help', [HelpController::class, 'show'])->name('help');
 
 // The Data panel's two actions (SCREEN-024, the D18b slice plan). Export streams this tool's own
 // data as a JSON download; Backup writes a server-side snapshot and never streams the database

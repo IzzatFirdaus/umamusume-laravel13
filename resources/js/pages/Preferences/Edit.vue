@@ -54,10 +54,11 @@ const form = useForm({
 // checked when it is NOT in the hidden list. The hidden list is recomputed from `shownCards`
 // on submit so the store never receives "show" semantics it does not authorise.
 const DASHBOARD_CARDS: ReadonlyArray<{ id: string; label: string }> = [
-    { id: 'active_career', label: 'Pick up where you left off' },
-    { id: 'quick_actions', label: 'Quick actions' },
-    { id: 'recent_veterans', label: 'Recent veterans' },
-    { id: 'data_status', label: 'Needs you' },
+    { id: 'active_career', label: 'Active Career' },
+    { id: 'quick_actions', label: 'Quick Actions' },
+    { id: 'recent_veterans', label: 'Recent Veterans' },
+    { id: 'roster', label: 'Roster' },
+    { id: 'data_status', label: 'Data Status' },
 ];
 
 const shownCards = ref<string[]>(

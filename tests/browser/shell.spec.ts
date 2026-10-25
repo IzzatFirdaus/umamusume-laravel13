@@ -8,7 +8,9 @@ import { test, expect } from '@playwright/test';
  *
  *   1. The product bar is 48px tall (`BAR`), with the section crumb left and the live-career pill
  *      right; the product name and rail control sit in the rail head (HFW shell, annotation 10).
- *   2. Its accent rule is 2px along the bottom edge.
+ *   2. Its accent rule is 2px along the bottom edge and its fill is the HFW's blue chrome.
+ *   2b. The wireframe's "Static wireframe" chip stays in the wireframe; Help is the bar's one utility
+ *      link, reachable from every screen.
  *   3. The build's version string is gone from the chrome.
  *   4. The active destination carries `aria-current="page"` and a 3px left rule in the rail.
  *
@@ -36,6 +38,13 @@ test('the product bar is 48px with a 2px stripe and no version string', async ({
     //    later `border-b` utility in the same element would leave the class list looking correct.
     const stripe = await bar.evaluate((el) => getComputedStyle(el).borderBottomWidth);
     expect(stripe).toBe('2px');
+
+    // 2b. The chrome is the HFW's blue, and the bar's two live slots are the crumb and Help. The
+    //     wireframe's own "Static wireframe" chip is a document artifact and does not ship.
+    await expect(bar).toHaveCSS('background-color', 'rgb(34, 85, 255)');
+    await expect(bar).toHaveCSS('border-bottom-color', 'rgb(255, 77, 135)');
+    await expect(bar.getByRole('link', { name: 'Help' })).toBeVisible();
+    await expect(page.getByText('Static wireframe')).toHaveCount(0);
 
     // 3. No build version string. `v2.0.0` was the shipped string; any `v` + semver token is the
     //    same defect.

@@ -344,15 +344,15 @@
     --color-anchor: #0B6FB8;
 
     /*
-     * Brand chrome / accent. The marketing palette the ship did not carry (Track 2-D amendments
-     * 2026-10-14/15): brand-chrome is the top-bar fill, brand-accent is the call-to-action chip,
-     * brand-accent-ink is the violet text/affordance, brand-accent-soft is its light backdrop.
-     * Status-positive and status-caution are category roles, not "good" / "bad": a status pill and a
-     * primary button never share a fill (Phase 11.11-11.12). Every new role owes a measured G-18
-     * pair; values here are the ruling's starting draft and `DesignTokensTest` is the gate.
+     * Brand chrome / accent. Owner override 2026-10-26: the HFW chrome is blue, so brand-chrome is
+     * the HFW's #2255FF with white ink (measured 5.1:1, above G-18's 4.5:1), and the dark block
+     * uses the HFW's #1A3FCC. brand-accent is the call-to-action chip, brand-accent-ink the violet
+     * text/affordance, brand-accent-soft its light backdrop. Status-positive and status-caution are
+     * category roles, not "good" / "bad": a status pill and a primary button never share a fill
+     * (Phase 11.11-11.12). Every new role owes a measured G-18 pair; `DesignTokensTest` is the gate.
      */
-    --color-brand-chrome: #5D8F03;
-    --color-on-brand-chrome: #141414;
+    --color-brand-chrome: #2255FF;
+    --color-on-brand-chrome: #FFFFFF;
     --color-brand-accent: #FF4D87;
     --color-brand-accent-ink: #2756FA;
     --color-brand-accent-soft: #EEEBFF;
@@ -465,9 +465,9 @@ html[data-theme='dark'] {
     --color-ink-faint: #605F5F;
     --color-rule: #666666;
 
-    /* Bright grass action, dark only (the mockup's lime CTA). */
-    --color-brand-chrome: #83B503;
-    --color-on-brand-chrome: #121212;
+    /* The HFW's dark chrome blue (#1A3FCC) with white ink (owner override 2026-10-26). */
+    --color-brand-chrome: #1A3FCC;
+    --color-on-brand-chrome: #FFFFFF;
     --color-green: #83B503;
     --color-chrome: #83B503;
     --color-on-chrome: #121212;
@@ -550,7 +550,7 @@ html[data-theme='dark'] {
      * Accent INK on a dark surface (2026-10-25 synthesis): the brand blue #2756FA is 3.6:1
      * on the near-black page, so the dark step is the light blue #97D1F9 (7.7:1 on raised);
      * the chip background stays #1D1D62. The brand pink is the owner's #FF3276 here (the
-     * light block lightens it to #FF4D87 only to clear the 1.2 hairline on the grass chrome).
+     * light block lightens it to #FF4D87 only to clear the 1.2 hairline on the brand chrome).
      */
     --color-brand-accent: #FF3276;
     --color-brand-accent-ink: #97D1F9;

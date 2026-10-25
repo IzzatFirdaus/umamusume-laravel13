@@ -438,6 +438,15 @@ const moreIsCurrent = computed(() =>
                         class="inline-flex shrink-0 items-center rounded-full bg-panel px-2 py-0.5 text-xs font-semibold text-ink"
                         data-shell-career-pill
                     >{{ activeCareerCount }} active career{{ activeCareerCount === 1 ? '' : 's' }}</span>
+                    <!-- Help, reachable from every screen (HFW topbar `.toputils`). -->
+                    <Link
+                        href="/help"
+                        class="inline-flex min-h-11 shrink-0 items-center gap-1 px-2 text-sm font-semibold text-on-brand-chrome hover:underline"
+                        title="Help and documentation"
+                    >
+                        <span aria-hidden="true">?</span>
+                        <span>Help</span>
+                    </Link>
                 </div>
                 <!-- The title band. Pages that render `PageHeader` in `#head` supply their own `h1`
                      there and leave this band empty, so exactly one `h1` reaches the document; the
