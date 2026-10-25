@@ -3403,6 +3403,8 @@ would have caught it, and no such gate exists.
 
 **What closure would need.** The A-0.5 per-run `deck_slots.card_level` column and an ADR, then a derivation from level to effect values.
 
+**2026-10-25 — dependency cleared.** A-0.5 landed at `df624cca`. KI-116 is no longer `blocked: A-0.5`; it becomes openable as a code-only slice (needs `SupportCardEffects::forLevel()`, which does not exist yet — `atCap()` is the only method, `SupportCardEffects.php:59`).
+
 ---
 
 ### KI-117 The run's per-run card level is not stored (Group A / A-0.5) - FILED 2026-10-24 (Group A + B audit pass)
@@ -3415,6 +3417,8 @@ would have caught it, and no such gate exists.
 
 **What closure would need.** A one-page ADR saying a per-run card level is stored on `deck_slots` and does not contradict ADR-0014's decline of `user_support_cards`, then the migration and the deck surfaces.
 
+**2026-10-25 — landed.** Deployed at `df624cca`; migration `2026_10_25_130000_add_card_level_to_deck_slots_table`. Numerator-only per ADR-0029 D1.
+
 ---
 
 ### KI-118 Team stat grades have no column (Group B / B-0.5, R4-12) - FILED 2026-10-24 (Group A + B audit pass)
@@ -3424,6 +3428,8 @@ would have caught it, and no such gate exists.
 **Current state.** `TeamPanelBuilder::teamSection()` hard-codes `grade => null` for every stat (`app/Services/Career/TeamPanelBuilder.php:501-506`); `UnityCupPanel.vue` prints the five-row absence. Ruling B-0.5 (2026-10-24): accepted; ADR first. See `docs/proposals/group-ab-rulings-owed.md#b-05`.
 
 **What closure would need.** An ADR, a `team_stat_grades` column (or table), the digest line, and the editor field.
+
+**2026-10-25 — landed.** Deployed at `005561c1`; migration `2026_10_25_140000_add_team_stat_grades_to_training_runs_table`. G/F/E/D/C/B/A/S only, no `S+` per R10.
 
 **2026-10-25 — added detail.** Per-stat grades are `G/F/E/D/C/B/A/S` (UMAMUSUME_REFERENCE.md §2.2.2). `S+` is the *overall* team rank (added 2026-07-01) and never a per-stat value. Any per-stat select or validation must reject `S+`; the B-0.5 migration contract (ADR-0029 D5, R10) pins this.
 
@@ -3437,6 +3443,8 @@ would have caught it, and no such gate exists.
 
 **What closure would need.** An ADR, a `current_spirit` column, the digest line, and a writer.
 
+**2026-10-25 — superseded by KI-133.** The B-0.6 run-level `current_spirit` shape was ruled out; KI-133 carries the current shape decision (per-team-member table, blocked on roster). KI-119's "accepted; ADR first" framing for the run-level column no longer holds.
+
 **2026-10-25 — B-0.6 ruling superseded.** The "accepted; ADR first" framing for a run-level `current_spirit` column no longer holds. The gauge is per team member, not per run, with no published numeric maximum; the burst is a once-per-member availability (UMAMUSUME_REFERENCE.md §2.2.2). The run-level shape is superseded by KI-133, which files the shape decision (per-member table vs. explicitly-labelled manual proxy) as blocked on the roster table (A-0.13, declined per R8 → B). B-0.6 stays closed as a run-level-column slice.
 
 ---
@@ -3448,6 +3456,8 @@ would have caught it, and no such gate exists.
 **Current state.** `SkillsPlannerController` carries acquisition state only (`app/Http/Controllers/Career/SkillsPlannerController.php:216-228`); no level column exists and `SkillAcquisition` has no level member. Ruling B-0.7 (2026-10-24): accepted; ADR first. See `docs/proposals/group-ab-rulings-owed.md#b-07`.
 
 **What closure would need.** An ADR, a `skill_levels` table (or per-run level column), the digest line, and the planner field.
+
+**2026-10-25 — landed.** Deployed at `b102581a`; migration `2026_10_25_150000_create_skill_levels_table`. Per ADR-0029 D4: run × skill → level integer only.
 
 ---
 
@@ -3501,6 +3511,8 @@ Cleaning', three card avatars on the tile".
 `turn_entries`, each needing an ADR, an `ARCHITECTURE-ESSENTIALS.md` digest line, and a PRD citation before
 code.
 
+**2026-10-25 — awaiting ruling, not ADR.** A-0.12's mechanism per ADR-0029 line 88 is a dated travel note on FR-C-2, not a new PRD story. The choice is travel-note (permissive) vs. decline (closes the KI), and both are lighter than a schema ADR. Awaiting owner ruling.
+
 ---
 
 ### KI-125 The 20/20 team-members counter has no stored roster to count (Group A / A-0.13) - FILED 2026-10-24 (audit addendum)
@@ -3515,6 +3527,8 @@ roster is 6, not 18).
 
 **Blocker.** `needs-schema`: a stored roster (or team-membership table) to count against 20.
 
+**2026-10-25 — declined per R8.** KI-130 was ruled retire at `3e81adf6`; R8 = B follows (`c734a280` records the decision). No composed team-panel surface exists for a roster table. A-0.13 and A-0.14 are permanently closed, not blocked.
+
 ---
 
 ### KI-126 Guest skill lists on the roster are not stored or derivable (Group A / A-0.14) - FILED 2026-10-24 (audit addendum)
@@ -3527,6 +3541,8 @@ resolved from the catalogue the way a support card's `hint_skills`/`event_skills
 "the 18-member roster and the guests' skill lists".
 
 **Blocker.** `needs-schema`: a character-to-skill link (or per-roster-member skill storage).
+
+**2026-10-25 — declined per R8.** KI-130 was ruled retire at `3e81adf6`; R8 = B follows (`c734a280` records the decision). No composed team-panel surface exists for a roster table. A-0.13 and A-0.14 are permanently closed, not blocked.
 ---
 
 ### KI-127 The team race facility panel is the only scenario panel with no card wrapper and no capsule header - FILED 2026-10-24 (capsule pass)
