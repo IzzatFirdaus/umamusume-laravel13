@@ -270,6 +270,8 @@ final class SkillsPlannerController extends Controller
     private function groupRows(TrainingRun $run, array $required, ?BuildTargetPayload $target): array
     {
         $prioritised = array_fill_keys($this->priorityNames($run), true);
+        /** @var array<int, int> $levels */
+        $levels = $run->skillLevels->pluck('current_level', 'skill_id')->all();
 
         $available = [];
         $learned = [];
@@ -279,6 +281,8 @@ final class SkillsPlannerController extends Controller
                 $learned[] = $this->skillRow($skill, $target, [
                     'status' => SkillAcquisition::Acquired->value,
                     'turn' => $skill->pivot->turn_acquired,
+                    // ADR-0029 D4: the level the skill reached, or null when it was not recorded.
+                    'current_level' => $levels[$skill->id] ?? null,
                 ]);
             }
 

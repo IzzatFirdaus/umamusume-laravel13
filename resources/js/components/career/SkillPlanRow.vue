@@ -25,7 +25,7 @@ const props = defineProps<{
         name_ja: string | null;
         is_unique: boolean;
         sp_cost: number | null;
-        recorded: { status: string; turn: number | null } | null;
+        recorded: { status: string; turn: number | null; current_level: number | null } | null;
         conditions: string | null;
         fit: FitCell[];
         note: string | null;
@@ -35,7 +35,11 @@ const props = defineProps<{
     movable: boolean;
 }>();
 
-const emit = defineEmits<{ move: [delta: number] }>();
+const emit = defineEmits<{ move: [delta: number]; level: [value: string] }>();
+
+function onLevel(event: Event): void {
+    emit('level', (event.target as HTMLInputElement).value);
+}
 
 const FIT_WORDS: Record<FitCell['state'], string> = {
     matches: 'Matches',
@@ -90,6 +94,25 @@ async function move(delta: number): Promise<void> {
             Recorded: {{ props.row.recorded.status }}
             <template v-if="props.row.recorded.turn !== null"> on turn {{ props.row.recorded.turn }}</template>
         </p>
+
+        <!-- ADR-0029 D4: the level an acquired skill reached in this run, 1..6. Hint levels are a
+             support-card fact and are not this row's. -->
+        <label
+            v-if="props.row.recorded !== null && props.row.recorded.status === 'Acquired'"
+            class="mt-1 flex items-center gap-2 text-xs text-ink-muted"
+        >
+            <span>Level</span>
+            <input
+                type="number"
+                min="1"
+                max="6"
+                class="min-h-11 w-20 rounded-[var(--radius-md)] border border-rule bg-raised px-2 text-sm text-ink"
+                :value="props.row.recorded.current_level ?? ''"
+                :aria-label="`Level for ${props.row.name}`"
+                @change="onLevel"
+            />
+            <span>of 6</span>
+        </label>
 
         <!-- The conditions are engine expressions a Trainer reads only when asking what gates a skill,
              so they sit behind a disclosure rather than in every row's scan line (plan 4.5). The

@@ -19,7 +19,7 @@ import SkillPlanRow from '../../components/career/SkillPlanRow.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import AcquisitionStatusEditor from '../../components/career/AcquisitionStatusEditor.vue';
 import { BaseButton, BaseSelect } from '../../components/Form';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
 
@@ -36,7 +36,7 @@ interface PlanRow {
     name_ja: string | null;
     is_unique: boolean;
     sp_cost: number | null;
-    recorded: { status: string; turn: number | null } | null;
+    recorded: { status: string; turn: number | null; current_level: number | null } | null;
     conditions: string | null;
     fit: FitCell[];
     note: string | null;
@@ -107,6 +107,25 @@ watch(
 );
 
 const announcement = ref('');
+
+/**
+ * ADR-0029 D4: save the level an acquired skill reached. The row's status and turn travel with it
+ * because the sync rewrites the pivot row and the level together.
+ */
+function saveLevel(row: PlanRow, value: string): void {
+    if (row.id === null || row.recorded === null) {
+        return;
+    }
+
+    router.post(props.run.skills_sync_url, {
+        skills: [{
+            skill_id: row.id,
+            status: row.recorded.status,
+            turn_acquired: row.recorded.turn,
+            current_level: value === '' ? null : Number(value),
+        }],
+    }, { preserveScroll: true });
+}
 
 function move(index: number, delta: number): void {
     const to = index + delta;
@@ -358,6 +377,7 @@ const coverageConstants = computed(() =>
                     :count="group.key === 'required' ? ordered.length : 1"
                     :movable="group.key === 'required'"
                     @move="(delta: number) => move(index, delta)"
+                    @level="(value: string) => saveLevel(row, value)"
                 />
             </ol>
         </section>

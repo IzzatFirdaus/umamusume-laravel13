@@ -294,3 +294,36 @@ test('lists the purchasable pool with prices and the shortfall against the recor
     await expect(panel.getByText(/the run holds/)).toBeVisible();
     await expect(panel.getByText(/\d+ SP/).first()).toBeVisible();
 });
+
+test('records the level an acquired skill reached and reads it back', async ({ page }) => {
+    await openPlanner(page);
+
+    const picker = page.getByRole('combobox', { name: 'Skill to add' });
+    const name = (await picker.locator('option').allTextContents())
+        .map((text) => text.trim())
+        .find((text) => text !== '' && text !== 'Choose a skill') ?? '';
+    expect(name, 'the picker offers a skill').not.toBe('');
+
+    await picker.selectOption({ label: name });
+    await page.getByRole('button', { name: 'Add skill' }).click();
+    await expect(page.getByLabel(`Change status for ${name}`)).toHaveCount(1, WRITE);
+
+    // Acquired is the only state that owes a level.
+    await page.getByLabel(`Change status for ${name}`).selectOption('Acquired');
+    await page.getByRole('button', { name: 'Save acquisition status' }).click();
+    await expect(page.getByText('Skill status saved.')).toBeVisible(WRITE);
+
+    const level = page.getByLabel(`Level for ${name}`);
+    await expect(level).toBeVisible(WRITE);
+    await level.fill('3');
+
+    // The level saves on change; wait for the write before reloading.
+    await Promise.all([
+        page.waitForResponse((response) => response.url().includes('/skills') && response.request().method() === 'POST'),
+        level.press('Tab'),
+    ]);
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.getByLabel(`Level for ${name}`)).toHaveValue('3');
+});

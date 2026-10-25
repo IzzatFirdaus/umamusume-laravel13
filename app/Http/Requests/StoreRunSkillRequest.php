@@ -8,6 +8,7 @@ use App\Enums\ReleaseStatus;
 use App\Enums\SkillAcquisition;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 /**
  * Validates a batch of run-skill status writes (PRD FR-C-3). Rows are
@@ -69,7 +70,28 @@ class StoreRunSkillRequest extends FormRequest
             ],
             'skills.*.status' => ['required', Rule::enum(SkillAcquisition::class)],
             'skills.*.turn_acquired' => ['nullable', 'integer', 'min:1'],
+            // ADR-0029 D4: the level a skill reached in the run, 1..6. Hint levels are not this
+            // table's fact (they are a support-card mechanic) and are not accepted here.
+            'skills.*.current_level' => ['nullable', 'integer', 'between:1,6'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            foreach ((array) $this->input('skills', []) as $index => $row) {
+                if (! is_array($row) || ! array_key_exists('current_level', $row) || $row['current_level'] === null) {
+                    continue;
+                }
+
+                if (($row['status'] ?? null) !== SkillAcquisition::Acquired->value) {
+                    $validator->errors()->add(
+                        "skills.{$index}.current_level",
+                        'A skill level is recorded only for an acquired skill.',
+                    );
+                }
+            }
+        });
     }
 
     /**

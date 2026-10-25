@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Enums\ReleaseStatus;
 use App\Enums\SkillAcquisition;
 use App\Models\Skill;
+use App\Models\SkillLevel;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -662,6 +663,71 @@ final class CareerSkillsPlannerTest extends TestCase
                 ->where('purchasable.total', 130)
                 ->where('purchasable.sp', 120)
                 ->where('purchasable.shortfall', 10));
+    }
+
+    public function test_records_the_level_an_acquired_skill_reached(): void
+    {
+        $run = $this->plannerRun();
+        $skill = $this->skill('Blue Rose Closer', 100, null, true);
+
+        $this->post(route('runs.skills.sync', $run), [
+            'skills' => [[
+                'skill_id' => $skill->id,
+                'status' => SkillAcquisition::Acquired->value,
+                'turn_acquired' => 1,
+                'current_level' => 3,
+            ]],
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('skill_levels', [
+            'training_run_id' => $run->id,
+            'skill_id' => $skill->id,
+            'current_level' => 3,
+        ]);
+
+        $this->get(route('runs.skills.planner', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('groups', function (Collection $groups): bool {
+                    $learned = $groups->firstWhere('key', 'learned');
+                    $row = collect(data_get($learned, 'rows', []))->firstWhere('name', 'Blue Rose Closer');
+
+                    return ($row['recorded']['current_level'] ?? null) === 3;
+                }));
+
+        // 6 is the top of the unique-skill ladder; 7 is refused.
+        $this->post(route('runs.skills.sync', $run), [
+            'skills' => [[
+                'skill_id' => $skill->id,
+                'status' => SkillAcquisition::Acquired->value,
+                'turn_acquired' => 1,
+                'current_level' => 6,
+            ]],
+        ])->assertSessionHasNoErrors();
+
+        $this->post(route('runs.skills.sync', $run), [
+            'skills' => [[
+                'skill_id' => $skill->id,
+                'status' => SkillAcquisition::Acquired->value,
+                'turn_acquired' => 1,
+                'current_level' => 7,
+            ]],
+        ])->assertSessionHasErrors('skills.0.current_level');
+
+        // A planned skill has no reached level.
+        $this->post(route('runs.skills.sync', $run), [
+            'skills' => [[
+                'skill_id' => $skill->id,
+                'status' => SkillAcquisition::Suggested->value,
+                'current_level' => 2,
+            ]],
+        ])->assertSessionHasErrors('skills.0.current_level');
+
+        // The unique key holds one row for the run/skill pair, and the accepted 6 stands.
+        $levels = SkillLevel::query()->where('training_run_id', $run->id)->where('skill_id', $skill->id);
+
+        expect($levels->count())->toBe(1)
+            ->and($levels->value('current_level'))->toBe(6);
     }
 
     private function plannerRun(): TrainingRun

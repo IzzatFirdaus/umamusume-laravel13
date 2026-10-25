@@ -1004,7 +1004,21 @@ class TrainingRunController extends Controller
                 // validated `integer` rule checks but does not cast, so the cast happens here at
                 // the boundary the write crosses.
                 $turn = $entry['turn_acquired'] ?? null;
-                $run->setSkillStatus($skill, $request->acquisitionFor($entry), $turn === null ? null : (int) $turn);
+                $status = $request->acquisitionFor($entry);
+                $run->setSkillStatus($skill, $status, $turn === null ? null : (int) $turn);
+
+                // ADR-0029 D4: the level lives in `skill_levels`, the acquisition status and turn stay
+                // on the pivot. A skill that is not Acquired has no reached level, so its row goes.
+                $level = $entry['current_level'] ?? null;
+
+                if ($status === SkillAcquisition::Acquired && $level !== null) {
+                    $run->skillLevels()->updateOrCreate(
+                        ['skill_id' => $skill->id],
+                        ['current_level' => (int) $level],
+                    );
+                } else {
+                    $run->skillLevels()->where('skill_id', $skill->id)->delete();
+                }
             }
         }
 

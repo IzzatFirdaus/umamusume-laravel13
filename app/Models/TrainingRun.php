@@ -323,6 +323,17 @@ class TrainingRun extends Model
     }
 
     /**
+     * The level each skill reached in this run (ADR-0029 D4). The acquisition status and turn stay on
+     * the `run_skills` pivot; this relation is the level alone.
+     *
+     * @return HasMany<SkillLevel, $this>
+     */
+    public function skillLevels(): HasMany
+    {
+        return $this->hasMany(SkillLevel::class);
+    }
+
+    /**
      * @return HasMany<DeckSlot, $this>
      */
     public function deckSlots(): HasMany
