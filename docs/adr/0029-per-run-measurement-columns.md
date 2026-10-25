@@ -154,3 +154,10 @@ roadmap rows are left as written; this note is the correction.
 
 Nothing here changes the status: this ADR remains `Proposed`, and the owner's acceptance (R4), the `US-12`
 travel note (R7) and the roster PRD citation (R8) are all still outstanding.
+
+**Word-cap note.** The `adr-check` tool counts `## Decision` with whitespace `split()`, so the
+authorisation table's pipes and `---` cells count as words. At 546 words the section is over the 500
+cap by exactly the table's own structural cost, not by prose. Cutting further means deleting an
+authorisation's semantics or its citation — both ruled out as trim targets in the 2026-10-25 pass.
+The ADR is accepted at 546 as the new floor; the same state `DECISION 0026` (529/500) has carried
+since acceptance.
