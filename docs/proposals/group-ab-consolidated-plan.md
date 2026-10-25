@@ -261,3 +261,20 @@ gated on R1 and R2, **not** because ADR-0029 blocks them.
 vector is stored and already read by `SupportCardEffects`; what is missing is a level-parameterised reader,
 not a table), the ADR's names confirmed against the roadmap's stale alternates, and the spec-file and
 register-gate corrections recorded. The ADR remains `Proposed`; R4, R7 and R8 are still outstanding.
+
+**2026-10-25 — R8 ruled B, A-0.13/A-0.14 declined.** The owner's ruling on KI-130 (`3e81adf6`, retire
+the four URA-only registrations) sets the R8 conditional to **B**: with no composed team-panel surface,
+a roster editor and guest skill lists have nowhere to live. A-0.13 (`KI-125`) and A-0.14 (`KI-126`)
+remain permanently blocked. The `US-16 (proposed)` draft that would have authorised them under branch A
+is recorded here as the historical alternative, not a work item:
+
+> As a Trainer, I record the team a Unity Cup run fielded and what each member was worth…
+
+*[Gap recorded 2026-10-25: only this opening sentence survives in this tree. The full D.2 US-16 draft was
+not found in tracked files, any ref (`git log -S`), either worktree
+(`.kilo/worktrees/almondine-plywood`, `.kilo/worktrees/cherry-pet`), or `.scratch-uma`. Paste the full
+draft here if it is recovered; this fragment is the record that it existed and what it was for.]*
+
+To un-decline: the ruling would need to reverse KI-130 back to compose, and a roster editor would need a
+composed `team_roster` panel registration and PRD §6 story. That is a new pass, not a reopen of this
+one.
