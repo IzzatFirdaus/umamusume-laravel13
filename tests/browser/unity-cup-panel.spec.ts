@@ -140,12 +140,28 @@ test('reaches the panel by keyboard without adding a control or trapping focus',
     // with no click and no hover. This fails if the panel ever hides a reading behind disclosure.
     await expect(section.getByText(/No teammate burst states recorded\./)).toBeVisible();
 
-    // The panel adds no focusable element of its own, so there is no control inside it that a
-    // keyboard path could step over. This assertion fails the day a form control lands in a panel.
-    await expect(section.locator('a, button, input, select, textarea, [tabindex]')).toHaveCount(0);
+    // The panel adds no form control of its own, so there is no control inside it that a keyboard path
+    // could step over. This assertion fails the day an input, a select or a button lands in a panel.
+    //
+    // Amended 2026-10-25 (owner ruling R3, `DESIGN.md` §5(a)): the absence channel is permitted here, so
+    // the guard measures what a stop can *do*, not how many there are. Measured this pass: the region's
+    // only links are `TeamRankLadderPanel`'s "Record this race" rows, every one of them navigating to the
+    // run's own races screen; its only other focusable node is `ProvenanceMark`'s `role="img"` mark, which
+    // opens a tooltip and acts on nothing; and its only disclosure is `AbsenceValue`'s.
+    await expect(section.locator('input, select, textarea, button')).toHaveCount(0);
+    await expect(section.locator('[tabindex]:not([role="img"])')).toHaveCount(0);
+    await expect(section.locator('details:not(:has(> summary:has-text("N/A")))')).toHaveCount(0);
 
-    // And focus passes the region on its way down the page rather than stopping in it: take the last
-    // control above the region, Tab once, and require focus to have landed outside the region.
+    const links = section.locator('a');
+    const linkCount = await links.count();
+
+    for (let i = 0; i < linkCount; i++) {
+        expect(await links.nth(i).getAttribute('href'), 'a link in the region left the run').toMatch(/\/races$/);
+    }
+
+    // And the region is not a trap: from the last control above it, Tab reaches the region's own stops —
+    // `AbsenceValue`'s summary and `ProvenanceMark`'s mark — and then leaves. Every stop inside is one of
+    // those two and never a control, which is the amended rule's whole content.
     const controls = page.locator('main a, main button');
     const count = await controls.count();
     const region = await section.boundingBox();
@@ -164,23 +180,38 @@ test('reaches the panel by keyboard without adding a control or trapping focus',
     expect(above, 'no control sits above the scenario region').toBeGreaterThanOrEqual(0);
 
     await controls.nth(above).focus();
-    await page.keyboard.press('Tab');
 
-    const active = await page.evaluate(() => {
-        const el = document.activeElement;
+    const readFocus = () =>
+        page.evaluate(() => {
+            const el = document.activeElement;
 
-        if (el === null) {
-            return null;
-        }
+            if (el === null) {
+                return null;
+            }
 
-        return {
-            tag: el.tagName,
-            insideRegion: el.closest('section[aria-labelledby="career-scenario-heading"]') !== null,
-        };
-    });
+            return {
+                tag: el.tagName,
+                insideRegion: el.closest('section[aria-labelledby="career-scenario-heading"]') !== null,
+                isControl:
+                    ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName) ||
+                    (el.hasAttribute('tabindex') && el.getAttribute('role') !== 'img'),
+            };
+        });
 
-    expect(active, 'focus left the document after one Tab').not.toBeNull();
-    expect(active?.insideRegion, 'focus stopped inside a region that renders no controls').toBe(false);
+    let escaped = false;
+
+    // Bounded: the region holds 14 stops and the page a few more, so 40 Tabs either leaves it or the
+    // region trapped focus.
+    for (let step = 0; step < 40 && !escaped; step++) {
+        await page.keyboard.press('Tab');
+        const stop = await readFocus();
+
+        expect(stop, 'focus left the document while tabbing through the region').not.toBeNull();
+        expect(stop?.isControl, 'Tab stopped on a control inside a region that adds none').toBe(false);
+        escaped = stop?.insideRegion === false;
+    }
+
+    expect(escaped, 'focus never left the Scenario region: it traps Tab').toBe(true);
 
     // The panel's copy stayed on screen while focus moved past it.
     await expect(section.getByText(/No teammate burst states recorded\./)).toBeVisible();
@@ -217,13 +248,13 @@ test('passes the axe A + AA scan with the Team Cockpit mounted', async ({ page }
  * G4: the team race's published shape. `UnityCupSurfacesTest` pins the payload and the dual readout's
  * firing rule; these cases assert what only a browser reaches — the five categories as a real table with
  * Dirt among them, the reason printed under it rather than behind it, the refusal sentence, and the
- * owner's 2026-10-11 ruling that this region stays free of focusable controls.
+ * owner's 2026-10-11 ruling on the region's focusables, as amended 2026-10-25 by ruling R3.
  *
  * **The board has no keyboard row stop, on purpose.** The brief asked for row-level keyboard reach; the
  * ruling that nothing in this panel may be clicked open or tab-stopped outranks it, and every row is
- * already in the document order the case above traces with Tab. The case that counts `details` elements
- * is the guard: `AbsenceValue` is a native disclosure, so one tab stop per empty cell would land focus
- * inside a region whose committed keyboard case says it must not.
+ * already in the document order the case above traces with Tab. That ruling was amended 2026-10-25
+ * (owner ruling R3, `DESIGN.md` §5(a)): `AbsenceValue`'s `<details>` is now a stop the rule allows, so the
+ * guard below measures controls: a control landing in a panel is still the failure.
  */
 
 test('draws the five team race categories as a table with the published ask and one named absence', async ({ page }) => {
@@ -243,10 +274,14 @@ test('draws the five team race categories as a table with the published ask and 
     await expect(board.getByRole('cell', { name: 'N/A' })).toHaveCount(5);
     await expect(board.getByText(/No column records who this run fields/i)).toBeVisible();
 
-    // The ruling, measured: no disclosure and no focus stop anywhere in the Scenario region.
+    // The ruling, measured, as amended 2026-10-25 (owner ruling R3): the region adds no form control, its
+    // only disclosures are `AbsenceValue`'s, and its only other focusable node is `ProvenanceMark`'s
+    // `role="img"` mark. The board itself adds neither, which is the claim this case owns.
     const region = page.getByRole('region', { name: 'Scenario' });
-    await expect(region.locator('details')).toHaveCount(0);
-    await expect(region.locator('a, button, input, select, textarea, [tabindex]')).toHaveCount(0);
+    await expect(region.locator('input, select, textarea, button')).toHaveCount(0);
+    await expect(region.locator('[tabindex]:not([role="img"])')).toHaveCount(0);
+    await expect(region.locator('details:not(:has(> summary:has-text("N/A")))')).toHaveCount(0);
+    await expect(board.locator('a, button, input, select, textarea, details, [tabindex]')).toHaveCount(0);
 });
 
 test('stacks the coverage table at 320 px without a sideways scroll', async ({ page }) => {

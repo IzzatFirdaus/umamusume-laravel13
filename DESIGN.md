@@ -937,6 +937,13 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
 > ships, not a second sanctioned channel. The 2026-10-17 UX audit's remaining inventory:
 > `AncestryNode.vue:102,118` (finding F-E3, extended) and the Dashboard's `Energy` and `Team Rank` tiles
 > (finding F-B2). Both are Phase 1's to migrate.
+> **Amended 2026-10-25 (owner ruling R3): the channel is permitted in the Scenario region.** The
+> 2026-10-11 ruling that nothing in that region may be clicked open is lifted for this channel only, and
+> the ruling's premise is corrected with it: the region was never control-free, because
+> `TeamRankLadderPanel` renders one "Record this race" link per ladder row and both measure at navigation
+> rather than at state. A guard over the region therefore asserts what a stop can do — no form control, no
+> `tabindex` outside a `role="img"` mark, every link to the run's own races screen, every disclosure
+> `AbsenceValue`'s — and not that the region is free of focusable nodes.
 >
 > **(b) One provenance-state label per fact.** `ProvenanceBadge` is the single owner of the state word;
 > a second provenance-shaped label beside it states one fact twice. The shipped case is the review queue,
