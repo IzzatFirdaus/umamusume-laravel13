@@ -195,9 +195,9 @@ test('names the active career and resumes it from the keyboard', async ({ page }
     await expect(door).toHaveAttribute('href', '/career/snapshot');
 
     // The primary action, reached and taken by keyboard alone.
-    const resume = card.getByRole('link', { name: 'Resume Career' });
+    const resume = card.getByRole('link', { name: 'Open cockpit' });
     const box = await resume.boundingBox();
-    expect(box?.height ?? 0, 'Resume Career is not sized to the 44px contract').toBeGreaterThanOrEqual(44);
+    expect(box?.height ?? 0, 'Open cockpit is not sized to the 44px contract').toBeGreaterThanOrEqual(44);
 
     await resume.focus();
     await expect(resume).toBeFocused();
@@ -301,7 +301,7 @@ test('renders no multi-career notice while exactly one career is live', async ({
     const card = page.getByRole('region', { name: 'PICK UP WHERE YOU LEFT OFF' });
 
     // The card still features the one career it has...
-    await expect(card.getByRole('link', { name: 'Resume career' })).toBeVisible();
+    await expect(card.getByRole('link', { name: 'Open cockpit' })).toBeVisible();
 
     // ...and the count-and-link line is not in the DOM at all, rather than reading "1 career are active."
     await expect(card.getByRole('link', { name: /^View all careers/ })).toHaveCount(0);
@@ -570,12 +570,12 @@ test('measures the three shell widths, the bento shape and the card voids at a 1
     // offers. The bar is that the stack stays content-sized and untrimmed, not that it fits a
     // 1080px viewport, which it cannot without hiding a region.
     //
-    // Re-measured 2026-10-26 at 1,269px, up from 835px: the HFW's KPI strip (index.html `.g-4`) and
+    // Re-measured 2026-10-26 at 1,191px, up from 835px: the HFW's KPI strip (index.html `.g-4`) and
     // the three "Needs you" tiles are now rendered here instead of the counts being folded away.
     // Stated as a band, like the standard case, so an unexplained growth fails it as hard as
     // trimming a region to fit does.
     const compactHeight = await rootHeight();
-    expect(compactHeight, 'the compact stack lost content it should still render').toBeGreaterThanOrEqual(1200);
+    expect(compactHeight, 'the compact stack lost content it should still render').toBeGreaterThanOrEqual(1100);
     expect(compactHeight, 'the compact stack grew beyond its measured budget').toBeLessThanOrEqual(1350);
     expect(await maxCardVoid()).toBeLessThanOrEqual(24);
     await page.screenshot({ path: testInfo.outputPath('dashboard-compact-1920.png'), fullPage: true });
@@ -633,10 +633,32 @@ test('the KPI row carries its sublines and the Needs you card carries its three 
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
 
+    // index.html `.phead`: the eyebrow names the surface and the `h1` names the product.
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Trainer Desk');
+    // The eyebrow is the line above the `h1`. Addressed structurally rather than by text because the
+    // shell's crumb names the same destination, and an unscoped "Dashboard" match is two elements.
+    await expect(
+        page.locator('[role="banner"] h1').locator('xpath=preceding-sibling::p'),
+    ).toHaveText('Dashboard');
+    // Scoped to the head: the rail carries a "New Career" destination too, so an unscoped name
+    // match is two elements under strict mode.
+    await expect(page.getByRole('banner').getByRole('link', { name: 'New career' })).toBeVisible();
+    await expect(page.getByRole('banner').getByRole('link', { name: 'All careers' })).toBeVisible();
+
     const row = page.locator('[data-kpi-row]');
     await expect(row.getByRole('link', { name: 'Browse catalog' })).toHaveAttribute('href', /\/umamusume/);
     await expect(row.getByRole('link', { name: 'Skill search' })).toHaveAttribute('href', /\/skills/);
     await expect(row.getByRole('link', { name: 'Browse cards' })).toHaveAttribute('href', /\/support-cards/);
+
+    // `.g-4` is one row of four, not a 2x2 stack: measured on the painted boxes, because the strip
+    // switches columns on the container, not the viewport, and a class check would pass on a grid
+    // the browser laid out differently.
+    const tops = await row.locator('[data-stat-tile]').evaluateAll((tiles) =>
+        tiles.map((t) => Math.round(t.getBoundingClientRect().top)),
+    );
+
+    expect(tops).toHaveLength(4);
+    expect(Math.max(...tops) - Math.min(...tops), 'the KPI tiles are not on one row').toBeLessThan(4);
 
     const needsYou = page.getByRole('region', { name: 'NEEDS YOU' });
     await expect(needsYou.getByText('Data status')).toBeVisible();

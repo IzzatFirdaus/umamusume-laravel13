@@ -253,22 +253,23 @@ const kpiSub = 'mt-1 text-xs text-ink-muted';
     <AppLayout>
         <Head title="Dashboard" />
         <template #head>
-            <PageHeader eyebrow="Overview" title="Dashboard" :description="lede">
-                <!--
-                    Data freshness is a page-level fact, not a card-level one: the Needs you card
-                    carries the live state and the ruleset version, and this line says when the
-                    matrix behind them was last verified. It sits beside the page title, muted, and
-                    it keeps the card's own line about the ruleset a single thing to read.
-                -->
+            <!-- index.html `.phead`: the eyebrow names the surface, the `h1` names the product, and
+                 the lede carries the three live figures. The two actions are the wireframe's pair —
+                 `New career` is an outline `.btn`, `All careers` the quiet one — so the page keeps
+                 exactly one filled primary, which is the card's "Open cockpit" below. -->
+            <PageHeader eyebrow="Dashboard" title="Trainer Desk" :description="lede">
                 <template #actions>
-                    <span v-if="props.dataStatus.verified_at" class="text-xs text-ink-muted">
+                    <!-- The freshness line stays page-level, not card-level (2026-10-21 operator
+                         ruling, pinned by `dashboard.spec.ts`), so it shares the head with the
+                         wireframe's two actions rather than moving into the tile it qualifies. -->
+                    <span v-if="props.dataStatus.verified_at" class="self-center text-xs text-ink-muted">
                         Verified {{ props.dataStatus.verified_at }} · {{ props.dataStatus.source }}
                     </span>
-                    <span
-                        v-else
-                        class="text-xs text-ink-muted"
-                        title="No verification date is recorded for the scenario matrix."
-                    >Verified N/A</span>
+                    <span v-else class="self-center text-xs text-ink-muted">
+                        Verified N/A<span class="sr-only">: no verification date is recorded for the scenario matrix.</span>
+                    </span>
+                    <LinkButton href="/career/setup/scenario" variant="secondary">New career</LinkButton>
+                    <LinkButton :href="props.careersUrl" variant="link">All careers</LinkButton>
                 </template>
             </PageHeader>
         </template>
@@ -450,13 +451,14 @@ const kpiSub = 'mt-1 text-xs text-ink-muted';
                     Resume this career to log its next turn.
                 </p>
 
-                <!-- The page's one filled primary. The outline duplicate is gone. -->
+                <!-- The page's one filled primary, and the wireframe's own word for it: the card
+                     opens the cockpit, which is where the next turn is logged. -->
                 <LinkButton
                     :href="props.activeCareer.resume_url"
                     variant="primary"
                     class="mt-4"
                 >
-                    Resume career
+                    Open cockpit
                 </LinkButton>
 
                 <!-- The multi-career notice is muted text with a link, not a pill: a bordered chip
@@ -509,7 +511,7 @@ const kpiSub = 'mt-1 text-xs text-ink-muted';
                  the HFW's own row, not a fold of the catalogue counts into the Needs you card: the
                  rail is too narrow for four-up tiles, and two-up inside the rail pushed the compact
                  stack past its content budget, which is why the sublines were skipped first time. -->
-            <div class="grid grid-cols-2 gap-3" :class="wideSpan()" data-kpi-row>
+            <div class="grid grid-cols-2 gap-3 @2xl:grid-cols-4" :class="wideSpan()" data-kpi-row>
                 <dl :class="kpiTile" data-stat-tile>
                     <dt :class="kpiLabel">Careers running</dt>
                     <dd :class="[kpiValueClass, 'mt-1']" data-stat-value>{{ group(props.counts.careersRunning) }}</dd>

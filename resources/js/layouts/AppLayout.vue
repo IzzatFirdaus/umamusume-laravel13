@@ -410,24 +410,24 @@ const moreIsCurrent = computed(() =>
                  it is gone. The footer's "Local data · Trainer Desk" line names the build's nature, and
                  a number a Trainer cannot act on is not worth a permanent slot in the chrome. -->
             <header role="banner" class="flex flex-col">
-                <div class="flex h-12 shrink-0 items-center gap-4 border-b-2 border-brand-chrome bg-panel px-4 text-ink md:px-8">
+                <div class="flex h-12 shrink-0 items-center gap-4 border-b-2 border-brand-accent bg-brand-chrome px-4 text-on-brand-chrome md:px-8">
                     <!-- The crumb names where the Trainer is, not the product. The product name lives in
                          the rail head now (HFW shell), so the bar spends its width on the one fact the
                          rail cannot carry: the section path. A page passes `breadcrumb`; the fallback
                          names the layout's own destination so the bar is never empty. -->
-                    <span class="min-w-0 truncate text-sm text-ink-muted" data-shell-crumb>
+                    <span class="min-w-0 truncate text-sm text-on-brand-chrome/80" data-shell-crumb>
                         <template v-if="breadcrumbParts.length">
                             <template v-for="(part, index) in breadcrumbParts" :key="`${part.label}-${index}`">
                                 <span v-if="index > 0" aria-hidden="true" class="px-1">/</span>
                                 <Link
                                     v-if="part.href"
                                     :href="part.href"
-                                    class="underline hover:text-ink-strong"
+                                    class="underline hover:text-on-brand-chrome"
                                 >{{ part.label }}</Link>
-                                <span v-else class="font-semibold text-ink-strong">{{ part.label }}</span>
+                                <span v-else class="font-semibold text-on-brand-chrome">{{ part.label }}</span>
                             </template>
                         </template>
-                        <span v-else class="font-semibold text-ink-strong">Trainer Desk</span>
+                        <span v-else class="font-semibold text-on-brand-chrome">Trainer Desk</span>
                     </span>
                     <span class="flex-1" />
                     <!-- The live-career pill. Count only, shared from the middleware so every screen
@@ -435,7 +435,7 @@ const moreIsCurrent = computed(() =>
                          normal state, not a warning. -->
                     <span
                         v-if="activeCareerCount > 0"
-                        class="inline-flex shrink-0 items-center rounded-full bg-status-positive/10 px-2 py-0.5 text-xs font-semibold text-status-positive"
+                        class="inline-flex shrink-0 items-center rounded-full bg-panel px-2 py-0.5 text-xs font-semibold text-ink"
                         data-shell-career-pill
                     >{{ activeCareerCount }} active career{{ activeCareerCount === 1 ? '' : 's' }}</span>
                 </div>
