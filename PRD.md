@@ -105,6 +105,18 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
 | US-14   | As a Trainer, I see a recommended next action with its reason, so I can decide faster without the app deciding for me.                                                                                       | P1         | The advisor ranks Trainer-entered options against the run's build target and the `ADR-0001` Energy constants; every suggestion carries a derivable reason line; a numeric estimate is opt-in, shows its formula and parameters, and is labelled as this tool's model, not the game's; nothing computes or implies a race outcome (§6.11 unchanged). [ADR-0020; ADR-0001]                                                                                                                                                                                                                                          |
 | US-15   | As a Trainer, I save a completed run as a reusable parent record, tagged and searchable, so my own history feeds the next Legacy selection.                                                                                                                                   | P1         | A completed run can be saved to the Veteran library with tags and notes; the library is searchable by trainee, sparks, distance, style, and tags; no inheritance outcome is computed (§6.3 engine ban unchanged). [ADR-0020; ADR-0010]                                                                                                                                                                                                                                                                                                                                                                        |
 
+**Dated travel note · 2026-10-25 (owner ruling R7).** US-12's acceptance sentence reads "no card
+level, limit break or Unique Perk state is stored anywhere (identity, not collection)". Its
+"anywhere" narrows to **account-level collection**: what remains refused is a collection entity — a
+library of owned cards with levels, limit breaks or a Unique Perk state that outlives any run —
+which is what ADR-0014 declined. What this note authorises is the per-run snapshot ADR-0029 ruled
+for: `deck_slots` storing the level the equipped card was **at in this run**, as a numerator only
+(ADR-0029 D1: reachable effects store what was reached, never a ceiling). The card is still recorded
+as identity in its slot; no account-level row is created, nothing is aggregated across runs, and a
+run that recorded no level still names the absence. The two readings differ on where the record
+lives, not on whether a level may exist, and A-0.5's citation of `FR-C-6, US-12 (travel note)` now
+points at this paragraph.
+
 ## 4. Functional Requirements
 
 ### FR-A: Catalog domain
