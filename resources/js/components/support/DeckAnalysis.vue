@@ -26,7 +26,7 @@ interface EffectLine {
     effect_id: number;
     name: string | null;
     mode: 'flat' | 'additive' | 'multiplicative';
-    cards: { card_name: string; display: string }[];
+    cards: { card_name: string; display: string; basis: 'catalog' | 'level'; level: number | null }[];
     total: { value: number; display: string; basis: string } | null;
 }
 
@@ -56,8 +56,9 @@ defineProps<{
 
         <template v-else>
             <p class="mt-2 text-sm text-[var(--color-ink-muted)]">
-                Every figure is an effect's highest stated anchor, the value the source publishes at its
-                top level, and never an interpolation for a level this deck holds.
+                A card whose slot records a level contributes the value it reached at that level, read
+                from the source's anchors. A slot with no recorded level falls back to the highest
+                stated anchor, the catalogue maximum, and names that basis beside the card.
             </p>
 
             <div class="mt-4 grid gap-4 @4xl:grid-cols-2">
@@ -87,6 +88,9 @@ defineProps<{
                                 <li v-for="card in effect.cards" :key="card.card_name + card.display">
                                     <span class="font-mono">{{ card.display }}</span>
                                     <span> &middot; {{ card.card_name }}</span>
+                                    <span class="ml-1">
+                                        ({{ card.basis === 'level' ? `at Lv ${card.level}` : 'catalogue maximum' }})
+                                    </span>
                                 </li>
                             </ul>
 

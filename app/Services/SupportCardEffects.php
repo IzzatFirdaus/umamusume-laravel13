@@ -98,6 +98,120 @@ class SupportCardEffects
     }
 
     /**
+     * The card's effects at a level the run reached, interpolated between the stated anchors.
+     *
+     * `forLevel()` derives the reached effect values for a card at a given level by linear interpolation
+     * between the two anchors bracketing `$level` on `support_cards.effects`. Below the lowest anchor,
+     * clamp to the lowest anchor's value. At or above the highest anchor, return the highest anchor's
+     * value (equivalent to `atCap()`). The method stores nothing — reached values are derived per
+     * ADR-0029 D2, never a per-run column. Source: UMAMUSUME_REFERENCE.md §1.4.2 (card level drives
+     * support effects only, not teammate stats).
+     *
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>|null  $dictionary
+     * @return list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>
+     */
+    public static function forLevel(int $cardId, int $level, ?array $dictionary = null): array
+    {
+        $card = SupportCard::query()->find($cardId);
+
+        if ($card === null) {
+            return [];
+        }
+
+        $dictionary ??= self::dictionary();
+        $rows = [];
+
+        foreach ($card->effects ?? [] as $row) {
+            if (count($row) !== count(self::ANCHOR_LEVELS) + 1) {
+                continue;
+            }
+
+            $value = self::valueAt($row, $level);
+
+            if ($value === null) {
+                continue;
+            }
+
+            $effectId = (int) $row[0];
+            $entry = $dictionary[$effectId] ?? null;
+
+            $rows[] = [
+                'effect_id' => $effectId,
+                'name' => $entry['name'] ?? null,
+                'display' => self::formatValue($value, $entry['symbol'] ?? null),
+                'value' => $value,
+                'symbol' => $entry['symbol'] ?? null,
+                'calc' => $entry['calc'] ?? null,
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * The stated brackets around `$level`, or null when the row states no anchor at all.
+     *
+     * Interpolating between the nearest stated anchors rather than between array positions keeps a
+     * `-1` gap from being read as a zero: a gap means the source states nothing at that level.
+     *
+     * @param  array<int, int>  $row
+     */
+    private static function valueAt(array $row, int $level): ?int
+    {
+        /** @var array<int, int> $anchors */
+        $anchors = [];
+
+        foreach (self::ANCHOR_LEVELS as $index => $anchor) {
+            $value = $row[$index + 1] ?? -1;
+
+            if ($value !== -1) {
+                $anchors[$anchor] = (int) $value;
+            }
+        }
+
+        if ($anchors === []) {
+            return null;
+        }
+
+        $levels = array_keys($anchors);
+        $first = $levels[0];
+        $last = $levels[count($levels) - 1];
+
+        if ($level <= $first) {
+            return $anchors[$first];
+        }
+
+        if ($level >= $last) {
+            return $anchors[$last];
+        }
+
+        if (isset($anchors[$level])) {
+            return $anchors[$level];
+        }
+
+        $low = $first;
+
+        foreach ($levels as $anchor) {
+            if ($anchor <= $level) {
+                $low = $anchor;
+            }
+        }
+
+        $high = $last;
+
+        foreach ($levels as $anchor) {
+            if ($anchor >= $level) {
+                $high = $anchor;
+                break;
+            }
+        }
+
+        $ratio = ($level - $low) / ($high - $low);
+
+        return (int) round($anchors[$low] + $ratio * ($anchors[$high] - $anchors[$low]));
+    }
+
+    /**
      * The anchor's own unit word, applied once here so a figure and a total of figures cannot read
      * two different units for the same effect.
      */

@@ -63,13 +63,22 @@ class DeckSelectController extends Controller
         $dictionary = SupportCardEffects::dictionary();
         $scenarioKey = $this->scenarioKey();
 
-        /** @var list<array{position: int, support_card_id: int|null, ownership: string|null}> $draft */
+        /** @var list<array{position: int, support_card_id: int|null, ownership: string|null, card_level: int|null}> $draft */
         $draft = SetupDraft::deck() ?? $this->emptySlots();
         $selected = array_values(array_filter(array_column($draft, 'support_card_id')));
         $cards = SupportCard::query()
             ->whereIn('id', $selected)
             ->get()
             ->keyBy('id');
+
+        /** @var array<int, int> $levels */
+        $levels = [];
+
+        foreach ($draft as $slot) {
+            if ($slot['support_card_id'] !== null && $slot['card_level'] !== null) {
+                $levels[(int) $slot['support_card_id']] = (int) $slot['card_level'];
+            }
+        }
 
         return Inertia::render('Career/DeckSelect', [
             'visited' => SetupDraft::visited(),
@@ -95,7 +104,7 @@ class DeckSelectController extends Controller
             'picker' => $this->picker($request, $selected),
             'scenarioLabel' => SetupDraft::scenarioLabel(),
             'scenarioPending' => SetupDraft::read()['scenario'] === null,
-            'analysis' => DeckAnalysis::build($this->analysisInput($cards)),
+            'analysis' => DeckAnalysis::build($this->analysisInput($cards, $levels)),
             // The one write this step makes, stated as a URL the page never has to resolve.
             'action' => route('career.deck.store'),
         ]);
@@ -229,11 +238,12 @@ class DeckSelectController extends Controller
      * are.
      *
      * @param  Collection<int, SupportCard>  $cards
-     * @return list<array{card_name: string, effects: list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>}>
+     * @param  array<int, int>  $levels
+     * @return list<array{card_name: string, effects: list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>, basis: 'catalog'|'level', level: int|null}>
      */
-    private function analysisInput($cards): array
+    private function analysisInput($cards, array $levels = []): array
     {
-        return DeckAnalysis::inputFor($cards);
+        return DeckAnalysis::inputFor($cards, $levels);
     }
 
     /**

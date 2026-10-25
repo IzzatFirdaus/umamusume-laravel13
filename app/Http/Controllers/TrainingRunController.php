@@ -252,7 +252,7 @@ class TrainingRunController extends Controller
             'types' => $this->builderTypes(),
             'rarities' => $this->rarityWords(),
             'availabilities' => SupportCard::AVAILABILITIES,
-            'analysis' => DeckAnalysis::build($this->builderAnalysisInput($request, $run, $dictionary)),
+            'analysis' => DeckAnalysis::build($this->builderAnalysisInput($request, $run)),
             'action' => route('runs.deck.sync', $run),
         ]);
     }
@@ -452,12 +452,12 @@ class TrainingRunController extends Controller
     }
 
     /**
-     * The six cards the analysis reads, in slot order, with their at-cap effects.
+     * The six cards the analysis reads, in slot order, with their reached effects where a slot records
+     * a level and their at-cap effects otherwise.
      *
-     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
-     * @return list<array{card_name: string, effects: list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>}>
+     * @return list<array{card_name: string, effects: list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>, basis: 'catalog'|'level', level: int|null}>
      */
-    private function builderAnalysisInput(Request $request, TrainingRun $run, array $dictionary): array
+    private function builderAnalysisInput(Request $request, TrainingRun $run): array
     {
         $ids = [];
 
@@ -470,15 +470,19 @@ class TrainingRunController extends Controller
         }
 
         $cards = [];
+        $levels = [];
 
         foreach (SupportCard::query()->whereIn('id', $ids)->get() as $card) {
-            $cards[] = [
-                'card_name' => $card->displayName(),
-                'effects' => SupportCardEffects::atCap($card, $dictionary),
-            ];
+            $cards[] = $card;
         }
 
-        return $cards;
+        foreach ($run->deckSlots as $slot) {
+            if ($slot->card_level !== null) {
+                $levels[(int) $slot->support_card_id] = (int) $slot->card_level;
+            }
+        }
+
+        return DeckAnalysis::inputFor(collect($cards), $levels);
     }
 
     /**

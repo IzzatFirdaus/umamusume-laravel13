@@ -25,15 +25,18 @@ use Illuminate\Support\Collection;
  * `mult` list each card's value and stop, because a total of those is a figure the client does not
  * state.
  *
+ * A card whose slot records a level contributes its reached value (`SupportCardEffects::forLevel()`);
+ * a slot with no level contributes the highest stated anchor and is marked as the catalogue maximum.
+ *
  * @phpstan-type EffectLine = array{
  *     effect_id: int,
  *     name: string|null,
  *     mode: string,
- *     cards: list<array{card_name: string, display: string}>,
+ *     cards: list<array{card_name: string, display: string, basis: 'catalog'|'level', level: int|null}>,
  *     total: array{value: int, display: string, basis: string}|null
  * }
  * @phpstan-type EffectEntry = array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}
- * @phpstan-type CardInput = array{card_name: string, effects: list<EffectEntry>}
+ * @phpstan-type CardInput = array{card_name: string, effects: list<EffectEntry>, basis: 'catalog'|'level', level: int|null}
  */
 class DeckAnalysis
 {
@@ -88,17 +91,26 @@ class DeckAnalysis
      * both printing "the analysis".
      *
      * @param  Collection<int, SupportCard>  $cards
+     * @param  array<int, int>  $levels  card id => the level recorded on that card's slot
      * @return list<CardInput>
      */
-    public static function inputFor(Collection $cards): array
+    public static function inputFor(Collection $cards, array $levels = []): array
     {
         $dictionary = SupportCardEffects::dictionary();
 
         return array_values($cards
-            ->map(static fn (SupportCard $card): array => [
-                'card_name' => $card->displayName(),
-                'effects' => SupportCardEffects::atCap($card, $dictionary),
-            ])
+            ->map(static function (SupportCard $card) use ($dictionary, $levels): array {
+                $level = $levels[$card->id] ?? null;
+
+                return [
+                    'card_name' => $card->displayName(),
+                    'effects' => $level === null
+                        ? SupportCardEffects::atCap($card, $dictionary)
+                        : SupportCardEffects::forLevel($card->id, $level, $dictionary),
+                    'basis' => $level === null ? 'catalog' : 'level',
+                    'level' => $level,
+                ];
+            })
             ->values()
             ->all());
     }
@@ -130,7 +142,7 @@ class DeckAnalysis
             foreach ($cards as $card) {
                 foreach ($card['effects'] as $effect) {
                     if (in_array($effect['effect_id'], $effectIds, true)) {
-                        self::collect($effect, $card['card_name'], $byEffect);
+                        self::collect($effect, $card, $byEffect);
                     }
                 }
             }
@@ -171,7 +183,7 @@ class DeckAnalysis
         foreach ($cards as $card) {
             foreach ($card['effects'] as $effect) {
                 if (! isset($categorised[$effect['effect_id']])) {
-                    self::collect($effect, $card['card_name'], $byEffect);
+                    self::collect($effect, $card, $byEffect);
                 }
             }
         }
@@ -181,9 +193,10 @@ class DeckAnalysis
 
     /**
      * @param  EffectEntry  $effect
+     * @param  CardInput  $card
      * @param  array<int, array<string, mixed>>  $byEffect
      */
-    private static function collect(array $effect, string $cardName, array &$byEffect): void
+    private static function collect(array $effect, array $card, array &$byEffect): void
     {
         // `isset` rather than a null comparison on the reference: taking `&$byEffect[$id]` creates a
         // null entry, so the old `$entry === null` was true only on the first carry of an effect, and
@@ -200,7 +213,12 @@ class DeckAnalysis
 
         $entry = &$byEffect[$effect['effect_id']];
 
-        $entry['cards'][] = ['card_name' => $cardName, 'display' => $effect['display']];
+        $entry['cards'][] = [
+            'card_name' => $card['card_name'],
+            'display' => $effect['display'],
+            'basis' => $card['basis'],
+            'level' => $card['level'],
+        ];
         $entry['values'][] = $effect['value'];
     }
 

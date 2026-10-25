@@ -313,3 +313,34 @@ test('stores the per-run card level on the run deck and reads it back', async ({
     await page.locator('#app > *').first().waitFor();
     await expect(page.getByLabel('Level for Slot 1')).toHaveValue('35');
 });
+
+test('uses the reached effect basis when a level is recorded and the catalogue maximum when it is not', async ({ page }) => {
+    const url = await builderUrl(page, 'ura_finale');
+
+    await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
+    await page.getByRole('button', { name: /^Equip to Slot 1/ }).first().click();
+    await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped');
+
+    await page.getByLabel('Level for Slot 1').fill('35');
+    await page.getByRole('button', { name: 'Confirm deck' }).click();
+    await page.waitForURL(/\/cockpit$/);
+
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const analysis = page.locator('#deck-analysis-heading').locator('..');
+    await expect(analysis.getByText('(at Lv 35)').first()).toBeVisible();
+    await expect(analysis.getByText('(catalogue maximum)')).toHaveCount(0);
+
+    // Clearing the level returns the card to the catalogue maximum.
+    await page.getByLabel('Level for Slot 1').fill('');
+    await page.getByRole('button', { name: 'Confirm deck' }).click();
+    await page.waitForURL(/\/cockpit$/);
+
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const cleared = page.locator('#deck-analysis-heading').locator('..');
+    await expect(cleared.getByText('(catalogue maximum)').first()).toBeVisible();
+    await expect(cleared.getByText('(at Lv 35)')).toHaveCount(0);
+});
