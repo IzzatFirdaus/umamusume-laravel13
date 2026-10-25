@@ -88,6 +88,13 @@ class StoreTrainingRunRequest extends FormRequest
             // The four preseason rounds; the tally the Trainer reports, not a round modelled here.
             'team_preseason_wins' => ['nullable', 'integer', 'between:0,4'],
             /*
+             * Per-stat team ranks, read off the client's Team Info panel. The key set is the stat
+             * matrix's own; each value is one of G..S. `S+` is the *overall* team rank added by the
+             * 2026-07-01 update and is never a per-stat value (UMAMUSUME_REFERENCE.md §2.2.2, R10).
+             */
+            'team_stat_grades' => ['nullable', 'array:'.implode(',', self::stats())],
+            'team_stat_grades.*' => ['nullable', 'string', Rule::in(['G', 'F', 'E', 'D', 'C', 'B', 'A', 'S'])],
+            /*
              * The Unity Cup progression tallies, as the Trainer reports them off the Team Info panel.
              * Entered, never derived: nothing here counts a training or a burst. Null is the honest
              * "not stated" (D-220); no upper bound beyond the column's own unsigned range.
@@ -205,5 +212,15 @@ class StoreTrainingRunRequest extends FormRequest
     public static function stats(): array
     {
         return array_values((array) config('scenarios.stat_order'));
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'team_stat_grades.*.in' => 'Per-stat grade must be G-S; S+ is overall team rank only.',
+        ];
     }
 }

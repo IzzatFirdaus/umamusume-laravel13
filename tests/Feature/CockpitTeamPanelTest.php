@@ -8,6 +8,7 @@ use App\Enums\RunStatus;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -121,6 +122,43 @@ final class CockpitTeamPanelTest extends TestCase
 
         expect($fresh->team_name)->toBeNull()
             ->and($fresh->team_league_placement)->toBeNull();
+    }
+
+    public function test_stores_per_stat_team_grades_and_rejects_s_plus(): void
+    {
+        $run = $this->unityCupRun();
+
+        // A fresh run records no grades; the panel receives nulls, not a defaulted letter.
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('scenario.team.stat_grades', fn (Collection $grades): bool => $grades->every(
+                    static fn (array $grade): bool => $grade['grade'] === null,
+                )));
+
+        $this->put(route('runs.update', $run), [
+            'umamusume_id' => $run->umamusume_id,
+            'status' => RunStatus::Active->value,
+            'team_stat_grades' => ['Speed' => 'S', 'Stamina' => 'A', 'Power' => 'A', 'Guts' => 'A', 'Wit' => 'A'],
+        ])->assertSessionHasNoErrors();
+
+        expect($run->fresh()->team_stat_grades)->toBe([
+            'Speed' => 'S', 'Stamina' => 'A', 'Power' => 'A', 'Guts' => 'A', 'Wit' => 'A',
+        ]);
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('scenario.team.stat_grades', fn (Collection $grades): bool => $grades->pluck('grade')->all() === ['S', 'A', 'A', 'A', 'A']));
+
+        // R10: S+ is the overall rank, never a per-stat value.
+        $this->put(route('runs.update', $run), [
+            'umamusume_id' => $run->umamusume_id,
+            'status' => RunStatus::Active->value,
+            'team_stat_grades' => ['Speed' => 'S+'],
+        ])->assertSessionHasErrors([
+            'team_stat_grades.Speed' => 'Per-stat grade must be G-S; S+ is overall team rank only.',
+        ]);
     }
 
     /**

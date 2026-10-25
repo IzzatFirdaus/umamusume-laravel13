@@ -13,7 +13,7 @@
  * renders Estimated, and the burst-band table renders with the Extreme-counting caveat the run
  * report §8.2 records.
  *
- * **What has no writer is an absence, not a zero.** Per-stat team grades, current Spirit, the run's
+ * **What has no writer is an absence, not a zero.** Current Spirit, the run's
  * own band position, member stats and roles, and the held advice (readiness, timing, benefit) each
  * render `N/A` or a named sentence with the reason in a `title`. Burst readiness is not computed:
  * no Spirit value is recorded and no numeric threshold exists in config, so there is nothing to
@@ -310,8 +310,13 @@ const counterSegments = computed((): string[] => {
                     >
                         <span class="text-ink">{{ grade.label }}</span>
                         <span
+                            v-if="grade.grade !== null"
                             class="font-mono tabular-nums text-ink-strong"
-                            title="No column records a team stat grade. The client prints these letters on its Team Info panel, and this tool has no input that stores them."
+                        >{{ grade.grade }}</span>
+                        <span
+                            v-else
+                            class="font-mono tabular-nums text-ink-strong"
+                            title="No per-stat team grade is recorded for this run yet. Enter it in the team-state editor."
                         >N/A</span>
                     </li>
                 </ul>

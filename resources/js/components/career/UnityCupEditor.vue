@@ -14,7 +14,19 @@
  * once.
  */
 import { useForm } from '@inertiajs/vue3';
-import { BaseInput } from '../Form';
+import { BaseInput, BaseSelect } from '../Form';
+
+const GRADE_OPTIONS = [
+    { value: '', label: 'Not recorded' },
+    { value: 'G', label: 'G' },
+    { value: 'F', label: 'F' },
+    { value: 'E', label: 'E' },
+    { value: 'D', label: 'D' },
+    { value: 'C', label: 'C' },
+    { value: 'B', label: 'B' },
+    { value: 'A', label: 'A' },
+    { value: 'S', label: 'S' },
+];
 
 const props = defineProps<{
     /** `route('runs.update', $run)`, supplied by the server like the header forms' own action. */
@@ -31,6 +43,7 @@ const props = defineProps<{
         unity_trainings_count: number | null;
         spirit_bursts_count: number | null;
         extreme_bursts_count: number | null;
+        stat_grades: { key: string; label: string; grade: string | null }[];
     };
 }>();
 
@@ -47,6 +60,9 @@ const form = useForm({
     unity_trainings_count: numeric(props.team.unity_trainings_count),
     spirit_bursts_count: numeric(props.team.spirit_bursts_count),
     extreme_bursts_count: numeric(props.team.extreme_bursts_count),
+    team_stat_grades: Object.fromEntries(
+        props.team.stat_grades.map((grade) => [grade.key, grade.grade ?? '']),
+    ) as Record<string, string>,
 });
 
 const save = (): void => {
@@ -68,6 +84,10 @@ const save = (): void => {
                 unity_trainings_count: figure(data.unity_trainings_count),
                 spirit_bursts_count: figure(data.spirit_bursts_count),
                 extreme_bursts_count: figure(data.extreme_bursts_count),
+                // A blank select is "not recorded"; a letter is the Trainer's reading (D-220).
+                team_stat_grades: Object.fromEntries(
+                    Object.entries(data.team_stat_grades).map(([stat, grade]) => [stat, grade === '' ? null : grade]),
+                ),
             };
         })
         .put(props.action, { preserveScroll: true });
@@ -153,6 +173,30 @@ const save = (): void => {
                     min="0"
                 />
             </label>
+
+            <fieldset class="flex flex-col gap-2 @3xl:col-span-2">
+                <legend class="text-ink-muted">Team stat grades</legend>
+                <div class="grid grid-cols-1 gap-3 @3xl:grid-cols-5">
+                    <label
+                        v-for="grade in props.team.stat_grades"
+                        :key="grade.key"
+                        :for="`team_stat_grade_${grade.key}`"
+                        class="flex flex-col gap-1"
+                    >
+                        <span class="text-ink-muted">{{ grade.label }}</span>
+                        <BaseSelect
+                            :id="`team_stat_grade_${grade.key}`"
+                            v-model="form.team_stat_grades[grade.key]"
+                            :name="`team_stat_grades[${grade.key}]`"
+                            :options="GRADE_OPTIONS"
+                        />
+                    </label>
+                </div>
+                <!-- R10: per-stat ranks stop at S; S+ is the overall team rank and is not this column. -->
+                <p class="text-xs text-ink-muted">
+                    Per-stat grades are G to S. S+ is the overall team rank, recorded elsewhere.
+                </p>
+            </fieldset>
 
             <!-- R4-13 / ruling R2 (2026-10-25): the editor offers no rank input, and silence about that
                  leaves a Trainer who read the client's rank with no path from this panel. The rank has an

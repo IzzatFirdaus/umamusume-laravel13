@@ -159,6 +159,34 @@ test('records the Unity Cup team state through the team editor', async ({ page }
     await expect(burstsBox).toContainText('11');
 });
 
+test('records the per-stat team grades and reads them back on the panel', async ({ page }) => {
+    await openCockpit(page);
+
+    const grades = page.getByRole('list', { name: 'Team stat grades' });
+    const rows = grades.getByRole('listitem');
+    await expect(rows).toHaveCount(5);
+    await expect(rows.first()).toContainText('N/A');
+
+    const editor = page.locator('details', { has: page.getByText('Edit team state') });
+    if (!(await editor.evaluate((el) => el instanceof HTMLDetailsElement && el.open))) {
+        await editor.locator('summary').click();
+    }
+
+    // R10: the per-stat set stops at S; S+ is the overall team rank and has no option here.
+    await expect(editor.locator('#team_stat_grade_Speed option', { hasText: 'S+' })).toHaveCount(0);
+
+    for (const [stat, grade] of [['Speed', 'S'], ['Stamina', 'A'], ['Power', 'A'], ['Guts', 'A'], ['Wit', 'A']] as const) {
+        await editor.locator(`#team_stat_grade_${stat}`).selectOption(grade);
+    }
+
+    await editor.getByRole('button', { name: 'Save team state' }).click();
+    await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
+
+    for (const [stat, grade] of [['Speed', 'S'], ['Stamina', 'A'], ['Power', 'A'], ['Guts', 'A'], ['Wit', 'A']] as const) {
+        await expect(rows.filter({ hasText: stat }).locator('span').nth(1)).toHaveText(grade);
+    }
+});
+
 test('renders the Unity Cup scenario region without a runtime error, the bursts widget as a meter', async ({ page }) => {
     // Regression for the cockpit-wt merge's SpiritBurstsPanel registration, removed 2026-10-16:
     // `spirit_bursts` is a widget key, and the panel-shaped component registered against it

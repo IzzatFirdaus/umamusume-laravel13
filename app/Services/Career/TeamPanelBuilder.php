@@ -498,10 +498,14 @@ final class TeamPanelBuilder
             'rank' => $rank,
             'facility_level' => $run->facilityLevel($rank),
             'ladder' => $ladder,
-            // No column records a team stat grade, so every row is a named absence rather than a
-            // zero (D-220); the labels ride config so the renderer never invents one.
+            // The stored per-stat rank, or null when the Trainer has not recorded one (D-220); the
+            // labels ride config so the renderer never invents one.
             'stat_grades' => array_map(
-                static fn (string $stat): array => ['key' => $stat, 'label' => $stat, 'grade' => null],
+                static fn (string $stat): array => [
+                    'key' => $stat,
+                    'label' => $stat,
+                    'grade' => ($run->team_stat_grades ?? [])[$stat] ?? null,
+                ],
                 $order
             ),
             'roster' => $roster,
