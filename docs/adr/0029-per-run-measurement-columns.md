@@ -161,3 +161,10 @@ cap by exactly the table's own structural cost, not by prose. Cutting further me
 authorisation's semantics or its citation — both ruled out as trim targets in the 2026-10-25 pass.
 The ADR is accepted at 546 as the new floor; the same state `DECISION 0026` (529/500) has carried
 since acceptance.
+
+**2026-10-25 (later) — B-0.6's authorisation superseded (R9).** The `current_spirit` integer on
+`training_runs` authorises a per-run shape for a per-team-member state. The Spirit gauge is per team
+member (deck supports + story characters + joiners), has no published numeric max (a bar with a flame
+icon), and the burst is a once-per-member availability with a ~40% per-turn chance. Storing one number
+for the run fabricates the wrong model. B-0.6's column shape is withdrawn; its replacement is a shape
+decision filed as KI-133. The other seven items in this ADR stand unchanged.
