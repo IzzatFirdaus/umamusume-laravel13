@@ -1,0 +1,1173 @@
+{
+  "timestamp": "2026-10-24T15:11:48.231Z",
+  "baseUrl": "http://localhost:8000",
+  "viewports": [
+    "mobile",
+    "tablet",
+    "desktop",
+    "desktop-wide"
+  ],
+  "totalRoutes": 48,
+  "successful": 188,
+  "failed": 0,
+  "skipped": 4,
+  "results": {
+    "successful": [
+      {
+        "route": "home",
+        "path": "/",
+        "viewport": "mobile",
+        "filename": "home-mobile.png"
+      },
+      {
+        "route": "home",
+        "path": "/",
+        "viewport": "tablet",
+        "filename": "home-tablet.png"
+      },
+      {
+        "route": "home",
+        "path": "/",
+        "viewport": "desktop",
+        "filename": "home-desktop.png"
+      },
+      {
+        "route": "home",
+        "path": "/",
+        "viewport": "desktop-wide",
+        "filename": "home-desktop-wide.png"
+      },
+      {
+        "route": "career.scenario",
+        "path": "/career/setup/scenario",
+        "viewport": "mobile",
+        "filename": "career.scenario-mobile.png"
+      },
+      {
+        "route": "career.scenario",
+        "path": "/career/setup/scenario",
+        "viewport": "tablet",
+        "filename": "career.scenario-tablet.png"
+      },
+      {
+        "route": "career.scenario",
+        "path": "/career/setup/scenario",
+        "viewport": "desktop",
+        "filename": "career.scenario-desktop.png"
+      },
+      {
+        "route": "career.scenario",
+        "path": "/career/setup/scenario",
+        "viewport": "desktop-wide",
+        "filename": "career.scenario-desktop-wide.png"
+      },
+      {
+        "route": "career.trainee",
+        "path": "/career/setup/trainee",
+        "viewport": "mobile",
+        "filename": "career.trainee-mobile.png"
+      },
+      {
+        "route": "career.trainee",
+        "path": "/career/setup/trainee",
+        "viewport": "tablet",
+        "filename": "career.trainee-tablet.png"
+      },
+      {
+        "route": "career.trainee",
+        "path": "/career/setup/trainee",
+        "viewport": "desktop",
+        "filename": "career.trainee-desktop.png"
+      },
+      {
+        "route": "career.trainee",
+        "path": "/career/setup/trainee",
+        "viewport": "desktop-wide",
+        "filename": "career.trainee-desktop-wide.png"
+      },
+      {
+        "route": "career.target",
+        "path": "/career/setup/target",
+        "viewport": "mobile",
+        "filename": "career.target-mobile.png"
+      },
+      {
+        "route": "career.target",
+        "path": "/career/setup/target",
+        "viewport": "tablet",
+        "filename": "career.target-tablet.png"
+      },
+      {
+        "route": "career.target",
+        "path": "/career/setup/target",
+        "viewport": "desktop",
+        "filename": "career.target-desktop.png"
+      },
+      {
+        "route": "career.target",
+        "path": "/career/setup/target",
+        "viewport": "desktop-wide",
+        "filename": "career.target-desktop-wide.png"
+      },
+      {
+        "route": "career.legacy",
+        "path": "/career/setup/legacy",
+        "viewport": "mobile",
+        "filename": "career.legacy-mobile.png"
+      },
+      {
+        "route": "career.legacy",
+        "path": "/career/setup/legacy",
+        "viewport": "tablet",
+        "filename": "career.legacy-tablet.png"
+      },
+      {
+        "route": "career.legacy",
+        "path": "/career/setup/legacy",
+        "viewport": "desktop",
+        "filename": "career.legacy-desktop.png"
+      },
+      {
+        "route": "career.legacy",
+        "path": "/career/setup/legacy",
+        "viewport": "desktop-wide",
+        "filename": "career.legacy-desktop-wide.png"
+      },
+      {
+        "route": "career.deck",
+        "path": "/career/setup/deck",
+        "viewport": "mobile",
+        "filename": "career.deck-mobile.png"
+      },
+      {
+        "route": "career.deck",
+        "path": "/career/setup/deck",
+        "viewport": "tablet",
+        "filename": "career.deck-tablet.png"
+      },
+      {
+        "route": "career.deck",
+        "path": "/career/setup/deck",
+        "viewport": "desktop",
+        "filename": "career.deck-desktop.png"
+      },
+      {
+        "route": "career.deck",
+        "path": "/career/setup/deck",
+        "viewport": "desktop-wide",
+        "filename": "career.deck-desktop-wide.png"
+      },
+      {
+        "route": "career.preflight",
+        "path": "/career/setup/preflight",
+        "viewport": "mobile",
+        "filename": "career.preflight-mobile.png"
+      },
+      {
+        "route": "career.preflight",
+        "path": "/career/setup/preflight",
+        "viewport": "tablet",
+        "filename": "career.preflight-tablet.png"
+      },
+      {
+        "route": "career.preflight",
+        "path": "/career/setup/preflight",
+        "viewport": "desktop",
+        "filename": "career.preflight-desktop.png"
+      },
+      {
+        "route": "career.preflight",
+        "path": "/career/setup/preflight",
+        "viewport": "desktop-wide",
+        "filename": "career.preflight-desktop-wide.png"
+      },
+      {
+        "route": "career.snapshot",
+        "path": "/career/snapshot",
+        "viewport": "mobile",
+        "filename": "career.snapshot-mobile.png"
+      },
+      {
+        "route": "career.snapshot",
+        "path": "/career/snapshot",
+        "viewport": "tablet",
+        "filename": "career.snapshot-tablet.png"
+      },
+      {
+        "route": "career.snapshot",
+        "path": "/career/snapshot",
+        "viewport": "desktop",
+        "filename": "career.snapshot-desktop.png"
+      },
+      {
+        "route": "career.snapshot",
+        "path": "/career/snapshot",
+        "viewport": "desktop-wide",
+        "filename": "career.snapshot-desktop-wide.png"
+      },
+      {
+        "route": "career.snapshot.setup",
+        "path": "/career/snapshot/setup",
+        "viewport": "mobile",
+        "filename": "career.snapshot.setup-mobile.png"
+      },
+      {
+        "route": "career.snapshot.setup",
+        "path": "/career/snapshot/setup",
+        "viewport": "tablet",
+        "filename": "career.snapshot.setup-tablet.png"
+      },
+      {
+        "route": "career.snapshot.setup",
+        "path": "/career/snapshot/setup",
+        "viewport": "desktop",
+        "filename": "career.snapshot.setup-desktop.png"
+      },
+      {
+        "route": "career.snapshot.setup",
+        "path": "/career/snapshot/setup",
+        "viewport": "desktop-wide",
+        "filename": "career.snapshot.setup-desktop-wide.png"
+      },
+      {
+        "route": "career.snapshot.review",
+        "path": "/career/snapshot/review",
+        "viewport": "mobile",
+        "filename": "career.snapshot.review-mobile.png"
+      },
+      {
+        "route": "career.snapshot.review",
+        "path": "/career/snapshot/review",
+        "viewport": "tablet",
+        "filename": "career.snapshot.review-tablet.png"
+      },
+      {
+        "route": "career.snapshot.review",
+        "path": "/career/snapshot/review",
+        "viewport": "desktop",
+        "filename": "career.snapshot.review-desktop.png"
+      },
+      {
+        "route": "career.snapshot.review",
+        "path": "/career/snapshot/review",
+        "viewport": "desktop-wide",
+        "filename": "career.snapshot.review-desktop-wide.png"
+      },
+      {
+        "route": "catalog.index",
+        "path": "/umamusume",
+        "viewport": "mobile",
+        "filename": "catalog.index-mobile.png"
+      },
+      {
+        "route": "catalog.index",
+        "path": "/umamusume",
+        "viewport": "tablet",
+        "filename": "catalog.index-tablet.png"
+      },
+      {
+        "route": "catalog.index",
+        "path": "/umamusume",
+        "viewport": "desktop",
+        "filename": "catalog.index-desktop.png"
+      },
+      {
+        "route": "catalog.index",
+        "path": "/umamusume",
+        "viewport": "desktop-wide",
+        "filename": "catalog.index-desktop-wide.png"
+      },
+      {
+        "route": "skills.index",
+        "path": "/skills",
+        "viewport": "mobile",
+        "filename": "skills.index-mobile.png"
+      },
+      {
+        "route": "skills.index",
+        "path": "/skills",
+        "viewport": "tablet",
+        "filename": "skills.index-tablet.png"
+      },
+      {
+        "route": "skills.index",
+        "path": "/skills",
+        "viewport": "desktop",
+        "filename": "skills.index-desktop.png"
+      },
+      {
+        "route": "skills.index",
+        "path": "/skills",
+        "viewport": "desktop-wide",
+        "filename": "skills.index-desktop-wide.png"
+      },
+      {
+        "route": "support-cards.index",
+        "path": "/support-cards",
+        "viewport": "mobile",
+        "filename": "support-cards.index-mobile.png"
+      },
+      {
+        "route": "support-cards.index",
+        "path": "/support-cards",
+        "viewport": "tablet",
+        "filename": "support-cards.index-tablet.png"
+      },
+      {
+        "route": "support-cards.index",
+        "path": "/support-cards",
+        "viewport": "desktop",
+        "filename": "support-cards.index-desktop.png"
+      },
+      {
+        "route": "support-cards.index",
+        "path": "/support-cards",
+        "viewport": "desktop-wide",
+        "filename": "support-cards.index-desktop-wide.png"
+      },
+      {
+        "route": "runs.index",
+        "path": "/training-runs",
+        "viewport": "mobile",
+        "filename": "runs.index-mobile.png"
+      },
+      {
+        "route": "runs.index",
+        "path": "/training-runs",
+        "viewport": "tablet",
+        "filename": "runs.index-tablet.png"
+      },
+      {
+        "route": "runs.index",
+        "path": "/training-runs",
+        "viewport": "desktop",
+        "filename": "runs.index-desktop.png"
+      },
+      {
+        "route": "runs.index",
+        "path": "/training-runs",
+        "viewport": "desktop-wide",
+        "filename": "runs.index-desktop-wide.png"
+      },
+      {
+        "route": "runs.create",
+        "path": "/training-runs/create",
+        "viewport": "mobile",
+        "filename": "runs.create-mobile.png"
+      },
+      {
+        "route": "runs.create",
+        "path": "/training-runs/create",
+        "viewport": "tablet",
+        "filename": "runs.create-tablet.png"
+      },
+      {
+        "route": "runs.create",
+        "path": "/training-runs/create",
+        "viewport": "desktop",
+        "filename": "runs.create-desktop.png"
+      },
+      {
+        "route": "runs.create",
+        "path": "/training-runs/create",
+        "viewport": "desktop-wide",
+        "filename": "runs.create-desktop-wide.png"
+      },
+      {
+        "route": "runs.import",
+        "path": "/training-runs/import",
+        "viewport": "mobile",
+        "filename": "runs.import-mobile.png"
+      },
+      {
+        "route": "runs.import",
+        "path": "/training-runs/import",
+        "viewport": "tablet",
+        "filename": "runs.import-tablet.png"
+      },
+      {
+        "route": "runs.import",
+        "path": "/training-runs/import",
+        "viewport": "desktop",
+        "filename": "runs.import-desktop.png"
+      },
+      {
+        "route": "runs.import",
+        "path": "/training-runs/import",
+        "viewport": "desktop-wide",
+        "filename": "runs.import-desktop-wide.png"
+      },
+      {
+        "route": "review.index",
+        "path": "/review",
+        "viewport": "mobile",
+        "filename": "review.index-mobile.png"
+      },
+      {
+        "route": "review.index",
+        "path": "/review",
+        "viewport": "tablet",
+        "filename": "review.index-tablet.png"
+      },
+      {
+        "route": "review.index",
+        "path": "/review",
+        "viewport": "desktop",
+        "filename": "review.index-desktop.png"
+      },
+      {
+        "route": "review.index",
+        "path": "/review",
+        "viewport": "desktop-wide",
+        "filename": "review.index-desktop-wide.png"
+      },
+      {
+        "route": "legacy.index",
+        "path": "/legacy",
+        "viewport": "mobile",
+        "filename": "legacy.index-mobile.png"
+      },
+      {
+        "route": "legacy.index",
+        "path": "/legacy",
+        "viewport": "tablet",
+        "filename": "legacy.index-tablet.png"
+      },
+      {
+        "route": "legacy.index",
+        "path": "/legacy",
+        "viewport": "desktop",
+        "filename": "legacy.index-desktop.png"
+      },
+      {
+        "route": "legacy.index",
+        "path": "/legacy",
+        "viewport": "desktop-wide",
+        "filename": "legacy.index-desktop-wide.png"
+      },
+      {
+        "route": "legacy.compare",
+        "path": "/legacy/compare",
+        "viewport": "mobile",
+        "filename": "legacy.compare-mobile.png"
+      },
+      {
+        "route": "legacy.compare",
+        "path": "/legacy/compare",
+        "viewport": "tablet",
+        "filename": "legacy.compare-tablet.png"
+      },
+      {
+        "route": "legacy.compare",
+        "path": "/legacy/compare",
+        "viewport": "desktop",
+        "filename": "legacy.compare-desktop.png"
+      },
+      {
+        "route": "legacy.compare",
+        "path": "/legacy/compare",
+        "viewport": "desktop-wide",
+        "filename": "legacy.compare-desktop-wide.png"
+      },
+      {
+        "route": "veterans.index",
+        "path": "/veterans",
+        "viewport": "mobile",
+        "filename": "veterans.index-mobile.png"
+      },
+      {
+        "route": "veterans.index",
+        "path": "/veterans",
+        "viewport": "tablet",
+        "filename": "veterans.index-tablet.png"
+      },
+      {
+        "route": "veterans.index",
+        "path": "/veterans",
+        "viewport": "desktop",
+        "filename": "veterans.index-desktop.png"
+      },
+      {
+        "route": "veterans.index",
+        "path": "/veterans",
+        "viewport": "desktop-wide",
+        "filename": "veterans.index-desktop-wide.png"
+      },
+      {
+        "route": "veterans.compare",
+        "path": "/veterans/compare",
+        "viewport": "mobile",
+        "filename": "veterans.compare-mobile.png"
+      },
+      {
+        "route": "veterans.compare",
+        "path": "/veterans/compare",
+        "viewport": "tablet",
+        "filename": "veterans.compare-tablet.png"
+      },
+      {
+        "route": "veterans.compare",
+        "path": "/veterans/compare",
+        "viewport": "desktop",
+        "filename": "veterans.compare-desktop.png"
+      },
+      {
+        "route": "veterans.compare",
+        "path": "/veterans/compare",
+        "viewport": "desktop-wide",
+        "filename": "veterans.compare-desktop-wide.png"
+      },
+      {
+        "route": "preferences.edit",
+        "path": "/preferences",
+        "viewport": "mobile",
+        "filename": "preferences.edit-mobile.png"
+      },
+      {
+        "route": "preferences.edit",
+        "path": "/preferences",
+        "viewport": "tablet",
+        "filename": "preferences.edit-tablet.png"
+      },
+      {
+        "route": "preferences.edit",
+        "path": "/preferences",
+        "viewport": "desktop",
+        "filename": "preferences.edit-desktop.png"
+      },
+      {
+        "route": "preferences.edit",
+        "path": "/preferences",
+        "viewport": "desktop-wide",
+        "filename": "preferences.edit-desktop-wide.png"
+      },
+      {
+        "route": "database.index",
+        "path": "/database",
+        "viewport": "mobile",
+        "filename": "database.index-mobile.png"
+      },
+      {
+        "route": "database.index",
+        "path": "/database",
+        "viewport": "tablet",
+        "filename": "database.index-tablet.png"
+      },
+      {
+        "route": "database.index",
+        "path": "/database",
+        "viewport": "desktop",
+        "filename": "database.index-desktop.png"
+      },
+      {
+        "route": "database.index",
+        "path": "/database",
+        "viewport": "desktop-wide",
+        "filename": "database.index-desktop-wide.png"
+      },
+      {
+        "route": "database.trainees",
+        "path": "/database/trainees",
+        "viewport": "mobile",
+        "filename": "database.trainees-mobile.png"
+      },
+      {
+        "route": "database.trainees",
+        "path": "/database/trainees",
+        "viewport": "tablet",
+        "filename": "database.trainees-tablet.png"
+      },
+      {
+        "route": "database.trainees",
+        "path": "/database/trainees",
+        "viewport": "desktop",
+        "filename": "database.trainees-desktop.png"
+      },
+      {
+        "route": "database.trainees",
+        "path": "/database/trainees",
+        "viewport": "desktop-wide",
+        "filename": "database.trainees-desktop-wide.png"
+      },
+      {
+        "route": "database.supports",
+        "path": "/database/supports",
+        "viewport": "mobile",
+        "filename": "database.supports-mobile.png"
+      },
+      {
+        "route": "database.supports",
+        "path": "/database/supports",
+        "viewport": "tablet",
+        "filename": "database.supports-tablet.png"
+      },
+      {
+        "route": "database.supports",
+        "path": "/database/supports",
+        "viewport": "desktop",
+        "filename": "database.supports-desktop.png"
+      },
+      {
+        "route": "database.supports",
+        "path": "/database/supports",
+        "viewport": "desktop-wide",
+        "filename": "database.supports-desktop-wide.png"
+      },
+      {
+        "route": "database.skills",
+        "path": "/database/skills",
+        "viewport": "mobile",
+        "filename": "database.skills-mobile.png"
+      },
+      {
+        "route": "database.skills",
+        "path": "/database/skills",
+        "viewport": "tablet",
+        "filename": "database.skills-tablet.png"
+      },
+      {
+        "route": "database.skills",
+        "path": "/database/skills",
+        "viewport": "desktop",
+        "filename": "database.skills-desktop.png"
+      },
+      {
+        "route": "database.skills",
+        "path": "/database/skills",
+        "viewport": "desktop-wide",
+        "filename": "database.skills-desktop-wide.png"
+      },
+      {
+        "route": "database.races",
+        "path": "/database/races",
+        "viewport": "mobile",
+        "filename": "database.races-mobile.png"
+      },
+      {
+        "route": "database.races",
+        "path": "/database/races",
+        "viewport": "tablet",
+        "filename": "database.races-tablet.png"
+      },
+      {
+        "route": "database.races",
+        "path": "/database/races",
+        "viewport": "desktop",
+        "filename": "database.races-desktop.png"
+      },
+      {
+        "route": "database.races",
+        "path": "/database/races",
+        "viewport": "desktop-wide",
+        "filename": "database.races-desktop-wide.png"
+      },
+      {
+        "route": "database.scenarios",
+        "path": "/database/scenarios",
+        "viewport": "mobile",
+        "filename": "database.scenarios-mobile.png"
+      },
+      {
+        "route": "database.scenarios",
+        "path": "/database/scenarios",
+        "viewport": "tablet",
+        "filename": "database.scenarios-tablet.png"
+      },
+      {
+        "route": "database.scenarios",
+        "path": "/database/scenarios",
+        "viewport": "desktop",
+        "filename": "database.scenarios-desktop.png"
+      },
+      {
+        "route": "database.scenarios",
+        "path": "/database/scenarios",
+        "viewport": "desktop-wide",
+        "filename": "database.scenarios-desktop-wide.png"
+      },
+      {
+        "route": "database.events",
+        "path": "/database/events",
+        "viewport": "mobile",
+        "filename": "database.events-mobile.png"
+      },
+      {
+        "route": "database.events",
+        "path": "/database/events",
+        "viewport": "tablet",
+        "filename": "database.events-tablet.png"
+      },
+      {
+        "route": "database.events",
+        "path": "/database/events",
+        "viewport": "desktop",
+        "filename": "database.events-desktop.png"
+      },
+      {
+        "route": "database.events",
+        "path": "/database/events",
+        "viewport": "desktop-wide",
+        "filename": "database.events-desktop-wide.png"
+      },
+      {
+        "route": "database.shop-items",
+        "path": "/database/shop-items",
+        "viewport": "mobile",
+        "filename": "database.shop-items-mobile.png"
+      },
+      {
+        "route": "database.shop-items",
+        "path": "/database/shop-items",
+        "viewport": "tablet",
+        "filename": "database.shop-items-tablet.png"
+      },
+      {
+        "route": "database.shop-items",
+        "path": "/database/shop-items",
+        "viewport": "desktop",
+        "filename": "database.shop-items-desktop.png"
+      },
+      {
+        "route": "database.shop-items",
+        "path": "/database/shop-items",
+        "viewport": "desktop-wide",
+        "filename": "database.shop-items-desktop-wide.png"
+      },
+      {
+        "route": "database.sparks",
+        "path": "/database/sparks",
+        "viewport": "mobile",
+        "filename": "database.sparks-mobile.png"
+      },
+      {
+        "route": "database.sparks",
+        "path": "/database/sparks",
+        "viewport": "tablet",
+        "filename": "database.sparks-tablet.png"
+      },
+      {
+        "route": "database.sparks",
+        "path": "/database/sparks",
+        "viewport": "desktop",
+        "filename": "database.sparks-desktop.png"
+      },
+      {
+        "route": "database.sparks",
+        "path": "/database/sparks",
+        "viewport": "desktop-wide",
+        "filename": "database.sparks-desktop-wide.png"
+      },
+      {
+        "route": "database.sources",
+        "path": "/database/sources",
+        "viewport": "mobile",
+        "filename": "database.sources-mobile.png"
+      },
+      {
+        "route": "database.sources",
+        "path": "/database/sources",
+        "viewport": "tablet",
+        "filename": "database.sources-tablet.png"
+      },
+      {
+        "route": "database.sources",
+        "path": "/database/sources",
+        "viewport": "desktop",
+        "filename": "database.sources-desktop.png"
+      },
+      {
+        "route": "database.sources",
+        "path": "/database/sources",
+        "viewport": "desktop-wide",
+        "filename": "database.sources-desktop-wide.png"
+      },
+      {
+        "route": "runs.cockpit",
+        "path": "/training-runs/29/cockpit",
+        "viewport": "mobile",
+        "filename": "runs.cockpit-mobile.png"
+      },
+      {
+        "route": "runs.cockpit",
+        "path": "/training-runs/29/cockpit",
+        "viewport": "tablet",
+        "filename": "runs.cockpit-tablet.png"
+      },
+      {
+        "route": "runs.cockpit",
+        "path": "/training-runs/29/cockpit",
+        "viewport": "desktop",
+        "filename": "runs.cockpit-desktop.png"
+      },
+      {
+        "route": "runs.cockpit",
+        "path": "/training-runs/29/cockpit",
+        "viewport": "desktop-wide",
+        "filename": "runs.cockpit-desktop-wide.png"
+      },
+      {
+        "route": "runs.races.decision",
+        "path": "/training-runs/29/races",
+        "viewport": "mobile",
+        "filename": "runs.races.decision-mobile.png"
+      },
+      {
+        "route": "runs.races.decision",
+        "path": "/training-runs/29/races",
+        "viewport": "tablet",
+        "filename": "runs.races.decision-tablet.png"
+      },
+      {
+        "route": "runs.races.decision",
+        "path": "/training-runs/29/races",
+        "viewport": "desktop",
+        "filename": "runs.races.decision-desktop.png"
+      },
+      {
+        "route": "runs.races.decision",
+        "path": "/training-runs/29/races",
+        "viewport": "desktop-wide",
+        "filename": "runs.races.decision-desktop-wide.png"
+      },
+      {
+        "route": "runs.races.planner",
+        "path": "/training-runs/29/races/planner",
+        "viewport": "mobile",
+        "filename": "runs.races.planner-mobile.png"
+      },
+      {
+        "route": "runs.races.planner",
+        "path": "/training-runs/29/races/planner",
+        "viewport": "tablet",
+        "filename": "runs.races.planner-tablet.png"
+      },
+      {
+        "route": "runs.races.planner",
+        "path": "/training-runs/29/races/planner",
+        "viewport": "desktop",
+        "filename": "runs.races.planner-desktop.png"
+      },
+      {
+        "route": "runs.races.planner",
+        "path": "/training-runs/29/races/planner",
+        "viewport": "desktop-wide",
+        "filename": "runs.races.planner-desktop-wide.png"
+      },
+      {
+        "route": "runs.skills.planner",
+        "path": "/training-runs/29/skills",
+        "viewport": "mobile",
+        "filename": "runs.skills.planner-mobile.png"
+      },
+      {
+        "route": "runs.skills.planner",
+        "path": "/training-runs/29/skills",
+        "viewport": "tablet",
+        "filename": "runs.skills.planner-tablet.png"
+      },
+      {
+        "route": "runs.skills.planner",
+        "path": "/training-runs/29/skills",
+        "viewport": "desktop",
+        "filename": "runs.skills.planner-desktop.png"
+      },
+      {
+        "route": "runs.skills.planner",
+        "path": "/training-runs/29/skills",
+        "viewport": "desktop-wide",
+        "filename": "runs.skills.planner-desktop-wide.png"
+      },
+      {
+        "route": "runs.training",
+        "path": "/training-runs/29/training",
+        "viewport": "mobile",
+        "filename": "runs.training-mobile.png"
+      },
+      {
+        "route": "runs.training",
+        "path": "/training-runs/29/training",
+        "viewport": "tablet",
+        "filename": "runs.training-tablet.png"
+      },
+      {
+        "route": "runs.training",
+        "path": "/training-runs/29/training",
+        "viewport": "desktop",
+        "filename": "runs.training-desktop.png"
+      },
+      {
+        "route": "runs.training",
+        "path": "/training-runs/29/training",
+        "viewport": "desktop-wide",
+        "filename": "runs.training-desktop-wide.png"
+      },
+      {
+        "route": "runs.inheritance",
+        "path": "/training-runs/29/inheritance",
+        "viewport": "mobile",
+        "filename": "runs.inheritance-mobile.png"
+      },
+      {
+        "route": "runs.inheritance",
+        "path": "/training-runs/29/inheritance",
+        "viewport": "tablet",
+        "filename": "runs.inheritance-tablet.png"
+      },
+      {
+        "route": "runs.inheritance",
+        "path": "/training-runs/29/inheritance",
+        "viewport": "desktop",
+        "filename": "runs.inheritance-desktop.png"
+      },
+      {
+        "route": "runs.inheritance",
+        "path": "/training-runs/29/inheritance",
+        "viewport": "desktop-wide",
+        "filename": "runs.inheritance-desktop-wide.png"
+      },
+      {
+        "route": "runs.events.decision",
+        "path": "/training-runs/29/events",
+        "viewport": "mobile",
+        "filename": "runs.events.decision-mobile.png"
+      },
+      {
+        "route": "runs.events.decision",
+        "path": "/training-runs/29/events",
+        "viewport": "tablet",
+        "filename": "runs.events.decision-tablet.png"
+      },
+      {
+        "route": "runs.events.decision",
+        "path": "/training-runs/29/events",
+        "viewport": "desktop",
+        "filename": "runs.events.decision-desktop.png"
+      },
+      {
+        "route": "runs.events.decision",
+        "path": "/training-runs/29/events",
+        "viewport": "desktop-wide",
+        "filename": "runs.events.decision-desktop-wide.png"
+      },
+      {
+        "route": "runs.timeline",
+        "path": "/training-runs/29/timeline",
+        "viewport": "mobile",
+        "filename": "runs.timeline-mobile.png"
+      },
+      {
+        "route": "runs.timeline",
+        "path": "/training-runs/29/timeline",
+        "viewport": "tablet",
+        "filename": "runs.timeline-tablet.png"
+      },
+      {
+        "route": "runs.timeline",
+        "path": "/training-runs/29/timeline",
+        "viewport": "desktop",
+        "filename": "runs.timeline-desktop.png"
+      },
+      {
+        "route": "runs.timeline",
+        "path": "/training-runs/29/timeline",
+        "viewport": "desktop-wide",
+        "filename": "runs.timeline-desktop-wide.png"
+      },
+      {
+        "route": "runs.result",
+        "path": "/training-runs/29/result",
+        "viewport": "mobile",
+        "filename": "runs.result-mobile.png"
+      },
+      {
+        "route": "runs.result",
+        "path": "/training-runs/29/result",
+        "viewport": "tablet",
+        "filename": "runs.result-tablet.png"
+      },
+      {
+        "route": "runs.result",
+        "path": "/training-runs/29/result",
+        "viewport": "desktop",
+        "filename": "runs.result-desktop.png"
+      },
+      {
+        "route": "runs.result",
+        "path": "/training-runs/29/result",
+        "viewport": "desktop-wide",
+        "filename": "runs.result-desktop-wide.png"
+      },
+      {
+        "route": "runs.deck",
+        "path": "/training-runs/29/deck",
+        "viewport": "mobile",
+        "filename": "runs.deck-mobile.png"
+      },
+      {
+        "route": "runs.deck",
+        "path": "/training-runs/29/deck",
+        "viewport": "tablet",
+        "filename": "runs.deck-tablet.png"
+      },
+      {
+        "route": "runs.deck",
+        "path": "/training-runs/29/deck",
+        "viewport": "desktop",
+        "filename": "runs.deck-desktop.png"
+      },
+      {
+        "route": "runs.deck",
+        "path": "/training-runs/29/deck",
+        "viewport": "desktop-wide",
+        "filename": "runs.deck-desktop-wide.png"
+      },
+      {
+        "route": "runs.veteran",
+        "path": "/training-runs/29/veteran",
+        "viewport": "mobile",
+        "filename": "runs.veteran-mobile.png"
+      },
+      {
+        "route": "runs.veteran",
+        "path": "/training-runs/29/veteran",
+        "viewport": "tablet",
+        "filename": "runs.veteran-tablet.png"
+      },
+      {
+        "route": "runs.veteran",
+        "path": "/training-runs/29/veteran",
+        "viewport": "desktop",
+        "filename": "runs.veteran-desktop.png"
+      },
+      {
+        "route": "runs.veteran",
+        "path": "/training-runs/29/veteran",
+        "viewport": "desktop-wide",
+        "filename": "runs.veteran-desktop-wide.png"
+      },
+      {
+        "route": "legacy.builder",
+        "path": "/legacy/29",
+        "viewport": "mobile",
+        "filename": "legacy.builder-mobile.png"
+      },
+      {
+        "route": "legacy.builder",
+        "path": "/legacy/29",
+        "viewport": "tablet",
+        "filename": "legacy.builder-tablet.png"
+      },
+      {
+        "route": "legacy.builder",
+        "path": "/legacy/29",
+        "viewport": "desktop",
+        "filename": "legacy.builder-desktop.png"
+      },
+      {
+        "route": "legacy.builder",
+        "path": "/legacy/29",
+        "viewport": "desktop-wide",
+        "filename": "legacy.builder-desktop-wide.png"
+      },
+      {
+        "route": "catalog.show",
+        "path": "/umamusume/agnes-digital",
+        "viewport": "mobile",
+        "filename": "catalog.show-mobile.png"
+      },
+      {
+        "route": "catalog.show",
+        "path": "/umamusume/agnes-digital",
+        "viewport": "tablet",
+        "filename": "catalog.show-tablet.png"
+      },
+      {
+        "route": "catalog.show",
+        "path": "/umamusume/agnes-digital",
+        "viewport": "desktop",
+        "filename": "catalog.show-desktop.png"
+      },
+      {
+        "route": "catalog.show",
+        "path": "/umamusume/agnes-digital",
+        "viewport": "desktop-wide",
+        "filename": "catalog.show-desktop-wide.png"
+      },
+      {
+        "route": "skills.show",
+        "path": "/skills/1",
+        "viewport": "mobile",
+        "filename": "skills.show-mobile.png"
+      },
+      {
+        "route": "skills.show",
+        "path": "/skills/1",
+        "viewport": "tablet",
+        "filename": "skills.show-tablet.png"
+      },
+      {
+        "route": "skills.show",
+        "path": "/skills/1",
+        "viewport": "desktop",
+        "filename": "skills.show-desktop.png"
+      },
+      {
+        "route": "skills.show",
+        "path": "/skills/1",
+        "viewport": "desktop-wide",
+        "filename": "skills.show-desktop-wide.png"
+      },
+      {
+        "route": "support-cards.show",
+        "path": "/support-cards/1",
+        "viewport": "mobile",
+        "filename": "support-cards.show-mobile.png"
+      },
+      {
+        "route": "support-cards.show",
+        "path": "/support-cards/1",
+        "viewport": "tablet",
+        "filename": "support-cards.show-tablet.png"
+      },
+      {
+        "route": "support-cards.show",
+        "path": "/support-cards/1",
+        "viewport": "desktop",
+        "filename": "support-cards.show-desktop.png"
+      },
+      {
+        "route": "support-cards.show",
+        "path": "/support-cards/1",
+        "viewport": "desktop-wide",
+        "filename": "support-cards.show-desktop-wide.png"
+      }
+    ],
+    "failed": [],
+    "skipped": [
+      {
+        "route": "veterans.show",
+        "path": "/veterans/1",
+        "viewport": "mobile",
+        "reason": "locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#app > *').first() to be visible\u001b[22m\n"
+      },
+      {
+        "route": "veterans.show",
+        "path": "/veterans/1",
+        "viewport": "tablet",
+        "reason": "locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#app > *').first() to be visible\u001b[22m\n"
+      },
+      {
+        "route": "veterans.show",
+        "path": "/veterans/1",
+        "viewport": "desktop",
+        "reason": "locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#app > *').first() to be visible\u001b[22m\n"
+      },
+      {
+        "route": "veterans.show",
+        "path": "/veterans/1",
+        "viewport": "desktop-wide",
+        "reason": "locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#app > *').first() to be visible\u001b[22m\n"
+      }
+    ]
+  }
+}
