@@ -268,7 +268,7 @@ it('counts every colour token the static theme declares', function (): void {
     // brand-chrome pair, so both resolve in both themes with no dark re-declaration of their own.
     $tokens = themeStaticColorTokens();
 
-    expect($tokens)->toHaveCount(89)
+    expect($tokens)->toHaveCount(94)
         ->and($tokens)->toContain('--color-goal')
         ->and($tokens)->toContain('--color-goal-line')
         ->and($tokens)->toContain('--color-on-risk')
@@ -317,8 +317,8 @@ it('declares the ratified radius scale and the overlay shadow in the static them
 
     expect($block)
         ->toContain('--radius-sm: 6px')
-        ->toContain('--radius-md: 10px')
-        ->toContain('--radius-lg: 14px')
+        ->toContain('--radius-md: 16px')
+        ->toContain('--radius-lg: 24px')
         ->toContain('--radius-xl: 16px')
         ->toContain('--radius-pill: 999px')
         ->toContain('--shadow-overlay');
@@ -639,7 +639,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         $page = visit('/umamusume');
         $names = themeStaticColorTokens();
 
-        expect($names)->toHaveCount(89);
+        expect($names)->toHaveCount(94);
 
         foreach (contrastThemes() as $theme) {
             /** @var array<string, array{raw: string, resolved: string}> $resolved */

@@ -252,6 +252,21 @@ and the corpus-transcription caveat above holds. Replacing those two stubs is th
 > 1.06:1 on its page, under G-18's 1.25 floor. `green`/`chrome` stay on the client lime (eva01
 > inherits them); `status-positive` carries the grass green.
 
+> **2026-10-25 — definitive synthesized palette.** Owner-supplied final values replace the
+> previous synthesis. Light: page `#F4F5F9`, panels `#FFFFFF`, sunken `#EDEDF1`, ink `#322A2F`,
+> muted `#625D7D`, brand chrome the deep grass `#5D8F03`, accent hot pink `#FF4D87` (a lighter
+> step of the requested `#FF3276`), blue `#2756FA` as `--color-brand-accent-ink`, success
+> `#5D8F03`, warning `#C62828`. Dark: page `#09090B`, panel `#2A2A2A`, raised `#333333`, ink
+> `#FCFCFC`, brand chrome the bright grass `#83B503`, pink `#FF3276`, blue step `#97D1F9`. Stat
+> icons are the exact `icons_svg` hues; five new `--color-stat-*-bg` tokens carry the pastel/dark
+> stat-block backgrounds. Geometry: `--radius-md` 16px and `--radius-lg` 24px (global).
+> Four G-18 adjustments, all recorded in `app.css`: the requested light hairline `#D1D3E0` is
+> 1.34:1 on the page so `rule` uses `#8C8A9A`; the requested dark hairline `#4D4D4D` is 2.35:1 so
+> `rule` uses `#666666`; white on `#5D8F03` is 3.91:1 so `--color-on-brand-chrome` is `#141414`;
+> `#FF3276` on `#5D8F03` is 1.11:1 so the light accent is `#FF4D87` (dark keeps `#FF3276`). The
+> token-count gate rises 89 -> 94 for the five stat-block tokens. eva01's block is byte-identical;
+> the global radii apply to every theme as instructed.
+
 Status badges (release status is the catalog's load-bearing signal) render through
 `--color-green` / `--color-sp` / `--color-pick` and their ink partners rather than
 literal hexes, so they follow the active theme instead of pinning one.

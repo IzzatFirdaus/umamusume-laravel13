@@ -38,8 +38,8 @@
      * --radius-sm because its 6px corner is measured from client frame 194819, not chosen here.
      */
     --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 14px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
     --radius-xl: 16px;
     --radius-pill: 999px;
 
@@ -113,10 +113,10 @@
      * #E2770B / #19A772 / #CA8417 / #23A85B. Idle/disabled/muted/faint keep their validated
      * values because the mockups supply no distinct tier for them.
      */
-    --color-page: #FAF7F2;
+    --color-page: #F4F5F9;
     --color-panel: #FFFFFF;
     --color-raised: #FFFFFF;
-    --color-sunken: #F6F5F2;
+    --color-sunken: #EDEDF1;
     --color-idle: #E2E4F0;
     --color-disabled: #D1D3E0;
     --color-ink: #322A2F;
@@ -161,11 +161,10 @@
        3:1 for non-text boundaries in both themes. 2026-10-24 (Umamusume brand palette):
        the brand pink #FF3276 here; the dark block uses the light blue #5B85FF. */
     --color-ring: #2756FA;
-    --color-risk: #D32F2F;
-    /* FQ-04 (2026-10-22): the ink that goes ON the risk fill. The brand red #FF4400 measures
-       3.45:1 as error text on the white panel, so the light red is stepped darker to #D32F2F
-       (4.98:1 on white) and the given white ink returns (4.98:1 on the fill). Owner-approved
-       override 2026-10-24; the dark theme keeps the given #FF4400 with the dark surface ink. */
+    --color-risk: #C62828;
+    /* FQ-04 (2026-10-22): the ink that goes ON the risk fill. 2026-10-25 (synthesis): the
+       owner's darker warning red #C62828 (5.62:1 as text on white, and white on it is
+       5.62:1). */
     --color-on-risk: #FFFFFF;
     /*
      * The mandatory goal race's own pair, split because D-181 asks for two colours on
@@ -223,6 +222,13 @@
     --color-stat-wit: #19A772;
     --color-stat-pal: #CA8417;
     --color-stat-group: #23A85B;
+    /* Stat-block backgrounds (2026-10-25 synthesis): pastel tints behind the SVG stat icons,
+       matching the mockup's stat blocks. Dark variants are in the dark block. */
+    --color-stat-speed-bg: #E6F0FA;
+    --color-stat-stamina-bg: #FAE6EE;
+    --color-stat-power-bg: #FAF0E6;
+    --color-stat-guts-bg: #F0E6FA;
+    --color-stat-wit-bg: #E6FAEC;
 
     /*
      * Mood tiers, as the client paints them (research §3.1, §6.17). `GREAT` and `GOOD` are
@@ -345,10 +351,10 @@
      * primary button never share a fill (Phase 11.11-11.12). Every new role owes a measured G-18
      * pair; values here are the ruling's starting draft and `DesignTokensTest` is the gate.
      */
-    --color-brand-chrome: #2756FA;
-    --color-on-brand-chrome: #FFFFFF;
-    --color-brand-accent: #FF3276;
-    --color-brand-accent-ink: #625D7D;
+    --color-brand-chrome: #5D8F03;
+    --color-on-brand-chrome: #141414;
+    --color-brand-accent: #FF4D87;
+    --color-brand-accent-ink: #2756FA;
     --color-brand-accent-soft: #EEEBFF;
 
     /* The one filled action on a screen. An alias, not a new colour: the action role and the
@@ -457,7 +463,7 @@ html[data-theme='dark'] {
     --color-ink-strong: #FFFFFF;
     --color-ink-muted: #A0A0A0;
     --color-ink-faint: #605F5F;
-    --color-rule: #605F5F;
+    --color-rule: #666666;
 
     /* Bright grass action, dark only (the mockup's lime CTA). */
     --color-brand-chrome: #83B503;
@@ -493,6 +499,13 @@ html[data-theme='dark'] {
     --color-stat-wit: #1AAE77;
     --color-stat-pal: #F9A31C;
     --color-stat-group: #26B864;
+    /* Dark stat-block backgrounds (2026-10-25 synthesis): deep tinted variants behind the
+       bright SVG stat icons. */
+    --color-stat-speed-bg: #1A2636;
+    --color-stat-stamina-bg: #331A26;
+    --color-stat-power-bg: #33261A;
+    --color-stat-guts-bg: #261A33;
+    --color-stat-wit-bg: #1A3322;
 
     --color-up: #B89825;
     --color-down: #97D1F9;
@@ -534,13 +547,13 @@ html[data-theme='dark'] {
     --color-anchor: #8FC4EE;
 
     /*
-     * Accent tokens that are INK on a surface keep a per-theme value (see the block note).
-     * `--color-brand-accent-soft` is the chip background, so it takes a sampled dark
-     * violet tone (#1D1D62) and its ink #9F8FFF. Brand chrome, the brand pink, the lime
-     * and its olive ink, the cautious amber and the gold are NOT overridden: they are
-     * identical in both themes.
+     * Accent INK on a dark surface (2026-10-25 synthesis): the brand blue #2756FA is 3.6:1
+     * on the near-black page, so the dark step is the light blue #97D1F9 (7.7:1 on raised);
+     * the chip background stays #1D1D62. The brand pink is the owner's #FF3276 here (the
+     * light block lightens it to #FF4D87 only to clear the 1.2 hairline on the grass chrome).
      */
-    --color-brand-accent-ink: #9F8FFF;
+    --color-brand-accent: #FF3276;
+    --color-brand-accent-ink: #97D1F9;
     --color-brand-accent-soft: #1D1D62;
     --shadow-overlay: 0 6px 16px rgb(0 0 0 / 0.32);
 }
