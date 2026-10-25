@@ -91,9 +91,12 @@ test.describe('Scenario Selection', () => {
         await openFacts(page, 'URA Finale');
 
         // The career-goals flag turned on for the scenario too (8668d9d), so the Systems row names it
-        // instead of the baseline absence it printed while the flag was off. The resource half of the
-        // baseline statement still holds: no widget beyond the baseline three composes a resource.
-        await expect(card(page, 'Our Grand Concert').getByText('Career goals', { exact: true })).toBeVisible();
+        // instead of the baseline absence it printed while the flag was off. Scoped to the facts
+        // disclosure: the card face also carries the composition tags, so an unscoped text match
+        // resolves to two elements. The resource half of the baseline statement still holds: no
+        // widget beyond the baseline three composes a resource.
+        const grandConcertFacts = card(page, 'Our Grand Concert').locator('details').filter({ hasText: 'Facts and mechanics' });
+        await expect(grandConcertFacts.getByText('Career goals', { exact: true })).toBeVisible();
         await expect(card(page, 'Our Grand Concert').getByText('None beyond the generic strip')).toBeVisible();
 
         // Caps are sourced even where mechanics are not, so the card still states what it optimizes.
@@ -136,7 +139,9 @@ test.describe('Scenario Selection', () => {
         // word, and the event that dated it rides the `title`; never inside the version row above.
         const dateRow = unity.getByText('Scenario ruleset date', { exact: true }).locator('..');
         await expect(dateRow).toContainText('2026-07-01 (rework)');
-        await expect(dateRow.locator('dd')).toHaveAttribute('title', /July 1, 2026 rework raised caps/);
+        // SubCell retired the `title` channel for a present value (2026-10-17 amendment), so the
+        // citation is a visible provenance line beside the row rather than a tooltip.
+        await expect(unity.locator('[data-field="ruleset-date-source"]')).toContainText(/July 1, 2026 rework raised caps/);
 
         // The family renders the humanized label, never the snake_case taxonomy key (owner
         // ruling, 2026-10-16): the row prints the matrix's taxonomy in words, not config.
@@ -162,7 +167,7 @@ test.describe('Scenario Selection', () => {
         // inner reason too, and an unscoped filter would match both.
         const unityUse = unity.getByText('Recommended use', { exact: true }).locator('..').locator('dd');
         await expect(unityUse).toContainText('go-to scenario for building strong, competitive aces');
-        await expect(unityUse).toHaveAttribute('title', /Game8, Unity Cup Update Guide \(archives\/545572\)/);
+        await expect(unity.locator('[data-field="recommended-use-source"]')).toContainText(/Game8, Unity Cup Update Guide \(archives\/545572\)/);
 
         const trackFocus = card(page, 'Trackblazer').getByText('Planning focus', { exact: true }).locator('..').locator('dd');
         await expect(trackFocus).toContainText('Races and the Pro Shop');
@@ -260,7 +265,7 @@ test.describe('Scenario Selection', () => {
         await expect(page).toHaveURL(/\/career\/setup\/scenario$/);
         await expect(card(page, 'Our Grand Concert').getByRole('radio')).toBeChecked();
 
-        await page.getByRole('button', { name: 'Save and continue' }).click();
+        await page.getByRole('button', { name: 'Continue to trainee' }).click();
         await page.waitForURL(/\/career\/setup\/trainee$/);
     });
 
@@ -301,8 +306,8 @@ test.describe('Scenario Selection', () => {
         }
 
         // The one action that advances the step, and the one that leaves it.
-        const save = await page.getByRole('button', { name: 'Save and continue' }).boundingBox();
-        expect(save?.height ?? 0, 'Save and continue is not sized to 44px').toBeGreaterThanOrEqual(44);
+        const save = await page.getByRole('button', { name: 'Continue to trainee' }).boundingBox();
+        expect(save?.height ?? 0, 'Continue to trainee is not sized to 44px').toBeGreaterThanOrEqual(44);
 
         const leave = await page.getByRole('link', { name: 'Leave setup' }).boundingBox();
         expect(leave?.height ?? 0, 'Leave setup is not sized to 44px').toBeGreaterThanOrEqual(44);

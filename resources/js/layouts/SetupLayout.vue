@@ -58,9 +58,9 @@ const steps = [
 ];
 
 const stepLink =
-    'flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
-const stepCurrent = 'bg-raised text-ink-strong font-bold';
-const stepCompleted = 'text-ink-strong';
+    'flex min-h-11 items-center rounded-full border border-rule px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
+const stepCurrent = 'border-brand-chrome bg-raised text-ink-strong font-bold';
+const stepCompleted = 'border-status-positive text-ink-strong';
 const stepNotStarted = 'text-ink-muted';
 
 // A named absence reads as a step and is never a link, so this restates `stepLink`'s geometry
@@ -76,8 +76,6 @@ const leaveLink =
 
 const isCompleted = (index: number): boolean =>
     (props.visited?.includes(index + 1) === true || props.saved?.includes(index + 1) === true) && index + 1 !== props.step;
-const isNotStarted = (index: number): boolean =>
-    !isCompleted(index) && index + 1 !== props.step;
 
 /*
  * Focus and document title, on every step load.
@@ -158,17 +156,17 @@ onMounted(async () => {
 
             <p class="sr-only">Step {{ props.step }} of {{ steps.length }}</p>
 
-            <ol class="mt-1 flex flex-wrap gap-1 text-sm">
+            <ol class="mt-1 flex flex-wrap gap-1 text-sm" aria-label="Setup step list">
                 <li v-for="(item, index) in steps" :key="item.label">
                     <Link
                         v-if="item.to"
                         :href="item.to"
-                        :class="[stepLink, index + 1 === props.step ? stepCurrent : isCompleted(index) ? stepCompleted : isNotStarted(index) ? stepNotStarted : '']"
+                        :class="[stepLink, index + 1 === props.step ? stepCurrent : isCompleted(index) ? stepCompleted : stepNotStarted]"
                         :aria-current="index + 1 === props.step ? 'step' : undefined"
                     >
                         <span class="mr-2 font-mono text-xs" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
-                        <span v-if="index + 1 !== props.step" class="ml-2 text-xs">
-                            {{ isCompleted(index) ? 'done' : 'not started' }}
+                        <span class="ml-2 text-xs">
+                            {{ index + 1 !== props.step ? (isCompleted(index) ? 'saved' : 'not started') : 'current' }}
                         </span>
                     </Link>
                     <span v-else :class="stepAbsent" title="This step arrives with its own slice.">

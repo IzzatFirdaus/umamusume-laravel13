@@ -16,9 +16,10 @@
  * says which way the next click goes.
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import SubCell from '../../components/SubCell.vue';
-import StickyFooter from '../../components/ui/StickyFooter.vue';
+import { BaseButton, LinkButton } from '../../components/Form';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref } from 'vue';
 
@@ -37,6 +38,8 @@ interface ScenarioCard {
     resources: string[];
     loop: string[];
     live_on_global: string | null;
+    /** The published caps, composed as the matrix states them ("1300 ×4 · Wit 1800"), or null. */
+    caps_label: string | null;
     metadata: {
         summary: string | null;
         planning_focus: string | null;
@@ -148,26 +151,30 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
 
 <template>
     <SetupLayout :step="1" :visited="props.visited" :saved="props.saved" :choices="props.choices">
-        <Head title="Choose a scenario" />
-        <template #eyebrow>Setup</template>
-        <template #title>Choose a scenario</template>
-
-        <!-- No breadcrumb. This page is step 1 of the wizard, and the "← Back to scenario" link it
-             used to carry pointed at this same URL: a control that navigates to the page it is on.
-             The step bar above already lists all six steps, so nothing is lost by removing it. -->
-
-        <!-- Header: eyebrow + subtitle. The page title is the layout's #title h1, so repeating it
-             here printed it twice at the same weight. -->
-        <header class="mb-4">
-            <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 1 of 6</p>
-            <p class="mt-1 text-sm text-ink-muted">The scenario decides which resources, systems and stat ceilings apply.</p>
-        </header>
-
-        <p class="max-w-3xl text-sm text-ink-muted">
-            The scenario decides which resources this tool tracks, which systems it can show, and which
-            stat ceilings apply. It is the first choice of six, and the wizard carries it forward instead
-            of asking again.
-        </p>
+        <Head title="Which scenario is this run?" />
+        <template #head>
+            <PageHeader
+                eyebrow="New career"
+                title="Which scenario is this run?"
+                description="The scenario decides which panels the cockpit composes, which caps apply, and which systems exist. It cannot be changed after the first turn."
+            >
+                <template #actions>
+                    <span class="self-center text-xs text-ink-muted">Step 1 of 6</span>
+                    <LinkButton href="/" variant="secondary">Cancel</LinkButton>
+                    <!-- One filled action (HFW annotation: "Continue to trainee" is the only filled
+                         button; Cancel is an outline). Disabled until a card holds, because the next
+                         step needs a scenario to compose against. -->
+                    <BaseButton
+                        type="button"
+                        variant="primary"
+                        :disabled="props.selected === null || form.processing"
+                        @click="continueStep"
+                    >
+                        Continue to trainee
+                    </BaseButton>
+                </template>
+            </PageHeader>
+        </template>
 
         <p
             v-if="form.errors.scenario"
@@ -210,7 +217,7 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                     :key="card.key"
                     data-scenario-card
                     class="relative rounded-lg border border-rule bg-panel p-4"
-                    :class="props.selected === card.key ? 'border-2 border-chrome' : ''"
+                    :class="props.selected === card.key ? 'border-2 border-pick-line bg-status-positive/10' : ''"
                 >
                 <label
                     :for="`scenario-radio-${card.key}`"
@@ -265,6 +272,25 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                     reason="No sourced summary line exists for this scenario in this repository."
                 />
 
+                <!-- The composition tags and the published caps, on the card face (HFW annotation 4:
+                     the caps print as the matrix states them, the outlier named rather than collapsed). -->
+                <div class="mt-3 flex flex-wrap gap-1.5">
+                    <span
+                        v-for="system in card.systems"
+                        :key="`system-${system}`"
+                        class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink-muted"
+                    >{{ system }}</span>
+                    <span
+                        v-for="resource in card.resources"
+                        :key="`resource-${resource}`"
+                        class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink-muted"
+                    >{{ resource }}</span>
+                    <span
+                        v-if="card.caps_label"
+                        class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink"
+                    >{{ card.caps_label }}</span>
+                </div>
+
                 <details class="mt-3 rounded-md border border-rule bg-raised p-3">
                     <summary class="flex min-h-11 cursor-pointer items-center text-xs font-semibold uppercase tracking-wide text-ink-muted">
                         Facts and mechanics
@@ -277,6 +303,14 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                         <SubCell label="Turn loop" :value="card.loop.length > 0 ? card.loop.join(' → ') : 'N/A'" :title="card.loop.length > 0 ? undefined : 'No turn loop steps are recorded for this scenario.'" />
                         <SubCell label="Live on Global" :value="card.live_on_global ?? 'N/A'" :title="card.live_on_global ? undefined : 'No Global availability date is recorded for this scenario.'" />
                         <SubCell label="Scenario ruleset date" :value="card.ruleset_date?.value ?? 'N/A'" :title="card.ruleset_date?.title ?? 'No source in this repository dates this scenario\'s ruleset.'" />
+                        <!-- The citation is a visible provenance line: SubCell retired the `title`
+                             channel for a present value (2026-10-17 amendment), so a sourced figure
+                             states its source in text rather than a tooltip. -->
+                        <p
+                            v-if="card.ruleset_date !== null"
+                            data-field="ruleset-date-source"
+                            class="text-xs text-ink-muted"
+                        >{{ card.ruleset_date.title }}</p>
                         <dl class="flex flex-wrap justify-between gap-x-4">
                             <dt class="text-ink-muted">Ruleset version</dt>
                             <dd v-if="props.ruleset.value === null" class="text-ink-muted">
@@ -288,6 +322,11 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                         </dl>
                         <SubCell data-field="description" label="Description" :value="card.description ?? 'N/A'" :title="card.description ? undefined : `No sourced description line exists for the ${card.label} guide in this repository.`" />
                         <SubCell data-field="recommended_use" label="Recommended use" :value="card.recommended_use ?? 'N/A'" :title="card.recommended_use ? (card.metadata?.recommended_use_source ?? undefined) : (card.metadata?.recommended_use_reason ?? 'The scenario guides state no recommended use, and choosing one would be a judgement this tool holds no source for.')" />
+                        <p
+                            v-if="card.metadata?.recommended_use_source"
+                            data-field="recommended-use-source"
+                            class="text-xs text-ink-muted"
+                        >{{ card.metadata.recommended_use_source }}</p>
                     </div>
 
                     <!-- Not "Ruleset version": the fact grid above carries three ruleset-worded facts,
@@ -328,28 +367,54 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
             </div>
         </fieldset>
 
-        <!--
-          One action for the step, in the footer. Selecting a card records the choice; Continue commits
-          the step and moves on. The per-card "Select Scenario" button made the same decision twice and
-          left the way forward to the step bar, which is navigation rather than a commit.
-        -->
-        <StickyFooter>
-            <template #left>
-                <Link
-                    href="/database/scenarios"
-                    class="inline-flex min-h-11 items-center text-sm font-medium text-ink underline"
-                >Compare scenarios</Link>
-            </template>
-            <template #right>
-                <button
-                    type="submit"
-                    class="inline-flex min-h-11 items-center rounded-md bg-chrome px-4 text-sm font-bold text-on-chrome disabled:cursor-wait disabled:bg-disabled"
-                    :disabled="props.selected === null || form.processing"
-                    @click="continueStep"
-                >
-                    Save and continue
-                </button>
-            </template>
-        </StickyFooter>
+        <p class="mt-4 text-sm">
+            <Link
+                href="/database/scenarios"
+                class="inline-flex min-h-11 items-center font-medium text-ink underline"
+            >Compare scenarios</Link>
+        </p>
+
+        <p class="mt-2 rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink-muted">
+            The panel tags are the composition matrix, not a marketing list: a scenario that leaves a
+            panel off cannot draw it, and a fifth scenario reaches the same shell for one config entry.
+            The caps quoted are the published scenario caps from the scenario matrix.
+        </p>
+
+        <!-- Reversibility stated before the commit (HFW annotation 3): the page says what a Trainer
+             would otherwise learn by getting it wrong. -->
+        <section class="mt-4 rounded-md border border-rule bg-panel p-4" aria-labelledby="scenario-reversibility">
+            <h2 id="scenario-reversibility" class="text-lg font-semibold text-ink-strong">What changes after this step</h2>
+            <table class="mt-2 w-full text-sm">
+                <thead>
+                    <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                        <th class="py-2 pr-3">Decision</th>
+                        <th class="pr-3">Reversible?</th>
+                        <th>Why</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-rule align-top">
+                        <td class="py-2 pr-3 font-semibold text-ink-strong">Scenario</td>
+                        <td class="pr-3"><span class="font-semibold text-risk">No</span></td>
+                        <td class="text-ink-muted">Switching composes a different panel set, cap table and currency; the cockpit has no shape for a mid-run swap.</td>
+                    </tr>
+                    <tr class="border-b border-rule align-top">
+                        <td class="py-2 pr-3 font-semibold text-ink-strong">Trainee</td>
+                        <td class="pr-3"><span class="font-semibold text-risk">No</span></td>
+                        <td class="text-ink-muted">The run's identity, growth row and base stats are the trainee's.</td>
+                    </tr>
+                    <tr class="border-b border-rule align-top">
+                        <td class="py-2 pr-3 font-semibold text-ink-strong">Build target</td>
+                        <td class="pr-3"><span class="font-semibold text-status-positive">Yes</span></td>
+                        <td class="text-ink-muted">Targets are the Trainer's own goals, editable from the cockpit.</td>
+                    </tr>
+                    <tr class="align-top">
+                        <td class="py-2 pr-3 font-semibold text-ink-strong">Legacy and deck</td>
+                        <td class="pr-3"><span class="font-semibold text-status-positive">Yes</span></td>
+                        <td class="text-ink-muted">Both are run-scoped selections with their own editors.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
     </SetupLayout>
 </template>

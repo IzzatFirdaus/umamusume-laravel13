@@ -18,7 +18,7 @@ import { test, expect } from '@playwright/test';
  */
 
 const STEPS: { url: string; label: string; title: string }[] = [
-    { url: '/career/setup/scenario', label: 'Scenario', title: 'Choose a scenario' },
+    { url: '/career/setup/scenario', label: 'Scenario', title: 'Which scenario is this run?' },
     { url: '/career/setup/trainee', label: 'Trainee', title: 'Choose a trainee' },
     { url: '/career/setup/target', label: 'Your target', title: '' },
     { url: '/career/setup/legacy', label: 'Legacy', title: '' },

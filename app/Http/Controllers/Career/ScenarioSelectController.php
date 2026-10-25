@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Career\StoreScenarioRequest;
 use App\Models\Preference;
 use App\Services\Career\SetupDraft;
+use App\Services\ScenarioCaps;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -97,6 +98,36 @@ class ScenarioSelectController extends Controller
     }
 
     /**
+     * The scenario's published caps, composed as the matrix states them: the value most stats share
+     * with its count, then any outlier named by stat ("1300 ×4 · Wit 1800"). The outlier is the
+     * scenario's mechanical identity, so it is printed rather than collapsed to one number.
+     * `ScenarioCaps::caps()` owns the base-plus-bonus arithmetic; this only words the result.
+     */
+    private function capsLabel(string $scenarioKey): ?string
+    {
+        $caps = ScenarioCaps::caps($scenarioKey);
+
+        if ($caps === []) {
+            return null;
+        }
+
+        $counts = array_count_values($caps);
+        arsort($counts);
+
+        $parts = [];
+
+        foreach (array_keys($counts) as $value) {
+            $stats = array_keys($caps, $value, true);
+
+            $parts[] = count($stats) === 1
+                ? ucfirst($stats[0]).' '.$value
+                : $value.' ×'.count($stats);
+        }
+
+        return 'Caps '.implode(' · ', $parts);
+    }
+
+    /**
      * One card per scenario the matrix composes, in the matrix's own order.
      *
      * @return list<array<string, mixed>>
@@ -134,6 +165,8 @@ class ScenarioSelectController extends Controller
                 'label' => (string) ($def['label'] ?? $key),
                 'documented' => $def['documented'] ?? null,
                 'optimizes' => $this->optimizes($statOrder, $caps),
+                // The absolute caps, composed the way the matrix states them (HFW annotation 4).
+                'caps_label' => $this->capsLabel((string) $key),
                 'systems' => $this->systems((array) ($def['panels'] ?? []), $panelLabels),
                 'resources' => array_values(array_filter(
                     array_map(

@@ -46,7 +46,7 @@ withDefaults(
                 {{ description }}
             </p>
         </div>
-        <div v-if="$slots.actions" class="flex shrink-0 flex-wrap items-center gap-2">
+        <div v-if="$slots.actions" class="flex flex-wrap items-center gap-2 md:shrink-0">
             <slot name="actions" />
         </div>
     </div>
