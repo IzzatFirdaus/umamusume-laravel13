@@ -53,12 +53,18 @@ class ReviewController extends Controller
             // at all is a database nobody has fetched, while rows with a verdict on them is a queue
             // someone has worked through.
             'neverFetched' => MatchCandidate::query()->count() === 0,
-            'aliasLanguages' => collect(AliasLanguage::cases())
-                ->map(fn (AliasLanguage $language): array => [
-                    'value' => $language->value,
-                    'label' => $language->label(),
-                ])
-                ->all(),
+            /*
+             * How much of that work landed today (HFW review.html "Resolved today" tile). `status`
+             * leaves `Pending` on exactly one path — the verdict action — so a row's `updated_at` IS
+             * the moment it was decided, and counting the decided rows dated today needs no new column.
+             *
+             * `aliasLanguages` is NOT passed here: the verdict form moved to `Review/Detail` in FQ-10,
+             * and a queue that no longer renders a select has no business shipping its options.
+             */
+            'resolvedToday' => MatchCandidate::query()
+                ->where('status', '!=', CandidateStatus::Pending->value)
+                ->whereDate('updated_at', today())
+                ->count(),
         ]);
     }
 

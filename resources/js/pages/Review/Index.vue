@@ -31,8 +31,9 @@ interface Paginator<T> {
 
 const props = defineProps<{
     candidates: Paginator<Candidate>;
-    aliasLanguages: { value: string; label: string }[];
     neverFetched: boolean;
+    /** Candidates whose verdict landed today (`status` left `Pending`, counted on `updated_at`). */
+    resolvedToday: number;
 }>();
 
 /**
@@ -157,6 +158,7 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                     </div>
                     <p class="shrink-0 text-xs text-ink-muted">
                         {{ resolvedCount }} of {{ candidates.total }} resolved
+                        <span v-if="props.resolvedToday > 0"> · {{ props.resolvedToday }} today</span>
                     </p>
                 </div>
                 <!-- NEEDS A DECISION: the engine proposed a row, so each card is a comparison and a

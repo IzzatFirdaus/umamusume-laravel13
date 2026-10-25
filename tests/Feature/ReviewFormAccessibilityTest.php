@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\CandidateStatus;
 use App\Models\MatchCandidate;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -14,9 +15,12 @@ use Inertia\Testing\AssertableInertia as Assert;
  * control - live in tests/browser/review.spec.ts, where the browser computes the names. This
  * file asserts the server side: the page receives the candidate names the controls are labelled
  * from, and the alias languages the third control offers.
+ *
+ * The languages belong to the detail page only: the queue stopped rendering a verdict form in
+ * FQ-10, so passing its options to the list was a prop no component read.
  */
 
-it('passes the queue its candidates and the alias languages the controls need', function (): void {
+it('passes the queue its candidates and the resolved-today count', function (): void {
     MatchCandidate::factory()->create(['proposed_name' => 'Unmatched One']);
     MatchCandidate::factory()->create(['proposed_name' => 'Unmatched Two']);
 
@@ -25,7 +29,23 @@ it('passes the queue its candidates and the alias languages the controls need', 
         ->assertInertia(fn (Assert $page) => $page
             ->component('Review/Index')
             ->has('candidates.data', 2)
-            ->has('aliasLanguages'));
+            ->where('resolvedToday', 0)
+            // The verdict form's options are the detail page's; the queue renders no select.
+            ->missing('aliasLanguages'));
+});
+
+it('counts a decided candidate as resolved today', function (): void {
+    MatchCandidate::factory()->create([
+        'proposed_name' => 'Decided One',
+        'status' => CandidateStatus::Confirmed,
+    ]);
+    MatchCandidate::factory()->create(['proposed_name' => 'Still Pending']);
+
+    test()->get('/review')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('resolvedToday', 1)
+            ->where('candidates.total', 1));
 });
 
 it('passes the detail page the one candidate the verdict form is about', function (): void {
