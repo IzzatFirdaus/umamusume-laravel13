@@ -253,3 +253,20 @@ it('counts the active careers so a second one can be named, with the list link',
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page->where('activeCareerCount', 2));
 });
+
+it('keeps the sourced catalogue count distinct from the operational trainee count', function (): void {
+    // DM-2: the KPI prints the catalogue figure, and the difference against this database is a fact
+    // the payload carries rather than a number the page guesses. The join rule is the dataset's own
+    // (`assets/data/README.md`): a trainee is catalogued when the pipeline stamped a source reference.
+    Umamusume::factory()->create(['name' => 'Sourced One', 'external_ref' => 'game-tora-1']);
+    Umamusume::factory()->create(['name' => 'Fixture One']);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('counts.catalogueTrainees', 1)
+            ->where('counts.trainees', 2)
+            // The stale flag is the tile's risk border, so it travels as a bool rather than being
+            // read back out of the displayed state word.
+            ->where('dataStatus.stale', false));
+});

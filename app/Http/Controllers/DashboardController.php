@@ -68,14 +68,22 @@ class DashboardController extends Controller
             'recentVeterans' => $this->recentVeterans($veterans),
             'quickActions' => $this->quickActions(),
             /*
-             * The HFW's KPI row (index.html `.g-4`) leads with "Careers running", which is the same
-             * count the card and the shell pill print, then the three catalogue figures. The turns
-             * recorded figure is NOT here: the HFW's fifth number was a static capture, and no page
-             * rule in this repo lets a dashboard invent one.
+             * The HFW's KPI row (index.html `.g-4`): "Careers running" leads because it is the figure
+             * the card above features, then the three catalogue counts. The turns recorded figure is
+             * NOT here: the HFW's fifth number was a static capture, and no page rule in this repo lets
+             * a dashboard invent one.
+             *
+             * `trainees` is the operational count (every row this database holds). `catalogueTrainees`
+             * is the sourced count the wireframe dataset publishes, and the two differ: the dev
+             * database carries four test-written trainees ("Form Counted 1" to "4") that no pipeline
+             * ever sourced. The rule is the join, not a name filter — a row counts when the fetch
+             * stamped it with a source reference — which is `assets/data/README.md`'s "What is not in
+             * the dataset" ruling, and it answers 67 against the 71 the app counter reads.
              */
             'counts' => [
                 'careersRunning' => TrainingRun::query()->where('status', RunStatus::Active)->count(),
                 'trainees' => Umamusume::count(),
+                'catalogueTrainees' => Umamusume::query()->whereNotNull('external_ref')->count(),
                 'skills' => Skill::count(),
                 'supportCards' => SupportCard::count(),
             ],
@@ -300,7 +308,7 @@ class DashboardController extends Controller
      * not here: it is the shared `app.ruleset` prop and it is null, so the page prints `N/A` with a
      * reason rather than a second, emptier copy of the same absence.
      *
-     * @return array{label: string, state: string, verified_at: string|null, source: string}
+     * @return array{label: string, state: string, stale: bool, verified_at: string|null, source: string}
      */
     private function dataStatus(): array
     {
@@ -310,6 +318,9 @@ class DashboardController extends Controller
         return [
             'label' => 'GLOBAL DATA',
             'state' => config('scenarios.stale', false) ? 'Stale' : 'Current',
+            // The tile's risk border needs the flag, not the word: matching on a display string to
+            // decide a state is the thing AGENTS.md §5 forbids.
+            'stale' => (bool) config('scenarios.stale', false),
             'verified_at' => config('scenarios.verified_at'),
             'source' => $this->dataStatusSource(),
         ];

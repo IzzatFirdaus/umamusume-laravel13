@@ -36,7 +36,6 @@ import { computed } from 'vue';
 import { useVisitState } from '../composables/useVisitState';
 import { useLayout } from '../composables/useLayout';
 import SubCell from '../components/SubCell.vue';
-import KpiCard from '../components/KpiCard.vue';
 import ArtworkSlot from '../components/ArtworkSlot.vue';
 
 /*
@@ -103,8 +102,15 @@ const props = defineProps<{
     careersUrl: string;
     recentVeterans: { rows: VeteranRow[]; total: number; limit: number; library_url: string };
     quickActions: { label: string; to: string }[];
-    counts: { careersRunning: number; trainees: number; skills: number; supportCards: number };
-    dataStatus: { label: string; state: string; verified_at: string | null; source: string };
+    counts: {
+        careersRunning: number;
+        trainees: number;
+        /** The sourced catalogue count; differs from `trainees` when the database holds fixtures. */
+        catalogueTrainees: number;
+        skills: number;
+        supportCards: number;
+    };
+    dataStatus: { label: string; state: string; stale: boolean; verified_at: string | null; source: string };
 }>();
 
 // The ruleset is a shared prop, not a second dashboard prop: `HandleInertiaRequests` already ships it
@@ -209,6 +215,14 @@ function cardSpan(cardId: string): string {
     return spans[cardId] ?? 'col-span-1';
 }
 
+// The KPI strip spans the whole grid, but only when the grid HAS twelve tracks. Emitting
+// `xl:col-span-12` into Compact's single-column grid makes the browser invent eleven implicit
+// columns and squeezes every other region into a 34px track, which is how the compact stack
+// measured 1,686px. Same branch as `cardSpan`, so the two cannot disagree.
+function wideSpan(): string {
+    return dashboardLayout.value === 'compact' ? '' : 'md:col-span-2 xl:col-span-12';
+}
+
 const { visiting, visitFailed } = useVisitState();
 
 // The page lede (HFW index.html `.lede`): the three live figures, never the static capture's numbers.
@@ -226,6 +240,13 @@ const emptyCardBase = 'rounded-md border border-dashed border-rule bg-raised p-4
 const subCellStrong = 'font-mono text-xl tabular-nums text-ink-strong';
 const subCellDefault = 'font-mono text-xl tabular-nums';
 const kpiValueClass = 'font-mono text-xl tabular-nums text-ink-strong';
+// The KPI tile's three lines (index.html `.g-4`): a 10px caps label, a large figure, and a muted
+// line that is either a link or a plain note. `data-stat-tile` / `data-stat-value` stay on the
+// markup so the browser gate that reads for a clipped figure still measures these cells rather
+// than silently finding nothing to measure.
+const kpiTile = 'rounded-md border border-rule bg-panel p-4 self-start';
+const kpiLabel = 'text-xs font-semibold uppercase tracking-wider text-ink-muted';
+const kpiSub = 'mt-1 text-xs text-ink-muted';
 </script>
 
 <template>
@@ -364,11 +385,11 @@ const kpiValueClass = 'font-mono text-xl tabular-nums text-ink-strong';
                     "
                     class="mt-3 rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink"
                 >
-                    This screen counts {{ props.activeCareer.turn }} recorded turn{{
-                        props.activeCareer.turn === 1 ? '' : 's'
-                    }}; the cockpit stands at turn {{ props.activeCareer.position_turn }} from the
-                    position the run was imported at. The disagreement is a known defect, not a
-                    rendering choice.
+                    A turn is counted from the turns recorded, not from the position the run was
+                    imported at. This run's cockpit reports turn {{ props.activeCareer.position_turn }}
+                    from its imported position; the strip here counts {{ props.activeCareer.turn }}
+                    recorded turn{{ props.activeCareer.turn === 1 ? '' : 's' }}. Both are labelled, and
+                    the disagreement is a known defect, not a rendering choice.
                 </p>
 
                 <!-- The turn rail. One mark per career turn, filled up to the last logged one, and
@@ -484,6 +505,50 @@ const kpiValueClass = 'font-mono text-xl tabular-nums text-ink-strong';
                 </div>
             </section>
 
+            <!-- KPI ROW (index.html `.g-4`): four figures, each with the muted line under it. This is
+                 the HFW's own row, not a fold of the catalogue counts into the Needs you card: the
+                 rail is too narrow for four-up tiles, and two-up inside the rail pushed the compact
+                 stack past its content budget, which is why the sublines were skipped first time. -->
+            <div class="grid grid-cols-2 gap-3" :class="wideSpan()" data-kpi-row>
+                <dl :class="kpiTile" data-stat-tile>
+                    <dt :class="kpiLabel">Careers running</dt>
+                    <dd :class="[kpiValueClass, 'mt-1']" data-stat-value>{{ group(props.counts.careersRunning) }}</dd>
+                    <dd :class="kpiSub">
+                        <template v-if="props.activeCareer">
+                            {{ props.activeCareer.trainee }} · {{ props.activeCareer.scenario_label }}
+                        </template>
+                        <template v-else>None running</template>
+                    </dd>
+                </dl>
+                <dl :class="kpiTile" data-stat-tile>
+                    <dt :class="kpiLabel">Trainees catalogued</dt>
+                    <dd :class="[kpiValueClass, 'mt-1']" data-stat-value>{{ group(props.counts.catalogueTrainees) }}</dd>
+                    <dd :class="kpiSub">
+                        <Link href="/umamusume" class="underline hover:text-ink-strong transition-colors duration-150 ease-out">Browse catalog</Link>
+                        <!-- DM-2: the catalogue figure is the sourced one, and the difference is said
+                             out loud rather than left as a number that quietly disagrees with the
+                             database. Four fixture rows are in this database and in no catalogue. -->
+                        <template v-if="props.counts.trainees !== props.counts.catalogueTrainees">
+                            · {{ group(props.counts.trainees) }} in this database
+                        </template>
+                    </dd>
+                </dl>
+                <dl :class="kpiTile" data-stat-tile>
+                    <dt :class="kpiLabel">Skills</dt>
+                    <dd :class="[kpiValueClass, 'mt-1']" data-stat-value>{{ group(props.counts.skills) }}</dd>
+                    <dd :class="kpiSub">
+                        <Link href="/skills" class="underline hover:text-ink-strong transition-colors duration-150 ease-out">Skill search</Link>
+                    </dd>
+                </dl>
+                <dl :class="kpiTile" data-stat-tile>
+                    <dt :class="kpiLabel">Support cards</dt>
+                    <dd :class="[kpiValueClass, 'mt-1']" data-stat-value>{{ group(props.counts.supportCards) }}</dd>
+                    <dd :class="kpiSub">
+                        <Link href="/support-cards" class="underline hover:text-ink-strong transition-colors duration-150 ease-out">Browse cards</Link>
+                    </dd>
+                </dl>
+            </div>
+
             <!-- QUICK ACTIONS (rail, top) -->
             <section
                 v-show="!isCardHidden('quick_actions')"
@@ -592,11 +657,40 @@ const kpiValueClass = 'font-mono text-xl tabular-nums text-ink-strong';
                     Needs you
                 </h2>
 
-                <p class="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
-                    <span class="font-semibold text-ink-strong">{{ props.dataStatus.label }}</span>
-                    <span aria-hidden="true" class="text-green-deep">●</span>
-                    <span class="text-ink">{{ props.dataStatus.state }}</span>
-                </p>
+                <!-- Three tiles (index.html "Needs you"): the data state, the banked Veterans, and the
+                     review queue. The first carries a risk border when the source is stale, and the
+                     flag comes from the payload rather than from a match on the displayed word. -->
+                <div class="mt-3 flex flex-col gap-3">
+                    <div
+                        class="border-l-4 pl-3"
+                        :class="props.dataStatus.stale ? 'border-l-risk' : 'border-l-transparent'"
+                    >
+                        <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Data status</p>
+                        <p class="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
+                            <span class="font-semibold text-ink-strong">{{ props.dataStatus.label }}</span>
+                            <span aria-hidden="true" class="text-green-deep">●</span>
+                            <span class="text-ink">{{ props.dataStatus.state }}</span>
+                        </p>
+                        <p class="mt-1 text-xs text-ink-muted">
+                            <Link href="/database/sources" class="underline hover:text-ink-strong transition-colors duration-150 ease-out">Source ledger</Link>
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Veterans</p>
+                        <p class="mt-1 text-sm text-ink">{{ group(props.recentVeterans.total) }} banked</p>
+                        <p class="mt-1 text-xs text-ink-muted">
+                            <Link :href="props.recentVeterans.library_url" class="underline hover:text-ink-strong transition-colors duration-150 ease-out">Open the library</Link>
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Review queue</p>
+                        <p class="mt-1 text-xs text-ink-muted">
+                            <Link href="/review" class="underline hover:text-ink-strong transition-colors duration-150 ease-out">Check pending matches</Link>
+                        </p>
+                    </div>
+                </div>
 
                 <p class="mt-2 text-xs text-ink-muted">
                     Ruleset version:
@@ -612,24 +706,6 @@ const kpiValueClass = 'font-mono text-xl tabular-nums text-ink-strong';
                         title="No source defines a Global ruleset version, so this tool states none."
                     >N/A</span>
                 </p>
-
-                <!-- KPI stat cells: the HFW's four-tile row (index.html `.g-4`). "Careers" leads
-                     because it is the figure the card above features; the other three are the catalogue
-                     counts. Two across, not four: `KpiCard` truncates its value, and the tile-overflow
-                     gate reads `scrollWidth > clientWidth`, so a four-up row reports every clipped
-                     figure as an overflow by construction. -->
-                <div class="mt-3 grid grid-cols-2 gap-2">
-                    <KpiCard label="Careers" :value="group(props.counts.careersRunning)" :value-class="kpiValueClass" />
-                    <KpiCard label="Trainees" :value="group(props.counts.trainees)" :value-class="kpiValueClass" />
-                    <KpiCard label="Skills" :value="group(props.counts.skills)" :value-class="kpiValueClass" />
-                    <KpiCard label="Support cards" :value="group(props.counts.supportCards)" :value-class="kpiValueClass" />
-                </div>
-
-                <!-- "Needs you" (HFW index.html right-hand card) is carried by the two cards that
-                     already own its facts: the Review queue row is in Quick Actions below, and the
-                     Veteran count is the Recent veterans card's own total. Repeating them here grew
-                     the compact stack past its content budget without adding a fact, so the tiles are
-                     not drawn a third time. -->
 
                 <!-- Recent Builds footnote (PLAN 6B.13, frontend-fidelity §5 T1-5): the standalone
                      empty-state card is collapsed into this card's footnote. There is no build record

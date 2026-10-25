@@ -500,15 +500,13 @@ test('measures the three shell widths, the bento shape and the card voids at a 1
         });
     }
 
-    /** The tallest `dl` stat cell inside a named region, in px. */
-    async function tallestCell(heading: string): Promise<number> {
-        return page.evaluate((name) => {
-            const cards = [...document.querySelectorAll('[data-dashboard-root] > [role="region"]')];
-            const card = cards.find((c) => (c.querySelector('h2, h3')?.textContent ?? '').trim() === name);
-            const cells = card === undefined ? [] : [...card.querySelectorAll('dl')];
+    /** The tallest KPI stat cell on the page, in px. */
+    async function tallestStatTile(): Promise<number> {
+        return page.evaluate(() => {
+            const cells = [...document.querySelectorAll('[data-stat-tile]')];
 
             return cells.length === 0 ? 0 : Math.max(...cells.map((d) => Math.round(d.getBoundingClientRect().height)));
-        }, heading);
+        });
     }
 
     // Standard is the default the suite's scratch database carries.
@@ -523,7 +521,7 @@ test('measures the three shell widths, the bento shape and the card voids at a 1
     expect(await firstCardShare()).toBeGreaterThanOrEqual(55);
     expect(await firstCardShare()).toBeLessThanOrEqual(70);
     expect(await maxCardVoid()).toBeLessThanOrEqual(24);
-    expect(await tallestCell('Needs you')).toBeGreaterThanOrEqual(88);
+    expect(await tallestStatTile()).toBeGreaterThanOrEqual(88);
     // No Pick up where you left off stat-cell assertion here: this screen's career strip is `v-if` on an active
     // run and the suite's scratch database holds none, so a check on it would skip on every run.
     // `names the active career and resumes it from the keyboard` owns the with-career state.
@@ -554,7 +552,7 @@ test('measures the three shell widths, the bento shape and the card voids at a 1
     expect(await firstCardShare()).toBeGreaterThanOrEqual(55);
     expect(await firstCardShare()).toBeLessThanOrEqual(70);
     expect(await maxCardVoid()).toBeLessThanOrEqual(24);
-    expect(await tallestCell('Needs you')).toBeGreaterThanOrEqual(88);
+    expect(await tallestStatTile()).toBeGreaterThanOrEqual(88);
     await page.screenshot({ path: testInfo.outputPath('dashboard-wide-1920.png'), fullPage: true });
 
     await page.goto('/preferences');
@@ -569,9 +567,16 @@ test('measures the three shell widths, the bento shape and the card voids at a 1
     expect(compact).toBeGreaterThanOrEqual(700);
     expect(compact).toBeLessThanOrEqual(850);
     // Compact is a single column, so it scrolls when the content asks for more than the shell
-    // offers (835px with no career, 1063px with one). The bar is that the stack stays content-sized
-    // and untrimmed, not that it fits a 1080px viewport, which it cannot without hiding a region.
-    expect(await rootHeight()).toBeLessThanOrEqual(1100);
+    // offers. The bar is that the stack stays content-sized and untrimmed, not that it fits a
+    // 1080px viewport, which it cannot without hiding a region.
+    //
+    // Re-measured 2026-10-26 at 1,269px, up from 835px: the HFW's KPI strip (index.html `.g-4`) and
+    // the three "Needs you" tiles are now rendered here instead of the counts being folded away.
+    // Stated as a band, like the standard case, so an unexplained growth fails it as hard as
+    // trimming a region to fit does.
+    const compactHeight = await rootHeight();
+    expect(compactHeight, 'the compact stack lost content it should still render').toBeGreaterThanOrEqual(1200);
+    expect(compactHeight, 'the compact stack grew beyond its measured budget').toBeLessThanOrEqual(1350);
     expect(await maxCardVoid()).toBeLessThanOrEqual(24);
     await page.screenshot({ path: testInfo.outputPath('dashboard-compact-1920.png'), fullPage: true });
 
@@ -617,6 +622,27 @@ test('no stat value overflows its tile', async ({ page }) => {
         }).filter(Boolean)
     );
     expect(offenders).toEqual([]);
+});
+
+/*
+ * The HFW's KPI row (index.html `.g-4`) and its "Needs you" card. The sublines are the reason the
+ * row exists as its own strip: the rail column is too narrow for four-up tiles, so folding the
+ * counts into the rail card dropped the links and the three tiles with it.
+ */
+test('the KPI row carries its sublines and the Needs you card carries its three tiles', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+
+    const row = page.locator('[data-kpi-row]');
+    await expect(row.getByRole('link', { name: 'Browse catalog' })).toHaveAttribute('href', /\/umamusume/);
+    await expect(row.getByRole('link', { name: 'Skill search' })).toHaveAttribute('href', /\/skills/);
+    await expect(row.getByRole('link', { name: 'Browse cards' })).toHaveAttribute('href', /\/support-cards/);
+
+    const needsYou = page.getByRole('region', { name: 'NEEDS YOU' });
+    await expect(needsYou.getByText('Data status')).toBeVisible();
+    await expect(needsYou.getByRole('link', { name: 'Source ledger' })).toHaveAttribute('href', /\/database\/sources/);
+    await expect(needsYou.getByText(/banked/)).toBeVisible();
+    await expect(needsYou.getByRole('link', { name: 'Check pending matches' })).toHaveAttribute('href', /\/review/);
 });
 
 /*
