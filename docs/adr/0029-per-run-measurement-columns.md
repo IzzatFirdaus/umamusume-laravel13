@@ -2,10 +2,10 @@
 
 <!-- ADR-CONTRACT
   decision: accepted (owner ruling R4, 2026-10-25) — authorise eight per-run measurement facts as storage, one column or table each, with deck_slots.card_level holding the numerator only
-  code: not built — no column or table for any of the eight exists: deck_slots carries support_card_id, slot_position and ownership only; turn_entries carries no facility_banner and no training_card_ids; training_runs carries no team_stat_grades and no current_spirit; there is no team_roster, no skill_levels and no roster-skill table
+  code: three built (A-0.5 at df624cca, B-0.5 at 005561c1, B-0.7 at b102581a); three declined (A-0.13/A-0.14 per R8, B-0.6 per R9); A-0.4 code-open; A-0.12 awaiting ruling
   superseded-by: —
   amended-by: —
-  open: the eight storages are authorised but unbuilt, so every audit row stays blocked until a slice migrates it; A-0.4 stores nothing and is computed from A-0.5's column, and its lookup prerequisite is the anchor vector already stored on support_cards.effects and named by support_effects — what does not exist is a reader that answers at an arbitrary level rather than only at cap (see the 2026-10-25 note); A-0.13 and A-0.14 have no PRD anchor and are marked needs-PRD-citation; US-12's sentence "no card level, limit break or Unique Perk state is stored anywhere" needs a dated travel note if this ADR is accepted
+  open: A-0.4 is code-open and needs SupportCardEffects::forLevel() (atCap() is the only method); A-0.12 awaits an owner ruling (travel note on FR-C-2 or decline); B-0.6 is shape-blocked by KI-133; A-0.13/A-0.14 are declined per R8; A-0.5's US-12 travel note landed at 06d9515e
 -->
 
 Status: **accepted** (owner ruling R4, 2026-10-25). Drafted 2026-10-24 for the owner's review; the agent drafts an ADR, the owner accepts it. Nothing here builds a column, a table, a model, or a slice.
