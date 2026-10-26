@@ -275,16 +275,15 @@ test('the race database renders whichever state the catalogue is in', async ({ p
         /Showing \d+ to \d+ of \d+ slots/,
     );
 
-    // Rows carry stored values, and every unstored one is `N/A` with its reason rather than a zero.
-    // Measured on this tree's first page: 2 of 25 rows carry no distance, surface or fan gate, and 23
-    // of 25 carry no entry gate at all, so this loop is never empty.
-    const unrecorded = table.getByTitle(/The source records no|No entry gate/);
-    expect(await unrecorded.count(), 'a populated catalogue states at least one unrecorded value')
+    // Rows carry stored values, and every unstored one is `N/A` rather than a zero. The reason used to
+    // sit in a per-cell `title`; the 12.1 sweep moved it out of the hover and into one note under the
+    // table, because a reason carried only in a `title` is invisible on touch. Measured on this tree's
+    // first page: 2 of 25 rows carry no distance, surface or fan gate, and 23 of 25 carry no entry gate.
+    const cells = table.getByText('N/A', { exact: true });
+    expect(await cells.count(), 'a populated catalogue states at least one unrecorded value')
         .toBeGreaterThan(0);
 
-    for (const cell of await unrecorded.all()) {
-        await expect(cell).toHaveText('N/A');
-    }
+    await expect(page.getByText(/N\/A marks a field the source records nothing for/)).toBeVisible();
 
     // No prediction lives in a reference table: win probability and readiness are held (ADR-0016).
     await expect(table).not.toContainText('%');
