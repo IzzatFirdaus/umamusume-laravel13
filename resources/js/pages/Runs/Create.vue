@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
+import Card from '../../components/ui/Card.vue';
 import TraineeCombobox from '../../components/TraineeCombobox.vue';
 import FormField from '../../components/ui/FormField.vue';
 import TextInput from '../../components/ui/TextInput.vue';
 import Textarea from '../../components/ui/Textarea.vue';
 import Select from '../../components/ui/Select.vue';
+import { BaseButton, LinkButton } from '../../components/Form';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -95,164 +98,186 @@ function submit(): void {
 </script>
 
 <template>
-    <AppLayout>
+    <AppLayout :breadcrumb="[{ label: 'Careers', href: '/training-runs' }, { label: 'New career' }]">
         <Head title="New career" />
-        <template #title>New career</template>
+        <template #head>
+            <PageHeader
+                eyebrow="New career"
+                title="Create a career"
+                description="Trainee and status are required. Scenario, inheritance parents, the Grade Point period, the shop countdown and notes are optional and can be recorded later on the run page."
+            >
+                <template #actions>
+                    <LinkButton href="/training-runs" variant="secondary">Back to careers</LinkButton>
+                </template>
+            </PageHeader>
+        </template>
 
         <form
-            class="mt-6 max-w-lg space-y-4 rounded-md border border-rule bg-raised p-4 text-sm"
+            class="max-w-3xl"
             :aria-busy="form.processing"
             @submit.prevent="submit"
         >
-            <div>
-                <label for="trainee-combobox" class="block">
-                    <!-- "Trainee" rather than "Umamusume" because it is the string this field's own copy
-                         already uses ("No trainee or card found", "Trainees and costume cards"), and the
-                         accessible name begins with it, so a speech-input user can say the words on
-                         screen and land here (WCAG 2.5.3). The `*` is this repository's required marker:
-                         a native `required` shows a sighted Trainer nothing until the submit fails. -->
-                    <span class="font-medium text-ink">Trainee *</span>
-                </label>
+            <Card padding="lg">
+                <h2>Career</h2>
 
-                <div class="mt-1">
-                    <TraineeCombobox
-                        :roster="roster"
-                        :initial-trainee-id="previous('umamusume_id')"
-                        :initial-card-id="previous('character_card_id')"
-                        :invalid="form.errors.umamusume_id !== undefined"
-                        @commit="onCommit"
-                        @clear="onClear"
-                    />
+                <div>
+                    <label for="trainee-combobox" class="block text-sm font-medium text-ink">
+                        <!-- "Trainee" rather than "Umamusume" because it is the string this field's own copy
+                             already uses ("No trainee or card found", "Trainees and costume cards"), and the
+                             accessible name begins with it, so a speech-input user can say the words on
+                             screen and land here (WCAG 2.5.3). The `*` is this repository's required marker:
+                             a native `required` shows a sighted Trainer nothing until the submit fails. -->
+                        <span>Trainee *</span>
+                    </label>
+
+                    <div class="mt-1">
+                        <TraineeCombobox
+                            :roster="roster"
+                            :initial-trainee-id="previous('umamusume_id')"
+                            :initial-card-id="previous('character_card_id')"
+                            :invalid="form.errors.umamusume_id !== undefined"
+                            @commit="onCommit"
+                            @clear="onClear"
+                        />
+                    </div>
+
+                    <p class="mt-1 text-xs text-ink-muted">
+                        One combobox for both the trainee and her costume. A trainee with nothing
+                        confirmed records the trainee alone.
+                    </p>
+
+                    <p v-if="form.errors.umamusume_id" id="create-umamusume_id-error" role="alert" class="mt-1 text-xs font-semibold text-risk">{{ form.errors.umamusume_id }}</p>
+                    <p v-if="form.errors.character_card_id" id="create-character_card_id-error" role="alert" class="mt-1 text-xs font-semibold text-risk">{{ form.errors.character_card_id }}</p>
                 </div>
 
-                <p v-if="form.errors.umamusume_id" id="create-umamusume_id-error" class="mt-1 text-risk">{{ form.errors.umamusume_id }}</p>
-                <p v-if="form.errors.character_card_id" id="create-character_card_id-error" class="mt-1 text-risk">{{ form.errors.character_card_id }}</p>
-            </div>
-
-            <!-- A select over the composition matrix, because the request validates `scenario` against
-                 its keys: free text here could only ever produce a rejected submission. Leaving it empty
-                 is a real option and renders the baseline strip. -->
-            <Select
-                :model-value="form.scenario"
-                id="create-scenario"
-                name="scenario"
-                label="Scenario (optional)"
-                :options="scenarioOptions"
-                :error="form.errors.scenario"
-                @update:model-value="(v: string | number | null) => (form.scenario = String(v ?? ''))"
-            />
-
-            <Select
-                :model-value="form.status"
-                id="create-status"
-                name="status"
-                label="Status"
-                :options="statusOptions"
-                required
-                :error="form.errors.status"
-                @update:model-value="(v: string | number | null) => (form.status = String(v ?? ''))"
-            />
-
-            <!-- Four fields the request validates and the model persists, surfaced here because the run
-                 page already reads them back (the inheritance row, the Grade Point period in the meter,
-                 the shop panel's countdown). All four are nullable, so leaving one empty keeps the shape
-                 a run had before this block existed. -->
-            <Select
-                :model-value="form.inheritance_parent_a_id"
-                id="create-inheritance_parent_a_id"
-                name="inheritance_parent_a_id"
-                label="Inheritance parent A (optional)"
-                :options="parentOptions"
-                :error="form.errors.inheritance_parent_a_id"
-                @update:model-value="(v: string | number | null) => (form.inheritance_parent_a_id = String(v ?? ''))"
-            />
-
-            <Select
-                :model-value="form.inheritance_parent_b_id"
-                id="create-inheritance_parent_b_id"
-                name="inheritance_parent_b_id"
-                label="Inheritance parent B (optional)"
-                :options="parentOptions"
-                :error="form.errors.inheritance_parent_b_id"
-                @update:model-value="(v: string | number | null) => (form.inheritance_parent_b_id = String(v ?? ''))"
-            />
-
-            <!-- The Grade Point period is entered, never derived (D-270). A scenario that does not compose
-                 the grade_objectives panel is rejected by the request's own closure, so a Trainer who
-                 picks period 3 on URA Finals sees the message there rather than the value silently
-                 dropped. -->
-            <FormField
-                label="Current Grade Point period"
-                :required="false"
-                :error="form.errors.current_objective_index"
-                :hint="`1 to ${maxObjectiveIndex}, tracked in the Grade Point meter on the run page. Only scenarios that compose the Grade Point panel accept a value here.`"
-                id="create-current_objective_index"
-            >
-                <template #default="{ id, describedBy, invalid, required }">
-                    <TextInput
-                        :id="id"
-                        type="number"
-                        name="current_objective_index"
-                        min="1"
-                        :max="maxObjectiveIndex"
-                        :model-value="form.current_objective_index"
-                        :described-by="describedBy"
-                        :invalid="invalid"
-                        :required="required"
-                        @update:model-value="(v: string) => (form.current_objective_index = String(v))"
+                <!-- The six request fields in the HFW's two-column grid. A select over the composition
+                     matrix for `scenario`, because the request validates it against its keys: free text
+                     here could only ever produce a rejected submission. Leaving it empty is a real option
+                     and renders the baseline strip. -->
+                <div class="mt-4 grid gap-4 md:grid-cols-2">
+                    <Select
+                        :model-value="form.scenario"
+                        id="create-scenario"
+                        name="scenario"
+                        label="Scenario (optional)"
+                        :options="scenarioOptions"
+                        :error="form.errors.scenario"
+                        @update:model-value="(v: string | number | null) => (form.scenario = String(v ?? ''))"
                     />
-                </template>
-            </FormField>
 
-            <FormField
-                label="Shop resets in"
-                :required="false"
-                :error="form.errors.shop_resets_in"
-                hint="Turns until the shop rotation as you read it. The scenario's own upper bound applies at the model layer."
-                id="create-shop_resets_in"
-            >
-                <template #default="{ id, describedBy, invalid, required }">
-                    <TextInput
-                        :id="id"
-                        type="number"
-                        name="shop_resets_in"
-                        min="0"
-                        :model-value="form.shop_resets_in"
-                        :described-by="describedBy"
-                        :invalid="invalid"
-                        :required="required"
-                        @update:model-value="(v: string) => (form.shop_resets_in = String(v))"
+                    <Select
+                        :model-value="form.status"
+                        id="create-status"
+                        name="status"
+                        label="Status"
+                        :options="statusOptions"
+                        required
+                        :error="form.errors.status"
+                        @update:model-value="(v: string | number | null) => (form.status = String(v ?? ''))"
                     />
-                </template>
-            </FormField>
 
-            <FormField
-                label="Notes"
-                :required="false"
-                :error="form.errors.notes"
-                id="create-notes"
-            >
-                <template #default="{ id, describedBy, invalid, required }">
-                    <Textarea
-                        :id="id"
-                        name="notes"
-                        :rows="3"
-                        :model-value="form.notes"
-                        :described-by="describedBy"
-                        :invalid="invalid"
-                        :required="required"
-                        @update:model-value="(v: string | number) => (form.notes = String(v))"
+                    <!-- Four fields the request validates and the model persists, surfaced here because the
+                         run page already reads them back (the inheritance row, the Grade Point period in the
+                         meter, the shop panel's countdown). All four are nullable, so leaving one empty
+                         keeps the shape a run had before this block existed. -->
+                    <Select
+                        :model-value="form.inheritance_parent_a_id"
+                        id="create-inheritance_parent_a_id"
+                        name="inheritance_parent_a_id"
+                        label="Inheritance parent A (optional)"
+                        :options="parentOptions"
+                        :error="form.errors.inheritance_parent_a_id"
+                        @update:model-value="(v: string | number | null) => (form.inheritance_parent_a_id = String(v ?? ''))"
                     />
-                </template>
-            </FormField>
 
-            <button
-                type="submit"
-                :disabled="form.processing"
-                class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-3 font-semibold text-on-primary-action disabled:opacity-60"
-            >
-                {{ form.processing ? 'Creating…' : 'Create run' }}
-            </button>
+                    <Select
+                        :model-value="form.inheritance_parent_b_id"
+                        id="create-inheritance_parent_b_id"
+                        name="inheritance_parent_b_id"
+                        label="Inheritance parent B (optional)"
+                        :options="parentOptions"
+                        :error="form.errors.inheritance_parent_b_id"
+                        @update:model-value="(v: string | number | null) => (form.inheritance_parent_b_id = String(v ?? ''))"
+                    />
+
+                    <!-- The Grade Point period is entered, never derived (D-270). A scenario that does not
+                         compose the grade_objectives panel is rejected by the request's own closure, so a
+                         Trainer who picks period 3 on URA Finals sees the message there rather than the
+                         value silently dropped. -->
+                    <FormField
+                        label="Current Grade Point period"
+                        :required="false"
+                        :error="form.errors.current_objective_index"
+                        :hint="`1 to ${maxObjectiveIndex}, tracked in the Grade Point meter on the run page. Only scenarios that compose the Grade Point panel accept a value here.`"
+                        id="create-current_objective_index"
+                    >
+                        <template #default="{ id, describedBy, invalid, required }">
+                            <TextInput
+                                :id="id"
+                                type="number"
+                                name="current_objective_index"
+                                min="1"
+                                :max="maxObjectiveIndex"
+                                :model-value="form.current_objective_index"
+                                :described-by="describedBy"
+                                :invalid="invalid"
+                                :required="required"
+                                @update:model-value="(v: string) => (form.current_objective_index = String(v))"
+                            />
+                        </template>
+                    </FormField>
+
+                    <FormField
+                        label="Shop resets in"
+                        :required="false"
+                        :error="form.errors.shop_resets_in"
+                        hint="Turns until the shop rotation as you read it. The scenario's own upper bound applies at the model layer."
+                        id="create-shop_resets_in"
+                    >
+                        <template #default="{ id, describedBy, invalid, required }">
+                            <TextInput
+                                :id="id"
+                                type="number"
+                                name="shop_resets_in"
+                                min="0"
+                                :model-value="form.shop_resets_in"
+                                :described-by="describedBy"
+                                :invalid="invalid"
+                                :required="required"
+                                @update:model-value="(v: string) => (form.shop_resets_in = String(v))"
+                            />
+                        </template>
+                    </FormField>
+                </div>
+
+                <FormField
+                    label="Notes"
+                    :required="false"
+                    :error="form.errors.notes"
+                    id="create-notes"
+                    class="mt-4"
+                >
+                    <template #default="{ id, describedBy, invalid, required }">
+                        <Textarea
+                            :id="id"
+                            name="notes"
+                            :rows="3"
+                            :model-value="form.notes"
+                            :described-by="describedBy"
+                            :invalid="invalid"
+                            :required="required"
+                            @update:model-value="(v: string | number) => (form.notes = String(v))"
+                        />
+                    </template>
+                </FormField>
+
+                <div class="mt-5 flex flex-wrap gap-3">
+                    <BaseButton type="submit" variant="primary" :loading="form.processing">
+                        {{ form.processing ? 'Creating…' : 'Create run' }}
+                    </BaseButton>
+                    <LinkButton href="/training-runs" variant="secondary">Cancel</LinkButton>
+                </div>
+            </Card>
         </form>
     </AppLayout>
 </template>

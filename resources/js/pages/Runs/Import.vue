@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
-import { BaseInput, BaseSelect, BaseTextarea } from '../../components/Form';
+import PageHeader from '../../components/ui/PageHeader.vue';
+import Card from '../../components/ui/Card.vue';
+import UiSelect from '../../components/ui/Select.vue';
+import UiTextarea from '../../components/ui/Textarea.vue';
+import { BaseInput, BaseSelect, BaseTextarea, BaseButton, LinkButton } from '../../components/Form';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 interface Trainee {
     id: number;
@@ -131,29 +135,111 @@ const rowErrors = computed(() => {
     return lines;
 });
 
+/*
+ * The preview's edit boxes. The run-level fields are the Trainer's own four, carried through the
+ * preview payload; a local copy is what the edit boxes bind, and the commit posts that copy, so a
+ * correction made here is the value the second Form Request validates. The watch re-seeds whenever a
+ * new preview arrives, because the component instance survives the Inertia visit that carries it.
+ */
+const runEdits = ref({ umamusume_id: '', scenario: '', status: '', notes: '' });
+
+watch(
+    () => props.preview,
+    (preview) => {
+        if (preview === null) {
+            return;
+        }
+
+        runEdits.value = {
+            umamusume_id: String(preview.run.umamusume_id ?? ''),
+            scenario: String(preview.run.scenario ?? ''),
+            status: String(preview.run.status ?? ''),
+            notes: String(preview.run.notes ?? ''),
+        };
+    },
+    { immediate: true },
+);
+
+// "Active, Completed or Retired" — the valid set named in words, built from the enum's own labels
+// rather than a second copy that can drift (import-preview annotation 2: a missing field says what
+// to do, not just that it is empty).
+const statusSet = computed(() => {
+    const labels = Object.values(props.statuses);
+
+    return labels.length < 2
+        ? labels.join('')
+        : `${labels.slice(0, -1).join(', ')} or ${labels[labels.length - 1]}`;
+});
+
 // A stored id that answers no catalog row is a broken reference, not an unrecorded value, so the
 // sentence names the id it read rather than printing a value marker over a name nobody has.
-const traineeRef = computed(() => {
-    const id = Number(props.preview?.run.umamusume_id);
-    const row = props.trainees.find((trainee) => trainee.id === id);
+const traineeResolves = computed(() => {
+    const id = runEdits.value.umamusume_id;
+
+    return id !== '' && props.trainees.some((trainee) => String(trainee.id) === id);
+});
+
+const traineeName = computed(() => {
+    const id = runEdits.value.umamusume_id;
+    const row = props.trainees.find((trainee) => String(trainee.id) === id);
 
     return row !== undefined
-        ? { name: row.name, title: undefined }
-        : {
-            name: `Trainee id ${id} does not resolve`,
-            title: `The imported payload carries umamusume_id ${id} and no catalog row answers it. This is a broken reference, not a name left blank.`,
-        };
+        ? row.name
+        : `Trainee id ${id} does not resolve`;
 });
 
 const scenarioName = computed(() => {
-    const key = props.preview?.run.scenario;
+    const key = runEdits.value.scenario;
 
-    if (key === null || key === undefined || key === '') {
+    if (key === '') {
         return 'No scenario (baseline strip)';
     }
 
-    return props.scenarios[String(key)] ?? String(key);
+    return props.scenarios[key] ?? key;
 });
+
+// The four fields, each with the found/missing verdict the preview prints beside it. Found means the
+// import carries a value; missing names what to do about it. Absence is a normal result, so a missing
+// optional field is muted and only a field the commit needs is a refusal-in-waiting.
+const previewFields = computed(() => [
+    {
+        key: 'umamusume_id',
+        label: 'Trainee',
+        found: traineeResolves.value,
+        required: true,
+        missing: `The import names no trainee the catalog answers. Choose the trainee this run belongs to.`,
+    },
+    {
+        key: 'scenario',
+        label: 'Scenario',
+        found: runEdits.value.scenario !== '',
+        required: false,
+        missing: 'Not in the file. Choose a scenario, or leave it Not set and the run renders the baseline strip.',
+    },
+    {
+        key: 'status',
+        label: 'Status',
+        found: runEdits.value.status !== '',
+        required: true,
+        missing: `Not in the file. Choose ${statusSet.value}.`,
+    },
+    {
+        key: 'notes',
+        label: 'Notes',
+        found: runEdits.value.notes.trim() !== '',
+        required: false,
+        missing: 'Not in the file. Notes are optional; an imported run records what the file said and nothing more.',
+    },
+]);
+
+const foundCount = computed(() => previewFields.value.filter((field) => field.found).length);
+const missingCount = computed(() => previewFields.value.length - foundCount.value);
+
+function fieldState(key: string): { found: boolean; required: boolean; missing: string } {
+    const field = previewFields.value.find((candidate) => candidate.key === key);
+
+    return field ?? { found: true, required: false, missing: '' };
+}
 
 const submitting = ref(false);
 
@@ -166,11 +252,12 @@ function confirmImport(): void {
     // Request the preview did, and `csv` and `turns` are what its rules require (KI-64). The commit is
     // not the form's own visit (the payload is the preview's, not the fields'), so its pending state is
     // this ref: the button disables and names the work, and a second press while the first is in flight
-    // is ignored instead of writing the run twice.
+    // is ignored instead of writing the run twice. The run half is the edited copy, so a correction made
+    // on the preview is the value the second validation reads.
     submitting.value = true;
 
     router.post('/training-runs/import', {
-        ...props.preview.run,
+        ...runEdits.value,
         csv: props.preview.csv,
         turns: props.preview.turns,
     }, {
@@ -179,186 +266,405 @@ function confirmImport(): void {
         },
     });
 }
+
+const breadcrumb = computed(() =>
+    props.preview === null
+        ? [{ label: 'Careers', href: '/training-runs' }, { label: 'Import' }]
+        : [{ label: 'Careers', href: '/training-runs' }, { label: 'Import', href: '/training-runs/import' }, { label: 'Preview' }],
+);
 </script>
 
 <template>
-    <AppLayout>
-        <Head title="Import a historical career" />
-        <template #title>Import a historical career</template>
-
-        <p class="mt-2 max-w-3xl text-sm text-ink-muted">
-            For a run you already finished. Paste or choose the CSV this app exports, and the turns come in
-            as the record of a past career. The preview shows every row before anything is written, and the
-            file has to be correct before the run exists: nothing is created until you confirm.
-        </p>
-
+    <AppLayout :breadcrumb="breadcrumb">
         <!-- Preview and commit are two POSTs to two routes, and the commit runs the same Form Request the
              preview did, so the preview is not a trust boundary: the raw text is carried in a field rather
              than a signed token standing in for it, and editing it into something invalid fails on the
              second POST rather than reaching the action. -->
-        <form v-if="preview !== null" class="mt-6" :aria-busy="submitting" @submit.prevent="confirmImport">
-            <h2 class="text-lg font-semibold text-ink-strong">Confirm the import</h2>
+        <!-- A named slot must be a direct child of the component: Vue cannot attach a slot template
+             whose parent is a conditional `<template v-if>`, and the build fails with "Codegen node is
+             missing". Both page heads render from this one hoisted slot. -->
+        <template #head>
+            <PageHeader
+                v-if="preview !== null"
+                eyebrow="Import preview"
+                title="Here is what the text says"
+                description="Every field the importer read, with an edit box on each. Fields it did not read are marked, not defaulted. Nothing is written until you confirm."
+            />
+            <PageHeader
+                v-else
+                eyebrow="Import"
+                title="Bring in a historical career"
+                description="Paste the CSV this app exports or upload the file. The preview shows every row it read, and nothing is created until you confirm."
+            />
+        </template>
 
-            <p class="mt-2 text-sm text-ink-muted">
-                <span class="font-semibold text-ink" :title="traineeRef.title">{{ traineeRef.name }}</span>
-                · {{ scenarioName }}
-                · {{ preview.run.status }}
-                · from {{ preview.source }}
-                · {{ preview.turns.length }} turn{{ preview.turns.length === 1 ? '' : 's' }}
-            </p>
+        <template v-if="preview !== null">
+            <Head title="Import preview" />
 
-            <p
-                role="note"
-                class="mt-3 max-w-3xl rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink-muted"
+            <!-- Three counts at the top (import-preview annotation 4): found, missing and source, so a
+                 Trainer knows at a glance how much review remains. -->
+            <div class="grid gap-3 sm:grid-cols-3">
+                <Card>
+                    <div class="border-l-4 border-status-positive pl-3">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Found</p>
+                        <p class="font-mono text-2xl font-extrabold text-ink-strong">{{ foundCount }} of {{ previewFields.length }}</p>
+                    </div>
+                </Card>
+                <Card>
+                    <div class="border-l-4 border-status-caution-ink pl-3">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Missing</p>
+                        <p class="font-mono text-2xl font-extrabold text-ink-strong">{{ missingCount }}</p>
+                    </div>
+                </Card>
+                <Card>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Source</p>
+                    <p class="text-sm font-extrabold text-ink-strong">{{ preview.source }}</p>
+                    <p class="mt-1 text-xs text-ink-muted">{{ preview.turns.length }} turn row{{ preview.turns.length === 1 ? '' : 's' }}</p>
+                </Card>
+            </div>
+
+            <form
+                class="mt-4 grid items-start gap-4 xl:grid-cols-3"
+                :aria-busy="submitting"
+                @submit.prevent="confirmImport"
             >
-                This imports turns only. Skills, the support deck and race entries are not part of the file
-                format, so they stay empty and you add them per-turn on the run page afterwards. A sheet that
-                recorded them is not lost, it just has no column here yet.
-            </p>
+                <div class="flex flex-col gap-4 xl:col-span-2">
+                    <Card>
+                        <h2>Identity and position</h2>
 
-            <div class="mt-4 overflow-x-auto" role="region" tabindex="0" aria-label="Rows to import">
-                <table class="w-full border-collapse text-sm">
-                    <caption class="sr-only">Every turn row that will be written</caption>
-                    <thead>
-                        <tr class="border-b border-rule text-left text-ink-muted">
-                            <th class="py-1 pr-3">Turn</th>
-                            <th class="pr-3">Speed</th>
-                            <th class="pr-3">Stamina</th>
-                            <th class="pr-3">Power</th>
-                            <th class="pr-3">Guts</th>
-                            <th class="pr-3">Wit</th>
-                            <th class="pr-3">SP</th>
-                            <th class="pr-3">Condition</th>
-                            <th class="pr-3">Energy</th>
-                            <th class="pr-3">Mood</th>
-                            <th class="pr-3">Fans</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr
-                            v-for="(row, index) in preview.turns"
-                            :key="index"
-                            class="border-b border-rule font-mono text-xs tabular-nums"
+                        <!-- DOMAIN OVERRIDE: the HFW gives every parsed turn cell an edit box. This app's
+                             commit step re-parses `turns` from `csv` server-side (ImportHistoricalRunRequest
+                             prepareForValidation), so a cell edited here would be silently replaced by the
+                             file's own value. The run-level fields are the edit boxes; the rows are the
+                             read-only review table below, and changing a row means correcting the file, which
+                             is what "Start over" is for. -->
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div>
+                                <label for="preview-umamusume_id" id="preview-umamusume_id-label" class="flex items-center gap-2 text-sm font-medium text-ink">
+                                    Trainee
+                                    <span class="tag" :class="fieldState('umamusume_id').found ? '' : 'you'">{{ fieldState('umamusume_id').found ? 'found' : 'missing' }}</span>
+                                </label>
+                                <UiSelect
+                                    id="preview-umamusume_id"
+                                    name="umamusume_id"
+                                    :model-value="runEdits.umamusume_id"
+                                    :options="importTraineeOptions"
+                                    :described-by="fieldState('umamusume_id').found ? undefined : 'preview-umamusume_id-missing'"
+                                    @update:model-value="(v: string | number | null) => (runEdits.umamusume_id = String(v ?? ''))"
+                                />
+                                <p v-if="!fieldState('umamusume_id').found" id="preview-umamusume_id-missing" class="mt-1 text-xs text-risk">
+                                    {{ fieldState('umamusume_id').missing }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <label for="preview-scenario" id="preview-scenario-label" class="flex items-center gap-2 text-sm font-medium text-ink">
+                                    Scenario
+                                    <span class="tag" :class="fieldState('scenario').found ? '' : 'you'">{{ fieldState('scenario').found ? 'found' : 'missing' }}</span>
+                                </label>
+                                <UiSelect
+                                    id="preview-scenario"
+                                    name="scenario"
+                                    :model-value="runEdits.scenario"
+                                    :options="importScenarioOptions"
+                                    :described-by="fieldState('scenario').found ? undefined : 'preview-scenario-missing'"
+                                    @update:model-value="(v: string | number | null) => (runEdits.scenario = String(v ?? ''))"
+                                />
+                                <p v-if="!fieldState('scenario').found" id="preview-scenario-missing" class="mt-1 text-xs text-ink-muted">
+                                    {{ fieldState('scenario').missing }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <label for="preview-status" id="preview-status-label" class="flex items-center gap-2 text-sm font-medium text-ink">
+                                    Status
+                                    <span class="tag" :class="fieldState('status').found ? '' : 'you'">{{ fieldState('status').found ? 'found' : 'missing' }}</span>
+                                </label>
+                                <UiSelect
+                                    id="preview-status"
+                                    name="status"
+                                    :model-value="runEdits.status"
+                                    :options="importStatusOptions"
+                                    :described-by="fieldState('status').found ? undefined : 'preview-status-missing'"
+                                    @update:model-value="(v: string | number | null) => (runEdits.status = String(v ?? ''))"
+                                />
+                                <p v-if="!fieldState('status').found" id="preview-status-missing" class="mt-1 text-xs text-risk">
+                                    {{ fieldState('status').missing }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <label for="preview-notes" id="preview-notes-label" class="flex items-center gap-2 text-sm font-medium text-ink">
+                                    Notes
+                                    <span class="tag" :class="fieldState('notes').found ? '' : 'you'">{{ fieldState('notes').found ? 'found' : 'missing' }}</span>
+                                </label>
+                                <UiTextarea
+                                    id="preview-notes"
+                                    name="notes"
+                                    :rows="2"
+                                    :model-value="runEdits.notes"
+                                    :described-by="fieldState('notes').found ? undefined : 'preview-notes-missing'"
+                                    @update:model-value="(v: string) => (runEdits.notes = v)"
+                                />
+                                <p v-if="!fieldState('notes').found" id="preview-notes-missing" class="mt-1 text-xs text-ink-muted">
+                                    {{ fieldState('notes').missing }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <p class="mt-3 text-sm text-ink-muted">
+                            <span class="font-semibold text-ink">{{ traineeName }}</span>
+                            · {{ scenarioName }}
+                            · {{ runEdits.status }}
+                            · from {{ preview.source }}
+                            · {{ preview.turns.length }} turn{{ preview.turns.length === 1 ? '' : 's' }}
+                        </p>
+                    </Card>
+
+                    <Card>
+                        <h2>Rows to import</h2>
+
+                        <p
+                            role="note"
+                            class="mb-3 rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink-muted"
                         >
-                            <td class="py-1 pr-3">{{ row.turn }}</td>
-                            <td class="pr-3">{{ row.speed }}</td>
-                            <td class="pr-3">{{ row.stamina }}</td>
-                            <td class="pr-3">{{ row.power }}</td>
-                            <td class="pr-3">{{ row.guts }}</td>
-                            <td class="pr-3">{{ row.wit }}</td>
-                            <td class="pr-3">{{ previewRow(row.sp) }}</td>
-                            <td class="pr-3 font-sans">{{ previewRow(row.condition) }}</td>
-                            <td class="pr-3">{{ previewRow(row.energy) }}</td>
-                            <td class="pr-3">{{ previewRow(row.mood) }}</td>
-                            <td class="pr-3">{{ previewRow(row.fans) }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                            This imports turns only. Skills, the support deck and race entries are not part of the file
+                            format, so they stay empty and you add them per-turn on the run page afterwards. A sheet that
+                            recorded them is not lost, it just has no column here yet.
+                        </p>
 
-            <div class="mt-5 flex flex-wrap gap-3">
-                <button
-                    type="submit"
-                    :disabled="submitting"
-                    class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-3 font-semibold text-on-primary-action disabled:opacity-60"
-                >
-                    {{ submitting ? 'Importing…' : `Import ${preview.turns.length} turns` }}
-                </button>
-                <Link
-                    href="/training-runs/import"
-                    class="inline-flex min-h-11 items-center rounded-full border-2 border-rule px-3 text-sm font-semibold text-ink-strong"
-                >
-                    Start over
-                </Link>
-            </div>
-        </form>
+                        <div class="overflow-x-auto" role="region" tabindex="0" aria-label="Rows to import">
+                            <table class="w-full border-collapse text-sm">
+                                <caption class="sr-only">Every turn row that will be written</caption>
+                                <thead>
+                                    <tr class="border-b border-rule text-left text-ink-muted">
+                                        <th class="py-1 pr-3">Turn</th>
+                                        <th class="pr-3">Speed</th>
+                                        <th class="pr-3">Stamina</th>
+                                        <th class="pr-3">Power</th>
+                                        <th class="pr-3">Guts</th>
+                                        <th class="pr-3">Wit</th>
+                                        <th class="pr-3">SP</th>
+                                        <th class="pr-3">Condition</th>
+                                        <th class="pr-3">Energy</th>
+                                        <th class="pr-3">Mood</th>
+                                        <th class="pr-3">Fans</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr
+                                        v-for="(row, index) in preview.turns"
+                                        :key="index"
+                                        class="border-b border-rule font-mono text-xs tabular-nums"
+                                    >
+                                        <td class="py-1 pr-3">{{ row.turn }}</td>
+                                        <td class="pr-3">{{ row.speed }}</td>
+                                        <td class="pr-3">{{ row.stamina }}</td>
+                                        <td class="pr-3">{{ row.power }}</td>
+                                        <td class="pr-3">{{ row.guts }}</td>
+                                        <td class="pr-3">{{ row.wit }}</td>
+                                        <td class="pr-3">{{ previewRow(row.sp) }}</td>
+                                        <td class="pr-3 font-sans">{{ previewRow(row.condition) }}</td>
+                                        <td class="pr-3">{{ previewRow(row.energy) }}</td>
+                                        <td class="pr-3">{{ previewRow(row.mood) }}</td>
+                                        <td class="pr-3">{{ previewRow(row.fans) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </Card>
+                </div>
 
-        <form
-            v-else
-            enctype="multipart/form-data"
-            class="mt-6 max-w-3xl space-y-4 rounded-md border border-rule bg-raised p-4 text-sm"
-            :aria-busy="form.processing"
-            @submit.prevent="form.post('/training-runs/import/preview', { forceFormData: true })"
-        >
-            <BaseSelect
-                :model-value="form.umamusume_id"
-                id="import-umamusume_id"
-                name="umamusume_id"
-                label="Trainee *"
-                :options="importTraineeOptions"
-                required
-                :error="errors.umamusume_id"
-                @update:model-value="(v: string | number | null) => (form.umamusume_id = String(v ?? ''))"
-            />
-            <!-- A plain select rather than the create page's combobox: an import names a trainee you
-                 already ran, and the costume-card gate the combobox exists to enforce has no field here. -->
+                <div class="flex flex-col gap-4">
+                    <Card>
+                        <h2>What will be created</h2>
+                        <table class="w-full text-sm">
+                            <tbody>
+                                <tr class="border-b border-rule">
+                                    <td class="py-1 pr-3 text-ink-muted">Run</td>
+                                    <td class="text-right font-mono">1</td>
+                                </tr>
+                                <tr class="border-b border-rule">
+                                    <td class="py-1 pr-3 text-ink-muted">Turn entries</td>
+                                    <td class="text-right font-mono">{{ preview.turns.length }}</td>
+                                </tr>
+                                <tr class="border-b border-rule">
+                                    <td class="py-1 pr-3 text-ink-muted">Race entries</td>
+                                    <td class="text-right font-mono">0</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1 pr-3 text-ink-muted">Skills and deck</td>
+                                    <td class="text-right text-xs text-ink-muted">Not in the file format</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </Card>
 
-            <BaseSelect
-                :model-value="form.scenario"
-                id="import-scenario"
-                name="scenario"
-                label="Scenario (optional)"
-                :options="importScenarioOptions"
-                :error="errors.scenario"
-                @update:model-value="(v: string | number | null) => (form.scenario = String(v ?? ''))"
-            />
+                    <Card>
+                        <h2>Confirm the import</h2>
+                        <div class="flex flex-wrap gap-3">
+                            <BaseButton type="submit" variant="primary" :disabled="submitting" :loading="submitting">
+                                {{ submitting ? 'Importing…' : `Import ${preview.turns.length} turns` }}
+                            </BaseButton>
+                            <LinkButton href="/training-runs/import" variant="secondary">Start over</LinkButton>
+                        </div>
+                    </Card>
+                </div>
+            </form>
+        </template>
 
-            <BaseSelect
-                :model-value="form.status"
-                id="import-status"
-                name="status"
-                label="Status *"
-                :options="importStatusOptions"
-                required
-                :error="errors.status"
-                @update:model-value="(v: string | number | null) => (form.status = String(v ?? ''))"
-            />
+        <template v-else>
+            <Head title="Import a run" />
 
-            <BaseTextarea
-                :model-value="form.notes"
-                id="import-notes"
-                name="notes"
-                label="Notes (optional)"
-                :rows="2"
-                @update:model-value="(v: string | number) => (form.notes = String(v))"
-            />
-
-            <BaseInput
-                    type="file"
-                    id="import-file"
-                    name="file"
-                    label="CSV file"
-                    accept=".csv,text/csv"
-                    :error="errors.file"
-                    @change="onFile"
-                />
-
-            <!-- The request's own HEADERS joined for reading, while the paste field's placeholder carries
-                 the same list joined for pasting. Restored: `63d1cdd2` dropped this line as a stale change
-                 while `run-import.spec.ts:53` kept asserting it, which left the tree red. -->
-            <span class="font-mono text-xs text-ink-muted">{{ headers.join(', ') }}</span>
-
-            <BaseTextarea
-                    :model-value="form.csv"
-                    id="import-csv"
-                    name="csv"
-                    label="or paste the CSV"
-                    :rows="8"
-                    :placeholder="headers.join(',')"
-                    :error="errors.csv || errors.turns || rowErrors.length ? (errors.csv ?? errors.turns ?? rowErrors[0] ?? 'Validation error') : undefined"
-                    :aria-describedby="errors.csv || errors.turns || rowErrors.length ? 'import-csv-errors' : undefined"
-                    class="font-mono text-xs"
-                    @update:model-value="(v: string | number) => (form.csv = String(v))"
-                />
-
-            <button
-                type="submit"
-                :disabled="form.processing"
-                class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-3 font-semibold text-on-primary-action disabled:opacity-60"
+            <!-- DOMAIN OVERRIDE: the HFW's source card takes free-text run write-ups and offers Markdown
+                 and JSON uploads. This importer parses the app's own CSV shape only (ADR-0017,
+                 ImportHistoricalRunRequest::HEADERS; `file` accepts mimes csv,txt), so the card states the
+                 CSV contract rather than promising a heuristic read it cannot do. -->
+            <form
+                enctype="multipart/form-data"
+                class="grid items-start gap-4 xl:grid-cols-3"
+                :aria-busy="form.processing"
+                @submit.prevent="form.post('/training-runs/import/preview', { forceFormData: true })"
             >
-                {{ form.processing ? 'Reading the file…' : 'Preview import' }}
-            </button>
-        </form>
+                <div class="xl:col-span-2">
+                    <Card padding="lg">
+                        <h2>Source</h2>
+
+                        <!-- The textarea is the primary control, set large (import annotation 3): pasting
+                             the sheet is the common case and gets more space than the filename picker. -->
+                        <BaseTextarea
+                            :model-value="form.csv"
+                            id="import-csv"
+                            name="csv"
+                            label="Paste the CSV"
+                            :rows="10"
+                            :placeholder="headers.join(',')"
+                            :error="errors.csv || errors.turns || rowErrors.length ? (errors.csv ?? errors.turns ?? rowErrors[0] ?? 'Validation error') : undefined"
+                            :aria-describedby="errors.csv || errors.turns || rowErrors.length ? 'import-csv-errors' : undefined"
+                            class="font-mono text-xs"
+                            @update:model-value="(v: string | number) => (form.csv = String(v))"
+                        />
+
+                        <!-- The request's own HEADERS joined for reading, while the paste field's placeholder carries
+                             the same list joined for pasting. Restored: `63d1cdd2` dropped this line as a stale change
+                             while `run-import.spec.ts:53` kept asserting it, which left the tree red. -->
+                        <p class="mt-1 font-mono text-xs text-ink-muted">{{ headers.join(', ') }}</p>
+
+                        <div class="mt-4">
+                            <BaseInput
+                                type="file"
+                                id="import-file"
+                                name="file"
+                                label="Or upload the file"
+                                accept=".csv,text/csv"
+                                :error="errors.file"
+                                @change="onFile"
+                            />
+                        </div>
+
+                        <div class="mt-4 grid gap-4 md:grid-cols-2">
+                            <BaseSelect
+                                :model-value="form.umamusume_id"
+                                id="import-umamusume_id"
+                                name="umamusume_id"
+                                label="Trainee *"
+                                :options="importTraineeOptions"
+                                required
+                                :error="errors.umamusume_id"
+                                @update:model-value="(v: string | number | null) => (form.umamusume_id = String(v ?? ''))"
+                            />
+                            <!-- A plain select rather than the create page's combobox: an import names a trainee you
+                                 already ran, and the costume-card gate the combobox exists to enforce has no field here. -->
+
+                            <BaseSelect
+                                :model-value="form.scenario"
+                                id="import-scenario"
+                                name="scenario"
+                                label="Scenario (optional)"
+                                :options="importScenarioOptions"
+                                :error="errors.scenario"
+                                @update:model-value="(v: string | number | null) => (form.scenario = String(v ?? ''))"
+                            />
+
+                            <BaseSelect
+                                :model-value="form.status"
+                                id="import-status"
+                                name="status"
+                                label="Status *"
+                                :options="importStatusOptions"
+                                required
+                                :error="errors.status"
+                                @update:model-value="(v: string | number | null) => (form.status = String(v ?? ''))"
+                            />
+
+                            <BaseTextarea
+                                :model-value="form.notes"
+                                id="import-notes"
+                                name="notes"
+                                label="Notes (optional)"
+                                :rows="2"
+                                @update:model-value="(v: string | number) => (form.notes = String(v))"
+                            />
+                        </div>
+
+                        <div class="mt-5 flex flex-wrap gap-3">
+                            <BaseButton type="submit" variant="primary" :disabled="form.processing" :loading="form.processing">
+                                {{ form.processing ? 'Reading the file…' : 'Preview import' }}
+                            </BaseButton>
+                            <LinkButton href="/training-runs" variant="secondary">Cancel</LinkButton>
+                        </div>
+
+                        <p class="note mt-4">
+                            <span class="g" aria-hidden="true">○</span>
+                            <span>
+                                Nothing is written on this step. The preview shows every row the file carries, and
+                                each run field can be corrected there before the run exists.
+                            </span>
+                        </p>
+                    </Card>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <Card>
+                        <h2>What the importer looks for</h2>
+                        <table class="w-full text-sm">
+                            <tbody>
+                                <tr class="border-b border-rule align-top">
+                                    <td class="py-1 pr-3 text-ink-muted">Header row</td>
+                                    <td>The first line must be the header this app exports, exactly.</td>
+                                </tr>
+                                <tr class="border-b border-rule align-top">
+                                    <td class="py-1 pr-3 text-ink-muted">Turn numbers</td>
+                                    <td>One row per turn, each number unique within the run.</td>
+                                </tr>
+                                <tr class="border-b border-rule align-top">
+                                    <td class="py-1 pr-3 text-ink-muted">The five stats</td>
+                                    <td>Speed, Stamina, Power, Guts and Wit on every row, within the chosen scenario's ceilings.</td>
+                                </tr>
+                                <tr class="align-top">
+                                    <td class="py-1 pr-3 text-ink-muted">Optional cells</td>
+                                    <td>sp, condition, energy, mood and fans may stay empty. An empty cell is recorded as empty, never as a default.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p class="note mt-3">
+                            <span class="g" aria-hidden="true">○</span>
+                            <span>
+                                The importer states what it found rather than blocking on what it did not: a sheet
+                                with the optional cells empty is a normal outcome, not an error.
+                            </span>
+                        </p>
+                    </Card>
+
+                    <Card>
+                        <h2>Files you can upload</h2>
+                        <p class="text-sm text-ink-muted">
+                            A CSV file, or a plain-text file holding the same rows: the sheet this app exports
+                            from a run page. Every row is shown for review before anything is written.
+                        </p>
+                    </Card>
+                </div>
+            </form>
+        </template>
     </AppLayout>
 </template>
-
