@@ -20,7 +20,7 @@ import CareerLayout from '../../layouts/CareerLayout.vue';
 import AptitudeBadge from '../../components/AptitudeBadge.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
 
 interface StatRow {
@@ -66,6 +66,13 @@ const props = defineProps<{
         turn: number | null;
         label: string;
     } | null;
+    /** The last turn's three stored readings, for the lead strip. Null is "not recorded", never zero. */
+    headline: { turn: number | null; sp: number | null; energy: number | null; fans: number | null };
+    /**
+     * The one sentence about how this career actually ended, compared against the published figure for
+     * the distance it was built for. Null when the finale was not won or no Stamina reading exists.
+     */
+    finding: { text: string; source: string } | null;
     scenario: {
         composed: boolean;
         notice: string | null;
@@ -89,6 +96,27 @@ const statValue = (value: number | null): string => (value === null ? 'N/A' : St
 const deficitValue = (stat: StatRow): string => (stat.deficit === null ? 'N/A' : String(stat.deficit));
 
 const countOf = (key: string): number => props.races.counts[key] ?? 0;
+
+/**
+ * The finale's own state in one phrase, for the accented tile: the outcome and placing when the run
+ * recorded them, "reached, not recorded" when the block arrived without an entry, and the absence
+ * when the career never got there or the scenario declares no finale row.
+ */
+const finaleHeadline = computed<string>(() => {
+    if (props.finale_state === null) {
+        return 'No finale row';
+    }
+
+    if (!props.finale_state.reached) {
+        return 'Not reached';
+    }
+
+    if (props.finale_state.outcome === null) {
+        return 'Reached, not recorded';
+    }
+
+    return [props.finale_state.outcome, props.finale_state.placement].filter((part) => part !== null).join(' · ');
+});
 </script>
 
 <template>
@@ -136,7 +164,51 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
         </section>
 
         <template v-else>
-            <p class="max-w-3xl text-sm text-ink-muted">
+            <!-- Leads with the outcome and the final totals, then the one finding worth printing.
+                 No aggregate: four facts, and the accented tile is the finale's own state rather
+                 than a grade computed from the rest. -->
+            <section aria-labelledby="result-headline-heading" class="mt-4">
+                <h2 id="result-headline-heading" class="sr-only">How this career ended</h2>
+                <dl class="grid grid-cols-2 gap-3 min-[1081px]:grid-cols-4">
+                    <div class="rounded-md border border-rule border-l-4 border-l-brand-accent-ink bg-panel p-3">
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Finale</dt>
+                        <dd class="mt-1 text-xl font-semibold text-ink-strong">{{ finaleHeadline }}</dd>
+                        <p class="mt-0.5 text-xs text-ink-muted">
+                            {{ props.finale_state === null ? 'This scenario declares no finale row' : props.finale_state.label }}
+                        </p>
+                    </div>
+                    <div class="rounded-md border border-rule bg-panel p-3">
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Final turn</dt>
+                        <dd class="mt-1 font-mono text-xl font-semibold tabular-nums text-ink-strong">
+                            {{ props.headline.turn === null ? 'Not recorded' : props.headline.turn }}
+                        </dd>
+                    </div>
+                    <div class="rounded-md border border-rule bg-panel p-3">
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Races won</dt>
+                        <dd class="mt-1 font-mono text-xl font-semibold tabular-nums text-ink-strong">
+                            {{ countOf('wins') }} <span class="text-sm font-normal text-ink-muted">of {{ countOf('completed') }}</span>
+                        </dd>
+                    </div>
+                    <div class="rounded-md border border-rule bg-panel p-3">
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Skill points at end</dt>
+                        <dd class="mt-1 font-mono text-xl font-semibold tabular-nums text-ink-strong">
+                            {{ props.headline.sp === null ? 'Not recorded' : props.headline.sp }}
+                        </dd>
+                    </div>
+                </dl>
+
+                <!-- The HFW's own ruling: print the fact that the published guide is a recommendation,
+                     in the run's real numbers, rather than implying a gate the game does not enforce. -->
+                <p
+                    v-if="props.finding !== null"
+                    class="mt-3 rounded-md border border-rule border-l-4 border-l-status-caution-ink bg-raised p-3 text-sm text-ink"
+                >
+                    {{ props.finding.text }}
+                    <span class="mt-1 block text-xs text-ink-muted">Figure from {{ props.finding.source }}.</span>
+                </p>
+            </section>
+
+            <p class="mt-4 max-w-3xl text-sm text-ink-muted">
                 {{ props.run.trainee }}'s finished career, as the run recorded it. Every figure below is a
                 stored or entered value, and each deficit is measured against the target you set. The tool
                 computes no grade for the build and no score for the career.
@@ -146,7 +218,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
             <section aria-labelledby="result-build-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
                 <h2 id="result-build-heading" class="text-lg font-semibold text-ink-strong">Final build</h2>
 
-                <dl class="mt-3 grid grid-cols-2 gap-3 @3xl:grid-cols-3 @5xl:grid-cols-5">
+                <dl class="mt-3 grid grid-cols-2 gap-3 min-[761px]:grid-cols-3 min-[1081px]:grid-cols-5">
                     <div v-for="stat in props.build.stats" :key="stat.key" class="rounded-md border border-rule bg-raised p-3">
                         <dt class="text-xs text-ink-muted">{{ stat.label }}</dt>
                         <dd class="mt-0.5 font-mono text-lg tabular-nums text-ink-strong">
@@ -222,7 +294,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
             <section aria-labelledby="result-races-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
                 <h2 id="result-races-heading" class="text-lg font-semibold text-ink-strong">Race history</h2>
 
-                <dl class="mt-3 grid grid-cols-2 gap-3 @3xl:grid-cols-5">
+                <dl class="mt-3 grid grid-cols-2 gap-3 min-[761px]:grid-cols-5">
                     <div class="rounded-md border border-rule bg-raised p-3">
                         <dt class="text-xs text-ink-muted">Races completed</dt>
                         <dd class="mt-0.5 font-mono text-lg tabular-nums text-ink-strong">{{ countOf('completed') }}</dd>
@@ -285,7 +357,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                 <p v-if="props.scenario.notice !== null" class="mt-1 text-sm text-ink-muted">{{ props.scenario.notice }}</p>
 
                 <template v-else>
-                    <dl class="mt-3 grid grid-cols-1 gap-3 @3xl:grid-cols-2 @5xl:grid-cols-4">
+                    <dl class="mt-3 grid grid-cols-1 gap-3 min-[761px]:grid-cols-2 min-[1081px]:grid-cols-4">
                         <div v-for="period in props.scenario.periods" :key="period.index" class="rounded-md border border-rule bg-raised p-3">
                             <dt class="text-xs text-ink-muted">{{ period.name }}</dt>
                             <dd class="mt-0.5 font-mono text-lg tabular-nums text-ink-strong">

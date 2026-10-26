@@ -64,17 +64,83 @@ class ResultController extends Controller
 
         $finished = $run->status === RunStatus::Completed;
         $latest = $finished ? $run->turnEntries->sortByDesc('turn')->first() : null;
+        $finale = FinaleReader::forRun($run);
+        $target = $finished ? $run->buildTarget() : null;
 
         return Inertia::render('Career/Result', [
             'run' => $this->runSection($run),
             'build' => $this->buildSection($run, $latest),
             'races' => $this->raceSection($run),
-            'finale_state' => FinaleReader::forRun($run),
+            'finale_state' => $finale,
+            'headline' => $this->headlineSection($latest),
+            'finding' => $this->findingSection($run, $latest, $finale, $target),
             'scenario' => $this->scenarioSection($run),
             'save_veteran' => $this->saveVeteranSection($run),
             'ruleset' => $this->rulesetSection(),
             'empty' => $this->emptyState($run),
         ]);
+    }
+
+    /**
+     * The three figures the HFW's lead strip prints beside the finale, read off the run's last turn.
+     *
+     * `sp` is nullable because a turn logged without reading Skill Points recorded nothing; the page
+     * prints that absence rather than a zero. No total is derived from these: they are three stored
+     * readings, and the fourth tile is the finale's own state.
+     *
+     * @return array{turn: int|null, sp: int|null, energy: int|null, fans: int|null}
+     */
+    private function headlineSection(?TurnEntry $latest): array
+    {
+        return [
+            'turn' => $latest?->turn,
+            'sp' => $latest?->sp,
+            'energy' => $latest?->energy,
+            'fans' => $latest?->fans,
+        ];
+    }
+
+    /**
+     * The one sentence worth printing about how this career actually ended.
+     *
+     * The HFW's own ruling: a result screen that implied the published finale figures are a gate would
+     * be teaching a rule the game does not enforce. So the finding compares the finished run's own
+     * Stamina against the published figure for the distance it was built for and states which side of
+     * it the run landed, in the run's own numbers. It renders only when the finale was won and a
+     * Stamina reading exists; a run whose distance was never set gets the absence rather than a
+     * borrowed denominator.
+     *
+     * @param  array{reached: bool, outcome: string|null, placement: string|null, turn: int|null, label: string}|null  $finale
+     * @return array{text: string, source: string}|null
+     */
+    private function findingSection(TrainingRun $run, ?TurnEntry $latest, ?array $finale, mixed $target): ?array
+    {
+        $stamina = $latest?->statValue('Stamina');
+
+        if ($finale === null || ! $finale['reached'] || $finale['placement'] !== '1st' || $stamina === null) {
+            return null;
+        }
+
+        $distance = is_object($target) && isset($target->distance) ? (string) $target->distance : null;
+        $guides = (array) config('scenarios.scenarios.'.$run->scenarioKey().'.finale_targets.stamina_by_distance', []);
+
+        if ($distance === null || ! isset($guides[$distance])) {
+            return [
+                'text' => "Won the finale with {$stamina} Stamina. No published Stamina figure applies here: "
+                    .'this run set no build-target distance, so there is no distance to read one for.',
+                'source' => 'docs/UMAMUSUME_REFERENCE.md §2.2.1',
+            ];
+        }
+
+        $guide = (int) $guides[$distance];
+        $side = $stamina < $guide ? 'below' : 'above';
+
+        return [
+            'text' => "Won the finale with {$stamina} Stamina, {$side} the {$guide} the published guide names "
+                ."for {$distance} courses. That figure is a recommendation, not a gate: the game did not "
+                .'enforce it, and this screen will not imply that it did.',
+            'source' => 'docs/UMAMUSUME_REFERENCE.md §2.2.1',
+        ];
     }
 
     /**
