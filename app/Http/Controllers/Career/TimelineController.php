@@ -13,6 +13,7 @@ use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
 use App\Services\CareerCalendar;
+use App\Services\Scenario\FinaleReader;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -63,6 +64,12 @@ class TimelineController extends Controller
             'entries' => $entries,
             'filters' => $this->filterSection($entries),
             'empty' => $entries === [] ? $this->emptyMessage($run, $origin) : null,
+            // DM-1: the grid is exactly `CareerCalendar::TURNS_PER_CAREER` turns and the finale block
+            // sits outside it. Both travel so the rail can group by phase and print the finale without
+            // numbering a row 73; the reader is `FinaleReader`, the same one the Cockpit and the Result
+            // read, so the three screens cannot disagree about whether the block arrived.
+            'total_turns' => CareerCalendar::TURNS_PER_CAREER,
+            'finale' => FinaleReader::forRun($run),
         ]);
     }
 

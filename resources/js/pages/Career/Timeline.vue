@@ -39,6 +39,10 @@ const props = defineProps<{
     }[];
     filters: { available: string[]; active: string[] };
     empty: string | null;
+    /** DM-1: `CareerCalendar::TURNS_PER_CAREER` (strictly 72). The finale sits outside it. */
+    total_turns: number;
+    /** The scenario's finale as `FinaleReader::forRun()` carries it, or null when the calendar has no row. */
+    finale: { reached: boolean; outcome: string | null; placement: string | null; turn: number | null; label: string } | null;
 }>();
 
 const { visiting, visitFailed } = useVisitState();
@@ -58,6 +62,26 @@ const filterCount = computed(() => activeKinds.value.length);
 const visibleCount = computed(() =>
     props.entries.filter((entry) => activeKinds.value.length === 0 || activeKinds.value.includes(entry.kind_label)).length,
 );
+
+/**
+ * The counts the HFW's strip prints, read off the payload rather than re-queried. Turns recorded is
+ * the career's own denominator (`DM-1`), so a half-logged career reads as what it is.
+ */
+const recordedTurns = computed(() => props.entries.filter((entry) => entry.kind === 'turn').length);
+const raceCount = computed(() => props.entries.filter((entry) => entry.kind === 'race').length);
+const eventCount = computed(() => props.entries.filter((entry) => entry.kind === 'event').length);
+
+const finaleText = computed(() => {
+    if (props.finale === null) {
+        return 'No finale row';
+    }
+
+    if (!props.finale.reached) {
+        return 'Not reached';
+    }
+
+    return props.finale.outcome === null ? 'Reached, not recorded' : [props.finale.outcome, props.finale.placement].filter(Boolean).join(' · ');
+});
 </script>
 
 <template>
@@ -81,6 +105,32 @@ const visibleCount = computed(() =>
             each turn stores the end-of-turn reading rather than an expected-then-actual pair. A row
             marked "Updated" was edited after its first save; the Cockpit is where the edit happened.
         </p>
+
+        <!-- The HFW's four counts, read off the payload. No aggregate and no score: four facts, one per
+             tile, and the final tile is the finale's own state rather than a derived grade. -->
+        <section aria-labelledby="timeline-counts-heading" class="mt-4">
+            <h2 id="timeline-counts-heading" class="sr-only">What this career has recorded</h2>
+            <dl class="grid grid-cols-2 gap-3 min-[1081px]:grid-cols-4">
+                <div class="rounded-md border border-rule bg-panel p-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Turns recorded</dt>
+                    <dd class="mt-1 font-mono text-xl font-semibold tabular-nums text-ink-strong">
+                        {{ recordedTurns }} <span class="text-sm font-normal text-ink-muted">of {{ props.total_turns }}</span>
+                    </dd>
+                </div>
+                <div class="rounded-md border border-rule bg-panel p-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Races entered</dt>
+                    <dd class="mt-1 font-mono text-xl font-semibold tabular-nums text-ink-strong">{{ raceCount }}</dd>
+                </div>
+                <div class="rounded-md border border-rule bg-panel p-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Events</dt>
+                    <dd class="mt-1 font-mono text-xl font-semibold tabular-nums text-ink-strong">{{ eventCount }}</dd>
+                </div>
+                <div class="rounded-md border border-rule bg-panel p-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Finale</dt>
+                    <dd class="mt-1 text-base font-semibold text-ink-strong">{{ finaleText }}</dd>
+                </div>
+            </dl>
+        </section>
 
         <section
             v-if="props.origin !== null"
@@ -127,7 +177,35 @@ const visibleCount = computed(() =>
             {{ props.empty }}
         </p>
 
-        <CareerTimeline v-else :entries="props.entries" :active-kinds="activeKinds" />
+        <CareerTimeline v-else :entries="props.entries" :active-kinds="activeKinds" :total-turns="props.total_turns" />
+
+        <!-- DM-1: the finale is the block after the grid, so it is its own section and never a row
+             numbered 73. -->
+        <!-- DOMAIN OVERRIDE (DM-1): finale block sits outside the 72-turn grid -->
+        <section aria-labelledby="timeline-finale-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
+            <h2 id="timeline-finale-heading" class="text-lg font-semibold text-ink-strong">After the grid · finale block</h2>
+            <template v-if="props.finale !== null">
+                <p class="mt-1 text-sm text-ink">
+                    <span class="font-semibold">{{ props.finale.label ?? 'This scenario has no label for it' }}</span>
+                    · {{ props.finale.reached ? 'reached' : 'not reached yet' }}
+                </p>
+                <p class="mt-1 text-sm text-ink">
+                    {{ props.finale.reached
+                        ? props.finale.outcome === null
+                            ? 'Reached, with no outcome recorded against it. The Result screen prints the same absence.'
+                            : `Outcome: ${props.finale.outcome}${props.finale.placement === null ? '' : ` · ${props.finale.placement}`}`
+                        : 'The grid has not run out yet, so nothing has been recorded here.' }}
+                </p>
+                <p class="mt-1 text-xs text-ink-muted">
+                    The twelve months of each year are 24 turns; the finale follows Senior Late December and
+                    is not one of the {{ props.total_turns }} numbered turns.
+                </p>
+            </template>
+            <p v-else class="mt-1 text-sm text-ink-muted">
+                This scenario declares no finale row in the career calendar, so there is nothing to report here.
+                That is an absence in the catalogue, not a missing result.
+            </p>
+        </section>
 
         <div class="mt-4 max-w-sm">
             <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">
