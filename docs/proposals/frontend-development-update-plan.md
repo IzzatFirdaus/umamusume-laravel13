@@ -805,7 +805,26 @@ inspiration events. Acceptance:
 - Star count is rolled, never presented as a choice; the 600/1100 stat thresholds are
   probabilities, not a deterministic mapping (§1.5.3).
 
+> **Amended 2026-10-27.** The round-2 session measured five spark families in the inheritance
+> payload, not four. `LegacySelectionPayload::SPARK_KINDS` is `['blue', 'pink', 'green', 'white',
+> 'scenario']`, and its own docblock states that `white` is one label over two dataset categories
+> (the skill family and the competition family) and that `green` is the unique-skill family. The
+> three families the HFW draws are Blue, Pink and the shared unique-skill family; the two the
+> payload adds are Green and White. DM-3 is amended to read "four family roles across five colour
+> keys" and the Inheritance screen (commit `f0caa281`) prints the five families with their roles
+> named. Any future slice must re-measure the payload before assuming four.
+
 ### DM-4. SP cost with hint-discount ladder (Slices 6, 8)
+
+**Erratum 2026-10-27 — this row is not actionable, and the ladder is not built.** `ADR-0011`
+("No hint levels, no discounts") and `ADR-0029` D-note ("hint levels stay 'level only, no
+percentage'") both precede this row and both bind it: no column anywhere stores a hint level,
+so `floor(base × (1 − discount))` has no input to compute from, and a discount printed from a
+ladder constant would be a figure the database cannot corroborate. `SkillsPlanner.vue` ships
+the base cost and states the absence in words; `tests/browser/career-skills-planner.spec.ts`
+pins both halves (`'Hint discounts are not modelled.'` visible, no `Hint Lvl` string
+rendered). Implement this row only if a later ADR adds a hint-level column; until then the
+acceptance below describes a screen that must not exist.
 
 §1.1.4, client-measured ladder: **Lv1 10%, Lv2 20%, Lv3 30%, Lv4 35%, Lv Max 40%** —
 not linear past Lv3; displayed cost = `floor(base × (1 − discount))`. Acceptance:
