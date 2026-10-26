@@ -415,7 +415,7 @@ const moreIsCurrent = computed(() =>
                          the rail head now (HFW shell), so the bar spends its width on the one fact the
                          rail cannot carry: the section path. A page passes `breadcrumb`; the fallback
                          names the layout's own destination so the bar is never empty. -->
-                    <span class="min-w-0 truncate text-sm text-on-brand-chrome/80" data-shell-crumb>
+                    <span class="min-w-0 truncate text-sm text-on-brand-chrome" data-shell-crumb>
                         <template v-if="breadcrumbParts.length">
                             <template v-for="(part, index) in breadcrumbParts" :key="`${part.label}-${index}`">
                                 <span v-if="index > 0" aria-hidden="true" class="px-1">/</span>
