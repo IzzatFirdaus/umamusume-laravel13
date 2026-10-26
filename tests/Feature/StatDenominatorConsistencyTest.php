@@ -55,7 +55,7 @@ function denominatorRun(?array $targets = null): TrainingRun
     return $run;
 }
 
-it('sends the Trainer target, not the cap, on the Cockpit stat strip', function (): void {
+it('sends both the Trainer target and the cap, and the Cockpit draws the cap', function (): void {
     $run = denominatorRun(['Speed' => 900, 'Stamina' => 500, 'Power' => 500, 'Guts' => 500, 'Wit' => 800]);
     $cap = ScenarioCaps::forRun($run)['Speed'];
 
@@ -66,8 +66,11 @@ it('sends the Trainer target, not the cap, on the Cockpit stat strip', function 
             ->where('state.stats.0.target', 900)
             ->where('state.stats.0.cap', $cap));
 
-    // The two numbers differ on this run, so a strip printing the cap under the target's name would be
-    // visibly wrong rather than coincidentally right.
+    // The two numbers differ on this run, so a strip printing one under the other's name would be
+    // visibly wrong rather than coincidentally right. The HFW parity ruling (plan §5 Slice 5) moved the
+    // Cockpit's bars to the run's ceiling: `ScenarioCaps::forRun()` answers the entered ceiling where the
+    // run states one and the scenario's published cap otherwise, so the bar answers "how far to the
+    // roof". The target still travels, because the advisor ranks against it.
     expect(900)->not->toBe($cap);
 });
 
@@ -82,17 +85,19 @@ it('sends the scenario cap on the event screen stat strip', function (): void {
             ->where('state.stats.0.cap', $cap));
 });
 
-it('labels the Cockpit strip with the word target', function (): void {
+it('labels the Cockpit strip with the word cap and keeps the no-target sentence', function (): void {
     $panel = (string) file_get_contents(resource_path('js/components/career/CareerStatePanel.vue'));
     $page = (string) file_get_contents(resource_path('js/pages/Career/Cockpit.vue'));
 
     // The missing target is one fact about the run, so it now reads once above the five rows instead of as
     // a phrase repeated on each of them. This case pins both halves of that change: the caption is there,
-    // and the per-row phrase is not.
+    // and the per-row phrase is not. The word is `cap` since the HFW parity ruling moved the Cockpit's bars
+    // to the ceiling the run carries; the panel still prints whichever word its caller names, so the
+    // event screen's own label keeps working.
     expect($panel)->toContain('denominatorLabel')
         ->and($panel)->toContain("'No build target was set for this run.'")
         ->and($panel)->not->toContain('no {{ props.denominatorLabel }} set')
-        ->and($page)->toContain('denominator-label="target"');
+        ->and($page)->toContain('denominator-label="cap"');
 });
 
 it('labels the event strip with the word cap', function (): void {

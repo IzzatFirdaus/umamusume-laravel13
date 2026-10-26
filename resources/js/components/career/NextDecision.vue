@@ -153,14 +153,20 @@ const incompleteData = computed(
                 />
             </ol>
 
-            <AlertRow
-                v-if="due !== null"
-                class="mt-2"
-                glyph="▲"
-                tone="critical"
-                :text="`${due.label} is due and not recorded.`"
-                detail="The calendar puts it at or before the turn being decided and no race is recorded against it."
-            />
+            <!-- The one obligation the calendar puts at or before this turn, marked the way the HFW
+                 marks its current row: a caution pill carrying the word, beside the sentence that
+                 names the obligation. The row itself already prints `Due` as a word, so the state
+                 never rides on the pill's colour alone (WCAG 1.4.1, HFW `is-current` row). -->
+            <div v-if="due !== null" class="mt-2 flex flex-wrap items-start gap-2">
+                <span class="pill pill-caution shrink-0">current</span>
+                <AlertRow
+                    class="min-w-0 flex-1"
+                    glyph="▲"
+                    tone="critical"
+                    :text="`${due.label} is due and not recorded.`"
+                    detail="The calendar puts it at or before the turn being decided and no race is recorded against it."
+                />
+            </div>
         </section>
 
         <h3

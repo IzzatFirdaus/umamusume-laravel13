@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Career;
 
 use App\Domain\Career\CareerPosition;
+use App\Enums\PerformanceType;
 use App\Enums\RunStatus;
 use App\Enums\TurnChoice;
 use App\Http\Controllers\Controller;
@@ -152,7 +153,11 @@ class CockpitController extends Controller
         // collection rather than re-queried.
         // `turnEvents` joins only when the scenario's team system has a payload reader at all: a
         // URA or Grand Concert cockpit must not hydrate every event row to discard it.
+        // Grand Concert's Performance reading is a turn-event payload too, so a run that accepts one
+        // loads the events for the same reason the burst counter does: the cockpit prints what a turn
+        // recorded rather than a count derived from absent rows.
         $needsEvents = $run->composesPanel('team_rank_ladder')
+            || $run->acceptsPerformanceObservations()
             || in_array('spirit_bursts', (array) config('scenarios.scenarios.'.$run->scenarioKey().'.widgets', []), true);
 
         $run->load(['umamusume', 'characterCard', 'turnEntries', 'raceEntries.raceCatalogSlot', 'raceEntries.scenarioSlot', 'raceEntries.turnEntry', 'deckSlots.supportCard']);
@@ -201,6 +206,11 @@ class CockpitController extends Controller
             ],
             'actions' => $this->actionSection($run, $advice),
             'advisor' => $this->advisorSection($advice, $run),
+            // Our Grand Concert's five Performance types and what this run's turns recorded against
+            // them (`docs/scenarios/07-grand-concert.md` §"The loop, in order"). A scenario the matrix
+            // gives no Performance field answers `enabled: false` with the same key set, so the page
+            // draws the card from one flag and never from a scenario name (D-240, G-33).
+            'performance' => $this->performanceSection($run),
             'raceStrip' => $this->raceStrip->raceStripSection($run, $this->obligationSlots($run)),
             'scenario' => $this->scenario->scenarioSection($run, $team, $latest, $advice, $this->scenarioSectionContext($run, $latest, $advice)),
             // F2, plan §9.6 ruling 2: arbitrary-turn correction. The selected turn defaults to the
@@ -247,7 +257,7 @@ class CockpitController extends Controller
      * The run's own identity, flattened. `scenario_label` names the absence rather than borrowing the
      * baseline's name, which is a composition device and not a fact (D-220).
      *
-     * @return array{id: int, trainee: string, trainee_ja: string|null, status: string, status_label: string, scenario_label: string, run_url: string, timeline_url: string, result_url: string, training_url: string, deck_url: string, status_labels: array<string,string>, scenarios: array<string,string>, update_url: string, destroy_url: string, current_objective_index: int|null}
+     * @return array{id: int, trainee: string, trainee_ja: string|null, status: string, status_label: string, scenario_label: string, run_url: string, index_url: string, timeline_url: string, result_url: string, training_url: string, deck_url: string, status_labels: array<string,string>, scenarios: array<string,string>, update_url: string, destroy_url: string, current_objective_index: int|null}
      */
     private function runSection(TrainingRun $run): array
     {
@@ -269,6 +279,9 @@ class CockpitController extends Controller
             // and grade-point period all POST through `runs.update`, the same route and validator the
             // 2.0.0 record screen used. The cockpit is the door, so the 2.0 edit URLs ride here.
             'run_url' => route('runs.cockpit', $run),
+            // The page head's own door back to the list. HFW parity gives every cockpit variant an
+            // `All careers` action beside the one primary, and the route is the list's own.
+            'index_url' => route('runs.index'),
             // The left column's own door to the Career Timeline (SCR-CAR-017): the region shows this
             // run's races, and the timeline is the screen that shows the whole recorded history.
             'timeline_url' => route('runs.timeline', $run),
@@ -359,6 +372,11 @@ class CockpitController extends Controller
             'year_label' => $yearLabel,
             'month_label' => $monthLabel,
             'turn' => $turn,
+            // DM-1: a career is exactly 72 turns and the finale is a separate phase outside them. The
+            // figure is the calendar's own constant, so the page prints `N of 72` from one owner rather
+            // than a literal, and a turn past 72 renders as the finale phase rather than turn 73+
+            // (`CareerCalendar::TURNS_PER_CAREER`).
+            'total_turns' => CareerCalendar::TURNS_PER_CAREER,
             'energy' => $energy['value'],
             // The reading as the header prints it: a recorded band reads `Low band`, not `N/A`. The
             // number alone was a half answer, because a turn recorded without one is still recorded
@@ -582,6 +600,45 @@ class CockpitController extends Controller
         }
 
         return ['stats' => $stats, 'meta' => $meta];
+    }
+
+    /**
+     * Our Grand Concert's Performance reading: the five client-named types and this run's own turn
+     * events against them.
+     *
+     * **The type names are the enum's, never a copy.** `PerformanceType` carries the client's own
+     * spelling (Vocals and Visuals plural, Composure not "Mental"), so the five tiles print what
+     * the client prints. `enabled` is the matrix's `performance_input` flag read through
+     * `TrainingRun::acceptsPerformanceObservations()`; the other three scenarios answer `false` and an
+     * empty list rather than a card full of blanks.
+     *
+     * **No total is derived.** `TrainingRun::performanceObservations()` states why: no source publishes
+     * what a run starts with, so one entered `+50` is not a total of 50. The page prints each recorded
+     * reading as the observation it is, and `Not recorded` where a type has none, which is the honest
+     * absence the HFW asks for.
+     *
+     * @return array{enabled: bool, types: list<string>, observations: list<array{type: string, turn: int, delta: int}>}
+     */
+    private function performanceSection(TrainingRun $run): array
+    {
+        $enabled = $run->acceptsPerformanceObservations();
+
+        if (! $enabled) {
+            return ['enabled' => false, 'types' => [], 'observations' => []];
+        }
+
+        return [
+            'enabled' => true,
+            'types' => array_map(static fn (PerformanceType $type): string => $type->label(), PerformanceType::cases()),
+            'observations' => array_map(
+                static fn (array $observation): array => [
+                    'type' => $observation['type']->label(),
+                    'turn' => $observation['turn'],
+                    'delta' => $observation['delta'],
+                ],
+                $run->performanceObservations(),
+            ),
+        ];
     }
 
     /**

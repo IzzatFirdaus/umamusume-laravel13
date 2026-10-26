@@ -2,16 +2,20 @@
 /*
  * The career state panel (SCREEN-009 §13): five stats and four meta values.
  *
- * Each stat shows the entered current value over the Trainer's own target, with a bar for the
- * distance between them. The bar measures progress toward the target, not toward the ceiling: the
- * ceiling is the scenario's and the target is the Trainer's, and conflating them would answer a
- * question nobody asked. The bar is `aria-hidden` and the numbers are printed beside it, so nothing
+ * Each stat shows the entered current value over the denominator its caller names: the Trainer's own
+ * target, or the run's ceiling (the figure entered for that run where one exists, the scenario's
+ * published cap otherwise), with a bar for the distance between them. The word `target` or `cap` is a
+ * required prop because printing one screen's denominator under the other's name is the defect R2-09
+ * closed. The HFW's cockpit draws the ceiling, so the bar answers "how far to the roof" there; the
+ * advisor's ranking against the target is a separate reading and stays stated in the rail.
+ * The bar is `aria-hidden` and the numbers are printed beside it, so nothing
  * here is a value carried by a fill alone (SCREEN-009 §34, WCAG 1.4.1).
  *
  * An unrecorded value is `AbsenceValue`'s: the marker plus its reason, which a keyboard and a screen
  * reader can both reach. It used to be `N/A` with a `title`, and a `title` answers a mouse only
- * (`DESIGN.md` §5). A zero is still printed as `0`, never as an absence, and a run with no target set has
- * no target bar and says so in words rather than drawing an empty track that reads as "at zero".
+ * (`DESIGN.md` §5). A zero is still printed as `0`, never as an absence, and a caller whose denominator
+ * is a target that no one set draws no track and states the absence in words rather than an empty
+ * track that reads as "at zero".
  *
  * StatBand was deliberately not reused here. Its bar is the scenario ceiling with the 1,200
  * halved-gains marker, which is the run record screen's question; giving it a second, target-shaped
@@ -94,71 +98,110 @@ const fanSuffix = computed((): string | null => {
 
 const currentHint = (stat: Stat): string => (stat.current === null ? 'No turn has recorded this stat yet.' : `Entered: ${group(stat.current)}.`);
 
-// The missing build target is one fact about the run, not five facts about five rows. It reads once,
-// above the grid, in the sentence `Result.vue` already uses for the same state; a row keeps only what
-// is true of itself. (Owner ruling 2026-10-09 asked that the target gap never go unstated; naming it
-// once above the five rows states it for all of them.)
-const targetCaption = computed((): string | null =>
-    props.denominatorLabel === 'target' && props.stats.some((stat: Stat): boolean => stat.target === null)
-        ? 'No build target was set for this run.'
-        : null,
-);
+/**
+ * D-259 / DM-5: the client's Mood Effect panel, training column (`UMAMUSUME_REFERENCE.md` §1.1.6,
+ * client capture 2026-09-27). The five values are the client's own and are not interpolated: the ramp
+ * is not a formula, and the report of 2026-10-24 keeps the config to one sourced entry rather than a
+ * table. One owner would be `MoodTier` beside `arrow()`; the table lives here until that enum grows
+ * the method, because this slice owns no enum file.
+ */
+const MOOD_TRAINING_PCT: Record<string, number> = {
+    GREAT: 20,
+    GOOD: 10,
+    NORMAL: 0,
+    BAD: -10,
+    AWFUL: -20,
+};
 
-function percent(stat: Stat): number {
-    if (stat.current === null || stat.target === null || stat.target <= 0) {
-        return 0;
+/** The tier's training percentage, signed, or null for a tier nobody recorded. */
+const moodPercent = (tier: string | null): string | null => {
+    if (tier === null || MOOD_TRAINING_PCT[tier] === undefined) {
+        return null;
     }
 
-    return Math.min(100, (stat.current / stat.target) * 100);
-}
+    const value = MOOD_TRAINING_PCT[tier];
+
+    return `${value >= 0 ? '+' : ''}${value}%`;
+};
+
+/**
+ * The bars' own caption. The Cockpit draws them against the run's ceiling (HFW annotation 3): the
+ * figure the Trainer entered where one exists, the scenario's published cap otherwise. The second
+ * sentence fires only where the build target is absent, which is the state the HFW names: the advisor
+ * ranks against a target that does not exist, so the bars are the only reading the screen has.
+ */
+const barCaption = computed((): string | null => {
+    if (props.denominatorLabel !== 'cap') {
+        return null;
+    }
+
+    const caption = 'Bars are drawn against the run\'s ceiling: the figure entered for this run where one exists, the scenario\'s published cap otherwise.';
+    const noTarget = 'No build target was set for this run.';
+
+    return props.stats.some((stat: Stat): boolean => stat.target === null)
+        ? `${caption} ${noTarget}`
+        : caption;
+});
 
 // The second number's own denominator: the scenario ceiling when the label says `cap`, the Trainer's own
 // target otherwise. `cap` is always a number; `target` is null until one is entered, and the row says so
 // in words rather than printing the cap under the target's name (R2-09).
 const denominator = (stat: Stat): number | null =>
     props.denominatorLabel === 'cap' ? stat.cap : stat.target;
+
+function percent(stat: Stat): number {
+    const total = denominator(stat);
+
+    if (stat.current === null || total === null || total <= 0) {
+        return 0;
+    }
+
+    return Math.min(100, (stat.current / total) * 100);
+}
 </script>
 
 <template>
     <section aria-labelledby="career-state-heading" class="card rounded-lg p-4">
         <h2 id="career-state-heading" class="text-lg font-semibold text-ink-strong">Stats and state</h2>
 
-        <p v-if="targetCaption !== null" class="mt-3 text-sm text-ink-muted">{{ targetCaption }}</p>
+        <p v-if="barCaption !== null" class="mt-3 text-sm text-ink-muted">{{ barCaption }}</p>
 
-        <ul class="mt-3 space-y-2">
-            <li v-for="stat in props.stats" :key="stat.key" class="rounded-md border border-rule bg-raised p-2">
-                <div class="flex items-baseline justify-between gap-3">
-                    <span class="text-sm font-semibold text-ink-strong">
-                        {{ stat.label }}
-                        <!-- The card's growth rate for this stat, beside its label, where the Trainer
-                             read it. Rendered only when recorded, never as a default +0%. -->
-                        <span v-if="growthFor(stat) !== null" class="ml-1 text-xs font-normal text-ink-muted">+{{ growthFor(stat) }}%</span>
-                    </span>
-                    <div class="flex items-baseline gap-1 font-mono text-sm tabular-nums text-ink-strong">
-                        <!-- The marker carries the same reason the visible sentence below the bar
-                             prints, from its one owner (`currentHint`), so the cell explains itself on
-                             hover and for a screen reader as well as for a reader of the row. The
-                             sentence stays: a reason reachable only by hover is the shape DESIGN.md §5
-                             rules out, and this is the pair rather than a swap. -->
-                        <span v-if="stat.current === null" :title="currentHint(stat)">N/A</span>
-                        <span v-else>{{ group(stat.current) }}</span>
-                        <template v-if="denominator(stat) !== null">
-                            <span class="text-ink-muted">/</span>
-                            <!-- The second number's own word (R2-09): `target` on this screen, `cap` where the
-                                 ceiling is the question. An absent denominator prints nothing here, because
-                                 the caption above the grid has already said it for all five rows. -->
-                            <span>
-                                {{ group(denominator(stat) as number) }}
-                                <span class="text-xs font-normal text-ink-muted">{{ props.denominatorLabel }}</span>
-                            </span>
-                        </template>
-                    </div>
-                </div>
+        <!-- The HFW's row shape (`.srow`): label and growth rate on the left, current over the
+             denominator on the right, and the distance between them as a track beneath. The track is
+             `aria-hidden` and both numbers print beside it, so nothing here is a value carried by a
+             fill alone (SCREEN-009 §34, WCAG 1.4.1). -->
+        <ul class="mt-2">
+            <li v-for="stat in props.stats" :key="stat.key" class="srow">
+                <span class="k">
+                    {{ stat.label }}
+                    <!-- The card's growth rate for this stat, beside its label, where the Trainer
+                         read it. Rendered only when recorded, never as a default +0%. -->
+                    <em v-if="growthFor(stat) !== null">+{{ growthFor(stat) }}%</em>
+                </span>
+                <span class="v flex items-baseline gap-1 font-mono tabular-nums">
+                    <!-- The marker carries the same reason the visible sentence below the bar
+                         prints, from its one owner (`currentHint`), so the cell explains itself on
+                         hover and for a screen reader as well as for a reader of the row. The
+                         sentence stays: a reason reachable only by hover is the shape DESIGN.md §5
+                         rules out, and this is the pair rather than a swap. -->
+                    <span v-if="stat.current === null" :title="currentHint(stat)">N/A</span>
+                    <span v-else>{{ group(stat.current) }}</span>
+                    <template v-if="denominator(stat) !== null">
+                        <span class="font-normal text-ink-muted">/</span>
+                        <!-- The second number's own word (R2-09): `target` on this screen, `cap` where the
+                             ceiling is the question. An absent denominator prints nothing here, because
+                             the caption above the grid has already said it for all five rows. -->
+                        <span class="font-normal text-ink-muted">
+                            {{ group(denominator(stat) as number) }}
+                            <span class="text-xs">{{ props.denominatorLabel }}</span>
+                        </span>
+                    </template>
+                </span>
 
-                <div v-if="stat.current !== null && stat.target !== null" class="mt-1.5 h-1.5 overflow-hidden rounded-md bg-sunken" aria-hidden="true">
+                <div v-if="stat.current !== null && denominator(stat) !== null" class="col-span-2 mt-1.5 h-1.5 overflow-hidden rounded-md bg-sunken" aria-hidden="true">
                     <div class="h-full bg-green-deep" :style="{ width: `${percent(stat)}%` }"></div>
                 </div>
-                <p v-else-if="stat.current === null" class="mt-1 text-xs text-ink-muted">{{ currentHint(stat) }}</p>
+                <p v-else-if="stat.current === null" class="col-span-2 mt-1 text-xs text-ink-muted">{{ currentHint(stat) }}</p>
             </li>
         </ul>
 
@@ -169,6 +212,10 @@ const denominator = (stat: Stat): number | null =>
                     <EnergyGauge v-if="row.key === 'energy'" :energy="row.value as number | null" :band-text="row.band_text ?? null" />
                     <template v-else-if="row.key === 'mood'">
                         <MoodPill :tier="row.value as string | null" unrecorded="N/A, not recorded" />
+                        <!-- D-259 / DM-5: the tier's own training percentage, signed, beside the word
+                             and the arrow. `Normal` prints `+0%` rather than a blank, so a real zero is
+                             never read as a missing reading. -->
+                        <span v-if="moodPercent(row.value as string | null) !== null" class="ml-1 font-mono text-xs tabular-nums text-ink-muted">{{ moodPercent(row.value as string | null) }}</span>
                         <!-- A-0.11: the client's Mood Effect headline beside the tier (great tier). -->
                         <span v-if="props.moodEffect" class="ml-1 text-xs text-ink-muted">
                             (training +{{ props.moodEffect.training }}%, running +{{ props.moodEffect.running }}%)

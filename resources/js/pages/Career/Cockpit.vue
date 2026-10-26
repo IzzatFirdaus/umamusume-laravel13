@@ -2,17 +2,29 @@
 /*
  * The Career Cockpit, `SCR-CAR-011` (SCREEN-009, plan §8 D8). The screen a Trainer reads on every turn.
  *
- * **Layout.** Desktop is the spec's three columns — timeline 20%, current decision 50%, advisor 30% —
- * with the scenario region full width beneath them (SCREEN-009 §12, design-2.0 §23). Tablet is two
- * columns with the timeline as a horizontal strip; mobile is one column in the spec's order: header,
- * current state, recommendation, action, scenario, timeline (SCREEN-009 §33, design-2.0 §40). The
- * order is CSS only — no element is hidden at a breakpoint, so nothing leaves the accessibility tree
- * and no primary decision needs a horizontal scroll.
+ * **Structure.** The four scenario variants share one region order, ported from the HFW set's
+ * `cockpit-*` pages at shell density: the page head carries the trainee, the position and the run's
+ * one primary action; the body is two columns, stats and the scenario on the left, the advisor and
+ * "Where to go" on the right; the run's settings and record surfaces follow below. The old three-column
+ * cockpit (timeline / decision / advisor) left with the HFW parity slice: the timelines are their own
+ * screen, and the cockpit's job is the turn's decision plus the scenario it belongs to.
  *
- * **The page pattern is `Catalog/Index.vue`'s**: the layout, `<Head title>` and the `#title` slot. The
- * calendar's year tabs left the page with D14a. The one query-string state is `?edit_turn=<id>`, which
- * names the turn the correction disclosure opens on (plan §9.6 ruling 2); the selector navigates it.
- * There is one form, the manual correction, and it posts to the route that already owns a turn write.
+ * **One decision, stated once.** The advisor's rail prints the recommendation, its reason and its cost
+ * in one block (`NextDecision.vue`), and the page head repeats only the ACTION as the page's single
+ * primary, which is HFW annotation 1: a Trainer can act without scrolling. The recommendation itself is
+ * never restated in a second sentence.
+ *
+ * **The finale lives in the scenario card.** `advisor.finale` is the advisor's proximity read and
+ * `scenario.finale_state` is the run's own record; both are printed beside the scenario panels rather
+ * than only below the fold, which is the Goal-Gradient failure the audit filed (HFW annotation 2).
+ *
+ * **DM-1: 72 turns, finale outside them.** Every position line prints `N of 72` from
+ * `header.total_turns` (the calendar's own constant, never a literal). A stored turn past 72 is the
+ * finale phase the client numbers on its own, so it renders as `Finale phase`, never as turn 73+.
+ *
+ * **The one query-string state** is `?edit_turn=<id>`, which names the turn the correction disclosure
+ * opens on (plan §9.6 ruling 2); the selector navigates it. There is one form family, the manual
+ * correction, and it posts to the route that already owns a turn write.
  *
  * **Loading and error are page-level** (ADR-0007): the only user-initiated async action here is the
  * correction, and Inertia keeps the current page on screen during a visit, so the state is announced
@@ -25,18 +37,21 @@
  * page declares its own contract for the same reason.
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
+import AbsenceValue from '../../components/AbsenceValue.vue';
 import CockpitIdentityCard from '../../components/career/CockpitIdentityCard.vue';
 import StatSummary from '../../components/career/StatSummary.vue';
 import CareerStatePanel from '../../components/career/CareerStatePanel.vue';
 import ActionGrid from '../../components/career/ActionGrid.vue';
 import AdvisorRail from '../../components/career/AdvisorRail.vue';
 import Section from '../../components/ui/Section.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
 import RunRaceStrip from '../../components/career/RunRaceStrip.vue';
 import ScenarioPanel from '../../components/scenario/ScenarioPanel.vue';
 import UnityCupEditor from '../../components/career/UnityCupEditor.vue';
 import BaseInput from '@/Components/Form/BaseInput.vue';
 import BaseSelect from '@/Components/Form/BaseSelect.vue';
 import BaseRadio from '@/Components/Form/BaseRadio.vue';
+import { LinkButton } from '@/Components/Form';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { TURN_ENTRY_ENERGY_BANDS as energyBands, TURN_ENTRY_ENERGY_STATES as energyStates, TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
 import { computed, nextTick, ref, watch } from 'vue';
@@ -48,6 +63,11 @@ interface Header {
     year_label: string | null;
     month_label: string | null;
     turn: number;
+    /**
+     * DM-1: the career's own length, `CareerCalendar::TURNS_PER_CAREER`. Strictly 72; the finale block
+     * sits outside it, so a stored turn past this figure is the finale phase rather than turn 73+.
+     */
+    total_turns: number;
     energy: number | null;
     energy_text: string | null;
     mood: string | null;
@@ -89,8 +109,33 @@ interface Correction {
     };
 }
 
+/**
+ * This run's own finale record, as `FinaleReader::forRun()` carries it: whether the block has arrived,
+ * what was recorded against it, and the scenario's own label for it. Null when the catalogue holds no
+ * finale row for the scenario.
+ */
+interface FinaleState {
+    reached: boolean;
+    outcome: string | null;
+    placement: string | null;
+    turn: number | null;
+    label: string;
+}
+
+/**
+ * Our Grand Concert's Performance reading. `enabled` is the matrix's `performance_input` flag read
+ * server-side; the other three scenarios answer `false` with the same key set, so the card draws from
+ * one flag and never from a scenario name (D-240, G-33). `observations` are the turn events this run
+ * recorded, one per reading: no total is derived because no source publishes a starting value.
+ */
+interface Performance {
+    enabled: boolean;
+    types: string[];
+    observations: { type: string; turn: number; delta: number }[];
+}
+
 const props = defineProps<{
-    run: { id: number; trainee: string; trainee_ja: string | null; umamusume_id: number; scenario: string | null; status: string; status_label: string; scenario_label: string; run_url: string; timeline_url: string; result_url: string; training_url: string; deck_url: string; status_labels: Record<string, string>; scenarios: Record<string, string>; update_url: string; destroy_url: string; export_csv_url: string; export_json_url: string; current_objective_index: number | null };
+    run: { id: number; trainee: string; trainee_ja: string | null; umamusume_id: number; scenario: string | null; status: string; status_label: string; scenario_label: string; run_url: string; index_url: string; timeline_url: string; result_url: string; training_url: string; deck_url: string; status_labels: Record<string, string>; scenarios: Record<string, string>; update_url: string; destroy_url: string; export_csv_url: string; export_json_url: string; current_objective_index: number | null };
     header: Header;
     /**
      * Where the career stands, as `CareerPosition::toArray()` carries it. The header's Year, Month and
@@ -168,6 +213,8 @@ const props = defineProps<{
     // The scenario panel's shape is declared at `components/scenario/ScenarioPanel.vue` for the same
     // reason: the shell is its one reader, and E2 to E4 register renderers against it.
     scenario: Record<string, unknown>;
+    /** Our Grand Concert's Performance reading; `enabled` is false for every other scenario. */
+    performance: Performance;
     correction: Correction | null;
 }>();
 
@@ -178,6 +225,206 @@ const empty = computed(() => props.header.turn === 0);
 // The door an objective can be settled at, read off the grid's own entries rather than from a second
 // route table. The grid already owns the href, and a due obligation with no door renders none.
 const raceDoor = computed(() => props.actions.find((action) => action.key === 'race')?.href ?? null);
+
+/**
+ * DM-1: one phrase for the run's position, from the calendar's own denominator. A run with no logged
+ * turn claims no number; a stored turn past 72 is the finale phase, which the client numbers on its
+ * own and which is not a career turn.
+ */
+const turnPhrase = computed((): string => {
+    if (props.header.turn <= 0) {
+        return 'No turn recorded';
+    }
+
+    if (props.header.turn > props.header.total_turns) {
+        return 'Finale phase';
+    }
+
+    return `Turn ${props.header.turn} of ${props.header.total_turns}`;
+});
+
+/** This run's finale record, or null for a scenario the catalogue gives no finale row. */
+const finaleState = computed((): FinaleState | null => (props.scenario as { finale_state?: FinaleState | null }).finale_state ?? null);
+
+/**
+ * The countdown the scenario card prints, when one exists. Two sources, one fact: the run's own finale
+ * record says whether the block has arrived, and the advisor's proximity read is the only source that
+ * dates it (the catalogue row carries no career turn for the finale block). A reached finale has no
+ * countdown, and neither does one with no proximity inside the advisor's lookahead window.
+ */
+const finaleTurnsAway = computed((): number | null => {
+    const advice = props.advisor.finale;
+    const state = finaleState.value;
+
+    if (advice === null || advice.turns_away === null) {
+        return null;
+    }
+
+    if (state !== null && state.reached) {
+        return null;
+    }
+
+    return advice.turns_away;
+});
+
+/**
+ * The finale, in one line, for the scenario card and the page head. Three states, the same three the
+ * Career Result prints: not yet reached, reached with nothing recorded, and recorded. `null` means the
+ * catalogue holds no finale row at all, which is an absence the card prints rather than a blank.
+ */
+const finaleLine = computed((): string | null => {
+    const state = finaleState.value;
+    const advice = props.advisor.finale;
+
+    if (state === null) {
+        return advice === null ? null : `${advice.label}: ${advice.state}`;
+    }
+
+    if (state.reached) {
+        return state.outcome === null
+            ? `${state.label}: reached; outcome not recorded`
+            : `${state.label}: ${[state.outcome, state.placement].filter((part): part is string => part !== null).join(', ')}`;
+    }
+
+    const away = finaleTurnsAway.value;
+
+    return away === null
+        ? `${state.label}: not yet reached`
+        : `${state.label}: ${away} ${away === 1 ? 'turn' : 'turns'} away`;
+});
+
+/**
+ * The closed run's own outcome, first: a finished career says what it achieved before anything else
+ * (HFW annotation 5 on `cockpit-ura-finale.html`). A Retired run names the turn it stopped at, the
+ * same spelling the careers list uses.
+ */
+const closedOutcome = computed((): string => {
+    if (props.run.status !== 'Completed') {
+        return props.header.turn > 0 ? `Retired at ${turnPhrase.value}` : 'Retired';
+    }
+
+    const state = finaleState.value;
+
+    if (state === null || !state.reached || state.outcome === null) {
+        return 'Finale outcome not recorded';
+    }
+
+    return `${state.label}: ${[state.outcome, state.placement].filter((part): part is string => part !== null).join(', ')}`;
+});
+
+/**
+ * The page-head line. Position and scenario, with the closed run's outcome in front of them: the one
+ * fact a finished career owes first. Identity stars and the card form stay on the identity card so
+ * one figure is not printed three times on one screen.
+ */
+const lede = computed((): string => {
+    const parts: string[] = [];
+
+    if (props.run.status !== 'Active') {
+        parts.push(closedOutcome.value);
+    }
+
+    if (props.header.year_label !== null) {
+        parts.push(props.header.year_label);
+    }
+
+    if (props.header.month_label !== null) {
+        parts.push(props.header.month_label);
+    }
+
+    if (props.header.turn > 0 && props.header.turn <= props.header.total_turns) {
+        parts.push(turnPhrase.value);
+    }
+
+    parts.push(props.run.scenario_label);
+
+    return parts.join(' · ');
+});
+
+interface RecommendedAction {
+    action: string;
+    action_url: string;
+}
+
+/** The advisor's recommendation, as its own words and its own door. */
+const recommendation = computed((): RecommendedAction | null => {
+    const value = (props.advisor.decision as { recommended?: RecommendedAction | null }).recommended;
+
+    return value !== null && value !== undefined && typeof value.action === 'string' && typeof value.action_url === 'string'
+        ? value
+        : null;
+});
+
+/**
+ * The page head's single primary action, which is the same action the advisor's rail states once
+ * (HFW annotation 1). A fresh career has nothing to recommend and a retired one has no result to open,
+ * so both render no primary at all rather than an invented one.
+ */
+const headAction = computed((): { label: string; href: string } | null => {
+    if (isActive.value) {
+        const value = recommendation.value;
+
+        if (value === null) {
+            return null;
+        }
+
+        return {
+            label: value.action === 'Rest' ? 'Rest this turn' : `Train ${value.action} this turn`,
+            href: value.action_url,
+        };
+    }
+
+    return props.run.status === 'Completed'
+        ? { label: 'Career result', href: props.run.result_url }
+        : null;
+});
+
+/**
+ * "Where to go": the screens a career's turn leads into, from the doors this page already carries.
+ * Every href is a prop or an action-grid entry, so no destination is spelled here and none can drift
+ * from the route table. HFW parity for all four variants; Unity Cup's own keybox names it.
+ */
+const whereToGo = computed((): { label: string; href: string }[] => {
+    const links: { label: string; href: string }[] = [{ label: 'Training decision', href: props.run.training_url }];
+    const race = props.actions.find((action) => action.key === 'race');
+
+    if (race !== undefined) {
+        links.push({ label: 'Race decision', href: race.href });
+    }
+
+    links.push({ label: 'Run deck', href: props.run.deck_url });
+    links.push({ label: 'Timeline', href: props.run.timeline_url });
+    links.push({ label: 'Career result', href: props.run.result_url });
+
+    return links;
+});
+
+/** The five Performance types with this run's latest recorded reading for each, or null. */
+const performanceRows = computed((): { type: string; latest: { turn: number; delta: number } | null }[] =>
+    props.performance.types.map((type: string) => {
+        const readings = props.performance.observations.filter((observation) => observation.type === type);
+        const latest = readings.length === 0 ? undefined : readings[readings.length - 1];
+
+        return { type, latest: latest === undefined ? null : { turn: latest.turn, delta: latest.delta } };
+    }),
+);
+
+/**
+ * The concert loop, in the order the sourced guide states it (`docs/scenarios/07-grand-concert.md`
+ * §"The loop, in order", read 2026-10-05). The numbers a guide does not publish are absent from this
+ * copy: it explains the shape of the loop, which is what a Trainer plans against, and claims no
+ * per-turn amount or cost curve.
+ */
+const concertLoop = [
+    { term: 'Lessons', detail: 'Open at turn 5, in the Lesson menu between the outing and race buttons.' },
+    { term: 'Spend', detail: 'Performance buys Live Techniques and Songs.' },
+    { term: 'Gauge', detail: 'Three Songs fill Live Performance Expectations, and a filled gauge guarantees Great Success.' },
+    { term: 'Concerts', detail: 'Four Promo Concerts, then the Grand Concert, every six months from late December of Junior Year.' },
+    { term: 'Payout', detail: '5 skill points per Technique Lesson and 25 per Song Lesson since the previous live; a live also raises the Performance cap by 50.' },
+];
+
+// A recorded reading is signed, so `+0` and `-0` never read as a missing value.
+const signed = (value: number): string => (value >= 0 ? `+${value}` : String(value));
 
 /**
  * A-0.1: the blue sparks the tree carries, one phrase each (`Power ★ (Parent A)`), or an explicit
@@ -523,27 +770,44 @@ const jumpToShop = (): void => {
         :scenario-label="props.run.scenario_label"
         :status-label="props.run.status_label"
         :status="props.run.status"
-        :position="props.header.turn === 0 ? null : `Turn ${props.header.turn}`"
+        :position="props.header.turn === 0 ? null : turnPhrase"
         :run-url="props.run.run_url"
         current="cockpit"
     >
         <Head :title="`Career: ${props.run.trainee}`" />
-        <template #eyebrow>Cockpit</template>
-        <template #title>{{ props.run.trainee }}</template>
+
+        <!-- The HFW page head: the small caps eyebrow, the trainee as the one `h1`, the position and
+             outcome as the lede, and the run's single primary action. It renders in the shell's
+             `role="banner"` region through `#head`, so the shell's own fallback title band is not
+             drawn and the document keeps exactly one heading of each level. -->
+        <template #head>
+            <PageHeader eyebrow="Cockpit" :title="props.run.trainee" :description="lede">
+                <template #actions>
+                    <LinkButton :href="props.run.index_url" variant="secondary" size="sm">
+                        All careers
+                    </LinkButton>
+                    <!-- The same action the advisor states once, never a second recommendation. A
+                         fresh career recommends nothing and a retired one has no result, so both
+                         render no filled action at all. -->
+                    <LinkButton v-if="headAction !== null" :href="headAction.href" variant="primary" size="sm">
+                        {{ headAction.label }}
+                    </LinkButton>
+                </template>
+            </PageHeader>
+        </template>
 
         <p v-if="visiting" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
         <p v-if="visitFailed" role="alert" class="mb-4 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
             That screen did not load. Nothing was saved; try again.
         </p>
 
-        <!-- The condensed read, above the wayfinder so the nav slides beneath it while the page scrolls
-             (the strip is `top-0` with a solid background and a higher z-index). It is a second READING
-             of the header's own facts and never a second primary: the one filled CTA stays in the
-             advisor rail, and the strip's outline affordance moves a Trainer to it. The class a source
-             scan would count is deliberately not printed here, so that a count of filled primaries in
-             this file stays equal to the number the page actually renders. -->
+        <!-- The condensed read, above the wayfinder so the nav slides beneath it while the page scrolls.
+             It is a second READING of the header's own facts and never a second primary: the outline
+             affordance moves a Trainer to the advisor, and the filled primary is the page head's. The
+             class a source scan counts is deliberately absent here. -->
         <StatSummary
             :turn="props.header.turn"
+            :total-turns="props.header.total_turns"
             :energy-text="props.header.energy_text"
             :mood="props.header.mood"
             :fans="props.header.fans"
@@ -557,10 +821,10 @@ const jumpToShop = (): void => {
 
              `md:sticky md:top-0 md:z-10` was here and is REMOVED, along with the sentence that claimed
              it: the nav sits inside `main`, which carries `container-type: inline-size` (load-bearing
-             for this page's `@4xl:`/`@5xl:` grid), so the sticky containing block moves with the page
-             and the nav scrolled away with everything else. Retired rather than left as a no-op so the
-             source does not claim a behaviour the page does not have;
-             `tests/browser/containment.spec.ts` pins the current behaviour deliberately. -->
+             for this page's `@4xl:` grid), so the sticky containing block moves with the page and the
+             nav scrolled away with everything else. Retired rather than left as a no-op so the source
+             does not claim a behaviour the page does not have; `tests/browser/containment.spec.ts`
+             pins the current behaviour deliberately. -->
         <nav aria-label="On this page" class="mb-4 border-b border-rule bg-page py-1 md:-mx-6 md:px-6">
             <ul class="flex flex-wrap gap-1 text-sm">
                 <li v-for="link in sectionLinks" :key="link.href">
@@ -574,26 +838,70 @@ const jumpToShop = (): void => {
             :trainee="props.run.trainee"
             :trainee-ja="props.run.trainee_ja"
             :header="props.header"
+            :total-turns="props.header.total_turns"
             :countdown="props.scenarioCountdown"
             :card-title="props.identity.card_title"
             :trainee-rarity="props.identity.trainee_rarity"
             :potential-level="props.identity.potential_level"
         />
 
-        <!-- The finished career's own summary (Step 5). It reads the header's turn, the run's status and
-             the five stat readings this screen already prints, and names the one door a closed career
-             still has: the Career Result. Nothing here is derived that the props do not carry, so there
-             is no total turn count and no epithet line, because no prop states either. -->
+        <!-- The empty state names what is missing, why it matters and what to do (plan §10). It sits
+             above the grid rather than replacing it: the grid's own entries are still the doors, and
+             the advisor's refusal is a real state rather than a blank. -->
+        <Section
+            v-if="empty"
+            id="career-empty-heading"
+            title="No turn recorded yet"
+            class="rounded-lg border border-dashed border-rule bg-panel p-4"
+        >
+            <p class="mt-1 text-sm text-ink">
+                Energy, Mood, Fans, Skill Points and the five stats are what this screen reads, and
+                none has been entered for this run. Until one turn is recorded the advisor has
+                nothing to rank, so it declines rather than guessing.
+            </p>
+            <a :href="props.run.training_url" class="mt-2 inline-flex min-h-11 items-center font-medium text-ink-strong underline">
+                Record the first turn through Training
+            </a>
+        </Section>
+
+        <!-- A closed run states its outcome first (HFW annotation 5 on the URA page): what the career
+             achieved is the fact that matters once nothing is being decided. The advisor rail below
+             collapses to the record, and no recommendation is invented for a career that has ended. -->
         <Section
             v-if="!isActive"
             id="cockpit-summary-heading"
             :title="`${props.run.trainee} · ${props.run.scenario_label}`"
             class="rounded-lg border border-rule bg-panel p-4"
         >
-            <p class="mt-1 text-sm text-ink">
-                {{ props.run.status_label }} · Turn {{ props.header.turn }}
-            </p>
-            <p class="mt-1 font-mono text-sm tabular-nums text-ink-strong">{{ summaryStats }}</p>
+            <p class="mt-1 text-sm font-semibold text-ink-strong" data-region="closed-outcome">{{ closedOutcome }}</p>
+            <ul class="tiles mt-3 grid-cols-2 @4xl:grid-cols-4">
+                <li class="tile">
+                    <p class="k">Finale</p>
+                    <p v-if="finaleLine !== null" class="v" data-field="finale-outcome">{{ finaleLine }}</p>
+                    <p v-else class="v na" data-field="finale-outcome">
+                        N/A. This run's scenario has no finale row in the catalogue.
+                    </p>
+                </li>
+                <li class="tile">
+                    <p class="k">Turn</p>
+                    <p class="v font-mono tabular-nums">{{ turnPhrase }}</p>
+                </li>
+                <li class="tile">
+                    <p class="k">Skill points</p>
+                    <div class="v font-mono tabular-nums">
+                        <template v-if="props.header.skill_points !== null">{{ props.header.skill_points.toLocaleString('en-US') }}</template>
+                        <AbsenceValue v-else compact reason="No turn entry for this run records Skill Points." />
+                    </div>
+                </li>
+                <li class="tile">
+                    <p class="k">Fans</p>
+                    <div class="v font-mono tabular-nums">
+                        <template v-if="props.header.fans !== null">{{ props.header.fans.toLocaleString('en-US') }}</template>
+                        <AbsenceValue v-else compact reason="No turn entry for this run records a fan count." />
+                    </div>
+                </li>
+            </ul>
+            <p class="mt-3 font-mono text-sm tabular-nums text-ink-strong">{{ summaryStats }}</p>
             <a
                 v-if="props.run.status === 'Completed'"
                 :href="props.run.result_url"
@@ -603,12 +911,236 @@ const jumpToShop = (): void => {
             </a>
         </Section>
 
-        <!-- The header edit forms (F2, plan §9.6 ruling 1). Status, scenario and grade-point period
-             all write through `runs.update`, the route and validator the 2.0.0 record screen used. A
-             failure comes back with `page.props.errors`, which the page-level alert names. Each form
-             carries the sibling fields the request still writes, so editing one cannot blank another. -->
-        <section aria-labelledby="cockpit-header-edit" class="mt-2">
-            <h3 id="cockpit-header-edit" class="text-lg font-semibold text-ink-strong">Run identity</h3>
+        <!-- The HFW's two-column body. Left: the run's stats, its scenario reading and the scenario's
+             own panels. Right: the advisor, then the doors a career leads into. The single-column
+             stack below `@4xl` keeps the reading order the tree already carries. -->
+        <div class="mt-4 grid grid-cols-1 gap-4 md:items-start @4xl:grid-cols-[2fr_1fr]">
+            <div class="flex min-w-0 flex-col gap-4">
+                <CareerStatePanel
+                    :stats="props.state.stats"
+                    :meta="props.state.meta"
+                    :growth-rate="props.identity.growth_rate"
+                    :fan-ladder="props.identity.fan_ladder"
+                    :mood-effect="props.moodEffect"
+                    denominator-label="cap"
+                />
+
+                <!-- Our Grand Concert's reading: five types, shared out of the turn-entry screen, and
+                     the loop a Trainer plans the run against. Both draw from `performance.enabled`,
+                     which is the matrix's own flag, so no scenario name reaches this page (G-33). -->
+                <template v-if="props.performance.enabled">
+                    <section aria-labelledby="career-performance-heading" class="card">
+                        <h2 id="career-performance-heading" class="text-lg font-semibold text-ink-strong">Performance</h2>
+                        <p class="sub">
+                            Five types, earned from training. No starting value, per-turn amount or Lesson
+                            cost is published, so no total is shown.
+                        </p>
+                        <ul class="tiles grid-cols-2 @3xl:grid-cols-3">
+                            <li v-for="row in performanceRows" :key="row.type" class="tile">
+                                <p class="k">{{ row.type }}</p>
+                                <p v-if="row.latest !== null" class="v font-mono tabular-nums">
+                                    {{ signed(row.latest.delta) }}
+                                    <span class="text-xs font-normal text-ink-muted">at turn {{ row.latest.turn }}</span>
+                                </p>
+                                <p v-else class="v na">Not recorded</p>
+                            </li>
+                        </ul>
+                        <p class="note mt-2">
+                            <span class="g" aria-hidden="true">○</span>
+                            <span>
+                                The Performance field lives on the turn-entry screen, not in the cockpit. This
+                                panel is a read, and a type no turn has recorded prints Not recorded rather than a
+                                zero.
+                            </span>
+                        </p>
+                    </section>
+
+                    <section aria-labelledby="career-concert-loop-heading" class="card">
+                        <h2 id="career-concert-loop-heading" class="text-lg font-semibold text-ink-strong">The concert loop</h2>
+                        <dl class="mt-2 grid grid-cols-1 gap-x-4 gap-y-1 text-sm @3xl:grid-cols-3">
+                            <template v-for="row in concertLoop" :key="row.term">
+                                <dt class="font-semibold text-ink-strong">{{ row.term }}</dt>
+                                <dd class="text-ink @3xl:col-span-2">{{ row.detail }}</dd>
+                            </template>
+                        </dl>
+                    </section>
+                </template>
+
+                <Section
+                    id="career-scenario-heading"
+                    title="Scenario"
+                    class="rounded-lg border border-rule bg-panel p-4"
+                >
+                    <!-- The finale countdown, in the scenario card rather than below the fold (HFW
+                         annotation 2). A reached finale prints its record; an unreached one prints the
+                         advisor's own proximity when it has one, and says so when nothing dates it.
+                         No control lives here: the Unity Cup region pins that. -->
+                    <p class="flex flex-wrap items-baseline gap-x-2 text-sm" data-region="scenario-finale">
+                        <span class="font-semibold text-ink-strong">Finale:</span>
+                        <template v-if="finaleLine !== null">
+                            <span class="text-ink">{{ finaleLine }}</span>
+                            <span v-if="finaleTurnsAway !== null" class="pill pill-caution">
+                                {{ finaleTurnsAway }} {{ finaleTurnsAway === 1 ? 'turn' : 'turns' }} away
+                            </span>
+                        </template>
+                        <span v-else class="text-ink-muted">
+                            N/A. This run's scenario has no finale row in the catalogue, so no countdown is
+                            computed.
+                        </span>
+                    </p>
+
+                    <!-- The shell switches on the matrix's own flags and widget keys and knows no
+                         scenario name (plan §9 E1, gate G-33). The prop's own shape is declared at
+                         `components/scenario/ScenarioPanel.vue`; the page forwards it untouched. -->
+                    <div class="mt-3">
+                        <ScenarioPanel :scenario="props.scenario as never" />
+                    </div>
+                </Section>
+            </div>
+
+            <div data-region="advisor" class="flex min-w-0 flex-col gap-4">
+                <AdvisorRail v-if="isActive" :decision="props.advisor.decision" :race-url="raceDoor" :timeline-url="props.run.timeline_url" />
+
+                <!-- A career that has ended has no turn being decided, so the advisor's own refusal is not
+                     the answer this region owes. One statement and the one door a finished career still has. -->
+                <Section
+                    v-else
+                    id="career-closed-heading"
+                    :title="props.run.status === 'Completed' ? 'This run is complete.' : 'This run is retired.'"
+                    class="rounded-lg border border-rule bg-panel p-4"
+                >
+                    <p class="mt-1 text-sm text-ink">
+                        Nothing is being decided, so nothing is ranked and nothing is refused.
+                    </p>
+                </Section>
+
+                <!-- HFW parity: every variant's right column ends with its doors, and Unity Cup's own
+                     keybox names the section. Every href is a prop or an action-grid entry, so no
+                     destination is spelled here and none can drift from the route table. -->
+                <section aria-labelledby="career-where-to-go-heading" class="card">
+                    <h2 id="career-where-to-go-heading" class="text-lg font-semibold text-ink-strong">Where to go</h2>
+                    <ul class="mt-2 grid grid-cols-1 gap-2 @3xl:grid-cols-2">
+                        <li v-for="link in whereToGo" :key="link.href">
+                            <LinkButton :href="link.href" variant="secondary" size="sm">{{ link.label }}</LinkButton>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+
+        <!-- The seven action entries keep their own region below the decision, the way the HFW keeps the
+             page head's primary and the advisor's rail as the only claims about what to do next: the
+             grid is the set of doors, not a second ranking. A closed career keeps it behind the same
+             disclosure it had. -->
+        <div class="mt-4">
+            <ActionGrid v-if="isActive" :actions="props.actions" />
+
+            <details v-else data-region="run-tools" class="mt-3 rounded-lg border border-rule bg-panel p-4">
+                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
+                    Run tools
+                </summary>
+                <ActionGrid class="mt-3" :actions="props.actions" />
+            </details>
+
+            <!-- Trackblazer's Pro Shop is reachable from the Cockpit's action area (plan §9
+                 E4, design-2.0 §28 "The Shop should be quickly accessible from the Career
+                 Cockpit"). The button is rendered only when the matrix composes a shop, so
+                 other scenarios see no Shop affordance. WCAG 2.4.11: focus moves to the
+                 Shop heading after the visit, and the body has `scroll-margin-top` so the
+                 sticky mobile nav does not cover the focused control. -->
+            <button
+                v-if="hasShop"
+                type="button"
+                class="mt-2 inline-flex min-h-11 items-center justify-center rounded-full border-2 border-rule px-4 font-semibold text-ink-strong"
+                @click="jumpToShop"
+            >
+                Shop
+            </button>
+        </div>
+
+        <section
+            class="mt-4 rounded-lg border border-rule bg-panel p-4"
+            aria-labelledby="career-timeline-heading"
+        >
+            <h2 v-if="isActive" id="career-timeline-heading" class="text-lg font-semibold text-ink-strong">
+                Races in this run
+            </h2>
+
+            <!-- Once the career has ended the race list is history, not a decision, so it collapses
+                 below the fold. The heading id moves onto the `summary` so the section keeps the one
+                 accessible name it has while open. -->
+            <details v-else data-region="races-in-this-run" class="mt-1 rounded-lg border border-rule bg-raised p-4">
+                <summary
+                    id="career-timeline-heading"
+                    class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong"
+                >
+                    Races in this run
+                </summary>
+                <RunRaceStrip class="mt-2" :strip="props.raceStrip as never" />
+            </details>
+
+            <RunRaceStrip v-if="isActive" :strip="props.raceStrip as never" />
+
+            <p class="mt-3 text-xs text-ink-muted">
+                This region carries the run's own races. Every logged turn, race and event, in order,
+                is on the Career Timeline.
+            </p>
+
+            <a
+                :href="props.run.timeline_url"
+                class="mt-2 inline-flex min-h-11 items-center text-xs font-medium text-ink-strong underline"
+            >
+                Career Timeline
+            </a>
+
+            <!-- The Career Result's only other door was the 2.0.0 record page's header, so it sits
+                 beside the timeline door here rather than in the action grid: the grid is the
+                 advisor's answer about the next turn, and this is a summary of the career. -->
+            <a
+                :href="props.run.result_url"
+                class="mt-2 inline-flex min-h-11 items-center text-xs font-medium text-ink-strong underline"
+            >
+                Career Result
+            </a>
+
+            <!-- The run-delete door (F2, plan §9.6 ruling 4). Two-step disclosure: the summary
+                 names the destructive action, the form inside submits the DELETE only after the
+                 Trainer opens it and confirms. `deleteForm` carries no fields — the route is run
+                 scoped and the controller deletes the bound row — so the only data that matters
+                 is the URL. -->
+            <details data-region="danger-zone" class="mt-4">
+                <summary
+                    class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-risk"
+                >
+                    Delete this career
+                </summary>
+                <p class="mt-2 text-sm text-ink-muted">
+                    Permanently removes this run and every record tied to it: turns, race entries,
+                    turn events, skills, support-deck slots, and the linked Veteran library record
+                    (if any was saved). There is no undo.
+                </p>
+                <form
+                    @submit.prevent="deleteRun"
+                    class="mt-2"
+                >
+                    <button
+                        type="submit"
+                        class="min-h-11 rounded-full border-2 border-risk px-4 font-semibold text-risk"
+                        :disabled="deleteForm.processing"
+                    >
+                        {{ deleteForm.processing ? 'Deleting…' : 'Delete this career' }}
+                    </button>
+                </form>
+            </details>
+        </section>
+
+        <!-- The run's settings, below the reading. The header edit forms (F2, plan §9.6 ruling 1).
+             Status, scenario and grade-point period all write through `runs.update`, the route and
+             validator the 2.0.0 record screen used. A failure comes back with `page.props.errors`,
+             which the page-level alert names. Each form carries the sibling fields the request still
+             writes, so editing one cannot blank another. -->
+        <section aria-labelledby="cockpit-header-edit" class="mt-4">
+            <h2 id="cockpit-header-edit" class="text-lg font-semibold text-ink-strong">Run identity</h2>
 
             <!-- The export and deck doors are reads, not writes, so they stay outside the disclosure
                  a Trainer must open to change a value (audit 2026-10-12 §3.3). -->
@@ -827,363 +1359,194 @@ const jumpToShop = (): void => {
             />
         </details>
 
-        <!-- The spec's order, as CSS only. `order-*` drives the single mobile column; from `md` up the
-             explicit row and column placement takes over, so the tablet strip and the desktop
-             three-column cockpit are the same DOM. -->
-        <div class="mt-4 grid grid-cols-1 gap-4 md:items-start @4xl:grid-cols-[2fr_1fr] lg:items-start @5xl:grid-cols-[1fr_2.5fr_1.5fr]">
-            <div class="order-1 min-w-0 md:order-none @4xl:col-start-1 @4xl:row-start-2 @5xl:col-start-2 @5xl:row-start-1">
-                <CareerStatePanel
-                    :stats="props.state.stats"
-                    :meta="props.state.meta"
-                    :growth-rate="props.identity.growth_rate"
-                    :fan-ladder="props.identity.fan_ladder"
-                    :mood-effect="props.moodEffect"
-                    denominator-label="target"
+        <!-- A-0.1: the cap arithmetic's recorded inputs (§1.2). The caps the run states sit beside the
+             blue sparks its Legacy tree carries, and the panel states plainly that the two do not
+             reconcile (the source's own open question). -->
+        <section aria-labelledby="cap-composition-heading" class="card mt-4 rounded-lg p-4">
+            <h2 id="cap-composition-heading" class="text-lg font-semibold text-ink-strong">Cap composition</h2>
+            <dl class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                <div v-for="(cap, stat) in props.capComposition.caps" :key="stat" class="flex items-baseline gap-1">
+                    <dt class="text-ink-muted">{{ stat }}</dt>
+                    <dd class="font-mono tabular-nums text-ink-strong">{{ cap.toLocaleString('en-US') }}</dd>
+                </div>
+            </dl>
+            <p class="mt-2 text-sm text-ink">
+                <span class="font-semibold text-ink-strong">Blue sparks:</span>
+                {{ capSparkText }}
+            </p>
+            <p class="mt-1 text-xs text-ink-muted">{{ props.capComposition.note }}</p>
+        </section>
+
+        <!-- A-0.6: the derived team roster — the six deck cards' characters. No stored roster;
+             the list is read off the run's own deck slots. -->
+        <section aria-labelledby="team-roster-heading" class="card mt-4 rounded-lg p-4">
+            <h2 id="team-roster-heading" class="text-lg font-semibold text-ink-strong">Team roster</h2>
+            <p v-if="props.roster.empty !== null" class="mt-1 text-sm text-ink-muted">{{ props.roster.empty }}</p>
+            <ol v-else class="mt-2 space-y-1 text-sm">
+                <li v-for="row in props.roster.rows" :key="row.slot" class="flex items-baseline justify-between gap-3">
+                    <span class="text-ink">
+                        {{ row.name ?? 'Unnamed card' }}
+                        <span v-if="row.friend" class="ml-1 text-xs text-ink-muted">(Friends)</span>
+                    </span>
+                    <span class="font-mono text-xs text-ink-muted">Slot {{ row.slot }}<template v-if="row.ownership !== null"> · {{ row.ownership }}</template></span>
+                </li>
+            </ol>
+        </section>
+
+        <section v-if="props.correction !== null" aria-labelledby="career-correction-heading" class="mt-4">
+            <h3 id="career-correction-heading" class="sr-only">Correct a turn by hand</h3>
+
+            <!-- The turn selector (F2, plan §9.6 ruling 2). It sits outside the disclosure so a
+                 switch does not close the form; `?edit_turn=<id>` is the same query the run
+                 screen and the Timeline's decision link already use. -->
+<BaseSelect
+                    id="correction-turn-select"
+                    ref="turnSelector"
+                    label="Correct turn"
+                    :value="String(props.correction.selected_turn_id)"
+                    @update:model-value="switchTurn($event)"
+                    :options="props.correction.turns.map(turn => ({ value: String(turn.id), label: 'Turn ' + turn.turn }))"
                 />
 
-                <!-- A-0.1: the cap arithmetic's recorded inputs (§1.2). The caps the run states sit
-                     beside the blue sparks its Legacy tree carries, and the panel states plainly that
-                     the two do not reconcile (the source's own open question). -->
-                <section aria-labelledby="cap-composition-heading" class="card mt-3 rounded-lg p-4">
-                    <h2 id="cap-composition-heading" class="text-lg font-semibold text-ink-strong">Cap composition</h2>
-                    <dl class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                        <div v-for="(cap, stat) in props.capComposition.caps" :key="stat" class="flex items-baseline gap-1">
-                            <dt class="text-ink-muted">{{ stat }}</dt>
-                            <dd class="font-mono tabular-nums text-ink-strong">{{ cap.toLocaleString('en-US') }}</dd>
-                        </div>
-                    </dl>
-                    <p class="mt-2 text-sm text-ink">
-                        <span class="font-semibold text-ink-strong">Blue sparks:</span>
-                        {{ capSparkText }}
-                    </p>
-                    <p class="mt-1 text-xs text-ink-muted">{{ props.capComposition.note }}</p>
-                </section>
-
-                <!-- A-0.6: the derived team roster — the six deck cards' characters. No stored roster;
-                     the list is read off the run's own deck slots. -->
-                <section aria-labelledby="team-roster-heading" class="card mt-3 rounded-lg p-4">
-                    <h2 id="team-roster-heading" class="text-lg font-semibold text-ink-strong">Team roster</h2>
-                    <p v-if="props.roster.empty !== null" class="mt-1 text-sm text-ink-muted">{{ props.roster.empty }}</p>
-                    <ol v-else class="mt-2 space-y-1 text-sm">
-                        <li v-for="row in props.roster.rows" :key="row.slot" class="flex items-baseline justify-between gap-3">
-                            <span class="text-ink">
-                                {{ row.name ?? 'Unnamed card' }}
-                                <span v-if="row.friend" class="ml-1 text-xs text-ink-muted">(Friends)</span>
-                            </span>
-                            <span class="font-mono text-xs text-ink-muted">Slot {{ row.slot }}<template v-if="row.ownership !== null"> · {{ row.ownership }}</template></span>
-                        </li>
-                    </ol>
-                </section>
-
-                <section v-if="props.correction !== null" aria-labelledby="career-correction-heading" class="mt-3">
-                    <h3 id="career-correction-heading" class="sr-only">Correct a turn by hand</h3>
-
-                    <!-- The turn selector (F2, plan §9.6 ruling 2). It sits outside the disclosure so a
-                         switch does not close the form; `?edit_turn=<id>` is the same query the run
-                         screen and the Timeline's decision link already use. -->
-<BaseSelect
-                            id="correction-turn-select"
-                            ref="turnSelector"
-                            label="Correct turn"
-                            :value="String(props.correction.selected_turn_id)"
-                            @update:model-value="switchTurn($event)"
-                            :options="props.correction.turns.map(turn => ({ value: String(turn.id), label: 'Turn ' + turn.turn }))"
-                        />
-
-                    <details data-region="correct-turn" class="mt-2 rounded-lg border border-rule bg-panel p-4">
-                        <summary class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong">
-                            Correct turn {{ props.correction.turn }} by hand
-                        </summary>
-                        <p class="mt-2 text-sm text-ink-muted">
-                            Every field of the turn the app is reading. It writes on submit and shows no
-                            preview, so use it to fix a mistyped reading rather than to log a new turn.
-                        </p>
-
-                        <div
-                            v-if="correctionForm.hasErrors"
-                            ref="alert"
-                            role="alert"
-                            tabindex="-1"
-                            class="mt-3 rounded-md border border-risk bg-raised p-3 text-sm text-risk"
-                        >
-                            <p class="font-semibold">The correction was not saved.</p>
-                            <ul class="mt-1 list-disc pl-5">
-                                <li v-for="(message, key) in correctionForm.errors" :key="key">{{ message }}</li>
-                            </ul>
-                        </div>
-
-                        <form class="mt-3 grid grid-cols-2 gap-3 text-sm @4xl:grid-cols-3" @submit.prevent="saveCorrection">
-                            <BaseInput
-                              v-model="correctionForm.turn"
-                              type="number"
-                              id="turn"
-                              name="turn"
-                              label="Turn *"
-                              required
-                              :error="correctionForm.errors.turn"
-                            />
-                            <BaseInput
-                              v-for="field in statFields"
-                              :key="field.name"
-                              v-model="correctionForm[field.name]"
-                              type="number"
-                              :id="field.name"
-                              name="field.name"
-                              :label="`${field.label} *`"
-                              required
-                              :error="correctionForm.errors[field.name]"
-                            />
-                            <BaseInput
-                              v-model="correctionForm.sp"
-                              type="number"
-                              id="sp"
-                              name="sp"
-                              label="Skill Points"
-                              :error="correctionForm.errors.sp"
-                            />
-                            <fieldset class="col-span-2 flex flex-col gap-1 @4xl:col-span-3">
-                                <legend class="text-ink-muted">Energy</legend>
-                                <div class="flex flex-wrap items-center gap-x-4">
-                                    <BaseRadio
-                                      v-for="state in energyStates"
-                                      :key="state.value"
-                                      v-model="correctionForm.energy_state"
-                                      :id="`energy_state_${state.value}`"
-                                      name="energy_state"
-                                      :label="state.label"
-                                      :value="state.value"
-                                      :error="correctionForm.errors.energy_state"
-                                    />
-                                </div>
-                                <BaseInput
-                                  v-if="correctionForm.energy_state === 'exact'"
-                                  v-model="correctionForm.energy"
-                                  type="number"
-                                  id="energy"
-                                  name="energy"
-                                  label="Energy figure"
-                                  :min="0"
-                                  :max="100"
-                                  :error="correctionForm.errors.energy"
-                                />
-                                <BaseSelect
-                                  v-else-if="correctionForm.energy_state === 'band'"
-                                  v-model="correctionForm.energy_band"
-                                  name="energy_band"
-                                  label="Energy band"
-                                  :options="energyBands"
-                                  :error="correctionForm.errors.energy_band"
-                                />
-                            </fieldset>
-                            <BaseInput
-                              v-model="correctionForm.fans"
-                              type="number"
-                              id="fans"
-                              name="fans"
-                              label="Fans"
-                              :error="correctionForm.errors.fans"
-                            />
-                            <BaseSelect
-                              v-model="correctionForm.mood"
-                              name="mood"
-                              label="Mood"
-                              :options="[{ value: '', label: 'not recorded' }, { value: 'GREAT', label: 'GREAT' }, { value: 'GOOD', label: 'GOOD' }, { value: 'NORMAL', label: 'NORMAL' }, { value: 'BAD', label: 'BAD' }, { value: 'AWFUL', label: 'AWFUL' }]"
-                              :error="correctionForm.errors.mood"
-                            />
-                            <button
-                                type="submit"
-                                class="inline-flex min-h-11 items-center justify-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action disabled:opacity-60 @4xl:col-span-3"
-                                :disabled="correctionForm.processing"
-                            >
-                                {{ correctionForm.processing ? 'Saving…' : 'Save correction' }}
-                            </button>
-                            <!-- The two header forms on this screen already report their own write; this
-                                 one said nothing, so a Trainer could not tell a saved correction from a
-                                 dead button (R3-04). `Correction saved.` names which of the three forms
-                                 is speaking. -->
-                            <p v-if="correctionForm.recentlySuccessful" class="text-xs text-ink-muted @4xl:col-span-3">
-                                Correction saved.
-                            </p>
-                        </form>
-
-                        <!-- Delete one turn and its failure event (F2, plan §9.6 ruling 2). A second
-                             disclosure inside the correction panel: the write is `runs.turns.destroy`,
-                             the route the record screen already used. -->
-                        <details class="mt-3 border-t border-rule pt-3">
-                            <summary class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-risk">
-                                Delete turn {{ props.correction.turn }}
-                            </summary>
-                            <p class="mt-2 text-sm text-ink-muted">
-                                Deletes turn {{ props.correction.turn }} and its recorded failure event.
-                                Other turns are unaffected. There is no undo.
-                            </p>
-                            <form class="mt-2" @submit.prevent="deleteTurn">
-                                <button
-                                    type="submit"
-                                    class="min-h-11 rounded-full border-2 border-risk px-4 font-semibold text-risk"
-                                    :disabled="turnDeleteForm.processing"
-                                >
-                                    {{ turnDeleteForm.processing ? 'Deleting…' : `Delete turn ${props.correction.turn}` }}
-                                </button>
-                            </form>
-                        </details>
-                    </details>
-                </section>
-            </div>
-
-            <div data-region="advisor" class="order-2 min-w-0 md:order-none @4xl:col-start-2 @4xl:row-span-2 @4xl:row-start-2 @5xl:col-start-3 @5xl:row-start-1">
-                <AdvisorRail v-if="isActive" :decision="props.advisor.decision" :race-url="raceDoor" :timeline-url="props.run.timeline_url" />
-
-                <!-- A career that has ended has no turn being decided, so the advisor's own refusal is not
-                     the answer this region owes. One statement and the one door a finished career still has. -->
-                <Section
-                    v-else
-                    id="career-closed-heading"
-                    :title="props.run.status === 'Completed' ? 'This run is complete.' : 'This run is retired.'"
-                    class="rounded-lg border border-rule bg-panel p-4"
-                >
-                    <p class="mt-1 text-sm text-ink">
-                        Nothing is being decided, so nothing is ranked and nothing is refused.
-                    </p>
-                </Section>
-            </div>
-
-            <div class="order-3 min-w-0 md:order-none @4xl:col-start-1 @4xl:row-start-3 @5xl:col-start-2 @5xl:row-start-2">
-                <!-- The empty state names what is missing, why it matters and what to do (plan §10). It
-                     sits above the grid rather than replacing it: the grid's own entries are still the
-                     doors, and the advisor's refusal is a real state rather than a blank. -->
-                <Section
-                    v-if="empty"
-                    id="career-empty-heading"
-                    title="No turn recorded yet"
-                    class="mb-3 rounded-lg border border-dashed border-rule bg-panel p-4"
-                >
-                    <p class="mt-1 text-sm text-ink">
-                        Energy, Mood, Fans, Skill Points and the five stats are what this screen reads, and
-                        none has been entered for this run. Until one turn is recorded the advisor has
-                        nothing to rank, so it declines rather than guessing.
-                    </p>
-                    <a :href="props.run.training_url" class="mt-2 inline-flex min-h-11 items-center font-medium text-ink-strong underline">
-                        Record the first turn through Training
-                    </a>
-                </Section>
-
-                <ActionGrid v-if="isActive" :actions="props.actions" />
-
-                <!-- The actions a finished career still offers are tools rather than decisions, so they sit
-                     below the fold in the same shape as the other settings. -->
-                <details v-else data-region="run-tools" class="mt-3 rounded-lg border border-rule bg-panel p-4">
-                    <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
-                        Run tools
-                    </summary>
-                    <ActionGrid class="mt-3" :actions="props.actions" />
-                </details>
-
-                <!-- Trackblazer's Pro Shop is reachable from the Cockpit's action area (plan §9
-                     E4, design-2.0 §28 "The Shop should be quickly accessible from the Career
-                     Cockpit"). The button is rendered only when the matrix composes a shop, so
-                     other scenarios see no Shop affordance. WCAG 2.4.11: focus moves to the
-                     Shop heading after the visit, and the body has `scroll-margin-top` so the
-                     sticky mobile nav does not cover the focused control. -->
-                <button
-                    v-if="hasShop"
-                    type="button"
-                    class="mt-2 inline-flex min-h-11 items-center justify-center rounded-full border-2 border-rule px-4 font-semibold text-ink-strong"
-                    @click="jumpToShop"
-                >
-                    Shop
-                </button>
-            </div>
-
-            <Section
-                id="career-scenario-heading"
-                title="Scenario"
-                class="order-4 min-w-0 rounded-lg border border-rule bg-panel p-4 md:order-none @4xl:col-span-2 @4xl:row-start-4 @5xl:col-span-3 @5xl:row-start-3"
-            >
-                <!-- The shell switches on the matrix's own flags and widget keys and knows no
-                     scenario name (plan §9 E1, gate G-33). The prop's own shape is declared at
-                     `components/scenario/ScenarioPanel.vue`; the page forwards it untouched. -->
-                <div class="mt-2">
-                    <ScenarioPanel :scenario="props.scenario as never" />
-                </div>
-            </Section>
-
-            <section
-                class="order-5 min-w-0 rounded-lg border border-rule bg-panel p-4 md:order-none @4xl:col-span-2 @4xl:row-start-1 @5xl:col-span-1 @5xl:col-start-1 @5xl:row-span-2 @5xl:row-start-1"
-                aria-labelledby="career-timeline-heading"
-            >
-                <h2 v-if="isActive" id="career-timeline-heading" class="text-lg font-semibold text-ink-strong">
-                    Races in this run
-                </h2>
-
-                <!-- Once the career has ended the race list is history, not a decision, so it collapses
-                     below the fold. The heading id moves onto the `summary` so the section keeps the one
-                     accessible name it has while open. -->
-                <details v-else data-region="races-in-this-run" class="mt-1 rounded-lg border border-rule bg-raised p-4">
-                    <summary
-                        id="career-timeline-heading"
-                        class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong"
-                    >
-                        Races in this run
-                    </summary>
-                    <RunRaceStrip class="mt-2" :strip="props.raceStrip as never" />
-                </details>
-
-                <RunRaceStrip v-if="isActive" :strip="props.raceStrip as never" />
-
-                <p class="mt-3 text-xs text-ink-muted">
-                    This region carries the run's own races. Every logged turn, race and event, in order,
-                    is on the Career Timeline.
+            <details data-region="correct-turn" class="mt-2 rounded-lg border border-rule bg-panel p-4">
+                <summary class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong">
+                    Correct turn {{ props.correction.turn }} by hand
+                </summary>
+                <p class="mt-2 text-sm text-ink-muted">
+                    Every field of the turn the app is reading. It writes on submit and shows no
+                    preview, so use it to fix a mistyped reading rather than to log a new turn.
                 </p>
 
-                <a
-                    :href="props.run.timeline_url"
-                    class="mt-2 inline-flex min-h-11 items-center text-xs font-medium text-ink-strong underline"
+                <div
+                    v-if="correctionForm.hasErrors"
+                    ref="alert"
+                    role="alert"
+                    tabindex="-1"
+                    class="mt-3 rounded-md border border-risk bg-raised p-3 text-sm text-risk"
                 >
-                    Career Timeline
-                </a>
+                    <p class="font-semibold">The correction was not saved.</p>
+                    <ul class="mt-1 list-disc pl-5">
+                        <li v-for="(message, key) in correctionForm.errors" :key="key">{{ message }}</li>
+                    </ul>
+                </div>
 
-                <!-- The Career Result's only other door was the 2.0.0 record page's header, so it sits
-                     beside the timeline door here rather than in the action grid: the grid is the
-                     advisor's answer about the next turn, and this is a summary of the career. -->
-                <a
-                    :href="props.run.result_url"
-                    class="mt-2 inline-flex min-h-11 items-center text-xs font-medium text-ink-strong underline"
-                >
-                    Career Result
-                </a>
-
-                <!-- The run-delete door (F2, plan §9.6 ruling 4). Two-step disclosure: the summary
-                     names the destructive action, the form inside submits the DELETE only after the
-                     Trainer opens it and confirms. `deleteForm` carries no fields — the route is run
-                     scoped and the controller deletes the bound row — so the only data that matters
-                     is the URL. -->
-                <details data-region="danger-zone" class="mt-4">
-                    <summary
-                        class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-risk"
+                <form class="mt-3 grid grid-cols-2 gap-3 text-sm @4xl:grid-cols-3" @submit.prevent="saveCorrection">
+                    <BaseInput
+                      v-model="correctionForm.turn"
+                      type="number"
+                      id="turn"
+                      name="turn"
+                      label="Turn *"
+                      required
+                      :error="correctionForm.errors.turn"
+                    />
+                    <BaseInput
+                      v-for="field in statFields"
+                      :key="field.name"
+                      v-model="correctionForm[field.name]"
+                      type="number"
+                      :id="field.name"
+                      name="field.name"
+                      :label="`${field.label} *`"
+                      required
+                      :error="correctionForm.errors[field.name]"
+                    />
+                    <BaseInput
+                      v-model="correctionForm.sp"
+                      type="number"
+                      id="sp"
+                      name="sp"
+                      label="Skill Points"
+                      :error="correctionForm.errors.sp"
+                    />
+                    <fieldset class="col-span-2 flex flex-col gap-1 @4xl:col-span-3">
+                        <legend class="text-ink-muted">Energy</legend>
+                        <div class="flex flex-wrap items-center gap-x-4">
+                            <BaseRadio
+                              v-for="state in energyStates"
+                              :key="state.value"
+                              v-model="correctionForm.energy_state"
+                              :id="`energy_state_${state.value}`"
+                              name="energy_state"
+                              :label="state.label"
+                              :value="state.value"
+                              :error="correctionForm.errors.energy_state"
+                            />
+                        </div>
+                        <BaseInput
+                          v-if="correctionForm.energy_state === 'exact'"
+                          v-model="correctionForm.energy"
+                          type="number"
+                          id="energy"
+                          name="energy"
+                          label="Energy figure"
+                          :min="0"
+                          :max="100"
+                          :error="correctionForm.errors.energy"
+                        />
+                        <BaseSelect
+                          v-else-if="correctionForm.energy_state === 'band'"
+                          v-model="correctionForm.energy_band"
+                          name="energy_band"
+                          label="Energy band"
+                          :options="energyBands"
+                          :error="correctionForm.errors.energy_band"
+                        />
+                    </fieldset>
+                    <BaseInput
+                      v-model="correctionForm.fans"
+                      type="number"
+                      id="fans"
+                      name="fans"
+                      label="Fans"
+                      :error="correctionForm.errors.fans"
+                    />
+                    <BaseSelect
+                      v-model="correctionForm.mood"
+                      name="mood"
+                      label="Mood"
+                      :options="[{ value: '', label: 'not recorded' }, { value: 'GREAT', label: 'GREAT' }, { value: 'GOOD', label: 'GOOD' }, { value: 'NORMAL', label: 'NORMAL' }, { value: 'BAD', label: 'BAD' }, { value: 'AWFUL', label: 'AWFUL' }]"
+                      :error="correctionForm.errors.mood"
+                    />
+                    <button
+                        type="submit"
+                        class="inline-flex min-h-11 items-center justify-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action disabled:opacity-60 @4xl:col-span-3"
+                        :disabled="correctionForm.processing"
                     >
-                        Delete this career
+                        {{ correctionForm.processing ? 'Saving…' : 'Save correction' }}
+                    </button>
+                    <!-- The two header forms on this screen already report their own write; this
+                         one said nothing, so a Trainer could not tell a saved correction from a
+                         dead button (R3-04). `Correction saved.` names which of the three forms
+                         is speaking. -->
+                    <p v-if="correctionForm.recentlySuccessful" class="text-xs text-ink-muted @4xl:col-span-3">
+                        Correction saved.
+                    </p>
+                </form>
+
+                <!-- Delete one turn and its failure event (F2, plan §9.6 ruling 2). A second
+                     disclosure inside the correction panel: the write is `runs.turns.destroy`,
+                     the route the record screen already used. -->
+                <details class="mt-3 border-t border-rule pt-3">
+                    <summary class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-risk">
+                        Delete turn {{ props.correction.turn }}
                     </summary>
                     <p class="mt-2 text-sm text-ink-muted">
-                        Permanently removes this run and every record tied to it: turns, race entries,
-                        turn events, skills, support-deck slots, and the linked Veteran library record
-                        (if any was saved). There is no undo.
+                        Deletes turn {{ props.correction.turn }} and its recorded failure event.
+                        Other turns are unaffected. There is no undo.
                     </p>
-                    <form
-                        @submit.prevent="deleteRun"
-                        class="mt-2"
-                    >
+                    <form class="mt-2" @submit.prevent="deleteTurn">
                         <button
                             type="submit"
                             class="min-h-11 rounded-full border-2 border-risk px-4 font-semibold text-risk"
-                            :disabled="deleteForm.processing"
+                            :disabled="turnDeleteForm.processing"
                         >
-                            {{ deleteForm.processing ? 'Deleting…' : 'Delete this career' }}
+                            {{ turnDeleteForm.processing ? 'Deleting…' : `Delete turn ${props.correction.turn}` }}
                         </button>
                     </form>
                 </details>
-            </section>
-        </div>
+            </details>
+        </section>
         </div>
     </CareerLayout>
 </template>

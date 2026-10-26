@@ -414,8 +414,25 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                             {{ currentPeriod.name }}
                         </p>
 
+                        <!-- The runway, leading with the shortfall: "88 short" is the whole page in
+                             two words (HFW annotation 2). The figure is the run's own entered total
+                             against the checkpoint's published target, and the pill carries the word
+                             so nothing rides on its colour. -->
+                        <div class="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                            <template v-if="earned !== null">
+                                <span class="font-mono text-3xl font-extrabold tabular-nums text-ink-strong">{{ earned }}</span>
+                                <span class="font-mono text-sm tabular-nums text-ink-muted">/ {{ currentPeriod.required }}</span>
+                                <span v-if="remaining > 0" class="pill pill-caution ml-auto">{{ remaining }} short</span>
+                                <span v-else class="pill pill-positive ml-auto">met</span>
+                            </template>
+                            <template v-else>
+                                <span class="font-mono text-sm tabular-nums text-ink-muted">/ {{ currentPeriod.required }}</span>
+                            </template>
+                        </div>
+
                         <div
-                            class="mt-3 h-2.5 overflow-hidden rounded-full bg-sunken"
+                            v-if="earned !== null"
+                            class="mt-2 h-2.5 overflow-hidden rounded-full bg-sunken"
                             role="img"
                             :aria-label="barLabel"
                         >
@@ -425,22 +442,8 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                             />
                         </div>
 
-                        <p v-if="earned !== null" class="mt-2 font-mono text-sm tabular-nums text-ink-strong">
-                            {{ earned }} / {{ currentPeriod.required }}
-                            <span class="font-sans text-xs text-ink-muted">
-                                <template v-if="over > 0">
-                                    · {{ over }} over the objective
-                                </template>
-                                <template v-else-if="currentPeriod.required > 0">
-                                    · {{ remaining }} to go
-                                </template>
-                                <template v-else>
-                                    · no points required
-                                </template>
-                            </span>
-                        </p>
                         <p
-                            v-else-if="props.scenario.grade.unpriced_count > 0"
+                            v-if="earned === null && props.scenario.grade.unpriced_count > 0"
                             class="mt-2 text-sm text-ink-muted"
                         >
                             <span class="font-semibold text-ink">not yet totalled</span>:
@@ -449,9 +452,14 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                             no published Grade Point value, so any total here would count less
                             than this run earned.
                         </p>
-                        <p v-else class="mt-2 text-sm text-ink-muted">
+                        <p v-else-if="earned === null" class="mt-2 text-sm text-ink-muted">
                             <span class="font-semibold text-ink">not yet recorded</span>:
                             no races are logged for this run, so there is no progress to show yet.
+                        </p>
+                        <p v-else class="mt-2 text-sm text-ink-muted">
+                            <template v-if="over > 0">{{ over }} over the objective, and not banked.</template>
+                            <template v-else-if="remaining === 0">The checkpoint is met, and anything further is not banked.</template>
+                            <template v-else>The runway is the decision: {{ remaining }} points stand between this run and its dated checkpoint.</template>
                         </p>
 
                         <p
@@ -593,6 +601,19 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                     <p class="mt-2 text-xs text-ink-muted">
                         The shop rotation is not modelled, so this list is the catalogue only;
                         no row is recommended, no row is selected, no row is highlighted.
+                    </p>
+
+                    <!-- The one arithmetic mistake this scenario invites, said once (HFW annotation
+                         4). Source: `UMAMUSUME_REFERENCE.md` §2.2.3, "The two currency tables behind
+                         that sentence" — the two counters are independent and neither derives from
+                         the other. -->
+                    <p class="note mt-2">
+                        <span class="g" aria-hidden="true">○</span>
+                        <span>
+                            <b>Grade Points and Shop Coins are independent.</b> Grade Points scale with
+                            the race's grade, while Coins scale with placement alone, so a Pre-OP win
+                            pays the same Coins as a G1 win and a fraction of the Points.
+                        </span>
                     </p>
 
                     <!--

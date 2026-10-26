@@ -27,11 +27,17 @@
  * An unrecorded value renders as an absence with its reason, through `AbsenceValue`, rather than as a
  * bare marker: the same contract the state panel uses, and the shape `UiHygieneTest` accepts.
  */
+import { computed } from 'vue';
 import AbsenceValue from '../AbsenceValue.vue';
 
 const props = defineProps<{
     /** The turn the run stands on. Always a number; turn 0 is a run with no logged turn. */
     turn: number;
+    /**
+     * DM-1: the career's own length (`CareerCalendar::TURNS_PER_CAREER`, strictly 72). The strip prints
+     * `N of 72`, and a stored turn past it is the finale phase rather than turn 73+.
+     */
+    totalTurns: number;
     /** Energy as the header prints it (a figure, a band word, or null). */
     energyText: string | null;
     mood: string | null;
@@ -45,6 +51,20 @@ const props = defineProps<{
 }>();
 
 const group = (n: number): string => n.toLocaleString('en-US');
+
+// DM-1: one phrase for the position. No logged turn claims no number; the finale block sits outside
+// the 72 turns, so a stored turn past them reads as the phase it belongs to.
+const turnLabel = computed((): string => {
+    if (props.turn <= 0) {
+        return 'No turn recorded';
+    }
+
+    if (props.turn > props.totalTurns) {
+        return 'Finale phase';
+    }
+
+    return `Turn ${props.turn} of ${props.totalTurns}`;
+});
 
 // The reason wording is the one the identity card already owns, so a Trainer reads the same sentence
 // wherever an absence appears.
@@ -74,7 +94,7 @@ function revealAdvisor(): void {
         class="mb-3 border-b border-rule bg-page py-2"
     >
         <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm" data-region="summary-values">
-            <span class="font-semibold text-ink-strong">Turn {{ props.turn }}</span>
+            <span class="font-semibold text-ink-strong">{{ turnLabel }}</span>
 
             <span class="text-ink">
                 Energy:

@@ -48,6 +48,12 @@ const props = defineProps<{
     traineeJa: string | null;
     header: Header;
     /**
+     * DM-1: the career's own length, `CareerCalendar::TURNS_PER_CAREER` (strictly 72). The position
+     * line prints `N of 72`; a stored turn past it is the finale phase the client numbers on its own,
+     * never turn 73+.
+     */
+    totalTurns: number;
+    /**
      * Turns until the scenario's next milestone, carried by an imported position. Null is the common
      * case - a new career derives its position from its own turn log and a scenario with no pending
      * milestone has no number - so the row is drawn only when a figure exists rather than printed as
@@ -68,6 +74,20 @@ const props = defineProps<{
 const group = (n: number): string => n.toLocaleString('en-US');
 
 const absent = (what: string): string => `${what} has not been recorded for this run.`;
+
+// DM-1: the position phrase, from the calendar's own denominator. Turn 0 is a run with no logged turn
+// and claims no number; a turn past the 72-turn career is the finale phase, which sits outside them.
+const turnLabel = computed((): string => {
+    if (props.header.turn <= 0) {
+        return 'No turn recorded';
+    }
+
+    if (props.header.turn > props.totalTurns) {
+        return 'Finale phase';
+    }
+
+    return `${props.header.turn} of ${props.totalTurns}`;
+});
 
 // Both halves or neither: `★3 · Potential 2` is one statement about the trainee, and printing half of
 // it (a star with no level, or a level with no star) would state a combination nobody entered. `typeof`
@@ -125,7 +145,7 @@ const hasTraineeIdentity = computed(
             </div>
             <div class="flex flex-col">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Turn</dt>
-                <dd class="font-mono tabular-nums text-ink-strong" data-field="turn">{{ group(props.header.turn) }}</dd>
+                <dd class="font-mono tabular-nums text-ink-strong" data-field="turn">{{ turnLabel }}</dd>
             </div>
             <div class="flex flex-col">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Energy</dt>

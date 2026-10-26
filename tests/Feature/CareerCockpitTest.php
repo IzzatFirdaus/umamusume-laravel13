@@ -10,6 +10,7 @@ use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
 use App\Models\Umamusume;
+use App\Services\CareerCalendar;
 use Illuminate\Support\Collection;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -930,4 +931,20 @@ it('gives two careers of one trainee two different header identities', function 
     expect($first->id)->not->toBe($second->id)
         // The id the header prints is derived from `runUrl`, so the two URLs must not collapse to one.
         ->and(route('runs.cockpit', $first))->not->toBe(route('runs.cockpit', $second));
+});
+
+it('prints the 72-turn career length and keeps the finale outside it', function (): void {
+    // DM-1: a career is exactly 72 turns (`CareerCalendar::TURNS_PER_CAREER`), and the finale is a
+    // separate phase rather than turns 73+. The page prints `N of 72` from this prop, so the
+    // denominator has one owner and no literal lives in the Vue layer.
+    expect(CareerCalendar::TURNS_PER_CAREER)->toBe(72);
+
+    $run = cockpitRun(['status' => RunStatus::Active, 'scenario' => 'unity_cup']);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('header.total_turns', 72)
+            // The page head's door back to the list, added with the HFW parity head.
+            ->where('run.index_url', route('runs.index')));
 });

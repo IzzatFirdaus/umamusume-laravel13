@@ -505,7 +505,9 @@ test('reads one turn number in the header and in the correction selector', async
 
     const header = page.locator('[data-field="turn"]');
     await expect(header).toHaveCount(1);
-    await expect(header).toHaveText('1');
+    // DM-1: every position line names the career's own denominator, so the header and the summary
+    // strip cannot disagree about what "turn 1" means.
+    await expect(header).toHaveText('1 of 72');
 
     // The dropdown's own value is a turn id, so the comparison is on the number the screen shows beside
     // it: the summary of the form that opens on this turn.
@@ -546,11 +548,14 @@ test('keeps every settings disclosure closed on load for a finished career', asy
     }
 });
 
-test('the scenario panels read between the advisor and the scenario strip', async ({ page }) => {
+test('the scenario panels read before the advisor, above the scenario strip', async ({ page }) => {
     await openCockpit(page);
 
     // Tree order, not visual order: `querySelectorAll` answers in document order, which is the order a
-    // screen reader and a keyboard reach the three regions.
+    // screen reader and a keyboard reach the regions. The HFW parity slice put the scenario card in the
+    // left column, so the panels and the strip come before the advisor's rail rather than between the
+    // rail and the strip: the claim this case keeps is that the panels are above the strip they belong
+    // to and that one registered renderer did not shadow another out of the tree.
     const regions = await page.evaluate(() =>
         Array.from(document.querySelectorAll('[data-region]')).map((el) => el.getAttribute('data-region')),
     );
@@ -559,8 +564,9 @@ test('the scenario panels read between the advisor and the scenario strip', asyn
     const scenario = regions.indexOf('scenario');
 
     expect(advisor).toBeGreaterThanOrEqual(0);
-    expect(panels).toBeGreaterThan(advisor);
+    expect(panels).toBeGreaterThanOrEqual(0);
     expect(panels).toBeLessThan(scenario);
+    expect(scenario).toBeLessThan(advisor);
 });
 
 test('a completed URA career prints no Critical row', async ({ page }) => {
@@ -629,8 +635,10 @@ test('renders the summary strip with the header values, the affordance and no pr
     const strip = page.getByRole('region', { name: 'Run summary' });
     await expect(strip).toBeVisible();
 
-    // The strip carries the header's own facts and says so in words, including the absences.
-    await expect(strip.getByText(/^Turn \d+/)).toBeVisible();
+    // The strip carries the header's own facts and says so in words, including the absences. DM-1:
+    // a career turn prints its 72-turn denominator, and the seeded URA finale run stands at turn 75,
+    // which is the finale phase outside the 72 turns and never "turn 75 of 72".
+    await expect(strip.getByText(/^(Turn \d+ of \d+|Finale phase)$/)).toBeVisible();
     for (const label of ['Energy:', 'Mood:', 'Fans:', 'Skill Points:']) {
         await expect(strip.getByText(label)).toBeVisible();
     }

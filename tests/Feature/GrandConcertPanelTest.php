@@ -184,3 +184,32 @@ it('draws the strip for a fifth scenario from config alone', function (): void {
             });
         });
 });
+
+it('ships the five Performance types and no invented reading for them', function (): void {
+    // HFW parity ruling: the five tiles render as honest absences rather than being removed. The type
+    // names are `PerformanceType`'s client strings (notice 905), not a copy in config or in the page,
+    // and a run that has recorded no Performance observation ships an empty list rather than zeroes.
+    $run = grandConcertRun();
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('performance.enabled', true)
+            ->where('performance.types', ['Dance', 'Passion', 'Vocals', 'Visuals', 'Composure'])
+            ->where('performance.observations', []));
+});
+
+it('answers the Performance prop for every other scenario with the flag off', function (): void {
+    // The card draws from the matrix's own `performance_input` flag, so no scenario name reaches the
+    // page (D-240, G-33). A third scenario that gains the field needs no edit in the Vue layer.
+    foreach (['ura_finale', 'unity_cup', 'trackblazer'] as $key) {
+        $run = grandConcertRun($key);
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('performance.enabled', false)
+                ->where('performance.types', [])
+                ->where('performance.observations', []));
+    }
+});
