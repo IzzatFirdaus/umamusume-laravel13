@@ -11,6 +11,67 @@ This file starts empty on purpose. The repository's whole history predates it, t
 mean writing claims about commits that were never recorded as changes, which `AGENTS.md` §5 forbids.
 Entries below are written at the time of the change, not back-filled.
 
+## [3.0.0] - 2026-10-27
+
+The HFW-parity release. The v3 frontend slices landed across the preceding sessions (S3a-S3c, S5, S6,
+S7a, S8, S9, S11 as commits `f0e89dbd` through `e4a6e2fb`); this release closes the remainder and files
+what it did not close. No new route, screen, API field, or schema change: every item below is copy,
+markup, a derived prop, or a test.
+
+### Added
+
+- **Careers row sort** (S3) - the list's fourth control. `RunSearchRequest` accepts `sort`
+  (`newest` / `oldest` / `trainee`), `TrainingRunController@index` applies it in SQL and echoes it into
+  `filters.sort`, and the row renders the select beside Status. Newest-first stays the default, and an
+  absent key is the same answer as `newest`.
+- **`tr.is-current`** on the active Careers row - the HFW's own class name beside the tint, so the state
+  is addressable by name while the pill's word and the Position cell still carry it.
+- **Difference column on Legacy compare** (S7) - one verdict per property: `same`, `differs by N` for
+  star ranks, `differs (N values)` for text. A comparison with no difference prints the permitted
+  verdict **"Nothing decisive"** in words.
+- **Cockpit turn-count pair** (S5 step 2.6) - the payload ships `header.logged_turns` (the recorded
+  rows) beside `header.turn` (the position) and `header.next_turn_to_play`, and the Turn tile prints
+  both readings when they disagree, matching the Dashboard's labelled-defect shape.
+- **Pick border on the Database ledger tile** (S9) - the source ledger is the tile the hub points at.
+- `tests/Feature/FrameworkAuditExitTest.php` - pins that the framework audit exits non-zero and says
+  `UNVERIFIED` when its browser cannot launch.
+
+### Fixed
+
+- **Careers create: the Notes label** now reads "Notes (optional)", matching the HFW and the two other
+  optional fields on the page.
+- **Training-detail copy pins** - `85d24959` re-spelled the *derived* energy-cost row as
+  `−17 … −28 Energy` / `0 Energy` while the server's *published* rows stayed on `E−21` / `E−0`. Three
+  assertions in `career-training-detail.spec.ts` still expected the old spelling; they now pin the
+  shipped copy (same count, same order, no assertion removed).
+- **Legacy compare: absence reasons are text** - the two rank rows, the Spark-count split and the Spark
+  chance row carried their reasons in `title` only; they now print them.
+
+### Documentation
+
+- `docs/proposals/frontend-development-update-plan.md` - **DM-3 amended**: four family roles across
+  five colour keys (`SPARK_KINDS` is `blue, pink, green, white, scenario`), with the Inheritance screen
+  (`f0caa281`) printing all five.
+- `docs/proposals/TASKS.md` - this release's evidence ledger: tree state, base attribution, the lint
+  block, the peer blocks, per-slice premise measurement and the gate runs.
+
+### Deferred, with the reason on file
+
+- **Legacy builder: one spark per parent by radio.** `legacy-builder.html` draws a radio per *spark row*
+  inside each parent, while the app's builder records the parent's whole spark list and its ancestors'
+  rows. Changing that changes the stored `legacy_selection` shape, not a UI slice, so it is filed rather
+  than silently re-shaped.
+- **Veterans index factor-grade columns and the detail reorder** - both files
+  (`Veterans/Index.vue`, `Veterans/Show.vue`) were peer-dirty for the whole session
+  (`blocked - foreign uncommitted`).
+- **TraineeProfile growth row** - `Career/TraineeProfile.vue` was peer-dirty (last peer edit
+  2026-10-27 01:44).
+- **`lint:ui` baseline bump to 220** - the 220th finding is in peer-dirty `Review/Index.vue:300`; the
+  baseline records a clean tree and this tree is not one, so it stays at 219 until the peer commits.
+- **The Trackblazer/Grand Concert "illustrative" sentence** - `.mockbar` is absent from every shipped
+  component, but the sentence suggested for it names a verification date this release did not perform,
+  so it is not printed.
+
 ## [2.1.1] - 2026-10-24
 
 A PATCH release from the Group A + Group B audit pass. Read-only panels and copy on existing screens,

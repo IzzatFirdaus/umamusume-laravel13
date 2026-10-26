@@ -187,4 +187,185 @@ Isolated worktree `D:\Projects\td-slice1` at `86127192` + only this slice's diff
 - `php artisan test --filter="RunsIndex"` — **14 passed (226 assertions)**.
 - `runs-create-forms.spec.ts:48` — **1 passed** (Phase 0.3).
 
+## Phase 2 — Slice 5: Cockpit (2026-10-27)
+
+Premise: the shell and the four scenario panels had already landed (`2ba54a61`, *feat(cockpit): HFW base
+layout and scenario panels (S5)*). Each bullet was checked against the tree before editing.
+
+| Bullet | State | Evidence |
+|---|---|---|
+| 2.1 shell order: identity card, then the two-column grid, then the race strip, then the scenario panel | already satisfied | `Cockpit.vue` renders `CockpitIdentityCard` (line 865) before the `@4xl:grid-cols-[2fr_1fr]` body; `RunRaceStrip` sits after it |
+| 2.1 one primary action, the same one the Next Decision card offers | already satisfied | `headAction` is the decision's own action (`<LinkButton variant="primary">`, line 820) |
+| 2.1 finale countdown inside the scenario card | already satisfied | `Cockpit.vue:1007` draws it in the scenario card, and `finaleTurnsAway` is the only countdown source |
+| 2.1 advisor rail `v-if="isActive"`, no empty rail on a Completed run | already satisfied | `Cockpit.vue:1035`; `ActionGrid` and the timeline heading are gated the same way |
+| 2.2 URA: outcome first on Completed, entered caps where they differ, no advisor rail | already satisfied | `ura-panel.spec.ts` (green in the batch below); `capComposition` carries the run's entered caps |
+| 2.3 Unity Cup: five `.srow` bars, current row pill, "Where to go" | already satisfied | `unity-cup-panel.spec.ts` (green below) |
+| 2.4 Trackblazer: shortfall as lead figure, currencies separated in one sentence, no `.mockbar` | already satisfied | `TrackblazerPanel.vue:610-617` separates Grade Points from Shop Coins in one sentence; `grep mockbar resources/js` → no hits |
+| 2.5 Grand Concert: loop explained, five tiles with honest absences, payouts stated | already satisfied | the reading is drawn inline in `Cockpit.vue:961` and explained at `Cockpit.vue:441-450`; `grand-concert-panel.spec.ts` green below |
+| **2.6 turn-count discrepancy labelled on both pages** | **gap → landed** | the Dashboard already shipped `position_turn` beside `turn`; the cockpit now ships `header.logged_turns`/`header.next_turn_to_play` and prints both when they disagree (`data-field="turn-discrepancy"`) |
+| 2.4/2.5 the HFW's `.mockbar` warning stated as a `.note` | **deviation, filed** | `.mockbar` is absent from every shipped component. The suggested sentence names a verification date (2026-09-27) that this session did not perform and that no ledger row records for these two areas' support data, so printing it would assert a verification that did not happen |
+
+Verification: `php artisan test --filter="Cockpit"` → **128 passed (1728 assertions)**. The four variant
+specs ran in the isolated worktree with this session's diff applied — result recorded in the gate block
+at the end of this file.
+
+**Browser gap recorded, not hidden:** `tests/browser/turn-count-discrepancy.spec.ts` was **not** written.
+The disagreement state needs a run whose stored position is ahead of its recorded rows, and the only
+surface that writes a stored position is the snapshot flow; driving it from a browser spec would be a
+second copy of `career-snapshot.spec.ts`'s walk. The pair is pinned where it is actually written —
+`CareerCockpitTest` and `DashboardTest`, one case each, both asserting the same two figures.
+
+## Phase 3 — Slice 7 remainder: Legacy Lab (2026-10-27)
+
+Premise: `bd1b2d73` landed the Legacy Lab index; the builder and compare pages predate it.
+
+| Bullet | State | Evidence |
+|---|---|---|
+| 3.1 saved pairs are the unit; three-row value table; Compare is the filled action | already satisfied | `Legacy/Index.vue:94-97` (Compare `variant="primary"`), `:251-286` (the three rows and the two-family note) |
+| 3.2 two parent slots, one pick each, no multi-select | **deviation, filed** | `legacy/AncestryNode.vue:140` renders one `<select>` per slot — a single-pick control, never a multi-select. The HFW's radios pick one **spark row** inside a parent, not a parent, and the app records whole spark lists; re-shaping that is a change to the stored `legacy_selection` payload, beyond a UI slice |
+| 3.2 dashed empty slot + "slot open", "Skip this moment" | **not applicable** | neither phrase exists in any Legacy wireframe: `grep -i "skip this moment\|slot open\|dashed" docs/design-research/frontend-v2-wireframes/legacy*.html career-legacy.html` → no matches. They belong to no HFW page, so they are not invented onto one |
+| 3.2 star count rolled, never a choice | already satisfied | the builder takes the star count as a number the Trainer reads off the game; nothing offers it as a choice |
+| **3.3 differences in a column** | **gap → landed** | new "Where they differ" table: one verdict per property, `same` / `differs by N` / `differs (N values)` |
+| **3.3 "Nothing decisive" as a permitted verdict** | **gap → landed** | the all-identical line now reads "Nothing decisive — …" |
+| 3.3 matching rows still print | already satisfied | the detail table is unchanged and prints every property |
+| bonus: absence reasons were `title`-only (rule 1) | **gap → fixed** | the two rank rows, the Spark-count split and the Spark chance row now print their reasons |
+
+## Phase 4 — Slice 8: Library (2026-10-27)
+
+Premise: `fac82088` (*feat(library): HFW catalog, support-card and skill screens (S8)*) landed the whole
+slice. Measured bullet by bullet:
+
+- **Catalog index/detail** — cards rather than tables, three aptitude letters per card, debut form and
+  rarity on the card, growth row with `+0%` for real zeros, release status as a word pill, and the
+  nine-letter aptitude table on the detail. Present in `Catalog/{Index,Show}.vue`; `catalog.spec.ts`
+  covers them.
+- **Support cards** — effect chips as words, Pal "None", type counts, the zero-coverage family as a line,
+  one row per card, stage table with absent levels never printed as `0`, four-diamond break state,
+  duplicate rule, provenance row with no file paths. Present; `support-cards.spec.ts` covers them.
+- **Skills** — engine condition in mono beside the readable name, base SP cost only (the ladder is the
+  planner's, `4b80f533`), search over name and effect, type as a filter; detail prints engine tokens
+  first and the "No client string." empty state, with `sourceText` never rendered as copy. Present;
+  `skills.spec.ts` covers them.
+- `php artisan test --filter="Catalog|SupportCard|Skill"` was **not** re-run as a gate in this session;
+  the class was green at the last recorded run and nothing in this session touched those files. Recorded
+  as "not run", which is a legitimate line in a report and not a claim of green.
+
+## Phase 5 — Slice 9: Database hub (2026-10-27)
+
+Premise: `42ac8b74` landed the hub and the area subnav.
+
+| Bullet | State | Evidence |
+|---|---|---|
+| 5.1 `areas[]` carries `count: int` | already satisfied, with named absences | four areas carry a live count, `Scenarios` carries the config count, and Events / Shop Items / Sparks / Data sources carry `null` plus a documented reason (no table holds them) |
+| 5.1 one grouped query for the counts, no N+1 | **partly satisfied, filed** | the hub issues four `count()` statements (Umamusume, SupportCard, Skill, RaceCatalogSlot) plus a config read. That is four round trips, not nine, and not the single `UNION ALL` the instruction sketches. A `UNION ALL` across four unrelated tables returns one row per table only with a synthetic key, which the payload then has to re-split; the four-call shape is what the controller's docblock already commits to. Recorded rather than re-shaped in a release commit |
+| 5.2 nine tiles, live counts, sub-nav strip, verification date | already satisfied | `Database/Index.vue`, `components/database/DatabaseNav.vue` |
+| **5.2 Sources tile carries the pick border** | **gap → landed** | `isLedger()` adds `border-brand-chrome` to that one tile |
+| 5.3 six sub-pages: sub-nav, honesty column, scoping, retry rules beside events, caveats on the row, breadcrumb, `N/A` with a reason | already satisfied | `database.spec.ts` covers the hub, the areas, the caveats and the breadcrumbs; `380bf50a` fixed the N/A notes |
+
+## Phase 6 — Slice 11 remainder: Preferences + Errors (2026-10-27)
+
+- **6.1 Preferences** — already satisfied by `985a44cb`, `8c182d3f` and `f3d3936a`: one `.savebar`, one
+  verb ("Save changes"), disabled while clean, three stated widths with their numbers, theme as a choice
+  of options with the "Follow the system stores nothing" note, language separated from game vocabulary.
+  The HFW's moved-up save action is the one deviation, and `8c182d3f` recorded it as KI-134 rather than
+  pretending the page matches. `preferences.spec.ts` covers all five acceptance lines.
+- **6.2 Error pages** — already satisfied by `fe2fa850`: `resources/views/errors/{404,419,500}.blade.php`
+  answer the data-loss question first, offer three exits with one filled action, and carry no
+  `http-equiv="refresh"`. They are Blade documents, not Inertia pages: the app has no `resolveErrorPage`
+  and no `resources/js/pages/Errors/`, so the instruction's "whichever component the app uses" resolves
+  to these three views.
+
+## Phase 7 — sweep, verification, release (2026-10-27)
+
+- **7.3 framework audit** — already non-vacuous in this repository's port. `tools/ui-framework-audit.mjs`
+  exits **2** with `UNVERIFIED` both when Playwright is absent (`:38-45`) and when Chromium cannot launch
+  (`:65-72`); the upstream `framework-audit.mjs` the instruction names is the HFW's reference copy under
+  `docs/design-research/`, not a shipped tool. A fixture test now pins the behaviour
+  (`tests/Feature/FrameworkAuditExitTest.php`), asserting a non-zero exit, `UNVERIFIED` and the printed
+  reason — the rule the instruction carries is "CI cannot pass when the driver is missing", and the exit
+  code it suggests (1) is a number, not the rule.
+- **7.1/7.2 full sweep and DM verification** — **not run as a repo-wide sweep in this session.** The two
+  rule classes it checks were touched where this session edited: the `title`-only reasons found in
+  `Legacy/Compare.vue` were fixed, and the DM-3 override is already present and now matches the amended
+  row. A repo-wide table with a row per rule was not produced, so no claim of a clean sweep is made.
+- **7.4 full gates** — **partial**. Run in this session: `npm run typecheck` (exit 0),
+  `npm run build` (exit 0, base and slice worktrees), the targeted Pest classes named per phase, and the
+  targeted browser specs listed below. **Not run:** the full `npm run test:browser` suite,
+  `pint --test`, `phpstan analyse`, `php tools/lore.php`, `node tools/ui-framework-audit.mjs` against a
+  live server. The 46-baseline comparison is therefore **not** produced, and the release is labelled
+  accordingly rather than claiming a clean full-suite run.
+
+## Gate log — 2026-10-27
+
+| Command | Where | Result |
+|---|---|---|
+| `npm run build` | `D:\Projects\td-base` (`86127192`) | exit 0, `✓ built in 26.67s` |
+| `npm run build` | `D:\Projects\td-slice1` (`86127192` + this session's diff) | exit 0, `✓ built in 23.49s` / `24.96s` |
+| `npm run typecheck` | working tree | exit 0 (`tsc --noEmit`) |
+| `php artisan test --filter="RunsIndex"` | working tree | **14 passed (226 assertions)** |
+| `php artisan test --filter="Cockpit"` | working tree | **128 passed (1728 assertions)** |
+| `php artisan test --filter="hands over both turn readings"` | working tree | **2 passed (24 assertions)** — cockpit + dashboard |
+| `php artisan test --filter="FrameworkAuditExit"` | working tree | **1 passed** (non-zero exit, `UNVERIFIED`, reason printed) |
+| `npx playwright test career-training-detail` | `td-slice1` | **21 passed** after the copy pins were corrected |
+| `npx playwright test career-deck-select` | `td-base` | **14 passed** |
+| `npx playwright test runs-create-forms:48` | `td-base` and working tree | **1 passed** each |
+| `npx playwright test runs-index.spec.ts` | `td-slice1` | **2 passed** (44.3s) |
+| `npx playwright test runs-create.spec.ts` | `td-slice1` | **1 passed** |
+| `npx playwright test run-import.spec.ts` | `td-slice1` | **8 passed** |
+| `npx playwright test legacy.spec.ts database.spec.ts:30 ura-panel unity-cup-panel trackblazer-panel grand-concert-panel` | `td-slice1` | **58 tests: 56 passed, 2 failed** — both were this session's own new assertions (the hub's class-token read matched `hover:border-brand-chrome`, and two `legacy.spec.ts` table locators went ambiguous once the difference table existed). Corrected and re-run green: hub **1 passed**, builder **1 passed**, compare alignment **1 passed**, difference column **3 passed together** (`-g "aligns up to four columns|prints the difference in its own column|confirms a selection"`, 42.0s). Two further pre-existing pins in `legacy.spec.ts` (`Blue Sparks` cell, `Spark chance` cell) needed rewriting because those cells now print their reasons as visible text; both re-run green |
+| `npm run lint:ui` | working tree | **red by peer**: `count 220 exceeds baseline 219`, `Review/Index.vue:300`. Base worktree is green, so the finding is foreign WIP |
+| `npm run lint:ui` | `td-base` | green (no `[debt-increase]` line) |
+
+**Not run, and named rather than implied:** full `npm run test:browser`, `vendor/bin/pint --test`,
+`vendor/bin/phpstan analyse`, `php tools/lore.php`, `node tools/ui-framework-audit.mjs` against a live
+server, the §7.1 rule sweep, the §7.2 DM table, and the 46-baseline comparison.
+
+## Session report — 2026-10-27
+
+**Status.** Phase 0: 0.1, 0.2, 0.3, 0.7, 0.8 landed; 0.4 Path B, 0.5 and 0.6 blocked by foreign
+uncommitted files, each filed with its path and mtime. Phase 1: landed (`30e9bcc7`). Phase 2: 2.1-2.5
+measured as already satisfied and confirmed by their specs; 2.6 landed. Phase 3: 3.1 and 3.3 landed
+(3.3's two gaps), 3.2 filed as a payload-shape change plus two non-existent HFW phrases. Phase 4:
+measured, already satisfied, not re-gated. Phase 5: 5.2 landed, 5.1's count prop already satisfied, the
+single-query shape filed. Phase 6: both halves already satisfied by earlier commits. Phase 7: 7.3
+verified and pinned, 7.5 partly done, 7.6 the release commit, 7.4 partial and stated as such.
+
+**`DOMAIN OVERRIDE` in the tree (this session's own).** None added. The one this session relied on is
+`Legacy/Index.vue`'s `DOMAIN OVERRIDE (DM-3)` on the Green/White row, which now matches the amended
+DM-3 text.
+
+**Tests written.** `tests/browser/runs-index.spec.ts` (new, 2 cases), `tests/browser/runs-create.spec.ts`
+(new, 1 case), `tests/Feature/FrameworkAuditExitTest.php` (new, 1 case), and one new case each in
+`tests/Feature/RunsIndexTest.php`, `tests/Feature/CareerCockpitTest.php`, `tests/browser/run-import.spec.ts`,
+`tests/browser/legacy.spec.ts`, `tests/browser/database.spec.ts`.
+
+**Tests rewritten.** `tests/browser/career-training-detail.spec.ts` (three copy pins, same intent, no
+assertion removed), `tests/browser/legacy.spec.ts` (two table locators scoped to the side-by-side
+region, and the Spark-count cell's pin now reads the count plus the split).
+
+**Changed files.** Shell/page: `Runs/{Index,Create}.vue`, `Legacy/Compare.vue`, `Database/Index.vue`,
+`Career/Cockpit.vue`. Controller/request: `TrainingRunController.php`, `RunSearchRequest.php`,
+`Career/CockpitController.php`. Tests: the seven files above. Docs: `docs/proposals/TASKS.md`,
+`docs/proposals/frontend-development-update-plan.md`, `CHANGELOG.md`, `VERSION.md`, `AGENTS.md`.
+
+**Commits.** `86127192`, `ae4b6230`, `70631a60`, `30e9bcc7`, plus the phase 2/3/5 commit and the release
+commit (hashes in `git log`).
+
+**Prior-session claims re-verified.** Round 1's Deck claim (14/14 at base) and Training claim (21/21
+after the copy pin correction) hold. The `runs-create-forms:48` premise was stale (pass at base and at
+HEAD). Round 2's Timeline/Result/SaveVeteran/RaceDecision/SkillsPlanner/Inheritance commits were not
+re-run in this session; their suites are in the full browser run that this session did not execute.
+
+**The three foreign files.** `VeteranController.php` (` M`, 01:44) and `Help.vue` (untouched by this
+session) — not edited. `Review/Index.vue` (` M`, 02:37:50) — not edited, and it still carries the 220th
+`lint:ui` finding, so the baseline stays at 219.
+
+**`85d24959`.** Acknowledged as round-1's home. It was read for blame evidence only (the energy-cost
+copy change), never reset, rebased, split or amended.
+
+**Worktrees.** `../td-base` and `../td-slice1` are removed at the end of the session; if either survives,
+the reason will be appended here.
+
+
+
 

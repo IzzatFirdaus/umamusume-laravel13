@@ -32,6 +32,11 @@ trackers plus the `uma_musume_race_planner` career-run planner (rev 0.2, repo #4
   these age the moment a slice lands, so this is a snapshot note, not a number to keep in step; what
   holds is the shape: the career set and the scenario panels are Vue, and
   `resources/views/components/` is empty since slice B1.*
+  *Dated correction 2026-10-27 (v3.0.0 release): re-measured, the tree carries 100 single-file
+  components under `resources/js/components/` and 59 page files under `resources/js/pages/`. The
+  v3 HFW-parity slices added the scenario panels and the Legacy/Catalog/SupportCards/Skills/Database
+  surfaces. The two earlier corrections stand as history; this figure is a snapshot too, and only the
+  shape above is a rule.*
 - **Data arrives through a stage-isolated fetch engine** that cross-references JP and
   Global catalog sources, snapshots each body, and promotes engine-owned facts with
   provenance.
@@ -509,8 +514,10 @@ ruling.
 `npm run lint:ui` (plan slice 1.12) fails a Card inside a Card and any new arbitrary Tailwind value
 `bg-[#…]`, `w-[37px]`). The check is `tools/ui-framework-check.mjs` — `tools/ui-lint.mjs` was retired
 in Phase 1.6 and its two rules absorbed as rules 8 and 10 there. Arbitrary values are enumerated in
-`tools/ui-lint-baseline.json`, which sets `count: 0`: every remaining value is named individually, so
-any new one fails at 0 + 1. That list is deferred debt with a named intent, not a place to add. The
+`tools/ui-lint-baseline.json`; the debt count there is **219** as measured on 2026-10-27 (the earlier
+"sets `count: 0`" line described the gate's intent, not its state), and each remaining value is named
+individually, so any new one fails at 219 + 1. That list is deferred debt with a named intent, not a
+place to add. The
 identifier and bare-`N/A` rules are enforced by `tests/Feature/UiHygieneTest.php`, and the
 one-`h1`-per-route rule by `tests/browser/ui-hygiene.spec.ts`.
 
