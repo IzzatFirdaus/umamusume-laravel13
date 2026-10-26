@@ -25,6 +25,8 @@ interface Absence {
 const props = defineProps<{
     veteran: Veteran;
     career: { turns: number; energy: number | null; fans: number | null };
+    /** The five final stats from the run's last logged turn; null where no turn recorded one. */
+    stats: Record<string, number | null>;
     counts: { skills: number; races: number };
     parents: { a: string | null; b: string | null };
     runUrl: string;
@@ -120,6 +122,28 @@ const doorClass =
                     <dd class="text-ink-strong">{{ props.counts.races }}</dd>
                 </div>
             </dl>
+
+            <!-- The five final stats, from the run's last logged turn. A career with no logged turn
+                 prints the absence in words per stat rather than five zeros: a zero here would read
+                 as a finishing total nobody recorded (Slice 7, HFW veteran-detail annotation 2). -->
+            <div class="mt-4">
+                <p class="text-xs text-ink-muted">Final stats</p>
+                <dl class="mt-1 flex flex-wrap gap-x-6 gap-y-1 text-sm">
+                    <div v-for="(value, stat) in props.stats" :key="stat" class="flex items-baseline gap-2">
+                        <dt class="text-xs text-ink-muted">{{ stat }}</dt>
+                        <dd class="font-mono tabular-nums text-ink-strong">
+                            <template v-if="value !== null">{{ value }}</template>
+                            <span v-else class="text-xs font-normal text-ink-muted">Not recorded</span>
+                        </dd>
+                    </div>
+                </dl>
+                <p
+                    v-if="Object.values(props.stats).every((value) => value === null)"
+                    class="mt-1 text-xs text-ink-muted"
+                >
+                    No turn is logged on this career, so none of the five stats has a recorded figure.
+                </p>
+            </div>
 
             <div class="mt-3 text-sm">
                 <p class="text-xs text-ink-muted">Tags</p>
