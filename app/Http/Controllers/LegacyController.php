@@ -80,25 +80,14 @@ class LegacyController extends Controller
             ->withQueryString()
             ->through(fn (Veteran $veteran): array => VeteranRow::from($veteran));
 
-        // The roster the Trainer assigns from. Bounded and unpaginated on purpose: the builder's pick
-        // list is a local search over a personal library, and a Trainer's own veterans number in the
-        // tens. A roster is not catalog data, so it is not cached (`ARCHITECTURE.md` §6).
-        $roster = Veteran::query()
-            ->with('trainingRun.umamusume')
-            ->latest('id')
-            ->get()
-            ->map(fn (Veteran $veteran): array => [
-                'id' => $veteran->id,
-                'name' => $veteran->trainingRun->umamusume->name,
-            ])
-            ->values()
-            ->all();
-
+        // Slice 7 prop-drift fix: this method used to pass a `roster` prop the page never declared
+        // (`Legacy/Index.vue` lists Veterans and opens the builder per row; the picker roster belongs to
+        // the builder, which builds its own through `roster()` below). Dropping the dead payload rather
+        // than declaring an unused prop, the same ruling §7.3 records for `VeteranController@index`.
         $totalCount = Veteran::query()->count();
 
         return Inertia::render('Legacy/Index', [
             'veterans' => $rows,
-            'roster' => $roster,
             'filters' => [
                 'trainee' => $filters['trainee'],
                 'scenario' => $filters['scenario'],
