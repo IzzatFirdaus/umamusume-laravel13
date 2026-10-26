@@ -55,6 +55,11 @@ const props = defineProps<{
 const page = usePage();
 const errors = computed(() => (page.props.errors ?? {}) as Record<string, string>);
 
+/** A Champions Meeting team registers three Veterans; whole teams are all the library can field. */
+const NEEDED_FOR_TEAM = 3;
+
+const teamsAvailable = computed(() => Math.floor(props.totalCount / NEEDED_FOR_TEAM));
+
 const traineeOptions = computed(() =>
     Object.entries(props.trainees).map(([name, id]) => ({ name, id })),
 );
@@ -118,7 +123,11 @@ const hasSharedAncestryNote = computed(() =>
     <AppLayout>
         <Head title="Veteran library" />
         <template #head>
-            <PageHeader eyebrow="Library" title="Veteran library" />
+            <PageHeader
+                eyebrow="Veterans"
+                title="Veteran library"
+                :description="libraryLede"
+            />
         </template>
 
         <form class="mt-4 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
@@ -187,6 +196,36 @@ const hasSharedAncestryNote = computed(() =>
         </p>
 
         <p v-if="loading" role="status" class="mt-4 text-sm text-ink-muted">Loading results…</p>
+
+        <!-- Team eligibility is arithmetic this page does rather than a figure a Trainer keeps by hand:
+             a Champions Meeting team registers three Veterans, so the library's own total answers both
+             how many are registered and how many whole teams that makes. `NEEDED_FOR_TEAM` is the
+             transplanted rule, not a config value, because no column or source in this repository states
+             the team size (`UMAMUSUME_REFERENCE.md` §1.3.6 is the reference the rule comes from). -->
+        <dl v-if="totalCount > 0" class="mt-4 grid grid-cols-1 gap-3 min-[761px]:grid-cols-3" data-field="team-eligibility">
+            <div class="rounded-md border border-rule bg-panel p-3">
+                <dt class="text-xs text-ink-muted">Registered</dt>
+                <dd class="font-mono tabular-nums text-ink-strong">{{ totalCount }}</dd>
+            </div>
+            <div class="rounded-md border border-rule bg-panel p-3">
+                <dt class="text-xs text-ink-muted">Needed for a team</dt>
+                <dd class="font-mono tabular-nums text-ink-strong">{{ NEEDED_FOR_TEAM }}</dd>
+            </div>
+            <div class="rounded-md border border-rule bg-panel p-3">
+                <dt class="text-xs text-ink-muted">Teams available</dt>
+                <dd class="font-mono tabular-nums text-ink-strong">{{ teamsAvailable }}</dd>
+            </div>
+        </dl>
+        <p v-if="totalCount > 0 && teamsAvailable === 0" class="mt-2 text-sm text-ink-muted">
+            No whole team yet: {{ NEEDED_FOR_TEAM - totalCount }} more
+            {{ NEEDED_FOR_TEAM - totalCount === 1 ? 'Veteran' : 'Veterans' }} would register one. This is
+            arithmetic on the library, not a claim that any three can win.
+        </p>
+
+        <p class="mt-4 text-sm text-ink-muted">
+            Three stars is the ceiling on Global. The ★4 cap is the JP-only factor-research item, which
+            cannot push past ★4 and does not exist here.
+        </p>
 
         <p class="mt-6 text-sm text-ink-muted">
             <template v-if="totalCount === 0">
