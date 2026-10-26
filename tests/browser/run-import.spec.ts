@@ -144,6 +144,50 @@ test('commits the previewed file: confirm writes the run and the page leaves the
     // Cockpit), and the URL leaving the import path is exactly the step KI-64 recorded as never
     // reached: the POST used to omit the file body, get refused, and leave the page (and its visitor)
     // sitting on the same URL with nothing said.
-    await page.waitForURL((url) => /\/training-runs\/\d+(\/cockpit)?$/.test(url.pathname));
+    await page.waitForURL((url) => /\/training-runs\/(\d+)(\/cockpit)?$/.test(url.pathname));
     await expect(page.getByRole('heading', { level: 1 })).toContainText(traineeName);
 });
+
+// Slice 3 step 1.3's two additions. The import page's own annotation 3 makes the textarea the primary
+// control, above the upload path, and import-preview annotation 2 makes every field state itself as
+// found or missing rather than defaulting silently.
+test('puts the paste box first and above the upload path, so the textarea is the primary control', async ({ page }) => {
+    await page.goto('/training-runs/import');
+    await page.locator('#app > *').first().waitFor();
+
+    const textarea = page.locator('textarea[name="csv"]');
+    const upload = page.locator('input[name="file"]');
+    const paste = await textarea.boundingBox();
+    const file = await upload.boundingBox();
+
+    // Region order: the paste box's top is above the upload control's, and it is the taller of the two.
+    expect(paste?.y ?? 0).toBeLessThan(file?.y ?? Number.MAX_SAFE_INTEGER);
+    expect(paste?.height ?? 0).toBeGreaterThan(120);
+    await expect(textarea).toHaveAttribute('rows', /^(8|9|10)$/);
+});
+
+test('tags every previewed field found or missing, and names what to do about a miss', async ({ page }) => {
+    await page.goto('/training-runs/import');
+    await page.locator('#app > *').first().waitFor();
+
+    // The form's own status select names the accepted set, which is the set the preview's miss sentence
+    // quotes. `Active, Completed or Retired` is the vocabulary, not a bare "required".
+    const statusOptions = await page.locator('select[name="status"] option').allTextContents();
+    expect(statusOptions.map((label) => label.trim()).sort()).toEqual(['Active', 'Completed', 'Retired']);
+
+    await fillForm(page, csv([okRow('1')]));
+
+    // A file the app wrote carries the trainee, the scenario and the status; it carries no notes, so the
+    // notes field is the one honest miss on a well-formed sheet.
+    const notesLabel = page.locator('#preview-notes-label');
+    await expect(notesLabel.getByText('missing', { exact: true })).toBeVisible();
+    await expect(page.getByText(/Not in the file\. Notes are optional/)).toBeVisible();
+
+    for (const field of ['umamusume_id', 'scenario', 'status']) {
+        await expect(
+            page.locator(`#preview-${field}-label`).getByText('found', { exact: true }),
+            `${field} is not tagged found`,
+        ).toBeVisible();
+    }
+});
+

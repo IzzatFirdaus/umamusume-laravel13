@@ -71,6 +71,7 @@ class TrainingRunController extends Controller
         $search = $filters['search'] ?? null;
         $scenario = $filters['scenario'] ?? null;
         $status = $filters['status'] ?? null;
+        $sort = $filters['sort'] ?? null;
 
         return Inertia::render('Runs/Index', [
             'runs' => TrainingRun::query()
@@ -93,6 +94,13 @@ class TrainingRunController extends Controller
                 )
                 ->latest('created_at')
                 ->latest('id')
+                // The row's Sort control. Newest first is the HFW's default and the absence of a
+                // chosen sort; the other two are the row's own vocabulary, applied in SQL rather
+                // than in the page so pagination keeps its order.
+                ->when($sort === 'oldest', fn ($query) => $query->reorder()->oldest('created_at')->oldest('id'))
+                ->when($sort === 'trainee', fn ($query) => $query->reorder()->orderByRaw(
+                    '(select name from umamusume where umamusume.id = training_runs.umamusume_id) asc',
+                ))
                 ->paginate(25)
                 // A filtered page keeps its query string, so page two of a filter is the same filter.
                 ->withQueryString()
@@ -138,6 +146,7 @@ class TrainingRunController extends Controller
                 'search' => $search,
                 'scenario' => $scenario,
                 'status' => $status,
+                'sort' => $sort,
             ],
             'scenarios' => $this->scenarioLabels(),
             'statuses' => $this->statusLabels(),

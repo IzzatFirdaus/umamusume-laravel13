@@ -164,6 +164,45 @@ it('does not render a hardcoded turn for an active run', function (): void {
             ->where('runs.data.0.turn_count', 72));
 });
 
+it('applies the row\'s sort choice, echoes it back, and refuses one outside its vocabulary', function (): void {
+    $older = TrainingRun::factory()->create(['created_at' => '2026-10-01 09:00:00']);
+    $newer = TrainingRun::factory()->create(['created_at' => '2026-10-20 09:00:00']);
+
+    test()->get('/training-runs')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('filters.sort', null)
+            ->where('runs.data.0.id', $newer->id)
+            ->where('runs.data.1.id', $older->id));
+
+    test()->get('/training-runs?sort=oldest')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('filters.sort', 'oldest')
+            ->where('runs.data.0.id', $older->id)
+            ->where('runs.data.1.id', $newer->id));
+
+    // The validator refuses a sort outside the row's three values rather than falling back quietly.
+    test()->get('/training-runs?sort=sideways')->assertRedirect(route('runs.index'));
+});
+
+it('sorts by the trainee\'s own name when the row asks for it', function (): void {
+    $zeta = TrainingRun::factory()->create([
+        'umamusume_id' => Umamusume::factory()->create(['name' => 'Zeta Sort'])->id,
+    ]);
+    $alpha = TrainingRun::factory()->create([
+        'umamusume_id' => Umamusume::factory()->create(['name' => 'Alpha Sort'])->id,
+    ]);
+
+    test()->get('/training-runs?sort=trainee')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('filters.sort', 'trainee')
+            ->has('runs.data', 2)
+            ->where('runs.data.0.id', $alpha->id)
+            ->where('runs.data.1.id', $zeta->id));
+});
+
 it('orders two runs created in the same second by id, newest first', function (): void {
     $first = TrainingRun::factory()->create(['created_at' => '2026-10-24 12:00:00']);
     $second = TrainingRun::factory()->create(['created_at' => '2026-10-24 12:00:00']);

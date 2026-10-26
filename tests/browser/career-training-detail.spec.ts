@@ -156,10 +156,16 @@ test('shows five cards, the sourced cost, and no projected number anywhere', asy
         await expect(page.getByRole('heading', { name: stat })).toBeVisible();
     }
 
-    // The cost prints as the range the constant is, worst first, and names its source in the title.
+    // The cost prints as the range the constant is, and names its source in the title.
     // This fixture records no facility level, so no published per-level row applies and the declared
     // range is the whole row; the published path is its own case below.
-    await expect(page.getByText('E−28 … E−17')).toHaveCount(4);
+    //
+    // Dated 2026-10-27: the copy moved with `85d24959`, which spelled the derived range as
+    // `−17 … −28 Energy` (the constant's own low-to-high order) rather than the `E−28 … E−17`
+    // shorthand this assertion was written against. The published per-level rows still carry the
+    // server's own `E−21` text (the cases below), so the two spellings are two different rows, not a
+    // regression.
+    await expect(page.getByText('−17 … −28 Energy')).toHaveCount(4);
 
     // No projected number prints on this screen state: the fixture records no facility level, so
     // the scenario matrix's published rows have no level to key to and render as the named absence.
@@ -175,7 +181,10 @@ test('shows five cards, the sourced cost, and no projected number anywhere', asy
     const wit = page.getByRole('article').filter({ hasText: /^Wit/ });
     await wit.getByRole('button', { name: 'Inspect details' }).click();
     await expect(wit.getByText('RiskNotMeasured')).toBeVisible();
-    await expect(page.getByText('E−0')).toBeVisible();
+    // The same `85d24959` spelling: a zero derived cost is `0 Energy`, and the card adds the
+    // `no Energy` tag beside it (its own case below). `exact` because the advisor's sentence ("Wit
+    // costs 0 Energy…") also contains the substring inside the same article.
+    await expect(wit.getByText('0 Energy', { exact: true })).toBeVisible();
 
     // Exactly one RECOMMENDED marker, on the largest deficit, with the advisor's reason line beside it.
     await expect(page.getByText('RECOMMENDED')).toHaveCount(1);
@@ -293,10 +302,13 @@ test('renders the scenario matrix published row when the turn records a facility
 
     // Wit renders its gains row under the same tag, and its Energy row stays the advisor's own
     // declared constant: the artifact's Wit rows state a refund, not a cost, so no published
-    // cost figure displaces the sourced E−0. The gains row is the Level-3 row the walk recorded.
+    // cost figure displaces the derived zero. The gains row is the Level-3 row the walk recorded.
+    //
+    // Dated 2026-10-27: `85d24959` re-spelled the derived zero from `E−0` to `0 Energy` (the card adds
+    // the `no Energy` tag beside it, its own case below).
     const witCard = page.getByRole('article').filter({ hasText: /^Wit/ });
     await expect(witCard.getByText('+8 Wit, +2 Speed, +5 SP')).toBeVisible();
-    await expect(witCard.getByText('E−0')).toBeVisible();
+    await expect(witCard.getByText('0 Energy', { exact: true })).toBeVisible();
 });
 
 test('expands and collapses the details by keyboard, and keeps the tab order with the document', async ({ page }) => {

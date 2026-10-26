@@ -11,7 +11,7 @@ use Illuminate\Validation\Rule;
 /**
  * The Careers list's one filter row (HFW runs-index annotation 1: filters are a single inline form
  * row). Every field is optional, and an empty value is "no filter chosen", the same answer as
- * omitting the key, so the three empties become null and pass as nullable rather than failing their
+ * omitting the key, so the four empties become null and pass as nullable rather than failing their
  * `in` lists as the empty string.
  *
  * `all` is this surface's token for the unfiltered list; it joins each accepted vocabulary
@@ -46,12 +46,15 @@ class RunSearchRequest extends FormRequest
                 self::ALL,
                 ...array_map(static fn (RunStatus $case): string => $case->value, RunStatus::cases()),
             ])],
+            // The row's fourth control. An absent key is the HFW's default order (newest first), so
+            // the page prints a sort only when one was applied and the URL always carries the answer.
+            'sort' => ['nullable', Rule::in(['newest', 'oldest', 'trainee'])],
         ];
     }
 
     protected function prepareForValidation(): void
     {
-        foreach (['search', 'scenario', 'status'] as $key) {
+        foreach (['search', 'scenario', 'status', 'sort'] as $key) {
             if ($this->input($key) === '') {
                 $this->merge([$key => null]);
             }

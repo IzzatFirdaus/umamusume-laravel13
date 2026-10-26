@@ -37,7 +37,7 @@ interface Paginator<T> {
 const props = defineProps<{
     runs: Paginator<Run>;
     /** The applied filter row, echoed back into the controls. */
-    filters: { search: string | null; scenario: string | null; status: string | null };
+    filters: { search: string | null; scenario: string | null; status: string | null; sort: string | null };
     scenarios: Record<string, string>;
     statuses: Record<string, string>;
 }>();
@@ -153,6 +153,16 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                     >{{ label }}</option>
                 </select>
             </label>
+            <label class="flex flex-col gap-1" :class="fieldLabel">
+                Sort
+                <select name="sort" :class="fieldControl">
+                    <option value="newest" :selected="props.filters.sort === null || props.filters.sort === 'newest'">
+                        Newest first
+                    </option>
+                    <option value="oldest" :selected="props.filters.sort === 'oldest'">Oldest first</option>
+                    <option value="trainee" :selected="props.filters.sort === 'trainee'">Trainee A–Z</option>
+                </select>
+            </label>
             <button
                 type="submit"
                 class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-semibold text-ink hover:bg-raised transition-colors duration-150 ease-out"
@@ -203,13 +213,15 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Annotation 2: the active run is the only row with a fill; the status word and
-                         the pill carry the state too, so it never rides on colour alone. -->
+                    <!-- Annotation 2: the active run is the only row with a fill, and it carries the
+                         HFW's own `is-current` class so the state is addressable by name. The pill's
+                         word and the Position cell carry the same state, so it never rides on colour
+                         alone (WCAG 1.4.1, DESIGN.md D-12). -->
                     <tr
                         v-for="run in props.runs.data"
                         :key="run.id"
                         class="border-b border-rule last:border-b-0"
-                        :class="isActive(run) ? 'bg-status-positive/10' : ''"
+                        :class="isActive(run) ? 'is-current bg-status-positive/10' : ''"
                     >
                         <td class="px-4 py-3">
                             <b class="text-ink-strong">{{ run.name }}</b>

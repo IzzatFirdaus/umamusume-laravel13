@@ -251,7 +251,7 @@ function submit(): void {
                 </div>
 
                 <FormField
-                    label="Notes"
+                    label="Notes (optional)"
                     :required="false"
                     :error="form.errors.notes"
                     id="create-notes"

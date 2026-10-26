@@ -134,3 +134,57 @@ The two committed Veterans slices (`b59ab9f2`, `367a7e6c`) already landed the el
 the five final stats, so what remains is the index factor-grade columns and the detail reorder — both
 inside the peer-dirty files and therefore not this session's to edit.
 
+## Phase 1 — Slice 3: Careers list & import (2026-10-27)
+
+Premise measurement first: `S3a`/`S3b`/`S3c` had already landed (`f0e89dbd`, `b8eb3216`), so most of
+Slice 3 was satisfied before this session. Each bullet was classified before anything was edited.
+
+### `Runs/Index.vue` (step 1.1)
+
+| Bullet | State | Evidence |
+|---|---|---|
+| filters are one inline form row, no drawer | already satisfied | `Runs/Index.vue:110-176`, one `<form role="search">`, no drawer component |
+| HFW's other three controls | already satisfied | Search, Scenario, Status, Apply, Clear read from `runs-index.html:71-113` |
+| a **Sort** control (the instruction's fourth control; the HFW's filter block draws none) | **gap → landed** | `RunSearchRequest` gains `sort` (`newest`/`oldest`/`trainee`), `TrainingRunController@index` applies it in SQL and echoes it, `Index.vue` renders the select |
+| `class="is-current"` on the active row | **gap → landed** | the HFW's class name now ships beside the tint |
+| pill word + position, never colour alone | already satisfied | `StatusPill` prints the status word; the Position cell prints the named position |
+| turn is `N / 72` | already satisfied | `turn_count` is `CareerCalendar::TURNS_PER_CAREER` in the controller, printed on the active row |
+| retired row says `Retired at turn N`, not `Finished` | already satisfied | `Index.vue` position cell |
+| no destructive action in a row | already satisfied | no delete control on the page |
+| pagination under the table | already satisfied | `TinyPager` after the table |
+
+Order note: the instruction lists "Search, Status, Scenario, Sort, Apply"; the HFW draws Search,
+Scenario, Status. The HFW's order was kept (it is the acceptance criterion) and Sort added before Apply.
+
+### `Runs/Create.vue` (step 1.2)
+
+Already satisfied against `runs-create.html:55-116`: eyebrow `New career`, `h1` "Create a career", the
+HFW's own lede sentence, one `Career` card, one filled action "Create run", Cancel as an outline link.
+One gap landed: the Notes label now reads "Notes (optional)", matching the HFW's label (and the two other
+optional fields already on the page).
+
+### `Runs/Import.vue` (step 1.3)
+
+Already satisfied against `import.html` / `import-preview.html`: the paste box is the first and largest
+control (`name="csv"`, `rows=10`) above the upload path, the format card is visible prose ("What the
+importer looks for"), confirm is the only filled action and nothing writes before it, and every preview
+field carries a `found`/`missing` tag with a sentence naming what to do. One honest limit, recorded
+rather than papered over: the status field's `missing` sentence quotes the valid set
+(`Choose Active, Completed or Retired`), but that branch is **not reachable through the form** — the
+status select always carries one of the three and `ImportHistoricalRunRequest` requires it. The spec
+therefore pins the valid set where it is observable (the select's own options) and the reachable
+`missing` case (Notes).
+
+### Verification
+
+Isolated worktree `D:\Projects\td-slice1` at `86127192` + only this slice's diff, `npm run build`:
+
+- `runs-index.spec.ts` (new) — **2 passed**, 44.3s. One career is started through the wizard and deleted
+  through `runs.destroy` in `afterEach`, so the scratch database is left as it was found.
+- `runs-create.spec.ts` (new) — **1 passed**.
+- `run-import.spec.ts` (two cases added) — **8 passed**.
+- `career-training-detail.spec.ts` — **21 of 21 pass** after the copy pin was corrected (Phase 0.2).
+- `php artisan test --filter="RunsIndex"` — **14 passed (226 assertions)**.
+- `runs-create-forms.spec.ts:48` — **1 passed** (Phase 0.3).
+
+
