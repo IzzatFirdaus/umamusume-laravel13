@@ -260,11 +260,10 @@ function runBackup(): void {
 
 <template>
     <AppLayout>
-        <Head title="Settings" />
-        <template #eyebrow>Preferences</template>
-        <template #title>Settings</template>
+        <Head title="Preferences" />
+        <template #eyebrow>Settings</template>
+        <template #title>Preferences</template>
 
-        <h2 class="text-lg font-semibold text-ink-strong">Preferences</h2>
         <p class="mt-1 text-sm text-ink-muted">
             Settings are stored in this app's database for a single Trainer and read back on the next
             full page load. A preference this tool cannot store is named rather than offered.
@@ -408,7 +407,7 @@ function runBackup(): void {
                         name="settings[dashboard_layout]"
                         label="Compact"
                         value="compact"
-                        hint="Focused composition. A single reading column, best for forms and long copy."
+                        hint="Focused composition. A single reading column at 768px, best for forms and long copy."
                         :aria-describedby="describedBy('settings.dashboard_layout')"
                     />
                 </fieldset>
@@ -422,16 +421,20 @@ function runBackup(): void {
                         Toggle which dashboard cards appear when you open the Dashboard.
                     </p>
 
-                    <BaseCheckbox
-                        v-for="card in DASHBOARD_CARDS"
-                        :key="card.id"
-                        :model-value="isCardShown(card.id)"
-                        :id="`dashboard_card_${card.id}`"
-                        :name="`settings[dashboard_hidden_cards][${card.id}]`"
-                        :label="card.label"
-                        :aria-describedby="describedBy('settings.dashboard_hidden_cards')"
-                        @update:model-value="(v: boolean | string | number) => toggleCard(card.id, v === true)"
-                    />
+                    <!-- One row of toggles: without the gap the labels abut the next box and the
+                         checkbox names run together as one sentence. -->
+                    <div class="flex flex-wrap gap-x-5 gap-y-2">
+                        <BaseCheckbox
+                            v-for="card in DASHBOARD_CARDS"
+                            :key="card.id"
+                            :model-value="isCardShown(card.id)"
+                            :id="`dashboard_card_${card.id}`"
+                            :name="`settings[dashboard_hidden_cards][${card.id}]`"
+                            :label="card.label"
+                            :aria-describedby="describedBy('settings.dashboard_hidden_cards')"
+                            @update:model-value="(v: boolean | string | number) => toggleCard(card.id, v === true)"
+                        />
+                    </div>
                 </fieldset>
 
                 <!-- Reset layout to defaults (DL.6): secondary, below the checkbox group, inline
@@ -627,12 +630,22 @@ function runBackup(): void {
                 {{ errorOf(key) }}
             </p>
 
-            <!-- The one accented primary on the screen (plan 6B.12); the tab strip's gold underline
-                 is the selection state, not a second action accent. Rendered through BaseButton so
-                 the browser gate can read `data-variant="primary"` off the committed element. -->
-            <BaseButton type="submit" variant="primary" :disabled="form.processing">
-                {{ form.processing ? 'Saving…' : 'Save preferences' }}
-            </BaseButton>
+            <!-- The savebar (preferences.html): the state of the form and the screen's one accented
+                 primary, on the same line. The button stays enabled on a clean form because saving an
+                 unchanged form is a supported action — the flash's second-announcement case saves
+                 twice with no edit — so only the state line changes, not what a Trainer can press. -->
+            <div class="flex flex-wrap items-center justify-between gap-3 rounded-md border border-rule bg-raised px-4 py-3">
+                <!-- Plain text, not a second live region: `ui/Flash.vue` owns the flash announcement,
+                     and a second `role="status"` on this screen made every status locator ambiguous. -->
+                <p class="text-xs text-ink-muted">
+                    {{ form.isDirty ? 'Unsaved changes' : 'All changes saved' }}
+                </p>
+                <!-- Rendered through BaseButton so the browser gate can read `data-variant="primary"`
+                     off the committed element. -->
+                <BaseButton type="submit" variant="primary" :disabled="form.processing">
+                    {{ form.processing ? 'Saving…' : 'Save preferences' }}
+                </BaseButton>
+            </div>
             <p class="text-xs text-ink-muted">Saves every tab in one write.</p>
         </form>
     </AppLayout>

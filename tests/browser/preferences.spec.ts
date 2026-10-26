@@ -8,7 +8,11 @@ test('Preferences renders its heading, both controls and the shell nav', async (
     await page.goto('/preferences');
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByRole('heading', { name: 'Preferences', level: 2 })).toBeVisible();
+    // The HFW's h1 is "Preferences"; the shell's eyebrow carries the rail's word, "Settings".
+    await expect(page.getByRole('heading', { name: 'Preferences', level: 1 })).toBeVisible();
+
+    // The savebar states the form's condition before anything is touched.
+    await expect(page.getByText('All changes saved', { exact: true })).toBeVisible();
 
     // The theme control offers the three stored values (light, dark, eva01) plus follow-the-OS.
     const theme = page.getByLabel('Theme');
@@ -431,7 +435,7 @@ test('the General category offers Layout width and Show on Dashboard controls', 
 
     // Show on Dashboard: five checkboxes, all checked by default (none hidden).
     await expect(page.getByText('Show on Dashboard')).toBeVisible();
-    for (const label of ['Pick up where you left off', 'Quick actions', 'Recent veterans', 'Needs you']) {
+    for (const label of ['Active Career', 'Quick Actions', 'Recent Veterans', 'Roster', 'Data Status']) {
         await expect(page.getByRole('checkbox', { name: label })).toBeVisible();
         await expect(page.getByRole('checkbox', { name: label })).toBeChecked();
     }
@@ -443,7 +447,7 @@ test('the saved dashboard layout and hidden cards survive a reload and reflect o
 
     // Switch to Focused layout and hide the Data Status card.
     await page.getByRole('radio', { name: 'Compact' }).check();
-    await page.getByRole('checkbox', { name: 'Needs you' }).uncheck();
+    await page.getByRole('checkbox', { name: 'Data Status' }).uncheck();
     await page.getByRole('button', { name: 'Save preferences' }).click();
     await expect(page.getByRole('status')).toHaveText('Preferences saved.');
 
@@ -451,20 +455,20 @@ test('the saved dashboard layout and hidden cards survive a reload and reflect o
     await page.reload();
     await page.locator('#app > *').first().waitFor();
     await expect(page.getByRole('radio', { name: 'Compact' })).toBeChecked();
-    await expect(page.getByRole('checkbox', { name: 'Needs you' })).not.toBeChecked();
+    await expect(page.getByRole('checkbox', { name: 'Data Status' })).not.toBeChecked();
 
     // The Dashboard reads the same stored preferences: Data Status region is gone, and the
     // grid container carries the focused class (single column, centred).
     await page.goto('/');
     await page.locator('#app > *').first().waitFor();
-    await expect(page.getByRole('region', { name: 'NEEDS YOU' })).toHaveCount(0);
+    await expect(page.getByRole('region', { name: 'DATA STATUS' })).toHaveCount(0);
 
     // Reset: back to Bento, all cards shown. The shared dev database must not hold the test
     // mutation, so the next spec sees the default grid.
     await page.goto('/preferences');
     await page.locator('#app > *').first().waitFor();
     await page.getByRole('radio', { name: 'Standard', exact: true }).check();
-    await page.getByRole('checkbox', { name: 'Needs you' }).check();
+    await page.getByRole('checkbox', { name: 'Data Status' }).check();
     await page.getByRole('button', { name: 'Save preferences' }).click();
     await expect(page.getByRole('status')).toHaveText('Preferences saved.');
 });
@@ -475,7 +479,7 @@ test('Reset layout to defaults restores bento and every card with a two-click co
 
     // Move away from the defaults first, so the reset has something to undo.
     await page.getByRole('radio', { name: 'Compact' }).check();
-    await page.getByRole('checkbox', { name: 'Needs you' }).uncheck();
+    await page.getByRole('checkbox', { name: 'Data Status' }).uncheck();
     await page.getByRole('button', { name: 'Save preferences' }).click();
     await expect(page.getByRole('status')).toHaveText('Preferences saved.');
 
@@ -486,7 +490,7 @@ test('Reset layout to defaults restores bento and every card with a two-click co
     // Second click commits: Bento is selected again and every card is shown.
     await page.getByRole('button', { name: 'Reset?' }).click();
     await expect(page.getByRole('radio', { name: 'Standard', exact: true })).toBeChecked();
-    for (const label of ['Pick up where you left off', 'Quick actions', 'Recent veterans', 'Needs you']) {
+    for (const label of ['Active Career', 'Quick Actions', 'Recent Veterans', 'Roster', 'Data Status']) {
         await expect(page.getByRole('checkbox', { name: label })).toBeChecked();
     }
     await expect(page.getByRole('status').filter({ hasText: 'Layout width reset to defaults.' })).toBeAttached();
