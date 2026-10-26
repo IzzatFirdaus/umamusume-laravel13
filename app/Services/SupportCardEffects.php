@@ -98,6 +98,59 @@ class SupportCardEffects
     }
 
     /**
+     * The card's effects as the source states them, anchor by anchor.
+     *
+     * `atCap()` answers "what is this worth at its best" and discards where the source says so. The card
+     * detail screen needs the anchors themselves, because the export states a value at particular card
+     * levels and says nothing between them: a level with no entry is an absence, not a zero, so a
+     * per-break column would print six evenly spaced cells the source never stated. Each row therefore
+     * carries its stated pairs in level order and the last of them, which is the cap `atCap()` returns.
+     *
+     * A row with no stated anchor at all is dropped, exactly as `atCap()` drops it.
+     *
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @return list<array{effect_id: int, name: string|null, anchors: list<array{level: int, display: string}>, cap: array{level: int, display: string}}>
+     */
+    public static function stages(SupportCard $card, array $dictionary): array
+    {
+        $rows = [];
+
+        foreach ($card->effects ?? [] as $row) {
+            if (count($row) !== count(self::ANCHOR_LEVELS) + 1) {
+                continue;
+            }
+
+            $effectId = (int) $row[0];
+            $entry = $dictionary[$effectId] ?? null;
+            $anchors = [];
+
+            foreach (self::ANCHOR_LEVELS as $index => $level) {
+                $value = $row[$index + 1];
+
+                if ($value !== -1) {
+                    $anchors[] = [
+                        'level' => $level,
+                        'display' => self::formatValue((int) $value, $entry['symbol'] ?? null),
+                    ];
+                }
+            }
+
+            if ($anchors === []) {
+                continue;
+            }
+
+            $rows[] = [
+                'effect_id' => $effectId,
+                'name' => $entry['name'] ?? null,
+                'anchors' => $anchors,
+                'cap' => $anchors[count($anchors) - 1],
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
      * The card's effects at a level the run reached, interpolated between the stated anchors.
      *
      * `forLevel()` derives the reached effect values for a card at a given level by linear interpolation

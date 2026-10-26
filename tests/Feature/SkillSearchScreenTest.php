@@ -395,3 +395,24 @@ it('is reachable from the shell nav rather than a run-screen door', function ():
 
     expect($layout)->toContain("to: '".$skillsPath."'");
 });
+
+it('carries the activation predicate the source states beside the row', function (): void {
+    skillScreenImport();
+
+    $response = test()->get('/skills')->assertOk();
+    $rows = $response->viewData('page')['props']['skills']['data'];
+
+    expect($rows)->not->toBeEmpty();
+
+    // At least one row must carry a predicate, or the assertion below would pass on an empty field.
+    expect(collect($rows)->contains(static fn (array $row): bool => $row['conditions'] !== []))->toBeTrue();
+
+    foreach ($rows as $row) {
+        $skill = Skill::query()->findOrFail($row['id']);
+
+        expect($row['conditions'])->toBe(array_map(
+            static fn (array $group): ?string => $group['condition'] ?? null,
+            $skill->condition_groups ?? [],
+        ));
+    }
+});

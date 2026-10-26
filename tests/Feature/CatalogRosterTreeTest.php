@@ -219,13 +219,15 @@ it('loads the tree in a fixed number of queries, not one per trainee', function 
     test()->get('/umamusume')->assertOk()->assertSee('Form Counted 4');
     $log = DB::getQueryLog();
 
-    // Counted separately because the shell owns it: the Blade view reads the stored theme, the
-    // Inertia payload reads it again, and it reads the stored settings the wizard's defaults come
-    // from (`HandleInertiaRequests`). A page that grew a trainee must not grow a query for any of
-    // them, so the tree's own count stays fixed while the shell's three are excluded above.
+    // Counted separately because the shell owns them: the Blade view reads the stored theme, the
+    // Inertia payload reads it again, it reads the stored settings the wizard's defaults come from,
+    // and the shell's active-career pill (`HandleInertiaRequests`) counts the active runs on every
+    // screen. A page that grew a trainee must not grow a query for any of them, so the tree's own
+    // count stays fixed while the shell's four are excluded above.
     $tree = array_values(array_filter(
         $log,
-        static fn (array $q): bool => ! str_contains($q['query'], 'from "preferences"'),
+        static fn (array $q): bool => ! str_contains($q['query'], 'from "preferences"')
+            && ! str_contains($q['query'], 'from "training_runs" where "status"'),
     ));
 
     // Four, whatever the page size: the ids and the total, the page re-read, and one
@@ -233,7 +235,7 @@ it('loads the tree in a fixed number of queries, not one per trainee', function 
     // each; loading a trainee's forms per row would be 4 more, and 68 trainees on a page
     // would be 68.
     expect($tree)->toHaveCount(4)
-        ->and(count($log))->toBe(7, 'the shell adds three preference queries the tree does not own: the Blade view theme, the Inertia theme, and the stored settings the wizard reads');
+        ->and(count($log))->toBe(8, 'the shell adds four queries the tree does not own: three preference reads and the active-career count');
 })->group('perf');
 
 it('reads a trainee badge off the cards the filter let through', function (): void {
@@ -582,4 +584,65 @@ it('names each form rarity through the shared chip rather than a second badge', 
             ->has('cards', 1)
             ->where('cards.0.rarity_label', 'Two stars')
             ->where('cards.0.rarity_stars', '★★'));
+});
+
+/*
+ * The list card's own three figures (plan Slice 8, `catalog.html` annotations 2 and 3): the strongest
+ * letter per axis, the form the portrait shows with that form's own rarity, and the release status as
+ * the stored value the page branches on rather than the label it prints.
+ */
+
+it('reduces the ten aptitude letters to the strongest one on each axis', function (): void {
+    $u = Umamusume::factory()->create(['name' => 'Aptitude One', 'slug' => 'aptitude-one']);
+    $u->forceFill([
+        'aptitude_turf' => 'A', 'aptitude_dirt' => 'B',
+        'aptitude_sprint' => 'C', 'aptitude_mile' => 'B', 'aptitude_medium' => 'A', 'aptitude_long' => 'E',
+        'aptitude_front_runner' => 'G', 'aptitude_pace_chaser' => 'A',
+        'aptitude_late_surger' => 'B', 'aptitude_end_closer' => 'C',
+    ])->save();
+
+    test()->get('/umamusume')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('umamusumes.data.0.aptitude_summary', 3)
+            ->where('umamusumes.data.0.aptitude_summary.0.axis', 'surface')
+            ->where('umamusumes.data.0.aptitude_summary.0.label', 'Turf')
+            ->where('umamusumes.data.0.aptitude_summary.0.letter', 'A')
+            ->where('umamusumes.data.0.aptitude_summary.1.axis', 'distance')
+            ->where('umamusumes.data.0.aptitude_summary.1.label', 'Medium')
+            ->where('umamusumes.data.0.aptitude_summary.1.letter', 'A')
+            ->where('umamusumes.data.0.aptitude_summary.2.axis', 'style')
+            ->where('umamusumes.data.0.aptitude_summary.2.label', 'Pace Chaser')
+            ->where('umamusumes.data.0.aptitude_summary.2.letter', 'A'));
+});
+
+it('reports no aptitude summary rather than three empty pills', function (): void {
+    Umamusume::factory()->create(['name' => 'No Aptitudes', 'slug' => 'no-aptitudes']);
+
+    test()->get('/umamusume')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('umamusumes.data.0.aptitude_summary', null));
+});
+
+it('names the form the card shows and that form\'s own rarity', function (): void {
+    $u = Umamusume::factory()->create(['name' => 'Gold Ship', 'slug' => 'gold-ship-card']);
+    CharacterCard::factory()->create([
+        'umamusume_id' => $u->id, 'card_id' => 100701, 'title' => '[Red Strife]',
+        'rarity' => CardRarity::TwoStar, 'is_debut_form' => true,
+    ]);
+    CharacterCard::factory()->create([
+        'umamusume_id' => $u->id, 'card_id' => 100702, 'title' => '[RUN! RUIN! LAUNCHER!]',
+        'rarity' => CardRarity::ThreeStar, 'global_release_date' => '2026-02-01',
+    ]);
+
+    // The debut form is the card's form even though a later form is the rarer one, and the rarity
+    // printed is the debut form's own: SR, not the three-star best (annotation 3).
+    test()->get('/umamusume')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('umamusumes.data.0.default_form.title', '[Red Strife]')
+            ->where('umamusumes.data.0.default_form.rarity_word', 'SR')
+            ->where('umamusumes.data.0.default_form.is_debut_form', true)
+            ->where('umamusumes.data.0.form_count', 2)
+            ->where('umamusumes.data.0.release_status', 'GlobalReleased'));
 });

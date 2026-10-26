@@ -129,7 +129,7 @@ class CatalogController extends Controller
         // and the unconfirmed opt-in.
         $umamusumes = (new LengthAwarePaginator($items, $total, $pageSize, $page, ['path' => $path]))
             ->withQueryString()
-            ->through(static function (Umamusume $umamusume) use ($mirror): array {
+            ->through(function (Umamusume $umamusume) use ($mirror): array {
                 // The badge and the form count both read the collection the card scope loaded,
                 // so a hidden card moves the max rarity with it.
                 $maxRarity = $umamusume->cards->isEmpty()
@@ -154,9 +154,26 @@ class CatalogController extends Controller
                     'slug' => $umamusume->slug,
                     'name' => $umamusume->name,
                     'name_ja' => $umamusume->name_ja,
+                    'release_status' => $umamusume->release_status->value,
                     'release_status_label' => $umamusume->release_status->label(),
                     'max_rarity' => $maxRarity === null ? null : ['label' => $maxRarity->label(), 'stars' => $maxRarity->stars()],
                     'artworkURL' => $headerCard === null ? null : $mirror->url('card_portrait', (int) $headerCard->card_id),
+                    // The form the card names beside her portrait, by the same rule the portrait uses
+                    // (`Umamusume::defaultForm()`): the debut form when the export flags one, otherwise
+                    // the first form in `cardScope()` order. The card and the detail page therefore
+                    // cannot name two different forms for one trainee, and `is_debut_form` lets the
+                    // page say "debut form" only where that is the fact (`catalog.html` annotation 3:
+                    // the form and its own rarity are two figures, not a trainee rarity).
+                    'default_form' => $headerCard === null ? null : [
+                        'title' => $headerCard->title,
+                        'rarity_label' => $headerCard->rarity->label(),
+                        'rarity_stars' => $headerCard->rarity->stars(),
+                        'rarity_word' => $headerCard->rarity->word(),
+                        'is_debut_form' => $headerCard->is_debut_form,
+                    ],
+                    // Three letters, not nine (`catalog.html` annotation 2): the strongest value per
+                    // axis, read off the model's own ten columns. The detail page owns the full set.
+                    'aptitude_summary' => $this->aptitudeSummary($umamusume),
                     'form_count' => $umamusume->cards->count(),
                     'cards' => $umamusume->cards->map(static fn (CharacterCard $card): array => [
                         'id' => $card->id,
@@ -476,6 +493,67 @@ class CatalogController extends Controller
             // rows that are not empty, so this page still carries no second boolean for the same fact.
             'empty_note' => TraineeGoal::ladderAbsenceReason($goals),
         ];
+    }
+
+    /**
+     * The aptitude grades from strongest to weakest, as the client orders them.
+     *
+     * Only used to pick the best of the two surface letters or the four in a distance or style family;
+     * the grade itself is printed verbatim, never mapped to a word.
+     */
+    private const APTITUDE_RANK = ['S' => 0, 'A' => 1, 'B' => 2, 'C' => 3, 'D' => 4, 'E' => 5, 'F' => 6, 'G' => 7];
+
+    /**
+     * The strongest letter on each of the three aptitude axes, for the list card.
+     *
+     * The card shows three letters instead of nine (`catalog.html` annotation 2), so each axis is read
+     * down to its best grade: the surface family (Turf, Dirt), the distance family and the style
+     * family. The axes and their labels come from `Umamusume::APTITUDE_AXES` through
+     * `aptitudeAxes()`, the model's own owner of the ten-column list, so this screen cannot print a
+     * second spelling of "Pace Chaser".
+     *
+     * Null is the same absence the detail page prints: `aptitude_turf` is the sentinel the parser
+     * writes all ten or none, so no letter is reported rather than three empty pills.
+     *
+     * @return list<array{axis: string, label: string, letter: string}>|null
+     */
+    private function aptitudeSummary(Umamusume $umamusume): ?array
+    {
+        $axes = collect($umamusume->aptitudeAxes())->keyBy('key');
+
+        $families = [
+            'surface' => ['turf', 'dirt'],
+            'distance' => ['sprint', 'mile', 'medium', 'long'],
+            'style' => ['front_runner', 'pace_chaser', 'late_surger', 'end_closer'],
+        ];
+
+        $summary = [];
+
+        foreach ($families as $axis => $keys) {
+            $best = null;
+
+            foreach ($keys as $key) {
+                $letter = $axes->get($key)['letter'] ?? null;
+
+                if ($letter === null || ! isset(self::APTITUDE_RANK[$letter])) {
+                    continue;
+                }
+
+                if ($best === null || self::APTITUDE_RANK[$letter] < self::APTITUDE_RANK[$best['letter']]) {
+                    $best = [
+                        'axis' => $axis,
+                        'label' => (string) ($axes->get($key)['label'] ?? $key),
+                        'letter' => $letter,
+                    ];
+                }
+            }
+
+            if ($best !== null) {
+                $summary[] = $best;
+            }
+        }
+
+        return $summary === [] ? null : $summary;
     }
 
     /**

@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\CardRarity;
 use App\Http\Requests\SupportCardSearchRequest;
+use App\Models\DeckSlot;
 use App\Models\Skill;
 use App\Models\SupportCard;
 use App\Models\Umamusume;
@@ -79,25 +80,41 @@ class SupportCardController extends Controller
         $cards = $this->ordered($this->filtered($rarity, $type, $status), $sort)
             ->paginate(PageSize::clamp($request->query('pageSize')))
             ->withQueryString()
-            ->through(static fn (SupportCard $card): array => [
-                'id' => $card->id,
-                'name' => $card->displayName(),
-                'url' => route('support-cards.show', $card),
-                // The row's thumbnail slot (`ADR-0021` read half, `design-2.0` §45a "Support-card
-                // index, card row"). `support_id` is the publisher's number and the only key the
-                // mirror's storage path answers to; the `url` above is built from the local primary
-                // key, because `show()` binds on that. The two must not be interchanged: a swapped
-                // `support-id` finds no file and the slot silently disappears, which reads as "the
-                // pictures never arrived" rather than as a bug. A null is the mirror's normal
-                // partial answer and the page renders no frame for it (`DESIGN.md` §4.7).
-                'artworkURL' => app(ArtworkMirror::class)->url('support_thumb', (int) $card->support_id),
-                'rarity_label' => $card->rarity->label(),
-                'rarity_stars' => $card->rarity->stars(),
-                'rarity_word' => $card->rarityWord(),
-                'type_label' => $card->typeLabel(),
-                'release_status' => $card->release_status,
-                'effects' => SupportCardEffects::atCap($card, $dictionary),
-            ]);
+            ->through(function (SupportCard $card) use ($dictionary): array {
+                $effects = SupportCardEffects::atCap($card, $dictionary);
+
+                return [
+                    'id' => $card->id,
+                    'name' => $card->displayName(),
+                    // The name and the epithet are two source fields, and the row prints them as the two
+                    // lines the card face carries. `name` above stays the joined label the row link and
+                    // the accessible-name contract are built on.
+                    'char_name' => $card->char_name ?? $card->name_ja ?? 'Card '.$card->support_id,
+                    'title' => $card->title_en,
+                    'url' => route('support-cards.show', $card),
+                    // The row's thumbnail slot (`ADR-0021` read half, `design-2.0` §45a "Support-card
+                    // index, card row"). `support_id` is the publisher's number and the only key the
+                    // mirror's storage path answers to; the `url` above is built from the local primary
+                    // key, because `show()` binds on that. The two must not be interchanged: a swapped
+                    // `support-id` finds no file and the slot silently disappears, which reads as "the
+                    // pictures never arrived" rather than as a bug. A null is the mirror's normal
+                    // partial answer and the page renders no frame for it (`DESIGN.md` §4.7).
+                    'artworkURL' => app(ArtworkMirror::class)->url('support_thumb', (int) $card->support_id),
+                    'rarity_label' => $card->rarity->label(),
+                    'rarity_stars' => $card->rarity->stars(),
+                    'rarity_word' => $card->rarityWord(),
+                    // The export's key beside its client word, because the type mark draws a different
+                    // glyph per key and the word alone cannot select it (`SupportTypeMark.vue`).
+                    'type' => $card->type,
+                    'type_label' => $card->typeLabel(),
+                    'release_status' => $card->release_status,
+                    'effects' => $effects,
+                    // The friendship bonus is the one effect the index compares on, so it gets its own
+                    // cell instead of being read out of the chip run (`support-cards.html` annotation 2:
+                    // a Pal card's absence is the deciding fact for that type, not a missing chip).
+                    'friendship' => $this->friendshipBonus($effects),
+                ];
+            });
 
         return [
             'cards' => $cards,
@@ -109,9 +126,105 @@ class SupportCardController extends Controller
             'typeWords' => $this->typeWords(),
             'availabilities' => SupportCard::AVAILABILITIES,
             'sorts' => $this->sortLabels(),
+            // Two whole-table reads on a 559-row table, taken once per page rather than once per row
+            // (`support-cards.html` annotations 3 and 4). Both state facts about the catalogue that no
+            // single row can: how the seven types divide, and which vocabulary effects no card carries.
+            'typeCounts' => $this->typeCounts(),
+            'uncoveredEffects' => $this->uncoveredEffects($dictionary),
             'totalCount' => SupportCard::query()->count(),
             'askedFor' => $this->describeAsk($rarity, $type, $status),
         ];
+    }
+
+    /**
+     * The export's own id for Friendship Bonus, the effect the deck-slot comparison turns on.
+     *
+     * An id and not a label: `support_effects` is the join target for `support_cards.effects`, so the
+     * lookup is by the source's key rather than by a display string that a later fetch could re-word
+     * (AGENTS.md §5, "no matching on display strings"). The dictionary row this id names is
+     * "Friendship Bonus" on every committed body, and a test pins that pairing.
+     */
+    private const FRIENDSHIP_EFFECT_ID = 1;
+
+    /**
+     * The friendship bonus at cap, or null when the card's effects do not state one.
+     *
+     * @param  list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>  $effects
+     * @return array{display: string}|null
+     */
+    private function friendshipBonus(array $effects): ?array
+    {
+        foreach ($effects as $effect) {
+            if ($effect['effect_id'] === self::FRIENDSHIP_EFFECT_ID) {
+                return ['display' => $effect['display']];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The seven types with their row counts, in the order `SupportCard::TYPES` states them.
+     *
+     * The `global` column is the availability split the page exists to make concrete: a JP guide's
+     * deck advice can be about a card Global has not received, and the counts say so on the page
+     * (`support-cards.html` annotation 3).
+     *
+     * @return list<array{type: string, label: string, total: int, global: int}>
+     */
+    private function typeCounts(): array
+    {
+        $rows = SupportCard::query()
+            ->selectRaw("type, count(*) as total, sum(case when release_status = 'Global' then 1 else 0 end) as global_count")
+            ->groupBy('type')
+            ->get()
+            ->keyBy('type');
+
+        return array_values(array_map(
+            static fn (string $type): array => [
+                'type' => $type,
+                'label' => SupportCard::typeWord($type),
+                'total' => (int) ($rows->get($type)->total ?? 0),
+                'global' => (int) ($rows->get($type)->global_count ?? 0),
+            ],
+            SupportCard::TYPES,
+        ));
+    }
+
+    /**
+     * The vocabulary effects that no card in this catalogue carries.
+     *
+     * A card row that names an effect on every anchor as `-1` states no value, so it does not carry the
+     * effect either; that is the same rule `atCap()` applies when it drops such a row. An effect with
+     * zero cards is a documented mechanism the data cannot show, and the page states it rather than
+     * silently omitting the family (`support-cards.html` annotation 4).
+     *
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @return list<array{effect_id: int, name: string|null}>
+     */
+    private function uncoveredEffects(array $dictionary): array
+    {
+        $carried = [];
+
+        foreach (SupportCard::query()->pluck('effects') as $rows) {
+            foreach ($rows ?? [] as $row) {
+                $values = array_slice($row, 1);
+
+                if ($values !== [] && array_filter($values, static fn (int $value): bool => $value !== -1) !== []) {
+                    $carried[(int) $row[0]] = true;
+                }
+            }
+        }
+
+        $uncovered = [];
+
+        foreach ($dictionary as $effectId => $entry) {
+            if (! isset($carried[$effectId])) {
+                $uncovered[] = ['effect_id' => $effectId, 'name' => $entry['name']];
+            }
+        }
+
+        return $uncovered;
     }
 
     /**
@@ -141,6 +254,7 @@ class SupportCardController extends Controller
                 'rarity_label' => $card->rarity->label(),
                 'rarity_stars' => $card->rarity->stars(),
                 'rarity_word' => $card->rarityWord(),
+                'type' => $card->type,
                 'type_label' => $card->typeLabel(),
                 'release_status' => $card->release_status,
                 // A calendar date stays a calendar date: converting it through the display timezone
@@ -154,6 +268,19 @@ class SupportCardController extends Controller
                 'is_manual' => $card->is_manual,
             ],
             'effects' => SupportCardEffects::atCap($card, $dictionary),
+            // The stage table's rows: the levels the source states a value at, and the last of them
+            // (`support-card-detail.html` annotation 1). A level between two anchors is absent rather
+            // than zero, which is why the screen cannot print one cell per break.
+            'effectStages' => SupportCardEffects::stages($card, $dictionary),
+            // The client's card-level cap for this rarity, so the detail can print what a fully broken
+            // copy reaches without inventing a stored level: the export's effect ladder stops at 50 for
+            // SSR, 45 for SR and 40 for R (`UMAMUSUME_REFERENCE.md` §1.4.2), which is the same set the
+            // in-client capture confirms.
+            'levelCap' => $this->levelCap($card->rarity),
+            // Runs own their six slots, so one card can sit in several runs without conflict. The
+            // detail answers "where is this used" from the slots rather than from a card-level owner,
+            // and each row's level is the level that run recorded, not a catalogue figure.
+            'usedBy' => $this->usedBy($card),
             'hinted' => $this->skillList($card->hint_skills),
             'events' => $this->skillList($card->event_skills),
             'trainee' => $trainee === null ? null : [
@@ -161,6 +288,53 @@ class SupportCardController extends Controller
                 'url' => route('catalog.show', $trainee->slug),
             ],
         ]);
+    }
+
+    /**
+     * The level a card of this rarity reaches at four breaks.
+     *
+     * Four breaks at +5 each from the unbroken base (SSR 30, SR 25, R 20) give 50 / 45 / 40, and the
+     * export's own effect ladder stops at exactly those levels per rarity, so the cap is a property of
+     * the rarity rather than a stored column (`UMAMUSUME_REFERENCE.md` §1.4.2).
+     */
+    private function levelCap(CardRarity $rarity): int
+    {
+        return match ($rarity) {
+            CardRarity::ThreeStar => 50,
+            CardRarity::TwoStar => 45,
+            CardRarity::OneStar => 40,
+        };
+    }
+
+    /**
+     * The runs whose deck holds this card, newest first.
+     *
+     * A run has no name of its own: it is identified by the trainee and the scenario, which is the
+     * pair the careers list prints too. `card_level` is the level the slot recorded for that run, and
+     * null there means the Trainer never stated one, which the page prints as an absence rather than
+     * as the catalogue's cap.
+     *
+     * @return list<array{run_id: int, trainee_name: string, scenario_label: string, status_label: string, card_level: int|null, url: string}>
+     */
+    private function usedBy(SupportCard $card): array
+    {
+        $scenarioLabels = array_map(static fn (array $def): string => $def['label'], config('scenarios.scenarios'));
+
+        return DeckSlot::query()
+            ->where('support_card_id', $card->id)
+            ->with(['trainingRun:id,umamusume_id,scenario,status', 'trainingRun.umamusume:id,name'])
+            ->get()
+            ->sortByDesc(static fn (DeckSlot $slot): int => $slot->trainingRun->id)
+            ->map(static fn (DeckSlot $slot): array => [
+                'run_id' => $slot->trainingRun->id,
+                'trainee_name' => $slot->trainingRun->umamusume->name,
+                'scenario_label' => $slot->trainingRun->scenario ? ($scenarioLabels[$slot->trainingRun->scenario] ?? $slot->trainingRun->scenario) : 'No scenario set',
+                'status_label' => $slot->trainingRun->status->label(),
+                'card_level' => $slot->card_level,
+                'url' => route('runs.show', $slot->trainingRun),
+            ])
+            ->values()
+            ->all();
     }
 
     /**

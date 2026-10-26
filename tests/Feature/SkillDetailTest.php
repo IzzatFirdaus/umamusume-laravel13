@@ -215,3 +215,22 @@ it('passes the trainees whose awakening and event lists carry the skill', functi
             ->has('eventHolders', 1)
             ->where('eventHolders.0.name', 'Event Holder'));
 });
+
+it('states how many skills the Global catalogue holds for the provenance card', function (): void {
+    $skill = skillDetailSkill(['name' => 'Counted Skill']);
+    skillDetailSkill(['name' => 'Another Global Skill']);
+
+    // A skill the Global scope refuses is not in the count, because the count is read through the same
+    // scope the index states, so the two screens cannot disagree.
+    Skill::factory()->create([
+        'name' => 'Japan Only Skill',
+        'release_status' => ReleaseStatus::JapanOnly,
+        'name_is_client' => false,
+    ]);
+
+    $this->get(route('skills.show', $skill))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Skills/Show')
+            ->where('catalogueCount', 2));
+});

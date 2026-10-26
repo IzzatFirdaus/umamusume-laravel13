@@ -1,5 +1,23 @@
 <script setup lang="ts">
+/*
+ * One skill, rebuilt to `skill-detail.html` (plan Slice 8).
+ *
+ * Engine tokens first, prose second. The condition table is the primary content: the export's own
+ * predicate and effect vector are the one representation that can be diffed against the source, so a
+ * paraphrase would lose exactly the boundary the skill fires on.
+ *
+ * The description block is an empty state by ruling, not a gap. No client-vocabulary description for a
+ * skill exists in this repository, so the block prints "No client string." instead of the export's
+ * English (which is the publisher's wording, not the client's) or a paraphrase of the tokens above.
+ *
+ * Two regions the HFW draws are not on this page and are not faked: "Related" would need condition-set
+ * comparison across the catalogue, and "In your runs" would need a per-run hint level, neither of which
+ * this tool stores. The class code is withheld on purpose: it is the export's integer and renders
+ * nothing.
+ */
 import AppLayout from '../../layouts/AppLayout.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
+import { LinkButton } from '../../components/Form';
 import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -39,6 +57,8 @@ const props = defineProps<{
     innateHolders: Holder[];
     awakeningHolders: Holder[];
     eventHolders: Holder[];
+    /** How many skills the Global catalogue holds, for the provenance card's scope line. */
+    catalogueCount: number;
 }>();
 
 const holderGroups = computed(() => [
@@ -50,160 +70,198 @@ const holderGroups = computed(() => [
 
 const hasAnyHolder = computed(() => holderGroups.value.some((group) => group.holders.length > 0));
 
-const conditions = computed(() => props.skill.condition_groups ?? []);
+const conditions = computed<ConditionGroup[]>(() => props.skill.condition_groups ?? []);
+
+const lede = computed<string>(() =>
+    [
+        props.skill.type ?? 'No type word',
+        props.skill.sp_cost === null ? 'no stated SP cost' : `${props.skill.sp_cost} Skill Points at base`,
+    ].join(' · '),
+);
+
+const th = 'border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong';
+const tdLabel = 'w-1/3 px-2 py-2 align-top text-sm text-ink-muted';
+const tdValue = 'min-w-0 px-2 py-2 align-top text-sm text-ink';
+const tdMono = 'min-w-0 break-words px-2 py-2 align-top font-mono text-xs text-ink';
+
+const effectLine = (effect: Effect): string => `type ${effect.type}: ${effect.value > 0 ? '+' : ''}${effect.value}`;
 </script>
 
 <template>
-    <AppLayout>
-        <Head :title="skill.name" />
-        <template #title>{{ skill.name }}</template>
-
-        <div class="flex justify-end">
-            <Link href="/skills" class="text-sm text-ink-muted hover:underline transition-colors duration-150 ease-out">Back to skill search</Link>
-        </div>
-
-        <!-- The index's dedupe rule carried over: 18 of the 623 [Global] rows store the same
-             string in both name columns, and printing the pair repeats the name. -->
-        <p v-if="skill.name_ja !== null && skill.name_ja !== skill.name" lang="ja" class="mt-1 text-sm text-ink-muted">
-            {{ skill.name_ja }}
-        </p>
-
-        <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-rule bg-panel p-4 text-sm @4xl:grid-cols-3">
-            <div>
-                <dt class="text-ink-muted">Type</dt>
-                <dd class="text-ink">
-                    <template v-if="skill.type">{{ skill.type }}</template>
-                    <span v-else title="The source's effect codes give this skill no type word.">N/A</span>
-                </dd>
-            </div>
-
-            <div>
-                <dt class="text-ink-muted">SP cost</dt>
-                <dd class="text-ink">
-                    <template v-if="skill.sp_cost !== null">{{ skill.sp_cost }} SP</template>
-                    <span v-else title="The source states no SP cost for this class of skill.">N/A</span>
-                </dd>
-            </div>
-
-            <div>
-                <dt class="text-ink-muted">Unique</dt>
-                <dd class="text-ink">
-                    <span
-                        v-if="skill.is_unique"
-                        class="rounded-full bg-sunken px-2 py-0.5 text-xs text-ink-strong"
-                        title="Marked from the source's skill class code, not from a card's own skill list."
-                    >✦ Unique</span>
-                    <template v-else>No</template>
-                </dd>
-            </div>
-        </dl>
-
-        <!-- The mechanics the source states, then the absences it does not. The activation predicate
-             and effect vector are the engine's own expressions and codes, not client copy. -->
-        <section class="mt-8" aria-labelledby="mechanics">
-            <h2 id="mechanics" class="text-lg font-semibold text-ink-strong">Mechanics</h2>
-
-            <template v-if="conditions.length > 0">
-                <!--
-                     ONE disclosure for the whole raw block. The activation predicates and the effect
-                     vector are the engine's own expressions and codes, not client copy, and a reader
-                     who does not want them should not have to scroll past them to find that out. The
-                     summary carries the provenance and the label, so the disclosure states what it
-                     holds and whose data it is before it is opened, and the ruling that keeps the
-                     description absent is on screen either way.
-
-                     The ruling is `ADR-0011`: the import renders no description, because no
-                     client-string source for one exists. The citation lives HERE and not on the
-                     screen, because a repository identifier in shipped copy is what
-                     `tests/Feature/UiHygieneTest.php` reads every template for, and a pointer to a
-                     decision is not what a Trainer needs. The summary states the ruling's substance
-                     instead.
-                 -->
-                <details class="mt-3">
-                    <summary class="cursor-pointer list-item text-sm font-semibold text-ink-strong">
-                        Raw engine data: the source's own expressions and codes, not client labels.
-                        The description is not recorded.
-                    </summary>
-
-                    <div v-for="(group, index) in conditions" :key="index" class="mt-3 min-w-0 rounded-md border border-rule bg-panel p-3 text-sm">
-                        <h3 v-if="conditions.length > 1" class="text-lg font-semibold text-ink-strong">
-                            Activation {{ index + 1 }}
-                        </h3>
-
-                        <dl class="grid min-w-0 gap-x-6 gap-y-2 @4xl:grid-cols-2">
-                            <div class="min-w-0 @4xl:col-span-2">
-                                <dt class="text-ink-muted">Condition</dt>
-                                <dd class="min-w-0 break-words font-mono text-xs text-ink">{{ group.condition ?? 'N/A' }}</dd>
-                            </div>
-
-                            <div v-if="group.precondition !== null" class="min-w-0 @4xl:col-span-2">
-                                <dt class="text-ink-muted">Precondition</dt>
-                                <dd class="min-w-0 break-words font-mono text-xs text-ink">{{ group.precondition }}</dd>
-                            </div>
-
-                            <div v-if="group.base_time !== null" class="min-w-0">
-                                <dt class="text-ink-muted">Base time</dt>
-                                <dd class="text-ink">{{ group.base_time }} ms</dd>
-                            </div>
-                        </dl>
-
-                        <ul v-if="group.effects.length > 0" class="mt-2 flex flex-wrap gap-2 text-xs">
-                            <li v-for="(effect, effectIndex) in group.effects" :key="effectIndex" class="rounded-md bg-sunken px-2 py-1 font-mono text-ink">
-                                effect {{ effect.type }}: {{ effect.value > 0 ? '+' : '' }}{{ effect.value }}
-                            </li>
-                        </ul>
-                    </div>
-
-                    <p class="mt-2 text-xs text-ink-muted">
-                        No client-string source for a skill description exists, and no awakening
-                        threshold is kept either.
-                    </p>
-                </details>
-            </template>
-
-            <p v-else class="mt-2 text-sm text-ink-muted">
-                Activation conditions, effect values and distance or style qualifiers are not
-                recorded. This tool's skills source stores no description it may render, and no
-                awakening thresholds are kept.
-            </p>
-        </section>
-
-        <!-- The holder lists keep the card's own grouping, because the lists answer different
-             questions: the unique list names the skill that belongs to her, the innate list names
-             what her kit starts with, and the awakening and event lists name what those routes
-             grant. The trainee is the link, once per group however many of her forms carry the skill. -->
-        <section class="mt-8" aria-labelledby="held-by">
-            <h2 id="held-by" class="text-lg font-semibold text-ink-strong">Held by trainees</h2>
-
-            <p v-if="!hasAnyHolder" class="mt-2 text-sm text-ink-muted">No trainees recorded with this skill.</p>
-            <template v-else>
-                <template v-for="group in holderGroups" :key="group.heading">
-                    <template v-if="group.holders.length > 0">
-                        <h3 class="mt-4 text-lg font-semibold text-ink-strong">{{ group.heading }}</h3>
-                        <ul class="mt-1">
-                            <li v-for="holder in group.holders" :key="holder.slug" class="py-1 text-sm">
-                                <Link :href="holder.url" class="text-ink-strong underline">{{ holder.name }}</Link>
-                            </li>
-                        </ul>
-                    </template>
+    <AppLayout
+        :breadcrumb="[
+            { label: 'Skills', href: '/skills' },
+            { label: props.skill.name },
+        ]"
+    >
+        <Head :title="props.skill.name" />
+        <template #head>
+            <PageHeader eyebrow="Skill" :title="props.skill.name" :description="lede">
+                <template #actions>
+                    <LinkButton href="/skills" variant="secondary">Back to search</LinkButton>
                 </template>
-            </template>
+            </PageHeader>
+        </template>
 
-            <p class="mt-2 text-xs text-ink-muted">
-                From the stored `skills_unique`, `skills_innate`, `skills_awakening` and
-                `skills_event` lists on each trainee's costume forms; a form hidden as unconfirmed
-                holds nothing here.
-            </p>
-        </section>
+        <!-- The index's dedupe rule carried over: 18 of the 623 Global rows store the same string in
+             both name columns, and printing the pair would repeat the name. -->
+        <p
+            v-if="props.skill.name_ja !== null && props.skill.name_ja !== props.skill.name"
+            lang="ja"
+            class="mb-4 text-sm text-ink-muted"
+        >{{ props.skill.name_ja }}</p>
 
-        <!-- D-33 at meta weight: the row's own provenance, named the way a costume form names
-             its fetch. A row no fetch wrote states that instead of printing an empty line. -->
-        <h2 class="mt-8 text-lg font-semibold text-ink-strong">Provenance</h2>
-        <p v-if="skill.source_url" class="mt-2 text-xs text-ink-muted">
-            from
-            <a :href="skill.source_url" class="break-all text-ink-strong underline">{{ skill.source_url }}</a>
-            <template v-if="skill.fetched_at_display"> · read {{ skill.fetched_at_display }}</template>
-        </p>
-        <p v-else class="mt-2 text-sm text-ink-muted">No fetched source. This record was seeded or entered by hand.</p>
+        <div class="grid grid-cols-1 gap-4 @4xl:grid-cols-3">
+            <section aria-labelledby="mechanics" class="@4xl:col-span-2">
+                <div class="card">
+                    <h2 id="mechanics">The source's own engine data</h2>
+                    <p class="sub">Shown as-is. These are the export's tokens, not client labels.</p>
+
+                    <template v-if="conditions.length > 0">
+                        <div v-for="(group, index) in conditions" :key="index" class="min-w-0" :class="index > 0 ? 'mt-4' : ''">
+                            <h3 v-if="conditions.length > 1" class="text-sm font-semibold text-ink-strong">
+                                Activation {{ index + 1 }}
+                            </h3>
+                            <table class="mt-1 w-full table-fixed border-collapse">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row" :class="tdLabel">Condition</th>
+                                        <td :class="tdMono">{{ group.condition ?? 'none stated' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" :class="tdLabel">Precondition</th>
+                                        <td :class="tdMono">{{ group.precondition ?? 'none stated' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" :class="tdLabel">Effects</th>
+                                        <td :class="tdMono">
+                                            <template v-if="group.effects.length > 0">
+                                                {{ group.effects.map(effectLine).join(' · ') }}
+                                            </template>
+                                            <span v-else>none stated</span>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="group.base_time !== null">
+                                        <th scope="row" :class="tdLabel">Base time</th>
+                                        <td :class="tdValue">{{ group.base_time }} ms</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <table class="mt-3 w-full table-fixed border-collapse">
+                            <tbody>
+                                <tr>
+                                    <th scope="row" :class="tdLabel">Base cost</th>
+                                    <td :class="[tdValue, 'font-mono']">
+                                        <template v-if="props.skill.sp_cost !== null">{{ props.skill.sp_cost }} SP</template>
+                                        <span title="The source states no SP cost for this class of skill.">N/A</span><span class="sr-only">: the source states no SP cost for this class of skill.</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" :class="tdLabel">Type</th>
+                                    <td :class="tdValue">
+                                        <template v-if="props.skill.type">{{ props.skill.type }}</template>
+                                        <span title="The source's effect codes give this skill no type word.">N/A</span><span class="sr-only">: the source's effect codes give this skill no type word.</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" :class="tdLabel">Unique</th>
+                                    <td :class="tdValue">
+                                        <span
+                                            v-if="props.skill.is_unique"
+                                            class="pill pill-neutral"
+                                            title="Marked from the source's skill class code, not from a card's own skill list."
+                                        >✦ Unique</span>
+                                        <template v-else>No</template>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p class="note mt-3">
+                            <span class="g" aria-hidden="true">○</span>
+                            <span>
+                                The expressions and effect codes above are the source's own engine data, not
+                                client labels. A tracker that cleaned them into prose would lose the one
+                                representation that can be diffed against the export.
+                            </span>
+                        </p>
+                    </template>
+
+                    <p v-else class="text-sm text-ink-muted">
+                        Activation conditions, effect values and distance or style qualifiers are not
+                        recorded for this skill. The cost and the type are; the description block below
+                        states why no readable sentence accompanies them.
+                    </p>
+                </div>
+            </section>
+
+            <div>
+                <div class="card">
+                    <h2>Readable description</h2>
+                    <p class="text-sm text-ink">No client string.</p>
+                    <p class="note mt-3">
+                        <span class="g" aria-hidden="true">○</span>
+                        <span>
+                            The plain description is a convenience reading of the tokens beside it, never a
+                            replacement for them. Where a client string exists it prints verbatim; for a
+                            skill none does, because no client-vocabulary source for descriptions exists in
+                            this repository. The block is empty by ruling rather than by omission.
+                        </span>
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h2>Held by trainees</h2>
+                    <p v-if="!hasAnyHolder" class="text-sm text-ink-muted">No trainees recorded with this skill.</p>
+                    <template v-else>
+                        <template v-for="group in holderGroups" :key="group.heading">
+                            <template v-if="group.holders.length > 0">
+                                <h3 class="mt-3 text-sm font-semibold text-ink-strong">{{ group.heading }}</h3>
+                                <ul class="mt-1">
+                                    <li v-for="holder in group.holders" :key="holder.slug" class="py-0.5 text-sm">
+                                        <Link :href="holder.url" class="text-ink-strong underline">{{ holder.name }}</Link>
+                                    </li>
+                                </ul>
+                            </template>
+                        </template>
+                    </template>
+                    <p class="mt-2 text-xs text-ink-muted">
+                        Read from the four skill lists on each trainee's costume forms, in reverse. A form
+                        hidden as unconfirmed holds nothing here.
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h2>Provenance</h2>
+                    <table class="w-full border-collapse">
+                        <tbody>
+                            <tr>
+                                <th scope="row" :class="tdLabel">Data</th>
+                                <td :class="tdValue">
+                                    <template v-if="props.skill.source_url">GameTora skill export</template>
+                                    <span v-else>No fetched source; this record was seeded or entered by hand.</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row" :class="tdLabel">Entries on Global</th>
+                                <td :class="[tdValue, 'font-mono']">{{ props.catalogueCount }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" :class="tdLabel">Last read</th>
+                                <td :class="tdValue">{{ props.skill.fetched_at_display ?? 'Not recorded' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="mt-3">
+                        <LinkButton href="/database/sources" variant="secondary" size="sm">Source ledger</LinkButton>
+                    </div>
+                    <p v-if="props.skill.source_url" class="mt-2 text-xs text-ink-muted">
+                        <a :href="props.skill.source_url" class="break-all text-ink-strong underline">{{ props.skill.source_url }}</a>
+                    </p>
+                </div>
+            </div>
+        </div>
     </AppLayout>
 </template>

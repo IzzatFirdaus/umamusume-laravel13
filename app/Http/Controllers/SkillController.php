@@ -90,6 +90,14 @@ class SkillController extends Controller
                 'is_unique' => $skill->is_unique,
                 'type' => $skill->type,
                 'sp_cost' => $skill->sp_cost,
+                // The activation predicate the source states, one entry per condition group, printed
+                // verbatim in monospace beside the readable name (`skills.html` annotation 1). Null is
+                // a group with no predicate, so the list carries only the strings the source wrote and
+                // the page states the absence once rather than inventing "none".
+                'conditions' => array_values(array_map(
+                    static fn (array $group): ?string => $group['condition'] ?? null,
+                    $skill->condition_groups ?? [],
+                )),
             ]);
 
         return [
@@ -135,6 +143,10 @@ class SkillController extends Controller
             'innateHolders' => $this->holderRows($model, 'skills_innate'),
             'awakeningHolders' => $this->holderRows($model, 'skills_awakening'),
             'eventHolders' => $this->holderRows($model, 'skills_event'),
+            // The provenance card states the size of the corpus this row belongs to, so a Trainer can
+            // read one row against the whole (`skill-detail.html`, "Entries"). It is the same count the
+            // index states, read through the same scope, so the two screens cannot disagree.
+            'catalogueCount' => $this->availableCount(),
         ]);
     }
 

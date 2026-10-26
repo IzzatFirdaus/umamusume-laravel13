@@ -50,6 +50,19 @@ test('prints a Japanese name in its own language on the index row', async ({ pag
     await expect(page.locator('#skill-results [lang="ja"]', { hasText: '十万バリキ' })).toBeVisible();
 });
 
+test('renders the condition column and states that the cost is the base cost', async ({ page }) => {
+    await page.goto('/skills?search=lookatcurren');
+    await page.locator('#app > *').first().waitFor();
+
+    // The engine condition has its own column, in monospace beside the readable name.
+    await expect(page.getByRole('columnheader', { name: 'Condition (engine)' })).toBeVisible();
+    await expect(page.locator('#skill-results tr').first().locator('td.font-mono')).toHaveCount(2);
+
+    // The hint discount is a per-run fact, so the library states the base cost and says so.
+    await expect(page.getByText(/Cost is the base cost only/)).toBeVisible();
+    await expect(page.getByText(/Search matches the skill's name/)).toBeVisible();
+});
+
 test('follows a search row to the detail page and states the absences there', async ({ page }) => {
     await page.goto('/skills?search=lookatcurren');
     await page.locator('#app > *').first().waitFor();
@@ -72,21 +85,21 @@ test('follows a search row to the detail page and states the absences there', as
     await expect(spCost).toBeVisible();
     await expect(spCost).toHaveText('N/A');
 
-    // The page's own sections and its way back.
-    await expect(page.getByRole('heading', { name: 'Mechanics', level: 2 })).toBeVisible();
+    // The page's own sections and its way back. Engine tokens lead (plan Slice 8), so the
+    // condition table is a visible card and not a fold.
+    await expect(page.getByRole('heading', { name: "The source's own engine data", level: 2 })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Held by trainees', level: 2 })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Provenance', level: 2 })).toBeVisible();
-    // The mechanics branch states that the description is not recorded. The ruling behind it
-    // (`ADR-0011`) is deliberately NOT on the screen: a repository identifier in shipped copy is
-    // what `tests/Feature/UiHygieneTest.php` reads every template for, and a pointer to a decision
-    // is not what a Trainer needs. The substance is on screen and the trace is in the source.
-    await expect(
-        page.locator('section[aria-labelledby="mechanics"] summary'),
-    ).toContainText('The description is not recorded');
-    await expect(page.getByRole('link', { name: 'Back to skill search' })).toBeVisible();
+
+    // Prose is second and it is an empty state: no client string for a skill description exists, so
+    // the block says so rather than paraphrasing the export's English.
+    await expect(page.getByRole('heading', { name: 'Readable description', level: 2 })).toBeVisible();
+    await expect(page.getByText('No client string.')).toBeVisible();
+    // The HFW's own label for the way back ("skill-detail.html:62").
+    await expect(page.getByRole('link', { name: 'Back to search' })).toBeVisible();
 });
 
-test('the skill detail holds the engine data in one labelled disclosure', async ({ page }) => {
+test('the skill detail prints the engine tokens first, with no fold over them', async ({ page }) => {
     await page.goto('/skills?search=lookatcurren');
     await page.locator('#app > *').first().waitFor();
 
@@ -94,15 +107,13 @@ test('the skill detail holds the engine data in one labelled disclosure', async 
     await expect(page).toHaveURL(/\/skills\/\d+$/);
     await page.locator('#app > *').first().waitFor();
 
-    // ONE disclosure for the whole raw block, and its summary states what it holds and whose data
-    // it is, so the reader knows that before opening it.
-    const disclosure = page.locator('section[aria-labelledby="mechanics"] details');
-    await expect(disclosure).toHaveCount(1);
-    await expect(disclosure.locator('summary')).toContainText('Raw engine data');
-    await expect(disclosure.locator('summary')).toContainText('not client labels');
-
-    // The fact that keeps the description absent is on the summary, not only inside the fold.
-    await expect(disclosure.locator('summary')).toContainText('The description is not recorded');
+    // The condition table is the primary content, so it is not behind a disclosure: a fold would
+    // make the one representation that can be diffed against the export the second thing read.
+    const mechanics = page.locator('section[aria-labelledby="mechanics"]');
+    await expect(mechanics.locator('details')).toHaveCount(0);
+    await expect(mechanics).toContainText('Condition');
+    await expect(mechanics).toContainText('Base cost');
+    await expect(mechanics).toContainText('not client labels');
 });
 
 test('the skill index states the page it is showing', async ({ page }) => {

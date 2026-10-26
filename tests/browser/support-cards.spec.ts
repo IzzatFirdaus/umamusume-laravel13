@@ -48,7 +48,7 @@ test('renders each row with the label, the rarity word and the type word', async
     await expect(page.getByText(/\d+ of \d+ support cards/)).toBeVisible();
 
     // The first row is the alphabetically first card, Admire Groove's R form.
-    const firstRow = page.locator('#support-card-results > li').first();
+    const firstRow = page.locator('#support-card-results > tr').first();
     await expect(firstRow).toContainText('Admire Groove');
     await expect(firstRow.getByRole('img', { name: 'One Star' })).toBeVisible();
     await expect(firstRow.getByText(/^R$/)).toBeVisible();
@@ -99,7 +99,9 @@ test('renders one card\'s own page with the fields the source states', async ({ 
 
     // Effects at cap name their basis, never a level-50 interpolation.
     await expect(page.getByRole('heading', { name: 'Effects', level: 2 })).toBeVisible();
-    await expect(page.getByText('Friendship Bonus 15%')).toBeVisible();
+    const friendshipRow = page.locator('tr', { hasText: 'Friendship Bonus' });
+    await expect(friendshipRow).toContainText('1: 5%');
+    await expect(friendshipRow).toContainText('15%');
     await expect(page.getByText(/highest stated anchor/)).toBeVisible();
 
     // The two skill lists keep the source's order and link each row to its own page.
@@ -113,7 +115,8 @@ test('renders one card\'s own page with the fields the source states', async ({ 
     // The provenance is ONE disclosure now, so the source is read from inside it.
     await page.locator('#provenance summary').click();
     await expect(page.getByText(/gametora\.com\/data\/umamusume\/support-cards/)).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Back to support cards' })).toBeVisible();
+    // The HFW's own label for the way back ("support-card-detail.html:65").
+    await expect(page.getByRole('link', { name: 'Back to cards' })).toBeVisible();
 });
 
 test('holds the row provenance in one disclosure that names its state', async ({ page }) => {
@@ -170,7 +173,7 @@ test('renders a mirrored row thumbnail as a named link to the same card', async 
     await page.goto('/support-cards');
     await page.locator('#app > *').first().waitFor();
 
-    const framed = page.locator('#support-card-results > li:has(img)').first();
+    const framed = page.locator('#support-card-results > tr:has(img)').first();
     if (await framed.locator('img').isVisible().catch(() => false)) {
         const frame = framed.locator('img');
         // Decorative: the row prints the card's name beside the frame, so the name is read once.
@@ -213,7 +216,7 @@ test('leaves support-card rows text-only when the mirror holds no file, and deco
     // every `support_thumb` id already on disk on this tree), so the case may not assume either
     // state: each branch asserts its own shape, and the populated branch's full contract is the
     // sibling case above.
-    const framed = page.locator('#support-card-results > li:has(img)').first();
+    const framed = page.locator('#support-card-results > tr:has(img)').first();
 
     if ((await framed.count()) === 0) {
         // Absence is a normal state (§4.7): no frame anywhere, and no clickable frame-shaped hole.
@@ -227,7 +230,7 @@ test('leaves support-card rows text-only when the mirror holds no file, and deco
     }
 
     // The rows still read as before.
-    await expect(page.locator('#support-card-results > li').first().locator('a').first()).toBeVisible();
+    await expect(page.locator('#support-card-results > tr').first().locator('a').first()).toBeVisible();
 });
 
 test('renders the support-card header thumbnail as a bare frame with no link', async ({ page }) => {

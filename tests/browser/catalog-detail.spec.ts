@@ -16,27 +16,31 @@ import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 // document, so the page never hydrates. What is proven: the prop that drives the branch
 // (`CatalogDetailPageTest`), and that the machine token stays off a real page (the last test below).
 
-const EIGHT_SECTIONS = [
-    'Basic information',
-    'Aptitude',
-    'Costume forms',
-    'Skills',
+// The HFW region order (plan Slice 8, `catalog-detail.html`): values and identity on the left, the
+// costume forms and their provenance on the right, then the regions this app answers beyond the HFW.
+const SECTIONS = [
+    'Base stats and growth',
+    'Profile',
+    'Aptitudes, full set',
+    'Costumes',
+    'Star breakthrough',
+    'Unique skill',
+    'Provenance',
+    'Skills on this form',
     'Trainee goals',
     'Her runs',
     'Aliases',
-    'Provenance',
 ];
 
-test('renders the eight sections in the binding order', async ({ page }) => {
+test('renders the page in the binding region order', async ({ page }) => {
     await page.goto('/umamusume/special-week');
     await page.locator('#app > *').first().waitFor();
 
     await expect(page.getByRole('heading', { name: 'Special Week', level: 1 })).toBeVisible();
 
-    // WS-2 Task 2.5. The order is the workstream head's, not the alphabetical list the task
-    // checklist uses to sweep them.
+    // The order is the plan's: the HFW regions first, then the ones this app answers beyond it.
     const headings = await page.getByRole('heading', { level: 2 }).allTextContents();
-    expect(headings).toEqual(EIGHT_SECTIONS);
+    expect(headings).toEqual(SECTIONS);
 });
 
 // Plan 5.4: the trainee's own fetch history is ONE disclosure. The heading stays on screen so the
@@ -51,6 +55,11 @@ test('holds her fetch history in one disclosure', async ({ page }) => {
     const disclosure = page.locator('#provenance');
     await expect(disclosure).toHaveCount(1);
     await expect(disclosure.locator('summary')).toContainText(/\d+ fetched source/);
+
+    // Provenance is a row plus a link to the ledger, and no file path reaches the screen.
+    await expect(page.getByRole('link', { name: 'Source ledger' })).toBeVisible();
+    await expect(page.locator('main')).not.toContainText('storage/app');
+    await expect(page.locator('main')).not.toContainText('snapshot');
 });
 
 // Plan 5.4 (Sweep 1): the ten letters printed as one flat grid, so "can she run Long" meant counting
@@ -139,12 +148,14 @@ test('prints the Japanese name in its own language and links the provenance sour
     // switches voice rather than reading the kana as English.
     await expect(page.locator('[lang="ja"]', { hasText: 'スペシャルウィーク' }).first()).toBeVisible();
 
-    // The trainee's own fetch history is on screen as a real link, not a parked string.
+    // The trainee's own fetch history is a real link, inside the provenance disclosure (the section
+    // folds its source list; the summary states the count before it opens).
+    await page.locator('details#provenance summary').click();
     await expect(page.getByRole('link', { name: /character-cards/ }).first()).toBeVisible();
 
     // The voice actor's own Japanese name is a language part too (WCAG 3.1.2): without lang="ja"
     // a screen reader reads the kana as English.
-    const voiceActor = page.getByText('Voice actor').locator('xpath=following-sibling::dd');
+    const voiceActor = page.getByText('Voice actor').locator('xpath=following-sibling::td');
     await expect(voiceActor.locator('[lang="ja"]')).toHaveCount(1);
 
     // The handoff names the trainee it starts, so the button says whose career it begins.
@@ -189,7 +200,7 @@ test('renders no tab strip for a trainee with a single form', async ({ page }) =
     // One form is not a choice, so there is no strip and no radio group: no chrome, not less page.
     await expect(page.getByRole('navigation', { name: 'Costume forms' })).toHaveCount(0);
     await expect(page.locator('input[type="radio"]')).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: 'Costume forms', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Costumes', level: 2 })).toBeVisible();
     await expect(page.getByRole('heading', { name: '[Innocent Silence]', level: 3 })).toBeVisible();
 });
 
@@ -215,7 +226,7 @@ test('renders the Identity portrait as a bare decorative frame when the mirror h
     await page.goto('/umamusume/special-week');
     await page.locator('#app > *').first().waitFor();
 
-    const frame = page.locator('section[aria-labelledby="basic-information"] img').first();
+    const frame = page.locator('section[aria-labelledby="profile"] img').first();
     if (await frame.isVisible().catch(() => false)) {
         // Decorative: the shell banner's `<h1>` is this trainee's name, so it is read once from the
         // text (`design-2.0` §42).
@@ -234,15 +245,15 @@ test('renders the Identity portrait as a bare decorative frame when the mirror h
     // anywhere around it. The Blade version always emitted one, producing a link to the page already
     // open whose `decorative` flag had just blanked the `aria-label` — an unnamed focusable control,
     // which fails WCAG 2.2 AA 4.1.2. A frame with no name and no purpose must not be focusable at all.
-    await expect(page.locator('section[aria-labelledby="basic-information"] a img')).toHaveCount(0);
-    await expect(page.locator('section[aria-labelledby="basic-information"] a[aria-label=""]')).toHaveCount(0);
+    await expect(page.locator('section[aria-labelledby="profile"] a img')).toHaveCount(0);
+    await expect(page.locator('section[aria-labelledby="profile"] a[aria-label=""]')).toHaveCount(0);
 });
 
 test('leaves the Identity section text-only when the mirror holds no file', async ({ page }) => {
     await page.goto('/umamusume/special-week');
     await page.locator('#app > *').first().waitFor();
 
-    const section = page.locator('section[aria-labelledby="basic-information"]');
+    const section = page.locator('section[aria-labelledby="profile"]');
     const frame = section.locator('img');
 
     // An empty `src` is the one shape §4.7 never allows, and it is a fact about this screen rather
@@ -268,6 +279,6 @@ test('leaves the Identity section text-only when the mirror holds no file', asyn
     }
 
     // And the section still reads: the heading and the page name are what the screen is for.
-    await expect(page.getByRole('heading', { name: 'Basic information' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible();
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 });

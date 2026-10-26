@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 use App\Enums\CardRarity;
 use App\Enums\ReleaseStatus;
+use App\Enums\RunStatus;
+use App\Models\DeckSlot;
 use App\Models\Skill;
 use App\Models\SupportCard;
 use App\Models\SupportEffect;
+use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -397,4 +400,146 @@ it('renders no tier label, which ADR-0014 holds pending a current Global source'
 
 it('refuses a card id that does not exist', function (): void {
     test()->get('/support-cards/999999')->assertNotFound();
+});
+
+/*
+ * The HFW parity additions (plan Slice 8): the stage table's anchors, the rarity cap, the runs that
+ * use the card, and the index's own catalogue-wide facts.
+ */
+
+it('states each card level the source gives an effect a value for, and its last anchor as the cap', function (): void {
+    effectRow(1, 'Friendship Bonus');
+    cardWithEffects(['char_name' => 'Special Week']);
+
+    $card = SupportCard::query()->firstOrFail();
+
+    // The factory vector states 5 at level 1, 10 at 20, 10 at 25 and 15 at 35, so the row carries four
+    // pairs: a level between two anchors carries no entry and must not print as a zero.
+    test()->get("/support-cards/{$card->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('effectStages', 1)
+            ->where('effectStages.0.name', 'Friendship Bonus')
+            ->has('effectStages.0.anchors', 4)
+            ->where('effectStages.0.anchors.0.level', 1)
+            ->where('effectStages.0.anchors.0.display', '5%')
+            ->where('effectStages.0.anchors.3.level', 35)
+            ->where('effectStages.0.anchors.3.display', '15%')
+            ->where('effectStages.0.cap.level', 35)
+            ->where('effectStages.0.cap.display', '15%'));
+});
+
+it('drops a level the source states nothing at instead of printing a zero', function (): void {
+    effectRow(2, 'Mood Effect');
+    cardWithEffects([
+        'char_name' => 'Special Week',
+        // ANCHOR_LEVELS is [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]: position 8 is level 35, so
+        // the level-40 slot is position 9.
+        'effects' => [[2, -1, -1, -1, -1, -1, -1, -1, -1, 60, -1, -1]],
+    ]);
+
+    $card = SupportCard::query()->firstOrFail();
+
+    // One anchor at level 40 and nothing else: the row is short, not padded with five zeros.
+    test()->get("/support-cards/{$card->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('effectStages.0.anchors', 1)
+            ->where('effectStages.0.anchors.0.level', 40)
+            ->where('effectStages.0.anchors.0.display', '60%')
+            ->where('effectStages.0.cap.level', 40));
+});
+
+it('states the client level cap for each rarity', function (): void {
+    $ssr = SupportCard::factory()->ssr()->create(['char_name' => 'SSR Card']);
+    $sr = SupportCard::factory()->sr()->create(['char_name' => 'SR Card']);
+    $r = SupportCard::factory()->create(['char_name' => 'R Card']);
+
+    // Four breaks at +5 from the unbroken base give SSR 50 / SR 45 / R 40, which is where the export's
+    // effect ladder stops for each rarity (`UMAMUSUME_REFERENCE.md` §1.4.2).
+    test()->get("/support-cards/{$ssr->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('levelCap', 50));
+
+    test()->get("/support-cards/{$sr->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('levelCap', 45));
+
+    test()->get("/support-cards/{$r->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('levelCap', 40));
+});
+
+it('answers where the card is used from the runs whose deck holds it', function (): void {
+    $card = SupportCard::factory()->create(['char_name' => 'Special Week']);
+    $run = TrainingRun::factory()->create([
+        'umamusume_id' => Umamusume::factory()->create(['name' => 'Rice Shower'])->id,
+        'scenario' => 'unity_cup',
+        'status' => RunStatus::Active,
+    ]);
+    DeckSlot::factory()->create([
+        'training_run_id' => $run->id,
+        'support_card_id' => $card->id,
+        'card_level' => 45,
+    ]);
+
+    test()->get("/support-cards/{$card->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('usedBy', 1)
+            ->where('usedBy.0.run_id', $run->id)
+            ->where('usedBy.0.trainee_name', 'Rice Shower')
+            ->where('usedBy.0.status_label', 'Active')
+            ->where('usedBy.0.card_level', 45)
+            ->where('usedBy.0.url', route('runs.show', $run)));
+});
+
+it('splits the row into the character name and the card\'s own epithet', function (): void {
+    // The dictionary row supplies the effect's symbol; without it the formatted value has no unit.
+    effectRow(1, 'Friendship Bonus');
+    cardWithEffects(['char_name' => 'Special Week', 'title_en' => '[Tracen Academy]']);
+
+    test()->get('/support-cards')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.name', 'Special Week [Tracen Academy]')
+            ->where('cards.data.0.char_name', 'Special Week')
+            ->where('cards.data.0.title', '[Tracen Academy]')
+            ->where('cards.data.0.type', 'guts')
+            ->where('cards.data.0.friendship.display', '15%'));
+});
+
+it('prints no friendship bonus for a Pal card, and none invented for a card that states none', function (): void {
+    // A Pal card carries no friendship bonus at all: the type is the absence's cause, not a data gap.
+    SupportCard::factory()->friend()->create(['char_name' => 'Aaa Pal', 'effects' => []]);
+    cardWithEffects(['char_name' => 'Zzz No Bonus', 'effects' => [[2, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+
+    test()->get('/support-cards')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.type', 'friend')
+            ->where('cards.data.0.friendship', null)
+            ->where('cards.data.1.type', 'guts')
+            ->where('cards.data.1.friendship', null));
+});
+
+it('counts the seven types and names the effects no card carries', function (): void {
+    effectRow(1, 'Friendship Bonus');
+    effectRow(2, 'Mood Effect');
+    cardWithEffects(['char_name' => 'Special Week']);
+    SupportCard::factory()->speed()->create(['char_name' => 'Silence Suzuka']);
+
+    // The first card carries effect 1 and the second carries the factory vector's effect 1 too, so
+    // Mood Effect (id 2) is the vocabulary row no card here states a value for.
+    test()->get('/support-cards')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('typeCounts', 7)
+            ->where('typeCounts.0.type', 'speed')
+            ->where('typeCounts.0.total', 1)
+            ->where('typeCounts.0.global', 1)
+            ->where('typeCounts.3.type', 'guts')
+            ->where('typeCounts.3.total', 1)
+            ->where('uncoveredEffects.0.effect_id', 2)
+            ->where('uncoveredEffects.0.name', 'Mood Effect'));
 });
