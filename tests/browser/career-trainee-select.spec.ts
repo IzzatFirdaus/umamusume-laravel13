@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 /*
  * Rendered-copy, state and accessibility evidence for SCREEN-003 (Trainee Selection) and SCREEN-004
- * (Trainee Profile) (ADR-0020 §1; plan §8 D3). `CareerTraineeSelectTest` asserts the resolved props,
+ * (Trainee Profile) (ADR-0020 section 1; plan section 8 D3). `CareerTraineeSelectTest` asserts the resolved props,
  * the filters and the session draft; these assert what the browser shows and what only a browser can
  * reach: the card copy, the `aria-pressed` state after a real PUT round trip, the keyboard path with
  * focus restore, the 44px sweep, 320px reflow and a clean console.
@@ -19,14 +19,15 @@ import { test, expect } from '@playwright/test';
  */
 
 /**
- * The table row that names the trainee.
+ * One trainee card.
  *
- * Slice 3.4 replaced the card list with a `DataTable`, so a row is a `<tr>` and the name is a
- * `<span>` rather than an `<h2>`. Addressed through the row role and the name text, not through the
- * heading, which no longer exists on this page.
+ * Slice 3.4 had replaced the card list with a `DataTable`; the wireframe parity pass put the cards back,
+ * so a trainee is a `[data-trainee-card]` block again and this helper addresses it by that hook plus the
+ * name the card prints. The `first()` is deliberate: the roster may hold two trainees whose names share a
+ * substring, and the case that needs a unique card filters the roster down to one row first.
  */
 function card(page: import('@playwright/test').Page, name: string) {
-    return page.getByRole('row').filter({ hasText: name }).filter({ has: page.getByRole('button') });
+    return page.locator('[data-trainee-card]').filter({ hasText: name }).first();
 }
 
 /**
@@ -37,7 +38,7 @@ function card(page: import('@playwright/test').Page, name: string) {
  * made yet is *not* an absence. It renders "not chosen" in muted text and deliberately does not use
  * `AbsenceValue` or the `N/A` marker, because nothing failed, no source went silent, and there is no
  * reason to state beyond "this step has not been reached". The three cases below therefore pin the
- * strip's own words — "not chosen" while empty, the trainee's name once set — and must not go looking
+ * strip's own words - "not chosen" while empty, the trainee's name once set - and must not go looking
  * for `N/A` or a named `group` on this node. That was the retired contract.
  */
 function choicesSoFar(page: import('@playwright/test').Page) {
@@ -49,7 +50,7 @@ function choicesSoFar(page: import('@playwright/test').Page) {
  *
  * Measured on the served page (empty draft): `<span>Trainee: <span class="text-ink-muted">not
  * chosen</span></span>`, between two `aria-hidden` middots. Once set, the inner node becomes
- * `<a href="/career/setup/trainee">Admire Vega</a>` — the strip links a chosen value and leaves an
+ * `<a href="/career/setup/trainee">Admire Vega</a>` - the strip links a chosen value and leaves an
  * unchosen one as plain text. The `^` anchor is what keeps this segment apart from its two siblings
  * and from the nested `not chosen` spans.
  */
@@ -78,29 +79,30 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(first).toBeVisible();
         await expect(first.locator('span[lang="ja"]')).toHaveText('アドマイヤベガ');
 
-        // The aptitude badges state the axis and the band in words, never colour alone (`design-2.0`
-        // §17). The seeded roster publishes all ten letters (the seeder replays the committed
-        // `gametora-characters` export), so every badge carries a real letter and its band rather than
-        // the absence words: Admire Vega's six full-weight badges are Turf A, Dirt G, Sprint F, Mile C,
-        // Medium A and Long C, and her four style badges sit behind the count-summary. A badge that
-        // read its axis by the wrong key printed "N/A / Not published" on every row while the columns
-        // held letters, which is the regression this pins.
-        await expect(first.getByText('Turf', { exact: true })).toBeVisible();
-        // The table shows the primary axes; the full list lives on the profile, which is the screen
-        // built to read one trainee rather than compare many.
-        // The table prints every axis, read from the row's own text rather than assumed: Turf A,
-        // Dirt G, Sprint F, Mile C, Medium A, Long C are the six shown by the aptitude cell, and the
-        // style axis sits behind the same disclosure the card used. The counts below are the DOM's,
-        // measured, not derived: an earlier version of this rewrite guessed "three primary axes" and
-        // the guess was wrong.
-        await expect(first.getByText('Turf', { exact: true })).toBeVisible();
-        await expect(first.getByText('Strong', { exact: true })).toHaveCount(2);
-        await expect(first.getByText('Neutral', { exact: true })).toHaveCount(2);
-        await expect(first.getByText('Very weak', { exact: true })).toHaveCount(2);
+        // The three aptitude rows the wireframe draws (`career-trainee.html:127-129`): Surface, Distance
+        // and Style, one row each, every letter stated as text. Admire Vega publishes all ten letters -
+        // Turf A, Dirt G / Sprint F, Mile C, Medium A, Long C / Front runner G, Pace chaser G, Late surger
+        // B, End closer A - and the strongest of each row carries the bold weight, so the comparison reads
+        // without colour (design-2.0 §17).
+        // The row names are the axis families the controller sends, capitalised by CSS rather than by a
+        // second copy of the words in the page, so the DOM text stays the family name and the transform is
+        // what makes it read "Surface". Both are asserted: a dropped class would leave the rows lowercase.
+        await expect(first.locator('dl > dt')).toHaveText(['surface', 'distance', 'style']);
+        await expect(first.locator('dl > dt').first()).toHaveCSS('text-transform', 'capitalize');
+        await expect(first.getByText('Turf A', { exact: true })).toBeVisible();
+        await expect(first.getByText('Dirt G', { exact: true })).toBeVisible();
+        await expect(first.getByText('End closer A', { exact: true })).toBeVisible();
+        // The strongest of each row is the bold one, and it is the row's best letter: Turf A over Dirt G,
+        // Medium A over Sprint F / Mile C / Long C, End closer A over Late surger B and the two Gs.
+        for (const strongest of ['Turf A', 'Medium A', 'End closer A']) {
+            await expect(first.getByText(strongest, { exact: true })).toHaveClass(/font-bold/);
+        }
+        await expect(first.getByText('Dirt G', { exact: true })).not.toHaveClass(/font-bold/);
         await expect(first.getByText('N/A', { exact: true })).toHaveCount(0);
-        await expect(first.getByText('Not published', { exact: true })).toHaveCount(0);
 
-        // Two actions per card: the read one and the primary one.
+        // Two actions per card: the pick control and the read one. The pick control draws the wireframe's
+        // disc and keeps its words for a screen reader, so the card's own text is not 25 copies of
+        // "Select".
         await expect(first.getByRole('button', { name: 'Select', exact: true })).toBeVisible();
         await expect(first.getByRole('link', { name: 'Profile' })).toBeVisible();
 
@@ -121,6 +123,34 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(strip.getByText('N/A', { exact: true })).toHaveCount(0);
         await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(25);
         await expect(page.getByText('67 trainees match.')).toBeVisible();
+
+        // The wireframe's "Selected" card is absent until a trainee is actually chosen: it restates a pick,
+        // and the strip above already says "not chosen" in words. Rendering an empty one would be a second
+        // way to say the same absence.
+        await expect(page.getByRole('heading', { name: 'Selected' })).toHaveCount(0);
+    });
+
+    test('restates the chosen trainee in the Selected card the wireframe draws', async ({ page }) => {
+        await page.goto('/career/setup/trainee');
+        await page.locator('#app > *').first().waitFor();
+
+        await card(page, 'Admire Vega').getByRole('button', { name: 'Select', exact: true }).click();
+        await expect(page.getByText('Trainee set: Admire Vega.')).toBeVisible();
+
+        // `career-trainee.html:191-200`: the heading, her name with the form in brackets, one sentence that
+        // names her strongest aptitude on each axis, and the link into the profile screen.
+        const selected = page.locator('[data-field="selected-trainee"]');
+        await expect(selected.getByText('Admire Vega')).toBeVisible();
+        await expect(selected.getByText('[Starry Nocturne]')).toBeVisible();
+        await expect(selected.getByText(/Medium A · Turf A · End closer A/)).toBeVisible();
+        // The wireframe's sentence names rarity and potential only. "Growth row" is deliberately absent:
+        // no column records a growth rate, so promising one would be a claim the schema cannot back.
+        await expect(selected.getByText(/sets this run's rarity and potential/)).toBeVisible();
+        await expect(selected.getByText(/growth/i)).toHaveCount(0);
+        await expect(selected.getByRole('link', { name: 'Preview profile' })).toHaveAttribute(
+            'href',
+            /\/career\/setup\/trainee\/\d+$/,
+        );
     });
 
     test('a selected trainee can be deselected back to no choice', async ({ page }) => {
@@ -195,7 +225,7 @@ test.describe('Trainee Selection and Profile', () => {
         await page.getByLabel('Search').fill('biwa');
         await page.getByRole('button', { name: 'Filter', exact: true }).click();
 
-        await expect(page.getByRole('row').filter({ hasText: 'Biwa Hayahide' })).toBeVisible();
+        await expect(card(page, 'Biwa Hayahide')).toBeVisible();
         await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(1);
 
         // The distance facet is a real column and composes with the search: Biwa publishes no G among

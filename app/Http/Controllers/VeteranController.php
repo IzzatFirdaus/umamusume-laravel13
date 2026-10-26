@@ -101,6 +101,12 @@ final class VeteranController extends Controller
         $veteran = $show->handle($veteran);
         $run = $veteran->trainingRun;
         $strip = $run->stripValues();
+        // The last logged turn's five totals, the same read `compare()` takes and never a sum of deltas
+        // (ADR-0003). `turnEntries` is eager-loaded by `ShowVeteran`, so this is one in-memory sort, not a
+        // query. A career that logged no turn has no final stats, and each row then states the absence
+        // rather than printing a zero that would read as a real finishing total (Slice 7, HFW
+        // veteran-detail annotation 2).
+        $latest = $run->turnEntries->sortByDesc('turn')->first();
 
         return Inertia::render('Veterans/Show', [
             'veteran' => VeteranRow::from($veteran),
@@ -108,6 +114,13 @@ final class VeteranController extends Controller
                 'turns' => $strip['turn'],
                 'energy' => $strip['energy'],
                 'fans' => $strip['fans'],
+            ],
+            'stats' => [
+                'Speed' => $latest?->speed,
+                'Stamina' => $latest?->stamina,
+                'Power' => $latest?->power,
+                'Guts' => $latest?->guts,
+                'Wit' => $latest?->wit,
             ],
             'counts' => [
                 'skills' => $run->skills->count(),

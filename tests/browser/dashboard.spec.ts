@@ -4,18 +4,22 @@ import { recordTurns } from '../utils/record-turns';
 
 /*
  * The Dashboard, built as a structural clone of the HFW `index.html` (owner ruling 2026-10-26: the
- * wireframe is the visual authority).
+ * wireframe is the visual authority, and `index.html` -- not `dashboard.html` -- is the board).
  *
  * What this pins:
  *
- *   - the wireframe's two rows, in its order: "Pick up where you left off" + "Recent veterans", then
- *     "Needs you" + "Quick actions", each 2.1fr / 1fr on desktop;
- *   - the wireframe's sections that the earlier build had left out: the Needs-you column with its
- *     data-status line and the catalogue, veteran and review doors;
+ *   - the page head: eyebrow `Dashboard`, h1 `Trainer Desk`, the three-figure lede, and the two
+ *     actions in the wireframe's own pair (one outline, one quiet) -- no filled action in the head;
+ *   - the wireframe's three rows in its order: "Pick up where you left off" + "Needs you", the
+ *     four-figure KPI strip, then "Recent veterans" + "Quick actions", each row 2.1fr / 1fr;
+ *   - the resume card's own composition: 64px frame, name beside the accent pill, one meta line,
+ *     "Open cockpit" on the row, three tiles with the Turn tile's "of 72" suffix;
  *   - the absence rule: Energy and Team rank keep their tiles and print a word, never a blank;
- *   - exactly one filled primary on the screen (annotation 1);
+ *   - the labelled turn-count defect: the note names the recorded count and the cockpit's position;
+ *   - the veterans footer's own sentence, "N veterans · N shown";
+ *   - exactly one filled primary on the screen (annotations 1 and 6);
  *   - the absence of the wireframe's own meta blocks: the Table of contents card and the annotation
- *     key are document artifacts.
+ *     key are document artifacts, not screens.
  */
 
 const BLUE = 'rgb(34, 85, 255)'; // --color-brand-chrome #2255FF (light)
@@ -42,22 +46,31 @@ async function box(page: import('@playwright/test').Page, selector: string) {
     return rect!;
 }
 
-test('the page head names the screen and offers one filled action', async ({ page }) => {
+test('the page head names the screen with the wireframe eyebrow and one unfilled action pair', async ({ page }) => {
     await ready(page);
 
     const banner = page.getByRole('banner');
-    await expect(banner.getByText('Overview', { exact: true })).toBeVisible();
+    // index.html:55 -- the eyebrow is the screen's own name, not "Overview". Scoped to a `p`
+    // because the bar's crumb already reads "Dashboard", and the eyebrow is the page's copy of it.
+    const eyebrow = banner.locator('p').filter({ hasText: /^Dashboard$/ });
+    await expect(eyebrow).toHaveCount(1);
+    await expect(eyebrow).toBeVisible();
+    await expect(banner.getByText('Overview', { exact: true })).toHaveCount(0);
     await expect(banner.getByRole('heading', { level: 1 })).toHaveText('Trainer Desk');
+
+    // index.html:59 -- the lede's three figures, bound to live props.
+    await expect(banner.getByText(/active careers?, \d+ finished runs?, and \d+ permanent Global scenarios?\./)).toBeVisible();
+
+    // index.html:61-64: "New career" is the outline and "All careers" is the quiet one.
     await expect(banner.getByRole('link', { name: 'New career' })).toBeVisible();
     await expect(banner.getByRole('link', { name: 'All careers' })).toBeVisible();
 
-    // Annotations 1 and 6: the head carries no filled action. "New career" is an outline button and
-    // "All careers" is a quiet link, so the accent is not spent twice on one screen.
+    // Annotations 1 and 6: the head carries no filled action. The accent belongs to "Open cockpit".
     await expect(banner.locator('[data-variant="primary"]')).toHaveCount(0);
     await expect(banner.locator('[data-variant="secondary"]')).toHaveCount(1);
 });
 
-test('renders the wireframe regions in its order and none of its meta blocks', async ({ page }) => {
+test('renders the wireframe rows in its order and none of its meta blocks', async ({ page }) => {
     await ready(page);
 
     for (const name of ['Pick up where you left off', 'Recent veterans', 'Needs you', 'Quick actions']) {
@@ -67,22 +80,34 @@ test('renders the wireframe regions in its order and none of its meta blocks', a
     const order = await page.locator('[data-dashboard-root] [data-card]').evaluateAll((cards) =>
         cards.map((card) => card.getAttribute('data-card') ?? ''),
     );
-    expect(order).toEqual(['active_career', 'recent_veterans', 'needs_you', 'quick_actions']);
+    // index.html reading order (index.html:71-186): row one, the four-figure strip, then row two.
+    expect(order).toEqual([
+        'active_career',
+        'needs_you',
+        'kpi_careers',
+        'kpi_trainees',
+        'kpi_skills',
+        'kpi_support',
+        'recent_veterans',
+        'quick_actions',
+    ]);
 
     // The wireframe's navigation aid and its annotation key belong to the document, not the product.
     await expect(page.getByRole('region', { name: 'Table of contents' })).toHaveCount(0);
     await expect(page.getByRole('heading', { name: /Table of contents/i })).toHaveCount(0);
     await expect(page.getByRole('heading', { name: /Annotation key/i })).toHaveCount(0);
+    // The wireframe's own provenance chip is a document artifact too.
+    await expect(page.getByText('Static wireframe')).toHaveCount(0);
 });
 
-test('the two rows lay out as a wide column and a narrow one', async ({ page }) => {
+test('the two side rows lay out as a wide column and a narrow one', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await ready(page);
 
     const pickup = await box(page, '[data-dashboard-row="pickup"] [data-card="active_career"]');
-    const veterans = await box(page, '[data-dashboard-row="pickup"] [data-card="recent_veterans"]');
-    const needs = await box(page, '[data-dashboard-row="needs-you"] [data-card="needs_you"]');
-    const quick = await box(page, '[data-dashboard-row="needs-you"] [data-card="quick_actions"]');
+    const needs = await box(page, '[data-dashboard-row="pickup"] [data-card="needs_you"]');
+    const veterans = await box(page, '[data-dashboard-row="veterans"] [data-card="recent_veterans"]');
+    const quick = await box(page, '[data-dashboard-row="veterans"] [data-card="quick_actions"]');
 
     /*
      * Row one: the wide card, then the narrow one on the same line. The comparison is between row
@@ -90,44 +115,71 @@ test('the two rows lay out as a wide column and a narrow one', async ({ page }) 
      * column, and a grid row that happened to be satisfied by one card must not be read as the card
      * being misplaced. Both cards are in the same row when both share a row container.
      */
-    expect(veterans.x).toBeGreaterThan(pickup.x + pickup.width - 1);
-    expect(pickup.width).toBeGreaterThan(veterans.width);
+    expect(needs.x).toBeGreaterThan(pickup.x + pickup.width - 1);
+    expect(pickup.width).toBeGreaterThan(needs.width);
     const rowOne = await box(page, '[data-dashboard-row="pickup"]');
     expect(Math.abs(pickup.y - rowOne.y)).toBeLessThan(2);
-    expect(Math.abs(veterans.y - rowOne.y)).toBeLessThan(2);
+    expect(Math.abs(needs.y - rowOne.y)).toBeLessThan(2);
 
-    // Row two: same shape, below row one.
-    expect(needs.y).toBeGreaterThanOrEqual(pickup.y + pickup.height - 1);
-    expect(quick.x).toBeGreaterThan(needs.x + needs.width - 1);
-    expect(needs.y).toBeGreaterThanOrEqual(Math.max(pickup.y + pickup.height, veterans.y + veterans.height) - 1);
+    // Row two: same shape, below the KPI strip.
+    expect(quick.x).toBeGreaterThan(veterans.x + veterans.width - 1);
+    expect(veterans.y).toBeGreaterThanOrEqual(pickup.y + pickup.height - 1);
+    expect(Math.abs(veterans.y - quick.y)).toBeLessThan(2);
 
     // The wireframe's 2.1fr / 1fr split, measured rather than read from a class list.
-    const ratio = pickup.width / veterans.width;
+    const ratio = pickup.width / needs.width;
     expect(ratio).toBeGreaterThan(2.0);
     expect(ratio).toBeLessThan(2.3);
 });
 
-test('the Needs you column carries the doors the wireframe draws', async ({ page }) => {
+test('the KPI strip draws four cards in one row at 1280', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await ready(page);
+
+    for (const name of ['Careers running', 'Trainees catalogued', 'Skills', 'Support cards']) {
+        await expect(page.getByRole('heading', { name })).toBeVisible();
+    }
+
+    // index.html:133-154 -- `.g-4` is four across on desktop, not two by two.
+    const cards = await page
+        .locator('[data-dashboard-row="kpi"] [data-card]')
+        .evaluateAll((nodes) => nodes.map((node) => node.getBoundingClientRect()));
+    expect(cards).toHaveLength(4);
+    const tops = new Set(cards.map((rect) => Math.round(rect.top)));
+    expect(tops.size, 'the four KPI cards are not on one line').toBe(1);
+
+    // index.html:142-152: each catalogue figure is the door to the screen that owns its list.
+    await expect(page.getByRole('link', { name: 'Browse catalog' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Skill search' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Browse cards' })).toBeVisible();
+});
+
+test('the Needs you column draws three tiles with their own doors', async ({ page }) => {
     await ready(page);
 
     const needs = page.getByRole('region', { name: 'Needs you' });
-    await expect(needs.getByText('GLOBAL DATA')).toBeVisible();
-    await expect(needs.getByText(/Verified \d{4}-\d{2}-\d{2}/)).toBeVisible();
-    await expect(needs.getByRole('link', { name: 'Source ledger' })).toBeVisible();
+    const tiles = needs.locator('[data-needs-you]');
+    await expect(tiles).toHaveCount(3);
 
-    // The catalogue figures the retired KPI strip carried still reach the screen.
-    await expect(needs.getByText(/trainees/)).toBeVisible();
-    await expect(needs.getByText(/support cards/)).toBeVisible();
-    await expect(needs.getByRole('link', { name: 'Browse catalog' })).toBeVisible();
+    // index.html:113-118: the data-status tile, its risk edge, and the verified line.
+    const status = needs.locator('[data-needs-you="data_status"]');
+    await expect(status.getByText('Data status')).toBeVisible();
+    await expect(status.getByText(/Global data · (Current|Stale)/)).toBeVisible();
+    await expect(status.getByText(/Verified \d{4}-\d{2}-\d{2}/)).toBeVisible();
+    await expect(status.getByRole('link', { name: 'Source ledger' })).toBeVisible();
 
-    await expect(needs.getByText(/veterans saved/)).toBeVisible();
-    await expect(needs.getByRole('link', { name: 'Open library' })).toBeVisible();
+    // index.html:119-123: "N banked", and the library door.
+    const veterans = needs.locator('[data-needs-you="veterans"]');
+    await expect(veterans.getByText(/\d+ banked/)).toBeVisible();
+    await expect(veterans.getByRole('link', { name: 'Open the library' })).toBeVisible();
 
-    await expect(needs.getByText(/pending\s+candidates?/)).toBeVisible();
-    await expect(needs.getByRole('link', { name: 'Open queue' })).toBeVisible();
+    // index.html:124-128: the review queue's instruction and its door.
+    const review = needs.locator('[data-needs-you="review"]');
+    await expect(review.getByText(/pending match|Check pending matches/)).toBeVisible();
+    await expect(review.getByRole('link', { name: 'Open review' })).toBeVisible();
 });
 
-test('the quick actions are four outline destinations with the rail marks', async ({ page }) => {
+test('the quick actions are four outline destinations and a note', async ({ page }) => {
     await ready(page);
 
     const quick = page.getByRole('region', { name: 'Quick actions' });
@@ -136,15 +188,17 @@ test('the quick actions are four outline destinations with the rail marks', asyn
     for (const label of ['Import a historical career', 'Review queue', 'Open settings', 'Database hub']) {
         await expect(nav.getByRole('link', { name: label })).toBeVisible();
     }
-    // A quick action is never the filled primary; the page head owns that.
+    // A quick action is never the filled primary; the resume card owns that.
     await expect(quick.locator('[data-variant="primary"]')).toHaveCount(0);
+    // index.html:184 -- the card's own note, in the wireframe's words.
+    await expect(quick.getByText(/Four destinations\./)).toBeVisible();
 });
 
 test('with no active career the resume card names the absence and keeps its actions', async ({ page }) => {
     await ready(page);
 
     const card = page.getByRole('region', { name: 'Pick up where you left off' });
-    const hasCareer = await card.getByText(/turns to go/).count();
+    const hasCareer = await card.getByRole('link', { name: 'Open cockpit' }).count();
 
     if (hasCareer === 0) {
         await expect(card.getByText('Not recorded: no career is running.')).toBeVisible();
@@ -156,29 +210,35 @@ test('with no active career the resume card names the absence and keeps its acti
     }
 });
 
-test('an active career shows the wireframe tiles, the 72-mark rail and Open cockpit', async ({ page }) => {
+test('an active career draws the resume card the wireframe draws', async ({ page }) => {
     await createActiveRun(page);
     await ready(page);
 
     const card = page.getByRole('region', { name: 'Pick up where you left off' });
-    await expect(card.getByText('Turn', { exact: true })).toBeVisible();
-    await expect(card.getByText(/Turn \d+ of 72/)).toBeVisible();
-    await expect(card.getByRole('list', { name: 'Career progress' }).locator('li')).toHaveCount(72);
-    await expect(card.getByRole('link', { name: 'Open cockpit' })).toBeVisible();
 
-    /*
-     * Absence keeps its tile (annotation 2). The team rank tile always exists, and it prints either a
-     * rank or the word \`N/A\`; a blank value is the defect this guards.
-     */
+    // index.html:87-100: three tiles, the Turn tile's "of 72" beside the figure.
+    await expect(card.getByText('Turn', { exact: true })).toBeVisible();
+    const turn = card.locator('[data-tile="turn"] [data-tile-value]');
+    await expect(turn).toHaveText(/^\d+of \d+$/);
+
+    // index.html:96-99: absence keeps its tile and prints a word, never a blank.
     const rank = card.locator('[data-tile="team_rank"] [data-tile-value]');
     await expect(rank).not.toHaveText('');
 
-    // Annotation 1: "Open cockpit" is the only filled action in the resume card.
+    // index.html:102-107: the labelled defect, naming both numbers.
+    await expect(card.getByText(/A turn is counted from the turns recorded/)).toBeVisible();
+    await expect(card.getByText(/cockpit reports turn \d+/)).toBeVisible();
+
+    // index.html:84: "Open cockpit" is the card's filled action, and the page's only one.
+    await expect(card.getByRole('link', { name: 'Open cockpit' })).toBeVisible();
     await expect(card.locator('[data-variant="primary"]')).toHaveCount(1);
     await expect(page.locator('[data-variant="primary"]')).toHaveCount(1);
+
+    // The 72-mark rail is `dashboard.html`'s drawing, not this board's.
+    await expect(card.getByRole('list', { name: 'Career progress' })).toHaveCount(0);
 });
 
-test('the recent veterans card names its rows, or its absence', async ({ page }) => {
+test('the recent veterans card names its rows, its footer and its door', async ({ page }) => {
     await ready(page);
 
     const card = page.getByRole('region', { name: 'Recent veterans' });
@@ -187,15 +247,16 @@ test('the recent veterans card names its rows, or its absence', async ({ page })
     const rows = card.locator('tbody tr');
     const count = await rows.count();
 
-    if (count === 0) {
-        await expect(card.getByText('Not recorded: the library holds no veterans yet.')).toBeVisible();
-    } else {
+    if (count > 0) {
         await expect(card.getByRole('columnheader', { name: 'Trainee' })).toBeVisible();
         await expect(card.getByRole('columnheader', { name: 'Scenario' })).toBeVisible();
         await expect(card.getByRole('columnheader', { name: 'Saved' })).toBeVisible();
         await expect(rows.first().getByRole('link', { name: 'Open' })).toBeVisible();
     }
-    await expect(card.getByRole('link', { name: /All veterans|Open the Veteran library/ })).toBeVisible();
+
+    // index.html:170-173: "N veterans · N shown" beside the library door.
+    await expect(card.getByText(/\d+ veterans? · \d+ shown/)).toBeVisible();
+    await expect(card.getByRole('link', { name: 'All veterans' })).toBeVisible();
 });
 
 test('logs no console errors at 1280 and 390, and the page does not scroll sideways on the phone', async ({ page }) => {
@@ -217,7 +278,12 @@ test('logs no console errors at 1280 and 390, and the page does not scroll sidew
     expect(overflow).toBeLessThanOrEqual(1);
 });
 
-test('the chrome is still the wireframe blue on this page', async ({ page }) => {
+test('the chrome is the wireframe blue with its accent stripe on this page', async ({ page }) => {
     await ready(page);
     await expect(page.locator('[data-shell-topbar]')).toHaveCSS('background-color', BLUE);
+    // index.html:45-52 -- the 2px accent rule under the bar.
+    await expect(page.locator('[data-shell-topbar]')).toHaveCSS('border-bottom-width', '2px');
+    // index.html:47 -- the crumb names the screen, and the product name lives in the rail.
+    await expect(page.locator('[data-shell-crumb]')).toContainText('Dashboard');
+    await expect(page.locator('[data-shell-crumb]')).not.toContainText('TRAINER DESK');
 });

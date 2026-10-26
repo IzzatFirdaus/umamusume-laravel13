@@ -24,9 +24,6 @@
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
-import AptitudeBadge from '../../components/AptitudeBadge.vue';
-import DataTable from '../../components/ui/DataTable.vue';
-import type { DataTableColumn } from '../../components/ui/data-table-types';
 import { BaseInput, BaseSelect, BaseButton } from '../../components/Form';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, nextTick, ref } from 'vue';
@@ -165,7 +162,6 @@ const pickedForm = ref<Record<number, number | null>>(
 // Track and distance read at full weight; the style axis sits behind the disclosure (owner ruling
 // 2026-10-13, audit §3.4 option 1). Both halves come from the controller's one list, so a tenth
 // axis arrives here without an edit.
-const primaryAxes = computed(() => props.aptitudeAxes.filter((axis) => axis.axis !== 'style'));
 
 /**
  * The table's columns (plan 3.4).
@@ -175,12 +171,50 @@ const primaryAxes = computed(() => props.aptitudeAxes.filter((axis) => axis.axis
  * and a control is neither present nor absent, so the select lives inside the last column's cell
  * instead of claiming a column of its own.
  */
-const traineeColumns: DataTableColumn[] = [
-    { key: 'trainee', label: 'Trainee' },
-    { key: 'aptitudes', label: 'Aptitudes' },
-    { key: 'forms', label: 'Forms' },
-    { key: 'select', label: 'Choose' },
-];
+/*
+ * The card's three aptitude rows (`career-trainee.html:127-129`).
+ *
+ * The wireframe draws Surface, Distance and Style as one row each, with the strongest letter of the row in
+ * bold. The ten axes arrive from the controller already carrying the family they belong to, so grouping by
+ * `axis` reproduces those three rows without this file naming an axis or a family: a tenth axis, or a
+ * re-lettering, changes the card without an edit here.
+ *
+ * The row's own name is the family the controller sent, capitalised by CSS (`career-trainee.html:127-129`
+ * prints "Surface", "Distance" and "Style"). The filter bar's labels are its own vocabulary and are not
+ * reused here: the facet calls the style family "Running style", which is the right name for a filter and
+ * the wrong one for a card row three words wide.
+ */
+const axisRows = computed(() =>
+    props.aptitudeAxes.reduce<Record<string, typeof props.aptitudeAxes>>((rows, axis) => {
+        (rows[axis.axis] ??= []).push(axis);
+
+        return rows;
+    }, {}),
+);
+
+
+/** S is the best letter and G the worst, so the row's strongest is its lowest rank, not its first. */
+const LETTER_RANK: Record<string, number> = { S: 0, A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7 };
+
+function strongest(aptitudes: Record<string, string> | null, axes: { value: string }[]): string | null {
+    if (aptitudes === null) {
+        return null;
+    }
+
+    return axes.reduce<string | null>((best, axis) => {
+        const letter = aptitudes[axis.value] ?? null;
+
+        if (letter === null) {
+            return best;
+        }
+
+        if (best === null || (LETTER_RANK[letter] ?? 99) < (LETTER_RANK[best] ?? 99)) {
+            return letter;
+        }
+
+        return best;
+    }, null);
+}
 
 
 function applyFilters(): void {
@@ -241,7 +275,50 @@ function choose(trainee: TraineeRow): void {
     });
 }
 
-const formCountLabel = (count: number): string => (count === 1 ? 'costume form' : 'costume forms');
+
+/** The wireframe's pill reads "1 form" / "2 forms", which is the count alone rather than the noun. */
+const formPillLabel = (count: number): string => (count === 1 ? '1 form' : `${count} forms`);
+
+/** The form the card's rarity pill states: the one the draft names, else the first the catalog lists. */
+function headlineForm(row: TraineeRow): FormRow | null {
+    const picked = pickedForm.value[row.id] ?? null;
+
+    return row.forms.find((form) => form.id === picked) ?? row.forms[0] ?? null;
+}
+
+/**
+ * The stored pick, as the "Selected" card at the foot of the roster states it (`career-trainee.html:191-200`).
+ *
+ * Read from `selectedName` rather than from `trainees.data`: the roster is filtered and paginated, so the
+ * chosen trainee is often not on the page, and a lookup there used to answer `N/A` beside a flash saying she
+ * was set (D5). The aptitude sentence and the form title are refinements: they print only when the row is
+ * on the page shown, and their absence leaves the name and the link intact.
+ */
+const selectedRow = computed<TraineeRow | null>(
+    () => props.trainees.data.find((trainee) => trainee.id === props.selected) ?? null,
+);
+
+const selectedSummary = computed<string | null>(() => {
+    const row = selectedRow.value;
+
+    if (row === null || row.aptitudes === null) {
+        return null;
+    }
+
+    // The strongest letter of each family, named the way the card's own rows name them, in the order the
+    // wireframe prints them: distance, then track, then the running style.
+    const strongestOf = (axis: string): string | null => {
+        const axes = axisRows.value[axis] ?? [];
+        const letter = strongest(row.aptitudes, axes);
+        const named = axes.find((candidate) => row.aptitudes?.[candidate.value] === letter);
+
+        return named === undefined || letter === null ? null : `${named.label} ${letter}`;
+    };
+
+    return [strongestOf('distance'), strongestOf('surface'), strongestOf('style')]
+        .filter((part): part is string => part !== null)
+        .join(' · ');
+});
 </script>
 
 <template>
@@ -250,7 +327,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
         <template #eyebrow>Setup</template>
         <template #title>Choose a trainee</template>
 
-        <!-- No breadcrumb: "← Back to trainee" pointed at this same URL. The step bar above lists all
+        <!-- No breadcrumb: "Back to trainee" pointed at this same URL. The step bar above lists all
              six steps, and the carried-choices strip states the scenario, so nothing is lost. -->
 
         <!-- Header: eyebrow + subtitle. The page title is the layout's #title h1. -->
@@ -325,7 +402,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
             </p>
         </div>
 
-        <p v-if="loading" role="status" class="mt-3 text-sm text-ink-muted">Loading the roster…</p>
+        <p v-if="loading" role="status" class="mt-3 text-sm text-ink-muted">Loading the roster...</p>
 
         <!-- A refused filter is announced where it was typed. The three aptitude facets share one message
              because the domain is one thing (S to G), and the skill filter names its own field. -->
@@ -340,7 +417,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
             </li>
         </ul>
 
-        <p v-if="selectForm.processing" role="status" class="mt-3 text-sm text-ink-muted">Saving your choice…</p>
+        <p v-if="selectForm.processing" role="status" class="mt-3 text-sm text-ink-muted">Saving your choice...</p>
 
         <p
             v-if="props.trainees.data.length === 0 && !loading"
@@ -351,97 +428,129 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
         </p>
 
         <!--
-          A table, not 25 stacked cards (plan 3.4). The cards repeated the aptitude grid and the form
-          list on every row, so comparing two trainees meant scrolling past twenty-four blocks of
-          chrome. A row per trainee puts the comparable facts in columns: the portrait, her name, the
-          three primary aptitudes, how many forms she has, and the control that picks her.
+          One card per trainee, three to a row (`career-trainee.html:111-181`).
 
-          The aptitude and form columns render through the table's cell slots, because chips, an
-          artwork frame and a select are not text. The costume-form select stays in this page rather
-          than the profile: a career starts on one form, and that is a choice about THIS career, not a
-          fact about the trainee.
+          The card states the facts the wireframe states, in its order: the pick control, the portrait, the
+          name with her Japanese name and the form beside it, the rarity / form-count / release pills, and the
+          three aptitude rows with the strongest letter of each in bold. A card rather than a table because
+          the row is chosen, not read down a column, and the aptitude comparison the table once offered is
+          still there: the three rows sit at the same height in every card of a row.
+
+          The whole card is clickable, which is the wireframe's `<label>` affordance, but the control inside
+          is a real `<button>` with `aria-pressed`: the choice is a toggle, because "no trainee" is a state
+          the draft can hold and a state you can enter has to be exitable. The button keeps a 44px hit area
+          and draws the small disc the wireframe draws, so the target is large and the affordance is the one
+          the design shows. Its words live in an `sr-only` span: the card's own text names the trainee, so a
+          visible "Select" on every card would be 25 copies of one word.
         -->
-        <DataTable
+        <div
             v-else
-            class="mt-6"
-            caption="Trainees in the catalog"
-            :columns="traineeColumns"
-            :rows="props.trainees.data"
+            class="mt-6 grid grid-cols-1 gap-3 min-[821px]:grid-cols-2 min-[1081px]:grid-cols-3"
         >
-            <template #cell-trainee="{ row }">
-                <div class="flex items-center gap-3">
-                    <!-- The name is in the next cell, so the image is decorative and takes `alt=""`
-                         (DESIGN.md §4.7), and `reserve` holds the frame so every name starts at one x
-                         whether or not the mirror holds the file. -->
-                    <ArtworkSlot :url="row.artworkURL" alt="" size="size-10" reserve />
-                    <div>
-                        <span class="text-sm font-semibold text-ink-strong">{{ row.name }}</span>
-                        <span v-if="row.name_ja" lang="ja" class="ml-2 text-sm text-ink-muted">{{ row.name_ja }}</span>
-                    </div>
-                </div>
-            </template>
-
-            <template #cell-aptitudes="{ row }">
-                <div v-if="row.aptitudes === null" class="flex items-baseline gap-1 text-sm text-ink-muted">
-                    <AbsenceValue compact reason="The character document published no aptitude letters for this trainee." />
-                </div>
-                <div v-else class="flex flex-wrap gap-1.5">
-                    <!-- `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` §17: the badge prints the letter and its band as two words, never
-                         a colour alone. -->
-                    <AptitudeBadge
-                        v-for="cell in primaryAxes"
-                        :key="cell.value"
-                        :label="cell.label"
-                        :letter="row.aptitudes[cell.value] ?? null"
-                    />
-                </div>
-            </template>
-
-            <template #cell-forms="{ row }">
-                <span class="whitespace-nowrap">{{ row.form_count }} {{ formCountLabel(row.form_count) }}</span>
-                <!-- R3-06: the costume form is asked only where there is a choice to make. One row
-                     states a fact, and "Not stated" stays a real answer rather than a default. -->
-                <!-- `BaseSelect` owns its own `<label>` and derives the select's `aria-labelledby` from
-                     the id it is given, so wrapping it in a second `<label>` broke the association: the
-                     select had no accessible name at all. The label is passed IN rather than wrapped
-                     around, which is the component's contract. -->
-                <BaseSelect
-                    v-if="row.forms.length > 1"
-                    class="mt-1"
-                    :id="`trainee-form-${row.id}`"
-                    name="character_card_id"
-                    label="Costume form"
-                    v-model="pickedForm[row.id]"
-                    :options="[{ value: null, label: 'Not stated' }, ...row.forms.map((card: { id: number; title: string; is_debut_form: boolean }) => ({ value: card.id, label: `${card.title}${card.is_debut_form ? ' (debut form)' : ''}` }))]"
-                />
-            </template>
-
-            <template #cell-select="{ row }">
-                <div class="flex flex-wrap items-center gap-2">
+            <div
+                v-for="row in props.trainees.data"
+                :key="row.id"
+                :data-trainee-card="row.id"
+                class="cursor-pointer rounded-lg border-2 bg-panel p-3.5 transition-colors duration-150 ease-out"
+                :class="props.selected === row.id ? 'border-pick-line bg-sunken' : 'border-rule hover:bg-raised'"
+                @click="choose(row)"
+            >
+                <div class="flex items-start gap-2.5">
                     <button
                         :id="`trainee-${row.id}`"
                         type="button"
-                        :class="[
-                            'inline-flex min-h-11 items-center rounded-md px-3 text-sm font-bold disabled:cursor-wait disabled:bg-disabled',
-                            props.selected === row.id
-                                ? 'bg-chrome text-on-chrome'
-                                : 'border border-rule bg-raised text-ink hover:bg-sunken transition-colors duration-150 ease-out'
-                        ]"
+                        class="flex size-11 shrink-0 items-center justify-center rounded-md disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                         :aria-pressed="props.selected === row.id ? 'true' : 'false'"
                         :disabled="selectForm.processing"
-                        @click="choose(row)"
+                        @click.stop="choose(row)"
                     >
-                        {{ props.selected === row.id ? 'Chosen · clear' : 'Select' }}
+                        <span
+                            aria-hidden="true"
+                            class="size-4 rounded-full border-2"
+                            :class="props.selected === row.id ? 'border-pick-line bg-pick-line' : 'border-rule bg-raised'"
+                        />
+                        <span class="sr-only">{{ props.selected === row.id ? 'Chosen · clear' : 'Select' }}</span>
                     </button>
+
+                    <!-- The name beside the frame is the accessible name, so the image is decorative and
+                         takes `alt=""` (DESIGN.md §4.7). -->
+                    <ArtworkSlot :url="row.artworkURL" alt="" size="size-10" reserve />
+
+                    <div class="min-w-0 flex-1">
+                        <p class="text-[15px] font-extrabold text-ink-strong">{{ row.name }}</p>
+                        <p class="text-xs text-ink-muted">
+                            <span v-if="row.name_ja" lang="ja">{{ row.name_ja }}</span>
+                            <template v-if="headlineForm(row)">
+                                <span v-if="row.name_ja" aria-hidden="true"> · </span>{{ headlineForm(row)?.title }}
+                            </template>
+                        </p>
+
+                        <div class="mt-1.5 flex flex-wrap gap-1.5 text-xs">
+                            <span
+                                v-if="headlineForm(row)"
+                                class="inline-flex items-center rounded-full border border-rule bg-raised px-2 py-0.5 font-semibold text-ink"
+                            >
+                                {{ headlineForm(row)?.rarity_stars }} {{ headlineForm(row)?.rarity_word }}
+                            </span>
+                            <span class="inline-flex items-center rounded-full border border-rule bg-raised px-2 py-0.5 text-ink-muted">
+                                {{ formPillLabel(row.form_count) }}
+                            </span>
+                            <span class="inline-flex items-center rounded-full border border-pick-line bg-raised px-2 py-0.5 text-ink">
+                                {{ row.release_status_label }}
+                            </span>
+                        </div>
+
+                        <dl
+                            v-if="row.aptitudes"
+                            class="mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-0.5 text-[11.5px]"
+                        >
+                            <template v-for="(axes, axis) in axisRows" :key="axis">
+                                <dt class="text-ink-muted capitalize">{{ axis }}</dt>
+                                <dd class="text-ink">
+                                    <template v-for="(cell, index) in axes" :key="cell.value">
+                                        <span v-if="index > 0" aria-hidden="true" class="text-ink-muted"> · </span>
+                                        <!-- The strongest letter of the row carries the weight change, so the
+                                             comparison reads without colour (design-2.0 §17). -->
+                                        <span
+                                            :class="row.aptitudes[cell.value] === strongest(row.aptitudes, axes)
+                                                ? 'font-bold text-ink-strong'
+                                                : ''"
+                                        >{{ cell.label }} {{ row.aptitudes[cell.value] ?? 'N/A' }}</span>
+                                    </template>
+                                </dd>
+                            </template>
+                        </dl>
+                        <p v-else class="mt-2 text-xs text-ink-muted">
+                            <AbsenceValue compact reason="The character document published no aptitude letters for this trainee." />
+                        </p>
+
+                        <!-- R3-06: the costume form is asked only where there is a choice to make. "Not stated"
+                             stays a real answer rather than a default that names a form nobody picked. The
+                             click is stopped so opening the picker does not also pick the card. -->
+                        <div v-if="row.forms.length > 1" @click.stop>
+                            <BaseSelect
+                                class="mt-2"
+                                :id="`trainee-form-${row.id}`"
+                                name="character_card_id"
+                                label="Costume form"
+                                v-model="pickedForm[row.id]"
+                                :options="[{ value: null, label: 'Not stated' }, ...row.forms.map((card: FormRow) => ({ value: card.id, label: `${card.title}${card.is_debut_form ? ' (debut form)' : ''}` }))]"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2 flex justify-end">
                     <a
                         :href="`/career/setup/trainee/${row.id}`"
                         class="inline-flex min-h-11 items-center text-sm font-medium text-ink underline"
+                        @click.stop
                     >
                         Profile
                     </a>
                 </div>
-            </template>
-        </DataTable>
+            </div>
+        </div>
 
         <nav
             v-if="props.trainees.links.length > 3"
@@ -461,6 +570,36 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
                 <span v-else class="px-3 py-1 text-ink-muted" v-html="link.label" />
             </template>
         </nav>
+
+        <!-- The chosen trainee, restated once at the foot of the roster (`career-trainee.html:191-200`). Read
+             from `selectedName` rather than from the page's own rows: the roster is filtered and paginated,
+             so the pick is usually not on the page shown, and a lookup there once answered `N/A` beside a
+             flash saying she had been set (D5). The card renders only when a trainee is actually chosen -
+             the wireframe has no empty state, and "nothing chosen" is already said by the strip above. -->
+        <div v-if="props.selectedName" data-field="selected-trainee" class="mt-3.5 rounded-lg border border-rule bg-panel p-4">
+            <h2 class="text-sm font-bold text-ink-strong">Selected</h2>
+            <div class="mt-2 flex flex-wrap items-center gap-3.5">
+                <div class="min-w-0 flex-1 basis-64">
+                    <p class="text-[15px] font-extrabold text-ink-strong">
+                        {{ props.selectedName }}
+                        <span v-if="selectedRow && headlineForm(selectedRow)" class="font-semibold text-ink-muted">
+                            {{ headlineForm(selectedRow)?.title }}
+                        </span>
+                    </p>
+                    <p class="text-xs text-ink-muted">
+                        <template v-if="selectedSummary">{{ selectedSummary }}.</template>
+                        The form you pick sets this run's rarity and potential.
+                    </p>
+                </div>
+                <a
+                    v-if="props.selected"
+                    :href="`/career/setup/trainee/${props.selected}`"
+                    class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-3 text-sm font-bold text-ink hover:bg-sunken transition-colors duration-150 ease-out"
+                >
+                    Preview profile
+                </a>
+            </div>
+        </div>
 
         <!-- The picker's only forward control used to be the wizard rail at the top, so a Trainer who
              scrolled to the end of the roster had to scroll back up to advance (R4-22). The same

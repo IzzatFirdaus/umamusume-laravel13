@@ -100,6 +100,7 @@ function focusRow(): void {
         :id="`deck-slot-${position}`"
         tabindex="-1"
         class="card flex flex-wrap items-start gap-x-4 gap-y-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
+        :style="is_friend || !card ? 'border-style:dashed' : undefined"
     >
         <ArtworkSlot
             v-if="card"
@@ -165,6 +166,15 @@ function focusRow(): void {
                     <span v-for="effect in card.effects" :key="effect.effect_id">
                         {{ effect.name ?? `[Unverified] effect ${effect.effect_id}` }} {{ effect.display }}
                     </span>
+                </p>
+
+                <!-- DOMAIN OVERRIDE (DM-8): Pal cards print "No friendship bonus" prose when the
+                     field is null. The client gives a Pal card no friendship gauge at all, so a blank
+                     chip would read as "not checked yet" rather than as the mechanic. -->
+                <p v-if="card.type === 'friend'" class="text-xs text-[var(--color-ink-muted)]">
+                    Event effectiveness &middot; failure protection &middot; event recovery.
+                    <strong class="text-[var(--color-ink-strong)]">No friendship bonus</strong> — Pal
+                    cards earn their slot through events.
                 </p>
             </template>
         </div>

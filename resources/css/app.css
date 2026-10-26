@@ -901,10 +901,23 @@ html[data-theme='eva01'] {
 
 /* `.card + .card`: ported from shell.css:371. Column-stacked card groups (help.html's "Keyboard",
    "What the tags mean", "Rules that are easier to look up", "If something looks wrong") carry no
-   inline margin and are separated by exactly this 14px. Cards that sit in a grid zero their own
-   margin inline, which is what keeps the grid gap authoritative there. */
+   inline margin and are separated by exactly this 14px. */
 .card + .card {
     margin-top:14px;
+}
+
+/* A card that is a direct child of a grid is separated by the grid's gap alone, never by the
+   column-stack margin above. This is the wireframe's own `style="margin:0"` on every card inside a
+   grid (index.html:72, :110, :134, :157, :176): without it the second card of every grid row sits
+   14px lower than the first, which is not a gap the drawing has.
+
+   It is a rule rather than a `m-0` utility on the element because `.card + .card` is authored
+   unlayered here while Tailwind's utilities live in `@layer utilities`, and unlayered styles
+   outrank every layer regardless of specificity -- a `m-0` class on the card loses to this file.
+   Measured, not assumed: the Dashboard's "Needs you" card sat at +14px against its row before this
+   rule, with `[&>*]:m-0` applied on the grid. */
+.grid > .card + .card {
+    margin-top:0;
 }
 
 /* .card > h2: ported from shell.css; resolves to house tokens. The rule under a card's own name is

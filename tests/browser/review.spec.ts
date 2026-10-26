@@ -192,27 +192,33 @@ test('measures the queue against the shell gutter', async ({ page }) => {
     // dashboard's starts at x=256, and the question was whether this page adds a gutter of its own
     // on top of the shell's.
     //
-    // It does not. Measured: the page's first CARD edge sits exactly on the shell's content edge,
-    // and the 17px between that edge and the form inside it is the card's own `p-4` plus its 1px
-    // border, not a page-level inset. The 352 measurement counted from inside a card. Declared here
-    // as a measurement against the card, which is the element the page actually positions.
+    // It does not. Measured: the page's first list row sits exactly on the shell's content edge, and
+    // the 17px between that edge and the form inside it is the card's own `p-4` plus its 1px border,
+    // not a page-level inset. The 352 measurement counted from inside a card. Declared here as a
+    // measurement against the row, which is the element the page actually positions.
+    //
+    // The gutter is read from `[data-shell-band]`, the element the shell gives it to (the HFW shell
+    // rewrite moved the band's padding off `main` itself onto its content band), so the measurement
+    // follows the padding wherever the shell puts it rather than assuming main carries it.
     const edges = await page.evaluate(() => {
         const main = document.querySelector('main') as HTMLElement;
-        const card = document.querySelector('section[aria-labelledby] ul > li') as HTMLElement | null;
-        const style = getComputedStyle(main);
+        const band = main.querySelector('[data-shell-band]') as HTMLElement | null;
+        const row = document.querySelector('section[aria-labelledby] ul > li') as HTMLElement | null;
+        const grip = band ?? main;
+        const style = getComputedStyle(grip);
 
         return {
-            mainContentLeft: main.getBoundingClientRect().left + Number.parseFloat(style.paddingLeft),
-            firstCardLeft: card === null ? null : card.getBoundingClientRect().left,
-            mainPaddingLeft: Number.parseFloat(style.paddingLeft),
+            shellContentLeft: grip.getBoundingClientRect().left + Number.parseFloat(style.paddingLeft),
+            firstRowLeft: row === null ? null : row.getBoundingClientRect().left,
+            shellGutter: Number.parseFloat(style.paddingLeft),
         };
     });
 
-    expect(edges.firstCardLeft).not.toBeNull();
-    // The card is the page's own first element, and it sits on the shell's content edge: no page
+    expect(edges.firstRowLeft).not.toBeNull();
+    // The row is the page's own first element, and it sits on the shell's content edge: no page
     // padding of its own, so the review page has no left-edge bug to fix.
-    expect(Math.abs((edges.firstCardLeft as number) - edges.mainContentLeft)).toBeLessThanOrEqual(1);
-    expect(edges.mainPaddingLeft, 'the shell gutter is the only inset').toBeLessThanOrEqual(96);
+    expect(Math.abs((edges.firstRowLeft as number) - edges.shellContentLeft)).toBeLessThanOrEqual(1);
+    expect(edges.shellGutter, 'the shell gutter is the only inset').toBeLessThanOrEqual(96);
 });
 
 test('summarises a no-match row on one line and links to the page that decides', async ({ page }) => {

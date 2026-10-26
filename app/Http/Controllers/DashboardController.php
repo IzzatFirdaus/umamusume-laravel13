@@ -174,6 +174,10 @@ class DashboardController extends Controller
             'energy' => $strip['energy'],
             'resource' => $this->primaryResource($run, $strip),
             'team_rank' => $this->teamRank($run),
+            // The 64px frame the wireframe draws beside the name (index.html:75, `.slot slot-16`). A
+            // loopback mirror url resolved server-side, never composed in Vue (`ADR-0021` read half,
+            // `DESIGN.md` §4.7); null is the mirror's normal partial answer and paints nothing.
+            'artworkURL' => VeteranRow::portraitUrl($run),
             // "Resume" continues the career, so it opens the Cockpit (SCREEN-009, `SCR-CAR-011`), the
             // screen the run is read from every turn, not the record sheet that logs its turns.
             'resume_url' => route('runs.cockpit', $run),
@@ -293,7 +297,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * @return array{id: int, label: string, trainee: string, trainee_ja: string|null, scenario_label: string, run_id: int, run_url: string}
+     * @return array{id: int, label: string, saved_date: string, trainee: string, trainee_ja: string|null, scenario_label: string, run_id: int, run_url: string, artworkURL: string|null}
      */
     private function veteranRow(Veteran $veteran): array
     {
@@ -302,6 +306,14 @@ class DashboardController extends Controller
         return [
             'id' => $veteran->id,
             'label' => VeteranRow::label($run),
+            /*
+             * The Saved column's own value (index.html:162, `2026-10-15`). `label` disambiguates two
+             * careers trained in the same form and therefore reads "Trainee · Scenario · date"; a
+             * table with a Trainee column and a Scenario column beside it would print both of those
+             * twice and the date once, buried. The stored start marker is the run's `created_at`,
+             * which is what `VeteranRow::label()` dates the same row from.
+             */
+            'saved_date' => $run->created_at?->format('Y-m-d') ?? '',
             'trainee' => $run->umamusume->name,
             'trainee_ja' => $run->umamusume->name_ja,
             'scenario_label' => $this->scenarioLabel($run),
@@ -309,6 +321,10 @@ class DashboardController extends Controller
             // A Veteran is a completed run, and the run is where its facts live, so the row opens
             // the run rather than a second reading of the same data (`Veteran`'s docblock).
             'run_url' => route('runs.cockpit', $run),
+            // The 40px frame the wireframe draws in the row (index.html:162, `.slot slot-10`).
+            // `ListVeterans` already eager-loads the two relations `portraitUrl()` reads, so this is
+            // a read of rows in memory rather than a query per row.
+            'artworkURL' => VeteranRow::portraitUrl($run),
         ];
     }
 
@@ -349,7 +365,10 @@ class DashboardController extends Controller
         // "Current" beside a "source marked stale" marker was two contradictions on the one line whose
         // job is saying whether the data can be trusted.
         return [
-            'label' => 'GLOBAL DATA',
+            // The sentence's first half, in the client's own mixed case, because it is read as the
+            // beginning of one line: `Global data · Current` (index.html:115). The tile's key above it
+            // is uppercased by CSS, so nothing loses its caps where caps are wanted.
+            'label' => 'Global data',
             'state' => config('scenarios.stale', false) ? 'Stale' : 'Current',
             // The tile's risk border needs the flag, not the word: matching on a display string to
             // decide a state is the thing AGENTS.md §5 forbids.

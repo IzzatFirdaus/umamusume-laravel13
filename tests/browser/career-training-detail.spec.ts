@@ -751,3 +751,34 @@ test('names the turn the record button writes', async ({ page }) => {
     await expect(page.getByRole('button', { name: /^Record turn \d+$/ })).toBeVisible();
 });
 
+
+test('marks Wit as the discipline that costs no Energy', async ({ page }) => {
+    // DM-7: Wit training costs 0 Energy, sourced from `config/advisor.php` (`wit_cost`). The figure and
+    // the tag both have to be present: a bare "0" reads as a missing measurement.
+    await openTrainingDetail(page);
+
+    const witCard = page.getByRole('article').filter({ hasText: /^Wit/ });
+    await expect(witCard.getByText('no Energy')).toBeVisible();
+    await expect(witCard.getByText(/Energy/).first()).toBeVisible();
+});
+
+test('prints a training Energy cost as a signed figure', async ({ page }) => {
+    await openTrainingDetail(page);
+
+    const speedCard = page.getByRole('article').filter({ hasText: /^Speed/ });
+    const cost = speedCard.getByText(/^−\d+( … −\d+)? Energy$/);
+
+    await expect(cost).toBeVisible();
+});
+
+test('picks a discipline with the printed 1-5 accelerator', async ({ page }) => {
+    // H7: the keyboard contract is printed beside the commit action, so the accelerator is discoverable.
+    // Pressing "2" holds the second card's discipline without recording anything.
+    await openTrainingDetail(page);
+
+    await page.locator('body').click({ position: { x: 5, y: 5 } });
+    await page.keyboard.press('2');
+
+    await expect(page.getByText(/Chosen: Stamina/)).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Record turn \d+$/ })).toBeVisible();
+});

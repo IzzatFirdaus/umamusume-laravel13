@@ -44,7 +44,9 @@ test('states the column list the export writes, so the paste target is checkable
     await page.goto('/training-runs/import');
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByRole('heading', { name: 'Import a historical career', level: 1 })).toBeVisible();
+    // The HFW import page's own heading, which the app ships verbatim; the earlier pin used a
+    // draft title the wireframe never carried (HFW precedence over the v2.1.0 test).
+    await expect(page.getByRole('heading', { name: 'Bring in a historical career', level: 1 })).toBeVisible();
     await expect(page.getByText(/nothing is created until you confirm/)).toBeVisible();
 
     // The hint is the request's own HEADERS joined for reading, and the placeholder the same list joined

@@ -5,8 +5,8 @@ import { deleteRun } from '../utils/delete-run';
  * F1, the career surface cutover: no normal navigation path may open the 2.0.0 run-detail page
  * (`SCR-RUN-003`), and Dashboard and Careers must converge on the Cockpit (`SCR-CAR-011`).
  *
- * What is asserted here is the state this slice ships: the Careers rows and the Dashboard's Resume
- * Career both carry the Cockpit's URL. The legacy-URL redirect itself (opening /training-runs/{id}
+ * What is asserted here is the state this slice ships: the Careers rows and the Dashboard's resume
+ * card (the HFW's "Open cockpit", formerly "Resume career") both carry the Cockpit's URL. The legacy-URL redirect itself (opening /training-runs/{id}
  * directly) is deliberately not asserted yet. The owner held it, and the reason is not a test count:
  * four writes have no 2.0 owner yet, so the record screen is still the only place a Trainer can reach
  * them (plan §9's F1 row). This file's header comment is where that case belongs when it lands.
@@ -42,17 +42,22 @@ async function openCareersAndSelectRun(page: import('@playwright/test').Page): P
     await createUnityCupRun(page);
     await page.goto('/training-runs', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await page.getByRole('link', { name: /Rice Shower/ }).first().click();
+    // runs-index.html makes the trainee's name plain text and the row's only door the "Cockpit"
+    // button, so the run is selected through that door rather than by clicking a name that the
+    // wireframe never links.
+    await page.getByRole('row').filter({ hasText: 'Rice Shower' })
+        .getByRole('link', { name: 'Cockpit' })
+        .click();
     await page.waitForURL(/\/cockpit$/, WRITE);
     await page.locator('#app > *').first().waitFor();
 }
 
-test('Dashboard Resume Career opens the Cockpit, not the run-detail page', async ({ page }) => {
+test('Dashboard Open cockpit opens the Cockpit, not the run-detail page', async ({ page }) => {
     await createUnityCupRun(page);
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await page.getByRole('link', { name: 'Resume Career' }).click();
+    await page.getByRole('link', { name: 'Open cockpit' }).click();
     await page.waitForURL(/\/cockpit$/, WRITE);
     await page.locator('#app > *').first().waitFor();
 
@@ -76,13 +81,18 @@ test('Dashboard Resume and Careers selection converge on the same Cockpit surfac
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await page.getByRole('link', { name: 'Resume Career' }).click();
+    await page.getByRole('link', { name: 'Open cockpit' }).click();
     await page.waitForURL(/\/cockpit$/, WRITE);
     const fromDashboard = new URL(page.url()).pathname;
 
     await page.goto('/training-runs', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await page.getByRole('link', { name: /Rice Shower/ }).first().click();
+    // runs-index.html makes the trainee's name plain text and the row's only door the "Cockpit"
+    // button, so the run is selected through that door rather than by clicking a name that the
+    // wireframe never links.
+    await page.getByRole('row').filter({ hasText: 'Rice Shower' })
+        .getByRole('link', { name: 'Cockpit' })
+        .click();
     await page.waitForURL(/\/cockpit$/, WRITE);
     const fromCareers = new URL(page.url()).pathname;
 

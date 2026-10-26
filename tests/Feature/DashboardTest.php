@@ -63,7 +63,7 @@ it('renders the dashboard with no active career, an empty Veteran list and the d
             ->where('quickActions.2.label', 'Open settings')
             ->where('quickActions.3.label', 'Database hub')
             // The badge's date is a config fact, so it cannot drift from the matrix it describes.
-            ->where('dataStatus.label', 'GLOBAL DATA')
+            ->where('dataStatus.label', 'Global data')
             ->where('dataStatus.state', 'Current')
             ->where('dataStatus.verified_at', config('scenarios.verified_at'))
             ->where('dataStatus.verified_at', '2026-09-27')

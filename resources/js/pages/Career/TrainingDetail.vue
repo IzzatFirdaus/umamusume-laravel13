@@ -34,7 +34,7 @@ import CareerLayout from '../../layouts/CareerLayout.vue';
 import TrainingCard from '../../components/career/TrainingCard.vue';
 import { BaseInput, BaseSelect, BaseRadio } from '../../components/Form';
 import { Head, useForm } from '@inertiajs/vue3';
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
 import { TURN_ENTRY_ENERGY_BANDS, TURN_ENTRY_ENERGY_STATES, TURN_ENTRY_FACILITY_FIELDS, TURN_ENTRY_PREVIEW_FIELDS, TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
 
@@ -370,6 +370,57 @@ const describedBy = (field: string): string | undefined =>
 
 const capFor = (label: string): number =>
     props.options.find((option) => option.key === label)?.cap ?? 0;
+
+/*
+ * The accelerator, and the contract printed for it (HFW `training-decision.html`: 1–5 pick, Enter
+ * records, Escape goes back; H7 — an accelerator a Trainer has to already know is not discoverable).
+ *
+ * The listener stands down on typing surfaces: a number typed into "Turn" must pick nothing, and Enter
+ * inside a field keeps the browser's own submit path instead of recording twice. A focused button keeps
+ * its own Enter activation for the same reason.
+ */
+const typing = (target: EventTarget | null): boolean => {
+    const el = target as HTMLElement | null;
+    const tag = el?.tagName;
+
+    return tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || el?.isContentEditable === true;
+};
+
+function onKeydown(event: KeyboardEvent): void {
+    if (event.metaKey || event.ctrlKey || event.altKey || typing(event.target)) {
+        return;
+    }
+
+    if (/^[1-5]$/.test(event.key)) {
+        const option = props.options[Number(event.key) - 1];
+
+        if (option !== undefined) {
+            event.preventDefault();
+            choose(option.choice);
+        }
+
+        return;
+    }
+
+    if (event.key === 'Enter') {
+        if (choice.value === null || (event.target as HTMLElement | null)?.tagName === 'BUTTON') {
+            return;
+        }
+
+        event.preventDefault();
+        recordTurn();
+
+        return;
+    }
+
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        window.history.back();
+    }
+}
+
+onMounted(() => window.addEventListener('keydown', onKeydown));
+onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
 </script>
 
 <template>
@@ -483,7 +534,7 @@ const capFor = (label: string): number =>
         <section aria-labelledby="training-options-heading">
             <h2 id="training-options-heading" class="text-lg font-semibold text-ink-strong">Training options</h2>
 
-            <div class="mt-3 grid grid-cols-1 gap-4 @4xl:grid-cols-2 @7xl:grid-cols-3">
+            <div class="mt-3 grid grid-cols-1 gap-4 min-[1081px]:grid-cols-2 min-[1281px]:grid-cols-3">
                 <TrainingCard
                     v-for="option in props.options"
                     :key="option.choice"
@@ -514,6 +565,19 @@ const capFor = (label: string): number =>
                 Every number below is what the client shows after the turn resolves. This tool does not
                 project them, so an empty field is the honest state and the write refuses a turn that has
                 not been read.
+            </p>
+
+            <!-- The contract for the accelerator, printed rather than memorised (HFW training-decision;
+                 H7). It names the same keys `onKeydown` listens for, and it sits beside the commit action
+                 so a Trainer who never reads the chart still finds it. -->
+            <p class="mt-2 text-xs text-ink-muted">
+                Keyboard:
+                <kbd class="rounded border border-rule bg-raised px-1 font-mono text-[11px]">1</kbd>–<kbd class="rounded border border-rule bg-raised px-1 font-mono text-[11px]">5</kbd>
+                pick a discipline,
+                <kbd class="rounded border border-rule bg-raised px-1 font-mono text-[11px]">Enter</kbd>
+                records the choice you are holding,
+                <kbd class="rounded border border-rule bg-raised px-1 font-mono text-[11px]">Esc</kbd>
+                steps back. Keys stand down while a field has focus.
             </p>
 
             <!-- Rest and Recreation, the two turn choices that are not trainings. They are not cards:

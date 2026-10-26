@@ -49,10 +49,10 @@ test('reviews the five entered steps as one checklist row each', async ({ page }
     await openPreflight(page);
 
     // The page is named for what it does, and the name is the shell's one `h1`.
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Review and start');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Before the first turn');
 
     // One row per entered step, in wizard order. Step 6 is this page, so it is not a row.
-    const rows = page.locator('li[id^="preflight-step-"]');
+    const rows = page.locator('tr[id^="preflight-step-"]');
     await expect(rows).toHaveCount(ROWS.length);
 
     for (const [index, key] of ROWS.entries()) {
@@ -60,13 +60,13 @@ test('reviews the five entered steps as one checklist row each', async ({ page }
     }
 
     // Every row carries its own door back to the step that owns it, and no two doors share a name.
-    await expect(page.locator('li[id^="preflight-step-"] a')).toHaveCount(ROWS.length);
+    await expect(page.locator('tr[id^="preflight-step-"] a')).toHaveCount(ROWS.length);
 
     // Build: the scenario's own label and the entered target, in the step's own words.
     await expect(page.locator('#preflight-step-scenario')).toContainText('URA Finale');
-    await expect(page.locator('#preflight-step-scenario')).toContainText('Entered');
+    await expect(page.locator('#preflight-step-scenario')).toContainText('Pass');
     await expect(page.locator('#preflight-step-target')).toContainText('Story Clear · Turf Medium · Pace Chaser');
-    await expect(page.locator('#preflight-step-target')).toContainText('Entered');
+    await expect(page.locator('#preflight-step-target')).toContainText('Pass');
 
     // Support deck: the equipped card is counted in words, not restated as a table.
     await expect(page.locator('#preflight-step-deck')).toContainText('1 of six positions carry a card');

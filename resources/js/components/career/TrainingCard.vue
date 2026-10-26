@@ -130,9 +130,16 @@ const publishedCost = computed(() => props.option.published.cost);
 
 const costText = computed(() =>
     props.option.cost.min === props.option.cost.max
-        ? `E−${props.option.cost.min}`
-        : `E−${props.option.cost.max} … E−${props.option.cost.min}`,
+        ? (props.option.cost.min === 0 ? '0 Energy' : `−${props.option.cost.min} Energy`)
+        : `−${props.option.cost.min} … −${props.option.cost.max} Energy`,
 );
+
+/**
+ * Wit is the one discipline the client refunds: `config/advisor.php` carries `wit_cost` as 0, sourced.
+ * The tag states that in words rather than leaving the trailer to be inferred from a "0 Energy" figure
+ * (DM-7), and the sign is the mechanic's, not a decoration.
+ */
+const isWit = computed(() => props.option.choice.toLowerCase().endsWith('-wit'));
 
 const costTitle = computed(() => {
     const cost = props.option.published.cost;
@@ -328,12 +335,25 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Energy cost</dt>
                 <dd class="mt-0.5">
                     <template v-if="publishedCost !== null">
-                        <span :title="costTitle" class="font-mono tabular-nums text-ink-strong">{{ publishedCost.text }}</span>
+                        <span
+                            :title="costTitle"
+                            class="font-mono tabular-nums"
+                            :class="props.option.cost.min === 0 ? 'text-ink-strong' : 'text-[var(--color-down)]'"
+                        >{{ publishedCost.text }} Energy</span>
                         <span class="text-xs text-ink-muted"> [{{ publishedCost.server }}]</span>
                     </template>
                     <template v-else>
-                        <span :title="costTitle" class="font-mono tabular-nums text-ink-strong">{{ costText }}</span>
+                        <span
+                            :title="costTitle"
+                            class="font-mono tabular-nums"
+                            :class="props.option.cost.min === 0 ? 'text-ink-strong' : 'text-[var(--color-down)]'"
+                        >{{ costText }}</span>
                     </template>
+                    <!-- DM-7: Wit training costs 0 Energy, so the card states the refund in words beside
+                         the figure rather than leaving a bare "0" to be read as a missing value. It sits
+                         outside both branches: the corpus publishes a cost for Wit too, so a tag nested in
+                         the derived branch would vanish on the one card that needs it. -->
+                    <span v-if="isWit" class="tag auto ml-1">no Energy</span>
                     <!-- `ADR-0001` §2 requires the constants behind a derived number to be visible wherever
                          the number appears, and a `title` is reachable by mouse only. The owner ruled the inline form
                          (2026-10-09); `ScenarioPanel.vue:205-208` and `Dashboard.vue:300-301` already print a

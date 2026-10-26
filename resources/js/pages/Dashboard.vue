@@ -11,20 +11,30 @@ import AbsenceValue from '../components/AbsenceValue.vue';
 import Pill from '../components/ui/Pill.vue';
 import Tile from '../components/ui/Tile.vue';
 import Note from '../components/ui/Note.vue';
-import NavGlyph from '../components/NavGlyph.vue';
 
 /*
- * The landing screen, rebuilt as a structural clone of HFW `index.html`.
+ * The landing screen, rebuilt as a structural clone of HFW `index.html` (owner steering: `index.html`
+ * is the dashboard reference, not `dashboard.html` -- the two draw different boards).
  *
- * Region order is the wireframe's reading order and it is load-bearing:
+ * Region order is the wireframe's reading order and it is load-bearing (index.html:69-186):
  *
- *   1. page head: eyebrow, h1, lede, two actions
- *   2. "Pick up where you left off" + "Recent veterans"   (row one, 2.1fr / 1fr)
- *   3. "Needs you" + "Quick actions"                      (row two, 2.1fr / 1fr)
+ *   1. page head: eyebrow, h1, lede, two actions, hairline
+ *   2. "Pick up where you left off" + "Needs you"          (.g-side, 2.1fr / 1fr)
+ *   3. four KPI tiles: Careers running / Trainees / Skills / Support cards   (.g-4)
+ *   4. "Recent veterans" + "Quick actions"                 (.g-side, 2.1fr / 1fr)
  *
- * The older three-tile KPI strip, the Roster card and the separate Data Status card are gone:
- * `index.html` has none of them. The catalogue counts now sit in the "Needs you" column as its
- * catalogue door's count line, which is where the wireframe carries them.
+ * The Roster card and the separate Data Status card are gone from `index.html`, and its own
+ * annotation 5 says so: the flat board became two, and the counts a Trainer read there are the
+ * KPI tiles' own figures. The catalogue figure reachable from a card stays, as the "Trainees
+ * catalogued" tile's door.
+ *
+ * The 72-mark turn rail is NOT drawn here: `index.html` has no rail, and the rail belongs to
+ * `dashboard.html`'s board (annotation 2 there). Its fact survives as the Turn tile's "of 72",
+ * which is exactly where `index.html:90` prints it.
+ *
+ * The wireframe's Table of contents and Annotation key are document artifacts -- one is a
+ * navigation aid for reading the set, the other is a checklist for the person reviewing it -- and
+ * neither is a screen. They are absent, and `tests/browser/dashboard.spec.ts` pins their absence.
  *
  * Absence is a word plus a reason, never a blank cell and never a bare tooltip: every `N/A` below
  * is paired with a sentence on the same screen (`AbsenceValue`'s disclosure, or the note).
@@ -51,7 +61,10 @@ interface ActiveCareer {
 
 interface VeteranRow {
     id: number;
+    /** The disambiguating sentence: "Trainee · Scenario · date". */
     label: string;
+    /** The Saved column's own value, `2026-10-15`. Empty when the run carries no start date. */
+    saved_date: string;
     trainee: string;
     trainee_ja: string | null;
     scenario_label: string;
@@ -94,7 +107,6 @@ const props = defineProps<{
 
 const page = usePage();
 const { visiting, visitFailed } = useVisitState();
-const ruleset = computed<string | null>(() => page.props.app?.ruleset ?? null);
 
 const { mode: dashboardLayout } = useLayout();
 const savedSettings = computed(() => (page.props.preferences?.settings ?? {}) as Record<string, unknown>);
@@ -122,96 +134,136 @@ const allCardsHidden = computed<boolean>(() => DASHBOARD_CARD_IDS.every((id) => 
 
 const group = (n: number): string => n.toLocaleString('en-US');
 
-// Both rows are the wireframe's `.g-side`: a wide column and a narrow one, one column below 820px.
-// Compact keeps one column at every width, because a narrower measure is the point of that mode.
 /*
- * `` because the `.card + .card` primitive stacks a card under its sibling with 14px of
- * margin, which is right in a column and wrong in a grid: it pushed the second card of each row down
- * by a gap the wireframe does not draw (`.card{margin:0}` inline on every HFW card).
+ * The wireframe's grids (shell.css:399-406), ported onto container queries.
+ *
+ * Container, not viewport, because the shell's rail is a fixed 236px column: the canvas these grids
+ * resolve against is the viewport minus that rail, and `main` is the `@container` they read. Measured
+ * in the browser rather than assumed: the canvas is 1044px wide at a 1280px viewport.
+ *
+ * The wireframe's two bands are viewport media queries (1080px and 820px, shell.css:405-406), so they
+ * are mapped across by that 236px offset rather than copied verbatim -- copying them would push every
+ * collapse point a whole band late and draw a two-across KPI row at 1280, which is not the picture
+ * index.html paints:
+ *
+ *   wireframe viewport   1080    820      ->  canvas   844    584
+ *
+ *   .g-side  two columns at 584px of canvas, one below    (shell.css:404-406)
+ *   .g-4     four at 844px, two at 584px, one below       (shell.css:402/405/406)
+ *   .g-3     three at 844px, two at 584px, one below      (shell.css:401/405/406)
+ *
+ * Compact keeps one column at every width, because a narrower measure is the point of that mode --
+ * the wireframe's own note says the same (shell.css:412).
+ *
+ * Grid children are separated by the grid's 14px gap alone; the `.card + .card` stack margin that
+ * would add 14px on top of it is zeroed by `resources/css/app.css` next to the primitive.
  */
 const sideGrid = computed<string>(() =>
     dashboardLayout.value === 'compact'
         ? 'grid grid-cols-1 gap-3.5'
-        : 'grid grid-cols-1 gap-3.5 @[820px]:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]',
+        : 'grid grid-cols-1 gap-3.5 @[584px]:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]',
+);
+
+const kpiGrid = computed<string>(() =>
+    dashboardLayout.value === 'compact'
+        ? 'grid grid-cols-1 gap-3.5'
+        : 'grid grid-cols-1 gap-3.5 @[584px]:grid-cols-2 @[844px]:grid-cols-4',
+);
+
+// `.g-3` inside the resume card. Three tiles side by side is the wireframe's drawing at 1280
+// (index.html:87-100); two is the step it takes below that, and one is the phone.
+const tileGrid = computed<string>(() =>
+    dashboardLayout.value === 'compact'
+        ? 'grid grid-cols-1 gap-2.5'
+        : 'grid grid-cols-1 gap-2.5 @[584px]:grid-cols-2 @[844px]:grid-cols-3',
 );
 
 const totalTurns = computed<number>(() => props.activeCareer?.total_turns ?? 0);
-const turnMarks = computed<number[]>(() => Array.from({ length: totalTurns.value }, (_, index) => index + 1));
-const remainingTurns = computed<number>(() => Math.max(0, totalTurns.value - (props.activeCareer?.turn ?? 0)));
-// The rail's own column template, computed once so the marks and their labels share it.
-const railStyle = computed<Record<string, string>>(() => ({
-    gridTemplateColumns: `repeat(${totalTurns.value}, minmax(0, 1fr))`,
-}));
 
-const turnLabels = computed<number[]>(() => {
-    const total = totalTurns.value;
-    if (total === 0) return [];
-    const labels = [1];
-    for (let mark = 12; mark < total; mark += 12) labels.push(mark);
-    labels.push(total);
-    return labels;
-});
-
-// The lede is composed from live figures; the verification line comes from data status.
-const lede = computed<string>(() => {
-    const verified = props.dataStatus.verified_at;
-    const verifiedLine =
-        verified !== null
-            ? `Verified ${verified} · ${props.dataStatus.source}`
-            : 'Verification date not recorded';
-    return (
+/*
+ * The lede is the wireframe's own sentence with its three figures bound to live props
+ * (index.html:59). The verification line that used to trail it now lives where the wireframe puts
+ * it -- inside the "Needs you" column's data-status tile (index.html:116) -- because a fact printed
+ * twice on one screen reads as two facts.
+ */
+const lede = computed<string>(
+    () =>
         `${props.activeCareerCount} active career${props.activeCareerCount === 1 ? '' : 's'}, ` +
         `${props.finishedRunCount} finished run${props.finishedRunCount === 1 ? '' : 's'}, and ` +
-        `${props.globalScenarioCount} permanent Global scenarios. ${verifiedLine}.`
+        `${props.globalScenarioCount} permanent Global scenario${props.globalScenarioCount === 1 ? '' : 's'}.`,
+);
+
+// The Japanese name and the calendar position, on the one line the wireframe gives them
+// (index.html:80-82: `ライスシャワー · Junior Year · Early January`).
+const careerMeta = computed<string[]>(() => {
+    if (props.activeCareer === null) return [];
+    return [props.activeCareer.trainee_ja, props.activeCareer.position_label].filter(
+        (part): part is string => part !== null && part !== '',
     );
 });
 
 /*
- * The strip counts what a Trainer has LOGGED; the cockpit stands at the imported position. When the
- * two disagree the screen prints both and names the disagreement (index.html annotation 3), because
- * printing one number while two screens contradict each other silently is the defect, not the fix.
+ * The note under the tiles (index.html:102-107). One paragraph, in the wireframe's order:
+ *
+ *   1. which figures no logged turn has reported, when any are missing;
+ *   2. the bold sentence naming the turn-count contradiction -- `turns recorded` (the count this
+ *      strip prints, `stripValues()['turn']`) against `the position the run was imported at` (the
+ *      cockpit's own standing, `nextTurnToPlay()`);
+ *   3. the two live numbers, so the disagreement is checkable rather than asserted.
+ *
+ * The bold sentence and the numbers print whenever a career is running: the contradiction exists
+ * whether or not Energy happens to be absent, and a note that only appeared for the absent figures
+ * would drop the labelled-defect half as soon as a Trainer logged Energy. With nothing missing the
+ * paragraph opens on the bold sentence instead of inventing an absence to lead with.
  */
-const turnDisagrees = computed<boolean>(
-    () =>
-        props.activeCareer !== null &&
-        props.activeCareer.cockpit_turn !== null &&
-        props.activeCareer.cockpit_turn !== props.activeCareer.turn,
-);
+const careerNote = computed<string | null>(() => {
+    const career = props.activeCareer;
 
-// The absence sentence under the rail: always the rail's own fact, plus exactly the tiles that print
-// `N/A` and the reason the strip has nothing to report for them.
-const absenceNote = computed<string>(() => {
-    if (props.activeCareer === null) return '';
+    if (career === null) return null;
+
     const missing: string[] = [];
-    if (props.activeCareer.energy === null) missing.push('Energy');
-    if (props.activeCareer.team_rank.value === null) missing.push('team rank');
-    const rail = "The rail is one mark per career turn: seventy-two marks, the client's twenty-four turns a year over three years.";
-    if (missing.length === 0) return rail;
-    const list = missing.length === 1 ? missing[0] : `${missing[0]} or ${missing[1]}`;
-    return `${rail} No logged turn has reported ${list} yet.`;
+    if (career.energy === null) missing.push('Energy');
+    if (career.team_rank.value === null) missing.push('a team rank');
+
+    const absence =
+        missing.length === 0
+            ? ''
+            : `No logged turn has reported ${missing.length === 1 ? missing[0] : `${missing[0]} or ${missing[1]}`} yet. `;
+
+    const recorded = career.turn;
+    const cockpit = career.cockpit_turn;
+
+    const numbers =
+        cockpit === null
+            ? `The strip here counts ${recorded} recorded turn${recorded === 1 ? '' : 's'}, and this run's cockpit has no imported position to report.`
+            : `This run's cockpit reports turn ${cockpit} from its imported position; the strip here counts ${recorded} recorded turn${recorded === 1 ? '' : 's'}.`;
+
+    return `${absence}A turn is counted from the turns recorded, not from the position the run was imported at. ${numbers} Both are labelled, and the disagreement is a known defect, not a rendering choice.`;
 });
+
+// How many Veterans the table is actually showing, for the footer's "7 veterans · 3 shown"
+// (index.html:171). The limit travels from the controller, so the two halves of the sentence are
+// both readings of the payload rather than one of them being typed here.
+const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
 </script>
 
 <template>
     <AppLayout :breadcrumb="[{ label: 'Dashboard' }]">
         <Head title="Dashboard" />
         <template #head>
-            <PageHeader eyebrow="Overview" title="Trainer Desk" :description="lede">
+            <PageHeader eyebrow="Dashboard" title="Trainer Desk" :description="lede">
                 <template #actions>
                     <!-- The wireframe's own pair (index.html:61-64): "New career" is an outline and
-                         "All careers" is the quiet link, so the page's ONE filled action is "Open
+                         "All careers" is the quiet one, so the page's ONE filled action is "Open
                          cockpit" in the resume card (annotations 1 and 6). A second filled button in
                          the head would make the accent mean "a button" rather than "the button". -->
                     <LinkButton href="/career/setup/scenario" variant="secondary">New career</LinkButton>
-                    <Link
-                        :href="props.careersUrl"
-                        class="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-ink underline underline-offset-2 hover:decoration-2"
-                    >All careers</Link>
+                    <LinkButton :href="props.careersUrl" variant="ghost">All careers</LinkButton>
                 </template>
             </PageHeader>
         </template>
 
-        <p v-if="visiting" role="status" class="mb-3 text-sm text-ink-muted">Loadingâ€¦</p>
+        <p v-if="visiting" role="status" class="mb-3 text-sm text-ink-muted">Loading...</p>
 
         <p
             v-if="visitFailed"
@@ -231,7 +283,7 @@ const absenceNote = computed<string>(() => {
         </div>
 
         <div v-else class="flex flex-col gap-3.5" data-dashboard-root :data-layout="dashboardLayout">
-            <!-- ROW ONE: Pick up where you left off | Recent veterans -->
+            <!-- ROW ONE: Pick up where you left off | Needs you (index.html:71-131) -->
             <div :class="sideGrid" data-dashboard-row="pickup">
                 <section
                     v-if="props.activeCareer && !isCardHidden('active_career')"
@@ -241,40 +293,53 @@ const absenceNote = computed<string>(() => {
                     data-card="active_career"
                 >
                     <h2 id="pickup-heading">Pick up where you left off</h2>
-                    <div class="flex flex-wrap items-start gap-3.5">
+
+                    <!-- One row: the frame, the name block, and the one filled action on the page
+                         (index.html:74-85, `display:flex; align-items:center; gap:16px`). The button
+                         is a sibling of the text rather than a child of it, which is what puts it on
+                         the right edge at desktop and lets it wrap under the name on a phone. -->
+                    <div class="flex flex-wrap items-center gap-4 pb-1.5 pt-0.5">
                         <ArtworkSlot
                             :url="props.activeCareer.artworkURL"
                             alt=""
                             size="size-16"
                             class="shrink-0"
                         />
-                        <div class="min-w-0 flex-1">
+                        <div class="min-w-0 flex-[1_1_250px]">
                             <p class="flex flex-wrap items-center gap-2">
                                 <span class="text-[19px] font-extrabold leading-tight text-ink-strong">{{ props.activeCareer.trainee }}</span>
-                                <Pill tone="neutral">{{ props.activeCareer.scenario_label }}</Pill>
+                                <Pill tone="accent">{{ props.activeCareer.scenario_label }}</Pill>
                             </p>
-                            <p v-if="props.activeCareer.trainee_ja" class="text-xs text-ink-muted">{{ props.activeCareer.trainee_ja }}</p>
-                            <p class="mt-1 text-[12.5px] text-ink">
-                                <template v-if="props.activeCareer.position_label">{{ props.activeCareer.position_label }}</template>
-                                <span v-else title="No turn has been logged, so this career is not standing anywhere on the calendar yet.">
-                                    N/A<span class="sr-only">: no turn has been logged yet.</span>
-                                </span>
+                            <p class="mt-[3px] text-[12.5px] text-ink-muted">
+                                <template v-if="careerMeta.length">
+                                    {{ careerMeta.join(' · ') }}
+                                </template>
+                                <AbsenceValue
+                                    v-else
+                                    compact
+                                    reason="No turn has been logged, so this career is not standing anywhere on the calendar yet."
+                                />
                             </p>
-                            <div class="mt-2.5">
-                                <LinkButton :href="props.activeCareer.resume_url" variant="primary">Open cockpit</LinkButton>
-                            </div>
                         </div>
+                        <LinkButton :href="props.activeCareer.resume_url" variant="primary">Open cockpit</LinkButton>
                     </div>
 
-                    <!-- The three tiles under the identity row. Tile two is the scenario's own third
-                         resource where it has one; where the scenario's resource IS team rank (Unity
-                         Cup) the resource is already tile three and tile two falls back to Energy. -->
-                    <div class="mt-3.5 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-                        <Tile label="Turn" :value="group(props.activeCareer.turn)" data-tile="turn" />
+                    <!-- index.html:87-100: `.grid g-3`, three tiles. Tile two is the scenario's own
+                         third resource where it has one; where the scenario's resource IS team rank
+                         (Unity Cup) the resource is already tile three and tile two falls back to
+                         Energy. The Turn tile carries "of 72" as the wireframe's quiet suffix, which
+                         is the whole of the turn-length fact on this board. -->
+                    <div :class="tileGrid" class="mt-1.5">
+                        <Tile
+                            label="Turn"
+                            :value="group(props.activeCareer.turn)"
+                            :suffix="'of ' + totalTurns"
+                            data-tile="turn"
+                        />
                         <Tile
                             v-if="props.activeCareer.resource"
                             :label="props.activeCareer.resource.label"
-                            :value="props.activeCareer.resource.value !== null ? group(props.activeCareer.resource.value) : 'N/A'"
+                            :value="props.activeCareer.resource.value !== null ? group(props.activeCareer.resource.value) : 'not recorded'"
                             :absent="props.activeCareer.resource.value === null"
                             :hint="props.activeCareer.resource.value === null ? props.activeCareer.resource.value_hint : undefined"
                             data-tile="resource"
@@ -282,64 +347,21 @@ const absenceNote = computed<string>(() => {
                         <Tile
                             v-else
                             label="Energy"
-                            :value="props.activeCareer.energy !== null ? group(props.activeCareer.energy) : 'N/A'"
+                            :value="props.activeCareer.energy !== null ? group(props.activeCareer.energy) : 'not recorded'"
                             :absent="props.activeCareer.energy === null"
                             :hint="props.activeCareer.energy === null ? 'No logged turn has recorded Energy for this career.' : undefined"
                             data-tile="energy"
                         />
                         <Tile
                             label="Team rank"
-                            :value="props.activeCareer.team_rank.value ?? 'N/A'"
+                            :value="props.activeCareer.team_rank.value ?? 'not recorded'"
                             :absent="props.activeCareer.team_rank.value === null"
                             :hint="props.activeCareer.team_rank.value === null ? props.activeCareer.team_rank.value_hint : undefined"
                             data-tile="team_rank"
                         />
                     </div>
 
-                    <!-- The 72-mark turn rail. -->
-                    <div class="mt-3.5">
-                        <div class="flex flex-wrap items-baseline justify-between gap-2 text-xs">
-                            <span class="font-extrabold text-ink-strong">Turn {{ props.activeCareer.turn }} of {{ totalTurns }}</span>
-                            <span class="text-ink-muted">{{ remainingTurns }} turns to go</span>
-                        </div>
-                        <ol
-                            role="list"
-                            aria-label="Career progress"
-                            class="mt-2 grid gap-px"
-                            :style="railStyle"
-                        >
-                            <li
-                                v-for="mark in turnMarks"
-                                :key="mark"
-                                :class="mark <= props.activeCareer.turn
-                                    ? 'h-2 rounded-[1px] bg-primary-action'
-                                    : 'h-2 rounded-[1px] border border-rule'"
-                                :aria-current="mark === props.activeCareer.turn ? 'step' : undefined"
-                            />
-                        </ol>
-                        <div
-                            aria-hidden="true"
-                            class="mt-1 grid text-[10.5px] text-ink-muted"
-                            :style="railStyle"
-                        >
-                            <span
-                                v-for="mark in turnLabels"
-                                :key="mark"
-                                class="whitespace-nowrap"
-                                :style="{ gridColumnStart: mark, justifySelf: mark === totalTurns ? 'end' : 'start' }"
-                            >{{ mark }}</span>
-                        </div>
-                    </div>
-
-                    <Note class="mt-3">{{ absenceNote }}</Note>
-
-                    <Note v-if="turnDisagrees" class="mt-2">
-                        <b class="font-extrabold text-ink-strong">A turn is counted from turns recorded, not
-                        from the position the run was imported at.</b>
-                        This run's cockpit reports {{ props.activeCareer.cockpit_label }}; the strip here
-                        counts what has been recorded. Both are labelled, and the disagreement is a known
-                        defect in the turn count, not a rendering choice made here.
-                    </Note>
+                    <Note v-if="careerNote" class="mt-2.5">{{ careerNote }}</Note>
                 </section>
 
                 <!-- The same card, saying there is nothing to resume rather than showing an empty rail. -->
@@ -367,6 +389,123 @@ const absenceNote = computed<string>(() => {
                     </div>
                 </section>
 
+                <!-- The wireframe's three stacked tiles (index.html:110-130): `.k` key, a 14px value,
+                     a muted subline, and one underlined door each. -->
+                <section
+                    v-show="!isCardHidden('roster') && !isCardHidden('data_status')"
+                    role="region"
+                    aria-labelledby="needs-you-heading"
+                    class="card"
+                    data-card="needs_you"
+                >
+                    <h2 id="needs-you-heading">Needs you</h2>
+                    <div class="flex flex-col gap-[9px]">
+                        <!-- The risk edge reads the `stale` flag, not the word (index.html:113). -->
+                        <div
+                            class="rounded-sm border border-rule bg-raised px-2.5 py-2"
+                            :class="props.needsYou.dataStatus.stale ? 'border-l-[3px] border-l-risk' : ''"
+                            data-needs-you="data_status"
+                        >
+                            <div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Data status</div>
+                            <div class="text-[14px] font-extrabold leading-[1.3] text-ink-strong">
+                                {{ props.needsYou.dataStatus.label }} &middot; {{ props.needsYou.dataStatus.state }}
+                            </div>
+                            <p class="text-[11.5px] text-ink-muted">
+                                <template v-if="props.needsYou.dataStatus.verified_at">
+                                    Verified {{ props.needsYou.dataStatus.verified_at }} &middot; {{ props.needsYou.dataStatus.source }}
+                                </template>
+                                <AbsenceValue
+                                    v-else
+                                    compact
+                                    reason="No verification date is recorded for the scenario matrix."
+                                />
+                            </p>
+                            <Link
+                                href="/database/sources"
+                                class="text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
+                            >Source ledger</Link>
+                        </div>
+
+                        <div
+                            class="rounded-sm border border-rule bg-raised px-2.5 py-2"
+                            data-needs-you="veterans"
+                        >
+                            <div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Veterans</div>
+                            <div class="text-[14px] font-extrabold leading-[1.3] text-ink-strong">
+                                {{ group(props.needsYou.veteranCount) }} banked
+                            </div>
+                            <Link
+                                :href="props.recentVeterans.library_url"
+                                class="text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
+                            >Open the library</Link>
+                        </div>
+
+                        <div
+                            class="rounded-sm border border-rule bg-raised px-2.5 py-2"
+                            data-needs-you="review"
+                        >
+                            <div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Review queue</div>
+                            <div class="text-[14px] font-extrabold leading-[1.3] text-ink-strong">
+                                <template v-if="props.needsYou.reviewPending > 0">
+                                    {{ group(props.needsYou.reviewPending) }} pending {{ props.needsYou.reviewPending === 1 ? 'match' : 'matches' }}
+                                </template>
+                                <!-- index.html:126 prints the bare instruction. With nothing waiting the
+                                     instruction is still the door's own words, and the count beside it
+                                     would read "0 pending matches" -- a figure that says nothing. -->
+                                <template v-else>Check pending matches</template>
+                            </div>
+                            <Link
+                                href="/review"
+                                class="text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
+                            >Open review</Link>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- KPI strip: the wireframe's `.g-4` (index.html:133-154). Four figures, each a door to
+                 the screen that owns its list where the wireframe draws one. "Careers running" leads
+                 because it is the figure the resume card above features. -->
+            <div :class="kpiGrid" data-dashboard-row="kpi">
+                <section class="card" aria-labelledby="kpi-careers-heading" data-card="kpi_careers">
+                    <h2 id="kpi-careers-heading" class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Careers running</h2>
+                    <p class="text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.careersRunning) }}</p>
+                    <p class="text-[11.5px] text-ink-muted">
+                        <span v-if="props.activeCareer">{{ props.activeCareer.trainee }} &middot; {{ props.activeCareer.scenario_label }}</span>
+                        <span v-else>No career is running.</span>
+                    </p>
+                </section>
+
+                <section class="card" aria-labelledby="kpi-trainees-heading" data-card="kpi_trainees">
+                    <h2 id="kpi-trainees-heading" class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Trainees catalogued</h2>
+                    <!-- The catalogue figure, not the app counter: the wireframe's 71 is what the
+                         sourced dataset publishes, and the plan's §7.2 ruling prints it with the
+                         catalogue's own door beside it. -->
+                    <p class="font-mono text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.catalogueTrainees) }}</p>
+                    <p class="text-[11.5px] text-ink-muted">
+                        <Link href="/catalog" class="underline underline-offset-2 hover:decoration-2">Browse catalog</Link>
+                    </p>
+                </section>
+
+                <section class="card" aria-labelledby="kpi-skills-heading" data-card="kpi_skills">
+                    <h2 id="kpi-skills-heading" class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Skills</h2>
+                    <p class="font-mono text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.skills) }}</p>
+                    <p class="text-[11.5px] text-ink-muted">
+                        <Link href="/skills" class="underline underline-offset-2 hover:decoration-2">Skill search</Link>
+                    </p>
+                </section>
+
+                <section class="card" aria-labelledby="kpi-support-heading" data-card="kpi_support">
+                    <h2 id="kpi-support-heading" class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Support cards</h2>
+                    <p class="font-mono text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.supportCards) }}</p>
+                    <p class="text-[11.5px] text-ink-muted">
+                        <Link href="/support-cards" class="underline underline-offset-2 hover:decoration-2">Browse cards</Link>
+                    </p>
+                </section>
+            </div>
+
+            <!-- ROW TWO: Recent veterans | Quick actions (index.html:156-186) -->
+            <div :class="sideGrid" data-dashboard-row="veterans">
                 <section
                     v-show="!isCardHidden('recent_veterans')"
                     role="region"
@@ -376,141 +515,52 @@ const absenceNote = computed<string>(() => {
                 >
                     <h2 id="recent-veterans-heading">Recent veterans</h2>
 
-                    <template v-if="props.recentVeterans.total === 0">
-                        <p class="text-sm font-semibold text-ink-strong">Not recorded: the library holds no veterans yet.</p>
-                        <p class="mt-1 text-[12.5px] text-ink-muted">
-                            Finish a career and choose Save Veteran on its Result screen.
-                        </p>
-                        <LinkButton :href="props.recentVeterans.library_url" variant="secondary" size="sm" class="mt-3">
-                            Open the Veteran library
-                        </LinkButton>
-                    </template>
-
-                    <template v-else>
-                        <div class="overflow-x-auto">
-                            <table class="w-full border-collapse text-[12.5px]">
-                                <thead>
-                                    <tr>
-                                        <th class="border-b border-rule-soft px-2 pb-1.5 text-left text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Trainee</th>
-                                        <th class="border-b border-rule-soft px-2 pb-1.5 text-left text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Scenario</th>
-                                        <th class="border-b border-rule-soft px-2 pb-1.5 text-left text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Saved</th>
-                                        <th class="border-b border-rule-soft px-2 pb-1.5 text-right text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted"><span class="sr-only">Open the veteran</span></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="veteran in props.recentVeterans.rows" :key="veteran.run_id" class="hover:bg-raised">
-                                        <td class="border-b border-rule-soft px-2 py-1.5 align-top">
-                                            <span class="flex items-center gap-2">
-                                                <!-- A veteran saved without a mirror file reserves its cell
-                                                     and paints nothing: absence is a normal state (DESIGN.md §4.7). -->
-                                                <ArtworkSlot :url="veteran.artworkURL" alt="" size="size-10" reserve />
-                                                <span class="min-w-0">
-                                                    <b class="font-extrabold text-ink-strong">{{ veteran.trainee }}</b>
-                                                    <span v-if="veteran.trainee_ja" class="ml-1 text-ink-muted">{{ veteran.trainee_ja }}</span>
-                                                </span>
+                    <div v-if="props.recentVeterans.rows.length" class="overflow-x-auto">
+                        <table class="w-full border-collapse text-[12.5px]">
+                            <thead>
+                                <tr>
+                                    <th class="border-b border-rule-soft px-[9px] py-[7px] text-left text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Trainee</th>
+                                    <th class="border-b border-rule-soft px-[9px] py-[7px] text-left text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Scenario</th>
+                                    <th class="border-b border-rule-soft px-[9px] py-[7px] text-left text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Saved</th>
+                                    <th class="border-b border-rule-soft px-[9px] py-[7px] text-right text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted"><span class="sr-only">Open the veteran</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="veteran in props.recentVeterans.rows" :key="veteran.run_id" class="hover:bg-raised">
+                                    <td class="border-b border-rule-soft px-[9px] py-[7px] align-top">
+                                        <span class="flex items-center gap-[9px]">
+                                            <!-- A veteran saved without a mirror file reserves its cell and paints nothing: absence is the normal state (DESIGN.md §4.7). -->
+                                            <ArtworkSlot :url="veteran.artworkURL" alt="" size="size-10" reserve />
+                                            <span class="min-w-0">
+                                                <b class="font-extrabold text-ink-strong">{{ veteran.trainee }}</b>
+                                                <span v-if="veteran.trainee_ja" class="ml-1 text-ink-muted">{{ veteran.trainee_ja }}</span>
                                             </span>
-                                        </td>
-                                        <td class="border-b border-rule-soft px-2 py-1.5 align-top">{{ veteran.scenario_label }}</td>
-                                        <td class="border-b border-rule-soft px-2 py-1.5 align-top font-mono">
-                                            <AbsenceValue v-if="!veteran.label" compact reason="No save date was recorded for this veteran." />
-                                            <template v-else>{{ veteran.label }}</template>
-                                        </td>
-                                        <td class="border-b border-rule-soft px-2 py-1.5 text-right align-top">
-                                            <LinkButton :href="veteran.run_url" variant="secondary" size="sm">Open</LinkButton>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <p class="mt-2.5">
-                            <Link
-                                :href="props.recentVeterans.library_url"
-                                class="text-[12.5px] font-semibold text-ink underline underline-offset-2 hover:decoration-2"
-                            >All veterans</Link>
-                        </p>
-                    </template>
-                </section>
-            </div>
+                                        </span>
+                                    </td>
+                                    <td class="border-b border-rule-soft px-[9px] py-[7px] align-top">{{ veteran.scenario_label }}</td>
+                                    <td class="border-b border-rule-soft px-[9px] py-[7px] align-top font-mono">
+                                        <AbsenceValue v-if="!veteran.saved_date" compact reason="No save date was recorded for this veteran." />
+                                        <template v-else>{{ veteran.saved_date }}</template>
+                                    </td>
+                                    <td class="border-b border-rule-soft px-[9px] py-[7px] text-right align-top">
+                                        <LinkButton :href="veteran.run_url" variant="secondary" size="sm">Open</LinkButton>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-            <!-- ROW TWO: Needs you | Quick actions -->
-            <div :class="sideGrid" data-dashboard-row="needs-you">
-                <section
-                    v-show="!isCardHidden('roster') && !isCardHidden('data_status')"
-                    role="region"
-                    aria-labelledby="needs-you-heading"
-                    class="card"
-                    data-card="needs_you"
-                >
-                    <h2 id="needs-you-heading">Needs you</h2>
-                    <ul class="flex flex-col gap-2.5">
-                        <li
-                            class="flex flex-wrap items-baseline gap-x-2.5 gap-y-1 border-l-[3px] pl-3 text-[12.5px]"
-                            :class="props.needsYou.dataStatus.stale ? 'border-l-risk' : 'border-l-transparent'"
-                            data-needs-you="data_status"
-                        >
-                            <b class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">{{ props.needsYou.dataStatus.label }}</b>
-                            <span class="font-semibold text-ink-strong">{{ props.needsYou.dataStatus.state }}</span>
-                            <span v-if="props.needsYou.dataStatus.verified_at" class="text-ink-muted">
-                                Verified {{ props.needsYou.dataStatus.verified_at }} · {{ props.needsYou.dataStatus.source }}
-                            </span>
-                            <AbsenceValue v-else compact class="text-ink-muted" reason="No verification date is recorded for the scenario matrix." />
-                            <span class="text-ink-muted">
-                                Ruleset version:
-                                <span class="font-mono text-ink">{{ ruleset ?? 'N/A' }}</span>
-                                <span v-if="!ruleset" class="sr-only">: no source defines a Global ruleset version, so this tool states none.</span>
-                            </span>
-                            <Link
-                                href="/database/sources"
-                                class="font-semibold text-ink underline underline-offset-2 hover:decoration-2"
-                            >Source ledger</Link>
-                        </li>
-
-                        <!-- The catalogue doors and their counts: this is where the wireframe's catalogue
-                             figures live now that the KPI strip is gone. -->
-                        <li
-                            class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-l-[3px] border-l-transparent pl-3 text-[12.5px]"
-                            data-needs-you="catalogue"
-                        >
-                            <span class="min-w-0">
-                                <span class="block font-semibold text-ink-strong">Catalogue ready</span>
-                                <span class="text-ink-muted">
-                                    {{ group(props.counts.catalogueTrainees) }} trainees ·
-                                    {{ group(props.counts.forms) }} forms ·
-                                    {{ group(props.counts.skills) }} skills ·
-                                    {{ group(props.counts.supportCards) }} support cards
-                                </span>
-                            </span>
-                            <Link href="/catalog" class="font-semibold text-ink underline underline-offset-2 hover:decoration-2">Browse catalog</Link>
-                        </li>
-
-                        <li
-                            class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-l-[3px] border-l-transparent pl-3 text-[12.5px]"
-                            data-needs-you="veterans"
-                        >
-                            <span class="min-w-0">
-                                <span class="block font-semibold text-ink-strong">Veteran library</span>
-                                <span class="text-ink-muted">{{ group(props.needsYou.veteranCount) }} veterans saved</span>
-                            </span>
-                            <Link
-                                :href="props.recentVeterans.library_url"
-                                class="font-semibold text-ink underline underline-offset-2 hover:decoration-2"
-                            >Open library</Link>
-                        </li>
-
-                        <li
-                            class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-l-[3px] border-l-transparent pl-3 text-[12.5px]"
-                            data-needs-you="review"
-                        >
-                            <span class="min-w-0">
-                                <span class="block font-semibold text-ink-strong">Match review</span>
-                                <span class="text-ink-muted">
-                                    {{ group(props.needsYou.reviewPending) }} pending
-                                    {{ props.needsYou.reviewPending === 1 ? 'candidate' : 'candidates' }}
-                                </span>
-                            </span>
-                            <Link href="/review" class="font-semibold text-ink underline underline-offset-2 hover:decoration-2">Open queue</Link>
-                        </li>
-                    </ul>
+                    <!-- The footer is one line in the wireframe (index.html:170-173): how many the
+                         library holds, how many of them this card is showing, and the door to the
+                         rest. The count on the left is the payload's own total, so it cannot drift
+                         from the library it links to. -->
+                    <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-[12px] text-ink-muted">
+                            {{ group(props.recentVeterans.total) }} veteran{{ props.recentVeterans.total === 1 ? '' : 's' }}
+                            &middot; {{ veteransShown }} shown
+                        </span>
+                        <LinkButton :href="props.recentVeterans.library_url" variant="secondary" size="sm">All veterans</LinkButton>
+                    </div>
                 </section>
 
                 <section
@@ -521,21 +571,21 @@ const absenceNote = computed<string>(() => {
                     data-card="quick_actions"
                 >
                     <h2 id="quick-actions-heading">Quick actions</h2>
+                    <!-- Four outline buttons, full width, label centred (index.html:178-183). The
+                         wireframe draws no marks here; the rail already carries one per destination,
+                         and a second icon set on one card would be a second vocabulary for the same
+                         destinations. -->
                     <nav aria-label="Quick actions">
                         <ul class="flex flex-col gap-2">
                             <li v-for="action in props.quickActions" :key="action.to">
-                                <LinkButton :href="action.to" variant="secondary" class="w-full justify-start gap-2">
-                                    <NavGlyph :name="action.icon" />
-                                    {{ action.label }}
-                                </LinkButton>
+                                <LinkButton :href="action.to" variant="secondary" class="w-full">{{ action.label }}</LinkButton>
                             </li>
                         </ul>
                     </nav>
-                    <p class="mt-2.5 text-xs text-ink-muted">
-                        Destinations the navigation does not carry. Partway through a career?
-                        <Link href="/career/snapshot" class="font-semibold text-ink underline underline-offset-2 hover:decoration-2">Import an existing career</Link>
-                        instead.
-                    </p>
+                    <Note class="mt-3">
+                        Four destinations. The running app's sidebar carries ten flat items; this
+                        dashboard is the same set, grouped, with one primary action.
+                    </Note>
                 </section>
             </div>
         </div>

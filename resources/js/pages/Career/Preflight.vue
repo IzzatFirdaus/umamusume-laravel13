@@ -35,7 +35,6 @@
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
-import StickyFooter from '../../components/ui/StickyFooter.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 
@@ -286,16 +285,77 @@ const start = (): void => {
 
     form.put(props.startAction);
 };
+
+/*
+ * The "This run" tiles (`career-preflight.html:90-106`): eight facts, each either a value the draft holds or
+ * a stated absence. A tile is never blank and never a zero standing in for "unknown" — the sum below returns
+ * null rather than 0 when there is no target, because a target total of 0 is a claim the draft has not made.
+ */
+const targetTotal = computed((): number | null => {
+    const targets = props.contract.build.target?.targets ?? null;
+
+    if (targets === null) {
+        return null;
+    }
+
+    return Object.values(targets).reduce((sum, value) => sum + value, 0);
+});
+
+/** The two parent names the legacy step recorded, or the word the wireframe uses for an empty slot. */
+const parentsSummary = computed((): string => {
+    const legacy = props.contract.build.legacy;
+
+    if (legacy === null) {
+        return 'Not entered';
+    }
+
+    const named = legacy.members.map((member) => member.name).filter((name): name is string => name !== null);
+
+    if (named.length === 0) {
+        return 'empty';
+    }
+
+    // The wireframe prints "Vodka · empty" for one recorded parent, so an unfilled slot is stated in place
+    // rather than silently dropped from the list.
+    return [...named, ...Array.from({ length: legacy.members.length - named.length }, () => 'empty')].join(' · ');
+});
+
+/**
+ * The deck's own state word. A deck with empty slots is a legitimate choice — the run commits either way —
+ * so it is a warning rather than a refusal, and it is stated once here rather than on every later screen
+ * (`career-preflight.html:140-143`).
+ */
+const deckState = computed((): 'Pass' | 'Warning' | 'Missing' => {
+    const deck = props.contract.deck;
+
+    if (deck === null) {
+        return 'Missing';
+    }
+
+    return deck.equipped === deck.slots.length ? 'Pass' : 'Warning';
+});
+
+/** The one word each check row carries, read off the row's own state rather than restated per branch. */
+function checkState(row: ChecklistRow): 'Pass' | 'Warning' | 'Missing' {
+    if (!row.entered) {
+        return 'Missing';
+    }
+
+    return row.key === 'deck' ? deckState.value : 'Pass';
+}
+
+/** The wireframe's career length: three career years on the client's own 24-turn grid. */
+const CAREER_TURNS = 72;
 </script>
 
 <template>
     <SetupLayout :step="props.step" :visited="props.visited" :saved="props.saved">
-        <Head title="Review and start" />
+        <Head title="Before the first turn" />
         <template #head>
             <PageHeader
-                eyebrow="Setup · Step 6 of 6"
-                title="Review and start"
-                description="What the five earlier steps recorded, and the one door back to each of them."
+                eyebrow="New career"
+                title="Before the first turn"
+                description="One screen listing what will be created, what the run will be measured against, and the things worth knowing before you commit."
             />
         </template>
 
@@ -314,79 +374,220 @@ const start = (): void => {
             </ul>
         </div>
 
-        <section class="mx-auto w-full max-w-4xl" aria-labelledby="checklist-heading">
-            <h2 id="checklist-heading" class="text-lg font-semibold text-ink-strong">
-                The {{ rows.length }} entered steps
-            </h2>
-            <p role="status" class="mt-1 text-sm text-ink">{{ attention }}</p>
+        <!-- `career-preflight.html:87-189`: a two-column shell, the run and its checks on the left, what the
+             scenario asks and what is missing on the right. `g-side` is 2.1fr / 1fr above 820px and one
+             column below it (shell.css:404-406), so the breakpoints are media queries and not container
+             queries: the columns must follow the window, not the shell's content box. -->
+        <div class="grid grid-cols-1 gap-3.5 min-[821px]:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
+            <div class="space-y-3.5">
+                <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="run-heading">
+                    <h2 id="run-heading" class="text-sm font-bold text-ink-strong">This run</h2>
 
-            <ol class="mt-3 max-w-3xl space-y-2">
-                <li
-                    v-for="row in rows"
-                    :id="`preflight-step-${row.key}`"
-                    :key="row.key"
-                    tabindex="-1"
-                    class="rounded-lg border border-rule bg-panel p-3"
-                >
-                    <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                        <p class="min-w-0 text-sm">
-                            <!-- Glyph plus text, never the glyph alone: the state is a word for a screen
-                                 reader and a shape for everyone else. -->
-                            <span
-                                aria-hidden="true"
-                                class="mr-1 font-mono font-bold"
-                                :class="row.entered ? 'text-goal-line' : 'text-risk'"
-                            >{{ row.entered ? '✓' : '✗' }}</span>
-                            <span class="sr-only">{{ row.entered ? 'Entered' : 'Missing' }}</span>
-                            <span class="font-semibold text-ink-strong">{{ row.label }}</span>
-                            <span class="text-ink"> · {{ row.summary }}</span>
-                            <span v-if="row.ja" lang="ja" class="ml-2 text-ink-muted">{{ row.ja }}</span>
-                        </p>
-                        <Link
-                            :href="row.edit"
-                            :aria-label="`Edit ${row.label}`"
-                            class="inline-flex min-h-11 shrink-0 items-center rounded-md border border-rule px-3 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
+                    <div class="mt-2.5 grid grid-cols-2 gap-2.5 min-[1081px]:grid-cols-4">
+                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
+                            <p class="text-xs text-ink-muted">Trainee</p>
+                            <p class="text-sm text-ink-strong">
+                                <template v-if="props.contract.build.trainee">{{ props.contract.build.trainee.name }}</template>
+                                <AbsenceValue v-else compact reason="No trainee has been chosen in this draft." />
+                            </p>
+                        </div>
+                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
+                            <p class="text-xs text-ink-muted">Scenario</p>
+                            <p class="text-sm text-ink-strong">
+                                <template v-if="props.contract.build.scenario">{{ props.contract.build.scenario.label }}</template>
+                                <AbsenceValue v-else compact reason="No scenario has been chosen in this draft." />
+                            </p>
+                        </div>
+                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
+                            <p class="text-xs text-ink-muted">Distance</p>
+                            <p class="text-sm text-ink-strong">
+                                <template v-if="props.contract.build.target">{{ props.contract.build.target.distance }}</template>
+                                <AbsenceValue v-else compact reason="The target step has not been entered." />
+                            </p>
+                        </div>
+                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
+                            <p class="text-xs text-ink-muted">Parents</p>
+                            <p class="text-sm text-ink-strong">{{ parentsSummary }}</p>
+                        </div>
+                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
+                            <p class="text-xs text-ink-muted">Deck</p>
+                            <p class="text-sm text-ink-strong">
+                                <template v-if="props.contract.deck">
+                                    {{ props.contract.deck.equipped }} of {{ props.contract.deck.slots.length }}
+                                </template>
+                                <AbsenceValue v-else compact reason="The deck step has not been entered." />
+                            </p>
+                        </div>
+                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
+                            <p class="text-xs text-ink-muted">Target total</p>
+                            <p class="text-sm font-mono tabular-nums text-ink-strong">
+                                <template v-if="targetTotal !== null">{{ targetTotal.toLocaleString('en-US') }}</template>
+                                <AbsenceValue v-else compact reason="The target step has not been entered." />
+                            </p>
+                        </div>
+                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
+                            <p class="text-xs text-ink-muted">Career length</p>
+                            <p class="text-sm font-mono tabular-nums text-ink-strong">{{ CAREER_TURNS }} turns</p>
+                        </div>
+                    </div>
+
+                    <!-- The wireframe states where the 72 comes from, because it is the one number on this
+                         screen that is not read off the draft. The post-December finale block sits outside
+                         the 24-turn grid and is deliberately not counted. -->
+                    <p class="mt-2.5 text-xs text-ink-muted">
+                        {{ CAREER_TURNS }} turns is three career years of the client's own 24-turn grid. The
+                        post-December finale block sits outside that grid and is not counted.
+                    </p>
+                </section>
+
+                <!-- The wireframe's Checks table (`career-preflight.html:108-144`), one row per step the
+                     wizard has, so the state and the door back to the step that owns it are on the same line.
+                     The ids survive from the list this replaced: they are the hooks the spec and the
+                     screen's own deep links use. -->
+                <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="checks-heading">
+                    <h2 id="checks-heading" class="text-sm font-bold text-ink-strong">Checks</h2>
+                    <p role="status" class="mt-1 text-sm text-ink">{{ attention }}</p>
+
+                    <table class="mt-2.5 w-full text-left text-sm">
+                        <caption class="sr-only">The five setup steps and whether each is recorded</caption>
+                        <thead>
+                            <tr class="border-b border-rule text-xs uppercase tracking-wide text-ink-muted">
+                                <th scope="col" class="py-1.5 pr-2 font-semibold">Check</th>
+                                <th scope="col" class="py-1.5 pr-2 font-semibold">State</th>
+                                <th scope="col" class="py-1.5 font-semibold">Detail</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="row in rows"
+                                :id="`preflight-step-${row.key}`"
+                                :key="row.key"
+                                tabindex="-1"
+                                class="border-b border-rule last:border-0 align-top"
+                            >
+                                <th scope="row" class="py-2 pr-2 font-semibold text-ink-strong">{{ row.label }}</th>
+                                <td class="py-2 pr-2">
+                                    <!-- A pill states the word as text, never a colour alone (design-2.0 §17). -->
+                                    <span
+                                        class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold"
+                                        :class="checkState(row) === 'Pass'
+                                            ? 'border-pick-line bg-raised text-ink'
+                                            : checkState(row) === 'Warning'
+                                                ? 'border-status-caution bg-raised text-ink'
+                                                : 'border-risk bg-raised text-ink'"
+                                    >{{ checkState(row) }}</span>
+                                </td>
+                                <td class="py-2 text-ink">
+                                    <span>{{ row.summary }}</span>
+                                    <span v-if="row.ja" lang="ja" class="ml-2 text-ink-muted">{{ row.ja }}</span>
+                                    <Link
+                                        :href="row.edit"
+                                        :aria-label="`Edit ${row.label}`"
+                                        class="ml-2 inline-flex min-h-11 items-center text-sm font-medium text-ink underline"
+                                    >
+                                        Edit
+                                    </Link>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <div class="space-y-3.5">
+                <!-- What the run will be measured against. Every row is a fact the draft or the ruleset
+                     holds; a row this tool cannot answer is absent rather than invented. -->
+                <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="asks-heading">
+                    <h2 id="asks-heading" class="text-sm font-bold text-ink-strong">What this scenario asks</h2>
+                    <table class="mt-2.5 w-full text-left text-sm">
+                        <caption class="sr-only">The target this run will be measured against</caption>
+                        <tbody>
+                            <tr class="border-b border-rule">
+                                <th scope="row" class="py-1.5 pr-2 font-normal text-ink-muted">Scenario</th>
+                                <td class="py-1.5 text-ink">
+                                    <template v-if="props.contract.build.scenario">{{ props.contract.build.scenario.label }}</template>
+                                    <AbsenceValue v-else compact reason="No scenario has been chosen in this draft." />
+                                </td>
+                            </tr>
+                            <tr class="border-b border-rule">
+                                <th scope="row" class="py-1.5 pr-2 font-normal text-ink-muted">Focus</th>
+                                <td class="py-1.5 text-ink">
+                                    <template v-if="props.contract.build.scenario?.focus">{{ props.contract.build.scenario.focus }}</template>
+                                    <AbsenceValue v-else compact reason="The scenario record carries no focus sentence." />
+                                </td>
+                            </tr>
+                            <tr class="border-b border-rule">
+                                <th scope="row" class="py-1.5 pr-2 font-normal text-ink-muted">Purpose</th>
+                                <td class="py-1.5 text-ink">
+                                    <template v-if="props.contract.build.target">{{ props.contract.build.target.purpose_label }}</template>
+                                    <AbsenceValue v-else compact reason="The target step has not been entered." />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="py-1.5 pr-2 font-normal text-ink-muted">Course</th>
+                                <td class="py-1.5 text-ink">
+                                    <template v-if="props.contract.build.target">
+                                        {{ props.contract.build.target.surface }} {{ props.contract.build.target.distance }} ·
+                                        {{ props.contract.build.target.style }}
+                                    </template>
+                                    <AbsenceValue v-else compact reason="The target step has not been entered." />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Product gaps, each naming what is missing and what the screen does instead. None says
+                     "not built": that is developer language in a user interface
+                     (`career-preflight.html:160-174`). -->
+                <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="gaps-heading">
+                    <h2 id="gaps-heading" class="text-sm font-bold text-ink-strong">What is not built yet</h2>
+                    <ul class="mt-2 list-disc space-y-1 pl-5 text-xs text-ink-muted">
+                        <li>Per-discipline facility training counts are not recorded, so no facility level can be shown.</li>
+                        <li>
+                            No column records a Global ruleset version, so the version is stated as an absence
+                            beside the ruleset it would qualify.
+                        </li>
+                        <li>
+                            A deck position's owned-or-rented flag is stored per position, and a position holding
+                            no card creates no deck row.
+                        </li>
+                    </ul>
+                    <p class="mt-2.5 text-xs text-ink-muted">
+                        Ruleset version:
+                        <AbsenceValue compact :reason="props.contract.ruleset.title" />
+                    </p>
+                </section>
+
+                <!-- The commitment itself. `Start career` is the page's only filled action, and it is honest
+                     about what it needs: a scenario and a trainee, which is exactly what
+                     `StartCareerRequest` refuses without. -->
+                <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="commit-heading">
+                    <h2 id="commit-heading" class="text-sm font-bold text-ink-strong">Commit</h2>
+                    <p class="mt-2 text-xs text-ink-muted">
+                        Creating the run writes the trainee, scenario, target, parents and deck. Turn 1 is
+                        recorded from the cockpit, not here, so nothing is marked played until a turn is
+                        actually logged.
+                    </p>
+                    <p v-if="startBlocker !== null" class="mt-2 text-sm text-ink">{{ startBlocker }}</p>
+                    <div class="mt-2.5 flex flex-wrap gap-2">
+                        <button
+                            type="button"
+                            class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-5 text-sm font-semibold text-on-primary-action disabled:opacity-60"
+                            :disabled="!canStart || form.processing"
+                            @click="start"
                         >
-                            Edit
+                            {{ form.processing ? 'Starting…' : 'Start career' }}
+                        </button>
+                        <Link
+                            :href="props.edit.deck"
+                            class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-3 text-sm font-medium text-ink hover:bg-sunken transition-colors duration-150 ease-out"
+                        >
+                            Back to deck
                         </Link>
                     </div>
-                </li>
-            </ol>
-        </section>
-
-        <section class="mx-auto w-full max-w-4xl mt-6" aria-labelledby="notes-heading">
-            <h2 id="notes-heading" class="text-lg font-semibold text-ink-strong">Before you start</h2>
-
-            <!-- The flag is in the checklist's own draft, and `StartCareerRequest::ownershipByPosition()`
-                 carries it onto the slot row this screen creates (`ADR-0023`, D3). Said at the commitment
-                 screen because a position left unclassified is the one entered fact that arrives as an
-                 absence. -->
-            <p class="mt-2 max-w-3xl rounded-md border border-dashed border-rule bg-panel p-3 text-xs text-ink-muted">
-                The owned or rented flag is in this setup draft, and starting the career writes it onto
-                each slot's deck row, one value per position. A position holding no card creates no deck
-                row, and a card whose flag was never chosen is stored as no flag, never as Owned.
-            </p>
-
-            <p class="mt-2 text-sm text-ink-muted">
-                Ruleset version:
-                <AbsenceValue compact :reason="props.contract.ruleset.title" />
-            </p>
-        </section>
-
-        <StickyFooter>
-            <template #left>
-                <p v-if="startBlocker !== null" class="text-sm text-ink">{{ startBlocker }}</p>
-            </template>
-            <template #right>
-                <button
-                    type="button"
-                    class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-5 text-sm font-semibold text-on-primary-action disabled:opacity-60"
-                    :disabled="!canStart || form.processing"
-                    @click="start"
-                >
-                    {{ form.processing ? 'Starting…' : 'Start career' }}
-                </button>
-            </template>
-        </StickyFooter>
+                </section>
+            </div>
+        </div>
     </SetupLayout>
 </template>

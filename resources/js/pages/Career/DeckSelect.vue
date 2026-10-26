@@ -28,7 +28,7 @@ import CardPicker from '../../components/support/CardPicker.vue';
 import SupportTypeMark from '../../components/support/SupportTypeMark.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import { BaseInput, BaseSelect, BaseButton } from '../../components/Form';
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, onMounted, ref } from 'vue';
 
 interface Effect {
@@ -141,6 +141,35 @@ const fillingSlotCard = computed(() => props.slots.find((slot) => slot.position 
 
 /** How many slots hold a card, counted from the server's own slot list. */
 const equippedCount = computed(() => props.slots.filter((slot) => slot.card !== null).length);
+
+/** The cards in the deck, in slot order. One list feeds every diagnostic below. */
+const deckCards = computed(() =>
+    props.slots.flatMap((slot) => (slot.card === null ? [] : [slot.card])),
+);
+
+/**
+ * The duplicate check. The client spends a duplicate on a limit break rather than equipping it twice,
+ * and `StoreDraftDeckRequest` refuses a save that repeats a card — so this row states the rule the save
+ * already enforces rather than adding a second, client-side one.
+ */
+const duplicateCount = computed(() => deckCards.value.length - new Set(deckCards.value.map((card) => card.id)).size);
+
+/**
+ * Cards whose stated effects include a friendship bonus. Read from the effect name the export uses
+ * (`Friendship Bonus`), because that is the source of truth for the mechanic — not a type rule: a Pal
+ * card carries none, which is exactly why the Pal row prints the absence instead of a blank.
+ */
+const friendshipCount = computed(
+    () => deckCards.value.filter((card) => card.effects.some((effect) => effect.name === 'Friendship Bonus')).length,
+);
+
+/** Cards the draft's chosen scenario links to. Zero when no scenario has been chosen yet. */
+const linkedCount = computed(() => deckCards.value.filter((card) => card.scenario_link === 'linked').length);
+
+/** Aim the picker at the first empty slot, or the current one when all six are taken. */
+function addCard(event: Event): void {
+    replace(props.slots.find((slot) => slot.card === null)?.position ?? filling.value, event);
+}
 
 /**
  * A refusal names the slot in the words the slot already carries on this screen. The validation key is a
@@ -275,9 +304,9 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
 
 <template>
     <SetupLayout :step="5" :visited="props.visited" :saved="props.saved">
-        <Head title="Support deck" />
-        <template #eyebrow>Setup</template>
-        <template #title>Support deck</template>
+        <Head title="Build the six-card deck" />
+        <template #eyebrow>New career</template>
+        <template #title>Build the six-card deck</template>
 
         <!-- No breadcrumb: "← Back to deck" pointed at this same URL, and its `Link` was never
              imported, so it rendered an empty `<nav aria-label="Breadcrumb">` and a resolve warning.
@@ -311,16 +340,24 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
             {{ form.errors.deck }}
         </p>
 
-        <div class="mt-5 max-w-5xl">
-            <section aria-labelledby="draft-slots-heading">
-                <h2 id="draft-slots-heading" class="text-lg font-semibold text-ink-strong">The six slots</h2>
+        <!-- `g-side`: the deck on the left, the checks and the type table on the right. Page-level
+             grids use viewport media queries, not `@container`: the shell's content box is 1088px at a
+             1440px viewport, so an `@3xl` page grid would collapse a column at a width the page reads as
+             desktop (`frontend-architecture-plan.md`, container-query note). -->
+        <div class="mt-5 grid gap-5 min-[1081px]:grid-cols-[minmax(0,1fr)_22rem]">
+            <section class="card" aria-labelledby="draft-slots-heading">
+                <h2 id="draft-slots-heading" class="text-lg font-semibold text-ink-strong">
+                    Deck
+                    <span class="text-xs font-semibold text-ink-muted">{{ equippedCount }} of 6 slots filled</span>
+                </h2>
 
                 <p class="mt-1 text-xs text-ink-muted">
                     Not equipped. The six cards are the deck the run starts with, so an empty slot here is a
-                    gap the Trainer can still fill.
+                    gap the Trainer can still fill. Slot 6 is the friend slot: it takes a borrowed card, and
+                    the client draws it apart from the five owned positions.
                 </p>
 
-                <ul class="mt-3 grid list-none grid-cols-1 gap-4 @3xl:grid-cols-2 @4xl:grid-cols-3">
+                <ul class="mt-3 grid list-none grid-cols-1 gap-4 min-[761px]:grid-cols-2">
                     <SupportSlot
                         v-for="slot in props.slots"
                         :key="slot.position"
@@ -337,6 +374,16 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                         @level="(position, value) => (form.deck[position].card_level = value)"
                     />
                 </ul>
+
+                <div class="mt-3 flex flex-wrap gap-3">
+                    <button
+                        type="button"
+                        class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel"
+                        @click="addCard"
+                    >
+                        Add a card
+                    </button>
+                </div>
 
                 <CardPicker
                     ref="picker"
@@ -367,9 +414,12 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                 </p>
 
                 <form class="mt-4 flex flex-wrap items-center gap-3" @submit.prevent="save()">
+                    <!-- Secondary by design: the screen's one filled action is "Continue to preflight".
+                         This button persists the per-slot level, which is the only field the equip
+                         controls do not write immediately. -->
                     <button
                         type="submit"
-                        class="h-11 rounded-md bg-primary-action px-5 font-semibold text-on-primary-action disabled:cursor-wait disabled:bg-disabled"
+                        class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel disabled:cursor-wait disabled:opacity-60"
                         :disabled="form.processing"
                     >
                         {{ form.processing ? 'Saving…' : 'Save deck' }}
@@ -378,6 +428,123 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                 </form>
             </section>
 
+            <div class="flex flex-col gap-4">
+                <section class="card" aria-labelledby="deck-diagnostics-heading">
+                    <h2 id="deck-diagnostics-heading" class="text-lg font-semibold text-ink-strong">Deck diagnostics</h2>
+
+                    <!-- Checks, not a score: there is no deck rating in any source, and a bar without a
+                         printed figure is a score wearing a chart costume. Every row states a fact the
+                         page can read, and a row the draft cannot answer says so rather than showing 0. -->
+                    <table class="mt-3 w-full text-sm">
+                        <caption class="sr-only">Deck checks and their state</caption>
+                        <thead>
+                            <tr class="text-left text-xs text-ink-muted">
+                                <th scope="col" class="pb-1 font-semibold">Check</th>
+                                <th scope="col" class="pb-1 text-right font-semibold">State</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-rule">
+                            <tr>
+                                <td class="py-1.5">Six slots filled</td>
+                                <td class="py-1.5 text-right">
+                                    <span :class="equippedCount === 6 ? 'pill pill-positive' : 'pill pill-caution'">
+                                        {{ equippedCount }} of 6
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="py-1.5">Duplicate card in the deck</td>
+                                <td class="py-1.5 text-right">
+                                    <span :class="duplicateCount === 0 ? 'pill pill-positive' : 'pill pill-caution'">
+                                        {{ duplicateCount === 0 ? 'None' : `${duplicateCount} duplicate${duplicateCount === 1 ? '' : 's'}` }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="py-1.5">Cards already at orange gauge</td>
+                                <td class="py-1.5 text-right">
+                                    <AbsenceValue reason="Not recorded. The setup draft has no friendship-gauge value per slot, and this step does not read the client's in-run gauge." />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="py-1.5">Cards carrying a friendship bonus</td>
+                                <td class="py-1.5 text-right font-mono">{{ friendshipCount }} of {{ equippedCount }}</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1.5">Scenario link on a card</td>
+                                <td class="py-1.5 text-right font-mono">{{ linkedCount }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p class="note mt-3 text-xs text-ink-muted">
+                        A card reaches friendship training at gauge <b>80</b>, which the client draws as the
+                        fourth mark and colours orange. The gauge rises about +5 per joint training, so a card
+                        with no head start needs most of a run to get there — which is why the "Initial
+                        Friendship Gauge" effect is the one that matters.
+                    </p>
+                </section>
+
+                <section class="card" aria-labelledby="deck-types-heading">
+                    <h2 id="deck-types-heading" class="text-lg font-semibold text-ink-strong">Card types</h2>
+
+                    <table class="mt-3 w-full text-sm">
+                        <caption class="sr-only">The support-card types and what each does</caption>
+                        <thead>
+                            <tr class="text-left text-xs text-ink-muted">
+                                <th scope="col" class="pb-1 font-semibold">Type</th>
+                                <th scope="col" class="pb-1 font-semibold">What it does</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-rule">
+                            <tr>
+                                <td class="py-2 align-top">Speed · Stamina · Power · Guts · Wit</td>
+                                <td class="py-2 align-top text-ink-muted">Boosts its own training tile; carries the friendship kit.</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 align-top">
+                                    <SupportTypeMark type="friend" label="Pal" />
+                                </td>
+                                <td class="py-2 align-top text-ink-muted">No friendship bonus. Earns its slot on event chains: energy return, mood, failure protection.</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 align-top">
+                                    <SupportTypeMark type="group" label="Group" />
+                                </td>
+                                <td class="py-2 align-top text-ink-muted">SSR only. Full friendship kit plus Wit friendship recovery; several trainees behind one card.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p class="mt-3 text-xs text-ink-muted">
+                        Seven types in total, and Group is a type rather than a flag on another one. Global
+                        holds 115 SSR cards against JP's 312, so the two catalogues are not interchangeable.
+                    </p>
+                </section>
+            </div>
+        </div>
+
+        <!-- The deck screen's own rule statements: the multiplier and the duplicate rule. The
+             arithmetic is shown as multiplication, because "+55%" teaches a model the client does
+             not use and the wrong model costs a run. -->
+        <p class="note mt-4 text-sm text-ink-muted">
+            <b>Two rainbow cards on one tile is the largest multiplier in a turn.</b> Bonuses multiply
+            rather than add, so a +25% and a +30% card give 1.25 × 1.30 = <b>1.625</b>, not +55%
+            (UMAMUSUME_REFERENCE.md §1.1.3).
+        </p>
+        <p class="note mt-2 text-sm text-ink-muted">
+            <b>Two identical cards cannot sit in one deck.</b> The client spends a duplicate on a limit
+            break instead, and the picker does not offer a card the deck already holds.
+        </p>
+
+        <div class="mt-5 flex flex-wrap items-center gap-3">
+            <div class="flex-1"></div>
+            <Link href="/career/setup/legacy" class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel">
+                Back
+            </Link>
+            <Link href="/career/setup/preflight" class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 font-semibold text-on-primary-action hover:bg-primary-action/90">
+                Continue to preflight
+            </Link>
         </div>
 
         <!--
@@ -394,20 +561,5 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
             :strengths="props.analysis.strengths"
             :weaknesses="props.analysis.weaknesses"
         />
-
-        <div class="mt-6 flex flex-wrap items-center gap-3">
-            <a
-                href="/career/setup/legacy"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
-            >
-                Back: Legacy
-            </a>
-            <a
-                href="/career/setup/preflight"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
-            >
-                Next: Preflight
-            </a>
-        </div>
     </SetupLayout>
 </template>

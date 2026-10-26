@@ -38,9 +38,13 @@ test('carries a chosen scenario onto the next step as a link to step 1', async (
     await page.goto('/career/setup/scenario', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    // Choose the first card through its own action, which is what writes the draft.
-    await page.getByRole('button', { name: /Choose|Select/ }).first().click();
-    await page.waitForLoadState('networkidle');
+    // Choose the first card through its radio, which is what writes the draft: the card is the
+    // radio's label, so checking the input is the card's pick, and the head's one filled action
+    // commits the step.
+    await page.getByRole('radio').first().check();
+    await page.getByRole('button', { name: 'Continue to trainee' }).click();
+    await page.waitForURL(/\/career\/setup\/trainee$/);
+    await page.locator('#app > *').first().waitFor();
 
     const chosen = page.locator(STRIP).getByRole('link', { name: /.+/ }).first();
     await expect(chosen).toBeVisible();

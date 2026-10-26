@@ -26,7 +26,10 @@ test('status name-matching mechanism', async ({ page }) => {
         statusNameFromContent: await probe(() => expect(page.getByRole('status', { name: 'Preferences saved.' })).toBeVisible()),
         statusExplicitAriaLabel: await probe(() => expect(page.getByRole('status', { name: 'Explicit label' })).toBeVisible()),
         buttonNameFromContent: await probe(() => expect(page.getByRole('button', { name: 'Save preferences' })).toBeVisible()),
-        statusRoleOnly: await probe(() => expect(page.getByRole('status')).toBeVisible()),
+        // Two status nodes live on this page, so the role-only probe reads the first:
+        // strict mode resolves the bare locator to two elements and the probe would record the
+        // ambiguity instead of the mechanism.
+        statusRoleOnly: await probe(() => expect(page.getByRole('status').first()).toBeVisible()),
     };
 
     // eslint-disable-next-line no-console

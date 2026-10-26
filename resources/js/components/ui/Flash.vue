@@ -68,8 +68,12 @@ defineExpose({ dismiss });
         class="flex items-center justify-between gap-2"
         :class="visible ? 'mb-4 rounded-md border border-rule bg-raised px-3 py-2' : ''"
     >
+        <!-- The accessible name is explicit because `role="status"` takes no name from
+             content (the mechanism probe in tests/browser/flash-name-mechanism.spec.ts): without
+             the label, the banner cannot be addressed by name at all. -->
         <p
             role="status"
+            :aria-label="visible ?? undefined"
             :class="visible ? 'text-sm text-ink' : 'sr-only'"
         >
             {{ visible ?? '' }}
