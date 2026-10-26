@@ -89,8 +89,8 @@ const doorClass =
                     <dt class="text-xs text-ink-muted">Energy at the last logged turn</dt>
                     <dd class="text-ink-strong">
                         <span v-if="props.career.energy !== null">{{ props.career.energy }}</span>
-                        <span v-else title="No turn carries an end-of-turn Energy figure on this record.">
-                            N/A
+                        <span v-else>
+                            N/A <span class="text-xs text-ink-muted">· no turn carries an Energy figure</span>
                         </span>
                     </dd>
                 </div>
@@ -99,8 +99,8 @@ const doorClass =
                     <dt class="text-xs text-ink-muted">Fans at the last logged turn</dt>
                     <dd class="text-ink-strong">
                         <span v-if="props.career.fans !== null">{{ props.career.fans }}</span>
-                        <span v-else title="No turn carries an end-of-turn Fans figure on this record.">
-                            N/A
+                        <span v-else>
+                            N/A <span class="text-xs text-ink-muted">· no turn carries a Fans figure</span>
                         </span>
                     </dd>
                 </div>
@@ -128,14 +128,13 @@ const doorClass =
                         v-for="tag in props.veteran.tags"
                         :key="tag"
                         class="rounded-full bg-sunken px-2 py-0.5 text-ink-strong"
-                        title="A tag you typed on this record. Tags are the Trainer's own words, not client vocabulary."
                     >
                         {{ tag }}
                     </span>
                 </p>
                 <p v-else class="mt-1 text-sm">
-                    <span title="No tag was recorded on this Veteran.">N/A</span>
-                    <span class="text-ink-muted"> tagged</span>
+                    <span>N/A</span>
+                    <span class="text-ink-muted"> tagged — no tag was recorded on this Veteran</span>
                 </p>
             </div>
 
@@ -143,7 +142,7 @@ const doorClass =
                 <p class="text-xs text-ink-muted">Notes</p>
                 <p v-if="props.veteran.notes !== null" class="mt-1 text-ink">{{ props.veteran.notes }}</p>
                 <p v-else class="mt-1 text-sm">
-                    <span title="No note was recorded on this Veteran.">N/A</span>
+                    <span>N/A</span> <span class="text-xs text-ink-muted">· no note was recorded</span>
                 </p>
             </div>
         </section>
@@ -162,14 +161,14 @@ const doorClass =
                     <dt class="text-xs text-ink-muted">Parent A</dt>
                     <dd class="text-ink-strong">
                         <span v-if="props.parents.a !== null">{{ props.parents.a }}</span>
-                        <span v-else title="The run records no Parent A.">N/A, not recorded</span>
+                        <span v-else>N/A, not recorded</span>
                     </dd>
                 </div>
                 <div>
                     <dt class="text-xs text-ink-muted">Parent B</dt>
                     <dd class="text-ink-strong">
                         <span v-if="props.parents.b !== null">{{ props.parents.b }}</span>
-                        <span v-else title="The run records no Parent B.">N/A, not recorded</span>
+                        <span v-else>N/A, not recorded</span>
                     </dd>
                 </div>
             </dl>
@@ -186,11 +185,13 @@ const doorClass =
                 v-else
                 href="/veterans"
                 :class="doorClass"
-                title="This run has no Legacy read-back recorded, so there is nothing to open in the builder."
             >
                 Back to the library
             </a>
         </div>
+        <p v-if="!props.veteran.builder_url" class="mt-2 text-xs text-ink-muted">
+            This run has no Legacy read-back recorded, so there is nothing to open in the builder.
+        </p>
 
         <section aria-labelledby="veteran-absences" class="mt-8">
             <h2 id="veteran-absences" class="text-lg font-semibold text-ink-strong">

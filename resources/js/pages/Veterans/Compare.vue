@@ -546,7 +546,7 @@ watch(orderedColumns, () => {
                                 <ul v-if="column.tags.length > 0" class="flex flex-wrap gap-1">
                                     <li v-for="tag in column.tags" :key="`${column.id}-${tag}`" class="rounded-full border border-rule bg-sunken px-2 text-xs text-ink">{{ tag }}</li>
                                 </ul>
-                                <span v-else class="text-xs text-ink-muted" title="The Trainer filed this career without tagging it.">No tags recorded</span>
+                                <span v-else class="text-xs text-ink-muted">No tags recorded</span>
                             </td>
                         </tr>
                         <tr class="border-b border-rule">
@@ -558,7 +558,7 @@ watch(orderedColumns, () => {
                                 :class="[careerColumnClass(index), { 'comparison-col-hover': hoveredColumn === index }]"
                             >
                                 <a v-if="column.builder_url" :href="column.builder_url" class="underline">Open its graph</a>
-                                <span v-else title="This career records no Legacy configuration, so it has no graph to open.">None recorded</span>
+                                <span v-else>None recorded <span class="text-xs text-ink-muted">· no Legacy configuration on this career</span></span>
                             </td>
                         </tr>
                     </tbody>
@@ -592,7 +592,7 @@ watch(orderedColumns, () => {
                         <span v-if="column.trainee_ja" lang="ja" class="text-xs text-ink-muted">{{ column.trainee_ja }}</span>
                     </header>
                     <p v-if="veteranResultClause(column.notes) !== null" class="whitespace-pre-wrap text-ink">{{ veteranResultClause(column.notes) }}</p>
-                    <p v-else class="text-xs text-ink-muted" title="No note was recorded on this career.">No note recorded for this career.</p>
+                    <p v-else class="text-xs text-ink-muted">No note recorded for this career.</p>
                 </article>
             </div>
         </section>

@@ -81,11 +81,10 @@ async function move(delta: number): Promise<void> {
                 <span
                     v-if="props.row.is_unique"
                     class="ml-1 rounded-full bg-sunken px-2 py-0.5 text-xs font-normal text-ink-strong"
-                    title="Marked from the source's skill class code, not from a card's own skill list."
-                >✦ Unique</span>
+                >✦ Unique <span class="font-normal text-ink-muted">· from the source's class code</span></span>
             </h4>
             <p class="font-mono text-xs tabular-nums text-ink-muted">
-                <span v-if="props.row.sp_cost === null" title="The source publishes no SP cost for this skill.">N/A SP</span>
+                <span v-if="props.row.sp_cost === null">N/A SP <span class="font-sans text-ink-muted">· the source publishes no cost</span></span>
                 <template v-else>{{ props.row.sp_cost }} SP base</template>
             </p>
         </div>

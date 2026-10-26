@@ -332,8 +332,7 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
                                 <span
                                     v-else
                                     class="text-ink-muted"
-                                    title="No parent recorded in slot B for this run."
-                                >N/A</span>
+                                >N/A <span class="text-xs">· no Parent B</span></span>
                             </td>
                         </tr>
 
@@ -367,8 +366,7 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
                                 <span
                                     v-else
                                     class="text-ink-muted"
-                                    title="No ancestors recorded for Parent B on this run."
-                                >N/A</span>
+                                >N/A <span class="text-xs">· none recorded for Parent B</span></span>
                             </td>
                         </tr>
 
@@ -387,7 +385,7 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
                                         parent(column, 'parent_a')?.is_guest && parent(column, 'parent_b')?.is_guest ? ' + ' : ''
                                     }}{{ parent(column, 'parent_b')?.is_guest ? 'B' : '' }}
                                 </span>
-                                <span v-else class="text-ink-muted" title="Neither parent is marked rented.">
+                                <span v-else class="text-ink-muted">
                                     No
                                 </span>
                             </td>
@@ -436,7 +434,7 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
                             <th scope="row" class="px-3 py-2 text-left font-medium text-ink">Tags</th>
                             <td v-for="column in columns" :key="column.run_id" class="px-3 py-2 text-ink">
                                 <span v-if="column.tags.length > 0">{{ column.tags.join(', ') }}</span>
-                                <span v-else class="text-ink-muted" title="This Veteran was saved with no tags.">
+                                <span v-else class="text-ink-muted">
                                     N/A
                                 </span>
                             </td>
@@ -446,7 +444,7 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
                             <th scope="row" class="px-3 py-2 text-left font-medium text-ink">Notes</th>
                             <td v-for="column in columns" :key="column.run_id" class="px-3 py-2 text-ink">
                                 <span v-if="column.notes">{{ column.notes }}</span>
-                                <span v-else class="text-ink-muted" title="No note was written for this Veteran.">
+                                <span v-else class="text-ink-muted">
                                     N/A
                                 </span>
                             </td>

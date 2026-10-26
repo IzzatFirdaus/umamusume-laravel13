@@ -72,12 +72,10 @@ const classesOf = (letter: string | null): string => {
     <span class="inline-flex items-baseline gap-1.5 rounded-md border px-2 py-1 text-xs" :class="classesOf(letter)">
         <span class="text-ink-muted">{{ label }}</span>
         <span class="font-mono tabular-nums">{{ letter ?? 'N/A' }}</span>
-        <span
-            v-if="letter !== null && bandOf(letter) === null"
-            title="This letter is outside the S to G scale this tool records."
-            class="text-ink-muted"
-        >Unrecognised</span>
-        <span v-else-if="letter === null" title="No aptitude letter has been published for this axis." class="text-ink-muted">
+        <span v-if="letter !== null && bandOf(letter) === null" class="text-ink-muted">
+            Unrecognised
+        </span>
+        <span v-else-if="letter === null" class="text-ink-muted">
             Not published
         </span>
         <span v-else>{{ bandOf(letter) }}</span>

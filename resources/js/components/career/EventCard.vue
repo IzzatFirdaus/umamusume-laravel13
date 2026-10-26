@@ -33,8 +33,7 @@ const props = defineProps<Props>();
                 <span class="text-xs text-ink-muted">#{{ props.id }}</span>
             </div>
             <span v-if="!props.outcome_recorded"
-                  class="inline-flex min-h-6 items-center rounded-full border border-risk px-2 py-0.5 text-xs font-semibold text-risk"
-                  title="No recorded outcome was entered for this choice. The trainer must choose manually.">
+                  class="inline-flex min-h-6 items-center rounded-full border border-risk px-2 py-0.5 text-xs font-semibold text-risk">
                 ⚠ Event outcome incomplete - choose manually
             </span>
         </header>

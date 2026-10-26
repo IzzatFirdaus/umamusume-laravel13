@@ -138,31 +138,28 @@ function goToPage(page: number): void {
                             </th>
                             <td class="py-1.5 px-3 text-ink">{{ slot.year_label }}</td>
                             <td class="py-1.5 px-3 text-ink">
-                                <span v-if="slot.turn === null" title="The source records no turn number for this slot.">N/A</span>
+                                <span v-if="slot.turn === null">N/A</span>
                                 <span v-else>{{ slot.turn }}</span>
                             </td>
                             <td class="py-1.5 px-3 text-ink">
-                                <span v-if="slot.tier === null" title="The source records no tier for this slot.">N/A</span>
+                                <span v-if="slot.tier === null">N/A</span>
                                 <span v-else>{{ slot.tier }}</span>
                             </td>
                             <td class="py-1.5 px-3 text-ink">
-                                <span v-if="slot.distance === null" title="The source records no distance for this slot.">N/A</span>
+                                <span v-if="slot.distance === null">N/A</span>
                                 <span v-else>{{ slot.distance }} m</span>
                             </td>
                             <td class="py-1.5 px-3 text-ink">
-                                <span v-if="slot.surface === null" title="The source records no surface for this slot.">N/A</span>
+                                <span v-if="slot.surface === null">N/A</span>
                                 <span v-else>{{ slot.surface }}</span>
                             </td>
                             <td class="py-1.5 px-3 text-ink">
-                                <span v-if="slot.fans_needed === null" title="The source records no fan gate for this slot.">N/A</span>
+                                <span v-if="slot.fans_needed === null">N/A</span>
                                 <span v-else>{{ slot.fans_needed }}</span>
                             </td>
                             <td class="py-1.5 px-3">
-                                <span
-                                    v-if="gates(slot).length === 0"
-                                    title="No entry gate: open to a trainee at this point of the career."
-                                >
-                                    N/A
+                                <span v-if="gates(slot).length === 0">
+                                    N/A <span class="text-xs text-ink-muted">· no entry gate</span>
                                 </span>
                                 <span v-else class="flex flex-wrap gap-1">
                                     <span
@@ -177,6 +174,10 @@ function goToPage(page: number): void {
                         </tr>
                     </tbody>
                 </table>
+                <p class="mt-2 text-xs text-ink-muted">
+                    N/A marks a field the source records nothing for. It is not a zero, and no column
+                    here fills a gap with a guess.
+                </p>
             </div>
 
             <Pagination

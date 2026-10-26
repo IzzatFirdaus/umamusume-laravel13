@@ -126,7 +126,7 @@ const hasTraineeIdentity = computed(
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Scenario</dt>
                 <dd class="text-ink-strong">
                     <span v-if="props.header.scenario_declared">{{ props.header.scenario_label }}</span>
-                    <span v-else title="No scenario was chosen for this run.">No scenario set</span>
+                    <span v-else>No scenario set</span>
                 </dd>
             </div>
             <div class="flex flex-col">

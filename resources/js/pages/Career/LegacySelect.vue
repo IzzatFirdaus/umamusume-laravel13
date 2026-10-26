@@ -364,7 +364,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                                     <p v-if="ancestorError(index, ancestorIndex)" :id="`ancestor-${parent.slot}-${ancestorIndex}-error`" class="mt-1 text-xs text-risk">
                                         {{ ancestorError(index, ancestorIndex) }}
                                     </p>
-                                    <p v-else class="mt-1 text-xs text-ink-muted" title="An ancestor is stored by name. Leave it blank if you have not recorded one.">
+                                    <p v-else class="mt-1 text-xs text-ink-muted">
                                         Enter the name as you read it. Blank stays N/A.
                                     </p>
 
@@ -577,7 +577,6 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                                 <p
                                     v-else
                                     class="mt-1 text-xs text-ink-muted"
-                                    title="No Sparks entered for this parent yet."
                                 >
                                     No Sparks recorded.
                                 </p>
@@ -615,7 +614,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                      name="affinity"
                      :options="[{ value: '', label: 'Not recorded' }, ...props.affinityGrades.map(grade => ({ value: grade, label: grade }))]"
                    />
-                <p class="mt-1 text-xs text-ink-muted" title="The published reference grades each link; this records the pair's own grade as read.">
+                <p class="mt-1 text-xs text-ink-muted">
                     The grade you read for the pair, not a score. This tool does not price it.
                 </p>
                 <p v-if="form.errors.affinity" class="mt-1 text-xs text-risk">{{ form.errors.affinity }}</p>

@@ -221,7 +221,6 @@ function applyFilters(): void {
                                 <span
                                     v-else
                                     class="text-xs text-ink-muted"
-                                    title="Open this run and record its Legacy selection, then it opens here."
                                 >
                                     No Legacy selection recorded for this run yet.
                                 </span>

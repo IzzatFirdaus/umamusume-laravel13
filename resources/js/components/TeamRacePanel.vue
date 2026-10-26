@@ -41,7 +41,7 @@ defineProps<{
             >
                 <span class="font-semibold text-ink-strong">{{ entry.title ?? 'a team race with no calendar row' }}</span>
                 <span class="flex flex-wrap gap-x-3 font-mono text-xs tabular-nums text-ink-muted">
-                    <span v-if="entry.tier === null" title="The race catalogue records no tier for this race.">N/A</span>
+                    <span v-if="entry.tier === null">N/A <span class="font-sans">· no tier in the catalogue</span></span>
                     <span v-else>{{ entry.tier }}</span>
                     <span>{{ entry.circles === null ? 'circles not read' : entry.circles + ' circles' }}</span>
                     <span v-if="entry.circles !== null">{{ entry.circles >= guidance ? 'at or above the margin' : 'below the margin' }}</span>

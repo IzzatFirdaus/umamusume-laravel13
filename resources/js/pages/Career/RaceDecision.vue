@@ -155,7 +155,7 @@ function submitManual(): void {
                 <span class="font-mono tabular-nums">Turn {{ props.nextTurn.turn_index }}</span>
                 <span class="text-ink-muted">({{ props.nextTurn.turn }} of the year)</span>
             </p>
-            <p v-else class="mt-1 text-sm text-ink" title="No turn is being decided on this run.">N/A</p>
+            <p v-else class="mt-1 text-sm text-ink">N/A <span class="text-xs text-ink-muted">· no turn is being decided</span></p>
         </section>
 
         <!-- Level 1, Critical (design-2.0 §4): a career obligation gets strong emphasis, a glyph and a

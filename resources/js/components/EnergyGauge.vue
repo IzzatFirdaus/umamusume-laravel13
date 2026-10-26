@@ -38,16 +38,13 @@ const stateClass = computed(() => {
         <!-- A band is a reading the Trainer did make: the client showed a level instead of a number, and
              printing `Energy N/A` over it claimed an absence (R3-01). No gauge is drawn, because a bar
              would state a figure nobody read. -->
-        <span
-            v-if="!recorded && bandText !== null"
-            class="font-mono text-sm text-ink-muted"
-            title="Recorded as the level the client showed, not as a number."
-        >
+        <span v-if="!recorded && bandText !== null" class="font-mono text-sm text-ink-muted">
             Energy {{ bandText }}
+            <span class="font-sans text-xs">· the level the client showed, not a figure</span>
         </span>
         <!-- Absent, not zero: an empty gauge would say the trainee is exhausted on a run
              that has not logged a turn (D-220). -->
-        <span v-else-if="!recorded" class="font-mono text-sm text-ink-muted" title="No Energy value recorded for this run">
+        <span v-else-if="!recorded" class="font-mono text-sm text-ink-muted">
             Energy N/A
         </span>
         <template v-else>

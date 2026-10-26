@@ -64,7 +64,7 @@ const state = computed(() => STATES[props.state]);
 
         <span class="text-xs text-ink-muted">
             <template v-if="props.due_label !== null">{{ props.due_label }}</template>
-            <template v-else><span title="The calendar records this slot with no turn, so the tool cannot date it.">N/A</span></template>
+            <template v-else><span class="text-xs">N/A</span></template>
         </span>
 
         <ProvenanceBadge :state="props.badge" :title="props.title" />

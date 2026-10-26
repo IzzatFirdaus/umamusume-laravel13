@@ -215,7 +215,6 @@ function goToPage(page: number): void {
                     label="Unique"
                     variant="skill"
                     size="sm"
-                    title="Marked from the source's skill class code, not from a card's own skill list."
                 />
 
                 <SparkChip
@@ -233,7 +232,7 @@ function goToPage(page: number): void {
                 <span class="ml-auto text-xs text-ink-muted">
                     <template v-if="skill.sp_cost !== null"> {{ skill.sp_cost }} SP</template>
                     <template v-else>
-                        · <span title="The source states no SP cost for this class of skill.">N/A</span>
+                        · <span>N/A <span class="font-sans">· no cost for this class</span></span>
                     </template>
                 </span>
             </li>

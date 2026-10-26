@@ -14,14 +14,12 @@ defineProps<{
         <Link v-if="skill.url" :href="skill.url" class="text-ink hover:underline transition-colors duration-150 ease-out">{{ skill.name }}</Link>
         <span v-else class="text-ink">{{ skill.name }}</span>
 
-        <span
-            v-if="skill.is_unique"
-            class="pill pill-neutral"
-            title="Marked from the source's skill class code, not from a card's own skill list."
-        >✦ Unique</span>
+        <span v-if="skill.is_unique" class="pill pill-neutral">
+            ✦ Unique <span class="font-normal text-ink-muted">· from the source's class code</span>
+        </span>
 
         <span class="ml-auto font-mono text-xs tabular-nums text-ink-muted">
-            <span v-if="skill.sp_cost === null" title="The source publishes no SP cost for this skill.">N/A SP</span>
+            <span v-if="skill.sp_cost === null">N/A SP <span class="font-sans">· no cost published</span></span>
             <template v-else>{{ skill.sp_cost }} SP</template>
         </span>
     </li>

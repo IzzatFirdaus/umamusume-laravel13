@@ -221,7 +221,7 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                         </td>
                         <td class="px-3 py-3">
                             <template v-if="run.scenario_label">{{ run.scenario_label }}</template>
-                            <span v-else title="No scenario is set for this run.">
+                            <span v-else>
                                 N/A<span class="sr-only">: no scenario is set for this run.</span>
                             </span>
                         </td>
@@ -238,7 +238,7 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                         </td>
                         <td class="px-3 py-3">
                             <template v-if="positionText(run) !== 'N/A'">{{ positionText(run) }}</template>
-                            <span v-else title="No turn has been logged on this run yet.">
+                            <span v-else>
                                 N/A<span class="sr-only">: no turn has been logged on this run yet.</span>
                             </span>
                         </td>

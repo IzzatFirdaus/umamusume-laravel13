@@ -250,7 +250,7 @@ const finaleHeadline = computed<string>(() => {
                     {{ props.build.target.style }}.
                 </p>
                 <p v-else class="mt-3 text-sm text-ink-muted">
-                    <span title="No build target was set for this run.">N/A</span>.
+                    <span>N/A</span>.
                     No build target was set for this run, so the stats above are read against no target.
                 </p>
 
@@ -280,7 +280,7 @@ const finaleHeadline = computed<string>(() => {
                     records an aptitude being altered.
                 </p>
                 <p v-if="props.build.aptitudes.length === 0" class="mt-2 text-sm text-ink-muted">
-                    <span title="No aptitude letters have been published for this trainee.">N/A</span>.
+                    <span>N/A</span>.
                     No aptitude letters are published for this trainee.
                 </p>
                 <ul v-else class="mt-2 flex flex-wrap gap-2">
@@ -342,7 +342,7 @@ const finaleHeadline = computed<string>(() => {
                                 </td>
                                 <td class="py-2 text-ink-muted">
                                     <span v-if="race.turn !== null" class="font-mono tabular-nums">{{ race.turn }}</span>
-                                    <span v-else title="The turn was not recorded against this race, so the turn is not known rather than zero.">N/A</span>
+                                    <span v-else>N/A <span class="text-xs">· turn not recorded</span></span>
                                 </td>
                             </tr>
                         </tbody>
@@ -361,13 +361,12 @@ const finaleHeadline = computed<string>(() => {
                         <div v-for="period in props.scenario.periods" :key="period.index" class="rounded-md border border-rule bg-raised p-3">
                             <dt class="text-xs text-ink-muted">{{ period.name }}</dt>
                             <dd class="mt-0.5 font-mono text-lg tabular-nums text-ink-strong">
-                                <span
-                                    :title="period.earned === null ? 'No priced finish is recorded in this period, so it has no total.' : null"
-                                >{{ period.earned === null ? 'N/A' : period.earned }}</span>
+                                <span>{{ period.earned === null ? 'N/A' : period.earned }}</span>
                                 <span class="text-sm font-normal text-ink-muted"> / {{ period.required }} GP</span>
                             </dd>
-                            <p v-if="period.unpriced > 0" class="mt-1 text-xs text-risk" title="This period holds a finish below first, and no source prices one, so the period's total is withheld rather than understated.">
+                            <p v-if="period.unpriced > 0" class="mt-1 text-xs text-risk">
                                 {{ period.unpriced }} finish{{ period.unpriced === 1 ? '' : 'es' }} unpriced
+                                · a finish below first has no published price, so the total is withheld
                             </p>
                         </div>
                     </dl>
@@ -379,7 +378,7 @@ const finaleHeadline = computed<string>(() => {
                 </template>
 
                 <p class="mt-3 text-sm text-ink-muted">
-                    <span title="No column on any table this tool reads holds a race reward or a Skill Point payout.">N/A</span>.
+                    <span>N/A</span>.
                     {{ props.scenario.rewards }}
                 </p>
 
@@ -436,7 +435,7 @@ const finaleHeadline = computed<string>(() => {
                     <p class="text-sm text-ink-muted">{{ props.save_veteran.reason }}</p>
                 </div>
                 <p v-else class="mt-3 text-sm text-ink-muted">
-                    <span title="A career is filed once it is Completed.">Not available yet</span>.
+                    <span>Not available yet</span>.
                     {{ props.save_veteran.reason }}
                 </p>
             </section>

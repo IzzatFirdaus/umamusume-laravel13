@@ -294,8 +294,11 @@ const emptyText = computed<string>(() =>
                 <p class="text-xs text-ink-muted">
                     <span
                         class="text-xs font-normal normal-case tracking-normal"
-                        title="The date the scenario matrix was last checked against its sources. Nothing here was fetched on it."
                     >Verified {{ props.scenario.caps.verified_at }}</span>
+                    <span class="text-xs font-normal normal-case tracking-normal">
+                        · the date the matrix was last checked against its sources; nothing here was
+                        fetched on it
+                    </span>
                 </p>
                 <!-- ADR-0001 §2 puts the constants behind a number wherever the number appears, so the
                      matrix this read from is named on the row rather than only in the badge's `title`. -->
