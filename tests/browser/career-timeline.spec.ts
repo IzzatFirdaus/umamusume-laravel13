@@ -68,7 +68,9 @@ test('renders the empty state when no turns have been logged', async ({ page }) 
 test('renders the rail with glyph alongside text and the audit opens by keyboard', async ({ page }) => {
     await openTimeline(page);
 
-    const firstRow = page.locator('ol[aria-label="Career timeline"] > li').first();
+    // Rows live in one ordered list per career year now, so the rail's spine is reached through the
+    // first phase's list rather than one flat `ol`.
+    const firstRow = page.locator('ol[aria-label$="entries, oldest first"] > li').first();
     const firstDetails = firstRow.locator('details');
     const firstSummary = firstDetails.locator('summary');
 
@@ -77,6 +79,12 @@ test('renders the rail with glyph alongside text and the audit opens by keyboard
     // The glyph and the text appear in the same row — never state through glyph alone.
     await expect(firstSummary).toContainText('●');
     await expect(firstSummary).toContainText(/Turn recorded/);
+
+    // DM-1: the turn number is the spine, first in the row and monospaced. Two logged turns give
+    // T1 and T2, and the column must start at the same offset in both rows or it stops scanning.
+    await expect(firstSummary).toContainText('T1');
+    const spine = page.locator('ol[aria-label$="entries, oldest first"] > li summary > span').first();
+    expect(await spine.evaluate((el) => getComputedStyle(el).fontFamily)).toContain('mono');
 
     // Closed by default: the disclosure is collapsed, so `details.open` is false.
     expect(await firstDetails.evaluate((el: HTMLDetailsElement) => el.open)).toBe(false);
@@ -104,7 +112,44 @@ test('toggles a type filter and shows only the active kind', async ({ page }) =>
     await expect(turnChip).toHaveAttribute('aria-pressed', 'true');
 
     // Two turn rows keep showing; the spec logged two turns and posted no race or event rows.
-    await expect(page.locator('ol[aria-label="Career timeline"] > li:visible')).toHaveCount(2);
+    await expect(page.locator('ol[aria-label$="entries, oldest first"] > li')).toHaveCount(2);
+});
+
+test('groups the rail by career year, and the finale sits outside the grid', async ({ page }) => {
+    await openTimeline(page);
+
+    // DM-1: a career is three 24-turn years, and the group caption carries the denominator so a
+    // half-logged year reads as what it is rather than as a complete one.
+    const junior = page.getByRole('heading', { name: 'Junior Year' });
+    await expect(junior).toBeVisible();
+    await expect(page.getByText('Turns 1–24')).toBeVisible();
+    await expect(page.getByText(/2 of 24 turns recorded/)).toBeVisible();
+
+    // The finale is its own section after the grid. It is never a row numbered past the grid, and
+    // the section says so in words rather than implying a 73rd turn.
+    const finale = page.getByRole('region', { name: /After the grid/ });
+    await expect(finale).toBeVisible();
+    await expect(finale).toContainText('not one of the 72 numbered turns');
+    await expect(page.locator('ol[aria-label$="entries, oldest first"] summary', { hasText: 'T73' })).toHaveCount(0);
+
+    // The counts strip reads the career's own denominator, not the number of rows.
+    await expect(page.getByText('of 72')).toBeVisible();
+});
+
+test('prints a blank as not recorded rather than as zero', async ({ page }) => {
+    await openTimeline(page);
+
+    const firstRow = page.locator('ol[aria-label$="entries, oldest first"] > li').first();
+    await firstRow.locator('summary').click();
+
+    // A turn recorded without a stat reading leaves the cell empty and states the rule once, so a
+    // blank never reads as a zero and the absence never hides behind a tooltip.
+    await expect(firstRow).toContainText('Blank means not recorded, never zero');
+    await expect(firstRow).not.toContainText('N/A');
+
+    // The first logged turn has no previous turn, which is a different absence from a missing stat
+    // and says so in its own words.
+    await expect(firstRow).toContainText('this is the first logged turn');
 });
 
 test('keeps min-h-11 tap targets on the filter chips and reflows at 320 px', async ({ page }) => {
@@ -119,7 +164,7 @@ test('keeps min-h-11 tap targets on the filter chips and reflows at 320 px', asy
     }
 
     await page.setViewportSize({ width: 320, height: 700 });
-    await expect(page.locator('ol[aria-label="Career timeline"]')).toBeVisible();
+    await expect(page.locator('ol[aria-label$="entries, oldest first"]').first()).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Career timeline' })).toBeVisible();
 });
 

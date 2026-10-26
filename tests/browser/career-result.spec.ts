@@ -127,6 +127,35 @@ test('a Completed career renders the three sections and the Save Veteran door', 
     await expect(page.locator('main')).not.toContainText('completion');
 });
 
+test('leads with four totals and exactly one accented tile, and computes no aggregate', async ({ page }) => {
+    await createRun(page);
+    await setStatus(page, 'Completed');
+    await page.goto(`${createdRunUrls[createdRunUrls.length - 1]}/result`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // DM-1/DM-2: the outcome leads. Four facts, and the finale is the only accented one, so the
+    // accent means "how it ended" rather than decorating the first tile in the row.
+    const strip = page.getByRole('region', { name: 'How this career ended' }).or(
+        page.locator('section', { has: page.getByRole('heading', { name: 'How this career ended' }) }),
+    );
+    for (const label of ['Finale', 'Final turn', 'Races won', 'Skill points at end']) {
+        await expect(strip.getByText(label, { exact: true })).toBeVisible();
+    }
+
+    const accented = page.locator('section dl > div.border-l-4');
+    await expect(accented).toHaveCount(1);
+
+    // A career completed without logging a turn recorded no skill-point reading, and the tile says
+    // so rather than printing a zero nobody took.
+    await expect(strip.getByText('Not recorded').first()).toBeVisible();
+
+    // No aggregate score, grade or completion percentage anywhere on the finished screen.
+    const main = page.locator('main');
+    await expect(main).not.toContainText('Build quality');
+    await expect(main).not.toContainText('Overall score');
+    await expect(main).not.toContainText('completion');
+});
+
 test('keeps the 44px floor and reflows at 320 px', async ({ page }) => {
     await createRun(page);
     await setStatus(page, 'Completed');
