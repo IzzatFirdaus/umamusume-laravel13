@@ -603,6 +603,18 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
                 </button>
             </div>
 
+            <!-- Rest figures, modal first (DM-7): the shape is a distribution, not a threshold. The
+                 corpus has no "50 Energy = failure" line, so the page says what is measured — one modal
+                 recovery and three branches — and prints the numbers rather than a warning word. -->
+            <p class="mt-3 text-xs text-ink-muted">
+                <b class="text-ink">Rest is rolled.</b> The modal result is
+                <span class="font-mono">+50 Energy</span> at <span class="font-mono">58.1%</span> of
+                <span class="font-mono">n=3,833</span>; then <span class="font-mono">+70</span> at
+                <span class="font-mono">25.4%</span>, <span class="font-mono">+30</span> at
+                <span class="font-mono">12.8%</span>, and <span class="font-mono">+30 + Late-Night Feeling</span>
+                at <span class="font-mono">3.7%</span>. Energy risk bends around 50 rather than falling off a
+                cliff there, so plan the turn around what the run can still afford.
+            </p>
             <div
                 v-if="form.hasErrors"
                 ref="alert"
