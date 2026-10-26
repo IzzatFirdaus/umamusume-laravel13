@@ -150,6 +150,34 @@ const sortedPredictedSparks = computed(() =>
     ),
 );
 
+const sparkFamilyLabels: Record<string, string> = {
+    blue: 'Blue',
+    pink: 'Pink',
+    green: 'Green',
+    white: 'White',
+    scenario: 'Scenario',
+};
+
+/**
+ * Five families per parent, always five.
+ *
+ * `spark_counts` omits a family that holds no Spark (`InheritanceEventController::legacySection`),
+ * so reading it alone would silently drop a family from the table. Building the row from
+ * `sparkKindOrder` and looking the count up keeps the absent family visible as its own column.
+ */
+const parentFamilyRows = computed(() =>
+    (props.legacy?.parents ?? []).map((parent) => ({
+        label: parent.label,
+        name: parent.name,
+        isGuest: parent.is_guest,
+        families: sparkKindOrder.map((kind) => ({
+            kind,
+            label: sparkFamilyLabels[kind] ?? kind,
+            count: parent.spark_counts.find((row) => row.kind === kind)?.count ?? null,
+        })),
+    })),
+);
+
 const statusGlyphClass = (status: Milestone['status']): string => {
     const base = 'inline-flex items-center justify-center w-5 h-5 text-xs font-mono font-bold rounded-full';
     const classes: Record<Milestone['status'], string> = {
@@ -272,9 +300,75 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                     <span class="text-xs text-ink-muted">Total across both parents and grandparents</span>
                 </div>
             </div>
-            <p v-else class="mt-3 text-sm text-ink-muted" title="No Legacy configuration recorded for this run.">
+            <p v-else class="mt-3 text-sm text-ink-muted">
                 No Sparks recorded in the Legacy configuration.
             </p>
+
+            <!-- DOMAIN OVERRIDE (DM-3): five Spark families, not the three the wireframe draws.
+                 The payload carries Blue, Pink, Green, White and Scenario; dropping two to match
+                 the drawing would hide Sparks the Trainer entered. -->
+            <div v-if="parentFamilyRows.length > 0" class="mt-4">
+                <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                    Sparks by family, per parent
+                </p>
+                <p class="mt-1 text-xs text-ink-muted">
+                    A family this parent records no Spark in prints “None recorded” rather than a zero:
+                    the count is absent from the payload, not measured as nothing.
+                </p>
+                <div
+                    class="mt-2 overflow-x-auto"
+                    role="region"
+                    tabindex="0"
+                    aria-label="Sparks by family for each parent"
+                >
+                    <table class="w-full border-collapse text-sm">
+                        <caption class="sr-only">
+                            Spark count per family for each parent in the Legacy configuration
+                        </caption>
+                        <thead>
+                            <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                                <th scope="col" class="py-2 pr-3">Parent</th>
+                                <th
+                                    v-for="family in sparkKindOrder"
+                                    :key="family"
+                                    scope="col"
+                                    class="py-2 pr-3 text-center"
+                                >
+                                    {{ sparkFamilyLabels[family] }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="parent in parentFamilyRows"
+                                :key="parent.label"
+                                class="border-b border-rule last:border-0"
+                            >
+                                <th scope="row" class="py-2 pr-3 text-left font-medium text-ink-strong">
+                                    {{ parent.label }}
+                                    <span class="block text-xs font-normal text-ink-muted">
+                                        {{ parent.name ?? 'Name not recorded' }}
+                                        <template v-if="parent.isGuest"> · guest</template>
+                                    </span>
+                                </th>
+                                <td
+                                    v-for="family in parent.families"
+                                    :key="family.kind"
+                                    class="py-2 pr-3 text-center"
+                                >
+                                    <span
+                                        v-if="family.count === null"
+                                        class="text-xs text-ink-muted"
+                                    >
+                                        None recorded
+                                    </span>
+                                    <span v-else class="font-mono tabular-nums text-ink">{{ family.count }}</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
             <!-- Expected Inheritance (NOT computed) -->
             <div class="mt-4 rounded-md border border-rule bg-sunken p-3">
