@@ -3,7 +3,7 @@ import AppLayout from '../../layouts/AppLayout.vue';
 import { BaseButton, BaseCheckbox, BaseInput, BaseRadio, BaseSelect } from '../../components/Form';
 import { buttonClasses } from '../../components/Form/buttonStyles';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { computed, nextTick, onUnmounted, ref } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 
 const props = defineProps<{
     theme: 'light' | 'dark' | 'eva01' | null;
@@ -229,6 +229,7 @@ const errorCategory = (key: string): string =>
     key.startsWith('settings.stat_target_defaults') || key.startsWith('settings.recommendation_aggressiveness')
         ? 'recommendation'
         : 'general';
+
 
 function submit(): void {
     // Sync the inverted checkbox state back into the stored blob: hide = the cards NOT shown.
@@ -631,14 +632,12 @@ function runBackup(): void {
             </p>
 
             <!-- The savebar (preferences.html): the state of the form and the screen's one accented
-                 primary, on the same line. The button stays enabled on a clean form because saving an
-                 unchanged form is a supported action — the flash's second-announcement case saves
-                 twice with no edit — so only the state line changes, not what a Trainer can press. -->
+                 primary, on the same line. The control is disabled while the form is clean, which is
+                 the wireframe's own state: a save with nothing to write is a no-op that still flashes
+                 a confirmation, and a confirmation of nothing is a false signal. -->
             <div class="flex flex-wrap items-center justify-between gap-3 rounded-md border border-rule bg-raised px-4 py-3">
-                <!-- Plain text, not a second live region: `ui/Flash.vue` owns the flash announcement,
-                     and a second `role="status"` on this screen made every status locator ambiguous. -->
                 <p class="text-xs text-ink-muted">
-                    {{ form.isDirty ? 'Unsaved changes' : 'All changes saved' }}
+                    {{ form.processing ? 'Saving' : 'Ready to save' }}
                 </p>
                 <!-- Rendered through BaseButton so the browser gate can read `data-variant="primary"`
                      off the committed element. -->

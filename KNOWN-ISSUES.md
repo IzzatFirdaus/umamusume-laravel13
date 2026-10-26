@@ -3757,3 +3757,36 @@ on it. Reopen R8 only if the roster is reopened at the same time.
 
 **Closure:** none. Closes when the chosen shape lands and a test proves the per-member state (or the
 explicitly-labelled proxy) round-trips.
+
+## KI-134 The Preferences savebar cannot state the form's condition, so the HFW's disabled-when-clean control is unbuilt - FILED 2026-10-26 (HFW parity S11.1 correction), OPEN
+
+**Status:** open. The savebar exists and carries a state line; the line says `Ready to save` rather
+than `All changes saved`, and the submit control stays enabled on a clean form. `preferences.html`
+draws it disabled while clean, so this is a known, named distance from the wireframe, not an
+oversight in the layout.
+
+**Symptom, measured.** Two independent ways of detecting an edit both fail to re-evaluate for the
+Recommendation panel's stat defaults, while the submitted payload proves the write reached the form:
+
+- `form.isDirty` stays `false` after `fill('2001')` into `settings.stat_target_defaults.Speed`.
+- A computed comparing `JSON.stringify(form.data())` against a snapshot taken at setup also stays
+  equal, so the comparison never re-runs.
+- `waitForRequest` on the forced submit returns
+  `{"settings":{"stat_target_defaults":{"Speed":2001, …}}}` — the value IS in the form.
+- A native `input` listener added to the `form` element from outside counts the event (1), and
+  dispatching `input` on the form element by hand flips the button to enabled. So the event bubbles
+  and the gate works; what does not happen is the reactive re-evaluation on a nested write.
+
+**Why the state line says `Ready to save`.** A savebar that reads `All changes saved` while a typed
+edit sits unsent is a false statement about the user's own work, which is the one thing AGENTS.md §5
+forbids in copy. `Ready to save` is true in every state the screen can actually observe.
+
+**Proving command.** `PLAYWRIGHT_PORT=8186 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/<session>/browser-8186.sqlite npx playwright test preferences.spec.ts` → 22 passed with the gate removed; with the gate
+in place `preferences.spec.ts:220` hangs 180s on `locator.click` against
+`<button disabled type="submit">` after the fill.
+
+**Closure.** Closes when a change-detection that survives a nested `v-model` write lands (either the
+form's own reactivity fixed at the source, or a per-control watch), the control is then
+`:disabled` on a clean form, and `preferences.spec.ts` asserts the disabled-when-clean state and the
+`edit → save → flash → edit → save → flash` sequence in the same case. Closure does not cover the
+Recommendation panel's own binding, which may need its own entry once the cause is named.

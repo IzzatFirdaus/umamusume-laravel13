@@ -11,8 +11,8 @@ test('Preferences renders its heading, both controls and the shell nav', async (
     // The HFW's h1 is "Preferences"; the shell's eyebrow carries the rail's word, "Settings".
     await expect(page.getByRole('heading', { name: 'Preferences', level: 1 })).toBeVisible();
 
-    // The savebar states the form's condition before anything is touched.
-    await expect(page.getByText('All changes saved', { exact: true })).toBeVisible();
+    // The savebar carries the screen's state line beside the one primary.
+    await expect(page.getByText('Ready to save', { exact: true })).toBeVisible();
 
     // The theme control offers the three stored values (light, dark, eva01) plus follow-the-OS.
     const theme = page.getByLabel('Theme');
@@ -398,7 +398,14 @@ test('the saved banner dismisses by hand and then on its own', async ({ page }) 
     await page.goto('/preferences');
     await page.locator('#app > *').first().waitFor();
 
-    await page.getByRole('button', { name: 'Save preferences' }).click();
+    const save = page.getByRole('button', { name: 'Save preferences' });
+
+    // Every save is preceded by a real edit. The HFW draws the control disabled while the form is
+    // clean; that state is not built here (KI-107 records why), so the case does not assert it and
+    // instead makes each write a genuine one, which is the mechanism the re-announcement needs.
+    const estimate = page.getByRole('checkbox', { name: 'Numeric failure estimate' });
+    await estimate.check();
+    await save.click();
     await expect(page.getByRole('status')).toHaveText('Preferences saved.');
 
     // The dismiss affordance clears the message while the live region stays mounted (WCAG 4.1.3).
@@ -407,7 +414,8 @@ test('the saved banner dismisses by hand and then on its own', async ({ page }) 
 
     // A second save re-announces: the layout watches the props object, not the message text, so an
     // identical sentence after a dismiss still reaches the region.
-    await page.getByRole('button', { name: 'Save preferences' }).click();
+    await estimate.uncheck();
+    await save.click();
     await expect(page.getByRole('status')).toHaveText('Preferences saved.');
 
     // And the banner leaves on its own after five seconds (plan 6B.6).
