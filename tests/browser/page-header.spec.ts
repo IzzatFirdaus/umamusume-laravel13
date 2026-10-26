@@ -44,9 +44,9 @@ for (const pilot of PILOTS) {
         const h1 = headings.first();
         await expect(h1).toHaveText(pilot.title);
 
-        // The Critical tier, from the signed ladder: 30px and semibold.
-        await expect(h1).toHaveClass(/text-3xl/);
-        await expect(h1).toHaveClass(/font-semibold/);
+        // The Critical tier as the HFW draws it: 28px, extra-bold, strong ink.
+        await expect(h1).toHaveClass(/text-\[28px\]/);
+        await expect(h1).toHaveClass(/font-extrabold/);
         await expect(h1).toHaveClass(/text-ink-strong/);
 
         // The eyebrow is the quiet line above the name, not a second title.

@@ -12,7 +12,10 @@ test('carries the selected trainee from the catalog into the wizard', async ({ p
     await page.goto('/umamusume/special-week');
     await page.locator('#app > *').first().waitFor();
 
-    await page.getByRole('button', { name: 'New career' }).click();
+    // The shell's rail carries a "New Career" destination in every banner region, and the catalog's
+    // own button only mounts with the page payload, so the click is scoped to the page's main and
+    // waits for the payload rather than latching onto the persistent chrome link.
+    await page.locator('main').getByRole('button', { name: 'New career' }).click();
     await page.waitForURL(/\/career\/setup\/scenario$/);
 
     // The carried choice reads back on the trainee step: the same stored-choice line a Trainer who

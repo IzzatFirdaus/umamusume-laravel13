@@ -57,18 +57,31 @@ async function openFixture(page: import('@playwright/test').Page): Promise<void>
     await expect(page.locator('#card-section-mount > main')).toHaveCount(1);
 }
 
-test('Card is the raised sheet: rule border, medium radius, rounded corner, no shadow', async ({ page }) => {
+/**
+ * The fixture mounts the component alone, so `app.css` is not in the document and a computed-style
+ * read returns the browser defaults (measured: `borderTopLeftRadius` answers `0px`). What this case
+ * can therefore prove is the spell: the card carries the named `.card` primitive and none of the
+ * retired utilities that used to carry its surface. The primitive's own values - the 10px corner and
+ * the `rule-soft` hairline - are owned by `app.css` and read there.
+ */
+function classesOf(locator: import('@playwright/test').Locator): Promise<string[]> {
+    return locator.getAttribute('class').then((value) => value?.split(/\s+/) ?? []);
+}
+
+test('Card is the sheet: the named primitive, no retired edge, no shadow', async ({ page }) => {
     await openFixture(page);
 
     for (const id of ['#card-md', '#card-lg']) {
         const card = page.locator(id);
         await expect(card).toBeVisible();
 
-        const classes = (await card.getAttribute('class'))?.split(/\s+/) ?? [];
-        expect(classes).toContain('bg-raised');
-        expect(classes).toContain('border');
-        expect(classes).toContain('border-rule');
-        expect(classes).toContain('rounded-md');
+        const classes = await classesOf(card);
+        expect(classes).toContain('card');
+
+        // The retired spell: the 3:1 `rule` edge and the 16px `rounded-md` corner are what the HFW
+        // replaced, and a utility that reintroduces either one out-specifies the primitive.
+        expect(classes).not.toContain('border-rule');
+        expect(classes).not.toContain('rounded-md');
 
         // No elevation. A static card that casts the overlay shadow claims a layer it does not occupy.
         expect(classes.filter((c) => /^shadow/.test(c))).toEqual([]);

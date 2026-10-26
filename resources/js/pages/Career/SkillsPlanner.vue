@@ -334,7 +334,15 @@ const coverageConstants = computed(() =>
                     v-if="props.purchasable.shortfall !== null && props.purchasable.shortfall > 0"
                 >, a shortfall of <span class="font-mono tabular-nums">{{ props.purchasable.shortfall }}</span> SP</template></template>.
             </p>
-            <ol v-if="props.purchasable.rows.length > 0" class="mt-2 max-h-72 space-y-1 overflow-y-auto text-sm">
+            <!-- A capped scroll region is keyboard-reachable or it is not reachable (WCAG 2.1.1 and
+                 axe's `scrollable-region-focusable`): `tabindex` puts the list itself in the tab
+                 order and the name says what scrolling it reveals. -->
+            <ol
+                v-if="props.purchasable.rows.length > 0"
+                tabindex="0"
+                aria-label="Priced skills this run has not acquired"
+                class="mt-2 max-h-72 space-y-1 overflow-y-auto text-sm"
+            >
                 <li v-for="skill in props.purchasable.rows" :key="skill.id" class="flex items-baseline justify-between gap-3">
                     <span class="text-ink">{{ skill.name }}</span>
                     <span class="font-mono tabular-nums text-ink-strong">{{ skill.sp_cost }} SP</span>

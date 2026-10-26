@@ -1,78 +1,94 @@
 import { test, expect } from '@playwright/test';
 
 /*
- * The app shell's bar (plan 1.2). Rendered-copy evidence, so it reads the built bundle and cannot
- * run green before `npm run build` (KI-70: a build writes `public/build`, shared by every session).
+ * The shell (HFW `index.html` + `assets/shell.css`). Rendered evidence, so it reads the built bundle
+ * and cannot run green before `npm run build` (KI-70).
  *
- * What is asserted is the part of 1.2 that does not contradict an owner-signed rule:
+ * The wireframe is the visual authority for this rewrite (owner ruling 2026-10-26), so what this
+ * case pins is the wireframe's own shell rather than the earlier 2.1.0 bar:
  *
- *   1. The product bar is 48px tall (`BAR`), with the section crumb left and the live-career pill
- *      right; the product name and rail control sit in the rail head (HFW shell, annotation 10).
- *   2. Its accent rule is 2px along the bottom edge and its fill is the HFW's blue chrome.
- *   2b. The wireframe's "Static wireframe" chip stays in the wireframe; Help is the bar's one utility
- *      link, reachable from every screen.
- *   3. The build's version string is gone from the chrome.
- *   4. The active destination carries `aria-current="page"` and a 3px left rule in the rail.
- *
- * What is deliberately NOT asserted: the plan's "h1 in `<main>`". `DESIGN.md` §2.2's owner-signed
- * 2026-10-17 amendment places the page `h1` in the shell's `#title`, and the owner ruled on
- * 2026-10-17 that the signed document wins. The `h1` therefore stays in the banner band immediately
- * below the 48px bar, which this case pins as `h1`-inside-banner rather than a repaint.
+ *   1. The bar is the wireframe's blue chrome (#2255FF in light), closed by its 2px pink hairline.
+ *   2. It carries the section crumb on the left and the two utilities on the right: the live-career
+ *      pill (`1 active career` / `N active careers`) and the `? Help` link.
+ *   3. The wireframe's `+ Static wireframe` chip is a document artifact and does not ship.
+ *   4. The rail is the wireframe's 236px column, the product name lives in its head, and the current
+ *      destination carries `aria-current="page"` plus a left rule.
+ *   5. One `h1`, inside the banner band under the bar.
  */
 
-// The bar is the first row of the banner: `h-12` = 3rem = 48px at the default root size.
-const BAR = '[role="banner"] > div:first-child';
+const BAR = '[data-shell-topbar]';
+const BLUE = 'rgb(34, 85, 255)'; // --color-brand-chrome, light theme
 
-test('the product bar is 48px with a 2px stripe and no version string', async ({ page }) => {
+async function ready(page: import('@playwright/test').Page): Promise<void> {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
+}
+
+test('the bar is the wireframe blue, 2px hairline, with crumb, career pill and Help', async ({ page }) => {
+    await ready(page);
 
     const bar = page.locator(BAR);
+    await expect(bar).toBeVisible();
+    await expect(bar).toHaveCSS('background-color', BLUE);
+    await expect(bar).toHaveCSS('border-bottom-width', '2px');
+    await expect(bar).toHaveCSS('border-bottom-style', 'solid');
 
-    // 1. Height. `getBoundingClientRect` through the bbox API reports the painted box.
-    const box = await bar.boundingBox();
-    expect(box).not.toBeNull();
-    expect(Math.round(box!.height)).toBe(48);
+    // 1. The crumb names where the Trainer is.
+    await expect(bar.locator('[data-shell-crumb]')).toContainText('Dashboard');
 
-    // 2. The accent rule along the bottom edge, measured rather than read from the class list: a
-    //    later `border-b` utility in the same element would leave the class list looking correct.
-    const stripe = await bar.evaluate((el) => getComputedStyle(el).borderBottomWidth);
-    expect(stripe).toBe('2px');
-
-    // 2b. The chrome is the HFW's blue, and the bar's two live slots are the crumb and Help. The
-    //     wireframe's own "Static wireframe" chip is a document artifact and does not ship.
-    await expect(bar).toHaveCSS('background-color', 'rgb(34, 85, 255)');
-    await expect(bar).toHaveCSS('border-bottom-color', 'rgb(255, 77, 135)');
+    // 2. The two utilities. The pill is present only while a career is running, so the assertion is
+    //    "when it renders, it counts careers", not "it is always there".
+    const pill = bar.locator('[data-shell-career-pill]');
+    if ((await pill.count()) > 0) {
+        await expect(pill).toHaveText(/^\d+ active careers?$/);
+    }
     await expect(bar.getByRole('link', { name: 'Help' })).toBeVisible();
+
+    // 3. The wireframe's own chip is a document artifact.
     await expect(page.getByText('Static wireframe')).toHaveCount(0);
+    await expect(bar).not.toContainText('Static wireframe');
 
-    // 3. No build version string. `v2.0.0` was the shipped string; any `v` + semver token is the
-    //    same defect.
-    await expect(page.getByRole('banner')).not.toContainText(/\bv\d+\.\d+\.\d+/);
-
-    // 4. The bar carries the section crumb; the product name and the rail control live in the rail
-    //    head (HFW index.html annotation 10). The bar itself carries no heading of its own.
-    await expect(bar).toContainText('Dashboard');
+    // The product name is the rail's, not the bar's.
     await expect(bar).not.toContainText('TRAINER DESK');
-    await expect(bar.getByRole('heading')).toHaveCount(0);
     await expect(page.locator('aside')).toContainText('TRAINER DESK');
 
-    // 5. One h1 on the page, in the banner band below the bar (not in the 48px row itself).
+    // No build version string in the chrome (the 2.0 bar carried `v2.0.0`).
+    await expect(page.getByRole('banner')).not.toContainText(/\bv\d+\.\d+\.\d+/);
+
+    // 5. One h1, in the banner band under the bar.
     await expect(page.locator('h1')).toHaveCount(1);
     await expect(page.getByRole('banner').getByRole('heading', { level: 1 })).toHaveCount(1);
 });
 
-test('the active destination is marked with aria-current and a left rule', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
+test('the rail is the wireframe 236px column and marks the current destination', async ({ page }) => {
+    await ready(page);
+
+    const rail = page.locator('aside').first();
+    const box = await rail.boundingBox();
+    expect(box).not.toBeNull();
+    expect(Math.round(box!.width)).toBe(236);
 
     const primary = page.getByRole('navigation', { name: 'Global navigation' });
     const current = primary.locator('[aria-current="page"]');
-
     await expect(current).toHaveCount(1);
+    await expect(current).toHaveText('Dashboard');
 
-    // The desktop rail carries the left rule as a stock utility (`border-l-4`, the nearest step on the
-    // ramp to the plan's 3px). This viewport renders the sidebar.
+    // The left rule is a shape as well as a fill, so state never rides on colour alone (WCAG 1.4.1).
     const rule = await current.evaluate((el) => getComputedStyle(el).borderLeftWidth);
     expect(rule).toBe('4px');
+});
+
+test('the mobile bar offers the wireframe four slots plus More', async ({ page }) => {
+    await ready(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+
+    const mobile = page.getByRole('navigation', { name: 'Primary mobile' });
+    await expect(mobile).toBeVisible();
+    for (const slot of ['Home', 'Career', 'Legacy', 'Deck']) {
+        await expect(mobile.getByRole('link', { name: slot, exact: true })).toBeVisible();
+    }
+    await expect(mobile.locator('summary')).toContainText('More');
+
+    // The desktop rail is not shrunk onto the phone (design-2.0 §41).
+    await expect(page.locator('aside').first()).toBeHidden();
 });

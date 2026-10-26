@@ -3,11 +3,19 @@ import { startCareer } from '../utils/start-career';
 import { recordTurns } from '../utils/record-turns';
 
 /*
- * The Dashboard, built as a structural clone of the HFW dashboard.html. This spec asserts the
- * wireframe's four grid rows, the blue chrome, the three-tile KPI strip, the Roster card and the
- * one-filled-primary rule. It also asserts the absence of the wireframe's own meta artifacts: the
- * annotation key, the table of contents and the "Static wireframe" chip belong to the document set,
- * not to the product (owner ruling 2026-10-26).
+ * The Dashboard, built as a structural clone of the HFW `index.html` (owner ruling 2026-10-26: the
+ * wireframe is the visual authority).
+ *
+ * What this pins:
+ *
+ *   - the wireframe's two rows, in its order: "Pick up where you left off" + "Recent veterans", then
+ *     "Needs you" + "Quick actions", each 2.1fr / 1fr on desktop;
+ *   - the wireframe's sections that the earlier build had left out: the Needs-you column with its
+ *     data-status line and the catalogue, veteran and review doors;
+ *   - the absence rule: Energy and Team rank keep their tiles and print a word, never a blank;
+ *   - exactly one filled primary on the screen (annotation 1);
+ *   - the absence of the wireframe's own meta blocks: the Table of contents card and the annotation
+ *     key are document artifacts.
  */
 
 const BLUE = 'rgb(34, 85, 255)'; // --color-brand-chrome #2255FF (light)
@@ -23,126 +31,174 @@ async function createActiveRun(page: import('@playwright/test').Page): Promise<v
     const runId = url.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
 
     expect(runId, 'startCareer did not land on a cockpit URL').not.toBe('');
-    await recordTurns(page, runId, 67);
+    await recordTurns(page, runId, 3);
 }
 
-/** The painted box of one grid child, so row geometry is measured rather than read off a class list. */
 async function box(page: import('@playwright/test').Page, selector: string) {
-    const el = page.locator(selector as string);
+    const el = page.locator(selector);
     await expect(el).toBeVisible();
     const rect = await el.boundingBox();
     expect(rect, `${selector} has no painted box`).not.toBeNull();
     return rect!;
 }
 
-test('the chrome is blue and carries the Help link and no wireframe chip', async ({ page }) => {
+test('the page head names the screen and offers one filled action', async ({ page }) => {
     await ready(page);
 
-    const bar = page.locator('[role="banner"] > div:first-child');
-    await expect(bar).toHaveCSS('background-color', BLUE);
-    await expect(bar).toHaveCSS('border-bottom-width', '2px');
-    await expect(bar.getByRole('link', { name: 'Help' })).toBeVisible();
-    await expect(bar).toContainText('Dashboard');
+    const banner = page.getByRole('banner');
+    await expect(banner.getByText('Overview', { exact: true })).toBeVisible();
+    await expect(banner.getByRole('heading', { level: 1 })).toHaveText('Trainer Desk');
+    await expect(banner.getByRole('link', { name: 'New career' })).toBeVisible();
+    await expect(banner.getByRole('link', { name: 'All careers' })).toBeVisible();
 
-    await expect(bar.locator('[data-shell-proto-chip]')).toHaveCount(0);
-    await expect(page.getByText('Static wireframe')).toHaveCount(0);
+    // Annotations 1 and 6: the head carries no filled action. "New career" is an outline button and
+    // "All careers" is a quiet link, so the accent is not spent twice on one screen.
+    await expect(banner.locator('[data-variant="primary"]')).toHaveCount(0);
+    await expect(banner.locator('[data-variant="secondary"]')).toHaveCount(1);
 });
 
-test('the empty state offers the one filled primary', async ({ page }) => {
+test('renders the wireframe regions in its order and none of its meta blocks', async ({ page }) => {
     await ready(page);
 
-    // The suite's scratch database starts with no active career, and this case runs first.
-    const card = page.getByRole('region', { name: 'Active Career' });
-    await expect(card.getByText('No active career. Start a new career.')).toBeVisible();
-    await expect(page.locator('[data-variant="primary"]')).toHaveCount(1);
-});
-
-test('renders the five wireframe regions and none of the wireframe meta blocks', async ({ page }) => {
-    await ready(page);
-
-    for (const name of ['Active Career', 'Quick Actions', 'Roster', 'Data Status', 'Recent Veterans']) {
+    for (const name of ['Pick up where you left off', 'Recent veterans', 'Needs you', 'Quick actions']) {
         await expect(page.getByRole('region', { name })).toBeVisible();
     }
 
-    const cards = await page.locator('[data-dashboard-root] > section').evaluateAll((sections) =>
-        sections.map((s) => s.getAttribute('data-card') ?? ''),
+    const order = await page.locator('[data-dashboard-root] [data-card]').evaluateAll((cards) =>
+        cards.map((card) => card.getAttribute('data-card') ?? ''),
     );
-    expect(cards).toEqual(['active_career', 'quick_actions', 'roster', 'data_status', 'recent_veterans']);
+    expect(order).toEqual(['active_career', 'recent_veterans', 'needs_you', 'quick_actions']);
 
+    // The wireframe's navigation aid and its annotation key belong to the document, not the product.
     await expect(page.getByRole('region', { name: 'Table of contents' })).toHaveCount(0);
-    await expect(page.getByRole('region', { name: 'Annotation key' })).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: 'Annotation key' })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: /Table of contents/i })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: /Annotation key/i })).toHaveCount(0);
 });
 
-test('the grid stacks the wireframe rows: career + actions, KPI, roster + status, veterans', async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
+test('the two rows lay out as a wide column and a narrow one', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
     await ready(page);
 
-    const career = await box(page, '[data-card="active_career"]');
-    const actions = await box(page, '[data-card="quick_actions"]');
-    const kpi = await box(page, '[data-dashboard-kpi]');
-    const roster = await box(page, '[data-card="roster"]');
-    const status = await box(page, '[data-card="data_status"]');
-    const veterans = await box(page, '[data-card="recent_veterans"]');
-    const grid = await box(page, '[data-dashboard-root]');
+    const pickup = await box(page, '[data-dashboard-row="pickup"] [data-card="active_career"]');
+    const veterans = await box(page, '[data-dashboard-row="pickup"] [data-card="recent_veterans"]');
+    const needs = await box(page, '[data-dashboard-row="needs-you"] [data-card="needs_you"]');
+    const quick = await box(page, '[data-dashboard-row="needs-you"] [data-card="quick_actions"]');
 
-    // Row 1: the resume card, then the actions card to its right, on one line.
-    expect(Math.abs(career.y - actions.y)).toBeLessThan(2);
-    expect(actions.x).toBeGreaterThan(career.x + career.width - 1);
+    /*
+     * Row one: the wide card, then the narrow one on the same line. The comparison is between row
+     * containers, not between cards: `.card + .card` stacks a sibling with 14px of margin in a
+     * column, and a grid row that happened to be satisfied by one card must not be read as the card
+     * being misplaced. Both cards are in the same row when both share a row container.
+     */
+    expect(veterans.x).toBeGreaterThan(pickup.x + pickup.width - 1);
+    expect(pickup.width).toBeGreaterThan(veterans.width);
+    const rowOne = await box(page, '[data-dashboard-row="pickup"]');
+    expect(Math.abs(pickup.y - rowOne.y)).toBeLessThan(2);
+    expect(Math.abs(veterans.y - rowOne.y)).toBeLessThan(2);
 
-    // Row 2: the KPI strip clears row 1 and is wider than either card above it.
-    expect(kpi.y).toBeGreaterThan(career.y + career.height - 1);
-    expect(kpi.width).toBeGreaterThan(career.width);
+    // Row two: same shape, below row one.
+    expect(needs.y).toBeGreaterThanOrEqual(pickup.y + pickup.height - 1);
+    expect(quick.x).toBeGreaterThan(needs.x + needs.width - 1);
+    expect(needs.y).toBeGreaterThanOrEqual(Math.max(pickup.y + pickup.height, veterans.y + veterans.height) - 1);
 
-    // Row 3: Roster, then Data Status to its right, on one line, below the strip.
-    expect(Math.abs(roster.y - status.y)).toBeLessThan(2);
-    expect(status.x).toBeGreaterThan(roster.x + roster.width - 1);
-    expect(roster.y).toBeGreaterThan(kpi.y + kpi.height - 1);
-
-    // Row 4: Recent Veterans across the whole grid, below row 3.
-    expect(veterans.y).toBeGreaterThan(Math.max(roster.y + roster.height, status.y + status.height) - 1);
-    expect(veterans.width).toBeGreaterThanOrEqual(grid.width - 1);
+    // The wireframe's 2.1fr / 1fr split, measured rather than read from a class list.
+    const ratio = pickup.width / veterans.width;
+    expect(ratio).toBeGreaterThan(2.0);
+    expect(ratio).toBeLessThan(2.3);
 });
 
-test('shows the three-tile KPI strip and the Roster card', async ({ page }) => {
+test('the Needs you column carries the doors the wireframe draws', async ({ page }) => {
     await ready(page);
 
-    const kpi = page.locator('[data-dashboard-kpi]');
-    await expect(kpi.getByText('Trainees', { exact: true })).toBeVisible();
-    await expect(kpi.getByText('Skills', { exact: true })).toBeVisible();
-    await expect(kpi.getByText('Support cards', { exact: true })).toBeVisible();
-    await expect(kpi.getByText('Careers running')).toHaveCount(0);
+    const needs = page.getByRole('region', { name: 'Needs you' });
+    await expect(needs.getByText('GLOBAL DATA')).toBeVisible();
+    await expect(needs.getByText(/Verified \d{4}-\d{2}-\d{2}/)).toBeVisible();
+    await expect(needs.getByRole('link', { name: 'Source ledger' })).toBeVisible();
 
-    const roster = page.getByRole('region', { name: 'Roster' });
-    await expect(roster.getByText('Forms', { exact: true })).toBeVisible();
-    await expect(roster.getByText('Release', { exact: true })).toBeVisible();
-    await expect(roster.getByRole('link', { name: 'Browse catalog' })).toBeVisible();
+    // The catalogue figures the retired KPI strip carried still reach the screen.
+    await expect(needs.getByText(/trainees/)).toBeVisible();
+    await expect(needs.getByText(/support cards/)).toBeVisible();
+    await expect(needs.getByRole('link', { name: 'Browse catalog' })).toBeVisible();
+
+    await expect(needs.getByText(/veterans saved/)).toBeVisible();
+    await expect(needs.getByRole('link', { name: 'Open library' })).toBeVisible();
+
+    await expect(needs.getByText(/pending\s+candidates?/)).toBeVisible();
+    await expect(needs.getByRole('link', { name: 'Open queue' })).toBeVisible();
 });
 
-test('the active career card reads the wireframe state and holds the one filled primary', async ({ page }) => {
+test('the quick actions are four outline destinations with the rail marks', async ({ page }) => {
+    await ready(page);
+
+    const quick = page.getByRole('region', { name: 'Quick actions' });
+    const nav = quick.getByRole('navigation', { name: 'Quick actions' });
+    await expect(nav.getByRole('link')).toHaveCount(4);
+    for (const label of ['Import a historical career', 'Review queue', 'Open settings', 'Database hub']) {
+        await expect(nav.getByRole('link', { name: label })).toBeVisible();
+    }
+    // A quick action is never the filled primary; the page head owns that.
+    await expect(quick.locator('[data-variant="primary"]')).toHaveCount(0);
+});
+
+test('with no active career the resume card names the absence and keeps its actions', async ({ page }) => {
+    await ready(page);
+
+    const card = page.getByRole('region', { name: 'Pick up where you left off' });
+    const hasCareer = await card.getByText(/turns to go/).count();
+
+    if (hasCareer === 0) {
+        await expect(card.getByText('Not recorded: no career is running.')).toBeVisible();
+        await expect(card.getByRole('link', { name: 'Start a career' })).toBeVisible();
+        await expect(card.getByRole('link', { name: 'Import an existing career' })).toBeVisible();
+        // With nothing to resume, the head's outline is not enough: this card owns the one accent.
+        await expect(card.locator('[data-variant="primary"]')).toHaveCount(1);
+        await expect(page.locator('[data-variant="primary"]')).toHaveCount(1);
+    }
+});
+
+test('an active career shows the wireframe tiles, the 72-mark rail and Open cockpit', async ({ page }) => {
     await createActiveRun(page);
     await ready(page);
 
-    const card = page.getByRole('region', { name: 'Active Career' });
-    await expect(card).toBeVisible();
-    await expect(card).toContainText('Turn 67 of 72');
-    await expect(card.getByRole('link', { name: 'Resume career' })).toBeVisible();
+    const card = page.getByRole('region', { name: 'Pick up where you left off' });
+    await expect(card.getByText('Turn', { exact: true })).toBeVisible();
+    await expect(card.getByText(/Turn \d+ of 72/)).toBeVisible();
+    await expect(card.getByRole('list', { name: 'Career progress' }).locator('li')).toHaveCount(72);
+    await expect(card.getByRole('link', { name: 'Open cockpit' })).toBeVisible();
 
-    // One filled primary on the whole screen: the Resume button.
-    await expect(page.locator('[data-variant="primary"]')).toHaveCount(1);
+    /*
+     * Absence keeps its tile (annotation 2). The team rank tile always exists, and it prints either a
+     * rank or the word \`N/A\`; a blank value is the defect this guards.
+     */
+    const rank = card.locator('[data-tile="team_rank"] [data-tile-value]');
+    await expect(rank).not.toHaveText('');
+
+    // Annotation 1: "Open cockpit" is the only filled action in the resume card.
     await expect(card.locator('[data-variant="primary"]')).toHaveCount(1);
+    await expect(page.locator('[data-variant="primary"]')).toHaveCount(1);
 });
 
-test('the recent veterans region names its state', async ({ page }) => {
+test('the recent veterans card names its rows, or its absence', async ({ page }) => {
     await ready(page);
 
-    // The scratch database holds no veterans, so the region prints the empty state rather than a
-    // table with invented rows.
-    const card = page.getByRole('region', { name: 'Recent Veterans' });
-    await expect(card.getByText('No veterans yet.')).toBeVisible();
+    const card = page.getByRole('region', { name: 'Recent veterans' });
+    await expect(card.getByRole('heading', { level: 2 })).toHaveText('Recent veterans');
+
+    const rows = card.locator('tbody tr');
+    const count = await rows.count();
+
+    if (count === 0) {
+        await expect(card.getByText('Not recorded: the library holds no veterans yet.')).toBeVisible();
+    } else {
+        await expect(card.getByRole('columnheader', { name: 'Trainee' })).toBeVisible();
+        await expect(card.getByRole('columnheader', { name: 'Scenario' })).toBeVisible();
+        await expect(card.getByRole('columnheader', { name: 'Saved' })).toBeVisible();
+        await expect(rows.first().getByRole('link', { name: 'Open' })).toBeVisible();
+    }
+    await expect(card.getByRole('link', { name: /All veterans|Open the Veteran library/ })).toBeVisible();
 });
 
-test('logs no console errors at 1280 and 390', async ({ page }) => {
+test('logs no console errors at 1280 and 390, and the page does not scroll sideways on the phone', async ({ page }) => {
     const errors: string[] = [];
     page.on('console', (message) => {
         if (message.type() === 'error') errors.push(message.text());
@@ -153,4 +209,15 @@ test('logs no console errors at 1280 and 390', async ({ page }) => {
     await ready(page);
 
     expect(errors).toEqual([]);
+
+    // WCAG 1.4.10: the phone reflows into one column instead of offering a sideways scroll.
+    const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(1);
+});
+
+test('the chrome is still the wireframe blue on this page', async ({ page }) => {
+    await ready(page);
+    await expect(page.locator('[data-shell-topbar]')).toHaveCSS('background-color', BLUE);
 });

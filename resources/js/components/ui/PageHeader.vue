@@ -27,11 +27,11 @@ withDefaults(
 </script>
 
 <template>
-    <div class="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+    <div class="flex flex-wrap items-end justify-between gap-x-5 gap-y-3">
         <div class="min-w-0 max-w-prose">
             <p
                 v-if="eyebrow"
-                class="text-xs font-semibold uppercase tracking-wider text-ink-muted"
+                class="text-xs font-extrabold uppercase tracking-[0.12em] text-ink-muted"
             >
                 {{ eyebrow }}
             </p>
@@ -39,15 +39,17 @@ withDefaults(
                  link that was clicked; the heading is not in the tab order otherwise (WCAG 2.4.3).
                  No `focus:outline-none`: a focused element must never lose its indicator (WCAG 2.4.7),
                  and the app-wide `:focus-visible` ring in app.css already draws it. -->
-            <h1 tabindex="-1" class="truncate text-3xl font-semibold text-ink-strong">
+            <h1 tabindex="-1" class="mt-[7px] truncate text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong">
                 {{ title }}
             </h1>
-            <p v-if="description" class="mt-1 text-sm text-ink">
+            <p v-if="description" class="mt-[5px] text-[13px] text-ink-muted">
                 {{ description }}
             </p>
         </div>
-        <div v-if="$slots.actions" class="flex flex-wrap items-center gap-2 md:shrink-0">
+        <div v-if="$slots.actions" class="flex flex-wrap items-center gap-2 pb-1 md:shrink-0">
             <slot name="actions" />
         </div>
+        <!-- The HFW's hairline closes the head band (`.phead .hr`): 16px of air, then one rule. -->
+        <div class="mt-4 basis-full border-t border-rule-soft" aria-hidden="true" data-page-head-rule />
     </div>
 </template>

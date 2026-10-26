@@ -42,6 +42,9 @@
     --radius-lg: 24px;
     --radius-xl: 16px;
     --radius-pill: 999px;
+    /* The wireframe's card corner. The 16px `--radius-md` remains for dialogs and panels; a card
+       in the HFW is 10px, which is the value its own `--r-md` carries. */
+    --radius-card: 10px;
 
     /* Tailwind v4's container scale stops at --container-7xl (1280px), so the ratified wide
        shell has no stock utility to carry 1536px; this key is what makes `max-w-shell-wide` exist. */
@@ -143,6 +146,10 @@
        page and cannot clear the 3:1 card boundary, so `rule` uses the brand's own muted step
        #8C8A9A (3.19:1 on page, 3.36:1 on panel). */
     --color-rule: #8C8A9A;
+/* The HFW's second hairline, `--rule-soft`, for in-card dividers (table rows, the page head's
+closing rule): present only as a quiet separation, never as a boundary a reader must see.
+Light #D7D8E0 measures 1.25:1 on page, which is why it never carries a card edge. */
+--color-rule-soft: #D7D8E0;
 
     /* Semantic roles. Amended 2026-10-15: green is a STATUS colour only — the positive status pill,
        and nothing else. Green is never the primary action fill, which is `--color-primary-action`
@@ -464,6 +471,7 @@ html[data-theme='dark'] {
     --color-ink-muted: #A0A0A0;
     --color-ink-faint: #605F5F;
     --color-rule: #666666;
+    --color-rule-soft: #3A3A3C;
 
     /* The HFW's dark chrome blue (#1A3FCC) with white ink (owner override 2026-10-26). */
     --color-brand-chrome: #1A3FCC;
@@ -881,20 +889,26 @@ html[data-theme='eva01'] {
  * deliberately absent (AGENTS.md section 13 bans decorative skeletons). Every
  * var() resolves to an app token, and every rule carries its docstring.
  */
-/* .card: ported from shell.css; resolves to house tokens. */
+/* .card: ported from shell.css; resolves to house tokens. The edge is `.rule-soft` because the
+   wireframe draws a card boundary at 1.25:1 and reserves the 3:1 `.rule` for controls; a card is a
+   grouping, not a boundary a reader must locate. Radius is the wireframe's own 10px. */
 .card {
     background:var(--color-panel);
-    border:1px solid var(--color-rule);
-    border-radius:var(--radius-md);
+    border:1px solid var(--color-rule-soft);
+    border-radius:var(--radius-card);
     padding:14px 16px;
 }
 
-/* .card + .card: ported from shell.css; resolves to house tokens. */
+/* `.card + .card`: ported from shell.css:371. Column-stacked card groups (help.html's "Keyboard",
+   "What the tags mean", "Rules that are easier to look up", "If something looks wrong") carry no
+   inline margin and are separated by exactly this 14px. Cards that sit in a grid zero their own
+   margin inline, which is what keeps the grid gap authoritative there. */
 .card + .card {
     margin-top:14px;
 }
 
-/* .card > h2: ported from shell.css; resolves to house tokens. */
+/* .card > h2: ported from shell.css; resolves to house tokens. The rule under a card's own name is
+   the wireframe's `.rule-soft`, as in the section title block it ports. */
 .card > h2 {
     margin:0;
     font-size:15px;
@@ -902,7 +916,7 @@ html[data-theme='eva01'] {
     color:var(--color-ink-strong);
     padding-bottom:9px;
     margin-bottom:12px;
-    border-bottom:1px solid var(--color-rule);
+    border-bottom:1px solid var(--color-rule-soft);
 }
 
 /* .card > h3: ported from shell.css; resolves to house tokens. */

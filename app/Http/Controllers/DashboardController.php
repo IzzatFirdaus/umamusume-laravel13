@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\ListVeterans;
+use App\Enums\CandidateStatus;
 use App\Enums\RunStatus;
 use App\Models\CharacterCard;
+use App\Models\MatchCandidate;
 use App\Models\RaceCatalogSlot;
 use App\Models\Skill;
 use App\Models\SupportCard;
@@ -67,6 +69,20 @@ class DashboardController extends Controller
             )),
             'careersUrl' => route('runs.index'),
             'recentVeterans' => $this->recentVeterans($veterans),
+            /*
+             * The HFW index.html's "Needs you" column (lines 110-130). Three rows, each a door to the
+             * screen that owns the fact:
+             *
+             * - Data status is the same payload the retired Data Status card printed, restated in the
+             *   column the wireframe puts it in; its risk edge reads the `stale` flag, not the word.
+             * - Veterans and the review queue are counts, so the screen can say how much work is
+             *   waiting rather than only linking to the room it waits in.
+             */
+            'needsYou' => [
+                'dataStatus' => $this->dataStatus(),
+                'veteranCount' => Veteran::query()->count(),
+                'reviewPending' => $this->reviewPending(),
+            ],
             'quickActions' => $this->quickActions(),
             /*
              * The HFW's KPI row (index.html `.g-4`): "Careers running" leads because it is the figure
@@ -130,6 +146,18 @@ class DashboardController extends Controller
             'trainee_ja' => $run->umamusume->name_ja,
             'scenario_label' => $this->scenarioLabel($run),
             'position_label' => $this->positionLabel($turn),
+            /*
+             * Where the Cockpit says the run stands (`TrainingRun::decisionTurn()`: the imported
+             * position for a snapshot run, else the turn after the last one logged) and the label for
+             * that turn. The landing screen prints the pair against `turn` whenever the two disagree,
+             * because the strip counts recorded turns while the cockpit stands at the imported
+             * position; that is the known defect the HFW names and labels (index.html:102-107), not a
+             * rendering choice this screen is allowed to smooth over.
+             */
+            'cockpit_turn' => $decisionTurn['turn_index'] ?? null,
+            'cockpit_label' => $decisionTurn === null
+                ? null
+                : ($decisionTurn['year'].' Year · Turn '.$decisionTurn['turn']),
             'turn' => $turn,
             // The cockpit's own standing (`decisionTurn()`: the imported position for a snapshot
             // run, else the turn after the last one logged). The page prints it beside `turn` only
@@ -289,7 +317,7 @@ class DashboardController extends Controller
      * destination whose slice had not landed would be a named absence here rather than a dead link
      * (`AppLayout`'s `to: null` rule).
      *
-     * @return list<array{label: string, to: string}>
+     * @return list<array{label: string, to: string, icon: string}>
      */
     private function quickActions(): array
     {
@@ -297,11 +325,13 @@ class DashboardController extends Controller
         // Career, Legacy Lab, Support Cards) all sit in the primary nav, so the card repeated a
         // path the Trainer already has a click for; "New Career" is now the Active Career card's
         // own primary action in the empty state.
+        // `icon` is a key in `NavGlyph`'s mark list, so a Destination carries the same mark here as
+        // in the rail and no second icon set is introduced for one card.
         return [
-            ['label' => 'Import a historical career', 'to' => route('runs.import')],
-            ['label' => 'Review queue', 'to' => route('review.index')],
-            ['label' => 'Open settings', 'to' => route('preferences.edit')],
-            ['label' => 'Database hub', 'to' => route('database.index')],
+            ['label' => 'Import a historical career', 'to' => route('runs.import'), 'icon' => 'list'],
+            ['label' => 'Review queue', 'to' => route('review.index'), 'icon' => 'triangle'],
+            ['label' => 'Open settings', 'to' => route('preferences.edit'), 'icon' => 'gear'],
+            ['label' => 'Database hub', 'to' => route('database.index'), 'icon' => 'book'],
         ];
     }
 
@@ -343,6 +373,16 @@ class DashboardController extends Controller
         }
 
         return implode(' · ', $parts);
+    }
+
+    /**
+     * How many matches are waiting on a Trainer's decision. The Review queue owns the list; this is
+     * only the count the landing screen prints beside its door, so the reading is the queue's own
+     * predicate and not a second one written here.
+     */
+    private function reviewPending(): int
+    {
+        return MatchCandidate::query()->where('status', CandidateStatus::Pending->value)->count();
     }
 
     /**

@@ -30,6 +30,14 @@ const page = usePage();
 const { layoutWidthClass } = useLayout();
 
 /*
+ * The shell's measure, as the wireframe applies it: one centring band per region, `26px` of side
+ * padding at desktop and `16px` below the rail's breakpoint. It is a class string rather than a
+ * wrapper so each band (bar content, page head, canvas) caps itself, which is what keeps the bar's
+ * own background running the full width while its content stops at the measure.
+ */
+const bandClass = 'mx-auto w-full px-4 md:px-[26px]';
+
+/*
  * The bar's crumb (HFW `.topbar > .crumb`). A page may pass its own trail — `Database / Sources` is
  * the shape the database area uses — and a page that passes nothing gets the destination the rail is
  * already marking current. The fallback is read from the same `isCurrent()` test the rail uses, so the
@@ -312,8 +320,8 @@ const moreIsCurrent = computed(() =>
 
         <aside
             :class="[
-                'hidden shrink-0 flex-col border-r border-rule bg-panel transition-[width] md:flex motion-reduce:transition-none',
-                railCollapsed ? 'w-14' : 'w-64',
+                'hidden shrink-0 flex-col border-r border-rule-soft bg-raised transition-[width] md:flex motion-reduce:transition-none',
+                railCollapsed ? 'w-14' : 'w-[236px]',
             ]"
         >
             <!-- The rail head carries the brand and the control that resizes this pane, because the
@@ -321,7 +329,7 @@ const moreIsCurrent = computed(() =>
                  placement in the 48px bar made a global row own a local width). Collapsed, the
                  wordmark shortens to the `TD` mark and the toggle keeps its icon; the accessible
                  name stays the action either way (WCAG 2.5.3). -->
-            <div class="flex items-center gap-2 border-b border-rule px-2 py-2">
+            <div class="flex items-center gap-2 border-b border-rule-soft px-2 py-2">
                 <span
                     class="flex min-w-0 items-center gap-2 px-1 text-xs font-bold tracking-wide text-ink-strong"
                 >
@@ -389,7 +397,7 @@ const moreIsCurrent = computed(() =>
                     </ul>
                 </div>
             </nav>
-            <div class="border-t border-rule px-2 py-3 text-xs text-ink-muted">
+            <div class="border-t border-rule-soft px-2 py-3 text-xs text-ink-muted">
                 <Link
                     href="/database/sources"
                     class="inline-flex min-h-11 items-center underline"
@@ -398,101 +406,109 @@ const moreIsCurrent = computed(() =>
             </div>
         </aside>
 
+<!-- The HFW's `.main` column: bar, page head, canvas. Three bands, each capped at the shell
+             measure, because the wireframe sets one measure per band and lets the rail own the rest
+             (`shell.css:351-367`). The bar is 41px, not the older 48px row: `10px` padding either
+             side of a `13px` line is what the wireframe paints, and the bar's height is a
+             consequence of its content rather than a fixed row. -->
         <div class="flex min-w-0 flex-1 flex-col">
-            <!-- The bar is chrome, not a title block: one 48px row, the breadcrumb on the left and
-                 the live-career pill on the right, closed by a 2px accent rule as its only ornament. It
-                 must not carry the page `h1`: DESIGN.md §2.2's owner-signed 2026-10-17 amendment puts
-                 the `h1` in the shell's `#title`, and one bar cannot be both 48px and hold an eyebrow
-                 over a 30px heading. The heading therefore sits immediately below, as its own band on
-                 the page field, which keeps its Critical treatment and keeps the bar's measured height.
-
-                 The build's version string used to sit opposite the heading in the old single-row bar;
-                 it is gone. The footer's "Local data · Trainer Desk" line names the build's nature, and
-                 a number a Trainer cannot act on is not worth a permanent slot in the chrome. -->
             <header role="banner" class="flex flex-col">
-                <div class="flex h-12 shrink-0 items-center gap-4 border-b-2 border-brand-accent bg-brand-chrome px-4 text-on-brand-chrome md:px-8">
-                    <!-- The crumb names where the Trainer is, not the product. The product name lives in
-                         the rail head now (HFW shell), so the bar spends its width on the one fact the
-                         rail cannot carry: the section path. A page passes `breadcrumb`; the fallback
-                         names the layout's own destination so the bar is never empty. -->
-                    <span class="min-w-0 truncate text-sm text-on-brand-chrome" data-shell-crumb>
-                        <template v-if="breadcrumbParts.length">
-                            <template v-for="(part, index) in breadcrumbParts" :key="`${part.label}-${index}`">
-                                <span v-if="index > 0" aria-hidden="true" class="px-1">/</span>
-                                <Link
-                                    v-if="part.href"
-                                    :href="part.href"
-                                    class="underline hover:text-on-brand-chrome"
-                                >{{ part.label }}</Link>
-                                <span v-else class="font-semibold text-on-brand-chrome">{{ part.label }}</span>
-                            </template>
-                        </template>
-                        <span v-else class="font-semibold text-on-brand-chrome">Trainer Desk</span>
-                    </span>
-                    <span class="flex-1" />
-                    <!-- The live-career pill. Count only, shared from the middleware so every screen
-                         can state it without a per-controller query. Absent at zero: no career is a
-                         normal state, not a warning. -->
-                    <span
-                        v-if="activeCareerCount > 0"
-                        class="inline-flex shrink-0 items-center rounded-full bg-panel px-2 py-0.5 text-xs font-semibold text-ink"
-                        data-shell-career-pill
-                    >{{ activeCareerCount }} active career{{ activeCareerCount === 1 ? '' : 's' }}</span>
-                    <!-- Help, reachable from every screen (HFW topbar `.toputils`). -->
-                    <Link
-                        href="/help"
-                        class="inline-flex min-h-11 shrink-0 items-center gap-1 px-2 text-sm font-semibold text-on-brand-chrome hover:underline"
-                        title="Help and documentation"
+                <!-- Blue chrome, pink hairline under it (owner override 2026-10-26; the HFW's own pair,
+                     #2255FF and #FF77CC, resolve through the house tokens so a theme flip keeps the
+                     relationship rather than the hex). -->
+                <div
+                    class="w-full border-b-2 border-b-brand-accent bg-brand-chrome text-on-brand-chrome"
+                    data-shell-topbar
+                >
+                    <div
+                        :class="[bandClass, 'flex items-center gap-4 py-2.5']"
                     >
-                        <span aria-hidden="true">?</span>
-                        <span>Help</span>
-                    </Link>
+                        <!-- The crumb names where the Trainer is, not the product. The product name lives
+                             in the rail head, so the bar spends its width on the one fact the rail cannot
+                             carry: the section path. A page passes `breadcrumb`; the fallback names the
+                             layout's own destination so the bar is never empty. -->
+                        <span
+                            class="min-w-0 truncate text-[12.5px] [&_b]:font-extrabold"
+                            data-shell-crumb
+                        >
+                            <template v-if="breadcrumbParts.length">
+                                <template v-for="(part, index) in breadcrumbParts" :key="`${part.label}-${index}`">
+                                    <span v-if="index > 0" aria-hidden="true" class="px-1 opacity-90">/</span>
+                                    <Link
+                                        v-if="part.href"
+                                        :href="part.href"
+                                        class="underline underline-offset-2 hover:decoration-2"
+                                    >{{ part.label }}</Link>
+                                    <b v-else>{{ part.label }}</b>
+                                </template>
+                            </template>
+                            <b v-else>Trainer Desk</b>
+                        </span>
+                        <span class="flex-1" />
+                        <!-- The live-career pill. Count only, shared from the middleware so every screen
+                             can state it without a per-controller query. Absent at zero: no career is a
+                             normal state, not a warning. -->
+                        <span
+                            v-if="activeCareerCount > 0"
+                            class="inline-flex shrink-0 items-center rounded-pill bg-status-positive px-2.5 py-[3px] text-[11.5px] font-extrabold leading-[1.45] text-status-positive-ink"
+                            data-shell-career-pill
+                        >{{ activeCareerCount }} active career{{ activeCareerCount === 1 ? '' : 's' }}</span>
+                        <!-- Help, reachable from every screen (HFW topbar `.toputils`). -->
+                        <Link
+                            href="/help"
+                            class="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-pill px-2.5 text-[12.5px] font-extrabold text-on-brand-chrome hover:bg-on-brand-chrome/10"
+                            title="Help and documentation"
+                        >
+                            <span aria-hidden="true">?</span>
+                            <span>Help</span>
+                        </Link>
+                    </div>
                 </div>
-                <!-- The title band. Pages that render `PageHeader` in `#head` supply their own `h1`
-                     there and leave this band empty, so exactly one `h1` reaches the document; the
-                     band remains for the pages that still fill `#title` and have not adopted the
-                     component yet. Both paths keep the heading in the banner region so the shell's
-                     `role="banner"` landmark still names the page. -->
-                <div v-if="$slots.head" class="border-b border-rule bg-page px-4 py-3 md:px-8">
+                <!-- The page head. Pages that render `PageHeader` in `#head` supply their own `h1`
+                     and actions here and leave the band empty below; the fallback band remains for the
+                     pages still filling `#title`. Both paths keep the heading in the banner region, so
+                     exactly one `h1` reaches the document. -->
+                <div v-if="$slots.head" :class="[bandClass, 'pt-5']">
                     <slot name="head" />
                 </div>
                 <div
                     v-else-if="$slots.title"
-                    class="flex min-w-0 flex-col border-b border-rule bg-page px-4 py-3 md:px-8"
+                    :class="[bandClass, 'flex min-w-0 flex-col pt-5']"
                 >
                     <p
                         v-if="$slots.eyebrow"
-                        class="text-xs font-semibold uppercase tracking-wider text-ink-muted"
+                        class="text-[11px] font-extrabold uppercase tracking-[0.12em] text-ink-muted"
                     >
                         <slot name="eyebrow" />
                     </p>
-                    <h1 class="truncate text-3xl font-semibold text-ink-strong">
+                    <h1 class="truncate text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong">
                         <slot name="title" />
                     </h1>
                 </div>
             </header>
-            <!-- The ratified shell measure (DESIGN.md:197-208): the error documents constrain
-                 themselves to this width and the product shell now does too. The h1 above is the
-                 shell's, per DESIGN.md §2.2's 2026-10-17 amendment; nothing here repeats it.
-
-                 `@container` is `container-type: inline-size`, and it is LOAD-BEARING: twenty-one
-                 files lay themselves out with the `@2xl:`/`@3xl:`/`@4xl:`/`@5xl:` variants, which
-                 resolve against this element rather than the viewport. Do not remove it to make an
-                 element stick.
+            <!-- The canvas. `@container` is `container-type: inline-size` and it is LOAD-BEARING:
+                 twenty-one files lay themselves out with the `@2xl:`/`@3xl:`/`@4xl:`/`@5xl:` variants,
+                 which resolve against this element rather than the viewport. Do not remove it to make
+                 an element stick.
 
                  Its CONSEQUENCE is that `position: sticky` is a NO-OP for every descendant of this
-                 `main`: the sticky containing block is the containment ancestor, not the scrollport,
-                 so a sticky child scrolls away exactly as a static one does. Every sticky claim that
-                 used to live under here has been retired rather than left in place - the wizard step
-                 bar (`SetupLayout.vue`), the "On this page" wayfinder (`Career/Cockpit.vue`), and the
-                 summary strip's own class. `tests/browser/containment.spec.ts` pins the current,
-                 deliberate behaviour, so a future containment fix updates that test instead of
-                 silently restoring nothing. Making sticky work here is a design decision, not a
-                 cleanup. -->
-            <main id="main" data-layout-container class="@container" :class="['mx-auto min-w-0 w-full flex-1 px-4 py-6 pb-24 md:px-8 md:pb-6', layoutWidthClass]">
+                 `main`: the sticky containing block is the containment ancestor, not the scrollport, so a
+                 sticky child scrolls away exactly as a static one does. `tests/browser/containment.spec.ts`
+                 pins the current, deliberate behaviour.
+
+                 `layoutWidthClass` still applies, so the Settings width preference keeps its effect;
+                 standard is the wireframe's own measure, and compact/wide narrow or open it. -->
+            <main
+                id="main"
+                data-layout-container
+                class="@container min-w-0 w-full flex-1 pb-24 md:pb-0"
+                :class="layoutWidthClass"
+            >
                 <!-- Always mounted, so the live region exists before its message does (WCAG 4.1.3). -->
                 <Flash :status="flashStatus" :token="page.props" />
-                <slot />
+                <div data-shell-band :class="[bandClass, 'pt-4 pb-16']">
+                    <slot />
+                </div>
             </main>
         </div>
 

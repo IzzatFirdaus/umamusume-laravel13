@@ -39,7 +39,12 @@ test.describe('Accessibility', () => {
             await route.continue();
         });
 
-        await page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'Review queue' }).click({ noWaitAfter: true });
+        /*
+         * The route pattern needs the double-star prefix to match the full URL, and the bare path
+         * does not; the HFW's landing carries two "Review queue" doors (Quick actions and the Needs
+         * you column), so this case names the page's own region, then the link inside it.
+         */
+        await page.getByRole('region', { name: 'Quick actions' }).getByRole('link', { name: 'Review queue' }).click({ noWaitAfter: true });
 
         // The indicator is the indeterminate pattern the slice names: a native `progress` with an
         // accessible name and no value attribute. A real percentage is not available to invent -
