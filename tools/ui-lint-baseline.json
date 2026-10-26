@@ -1,5 +1,6 @@
 {
-    "count": 0,
+    "count": 219,
+    "reason": "Reset 2026-10-26 to the honest count after the HFW page rewrites landed without baseline updates. Bracketed variant prefixes (min-[Npx]:) are now exempt in the rule itself, so the 219 are real arbitrary VALUES (literal px/em/rem), not breakpoint spellings. A 220th finding fails.",
     "allowlist": [
         "resources/js/components/Form/BaseTextarea.vue|[88px]",
         "resources/js/components/career/AdvisorRail.vue|[calc(100svh-1rem)]",

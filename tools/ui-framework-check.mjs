@@ -153,7 +153,16 @@ for (const file of walk(JS_ROOT, '.vue')) {
             for (const colour of classes.match(/\b(?:bg|text|border)-\[#[0-9a-fA-F]{3,8}\]/g) ?? []) {
                 add('literal-colour', rel, lineNo, `${colour} is a literal colour in a class attribute`);
             }
-            for (const value of classes.match(/\[[^\]]+\]/g) ?? []) {
+            // A bracketed value that ends a VARIANT (`min-[1081px]:`, `max-[761px]:`) is a breakpoint
+            // spelling, not a magic number: the page-level HFW grids are required to use viewport media
+            // queries, and `min-[Npx]:` is the only spelling Tailwind offers for an arbitrary width.
+            // Counting it as debt would make the rule force the exact thing the design rules forbid
+            // (container queries on page grids), so bracketed variant prefixes are exempt here while a
+            // bracketed VALUE (`w-[37vw]`, `text-[9px]`) still counts.
+            const variantPrefixes = classes.match(/\[[^\]]+\](?=:)/g) ?? [];
+            const counted = variantPrefixes.reduce((acc, prefix) => acc.split(prefix).join(''), classes);
+
+            for (const value of counted.match(/\[[^\]]+\]/g) ?? []) {
                 const key = `${rel}|${value}`;
                 if (!ALLOWLIST.has(key)) {
                     arbitraryCount++;
