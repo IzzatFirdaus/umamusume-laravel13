@@ -40,12 +40,6 @@ class PreferenceController extends Controller
         return Inertia::render('Preferences/Edit', [
             'theme' => in_array($theme, ['light', 'dark', 'eva01'], true) ? $theme : null,
             'failureEstimate' => Preference::get('failure_estimate') ?? 'off',
-            // D18 (SCREEN-024): Settings categories gained a Data panel and a Game-version panel.
-            // `verified_at` is a config fact, not a literal, so the badge cannot drift from the
-            // matrix it describes — mirrors DashboardController::dataStatus().
-            'verifiedAt' => config('scenarios.verified_at'),
-            // Import has a live route; the other Data actions are named absences on the page.
-            'importUrl' => route('runs.import'),
             // D18b (SCREEN-024): the stored structured preferences, normalised so the page never
             // tests for a missing offset. `stat_target_defaults` carries the matrix's own stat
             // names as keys, exactly as the blob was validated to.
@@ -56,9 +50,11 @@ class PreferenceController extends Controller
                 'recommendation_aggressiveness' => isset($settings['recommendation_aggressiveness']) && is_string($settings['recommendation_aggressiveness'])
                     ? $settings['recommendation_aggressiveness']
                     : null,
-                'stat_target_defaults' => isset($settings['stat_target_defaults']) && is_array($settings['stat_target_defaults'])
-                    ? $settings['stat_target_defaults']
-                    : null,
+                'stat_target_defaults' => $this->statTargetDefaults(
+                    isset($settings['stat_target_defaults']) && is_array($settings['stat_target_defaults'])
+                        ? $settings['stat_target_defaults']
+                        : [],
+                ),
                 'language' => isset($settings['language']) && is_string($settings['language'])
                     ? $settings['language']
                     : null,
@@ -84,18 +80,36 @@ class PreferenceController extends Controller
                 ->all(),
             'statOrder' => array_values((array) config('scenarios.stat_order')),
             'hardCap' => ScenarioCaps::hardCap(),
-            // The three values the preference carries, labelled here so the screen and the write
-            // path read one list rather than two.
-            'aggressivenessOptions' => array_map(
-                static fn (string $value): array => ['value' => $value, 'label' => ucfirst($value)],
-                Preference::AGGRESSIVENESS,
-            ),
             'exportUrl' => route('preferences.export'),
             'backupUrl' => route('preferences.backup'),
             // DL.14: the Wide Bento gate, so the Settings radio is disabled (and the writer guards)
             // while the DESIGN.md:210-221 ruling is outstanding.
             'wideBentoEnabled' => (bool) config('dashboard.wide_bento_enabled'),
         ]);
+    }
+
+    /**
+     * The five stat names the matrix holds, each with its stored default or null.
+     *
+     * A stat the Trainer never set is null rather than zero: a zero is a number nobody entered,
+     * and the card's own line says an empty default leaves the build-target step blank. The keys
+     * are the matrix's own names, so the screen reads five fields instead of testing for a
+     * missing offset.
+     *
+     * @param  array<string, mixed>  $stored
+     * @return array<string, int|null>
+     */
+    private function statTargetDefaults(array $stored): array
+    {
+        $defaults = [];
+
+        foreach (array_values((array) config('scenarios.stat_order')) as $stat) {
+            $value = $stored[$stat] ?? null;
+
+            $defaults[$stat] = is_numeric($value) ? (int) $value : null;
+        }
+
+        return $defaults;
     }
 
     public function update(UpdatePreferenceRequest $request): RedirectResponse

@@ -3758,35 +3758,27 @@ on it. Reopen R8 only if the roster is reopened at the same time.
 **Closure:** none. Closes when the chosen shape lands and a test proves the per-member state (or the
 explicitly-labelled proxy) round-trips.
 
-## KI-134 The Preferences savebar cannot state the form's condition, so the HFW's disabled-when-clean control is unbuilt - FILED 2026-10-26 (HFW parity S11.1 correction), OPEN
+## KI-134 The Preferences savebar cannot state the form's condition, so the HFW's disabled-when-clean control is unbuilt - FILED 2026-10-26 (HFW parity S11.1 correction), RESOLVED 2026-10-26 (HFW parity S11.1)
 
-**Status:** open. The savebar exists and carries a state line; the line says `Ready to save` rather
-than `All changes saved`, and the submit control stays enabled on a clean form. `preferences.html`
-draws it disabled while clean, so this is a known, named distance from the wireframe, not an
-oversight in the layout.
+**Status:** resolved. The state line reads `All changes saved` on a clean form and `Unsaved changes`
+once a write lands, and the submit control is disabled while clean, which is what `preferences.html`
+draws. The Recommendation panel it named is gone with the tablist: the screen is the wireframe's card
+grid (S11.1), and the stat defaults live in the Target defaults card.
 
-**Symptom, measured.** Two independent ways of detecting an edit both fail to re-evaluate for the
-Recommendation panel's stat defaults, while the submitted payload proves the write reached the form:
+**Cause.** Inertia's `form.isDirty` and a `JSON.stringify(form.data())` comparison both read the form
+through a path that does not re-run on a nested write, so a typed stat default never flipped the
+comparison. The screen now compares a snapshot of everything it will submit — the theme, the failure
+estimate, the whole `settings` blob and the dashboard's shown set — against the snapshot taken at
+load, re-baselined after every successful save. `JSON.stringify` walks the nested proxy leaf by
+leaf, so a write to one stat target is a write the comparison sees, and the submitted payload is
+unchanged.
 
-- `form.isDirty` stays `false` after `fill('2001')` into `settings.stat_target_defaults.Speed`.
-- A computed comparing `JSON.stringify(form.data())` against a snapshot taken at setup also stays
-  equal, so the comparison never re-runs.
-- `waitForRequest` on the forced submit returns
-  `{"settings":{"stat_target_defaults":{"Speed":2001, …}}}` — the value IS in the form.
-- A native `input` listener added to the `form` element from outside counts the event (1), and
-  dispatching `input` on the form element by hand flips the button to enabled. So the event bubbles
-  and the gate works; what does not happen is the reactive re-evaluation on a nested write.
+**Verification.** `npx playwright test tests/browser/preferences.spec.ts` — 15 passed. The case
+`a second save re-announces the flash after a real edit` walks the `edit → save → flash → edit →
+save → flash` sequence on a stat target (the nested write that used to be invisible), and the case
+`Preferences renders its heading, the savebar and the shell nav` asserts the disabled-when-clean
+state and the `All changes saved` line.
 
-**Why the state line says `Ready to save`.** A savebar that reads `All changes saved` while a typed
-edit sits unsent is a false statement about the user's own work, which is the one thing AGENTS.md §5
-forbids in copy. `Ready to save` is true in every state the screen can actually observe.
-
-**Proving command.** `PLAYWRIGHT_PORT=8186 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/<session>/browser-8186.sqlite npx playwright test preferences.spec.ts` → 22 passed with the gate removed; with the gate
-in place `preferences.spec.ts:220` hangs 180s on `locator.click` against
-`<button disabled type="submit">` after the fill.
-
-**Closure.** Closes when a change-detection that survives a nested `v-model` write lands (either the
-form's own reactivity fixed at the source, or a per-control watch), the control is then
-`:disabled` on a clean form, and `preferences.spec.ts` asserts the disabled-when-clean state and the
-`edit → save → flash → edit → save → flash` sequence in the same case. Closure does not cover the
-Recommendation panel's own binding, which may need its own entry once the cause is named.
+**Distance closed.** The wireframe's "One save model across the screen. One bar, one verb, disabled
+when clean." is now built on the Preferences screen: one page head carries the state line and the
+one verb, and the verb is disabled while the form is clean.

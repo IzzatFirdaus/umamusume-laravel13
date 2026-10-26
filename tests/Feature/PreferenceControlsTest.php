@@ -154,14 +154,16 @@ it('stores preferences in the database and not in browser storage', function ():
         ->and(Preference::whereKey('theme')->value('value'))->toBe('dark');
 });
 
-it('passes the verified-at date and the import route to the Data panel', function (): void {
-    // D18 (SCREEN-024): the Data category's Import link and the Game-version panel's verified
-    // date are sourced from config and a named route, not inventoried by this controller.
-    test()->get('/preferences')
+it('passes the corpus verification date to the screen that shows it', function (): void {
+    // D18 (SCREEN-024): the verification date is a config fact, not a literal, so the badge
+    // cannot drift from the matrix it describes — mirrors DashboardController::dataStatus().
+    // The HFW's Settings card set (S11.1) has no Game-version panel and no Import link, so the
+    // date belongs to the Database hub, which reads the same config; the import route stays
+    // reachable from the Careers index.
+    test()->get(route('database.index'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('verifiedAt', config('scenarios.verified_at'))
-            ->where('importUrl', route('runs.import')));
+            ->where('matrix.verified_at', config('scenarios.verified_at')));
 });
 
 /*

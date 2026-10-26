@@ -12,6 +12,8 @@ interface Props {
     disabled?: boolean;
     ariaDescribedby?: string;
     error?: string;
+    /** Keeps the label as the control's accessible name while printing the row's own text once. */
+    srOnlyLabel?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -73,7 +75,7 @@ function onFocus(event: FocusEvent): void {
             @focus="onFocus"
             class="size-6 rounded-md border-rule bg-raised text-chrome focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring transition-colors duration-150 ease-out disabled:opacity-60 disabled:cursor-not-allowed"
         />
-        <span class="font-medium text-ink">{{ label }}</span>
+        <span :class="srOnlyLabel ? 'sr-only' : 'font-medium text-ink'">{{ label }}</span>
     </label>
     <label v-else class="inline-flex min-h-11 items-center gap-2 cursor-pointer">
         <input
