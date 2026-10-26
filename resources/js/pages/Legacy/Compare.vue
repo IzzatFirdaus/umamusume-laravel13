@@ -148,6 +148,78 @@ const ancestorsOf = (column: CompareColumn, slot: string): string =>
 
 const sparkCount = (column: CompareColumn, slot: string, kind: string): number =>
     parent(column, slot)?.spark_counts.find((entry) => entry.kind === kind)?.count ?? 0;
+
+/*
+ * The difference column (`legacy-compare.html`, slice 7 step 3.3).
+ *
+ * "Differences in a column" means one verdict per property, not a per-cell diff the reader has to
+ * assemble: `same` when every selected run agrees, `differs by N` when the values are numbers (the star
+ * ranks), and `differs (N values)` when they are text. Matching rows still print — an absent difference
+ * is a result, and a table that hid its matches would make the reader wonder whether the row was
+ * checked at all. "Nothing decisive" is a permitted verdict, so a comparison with no difference says so
+ * in words rather than leaving the table to be interpreted.
+ */
+type Difference = { property: string; verdict: string };
+
+function differenceOf(values: (string | number | null)[]): string {
+    if (values.length < 2) {
+        return 'single column';
+    }
+
+    const present = values.filter((value): value is string | number => value !== null && value !== '');
+
+    if (present.length === 0) {
+        return 'same'; // nothing is recorded on any column, so there is nothing that differs
+    }
+
+    const distinct = new Set(present.map((value) => String(value)));
+
+    if (distinct.size === 1) {
+        return 'same';
+    }
+
+    const numbers = present.map((value) => Number(value));
+
+    if (numbers.every((value) => Number.isFinite(value))) {
+        return `differs by ${Math.max(...numbers) - Math.min(...numbers)}`;
+    }
+
+    return `differs (${distinct.size} values)`;
+}
+
+const differences = computed((): Difference[] => {
+    const ofColumn = <T>(read: (column: CompareColumn) => T): T[] => props.columns.map(read);
+
+    const rows: Difference[] = [
+        { property: 'Trainee', verdict: differenceOf(ofColumn((column) => column.graph.trainee.name)) },
+        { property: 'Parent A', verdict: differenceOf(ofColumn((column) => parent(column, 'parent_a')?.name ?? null)) },
+        { property: 'Parent A rank', verdict: differenceOf(ofColumn((column) => parent(column, 'parent_a')?.rank ?? null)) },
+        { property: 'Parent A ancestors', verdict: differenceOf(ofColumn((column) => ancestorsOf(column, 'parent_a'))) },
+        { property: 'Parent B', verdict: differenceOf(ofColumn((column) => parent(column, 'parent_b')?.name ?? null)) },
+        { property: 'Parent B rank', verdict: differenceOf(ofColumn((column) => parent(column, 'parent_b')?.rank ?? null)) },
+        { property: 'Parent B ancestors', verdict: differenceOf(ofColumn((column) => ancestorsOf(column, 'parent_b'))) },
+        {
+            property: 'Rented from a friend',
+            verdict: differenceOf(ofColumn((column) => {
+                const rented = (parent(column, 'parent_a')?.is_guest === true) || (parent(column, 'parent_b')?.is_guest === true);
+
+                return rented ? 'yes' : 'no';
+            })),
+        },
+    ];
+
+    for (const [kind, label] of Object.entries(props.sparkKinds)) {
+        rows.push({
+            property: `${label} Sparks`,
+            verdict: differenceOf(ofColumn((column) => sparkCount(column, 'parent_a', kind) + sparkCount(column, 'parent_b', kind))),
+        });
+    }
+
+    rows.push({ property: 'Tags', verdict: differenceOf(ofColumn((column) => column.tags.join(', '))) });
+    rows.push({ property: 'Notes', verdict: differenceOf(ofColumn((column) => column.notes)) });
+
+    return rows;
+});
 </script>
 
 <template>
@@ -218,7 +290,8 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
                 v-if="allColumnsIdentical"
                 class="mt-6 rounded-md border border-rule bg-status-caution px-3 py-2 text-sm text-status-caution-ink"
             >
-                All selected runs share every value; nothing differs.
+                Nothing decisive — all selected runs share every value, so no row in the difference
+                column can be read as a reason to pick one.
             </p>
 
             <!-- The scroll container. `overflow-x-auto` plus a focusable, labelled region is the
@@ -291,11 +364,16 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
                                 :key="column.run_id"
                                 class="px-3 py-2 font-mono tabular-nums text-ink"
                             >
-                                <span
-                                    :title="parent(column, 'parent_a')?.rank === null
-                                        ? 'This Legacy’s own star count was not recorded.'
-                                        : undefined"
-                                >{{ parent(column, 'parent_a')?.rank ?? 'N/A' }}</span>
+                                <template v-if="parent(column, 'parent_a')?.rank !== null && parent(column, 'parent_a') !== undefined">
+                                    {{ parent(column, 'parent_a')?.rank }}
+                                </template>
+                                <!-- The absence is a reason, so it prints as text rather than only on hover. -->
+                                <template v-else>
+                                    N/A
+                                    <span class="block font-sans text-xs font-normal text-ink-muted">
+                                        Star count not recorded.
+                                    </span>
+                                </template>
                             </td>
                         </tr>
 
@@ -343,11 +421,15 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
                                 :key="column.run_id"
                                 class="px-3 py-2 font-mono tabular-nums text-ink"
                             >
-                                <span
-                                    :title="parent(column, 'parent_b')?.rank === null
-                                        ? 'This Legacy’s own star count was not recorded.'
-                                        : undefined"
-                                >{{ parent(column, 'parent_b')?.rank ?? 'N/A' }}</span>
+                                <template v-if="parent(column, 'parent_b')?.rank !== null && parent(column, 'parent_b') !== undefined">
+                                    {{ parent(column, 'parent_b')?.rank }}
+                                </template>
+                                <template v-else>
+                                    N/A
+                                    <span class="block font-sans text-xs font-normal text-ink-muted">
+                                        Star count not recorded.
+                                    </span>
+                                </template>
                             </td>
                         </tr>
 
@@ -408,8 +490,12 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
                                 :key="column.run_id"
                                 class="px-3 py-2 font-mono tabular-nums text-ink"
                             >
-                                <span :title="`${sparkCount(column, 'parent_a', kind)} from Parent A, ${sparkCount(column, 'parent_b', kind)} from Parent B.`">
+                                <span>
                                     {{ sparkCount(column, 'parent_a', kind) + sparkCount(column, 'parent_b', kind) }}
+                                    <span class="block font-sans text-xs font-normal text-ink-muted">
+                                        {{ sparkCount(column, 'parent_a', kind) }} from Parent A,
+                                        {{ sparkCount(column, 'parent_b', kind) }} from Parent B.
+                                    </span>
                                 </span>
                             </td>
                         </tr>
@@ -423,10 +509,12 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
                                 :key="column.run_id"
                                 class="px-3 py-2 font-mono tabular-nums text-ink"
                             >
-                                <span
-                                    class="text-ink-muted"
-                                    :title="parent(column, 'parent_a')?.probability.title"
-                                >N/A</span>
+                                <span class="text-ink-muted">
+                                    N/A
+                                    <span class="block font-sans text-xs font-normal">
+                                        {{ parent(column, 'parent_a')?.probability.title }}
+                                    </span>
+                                </span>
                             </td>
                         </tr>
 
@@ -448,6 +536,38 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
                                     N/A
                                 </span>
                             </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- The difference column (slice 7 step 3.3). It sits under the detail table because it is a
+                 reading of it: one verdict per property, matching rows included. -->
+            <h3 class="mt-8 text-base font-semibold text-ink-strong">Where they differ</h3>
+            <p class="mt-1 text-sm text-ink-muted">
+                One row per stored property. A row that matches still prints and says <b>same</b>; a row
+                that differs names the difference, and a star rank names it as a number.
+            </p>
+
+            <div class="mt-3 overflow-x-auto rounded-md border border-rule">
+                <table class="w-full border-collapse bg-raised text-sm">
+                    <caption class="px-3 py-2 text-left text-xs text-ink-muted">
+                        Differences only. Nothing here is scored or ranked.
+                    </caption>
+                    <thead>
+                        <tr class="border-b border-rule">
+                            <th scope="col" class="px-3 py-2 text-left font-semibold text-ink-strong">Property</th>
+                            <th scope="col" class="px-3 py-2 text-left font-semibold text-ink-strong">Difference</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr
+                            v-for="row in differences"
+                            :key="row.property"
+                            class="border-b border-rule last:border-b-0"
+                        >
+                            <th scope="row" class="px-3 py-2 text-left font-medium text-ink">{{ row.property }}</th>
+                            <td class="px-3 py-2 font-mono tabular-nums text-ink">{{ row.verdict }}</td>
                         </tr>
                     </tbody>
                 </table>

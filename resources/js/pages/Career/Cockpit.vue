@@ -64,6 +64,15 @@ interface Header {
     month_label: string | null;
     turn: number;
     /**
+     * Slice 5 step 2.6: the two figures the known turn-count defect separates. `logged_turns` is how
+     * many recorded turn rows the log holds, and `next_turn_to_play` is where the model says the next
+     * decision sits. `turn` above is the position the header prints; when it disagrees with the log's
+     * own count the page prints both, because the divergence is a labelled defect rather than a number
+     * the view is allowed to pick.
+     */
+    logged_turns: number;
+    next_turn_to_play: number | null;
+    /**
      * DM-1: the career's own length, `CareerCalendar::TURNS_PER_CAREER`. Strictly 72; the finale block
      * sits outside it, so a stored turn past this figure is the finale phase rather than turn 73+.
      */
@@ -241,6 +250,25 @@ const turnPhrase = computed((): string => {
     }
 
     return `Turn ${props.header.turn} of ${props.header.total_turns}`;
+});
+
+/**
+ * Slice 5 step 2.6: the labelled-defect line. The header prints the run's position; the log holds a
+ * number of recorded turns. For a played run they agree, and nothing is printed. For an imported run
+ * whose position is ahead of its rows they disagree, and both figures print rather than one standing
+ * for the other — the Dashboard already labels the same pair (`position_turn` beside `turn`), and the
+ * cockpit must match that shape so a Trainer reading either screen is told the same thing.
+ */
+const turnDisagreement = computed((): string | null => {
+    if (props.header.logged_turns === props.header.turn) {
+        return null;
+    }
+
+    const logged = props.header.logged_turns;
+    const plural = logged === 1 ? 'turn' : 'turns';
+
+    return `The position reads turn ${props.header.turn}; the turn log holds ${logged} recorded ${plural}. `
+        + 'The two disagree, so both are printed.';
 });
 
 /** This run's finale record, or null for a scenario the catalogue gives no finale row. */
@@ -885,6 +913,11 @@ const jumpToShop = (): void => {
                 <li class="tile">
                     <p class="k">Turn</p>
                     <p class="v font-mono tabular-nums">{{ turnPhrase }}</p>
+                    <p
+                        v-if="turnDisagreement !== null"
+                        class="mt-1 text-xs text-ink-muted"
+                        data-field="turn-discrepancy"
+                    >{{ turnDisagreement }}</p>
                 </li>
                 <li class="tile">
                     <p class="k">Skill points</p>

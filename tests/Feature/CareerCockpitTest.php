@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Domain\Career\CareerPosition;
 use App\Enums\MoodTier;
+use App\Enums\RunMode;
 use App\Enums\RunStatus;
 use App\Enums\TurnChoice;
 use App\Models\Advisor\BuildTargetPayload;
@@ -947,4 +949,27 @@ it('prints the 72-turn career length and keeps the finale outside it', function 
             ->where('header.total_turns', 72)
             // The page head's door back to the list, added with the HFW parity head.
             ->where('run.index_url', route('runs.index')));
+});
+
+it('hands over both turn readings when a snapshot stands ahead of its recorded log', function (): void {
+    // Slice 5 step 2.6: the known turn-count defect, labelled rather than smoothed. A snapshot holds
+    // one recorded turn and stands at the position it was imported at, so the cockpit ships the
+    // position, the log's own count and the model's next turn as three separate figures. The page
+    // prints both readings when they disagree; this pins the pair the view reads.
+    $run = TrainingRun::factory()->create([
+        'scenario' => 'unity_cup',
+        'status' => RunStatus::Active,
+        'mode' => RunMode::Snapshot,
+        'career_position' => CareerPosition::fromTurnIndex(67),
+        'career_position_source' => 'imported',
+    ]);
+
+    TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 67]);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('header.turn', 67)
+            ->where('header.logged_turns', 1)
+            ->where('header.next_turn_to_play', 68));
 });

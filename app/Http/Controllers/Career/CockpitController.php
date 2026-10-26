@@ -372,6 +372,17 @@ class CockpitController extends Controller
             'year_label' => $yearLabel,
             'month_label' => $monthLabel,
             'turn' => $turn,
+            // Slice 5 step 2.6: the two figures the known defect separates. `turn` is where the run
+            // stands — the position a snapshot named, else the last turn the run logged — and
+            // `logged_turns` is how many recorded rows the log holds. They disagree for an imported run
+            // whose position is ahead of its rows, and the page prints both rather than letting one
+            // stand for the other (`DashboardController`'s `position_turn`/`turn` pair is the same shape,
+            // and the HFW labels the divergence instead of smoothing it).
+            'logged_turns' => $run->turnEntries->count(),
+            // `nextTurnToPlay()` answers a `{year, turn, turn_index}` shape; the page needs the index
+            // only, so the null the model returns past the last career turn travels as null rather than
+            // being coerced to 0.
+            'next_turn_to_play' => $run->nextTurnToPlay()['turn_index'] ?? null,
             // DM-1: a career is exactly 72 turns and the finale is a separate phase outside them. The
             // figure is the calendar's own constant, so the page prints `N of 72` from one owner rather
             // than a literal, and a turn past 72 renders as the finale phase rather than turn 73+

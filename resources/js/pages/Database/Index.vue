@@ -23,6 +23,11 @@ const props = defineProps<{
 
 const group = (n: number): string => n.toLocaleString('en-US');
 const tile = 'flex flex-col justify-between rounded-md border border-rule bg-panel p-4 hover:border-brand-chrome transition-colors duration-150 ease-out';
+
+// The source ledger is the answer to every provenance question, so its tile carries the pick border
+// (`database.html`'s one accented tile). Named by its label rather than its URL so the accent moves
+// with the area's name, which is the word the rail and every area page already use.
+const isLedger = (label: string): boolean => label === 'Data sources';
 </script>
 
 <template>
@@ -67,7 +72,7 @@ const tile = 'flex flex-col justify-between rounded-md border border-rule bg-pan
                         :prefetch="'hover'"
                         :aria-label="area.label"
                         :aria-describedby="`database-area-${index}`"
-                        :class="tile"
+                        :class="[tile, isLedger(area.label) ? 'border-brand-chrome' : '']"
                     >
                         <span class="flex items-baseline justify-between gap-3">
                             <b class="text-sm font-bold text-ink-strong">{{ area.label }}</b>

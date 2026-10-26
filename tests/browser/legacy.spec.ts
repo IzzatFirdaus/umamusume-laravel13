@@ -261,8 +261,9 @@ test.describe('Legacy Lab builder', () => {
         // look like" answer to a confirmation.
         await page.waitForURL(/\/legacy\/compare/, { waitUntil: 'domcontentloaded' });
         // The recorded values read back as stored, and the row structure is the alignment
-        // design-2.0 §46 asks for.
-        const table = page.getByRole('table');
+        // design-2.0 §46 asks for. Scoped to the side-by-side region because the page now carries the
+        // difference table too (slice 7 step 3.3), so an unscoped table locator resolves two.
+        const table = page.getByRole('region', { name: /side by side/i }).getByRole('table');
         await expect(table).toBeVisible();
 
         // The compare surface holds no per-Spark row. A column carries a variable number of Sparks, so
@@ -274,7 +275,12 @@ test.describe('Legacy Lab builder', () => {
         // table and Playwright resolves a locator against whatever DOM is current when the assertion
         // runs: reading the compare rows after leaving the compare surface asserts on the builder.
         const blueSparks = table.getByRole('rowheader', { name: 'Blue Sparks', exact: true }).locator('..');
-        await expect(blueSparks.locator('td').first()).toHaveText('1');
+        // The cell's leading figure is the count; since slice 7 step 3.3 the per-parent split prints
+        // beside it as visible text rather than living in a `title`, so the pin reads the count at the
+        // start of the cell and the split separately instead of requiring the cell to contain the
+        // number alone.
+        await expect(blueSparks.locator('td').first()).toHaveText(/^1\b/);
+        await expect(blueSparks.locator('td').first()).toContainText('from Parent A');
 
         // Every stored property is a row header, and the absent ones are N/A with a reason rather
         // than a dash or a zero. `exact` because a substring match on 'Parent A' also answers to
@@ -290,10 +296,16 @@ test.describe('Legacy Lab builder', () => {
             await expect(table.getByRole('rowheader', { name: row, exact: true })).toBeVisible();
         }
 
-        // The held figure reads as absent with its reason on the element, not as a zero.
+        // The held figure reads as absent with its reason printed, not as a zero.
+        //
+        // Dated 2026-10-27 (slice 7 step 3.3): the reason moved out of a hover-only `title` and into
+        // visible text, so the cell is `N/A` plus the sentence rather than `N/A` alone. The `title`
+        // assertion that used to follow it is retired with the attribute it read.
         const chanceRow = table.getByRole('rowheader', { name: 'Spark chance', exact: true }).locator('..');
-        await expect(chanceRow.locator('td').first()).toHaveText('N/A');
-        await expect(chanceRow.locator('td [title]')).toHaveAttribute('title', /star-roll table/);
+        // The cell's own text starts with whitespace (the `N/A` sits in a wrapping span), so the
+        // pattern anchors on the words rather than on `^`.
+        await expect(chanceRow.locator('td').first()).toHaveText(/N\/A\s+This tool holds no sourced star-roll table/);
+        await expect(chanceRow.locator('td').first()).toContainText(/star-roll table/);
 
         await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
@@ -320,7 +332,7 @@ test.describe('Legacy Lab compare', () => {
         await page.goto(`/legacy/compare?runs[]=${first}&runs[]=${second}`, { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
-        const table = page.getByRole('table');
+        const table = page.getByRole('region', { name: /side by side/i }).getByRole('table');
         await expect(table).toBeVisible();
 
         // Both runs are column headers, so the properties line up under them (design-2.0 §46:
@@ -385,5 +397,38 @@ test.describe('Legacy Lab compare', () => {
         // design-2.0 §29 again: what is missing, why it matters, what to do.
         await expect(page.getByText(/Nothing selected to compare/)).toBeVisible();
         await expect(page.getByRole('table')).toHaveCount(0);
+    });
+
+    test('prints the difference in its own column, and calls a no-difference verdict "Nothing decisive"', async ({ page }) => {
+        // Two runs with the same recorded selection: the difference column must exist, must print a
+        // match as `same` rather than hiding the row, and the page's verdict line must say the
+        // comparison is not decisive.
+        const first = await createActiveRun(page, 'Special Week');
+        const second = await createActiveRun(page, 'Special Week');
+
+        for (const runId of [first, second]) {
+            await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
+            await page.locator('#app > *').first().waitFor();
+            await page.getByLabel('Assign to Parent A').selectOption({ index: 0 });
+            await page.getByRole('button', { name: 'Confirm Inheritance' }).click();
+            await page.waitForURL(/\/legacy\/compare/, { waitUntil: 'domcontentloaded' });
+        }
+
+        await page.goto(`/legacy/compare?runs[]=${first}&runs[]=${second}`, { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
+
+        const differenceTable = page
+            .getByRole('heading', { name: 'Where they differ' })
+            .locator('xpath=following-sibling::div[1]')
+            .getByRole('table');
+        await expect(differenceTable).toBeVisible();
+        await expect(differenceTable.getByRole('columnheader', { name: 'Difference' })).toBeVisible();
+
+        // Matching rows still print, and they print the word `same` rather than an empty cell.
+        await expect(differenceTable.getByRole('rowheader', { name: 'Trainee' })).toBeVisible();
+        await expect(differenceTable.getByRole('cell', { name: 'same' }).first()).toBeVisible();
+
+        // No difference anywhere is a permitted verdict, and it is printed in words.
+        await expect(page.getByText(/Nothing decisive/)).toBeVisible();
     });
 });

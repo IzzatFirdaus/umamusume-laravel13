@@ -57,6 +57,19 @@ test('the hub lists the nine areas and no deferred section', async ({ page }) =>
     // The door the audit found missing, asserted on its destination rather than on existing at all.
     await expect(areas.getByRole('link', { name: 'Data sources', exact: true })).toHaveAttribute('href', /\/database\/sources$/);
 
+    // The ledger tile carries the hub's one pick border (database.html): it is the answer to every
+    // provenance question, so it is the tile the page points at rather than one of eight equals.
+    //
+    // Read as class TOKENS, not as a substring: every tile carries `hover:border-brand-chrome` from the
+    // shared `tile` constant, so `/border-brand-chrome/` matches all nine and proves nothing.
+    const tokensOf = async (label: string): Promise<string[]> =>
+        (await areas.getByRole('link', { name: label, exact: true }).getAttribute('class') ?? '')
+            .split(/\s+/)
+            .filter(Boolean);
+
+    expect(await tokensOf('Data sources')).toContain('border-brand-chrome');
+    expect(await tokensOf('Trainees')).not.toContain('border-brand-chrome');
+
     // The three areas that were once "Not in this build" are destinations now, so the section that
     // named them absent is deleted rather than softened: a heading saying otherwise would be false.
     await expect(page.getByRole('heading', { name: 'Not in this build' })).toHaveCount(0);
