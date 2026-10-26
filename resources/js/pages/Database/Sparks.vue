@@ -19,6 +19,7 @@
  * for a table this small).
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import DataTable, { type DataTableColumn } from '../../components/ui/DataTable.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import SparkChip from '../../components/SparkChip.vue';
@@ -116,6 +117,8 @@ const close = async (): Promise<void> => {
     <AppLayout>
         <Head title="Sparks" />
         <template #title>Sparks</template>
+
+        <DatabaseNav />
 
         <p class="mt-4 max-w-3xl text-sm text-ink-muted">
             The Spark categories a finished Umamusume can carry, and the odds a Spark rolls at one,

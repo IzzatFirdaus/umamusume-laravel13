@@ -13,6 +13,7 @@
  * by nature. The table still scrolls inside its own container at 320px, never the page.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import Pagination from '../../components/ui/Pagination.vue';
 import { Head, router } from '@inertiajs/vue3';
 
@@ -71,6 +72,8 @@ function goToPage(page: number): void {
     <AppLayout>
         <Head title="Races" />
         <template #title>Races</template>
+
+        <DatabaseNav />
 
         <h2 class="text-lg font-semibold text-ink-strong">Race database</h2>
 

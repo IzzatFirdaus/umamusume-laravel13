@@ -1,79 +1,87 @@
 <script setup lang="ts">
 /*
- * The Database hub (SCREEN-023, plan §8 D17; completed by `SCR-SYS-008` to `010`).
+ * The Database hub (SCREEN-023, plan §8 D17), rebuilt on database.html.
  *
- * The eight areas SCREEN-023 lists. The first five landed with D17; the last three (Events, Shop
- * Items and Sparks) were a "Not in this build" section, and that section is now deleted rather than
- * softened: the sections are in the brief and the source data exists, so a row saying otherwise would
- * be false. Each area is a live link, and none is a dead one.
+ * The HFW's shape is one `g-3` launcher: nine tiles, each a live count (or the word the area's data
+ * carries instead of one) over a one-line description of what the area holds. The hub invents no
+ * figure: the counts arrive from the controller's own tables, and the transcribed areas print their
+ * family word rather than a number no table can corroborate.
  *
- * No area counts on this page. Each area states how many rows it holds, and the catalog's first screen
- * is filtered to [Global] while `umamusume` also holds JP-only rows, so a figure here would be one no
- * area corroborates on arrival. What each row does carry is its source arm — Fetched, Config or
- * Transcribed — the three the subtitle names, moved from each view's own provenance onto the door.
- *
- * The sidebar's Database entry points at this hub rather than at `/umamusume`, so the hub has an
- * inbound click path without adding an eleventh destination to the nav.
+ * The subnav under the page head is the area switcher, shared with every area page
+ * (`components/database/DatabaseNav.vue`). The source ledger is the page's one filled action.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
-import Card from '../../components/ui/Card.vue';
-import SubCell from '../../components/SubCell.vue';
+import { LinkButton } from '../../components/Form';
+import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
 const props = defineProps<{
-    areas: { label: string; url: string; source: string }[];
+    areas: { label: string; url: string; source: string; count: number | null; tag: string | null; description: string }[];
+    matrix: { state: string; verified_at: string | null; source: string };
 }>();
 
-const sourceReason: Record<string, string> = {
-    Fetched: 'Fetched from the engine sources and read straight off the catalog tables.',
-    Config: 'Read from config/scenarios.php, the only place scenario facts live (D-240).',
-    Transcribed: 'Transcribed from docs/UMAMUSUME_REFERENCE.md into config/reference.php.',
-};
+const group = (n: number): string => n.toLocaleString('en-US');
+const tile = 'flex flex-col justify-between rounded-md border border-rule bg-panel p-4 hover:border-brand-chrome transition-colors duration-150 ease-out';
 </script>
 
 <template>
-    <AppLayout>
-        <Head title="Database" />
+    <AppLayout :breadcrumb="[{ label: 'Database' }]">
+        <Head title="Reference data" />
         <template #head>
             <PageHeader
-                eyebrow="Data Quality"
-                title="Database"
-                description="Reference data this tool fetched, plus the tables transcribed from the reference guide. Reading any of it never touches a run: an area opens the catalog behind it, and nothing here writes."
-            />
+                eyebrow="Database"
+                title="Reference data"
+                description="Everything the tool knows about the game, and where each figure came from. Nine areas, one source ledger."
+            >
+                <template #actions>
+                    <LinkButton href="/database/sources" variant="primary">Source ledger</LinkButton>
+                </template>
+            </PageHeader>
         </template>
 
-        <!-- The reference-data sentence moved into the PageHeader's description, so it is stated
-             once at the top rather than as a loose paragraph that reads as a second title. -->
+        <DatabaseNav />
 
-        <nav aria-label="Database areas" class="mt-6">
-            <!-- One card per area, so each dataset is a destination of its own rather than a row
-                 in a list that has to be scanned to find the one you want. The card is the list
-                 item, so the list a screen reader hears is the list the page shows. -->
-            <ul class="grid gap-3 @2xl:grid-cols-2 @4xl:grid-cols-3">
-                <Card
-                    v-for="area in props.areas"
-                    :key="area.label"
-                    as="li"
-                    class="flex items-center gap-x-4"
-                >
-                    <!-- The source cell sits beside the link, not inside it: a link's accessible name is
-                         its contents, and the hub's rows are addressed by their exact label elsewhere
-                         (`database.spec.ts`); "Events Source Transcribed" would be a different name. -->
+        <p class="mt-4 rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink-muted">
+            <span aria-hidden="true" class="mr-2 text-status-positive">i</span>
+            <b class="text-ink-strong">Global data · {{ props.matrix.state }}.</b>
+            <template v-if="props.matrix.verified_at">
+                The scenario matrix was verified {{ props.matrix.verified_at }} against
+                {{ props.matrix.source }}.
+            </template>
+            <template v-else>
+                The scenario matrix carries no recorded verification date; the source ledger names the
+                documents behind it.
+            </template>
+            Nothing on this page was fetched today; a verification date is not an update date.
+        </p>
+
+        <nav aria-label="Reference data" class="mt-4">
+            <ul class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                <li v-for="(area, index) in props.areas" :key="area.label">
+                    <!-- The tile's name is its area, not its area plus its count: the count and the
+                         description ride along as the description, so the door is addressable by the
+                         word the rail and the area pages use. -->
                     <Link
                         :href="area.url"
                         :prefetch="'hover'"
-                        class="flex min-h-11 flex-1 items-center text-sm font-medium text-ink-strong hover:bg-panel transition-colors duration-150 ease-out"
+                        :aria-label="area.label"
+                        :aria-describedby="`database-area-${index}`"
+                        :class="tile"
                     >
-                        {{ area.label }}
+                        <span class="flex items-baseline justify-between gap-3">
+                            <b class="text-sm font-bold text-ink-strong">{{ area.label }}</b>
+                            <span v-if="area.count !== null" class="font-mono text-sm font-bold tabular-nums text-ink-strong">
+                                {{ group(area.count) }}
+                            </span>
+                            <span
+                                v-else
+                                class="inline-flex shrink-0 items-center rounded-full border border-rule px-2 py-0.5 text-xs font-semibold text-ink-muted"
+                            >{{ area.tag }}</span>
+                        </span>
+                        <span :id="`database-area-${index}`" class="mt-1.5 text-xs text-ink-muted">{{ area.description }}</span>
                     </Link>
-                    <SubCell
-                        label="Source"
-                        :value="area.source"
-                        value-class="font-mono text-sm text-ink-strong"
-                        :title="sourceReason[area.source]"
-                    />
-                </Card>
+                </li>
             </ul>
         </nav>
     </AppLayout>

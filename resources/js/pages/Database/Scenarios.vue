@@ -15,6 +15,7 @@
  * Density is allowed on this screen only (plan §13, "Deliberately traded").
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import DataTable, { type DataTableColumn } from '../../components/ui/DataTable.vue';
 import { Head } from '@inertiajs/vue3';
 
@@ -76,6 +77,8 @@ const panelRows = (scenario: Scenario): Record<string, unknown>[] =>
     <AppLayout>
         <Head title="Scenarios" />
         <template #title>Scenarios</template>
+
+        <DatabaseNav />
 
         <h2 class="text-lg font-semibold text-ink-strong">Scenario matrix</h2>
 

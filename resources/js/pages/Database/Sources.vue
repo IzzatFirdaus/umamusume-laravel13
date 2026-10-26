@@ -20,6 +20,7 @@
  * path is a repository detail that belongs in the commit, not on the screen.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import { Head } from '@inertiajs/vue3';
 
 interface FetchedDataset {
@@ -48,6 +49,8 @@ const props = defineProps<{
         <Head title="Data sources" />
 
         <template #title>Data sources</template>
+
+        <DatabaseNav />
 
         <p class="mt-2 max-w-3xl text-sm text-ink-muted">
             Every table in this tool comes from one of two places: a document this tool fetches, or

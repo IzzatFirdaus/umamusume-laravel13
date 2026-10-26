@@ -31,14 +31,18 @@ test('the hub lists the nine areas and no deferred section', async ({ page }) =>
     await page.goto('/database', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    // The hub's title is the layout's own h1 (`AppLayout.vue` renders the `#title` slot in the banner
-    // band), so the page does not repeat it as an h2 the way it once did. Cited without a line number:
-    // the shell moved under it in plan 1.2 and a line pin ages on the next edit.
-    await expect(page.getByRole('heading', { name: 'Database', level: 1 })).toBeVisible();
+    // The hub's title is the page head's h1 (`PageHeader` renders inside the banner band). The HFW
+    // names the destination "Reference data"; the rail's word for it is "Database", and the crumb
+    // still says Database because that is where the Trainer is.
+    await expect(page.getByRole('heading', { name: 'Reference data', level: 1 })).toBeVisible();
 
     // Scoped to the hub's own nav: the sidebar carries "Support Cards" and "Skills" as destinations
     // too, so a page-wide link query is a strict-mode violation rather than a missing link.
-    const areas = page.getByRole('navigation', { name: 'Database areas' });
+    const areas = page.getByRole('navigation', { name: 'Reference data', exact: true });
+
+    // The shared subnav strip (database.html) sits between the page head and the tiles, and carries
+    // every area plus the hub itself.
+    await expect(page.getByRole('navigation', { name: 'Reference data areas' })).toBeVisible();
 
     // Nine, not eight: "Data sources" joined on 2026-10-22 (UX audit F-14). The page was registered
     // and served but had no door, so it was reachable only by typing the URL.

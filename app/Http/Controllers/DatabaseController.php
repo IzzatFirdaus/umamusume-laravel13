@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\RaceCatalogSlot;
+use App\Models\Skill;
+use App\Models\SupportCard;
+use App\Models\Umamusume;
 use App\Services\PageSize;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -48,20 +51,29 @@ class DatabaseController extends Controller
         // (the only place scenario facts live, D-240), or the reference guide transcribed into
         // `config/reference.php`. The hub adds no new fact — it moves the provenance each view already
         // states onto the row that leads to it (frontend-fidelity Slice 3.2).
+        //
+        // `count` is the live row count for the four fetched areas and the scenario matrix; it is null
+        // where the area's rows are transcribed into config, and those tiles print the `tag` word the
+        // HFW prints instead. A count that no table can corroborate would be a typed capture value.
         return Inertia::render('Database/Index', [
             'areas' => [
-                ['label' => 'Trainees', 'url' => route('database.trainees'), 'source' => 'Fetched'],
-                ['label' => 'Support Cards', 'url' => route('database.supports'), 'source' => 'Fetched'],
-                ['label' => 'Skills', 'url' => route('database.skills'), 'source' => 'Fetched'],
-                ['label' => 'Races', 'url' => route('database.races'), 'source' => 'Fetched'],
-                ['label' => 'Events', 'url' => route('database.events'), 'source' => 'Transcribed'],
-                ['label' => 'Scenarios', 'url' => route('database.scenarios'), 'source' => 'Config'],
-                ['label' => 'Shop Items', 'url' => route('database.shop-items'), 'source' => 'Transcribed'],
-                ['label' => 'Sparks', 'url' => route('database.sparks'), 'source' => 'Transcribed'],
+                ['label' => 'Trainees', 'url' => route('database.trainees'), 'source' => 'Fetched', 'count' => Umamusume::query()->whereNotNull('external_ref')->count(), 'tag' => null, 'description' => 'Aptitudes, costumes, base stats and growth rows.'],
+                ['label' => 'Support Cards', 'url' => route('database.supports'), 'source' => 'Fetched', 'count' => SupportCard::count(), 'tag' => null, 'description' => 'Seven types, effect ladders, limit-break stages.'],
+                ['label' => 'Skills', 'url' => route('database.skills'), 'source' => 'Fetched', 'count' => Skill::count(), 'tag' => null, 'description' => 'Engine conditions, base costs, hint ladders.'],
+                ['label' => 'Races', 'url' => route('database.races'), 'source' => 'Fetched', 'count' => RaceCatalogSlot::count(), 'tag' => null, 'description' => 'Grade, surface, distance band, fan thresholds.'],
+                ['label' => 'Events', 'url' => route('database.events'), 'source' => 'Transcribed', 'count' => null, 'tag' => 'Reference', 'description' => 'Support-card and trainee event chains.'],
+                ['label' => 'Scenarios', 'url' => route('database.scenarios'), 'source' => 'Config', 'count' => count((array) config('scenarios.scenarios', [])), 'tag' => null, 'description' => 'Caps, panels, live-on-Global dates, rulesets.'],
+                ['label' => 'Shop Items', 'url' => route('database.shop-items'), 'source' => 'Transcribed', 'count' => null, 'tag' => 'Trackblazer', 'description' => 'Costs, effects and one publisher\'s ratings.'],
+                ['label' => 'Sparks', 'url' => route('database.sparks'), 'source' => 'Transcribed', 'count' => null, 'tag' => 'Inheritance', 'description' => 'Blue, pink and white factor families and their grades.'],
                 // The ninth area, and the one that had no door (UX audit F-14): `/database/sources`
                 // is a registered screen serving the fetch and transcription record, and the hub is
                 // the only index of Database screens, so leaving it out made the page URL-only.
-                ['label' => 'Data sources', 'url' => route('database.sources'), 'source' => 'Config'],
+                ['label' => 'Data sources', 'url' => route('database.sources'), 'source' => 'Config', 'count' => null, 'tag' => 'Ledger', 'description' => 'Every source, the date each was read, and what it fed.'],
+            ],
+            'matrix' => [
+                'state' => config('scenarios.stale', false) ? 'Stale' : 'Current',
+                'verified_at' => config('scenarios.verified_at'),
+                'source' => config('scenarios.source'),
             ],
         ]);
     }

@@ -15,6 +15,7 @@
  * modelled, so no row is marked best value and no row is selected.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import DataTable, { type DataTableColumn } from '../../components/ui/DataTable.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import SparkChip from '../../components/SparkChip.vue';
@@ -104,6 +105,8 @@ const close = async (): Promise<void> => {
     <AppLayout>
         <Head title="Shop Items" />
         <template #title>Shop Items</template>
+
+        <DatabaseNav />
 
         <p class="mt-4 max-w-3xl text-sm text-ink-muted">
             Consumables and currencies, with the client's own effect string and where each is actually

@@ -15,6 +15,7 @@
  * drawer (§32), never in a modal (§31).
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import DataTable, { type DataTableColumn } from '../../components/ui/DataTable.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import ReferenceDrawer from '../../components/database/ReferenceDrawer.vue';
@@ -87,6 +88,8 @@ const close = async (): Promise<void> => {
     <AppLayout>
         <Head title="Events" />
         <template #title>Events</template>
+
+        <DatabaseNav />
 
         <h2 class="text-lg font-semibold text-ink-strong">Recurring event types</h2>
 
