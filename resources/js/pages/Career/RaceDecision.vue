@@ -249,7 +249,49 @@ function submitManual(): void {
                  >
                     {{ props.empty }}
                 </p>
-                <ul v-else class="mt-3 flex flex-col gap-3">
+                <!-- The comparison is a table, not two card grids: the decision is a comparison across the
+                     races offered at this turn, and a table is what puts the same fact on the same line
+                     for both. The cards below stay because the write lives in their drawer. -->
+                <div v-if="props.races.length > 0" class="mt-3 overflow-x-auto" role="region" tabindex="0" aria-label="Compare the races offered this turn">
+                    <table class="w-full border-collapse text-sm">
+                        <caption class="sr-only">The races this turn offers, compared on the facts the catalogue holds</caption>
+                        <thead>
+                            <tr class="border-b border-rule text-left text-ink-muted">
+                                <th scope="col" class="py-2 pr-3 font-medium">Race</th>
+                                <th scope="col" class="py-2 pr-3 font-medium">Tier</th>
+                                <th scope="col" class="py-2 pr-3 font-medium">Turn</th>
+                                <th scope="col" class="py-2 pr-3 font-medium">Fan gate</th>
+                                <th scope="col" class="py-2 pr-3 font-medium">Open?</th>
+                                <th scope="col" class="py-2 pr-3 font-medium">Obligation</th>
+                                <th scope="col" class="py-2 font-medium">Recorded</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="race in props.races" :key="race.id" class="border-b border-rule last:border-0">
+                                <td class="py-2 pr-3 text-ink-strong">{{ race.title }}</td>
+                                <td class="py-2 pr-3 text-ink-muted">{{ race.tier ?? 'No tier recorded' }}</td>
+                                <td class="py-2 pr-3 font-mono tabular-nums text-ink-muted">{{ race.turn ?? 'Not on the grid' }}</td>
+                                <td class="py-2 pr-3 font-mono tabular-nums text-ink">
+                                    {{ race.fans_needed === null ? 'None' : race.fans_needed }}
+                                </td>
+                                <!-- The refusal reason, on the row rather than only inside the card, and
+                                     never hidden: a race this run cannot enter says why here. -->
+                                <td class="py-2 pr-3">
+                                    <span v-if="!race.maiden_gated" class="text-ink">Open</span>
+                                    <span v-else class="text-ink-muted">Closed: maiden rule, this race opens only once she has won one</span>
+                                </td>
+                                <td class="py-2 pr-3 text-ink-muted">
+                                    <span v-if="race.is_mandatory">Mandatory</span>
+                                    <span v-else-if="race.goal">{{ race.goal }}</span>
+                                    <span v-else>Optional</span>
+                                </td>
+                                <td class="py-2 text-ink-muted">{{ race.status ?? 'Not reached' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <ul v-if="props.races.length > 0" class="mt-3 flex flex-col gap-3">
                     <RaceCard
                         v-for="race in props.races"
                         :key="race.id"
