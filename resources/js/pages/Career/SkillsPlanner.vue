@@ -295,6 +295,18 @@ const coverageConstants = computed(() =>
                     <span class="font-mono tabular-nums">{{ props.coverage.remaining }}</span></template>.
             </p>
             <p v-else class="mt-1 text-sm text-ink">{{ props.coverage.absent }}</p>
+
+            <!-- DOMAIN OVERRIDE (DM-4): the base cost, not a hint ladder. The HFW draws a discount
+                 ladder down to Lv5; `PRD.md` FR-C-3's dated 2026-10-25 note records that hint levels
+                 are a support-card fact and are excluded by ADR-0029 D4, so no column holds one and no
+                 ladder can be computed. Printed here, beside the cost, so a reader sees the ladder is
+                 absent by ruling rather than by omission. -->
+            <p class="mt-1 text-xs text-ink-muted">
+                Every figure above prices a skill at its base cost. The client charges less when a hint
+                level sits on the skill, and no table in this build stores hint levels
+                (<code>ADR-0029</code> D4), so the ladder from Lv1 to Lv5 is not shown and no discount
+                is applied.
+            </p>
             <p v-if="coverageConstants !== ''" class="mt-1 text-xs text-ink-muted">
                 {{ coverageConstants }}
             </p>
