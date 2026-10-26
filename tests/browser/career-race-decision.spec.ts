@@ -114,6 +114,27 @@ test('names each absent race field with its reason, and refuses a readiness band
     await expect(page.locator('main')).not.toContainText('%');
 });
 
+test('compares the turn\'s races in a table and keeps a refused race visible with its reason', async ({ page }) => {
+    await openDecision(page);
+
+    // The HFW's ruling: the comparison is a table, not two card grids. One fact per column means the
+    // same fact sits on the same line across races, which is what makes a comparison scannable.
+    const table = page.getByRole('region', { name: 'Compare the races offered this turn' });
+    await expect(table).toBeVisible();
+    for (const column of ['Race', 'Tier', 'Turn', 'Fan gate', 'Open?', 'Obligation', 'Recorded']) {
+        await expect(table.getByRole('columnheader', { name: column, exact: true })).toBeVisible();
+    }
+
+    // Every offered race has a row. A race this run cannot enter is not hidden: the row carries the
+    // refusal reason in words, and the closed state is text rather than colour alone.
+    const rows = table.locator('tbody tr');
+    expect(await rows.count()).toBeGreaterThan(0);
+    await expect(table).toContainText(/Open|Closed: maiden rule/);
+
+    // No invented figure: no win probability and no risk band, so no percentage reaches the page.
+    await expect(table).not.toContainText('%');
+});
+
 test('opens the drawer from the keyboard, closes it on Escape and returns focus to the opener', async ({ page }) => {
     await openDecision(page);
 
