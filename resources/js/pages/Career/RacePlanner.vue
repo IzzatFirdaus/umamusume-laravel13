@@ -197,28 +197,30 @@ function clearSelection(): void {
                 {{ props.nextTurn.year_label }} ·
                 <span class="font-mono tabular-nums">Turn {{ props.nextTurn.turn }}</span>
             </p>
-            <p v-else class="mt-1 text-sm text-ink" title="No turn has been logged on this run, so there is no position to plan from.">
-                N/A
+            <p v-else class="mt-1 text-sm text-ink">
+                N/A <span class="text-xs text-ink-muted">· no turn has been logged, so there is no position to plan from</span>
             </p>
         </section>
 
-        <!-- The two figures the brief asks for that this tool must not state. Each carries the reason
-             in its `title`, and neither is a band, a percentage or a number. -->
+        <!-- The two figures the brief asks for that this tool must not state. Each prints the
+             controller's reason as visible text; neither is a band, a percentage or a number. -->
         <section aria-labelledby="race-planner-held-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
             <h2 id="race-planner-held-heading" class="text-lg font-semibold text-ink-strong">Held figures</h2>
             <dl class="mt-2 flex flex-col gap-1 text-sm">
                 <div class="flex flex-wrap items-baseline gap-x-2">
                     <dt class="text-ink">Win probability</dt>
-                    <dd class="font-semibold text-ink-strong" :title="props.held.win_probability.title">
+                    <dd class="font-semibold text-ink-strong">
                         {{ props.held.win_probability.label }}
                     </dd>
                 </div>
+                <p class="text-xs text-ink-muted">{{ props.held.win_probability.title }}</p>
                 <div class="flex flex-wrap items-baseline gap-x-2">
                     <dt class="text-ink">Expected risk</dt>
-                    <dd class="font-semibold text-ink-strong" :title="props.held.expected_risk.title">
+                    <dd class="font-semibold text-ink-strong">
                         {{ props.held.expected_risk.label }}
                     </dd>
                 </div>
+                <p class="text-xs text-ink-muted">{{ props.held.expected_risk.title }}</p>
             </dl>
         </section>
 
@@ -356,7 +358,6 @@ function clearSelection(): void {
                              comparison rather than a reading. Never a score and never a percentage. -->
                         <ProvenanceBadge
                             state="calculated"
-                            title="Derived by comparing the race's own catalogue values with the run's recorded build target."
                         />
                     </h3>
                     <!--

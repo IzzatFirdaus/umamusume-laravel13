@@ -716,7 +716,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
                         :aria-describedby="describedBy('energy_band')"
                         :error="errorOf('energy_band')"
                     />
-                    <p v-else class="text-xs text-ink-muted" title="Energy is recorded as not recorded for this turn.">
+                    <p v-else class="text-xs text-ink-muted">
                         Not recorded
                     </p>
                 </fieldset>
