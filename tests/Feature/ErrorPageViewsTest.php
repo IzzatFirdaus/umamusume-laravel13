@@ -26,14 +26,22 @@ use Illuminate\Support\Facades\DB;
  * once the status exists.
  */
 
-it('keeps a missing address on-theme with a way back to work', function (): void {
+it('answers the data-loss question first and offers three exits on the 404', function (): void {
     $html = test()->get('/no-such-page')
         ->assertNotFound()
         ->getContent();
 
     expect($html)
-        ->toContain('Page not found')
-        ->toContain('Nothing to show here')
+        // error-404.html: the head names the fact, the lede answers whether anything was lost,
+        // and the third region says what the page deliberately does not do.
+        ->toContain('That page does not exist')
+        ->toContain('Nothing was changed and nothing was lost')
+        ->toContain('Where would you like to go?')
+        ->toContain('What this page does not do')
+        // Three exits, and the filled one is the Dashboard (error-404.html `.act`).
+        ->toContain(route('home'))
+        ->toContain(route('runs.index'))
+        ->toContain(route('database.index'))
         ->toContain('bg-page')
         ->not->toMatch('/<style|font-family:\s*(?!var\()/');
 });
@@ -44,8 +52,12 @@ it('renders a themed 419 that says what happened and what to do', function (): v
     expect($html)
         // This tool has no sign-in (PRD NFR-1), so the heading names the cause the body explains
         // instead of pointing at a screen that does not exist.
-        ->toContain('This page is older than the session')
+        ->toContain('Your session timed out')
         ->not->toContain('Sign-in')
+        // error-419.html's Cause / Your data / What is lost table is the region that carries the
+        // reassurance, so the case pins the region and its middle row rather than a sentence.
+        ->toContain('Why this happens')
+        ->toContain('Everything saved before the submission is intact')
         ->toContain('bg-page')
         ->toContain('min-h-11')
         // First paint is themed without a script deciding it afterwards: either the stored
@@ -64,7 +76,11 @@ it('renders the 500 page without querying the database', function (): void {
     DB::disableQueryLog();
 
     expect($queries)->toBe([], 'the 500 view asked the database something while the app was failing')
-        ->and($html)->toContain('Something broke on this machine');
+        ->and($html)->toContain('Something went wrong on our side')
+        // error-500.html names what the page withholds, which is the sentence that keeps a stack
+        // trace off a Trainer-facing surface.
+        ->and($html)->toContain('What is shown and what is not')
+        ->and($html)->toContain('A stack trace is developer information, not an interface');
 
     // The view is the reason the assertion above can pass: it is a standalone document that is not
     // on the composer's list, so nothing resolves its theme from the database for it.
@@ -111,7 +127,10 @@ it('keeps both new error pages free of a default value standing in for a fact', 
 });
 
 it('gives each error page a way back to work', function (): void {
-    expect(view('errors.419')->render())->toContain(route('runs.index'))
+    // The exits are the wireframes' own: error-419.html returns to the screen that submitted the
+    // form (which this view can only reach through the previous URL, not a named route) and offers
+    // the Dashboard; error-500.html offers the Dashboard and the Careers list.
+    expect(view('errors.419')->render())->toContain(route('home'))
         ->and(view('errors.500')->render())->toContain(route('runs.index'));
 });
 
@@ -122,12 +141,16 @@ it('fills each error page primary with the app action colour, not the green chro
     // inside the app filled it with `--color-primary-action`. `enamel` rode along as a dead class:
     // the utility was retired the same day and resolves to nothing.
     //
-    // The equality is checked against a live app screen rather than against a string constant, so
-    // the case fails if either side drifts. `Runs/Index.vue` is read deliberately: it is a primary
-    // action the app renders, and it is not one of the files another session currently holds.
-    $appPrimary = (string) file_get_contents(base_path('resources/js/pages/Runs/Index.vue'));
+    // The equality is checked against the app's own action fill rather than a string constant, so
+    // the case fails if either side drifts. `buttonStyles.ts` is the single owner of that class:
+    // the HFW rewrite moved every page's primary onto the `variant="primary"` button primitive, so
+    // reading a page file for the literal now proves only that the page delegates. `Runs/Index.vue`
+    // is still read, for the half the module cannot show: a live screen actually asks for it.
+    $owner = (string) file_get_contents(base_path('resources/js/components/Form/buttonStyles.ts'));
+    $liveScreen = (string) file_get_contents(base_path('resources/js/pages/Runs/Index.vue'));
 
-    expect($appPrimary)->toContain('bg-primary-action');
+    expect($owner)->toContain('bg-primary-action')
+        ->and($liveScreen)->toContain('variant="primary"');
 
     foreach (['404', '419', '500'] as $status) {
         $source = (string) file_get_contents(base_path("resources/views/errors/{$status}.blade.php"));

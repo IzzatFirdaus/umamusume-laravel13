@@ -5,6 +5,10 @@
     port (ADR-0020 §1). The 404 keeps the same ground plane, the same theme order, and a
     way back to work rather than leaving the Trainer on a framework page.
 
+    Structure is the HFW error-404.html: the data-loss question answered in the lede, then
+    the three exits with one filled, then the region that says what this page does not do.
+    Its `.keybox` annotation block is wireframe documentation and is not shipped.
+
     Named states, not "No data" (D-220). `$theme` is composed server-side by
     AppServiceProvider so the first paint is already the chosen theme; the inline script
     is the fallback for a Trainer with no stored preference, and it stays in the head
@@ -15,7 +19,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page not found</title>
+    <title>That page does not exist</title>
     @empty($theme)
         <script>
             (function () {
@@ -36,28 +40,40 @@
         Skip to content
     </a>
     <main id="main" class="mx-auto max-w-5xl px-4 py-8">
-        <h1 class="text-3xl font-semibold text-ink-strong">Page not found</h1>
+        <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">404</p>
+        <h1 class="mt-1 text-3xl font-semibold text-ink-strong">That page does not exist</h1>
+        <p class="mt-2 max-w-3xl text-sm text-ink-muted">
+            The address did not match any screen. Nothing was changed and nothing was lost.
+        </p>
 
-        <div class="mt-6 rounded-md border border-dashed border-rule bg-panel p-6">
-            <p class="text-sm font-semibold text-ink-strong">Nothing to show here</p>
-            <p class="mt-1 text-sm text-ink-muted">
-                Trainer Desk has no page at this address. The run, Umamusume or review candidate you
-                were looking for may have been deleted, or the link may be mistyped.
+        <div class="mt-6 rounded-md border border-dashed border-rule bg-panel p-6 text-center">
+            <h2 class="text-lg font-semibold text-ink-strong">Where would you like to go?</h2>
+            <p class="mx-auto mt-1 max-w-3xl text-sm text-ink-muted">
+                If you followed a link from inside the app, that link is broken and worth reporting.
+                If you typed the address, check it against one of these.
             </p>
-            <div class="mt-4 flex flex-wrap gap-3 text-sm">
-                <a href="{{ route('runs.index') }}"
+            <div class="mt-4 flex flex-wrap justify-center gap-3 text-sm">
+                <a href="{{ route('home') }}"
                    class="inline-flex min-h-11 items-center rounded-full bg-primary-action px-4 font-bold text-on-primary-action">
-                    Training runs
+                    Dashboard
                 </a>
-                <a href="{{ route('catalog.index') }}"
+                <a href="{{ route('runs.index') }}"
                    class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:text-ink-strong">
-                    Catalog
+                    Careers
                 </a>
-                <a href="{{ route('review.index') }}"
+                <a href="{{ route('database.index') }}"
                    class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:text-ink-strong">
-                    Review
+                    Database
                 </a>
             </div>
+        </div>
+
+        <div class="mt-4 rounded-md border border-rule bg-panel p-6">
+            <h2 class="text-lg font-semibold text-ink-strong">What this page does not do</h2>
+            <p class="mt-1 max-w-3xl text-sm text-ink-muted">
+                It does not redirect you somewhere else automatically. A silent redirect hides the
+                broken link that sent you here, which is the thing worth fixing.
+            </p>
         </div>
     </main>
 </body>
