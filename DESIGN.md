@@ -1231,6 +1231,16 @@ than re-reads.
   `[minmax(0,Nrem)_minmax(0,1fr)]` (6 sites) as a `--grid-sidebar-main` candidate, and `[26rem]` as a
   sibling of the measure. The other 12 are one-offs (viewport heights, layout fixes, a vendor selector).
 
+*Dated update 2026-10-27 (mechanics sync; every dated read above is preserved as written).*
+
+- **The token count is now stated as 95 and the pin is reconciled to the stylesheet.** `DesignTokensTest.php`
+  asserts `toHaveCount(95)` in both the static count and the browser gate, and `DesignDocEnforcementTest`
+  holds this sentence to those two pins. The figure was measured rather than carried forward:
+  `resources/css/app.css` at `d55927cd` already declares **95** unique `--color-*` names while the pin
+  still said 94, so the ratchet had drifted behind the tree — the fourth time this section records that
+  failure. No colour role was added or removed by the 2026-10-27 work (`app.css` is byte-identical to
+  `d55927cd`). The "89" above is superseded, as are "81", "60" and "59" before it.
+
 ## 11. Open questions for the owner
 
 Not defects; decisions this file cannot make for itself.

@@ -266,9 +266,18 @@ it('counts every colour token the static theme declares', function (): void {
     // 2026-10-15: 79 -> 81. The primary action fill split from the chrome role it aliased:
     // `--color-primary-action` and `--color-on-primary-action` are declared as aliases of the
     // brand-chrome pair, so both resolve in both themes with no dark re-declaration of their own.
+    //
+    // 2026-10-27: 94 -> 95. Measured, not assumed. The stylesheet at `d55927cd` already declares 95
+    // unique `--color-*` names while this row still pinned 94, so the pin had drifted behind the
+    // tree — the same failure this comment's history describes three times. The drift is not caused
+    // by any 2026-10-27 mechanics work: `resources/css/app.css` is byte-identical to `d55927cd`
+    // (no diff against HEAD), and the baseline run in the `td-wedge` worktree at that commit could
+    // not reach this assertion because it dies earlier on the sandbox's Playwright temp-file write.
+    // The number is therefore reconciled to what the stylesheet declares; the row is a tripwire for
+    // an undeclared token, and a stale pin defeats it.
     $tokens = themeStaticColorTokens();
 
-    expect($tokens)->toHaveCount(94)
+    expect($tokens)->toHaveCount(95)
         ->and($tokens)->toContain('--color-goal')
         ->and($tokens)->toContain('--color-goal-line')
         ->and($tokens)->toContain('--color-on-risk')
@@ -639,7 +648,9 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         $page = visit('/umamusume');
         $names = themeStaticColorTokens();
 
-        expect($names)->toHaveCount(94);
+        // Same reconciled pin as the static count above (2026-10-27: 94 -> 95, measured against the
+        // stylesheet, not against the tree's history; the two rows must not disagree).
+        expect($names)->toHaveCount(95);
 
         foreach (contrastThemes() as $theme) {
             /** @var array<string, array{raw: string, resolved: string}> $resolved */
