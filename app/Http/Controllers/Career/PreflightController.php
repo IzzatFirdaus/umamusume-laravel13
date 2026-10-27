@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Career;
 
+use App\Enums\IndependentTrainingPolicy;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Career\StartCareerRequest;
 use App\Models\Advisor\BuildTargetPayload;
@@ -124,6 +125,13 @@ class PreflightController extends Controller
                 'deck' => route('career.deck'),
             ],
             'startAction' => route('career.preflight.store'),
+            // Independent Training (§1.1.7): the three policies the mode offers, for the entry tab's
+            // selector. Rotation defaults to the scenario's target races and priority skills default to
+            // none, so only the policy is the required choice.
+            'policy_options' => array_map(
+                static fn (IndependentTrainingPolicy $policy): array => ['value' => $policy->value, 'label' => $policy->label()],
+                IndependentTrainingPolicy::cases(),
+            ),
         ]);
     }
 
