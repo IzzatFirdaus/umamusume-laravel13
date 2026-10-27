@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { assertStructurallyEqual, capture } from './fixtures/hfw-structure';
 
 /*
  * Rendered-copy, state and accessibility evidence for SCREEN-002, Scenario Selection
@@ -362,5 +365,34 @@ test.describe('Scenario Selection', () => {
             await expect(summary).toBeVisible();
             await expect(summary).not.toHaveText(/^\s*$/);
         }
+    });
+
+    /*
+     * The step body, measured against the wireframe rather than read off the source.
+     *
+     * `.canvas` is the compared subtree on both sides: the wireframe wraps the stepper, the scenario
+     * grid, the note and the reversibility card in it, and so does `SetupLayout`. `regions: 'subset'`
+     * requires the wireframe's markers in order, which covers the four cards, the card-face order
+     * (name, baseline pill, release tag, paragraph, tag row), the note and the reversibility table;
+     * app-only markers above them (`ChoicesSoFar`, the "Compare scenarios" link) are allowed.
+     *
+     * `grid: true` compares the track count of the first grid in the subtree, which is the scenario
+     * grid: two tracks at 1280 on both sides. The wireframe's own breakpoint is `max-width:820px`
+     * (frontend-v2-wireframes/assets/shell.css:406), which is why the page keeps `min-[821px]:`; the
+     * instruction's "761px" would draw two columns where the wireframe draws one.
+     */
+    test('renders the four scenario cards in a two-column grid, HFW structure', async ({ page }) => {
+        const hfw = pathToFileURL(
+            resolve(process.cwd(), 'docs/design-research/frontend-v2-wireframes/career-scenario.html'),
+        ).href;
+
+        await page.goto('/career/setup/scenario');
+        await page.locator('#app > *').first().waitFor();
+        const app = await capture(page, '.canvas', { slug: 'scenario', side: 'app' });
+
+        await page.goto(hfw);
+        const wireframe = await capture(page, '.canvas', { slug: 'scenario', side: 'hfw' });
+
+        assertStructurallyEqual(app, wireframe, { regions: 'subset', grid: true });
     });
 });

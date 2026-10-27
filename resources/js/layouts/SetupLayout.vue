@@ -180,7 +180,7 @@ onMounted(async () => {
              `@3xl:`/`@4xl:` step layouts - see the note on `wrapperClass` above), so the sticky
              containing block moves with the page instead of the scrollport and the nav scrolled away
              with everything else. `tests/browser/containment.spec.ts` pins the current behaviour. -->
-        <div :class="wrapperClass" class="@container" data-layout-container data-region="canvas">
+        <div :class="wrapperClass" class="canvas @container" data-layout-container data-region="canvas">
             <nav aria-label="Setup steps" class="mb-4">
                 <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
                     <div class="stepper" role="list" data-setup-steps>

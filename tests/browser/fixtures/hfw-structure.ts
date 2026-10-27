@@ -111,18 +111,25 @@ export async function capture(page: Page, selector: string, opts: CaptureOptions
             };
 
             const regions: string[] = [];
-            const walk = (node: Element): void => {
+            // A marker resolves once per marker name down any one branch. `SubCell.vue` styles its stat
+            // cell with the ported `.card` class (`resources/js/components/SubCell.vue:37`), so a card
+            // that carries a facts grid would otherwise register one card per cell and the wireframe's
+            // single `.card` would have nothing to line up against. Nesting a marker of the same name is
+            // already forbidden by the repo's own UI lint (Card inside a Card), so suppressing the inner
+            // one is the rule the design system already implies, not a special case for this page.
+            const walk = (node: Element, seen: Set<string>): void => {
                 for (const child of Array.from(node.children)) {
                     const name = nameOf(child);
 
-                    if (name !== null) {
+                    if (name !== null && !seen.has(name)) {
                         regions.push(name);
+                        walk(child, new Set([...seen, name]));
+                    } else {
+                        walk(child, seen);
                     }
-
-                    walk(child);
                 }
             };
-            walk(root);
+            walk(root, new Set());
 
             // A grid's track count is the shape that matters, not the literal track size: the wireframe
             // and the app disagree on `minmax()` spelling and mean the same two columns.

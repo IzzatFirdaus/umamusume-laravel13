@@ -58,6 +58,9 @@ class ScenarioSelectController extends Controller
             // not stand in for either a career in progress or a choice just withdrawn.
             'selected' => $draft['scenario'] ?? (SetupDraft::scenarioRecorded() ? null : $this->storedDefault()),
             'ruleset' => $this->ruleset(),
+            // The matrix's own verification date, so the card's footnote can date the caps it quotes
+            // without the page reading config (gate G-33).
+            'verified_at' => (string) config('scenarios.verified_at'),
             // The step's write URL, supplied server-side the way CareerLayout.vue:11 and
             // UnityCupEditor.vue:20 already receive URLs. No Ziggy dependency is introduced.
             'action' => route('career.scenario.store'),
@@ -164,6 +167,15 @@ class ScenarioSelectController extends Controller
                 'key' => $key,
                 'label' => (string) ($def['label'] ?? $key),
                 'documented' => $def['documented'] ?? null,
+                // The baseline entry is the scenario every other card's panel list is subtracted
+                // against, and the card states it as the HFW's "Baseline" pill. Derived from
+                // `config/scenarios.baseline`, so a fifth scenario still needs no component edit.
+                'is_baseline' => $key === $baselineKey,
+                // Our Grand Concert's turn-rail observation field. It is a flag rather than a `panels`
+                // key on purpose: the scenario composes no panel, so switching one on would hand the
+                // shell an ON panel with no renderer. The card states it as the HFW's "Performance
+                // input" tag, which is why the flag is read here and nowhere else.
+                'performance_input' => ($def['performance_input'] ?? false) === true,
                 'optimizes' => $this->optimizes($statOrder, $caps),
                 // The absolute caps, composed the way the matrix states them (HFW annotation 4).
                 'caps_label' => $this->capsLabel((string) $key),

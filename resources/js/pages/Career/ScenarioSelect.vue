@@ -33,6 +33,10 @@ interface ScenarioCard {
     key: string;
     label: string;
     documented: boolean | null;
+    /** The matrix's baseline entry (`config/scenarios.baseline`); the card states it as a pill. */
+    is_baseline: boolean;
+    /** The scenario's turn-rail observation field, where it has one; stated as the "Performance input" tag. */
+    performance_input: boolean;
     optimizes: Optimizes;
     systems: string[];
     resources: string[];
@@ -64,6 +68,8 @@ const props = defineProps<{
     choices: { label: string; value: string | null; url: string | null }[];
     selected: string | null;
     ruleset: { value: string | null; title: string };
+    /** `config/scenarios.verified_at`: the date the caps quoted in the footnote were checked. */
+    verified_at: string;
     /** `route('career.scenario.store')`, supplied by the server so the page never hard-codes the URL. */
     action: string;
 }>();
@@ -218,15 +224,16 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                     v-for="card in props.scenarios"
                     :key="card.key"
                     data-scenario-card
+                    data-region="card"
                     class="relative rounded-lg border border-rule bg-panel p-4"
                     :class="props.selected === card.key ? 'border-2 border-pick-line bg-green-tint' : ''"
                 >
-                <label
-                    :for="`scenario-radio-${card.key}`"
-                    class="flex min-h-11 cursor-pointer items-start gap-2"
-                >
-                    <h2 class="flex flex-wrap items-baseline gap-x-3 text-lg font-semibold text-ink-strong">
-<input
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <label
+                        :for="`scenario-radio-${card.key}`"
+                        class="flex min-h-11 cursor-pointer items-start gap-2"
+                    >
+                        <input
                             :id="`scenario-radio-${card.key}`"
                             type="radio"
                             name="scenario"
@@ -242,19 +249,29 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                             @keydown.arrow.up="prevCard"
                             @keydown.arrow.down="nextCard"
                         >
-                        {{ card.label }}
-                        <!-- Glyph and word, so the documentation state is never carried by colour or by the
-                             dot alone (WCAG 1.4.1). -->
-                        <span
-                            v-if="card.documented === false"
-                            class="inline-flex items-center gap-1 rounded-full bg-sunken px-2 py-0.5 text-xs font-bold text-ink-strong"
-                            title="The matrix records no mechanics guide for this scenario, so only baseline tracking is available."
-                        >
-                            <span aria-hidden="true">◐</span>
-                            PARTIALLY DOCUMENTED
-                        </span>
-                    </h2>
-                </label>
+                        <h2 class="text-lg font-semibold text-ink-strong">{{ card.label }}</h2>
+                    </label>
+                    <!-- The HFW's card face order: name, then the baseline pill, then the release date,
+                         then the paragraph and the tag row. The pill and the tag sit OUTSIDE the `h2`:
+                         a heading that swallowed them would carry an accessible name longer than the
+                         scenario, and `card()` in the spec addresses each card by that exact name. -->
+                    <span v-if="card.is_baseline" class="pill pill-neutral">Baseline</span>
+                    <span
+                        v-if="card.live_on_global"
+                        data-region="tag"
+                        class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink-muted"
+                    >Global · {{ card.live_on_global }}</span>
+                    <!-- Glyph and word, so the documentation state is never carried by colour or by the
+                         dot alone (WCAG 1.4.1). -->
+                    <span
+                        v-if="card.documented === false"
+                        class="inline-flex items-center gap-1 rounded-full bg-sunken px-2 py-0.5 text-xs font-bold text-ink-strong"
+                        title="The matrix records no mechanics guide for this scenario, so only baseline tracking is available."
+                    >
+                        <span aria-hidden="true">◐</span>
+                        PARTIALLY DOCUMENTED
+                    </span>
+                </div>
 
                 <!-- The selected card states its state in words as well as in the input, so a
                      sighted reader who cannot see the accent colour still knows which card holds. -->
@@ -280,15 +297,23 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                     <span
                         v-for="system in card.systems"
                         :key="`system-${system}`"
+                        data-region="tag"
                         class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink-muted"
                     >{{ system }}</span>
                     <span
                         v-for="resource in card.resources"
                         :key="`resource-${resource}`"
+                        data-region="tag"
                         class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink-muted"
                     >{{ resource }}</span>
                     <span
+                        v-if="card.performance_input"
+                        data-region="tag"
+                        class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink-muted"
+                    >Performance input</span>
+                    <span
                         v-if="card.caps_label"
+                        data-region="tag"
                         class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink"
                     >{{ card.caps_label }}</span>
                 </div>
@@ -379,12 +404,17 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
         <p class="note mt-2">
             The panel tags are the composition matrix, not a marketing list: a scenario that leaves a
             panel off cannot draw it, and a fifth scenario reaches the same shell for one config entry.
-            The caps quoted are the published scenario caps from the scenario matrix.
+            The caps quoted are the published scenario caps from config/scenarios.php, verified
+            {{ props.verified_at }}.
         </p>
 
         <!-- Reversibility stated before the commit (HFW annotation 3): the page says what a Trainer
              would otherwise learn by getting it wrong. -->
-        <section class="mt-4 rounded-md border border-rule bg-panel p-4" aria-labelledby="scenario-reversibility">
+        <section
+            data-region="card"
+            class="mt-4 rounded-md border border-rule bg-panel p-4"
+            aria-labelledby="scenario-reversibility"
+        >
             <h2 id="scenario-reversibility" class="text-lg font-semibold text-ink-strong">What changes after this step</h2>
             <table class="mt-2 w-full text-sm">
                 <thead>
