@@ -97,9 +97,6 @@ class TraineeSearchRequest extends FormRequest
             'surface' => $letters,
             'distance' => $letters,
             'style' => $letters,
-            // The skill's own export id, which is the value `character_cards.skills_unique` stores. An
-            // id no skill row carries is refused rather than answered with an empty roster.
-            'skill' => ['nullable', 'integer', Rule::exists('skills', 'export_id')],
             'direction' => ['nullable', Rule::in(['asc', 'desc'])],
         ];
     }
@@ -113,7 +110,6 @@ class TraineeSearchRequest extends FormRequest
             'surface.in' => 'Aptitude letters are S, A, B, C, D, E, F and G.',
             'distance.in' => 'Aptitude letters are S, A, B, C, D, E, F and G.',
             'style.in' => 'Aptitude letters are S, A, B, C, D, E, F and G.',
-            'skill.exists' => 'That skill id is not in this catalog, so no trainee could be filtered by it.',
         ];
     }
 
@@ -125,7 +121,7 @@ class TraineeSearchRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge(array_reduce(
-            ['search', 'surface', 'distance', 'style', 'skill', 'sortBy', 'direction'],
+            ['search', 'surface', 'distance', 'style', 'sortBy', 'direction'],
             fn (array $only, string $key): array => $only + [$key => $this->input($key) === '' ? null : $this->input($key)],
             [],
         ));

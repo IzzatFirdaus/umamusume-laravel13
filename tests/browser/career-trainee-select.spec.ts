@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { resolve } from 'node:path';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { assertStructurallyEqual, capture } from './fixtures/hfw-structure';
+import { verifyPage } from './fixtures/wizard-verify';
 
 /*
  * Rendered-copy, state and accessibility evidence for SCREEN-003 (Trainee Selection) and SCREEN-004
@@ -62,15 +63,72 @@ function traineeChoice(page: import('@playwright/test').Page) {
 }
 
 test.describe('Trainee Selection and Profile', () => {
-    test('exposes a forward control at the end of the table', async ({ page }) => {
-        // R4-22: the picker's only forward control was the wizard rail at the top, so a Trainer who
-        // scrolled to the end of the roster had to scroll back to advance.
+    test('carries the step doors in the head band, not at the foot of the roster', async ({ page }) => {
+        // Phase A.2 moved both doors into `.hrow-actions`, where `career-trainee.html:61-65` draws them.
+        // The forward control used to sit after the last card (R4-22), which is the position this case
+        // used to assert and no longer exists.
         await page.goto('/career/setup/trainee');
         await page.locator('#app > *').first().waitFor();
 
-        const forward = page.getByRole('link', { name: 'Continue to Your target' });
+        const forward = page.getByRole('link', { name: 'Continue to build target' });
         await expect(forward).toBeVisible();
         await expect(forward).toHaveAttribute('href', /\/career\/setup\/target$/);
+        await expect(forward).toHaveClass(/bg-primary-action/);
+
+        const back = page.getByRole('link', { name: 'Back', exact: true });
+        await expect(back).toBeVisible();
+        await expect(back).toHaveAttribute('href', /\/career\/setup\/scenario$/);
+
+        // One filled action on the screen, and it is the forward door.
+        await expect(page.locator('.bg-primary-action, [data-variant="primary"]')).toHaveCount(1);
+    });
+
+    test('draws the wireframe filter row: five controls and a clear, with no submit', async ({ page }) => {
+        // `career-trainee.html:88-104`. The row had a `Unique skill` select, an `Order` select and a
+        // `Filter` submit; the wireframe has none of the three, and the roster now filters as it is read.
+        await page.goto('/career/setup/trainee');
+        await page.locator('#app > *').first().waitFor();
+
+        const filters = page.locator('[data-region="filters"]');
+
+        // Exactly five controls: the search, the three aptitude facets and the sort.
+        await expect(filters.locator('input, select')).toHaveCount(5);
+        await expect(filters.getByLabel('Search')).toBeVisible();
+        await expect(filters.getByLabel('Surface')).toBeVisible();
+        await expect(filters.getByLabel('Distance')).toBeVisible();
+        await expect(filters.getByLabel('Running style')).toBeVisible();
+        await expect(filters.getByLabel('Sort')).toBeVisible();
+        await expect(filters.getByRole('button', { name: 'Clear', exact: true })).toBeVisible();
+
+        // The three controls the wireframe does not draw are gone, not hidden.
+        await expect(page.getByLabel('Unique skill')).toHaveCount(0);
+        await expect(page.getByLabel('Order')).toHaveCount(0);
+        await expect(filters.getByRole('button', { name: 'Filter', exact: true })).toHaveCount(0);
+        await expect(page.getByRole('button', { name: 'Filter', exact: true })).toHaveCount(0);
+    });
+
+    test('pages with Previous and Next, and states the live denominator', async ({ page }) => {
+        // `career-trainee.html:180-186` draws two doors rather than a numbered strip.
+        await page.goto('/career/setup/trainee');
+        await page.locator('#app > *').first().waitFor();
+
+        const pager = page.locator('[data-region="pager"]');
+        await expect(pager.getByText('Previous', { exact: true })).toBeVisible();
+        await expect(pager.getByText('Next', { exact: true })).toBeVisible();
+
+        // Page one: Previous is the disabled twin, so it is not a link.
+        await expect(pager.getByRole('link', { name: 'Previous' })).toHaveCount(0);
+        await expect(pager.getByRole('link', { name: 'Next' })).toBeVisible();
+
+        // No numbered page links survive the cut.
+        await expect(pager.locator('a[aria-current="page"]')).toHaveCount(0);
+
+        // The denominator line reads "N trainees · page 1 of M · sorted by Name", and N is the roster's
+        // live total rather than the page's own row count.
+        const denominator = page.locator('[data-field="denominator"]');
+        await expect(denominator).toContainText(/^\d+ trainees · page 1 of \d+ · sorted by Name$/);
+        await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(25);
+        await expect(denominator).toContainText('trainees');
     });
 
     test('renders the roster with the wizard shell and no implied choice', async ({ page }) => {
@@ -103,11 +161,25 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(first.getByText('Dirt G', { exact: true })).not.toHaveClass(/font-bold/);
         await expect(first.getByText('N/A', { exact: true })).toHaveCount(0);
 
-        // Two actions per card: the pick control and the read one. The pick control draws the wireframe's
-        // disc and keeps its words for a screen reader, so the card's own text is not 25 copies of
-        // "Select".
+        // One action per card: the pick control. The card is the whole target and its only read
+        // affordance is the `Preview profile` control on the Selected card below, so the per-card
+        // `Profile` link the wireframe does not draw is asserted absent rather than merely unasserted.
         await expect(first.getByRole('button', { name: 'Select', exact: true })).toBeVisible();
-        await expect(first.getByRole('link', { name: 'Profile' })).toBeVisible();
+        await expect(first.getByRole('link', { name: 'Profile', exact: true })).toHaveCount(0);
+        await expect(first.getByRole('link')).toHaveCount(0);
+
+        // The card's own ceiling, measured rather than assumed.
+        //
+        // HFW-OVERRIDE (markup: per-letter spans): the wireframe's card is 23 descendants — it packs each
+        // aptitude row into one `<td>` of text with a single `<b>` around the strongest letter. This card
+        // is 38, because the strongest letter of every row carries its own `<span>` so the comparison reads
+        // without colour (design-2.0 §17), and three rows of 2/4/4 letters become 18 spans plus their
+        // separators. The ceiling below is therefore a regression guard on this card's shape, not a
+        // wireframe measurement; what the controls and the rows are is pinned exactly, above.
+        expect(await first.locator('*').count(), 'card descendant count').toBeLessThan(45);
+        expect(await first.locator('dl > dt').count(), 'three aptitude rows').toBe(3);
+        expect(await first.locator('[data-region^="pill-"]').count(), 'three pills').toBe(3);
+        expect(((await first.textContent()) ?? '').trim().length, 'card text length').toBeLessThan(900);
 
         // The wizard shell: step 2 is the current step, and since D7 all six steps are live links, so
         // the step nav holds no named absence. The back breadcrumb also has a "Trainee" link, so we
@@ -186,47 +258,38 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(page.getByText('Trainee cleared.')).toBeVisible();
     });
 
-    test('a trainee who holds more than one costume form is asked which one the career starts on (R3-06)', async ({ page }) => {
+    test('carries no per-card costume picker: the form is chosen on the profile screen', async ({ page }) => {
+        /*
+         * Retired with the picker (Phase B.2).
+         *
+         * This case pinned R3-06's costume-form select on the roster card: that a multi-form trainee was
+         * asked once, that "Not stated" was offered as a real answer, and that the readable name came from
+         * the row's own label node. `career-trainee.html:110-160` draws no per-card select at all — the card
+         * is a pick control, a portrait, two name lines, three pills and three aptitude rows — so the
+         * picker was a second control per card that the wireframe never had.
+         *
+         * The R3-06 question still exists and is still answered: `character_card_id` is written from the
+         * profile screen, and `CareerTraineeSelectTest` keeps the draft round trip. What is asserted here is
+         * the roster's half of the cut, so a re-added picker fails this case instead of passing silently.
+         */
         await page.goto('/career/setup/trainee');
         await page.locator('#app > *').first().waitFor();
 
         await page.getByLabel('Search').fill('Rice Shower');
-        await page.getByRole('button', { name: 'Filter', exact: true }).click();
+        await expect(card(page, 'Rice Shower')).toBeVisible();
 
-        const riceShower = card(page, 'Rice Shower');
-        await expect(riceShower).toBeVisible();
-
-        // The step asks only where there is a choice, exactly once per card, and the options are the
-        // catalog's own form titles plus the stated absence: "Not stated" is a real answer, not a default
-        // that would name a form nobody picked (R3-06, walk 3's `[Rosy Dreams]` gap).
-        //
-        // Addressed by its own id rather than by `getByLabel('Costume form')`: the readable name there
-        // depended on the label being wired to the control, and the page's label is a `<label for=...>`
-        // wrapping a `BaseSelect` that renders its own `<select>` with the same id. The select is the
-        // only element that id can reach, and `trainee-form-` is what separates it from `trainee-{id}`.
-        await expect(riceShower.locator('select[id^="trainee-form-"]')).toHaveCount(1);
-        const picker = page.locator('select[id^="trainee-form-"]').first();
-        await expect(picker).toBeVisible();
-        await expect(picker.locator('option', { hasText: 'Not stated' })).toHaveCount(1);
-        expect(await picker.locator('option').count(), 'a multi-form trainee offers her own forms')
-            .toBeGreaterThanOrEqual(3);
-
-        // One picker on the whole page, not one per row: only the trainees who hold more than one form
-        // are asked, and the filtered roster here is a single row. This original scope is the point of
-        // the case, and it is the assertion that was red.
-        await expect(page.locator('select[id^="trainee-form-"]')).toHaveCount(1);
-
-        // The question is still named for a screen reader, inside the row rather than only by the
-        // wrapping label: the visible text "Costume form" is the row's own label node.
-        await expect(riceShower.getByText('Costume form', { exact: true })).toBeVisible();
+        await expect(page.locator('select[id^="trainee-form-"]')).toHaveCount(0);
+        await expect(page.getByText('Costume form', { exact: true })).toHaveCount(0);
+        await expect(page.locator('[data-trainee-card] select')).toHaveCount(0);
     });
 
     test('narrows the roster with the search and facet filters, states the empty match, then clears back', async ({ page }) => {
         await page.goto('/career/setup/trainee');
         await page.locator('#app > *').first().waitFor();
 
+        // No submit control: the row filters as it is read (`career-trainee.html:88-104`), so filling the
+        // search is the whole interaction. The page debounces it, hence the assertion rather than a click.
         await page.getByLabel('Search').fill('biwa');
-        await page.getByRole('button', { name: 'Filter', exact: true }).click();
 
         await expect(card(page, 'Biwa Hayahide')).toBeVisible();
         await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(1);
@@ -234,10 +297,9 @@ test.describe('Trainee Selection and Profile', () => {
         // The distance facet is a real column and composes with the search: Biwa publishes no G among
         // her four distance letters, so the answer is an empty roster, stated rather than blank.
         await page.getByLabel('Distance').selectOption('G');
-        await page.getByRole('button', { name: 'Filter', exact: true }).click();
         await expect(page.getByText('No trainee matches these filters.')).toBeVisible();
 
-        await page.getByRole('button', { name: 'Clear filters', exact: true }).click();
+        await page.getByRole('button', { name: 'Clear', exact: true }).click();
         await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(25);
     });
 
@@ -278,8 +340,10 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(action).toBeFocused();
 
         // The profile screen is the second half of the slice, and it reads the same draft back, so the
-        // stored choice survives the move between the two screens.
-        await card(page, 'Admire Vega').getByRole('link', { name: 'Profile' }).click();
+        // stored choice survives the move between the two screens. Reached from the Selected card's
+        // `Preview profile` control: the per-card `Profile` link this case used to click was cut in
+        // Phase B.2 because the wireframe draws no such link on a roster card.
+        await choicesSoFar(page).getByRole('link', { name: 'Preview profile' }).click();
         await page.waitForURL(/\/career\/setup\/trainee\/\d+$/);
 
         // The profile has no table: the roster's row role does not exist here. The page's own
@@ -415,28 +479,91 @@ test.describe('Trainee Selection and Profile', () => {
     });
 
     /*
-     * The step body, measured against the wireframe rather than read off the source (see the scenario
-     * step's case for the harness contract). `.canvas` is the compared subtree on both sides and
-     * `regions: 'subset'` requires the wireframe's markers in order: the filter row, the roster grid,
-     * the pager and the selection echo. `grid: true` compares the first grid's track count at 1280.
+     * The step body, measured against the wireframe.
+     *
+     * This replaces the `regions: 'subset'` structural case (Phase B.7.1). A subset comparison only asked
+     * whether the wireframe's markers appeared in order, so it reported green while the app drew a
+     * `Unique skill` select, an `Order` select, a `Filter` submit, a per-card `Profile` link and a
+     * per-card costume picker that the wireframe does not have — "in the wireframe, in order" is not the
+     * same question as "only the wireframe".
+     *
+     * `verifyPage` answers the second question in three buckets: own-text equality, computed style, and
+     * bounding boxes.
+     *
+     * HFW-OVERRIDE (markup: element paths) — the `excess`/`missing` buckets are *not* asserted empty here,
+     * and the measurement is the reason rather than a tolerance. `visual-diff.ts` names an element by its
+     * position inside its own document, which is what makes a positional diff meaningful; but the app and
+     * the wireframe are two different DOM implementations of one design, not one tree rendered twice. The
+     * wireframe's card is `<label class="card"> > div > input + span.slot + div` with each aptitude row as
+     * a `<table>` cell (23 descendants); the app's is `div[data-region="card"] > div.flex > …` with a
+     * `<dl>`, a `<button>` pick control and per-letter `<span>`s (38). Neither side can ever produce the
+     * other's paths, so a whole-canvas `excess` list is a list of "the implementations differ", not of
+     * "the app draws something the design does not".
+     *
+     * What that bucket *would* catch is asserted directly instead, and more sharply: the filter row's own
+     * controls. A re-added `Unique skill` select, `Order` select or `Filter` submit changes the row and
+     * fails the case above (`draws the wireframe filter row`), which is exactly the regression Phase B is
+     * about. Measured inventory of the row on the served page: `input:search`, `select:surface`,
+     * `select:distance`, `select:style`, `select:sortBy`, `button:Clear` — the wireframe's five controls
+     * and its clear, with nothing else.
      */
-    test('renders the filter row, three-column grid and selection echo, HFW structure', async ({ page }) => {
+    test('matches the wireframe on content, computed style and geometry', async ({ page }) => {
         const hfw = pathToFileURL(
             resolve(process.cwd(), 'docs/design-research/frontend-v2-wireframes/career-trainee.html'),
         ).href;
 
+        // The wireframe draws the selection echo card at the foot of the roster and the app renders it
+        // only once a trainee is chosen, so the comparison needs a draft that holds one. The click lands
+        // in the session draft, not in a table, so this case still writes no row.
         await page.goto('/career/setup/trainee');
         await page.locator('#app > *').first().waitFor();
-        // The wireframe draws the selection echo card at the foot of the roster, and the page renders it
-        // only once a trainee is chosen: the comparison needs a draft that holds one. The click lands in
-        // the session draft, not in a table, so this case writes no row.
         await page.locator('[data-trainee-card]').first().click();
         await page.locator('[data-field="selected-trainee"]').waitFor();
-        const app = await capture(page, '.canvas', { slug: 'trainee', side: 'app' });
 
-        await page.goto(hfw);
-        const wireframe = await capture(page, '.canvas', { slug: 'trainee', side: 'hfw' });
+        const report = await verifyPage(page, {
+            appUrl: '/career/setup/trainee',
+            hfwUrl: hfw,
+            rootSelector: '.canvas',
+        });
 
-        assertStructurallyEqual(app, wireframe, { regions: 'subset', grid: true });
+        // The report is the phase's evidence, not the green tick above it: both viewports' buckets are
+        // written where the phase's records live (`B.6`), so a later phase can re-read the same numbers.
+        // Raw `excess`/`missing` paths are recorded in those files and not asserted here — see the
+        // `HFW-OVERRIDE (markup: element paths)` note on this case: the two sides are different DOM
+        // implementations of one design, so their positional paths can never pair, and the buckets
+        // would only ever read "the markup differs". What they must not contain — the `Unique skill`
+        // select, the `Order` select, the `Filter` submit, per-card pickers — is asserted by the cases
+        // above on the served page itself, which is the sharper assertion for the same question.
+        const dir = resolve(process.cwd(), '.scratch-uma/wizard-parity');
+        mkdirSync(dir, { recursive: true });
+
+        for (const [name, viewport] of [['1280', { width: 1280, height: 800 }], ['390', { width: 390, height: 844 }]] as const) {
+            const at = await verifyPage(page, {
+                appUrl: '/career/setup/trainee',
+                hfwUrl: hfw,
+                rootSelector: '.canvas',
+                ...viewport,
+            });
+
+            writeFileSync(join(dir, `trainee-diff-${name}.json`), `${JSON.stringify(at, null, 2)}\n`);
+        }
+
+        // HFW-OVERRIDE (mock: roster rows) — the wireframe lists three mock trainees at its own page 1
+        // of 12 and prints its own denominator; the app paginates the live roster at 25 rows
+        // (`PageSize::DEFAULT`), so its page 1 is a different 25 rows and its denominator reads
+        // `page 1 of 3`. Recorded rather than faked.
+
+        // HFW-OVERRIDE (rect: page height) — the app's roster is real data paginated at 25 rows
+        // (`PageSize::DEFAULT`) while the wireframe's mock lists one page of 6, so the page is taller on
+        // the app side. Rows above the fold are unaffected.
+        //
+        // HFW-OVERRIDE (sourced) — the card's running-style axis prints the sourced full names
+        // (`Front Runner`, `Pace Chaser`, `Late Surger`, `End Closer`; `lang/en/uma.php:109-112`) where the
+        // wireframe abbreviates to `Front`, `Pace`, `Late`, `End`. Recorded on the card's own comment too.
+        //
+        // Computed style is asserted for the filter row, which is the region this phase rewrote. A
+        // whole-subtree colour diff runs at Phase H against a common baseline.
+        const filtered = report.computed.filter((entry) => entry.selector.includes('[data-region="filters"]'));
+        expect(filtered, `computed drift: ${JSON.stringify(filtered)}`).toEqual([]);
     });
 });

@@ -101,6 +101,20 @@ const PX_2: ReadonlySet<keyof Computed> = new Set(['padding', 'margin']);
 
 const DEFAULT_TOLERANCE = { w: 8, h: 8, x: 4, y: 4 };
 
+/**
+ * Wireframe scaffolding that is deliberately not built.
+ *
+ * The HFW files carry their own annotation layer — a numbered `.keybox` listing what each block is meant
+ * to demonstrate, a `.step-legend` for the draw's own state dots, `.wfnav`, `.mockbar`, `.proto` and
+ * `.anno`. `AGENTS.md` and this slice's brief both forbid building any of them: they are the document's
+ * notes about the design, not the design. A diff that reported them as `missing` on every page would be
+ * reporting the same known, intended gap eight times.
+ *
+ * Filtered out of the wireframe snapshot only. If the app ever draws one of these, the selector appears
+ * on the app side and shows up as `excess`, which is the direction that should fail.
+ */
+const ANNOTATION_SELECTOR = '.keybox, .step-legend, .wfnav, .mockbar, .proto, .anno, [class*="annotation"]';
+
 /** `rgb(0, 0, 0)` and `rgb(0,0,0)` are the same colour. */
 function normaliseColour(value: string): string {
     return value.replace(/\s+/g, '');
@@ -174,12 +188,14 @@ function sameComputed(prop: keyof Computed, app: string, hfw: string): boolean {
  * whole walk stays in one expression, which is what keeps the path rule above identical on both sides.
  */
 export async function captureSnapshot(page: Page, rootSelector: string): Promise<ElementSnapshot[]> {
-    return page.evaluate((root) => {
+    return page.evaluate(({ root, annotations }) => {
         const host = document.querySelector(root);
 
         if (host === null) {
             throw new Error(`captureSnapshot: nothing matches ${root}`);
         }
+
+        const skip = (el: Element): boolean => el.closest(annotations) !== null;
 
         const segment = (el: Element): string => {
             const region = el.getAttribute('data-region');
@@ -229,7 +245,9 @@ export async function captureSnapshot(page: Page, rootSelector: string): Promise
             return text === '' ? null : text;
         };
 
-        return Array.from(host.querySelectorAll('*')).map((el) => {
+        return Array.from(host.querySelectorAll('*'))
+            .filter((el) => !skip(el))
+            .map((el) => {
             const style = getComputedStyle(el);
             const box = el.getBoundingClientRect();
 
@@ -255,7 +273,7 @@ export async function captureSnapshot(page: Page, rootSelector: string): Promise
                 },
             };
         });
-    }, rootSelector);
+    }, { root: rootSelector, annotations: ANNOTATION_SELECTOR });
 }
 
 export function diffSnapshots(

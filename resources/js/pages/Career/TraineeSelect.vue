@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /*
  * SCREEN-003, Trainee Selection (`ADR-0020` §1; `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` §6). Step 2 of the
  * setup wizard.
@@ -26,7 +26,7 @@ import AbsenceValue from '../../components/AbsenceValue.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import { BaseInput, BaseSelect, BaseButton } from '../../components/Form';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 
 interface FormRow {
     id: number;
@@ -69,11 +69,6 @@ interface Option {
     label: string;
 }
 
-interface SkillOption {
-    export_id: number;
-    name: string;
-}
-
 const props = defineProps<{
     trainees: Paginator<TraineeRow>;
     /** The steps this session has opened, the step bar's completed marking reads them. */
@@ -97,7 +92,6 @@ const props = defineProps<{
         surface: string | null;
         distance: string | null;
         style: string | null;
-        skill: number | null;
     };
     sortBy: string;
     direction: string;
@@ -105,7 +99,6 @@ const props = defineProps<{
     sortKeys: Option[];
     /** The ten aptitude axes with the family each belongs to; the controller is their one owner. */
     aptitudeAxes: { value: string; label: string; axis: string }[];
-    uniqueSkills: SkillOption[];
     /** `route('career.trainee.store')`, supplied by the server so the page never hard-codes the URL. */
     action: string;
     /** `route('career.trainee')`, supplied by the server so the filter never hard-codes the URL. */
@@ -128,9 +121,7 @@ const filterLabels = computed(() =>
 
 const STATIC_FILTER_LABELS: Record<string, string> = {
     search: 'Search',
-    skill: 'Unique skill',
-    sortBy: 'Sort by',
-    direction: 'Order',
+    sortBy: 'Sort',
 };
 
 function errorLabel(field: string): string {
@@ -146,7 +137,6 @@ const filterValues = ref<Record<string, string>>({
     surface: props.filters.surface ?? '',
     distance: props.filters.distance ?? '',
     style: props.filters.style ?? '',
-    skill: props.filters.skill === null ? '' : String(props.filters.skill),
 });
 const sortBy = ref(props.sortBy);
 const direction = ref(props.direction);
@@ -229,7 +219,6 @@ function applyFilters(): void {
             surface: filterValues.value.surface || undefined,
             distance: filterValues.value.distance || undefined,
             style: filterValues.value.style || undefined,
-            skill: filterValues.value.skill || undefined,
             sortBy: sortBy.value || undefined,
             direction: direction.value || undefined,
         },
@@ -246,12 +235,53 @@ function applyFilters(): void {
     );
 }
 
+/**
+ * The roster filters as it is read, not when a button is pressed.
+ *
+ * The wireframe's row has no submit control at all (`career-trainee.html:88-104`), so the search has to
+ * fire from the controls. It fires from a `watch` rather than from `@input`/`@change` because neither
+ * `BaseInput` nor `BaseSelect` forwards those listeners — `BaseInput` declares `change` for its file
+ * branch only and `BaseSelect` declares neither, and both render a fragment, so a listener handed to
+ * either component is dropped instead of landing on the control.
+ *
+ * The debounce is what keeps a typed word from becoming one round trip per keystroke. `suppressWatch`
+ * covers the one path that must not double-fire: `clearFilters` empties the controls and navigates
+ * itself, so the watcher's own callback has to stand down for that flush.
+ */
+let filterTimer: ReturnType<typeof setTimeout> | null = null;
+let suppressWatch = false;
+
+watch(
+    [filterValues, sortBy],
+    () => {
+        if (suppressWatch) {
+            return;
+        }
+
+        if (filterTimer !== null) {
+            clearTimeout(filterTimer);
+        }
+
+        filterTimer = setTimeout(() => {
+            filterTimer = null;
+            applyFilters();
+        }, 250);
+    },
+    { deep: true },
+);
+
 function clearFilters(): void {
-    filterValues.value = { search: '', surface: '', distance: '', style: '', skill: '' };
+    suppressWatch = true;
+    filterValues.value = { search: '', surface: '', distance: '', style: '' };
     sortBy.value = 'name';
     direction.value = 'asc';
 
     applyFilters();
+
+    // Re-arm after the flush that runs the watcher, so the guard covers exactly this change.
+    nextTick(() => {
+        suppressWatch = false;
+    });
 }
 
 function choose(trainee: TraineeRow): void {
@@ -395,7 +425,7 @@ const sortLabel = computed(
                         type="text"
                         id="filter-search"
                         name="search"
-                        placeholder="Trainee name"
+                        placeholder="Name or unique skill"
                         label="Search"
                     />
                 </div>
@@ -411,38 +441,15 @@ const sortLabel = computed(
                 </div>
                 <div class="contents" data-region="field">
                     <BaseSelect
-                        v-model="filterValues.skill"
-                        id="filter-skill"
-                        name="skill"
-                        label="Unique skill"
-                        :options="props.uniqueSkills.map(o => ({ value: String(o.export_id), label: o.name }))"
-                        placeholder="Any"
-                    />
-                </div>
-                <div class="contents" data-region="field">
-                    <BaseSelect
                         v-model="sortBy"
                         id="filter-sortBy"
                         name="sortBy"
-                        label="Sort by"
+                        label="Sort"
                         :options="props.sortKeys.map(o => ({ value: o.value, label: o.label }))"
                     />
                 </div>
-                <div class="contents" data-region="field">
-                    <BaseSelect
-                        v-model="direction"
-                        id="filter-direction"
-                        name="direction"
-                        label="Order"
-                        :options="[{ value: 'asc', label: 'Ascending' }, { value: 'desc', label: 'Descending' }]"
-                        :aria-describedby="filter-direction"
-                    />
-                </div>
-                <BaseButton type="submit" variant="secondary">
-                    Filter
-                </BaseButton>
                 <BaseButton type="button" variant="secondary" @click="clearFilters">
-                    Clear filters
+                    Clear
                 </BaseButton>
             </form>
 
@@ -567,7 +574,14 @@ const sortLabel = computed(
                                     <template v-for="(cell, index) in axes" :key="cell.value">
                                         <span v-if="index > 0" aria-hidden="true" class="text-ink-muted"> · </span>
                                         <!-- The strongest letter of the row carries the weight change, so the
-                                             comparison reads without colour (design-2.0 §17). -->
+                                             comparison reads without colour (design-2.0 §17).
+
+                                             HFW-OVERRIDE (sourced): `career-trainee.html:130-132` abbreviates the
+                                             running-style axis to "Front", "Pace", "Late", "End". The sourced
+                                             vocabulary is the full form (`lang/en/uma.php:109-112`: Front Runner,
+                                             Pace Chaser, Late Surger, End Closer), and the label is the
+                                             controller's `aptitudeAxes` rather than a literal here, so the
+                                             card prints the sourced name. Source vocabulary wins over mock. -->
                                         <span
                                             :class="row.aptitudes[cell.value] === strongest(row.aptitudes, axes)
                                                 ? 'font-bold text-ink-strong'
@@ -581,51 +595,59 @@ const sortLabel = computed(
                             <AbsenceValue compact reason="The character document published no aptitude letters for this trainee." />
                         </p>
 
-                        <!-- R3-06: the costume form is asked only where there is a choice to make. "Not stated"
-                             stays a real answer rather than a default that names a form nobody picked. The
-                             click is stopped so opening the picker does not also pick the card. -->
-                        <div v-if="row.forms.length > 1" @click.stop>
-                            <BaseSelect
-                                class="mt-2"
-                                :id="`trainee-form-${row.id}`"
-                                name="character_card_id"
-                                label="Costume form"
-                                v-model="pickedForm[row.id]"
-                                :options="[{ value: null, label: 'Not stated' }, ...row.forms.map((card: FormRow) => ({ value: card.id, label: `${card.title}${card.is_debut_form ? ' (debut form)' : ''}` }))]"
-                            />
-                        </div>
+                        <!-- R3-06's costume picker is not on the card: `career-trainee.html:110-160` draws a
+                             pick control, a portrait, a name, three pills and three aptitude rows, and no
+                             per-card select. The form is chosen on the profile screen, which is where the
+                             draft's `character_card_id` is written; the card still states the stored pick
+                             through `headlineForm`, so the rarity pill keeps naming the form in play. -->
                     </div>
-                </div>
-
-                <div class="mt-2 flex justify-end">
-                    <a
-                        :href="`/career/setup/trainee/${row.id}`"
-                        class="inline-flex min-h-11 items-center text-sm font-medium text-ink underline"
-                        @click.stop
-                    >
-                        Profile
-                    </a>
                 </div>
             </div>
         </div>
 
+        <!-- No per-card "Profile" link: the wireframe's card is one big pick target and its only profile
+             affordance is the `Preview profile` control on the selected card below
+             (`career-trainee.html:196`). Two doors to the same read page, one of them repeated on every
+             card, made the roster read as a list of links. -->
+        <!-- Two doors, not a row of numbers: `career-trainee.html:180-186` draws `Previous` and `Next` and
+             nothing else, with `Previous` disabled on the first page and `Next` on the last. A numbered
+             strip also cannot express "disabled" — Laravel's paginator emits a `<span>` for a missing
+             page, which is the same shape the numbered version drew for a live link. -->
         <nav
-            v-if="props.trainees.links.length > 3"
             aria-label="Pagination"
             data-region="pager"
             class="mt-4 flex flex-wrap items-center gap-2 text-sm"
         >
-            <template v-for="(link, index) in props.trainees.links" :key="index">
-                <a
-                    v-if="link.url"
-                    :href="link.url"
-                    :aria-current="link.active ? 'page' : undefined"
-                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised transition-colors duration-150 ease-out"
-                    :class="link.active ? 'bg-raised font-bold text-ink-strong' : ''"
-                    v-html="link.label"
-                />
-                <span v-else class="px-3 py-1 text-ink-muted" v-html="link.label" />
-            </template>
+            <a
+                v-if="props.trainees.prev_page_url"
+                :href="props.trainees.prev_page_url"
+                rel="prev"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised transition-colors duration-150 ease-out"
+            >
+                Previous
+            </a>
+            <span
+                v-else
+                aria-disabled="true"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink-muted"
+            >
+                Previous
+            </span>
+            <a
+                v-if="props.trainees.next_page_url"
+                :href="props.trainees.next_page_url"
+                rel="next"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised transition-colors duration-150 ease-out"
+            >
+                Next
+            </a>
+            <span
+                v-else
+                aria-disabled="true"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink-muted"
+            >
+                Next
+            </span>
         </nav>
 
         <!-- The chosen trainee, restated once at the foot of the roster (`career-trainee.html:191-200`). Read

@@ -169,8 +169,7 @@ it('renders the roster paginated, with no stored choice and no draft write', fun
             ->where('sortBy', 'name')
             ->where('direction', 'asc')
             ->has('facets', 3)
-            ->has('sortKeys')
-            ->has('uniqueSkills'));
+            ->has('sortKeys'));
 
     expect(SetupDraft::read()['umamusume_id'])->toBeNull();
 });
@@ -270,50 +269,25 @@ it('narrows the roster with each filter it claims to offer', function (): void {
         ->assertInertia(fn (Assert $page) => $page->has('trainees.data', 0));
 });
 
-it('narrows the roster to trainees whose costume forms list a unique skill', function (): void {
-    $carrier = rosterTrainee('Skill Carrier', ['turf' => 'A']);
-    $other = rosterTrainee('Skillless', ['turf' => 'A']);
-
-    $unique = Skill::factory()->create([
-        'name' => 'Evasive Triple Cut',
-        'export_id' => 100201,
-        'release_status' => ReleaseStatus::GlobalReleased,
-        'name_is_client' => true,
-    ]);
-
-    CharacterCard::factory()->for($carrier)->create(['skills_unique' => [$unique->export_id]]);
-    CharacterCard::factory()->for($other)->create(['skills_unique' => [999999]]);
-
-    $this->get('/career/setup/trainee?skill='.$unique->export_id)
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->has('trainees.data', 1)
-            ->where('trainees.data.0.name', 'Skill Carrier'));
-
-    // The option list is the catalog's own unique skills that survive `availableOnGlobal()`, offered so a
-    // Trainer is never asked to type an export id.
-    $this->get('/career/setup/trainee')
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->has('uniqueSkills', 1)
-            ->where('uniqueSkills.0.export_id', 100201)
-            ->where('uniqueSkills.0.name', 'Evasive Triple Cut'));
-
-    // A JP-only or non-client-named skill is not a Global Trainer's option, so it never reaches the facet
-    // list even when a card references it (`ADR-0011` §2).
-    $jpOnly = Skill::factory()->create([
-        'name' => 'Withdrawn Skill',
-        'export_id' => 100202,
-        'release_status' => ReleaseStatus::JapanOnly,
-        'name_is_client' => true,
-    ]);
-
-    CharacterCard::factory()->for($carrier)->create(['skills_unique' => [$jpOnly->export_id]]);
-
-    $this->get('/career/setup/trainee')
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->has('uniqueSkills', 1));
-});
+/*
+ * Retired with the unique-skill filter (Phase B.1).
+ *
+ * The test that stood here asserted three things about a filter this screen no longer offers: that
+ * `?skill=<export id>` narrowed the roster through `whereJsonContains('skills_unique', ...)`, that the
+ * `uniqueSkills` prop offered the catalog's Global-released uniques, and that a JP-only skill never
+ * reached that list.
+ *
+ * `career-trainee.html:88-104` draws five controls — a search, three aptitude facets and a sort — and
+ * none of them filters by skill. Keeping a control the wireframe does not draw was the divergence Phase
+ * B exists to remove, and the controller's `uniqueSkillOptions()` built its list by reading
+ * `skills_unique` off every card row in PHP on each page load, so the prop cost a query to feed a filter
+ * with no control.
+ *
+ * Nothing is left untested: the three survivors in that test's place are asserted by
+ * `narrows the roster with each filter it claims to offer` (the search and the three facets) and
+ * `refuses an unknown filter value and degrades an unknown sort` (the refusal shape those facets share).
+ * A re-added skill filter would need the wireframe to draw it first.
+ */
 
 it('refuses an unknown filter value and degrades an unknown sort rather than refusing it', function (): void {
     rosterTrainee('Special Week', ['turf' => 'A']);
@@ -325,7 +299,6 @@ it('refuses an unknown filter value and degrades an unknown sort rather than ref
         ->assertSessionHasErrors('surface');
 
     $this->get('/career/setup/trainee?distance=9')->assertSessionHasErrors('distance');
-    $this->get('/career/setup/trainee?skill=424242')->assertSessionHasErrors('skill');
 
     // A sort key is a presentation choice and usually arrives from a pasted URL, so it falls back the way
     // `PageSize::clamp` does. The allowlist is what makes the fallback safe: an off-list key never reaches

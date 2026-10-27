@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Career\StoreTraineeRequest;
 use App\Http\Requests\Career\TraineeSearchRequest;
 use App\Models\CharacterCard;
-use App\Models\Skill;
 use App\Models\Umamusume;
 use App\Services\Career\SetupDraft;
 use App\Services\DataPipeline\ArtworkMirror;
@@ -85,7 +84,6 @@ class TraineeSelectController extends Controller
 
         $this->applySearch($query, $request);
         $this->applyFacets($query, $request);
-        $this->applySkillFilter($query, $request);
         $this->applySort($query, $request);
 
         $trainees = $query->paginate(PageSize::clamp($request->query('pageSize')), ['*'], 'page')
@@ -118,7 +116,6 @@ class TraineeSelectController extends Controller
                 'surface' => $request->validated('surface'),
                 'distance' => $request->validated('distance'),
                 'style' => $request->validated('style'),
-                'skill' => $request->validated('skill') === null ? null : (int) $request->validated('skill'),
             ],
             'sortBy' => $request->sortKey(),
             'direction' => $request->input('direction') === 'desc' ? 'desc' : 'asc',
@@ -134,7 +131,6 @@ class TraineeSelectController extends Controller
                 static fn (array $axis): array => ['value' => $axis['value'], 'label' => $axis['label']],
                 self::APTITUDE_AXES,
             )],
-            'uniqueSkills' => $this->uniqueSkillOptions(),
             // The step's read and write URLs, supplied server-side the way CareerLayout.vue:11 and
             // UnityCupEditor.vue:20 already receive URLs. No Ziggy dependency is introduced.
             'action' => route('career.trainee.store'),
@@ -345,25 +341,6 @@ class TraineeSelectController extends Controller
     }
 
     /**
-     * The unique-skill filter: trainees owning a costume form whose `skills_unique` list carries the
-     * requested export id. `skills_unique` is a JSON column, so this is a JSON containment test rather
-     * than a join, and it runs over the trainee's cards because a unique skill belongs to a form.
-     *
-     * @param  Builder<Umamusume>  $query
-     */
-    private function applySkillFilter(Builder $query, TraineeSearchRequest $request): void
-    {
-        $skill = $request->validated('skill');
-
-        if ($skill === null) {
-            return;
-        }
-
-        $query->whereHas('cards', static fn (Builder $cards): Builder => $cards
-            ->whereJsonContains('skills_unique', (int) $skill));
-    }
-
-    /**
      * The allowlisted sort. `TraineeSearchRequest::SORTS` is the only set of column names that can reach
      * `orderBy()`, which is what makes degrading an unknown key safe rather than merely quiet: the key
      * never becomes SQL.
@@ -413,45 +390,6 @@ class TraineeSelectController extends Controller
 
         // The fallthrough is the null case: no letter published ranks past every letter that is.
         return "case {$column}{$ranked} else 99 end";
-    }
-
-    /**
-     * The unique-skill options the filter offers: every skill id the catalog's own costume forms list as
-     * a unique, resolved through `Skill::scopeAvailableOnGlobal()` so a Global Trainer is never asked to
-     * filter by a skill their client cannot show (`ADR-0011` §2).
-     *
-     * `ponytail:` the id set is built by reading `skills_unique` off all 106 card rows in PHP, because
-     * the column is JSON and a SQL distinct over it is not portable. On this catalog that is one bounded
-     * query per page load; the upgrade path is a `skill_card` pivot if the roster ever grows an order of
-     * magnitude.
-     *
-     * @return list<array<string, mixed>>
-     */
-    private function uniqueSkillOptions(): array
-    {
-        $exportIds = CharacterCard::query()
-            ->whereNotNull('skills_unique')
-            ->pluck('skills_unique')
-            ->flatten()
-            ->filter()
-            ->unique()
-            ->values();
-
-        if ($exportIds->isEmpty()) {
-            return [];
-        }
-
-        return array_values(Skill::query()
-            ->availableOnGlobal()
-            ->whereIn('export_id', $exportIds)
-            ->orderBy('name')
-            ->get(['name', 'export_id'])
-            ->map(static fn (Skill $skill): array => [
-                'export_id' => $skill->export_id,
-                'name' => $skill->name,
-            ])
-            ->values()
-            ->all());
     }
 
     /**
