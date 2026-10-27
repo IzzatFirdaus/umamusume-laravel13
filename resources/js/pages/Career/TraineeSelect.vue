@@ -339,6 +339,32 @@ const sortLabel = computed(
         <template #eyebrow>New career</template>
         <template #title>Choose a trainee</template>
 
+        <!--
+          The HFW's head-band pair (`career-trainee.html:61-65`): Back to the scenario, then the one filled
+          action. The forward door used to be a `Continue to Your target` button at the foot of the roster,
+          which put the step's exit after the whole card grid and gave the step no back door at all — the
+          two facts `eca5a628` left open when it cut the shell's extra exit link.
+
+          The label is the wireframe's ("Continue to build target") even though this app's next screen is
+          the target step rather than a profile: profile is a per-record read page reached from a card, not
+          a step the wizard walks through, so the destination is `props.targetUrl` and the sentence names
+          the step the Trainer lands on.
+        -->
+        <template #actions>
+            <Link
+                href="/career/setup/scenario"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel"
+            >
+                Back
+            </Link>
+            <Link
+                :href="props.targetUrl"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 font-semibold text-on-primary-action hover:bg-primary-action/90"
+            >
+                Continue to build target
+            </Link>
+        </template>
+
         <!-- No breadcrumb: "Back to trainee" pointed at this same URL. The step bar above lists all
              six steps, and the carried-choices strip states the scenario, so nothing is lost. -->
 
@@ -632,16 +658,8 @@ const sortLabel = computed(
             </div>
         </div>
 
-        <!-- The picker's only forward control used to be the wizard rail at the top, so a Trainer who
-             scrolled to the end of the roster had to scroll back up to advance (R4-22). The same
-             destination, at the point the choice is made. -->
-        <div class="mt-4 flex justify-end">
-            <a
-                :href="props.targetUrl"
-                class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 text-sm font-bold text-on-primary-action"
-            >
-                Continue to Your target
-            </a>
-        </div>
+        <!-- The forward door moved to the head band above (`#actions`), where the HFW draws it. The copy
+             that stood here said it was the same destination "at the point the choice is made", which was
+             true and also the reason the step's only exit sat after the last card. -->
     </SetupLayout>
 </template>

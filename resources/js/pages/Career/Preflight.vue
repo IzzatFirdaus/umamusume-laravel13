@@ -366,7 +366,33 @@ const CAREER_TURNS = 72;
                 title="Before the first turn"
                 description="One screen listing what will be created, what the run will be measured against, and the things worth knowing before you commit."
                 position="Step 6 of 6"
-            />
+            >
+                <!--
+                  The HFW's head-band pair (`career-preflight.html:61-65`). Both controls used to sit in a
+                  row inside the "This run" card, at the foot of its training-policy fieldset, so the screen's
+                  one write was below a card the Trainer had to reach by scrolling.
+
+                  "Create the run" is this step's write and it stays a method call rather than a form submit:
+                  `PreflightController@store` is a PUT composed from the draft, and the button's disabled
+                  state reads `canStart`, which is the same gate the request re-checks.
+                -->
+                <template #actions>
+                    <Link
+                        :href="props.edit.deck"
+                        class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel"
+                    >
+                        Back to deck
+                    </Link>
+                    <button
+                        type="button"
+                        class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 font-semibold text-on-primary-action hover:bg-primary-action/90 disabled:opacity-60"
+                        :disabled="!canStart || form.processing"
+                        @click="start"
+                    >
+                        {{ form.processing ? 'Starting…' : 'Create the run' }}
+                    </button>
+                </template>
+            </PageHeader>
         </template>
 
         <!-- The refusal, when the server finds a section that no longer validates. Nothing below blocks;
@@ -630,22 +656,9 @@ const CAREER_TURNS = 72;
                         </p>
                     </fieldset>
 
-                    <div class="mt-2.5 flex flex-wrap gap-2">
-                        <button
-                            type="button"
-                            class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-5 text-sm font-semibold text-on-primary-action disabled:opacity-60"
-                            :disabled="!canStart || form.processing"
-                            @click="start"
-                        >
-                            {{ form.processing ? 'Starting…' : form.independent ? 'Start Independent Training' : 'Start career' }}
-                        </button>
-                        <Link
-                            :href="props.edit.deck"
-                            class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-3 text-sm font-medium text-ink hover:bg-sunken transition-colors duration-150 ease-out"
-                        >
-                            Back to deck
-                        </Link>
-                    </div>
+                    <!-- "Create the run" and "Back to deck" moved to the head band above (`#actions`), where
+                         the HFW draws them. Only the policy note keeps its place here, beside the radios it
+                         describes. -->
                 </section>
             </div>
         </div>

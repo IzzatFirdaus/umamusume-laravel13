@@ -316,6 +316,30 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
         <template #eyebrow>New career</template>
         <template #title>Build the six-card deck</template>
 
+        <!--
+          The HFW's head-band pair (`career-deck.html:61-68`). The step's two doors used to sit in a row at
+          the foot of the page, after the six slots, the diagnostics table and the card-type table, so the
+          only way out of the step was below everything it draws.
+
+          The forward door stays a navigation. This step's write redirects back to `career.deck` so the
+          per-slot levels survive the round trip, and a forward button that merely posted would strand the
+          Trainer on this step; the write keeps its own control inside the section it writes.
+        -->
+        <template #actions>
+            <Link
+                href="/career/setup/legacy"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel"
+            >
+                Back
+            </Link>
+            <Link
+                href="/career/setup/preflight"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 font-semibold text-on-primary-action hover:bg-primary-action/90"
+            >
+                Continue to preflight
+            </Link>
+        </template>
+
         <!-- No breadcrumb: "← Back to deck" pointed at this same URL, and its `Link` was never
              imported, so it rendered an empty `<nav aria-label="Breadcrumb">` and a resolve warning.
              The step bar above lists all six steps, so nothing is lost. Steps 1 and 2 carry the same
@@ -565,15 +589,8 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
             break instead, and the picker does not offer a card the deck already holds.
         </p>
 
-        <div class="mt-5 flex flex-wrap items-center gap-3">
-            <div class="flex-1"></div>
-            <Link href="/career/setup/legacy" class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel">
-                Back
-            </Link>
-            <Link href="/career/setup/preflight" class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 font-semibold text-on-primary-action hover:bg-primary-action/90">
-                Continue to preflight
-            </Link>
-        </div>
+        <!-- Back and "Continue to preflight" moved to the head band above (`#actions`), where the HFW draws
+             them. The row that stood here printed the same two doors after the whole page. -->
 
         <!--
           Hidden until at least one card is equipped (plan 3.7). The panel counts what the deck covers,

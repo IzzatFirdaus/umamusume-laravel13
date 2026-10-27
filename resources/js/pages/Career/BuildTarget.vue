@@ -262,6 +262,28 @@ function applyDefaults(): void {
         <template #eyebrow>New career</template>
         <template #title>Your target</template>
 
+        <!--
+          The HFW's head-band pair (`career-target.html:61-65`). The forward action is this step's write, not
+          a navigation: the button lives here and posts the form below through the native `form` attribute,
+          which is what lets it sit in the head band while the fields stay in the canvas. The write endpoint
+          is unchanged (`career.target.store`), and the label is the wireframe's.
+
+          `Back` points at the trainee step, which is this app's previous screen. The wireframe's own back
+          link targets `career-profile.html`, but profile is a per-record read page here rather than a step
+          in the flow, so the honest previous step is the roster.
+        -->
+        <template #actions>
+            <Link
+                href="/career/setup/trainee"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel"
+            >
+                Back
+            </Link>
+            <BaseButton type="submit" form="build-target-form" variant="primary" :disabled="form.processing">
+                Continue to legacy
+            </BaseButton>
+        </template>
+
         <!-- No breadcrumb: "← Back to target" pointed at this same URL, a control that navigates to the
              page it is on. The step bar above lists all six steps and the carried-choices strip states
              the scenario and the trainee, so nothing is lost. Steps 1 and 2 carry the same note. -->
@@ -296,7 +318,7 @@ function applyDefaults(): void {
              native constraint validation would block the submit with a browser bubble instead of
              letting the server refuse with its named bound, which is the message this page renders
              with its own `aria-describedby` and focus. -->
-        <form class="mt-5 mx-auto max-w-4xl space-y-6" novalidate @submit.prevent="submit">
+        <form id="build-target-form" class="mt-5 mx-auto max-w-4xl space-y-6" novalidate @submit.prevent="submit">
             <!--
               The wireframe's two-column canvas. `.g-side` is `minmax(0,2.1fr) minmax(0,1fr)` and it
               collapses below 821px (frontend-v2-wireframes/assets/shell.css:404,406), so both the
@@ -592,12 +614,9 @@ function applyDefaults(): void {
             </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-3">
-                <BaseButton type="submit" variant="primary" :disabled="form.processing">
-                    {{ form.processing ? 'Saving…' : 'Save target' }}
-                </BaseButton>
-                <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving your target…</p>
-            </div>
+            <!-- The submit moved to the head band's `#actions` (`career-target.html:61-65`), posting this
+                 form by id. Only the status line stays here, beside the fields it is saving. -->
+            <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving your target…</p>
         </form>
     </SetupLayout>
 </template>

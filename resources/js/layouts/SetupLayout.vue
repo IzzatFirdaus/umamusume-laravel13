@@ -191,9 +191,9 @@ onMounted(async () => {
                 <!--
                   One exit, one label, in the wireframe's position: the HFW's stepper row carries the six
                   steps and nothing else, and the only leave-wizard control it draws is the head band's
-                  `Cancel` (`career-scenario.html:63`). The extra `Leave setup` link that used to sit at
-                  the end of this row printed a second name for the same destination on every step and
-                  appeared nowhere in the wireframe, so it is gone rather than restyled.
+                  `Cancel` (`career-scenario.html:63`). The extra exit link that used to sit at the end of
+                  this row printed a second name for the same destination on every step and appeared nowhere
+                  in the wireframe, so it is gone rather than restyled.
                 -->
                 <div class="stepper" role="list" data-setup-steps>
                     <span

@@ -242,6 +242,30 @@ const ancestorError = (index: number, slot: number): string | undefined =>
         <template #eyebrow>New career</template>
         <template #title>Legacy</template>
 
+        <!--
+          The HFW's head-band pair (`career-legacy.html:61-65`). Both doors used to live at the foot of the
+          form, below the ancestry graph, so the step's only exit sat after every panel on the page.
+
+          "Continue to deck" stays a navigation rather than becoming this step's submit: the write endpoint
+          redirects back to `career.legacy` to report the save, so a forward button that merely posted would
+          leave the Trainer on this step with a "saved" message and no way on. The write keeps its own
+          control beside the fields it writes.
+        -->
+        <template #actions>
+            <a
+                href="/career/setup/target"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel"
+            >
+                Back
+            </a>
+            <a
+                href="/career/setup/deck"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 font-semibold text-on-primary-action hover:bg-primary-action/90"
+            >
+                Continue to deck
+            </a>
+        </template>
+
         <!-- No breadcrumb: "← Back to legacy" pointed at this same URL, and its `Link` was never
              imported, so it rendered an empty `<nav aria-label="Breadcrumb">` and a resolve warning.
              The step bar above lists all six steps, so nothing is lost. Steps 1 and 2 carry the same
@@ -731,7 +755,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                 id="legacy-save"
                 type="button"
                 :disabled="form.processing"
-                class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action disabled:cursor-wait disabled:bg-disabled"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel disabled:cursor-wait disabled:opacity-60"
                 @click="saving"
             >
                 {{ form.processing ? 'Saving…' : 'Save Legacy' }}
@@ -739,23 +763,9 @@ const ancestorError = (index: number, slot: number): string | undefined =>
 
             <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving the Legacy…</p>
 
-            <!-- One filled action on this screen: the write. The forward door is a link, because
-                 advancing without writing would carry an unsaved ancestry into the deck step and the
-                 deck would compose against a parent the Trainer never recorded. The in-card
-                 "Choose a veteran" control is a select, not a second primary (recorded deviation from
-                 the literal HFW, where that control is a filled button). -->
-            <a
-                href="/career/setup/target"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
-            >
-                Back: Target
-            </a>
-            <a
-                href="/career/setup/deck"
-                class="inline-flex min-h-11 items-center font-medium text-ink underline"
-            >
-                Continue to deck
-            </a>
+            <!-- Both doors moved to the head band above (`#actions`), where the HFW draws them. What stood
+                 here was a "Back: Target" outline and an underlined "Continue to deck", below the ancestry
+                 graph and below the save button, so the step's exits sat after every panel on the page. -->
         </div>
     </SetupLayout>
 </template>
