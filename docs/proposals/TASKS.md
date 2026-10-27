@@ -740,7 +740,7 @@ Worktree `D:\Projects\td-release` at **`06642b9d`** (branch `master`), `node_mod
 | `php tools/lore.php` | **11 hits / 7 files**, none in shipped vocabulary; delta unknown (no baseline figure in context) |
 | `node tools/ui-framework-audit.mjs` | the `UNVERIFIED` path is pinned by `FrameworkAuditExitTest` (exit 2, reason printed); against a live server it is **not run** |
 | `php artisan test` (full, session tree) | **1994 passed, 15 failed, every failure attributed below — 0 this session's** |
-| `npx playwright test` (full, gate worktree) | **603 tests** — result recorded in the run note below |
+| `npx playwright test` (full, gate worktree) | **NOT COMPLETED — blocked.** 153 of 603 tests executed in ~50 minutes (0 green summary lines, 3 distinct failure shapes), then the single worker wedged on `career-scenario-select.spec.ts:297` for 15+ minutes with no progress and the run was stopped. §7.4 therefore does **not** pass, and per §7.6 the `3.0.0` tag is **not** re-cut this session |
 
 **Pest in a worktree is unusable on this host, recorded rather than worked around.** `php artisan test`
 inside `../td-release` produced 1589 instant failures with `A facade root has not been set`
@@ -797,10 +797,15 @@ sections; logs were written per run and quoted here rather than attached.
 session), `06642b9d` (encoding repair, dash removal, phpstan typing), plus the docs commit at the end.
 Tag: `3.0.0` deleted and re-cut per §1.2 — see the tag section above and the release note below.
 
-**7. The 46-baseline re-check.** Not produced as a table this session: the full browser suite is the only
-instrument that can name per-spec:line results, and its run is recorded below. Round 3's batch already
-showed `ura-panel`, `unity-cup-panel`, `trackblazer-panel` and `grand-concert-panel` green, which is 8+3+2
-of the 46; those remain closed.
+**7. The 46-baseline re-check.** **Not produced, and the full-suite gate is blocked.** The suite ran 153
+of 603 tests before the single worker wedged at `career-scenario-select.spec.ts:297` (a peer-owned ST-4
+spec) and was stopped; three failure shapes were seen before the wedge (`toHaveCount` resolved to 1,
+`toHaveAttribute` on `<span class="text-xs">N/A</span>`, and an `Event outcome incomplete - choose
+manually` pill), none attributable without a completed run. Round 3's batch already showed `ura-panel`,
+`unity-cup-panel`, `trackblazer-panel` and `grand-concert-panel` green, which closes 8+3+2 of the 46;
+those stay closed. **Consequence: `3.0.0` was deleted and is NOT re-cut — a tag on a tree whose
+full-suite gate has not run is the defect this session was created to prevent.** The re-cut is the next
+session's job, on a commit whose suite finishes.
 
 **8. Visual-verification blocker.** Screenshots remain unavailable; every acceptance criterion above is a
 DOM measurement (`getBoundingClientRect`, `getComputedStyle`, class tokens, text assertions), named per
@@ -819,7 +824,11 @@ five keys, S7.2's payload block, the corrected page for "Skip this moment"/"slot
 audit's exit code needing no erratum, and the two filed deviations.
 
 **12. Tag resolution.** Recorded at the top of this round-4 section with all four command outputs;
-`3.0.0` was deleted (`was 7d7f783b`, target `c2c72c13`) and is re-cut by §7.6 on the gated commit.
+`3.0.0` was deleted (`was 7d7f783b`, target `c2c72c13`). **It is not re-cut:** §7.4's full-suite gate did
+not complete (blocked, see §7), and §7.6 requires the gates. The repository is therefore left with **no
+`3.0.0` tag**, which is the honest state — a tag on unverified content was the defect this session
+existed to remove. Re-cutting it is a one-command job on the first commit whose full suite finishes:
+`git tag -a 3.0.0 -m "HFW parity, v3.0.0"`.
 
 **13. Deferred items.** A blocked (payload shape), B closed (landed on the Inheritance screen), C closed
 (date sourced from `config/scenarios.php`), D blocked (peer-dirty, mtimes recorded), E blocked (peer-dirty;
