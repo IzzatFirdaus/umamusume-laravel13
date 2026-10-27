@@ -168,6 +168,12 @@ return [
             'cap_bonus' => ['Speed' => 200, 'Stamina' => 200, 'Power' => 200, 'Guts' => 200, 'Wit' => 200],
             'widgets' => ['turn', 'energy', 'fans'],
             'steps' => ['training', 'outcome', 'skill'],
+            // The two composition tags the HFW's card draws (career-scenario.html:104-105). The card
+            // prints these plus the caps; the full matrix stays on Database / Scenarios. Listed here
+            // rather than derived from `panels` because the wireframe curates which two it draws — a
+            // derived "first two" would put Race calendar and Team races on Unity Cup where the mock
+            // names Team races and Team rank ladder. A fifth scenario supplies its own list (gate G-33).
+            'card_tags' => ['race_calendar', 'career_goals'],
             'panels' => [
                 'race_calendar' => true,
                 'team_race' => false,
@@ -366,6 +372,7 @@ return [
             'cap_bonus' => ['Speed' => 100, 'Stamina' => 100, 'Power' => 100, 'Guts' => 100, 'Wit' => 600],
             'widgets' => ['turn', 'energy', 'fans', 'team_rank', 'spirit_bursts'],
             'steps' => ['facility', 'training', 'team_race', 'outcome', 'skill'],
+            'card_tags' => ['team_race', 'team_rank_ladder'],
             'panels' => [
                 'race_calendar' => true,
                 'team_race' => true,
@@ -579,6 +586,7 @@ return [
             'cap_bonus' => ['Speed' => 0, 'Stamina' => 700, 'Power' => 0, 'Guts' => 0, 'Wit' => 300],
             'widgets' => ['turn', 'energy', 'fans', 'grade_points', 'shop_coins'],
             'steps' => ['training', 'shop', 'outcome', 'skill'],
+            'card_tags' => ['grade_objectives', 'shop'],
             'panels' => [
                 'race_calendar' => false,
                 'team_race' => false,
@@ -978,6 +986,9 @@ return [
             'cap_bonus' => ['Speed' => 400, 'Stamina' => 100, 'Power' => 100, 'Guts' => 300, 'Wit' => 100],
             'widgets' => ['turn', 'energy', 'fans'],
             'steps' => ['training', 'outcome', 'skill'],
+            // One panel tag here; the card's second tag is the `performance_input` flag below, which the
+            // page adds as its own tag because it is deliberately not a `panels` key.
+            'card_tags' => ['career_goals'],
             'panels' => [
                 'race_calendar' => false,
                 'team_race' => false,

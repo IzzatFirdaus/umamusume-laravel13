@@ -37,6 +37,8 @@ interface ScenarioCard {
     /** The scenario's turn-rail observation field, where it has one; stated as the "Performance input" tag. */
     performance_input: boolean;
     optimizes: Optimizes;
+    /** The two composition tags the card face prints (`config/scenarios.php` `card_tags`). */
+    card_tags: string[];
     systems: string[];
     resources: string[];
     loop: string[];
@@ -138,7 +140,7 @@ function continueStep(): void {
 </script>
 
 <template>
-    <SetupLayout :step="1" :visited="props.visited" :saved="props.saved" :choices="props.choices">
+    <SetupLayout :step="1" :visited="props.visited" :saved="props.saved">
         <Head title="Which scenario is this run?" />
         <template #head>
             <PageHeader
@@ -275,11 +277,11 @@ function continueStep(): void {
                      the caps print as the matrix states them, the outlier named rather than collapsed). -->
                 <div class="mt-3 flex flex-wrap gap-1.5">
                     <span
-                        v-for="system in card.systems"
-                        :key="`system-${system}`"
+                        v-for="tag in card.card_tags"
+                        :key="`compose-${tag}`"
                         data-region="tag"
                         class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink-muted"
-                    >{{ system }}</span>
+                    >{{ tag }}</span>
                     <span
                         v-if="card.performance_input"
                         data-region="tag"

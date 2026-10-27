@@ -75,12 +75,10 @@ test.describe('Scenario Selection', () => {
         // The caps print as the matrix states them: the shared value with its count, the outlier named
         // rather than collapsed to one number.
         //
-        // Two deliberate departures from the wireframe's own tag text, both on Trackblazer. The mock
-        // abbreviates the stat ("Caps Sta 1900 · Wit 1500") where the page spells it ("Stamina 1900"),
-        // and it omits the shared part ("1200 ×3") that every other card on the same page prints,
-        // including URA's "1400 ×5". The page is consistent across all four cards and reads from
-        // `ScenarioCaps`; the mock is the outlier here, so the assertion follows the page and the
-        // divergence is recorded rather than silently matched.
+        // HFW-OVERRIDE (sourced): caps string uses the sourced stat name and the shared base; the mock
+        // abbreviates and drops the base on this card (career-scenario.html:145 prints
+        // "Caps Sta 1900 · Wit 1500"). The page reads from `ScenarioCaps` and is consistent across all
+        // four cards, including URA's "1400 ×5", so the page is not corrected to the mock.
         await expect(card(page, 'URA Finale')).toContainText(/1400\s*×5/);
         await expect(card(page, 'Unity Cup')).toContainText(/1300\s*×4/);
         await expect(card(page, 'Unity Cup')).toContainText(/Wit\s*1800/);
@@ -94,6 +92,15 @@ test.describe('Scenario Selection', () => {
         // names both. This is the baseline-only statement the old case read out of the facts grid.
         await expect(card(page, 'Our Grand Concert').getByText('Career goals', { exact: true })).toBeVisible();
         await expect(card(page, 'Our Grand Concert').getByText('Performance input', { exact: true })).toBeVisible();
+
+        /*
+         * Four tag markers per card, which is exactly what the wireframe draws: the release date in the
+         * head row, then two composition tags and the caps in the tag row. The composition pair is
+         * `config/scenarios.php`'s `card_tags`, so a card cannot quietly grow a third again.
+         */
+        for (const name of CARDS) {
+            await expect(card(page, name).locator('[data-region="tag"]'), `${name} tag count`).toHaveCount(4);
+        }
     });
 
     test('states the documentation badge when the matrix records no guide', async ({ page }) => {
@@ -119,10 +126,10 @@ test.describe('Scenario Selection', () => {
         // Nothing is checked on a fresh draft, so the stored state is visible rather than implied.
         await expect(trackblazer).not.toBeChecked();
 
-        // The strip states the three carried choices, and says the scenario is unmade. This replaced
-        // the per-step "Stored choice:" line in 3.2, so the assertion moved with it.
-        await expect(page.locator('[data-field="choices-so-far"]')).toContainText('Scenario:');
-        await expect(page.locator('[data-field="choices-so-far"]').getByText('not chosen')).toHaveCount(3);
+        // No carried-choices strip on this step. `career-scenario.html` does not draw one, because on
+        // step 1 nothing has been carried yet, so the page no longer renders it. The strip stays on the
+        // steps whose wireframe does draw it (`career-profile.html`), and the empty state here is simply
+        // the unchecked group above.
 
         await trackblazer.focus();
         await expect(trackblazer).toBeFocused();
@@ -133,7 +140,6 @@ test.describe('Scenario Selection', () => {
         await expect(page.getByText('Scenario set.')).toBeVisible();
         await expect(trackblazer).toBeChecked();
         await expect(page.getByText('✓ Selected')).toBeVisible();
-        await expect(page.locator('[data-field="choices-so-far"]')).toContainText('Trackblazer');
         await expect(trackblazer).toBeFocused();
 
         // And it survives leaving the wizard entirely, which a client-only selection would not.
@@ -175,12 +181,10 @@ test.describe('Scenario Selection', () => {
 
         await concert.check();
         await expect(concert).toBeChecked();
-        await expect(page.locator('[data-field="choices-so-far"]')).toContainText('Our Grand Concert');
 
         await trackblazer.check();
         await expect(trackblazer).toBeChecked();
         await expect(concert).not.toBeChecked();
-        await expect(page.locator('[data-field="choices-so-far"]')).toContainText('Trackblazer');
 
         // Still on the step: changing the answer is not the same as committing it.
         await expect(page).toHaveURL(/\/career\/setup\/scenario$/);
@@ -313,6 +317,10 @@ test.describe('Scenario Selection', () => {
 
         // Wireframe-only artifacts are not ported at all (the instruction's exclusion list).
         await expect(page.locator('.keybox, .proto, .wfnav, .mockbar, .anno')).toHaveCount(0);
+
+        // And no carried-choices strip: `career-scenario.html` draws one only on the profile step, so
+        // this page stops supplying the shell's `choices` prop.
+        await expect(page.locator('[data-field="choices-so-far"]')).toHaveCount(0);
 
         /*
          * Card scale. The wireframe's card is 11-12 descendants and roughly 400 characters of prose;
