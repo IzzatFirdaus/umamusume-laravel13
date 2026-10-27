@@ -38,8 +38,8 @@ function firstTraineeId(db: DatabaseSync): number {
  * A run whose idle window is still open: `completes_at` ten minutes from now, so `isInProgress()` is
  * true and the dashboard renders the timer card.
  */
-export function seedInProgressSession(options: { policy?: string } = {}): SeededIndependentSession {
-    const { policy = 'balanced' } = options;
+export function seedInProgressSession(options: { policy?: string; mood?: string } = {}): SeededIndependentSession {
+    const { policy = 'balanced', mood = null } = options as { policy?: string; mood?: string | null };
     const db = new DatabaseSync(resolvedScratchDatabase());
     const now = new Date();
     const traineeId = firstTraineeId(db);
@@ -50,6 +50,15 @@ export function seedInProgressSession(options: { policy?: string } = {}): Seeded
             .run(traineeId, sqlTime(now), sqlTime(now));
 
         const runId = Number(run.lastInsertRowid);
+
+        // A logged turn, so the cockpit's state panel has a Mood tier to draw both columns for (§1.1.6).
+        // The five stats are NOT NULL on `turn_entries`, so the fixture states them rather than leaving
+        // the column to a default the migration does not declare.
+        db.prepare(
+            `INSERT INTO turn_entries
+                (training_run_id, turn, speed, stamina, power, guts, wit, mood, created_at, updated_at)
+             VALUES (?, 1, 600, 600, 600, 600, 600, ?, ?, ?)`,
+        ).run(runId, mood, sqlTime(now), sqlTime(now));
 
         db.prepare(
             `INSERT INTO independent_training_runs
