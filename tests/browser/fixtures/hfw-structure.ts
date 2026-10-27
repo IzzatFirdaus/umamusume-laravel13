@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test';
+import { saveShot } from './wizard-screenshots';
 
 /*
  * Structural parity between a rendered app route and its HFW wireframe, measured from the live DOM
@@ -83,6 +84,9 @@ export const MARKERS = [...SHELL_MARKERS, ...PAGE_MARKERS];
 export type CaptureOptions = {
     /** Restrict the marker vocabulary, e.g. `SHELL_MARKERS` for the shell-only case. */
     markers?: string[];
+    /** Screenshot slug; a shot is written only when `WIZARD_SCREENSHOTS=1` (see `wizard-screenshots.ts`). */
+    slug?: string;
+    side?: 'app' | 'hfw';
 };
 
 export async function capture(page: Page, selector: string, opts: CaptureOptions = {}): Promise<Structure> {
@@ -147,6 +151,10 @@ export async function capture(page: Page, selector: string, opts: CaptureOptions
         },
         { sel: selector, markerList: markers },
     );
+
+    if (process.env.WIZARD_SCREENSHOTS === '1' && opts.slug !== undefined && opts.side !== undefined) {
+        await saveShot(page, opts.slug, opts.side, page.viewportSize()?.width ?? 1280);
+    }
 
     return structure;
 }
