@@ -36,3 +36,13 @@ it('surfaces no idle window for a normal career', function (): void {
         ->assertInertia(fn (Assert $page) => $page
             ->where('activeCareer.indep', null));
 });
+
+it('abandons the idle session through the route', function (): void {
+    $run = TrainingRun::factory()->create(['status' => RunStatus::Active]);
+    IndependentTrainingRun::factory()->for($run, 'trainingRun')->create();
+
+    $this->post(route('runs.indep.abandon', $run))->assertRedirect(route('home'));
+
+    expect($run->fresh()->independentTrainingRun->abandoned_at)->not->toBeNull()
+        ->and($run->fresh()->status)->toBe(RunStatus::Retired);
+});

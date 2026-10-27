@@ -2,7 +2,7 @@
 import AppLayout from '../layouts/AppLayout.vue';
 import PageHeader from '../components/ui/PageHeader.vue';
 import { LinkButton } from '../components/Form';
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useVisitState } from '../composables/useVisitState';
 import { useLayout } from '../composables/useLayout';
@@ -58,7 +58,7 @@ interface ActiveCareer {
     resume_url: string;
     artworkURL: string | null;
     /** Independent Training overlay (§1.1.7), present when this run is an idle session. */
-    indep: { in_progress: boolean; completes_at: string | null; policy_label: string | null } | null;
+    indep: { in_progress: boolean; completes_at: string | null; policy_label: string | null; abandon_url: string } | null;
 }
 
 interface VeteranRow {
@@ -349,6 +349,13 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                                 <p class="mt-0.5 text-xs text-ink-muted">
                                     You cannot start another training until this one completes.
                                 </p>
+                                <button
+                                    type="button"
+                                    class="mt-1.5 inline-flex min-h-9 items-center rounded-md border border-rule bg-raised px-3 text-xs font-medium text-ink hover:bg-sunken transition-colors duration-150 ease-out"
+                                    @click="router.post(props.activeCareer.indep.abandon_url)"
+                                >
+                                    Give up
+                                </button>
                             </template>
                         </div>
                         <LinkButton :href="props.activeCareer.resume_url" variant="primary">Open cockpit</LinkButton>

@@ -200,6 +200,7 @@ Route::post('/training-runs/{run}/turns', [TrainingRunController::class, 'storeT
 Route::put('/training-runs/{run}/turns/{turn}', [TrainingRunController::class, 'updateTurn'])->name('runs.turns.update');
 Route::delete('/training-runs/{run}/turns/{turn}', [TrainingRunController::class, 'destroyTurn'])->name('runs.turns.destroy');
 Route::post('/training-runs/{run}/skills', [TrainingRunController::class, 'syncSkills'])->name('runs.skills.sync');
+Route::post('/training-runs/{run}/indep-abandon', [TrainingRunController::class, 'abandonIndependent'])->name('runs.indep.abandon');
 Route::post('/training-runs/{run}/deck', [TrainingRunController::class, 'syncDeck'])->name('runs.deck.sync');
 // The deck builder (SCREEN-007). Read-only; it posts to `runs.deck.sync` above, so the write and its
 // Form Request are the ones the run screen already uses. Registered after the POST because Laravel

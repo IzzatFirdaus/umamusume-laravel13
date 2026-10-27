@@ -192,7 +192,7 @@ class DashboardController extends Controller
      * reads `in_progress` to swap the Resume action for the 50-minute window; `completes_at` is an
      * ISO-8601 instant the client counts down from, and `policy_label` is the focus the Trainer fixed.
      *
-     * @return array{in_progress: bool, completes_at: string|null, policy_label: string|null}|null
+     * @return array{in_progress: bool, completes_at: string|null, policy_label: string|null, abandon_url: string}|null
      */
     private function independentStatus(TrainingRun $run): ?array
     {
@@ -206,6 +206,7 @@ class DashboardController extends Controller
             'in_progress' => $itr->isInProgress(),
             'completes_at' => $itr->completes_at?->toIso8601String(),
             'policy_label' => $itr->policy->label(),
+            'abandon_url' => route('runs.indep.abandon', $run),
         ];
     }
 

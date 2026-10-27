@@ -40,6 +40,7 @@ use App\Services\Career\CareerPositionLabel;
 use App\Services\CareerCalendar;
 use App\Services\DataPipeline\ArtworkMirror;
 use App\Services\DeckAnalysis;
+use App\Services\IndependentTraining\Lifecycle;
 use App\Services\PageSize;
 use App\Services\SupportCardEffects;
 use Illuminate\Http\RedirectResponse;
@@ -1090,6 +1091,22 @@ class TrainingRunController extends Controller
         }
 
         return redirect()->route('runs.skills.planner', $run)->with('status', 'Skill status saved.');
+    }
+
+    /**
+     * Abandon an in-progress Independent Training session (§1.1.7): the Trainer gives up the 50-minute
+     * window so another session can start. Idempotent — the `Lifecycle::abandon()` stamp ignores a run
+     * that already ended, and a normal career (no overlay) is a no-op rather than an error.
+     */
+    public function abandonIndependent(TrainingRun $run): RedirectResponse
+    {
+        $itr = $run->independentTrainingRun;
+
+        if ($itr !== null) {
+            (new Lifecycle)->abandon($itr);
+        }
+
+        return redirect()->route('home')->with('status', 'Independent Training session abandoned.');
     }
 
     /**
