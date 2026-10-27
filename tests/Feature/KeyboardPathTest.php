@@ -58,10 +58,12 @@ it('carries the product navigation into the wizard without duplicating the shell
     expect($wizard)->toContain('<AppLayout>')
         ->and($wizard)->not->toContain('href="#main"')
         ->and($wizard)->not->toContain('<main id="main"')
-        // The step bar stays as the wizard's own sub-navigation, labelled, with its way out.
+        // The step bar stays as the wizard's own sub-navigation and stays labelled. It no longer
+        // carries a way out: the wireframe puts the one leave-wizard control in the head band
+        // (`career-scenario.html:63`), so a second `Leave setup` link was a duplicate exit and was cut
+        // in the 2026-10-27 parity audit. The keyboard path out is the head band's `Cancel`.
         ->and($wizard)->toContain('aria-label="Setup steps"')
         ->and($wizard)->toContain('aria-current')
-        ->and($wizard)->toContain('Leave setup')
         // ...and the shell it inherits is the §41 bar: four slots plus a More disclosure, never the
         // whole sidebar in a scrolling strip. Matched on class attributes, because AppLayout's own
         // comment quotes the utility to explain why it is gone.

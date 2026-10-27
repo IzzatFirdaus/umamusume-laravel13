@@ -83,6 +83,16 @@ class BuildTargetController extends Controller
             'statOrder' => array_values((array) config('scenarios.stat_order')),
             'purposeOptions' => $this->purposeOptions(),
             'distanceBands' => BuildTargetPayload::DISTANCE_BANDS,
+            // Each band's coaching emphasis, as the wireframe prints it beside the radio
+            // (`career-target.html:147-156`). It arrives from the server because the page holds no
+            // band vocabulary of its own: `CareerBuildTargetTest` refuses a scenario or stat name in
+            // the component, and these sentences name both the band and the stat the band leans on.
+            'distanceBandNotes' => [
+                'Sprint' => '1400 m and under · Speed-first',
+                'Mile' => '1401–1800 m · Speed-first, stamina as insurance',
+                'Medium' => '1801–2400 m · Speed plus the stamina to finish',
+                'Long' => '2401 m and up · all five stats high',
+            ],
             'surfaces' => BuildTargetPayload::SURFACES,
             'styles' => BuildTargetPayload::STYLES,
             'scenarioLabel' => SetupDraft::scenarioLabel(),

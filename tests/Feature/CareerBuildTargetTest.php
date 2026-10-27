@@ -331,6 +331,25 @@ it('keeps every scenario name and target vocabulary out of the step-3 components
     foreach ($sources as $path) {
         $source = (string) file_get_contents(base_path($path));
 
+        /*
+         * The wireframe's own prose, subtracted before the scan.
+         *
+         * `career-target.html` titles one card "Stamina floor" and asks for the distance "before
+         * recommending a Medium or Long race"; the 2026-10-27 parity audit made the page print both
+         * sentences verbatim. They name a stat and two bands as English, not as option values, and the
+         * gate's subject is the option values: a hardcoded list is what drifts from `BuildTargetPayload`.
+         * Everything else in the file stays checked — the radios take their band names from
+         * `props.distanceBands` and their sentences from `props.distanceBandNotes`.
+         */
+        $source = str_replace(
+            [
+                'Stamina floor',
+                'What the advisor checks before recommending a Medium or Long race.',
+            ],
+            '',
+            $source,
+        );
+
         $violations = array_values(array_filter(
             $scenarioNames,
             static fn (string $name): bool => $repeats($source, $name),

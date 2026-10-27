@@ -21,8 +21,6 @@
  * of its own screen needs it, and because a named absence is the honest answer rather than a dead link.
  */
 import AppLayout from './AppLayout.vue';
-import ChoicesSoFar from '../components/career/ChoicesSoFar.vue';
-import { Link } from '@inertiajs/vue3';
 import { computed, onMounted, nextTick } from 'vue';
 import { useLayout } from '../composables/useLayout';
 
@@ -31,8 +29,13 @@ const props = defineProps<{
     visited?: number[];
     saved?: number[];
     /**
-     * The three carried choices, from `SetupDraft::summary()`. Optional so a wizard step that has not
-     * adopted the strip renders exactly as before rather than showing an empty bar.
+     * Accepted and unused. `SetupDraft::summary()` still composes it and the controllers still send
+     * it, but no career setup wireframe draws a carried-choices strip (`career-scenario.html`,
+     * `career-trainee.html`, `career-target.html`, `career-legacy.html`, `career-deck.html` and
+     * `career-preflight.html` were each searched for one and none has it), so the shell stopped
+     * rendering it. The prop stays declared so the six controllers keep one shape while the strip's
+     * remaining home is decided; dropping it here first would have been a controller change made to
+     * suit a layout.
      */
     choices?: { label: string; value: string | null; url: string | null }[];
 }>();
@@ -48,17 +51,20 @@ const wrapperClass = computed(() => {
     return `${layoutWidthClass.value} mx-auto w-full`;
 });
 
+/*
+ * The six step names are the wireframe's own words, not this layout's (`career-scenario.html:73-78`):
+ * "Build target" and "Deck", not "Your target" and "Support deck". The step bar is the HFW's status
+ * readout, so its labels are read off the HFW rather than paraphrased here — a paraphrased label makes
+ * the same step print two names on one screen, because the head band's `h1` uses the page's own title.
+ */
 const steps = [
     { label: 'Scenario' },
     { label: 'Trainee' },
-    { label: 'Your target' },
+    { label: 'Build target' },
     { label: 'Legacy' },
-    { label: 'Support deck' },
+    { label: 'Deck' },
     { label: 'Preflight' },
 ];
-
-const leaveLink =
-    'inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
 
 const isCompleted = (index: number): boolean =>
     (props.visited?.includes(index + 1) === true || props.saved?.includes(index + 1) === true) && index + 1 !== props.step;
@@ -182,20 +188,24 @@ onMounted(async () => {
              with everything else. `tests/browser/containment.spec.ts` pins the current behaviour. -->
         <div :class="wrapperClass" class="canvas @container" data-layout-container data-region="canvas">
             <nav aria-label="Setup steps" class="mb-4">
-                <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
-                    <div class="stepper" role="list" data-setup-steps>
-                        <span
-                            v-for="(item, index) in steps"
-                            :key="item.label"
-                            role="listitem"
-                            :class="['step', ...stepClass(index)]"
-                            :aria-current="index + 1 === props.step ? 'step' : undefined"
-                            :aria-label="item.label"
-                        >
-                            <span class="n" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
-                        </span>
-                    </div>
-                    <Link href="/" :class="leaveLink">Leave setup</Link>
+                <!--
+                  One exit, one label, in the wireframe's position: the HFW's stepper row carries the six
+                  steps and nothing else, and the only leave-wizard control it draws is the head band's
+                  `Cancel` (`career-scenario.html:63`). The extra `Leave setup` link that used to sit at
+                  the end of this row printed a second name for the same destination on every step and
+                  appeared nowhere in the wireframe, so it is gone rather than restyled.
+                -->
+                <div class="stepper" role="list" data-setup-steps>
+                    <span
+                        v-for="(item, index) in steps"
+                        :key="item.label"
+                        role="listitem"
+                        :class="['step', ...stepClass(index)]"
+                        :aria-current="index + 1 === props.step ? 'step' : undefined"
+                        :aria-label="item.label"
+                    >
+                        <span class="n" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
+                    </span>
                 </div>
 
                 <div class="step-legend" aria-hidden="true">
@@ -205,14 +215,6 @@ onMounted(async () => {
                     <span><i class="l-current" />Current</span>
                 </div>
             </nav>
-
-            <!--
-              What the Trainer has already decided, above the step they are on. The three steps that
-              landed first each printed their own "Stored choice:" line, so a Trainer on step 4 could
-              see step 1's answer but not step 2's; this states all three on every step. Renders only
-              when a page supplies `choices`, so a step that has not adopted it is unchanged.
-            -->
-            <ChoicesSoFar v-if="props.choices" :choices="props.choices" />
 
             <slot />
         </div>

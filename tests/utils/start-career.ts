@@ -66,22 +66,17 @@ export async function walkWizard(
     await traineeButton.click();
     await expect(traineeButton).toHaveAttribute('aria-pressed', 'true', WRITE);
 
-    // The chosen trainee's name, read back from the strip the wizard actually renders.
+    // The chosen trainee's name, read back from the echo card the wizard actually renders.
     //
-    // Dated note 2026-10-20 (isolated worktree, first real run): both halves of this read were wrong
-    // and neither had ever executed. The locator waited on a `Stored choice:` line that 3.1 and 3.2
-    // had already replaced with `ChoicesSoFar`'s `choices-so-far` strip, and the name is the strip's
-    // LINK text (the trainee choice carries a url), not the `<strong>` the retired private walks
-    // looked for. The four walks were verified-by-read only until the worktree built a bundle, so the
-    // stale read shipped in 8a1f167 unchallenged. The strip is the contract; the `a, strong` selector
-    // covers both branches the component has.
-    const strip = page.locator('[data-field="choices-so-far"]');
-    await strip.waitFor();
-    const traineeName = (
-        await strip.locator('span', { hasText: 'Trainee:' }).first().locator('a, strong').first().textContent()
-    )?.trim() ?? '';
+    // Dated note 2026-10-27 (wizard parity audit, Phase A): the carried-choices strip this used to read
+    // (`[data-field="choices-so-far"]`) was cut from `SetupLayout`, because no career setup wireframe
+    // draws one. The echo card is the page's own statement of the same fact and predates the strip, so
+    // the read moved there rather than the strip staying for the helper's benefit.
+    const echo = page.locator('[data-field="selected-trainee"]');
+    await echo.waitFor();
+    const traineeName = (await echo.locator('p').first().innerText()).trim();
 
-    expect(traineeName, 'the choices strip names no trainee after the pick').not.toBe('');
+    expect(traineeName, 'the selection echo names no trainee after the pick').not.toBe('');
 
     await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();

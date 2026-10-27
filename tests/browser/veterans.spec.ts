@@ -225,7 +225,7 @@ test('says the library holds nothing filed rather than showing a blank list', as
         // One main region: the wizard must not re-declare the shell's landmarks.
         await expect(page.getByRole('main')).toHaveCount(1);
         await expect(page.getByRole('link', { name: 'Skip to content' })).toHaveCount(1);
-        await expect(page.getByRole('link', { name: 'Leave setup' })).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Cancel' })).toBeVisible();
     });
 });
 

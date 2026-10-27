@@ -24,7 +24,6 @@
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
-import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import SubCell from '../../components/SubCell.vue';
 import { BaseSelect, BaseInput, BaseButton } from '../../components/Form';
 import { Head, Link, useForm } from '@inertiajs/vue3';
@@ -70,6 +69,11 @@ const props = defineProps<{
     statOrder: string[];
     purposeOptions: SelectOption[];
     distanceBands: string[];
+    /**
+     * Each band's own sentence, printed beside its radio. Composed by the controller because the page
+     * may not name a band or a stat (`CareerBuildTargetTest` enforces that), and the sentence does both.
+     */
+    distanceBandNotes: Record<string, string>;
     surfaces: string[];
     styles: string[];
     scenarioLabel: string | null;
@@ -138,8 +142,6 @@ const form = useForm<{
     cap_power: ceilingField('cap_power'),
     cap_guts: ceilingField('cap_guts'),
 });
-
-const newSkill = ref('');
 
 const errors = computed<Record<string, string | undefined>>(
     () => form.errors as Record<string, string | undefined>,
@@ -221,12 +223,6 @@ const percent = (stat: string): number => {
     return Math.min(100, Math.max(0, Math.round((value / ceiling) * 100)));
 };
 
-const enteredLabel = (stat: string): string => {
-    const value = entered(stat);
-
-    return value === null ? 'N/A' : `${value} of ${cap(stat)}`;
-};
-
 /** The sum of the five entered targets, or null while any one of them is still empty. */
 const totalTarget = computed((): number | null => {
     const values = props.statOrder.map((stat) => entered(stat));
@@ -237,58 +233,6 @@ const totalTarget = computed((): number | null => {
 /** The sum of the five caps this run is bounded by: the denominator the total is read against. */
 const totalCap = computed((): number => props.statOrder.reduce((sum, stat) => sum + cap(stat), 0));
 
-
-const capTitle = (stat: string): string => {    if (props.scenarioPending) {
-        return 'No scenario is chosen yet, so this is the base cap with no scenario bonus.';
-    }
-
-    // An entered ceiling outranks the matrix, and the two figures are different claims: one is what the
-    // Trainer read off the client, the other what the scenario publishes (`ADR-0025`).
-    return props.enteredCaps[capColumn(stat)] === undefined || props.enteredCaps[capColumn(stat)] === null
-        ? 'The chosen scenario’s ceiling for this stat, the same number the write enforces.'
-        : `The ceiling entered for this run, the same number the write enforces. The scenario itself publishes ${props.scenarioCaps[stat]}.`;
-};
-
-const optionLabel = (options: SelectOption[], value: string): string | null =>
-    options.find((option) => option.value === value)?.label ?? null;
-
-/**
- * The published figure under each ceiling field. A ceiling the Trainer enters replaces it for this run
- * and nothing here recomputes it (`ADR-0025`).
- */
-const scenarioTitle = computed((): string =>
-    props.scenarioPending
-        ? 'The base cap with no scenario bonus, because no scenario is chosen yet. `config/scenarios.php` is the source.'
-        : 'What this scenario publishes in `config/scenarios.php`. An entered ceiling replaces it for this run.',
-);
-
-/** One sentence from the entered values alone; an empty field is named, never omitted. */
-const summary = computed((): string => {
-    const clauses: string[] = [];
-
-    const purpose = optionLabel(props.purposeOptions, form.purpose);
-    clauses.push(purpose === null ? 'Purpose not chosen yet' : `Purpose ${purpose}`);
-
-    clauses.push(form.distance === '' ? 'distance not chosen yet' : `distance ${form.distance}`);
-    clauses.push(form.surface === '' ? 'surface not chosen yet' : `surface ${form.surface}`);
-    clauses.push(form.style === '' ? 'style not chosen yet' : `style ${form.style}`);
-
-    const stats = props.statOrder
-        .map((stat) => {
-            const value = entered(stat);
-            return `${stat} ${value === null ? 'not entered' : value}`;
-        })
-        .join(', ');
-    clauses.push(stats);
-
-    clauses.push(
-        form.skill_priorities.length === 0
-            ? 'skills in order: none listed yet'
-            : `skills in order: ${form.skill_priorities.join(', ')}`,
-    );
-
-    return `${clauses.join('; ')}.`;
-});
 
 /**
  * Fills the five stat fields from the Trainer's stored defaults. Only ever called from the explicit
@@ -310,30 +254,6 @@ function applyDefaults(): void {
     });
 }
 
-function addSkill(): void {    const name = newSkill.value.trim();
-
-    if (name === '') {
-        return;
-    }
-
-    form.skill_priorities.push(name);
-    newSkill.value = '';
-}
-
-function move(index: number, delta: number): void {
-    const target = index + delta;
-
-    if (target < 0 || target >= form.skill_priorities.length) {
-        return;
-    }
-
-    const [name] = form.skill_priorities.splice(index, 1);
-    form.skill_priorities.splice(target, 0, name);
-}
-
-function removeAt(index: number): void {
-    form.skill_priorities.splice(index, 1);
-}
 </script>
 
 <template>
@@ -355,48 +275,20 @@ function removeAt(index: number): void {
             nothing to measure a turn against. Filling these in is what makes the run's progress answerable.
         </div>
 
-        <p class="max-w-3xl text-sm text-ink-muted">
-            The target is what this career is built to reach. It is entered as one object and replaced
-            as one object, and it lives in this setup draft until Preflight creates the run.
-        </p>
+        <!--
+          The page is the wireframe's page and nothing else (`career-target.html:87-195`): the warn band,
+          then `.g-side` — stat targets with their totals on the left; distance, stamina floor and the
+          saved default on the right. Four blocks the app used to add around that shell are gone, each
+          because the HFW does not draw it: a `Summary` card that restated the whole form as one
+          sentence; a "Scenario: … Back: Trainee / Change scenario" line duplicating the step bar's
+          doors; a "What the career is for" fieldset (purpose / distance / surface / style); and a
+          "Skill priorities" fieldset, which belongs to the post-wizard Skills Planner.
 
-        <section aria-labelledby="target-summary-heading" class="mt-3 rounded-lg border border-rule bg-panel p-4">
-            <h2 id="target-summary-heading" class="text-lg font-semibold text-ink-strong">Summary</h2>
-            <p class="mt-2 text-sm text-ink">
-                {{ summary }}
-                <ProvenanceBadge
-                    state="calculated"
-                    title="assembled by this tool from the values entered on this form, not a stored fact"
-                />
-            </p>
-        </section>
-
-        <p class="mt-3 text-sm text-ink">
-            Scenario:
-            <strong v-if="props.scenarioLabel" class="text-ink-strong">{{ props.scenarioLabel }}</strong>
-            <AbsenceValue
-                v-else
-                compact
-                reason="No scenario has been chosen in this setup draft yet, so every cap below is the base cap with no scenario bonus."
-            />
-            <Link
-                href="/career/setup/trainee"
-                class="ml-3 inline-flex min-h-11 items-center rounded-md px-2 text-sm text-ink underline"
-            >
-                Back: Trainee
-            </Link>
-            <Link
-                href="/career/setup/scenario"
-                class="ml-3 inline-flex min-h-11 items-center rounded-md px-2 text-sm text-ink underline"
-            >
-                Change scenario
-            </Link>
-        </p>
-
-        <p
-            v-if="props.target === null"
-            class="mt-3 text-sm text-ink-muted"
-        >
+          Nothing the write needs is dropped with them: the four values keep travelling in the form
+          payload (`BuildTargetPayload::KEYS` is untouched) and distance is asked for by the radio
+          group below, which is where the HFW asks for it.
+        -->
+        <p v-if="props.target === null" class="mt-3 text-sm text-ink-muted">
             No target is recorded yet. The fields below start empty rather than at zero.
         </p>
 
@@ -414,10 +306,25 @@ function removeAt(index: number): void {
             -->
             <div class="grid gap-6 min-[821px]:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
             <div class="space-y-6">
-            <fieldset data-region="card" class="rounded-lg border border-rule bg-panel p-4">
-                <legend class="px-1 text-lg font-semibold text-ink-strong">What the career is for</legend>
+            <!--
+              HFW-OVERRIDE (required by the write): purpose, surface and style are asked for here although
+              `career-target.html` draws no such fieldset.
 
-                <div class="grid gap-4 min-[821px]:grid-cols-2">
+              `StoreBuildTargetRequest::rules()` makes all four of `purpose`, `distance`, `surface` and
+              `style` `required` the moment any stat carries a number, because `payload()` stores them and
+              a target with no purpose is a stat list with no reason behind it. Deleting this fieldset would
+              therefore leave a Trainer able to type five numbers and no way to satisfy the refusal: the
+              page would render a form the server always rejects, and career creation would stop. That is a
+              domain change (relaxing the request, or giving the wizard a default for each) and not a
+              layout cut, so the fields stay and the divergence is recorded rather than silently created.
+
+              `distance` is the one of the four the HFW does ask for, as the radio group in the Distance
+              card below, so it is NOT repeated here; the group owns it and posts the same field name.
+            -->
+            <section data-region="card" class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="target-purpose-heading">
+                <h2 id="target-purpose-heading" class="text-lg font-semibold text-ink-strong">What the career is for</h2>
+
+                <div class="mt-2 grid gap-4 min-[821px]:grid-cols-2">
                     <BaseSelect
                         v-model="form.purpose"
                         :id="controlId('purpose')"
@@ -425,14 +332,6 @@ function removeAt(index: number): void {
                         label="Purpose"
                         :options="[{ value: '', label: 'Not chosen yet' }, ...props.purposeOptions]"
                         :aria-describedby="describedBy('purpose')"
-                    />
-                    <BaseSelect
-                        v-model="form.distance"
-                        :id="controlId('distance')"
-                        name="distance"
-                        label="Distance"
-                        :options="[{ value: '', label: 'Not chosen yet' }, ...props.distanceBands.map(b => ({ value: b, label: b }))]"
-                        :aria-describedby="describedBy('distance')"
                     />
                     <BaseSelect
                         v-model="form.surface"
@@ -452,41 +351,17 @@ function removeAt(index: number): void {
                     />
                 </div>
 
-                <p
-                    v-if="errorOf('purpose')"
-                    :id="errorId('purpose')"
-                    role="alert"
-                    class="mt-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-ink"
-                >{{ errorOf('purpose') }}</p>
-                <p
-                    v-if="errorOf('distance')"
-                    :id="errorId('distance')"
-                    role="alert"
-                    class="mt-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-ink"
-                >{{ errorOf('distance') }}</p>
-                <p
-                    v-if="errorOf('surface')"
-                    :id="errorId('surface')"
-                    role="alert"
-                    class="mt-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-ink"
-                >{{ errorOf('surface') }}</p>
-                <p
-                    v-if="errorOf('style')"
-                    :id="errorId('style')"
-                    role="alert"
-                    class="mt-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-ink"
-                >{{ errorOf('style') }}</p>
+                <p v-if="errorOf('purpose')" role="alert" class="mt-2 text-sm text-risk">{{ errorOf('purpose') }}</p>
+                <p v-if="errorOf('surface')" role="alert" class="mt-2 text-sm text-risk">{{ errorOf('surface') }}</p>
+                <p v-if="errorOf('style')" role="alert" class="mt-2 text-sm text-risk">{{ errorOf('style') }}</p>
+            </section>
 
-                <!-- The design brief names six purposes and the stored enum holds four. The gap
-                     is stated rather than filled with an option the write would refuse. -->
-            </fieldset>
-
-            <fieldset data-region="card" class="rounded-lg border border-rule bg-panel p-4">
-                <legend class="px-1 text-lg font-semibold text-ink-strong">Stat targets & ceilings</legend>
+            <section data-region="card" class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="stat-targets-heading">
+                <h2 id="stat-targets-heading" class="text-lg font-semibold text-ink-strong">Stat targets</h2>
 
                 <p class="text-sm text-ink-muted">
-                    Target is the number you aim for this run. Ceiling is the highest the client shows;
-                    leave empty to keep the scenario's published figure.
+                    Each target is compared against the run's scenario cap, so a target above the cap is
+                    refused at preflight rather than silently clipped.
                 </p>
 
                 <div class="mt-4 space-y-4">
@@ -512,35 +387,20 @@ function removeAt(index: number): void {
                                 value-class="font-mono text-ink tabular-nums"
                                 :error="errorOf(`targets.${stat}`)"
                             />
-                            <!-- The denominator sits inside the field's own group: the value and the cap it
-                                 is read against are one claim, so they print together rather than in a
-                                 column header the Trainer has to match up. -->
+                            <!--
+                              The wireframe's field is one label, one number, its denominator and its
+                              share of the cap (`career-target.html:101-125`). The three lines this cell
+                              used to add — a second copy of the cap, a bar restating the same figure,
+                              and a named absence standing where the number goes — all said what the
+                              denominator already says, so they are gone and an empty field is simply
+                              empty.
+                            -->
                             <span class="font-mono text-xs text-ink-muted tabular-nums" data-field="denominator">
                                 {{ entered(stat) ?? '—' }} / {{ cap(stat) }} cap
                             </span>
                             <span class="text-xs text-ink-muted" data-field="percent-of-cap">
                                 <template v-if="entered(stat) !== null">{{ percent(stat) }}% of cap</template>
                                 <template v-else>not entered, so no share of the cap is claimed</template>
-                            </span>
-                            <span class="text-xs text-ink-muted" :title="capTitle(stat)">Cap {{ cap(stat) }}</span>
-
-                            <span class="flex flex-wrap items-center gap-2">
-                                <span v-if="entered(stat) !== null" class="flex flex-wrap items-center gap-2">
-                                    <span class="h-2 w-36 overflow-hidden rounded-md bg-sunken" aria-hidden="true">
-                                        <span
-                                            class="block h-full bg-chrome"
-                                            :data-fill="percent(stat)"
-                                            :style="{ width: `${percent(stat)}%` }"
-                                        ></span>
-                                    </span>
-                                    <span class="font-mono text-xs text-ink tabular-nums">{{ enteredLabel(stat) }}</span>
-                                </span>
-                                <AbsenceValue
-                                    v-else
-                                    compact
-                                    class="font-mono"
-                                    reason="No target entered for this stat yet."
-                                />
                             </span>
                         </div>
 
@@ -561,9 +421,6 @@ function removeAt(index: number): void {
                                 class="w-full"
                                 :error="errorOf(capColumn(stat))"
                             />
-                            <span class="text-xs text-ink-muted" :title="scenarioTitle">
-                                Scenario publishes {{ props.scenarioCaps[stat] }}
-                            </span>
                         </div>
                         <!-- Placeholder for stats without ceiling (the fifth stat) to keep grid alignment -->
                         <div v-else class="space-y-1">
@@ -578,13 +435,27 @@ function removeAt(index: number): void {
                     role="alert"
                     class="mt-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-ink"
                 >{{ errors.targets }}</p>
-            </fieldset>
+            </section>
 
             <!-- The totals block: what the entered figures add up to, beside the one published build the
                  page names and the ceiling the five caps sum to. Three different claims, three rows, and
                  the note says which one is a requirement (none of them is). -->
-            <section data-region="card" class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="target-totals">
-                <h2 id="target-totals" class="text-lg font-semibold text-ink-strong">Totals</h2>
+            <!--
+              The totals block is the third part of the wireframe's Stat targets card, not a card of its
+              own (`career-target.html:128-138` nests it inside). It keeps its own element so the rows can
+              be read as a group, but it no longer claims `data-region="card"`: a card marker here made the
+              page render five cards where the HFW draws four.
+            -->
+            <section class="rounded-lg border border-rule bg-panel p-4" aria-label="Total against the published sample">
+                <!--
+                  The wireframe labels this block "Total against the published sample" and gives it no
+                  heading of its own (`career-target.html:128-138`): it is the third part of the Stat
+                  targets card, not a card called "Totals". The `h2` went with the name, so the card
+                  count and the heading order now match the HFW's four cards.
+                -->
+                <p class="text-[10px] font-extrabold uppercase tracking-[0.07em] text-ink-muted">
+                    Total against the published sample
+                </p>
 
                 <div class="mt-2" data-field="target-totals">
                     <div class="srow">
@@ -616,11 +487,39 @@ function removeAt(index: number): void {
                  warning band: the page states a source disagreement rather than refusing a submit. -->
             <div class="space-y-6">
             <section data-region="card" class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="distance-bands">
-                <h2 id="distance-bands" class="text-lg font-semibold text-ink-strong">Distance bands</h2>
+                <h2 id="distance-bands" class="text-lg font-semibold text-ink-strong">Distance</h2>
+                <p class="text-sm text-ink-muted">Sets the stamina floor the advisor warns about before a race.</p>
 
-                <ul class="mt-2 flex flex-wrap gap-1.5 text-xs">
-                    <li v-for="band in props.distanceBands" :key="band" class="pill pill-outline">{{ band }}</li>
-                </ul>
+                <!--
+                  The wireframe asks for the distance as a radio group with each band's own sentence
+                  beside it (`career-target.html:141-158`), not as a row of pills: the choice is one of
+                  four and only one can hold, which is what a radio group means to a keyboard and a
+                  screen reader. The bands themselves still arrive from the server, so the descriptions
+                  are looked up by band name and a fifth band renders with its name and no sentence
+                  rather than with an invented one.
+                -->
+                <fieldset class="mt-2">
+                    <legend class="sr-only">Distance</legend>
+                    <div class="flex flex-col gap-1.5">
+                        <label
+                            v-for="band in props.distanceBands"
+                            :key="band"
+                            class="flex items-center gap-2 text-sm text-ink"
+                        >
+                            <input
+                                v-model="form.distance"
+                                type="radio"
+                                name="distance"
+                                :value="band"
+                                class="accent-chrome"
+                            >
+                            {{ band }}
+                            <span v-if="props.distanceBandNotes[band]" class="text-xs text-ink-muted">{{ props.distanceBandNotes[band] }}</span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <p v-if="errorOf('distance')" role="alert" class="mt-2 text-sm text-risk">{{ errorOf('distance') }}</p>
 
                 <p class="note mt-2" data-field="distance-conflict">
                     <b>1400 m is disputed.</b>
@@ -634,7 +533,9 @@ function removeAt(index: number): void {
 
             <!-- The stamina floor per band, read from the scenario's own stanza rather than restated. -->
             <section data-region="card" class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="distance-floor">
-                <h2 id="distance-floor" class="text-lg font-semibold text-ink-strong">Floor per distance band</h2>
+                <h2 id="distance-floor" class="text-lg font-semibold text-ink-strong">Stamina floor</h2>
+
+                <p class="text-sm text-ink-muted">What the advisor checks before recommending a Medium or Long race.</p>
 
                 <table v-if="Object.keys(props.finaleTargets.staminaByDistance).length > 0" class="mt-2 w-full text-sm">
                     <thead>
@@ -659,87 +560,6 @@ function removeAt(index: number): void {
                     the floor the finale expects, not a target to overshoot.
                 </p>
             </section>
-            </div>
-            </div>
-
-            <fieldset data-region="card" class="rounded-lg border border-rule bg-panel p-4">
-                <legend class="px-1 text-lg font-semibold text-ink-strong">Skill priorities</legend>
-
-                <p class="text-sm text-ink-muted">
-                    An ordered list of skill names, most important first. Reorder with the buttons; no
-                    drag is required.
-                </p>
-
-                <div class="mt-3 flex flex-wrap items-end gap-2">
-                    <BaseInput
-                        v-model="newSkill"
-                        :id="controlId('skill_priorities')"
-                        type="text"
-                        name="skill_name"
-                        maxlength="255"
-                        label="Skill name"
-                        :aria-describedby="describedBy('skill_priorities')"
-                        placeholder="Enter skill name"
-                    />
-                    <BaseButton type="button" variant="secondary" :disabled="newSkill.trim() === ''" @click="addSkill">
-                        Add
-                    </BaseButton>
-                </div>
-
-                <ol v-if="form.skill_priorities.length > 0" class="mt-4 space-y-2">
-                    <li
-                        v-for="(name, index) in form.skill_priorities"
-                        :key="`${index}-${name}`"
-                        class="flex flex-wrap items-center gap-2"
-                        data-skill-row
-                    >
-                        <span class="font-mono text-sm text-ink-muted tabular-nums">{{ index + 1 }}.</span>
-                        <span class="mr-auto text-sm text-ink-strong">{{ name }}</span>
-                        <button
-                            type="button"
-                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm text-ink hover:bg-raised disabled:cursor-not-allowed disabled:opacity-60 transition-colors duration-150 ease-out"
-                            :disabled="index === 0"
-                            :aria-label="`Move ${name} up`"
-                            @click="move(index, -1)"
-                        >
-                            Move up
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm text-ink hover:bg-raised disabled:cursor-not-allowed disabled:opacity-60 transition-colors duration-150 ease-out"
-                            :disabled="index === form.skill_priorities.length - 1"
-                            :aria-label="`Move ${name} down`"
-                            @click="move(index, 1)"
-                        >
-                            Move down
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm text-ink hover:bg-raised transition-colors duration-150 ease-out"
-                            :aria-label="`Remove ${name}`"
-                            @click="removeAt(index)"
-                        >
-                            Remove
-                        </button>
-                    </li>
-                </ol>
-                <p v-else class="mt-3 text-sm text-ink-muted">No skill priorities listed yet.</p>
-
-                <p
-                    v-if="errorOf('skill_priorities')"
-                    :id="errorId('skill_priorities')"
-                    role="alert"
-                    class="mt-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-ink"
-                >{{ errorOf('skill_priorities') }}</p>
-
-                <!-- The design also asks for a risk tolerance and per-skill marks. Both would be
-                     stored-shape changes (`BuildTargetPayload::KEYS` is exactly six keys), so they
-                     are named here rather than offered as fields the write would refuse. -->
-                <p class="mt-3 text-xs text-ink-muted">
-                    A risk tolerance and per-skill marks (Required, High, Optional, Ignore) are not
-                    recorded yet.
-                </p>
-            </fieldset>
 
             <!-- The wireframe's fourth card: the saved default is a preference the Trainer applies, not this
                  run's target. Its three preset buttons are deliberately not built: `statDefaults` holds one
@@ -769,6 +589,8 @@ function removeAt(index: number): void {
                     </template>
                 </p>
             </section>
+            </div>
+            </div>
 
             <div class="flex flex-wrap items-center gap-3">
                 <BaseButton type="submit" variant="primary" :disabled="form.processing">

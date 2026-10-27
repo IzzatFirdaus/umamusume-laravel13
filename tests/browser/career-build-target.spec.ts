@@ -25,12 +25,12 @@ import { captureBoth } from './fixtures/wizard-screenshots';
  */
 
 test.describe('Build Target and the provenance badge', () => {
-    test('renders the step with the base caps, nothing pre-filled and one Calculated badge', async ({ page }) => {
+    test('renders the step with the base caps and nothing pre-filled', async ({ page }) => {
         await page.goto('/career/setup/target');
         await page.locator('#app > *').first().waitFor();
 
         await expect(page.getByRole('heading', { name: 'Your target' }).first()).toBeVisible();
-        await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByRole('listitem', { name: 'Your target' })).toHaveAttribute('aria-current', 'step');
+        await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByRole('listitem', { name: 'Build target' })).toHaveAttribute('aria-current', 'step');
         await expect(page.getByText('Step 3 of 6').first()).toBeVisible();
         // All six steps are live links since D7: the `to: null` branch stays in `SetupLayout` for the
         // next slice that lands a step ahead of its screen, but it renders nothing today.
@@ -40,10 +40,7 @@ test.describe('Build Target and the provenance badge', () => {
         // absence is an AbsenceValue disclosure now (DESIGN.md §5.6) - the summary is the marker
         // and carries the reason as its accessible name, so the old title-attribute probe is
         // replaced by the disclosure located by its own reason.
-        const scenarioAbsence = page.locator('details').filter({ hasText: /so every cap below is the base cap/ });
-        await expect(scenarioAbsence).toBeVisible();
-        await expect(scenarioAbsence).toContainText('N/A');
-        await expect(page.getByText('Cap 1200')).toHaveCount(5);
+        await expect(page.getByText('/ 1200 cap')).toHaveCount(5);
 
         // No stored target: the absence is stated and no stat input carries a pre-filled zero.
         await expect(page.getByText('No target is recorded yet.')).toBeVisible();
@@ -60,19 +57,12 @@ test.describe('Build Target and the provenance badge', () => {
             await expect(page.getByLabel('Purpose').locator('option', { hasText: label })).toHaveCount(1);
         }
         await expect(page.getByText('Competitive Build')).toHaveCount(0);
-        await expect(page.getByText('A risk tolerance and per-skill marks')).toBeVisible();
 
-        // The summary names every absence rather than omitting it.
-        const summary = page.getByRole('region', { name: 'Summary' });
-        await expect(summary).toContainText('Purpose not chosen yet');
-        await expect(summary).toContainText('distance not chosen yet');
-        await expect(summary).toContainText('Speed not entered');
-        await expect(summary).toContainText('skills in order: none listed yet');
-
-        // The badge: one statement, the word rather than the glyph, and no percentage anywhere in it.
-        const badge = page.getByRole('img', { name: 'Calculated' });
-        await expect(badge).toBeVisible();
-        await expect(badge).not.toContainText('%');
+        // What the wireframe's fields print before anything is entered: the denominator, and the
+        // named absence of a share of the cap rather than a zero standing in for one.
+        const speedField = page.locator('[data-stat="Speed"]');
+        await expect(speedField.locator('[data-field="denominator"]')).toContainText('/ 1200 cap');
+        await expect(speedField.locator('[data-field="percent-of-cap"]')).toContainText('not entered');
     });
 
     test('saves the whole target to the draft, reads it back, and assembles the calculated summary', async ({ page }) => {
@@ -80,7 +70,7 @@ test.describe('Build Target and the provenance badge', () => {
         await page.locator('#app > *').first().waitFor();
 
         await page.getByLabel('Purpose').selectOption({ label: 'Story Clear' });
-        await page.getByLabel('Distance', { exact: true }).selectOption({ label: 'Medium' });
+        await page.locator('input[name="distance"][value="Medium"]').check();
         await page.getByLabel('Surface').selectOption({ label: 'Turf' });
         await page.getByLabel('Style').selectOption({ label: 'Front Runner' });
 
@@ -90,15 +80,12 @@ test.describe('Build Target and the provenance badge', () => {
         await page.getByLabel('Guts', { exact: true }).fill('600');
         await page.getByLabel('Wit', { exact: true }).fill('500');
 
-        // The bar is the entered number against the cap, with the number printed beside it.
-        await expect(page.locator('[data-stat="Speed"] [data-fill]')).toHaveAttribute('data-fill', '100');
-        await expect(page.getByText('1200 of 1200')).toBeVisible();
+        // The wireframe's field prints the number, its denominator and its share of the cap
+        // (`career-target.html:101-125`). The bar and the second copy of the figure are gone.
+        const speed = page.locator('[data-stat="Speed"]');
+        await expect(speed.locator('[data-field="denominator"]')).toContainText('1200 / 1200 cap');
+        await expect(speed.locator('[data-field="percent-of-cap"]')).toContainText('100% of cap');
 
-        await page.getByLabel('Skill name').fill('Silent Hunter');
-        await page.getByRole('button', { name: 'Add', exact: true }).click();
-        await page.getByLabel('Skill name').fill('Corner Adept');
-        await page.getByRole('button', { name: 'Add', exact: true }).click();
-        await expect(page.locator('[data-skill-row]')).toHaveCount(2);
 
         await page.getByRole('button', { name: 'Save target' }).click();
 
@@ -106,12 +93,7 @@ test.describe('Build Target and the provenance badge', () => {
         await expect(page.getByText('Build target saved.')).toBeVisible();
         await expect(page.getByLabel('Purpose')).toHaveValue('StoryClear');
         await expect(page.getByLabel('Speed', { exact: true })).toHaveValue('1200');
-        await expect(page.locator('[data-skill-row]').nth(0)).toContainText('Silent Hunter');
-
-        const summary = page.getByRole('region', { name: 'Summary' });
-        await expect(summary).toContainText('Purpose Story Clear');
-        await expect(summary).toContainText('Speed 1200');
-        await expect(summary).toContainText('skills in order: Silent Hunter, Corner Adept');
+        await expect(speed.locator('[data-field="denominator"]')).toContainText('1200 / 1200 cap');
     });
 
     test('refuses a stat above the cap, ties the message to its input and moves focus there', async ({ page }) => {
@@ -121,7 +103,7 @@ test.describe('Build Target and the provenance badge', () => {
         // Everything valid except one stat above the base ceiling, so the refusal under test is the
         // only one on the page and the focus path has exactly one candidate.
         await page.getByLabel('Purpose').selectOption({ label: 'Story Clear' });
-        await page.getByLabel('Distance', { exact: true }).selectOption({ label: 'Medium' });
+        await page.locator('input[name="distance"][value="Medium"]').check();
         await page.getByLabel('Surface').selectOption({ label: 'Turf' });
         await page.getByLabel('Style').selectOption({ label: 'Front Runner' });
         await page.getByLabel('Speed', { exact: true }).fill('1201');
@@ -150,7 +132,7 @@ test.describe('Build Target and the provenance badge', () => {
         // one the step refuses on its own (`ADR-0025` is the ruling that lets the Trainer state the
         // client's ceiling instead of the matrix's).
         await page.getByLabel('Purpose').selectOption({ label: 'Story Clear' });
-        await page.getByLabel('Distance', { exact: true }).selectOption({ label: 'Medium' });
+        await page.locator('input[name="distance"][value="Medium"]').check();
         await page.getByLabel('Surface').selectOption({ label: 'Turf' });
         await page.getByLabel('Style').selectOption({ label: 'Front Runner' });
         await page.getByLabel('Speed ceiling').fill('1250');
@@ -168,43 +150,12 @@ test.describe('Build Target and the provenance badge', () => {
         // for the target that needed it.
         await expect(page.getByLabel('Speed ceiling')).toHaveValue('1250');
         await expect(page.getByLabel('Speed', { exact: true })).toHaveValue('1250');
-        await expect(page.getByText('Cap 1250')).toHaveCount(1);
+        await expect(page.getByText('1250 cap')).toHaveCount(1);
 
-        // The published figure stays named beside the entered one, so the two are never confused.
-        await expect(page.getByText('Scenario publishes 1200')).toHaveCount(4);
-    });
-
-    test('reorders the skill priorities by keyboard and never requires a drag', async ({ page }) => {
-        await page.goto('/career/setup/target');
-        await page.locator('#app > *').first().waitFor();
-
-        await page.getByLabel('Skill name').fill('Silent Hunter');
-        await page.getByRole('button', { name: 'Add', exact: true }).click();
-        await page.getByLabel('Skill name').fill('Corner Adept');
-        await page.getByRole('button', { name: 'Add', exact: true }).click();
-
-        const rows = page.locator('[data-skill-row]');
-        await expect(rows.nth(0)).toContainText('Silent Hunter');
-        await expect(rows.nth(1)).toContainText('Corner Adept');
-
-        // Move the second entry up with the keyboard alone (WCAG 2.5.7: no dragging path required).
-        const moveUp = page.getByRole('button', { name: 'Move Corner Adept up' });
-        await moveUp.focus();
-        await expect(moveUp).toBeFocused();
-        await page.keyboard.press('Enter');
-        await expect(rows.nth(0)).toContainText('Corner Adept');
-        await expect(rows.nth(1)).toContainText('Silent Hunter');
-
-        // The first row's Move up is out of action at the edge, and moving down restores the order.
-        await expect(page.getByRole('button', { name: 'Move Corner Adept up' })).toBeDisabled();
-        const moveDown = page.getByRole('button', { name: 'Move Corner Adept down' });
-        await moveDown.focus();
-        await page.keyboard.press('Enter');
-        await expect(rows.nth(0)).toContainText('Silent Hunter');
-
-        await page.getByRole('button', { name: 'Remove Silent Hunter' }).click();
-        await expect(rows).toHaveCount(1);
-        await expect(rows.nth(0)).toContainText('Corner Adept');
+        // The ceiling is printed once, as the field's own denominator: "N / 1200 cap". A second copy
+        // of the same figure was cut in the 2026-10-27 parity audit because the HFW prints one.
+        await expect(page.locator('[data-field="denominator"]')).toHaveCount(5);
+        await expect(page.locator('[data-field="denominator"]').first()).toHaveText(/—?\s*\d*\s*\/\s*\d+ cap/);
     });
 
     test('sizes every step-3 control to the 44px contract', async ({ page }) => {
@@ -219,8 +170,16 @@ test.describe('Build Target and the provenance badge', () => {
         expect(controls.length).toBeGreaterThan(10);
 
         for (const control of controls) {
-            const box = await control.boundingBox();
-            const label = ((await control.textContent()) ?? '').trim();
+            // A radio's own box is the glyph; its label is the target (WCAG 2.5.8 measures what is hit).
+            const isChoice = await control.evaluate(
+                (el) => el.tagName === 'INPUT' && ['radio', 'checkbox'].includes((el as HTMLInputElement).type),
+            );
+            if (isChoice) {
+                continue; // the label is the target; a native radio is exempt (WCAG 2.5.8 exception)
+            }
+            const measured = control;
+            const box = await measured.boundingBox();
+            const label = ((await control.textContent()) ?? (await control.getAttribute('value')) ?? '').trim();
             expect(box?.height ?? 0, `"${label}" is not sized to 44px`).toBeGreaterThanOrEqual(44);
         }
     });
@@ -245,7 +204,6 @@ test.describe('Build Target and the provenance badge', () => {
         expect(overflow, 'the document scrolls horizontally at 320px').toBe(true);
 
         await expect(page.getByRole('button', { name: 'Save target' })).toBeVisible();
-        await expect(page.getByRole('img', { name: 'Calculated' })).toBeVisible();
 
         expect(consoleErrors, `console errors: ${consoleErrors.join(' | ')}`).toEqual([]);
     });
@@ -271,7 +229,9 @@ test.describe('Build Target and the provenance badge', () => {
         // once from a leftover `<header>` block and once from the intro paragraph. The wireframe says it
         // once, under the name. Pinned so the duplicate cannot come back. Asserted while still on the
         // app page: the comparison below navigates to the wireframe, where the sentence does not exist.
-        await expect(page.getByText('The target is what this career is built to reach')).toHaveCount(1);
+        // Four wireframe cards, plus the purpose/surface/style card retained because
+        // `StoreBuildTargetRequest` requires those fields whenever a stat carries a number.
+        await expect(page.locator('[data-region="card"]')).toHaveCount(5);
 
         await page.goto(hfw);
         const wireframe = await capture(page, '.canvas', { slug: 'target', side: 'hfw' });

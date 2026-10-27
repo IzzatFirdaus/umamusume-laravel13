@@ -47,7 +47,7 @@ test.describe('Scenario Selection', () => {
         await expect(page.getByRole('radio')).toHaveCount(CARDS.length);
 
         // The step position is announced, and the unbuilt steps are named absences rather than links.
-        await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByRole('link', { name: 'Scenario' })).toHaveAttribute('aria-current', 'step');
+        await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByRole('listitem', { name: 'Scenario' })).toHaveAttribute('aria-current', 'step');
         await expect(page.getByText('Step 1 of 6').first()).toBeVisible();
 
         // Scoped to the step nav: a page-body phrase like "not built" would otherwise be counted as an
@@ -143,7 +143,7 @@ test.describe('Scenario Selection', () => {
         await expect(trackblazer).toBeFocused();
 
         // And it survives leaving the wizard entirely, which a client-only selection would not.
-        await page.getByRole('link', { name: 'Leave setup' }).click();
+        await page.getByRole('link', { name: 'Cancel' }).click();
         await page.waitForURL(/\/$/);
 
         await page.goto('/career/setup/scenario');
@@ -205,10 +205,10 @@ test.describe('Scenario Selection', () => {
         const save = await page.getByRole('button', { name: 'Continue to trainee' }).boundingBox();
         expect(save?.height ?? 0, 'Continue to trainee is not sized to 44px').toBeGreaterThanOrEqual(44);
 
-        const leave = await page.getByRole('link', { name: 'Leave setup' }).boundingBox();
-        expect(leave?.height ?? 0, 'Leave setup is not sized to 44px').toBeGreaterThanOrEqual(44);
+        const leave = await page.getByRole('link', { name: 'Cancel' }).boundingBox();
+        expect(leave?.height ?? 0, 'Cancel is not sized to 44px').toBeGreaterThanOrEqual(44);
 
-        const stepLink = await page.getByRole('navigation', { name: 'Setup steps' }).getByRole('link', { name: 'Scenario' }).boundingBox();
+        const stepLink = await page.getByRole('navigation', { name: 'Setup steps' }).getByRole('listitem', { name: 'Scenario' }).boundingBox();
         expect(stepLink?.height ?? 0, 'the step link is not sized to 44px').toBeGreaterThanOrEqual(44);
     });
 

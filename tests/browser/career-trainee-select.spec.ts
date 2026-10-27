@@ -45,7 +45,7 @@ function card(page: import('@playwright/test').Page, name: string) {
  * for `N/A` or a named `group` on this node. That was the retired contract.
  */
 function choicesSoFar(page: import('@playwright/test').Page) {
-    return page.locator('[data-field="choices-so-far"]');
+    return page.locator('[data-field="selected-trainee"]');
 }
 
 /**
@@ -58,7 +58,7 @@ function choicesSoFar(page: import('@playwright/test').Page) {
  * and from the nested `not chosen` spans.
  */
 function traineeChoice(page: import('@playwright/test').Page) {
-    return choicesSoFar(page).locator('span').filter({ hasText: /^Trainee: / });
+    return page.locator('[data-field="selected-trainee"] p').first();
 }
 
 test.describe('Trainee Selection and Profile', () => {
@@ -116,14 +116,14 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(page.getByText('Step 2 of 6').first()).toBeVisible();
         await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByText('not built')).toHaveCount(0);
 
-        // Nothing is chosen on a fresh draft, so the carried-choices strip says so in words and no row
-        // is pressed. The per-step "Stored choice:" absence left with slice 3.2, and the strip states
-        // a draft gap as "not chosen" rather than as an `N/A` disclosure (see the helper above).
-        const strip = choicesSoFar(page);
-        await expect(strip.locator('span').filter({ hasText: /^Trainee: / })).toHaveCount(1);
-        await expect(strip.getByText('not chosen', { exact: true })).toHaveCount(3);
-        await expect(strip.getByText(/^Trainee: not chosen$/)).toHaveCount(1);
-        await expect(strip.getByText('N/A', { exact: true })).toHaveCount(0);
+        // Nothing is chosen on a fresh draft. The carried-choices strip this block used to read was
+        // cut in the 2026-10-27 parity audit (no setup wireframe draws one), and the page's own
+        // statement of the same fact is the echo card the wireframe draws at the foot of the roster:
+        expect(await choicesSoFar(page).count()).toBe(0);
+        await expect(page.locator('[data-trainee-card] button[aria-pressed="true"]')).toHaveCount(0);
+
+
+
         await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(25);
         await expect(page.locator('[data-field="denominator"]')).toContainText('trainees');
 
@@ -172,16 +172,16 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(action).toHaveAttribute('aria-pressed', 'true');
         await expect(action).toHaveText('Chosen · clear');
         // The chosen trainee replaces the muted empty word with her name, inside the same segment.
-        await expect(traineeChoice(page)).toHaveText('Trainee: Admire Vega');
-        await expect(traineeChoice(page).getByRole('link', { name: 'Admire Vega' })).toHaveAttribute(
+        await expect(traineeChoice(page)).toContainText('Admire Vega');
+        await expect(choicesSoFar(page).getByRole('link', { name: 'Preview profile' })).toHaveAttribute(
             'href',
-            '/career/setup/trainee',
+            /\/career\/setup\/trainee\/\d+$/,
         );
 
         await action.click();
         await expect(action).toHaveAttribute('aria-pressed', 'false');
         await expect(action).toHaveText('Select');
-        await expect(traineeChoice(page)).toHaveText('Trainee: not chosen');
+        await expect(page.locator('[data-field="selected-trainee"]')).toHaveCount(0);
         await expect(traineeChoice(page).getByRole('link')).toHaveCount(0);
         await expect(page.getByText('Trainee cleared.')).toBeVisible();
     });
@@ -262,7 +262,7 @@ test.describe('Trainee Selection and Profile', () => {
         const action = page.locator(`#${actionId}`);
 
         await expect(action).toHaveAttribute('aria-pressed', 'false');
-        await expect(traineeChoice(page)).toHaveText('Trainee: not chosen');
+        await expect(page.locator('[data-field="selected-trainee"]')).toHaveCount(0);
 
         await action.focus();
         await expect(action).toBeFocused();
@@ -274,7 +274,7 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(page.getByText('Trainee set: Admire Vega.')).toBeVisible();
         await expect(action).toHaveAttribute('aria-pressed', 'true');
         await expect(action).toHaveText('Chosen · clear');
-        await expect(traineeChoice(page)).toHaveText('Trainee: Admire Vega');
+        await expect(traineeChoice(page)).toContainText('Admire Vega');
         await expect(action).toBeFocused();
 
         // The profile screen is the second half of the slice, and it reads the same draft back, so the
@@ -306,7 +306,7 @@ test.describe('Trainee Selection and Profile', () => {
         await card(page, 'Admire Vega').getByRole('button', { name: 'Select', exact: true }).click();
 
         await expect(page.getByText('Trainee set: Admire Vega.')).toBeVisible();
-        await expect(page.locator('[data-field="choices-so-far"]')).toContainText('Admire Vega');
+        await expect(page.locator('[data-field="selected-trainee"]')).toContainText('Admire Vega');
     });
 
     test('renders the profile with basic facts, one aptitude grid and skills at card grain', async ({ page }) => {
