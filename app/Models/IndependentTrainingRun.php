@@ -28,6 +28,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $completes_at started_at + 50 minutes
  * @property Carbon|null $completed_at set when the scheduler finishes the run
  * @property Carbon|null $abandoned_at set when the Trainer gives up
+ * @property array<string, mixed>|null $result the simulator's completion payload, written on complete
  * @property-read TrainingRun $trainingRun
  */
 class IndependentTrainingRun extends Model
@@ -46,6 +47,7 @@ class IndependentTrainingRun extends Model
         'completes_at',
         'completed_at',
         'abandoned_at',
+        'result',
     ];
 
     protected function casts(): array
@@ -54,6 +56,7 @@ class IndependentTrainingRun extends Model
             'policy' => IndependentTrainingPolicy::class,
             'priority_skills' => 'array',
             'rotation' => 'array',
+            'result' => 'array',
             'started_at' => 'datetime',
             'completes_at' => 'datetime',
             'completed_at' => 'datetime',

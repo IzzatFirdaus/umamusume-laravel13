@@ -71,9 +71,8 @@ final class Lifecycle
     }
 
     /**
-     * End a session by completion: stamp the finish and mark the run Completed. Idempotent — a run
-     * the scheduler already closed, or one the Trainer abandoned, is not re-stamped. The completion
-     * simulation (§1.1.7's fans/sashes/hints) is wired in by `Simulator` (Slice 1.3), not here.
+     * End a session by completion: run the simulation, stamp the finish, and mark the run Completed.
+     * Idempotent — a run the scheduler already closed, or one the Trainer abandoned, is not re-stamped.
      */
     public function complete(IndependentTrainingRun $itr): TrainingRun
     {
@@ -81,7 +80,10 @@ final class Lifecycle
             return $itr->trainingRun;
         }
 
-        $itr->update(['completed_at' => now()]);
+        $itr->update([
+            'completed_at' => now(),
+            'result' => (new Simulator)->run($itr),
+        ]);
         $itr->trainingRun()->update(['status' => RunStatus::Completed]);
 
         return $itr->trainingRun()->firstOrFail();
