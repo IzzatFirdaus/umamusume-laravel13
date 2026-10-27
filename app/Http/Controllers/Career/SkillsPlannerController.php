@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\Skill;
 use App\Models\TrainingRun;
+use App\Services\HintDiscount;
 use App\Services\SkillSpendCoverage;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
@@ -45,6 +46,10 @@ final class SkillsPlannerController extends Controller
             // A-0.8: the priced skills the run has not acquired, sorted by cost, with the sum and the
             // shortfall against the run's recorded SP (§2.2/§2.3).
             'purchasable' => $this->purchasableSection($run),
+            // §1.1.4's hint discount ladder: the five captions and their percentages, shown so a
+            // Trainer can read the rule the client applies. The base-price arithmetic below prices a
+            // skill with no recorded hint level, which is the honest figure when none is stored.
+            'hint_discount' => HintDiscount::ladder(),
             'groups' => $this->groupRows($run, $required, $target),
             // F2, plan §9.6 ruling 5: the acquired/skipped status write now lives on the Skills
             // Planner rather than the 2.0.0 run-detail screen. The route and Form Request are the

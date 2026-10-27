@@ -109,3 +109,15 @@ of the schema until a screen needs them.
   `tests/Feature/SkillSearchScreenTest.php`, `tests/Feature/EpithetRewardNamesTest.php`
 - docs/design-research/SKILLS-GAPS.md; docs/UMAMUSUME_REFERENCE.md §1.2.6, §2.7
 - `CONSTRAINTS.md` C-4, D-20, D-30, D-210; KI-5, KI-23, KI-24
+
+## Dated amendment · 2026-10-27 · the hint discount ladder supersedes "no discounts"
+
+The decision recorded above — "No hint levels, no discounts" and the owner ruling rendered as "level
+only, no percentage" — is corrected on the game-rule half. `UMAMUSUME_REFERENCE.md` §1.1.4 reads the
+discount ladder off the `[Global]` Learn screen (68 frames, 2026-10-03): `Hint Lvl 1` **10%**, Lv2
+**20%**, Lv3 **30%**, Lv4 **35%**, `Hint Lvl Max` **40%**, with displayed cost `floor(base × (1 −
+discount))`. The ladder exists in the client, so a code path that skipped it was wrong. The
+architecture of this ADR — the import, `rarity` as a PRD amendment, the R37 hint-pool cut — is
+unchanged; only the belief that the ladder does not exist is superseded. The ladder is now carried by
+`config/uma.php` `skills.hint_discount` and `App\Services\HintDiscount`, and a skill with no recorded
+hint level still prices at its base, because no column stores a per-skill hint level.

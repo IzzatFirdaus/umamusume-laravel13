@@ -261,7 +261,10 @@ class SupportCardEffects
 
         $ratio = ($level - $low) / ($high - $low);
 
-        return (int) round($anchors[$low] + $ratio * ($anchors[$high] - $anchors[$low]));
+        // UMAMUSUME_REFERENCE.md §1.4.7: the floor of the straight line, not the nearest integer —
+        // "rounding is truncation, not nearest, and getting that wrong shifts every intermediate
+        // value by one". At level 35 Friendship Bonus is 15 + 5·5/15 = 16.67 → 16, not 17.
+        return (int) floor($anchors[$low] + $ratio * ($anchors[$high] - $anchors[$low]));
     }
 
     /**

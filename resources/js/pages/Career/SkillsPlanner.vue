@@ -10,9 +10,9 @@
  * target write whose Form Request already owns `skill_priorities`.
  *
  * The page pattern is `Career/RaceDecision.vue`'s: `CareerLayout`, page-level loading and error
- * roles, and every figure composed server-side. No percentage appears here: the hint-discount
- * ladder is not modelled, because no column holds a hint level, and the screen states that absence
- * rather than printing a derived percentage.
+ * roles, and every figure composed server-side. The hint-discount ladder (UMAMUSUME_REFERENCE.md
+ * §1.1.4) renders from a server prop, but the base prices above it stay base: a discount applies
+ * only when a hint level sits on the skill, and no column records one, so no row is re-priced.
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import SkillPlanRow from '../../components/career/SkillPlanRow.vue';
@@ -85,6 +85,8 @@ const props = defineProps<{
     };
     groups: Group[];
     acquisition_options: { value: string; label: string }[];
+    /** UMAMUSUME_REFERENCE.md §1.1.4: the hint discount ladder, caption and percentage per row. */
+    hint_discount: { key: number | string; label: string; discount: number }[];
     /** Slice 10: the Global catalogue skills this run does not hold yet, `{id, name}` each. */
     picker_skills: { id: number; name: string }[];
 }>();
@@ -296,16 +298,14 @@ const coverageConstants = computed(() =>
             </p>
             <p v-else class="mt-1 text-sm text-ink">{{ props.coverage.absent }}</p>
 
-            <!-- DOMAIN OVERRIDE (DM-4): the base cost, not a hint ladder. The HFW draws a discount
-                 ladder down to Lv5; `PRD.md` FR-C-3's dated 2026-10-25 note records that hint levels
-                 are a support-card fact and are excluded by ADR-0029 D4, so no column holds one and no
-                 ladder can be computed. Printed here, beside the cost, so a reader sees the ladder is
-                 absent by ruling rather than by omission. -->
+            <!-- UMAMUSUME_REFERENCE.md §1.1.4: the hint discount ladder is a client fact, and it
+                 renders below in the Hint discounts section. A row here stays at its base cost
+                 because a discount applies only when a hint level sits on the skill, and no column
+                 records one, so nothing re-prices a row against the ladder. -->
             <p class="mt-1 text-xs text-ink-muted">
                 Every figure above prices a skill at its base cost. The client charges less when a hint
-                level sits on the skill, and no table in this build stores hint levels
-                (<code>ADR-0029</code> D4), so the ladder from Lv1 to Lv5 is not shown and no discount
-                is applied.
+                level sits on the skill; the ladder it applies is the Hint discounts section below, and a
+                run records no hint level here, so no discount is applied to these rows.
             </p>
             <p v-if="coverageConstants !== ''" class="mt-1 text-xs text-ink-muted">
                 {{ coverageConstants }}
@@ -363,12 +363,20 @@ const coverageConstants = computed(() =>
             <p v-else class="mt-1 text-sm text-ink">The catalogue prices no skill this run has not already acquired.</p>
         </section>
 
-        <!-- The hint discounts are not modelled: no column holds a hint level, so nothing the run
-             records can price one. The screen states that absence rather than printing a derived
-             percentage (ADR-0001 §3's rule for a percentage no stored value backs). -->
+        <!-- UMAMUSUME_REFERENCE.md §1.1.4: the hint discount ladder, read off the client Learn screen.
+             Displayed cost is floor(base × (1 − discount)); the ladder is not linear past Lv3. -->
         <section aria-labelledby="skills-hints-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
             <h2 id="skills-hints-heading" class="text-lg font-semibold text-ink-strong">Hint discounts</h2>
-            <p class="mt-1 text-sm text-ink">Hint discounts are not modelled.</p>
+            <p class="mt-1 text-sm text-ink">
+                The client's Learn screen prints <code>Hint Lvl N</code> above <code>NN% OFF</code>. The
+                displayed cost is <code>base × (1 − discount)</code>, floored to the integer.
+            </p>
+            <ol class="mt-2 grid max-w-sm grid-cols-[1fr_auto] gap-x-6 gap-y-1 text-sm">
+                <li v-for="row in props.hint_discount" :key="String(row.key)" class="contents">
+                    <span class="text-ink">{{ row.label }}</span>
+                    <span class="font-mono tabular-nums text-ink-strong">{{ row.discount }}% off</span>
+                </li>
+            </ol>
         </section>
 
         <section

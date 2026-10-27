@@ -170,3 +170,16 @@ for the run fabricates the wrong model. B-0.6's column shape is withdrawn; its r
 decision filed as KI-133. The other seven items in this ADR stand unchanged.
 
 **2026-10-25 (later) — superseded.** R4 landed at `f3ca8813` (ADR-0029 accepted). R7 landed at `06d9515e` (US-12 narrowed). R8 landed at `c734a280` (A-0.13/A-0.14 declined, KI-130 retire). None are outstanding.
+
+## Dated amendment · 2026-10-27 · "level only, no percentage" does not bar the hint ladder
+
+D4's "No percentage … `ADR-0011`'s 'level only, no percentage' is the copy rule" and the line reading
+"hint levels stay 'level only, no percentage'" are corrected on the game-rule half. The copy rule
+governs `skill_levels`' **unique-skill level** (1 to 6), a quantity `UMAMUSUME_REFERENCE.md` §1.1.4
+names distinct from the **hint level** (1 to 5): the two must not be summed or converted. The hint
+level's own ladder — `Hint Lvl 1` 10%, Lv2 20%, Lv3 30%, Lv4 35%, `Hint Lvl Max` 40%, displayed cost
+`floor(base × (1 − discount))` — is read off the `[Global]` Learn screen and printed in
+`UMAMUSUME_REFERENCE.md` §1.1.4. It exists in the client, so "level only, no percentage" does not
+extend to it. This ADR's storage decisions are unchanged: `skill_levels` still stores the level and
+nothing else, and the ladder is carried by `config/uma.php` `skills.hint_discount` with no per-skill
+hint-level column, so a row prices at base until one is recorded.

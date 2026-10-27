@@ -99,11 +99,12 @@ const fanSuffix = computed((): string | null => {
 const currentHint = (stat: Stat): string => (stat.current === null ? 'No turn has recorded this stat yet.' : `Entered: ${group(stat.current)}.`);
 
 /**
- * D-259 / DM-5: the client's Mood Effect panel, training column (`UMAMUSUME_REFERENCE.md` §1.1.6,
+ * D-259 / DM-5: the client's Mood Effect panel, both columns (`UMAMUSUME_REFERENCE.md` §1.1.6,
  * client capture 2026-09-27). The five values are the client's own and are not interpolated: the ramp
- * is not a formula, and the report of 2026-10-24 keeps the config to one sourced entry rather than a
- * table. One owner would be `MoodTier` beside `arrow()`; the table lives here until that enum grows
- * the method, because this slice owns no enum file.
+ * is not a formula, and the two columns are distinct — training yield and pre-race attributes — so
+ * neither may be derived from the other. The report of 2026-10-24 kept the config to one sourced entry
+ * rather than a table; that ruling is superseded by §1.1.6's client panel, which prints all ten
+ * percentages, so both columns live here per tier.
  */
 const MOOD_TRAINING_PCT: Record<string, number> = {
     GREAT: 20,
@@ -113,6 +114,15 @@ const MOOD_TRAINING_PCT: Record<string, number> = {
     AWFUL: -20,
 };
 
+/** §1.1.6's pre-race attribute column: +4% at GREAT down to −4% at AWFUL. */
+const MOOD_RUNNING_PCT: Record<string, number> = {
+    GREAT: 4,
+    GOOD: 2,
+    NORMAL: 0,
+    BAD: -2,
+    AWFUL: -4,
+};
+
 /** The tier's training percentage, signed, or null for a tier nobody recorded. */
 const moodPercent = (tier: string | null): string | null => {
     if (tier === null || MOOD_TRAINING_PCT[tier] === undefined) {
@@ -120,6 +130,17 @@ const moodPercent = (tier: string | null): string | null => {
     }
 
     const value = MOOD_TRAINING_PCT[tier];
+
+    return `${value >= 0 ? '+' : ''}${value}%`;
+};
+
+/** The tier's pre-race attribute percentage, signed, or null for a tier nobody recorded. */
+const moodRunningPercent = (tier: string | null): string | null => {
+    if (tier === null || MOOD_RUNNING_PCT[tier] === undefined) {
+        return null;
+    }
+
+    const value = MOOD_RUNNING_PCT[tier];
 
     return `${value >= 0 ? '+' : ''}${value}%`;
 };
@@ -212,13 +233,15 @@ function percent(stat: Stat): number {
                     <EnergyGauge v-if="row.key === 'energy'" :energy="row.value as number | null" :band-text="row.band_text ?? null" />
                     <template v-else-if="row.key === 'mood'">
                         <MoodPill :tier="row.value as string | null" unrecorded="N/A, not recorded" />
-                        <!-- D-259 / DM-5: the tier's own training percentage, signed, beside the word
+                        <!-- D-259 / DM-5: the tier's own two Mood Effect columns, signed, beside the word
                              and the arrow. `Normal` prints `+0%` rather than a blank, so a real zero is
-                             never read as a missing reading. -->
-                        <span v-if="moodPercent(row.value as string | null) !== null" class="ml-1 font-mono text-xs tabular-nums text-ink-muted">{{ moodPercent(row.value as string | null) }}</span>
-                        <!-- A-0.11: the client's Mood Effect headline beside the tier (great tier). -->
-                        <span v-if="props.moodEffect" class="ml-1 text-xs text-ink-muted">
-                            (training +{{ props.moodEffect.training }}%, running +{{ props.moodEffect.running }}%)
+                             never read as a missing reading. Training yield then pre-race attributes,
+                             the panel's own column order (UMAMUSUME_REFERENCE.md §1.1.6). -->
+                        <span
+                            v-if="moodPercent(row.value as string | null) !== null"
+                            class="ml-1 font-mono text-xs tabular-nums text-ink-muted"
+                        >
+                            training {{ moodPercent(row.value as string | null) }}, running {{ moodRunningPercent(row.value as string | null) }}
                         </span>
                     </template>
                     <AbsenceValue

@@ -8,6 +8,7 @@ use App\Enums\ReleaseStatus;
 use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use App\Services\HintDiscount;
 use App\Services\SkillSpendCoverage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -19,8 +20,9 @@ use Tests\TestCase;
  * The audit found the headline stated as "The skills still to learn cost N/A SP", a panel that
  * could never resolve. `SkillSpendCoverage` now sums the required skills' stored prices against the
  * run's recorded Skill Points, and the screen prints that figure, the remainder, or the names of the
- * skills it cannot price. The hint-discount ladder is gone on the owner's ruling, so this file also
- * proves no ladder or percentage survives on the resolved props.
+ * skills it cannot price. The hint-discount ladder is a client fact (UMAMUSUME_REFERENCE.md §1.1.4),
+ * so this file also proves the ladder resolves and that a row with no recorded hint level stays at its
+ * base cost.
  *
  * Class-based with private helpers, matching `CareerSkillsPlannerTest`: a top-level function in
  * `tests/Feature` shares one namespace, and a duplicate name fatals the whole suite at load time.
@@ -90,7 +92,7 @@ final class SkillSpendCoverageTest extends TestCase
                 ->where('coverage.absent', null));
     }
 
-    public function test_resolves_no_hint_ladder_and_no_percentage_anywhere_on_the_screen(): void
+    public function test_resolves_the_hint_discount_ladder_from_the_reference(): void
     {
         $run = $this->plannerRun();
         $this->skill('Priced Skill', 200);
@@ -100,19 +102,35 @@ final class SkillSpendCoverageTest extends TestCase
         $response = $this->get(route('runs.skills.planner', $run));
         $response->assertOk();
 
-        // The ladder's source is gone from config, so nothing can re-price a row against it.
-        expect(config('uma.skills.hint_discount'))->toBeNull();
+        // UMAMUSUME_REFERENCE.md §1.1.4: Lv1 10%, Lv2 20%, Lv3 30%, Lv4 35%, Lv Max 40%.
+        expect(config('uma.skills.hint_discount'))->toBe([1 => 10, 2 => 20, 3 => 30, 4 => 35, 'max' => 40]);
 
         /** @var array<string, mixed> $props */
         $props = $response->viewData('page')['props'];
         $encoded = json_encode($props, JSON_THROW_ON_ERROR);
 
-        expect($props)->not->toHaveKey('ladder')
-            ->and($encoded)->not->toContain('Hint Lvl')
-            ->and($encoded)->not->toContain('% off')
-            // The per-row ladder block was the second render site; its `costs` array is gone too.
-            ->and($props['groups'][0]['rows'][0])->not->toHaveKey('costs')
+        expect($props)->toHaveKey('hint_discount')
+            ->and($encoded)->toContain('Hint Lvl 1')
+            ->and($encoded)->toContain('Hint Lvl Max')
+            ->and($props['hint_discount'])->toHaveCount(5)
+            // A row with no recorded hint level stays at its base cost: the ladder exists, but no
+            // column holds a hint level, so nothing re-prices the row (G-SK-3).
             ->and($props['groups'][0]['rows'][0]['sp_cost'])->toBe(200);
+    }
+
+    public function test_prices_a_skill_at_each_hint_level_with_the_floored_discount(): void
+    {
+        // UMAMUSUME_REFERENCE.md §1.1.4: displayed cost is floor(base × (1 − discount)). The one
+        // observed rounding case is Pace Chaser Corners ○ at 84 against a base of 130 (130 × 0.65).
+        expect(HintDiscount::price(130, 1))->toBe(117)
+            ->and(HintDiscount::price(130, 2))->toBe(104)
+            ->and(HintDiscount::price(130, 3))->toBe(91)
+            ->and(HintDiscount::price(130, 4))->toBe(84)
+            ->and(HintDiscount::price(130, 'max'))->toBe(78)
+            // A base the reference samples: 160 at Lv Max is 96 (160 × 0.6).
+            ->and(HintDiscount::price(160, 'max'))->toBe(96)
+            // An unknown hint level leaves the base cost untouched rather than inventing a discount.
+            ->and(HintDiscount::price(130, 9))->toBe(130);
     }
 
     public function test_the_service_refuses_the_sum_when_any_price_is_absent(): void

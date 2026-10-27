@@ -444,6 +444,21 @@ return [
          * leaves that question Unknown.
          */
         'gold_prerequisites' => ['Burning Spirit' => 'Ignited Spirit'],
+
+        /*
+         * The hint discount ladder, read off the `[Global]` Learn screen on 2026-10-03 and printed in
+         * `UMAMUSUME_REFERENCE.md` §1.1.4: `Hint Lvl 1` 10%, Lv2 20%, Lv3 30%, Lv4 35%, `Hint Lvl Max`
+         * 40%. Displayed cost is `floor(base × (1 − discount / 100))`; the one observed rounding case is
+         * Pace Chaser Corners ○ at 84 against a base of 130 (130 × 0.65 = 84.5, floored). The ladder is
+         * not linear past Lv3 (+5 then +5), so the percentages are stated per level rather than derived
+         * from a step. `Lv Max` is a client caption, not a level number, so its key is the string `max`.
+         *
+         * The discount applies when a hint level sits on a skill; a run that has recorded no hint level
+         * prices the skill at its base, which is what the planner's own arithmetic states.
+         *
+         * @var array<int|string, int>
+         */
+        'hint_discount' => [1 => 10, 2 => 20, 3 => 30, 4 => 35, 'max' => 40],
     ],
 
     /*
@@ -494,10 +509,11 @@ return [
     ],
 
     /*
-     * The client's Mood Effect headline, read from its Mood Effect panel (UMAMUSUME_REFERENCE.md §1.1.6,
-     * client capture 2026-09-27): the `GREAT` tier's training bonus is +20% and its pre-race bonus is
-     * +4%. Kept as one sourced figure rather than the full ten-cell per-tier table the reference also
-     * carries (A-0.11, owner ruling 2026-10-24: one config entry, no table).
+     * The client's Mood Effect panel (UMAMUSUME_REFERENCE.md §1.1.6, client capture 2026-09-27): the
+     * `GREAT` tier's training bonus is +20% and its pre-race bonus is +4%. The full ten-cell per-tier
+     * table (training +20/+10/0/−10/−20 and running +4/+2/0/−2/−4) is the panel's own and lives in
+     * `CareerStatePanel.vue` beside the mood readout; this entry stays the one sourced `GREAT` headline
+     * the older A-0.11 ruling kept, and is superseded where a per-tier figure is needed.
      *
      * @var array{training: int, running: int}
      */
