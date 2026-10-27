@@ -85,6 +85,16 @@ const props = defineProps<{
     save_veteran: { available: boolean; reason: string; url: string; veteran_url: string | null };
     ruleset: { value: null; title: string };
     empty: { reason: string; message: string } | null;
+    /** Independent Training (§1.1.7): the idle-mode completion, null for a normal career. */
+    independent: {
+        policy_label: string;
+        result: {
+            stat_gains: Record<string, number>;
+            fans: number;
+            sashes: number;
+            skill_hints: number[];
+        } | null;
+    } | null;
 }>();
 
 const { visiting, visitFailed } = useVisitState();
@@ -164,6 +174,28 @@ const finaleHeadline = computed<string>(() => {
         </section>
 
         <template v-else>
+            <!-- Independent Training (§1.1.7): the idle mode's own completion. The six limits ride as
+                 fixed copy so a Trainer sees what the run did not do. -->
+            <section
+                v-if="props.independent !== null"
+                aria-labelledby="result-indep-heading"
+                class="mt-4 rounded-md border border-rule bg-panel p-4"
+            >
+                <h2 id="result-indep-heading" class="text-lg font-semibold text-ink-strong">Independent Training complete</h2>
+                <p class="mt-1 text-sm text-ink">
+                    Ran as an idle session, {{ props.independent.policy_label }} policy.
+                    <template v-if="props.independent.result">
+                        Fans earned <span class="font-mono tabular-nums">{{ props.independent.result.fans.toLocaleString() }}</span>,
+                        winner's sashes <span class="font-mono tabular-nums">{{ props.independent.result.sashes }}</span>.
+                    </template>
+                </p>
+                <p class="mt-2 text-xs text-ink-muted">
+                    An idle session awards no race trophies, unlocks no Winning Live or Gallery content, is
+                    not viewable for Career events or concerts, does not advance skills that evolve off rest
+                    counts, and ignores the growth-rate row for base stats.
+                </p>
+            </section>
+
             <!-- Leads with the outcome and the final totals, then the one finding worth printing.
                  No aggregate: four facts, and the accented tile is the finale's own state rather
                  than a grade computed from the rest. -->

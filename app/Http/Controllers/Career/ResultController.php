@@ -60,6 +60,7 @@ class ResultController extends Controller
             'raceEntries.turnEntry',
             'skills',
             'veteran',
+            'independentTrainingRun',
         ]);
 
         $finished = $run->status === RunStatus::Completed;
@@ -77,8 +78,33 @@ class ResultController extends Controller
             'scenario' => $this->scenarioSection($run),
             'save_veteran' => $this->saveVeteranSection($run),
             'ruleset' => $this->rulesetSection(),
+            // Independent Training (§1.1.7): the idle mode's completion banner, null for a normal
+            // career. The six limits ride on it so the Trainer sees what the run did not do.
+            'independent' => $this->independentSection($run),
             'empty' => $this->emptyState($run),
         ]);
+    }
+
+    /**
+     * The Independent Training completion payload (§1.1.7), or null for a normal career. The banner the
+     * page renders reads the simulator's stored result; the six limits travel as fixed copy so a Trainer
+     * sees what an idle run did not do (no trophies, no Winning Live/Gallery, no Career events or
+     * concerts, no rest-evolution skill advance, growth rate ignored).
+     *
+     * @return array{policy_label: string, result: array<string, mixed>|null}|null
+     */
+    private function independentSection(TrainingRun $run): ?array
+    {
+        $itr = $run->independentTrainingRun;
+
+        if ($itr === null) {
+            return null;
+        }
+
+        return [
+            'policy_label' => $itr->policy->label(),
+            'result' => $itr->result,
+        ];
     }
 
     /**
