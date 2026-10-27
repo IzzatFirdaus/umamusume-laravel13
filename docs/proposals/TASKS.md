@@ -366,6 +366,67 @@ copy change), never reset, rebased, split or amended.
 **Worktrees.** `../td-base` and `../td-slice1` are removed at the end of the session; if either survives,
 the reason will be appended here.
 
+---
+
+# Round 4 — post-handoff session (2026-10-27 10:05 +08)
+
+Session: `hf-gates-and-slices-2026-10-27`. Round 3's report above stands as the baseline; nothing in it is
+re-verified as a matter of course, only where §1.4 of the continuation brief asks.
+
+## Tag resolution (2026-10-27 10:05)
+
+Resolution **A — delete and re-cut**. The tag was cut on a commit whose release gates had not run, which
+is the situation the plan's Phase 6 sweep exists to prevent; it was local, so deleting it costs nothing
+and re-cutting it after §7.4 is the honest order.
+
+The four commands and their output, run before deleting:
+
+```text
+$ git tag -l '3.0.*'
+3.0.0
+$ git log -1 --oneline 3.0.0
+c2c72c13 docs: release 3.0.0 — changelog, version, agents snapshot corrections, the evidence ledger
+$ git ls-remote --tags origin '3.0.*'
+(no output — no 3.0.* tag exists on the remote)
+$ git rev-parse --short HEAD
+c2c72c13
+$ git tag -d 3.0.0
+Deleted tag '3.0.0' (was 7d7f783b)
+$ git tag -l '3.0.*'
+(no output)
+```
+
+`7d7f783b` is the annotated tag object, whose target was `c2c72c13`. The tag will be re-cut in §7.6 on the
+commit that passes the §7.4 gates. `CHANGELOG.md` and `VERSION.md` keep their 3.0.0 entries: they are the
+release notes, and only the tag moves.
+
+## Tree state and peer surfaces (2026-10-27 10:05)
+
+- `git rev-parse --short HEAD` → `c2c72c13`; branch `master`.
+- `85d24959` still resolves (`WIP: prior slice state before ST-4`) and was not touched.
+- `git status --short`: 22 modified, 3 untracked — all peer work, none of it this session's. New since
+  round 3's snapshot: `resources/css/app.css`, `tests/utils/start-career.ts` (03:50:22) and the untracked
+  `tests/browser/setup-layout.spec.ts`.
+- The four named peer surfaces are **still dirty with round 3's exact mtimes**, so all four slices stay
+  blocked and none of the files was opened for edit:
+
+```text
+2026-10-27 01:44:01  resources/js/pages/Career/TraineeProfile.vue
+2026-10-27 01:57:52  resources/js/pages/Veterans/Index.vue
+2026-10-27 02:01:16  resources/js/pages/Veterans/Show.vue
+2026-10-27 02:37:50  resources/js/pages/Review/Index.vue
+```
+
+`blocked — TraineeProfile.vue uncommitted, mtime 2026-10-27 01:44:01`
+`blocked — Veterans/Index.vue uncommitted, mtime 2026-10-27 01:57:52`
+`blocked — Veterans/Show.vue uncommitted, mtime 2026-10-27 02:01:16`
+`blocked — Review/Index.vue uncommitted, mtime 2026-10-27 02:37:50`
+
+Peers stopped writing six hours before this snapshot (latest write 03:50) and did not commit, so the
+situation is "quiet but uncommitted": the files are not in flux, but they are not this session's to edit
+and the KI-70 rule is about ownership, not about recent activity.
+
+
 
 
 
