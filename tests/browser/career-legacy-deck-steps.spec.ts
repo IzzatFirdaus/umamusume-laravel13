@@ -220,7 +220,7 @@ test.describe('Setup step 4 — Legacy', () => {
 });
 
 test.describe('Setup step 5 — Support deck', () => {
-    test('renders six slots, the seven spelled types and the ownership flag as a named absence', async ({ page }) => {
+    test('renders six slots with the flag as a named absence', async ({ page }) => {
         await hydrate(page, '/career/setup/deck');
 
         await expect(page.getByRole('heading', { name: 'Build the six-card deck', level: 1 })).toBeVisible();
@@ -248,17 +248,12 @@ test.describe('Setup step 5 — Support deck', () => {
         // invented fact the Floor forbids.
         await expect(page.locator('[title="No ownership has been recorded for this slot yet."]')).toHaveCount(6);
 
-        // The seven types print as server-labelled words beside their marks (`SupportTypeMark`). The
-        // assertion is scoped to their own paragraph and matches each word as written: a bare
-        // `getByText('Wit')` is a case-insensitive substring match, and it resolved to 54 elements
-        // (every "with", every option label) rather than to the one this case is about.
-        const typeWords = page.locator('p').filter({ hasText: 'The seven support types' });
-        await expect(typeWords).toHaveText(/The seven support typesSpeedStaminaPowerGutsWitPalGroup/);
-
-        // Where the flag goes, stated beside the six toggles it describes (`ADR-0023`: the draft keeps
-        // it, Preflight writes it onto the run's slot row, and an unclassified slot stays an absence).
-        await expect(page.getByText(/Preflight writes it onto the run\s+as one value per slot/)).toBeVisible();
-        await expect(page.getByText(/reads\s+as N\/A rather than as Owned/)).toBeVisible();
+        // The seven-types legend and the ownership-prose block are cut (Phase E): `career-deck.html`
+        // draws neither. The type words still render inside the picker's dialog legend
+        // (`CardPicker.vue`), and the ownership destination is stated on the run-scoped builder
+        // (`resources/js/pages/Support/Builder.vue`), which the page's own header comment records.
+        await expect(page.getByText(/Preflight writes it onto the run\s+as one value per slot/)).toHaveCount(0);
+        await expect(page.getByText(/reads\s+as N\/A rather than as Owned/)).toHaveCount(0);
     });
 
     test('equips from the picker, marks the flag, and reads each write back from the session', async ({ page }) => {
@@ -314,9 +309,10 @@ test.describe('Setup step 5 — Support deck', () => {
             await assertMinHeight(page, selector);
         }
 
-        // "Save deck" and "Filter" are the two submits, both `h-11` like every other control.
+        // "Filter" is the dialog's one submit, and `h-11` like every other control. The step's old
+        // page-level "Save deck" submit is cut (Phase E): the forward door writes before it leaves.
         const submits = await page.locator('button[type="submit"]').all();
-        expect(submits).toHaveLength(2);
+        expect(submits).toHaveLength(1);
         for (const submit of submits) {
             const box = await submit.boundingBox();
             expect(box?.height ?? 0, 'a submit control is not sized to the 44px contract').toBeGreaterThanOrEqual(44);

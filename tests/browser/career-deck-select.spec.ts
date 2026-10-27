@@ -1,4 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { verifyPage } from './fixtures/wizard-verify';
 
 /*
  * The support-deck step, against the HFW `career-deck.html` (slice 4b.4b).
@@ -106,12 +110,70 @@ test('returns focus to the slot button that opened the picker', async ({ page })
     expect(focused.label, 'focus returned to the button that opened the dialog').toBe(openerName);
 });
 
-test('hides the deck analysis until a card is equipped', async ({ page }) => {
+test('draws no analysis panel, no page-level save, no ownership prose (Phase E)', async ({ page }) => {
+    // `career-deck.html:73-231` draws the slots, the diagnostics and the card types — no coverage
+    // panel, no `Save deck` submit, no ownership-flag explanation. The panel lives on the run's
+    // deck screen, the forward door writes before it leaves, and the flag's destination is the
+    // builder's own copy.
     await expect(page.getByRole('heading', { name: /deck analysis/i })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Save deck' })).toHaveCount(0);
+    await expect(page.getByText(/Preflight writes it onto the run\s+as one value per slot/)).toHaveCount(0);
+    await expect(page.getByText(/reads\s+as N\/A rather than as Owned/)).toHaveCount(0);
 });
 
-test('shows the ownership default in the picker copy', async ({ page }) => {
-    await expect(page.getByText(/Equipping a card records it as Owned unless you mark it Rented/)).toBeVisible();
+test('the diagnostics table carries five checks', async ({ page }) => {
+    const diagnostics = page.locator('section[aria-labelledby="deck-diagnostics-heading"]');
+    await expect(diagnostics.locator('tbody tr')).toHaveCount(5);
+});
+
+test('a slot row stays a card, not a document', async ({ page }) => {
+    // Per-card ceiling: a slot is a card summary with two or three controls, not a panel that
+    // swallowed the page. Measured on the slot's own descendants.
+    const slot = page.locator('#deck-slot-1');
+    expect(await slot.locator('*').count(), 'slot descendants under the 25-per-card ceiling').toBeLessThan(25);
+    const text = (await slot.innerText()).trim();
+    expect(text.length, 'slot text under the 900-character ceiling').toBeLessThan(900);
+});
+
+test('three-diff against career-deck.html writes the phase evidence', async ({ page }) => {
+    // Phase E evidence: text (excess/missing), computed style and bounding rect against the HFW.
+    //
+    // HFW-OVERRIDE (markup: element paths) — `excess`/`missing` are the helper's structural-path
+    // buckets, not content: the shell wraps the step bar in `<nav class="mb-4">` and the HFW draws a
+    // bare `div.stepper`, so every descendant path below it shifts and lands in both buckets (4543
+    // excess / 156 missing at both viewports, measured 2026-10-28). `career-deck.html` also draws
+    // mock affordances this build does not have a source for (`Suggest medium front-runner`, a
+    // `Save deck`-shaped footer row) and mock veteran cards the scratch database does not hold. The
+    // content-level buckets are the gate and they are clean: text 0, computed 0, rect 0, asserted
+    // below for the head band Phase A.2 rewrote and recorded in the JSON for the rest.
+    const hfw = pathToFileURL(
+        resolve(process.cwd(), 'docs/design-research/frontend-v2-wireframes/career-deck.html'),
+    ).href;
+
+    const dir = resolve(process.cwd(), '.scratch-uma/wizard-parity');
+    mkdirSync(dir, { recursive: true });
+
+    for (const [name, viewport] of [['1280', { width: 1280, height: 800 }], ['390', { width: 390, height: 844 }]] as const) {
+        const at = await verifyPage(page, {
+            appUrl: '/career/setup/deck',
+            hfwUrl: hfw,
+            rootSelector: '.canvas',
+            ...viewport,
+        });
+
+        writeFileSync(join(dir, `deck-diff-${name}.json`), `${JSON.stringify(at, null, 2)}\n`);
+    }
+
+    const report = await verifyPage(page, {
+        appUrl: '/career/setup/deck',
+        hfwUrl: hfw,
+        rootSelector: '.canvas',
+    });
+
+    // The content-level gate: no text, computed-style or geometry drift on this page.
+    expect(report.text, `text drift: ${JSON.stringify(report.text)}`).toEqual([]);
+    expect(report.computed, `computed drift: ${JSON.stringify(report.computed)}`).toEqual([]);
+    expect(report.rect, `rect drift: ${JSON.stringify(report.rect)}`).toEqual([]);
 });
 
 test('keeps the picker open across a filter', async ({ page }) => {
@@ -150,14 +212,18 @@ test('stores the per-run card level and reads it back after a reload', async ({ 
     await expect(level).toBeVisible();
     await level.fill('35');
 
+    // The per-slot level field has no writer of its own (Phase E cut the page-level `Save deck`);
+    // the forward door writes the deck before it navigates. The draft keeps the value, so the
+    // read-back happens on this step after a fresh arrival.
     await Promise.all([
         page.waitForResponse(
             (response) => response.url().includes('/career/setup/deck') && response.request().method() === 'PUT',
         ),
-        page.getByRole('button', { name: 'Save deck' }).click(),
+        page.getByRole('button', { name: 'Continue to preflight' }).click(),
     ]);
+    await expect(page).toHaveURL(/\/career\/setup\/preflight/);
 
-    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.goto('/career/setup/deck', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     await expect(page.getByLabel('Level for Slot 1')).toHaveValue('35');
 });

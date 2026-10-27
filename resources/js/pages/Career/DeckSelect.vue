@@ -18,11 +18,13 @@
  * the slot the picker is aimed at, and a keyboard Trainer reaches every one of those controls in the tab
  * order with nothing hidden behind a pointer gesture.
  *
- * **The analysis is the counts `DeckAnalysis` already makes**, from `SupportCardEffects` anchor values, and
- * nothing is added to it: no score, no ranking, no recommended replacement (`ADR-0020` §3, PRD FR-G-4).
+ * **No page-local submit, and no analysis panel (Phase E).** `career-deck.html` draws neither a `Save
+ * deck` control nor the effect-coverage panel: equipping, flagging and clearing already write as they
+ * happen, and the forward door writes again before it navigates, so the step's one submit-shaped control
+ * is the head band's `Continue to preflight`. The coverage panel belongs to the run's own deck screen
+ * (`resources/js/pages/Support/Builder.vue`), where the effect anchors have a run to measure against.
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
-import DeckAnalysis from '../../components/support/DeckAnalysis.vue';
 import SupportSlot from '../../components/support/SupportSlot.vue';
 import CardPicker from '../../components/support/CardPicker.vue';
 import SupportTypeMark from '../../components/support/SupportTypeMark.vue';
@@ -71,14 +73,6 @@ interface Option {
     rarity_word: string;
 }
 
-interface EffectLine {
-    effect_id: number;
-    name: string | null;
-    mode: 'flat' | 'additive' | 'multiplicative';
-    cards: { card_name: string; display: string }[];
-    total: { value: number; display: string; basis: string } | null;
-}
-
 const props = defineProps<{
     /** The steps this session has opened, the step bar's completed marking reads them. */
     visited: number[];
@@ -94,13 +88,6 @@ const props = defineProps<{
     };
     scenarioLabel: string | null;
     scenarioPending: boolean;
-    analysis: {
-        covered: number;
-        categories: Record<string, { label: string; blank: boolean; effects: EffectLine[] }>;
-        uncategorised: EffectLine[];
-        strengths: string[];
-        weaknesses: string[];
-    };
     action: string;
 }>();
 
@@ -236,6 +223,21 @@ function save(after?: number): void {
 }
 
 /**
+ * The forward door writes before it leaves. A slot's per-level field has no writer of its own on this
+ * step, so the write here is also the only guarantee that a typed level reaches the draft when the
+ * Trainer did nothing else on the step. The focus move `save()` owns is skipped: the navigation that
+ * follows replaces the whole screen.
+ */
+function saveAndContinue(): void {
+    form.put(props.action, {
+        preserveScroll: true,
+        onSuccess: () => {
+            router.get('/career/setup/preflight');
+        },
+    });
+}
+
+/**
  * Equip a card chosen in the dialog.
  *
  * The dialog's own Equip button names the card it equips, so there is no `<select>` to read back: the
@@ -321,9 +323,8 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
           the foot of the page, after the six slots, the diagnostics table and the card-type table, so the
           only way out of the step was below everything it draws.
 
-          The forward door stays a navigation. This step's write redirects back to `career.deck` so the
-          per-slot levels survive the round trip, and a forward button that merely posted would strand the
-          Trainer on this step; the write keeps its own control inside the section it writes.
+          The forward door writes and then navigates (see the override note beside it). The write has no
+          control of its own inside the page any more: the six slots save as they are edited.
         -->
         <template #actions>
             <Link
@@ -332,12 +333,22 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
             >
                 Back
             </Link>
-            <Link
-                href="/career/setup/preflight"
-                class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 font-semibold text-on-primary-action hover:bg-primary-action/90"
+            <!--
+              HFW-OVERRIDE (write-before-leave): the wireframe's `Continue to preflight` is a plain link
+              (`career-deck.html:67`), because a mock holds no state. This step writes state, and the
+              per-slot level field is the one value that has no immediate writer of its own since the
+              step carries no submit button (`career-deck.html:166-169` draws none), so the forward door
+              writes the deck first and navigates on success. On an empty form the put round-trips what
+              the draft already holds.
+            -->
+            <button
+                type="button"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 font-semibold text-on-primary-action hover:bg-primary-action/90 disabled:cursor-wait disabled:opacity-60"
+                :disabled="form.processing"
+                @click="saveAndContinue()"
             >
                 Continue to preflight
-            </Link>
+            </button>
         </template>
 
         <!-- No breadcrumb: "← Back to deck" pointed at this same URL, and its `Link` was never
@@ -443,37 +454,6 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                     @equip="equipCard"
                     @filter="applyPickerFilter"
                 />
-
-                 <p
-                     v-if="form.errors.deck && !form.processing"
-                     class="mt-3 rounded-md border border-dashed border-rule bg-panel p-3 text-xs text-ink-muted"
-                 >
-                    A slot that holds a card has to say whether you own it or rented it. Nothing is stored
-                    until you choose one of the two.
-                </p>
-
-                <!-- Where the flag goes, said next to the six toggles it describes: the draft holds it
-                     while the setup is in flight, and Preflight writes it onto the run's deck row when
-                     the career starts (`ADR-0023`, D3). -->
-                <p class="mt-3 rounded-md border border-dashed border-rule bg-panel p-3 text-xs text-ink-muted">
-                    The owned or rented flag is kept in this setup draft, and Preflight writes it onto the run
-                    as one value per slot, where it stays after a reload. Equipping a card records it as Owned
-                    unless you mark it Rented. A slot you have not classified reads as N/A rather than as Owned.
-                </p>
-
-                <form class="mt-4 flex flex-wrap items-center gap-3" @submit.prevent="save()">
-                    <!-- Secondary by design: the screen's one filled action is "Continue to preflight".
-                         This button persists the per-slot level, which is the only field the equip
-                         controls do not write immediately. -->
-                    <button
-                        type="submit"
-                        class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel disabled:cursor-wait disabled:opacity-60"
-                        :disabled="form.processing"
-                    >
-                        {{ form.processing ? 'Saving…' : 'Save deck' }}
-                    </button>
-                    <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving the deck…</p>
-                </form>
             </section>
 
             <div class="flex flex-col gap-4">
@@ -592,19 +572,8 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
         <!-- Back and "Continue to preflight" moved to the head band above (`#actions`), where the HFW draws
              them. The row that stood here printed the same two doors after the whole page. -->
 
-        <!--
-          Hidden until at least one card is equipped (plan 3.7). The panel counts what the deck covers,
-          so an empty draft would render six zeroes and a list of gaps, which reads as a verdict on a
-          deck the Trainer has not built yet. `equippedCount` reads the same draft the analysis does,
-          so the panel appears the moment the first card lands and never contradicts it.
-        -->
-        <DeckAnalysis
-            v-if="equippedCount > 0"
-            :covered="props.analysis.covered"
-            :categories="props.analysis.categories"
-            :uncategorised="props.analysis.uncategorised"
-            :strengths="props.analysis.strengths"
-            :weaknesses="props.analysis.weaknesses"
-        />
+        <!-- The wireframe draws no coverage panel on this step (`career-deck.html:73-231` is the slots,
+             the diagnostics and the card types). The panel lives on the run-scoped deck screen, where the
+             effect anchors have a run to measure against. -->
     </SetupLayout>
 </template>
