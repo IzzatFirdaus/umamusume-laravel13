@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { assertStructurallyEqual, capture } from './fixtures/hfw-structure';
 
 /*
  * Rendered-copy, state and accessibility evidence for SCREEN-003 (Trainee Selection) and SCREEN-004
@@ -409,5 +412,31 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(page.getByRole('button', { name: 'Select', exact: true }).first()).toBeVisible();
 
         expect(consoleErrors, `console errors: ${consoleErrors.join(' | ')}`).toEqual([]);
+    });
+
+    /*
+     * The step body, measured against the wireframe rather than read off the source (see the scenario
+     * step's case for the harness contract). `.canvas` is the compared subtree on both sides and
+     * `regions: 'subset'` requires the wireframe's markers in order: the filter row, the roster grid,
+     * the pager and the selection echo. `grid: true` compares the first grid's track count at 1280.
+     */
+    test('renders the filter row, three-column grid and selection echo, HFW structure', async ({ page }) => {
+        const hfw = pathToFileURL(
+            resolve(process.cwd(), 'docs/design-research/frontend-v2-wireframes/career-trainee.html'),
+        ).href;
+
+        await page.goto('/career/setup/trainee');
+        await page.locator('#app > *').first().waitFor();
+        // The wireframe draws the selection echo card at the foot of the roster, and the page renders it
+        // only once a trainee is chosen: the comparison needs a draft that holds one. The click lands in
+        // the session draft, not in a table, so this case writes no row.
+        await page.locator('[data-trainee-card]').first().click();
+        await page.locator('[data-field="selected-trainee"]').waitFor();
+        const app = await capture(page, '.canvas', { slug: 'trainee', side: 'app' });
+
+        await page.goto(hfw);
+        const wireframe = await capture(page, '.canvas', { slug: 'trainee', side: 'hfw' });
+
+        assertStructurallyEqual(app, wireframe, { regions: 'subset', grid: true });
     });
 });

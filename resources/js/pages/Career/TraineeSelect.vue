@@ -358,48 +358,60 @@ const sortLabel = computed(
 
         <!-- Filter bar in bordered container -->
         <div class="mt-5 rounded-md border border-rule bg-raised p-4">
-            <form class="mx-auto w-full max-w-4xl flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
-                <BaseInput
-                    v-model="filterValues.search"
-                    type="text"
-                    id="filter-search"
-                    name="search"
-                    placeholder="Trainee name"
-                    label="Search"
-                />
-                <BaseSelect
-                    v-for="facet in props.facets"
-                    :key="facet.param"
-                    v-model="filterValues[facet.param]"
-                    :id="`filter-${facet.param}`"
-                    :name="facet.param"
-                    :label="facet.label"
-                    :options="facet.letters.map(l => ({ value: l, label: l }))"
-                    placeholder="Any"
-                />
-                <BaseSelect
-                    v-model="filterValues.skill"
-                    id="filter-skill"
-                    name="skill"
-                    label="Unique skill"
-                    :options="props.uniqueSkills.map(o => ({ value: String(o.export_id), label: o.name }))"
-                    placeholder="Any"
-                />
-                <BaseSelect
-                    v-model="sortBy"
-                    id="filter-sortBy"
-                    name="sortBy"
-                    label="Sort by"
-                    :options="props.sortKeys.map(o => ({ value: o.value, label: o.label }))"
-                />
-                <BaseSelect
-                    v-model="direction"
-                    id="filter-direction"
-                    name="direction"
-                    label="Order"
-                    :options="[{ value: 'asc', label: 'Ascending' }, { value: 'desc', label: 'Descending' }]"
-                    :aria-describedby="filter-direction"
-                />
+            <form data-region="filters" class="mx-auto w-full max-w-4xl flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
+                <!-- Each control sits in a `contents` box carrying the wireframe's `.field` marker. The box
+                     is layout-invisible (`display: contents`), so the controls stay the form's own flex
+                     items; `BaseInput`/`BaseSelect` render a fragment (a labelled branch and a bare one),
+                     so a `data-region` handed to the component itself is dropped rather than forwarded. -->
+                <div class="contents" data-region="field">
+                    <BaseInput
+                        v-model="filterValues.search"
+                        type="text"
+                        id="filter-search"
+                        name="search"
+                        placeholder="Trainee name"
+                        label="Search"
+                    />
+                </div>
+                <div v-for="facet in props.facets" :key="facet.param" class="contents" data-region="field">
+                    <BaseSelect
+                        v-model="filterValues[facet.param]"
+                        :id="`filter-${facet.param}`"
+                        :name="facet.param"
+                        :label="facet.label"
+                        :options="facet.letters.map(l => ({ value: l, label: l }))"
+                        placeholder="Any"
+                    />
+                </div>
+                <div class="contents" data-region="field">
+                    <BaseSelect
+                        v-model="filterValues.skill"
+                        id="filter-skill"
+                        name="skill"
+                        label="Unique skill"
+                        :options="props.uniqueSkills.map(o => ({ value: String(o.export_id), label: o.name }))"
+                        placeholder="Any"
+                    />
+                </div>
+                <div class="contents" data-region="field">
+                    <BaseSelect
+                        v-model="sortBy"
+                        id="filter-sortBy"
+                        name="sortBy"
+                        label="Sort by"
+                        :options="props.sortKeys.map(o => ({ value: o.value, label: o.label }))"
+                    />
+                </div>
+                <div class="contents" data-region="field">
+                    <BaseSelect
+                        v-model="direction"
+                        id="filter-direction"
+                        name="direction"
+                        label="Order"
+                        :options="[{ value: 'asc', label: 'Ascending' }, { value: 'desc', label: 'Descending' }]"
+                        :aria-describedby="filter-direction"
+                    />
+                </div>
                 <BaseButton type="submit" variant="secondary">
                     Filter
                 </BaseButton>
@@ -468,6 +480,7 @@ const sortLabel = computed(
                 v-for="row in props.trainees.data"
                 :key="row.id"
                 :data-trainee-card="row.id"
+                data-region="card"
                 class="cursor-pointer rounded-lg border-2 bg-panel p-3.5 transition-colors duration-150 ease-out"
                 :class="props.selected === row.id ? 'border-pick-line bg-green-tint' : 'border-rule hover:bg-raised'"
                 @click="choose(row)"
@@ -491,7 +504,7 @@ const sortLabel = computed(
 
                     <!-- The name beside the frame is the accessible name, so the image is decorative and
                          takes `alt=""` (DESIGN.md §4.7). -->
-                    <ArtworkSlot :url="row.artworkURL" alt="" size="size-10" reserve />
+                    <ArtworkSlot :url="row.artworkURL" alt="" size="size-10" reserve data-region="slot" />
 
                     <div class="min-w-0 flex-1">
                         <p class="text-[15px] font-extrabold text-ink-strong">{{ row.name }}</p>
@@ -505,14 +518,15 @@ const sortLabel = computed(
                         <div class="mt-1.5 flex flex-wrap gap-1.5 text-xs">
                             <span
                                 v-if="headlineForm(row)"
+                                data-region="pill-neutral"
                                 class="inline-flex items-center rounded-full border border-rule bg-raised px-2 py-0.5 font-semibold text-ink"
                             >
                                 {{ headlineForm(row)?.rarity_stars }} {{ headlineForm(row)?.rarity_word }}
                             </span>
-                            <span class="inline-flex items-center rounded-full border border-rule bg-raised px-2 py-0.5 text-ink-muted">
+                            <span data-region="pill-outline" class="inline-flex items-center rounded-full border border-rule bg-raised px-2 py-0.5 text-ink-muted">
                                 {{ formPillLabel(row.form_count) }}
                             </span>
-                            <span class="inline-flex items-center rounded-full border border-pick-line bg-raised px-2 py-0.5 text-ink">
+                            <span data-region="pill-positive" class="inline-flex items-center rounded-full border border-pick-line bg-raised px-2 py-0.5 text-ink">
                                 {{ row.release_status_label }}
                             </span>
                         </div>
@@ -572,6 +586,7 @@ const sortLabel = computed(
         <nav
             v-if="props.trainees.links.length > 3"
             aria-label="Pagination"
+            data-region="pager"
             class="mt-4 flex flex-wrap items-center gap-2 text-sm"
         >
             <template v-for="(link, index) in props.trainees.links" :key="index">
@@ -592,7 +607,7 @@ const sortLabel = computed(
              so the pick is usually not on the page shown, and a lookup there once answered `N/A` beside a
              flash saying she had been set (D5). The card renders only when a trainee is actually chosen -
              the wireframe has no empty state, and "nothing chosen" is already said by the strip above. -->
-        <div v-if="props.selectedName" data-field="selected-trainee" class="mt-3.5 rounded-lg border border-rule bg-panel p-4">
+        <div v-if="props.selectedName" data-field="selected-trainee" data-region="card" class="mt-3.5 rounded-lg border border-rule bg-panel p-4">
             <h2 class="text-sm font-bold text-ink-strong">Selected</h2>
             <div class="mt-2 flex flex-wrap items-center gap-3.5">
                 <div class="min-w-0 flex-1 basis-64">
