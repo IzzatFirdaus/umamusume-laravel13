@@ -10,11 +10,9 @@ use App\Models\DeckSlot;
 use App\Models\SupportCard;
 use App\Services\Career\SetupDraft;
 use App\Services\DataPipeline\ArtworkMirror;
-use App\Services\DeckAnalysis;
 use App\Services\SupportCardEffects;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\ViewErrorBag;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -42,11 +40,12 @@ use Inertia\Response;
  * equips a card without saying which it is, and leaves the flag absent on a slot with no card: "owned or
  * rented" describes nothing when nothing sits in the position.
  *
- * **Analysis is the counts `DeckAnalysis` already makes, and no more.** The six cards' effects are the
- * anchors `SupportCardEffects::atCap()` resolves at each card's highest stated level, and the category
- * totals are those anchors added or listed as the export's own `calc` says. Nothing here ranks a deck,
- * scores it, or proposes a replacement (`ADR-0020` §3, PRD FR-G-4): the sentences the component prints are
- * restatements of the counts beside them.
+ * **No analysis prop (Phase F).** `DeckAnalysis` used to ride this step as an `analysis` prop the page
+ * rendered as a coverage panel; Phase E moved that panel to the run-scoped builder, so the prop, the
+ * `DeckAnalysis` import and the at-cap input mapping are gone and nothing is computed twice. The step
+ * still answers the two checks the draft can carry (the filled-slot count and the duplicate rule),
+ * because those read the slot list rather than the effect catalogue. Nothing here ranks a deck, scores
+ * it, or proposes a replacement (`ADR-0020` §3, PRD FR-G-4).
  */
 class DeckSelectController extends Controller
 {
@@ -70,15 +69,6 @@ class DeckSelectController extends Controller
             ->whereIn('id', $selected)
             ->get()
             ->keyBy('id');
-
-        /** @var array<int, int> $levels */
-        $levels = [];
-
-        foreach ($draft as $slot) {
-            if ($slot['support_card_id'] !== null && $slot['card_level'] !== null) {
-                $levels[(int) $slot['support_card_id']] = (int) $slot['card_level'];
-            }
-        }
 
         return Inertia::render('Career/DeckSelect', [
             'visited' => SetupDraft::visited(),
@@ -104,7 +94,6 @@ class DeckSelectController extends Controller
             'picker' => $this->picker($request, $selected),
             'scenarioLabel' => SetupDraft::scenarioLabel(),
             'scenarioPending' => SetupDraft::read()['scenario'] === null,
-            'analysis' => DeckAnalysis::build($this->analysisInput($cards, $levels)),
             // The one write this step makes, stated as a URL the page never has to resolve.
             'action' => route('career.deck.store'),
         ]);
@@ -230,20 +219,6 @@ class DeckSelectController extends Controller
             'scenario_link_note' => $link['note'],
             'effects' => SupportCardEffects::atCap($card, $dictionary),
         ];
-    }
-
-    /**
-     * The six cards the analysis reads, in the draft's order, with their at-cap effects. The mapping is
-     * `DeckAnalysis::inputFor()`'s, so this step and Preflight cannot disagree about what a deck's effects
-     * are.
-     *
-     * @param  Collection<int, SupportCard>  $cards
-     * @param  array<int, int>  $levels
-     * @return list<array{card_name: string, effects: list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>, basis: 'catalog'|'level', level: int|null}>
-     */
-    private function analysisInput($cards, array $levels = []): array
-    {
-        return DeckAnalysis::inputFor($cards, $levels);
     }
 
     /**
