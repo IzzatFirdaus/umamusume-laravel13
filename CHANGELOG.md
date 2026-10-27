@@ -11,6 +11,40 @@ This file starts empty on purpose. The repository's whole history predates it, t
 mean writing claims about commits that were never recorded as changes, which `AGENTS.md` §5 forbids.
 Entries below are written at the time of the change, not back-filled.
 
+## [Unreleased]
+
+The game-mechanics sync. Four Round-5 defects corrected against `UMAMUSUME_REFERENCE.md`, the maiden
+lock schema cleanup, and Independent Training (§1.1.7) built end to end. The reference is the ground
+truth for mechanics; the two ADRs that contradicted it were amended rather than obeyed.
+
+### Fixed
+
+- **Hint discount ladder** (§1.1.4) - `config/uma.php` `skills.hint_discount` carries Lv1 10% / Lv2 20%
+  / Lv3 30% / Lv4 35% / Lv Max 40%, and `App\Services\HintDiscount` prices a skill at
+  `floor(base × (1 − discount))`. ADR-0011 and ADR-0029 are amended: the ladder exists in the client
+  and a code path that skipped it was wrong.
+- **Mood effect, both columns** (§1.1.6) - `CareerStatePanel.vue` renders the full per-tier training
+  column (+20/+10/0/−10/−20) and the pre-race column (+4/+2/0/−2/−4), not just the GREAT headline.
+- **Effect interpolation floor** (§1.4.7) - `SupportCardEffects::valueAt()` uses `floor`, not `round`;
+  the reference's "rounding is truncation, not nearest" (16.67 → 16, not 17).
+- **Maiden lock is run-level** (§1.2.6) - `TrainingRun::hasClearedMaidenLock()` (won Debut grade 900 or
+  Maiden grade 800, placement 1) gates standard grades through `maidenGates()`, and the per-race
+  `is_maiden_gated` / `maiden_gated` columns are dropped (migration `2026_10_27_120000`).
+
+### Added
+
+- **Independent Training** (§1.1.7) - the idle mode: `independent_training_runs` schema,
+  `IndependentTrainingPolicy` (Balanced / Stamina focus / Sprint focus), `Lifecycle` (start / one-at-a-
+  time / complete / abandon / completeExpired), `Simulator` (a calibrated approximation matching the
+  mode's output classes, with growth rate excluded and the priority list as the hint set), and the
+  `independent-training:complete` scheduled command. The simulator's docstring states the boundary:
+  the client does not publish the per-turn algorithm.
+
+### Changed
+
+- Colour-token pin reconciled 94 → 95 (`DesignTokensTest`, `DESIGN.md`), measured against the
+  stylesheet rather than carried forward.
+
 ## [3.0.0] - 2026-10-27
 
 The HFW-parity release. The v3 frontend slices landed across the preceding sessions (S3a-S3c, S5, S6,
