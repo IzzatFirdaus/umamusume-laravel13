@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Career;
 
+use App\Enums\IndependentTrainingPolicy;
 use App\Enums\RunStatus;
 use App\Http\Requests\Concerns\ValidatesEnteredCaps;
 use App\Models\Advisor\BuildTargetPayload;
@@ -102,6 +103,15 @@ class StartCareerRequest extends FormRequest
             // the warning names the step that owns it. There is nothing recorded to sit above them,
             // because this career has no turns yet, so the recorded-stat guard has no row to read.
             ...$this->enteredCapRules(),
+            // Independent Training (§1.1.7): the three inputs fixed at start ride on the page's own POST,
+            // because they are the only facts the draft does not already hold. `policy` is the one that
+            // must be present when the flag is on; the other two default to the client's own defaults
+            // (goal races only; no priority skills) when absent.
+            'independent' => ['nullable', 'boolean'],
+            'policy' => ['nullable', 'string', Rule::enum(IndependentTrainingPolicy::class)],
+            'rotation' => ['nullable', 'array'],
+            'priority_skills' => ['nullable', 'array', 'max:10'],
+            'priority_skills.*' => ['integer', Rule::exists('skills', 'id')],
         ];
     }
 
@@ -191,6 +201,29 @@ class StartCareerRequest extends FormRequest
         }
 
         return $ownership;
+    }
+
+    /**
+     * The Independent Training config (§1.1.7), or null when the page did not post the flag. The three
+     * inputs are the page's own — the draft holds the trainee, deck and scenario, but not the idle-mode
+     * policy, rotation or priority skills. Absent `rotation` and `priority_skills` are the client's own
+     * defaults, expressed here as null and an empty list.
+     *
+     * @return array{policy: string, rotation: array<string, mixed>|null, priority_skills: list<int>}|null
+     */
+    public function independentConfig(): ?array
+    {
+        if (! $this->boolean('independent')) {
+            return null;
+        }
+
+        return [
+            'policy' => (string) $this->input('policy'),
+            'rotation' => is_array($this->input('rotation')) ? $this->input('rotation') : null,
+            'priority_skills' => is_array($this->input('priority_skills'))
+                ? array_values(array_map('intval', $this->input('priority_skills')))
+                : [],
+        ];
     }
 
     /**

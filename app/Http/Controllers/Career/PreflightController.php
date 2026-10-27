@@ -17,6 +17,7 @@ use App\Models\Umamusume;
 use App\Services\Career\SetupDraft;
 use App\Services\DataPipeline\ArtworkMirror;
 use App\Services\DeckAnalysis;
+use App\Services\IndependentTraining\Lifecycle;
 use App\Services\Legacy\AncestryGraph;
 use App\Services\SupportCardEffects;
 use Illuminate\Http\RedirectResponse;
@@ -147,6 +148,14 @@ class PreflightController extends Controller
 
             return $run;
         });
+
+        // Independent Training (§1.1.7): the run is created the same way, then the idle-mode overlay is
+        // opened on it. The 50-minute window starts now, and the scheduler closes it later.
+        $config = $request->independentConfig();
+
+        if ($config !== null) {
+            (new Lifecycle)->start($run, $config);
+        }
 
         SetupDraft::reset();
 
