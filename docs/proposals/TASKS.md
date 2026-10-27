@@ -993,6 +993,89 @@ diff does not touch this read path):
   split, or amended. `ad876208` still carries the ST-4 hand-back as recorded in the attribution
   incident above (162 added `TASKS.md` lines in that commit's stat); not repaired.
 
+## Final report — round 5 main-agent scope (2026-10-27 15:05 +08)
+
+**Status: the project is NOT closed.** The tag is absent, and the seven completion-gate items under
+the ST-4 agent's Phases 0–4 are unmet because no follow-up hand-back exists. This report covers
+Phases 5–7 only and states every unmet item plainly.
+
+**1. Per-step status.** 5.1–5.5 **blocked** (the four peer files are byte-identical to round 4's
+mtimes; the Legacy payload shape is one column and one selection). 5.6 **not satisfied** (Law A: no
+completed full browser suite). 6.1 **done** (`5642593f`). 6.5 **done** for the independent claims
+(`55f5a202`); `SCREEN_SPEC.md` owes no rows. 6.2, 6.3, 6.4's wedge line, 6.6, 7 and 8.2 **blocked** on
+the ST-4 hand-back.
+
+**2. `DOMAIN OVERRIDE` inventory.** No new override this session; round 4's 10 sites stand.
+
+**3. Tests written, rewritten, retired.** None: no behaviour changed.
+
+**4. Changed files.** `AGENTS.md` (ruleblock retired, one change-log row) and this ledger. Nothing
+else was staged or committed by this session.
+
+**5. Commands run.**
+
+| Command | Result | Evidence |
+|---|---|---|
+| `npm run lint:ui` (working tree) | exit 0; prints `[debt-increase] arbitrary-value count 221 exceeds baseline 219` | `.scratch-uma/main-2026-10-27/lint-ui.log` |
+| `node tools/ui-framework-check.mjs` (clean worktree at `d55927cd`) | exit 0; 219 findings | `.scratch-uma/main-2026-10-27/lint-ui-clean.log` |
+| `python tools/md_fence_check.py AGENTS.md docs/proposals/TASKS.md` | exit 0; 0 invalid closing fences | inline |
+| `php tools/lore.php` | 522 hits, 75 exempt lines; delta +44 from the 478 recorded at `5ed45d67`; **zero hits on the added lines** | `.scratch-uma/main-2026-10-27/lore-docs.log` |
+| `php tools/lore.php code` | 224 hits; delta +3 from the ST-4 hand-back's 221; **zero hits in the files this session touched** | `.scratch-uma/main-2026-10-27/lore-code.log` |
+| `pint`, `phpstan`, `npm run typecheck` | **not run**: markdown-only change, no PHP/TS path touched | n/a |
+| full Pest / full Playwright | **not run** this session; round 4's Pest baseline (1994 passed / 15 failed, all attributed) stands, and the full browser suite is still blocked | round 4's ledger |
+
+**6. Commits and tag.** `5642593f` (Phase 5 ledger), `55f5a202` (ruleblock retirement). **Tag: none**;
+`git tag -l '3.0.*'` is empty after both commits.
+
+**7. The 46-baseline.** **Not produced**: the full browser suite has not completed. Round 4's
+partial reading (153/603, three failure shapes) is unchanged.
+
+**8. Screenshot blocker.** Unchanged (`mcode-tools` `UND_ERR_HEADERS_TIMEOUT`); no visual criterion was
+measured this session.
+
+**9. Safe defaults.** The lint baseline stays at 219 rather than pre-bumping for peer-dirty files; the
+ruleblock is deleted rather than re-dated because Phase 6 exited on 2026-10-23; the tag stays absent
+because Law A is unmet; no duplicate amendments block was appended.
+
+**10. Prior-session claims re-verified.** `ad876208` still carries the ST-4 hand-back (162 `TASKS.md`
+lines in its stat); `AGENTS.md:517` still reads 219; the four peer mtimes are unchanged since round 4;
+the Legacy payload shape is unchanged at `d55927cd`; the clean tree measures 219 arbitrary values;
+`td-wedge` is still clean at `d55927cd` with one untracked probe (`.wedge-plain.txt`, 13:46:07).
+
+**11. Plan amendments.** None appended: `frontend-development-update-plan.md:12-31` already carries
+the five 2026-10-27 items. Only the wedge line is owed, and Phase 3 owns it.
+
+**12. Tag resolution.** `3.0.0` was deleted at `1ca9caa3` and remains absent. No round-5 re-cut. The
+next action is the ST-4 hand-back's hash plus a completed full browser suite on that hash.
+
+**13. Deferred items.** A (Legacy radios), D (Veterans and TraineeProfile) and E (lint baseline) are
+blocked; the block evidence is the 5.1–5.5 table above.
+
+**14. Foreign files at hand-back.** The 41 paths in the Phase 5 hand-back list, plus one untracked peer
+file that appeared during the session: `docs/framework-ui-ux/_audit-prompt.md` (14:47:26). None was
+edited.
+
+**15. `85d24959` and `ad876208`.** Both acknowledged as prior sessions' work; both resolve; neither was
+reset, rebased, split, or amended.
+
+**16. Worktrees.** `../td-wedge` is the ST-4 agent's and is left in place (clean at `d55927cd`, one
+untracked probe). This session created none and removed none.
+
+### Completion gate
+
+| Item | State |
+|---|---|
+| Phase 1 annotation-sweep + attribution | **unmet** — ST-4 owns |
+| Phase 2 six Pest tests | **unmet** — ST-4 owns |
+| Phase 3 wedge | **unmet** — ST-4 owns; its probe is in flight |
+| Phase 4 full browser suite + 46-baseline | **unmet** — ST-4 owns |
+| Phase 5 re-measurement | **met** — every blocked item re-filed with its current mtime |
+| Phase 6 documentation at the tag commit | **partly met** — the ruleblock is retired; release docs wait on the tag |
+| Phase 7 tag | **unmet** — no commit with a completed suite |
+| Final report | **met as a status report**; it reports the project as not closed |
+
+**Tag decision:** Law A not satisfied; Law B not measurable. `3.0.0` stays absent.
+
 
 
 
