@@ -16,7 +16,7 @@ class CompleteIndependentTraining extends Command
 {
     protected $signature = 'independent-training:complete';
 
-    protected $description = 'Complete Independent Training sessions whose 50-minute window has passed (§1.1.7)';
+    protected $description = 'Complete Independent Training sessions whose 50-minute window has passed';
 
     public function handle(Lifecycle $lifecycle): int
     {
