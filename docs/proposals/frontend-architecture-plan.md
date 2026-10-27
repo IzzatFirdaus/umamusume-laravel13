@@ -2035,3 +2035,30 @@ rather than relying on an agent noticing a delta.
 **Ruling landing.** Option A adds a pre-commit hook script (`.git/hooks/pre-commit` or
 `scripts/pre-commit.sh`) plus a note in `## Working conventions` rule 1. Option B records the accepted risk
 with A's rationale written down. **Not applied by this pass** — filed only.
+
+### CQ-11 — `DocCitationParityTest` baseline is stale against the documentation folds (2026-10-28)
+
+**The finding.** `tests/Feature/DocCitationParityTest.php` pins `DOC_CITATION_BASELINE = 708`, measured
+2026-10-02. `tools/doc_census.py` now reads **758 dead citations**, and the test forbids raising its own
+baseline by design ("Never raise it to make a failing gate pass"). The rise is not the mechanics sync's:
+no census `GONE` line names any file this pass touched (the Round-5 ADR amendments and the Round-6
+Independent Training work cite only `UMAMUSUME_REFERENCE.md`, which resolves). The 758 is the repository's
+own documentation restructuring, measured to be dominated by **`CONSTRAINTS.md` (148 refs)** and
+**`PLAN.md` (49 refs)** — both folded into `docs/research-scratch/GOVERNANCE.md` by the 2026-10-26
+consolidation — plus `docs/archive/adr/*` references. The baseline predates that fold.
+
+**Options.**
+
+- **A — raise the baseline to 758 and record why.** One number moves; the test's docblock records the fold
+  as the cause. Consequence: the ratchet re-binds to today's tree, and the next documentation fold has to
+  touch it again. Contradicts the test's own "never raise it" rule, so it needs an owner ruling to override.
+- **B — repoint the folded-doc references repo-wide.** Re-point ~197 `CONSTRAINTS.md`/`PLAN.md` citations
+  (and the archive-ADR set) to `GOVERNANCE.md` or errata, lowering the count under 708 without moving the
+  baseline. Consequence: a large documentation pass unrelated to mechanics, and the count moves one way
+  only — the ratchet's stated design.
+
+**Recommendation.** B if the documentation debt is on the near roadmap; A otherwise. The mechanics work
+does not own this number, so the ruling is the owner's.
+
+**Ruling landing.** **Filed, awaiting the owner.** The DoD's "full suite passes" row stays unmet while
+this test is red; the mechanics sync reports "blocked on owner ruling" on this one row, not "complete".
