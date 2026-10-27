@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /*
  * The Shop Items reference view (SCREEN-023, `SCR-SYS-009`). The consumables and currencies from
- * `docs/UMAMUSUME_REFERENCE.md` §1.6.10, plus the Trackblazer Pro Shop read straight from
+ * `docs/UMAMUSUME_REFERENCE.md` Â§1.6.10, plus the Trackblazer Pro Shop read straight from
  * `config/scenarios.php`.
  *
  * **The scenario block is reused, not retyped.** The Pro Shop's nineteen rows live in the scenario
@@ -9,9 +9,9 @@
  * copying it. The reference config carries only the wider catalogue the matrix does not.
  *
  * **Two kinds of row, stated in words.** A consumable is spent; a currency is exchanged. The kind is a
- * text pill, never a colour, so the distinction survives without styling (§5, §42).
+ * text pill, never a colour, so the distinction survives without styling (Â§5, Â§42).
  *
- * **No recommendation.** §19 and §20 do not apply to a reference view, and the shop rotation is not
+ * **No recommendation.** Â§19 and Â§20 do not apply to a reference view, and the shop rotation is not
  * modelled, so no row is marked best value and no row is selected.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
@@ -102,7 +102,7 @@ const close = async (): Promise<void> => {
 </script>
 
 <template>
-    <AppLayout>
+    <AppLayout :breadcrumb="[{ label: 'Database', href: '/database' }, { label: 'Shop Items' }]">
         <Head title="Shop Items" />
         <template #title>Shop Items</template>
 

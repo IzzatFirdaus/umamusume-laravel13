@@ -46,6 +46,17 @@ class DatabaseController extends Controller
      */
     public function index(): Response
     {
+        // One grouped query for the four live counts (slice 9.1). Four separate `count()` calls are
+        // four round trips for four integers, and the hub is the screen every other area is reached
+        // from, so it is the one page where that shape is worth fixing. `UNION ALL` keeps the areas as
+        // rows of one result set; the alternative — one query per area — is what this replaces.
+        $live = collect(DB::select(
+            "select 'trainees' as area, count(*) as total from umamusume where external_ref is not null "
+            ."union all select 'supports', count(*) from support_cards "
+            ."union all select 'skills', count(*) from skills "
+            ."union all select 'races', count(*) from race_catalog_slots"
+        ))->pluck('total', 'area');
+
         // Each area's `source` states, in one of the three arms the hub's own subtitle names, where
         // the data behind the door came from: the fetch engine's catalog tables, `config/scenarios.php`
         // (the only place scenario facts live, D-240), or the reference guide transcribed into
@@ -57,10 +68,10 @@ class DatabaseController extends Controller
         // HFW prints instead. A count that no table can corroborate would be a typed capture value.
         return Inertia::render('Database/Index', [
             'areas' => [
-                ['label' => 'Trainees', 'url' => route('database.trainees'), 'source' => 'Fetched', 'count' => Umamusume::query()->whereNotNull('external_ref')->count(), 'tag' => null, 'description' => 'Aptitudes, costumes, base stats and growth rows.'],
-                ['label' => 'Support Cards', 'url' => route('database.supports'), 'source' => 'Fetched', 'count' => SupportCard::count(), 'tag' => null, 'description' => 'Seven types, effect ladders, limit-break stages.'],
-                ['label' => 'Skills', 'url' => route('database.skills'), 'source' => 'Fetched', 'count' => Skill::count(), 'tag' => null, 'description' => 'Engine conditions, base costs, hint ladders.'],
-                ['label' => 'Races', 'url' => route('database.races'), 'source' => 'Fetched', 'count' => RaceCatalogSlot::count(), 'tag' => null, 'description' => 'Grade, surface, distance band, fan thresholds.'],
+                ['label' => 'Trainees', 'url' => route('database.trainees'), 'source' => 'Fetched', 'count' => (int) ($live['trainees'] ?? 0), 'tag' => null, 'description' => 'Aptitudes, costumes, base stats and growth rows.'],
+                ['label' => 'Support Cards', 'url' => route('database.supports'), 'source' => 'Fetched', 'count' => (int) ($live['supports'] ?? 0), 'tag' => null, 'description' => 'Seven types, effect ladders, limit-break stages.'],
+                ['label' => 'Skills', 'url' => route('database.skills'), 'source' => 'Fetched', 'count' => (int) ($live['skills'] ?? 0), 'tag' => null, 'description' => 'Engine conditions, base costs, hint ladders.'],
+                ['label' => 'Races', 'url' => route('database.races'), 'source' => 'Fetched', 'count' => (int) ($live['races'] ?? 0), 'tag' => null, 'description' => 'Grade, surface, distance band, fan thresholds.'],
                 ['label' => 'Events', 'url' => route('database.events'), 'source' => 'Transcribed', 'count' => null, 'tag' => 'Reference', 'description' => 'Support-card and trainee event chains.'],
                 ['label' => 'Scenarios', 'url' => route('database.scenarios'), 'source' => 'Config', 'count' => count((array) config('scenarios.scenarios', [])), 'tag' => null, 'description' => 'Caps, panels, live-on-Global dates, rulesets.'],
                 ['label' => 'Shop Items', 'url' => route('database.shop-items'), 'source' => 'Transcribed', 'count' => null, 'tag' => 'Trackblazer', 'description' => 'Costs, effects and one publisher\'s ratings.'],

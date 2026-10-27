@@ -1,9 +1,9 @@
 <script setup lang="ts">
 /*
  * The Sparks reference view (SCREEN-023, `SCR-SYS-010`). The Spark categories from
- * `docs/UMAMUSUME_REFERENCE.md` §1.5.2 and the star-roll odds from §1.5.3.
+ * `docs/UMAMUSUME_REFERENCE.md` Â§1.5.2 and the star-roll odds from Â§1.5.3.
  *
- * **The category colour is §18's spark identity, paired with the word.** Blue, Pink, Green and White
+ * **The category colour is Â§18's spark identity, paired with the word.** Blue, Pink, Green and White
  * are carried as an accent chip beside the category name, never as the only difference between two
  * rows: the category word and the global name both print.
  *
@@ -15,7 +15,7 @@
  * export holds 874. The view names that difference instead of leaving the reader to find it.
  *
  * **The odds table renders on the page.** It is three rows and it answers a question a Trainer asks
- * directly, so it is not hidden in a drawer (§35's progressive disclosure is for the row detail, not
+ * directly, so it is not hidden in a drawer (Â§35's progressive disclosure is for the row detail, not
  * for a table this small).
  */
 import AppLayout from '../../layouts/AppLayout.vue';
@@ -57,7 +57,7 @@ const props = defineProps<{
     totalCount: number;
 }>();
 
-// §18's four spark families have no committed token set in this build, so `SparkChip` renders every
+// Â§18's four spark families have no committed token set in this build, so `SparkChip` renders every
 // variant neutral and the category word carries the identity. Inventing a colour mapping would state
 // a distinction the design system does not own; the word is the distinction, and it always prints.
 
@@ -114,7 +114,7 @@ const close = async (): Promise<void> => {
 </script>
 
 <template>
-    <AppLayout>
+    <AppLayout :breadcrumb="[{ label: 'Database', href: '/database' }, { label: 'Sparks' }]">
         <Head title="Sparks" />
         <template #title>Sparks</template>
 
@@ -203,8 +203,8 @@ const close = async (): Promise<void> => {
         </p>
 
         <!--
-            The star-roll odds, §1.5.3. A real table with row headers, because the four columns are the
-            same property across three bands and comparison is the point (design-2.0 §46).
+            The star-roll odds, Â§1.5.3. A real table with row headers, because the four columns are the
+            same property across three bands and comparison is the point (design-2.0 Â§46).
         -->
         <section aria-labelledby="spark-odds" class="mt-10">
             <h3 id="spark-odds" class="text-lg font-semibold text-ink-strong">

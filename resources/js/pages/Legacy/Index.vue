@@ -40,8 +40,26 @@ interface Paginator<T> {
     total: number;
 }
 
+/**
+ * A saved pair: one run's Legacy selection projected as the unit the page lists (slice 7.1). The three
+ * value strings are pre-formatted by the controller because every branch of them is a named absence
+ * ("No blue Spark recorded"), and a view that formatted them would be a second place to word one.
+ */
+interface SavedPair {
+    run_id: number;
+    trainee: string;
+    scenario_label: string;
+    pair_label: string;
+    blue_grades: string;
+    pink_range: string;
+    hint_family: string;
+    builder_url: string;
+    compare_url: string;
+}
+
 const props = defineProps<{
     veterans: Paginator<VeteranRow>;
+    pairs: SavedPair[];
     filters: { trainee: number | null; scenario: string | null; tag: string | null };
     trainees: Record<string, string>;
     scenarios: Record<string, string>;
@@ -99,7 +117,74 @@ function applyFilters(): void {
             </PageHeader>
         </template>
 
-        <div class="grid gap-6 @3xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <!-- `legacy.html:73` — the page's unit is the saved pair, not the Veteran row. A pair is one
+             object (two parents and the sparks they pass on) stored as one `legacy_selection` column,
+             so the rows here are runs that carry a selection. -->
+        <section aria-labelledby="legacy-saved-pairs" class="mt-6">
+            <h2 id="legacy-saved-pairs" class="text-lg font-semibold text-ink-strong">Saved legacies</h2>
+            <p class="mt-1 text-sm text-ink-muted">
+                A legacy is one object: two parents and the sparks they pass on. Each row below is a run
+                that carries a saved pair, read back exactly as it was entered.
+            </p>
+
+            <p
+                v-if="pairs.length === 0"
+                class="mt-3 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
+            >
+                No saved pair yet. Open a run's Legacy builder, assign a parent, and confirm: that run
+                becomes a pair this list can compare.
+            </p>
+
+            <ul v-else class="mt-3 space-y-3">
+                <li
+                    v-for="pair in pairs"
+                    :key="pair.run_id"
+                    class="rounded-md border border-rule bg-raised p-4 text-sm"
+                    :data-pair-run="pair.run_id"
+                >
+                    <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                        <span class="font-semibold text-ink-strong">{{ pair.pair_label }}</span>
+                        <span class="text-xs text-ink-muted">
+                            {{ pair.trainee }} · {{ pair.scenario_label }} · run #{{ pair.run_id }}
+                        </span>
+                    </div>
+
+                    <!-- Three values, because blue and pink are the whole starting-bonus economy and the
+                         hint families are the one thing that is not a starting bonus (DM-3). -->
+                    <dl class="mt-2 grid gap-2 text-xs sm:grid-cols-3">
+                        <div>
+                            <dt class="font-semibold uppercase tracking-wide text-ink-muted">Blue grades</dt>
+                            <dd class="mt-0.5 text-ink">{{ pair.blue_grades }}</dd>
+                        </div>
+                        <div>
+                            <dt class="font-semibold uppercase tracking-wide text-ink-muted">Pink range</dt>
+                            <dd class="mt-0.5 text-ink">{{ pair.pink_range }}</dd>
+                        </div>
+                        <div>
+                            <dt class="font-semibold uppercase tracking-wide text-ink-muted">Unique-skill hints</dt>
+                            <dd class="mt-0.5 text-ink">{{ pair.hint_family }}</dd>
+                        </div>
+                    </dl>
+
+                    <p class="mt-3 flex flex-wrap items-center gap-3">
+                        <Link
+                            :href="pair.builder_url"
+                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
+                        >
+                            Open Legacy builder
+                        </Link>
+                        <a
+                            :href="pair.compare_url"
+                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
+                        >
+                            Compare
+                        </a>
+                    </p>
+                </li>
+            </ul>
+        </section>
+
+        <div class="mt-8 grid gap-6 @3xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <section aria-labelledby="legacy-library">
                 <h2 id="legacy-library" class="text-lg font-semibold text-ink-strong">Veteran library</h2>
 

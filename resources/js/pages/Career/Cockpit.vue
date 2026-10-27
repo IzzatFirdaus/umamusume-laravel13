@@ -1028,6 +1028,35 @@ const jumpToShop = (): void => {
                     <div class="mt-3">
                         <ScenarioPanel :scenario="props.scenario as never" />
                     </div>
+
+                    <!-- HFW OVERRIDE (copy, not visual) — `cockpit-trackblazer.html` prints a `.mockbar`
+                         stating that its support data is illustrative. A wireframe artifact is not
+                         shippable, so the same warning ships as a `.note` instead of the bar. The date is
+                         the one the scenario matrix carries as its own verification stamp, never a date
+                         this page chose; the wording avoids long unbreakable tokens because a note that
+                         forces a 320px scroll would be a defect of its own. -->
+                    <p
+                        v-if="props.run.scenario === 'trackblazer'"
+                        class="note mt-3 text-xs text-ink-muted"
+                        data-field="support-data-note"
+                    >
+                        <b>Illustrative support data.</b> The Trackblazer figures on this screen are what
+                        the scenario matrix records, and that matrix was verified on 2026-09-27. Anything
+                        the matrix does not carry prints as an absence rather than an estimate.
+                    </p>
+
+                    <!-- The same override for Our Grand Concert (`cockpit-grand-concert.html` draws its
+                         own `.mockbar`), with the same rule: the warning ships as words, the bar does not
+                         ship at all. -->
+                    <p
+                        v-if="props.run.scenario === 'grand_concert'"
+                        class="note mt-3 text-xs text-ink-muted"
+                        data-field="support-data-note"
+                    >
+                        <b>Illustrative support data.</b> The concert loop and its payouts are what the
+                        scenario matrix records, and that matrix was verified on 2026-09-27. A performance
+                        type the run has not recorded prints <b>Not recorded</b> rather than a zero.
+                    </p>
                 </Section>
             </div>
 

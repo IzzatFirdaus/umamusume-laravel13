@@ -65,6 +65,14 @@ class LegacyController extends Controller
     public const RECORD_ONLY_NOTICE = 'Record only. This screen stores and compares what you enter. It does not compute inheritance.';
 
     /**
+     * How many saved pairs the browse surface projects. A pair is a run with a Legacy Select, so this
+     * is a window on the most recent ones rather than a paginated collection: the Veteran library below
+     * it is the paginated list, and a second pager for a projection of the same rows would be two
+     * controls over one set.
+     */
+    private const PAIR_LIMIT = 12;
+
+    /**
      * `GET /legacy` — browse the recorded Veterans and open a builder on one.
      *
      * The list is `ListVeterans` unchanged, paginated and mapped to arrays; the only addition is a
@@ -88,6 +96,11 @@ class LegacyController extends Controller
 
         return Inertia::render('Legacy/Index', [
             'veterans' => $rows,
+            // Slice 7.1: the saved pairs. A Legacy Select is ONE object — two parents plus their four
+            // ancestor slots — and it is stored as one `training_runs.legacy_selection` column
+            // (`ADR-0010`), so "a saved pair" is a run that carries a selection, not two Veteran rows.
+            // The projection is additive and read-only: no table, no write, no derived score.
+            'pairs' => $this->savedPairs(),
             'filters' => [
                 'trainee' => $filters['trainee'],
                 'scenario' => $filters['scenario'],
@@ -104,6 +117,106 @@ class LegacyController extends Controller
             'totalCount' => $totalCount,
             'notice' => self::RECORD_ONLY_NOTICE,
         ]);
+    }
+
+    /**
+     * The runs that carry a Legacy Select, projected as saved pairs (slice 7.1).
+     *
+     * A pair is ONE object — two parents and the sparks they pass on — and it is stored as one
+     * `training_runs.legacy_selection` column (`ADR-0010`), so "a saved pair" is a run that carries a
+     * selection, not two Veteran rows. The projection is additive and read-only: no table, no write and
+     * no derived score. The three values the HFW's table asks for are read straight off the payload:
+     * the blue grades are the stat sparks' star counts, the pink range is the width of the aptitude
+     * sparks' stars, and the unique-skill hint family is the green plus white sparks, which are hint
+     * levels rather than flat stat boosts (DM-3).
+     *
+     * @return list<array{run_id: int, trainee: string, scenario_label: string, pair_label: string,
+     *     blue_grades: string, pink_range: string, hint_family: string, builder_url: string,
+     *     compare_url: string}>
+     */
+    private function savedPairs(): array
+    {
+        return TrainingRun::query()
+            ->whereNotNull('legacy_selection')
+            ->with(['umamusume:id,name', 'inheritanceParentA:id,name', 'inheritanceParentB:id,name'])
+            ->latest('id')
+            ->limit(self::PAIR_LIMIT)
+            ->get()
+            ->map(static function (TrainingRun $run): array {
+                $sparks = [];
+                foreach ($run->legacySelection()?->legacies ?? [] as $legacy) {
+                    foreach ((array) ($legacy['sparks'] ?? []) as $spark) {
+                        $sparks[] = (array) $spark;
+                    }
+                }
+
+                $ofKind = static fn (string ...$kinds): array => array_values(array_filter(
+                    $sparks,
+                    static fn (array $spark): bool => in_array($spark['kind'] ?? null, $kinds, true),
+                ));
+
+                $stars = static function (array $list): array {
+                    $values = [];
+                    foreach ($list as $spark) {
+                        if (is_int($spark['stars'] ?? null)) {
+                            $values[] = $spark['stars'];
+                        }
+                    }
+
+                    return $values;
+                };
+
+                $blue = $ofKind('blue');
+                $pink = $ofKind('pink');
+                $hints = $ofKind('green', 'white');
+
+                $blueGrades = [];
+                foreach ($blue as $spark) {
+                    $target = is_string($spark['target'] ?? null) ? $spark['target'] : null;
+                    $star = is_int($spark['stars'] ?? null) ? $spark['stars'] : null;
+                    $blueGrades[] = trim(($target ?? 'Target not recorded').($star === null ? '' : ' ★'.$star));
+                }
+
+                $pinkStars = $stars($pink);
+                $pinkRange = match (true) {
+                    $pink === [] => 'No pink Spark recorded',
+                    $pinkStars === [] => 'Star counts not recorded',
+                    min($pinkStars) === max($pinkStars) => '★'.min($pinkStars),
+                    default => '★'.min($pinkStars).'–★'.max($pinkStars),
+                };
+
+                $hintCounts = [];
+                foreach ($hints as $spark) {
+                    $kind = is_string($spark['kind'] ?? null) ? $spark['kind'] : 'unrecorded';
+                    $hintCounts[$kind] = ($hintCounts[$kind] ?? 0) + 1;
+                }
+
+                $names = array_values(array_filter([
+                    $run->inheritanceParentA?->name,
+                    $run->inheritanceParentB?->name,
+                ], static fn (?string $name): bool => $name !== null && $name !== ''));
+
+                return [
+                    'run_id' => $run->id,
+                    'trainee' => $run->umamusume->name,
+                    'scenario_label' => $run->hasScenario()
+                        ? (string) (config('scenarios.scenarios.'.$run->scenarioKey().'.label') ?? $run->scenarioKey())
+                        : 'No scenario set',
+                    'pair_label' => $names === [] ? 'Parent names not recorded' : implode(' × ', $names),
+                    'blue_grades' => $blueGrades === [] ? 'No blue Spark recorded' : implode(', ', $blueGrades),
+                    'pink_range' => $pinkRange,
+                    'hint_family' => $hintCounts === []
+                        ? 'No hint Spark recorded'
+                        : implode(', ', array_map(
+                            static fn (string $kind, int $count): string => ucfirst($kind).' '.$count,
+                            array_keys($hintCounts),
+                            array_values($hintCounts),
+                        )),
+                    'builder_url' => route('legacy.builder', $run),
+                    'compare_url' => route('legacy.compare', ['runs' => [$run->id]]),
+                ];
+            })
+            ->all();
     }
 
     /**

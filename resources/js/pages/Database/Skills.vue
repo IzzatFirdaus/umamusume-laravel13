@@ -1,12 +1,13 @@
 <script setup lang="ts">
 /*
- * The Database hub's Skills area (SCREEN-023, plan §8 D17).
+ * The Database hub's Skills area (SCREEN-023, plan Ã‚Â§8 D17).
  *
  * The skill search, on the Database URL. The same shared list body the skill search mounts, behind
  * `SkillController::databaseIndex`. See `Trainees.vue` for why this is a shared screen rather than a
  * redirect to `/skills`.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import SkillCatalog from '../../components/skills/SkillCatalog.vue';
 import { Head } from '@inertiajs/vue3';
 
@@ -39,9 +40,11 @@ const props = defineProps<{
 </script>
 
 <template>
-    <AppLayout>
+    <AppLayout :breadcrumb="[{ label: 'Database', href: '/database' }, { label: 'Skills' }]">
         <Head title="Skills" />
         <template #title>Skills</template>
+
+        <DatabaseNav />
 
         <SkillCatalog
             :skills="props.skills"

@@ -62,6 +62,12 @@
                    class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:text-ink-strong">
                     Dashboard
                 </a>
+                {{-- The third exit (`error-419.html`): one filled action plus two safe places. Careers
+                     is read-only on arrival, so it cannot repeat the write that just expired. --}}
+                <a href="{{ route('runs.index') }}"
+                   class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:text-ink-strong">
+                    Careers
+                </a>
             </div>
         </div>
 

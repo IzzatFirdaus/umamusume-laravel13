@@ -59,6 +59,14 @@
                    class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:text-ink-strong">
                     Careers
                 </a>
+                {{-- The third exit the HFW draws (`error-500.html`): one filled action and two outline
+                     doors, so a Trainer whose screen broke has a known-good place to read from while
+                     the failed one is investigated. Database is read-only, so it cannot fail the same
+                     way a write surface can. --}}
+                <a href="{{ route('database.index') }}"
+                   class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:text-ink-strong">
+                    Database
+                </a>
             </div>
         </div>
 

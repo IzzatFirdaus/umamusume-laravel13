@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*
- * The race database (SCREEN-023, plan §8 D17). Every slot of the shared [Global] career calendar,
+ * The race database (SCREEN-023, plan Â§8 D17). Every slot of the shared [Global] career calendar,
  * read straight off `race_catalog_slots` and paginated server-side.
  *
  * The calendar is the second new area of this slice, and it is the one that can genuinely be empty:
@@ -9,7 +9,7 @@
  * placeholder race, because an invented row in a reference table is a lie the whole career workflow
  * would build on.
  *
- * Density is allowed on this screen only (plan §13, "Deliberately traded"): a reference table is dense
+ * Density is allowed on this screen only (plan Â§13, "Deliberately traded"): a reference table is dense
  * by nature. The table still scrolls inside its own container at 320px, never the page.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
@@ -69,7 +69,7 @@ function goToPage(page: number): void {
 </script>
 
 <template>
-    <AppLayout>
+    <AppLayout :breadcrumb="[{ label: 'Database', href: '/database' }, { label: 'Races' }]">
         <Head title="Races" />
         <template #title>Races</template>
 
@@ -159,7 +159,7 @@ function goToPage(page: number): void {
                             </td>
                             <td class="py-1.5 px-3">
                                 <span v-if="gates(slot).length === 0">
-                                    N/A <span class="text-xs text-ink-muted">· no entry gate</span>
+                                    N/A <span class="text-xs text-ink-muted">Â· no entry gate</span>
                                 </span>
                                 <span v-else class="flex flex-wrap gap-1">
                                     <span

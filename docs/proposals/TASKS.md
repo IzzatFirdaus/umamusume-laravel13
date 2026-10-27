@@ -483,6 +483,135 @@ baseline 219`, the 220th hit `resources/js/pages/Review/Index.vue:300`. That fil
 the gate printed a `debt-increase` finding and still exited **0**, so CI (if it existed) could not see it.
 `blocked — Review/Index.vue:300, peer uncommitted, mtime 2026-10-27 02:37:50`.
 
+## Phase A — the cockpit shell and its four variants (2026-10-27)
+
+Premise, measured rather than assumed: S5.1–S5.5 had already landed with `2ba54a61`, and round 3 added
+S5.6. What was missing was **the shell's own spec** and one HFW copy note; the four variants were already
+green. So Phase A landed as verification plus two additions, not a rewrite.
+
+| Bullet | State | Evidence |
+|---|---|---|
+| S5.1 identity card first, one primary, countdown in the scenario card, rail gated on `isActive` | already satisfied | `Cockpit.vue`: `CockpitIdentityCard` at `:865`, head action at `:820`, `[data-region="scenario-finale"]` inside the Scenario section at `:1011`, `AdvisorRail v-if="isActive"` at `:1035` |
+| S5.1 the shell spec the brief asks for | **gap → landed** | new `tests/browser/cockpit-shell.spec.ts`: identity above both body regions, one filled action, the 390px reflow, the countdown inside the scenario card and **not** in the advisor, and a Completed run with no advisor rail and its outcome printed first |
+| S5.2 URA finale: outcome first, entered caps, no rail | already satisfied | `ura-panel.spec.ts` green in the batch below |
+| S5.3 Unity Cup: five bars, pill-caution, "Where to go" | already satisfied | `unity-cup-panel.spec.ts` green below |
+| S5.4 Trackblazer: shortfall lead figure, currencies in one sentence, no `.mockbar` | already satisfied | `TrackblazerPanel.vue:610-617`; `grep mockbar resources/js` → 0 hits |
+| S5.4/S5.5 the `.mockbar` warning as a `.note` | **gap → landed** | two notes on the Cockpit's scenario card (`data-field="support-data-note"`), one for `trackblazer`, one for `grand_concert`, each naming the matrix's `verified_at` as the source of the date (see §1.5 C) |
+| S5.5 Grand Concert: loop explained, five tiles with absences, payouts | already satisfied | drawn inline at `Cockpit.vue:961` and explained at `:441-450`; `grand-concert-panel.spec.ts` green below |
+
+**Two of this session's own assertions were wrong on first run and were corrected, not weakened:** the
+two-column "shared top edge" check (the scenario card sits *below* the body grid, so the pair being
+compared was never in one row — the assertion now pins the order the shell actually documents), and the
+320px reflow, which the new note broke because `config/scenarios.php` in a `<code>` does not wrap
+(`break-words` added — a real regression this session introduced and fixed).
+
+## Phase B — S7.1 Legacy Index (2026-10-27)
+
+| Bullet | State | Evidence |
+|---|---|---|
+| saved pairs are the unit | **gap → landed** | `LegacyController@index` gains an additive, read-only `pairs` projection (`savedPairs()`): runs carrying a `legacy_selection`, each projected as one pair with the two parent names read off `inheritance_parent_a_id`/`_b`. No table, no write, no score |
+| three-row value table | already satisfied | the reference aside already printed blue grades, pink range and the Green/White hint row (`Legacy/Index.vue:334-354`, with its two `DOMAIN OVERRIDE` comments); each pair row now also carries the three values **per pair**, which is the brief's "values from the payload" |
+| Compare is the only filled action | already satisfied | `LinkButton variant="primary"` in the page head |
+| the HFW's `<h2>` headers | **gap → landed** | "Saved legacies" is new and first; the library list keeps its own heading, and the aside already carried "What a legacy is worth" and "Parents available". A first attempt added a *duplicate* worth table above the grid — caught by the new spec's strict-mode failure and removed rather than left as a second copy |
+| S7.2 radios | blocked, see §1.5 A | payload shape |
+| tests | **landed** | new `tests/browser/legacy-index.spec.ts`: saved pair as a row keyed by its run, the three values, the three regions and their order, one primary |
+
+## Phase C — S8 Library (2026-10-27)
+
+Already satisfied end to end by `fac82088`; measured bullet by bullet and **not** re-written:
+
+- Catalog: cards, three aptitude letters per card (`catalog.spec.ts:96-102`), debut form and rarity on the
+  card, a growth row that states the catalogue holds no growth figure, release status as a word pill;
+  detail carries the full nine letters under their own headings and the `FormTabs` link strip with
+  `aria-current="page"` (`catalog-detail.spec.ts:173-191`).
+- Support cards: effect chips as words, Pal `None` with its reason, type counts, one row per card; the
+  detail's stage table states that a level between anchors is an absence and not a zero, the break widget
+  is four diamonds with a level readout, and provenance is a row plus a link to the ledger with no file
+  path.
+- Skills: engine condition beside the name, base SP cost only, search over name and effect text, type as
+  a filter; detail prints engine tokens first and the "No client string." empty state, with `sourceText`
+  never rendered as copy.
+- No test was added: the brief's four assertions already exist in `catalog.spec.ts` and
+  `catalog-detail.spec.ts`, and re-writing them would be churn. `php artisan test --filter="Catalog|SupportCard|Skill"`
+  was not re-run this session; `Legacy|Database` (119 passed) and the new Feature classes were.
+
+## Phase D — S9 Database (2026-10-27)
+
+| Bullet | State | Evidence |
+|---|---|---|
+| S9.1 `areas[].count` | already satisfied (round 3 measured it) | four live counts, one config count, four documented `null`s |
+| S9.1 **one grouped query** | **gap → landed** | the four live counts now come from one `UNION ALL` (`DatabaseController@index`), and `tests/Feature/DatabaseIndexCountsTest.php` proves both the numbers and that exactly **one** statement mentions the four tables (`toHaveCount(1)` + `toContain('union all')`) |
+| S9.2 nine tiles, strip, verification date, Sources pick border | already satisfied (`496d02c6` + `42ac8b74`) | `database.spec.ts` |
+| S9.3 sub-nav strip on **every** area page | **gap → landed** | `Skills.vue`, `Supports.vue` and `Trainees.vue` were the three without `DatabaseNav`; all nine now carry it |
+| S9.3 breadcrumb `Database / <Area>` | **gap → landed** | all nine sub-pages now pass `:breadcrumb` to `AppLayout`; only the hub did before |
+| S9.3 "Effects documented?" honesty column | **filed, not built** | the Races/Events/ShopItems payloads carry no per-row "effects documented" flag, and a column printing the same word on every row would be a claim the data cannot corroborate. Each row already states its own absence as `N/A` with a visible reason (`380bf50a`), the same honesty at the grain the data has |
+| tests | **landed** | new `tests/browser/database-subpages.spec.ts`: one case per area (one `h1`, the strip, the `Database` crumb link and the area's own crumb text) plus the hub's nine tiles, strip and verification date |
+
+## Phase E — S6 Preferences + error pages (2026-10-27)
+
+- **Preferences**: already satisfied, and closer to the HFW than round 3 recorded. The save action is in
+  the **page head's action row** (`PageHeader #actions`), not a bottom bar, so the brief's option (a) is
+  the shipped shape; the state line reads `All changes saved` / `Unsaved changes`, the control is
+  disabled while clean (KI-134 resolved), the three widths state their numbers, and the theme card states
+  that "Follow the system" stores nothing so the OS decides. `preferences.spec.ts` covers all five lines.
+  No change made.
+- **Error pages**: already satisfied in shape (Blade documents with one filled action, plain-language
+  headlines, no meta refresh), with two gaps closed here: the **419 had two exits and now has three**
+  (Careers added beside Dashboard) and the **500 had two and now has three** (Database added). New
+  `tests/Feature/ErrorPageCopyTest.php` pins all three documents (data-loss answer, exactly one
+  `bg-primary-action`, three exits, no `http-equiv`), and new `tests/browser/errors.spec.ts` pins the one
+  error a visitor actually reaches: a 404 with its data-loss line, one filled action, three exits and no
+  auto-redirect.
+
+## 12.1 sweep — 2026-10-27
+
+Greps over `resources/js/**` (`.vue`, `.ts`). "Hits" is the raw count; the note says whether a hit is a
+finding. Nothing was fixed in this sweep because nothing was found: the one rule class that had findings
+this release (title-only reasons) was closed by `496d02c6`, and the UI hygiene guard still enforces it.
+
+| # | Rule | Grep | Result | Files touched |
+|---|---|---|---|---|
+| 1 | `title=`-only reasons | `title=` | 263 hits; **0 findings**. The attribute is used for labels, icon hints and system-name captions, and the absence-reason shape is enforced by `tests/Feature/UiHygieneTest.php` (it reads the 25 lines after each `N/A` for a `_title`/`_reason`/`absence` twin) | — |
+| 2 | `animate-pulse` / `.skel` | `animate-pulse\|\.skel` | **0 hits** | — |
+| 3 | growth zeros `+0%` | `Not recorded` | 109 hits — the honest-absence wording is the shipped default | — |
+| 4 | confirmed → `null` | `confirmed.*null` | 7 hits, all payload/badge conventions | — |
+| 5 | `ArtworkSlot` missing → nothing | `ArtworkSlot` | 28 hits, all the component and its consumers | — |
+| 6 | `HFW OVERRIDE` for visuals | `HFW OVERRIDE` | 1 hit — the new Cockpit support-data note, which is a **copy** override and says so in its own comment | `Cockpit.vue:1033` |
+| 7 | `dark:` | `dark:` | 2 hits, **both inside comments that prohibit it** (`SparkChip.vue:18`, `AptitudeBadge.vue:46`) → **0 utilities** | — |
+| 8 | one primary per page | `.bg-primary-action` count | Asserted per page by this session's three new specs (cockpit shell, legacy index, error pages); no repo-wide count was taken | — |
+| 9 | `Form/buttonStyles.ts` imports | `buttonStyles` | 4 hits, the shared module and its importers | — |
+| 10 | `.savebar` disabled-when-clean | `savebar` | 1 hit (`Preferences/Edit.vue`), and `preferences.spec.ts` pins disabled-while-clean | — |
+| 11 | provenance row + link, no paths | `database.sources\|database/sources` | 11 hits, all links to the ledger | — |
+| 12 | client vocabulary verbatim | spot-check | `Released (Global)`, `None`, `Not recorded`, `No client string.` read as the client's own words | — |
+| 13 | lore gate | `php tools/lore.php` | **11 hits / 7 files**: all code identifiers, the gate's own patterns, and two comments (`AncestryNode.vue:41` "pairing", `UnityCupPanel.vue:194` "pairing"); **none is displayed vocabulary**. Delta from the last recorded figure: **unknown** — no baseline figure was in this session's context, so none is claimed | — |
+| 14 | one `h1` per page | `<h1` | 2 hits, both shared chrome (`ui/PageHeader.vue:42` and `AppLayout.vue:484`); a page renders one or the other, never both | — |
+| 15 | blank is not zero | `N/A` + reason tests | Enforced by `UiHygieneTest` and by each panel spec's absence cases | — |
+| 16 | state never on colour alone | status pills | Every status carries a word (`StatusPill`, `.pill-caution`), and the Careers row prints position beside status | — |
+| 17 | `.tag.auto` / `.tag.you` | `tag auto\|tag.auto` | 3 hits, the provenance tag family | — |
+
+## 12.2 DM sweep — 2026-10-27
+
+`DOMAIN OVERRIDE` appears **10 times**, numbered where the wireframe conflicts with the domain:
+DM-1 ×2, DM-3 ×3, DM-8 ×2, plus three copy-only overrides that name no DM (Legacy's worth table and
+Import's two cell/edit overrides).
+
+| DM | Acceptance | Files expected | Present | Line |
+|---|---|---|---|---|
+| DM-1 | 72 turns + finale outside | cockpit, timeline, result, dashboard | yes, 2 overrides | `CareerTimeline.vue:9`, `Career/Timeline.vue:184` |
+| DM-2 | five stats distinct | cockpit stat summary | implemented, no override needed | `components/career/StatSummary.vue` (five distinct rows) |
+| DM-3 | four/five spark families | inheritance, legacy, veterans | yes, 3 overrides | `Career/InheritanceEvent.vue:318` (five families), `Career/LegacySelect.vue:611`, `Legacy/Index.vue:354` |
+| DM-4 | SP ladder, base cost + note | skills planner | implemented, ladder renders below base prices | `Career/SkillsPlanner.vue:13-15`, `:301-303` |
+| DM-5 | mood percentages + non-monotone ramp | mood pill, cockpit | implemented (Mood Effect headline) | `Career/Cockpit.vue` (`Mood Effect` block) |
+| DM-6 | four running strategies | trainee/aptitude surfaces | **not found in the surfaces the row names** — no `Pace Chaser`/`Front Runner`/`End Closer`/`Late Surger` string in `Career/*.vue`. Filed rather than invented: the strategy vocabulary lives in the wizard's build target (`distance`/`surface`/`style` selects), which is `Career/BuildTarget.vue` — a peer-dirty file this session could not open | — |
+| DM-7 | energy bend, rest distribution | training decision | implemented ("Rest is rolled… bends around 50") | `Career/TrainingDetail.vue:?` rest paragraph |
+| DM-8 | six-slot deck, guest, Pal "None" | deck select, support deck | yes, 2 overrides | `Career/DeckSelect.vue:370`, `components/support/SupportSlot.vue:171` |
+
+DM-6's row is the one gap in this table, and it is a *measurement* gap rather than a missing mechanic:
+the strategy fields are the wizard's (`select[name="style"]`), which `career-build-target.spec.ts` covers,
+but that file is peer-dirty so this session did not read or run it.
+
+
+
 ## ST-4 close-out — deviations filed 2026-10-27
 
 Two HFW-vs-app mismatches of one class: an HFW label promises a navigation the controller does not
@@ -529,6 +658,39 @@ greps `resources/js/**` for `∑` and found `resources/js/pages/Help.vue:21`, wh
 **subject** of the marks glossary rather than an accidental duplicate. The sweep now carries a
 file-scoped exclusion (`$helpGlossary`) with an in-place rationale comment. The exclusion does not
 weaken the sweep for any other file. `Help.vue` was not edited (foreign, Slice 11.2).
+
+## ST-4 close-out — hand-back 2026-10-27
+
+| Field | Value |
+|---|---|
+| Commit | `0201d8e7` — "ST-4: career setup wizard HFW parity (close-out)" |
+| Branch / base | `master`; parent `1ca9caa3`, which sits on `c2c72c13` (both still ancestors) |
+| Files staged (16) | `resources/js/layouts/SetupLayout.vue`, `resources/js/pages/Career/{ScenarioSelect,TraineeSelect,BuildTarget,LegacySelect,DeckSelect,Preflight}.vue`, `resources/css/app.css`, `tests/browser/career-{build-target,trainee-select,preflight,legacy-deck-steps}.spec.ts`, `tests/browser/setup-layout.spec.ts` (new), `tests/utils/start-career.ts`, `tests/Feature/CareerBuildTargetTest.php`, `app/Http/Controllers/Career/BuildTargetController.php`, `docs/proposals/TASKS.md` |
+| Files NOT staged | Peer work, all left as found: `app/Http/Controllers/ReviewController.php`, `resources/js/pages/Review/{Index,Detail}.vue`, `resources/js/pages/Veterans/{Index,Show}.vue`, `resources/js/pages/Career/TraineeProfile.vue`, `tests/browser/dashboard.spec.ts`, `tests/browser/career-scenario-select.spec.ts` (re-dirtied by a peer after this session), `tests/Feature/ReviewDetailPayloadTest.php` (untracked). `resources/js/pages/Help.vue` was never opened. Untracked `tests/browser/annotation-sweep.spec.ts` is ST-4 work but was not in the close-out staging list, so it is left for a follow-up. |
+| Playwright wizard suite | **82 passed / 0 failed** (7 career specs + `setup-layout.spec.ts` + `annotation-sweep.spec.ts`) |
+| Re-run after the label revert | `career-build-target` + `career-preflight` → **12 passed / 0 failed** |
+| Pest `CareerBuildTarget` | **13 passed / 0 failed** (the sweep test is green) |
+| Pest wizard remainder | **71 passed / 0 failed** (`CareerLegacyDeckSteps`, `CareerScenarioSelect`, `CareerTraineeSelect`, `CareerPreflight`) |
+| ∑ glyph sweep | Resolved via a file-scoped allowlist with in-place rationale; green. `Help.vue` untouched. |
+| Deviation 1 (BuildTarget) | **(a) chosen and applied** — label reverted to "Save target" in this commit; `CareerBuildTargetTest`'s pinned `assertRedirect(route('career.target'))` untouched |
+| Deviation 2 (Legacy) | **(a) chosen and kept** — "Save Legacy" stays the primary |
+| Dark theme | Not explicitly measured. Zero `dark:` utilities confirmed by grep (the repo-wide table above records 2 hits, both inside comments that prohibit the utility); the flip rides `html[data-theme='dark']`. |
+| Screenshot blocker | `mcode-tools` connector fails `UND_ERR_HEADERS_TIMEOUT`; mitigated by DOM measurement (`scrollWidth`, `getBoundingClientRect`, structure) via Playwright evaluate. |
+| Gates | `npm run typecheck` clean; `npm run build` ✓; `pint --test` passed; `phpstan analyse` no errors on touched paths; `lore code` 221 hits (advisory, none added); `lint:ui` adds no arbitrary-value debt (the `220>219` is `Review/Index.vue:300`, peer-owned) |
+| Not run | Full `test:browser` suite, full Pest suite, live framework-audit |
+| Next | **Main session owns.** The ST-4 agent does not continue into Phase 6.1 or any other slice. |
+
+Two additions beyond the close-out brief's staging list, both deliberate and flagged here:
+
+1. **`app/Http/Controllers/Career/BuildTargetController.php`** — staged because it is the supplier of the
+   `finaleTargets` prop that `BuildTarget.vue` declares as required (the ST-4 §4 prop delta, and the
+   locus §4 Deviation 1 names). Committing the page without its controller would have left a required prop
+   unsupplied. The redirect inside it was **not** changed.
+2. **`docs/proposals/TASKS.md`** — the brief makes the deviation entries and this hand-back deliverables.
+
+The commit's subject acquired a UTF-8 BOM from `Out-File -Encoding utf8` on first write; it was amended
+once, immediately, with a BOM-free writer to strip it. The amended hash is the one above; the original
+`0fa022ef` never left this branch.
 
 
 

@@ -45,7 +45,7 @@ const props = defineProps<{
 </script>
 
 <template>
-    <AppLayout>
+    <AppLayout :breadcrumb="[{ label: 'Database', href: '/database' }, { label: 'Data sources' }]">
         <Head title="Data sources" />
 
         <template #title>Data sources</template>
@@ -83,7 +83,7 @@ const props = defineProps<{
 
                     <p class="mt-1 break-all text-sm text-ink">
                         <!-- The URL is the only content of its paragraph, so the link's own hit area is
-                             the target. `min-h-11` grows it to the house 44px bar (DESIGN.md §12, KI-29);
+                             the target. `min-h-11` grows it to the house 44px bar (DESIGN.md Â§12, KI-29);
                              `inline-flex` keeps it on the text's own line, and the paragraph grows with
                              it rather than the text being displaced. -->
                         <a

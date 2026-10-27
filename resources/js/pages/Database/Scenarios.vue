@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*
- * The scenario matrix (SCREEN-023, plan §8 D17). The composition matrix in `config/scenarios.php`,
+ * The scenario matrix (SCREEN-023, plan Â§8 D17). The composition matrix in `config/scenarios.php`,
  * printed as it is: the caps, the panels, the widgets, the live date and the documentation marker, with
  * the matrix's own verification date beside the source the config's header cites.
  *
@@ -12,7 +12,7 @@
  * an off panel is a fact here rather than a silence. The word `off` stays in the text, so the state
  * never rides on colour alone.
  *
- * Density is allowed on this screen only (plan §13, "Deliberately traded").
+ * Density is allowed on this screen only (plan Â§13, "Deliberately traded").
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import DatabaseNav from '../../components/database/DatabaseNav.vue';
@@ -74,7 +74,7 @@ const panelRows = (scenario: Scenario): Record<string, unknown>[] =>
 </script>
 
 <template>
-    <AppLayout>
+    <AppLayout :breadcrumb="[{ label: 'Database', href: '/database' }, { label: 'Scenarios' }]">
         <Head title="Scenarios" />
         <template #title>Scenarios</template>
 

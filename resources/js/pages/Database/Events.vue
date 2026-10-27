@@ -1,18 +1,18 @@
 <script setup lang="ts">
 /*
  * The Events reference view (SCREEN-023, `SCR-SYS-008`). The recurring event types from
- * `docs/UMAMUSUME_REFERENCE.md` §4.4, printed as the reference guide states them.
+ * `docs/UMAMUSUME_REFERENCE.md` Â§4.4, printed as the reference guide states them.
  *
- * **Recurring types, not a live schedule.** §4.1 to §4.3 record what was running on one day and rot;
- * §4.4 is a cadence table read from the local event exports, which is what a reference view can print
+ * **Recurring types, not a live schedule.** Â§4.1 to Â§4.3 record what was running on one day and rot;
+ * Â§4.4 is a cadence table read from the local event exports, which is what a reference view can print
  * honestly. Nothing here is a countdown and nothing predicts the next edition.
  *
- * **Level 3, informational** (design-2.0 §4): muted text on secondary cards, no Level 1 emphasis. A
+ * **Level 3, informational** (design-2.0 Â§4): muted text on secondary cards, no Level 1 emphasis. A
  * reference row is not a decision, so no row carries a primary action.
  *
- * **State is never colour-only** (§5, §42): the server tag is bracketed text, and the provenance badge
+ * **State is never colour-only** (Â§5, Â§42): the server tag is bracketed text, and the provenance badge
  * is glyph plus word with the word as its accessible name. The row's own detail opens in the shared
- * drawer (§32), never in a modal (§31).
+ * drawer (Â§32), never in a modal (Â§31).
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import DatabaseNav from '../../components/database/DatabaseNav.vue';
@@ -85,7 +85,7 @@ const close = async (): Promise<void> => {
 </script>
 
 <template>
-    <AppLayout>
+    <AppLayout :breadcrumb="[{ label: 'Database', href: '/database' }, { label: 'Events' }]">
         <Head title="Events" />
         <template #title>Events</template>
 

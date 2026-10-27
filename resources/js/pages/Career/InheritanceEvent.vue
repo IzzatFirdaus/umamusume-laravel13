@@ -143,6 +143,17 @@ const submitEvent = (): void => {
 
 const sparkKindOrder = ['blue', 'pink', 'green', 'white', 'scenario'] as const;
 
+/**
+ * The two grandparent slots a parent brings, always two (`inheritance.html:202`).
+ *
+ * The payload carries `ancestors` as a list of names with nulls for the empty positions, so this pads
+ * a short list rather than trusting its length: a parent with no ancestors recorded must still draw
+ * both slots and say `slot open`, because the rule provides them and the absence is a state worth
+ * seeing, not a row worth omitting.
+ */
+const ancestorSlots = (parent: LegacyParent): (string | null)[] =>
+    [0, 1].map((index) => parent.ancestors[index] ?? null);
+
 const sortedPredictedSparks = computed(() =>
     [...props.predicted.predicted_sparks].sort(
         (a, b) => sparkKindOrder.indexOf(a.kind as typeof sparkKindOrder[number]) -
@@ -426,6 +437,63 @@ const statusGlyphClass = (status: Milestone['status']): string => {
 </table>
             </div>
         </div>
+        </section>
+
+        <!-- The ancestry as nodes, `inheritance.html:80-101`: two parents, four grandparent slots.
+             A slot the Legacy configuration leaves empty is DRAWN and reads `slot open` with a dashed
+             border, because the rule provides it and hiding it would misstate how many ancestors the
+             configuration holds (`inheritance.html:202`). -->
+        <section
+            aria-labelledby="inheritance-ancestry-heading"
+            class="mt-4 rounded-md border border-rule bg-panel p-4"
+        >
+            <h2 id="inheritance-ancestry-heading" class="text-lg font-semibold text-ink-strong">Ancestry</h2>
+            <p class="mt-1 text-sm text-ink-muted">
+                Each parent brings two grandparent slots. A slot the configuration leaves empty is still
+                drawn, marked <b>slot open</b>: the rule provides it, this Legacy has not filled it.
+            </p>
+
+            <ul class="mt-3 space-y-3" role="list" aria-label="Ancestry">
+                <li v-for="parent in props.legacy?.parents ?? []" :key="parent.slot">
+                    <p class="flex flex-wrap items-baseline gap-2">
+                        <span class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ parent.label }}</span>
+                        <span v-if="parent.name !== null" class="text-sm font-semibold text-ink-strong">{{ parent.name }}</span>
+                        <span v-else class="text-sm text-ink-muted">Not set</span>
+                        <span v-if="parent.isGuest" class="text-xs text-ink-muted">· guest</span>
+                    </p>
+
+                    <ul class="mt-1 grid gap-2 sm:grid-cols-2" role="list">
+                        <li
+                            v-for="(ancestor, ancestorIndex) in ancestorSlots(parent)"
+                            :key="`${parent.slot}-ancestor-${ancestorIndex}`"
+                            class="rounded-md border p-2"
+                            :class="ancestor === null ? 'border-dashed border-rule bg-panel' : 'border-rule bg-raised'"
+                            :data-slot-state="ancestor === null ? 'open' : 'filled'"
+                        >
+                            <span class="block text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                                Grandparent {{ ancestorIndex + 1 }}
+                            </span>
+                            <span v-if="ancestor !== null" class="text-sm font-medium text-ink-strong">{{ ancestor }}</span>
+                            <span v-else class="text-sm text-ink-muted">
+                                Not set <span class="text-xs">· slot open</span>
+                            </span>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+            <!-- Inheritance is optional at every one of its three moments (`inheritance.html:200`), so
+                 the screen offers leaving without a record rather than implying the moment is mandatory. -->
+            <p class="mt-3 text-sm text-ink-muted">
+                Inheritance is optional at every one of its three moments; leaving without a record is a
+                valid answer.
+            </p>
+            <a
+                :href="props.run.cockpit_url"
+                class="mt-2 inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
+            >
+                Skip this moment
+            </a>
         </section>
 
         <!-- Observed Section -->
