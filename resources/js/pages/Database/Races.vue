@@ -27,7 +27,6 @@ interface Slot {
     surface: string | null;
     fans_needed: number | null;
     is_mandatory: boolean;
-    is_maiden_gated: boolean;
     is_special_race: boolean;
 }
 
@@ -48,7 +47,6 @@ const props = defineProps<{
 const gates = (slot: Slot): string[] =>
     [
         slot.is_mandatory ? 'Mandatory' : null,
-        slot.is_maiden_gated ? 'Maiden-gated' : null,
         slot.is_special_race ? 'Special race' : null,
     ].filter((mark): mark is string => mark !== null);
 

@@ -40,7 +40,6 @@ class ScenarioSlot extends Model
         'tier',
         'fans_needed',
         'is_mandatory',
-        'is_maiden_gated',
         'sort_order',
         'source_url',
         'snapshot_path',
@@ -54,7 +53,6 @@ class ScenarioSlot extends Model
         'half' => 'string',
         'fans_needed' => 'integer',
         'is_mandatory' => 'boolean',
-        'is_maiden_gated' => 'boolean',
         'sort_order' => 'integer',
         'is_manual' => 'boolean',
         'fetched_at' => 'datetime',
@@ -124,12 +122,6 @@ class ScenarioSlot extends Model
     public function hasFanGate(): bool
     {
         return $this->isGoalRace() && $this->fans_needed !== null && $this->fans_needed > 0;
-    }
-
-    // Convenience: does this slot have a maiden gate?
-    public function hasMaidenGate(): bool
-    {
-        return $this->isGoalRace() && $this->is_maiden_gated;
     }
 
     // Convenience: is this a mandatory goal race?

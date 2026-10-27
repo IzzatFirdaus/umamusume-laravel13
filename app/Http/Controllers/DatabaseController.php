@@ -122,7 +122,6 @@ class DatabaseController extends Controller
                 'surface' => $slot->surface,
                 'fans_needed' => $slot->fans_needed,
                 'is_mandatory' => $slot->is_mandatory,
-                'is_maiden_gated' => $slot->is_maiden_gated,
                 'is_special_race' => $slot->is_special_race,
             ]);
 

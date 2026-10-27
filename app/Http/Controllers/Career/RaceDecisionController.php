@@ -168,8 +168,11 @@ class RaceDecisionController extends Controller
             ->mapWithKeys(fn (TraineeGoal $goal): array => [(int) $goal->race_catalog_slot_id => $goal->obligationLine()])
             ->all();
 
+        // §1.2.6: the maiden lock is one run-level state, asked once rather than once per row.
+        $maidenCleared = $run->hasClearedMaidenLock();
+
         return array_values($slots
-            ->map(fn (RaceCatalogSlot $slot): array => $this->raceRow($slot, $entries->get($slot->id), $obligations))
+            ->map(fn (RaceCatalogSlot $slot): array => $this->raceRow($run, $slot, $entries->get($slot->id), $obligations, $maidenCleared))
             ->values()
             ->all());
     }
@@ -178,7 +181,7 @@ class RaceDecisionController extends Controller
      * @param  array<int, string>  $obligations  calendar slot id => the trainee's own objective line
      * @return array<string, mixed>
      */
-    private function raceRow(RaceCatalogSlot $slot, ?RaceEntry $entry, array $obligations): array
+    private function raceRow(TrainingRun $run, RaceCatalogSlot $slot, ?RaceEntry $entry, array $obligations, bool $maidenCleared): array
     {
         return [
             'id' => $slot->id,
@@ -187,7 +190,7 @@ class RaceDecisionController extends Controller
             'year_label' => $slot->yearLabel(),
             'turn' => $slot->turnNumber(),
             'fans_needed' => $slot->hasFanGate() ? $slot->fans_needed : null,
-            'maiden_gated' => $slot->hasMaidenGate(),
+            'maiden_gated' => $run->maidenGates($slot, $maidenCleared),
             'is_mandatory' => $slot->is_mandatory,
             // The second, different claim beside `is_mandatory`: this is what the calendar owes every
             // trainee, this is what *her* ladder asks. Null when her objectives name no race here.

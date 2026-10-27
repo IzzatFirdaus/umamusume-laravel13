@@ -34,8 +34,31 @@ function runWithFans(int $fans): TrainingRun
     return $run->fresh();
 }
 
+/**
+ * A run that has cleared the maiden lock by winning the Debut (grade 900), so the fan and open
+ * states a standard race can carry are reachable (UMAMUSUME_REFERENCE.md §1.2.6: run-level).
+ * The debut slot is shared across calls via `firstOrCreate`: its grain is unique, so two runs in
+ * one test must reuse the same row rather than each create a second `Junior Make Debut`.
+ */
+function withDebutWin(TrainingRun $run): TrainingRun
+{
+    $debut = RaceCatalogSlot::firstOrCreate(
+        ['scenario_key' => null, 'title' => 'Junior Make Debut'],
+        RaceCatalogSlot::factory()->debut()->raw(),
+    );
+
+    RaceEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'race_catalog_slot_id' => $debut->id,
+        'status' => RaceEntryStatus::Completed,
+        'placement' => 1,
+    ]);
+
+    return $run->fresh();
+}
+
 it('renders a mandatory career race as an open cell, not as a Goal pennant', function (): void {
-    $run = runWithFans(20000);
+    $run = withDebutWin(runWithFans(20000));
     RaceCatalogSlot::factory()->create([
         'scenario_key' => null,
         'year' => 1,
@@ -87,8 +110,8 @@ it('locks a fan-gated race until this run has the fans it asks for', function ()
         'fans_needed' => 15000,
     ]);
 
-    $short = runWithFans(3000);
-    $long = runWithFans(15000);
+    $short = withDebutWin(runWithFans(3000));
+    $long = withDebutWin(runWithFans(15000));
 
     // The figure travels with the lock: it is what the Trainer works toward (D-173).
     expect($short->calendarCells()[3]['halves']['Early']['slots'][0]['state'])->toBe('fan_locked')
@@ -96,7 +119,9 @@ it('locks a fan-gated race until this run has the fans it asks for', function ()
         ->and($long->calendarCells()[3]['halves']['Early']['slots'][0]['state'])->toBe('open');
 });
 
-it('shows a maiden-gated race as a maiden lock until this run has won', function (): void {
+it('shows a standard race as a maiden lock until this run has won a Debut or Maiden', function (): void {
+    // UMAMUSUME_REFERENCE.md §1.2.6: the maiden lock is a run-level state, not a per-race column.
+    // A standard race (grade 100-700) is gated until the run wins Debut (900) or a Maiden (800).
     RaceCatalogSlot::factory()->create([
         'scenario_key' => null,
         'year' => 1,
@@ -105,7 +130,6 @@ it('shows a maiden-gated race as a maiden lock until this run has won', function
         'half' => 'Early',
         'turn' => 9,
         'is_mandatory' => false,
-        'is_maiden_gated' => true,
         'fans_needed' => 0,
     ]);
 
@@ -115,8 +139,10 @@ it('shows a maiden-gated race as a maiden lock until this run has won', function
         // No fan figure: a maiden gate is decided by an event, not a quantity.
         ->and($winless->calendarCells()[4]['halves']['Early']['slots'][0])->not->toHaveKey('fans_needed');
 
+    $debut = RaceCatalogSlot::factory()->debut()->create();
     RaceEntry::create([
         'training_run_id' => $winless->id,
+        'race_catalog_slot_id' => $debut->id,
         'status' => RaceEntryStatus::Completed,
         'placement' => 1,
     ]);

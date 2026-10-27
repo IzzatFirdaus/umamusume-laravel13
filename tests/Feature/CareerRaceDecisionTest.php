@@ -156,6 +156,32 @@ it('states the fields the corpus holds and names the reason for each one it does
             ->where('races.0.facts.9.value', null));
 });
 
+it('gates a standard race on the run-level maiden lock and clears it on a debut win', function (): void {
+    // UMAMUSUME_REFERENCE.md §1.2.6: the maiden lock is a run-level state — "has this run won Debut
+    // or any Maiden race?" — applied to every standard race, not a per-race column. A winless run
+    // gates its standard races; a first-place debut finish clears the lock for the rest of the run.
+    $run = raceRun(turns: 12);
+    raceSlot(['title' => 'Chukyo Junior Stakes', 'sort_order' => 1]);
+
+    $this->get(route('runs.races.decision', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('races.0.maiden_gated', true));
+
+    $debut = RaceCatalogSlot::factory()->debut()->create();
+    RaceEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'race_catalog_slot_id' => $debut->id,
+        'status' => RaceEntryStatus::Completed,
+        'placement' => 1,
+    ]);
+
+    $this->get(route('runs.races.decision', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('races.0.maiden_gated', false));
+});
+
 it('refuses to state a readiness or a win figure, and names the ADR-0016 blocker', function (): void {
     $run = raceRun(turns: 12);
     raceSlot();

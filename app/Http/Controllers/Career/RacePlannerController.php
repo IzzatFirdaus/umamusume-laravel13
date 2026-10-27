@@ -188,13 +188,16 @@ class RacePlannerController extends Controller
             ->filter(fn (RaceEntry $entry): bool => $entry->race_catalog_slot_id !== null)
             ->keyBy('race_catalog_slot_id');
 
+        // §1.2.6: the maiden lock is one run-level state, asked once rather than once per row.
+        $maidenCleared = $run->hasClearedMaidenLock();
+
         $mandatory = [];
         $upcoming = [];
         $optional = [];
 
         foreach ($slots as $slot) {
             $entry = $entries->get($slot->id);
-            $row = $this->raceRow($run, $slot, $entry);
+            $row = $this->raceRow($run, $slot, $entry, $maidenCleared);
 
             if ($slot->is_mandatory) {
                 $mandatory[] = $row;
@@ -298,7 +301,7 @@ class RacePlannerController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function raceRow(TrainingRun $run, RaceCatalogSlot $slot, ?RaceEntry $entry): array
+    private function raceRow(TrainingRun $run, RaceCatalogSlot $slot, ?RaceEntry $entry, bool $maidenCleared): array
     {
         return [
             'id' => $slot->id,
@@ -307,7 +310,7 @@ class RacePlannerController extends Controller
             'year_label' => $slot->yearLabel(),
             'turn' => $slot->turnNumber(),
             'fans_needed' => $slot->hasFanGate() ? $slot->fans_needed : null,
-            'maiden_gated' => $slot->hasMaidenGate(),
+            'maiden_gated' => $run->maidenGates($slot, $maidenCleared),
             'is_mandatory' => $slot->is_mandatory,
             'is_special' => $slot->is_special_race,
             'facts' => RaceFacts::forSlot($slot),

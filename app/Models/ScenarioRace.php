@@ -28,7 +28,6 @@ use Illuminate\Support\Carbon;
  * @property string|null $tier
  * @property int|null $fans_needed
  * @property bool $mandatory
- * @property bool $maiden_gated
  * @property string|null $source_url
  * @property string|null $snapshot_path
  * @property Carbon|null $fetched_at
@@ -41,7 +40,7 @@ use Illuminate\Support\Carbon;
 #[Table('scenario_races')]
 #[Fillable([
     'scenario_key', 'slot_label', 'race_name', 'tier', 'fans_needed',
-    'mandatory', 'maiden_gated', 'source_url', 'snapshot_path', 'fetched_at',
+    'mandatory', 'source_url', 'snapshot_path', 'fetched_at',
     'source_timezone', 'is_manual',
 ])]
 class ScenarioRace extends Model
@@ -62,7 +61,6 @@ class ScenarioRace extends Model
         return [
             'fans_needed' => 'integer',
             'mandatory' => 'boolean',
-            'maiden_gated' => 'boolean',
             'is_manual' => 'boolean',
             'fetched_at' => 'datetime',
         ];

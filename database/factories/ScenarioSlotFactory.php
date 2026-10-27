@@ -33,7 +33,6 @@ class ScenarioSlotFactory extends Factory
             'tier' => 'G1',
             'fans_needed' => 12000,
             'is_mandatory' => true,
-            'is_maiden_gated' => false,
             'sort_order' => 0,
             'source_url' => null,
             'snapshot_path' => null,
@@ -82,13 +81,6 @@ class ScenarioSlotFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'is_mandatory' => true,
-        ]);
-    }
-
-    public function maidenGated(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'is_maiden_gated' => true,
         ]);
     }
 

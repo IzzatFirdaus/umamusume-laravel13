@@ -66,7 +66,6 @@ class RaceCatalogSlot extends Model
         'fans_second',
         'fans_third',
         'is_mandatory',
-        'is_maiden_gated',
         'is_special_race',
         'did_not_exist',
         'external_ref',
@@ -93,7 +92,6 @@ class RaceCatalogSlot extends Model
         'fans_third' => 'integer',
         'sort_order' => 'integer',
         'is_mandatory' => 'boolean',
-        'is_maiden_gated' => 'boolean',
         'is_special_race' => 'boolean',
         'is_manual' => 'boolean',
         'fetched_at' => 'datetime',
@@ -230,16 +228,6 @@ class RaceCatalogSlot extends Model
     public function hasFanGate(): bool
     {
         return $this->fans_needed !== null && $this->fans_needed > 0;
-    }
-
-    /**
-     * The maiden lock: a race this trainee cannot enter until she has won
-     * something. No fan figure travels with it, because it clears on an event
-     * rather than on a quantity.
-     */
-    public function hasMaidenGate(): bool
-    {
-        return $this->is_maiden_gated;
     }
 
     /**

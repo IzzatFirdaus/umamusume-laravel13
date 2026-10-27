@@ -120,7 +120,6 @@ it('renders the Races table with N/A for unrecorded values when populated', func
             ->has('slots.data.0.surface')
             ->has('slots.data.0.fans_needed')
             ->has('slots.data.0.is_mandatory')
-            ->has('slots.data.0.is_maiden_gated')
             ->has('slots.data.0.is_special_race'));
 });
 

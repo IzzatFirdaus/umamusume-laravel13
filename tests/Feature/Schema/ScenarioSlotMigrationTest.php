@@ -34,7 +34,6 @@ it('has a scenario_slots table with the required columns', function (): void {
         ->toContain('tier')
         ->toContain('fans_needed')
         ->toContain('is_mandatory')
-        ->toContain('is_maiden_gated')
         ->toContain('sort_order')
         ->toContain('source_url')
         ->toContain('snapshot_path')
@@ -72,7 +71,6 @@ it('supports a goal race (URA/Unity Cup mandatory races with fan gates)', functi
         'tier' => 'G1',
         'fans_needed' => 12000,
         'is_mandatory' => true,
-        'is_maiden_gated' => false,
     ]);
 
     expect($slot->isGoalRace())->toBeTrue()
@@ -94,31 +92,11 @@ it('supports a fan-locked race (URA/Unity Cup non-mandatory races with fan gates
         'tier' => 'OP',
         'fans_needed' => 3500,
         'is_mandatory' => false,
-        'is_maiden_gated' => false,
     ]);
 
     expect($slot->isGoalRace())->toBeTrue()
         ->and($slot->is_mandatory)->toBeFalse()
         ->and($slot->fans_needed)->toBe(3500);
-});
-
-it('supports a maiden-gated race', function (): void {
-    $slot = ScenarioSlot::factory()->create([
-        'scenario_key' => 'ura_finale',
-        'kind' => 'goal_race',
-        'slot_label' => 'OP',
-        'title' => 'Naruta Kinpa Cup',
-        'month' => 5,
-        'half' => 'Early',
-        'tier' => 'OP',
-        'fans_needed' => 0,
-        'is_mandatory' => false,
-        'is_maiden_gated' => true,
-    ]);
-
-    expect($slot->isGoalRace())->toBeTrue()
-        ->and($slot->is_maiden_gated)->toBeTrue()
-        ->and($slot->fans_needed)->toBe(0);
 });
 
 it('supports a Unity Cup Team Race slot', function (): void {
@@ -132,7 +110,6 @@ it('supports a Unity Cup Team Race slot', function (): void {
         'tier' => null,
         'fans_needed' => null,
         'is_mandatory' => false,
-        'is_maiden_gated' => false,
     ]);
 
     expect($slot->isTeamRace())->toBeTrue()
@@ -151,7 +128,6 @@ it('supports a Trackblazer Grade Point deadline', function (): void {
         'tier' => null,
         'fans_needed' => null,
         'is_mandatory' => true,
-        'is_maiden_gated' => false,
     ]);
 
     expect($slot->isGradeDeadline())->toBeTrue()
@@ -170,7 +146,6 @@ it('supports a scripted event (e.g., URA April Unique Skill level-up)', function
         'tier' => null,
         'fans_needed' => null,
         'is_mandatory' => false,
-        'is_maiden_gated' => false,
     ]);
 
     expect($slot->isScriptedEvent())->toBeTrue()
@@ -205,7 +180,6 @@ it('allows multiple goal_race slots in the same month and half when source_key d
         'tier' => 'OP',
         'fans_needed' => 350,
         'is_mandatory' => false,
-        'is_maiden_gated' => false,
     ];
 
     ScenarioSlot::factory()->create(array_merge($base, [
@@ -239,7 +213,6 @@ it('seeding the same three Early August races twice yields exactly three rows (i
         'tier' => 'OP',
         'fans_needed' => 350,
         'is_mandatory' => false,
-        'is_maiden_gated' => false,
     ];
 
     // Seed twice

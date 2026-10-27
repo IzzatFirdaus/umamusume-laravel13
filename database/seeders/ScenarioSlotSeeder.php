@@ -178,7 +178,6 @@ class ScenarioSlotSeeder extends Seeder
                     'tier' => $tier,
                     'fans_needed' => $uraRow['fans_needed'] ?? null,
                     'is_mandatory' => false,
-                    'is_maiden_gated' => false,
                     'sort_order' => $sortOrder++,
                     'source_url' => $tierSourceUrl,
                     'snapshot_path' => self::SNAPSHOT_PATH.'/'.($tier === null ? 'races.json' : self::TIER_LABELS_FILE),
