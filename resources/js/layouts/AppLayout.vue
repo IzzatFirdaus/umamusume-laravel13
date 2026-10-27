@@ -426,14 +426,18 @@ const moreIsCurrent = computed(() =>
                         <!-- The crumb names where the Trainer is, not the product. The product name lives
                              in the rail head, so the bar spends its width on the one fact the rail cannot
                              carry: the section path. A page passes `breadcrumb`; the fallback names the
-                             layout's own destination so the bar is never empty. -->
+                             layout's own destination so the bar is never empty. Separator is the
+                             interpunct every HFW crumb uses (`Rice Shower · Unity Cup · Cockpit`), not a
+                             slash. HFW-OVERRIDE (computed: font-weight): the cockpit HFW bolds its
+                             scenario while `Races` and `Save Veteran` in the same set bold the screen, so
+                             the crumb follows the set's dominant rule and bolds its leaf. -->
                         <span
                             class="min-w-0 truncate text-[12.5px] [&_b]:font-extrabold"
                             data-shell-crumb
                         >
                             <template v-if="breadcrumbParts.length">
                                 <template v-for="(part, index) in breadcrumbParts" :key="`${part.label}-${index}`">
-                                    <span v-if="index > 0" aria-hidden="true" class="px-1 opacity-90">/</span>
+                                    <span v-if="index > 0" aria-hidden="true"> · </span>
                                     <Link
                                         v-if="part.href"
                                         :href="part.href"
@@ -445,14 +449,19 @@ const moreIsCurrent = computed(() =>
                             <b v-else>Trainer Desk</b>
                         </span>
                         <span class="flex-1" />
-                        <!-- The live-career pill. Count only, shared from the middleware so every screen
-                             can state it without a per-controller query. Absent at zero: no career is a
+                        <!-- The `who` pill. A run-scoped screen supplies the run's own state here
+                             (HFW topbar `.who`: `Turn 67 · Active`, or `Completed`), because on a
+                             career screen the count of careers is not the fact the Trainer needs.
+                             Every other screen keeps the count, which is shared from the middleware
+                             so it costs no per-controller query. Absent at zero: no career is a
                              normal state, not a warning. -->
-                        <span
-                            v-if="activeCareerCount > 0"
-                            class="inline-flex shrink-0 items-center rounded-pill bg-status-positive px-2.5 py-[3px] text-[11.5px] font-extrabold leading-[1.45] text-status-positive-ink"
-                            data-shell-career-pill
-                        >{{ activeCareerCount }} active career{{ activeCareerCount === 1 ? '' : 's' }}</span>
+                        <slot name="who">
+                            <span
+                                v-if="activeCareerCount > 0"
+                                class="inline-flex shrink-0 items-center rounded-pill bg-status-positive px-2.5 py-[3px] text-[11.5px] font-extrabold leading-[1.45] text-status-positive-ink"
+                                data-shell-career-pill
+                            >{{ activeCareerCount }} active career{{ activeCareerCount === 1 ? '' : 's' }}</span>
+                        </slot>
                         <!-- Help, reachable from every screen (HFW topbar `.toputils`). -->
                         <Link
                             href="/help"

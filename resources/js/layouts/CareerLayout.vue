@@ -13,6 +13,7 @@
  * `#title` is forwarded to `AppLayout`'s own heading rather than rendered here, so the page keeps one
  * `h1` and the document outline stays one document wide.
  */
+import { computed } from 'vue';
 import AppLayout from './AppLayout.vue';
 import CareerSectionNav from '../components/career/CareerSectionNav.vue';
 import { useLayout } from '../composables/useLayout';
@@ -40,10 +41,59 @@ const props = defineProps<{
  * gate can assert the width without depending on AppLayout's `#main` implementation.
  */
 const { layoutWidthClass } = useLayout();
+
+/*
+ * The topbar crumb, `{trainee} · {scenario} · {screen}` (HFW `cockpit-*.html` `.crumb`). The shell
+ * owns it because every career screen shares the first two parts, and a per-screen crumb would be
+ * nine places for the scenario label to drift. The screen part is the live section key, which
+ * capitalises to its own label (`cockpit` -> `Cockpit`), so no second label map can drift from the
+ * stepper's.
+ */
+const breadcrumb = computed(() => {
+    const screen = props.current ? props.current.charAt(0).toUpperCase() + props.current.slice(1) : 'Cockpit';
+
+    return [
+        { label: props.trainee },
+        { label: props.scenarioLabel },
+        { label: screen },
+    ].filter((part) => part.label.length > 0);
+});
+
+/*
+ * The topbar `who` pill (HFW `.who`): the run's own state, where every other screen shows the count
+ * of active careers. `Turn 67 · Active` while the run is on the 72-turn grid, `Completed` once it is
+ * past it. The turn figure is omitted rather than guessed when the payload has no position.
+ */
+const whoPill = computed(() => {
+    const active = props.status === 'active' || props.statusLabel.toLowerCase() === 'active';
+    const turn = props.position?.match(/turn\s+(\d+)/i)?.[1];
+
+    if (!active) {
+        return { label: props.statusLabel, tone: 'neutral' as const };
+    }
+
+    return {
+        label: turn ? `Turn ${turn} · Active` : 'Active',
+        tone: 'positive' as const,
+    };
+});
 </script>
 
 <template>
-    <AppLayout>
+    <AppLayout :breadcrumb="breadcrumb">
+        <!-- HFW `.who`: on a career screen the run's own state outranks a count of careers. -->
+        <template #who>
+            <span
+                class="inline-flex shrink-0 items-center rounded-pill px-2.5 py-[3px] text-[11.5px] font-extrabold leading-[1.45]"
+                :class="
+                    whoPill.tone === 'positive'
+                        ? 'bg-status-positive text-status-positive-ink'
+                        : 'bg-sunken text-ink-muted'
+                "
+                data-shell-run-pill
+            >{{ whoPill.label }}</span>
+        </template>
+
         <!--
           A page that supplies its own whole title band does so through `#head`, the same either/or the
           wizard shell documents (3.8): the band renders `#head` or `#title`, never both, so exactly one
