@@ -651,21 +651,6 @@ No security document exists; the model is `ARCHITECTURE.md` §8.
 - Every data view renders its empty, loading/refresh, and error states (ADR-0007: a custom
   loading state is required only for user-initiated async actions).
 - Unrecorded values render as `N/A` with a **disclosure channel**, never a default.
-
-- *The migration ruleblock (dated banner: applies while the named-primitive migration is open; removed
-  at Phase 6 exit, re-validated by 2026-12-31 at the latest).*
-  **When you spell a component, use the primitive that already exists.** Look it up in `DESIGN.md` §3,
-  then `resources/css/app.css`, then
-  `docs/design-research/frontend-v2-wireframes/assets/shell.css`. Never invent a class, an arbitrary
-  value, or a `dark:` utility when a named primitive exists.
-  **A component re-spell changes the class spell and nothing else.** Do not change props, emits, slot
-  names, `aria-*` attributes, or the markup tree in the same commit; those carry their own spec.
-  The escape hatch: a `ponytail:` comment naming the ceiling is the only sanctioned way to leave a
-  utility in place, and `tools/ui-framework-check.mjs` counts them.
-
-  *Dated correction 2026-10-23 (BQ-02).* The bullet above said "with a `title`"; a title is not a
-  channel a keyboard or touch reader can use. The corrected wording is the one `DESIGN.md` §5 (a)
-  already requires: the reason is visible text, or a `title` mirrored by an `sr-only` sibling.
 - Print the Global client vocabulary only (`lang/en/uma.php` is the terms map; `Wit` and
   `Mood` are client words, and their wiki glosses are banned by `lore-code`).
 - Keep the established accessibility behavior: keyboard paths, target sizes, and the
@@ -814,3 +799,4 @@ fails if the logic breaks; a trivial one-liner needs no test.
 | 2026-10-22   | §9 gains the **stay inside the repository** rule: every artifact an agent writes lands under this repository's own tree (`.scratch-uma/<session>/...`, or a temporary directory the repository owns), and never in a drive root, beside the repository, or in a shared scratch directory outside it, unless the owner names the path for that task. The session-private rule above stays the first rung; the new paragraph generalizes it rather than replacing it. | Owner instruction 2026-10-22, after a cleanup measured what agents had been leaving outside the tree: three DSH ACL output directories under `D:\Projects\`, a 99 MB session scratchpad at `D:\private`, a stale copy of this repository's own scratch tree at `D:\.scratch-uma`, and 37 loose files in `D:\tmp`. No tracked file referenced any of them, and the `D:\tmp` survivors included another project's database and script, which is exactly the collision the rule exists to prevent. |
 | 2026-10-24   | Adds §2a, the mandatory plan-first contract: goal, scope, acceptance criteria, ordered TODO list, verification and risks before implementation; native task-list use with a visible Markdown fallback; TODO maintenance and blocked-item reporting; the statement that a plan is not an approval gate; the no-persistent-planning-files default; and the verified-completion checklist. §15 gains the matching first checkbox. This edit also restores the whole §3-§20 contract that commit `baa4b755` had replaced with an injected guidelines blob, and drops the same stale blob appended to `CLAUDE.md`. | Every task now must show its goal, acceptance criteria and task list before a file changes, consistently across agents, while keeping routine work unblocked and the existing gates, precedence and documentation policy intact. The restore is part of the same alignment: the corrupted `AGENTS.md` had lost the documentation map, change-safety, command reference and definition of done that every other tracked instruction file cites. |
 | 2026-10-26   | Round 21 fold, owner-ordered: the root `coverage.md` and `SKILL_REGISTRY.md` and the eight files under `docs/audits/` and `docs/proposals/` dated 2026-10-24/25 (the group-ab audit, pass report and Phase 8.1 browser triage; the group-ab plan, consolidated plan and rulings-owed brief; the remaining-work roadmap and its rulings brief) were folded into `docs/research-scratch/` masters and deleted from their locations. §3's `coverage.md` map row now names `GOVERNANCE.md` sections, and §14's tracked root set shrinks to thirteen. Nothing else in this file moved. | The owner ordered the consolidation. `INDEX.md` §File discipline forbids standalone markdown outside the masters, and the two root skill files were not in that section's standing-set table at all, so the fold clears a standing violation as well as absorbing ten sources. | <!-- census: quoted-original -->
+| 2026-10-27   | §13's named-primitive migration ruleblock was removed, per its own banner ("removed at Phase 6 exit"). §9's `count: 219` debt figure was re-verified against `tools/ui-lint-baseline.json`; no other section moved. | The named-primitive migration exited when Phase 6 released 2.1.0 on 2026-10-23 (`docs/proposals/frontend-architecture-plan.md:1006`); that plan's rationale at `:791` is that a migration-scoped rule outliving its migration becomes stale instruction. The clean tree measures 219 arbitrary values; the working tree's 221 are two peer-owned additions (`Review/Index.vue:300`, `Career/SkillsPlanner.vue:374`), so the baseline is unchanged. |
