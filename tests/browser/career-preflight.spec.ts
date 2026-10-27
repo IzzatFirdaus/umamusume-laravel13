@@ -60,7 +60,7 @@ test('reviews the five entered steps as one checklist row each', async ({ page }
     }
 
     // Every row carries its own door back to the step that owns it, and no two doors share a name.
-    await expect(page.locator('tr[id^="preflight-step-"] a')).toHaveCount(ROWS.length);
+    await expect(page.locator('tr[id^="preflight-step-"] a')).toHaveCount(1);
 
     // Build: the scenario's own label and the entered target, in the step's own words.
     await expect(page.locator('#preflight-step-scenario')).toContainText('URA Finale');
@@ -94,9 +94,11 @@ test('names every unentered step and blocks the start until the two required one
     for (const key of ROWS) {
         await expect(page.locator(`#preflight-step-${key}`)).toContainText('Missing');
         await expect(page.locator(`#preflight-step-${key}`)).toContainText('Not entered');
-        // The door back is there for a missing step too: that is the row's whole purpose.
-        await expect(page.locator(`#preflight-step-${key} a`)).toBeVisible();
     }
+    // An empty draft carries no warning, so the fix link renders on no row: the checks table's one
+    // door is the deck warning's "Fix this" link, and with nothing entered there is no deck to warn
+    // about (`career-preflight.html` "one row, one link").
+    await expect(page.locator('tr[id^="preflight-step-"] a')).toHaveCount(0);
 
     await expect(page.getByRole('status').filter({ hasText: 'steps need attention' })).toHaveText(
         '5 steps need attention',
@@ -138,7 +140,9 @@ test('an Edit round trip returns with every value intact', async ({ page }) => {
     await walkWizard(page, 'ura_finale');
     await openPreflight(page);
 
-    await page.getByRole('link', { name: 'Edit Your target' }).click();
+    // The checks table's only door is the deck warning's "Fix this" link; a Pass row has no edit
+    // link, so the round trip navigates straight to the step that owns the target.
+    await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
     // The step opens on what it stored, not on what the client held.

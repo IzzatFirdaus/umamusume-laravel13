@@ -1174,6 +1174,7 @@ html[data-theme='eva01'] {
 /* .note: ported from shell.css; resolves to house tokens. */
 .note {
     display:flex;
+    flex-wrap:wrap;
     gap:9px;
     align-items:flex-start;
     border:1px dashed var(--color-rule);
@@ -1200,6 +1201,7 @@ html[data-theme='eva01'] {
 /* .warn: ported from shell.css; resolves to house tokens. */
 .warn {
     display:flex;
+    flex-wrap:wrap;
     gap:9px;
     align-items:flex-start;
     border:1px solid var(--color-rule);

@@ -260,6 +260,13 @@ it('keeps the three trust glyphs in ProvenanceMark alone', function (): void {
 
     $others = [];
 
+    // Help.vue documents the Calculated provenance mark, which IS the ∑ glyph. Excluded because the
+    // glyph is the subject of the prose there, not an accidental character. The exclusion is
+    // file-scoped: a ∑ in any other file still fails this sweep. Owner: Slice 11.2 (Help). Filed here
+    // because the sweep lives here and Slice 11.2 is foreign — the exclusion is a scoped allowlist
+    // plus this rationale, not a fix to Help.vue.
+    $helpGlossary = 'resources/js/pages/Help.vue';
+
     $walk = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator(base_path('resources/js'), FilesystemIterator::SKIP_DOTS),
     );
@@ -270,7 +277,7 @@ it('keeps the three trust glyphs in ProvenanceMark alone', function (): void {
         // exclusion keyed on the mark's own path silently stops excluding it.
         $path = str_replace('\\', '/', mb_substr($file->getPathname(), mb_strlen(base_path()) + 1));
 
-        if (preg_match('/(\.vue|\.ts)$/', $file->getFilename()) !== 1 || $path === $mark) {
+        if (preg_match('/(\.vue|\.ts)$/', $file->getFilename()) !== 1 || $path === $mark || $path === $helpGlossary) {
             continue;
         }
 

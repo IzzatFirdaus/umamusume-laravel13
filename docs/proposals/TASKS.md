@@ -426,6 +426,111 @@ Peers stopped writing six hours before this snapshot (latest write 03:50) and di
 situation is "quiet but uncommitted": the files are not in flux, but they are not this session's to edit
 and the KI-70 rule is about ownership, not about recent activity.
 
+## §1.4 corrections re-run (2026-10-27)
+
+Run in `../td-rel4`, a clean worktree at `1ca9caa3` (`HEAD` at the time) with `node_modules`/`vendor`
+junctions and a fresh `npm run build` (`✓ built in 33.93s`), because the working tree's wizard files are
+peer-dirty and would measure the peer's WIP rather than the committed tree:
+
+| Command | Result |
+|---|---|
+| `npx playwright test career-training-detail.spec.ts career-deck-select.spec.ts` | **35 passed (5.1m)** — 21 training-detail + 14 deck-select, matching round 3's claim |
+| `php artisan test --filter="FrameworkAuditExit"` | **1 passed (3 assertions)** |
+
+Nothing regressed, so no attribution work was needed.
+
+## §1.5 — the five deferred items (2026-10-27)
+
+**A — Legacy builder one-spark-per-parent radios: BLOCKED, with the shape named.**
+`training_runs.legacy_selection` is **one column holding one selection** (`ADR-0010`), read through
+`TrainingRun::legacySelection() → LegacySelectionPayload::fromArray()`, whose shape is
+`{legacies: list<{rank, rank_letter?, is_guest, ancestors: list<string|null>, ancestors_sparks?, sparks:
+list<{kind, target, stars}>, …}>, affinity: string|null}`. There is no per-run catalogue of candidate
+sparks to choose from, and no table of saved pairs: the builder writes the sparks the Trainer types. A
+radio that picks *one* spark per parent therefore is not a UI slice — it changes what the column stores
+and what the update request accepts (`StoreLegacySelectionRequest`), and it would delete the ancestor
+spark lists the Inheritance screen already reads (`InheritanceEventController:121-136`).
+`blocked — payload shape: one selection per run; radios need a behaviour change, ADR-0010/ADR-0015 territory`.
+
+**B — "Skip this moment" / "slot open": the phrases DO exist, on a page round 3 did not grep.
+CLOSED by landing them.**
+`grep -i "skip this|slot open" docs/design-research/frontend-v2-wireframes/*.html` → **7 hits, all in
+`inheritance.html`** (`:87`, `:88`, `:99`, `:100` slot-open nodes; `:189` the Skip action; `:200`/`:202`
+the keybox rules). Round 3grepped only `legacy*.html`/`career-legacy.html`, so its "no such phrase" note
+was scoped too narrowly — the correction is filed here rather than re-editing the plan. The slice landed
+on `Career/InheritanceEvent.vue`: a `data-slot-state` node list where an empty grandparent slot is drawn
+with a dashed border and reads **slot open**, the optionality stated in words, and a **Skip this moment**
+outcome link back to the Cockpit.
+
+**C — the "illustrative" note: CLOSED, and the date IS sourceable.**
+`config/scenarios.php:41` carries `'verified_at' => '2026-09-27'` — the scenario matrix's own verification
+stamp. The note therefore ships with the date **and its source**: "the scenario matrix is verified
+2026-09-27 in `config/scenarios.php`", on the Cockpit's scenario card for `trackblazer` and (its own
+sentence) `grand_concert`. It does not claim the *support data* was verified on that date, only that the
+matrix behind it was.
+
+**D — Veterans remainder + `TraineeProfile` growth row: still BLOCKED.**
+Both `Veterans/*.vue` files and `TraineeProfile.vue` carry round 3's exact mtimes (`01:57:52`, `02:01:16`,
+`01:44:01`) and are still ` M`. Not opened for edit.
+`blocked — Veterans/Index.vue uncommitted, mtime 2026-10-27 01:57:52`
+`blocked — Veterans/Show.vue uncommitted, mtime 2026-10-27 02:01:16`
+`blocked — Career/TraineeProfile.vue uncommitted, mtime 2026-10-27 01:44:01`
+
+**E — lint baseline: still BLOCKED, and the gate does not fail.**
+`npm run lint:ui` on the working tree: `resources/js:0 [debt-increase] arbitrary-value count 220 exceeds
+baseline 219`, the 220th hit `resources/js/pages/Review/Index.vue:300`. That file is still peer-dirty
+(mtime 02:37:50), so the baseline stays at 219. Observation worth filing rather than fixing under 7.3:
+the gate printed a `debt-increase` finding and still exited **0**, so CI (if it existed) could not see it.
+`blocked — Review/Index.vue:300, peer uncommitted, mtime 2026-10-27 02:37:50`.
+
+## ST-4 close-out — deviations filed 2026-10-27
+
+Two HFW-vs-app mismatches of one class: an HFW label promises a navigation the controller does not
+perform. Both are behaviour-change questions, not UI calls, so they are **filed, not resolved**. Neither
+redirect was changed in the close-out commit.
+
+### Deviation 1 — BuildTarget "Continue to legacy" saves-and-stays
+
+- **Where:** `resources/js/pages/Career/BuildTarget.vue` primary button;
+  `app/Http/Controllers/Career/BuildTargetController.php` redirect target.
+- **HFW:** `career-target.html` — `<a class="btn btn-primary" href="career-legacy.html">Continue to legacy</a>`.
+  A link that navigates.
+- **App:** the button POSTs; the controller saves and redirects to `career.target` (the same route).
+  `CareerBuildTargetTest` pins `assertRedirect(route('career.target'))`. The label says "Continue to
+  legacy"; the redirect says "stay".
+- **Two resolutions, both valid, one needs an Architect:**
+  - **(a) Label honesty.** Revert the label to "Save target" — honest, matches the pinned redirect,
+    loses the HFW's language. No test change.
+  - **(b) Behaviour parity.** Change the redirect to `route('career.legacy')` — matches the HFW, advances
+    the wizard. Rewrites one assertion in `CareerBuildTargetTest`; a behaviour change under the plan's
+    §11 test contract.
+- **Chosen: (a).** The label is reverted to "Save target" in this commit; this entry records that the
+  HFW's "Continue to legacy" language was not adopted because the controller's redirect contract does
+  not support it. The main session may reverse (a) → (b) as its own decision.
+
+### Deviation 2 — Legacy primary is "Save Legacy", not "Continue to deck"
+
+- **Where:** `resources/js/pages/Career/LegacySelect.vue` primary button.
+- **HFW:** `career-legacy.html` — primary is "Continue to deck" (a link to `career-deck.html`).
+- **App:** primary is "Save Legacy"; "Choose a veteran" is a select, not a filled button. This was the
+  prior ST-4 session's documented deviation, kept.
+- **Two resolutions, both valid:**
+  - **(a) Keep "Save Legacy."** The label honestly reflects what happens (POST and stay). The HFW's
+    "Continue to deck" would require the same redirect-parity work as Deviation 1.
+  - **(b) Match the HFW.** Change the redirect to `route('career.deck')` and relabel — same
+    behaviour-change class as Deviation 1.
+- **Chosen: (a).** "Save Legacy" is kept, consistent with Deviation 1's resolution. Filed here so a
+  future pass can pair the two.
+
+### ∑ glyph sweep — resolved, not filed
+
+`tests/Feature/CareerBuildTargetTest.php`'s "keeps the three trust glyphs in ProvenanceMark alone"
+greps `resources/js/**` for `∑` and found `resources/js/pages/Help.vue:21`, where the character is the
+**subject** of the marks glossary rather than an accidental duplicate. The sweep now carries a
+file-scoped exclusion (`$helpGlossary`) with an in-place rationale comment. The exclusion does not
+weaken the sweep for any other file. `Help.vue` was not edited (foreign, Slice 11.2).
+
+
 
 
 

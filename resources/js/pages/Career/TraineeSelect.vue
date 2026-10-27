@@ -54,6 +54,8 @@ interface Paginator<T> {
     data: T[];
     links: { url: string | null; label: string; active: boolean }[];
     total: number;
+    current_page: number;
+    last_page: number;
 }
 
 interface Facet {
@@ -76,6 +78,8 @@ const props = defineProps<{
     trainees: Paginator<TraineeRow>;
     /** The steps this session has opened, the step bar's completed marking reads them. */
     visited: number[];
+    /** The steps that have data stored in the draft (`SetupDraft::saved()`), read apart from `visited`. */
+    saved: number[];
     choices: { label: string; value: string | null; url: string | null }[];
     selected: number | null;
     /** The costume form the draft already names, so a return to this step re-seeds the picker (R3-06). */
@@ -319,20 +323,28 @@ const selectedSummary = computed<string | null>(() => {
         .filter((part): part is string => part !== null)
         .join(' · ');
 });
+
+/**
+ * The sort key's label, for the denominator line. Falls back to the key itself rather than to a
+ * invented word: an unlabelled sort key is a payload gap, and printing it is the honest answer.
+ */
+const sortLabel = computed(
+    (): string => props.sortKeys.find((key) => key.value === props.sortBy)?.label ?? props.sortBy,
+);
 </script>
 
 <template>
     <SetupLayout :step="2" :visited="props.visited" :saved="props.saved" :choices="props.choices">
         <Head title="Choose a trainee" />
-        <template #eyebrow>Setup</template>
+        <template #eyebrow>Setup · Step 2 of 6</template>
         <template #title>Choose a trainee</template>
 
         <!-- No breadcrumb: "Back to trainee" pointed at this same URL. The step bar above lists all
              six steps, and the carried-choices strip states the scenario, so nothing is lost. -->
 
-        <!-- Header: eyebrow + subtitle. The page title is the layout's #title h1. -->
+        <!-- The position is carried by the eyebrow in the title band above, so this block only adds
+             the one-sentence subject line. -->
         <header class="mb-4">
-            <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 2 of 6</p>
             <p class="mt-1 text-sm text-ink-muted">Pick the trainee the career is built on.</p>
         </header>
 
@@ -396,9 +408,14 @@ const selectedSummary = computed<string | null>(() => {
                 </BaseButton>
             </form>
 
-            <!-- Row-count line -->
-            <p v-if="props.trainees.total > 0" class="mt-2 text-xs text-ink-muted">
-                {{ props.trainees.total }} trainee{{ props.trainees.total !== 1 ? 's' : '' }} match{{ props.trainees.total !== 1 ? 's' : '' }}.
+            <!-- The denominator line (`career-trainee.html`). It prints the live total, the page and the
+                 sort so "71 trainees" is never mistaken for the page's own row count. The sort label is
+                 read from `sortKeys`, so renaming a sort key renames this line rather than leaving it
+                 claiming an order the query no longer uses. -->
+            <p v-if="props.trainees.total > 0" class="mt-2 text-xs text-ink-muted" data-field="denominator">
+                {{ props.trainees.total }} trainee{{ props.trainees.total !== 1 ? 's' : '' }} ·
+                page {{ props.trainees.current_page }} of {{ props.trainees.last_page }} ·
+                sorted by {{ sortLabel }}
             </p>
         </div>
 
@@ -452,7 +469,7 @@ const selectedSummary = computed<string | null>(() => {
                 :key="row.id"
                 :data-trainee-card="row.id"
                 class="cursor-pointer rounded-lg border-2 bg-panel p-3.5 transition-colors duration-150 ease-out"
-                :class="props.selected === row.id ? 'border-pick-line bg-sunken' : 'border-rule hover:bg-raised'"
+                :class="props.selected === row.id ? 'border-pick-line bg-green-tint' : 'border-rule hover:bg-raised'"
                 @click="choose(row)"
             >
                 <div class="flex items-start gap-2.5">
@@ -557,7 +574,6 @@ const selectedSummary = computed<string | null>(() => {
             aria-label="Pagination"
             class="mt-4 flex flex-wrap items-center gap-2 text-sm"
         >
-            <span class="mr-2 text-ink-muted">{{ props.trainees.total }} trainees match.</span>
             <template v-for="(link, index) in props.trainees.links" :key="index">
                 <a
                     v-if="link.url"

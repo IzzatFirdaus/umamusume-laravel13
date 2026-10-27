@@ -90,6 +90,15 @@ class BuildTargetController extends Controller
             // The step's write URL, supplied server-side the way CareerLayout.vue:11 and
             // UnityCupEditor.vue:20 already receive URLs. No Ziggy dependency is introduced.
             'action' => route('career.target.store'),
+            // The stanza's own finale floors, read from the config entry the scenario's caps already come
+            // from rather than restated on the page: Sprint 400 / Mile 500 / Medium 600 / Long 700. A
+            // second table on the page would be one more place for a published figure to drift.
+            'finaleTargets' => [
+                'staminaByDistance' => (array) config(
+                    'scenarios.scenarios.'.(SetupDraft::read()['scenario'] ?? '').'.finale_targets.stamina_by_distance',
+                    [],
+                ),
+            ],
         ]);
     }
 

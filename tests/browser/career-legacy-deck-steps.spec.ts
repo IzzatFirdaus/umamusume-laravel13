@@ -57,7 +57,7 @@ test.describe('Setup step 4 — Legacy', () => {
         await expect(page.getByRole('heading', { name: 'Legacy', level: 1 })).toBeVisible();
         await expect(page.getByText('Step 4 of 6').first()).toBeVisible();
         await expect(
-            page.getByRole('navigation', { name: 'Setup steps' }).getByRole('link', { name: 'Legacy' }),
+            page.getByRole('navigation', { name: 'Setup steps' }).getByRole('listitem', { name: 'Legacy' }),
         ).toHaveAttribute('aria-current', 'step');
         // All six steps are live links: Preflight landed with D7, so no step renders as a named
         // absence in the nav.
@@ -137,7 +137,7 @@ test.describe('Setup step 4 — Legacy', () => {
         // the value is picked from each list rather than typed. `Stars` needs `exact` because the label
         // is a case-insensitive substring of each parent's own "Own rank (stars)".
         await page.getByLabel('Applies to').selectOption('Stat');
-        await page.getByLabel('Target').selectOption('Speed');
+        await page.getByLabel(/^Target/).selectOption('Speed');
         await page.getByLabel('Stars', { exact: true }).fill('2');
         await page.locator('#affinity').selectOption('◎');
         await page.getByRole('button', { name: 'Save Legacy' }).click();
@@ -241,10 +241,10 @@ test.describe('Setup step 5 — Support deck', () => {
     test('renders six slots, the seven spelled types and the ownership flag as a named absence', async ({ page }) => {
         await hydrate(page, '/career/setup/deck');
 
-        await expect(page.getByRole('heading', { name: 'Support deck', level: 1 })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Build the six-card deck', level: 1 })).toBeVisible();
         await expect(page.getByText('Step 5 of 6').first()).toBeVisible();
         await expect(
-            page.getByRole('navigation', { name: 'Setup steps' }).getByRole('link', { name: 'Support deck' }),
+            page.getByRole('navigation', { name: 'Setup steps' }).getByRole('listitem', { name: 'Support deck' }),
         ).toHaveAttribute('aria-current', 'step');
 
         // No scenario in the draft yet, and the page says so through `AbsenceValue`'s disclosure:
@@ -353,7 +353,7 @@ test.describe('Setup step 5 — Support deck', () => {
 
         // WCAG 1.4.10 Reflow: the two-column grid stacks, and the document itself never scrolls
         // sideways.
-        await expect(page.getByRole('heading', { name: 'The six slots' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: /Deck\s+\d+ of 6 slots filled/ })).toBeVisible();
 
         // The picker is a dialog opened by a slot, so its heading is asserted where the page renders
         // it: open the dialog and measure the document with it up.
@@ -373,10 +373,10 @@ test.describe('Setup step 5 — Support deck', () => {
         await page.getByRole('button', { name: 'Save Legacy' }).click();
         await expect(page.getByText('Legacy recorded.')).toBeVisible();
 
-        // Step 5 through the page's own next-step link: one equipped card. The card is whichever the
+        // Step 5 through the page's own primary action: one equipped card. The card is whichever the
         // deterministic picker order puts first, so the test lifts its name off the rendered slot
         // rather than hardcoding today's first row.
-        await page.getByRole('link', { name: 'Next: Support deck' }).click();
+        await page.getByRole('link', { name: 'Continue to deck' }).click();
         await page.locator('#app > *').first().waitFor();
         await expect(page).toHaveURL(/\/career\/setup\/deck/);
         await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
@@ -395,17 +395,19 @@ test.describe('Setup step 5 — Support deck', () => {
             .innerText();
         expect(cardName.length, 'the slot carries no card link').toBeGreaterThan(0);
 
-        // Back to step 4 through the nav: the value stays because `SetupDraft::write()` merges and
-        // neither step owns the other's keys. It is read back off the session, not remembered.
-        const nav = page.getByRole('navigation', { name: 'Setup steps' });
-        await nav.getByRole('link', { name: 'Legacy' }).click();
+        // Back to step 4 through the page's own Back control: the value stays because
+        // `SetupDraft::write()` merges and neither step owns the other's keys. It is read back off the
+        // session, not remembered. The step bar is a status readout, not a second navigation, so the
+        // round trip uses the same door a Trainer uses.
+        await page.getByRole('link', { name: 'Back', exact: true }).click();
         await page.locator('#app > *').first().waitFor();
         await expect(page.locator('#ancestor-parent_a-0')).toHaveValue('Grass Wonder');
         await expect(page.getByText(/This setup already holds a Legacy/)).toBeVisible();
 
         // And forward again: the deck survived the round trip too.
-        await nav.getByRole('link', { name: 'Support deck' }).click();
+        await page.getByRole('link', { name: 'Continue to deck' }).click();
         await page.locator('#app > *').first().waitFor();
+        await expect(page).toHaveURL(/\/career\/setup\/deck/);
         await expect(page.locator('#deck-slot-1')).toContainText(cardName);
 
         // The last shared invariant: writes across both steps, and still no run. The two steps

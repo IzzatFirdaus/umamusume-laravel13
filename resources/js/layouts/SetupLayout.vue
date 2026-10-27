@@ -49,33 +49,40 @@ const wrapperClass = computed(() => {
 });
 
 const steps = [
-    { label: 'Scenario', to: '/career/setup/scenario' },
-    { label: 'Trainee', to: '/career/setup/trainee' },
-    { label: 'Your target', to: '/career/setup/target' },
-    { label: 'Legacy', to: '/career/setup/legacy' },
-    { label: 'Support deck', to: '/career/setup/deck' },
-    { label: 'Preflight', to: '/career/setup/preflight' },
+    { label: 'Scenario' },
+    { label: 'Trainee' },
+    { label: 'Your target' },
+    { label: 'Legacy' },
+    { label: 'Support deck' },
+    { label: 'Preflight' },
 ];
-
-const stepLink =
-    'flex min-h-11 items-center rounded-full border border-rule px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
-const stepCurrent = 'border-brand-chrome bg-raised text-ink-strong font-bold';
-const stepCompleted = 'border-status-positive text-ink-strong';
-const stepNotStarted = 'text-ink-muted';
-
-// A named absence reads as a step and is never a link, so this restates `stepLink`'s geometry
-// without its hover and without `text-ink`: a muted, non-focusable row that keeps the 44px line
-// height so the bar does not jump when a step is unbuilt. Not built on top of `stepLink` with a
-// second text colour, because two `text-*` utilities in one class list resolve by stylesheet
-// order rather than by the order they are written.
-const stepAbsent =
-    'flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink-muted';
 
 const leaveLink =
     'inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
 
 const isCompleted = (index: number): boolean =>
     (props.visited?.includes(index + 1) === true || props.saved?.includes(index + 1) === true) && index + 1 !== props.step;
+
+/*
+ * The step list's three states, as the HFW's `.step` modifiers rather than as links.
+ *
+ * The wireframe's stepper is a status readout, not a second navigation: the six `.step` spans carry
+ * `.is-done` / `.is-partial` / `.is-empty` and the current one carries `aria-current="step"`. The
+ * previous version rendered each step as a `<Link>`, which made the bar a second way to move through
+ * the wizard beside the page's own Back/Continue pair, and made "which step am I on" compete with six
+ * clickable targets. The states resolve through the ported `.step` rules in `app.css`; nothing here
+ * restates a colour.
+ */
+function stepClass(index: number): string[] {
+    const number = index + 1;
+
+    if (number === props.step) {
+        return ['is-partial'];
+    }
+
+    return isCompleted(index) ? ['is-done'] : ['is-empty'];
+}
+
 
 /*
  * Focus and document title, on every step load.
@@ -134,47 +141,42 @@ onMounted(async () => {
         <template v-if="$slots.eyebrow && !$slots.head" #eyebrow><slot name="eyebrow" /></template>
         <template v-if="!$slots.head" #title><slot name="title" /></template>
 
-        <!-- The step list is a labelled nav, and the current step carries `aria-current="step"`, so
-             the position is announced rather than carried by the accent alone (WCAG 1.4.1). The visible
-             count and the `sr-only` line are the same fact in two media: the number is a position, and
-             a screen reader should hear it before the list rather than after the sixth item.
+        <!-- The step list is the wireframe's stepper: a status readout, not a second navigation.
+             `aria-current="step"` carries the position for assistive tech (WCAG 1.4.1), and the four
+             legend marks name the states so "amber means you started this one" is written down rather
+             than inferred from a colour. The `.step`/`.step-legend` rules are ported into `app.css`,
+             so this template states structure and never a colour.
 
-             `md:sticky md:top-0 md:z-10` was here and is REMOVED: it never did anything. This nav sits
-             inside the `AppLayout` `main`, which carries `container-type: inline-size` (load-bearing for
-             the `@3xl:`/`@4xl:` step layouts - see the note on `wrapperClass` above), so the sticky
+             `md:sticky` was here and is REMOVED: it never did anything. This nav sits inside the
+             `AppLayout` `main`, which carries `container-type: inline-size` (load-bearing for the
+             `@3xl:`/`@4xl:` step layouts - see the note on `wrapperClass` above), so the sticky
              containing block moves with the page instead of the scrollport and the nav scrolled away
-             with everything else. The class is retired rather than kept as a no-op so the source does
-             not claim a behaviour the page does not have. `tests/browser/containment.spec.ts` pins the
-             current behaviour deliberately. -->
-        <nav aria-label="Setup steps" class="mb-4 border-b border-rule pb-2 md:-mx-6 md:bg-page md:px-6">
-            <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-                <p class="text-xs text-ink-muted">
-                    Step {{ props.step }} of {{ steps.length }}
-                </p>
+             with everything else. `tests/browser/containment.spec.ts` pins the current behaviour. -->
+        <nav aria-label="Setup steps" class="mb-4">
+            <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+                <div class="stepper" role="list" data-setup-steps>
+                    <span
+                        v-for="(item, index) in steps"
+                        :key="item.label"
+                        role="listitem"
+                        :class="['step', ...stepClass(index)]"
+                        :aria-current="index + 1 === props.step ? 'step' : undefined"
+                        :aria-label="item.label"
+                    >
+                        <span class="n" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
+                    </span>
+                </div>
                 <Link href="/" :class="leaveLink">Leave setup</Link>
             </div>
 
             <p class="sr-only">Step {{ props.step }} of {{ steps.length }}</p>
 
-            <ol class="mt-1 flex flex-wrap gap-1 text-sm" aria-label="Setup step list">
-                <li v-for="(item, index) in steps" :key="item.label">
-                    <Link
-                        v-if="item.to"
-                        :href="item.to"
-                        :class="[stepLink, index + 1 === props.step ? stepCurrent : isCompleted(index) ? stepCompleted : stepNotStarted]"
-                        :aria-current="index + 1 === props.step ? 'step' : undefined"
-                    >
-                        <span class="mr-2 font-mono text-xs" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
-                        <span class="ml-2 text-xs">
-                            {{ index + 1 !== props.step ? (isCompleted(index) ? 'saved' : 'not started') : 'current' }}
-                        </span>
-                    </Link>
-                    <span v-else :class="stepAbsent" title="This step arrives with its own slice.">
-                        <span class="mr-2 font-mono text-xs" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
-                        <span class="ml-2 text-xs">not built</span>
-                    </span>
-                </li>
-            </ol>
+            <div class="step-legend" aria-hidden="true">
+                <span><i class="l-done" />Saved</span>
+                <span><i class="l-partial" />Started unfinished</span>
+                <span><i class="l-empty" />Not started</span>
+                <span><i class="l-current" />Current</span>
+            </div>
         </nav>
 
         <div :class="wrapperClass" class="@container" data-layout-container>

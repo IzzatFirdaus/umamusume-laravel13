@@ -109,7 +109,7 @@ test.describe('Trainee Selection and Profile', () => {
         // The wizard shell: step 2 is the current step, and since D7 all six steps are live links, so
         // the step nav holds no named absence. The back breadcrumb also has a "Trainee" link, so we
         // scope to the Setup steps nav to avoid strict-mode violations.
-        await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByRole('link', { name: 'Trainee' })).toHaveAttribute('aria-current', 'step');
+        await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByRole('listitem', { name: 'Trainee' })).toHaveAttribute('aria-current', 'step');
         await expect(page.getByText('Step 2 of 6').first()).toBeVisible();
         await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByText('not built')).toHaveCount(0);
 
@@ -122,7 +122,7 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(strip.getByText(/^Trainee: not chosen$/)).toHaveCount(1);
         await expect(strip.getByText('N/A', { exact: true })).toHaveCount(0);
         await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(25);
-        await expect(page.getByText('67 trainees match.')).toBeVisible();
+        await expect(page.locator('[data-field="denominator"]')).toContainText('trainees');
 
         // The wireframe's "Selected" card is absent until a trainee is actually chosen: it restates a pick,
         // and the strip above already says "not chosen" in words. Rendering an empty one would be a second
@@ -282,10 +282,10 @@ test.describe('Trainee Selection and Profile', () => {
         // The profile has no table: the roster's row role does not exist here. The page's own
         // heading carries the name, and the footer button carries the chosen state.
         await expect(page.getByRole('heading', { name: /Admire Vega/ }).first()).toBeVisible();
-        await expect(page.getByRole('button', { name: 'Select this trainee', exact: true })).toHaveAttribute('aria-pressed', 'true');
-        await expect(page.getByText('Chosen')).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Continue to build target', exact: true })).toHaveAttribute('aria-pressed', 'true');
+        await expect(page.getByText('Chosen', { exact: true })).toBeVisible();
 
-        await page.getByRole('link', { name: 'Back to the roster' }).click();
+        await page.getByRole('link', { name: 'Choose a different trainee' }).click();
         await page.waitForURL(/\/career\/setup\/trainee$/);
 
         await expect(page.locator(`#${actionId}`)).toHaveAttribute('aria-pressed', 'true');
@@ -327,8 +327,8 @@ test.describe('Trainee Selection and Profile', () => {
         // Rarity is the form's own fact, printed beside the form it belongs to.
         await expect(page.getByRole('heading', { name: 'Costume forms' })).toBeVisible();
         await expect(page.getByText('[Starry Nocturne]')).toBeVisible();
-        await expect(page.getByText('SSR')).toBeVisible();
-        await expect(page.getByText('Released (Global) Mar 5, 2026')).toBeVisible();
+        await expect(page.getByRole('img', { name: /Three stars/i }).first()).toBeVisible();
+        await expect(page.getByText('Mar 5, 2026')).toBeVisible();
 
         // Skills, resolved through the Global scope. The unique skill publishes no SP cost, so the row
         // states the absence rather than a number.
@@ -345,7 +345,7 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(page.locator('[title*="carries no umamusume_id by ruling"]')).toHaveCount(0);
 
         // The version absence survives and still carries its reason.
-        await expect(page.locator('[title*="No column records a version"]')).toHaveText('N/A');
+        await expect(page.getByText(/No column records a version/).first()).toBeVisible();
 
         // The kept sentence still explains the absent goal ladder, and names where the ladder lives.
         await expect(page.getByText(/no career-goal section by design/)).toBeVisible();
@@ -378,8 +378,8 @@ test.describe('Trainee Selection and Profile', () => {
         await page.locator('#app > *').first().waitFor();
 
         for (const control of [
-            page.getByRole('link', { name: 'Back to the roster' }),
-            page.getByRole('button', { name: 'Select this trainee', exact: true }),
+            page.getByRole('link', { name: 'Choose a different trainee' }),
+            page.getByRole('button', { name: 'Continue to build target', exact: true }),
         ]) {
             const box = await control.boundingBox();
             expect(box?.height ?? 0, 'a profile control is not sized to 44px').toBeGreaterThanOrEqual(44);

@@ -26,7 +26,7 @@ test.describe('Build Target and the provenance badge', () => {
         await page.locator('#app > *').first().waitFor();
 
         await expect(page.getByRole('heading', { name: 'Your target' }).first()).toBeVisible();
-        await expect(page.getByRole('link', { name: 'Your target' })).toHaveAttribute('aria-current', 'step');
+        await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByRole('listitem', { name: 'Your target' })).toHaveAttribute('aria-current', 'step');
         await expect(page.getByText('Step 3 of 6').first()).toBeVisible();
         // All six steps are live links since D7: the `to: null` branch stays in `SetupLayout` for the
         // next slice that lands a step ahead of its screen, but it renders nothing today.
@@ -76,7 +76,7 @@ test.describe('Build Target and the provenance badge', () => {
         await page.locator('#app > *').first().waitFor();
 
         await page.getByLabel('Purpose').selectOption({ label: 'Story Clear' });
-        await page.getByLabel('Distance').selectOption({ label: 'Medium' });
+        await page.getByLabel('Distance', { exact: true }).selectOption({ label: 'Medium' });
         await page.getByLabel('Surface').selectOption({ label: 'Turf' });
         await page.getByLabel('Style').selectOption({ label: 'Front Runner' });
 
@@ -117,7 +117,7 @@ test.describe('Build Target and the provenance badge', () => {
         // Everything valid except one stat above the base ceiling, so the refusal under test is the
         // only one on the page and the focus path has exactly one candidate.
         await page.getByLabel('Purpose').selectOption({ label: 'Story Clear' });
-        await page.getByLabel('Distance').selectOption({ label: 'Medium' });
+        await page.getByLabel('Distance', { exact: true }).selectOption({ label: 'Medium' });
         await page.getByLabel('Surface').selectOption({ label: 'Turf' });
         await page.getByLabel('Style').selectOption({ label: 'Front Runner' });
         await page.getByLabel('Speed', { exact: true }).fill('1201');
@@ -146,7 +146,7 @@ test.describe('Build Target and the provenance badge', () => {
         // one the step refuses on its own (`ADR-0025` is the ruling that lets the Trainer state the
         // client's ceiling instead of the matrix's).
         await page.getByLabel('Purpose').selectOption({ label: 'Story Clear' });
-        await page.getByLabel('Distance').selectOption({ label: 'Medium' });
+        await page.getByLabel('Distance', { exact: true }).selectOption({ label: 'Medium' });
         await page.getByLabel('Surface').selectOption({ label: 'Turf' });
         await page.getByLabel('Style').selectOption({ label: 'Front Runner' });
         await page.getByLabel('Speed ceiling').fill('1250');

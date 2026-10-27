@@ -47,6 +47,8 @@ interface StoredTarget {
 const props = defineProps<{
     /** The steps this session has opened, the step bar's completed marking reads them. */
     visited: number[];
+    /** The steps that have data stored in the draft (`SetupDraft::saved()`), read apart from `visited`. */
+    saved: number[];
     choices: { label: string; value: string | null; url: string | null }[];
     /** The stored payload as entered, or null before one exists. */
     target: StoredTarget | null;
@@ -74,6 +76,11 @@ const props = defineProps<{
     scenarioPending: boolean;
     /** `route('career.target.store')`, supplied by the server so the page never hard-codes the URL. */
     action: string;
+    /**
+     * The scenario stanza's own stamina floors, from `config/scenarios.php` via the controller. Read
+     * rather than restated, so a published figure has one home.
+     */
+    finaleTargets: { staminaByDistance: Record<string, number> };
 }>();
 
 /**
@@ -220,8 +227,18 @@ const enteredLabel = (stat: string): string => {
     return value === null ? 'N/A' : `${value} of ${cap(stat)}`;
 };
 
-const capTitle = (stat: string): string => {
-    if (props.scenarioPending) {
+/** The sum of the five entered targets, or null while any one of them is still empty. */
+const totalTarget = computed((): number | null => {
+    const values = props.statOrder.map((stat) => entered(stat));
+
+    return values.some((value) => value === null) ? null : (values as number[]).reduce((sum, value) => sum + value, 0);
+});
+
+/** The sum of the five caps this run is bounded by: the denominator the total is read against. */
+const totalCap = computed((): number => props.statOrder.reduce((sum, stat) => sum + cap(stat), 0));
+
+
+const capTitle = (stat: string): string => {    if (props.scenarioPending) {
         return 'No scenario is chosen yet, so this is the base cap with no scenario bonus.';
     }
 
@@ -273,8 +290,27 @@ const summary = computed((): string => {
     return `${clauses.join('; ')}.`;
 });
 
-function addSkill(): void {
-    const name = newSkill.value.trim();
+/**
+ * Fills the five stat fields from the Trainer's stored defaults. Only ever called from the explicit
+ * button, so a preference never overwrites a career's own target on load.
+ */
+function applyDefaults(): void {
+    const defaults = props.statDefaults;
+
+    if (defaults === null) {
+        return;
+    }
+
+    props.statOrder.forEach((stat) => {
+        const value = defaults[stat];
+
+        if (typeof value === 'number') {
+            form.targets[stat] = value;
+        }
+    });
+}
+
+function addSkill(): void {    const name = newSkill.value.trim();
 
     if (name === '') {
         return;
@@ -303,18 +339,27 @@ function removeAt(index: number): void {
 <template>
     <SetupLayout :step="3" :visited="props.visited" :saved="props.saved" :choices="props.choices">
         <Head title="Your target" />
-        <template #eyebrow>Setup</template>
+        <template #eyebrow>Setup · Step 3 of 6</template>
         <template #title>Your target</template>
 
         <!-- No breadcrumb: "← Back to target" pointed at this same URL, a control that navigates to the
              page it is on. The step bar above lists all six steps and the carried-choices strip states
              the scenario and the trainee, so nothing is lost. Steps 1 and 2 carry the same note. -->
 
-        <!-- Header: eyebrow + subtitle. The page title is the layout's #title h1. -->
+        <!-- The position is carried by the eyebrow in the title band above, so this block only adds
+             the subject line. -->
         <header class="mb-4">
-            <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 3 of 6</p>
             <p class="mt-1 text-sm text-ink-muted">The target is what this career is built to reach.</p>
         </header>
+
+        <!-- The wireframe's labelled-defect pattern, kept in its shape. It states the failure the step
+             exists to prevent rather than describing the implementation: a career whose target was never
+             entered reads as a career with no goal at the moment it is committed. -->
+        <div class="warn" data-field="target-defect">
+            <b>This is the step the current build skips.</b>
+            A run created with no target entered commits with five empty goals, and the cockpit then has
+            nothing to measure a turn against. Filling these in is what makes the run's progress answerable.
+        </div>
 
         <p class="max-w-3xl text-sm text-ink-muted">
             The target is what this career is built to reach. It is entered as one object and replaced
@@ -357,7 +402,6 @@ function removeAt(index: number): void {
         <p
             v-if="props.target === null"
             class="mt-3 text-sm text-ink-muted"
-            title="No build target is stored in this setup draft yet."
         >
             No target is recorded yet. The fields below start empty rather than at zero.
         </p>
@@ -370,7 +414,7 @@ function removeAt(index: number): void {
             <fieldset class="rounded-lg border border-rule bg-panel p-4">
                 <legend class="px-1 text-lg font-semibold text-ink-strong">What the career is for</legend>
 
-                <div class="grid gap-4 @3xl:grid-cols-2">
+                <div class="grid gap-4 min-[821px]:grid-cols-2">
                     <BaseSelect
                         v-model="form.purpose"
                         :id="controlId('purpose')"
@@ -443,7 +487,7 @@ function removeAt(index: number): void {
                 </p>
 
                 <div class="mt-4 space-y-4">
-                    <div v-for="stat in props.statOrder" :key="stat" :data-stat="stat" class="grid gap-3 @3xl:grid-cols-2">
+                    <div v-for="stat in props.statOrder" :key="stat" :data-stat="stat" class="grid gap-3 min-[821px]:grid-cols-2">
                         <!-- Target column -->
                         <div class="space-y-1">
                             <BaseInput
@@ -460,6 +504,16 @@ function removeAt(index: number): void {
                                 value-class="font-mono text-ink tabular-nums"
                                 :error="errorOf(`targets.${stat}`)"
                             />
+                            <!-- The denominator sits inside the field's own group: the value and the cap it
+                                 is read against are one claim, so they print together rather than in a
+                                 column header the Trainer has to match up. -->
+                            <span class="font-mono text-xs text-ink-muted tabular-nums" data-field="denominator">
+                                {{ entered(stat) ?? '—' }} / {{ cap(stat) }} cap
+                            </span>
+                            <span class="text-xs text-ink-muted" data-field="percent-of-cap">
+                                <template v-if="entered(stat) !== null">{{ percent(stat) }}% of cap</template>
+                                <template v-else>not entered, so no share of the cap is claimed</template>
+                            </span>
                             <span class="text-xs text-ink-muted" :title="capTitle(stat)">Cap {{ cap(stat) }}</span>
 
                             <span class="flex flex-wrap items-center gap-2">
@@ -517,6 +571,82 @@ function removeAt(index: number): void {
                     class="mt-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-ink"
                 >{{ errors.targets }}</p>
             </fieldset>
+
+            <!-- The totals block: what the entered figures add up to, beside the one published build the
+                 page names and the ceiling the five caps sum to. Three different claims, three rows, and
+                 the note says which one is a requirement (none of them is). -->
+            <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="target-totals">
+                <h2 id="target-totals" class="text-lg font-semibold text-ink-strong">Totals</h2>
+
+                <div class="mt-2" data-field="target-totals">
+                    <div class="srow">
+                        <span class="k">Your total</span>
+                        <span class="v font-mono tabular-nums">{{ totalTarget === null ? '—' : totalTarget }}</span>
+                    </div>
+                    <div class="srow">
+                        <span class="k">Published Global sample build <em>Special Week</em></span>
+                        <span class="v font-mono tabular-nums">—</span>
+                    </div>
+                    <div class="srow">
+                        <span class="k">Sum of the five scenario caps</span>
+                        <span class="v font-mono tabular-nums">{{ totalCap }}</span>
+                    </div>
+                </div>
+
+                <p class="note mt-2">
+                    The published Global sample is one publisher's build, not a requirement and not this
+                    tool's recommendation: it is a figure to compare against, and a career below it is not
+                    a worse career. This repository stores no sample-build column, so the row prints a dash
+                    rather than a number it cannot source.
+                </p>
+            </section>
+
+            <!-- The distance bands carry their edges, and the 1400 m row states the conflict instead of
+                 resolving it: three sources disagree and this tool holds no ruling. -->
+            <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="distance-bands">
+                <h2 id="distance-bands" class="text-lg font-semibold text-ink-strong">Distance bands</h2>
+
+                <ul class="mt-2 flex flex-wrap gap-1.5 text-xs">
+                    <li v-for="band in props.distanceBands" :key="band" class="pill pill-outline">{{ band }}</li>
+                </ul>
+
+                <p class="warn mt-2" data-field="distance-conflict">
+                    <b>1400 m is disputed.</b>
+                    Game8 files it as {{ props.distanceBands[0] }}, the client's export code 2 reads as
+                    {{ props.distanceBands[1] }}, and the client's own skills gate on
+                    <code>distance_type == 2</code>. This tool states the disagreement rather than picking a
+                    side, so a 1400 m race can be typed either way as long as the skill gate it is planned
+                    against uses the same reading.
+                </p>
+            </section>
+
+            <!-- The stamina floor per band, read from the scenario's own stanza rather than restated. -->
+            <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="distance-floor">
+                <h2 id="distance-floor" class="text-lg font-semibold text-ink-strong">Floor per distance band</h2>
+
+                <table v-if="Object.keys(props.finaleTargets.staminaByDistance).length > 0" class="mt-2 w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                            <th class="py-2 pr-3">Band</th>
+                            <th>Floor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(floor, band) in props.finaleTargets.staminaByDistance" :key="band" class="border-b border-rule">
+                            <td class="py-2 pr-3 text-ink">{{ band }}</td>
+                            <td class="font-mono text-ink tabular-nums">{{ floor }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p v-else class="mt-2 text-sm text-ink-muted">
+                    <AbsenceValue compact reason="The chosen scenario publishes no stamina floor per distance, so none is stated." />
+                </p>
+
+                <p class="note mt-2">
+                    These come from the scenario's own settings, the same entry its caps come from. They are
+                    the floor the finale expects, not a target to overshoot.
+                </p>
+            </section>
 
             <fieldset class="rounded-lg border border-rule bg-panel p-4">
                 <legend class="px-1 text-lg font-semibold text-ink-strong">Skill priorities</legend>
@@ -597,12 +727,31 @@ function removeAt(index: number): void {
                 </p>
             </fieldset>
 
-<div class="flex flex-wrap items-center gap-3">
+            <!-- Saved defaults are a preference, not this run's target: applying them fills the five
+                 fields from the Trainer's own stored numbers, and the note says where they live when none
+                 is set. The primary is the wizard's Continue, which is also the write. -->
+            <div class="flex flex-wrap items-center gap-3">
                 <BaseButton type="submit" variant="primary" :disabled="form.processing">
                     {{ form.processing ? 'Saving…' : 'Save target' }}
                 </BaseButton>
+                <BaseButton type="button" variant="secondary" :disabled="props.statDefaults === null" @click="applyDefaults">
+                    Use saved defaults
+                </BaseButton>
+                <Link href="/settings" class="inline-flex min-h-11 items-center text-sm text-ink underline">
+                    Set defaults in Settings
+                </Link>
                 <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving your target…</p>
             </div>
+
+            <p class="text-xs text-ink-muted">
+                <template v-if="props.statDefaults === null">
+                    No saved stat defaults exist, so there is nothing to apply. Settings is where they are set.
+                </template>
+                <template v-else>
+                    Saved defaults are your own preference. Applying them replaces the five figures above;
+                    they are never applied to a run whose target is already stored.
+                </template>
+            </p>
         </form>
     </SetupLayout>
 </template>

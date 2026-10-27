@@ -59,6 +59,8 @@ const props = defineProps<{
     scenarios: ScenarioCard[];
     /** The steps this session has opened, the step bar's completed marking reads them. */
     visited: number[];
+    /** The steps that have data stored in the draft (`SetupDraft::saved()`), read apart from `visited`. */
+    saved: number[];
     choices: { label: string; value: string | null; url: string | null }[];
     selected: string | null;
     ruleset: { value: string | null; title: string };
@@ -211,13 +213,13 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
         <fieldset v-else class="mt-6">
             <legend class="text-sm font-semibold text-ink-strong">Which scenario is this career in?</legend>
 
-            <div class="mt-3 grid grid-cols-1 gap-4 @4xl:grid-cols-2 @7xl:grid-cols-4">
+            <div class="mt-3 grid grid-cols-1 gap-4 min-[821px]:grid-cols-2">
                 <div
                     v-for="card in props.scenarios"
                     :key="card.key"
                     data-scenario-card
                     class="relative rounded-lg border border-rule bg-panel p-4"
-                    :class="props.selected === card.key ? 'border-2 border-pick-line bg-status-positive/10' : ''"
+                    :class="props.selected === card.key ? 'border-2 border-pick-line bg-green-tint' : ''"
                 >
                 <label
                     :for="`scenario-radio-${card.key}`"
@@ -374,7 +376,7 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
             >Compare scenarios</Link>
         </p>
 
-        <p class="mt-2 rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink-muted">
+        <p class="note mt-2">
             The panel tags are the composition matrix, not a marketing list: a scenario that leaves a
             panel off cannot draw it, and a fifth scenario reaches the same shell for one config entry.
             The caps quoted are the published scenario caps from the scenario matrix.
@@ -395,22 +397,22 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                 <tbody>
                     <tr class="border-b border-rule align-top">
                         <td class="py-2 pr-3 font-semibold text-ink-strong">Scenario</td>
-                        <td class="pr-3"><span class="font-semibold text-risk">No</span></td>
+                        <td class="pr-3"><span class="pill pill-caution">No</span></td>
                         <td class="text-ink-muted">Switching composes a different panel set, cap table and currency; the cockpit has no shape for a mid-run swap.</td>
                     </tr>
                     <tr class="border-b border-rule align-top">
                         <td class="py-2 pr-3 font-semibold text-ink-strong">Trainee</td>
-                        <td class="pr-3"><span class="font-semibold text-risk">No</span></td>
+                        <td class="pr-3"><span class="pill pill-caution">No</span></td>
                         <td class="text-ink-muted">The run's identity, growth row and base stats are the trainee's.</td>
                     </tr>
                     <tr class="border-b border-rule align-top">
                         <td class="py-2 pr-3 font-semibold text-ink-strong">Build target</td>
-                        <td class="pr-3"><span class="font-semibold text-status-positive">Yes</span></td>
+                        <td class="pr-3"><span class="pill pill-positive">Yes</span></td>
                         <td class="text-ink-muted">Targets are the Trainer's own goals, editable from the cockpit.</td>
                     </tr>
                     <tr class="align-top">
                         <td class="py-2 pr-3 font-semibold text-ink-strong">Legacy and deck</td>
-                        <td class="pr-3"><span class="font-semibold text-status-positive">Yes</span></td>
+                        <td class="pr-3"><span class="pill pill-positive">Yes</span></td>
                         <td class="text-ink-muted">Both are run-scoped selections with their own editors.</td>
                     </tr>
                 </tbody>

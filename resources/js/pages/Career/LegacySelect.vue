@@ -58,6 +58,8 @@ interface SparkDraft {
 const props = defineProps<{
     /** The steps this session has opened, the step bar's completed marking reads them. */
     visited: number[];
+    /** The steps that have data stored in the draft (`SetupDraft::saved()`), read apart from `visited`. */
+    saved: number[];
     trainee: { id: number; name: string; name_ja: string | null } | null;
     scenarioLabel: string | null;
     hasSelection: boolean;
@@ -167,10 +169,11 @@ const saving = (): void => {
         })),
     })).put(props.action, {
         preserveScroll: true,
-        // Focus returns after the new props land, in `onSuccess` + `nextTick`: the component instance
-        // survives a client-side visit so an `onMounted` hook would never re-run, and taking focus on a cold
-        // load would steal it from a Trainer who has not acted yet (WCAG 2.4.3). The `id` is on the button
-        // itself, because an `id` on a non-focusable wrapper makes `.focus()` a silent no-op.
+
+        // Focus returns after the new props land: the component instance survives a client-side visit
+        // so an `onMounted` hook would never re-run, and taking focus on a cold load would steal it
+        // from a Trainer who has not acted yet (WCAG 2.4.3). The `id` is on the button itself, because
+        // an `id` on a non-focusable wrapper makes `.focus()` a silent no-op.
         onSuccess: () => {
             nextTick(() => document.getElementById('legacy-save')?.focus());
         },
@@ -236,7 +239,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
 <template>
     <SetupLayout :step="4" :visited="props.visited" :saved="props.saved">
         <Head title="Legacy" />
-        <template #eyebrow>Setup</template>
+        <template #eyebrow>Setup · Step 4 of 6</template>
         <template #title>Legacy</template>
 
         <!-- No breadcrumb: "← Back to legacy" pointed at this same URL, and its `Link` was never
@@ -244,9 +247,9 @@ const ancestorError = (index: number, slot: number): string | undefined =>
              The step bar above lists all six steps, so nothing is lost. Steps 1 and 2 carry the same
              note. -->
 
-        <!-- Header: eyebrow + subtitle. The page title is the layout's #title h1. -->
+        <!-- The position is carried by the eyebrow in the title band above, so this block only adds
+             the subject line. -->
         <header class="mb-4">
-            <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 4 of 6</p>
             <p class="mt-1 text-sm text-ink-muted">The two parents this career will be bred from.</p>
         </header>
 
@@ -310,8 +313,8 @@ const ancestorError = (index: number, slot: number): string | undefined =>
             {{ props.roster.length }}. The rest are on the Legacy Lab browse screen.
         </p>
 
-        <ol class="mt-4 max-w-5xl grid grid-cols-1 items-start gap-4 @5xl:grid-cols-3">
-            <li class="rounded-lg border-2 border-rule bg-panel p-3 @5xl:col-span-1">
+        <ol class="mt-4 grid grid-cols-1 items-start gap-4 min-[1081px]:grid-cols-2">
+            <li class="rounded-lg border-2 border-rule bg-panel p-3">
                 <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Trainee</p>
                 <div class="mt-1 text-lg font-semibold text-ink-strong">
                     <span v-if="props.graph.trainee.name">{{ props.graph.trainee.name }}</span>
@@ -604,6 +607,100 @@ const ancestorError = (index: number, slot: number): string | undefined =>
             <option v-for="letter in props.rankLetters" :key="letter" :value="letter" />
         </datalist>
 
+        <!--
+          DOMAIN OVERRIDE (DM-3): four spark families; HFW draws three
+          The wireframe draws Blue, Pink and the unique-skill factor. Mechanics has four families, because
+          Green (unique-skill hints) and White (skill hints and competition) both exist and a parent's
+          spark list can carry either. Drawing three would make the page silently disagree with the data
+          the row above it prints, so all four are named here and the override is recorded rather than
+          hidden.
+        -->
+        <section class="mt-5 rounded-lg border border-rule bg-panel p-4" aria-labelledby="inheritance-does">
+            <h2 id="inheritance-does" class="text-lg font-semibold text-ink-strong">What inheritance actually does</h2>
+
+            <table class="mt-2 w-full text-sm">
+                <thead>
+                    <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                        <th class="py-2 pr-3">Mechanism</th>
+                        <th class="pr-3">Effect</th>
+                        <th>When it applies</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-rule align-top">
+                        <td class="py-2 pr-3 font-semibold text-ink-strong">Blue spark</td>
+                        <td class="pr-3 text-ink">+16 to the stat's cap per ★3</td>
+                        <td class="text-ink-muted">At run start, and again at both inheritance moments.</td>
+                    </tr>
+                    <tr class="border-b border-rule align-top">
+                        <td class="py-2 pr-3 font-semibold text-ink-strong">Pink spark</td>
+                        <td class="pr-3 text-ink">+5 / +12 / +21 by grade</td>
+                        <td class="text-ink-muted">Same three moments as the Blue spark, on the aptitude it names.</td>
+                    </tr>
+                    <tr class="border-b border-rule align-top">
+                        <td class="py-2 pr-3 font-semibold text-ink-strong">Unique-skill factor</td>
+                        <td class="pr-3 text-ink">Inherits her unique skill as a factor</td>
+                        <td class="text-ink-muted">Read at run start; a factor is not a cost and carries no SP price here.</td>
+                    </tr>
+                    <tr class="border-b border-rule align-top">
+                        <td class="py-2 pr-3 font-semibold text-ink-strong">Green spark</td>
+                        <td class="pr-3 text-ink">Unique-skill hints</td>
+                        <td class="text-ink-muted">Hints raise the chance a skill is offered, not its level.</td>
+                    </tr>
+                    <tr class="border-b border-rule align-top">
+                        <td class="py-2 pr-3 font-semibold text-ink-strong">White spark</td>
+                        <td class="pr-3 text-ink">Skill hints and competition bonuses</td>
+                        <td class="text-ink-muted">Same reading as Green: a hint, not a granted skill.</td>
+                    </tr>
+                    <tr class="align-top">
+                        <td class="py-2 pr-3 font-semibold text-ink-strong">Enhanced spark</td>
+                        <td class="pr-3"><AbsenceValue compact reason="No source in this repository states an enhanced spark's rate, so none is printed." /></td>
+                        <td class="text-ink-muted">Named because the client shows it; unpriced because this tool holds no figure.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="mt-4 rounded-lg border border-rule bg-panel p-4" aria-labelledby="projected-start">
+            <h2 id="projected-start" class="text-lg font-semibold text-ink-strong">Projected start</h2>
+
+            <p class="mt-1 text-sm text-ink-muted">
+                One column per parent chosen. Only the cap a parent's Blue spark names moves; every other
+                row stays where the scenario put it.
+            </p>
+
+            <table class="mt-2 w-full text-sm">
+                <thead>
+                    <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                        <th class="py-2 pr-3">Stat</th>
+                        <th class="pr-3">Scenario cap</th>
+                        <th>After both parents</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="parent in props.graph.parents" :key="`projected-${parent.slot}`" class="border-b border-rule">
+                        <td class="py-2 pr-3 text-ink">{{ parent.label }}</td>
+                        <td class="pr-3 font-mono text-ink-muted tabular-nums">{{ parent.rank === null ? '—' : parent.rank }}</td>
+                        <td class="font-mono text-ink tabular-nums">
+                            <template v-if="parent.sparks.some((spark) => spark.kind === 'blue')">
+                                +{{ parent.sparks.filter((spark) => spark.kind === 'blue').length * 16 }} cap
+                            </template>
+                            <template v-else>no Blue spark, so no cap moves</template>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p class="note mt-2">
+                This projection is arithmetic on the published rule, not a reading off the client. It assumes
+                every Blue spark on the record is ★3, which is what the row above states per spark.
+            </p>
+        </section>
+
+        <p class="note mt-4">
+            Parents must differ: a trainee cannot be her own parent, the same Veteran record cannot fill both
+            slots, and leaving both empty is a legitimate state rather than an error.
+        </p>
         <fieldset class="mt-4 max-w-sm rounded-lg border border-rule bg-panel p-3">
             <legend class="text-xs font-semibold uppercase tracking-wide text-ink-muted px-1">Pair</legend>
             <div class="mt-2">
@@ -642,6 +739,11 @@ const ancestorError = (index: number, slot: number): string | undefined =>
 
             <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving the Legacy…</p>
 
+            <!-- One filled action on this screen: the write. The forward door is a link, because
+                 advancing without writing would carry an unsaved ancestry into the deck step and the
+                 deck would compose against a parent the Trainer never recorded. The in-card
+                 "Choose a veteran" control is a select, not a second primary (recorded deviation from
+                 the literal HFW, where that control is a filled button). -->
             <a
                 href="/career/setup/target"
                 class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
@@ -650,9 +752,9 @@ const ancestorError = (index: number, slot: number): string | undefined =>
             </a>
             <a
                 href="/career/setup/deck"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
+                class="inline-flex min-h-11 items-center font-medium text-ink underline"
             >
-                Next: Support deck
+                Continue to deck
             </a>
         </div>
     </SetupLayout>

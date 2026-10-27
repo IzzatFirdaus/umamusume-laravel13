@@ -108,6 +108,8 @@ const props = defineProps<{
     step: number;
     /** The steps this session has opened, the step bar's completed marking reads them. */
     visited: number[];
+    /** The steps that have data stored in the draft (`SetupDraft::saved()`), read apart from `visited`. */
+    saved: number[];
     contract: {
         complete: boolean;
         build: {
@@ -392,6 +394,13 @@ const CAREER_TURNS = 72;
                             </p>
                         </div>
                         <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
+                            <p class="text-xs text-ink-muted">Form</p>
+                            <p class="text-sm text-ink-strong">
+                                <template v-if="props.contract.build.trainee">as chosen above</template>
+                                <AbsenceValue v-else compact reason="No trainee has been chosen in this draft, so no costume form is named." />
+                            </p>
+                        </div>
+                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
                             <p class="text-xs text-ink-muted">Scenario</p>
                             <p class="text-sm text-ink-strong">
                                 <template v-if="props.contract.build.scenario">{{ props.contract.build.scenario.label }}</template>
@@ -480,12 +489,16 @@ const CAREER_TURNS = 72;
                                 <td class="py-2 text-ink">
                                     <span>{{ row.summary }}</span>
                                     <span v-if="row.ja" lang="ja" class="ml-2 text-ink-muted">{{ row.ja }}</span>
+                                    <!-- Exactly one fix link, on the row that is the one warning. A link on
+                                         every row would be five ways to leave a screen whose point is the
+                                         single thing left to do. -->
                                     <Link
+                                        v-if="checkState(row) === 'Warning'"
                                         :href="row.edit"
-                                        :aria-label="`Edit ${row.label}`"
+                                        :aria-label="`Fix ${row.label}`"
                                         class="ml-2 inline-flex min-h-11 items-center text-sm font-medium text-ink underline"
                                     >
-                                        Edit
+                                        Fix this
                                     </Link>
                                 </td>
                             </tr>

@@ -82,6 +82,8 @@ interface EffectLine {
 const props = defineProps<{
     /** The steps this session has opened, the step bar's completed marking reads them. */
     visited: number[];
+    /** The steps that have data stored in the draft (`SetupDraft::saved()`), read apart from `visited`. */
+    saved: number[];
     slots: Slot[];
     types: { key: string; label: string }[];
     picker: {
@@ -156,8 +158,8 @@ const duplicateCount = computed(() => deckCards.value.length - new Set(deckCards
 
 /**
  * Cards whose stated effects include a friendship bonus. Read from the effect name the export uses
- * (`Friendship Bonus`), because that is the source of truth for the mechanic — not a type rule: a Pal
- * card carries none, which is exactly why the Pal row prints the absence instead of a blank.
+ * (`Friendship Bonus`), because that is the source of truth for the mechanic — not a type rule: the
+ * friend card carries none, which is exactly why that row prints the absence instead of a blank.
  */
 const friendshipCount = computed(
     () => deckCards.value.filter((card) => card.effects.some((effect) => effect.name === 'Friendship Bonus')).length,
@@ -165,6 +167,12 @@ const friendshipCount = computed(
 
 /** Cards the draft's chosen scenario links to. Zero when no scenario has been chosen yet. */
 const linkedCount = computed(() => deckCards.value.filter((card) => card.scenario_link === 'linked').length);
+
+/** The five stat-type marks, in the server's own order, for the first row of the card-types table. */
+const statTypes = computed(() => props.types.filter((type) => !['friend', 'group'].includes(type.key)));
+
+/** A type's client word, read off the server's own list rather than typed into this page. */
+const typeLabel = (key: string): string => props.types.find((type) => type.key === key)?.label ?? key;
 
 /** Aim the picker at the first empty slot, or the current one when all six are taken. */
 function addCard(event: Event): void {
@@ -305,7 +313,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
 <template>
     <SetupLayout :step="5" :visited="props.visited" :saved="props.saved">
         <Head title="Build the six-card deck" />
-        <template #eyebrow>New career</template>
+        <template #eyebrow>New career · Step 5 of 6</template>
         <template #title>Build the six-card deck</template>
 
         <!-- No breadcrumb: "← Back to deck" pointed at this same URL, and its `Link` was never
@@ -313,15 +321,16 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
              The step bar above lists all six steps, so nothing is lost. Steps 1 and 2 carry the same
              note. -->
 
-        <!-- Header: eyebrow + subtitle. The page title is the layout's #title h1. -->
+        <!-- The position is carried by the eyebrow in the title band above, so this block only adds
+             the subject line. -->
         <header class="mb-4">
-            <p class="text-xs font-semibold uppercase tracking-wider text-brand-accent-ink">Step 5 of 6</p>
             <p class="mt-1 text-sm text-ink-muted">A deck is the six cards equipped before the career starts.</p>
         </header>
 
         <p class="max-w-3xl text-sm text-ink-muted">
-            A deck is the six cards equipped before the career starts. Position six is the friend slot, and
-            that role belongs to the position: any card may sit in it.
+            Six slots. Every card earns its place by the training it boosts, the events it brings, or the
+            friendship gauge it starts with. Position six is the friend slot, and that role belongs to the
+            position: any card may sit in it.
         </p>
 
         <div class="mt-3 text-sm text-ink-muted">
@@ -357,6 +366,11 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                     the client draws it apart from the five owned positions.
                 </p>
 
+                <!--
+                  DOMAIN OVERRIDE (DM-8): the sixth slot is a borrowed guest, and the HFW does not draw it
+                  distinct. The client separates a rented friend card from the five owned positions, so the
+                  slot states its ownership rather than leaving the Trainer to infer it from the card name.
+                -->
                 <ul class="mt-3 grid list-none grid-cols-1 gap-4 min-[761px]:grid-cols-2">
                     <SupportSlot
                         v-for="slot in props.slots"
@@ -384,6 +398,16 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                         Add a card
                     </button>
                 </div>
+
+                <!-- The deck screen's own multiplier rule, stated where the six slots it describes
+                     are: HFW carries it inside this card, under the add action. The arithmetic is
+                     shown as multiplication, because "+55%" teaches a model the client does not use
+                     and the wrong model costs a run. -->
+                <p class="note mt-3 text-sm text-ink-muted">
+                    <b>Two rainbow cards on one tile is the largest multiplier in a turn.</b> Bonuses
+                    multiply rather than add, so a +25% and a +30% card give 1.25 × 1.30 = <b>1.625</b>,
+                    not +55% (UMAMUSUME_REFERENCE.md §1.1.3).
+                </p>
 
                 <CardPicker
                     ref="picker"
@@ -498,41 +522,45 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                         </thead>
                         <tbody class="divide-y divide-rule">
                             <tr>
-                                <td class="py-2 align-top">Speed · Stamina · Power · Guts · Wit</td>
+                                <td class="py-2 align-top">
+                                    <span
+                                        v-for="(type, index) in statTypes"
+                                        :key="type.key"
+                                        class="inline-flex"
+                                        :class="index > 0 ? 'ml-2' : ''"
+                                    >
+                                        <SupportTypeMark :type="type.key" :label="type.label" />
+                                    </span>
+                                </td>
                                 <td class="py-2 align-top text-ink-muted">Boosts its own training tile; carries the friendship kit.</td>
                             </tr>
                             <tr>
                                 <td class="py-2 align-top">
-                                    <SupportTypeMark type="friend" label="Pal" />
+                                    <SupportTypeMark type="friend" :label="typeLabel('friend')" />
                                 </td>
                                 <td class="py-2 align-top text-ink-muted">No friendship bonus. Earns its slot on event chains: energy return, mood, failure protection.</td>
                             </tr>
                             <tr>
                                 <td class="py-2 align-top">
-                                    <SupportTypeMark type="group" label="Group" />
+                                    <SupportTypeMark type="group" :label="typeLabel('group')" />
                                 </td>
-                                <td class="py-2 align-top text-ink-muted">SSR only. Full friendship kit plus Wit friendship recovery; several trainees behind one card.</td>
+                                <td class="py-2 align-top text-ink-muted">SSR only. Full friendship kit plus a friendship recovery; several trainees behind one card.</td>
                             </tr>
                         </tbody>
                     </table>
 
                     <p class="mt-3 text-xs text-ink-muted">
-                        Seven types in total, and Group is a type rather than a flag on another one. Global
-                        holds 115 SSR cards against JP's 312, so the two catalogues are not interchangeable.
+                        Seven types in total, and {{ typeLabel('group') }} is a type rather than a flag on another one.
+                        Global holds 115 SSR cards against JP's 312, so the two catalogues are not interchangeable.
                     </p>
                 </section>
             </div>
         </div>
 
-        <!-- The deck screen's own rule statements: the multiplier and the duplicate rule. The
-             arithmetic is shown as multiplication, because "+55%" teaches a model the client does
-             not use and the wrong model costs a run. -->
+        <!-- The deck screen's own rule statements: the multiplier lives inside the deck card,
+             beside the slots it describes. The duplicate rule stays here because it governs the
+             picker, not the slots. -->
         <p class="note mt-4 text-sm text-ink-muted">
-            <b>Two rainbow cards on one tile is the largest multiplier in a turn.</b> Bonuses multiply
-            rather than add, so a +25% and a +30% card give 1.25 × 1.30 = <b>1.625</b>, not +55%
-            (UMAMUSUME_REFERENCE.md §1.1.3).
-        </p>
-        <p class="note mt-2 text-sm text-ink-muted">
             <b>Two identical cards cannot sit in one deck.</b> The client spends a duplicate on a limit
             break instead, and the picker does not offer a card the deck already holds.
         </p>
