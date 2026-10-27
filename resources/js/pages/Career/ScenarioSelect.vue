@@ -18,7 +18,6 @@
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
-import SubCell from '../../components/SubCell.vue';
 import { BaseButton, LinkButton } from '../../components/Form';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref } from 'vue';
@@ -136,25 +135,6 @@ function continueStep(): void {
     router.visit('/career/setup/trainee');
 }
 
-const optimizesText = (card: ScenarioCard): string | null => {
-    if (card.optimizes.kind === 'unknown' || card.optimizes.stats.length === 0) {
-        return null;
-    }
-
-    const stats = card.optimizes.stats.join(', ');
-
-    // A tie is said as a tie. Naming one "primary" among five equal bonuses would be a preference
-    // this matrix does not express.
-    return card.optimizes.kind === 'uniform'
-        ? `No single stat: +${card.optimizes.bonus} on all five`
-        : `${stats} (+${card.optimizes.bonus})`;
-};
-
-// The Rule family row's provenance, as its `title`. The word is this repository's own taxonomy for
-// how the scenario advances its facility level, read from the entry's `facility_level_source`; the
-// 2026-10-15 artifact's report resolves the field against that config fact and states that no
-// publisher uses the term, so the citation is the repository's, not a publisher's.
-const ruleFamilyTitle = 'How this scenario advances its training facility level, read from the entry\'s own rule field; the repository\'s own taxonomy, which no publisher uses.';
 </script>
 
 <template>
@@ -301,12 +281,6 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                         class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink-muted"
                     >{{ system }}</span>
                     <span
-                        v-for="resource in card.resources"
-                        :key="`resource-${resource}`"
-                        data-region="tag"
-                        class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink-muted"
-                    >{{ resource }}</span>
-                    <span
                         v-if="card.performance_input"
                         data-region="tag"
                         class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink-muted"
@@ -318,88 +292,9 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                     >{{ card.caps_label }}</span>
                 </div>
 
-                <details class="mt-3 rounded-md border border-rule bg-raised p-3">
-                    <summary class="flex min-h-11 cursor-pointer items-center text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                        Facts and mechanics
-                    </summary>
-
-                    <div class="mt-3 space-y-2 text-sm" aria-label="Facts and mechanics">
-                        <SubCell label="Optimizes" :value="optimizesText(card) ?? 'N/A'" :title="optimizesText(card) ? undefined : 'This scenario publishes no stat cap bonus.'" />
-                        <SubCell label="Systems" :value="card.systems.length > 0 ? card.systems.join(', ') : 'N/A'" :title="card.systems.length > 0 ? undefined : 'Every panel in the matrix is off for this scenario.'" />
-                        <SubCell label="Tracked resources" :value="card.resources.length > 0 ? card.resources.join(', ') : 'None beyond the generic strip'" :title="card.resources.length > 0 ? undefined : 'It composes only the widgets every scenario carries.'" />
-                        <SubCell label="Turn loop" :value="card.loop.length > 0 ? card.loop.join(' → ') : 'N/A'" :title="card.loop.length > 0 ? undefined : 'No turn loop steps are recorded for this scenario.'" />
-                        <SubCell label="Live on Global" :value="card.live_on_global ?? 'N/A'" :title="card.live_on_global ? undefined : 'No Global availability date is recorded for this scenario.'" />
-                        <SubCell label="Scenario ruleset date" :value="card.ruleset_date?.value ?? 'N/A'" :title="card.ruleset_date?.title ?? 'No source in this repository dates this scenario\'s ruleset.'" />
-                        <!-- The citation is a visible provenance line: SubCell retired the `title`
-                             channel for a present value (2026-10-17 amendment), so a sourced figure
-                             states its source in text rather than a tooltip. -->
-                        <p
-                            v-if="card.ruleset_date !== null"
-                            data-field="ruleset-date-source"
-                            class="text-xs text-ink-muted"
-                        >{{ card.ruleset_date.title }}</p>
-                        <dl class="flex flex-wrap justify-between gap-x-4">
-                            <dt class="text-ink-muted">Ruleset version</dt>
-                            <dd v-if="props.ruleset.value === null" class="text-ink-muted">
-                                <AbsenceValue compact :reason="props.ruleset.title" />
-                            </dd>
-                            <dd v-else class="font-mono text-ink" :title="props.ruleset.title">
-                                {{ props.ruleset.value }}
-                            </dd>
-                        </dl>
-                        <SubCell data-field="description" label="Description" :value="card.description ?? 'N/A'" :title="card.description ? undefined : `No sourced description line exists for the ${card.label} guide in this repository.`" />
-                        <SubCell data-field="recommended_use" label="Recommended use" :value="card.recommended_use ?? 'N/A'" :title="card.recommended_use ? (card.metadata?.recommended_use_source ?? undefined) : (card.metadata?.recommended_use_reason ?? 'The scenario guides state no recommended use, and choosing one would be a judgement this tool holds no source for.')" />
-                        <p
-                            v-if="card.metadata?.recommended_use_source"
-                            data-field="recommended-use-source"
-                            class="text-xs text-ink-muted"
-                        >{{ card.metadata.recommended_use_source }}</p>
-                    </div>
-
-                    <!-- Not "Ruleset version": the fact grid above carries three ruleset-worded facts,
-                         each on its own row — the tool-wide ruleset *version*, which no source names;
-                         the scenario's own ruleset *date*, its launch or rework; and this row, the
-                         scenario's rule *family*, read from the matrix's `facility_level_source`. One
-                         label for two facts read as a card contradicting itself, which is exactly what
-                         the second audit reported (R2-05). -->
-                    <div v-if="card.metadata !== null" class="mt-3 rounded-md border border-rule bg-panel p-3 text-sm">
-                        <dl class="space-y-1">
-                            <div data-field="rule-family" class="flex flex-wrap justify-between gap-x-4">
-                                <dt class="text-ink-muted">Rule family</dt>
-                                <dd class="text-ink" :title="card.rule_family !== null ? ruleFamilyTitle : undefined">{{ card.rule_family ?? 'Not recorded' }}</dd>
-                            </div>
-                            <div class="flex flex-wrap justify-between gap-x-4">
-                                <dt class="text-ink-muted">Planning focus</dt>
-                                <dd
-                                    v-if="card.metadata.planning_focus !== null"
-                                    class="text-ink"
-                                    :title="card.metadata.planning_focus_source ?? undefined"
-                                >{{ card.metadata.planning_focus }}</dd>
-                                <dd v-else>
-                                    <AbsenceValue compact :reason="card.metadata.planning_focus_reason ?? 'No planning focus is recorded for this scenario in this repository.'" />
-                                </dd>
-                            </div>
-                        </dl>
-                        <details v-if="card.metadata.key_mechanics.length > 0" class="mt-2">
-                            <summary class="flex min-h-11 cursor-pointer items-center text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                                Key mechanics ({{ card.metadata.key_mechanics.length }})
-                            </summary>
-                            <ul class="mt-1 list-disc pl-5 text-sm text-ink">
-                                <li v-for="(line, index) in card.metadata.key_mechanics" :key="index">{{ line }}</li>
-                            </ul>
-                        </details>
-                    </div>
-                </details>
                 </div>
             </div>
         </fieldset>
-
-        <p class="mt-4 text-sm">
-            <Link
-                href="/database/scenarios"
-                class="inline-flex min-h-11 items-center font-medium text-ink underline"
-            >Compare scenarios</Link>
-        </p>
 
         <p class="note mt-2">
             The panel tags are the composition matrix, not a marketing list: a scenario that leaves a

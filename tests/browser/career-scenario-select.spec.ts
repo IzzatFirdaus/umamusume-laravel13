@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { assertStructurallyEqual, capture } from './fixtures/hfw-structure';
+import { captureBoth } from './fixtures/wizard-screenshots';
 
 /*
  * Rendered-copy, state and accessibility evidence for SCREEN-002, Scenario Selection
@@ -32,30 +33,6 @@ function card(page: import('@playwright/test').Page, label: string) {
     return page.locator('[data-scenario-card]').filter({ has: page.getByRole('heading', { name: label, exact: true }) });
 }
 
-/**
- * Opens the card's one facts disclosure and returns it.
- *
- * The option-card grammar (Hick's Law, ux-laws §3.2 row 4) keeps the eight-row fact grid and the
- * matrix's metadata behind a card-level collapse, so every assertion that reads a fact opens it first.
- * The filter survives the two nested `<details>` inside it (the ruleset absence and the key-mechanics
- * collapse) because neither contains the summary's own words, and the count guard is what turns a
- * structural mistake into a loud failure instead of a strict-mode collision.
- */
-async function openFacts(page: import('@playwright/test').Page, label: string) {
-    const facts = card(page, label).locator('details').filter({ hasText: 'Facts and mechanics' });
-
-    await expect(facts, `${label} renders exactly one facts disclosure`).toHaveCount(1);
-
-    // The summary is addressed by its own words, not by `locator('summary')`: the open disclosure
-    // holds every nested summary on the card (the absences, the key mechanics), and a descendant
-    // query resolves to all of them at once.
-    if (!(await facts.evaluate((el) => (el as HTMLDetailsElement).open))) {
-        await facts.locator('summary').filter({ hasText: 'Facts and mechanics' }).click();
-    }
-
-    return facts;
-}
-
 test.describe('Scenario Selection', () => {
     test('renders one card per scenario the matrix composes', async ({ page }) => {
         await page.goto('/career/setup/scenario');
@@ -78,108 +55,45 @@ test.describe('Scenario Selection', () => {
         await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByText('not built')).toHaveCount(0);
     });
 
-    test('shows Our Grand Concert as baseline-only, read off the matrix', async ({ page }) => {
+/*
+     * What the card face states, read off the matrix.
+     *
+     * This case used to open a "Facts and mechanics" disclosure on each card and assert eleven rows
+     * inside it. The wireframe's card is name, baseline pill, release date, one sentence and three tags
+     * (career-scenario.html:89-170), and that block was removed from the page, so the case now asserts
+     * the same matrix facts where the wireframe puts them: on the face. The caps are matched with a
+     * tolerant separator because the controller joins the parts with a middle dot.
+     */
+    test('states each scenario on the card face the way the matrix composes it', async ({ page }) => {
         await page.goto('/career/setup/scenario');
         await page.locator('#app > *').first().waitFor();
 
-        // The option-card grammar: every card carries its facts collapsed, so the choice reads as a
-        // name, a subtitle and one action before anything expands.
-        for (const label of CARDS) {
-            await expect(card(page, label).locator('details').filter({ hasText: 'Facts and mechanics' })).not.toHaveAttribute('open');
-        }
+        // The Baseline pill belongs to the matrix's own baseline entry and to no other card.
+        await expect(page.getByText('Baseline', { exact: true })).toHaveCount(1);
+        await expect(card(page, 'URA Finale').getByText('Baseline', { exact: true })).toBeVisible();
 
-        // The scenario composes no panel beyond the baseline, so its resource list is empty and its
-        // systems list is the one entry the goals flag names (8668d9d). Both read off the matrix.
-        await openFacts(page, 'Our Grand Concert');
-        await openFacts(page, 'URA Finale');
+        // The caps print as the matrix states them: the shared value with its count, the outlier named
+        // rather than collapsed to one number.
+        //
+        // Two deliberate departures from the wireframe's own tag text, both on Trackblazer. The mock
+        // abbreviates the stat ("Caps Sta 1900 · Wit 1500") where the page spells it ("Stamina 1900"),
+        // and it omits the shared part ("1200 ×3") that every other card on the same page prints,
+        // including URA's "1400 ×5". The page is consistent across all four cards and reads from
+        // `ScenarioCaps`; the mock is the outlier here, so the assertion follows the page and the
+        // divergence is recorded rather than silently matched.
+        await expect(card(page, 'URA Finale')).toContainText(/1400\s*×5/);
+        await expect(card(page, 'Unity Cup')).toContainText(/1300\s*×4/);
+        await expect(card(page, 'Unity Cup')).toContainText(/Wit\s*1800/);
+        await expect(card(page, 'Trackblazer')).toContainText(/1200\s*×3/);
+        await expect(card(page, 'Trackblazer')).toContainText(/Stamina\s*1900/);
+        await expect(card(page, 'Trackblazer')).toContainText(/Wit\s*1500/);
+        await expect(card(page, 'Our Grand Concert')).toContainText(/Speed\s*1600/);
+        await expect(card(page, 'Our Grand Concert')).toContainText(/Guts\s*1500/);
 
-        // The career-goals flag turned on for the scenario too (8668d9d), so the Systems row names it
-        // instead of the baseline absence it printed while the flag was off. Scoped to the facts
-        // disclosure: the card face also carries the composition tags, so an unscoped text match
-        // resolves to two elements. The resource half of the baseline statement still holds: no
-        // widget beyond the baseline three composes a resource.
-        const grandConcertFacts = card(page, 'Our Grand Concert').locator('details').filter({ hasText: 'Facts and mechanics' });
-        await expect(grandConcertFacts.getByText('Career goals', { exact: true })).toBeVisible();
-        await expect(card(page, 'Our Grand Concert').getByText('None beyond the generic strip')).toBeVisible();
-
-        // Caps are sourced even where mechanics are not, so the card still states what it optimizes.
-        await expect(card(page, 'Our Grand Concert').getByText('Speed (+400)')).toBeVisible();
-
-        // The ruleset version is a named absence on every card, and its reason is one statement in
-        // two media (DESIGN.md §5.6). Scoped to the `dd` that owns the reason: once the facts
-        // disclosure is open, a card-level `details` filter matches the outer collapse too, because
-        // the outer's text now contains the reason.
-        const ruleset = card(page, 'URA Finale').locator('dd').filter({ hasText: /No source defines a Global ruleset version/ }).locator('details');
-        await expect(ruleset).toBeVisible();
-        await expect(ruleset).toContainText('N/A');
-
-        // And the brief's description and recommended use render where a scenario guide sources
-        // them: URA Finale's guide states both, so this card prints them rather than the absence,
-        // and the absence is reserved for a guide that names neither.
-        const use = card(page, 'URA Finale').getByText('Recommended use').locator('..');
-        await expect(use).toContainText('baseline for learning');
-        await expect(use.getByText('N/A')).toHaveCount(0);
-    });
-
-    test('keeps the ruleset version, the scenario ruleset date and the rule family as separately named facts', async ({ page }) => {
-        // R2-05: the Unity Cup card printed two rows headed `Ruleset`, one `N/A` and one `Team`, which
-        // reads as the card contradicting itself. Each fact keeps its own heading and its own value —
-        // and since the 2026-10-15 wiring there are three ruleset-worded rows, each still its own:
-        // the tool-wide version (absent by ruling), the scenario's own ruleset date (sourced), and
-        // the rule family (the matrix's facility_level_source).
-        await page.goto('/career/setup/scenario');
-        await page.locator('#app > *').first().waitFor();
-
-        await openFacts(page, 'Unity Cup');
-
-        const unity = card(page, 'Unity Cup');
-
-        const unityRuleset = unity.locator('dd').filter({ hasText: /No source defines a Global ruleset version/ }).locator('details');
-        await expect(unityRuleset).toBeVisible();
-        await expect(unityRuleset).toContainText('N/A');
-
-        // The scenario's own ruleset date renders its sourced value with a derived launch/rework
-        // word, and the event that dated it rides the `title`; never inside the version row above.
-        const dateRow = unity.getByText('Scenario ruleset date', { exact: true }).locator('..');
-        await expect(dateRow).toContainText('2026-07-01 (rework)');
-        // SubCell retired the `title` channel for a present value (2026-10-17 amendment), so the
-        // citation is a visible provenance line beside the row rather than a tooltip.
-        await expect(unity.locator('[data-field="ruleset-date-source"]')).toContainText(/July 1, 2026 rework raised caps/);
-
-        // The family renders the humanized label, never the snake_case taxonomy key (owner
-        // ruling, 2026-10-16): the row prints the matrix's taxonomy in words, not config.
-        await expect(unity.getByText('Rule family', { exact: true }).locator('..').getByText('Team rank', { exact: true })).toBeVisible();
-
-        // Neither heading is bare `Ruleset` any more, on any card, and no heading repeats. The row
-        // that carries the family prints the family where the matrix records one and the named
-        // absence where it does not, so a scenario entry holding no ruleset still names the gap
-        // rather than dropping the row. Trackblazer's facts open here because the rows inside a
-        // closed disclosure are in the tree but not visible.
-        await openFacts(page, 'Trackblazer');
-        await expect(page.getByText('Ruleset', { exact: true })).toHaveCount(0);
-        await expect(card(page, 'Trackblazer').getByText('Rule family', { exact: true })).toHaveCount(1);
-        await expect(
-            card(page, 'Trackblazer').getByText('Rule family', { exact: true }).locator('..').getByText('Repetition + purchases', { exact: true }),
-        ).toBeVisible();
-
-        // The 2026-10-16 publisher pass recovered Unity Cup's recommended use and Trackblazer's
-        // planning focus, so those rows print the published line and cite the page it came from in
-        // the `title`. The one cell no publisher names, URA Finale's planning focus, still renders
-        // the research's own recorded search, verbatim. The filter there is scoped to the card's
-        // nested `details` only: with the facts disclosure open, the outer one's text contains the
-        // inner reason too, and an unscoped filter would match both.
-        const unityUse = unity.getByText('Recommended use', { exact: true }).locator('..').locator('dd');
-        await expect(unityUse).toContainText('go-to scenario for building strong, competitive aces');
-        await expect(unity.locator('[data-field="recommended-use-source"]')).toContainText(/Game8, Unity Cup Update Guide \(archives\/545572\)/);
-
-        const trackFocus = card(page, 'Trackblazer').getByText('Planning focus', { exact: true }).locator('..').locator('dd');
-        await expect(trackFocus).toContainText('Races and the Pro Shop');
-        await expect(trackFocus).toHaveAttribute('title', /archives\/580723/);
-
-        await openFacts(page, 'URA Finale');
-        await expect(
-            card(page, 'URA Finale').locator('details details').filter({ hasText: 'No repo master names a planning focus for this scenario' }),
-        ).toHaveCount(1);
+        // Our Grand Concert composes the goals panel and carries the turn-rail flag, so its tag row
+        // names both. This is the baseline-only statement the old case read out of the facts grid.
+        await expect(card(page, 'Our Grand Concert').getByText('Career goals', { exact: true })).toBeVisible();
+        await expect(card(page, 'Our Grand Concert').getByText('Performance input', { exact: true })).toBeVisible();
     });
 
     test('states the documentation badge when the matrix records no guide', async ({ page }) => {
@@ -192,31 +106,6 @@ test.describe('Scenario Selection', () => {
         await page.locator('#app > *').first().waitFor();
 
         await expect(page.getByText('PARTIALLY DOCUMENTED')).toHaveCount(0);
-    });
-
-    test('renders the facts grid as a run of `<dl>` cells under a plain container', async ({ page }) => {
-        await page.goto('/career/setup/scenario');
-        await page.locator('#app > *').first().waitFor();
-
-        // A-91 (plan slice 1.4). The grid's cells are `SubCell` roots, and `SubCell` is a `<dl>` by its
-        // own markup, so a `role="list"` over them was a critical `aria-required-children` violation.
-        // This is the third site of that shape; the two the audit named were fixed and this one was
-        // missed because a settled scan never enters a collapsed `<details>`. The role is asserted
-        // absent outright rather than merely not `list`, and the cells as `dl` roots rather than by a
-        // count, so the case cannot be satisfied by a different wrong role or broken by the grid
-        // gaining a row.
-        const grid = (await openFacts(page, 'URA Finale')).locator('[aria-label="Facts and mechanics"]');
-
-        await expect(grid, 'one facts container per card').toHaveCount(1);
-        await expect(grid.locator('> dl[data-stat-tile]')).not.toHaveCount(0);
-        await expect(grid.locator('> li')).toHaveCount(0);
-        // An absent `role` reads `null` on BOTH the attribute and the `HTMLElement.role` property.
-        // Measured, not assumed: a bare `<div>` reports `getAttribute` null and `.role` null, while
-        // `role="list"` reports `"list"` on both. The assertion this replaced
-        // (`toHaveJSProperty('role', '')`) could never pass, which is why this case read
-        // red-as-stale; the property is never the empty string.
-        await expect(grid).not.toHaveAttribute('role');
-        await expect(grid).toHaveJSProperty('role', null);
     });
 
     test('selects a scenario by keyboard and keeps it after a round trip', async ({ page }) => {
@@ -368,31 +257,99 @@ test.describe('Scenario Selection', () => {
     });
 
     /*
-     * The step body, measured against the wireframe rather than read off the source.
+     * The page compared against the page, not the markers against the markers.
      *
-     * `.canvas` is the compared subtree on both sides: the wireframe wraps the stepper, the scenario
-     * grid, the note and the reversibility card in it, and so does `SetupLayout`. `regions: 'subset'`
-     * requires the wireframe's markers in order, which covers the four cards, the card-face order
-     * (name, baseline pill, release tag, paragraph, tag row), the note and the reversibility table;
-     * app-only markers above them (`ChoicesSoFar`, the "Compare scenarios" link) are allowed.
-     *
-     * `grid: true` compares the track count of the first grid in the subtree, which is the scenario
-     * grid: two tracks at 1280 on both sides. The wireframe's own breakpoint is `max-width:820px`
-     * (frontend-v2-wireframes/assets/shell.css:406), which is why the page keeps `min-[821px]:`; the
-     * instruction's "761px" would draw two columns where the wireframe draws one.
+     * The case this replaces asserted only that the wireframe's markers appear somewhere in the app.
+     * That passed while each card still carried a 72-line "Facts and mechanics" disclosure the
+     * wireframe does not have, and it passed again after those 105 lines were deleted: a one-way
+     * subset test cannot see content the reference lacks, and it cannot see size. So this case asks
+     * both directions — what must appear, what must not, and how big a card is allowed to be — and
+     * keeps the marker comparison only for the skeleton and the grid shape.
      */
-    test('renders the four scenario cards in a two-column grid, HFW structure', async ({ page }) => {
+    test('renders the HFW scenario page and nothing the wireframe does not have', async ({ page }) => {
         const hfw = pathToFileURL(
             resolve(process.cwd(), 'docs/design-research/frontend-v2-wireframes/career-scenario.html'),
         ).href;
 
         await page.goto('/career/setup/scenario');
         await page.locator('#app > *').first().waitFor();
+        expect(page.url()).toContain('/career/setup/scenario');
+
+        // What the wireframe shows, the page shows.
+        for (const name of CARDS) {
+            await expect(card(page, name)).toBeVisible();
+        }
+
+        await expect(page.getByText('Baseline', { exact: true })).toHaveCount(1);
+        await expect(page.getByText('Global · 2025-06-26')).toHaveCount(1);
+        await expect(page.getByRole('columnheader', { name: 'Reversible?' })).toBeVisible();
+
+        // Heading order is the page's section order: four cards, then the reversibility card.
+        const headings = await page.locator('main h2').evaluateAll((els) => els.map((el) => (el.textContent ?? '').trim()));
+        expect(headings).toEqual([...CARDS, 'What changes after this step']);
+
+        /*
+         * What the wireframe does not show, the page does not show. Each of these rendered here before
+         * the parity pass: a 72-line "Facts and mechanics" disclosure per card, and a "Compare
+         * scenarios" link. They are scenario facts the repository still holds — they belong on
+         * Database / Scenarios, not on the step that asks one question.
+         */
+        for (const absent of [
+            'Facts and mechanics',
+            'Annotation key',
+            'Compare scenarios',
+            'Optimizes',
+            'Tracked resources',
+            'Turn loop',
+            'Ruleset version',
+            'Scenario ruleset date',
+            'Recommended use',
+            'Rule family',
+            'Planning focus',
+            'Key mechanics',
+        ]) {
+            await expect(page.getByText(absent), `the page must not render "${absent}"`).toHaveCount(0);
+        }
+
+        // Wireframe-only artifacts are not ported at all (the instruction's exclusion list).
+        await expect(page.locator('.keybox, .proto, .wfnav, .mockbar, .anno')).toHaveCount(0);
+
+        /*
+         * Card scale. The wireframe's card is 11-12 descendants and roughly 400 characters of prose;
+         * the app's was 54-68 and 1419-2216 before this pass. A marker test cannot see this at all —
+         * the extra rows carried no markers — so the size is asserted directly.
+         */
+        const sizes = await page.locator('[data-scenario-card]').evaluateAll((els) => els.map((el) => ({
+            descendants: el.querySelectorAll('*').length,
+            chars: (el.textContent ?? '').trim().length,
+            details: el.querySelectorAll('details').length,
+        })));
+
+        expect(sizes).toHaveLength(4);
+
+        for (const size of sizes) {
+            expect(size.details, 'the card carries no disclosure').toBe(0);
+            expect(size.descendants, `card holds ${size.descendants} descendants`).toBeLessThan(25);
+            expect(size.chars, `card holds ${size.chars} characters`).toBeLessThan(900);
+        }
+
         const app = await capture(page, '.canvas', { slug: 'scenario', side: 'app' });
 
         await page.goto(hfw);
         const wireframe = await capture(page, '.canvas', { slug: 'scenario', side: 'hfw' });
 
+        /*
+         * Still `subset`, deliberately, and the reason is a finding rather than an oversight: the page
+         * prints one tag per panel `config/scenarios.php` switches on, and the matrix has three on for
+         * Unity Cup and four for Trackblazer where the wireframe's mock lists two each. Matching the
+         * wireframe exactly would mean suppressing real composition facts to hit a marker count, which
+         * makes the page state less than the tool knows. The excess that was genuinely wrong (the fact
+         * grid, the link, the card size) is asserted above instead.
+         */
         assertStructurallyEqual(app, wireframe, { regions: 'subset', grid: true });
+
+        if (process.env.WIZARD_SCREENSHOTS === '1') {
+            await captureBoth(page, 'scenario');
+        }
     });
 });
