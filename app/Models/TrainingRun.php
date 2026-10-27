@@ -342,6 +342,35 @@ class TrainingRun extends Model
         return $this->hasMany(DeckSlot::class)->orderBy('slot_position');
     }
 
+    /**
+     * The idle-mode overlay for this run, when it was started as Independent Training
+     * (`UMAMUSUME_REFERENCE.md` §1.1.7). One per run: the mode is a fixed 50-minute window, and a
+     * second session cannot start while one is in progress.
+     *
+     * @return HasOne<IndependentTrainingRun, $this>
+     */
+    public function independentTrainingRun(): HasOne
+    {
+        return $this->hasOne(IndependentTrainingRun::class);
+    }
+
+    /**
+     * Whether this run is an Independent Training session rather than a normal career.
+     */
+    public function isIndependent(): bool
+    {
+        return $this->independentTrainingRun !== null;
+    }
+
+    /**
+     * Whether this run's idle window is open and neither ending has been written. The scheduler that
+     * completes expired sessions (`CompleteIndependentTraining`) flips this to false.
+     */
+    public function isInProgress(): bool
+    {
+        return $this->independentTrainingRun?->isInProgress() ?? false;
+    }
+
     public function setSkillStatus(Skill $skill, SkillAcquisition $status, ?int $turnAcquired = null): void
     {
         $this->skills()->syncWithoutDetaching([
@@ -540,10 +569,7 @@ class TrainingRun extends Model
 
         $fans = $this->stripValues()['fans'];
 
-        $hasWon = $this->raceEntries()
-            ->where('status', RaceEntryStatus::Completed)
-            ->where('placement', 1)
-            ->exists();
+        $maidenCleared = $this->hasClearedMaidenLock();
 
         foreach ($catalog as $slot) {
             $index = ($slot->month ?? 0) - 1;
@@ -556,11 +582,10 @@ class TrainingRun extends Model
             $cells[$index]['halves'][$slot->half === 'Late' ? 'Late' : 'Early']['slots'][] = $this->calendarCell(
                 $slot->title,
                 $slot->fans_needed,
-                $slot->hasMaidenGate(),
+                $this->maidenGates($slot, $maidenCleared),
                 $racedCatalog->get($slot->id),
                 $fans,
                 false,
-                $hasWon,
             );
         }
 
@@ -578,7 +603,6 @@ class TrainingRun extends Model
                 $racedFree->get($slot->id),
                 $fans,
                 true,
-                $hasWon,
             );
         }
 
@@ -787,7 +811,6 @@ class TrainingRun extends Model
         ?RaceEntry $entry,
         ?int $fans,
         bool $manual,
-        bool $hasWon,
     ): array {
         if ($entry !== null) {
             // The marker survives the finish. `free_race` is a tool concept, not a
@@ -807,7 +830,7 @@ class TrainingRun extends Model
             return ['state' => 'open', 'label' => $title, 'manual' => true];
         }
 
-        if ($maidenGated && ! $hasWon) {
+        if ($maidenGated) {
             // No fan figure travels with this lock: the maiden gate clears on an
             // event, so a number here would send the Trainer off to grind toward
             // a target that decides nothing.
@@ -819,6 +842,51 @@ class TrainingRun extends Model
         }
 
         return ['state' => 'open', 'label' => $title];
+    }
+
+    /**
+     * Whether this run has cleared the maiden lock, as one run-level state.
+     *
+     * `UMAMUSUME_REFERENCE.md` §1.2.6: the lock is a run-level fact — "has this run won Debut or any
+     * Maiden race?" — applied to every standard race, not a flag the export sets per race. Debut is
+     * grade 900 and Maiden grade 800 (`GametoraRaceCatalogParser::TIER_BY_GRADE`), so a completed
+     * first-place finish against either clears it for the rest of the run.
+     */
+    public function hasClearedMaidenLock(): bool
+    {
+        // The race surfaces eager-load `raceEntries.raceCatalogSlot`, so when the relation is already
+        // loaded the answer is computed in memory and adds no second calendar read (the planner's
+        // read-count test pins the calendar to one read). Without the eager load, fall back to a join.
+        if ($this->relationLoaded('raceEntries')) {
+            return $this->raceEntries->contains(
+                static fn (RaceEntry $entry): bool => $entry->status === RaceEntryStatus::Completed
+                    && $entry->placement === 1
+                    && in_array($entry->raceCatalogSlot?->grade_code, [800, 900], true),
+            );
+        }
+
+        return $this->raceEntries()
+            ->where('status', RaceEntryStatus::Completed->value)
+            ->where('placement', 1)
+            ->whereHas('raceCatalogSlot', fn ($query) => $query->whereIn('grade_code', [800, 900]))
+            ->exists();
+    }
+
+    /**
+     * Whether the maiden lock still gates a calendar race for this run.
+     *
+     * Standard races (grade 100 to 700) are the ones the lock gates; Debut and Maiden themselves are
+     * the gate-clearers, and a row with no standard grade has no maiden gate to carry. The cleared
+     * state is passed in rather than queried here, so a calendar loop asks `hasClearedMaidenLock()`
+     * once instead of once per row (the N+1 the planner's read-count test pins).
+     */
+    public function maidenGates(RaceCatalogSlot $slot, bool $maidenCleared): bool
+    {
+        if (! in_array($slot->grade_code, [100, 200, 300, 400, 700], true)) {
+            return false;
+        }
+
+        return ! $maidenCleared;
     }
 
     /**
