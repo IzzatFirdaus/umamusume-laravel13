@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\RaceCatalogSlot;
-use App\Models\Skill;
-use App\Models\SupportCard;
 use App\Models\Umamusume;
 use App\Services\PageSize;
 use Illuminate\Http\Request;
