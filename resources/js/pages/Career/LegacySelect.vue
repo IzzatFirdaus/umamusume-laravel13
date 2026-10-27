@@ -1,58 +1,51 @@
 <script setup lang="ts">
 /*
- * The career setup wizard's ancestry step, `SCR-CAR-008` (PRD FR-G-1, `ADR-0020` §1 and §3, under
+ * The career setup wizard's legacy step, `SCR-CAR-008` (PRD FR-G-1, `ADR-0020` §1 and §3, under
  * `ADR-0010`). Step 4 of six.
  *
  * **Record only.** This page stores what the Trainer read off the client and computes nothing: no
  * inheritance outcome, no expected stat, no Affinity payout, no Spark roll chance, no score, no ranking,
- * no recommended combination (`ADR-0020` §3, PRD FR-G-4). The chance a Spark rolls is `N/A` with the reason
- * in its `title`, and the grade for the pair is a letter that was read, never a value. The sentence the
- * Legacy Lab carries as its banner arrives here as the `notice` prop from its one owner.
+ * no recommended combination (`ADR-0020` §3, PRD FR-G-4). The sentence the Legacy Lab carries as its
+ * banner arrives here as the `notice` prop from its one owner.
  *
- * **Six nodes, one shape.** The graph is `AncestryGraph::build()` — the same call the run-scoped builder
- * and the compare surface make — so a node means the same thing on this step as it does on a career. The
- * nodes are a nested list rather than a drawn tree, because a tree drawn as a picture is unreadable to a
- * screen reader and unreachable by keyboard, and the ancestry assignment is a labelled `<select>` with no
- * dragging path at all (WCAG 2.2 SC 2.5.7).
+ * **Two slots, not a graph (Phase D).** The wireframe (`career-legacy.html:87-120`) draws two parent
+ * cards — `Parent A` and `Parent B`, each carrying a `Chosen` / `Not chosen` pill, the recorded name,
+ * the veteran's scenario and save date, and the sparks the draft already holds. The six-node graph the
+ * step used to draw moved to where it is read: `InheritanceEvent.vue:442-450` renders the ancestry on
+ * the run, which is the one surface that can name every node from a persisted payload.
  *
- * **Why the pick control now works.** `AncestryNode` emitted nothing from its `<select>` until this step
- * landed: a native select fires `change`, not `update:model-value`, so the listener every assignable surface
- * carries never ran and a chosen parent was dropped on submit. The node emits on `change` and takes its
- * current value as a prop, which is also what lets a saved step read the pick back off the draft.
+ * **The pick stays a control, not a link.** The wireframe's empty card links out to a library browse
+ * page (`Choose a veteran`), but the library is run-scoped and cannot write the session draft, so the
+ * pick control is the slot's own `<select>` carrying that label, and `Inspect` opens the chosen
+ * veteran's run record in the Legacy Lab. `Leave empty` clears the slot: the note beside it names an
+ * empty slot a legitimate build, not an error.
+ *
+ * **Projection is a named absence.** The wireframe's Projected start table prints `cap + 16 per ★3`
+ * arithmetic per parent. `ADR-0020` §3 forbids computing an inheritance outcome, so the projected
+ * column states the named absence and the note says why; the recorded Blue spark against a stat is
+ * what the two parent columns print.
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
-import AncestryNode from '../../components/legacy/AncestryNode.vue';
-import { BaseInput, BaseSelect, BaseCheckbox } from '../../components/Form';
+import { BaseSelect } from '../../components/Form';
 import { Head, useForm } from '@inertiajs/vue3';
 import { nextTick } from 'vue';
 
-interface SparkRow {
-    kind: string;
-    kind_label: string;
-    target: string | null;
-    stars: number | null;
-}
-
-interface ParentNode {
-    slot: string;
-    label: string;
-    name: string | null;
-    rank: number | null;
-    rank_letter: string | null;
-    rank_label: string;
-    is_guest: boolean;
-    ancestors: { slot: string; name: string | null; rank: number | null; rank_letter: string | null; sparks: SparkRow[]; sparks_label: string }[];
-    sparks: SparkRow[];
-    spark_counts: { kind: string; kind_label: string; count: number }[];
-    probability: { value: null; title: string };
-}
-
 interface SparkDraft {
     kind: string;
-    category: string;
     target: string;
     stars: string | number;
+}
+
+interface ParentCard {
+    veteranId: number;
+    runId: number;
+    name: string;
+    japanese: string | null;
+    scenario: string | null;
+    stars: number | null;
+    savedAt: string | null;
+    sparks: { family: string; stat: string | null; stars: number | null }[];
 }
 
 const props = defineProps<{
@@ -65,78 +58,89 @@ const props = defineProps<{
     hasSelection: boolean;
     /** The grade the draft holds for the pair, or null before one was read. */
     affinity: string | null;
-    graph: { trainee: { name: string | null }; parents: ParentNode[] };
+    /** The two slots' recorded payload, exactly as `legacy_selection` holds it, so a saved step reads back. */
+    payload: {
+        affinity: string | null;
+        legacies: {
+            legacy_id: number | null;
+            rank: number | null;
+            rank_letter: string | null;
+            is_guest: boolean;
+            ancestors: (string | null)[];
+            ancestors_rank_letters: (string | null)[];
+            ancestors_rank: (number | null)[];
+            ancestors_sparks: { kind: string; target: string | null; stars: number | null }[][];
+            sparks: { kind: string; target: string | null; stars: number | null }[];
+        }[];
+    } | null;
+    /** The two parent cards, resolved through the library picks; null while a slot is empty. */
+    parentA: ParentCard | null;
+    parentB: ParentCard | null;
+    /** The draft scenario's published ceilings per stat, for the projected-start table's read-out. */
+    scenarioCaps: Record<string, number>;
+    /** The stat matrix order the table prints, from `config('scenarios.stat_order')`. */
+    statOrder: string[];
+    /** The library ids the pick controls select, so a saved step reads back what was chosen rather
+     *  than what the client still holds. Position in the list is the slot: 0 is Parent A. */
     parents: (number | null)[];
     roster: { id: number; name: string; costume: string | null; label: string }[];
     rosterTotal: number;
-    knownNames: string[];
-    sparkKinds: Record<string, string>;
     affinityGrades: string[];
-    rankLetters: string[];
-    sparkTargets: { Stat: string[]; Aptitude: string[]; Skill: string[] };
     notice: string;
     /** `route('career.legacy.store')`, supplied by the server so the page never hard-codes the URL. */
     action: string;
 }>();
 
 /**
- * The three target categories, and the one inference the read-back needs: the payload stores only the
- * target string, so a stored Spark's category is recovered from which list holds it.
- */
-const SPARK_CATEGORIES = ['Stat', 'Aptitude', 'Skill'];
-
-function inferCategory(target: string): string {
-    if (target === '') {
-        return 'Stat';
-    }
-
-    if (props.sparkTargets.Stat.includes(target)) {
-        return 'Stat';
-    }
-
-    if (props.sparkTargets.Aptitude.includes(target)) {
-        return 'Aptitude';
-    }
-
-    return 'Skill';
-}
-
-/**
- * The form is seeded from the draft, not left blank: a step the Trainer returns to shows what they entered.
- * Every nullable figure stays nullable on the way in and posts as an empty field on the way out, because a
- * half-read screen is a real state the payload exists to hold (`ADR-0010` Consequences §3) and a zero would
- * be a claim.
+ * The form is seeded from the draft, not left blank: a step the Trainer returns to shows what they
+ * entered. Every nullable figure stays nullable on the way in and posts as an empty field on the way
+ * out, because a half-read screen is a real state the payload exists to hold (`ADR-0010` Consequences
+ * §3) and a zero would be a claim.
+ *
+ * The ancestor and spark rows are not edited on this step any more — the run-scoped Legacy Lab is
+ * where a recorded node is built — but a stored payload is read back whole on save, so re-saving a
+ * pick never erases the record behind it.
  */
 const form = useForm({
     affinity: props.affinity ?? '',
-    legacies: props.graph.parents.map((parent, index) => ({
+    legacies: (props.payload?.legacies ?? []).map((legacy, index) => ({
         legacy_id: String(props.parents[index] ?? ''),
-        rank: parent.rank === null ? '' : String(parent.rank),
-        rank_letter: parent.rank_letter ?? '',
-        is_guest: parent.is_guest,
-        ancestors: [parent.ancestors[0]?.name ?? '', parent.ancestors[1]?.name ?? ''] as [string, string],
-        // The grandparents' own ranks, seeded the way a parent's are: a recorded letter reads back, a
-        // blank one posts as the absence rather than as a zero (R3-09).
-        ancestors_rank_letters: parent.ancestors.map((ancestor) => ancestor.rank_letter ?? ''),
-        ancestors_rank: parent.ancestors.map((ancestor) =>
-            ancestor.rank === null || ancestor.rank === undefined ? '' : String(ancestor.rank),
+        rank: legacy.rank === null ? '' : String(legacy.rank),
+        rank_letter: legacy.rank_letter ?? '',
+        is_guest: legacy.is_guest,
+        ancestors: [(legacy.ancestors[0] ?? '') as string, (legacy.ancestors[1] ?? '') as string] as [string, string],
+        ancestors_rank_letters: (legacy.ancestors_rank_letters ?? []).map((letter) => letter ?? ''),
+        ancestors_rank: (legacy.ancestors_rank ?? []).map((rank) => (rank === null ? '' : String(rank))),
+        ancestors_sparks: (legacy.ancestors_sparks ?? []).map((list) =>
+            list.map((spark) => ({
+                kind: spark.kind,
+                target: spark.target ?? '',
+                stars: spark.stars === null ? '' : spark.stars,
+            })),
         ),
-        // Each grandparent's own Sparks, seeded the way a parent's are: a stored row reads back, a
-        // blank one is a draft the write discards.
-        ancestors_sparks: parent.ancestors.map((ancestor) => ancestor.sparks.map((spark) => ({
+        sparks: (legacy.sparks ?? []).map((spark) => ({
             kind: spark.kind,
-            category: inferCategory(spark.target ?? ''),
-            target: spark.target ?? '',
-            stars: spark.stars === null ? '' : spark.stars,
-        }))),
-        sparks: parent.sparks.map((spark) => ({
-            kind: spark.kind,
-            category: inferCategory(spark.target ?? ''),
             target: spark.target ?? '',
             stars: spark.stars === null ? '' : spark.stars,
         })),
     })),
 });
+
+// A draft that never wrote a selection has no legs array; the two slots still exist on the form so the
+// first pick is a full payload row, not a half of one.
+while (form.legacies.length < 2) {
+    form.legacies.push({
+        legacy_id: '',
+        rank: '',
+        rank_letter: '',
+        is_guest: false,
+        ancestors: ['', ''],
+        ancestors_rank_letters: [],
+        ancestors_rank: [],
+        ancestors_sparks: [],
+        sparks: [],
+    });
+}
 
 const saving = (): void => {
     form.transform((data) => ({
@@ -152,20 +156,22 @@ const saving = (): void => {
             rank_letter: legacy.rank_letter === '' ? null : legacy.rank_letter,
             ancestors_rank_letters: legacy.ancestors_rank_letters.map((letter: string) => (letter === '' ? null : letter)),
             ancestors_rank: legacy.ancestors_rank.map((rank: string) => (rank === '' ? null : Number(rank))),
-            ancestors_sparks: legacy.ancestors_sparks.map((list) => list
+            ancestors_sparks: legacy.ancestors_sparks.map((list) =>
+                list
+                    .filter((spark) => !isBlankSpark(spark))
+                    .map((spark) => ({
+                        kind: spark.kind,
+                        target: spark.target === '' ? null : spark.target,
+                        stars: spark.stars === '' ? null : Number(spark.stars),
+                    })),
+            ),
+            sparks: legacy.sparks
                 .filter((spark) => !isBlankSpark(spark))
                 .map((spark) => ({
                     kind: spark.kind,
-                    category: spark.category,
                     target: spark.target === '' ? null : spark.target,
                     stars: spark.stars === '' ? null : Number(spark.stars),
-                }))),
-            sparks: legacy.sparks.filter((spark) => !isBlankSpark(spark)).map((spark) => ({
-                kind: spark.kind,
-                category: spark.category,
-                target: spark.target === '' ? null : spark.target,
-                stars: spark.stars === '' ? null : Number(spark.stars),
-            })),
+                })),
         })),
     })).put(props.action, {
         preserveScroll: true,
@@ -182,58 +188,30 @@ const saving = (): void => {
 
 function assignParent(index: number, value: string): void {
     form.legacies[index].legacy_id = value;
-
-    // Choosing a Veteran does not copy her Sparks into the record. The Sparks a node shows are the ones the
-    // Trainer read off the client and typed below, and a library row holds no Spark read-back at all.
-    // Filling them from the roster would be this tool asserting what a parent carries, which is the
-    // computation the slice refuses (`ADR-0020` §3).
 }
 
-function addSpark(index: number): void {
-    form.legacies[index].sparks.push({ kind: 'blue', category: 'Stat', target: '', stars: '' } as SparkDraft);
-}
-
-function removeSpark(index: number, sparkIndex: number): void {
-    form.legacies[index].sparks.splice(sparkIndex, 1);
-}
-
-function addAncestorSpark(index: number, ancestorIndex: number): void {
-    form.legacies[index].ancestors_sparks[ancestorIndex].push({ kind: 'blue', category: 'Stat', target: '', stars: '' } as SparkDraft);
-}
-
-function removeAncestorSpark(index: number, ancestorIndex: number, sparkIndex: number): void {
-    form.legacies[index].ancestors_sparks[ancestorIndex].splice(sparkIndex, 1);
+function clearParent(index: number): void {
+    form.legacies[index].legacy_id = '';
 }
 
 /**
- * A draft row the Trainer added and left blank. The editor appends one on `Add Spark`, and it is not a
- * Spark until it carries a target or a star count: the server discards the same shape
- * (`StoreLegacySelectionRequest::payload()`), and this keeps the chip list and the posted payload honest
- * while it is still a draft.
+ * A draft row the Trainer added and left blank. It is not a Spark until it carries a target or a star
+ * count: the server discards the same shape (`StoreLegacySelectionRequest::payload()`), and this keeps
+ * the posted payload honest while it is still a draft.
  */
 function isBlankSpark(spark: SparkDraft): boolean {
     return spark.target === '' && spark.stars === '';
 }
 
-/**
- * The chips a node shows are the rows in the form, so a Spark reads the same while it is being typed as it
- * does once saved. `kind_label` comes from the server map for a stored Spark and from the kind's own word
- * for one being added now; either way `SparkChip` spells the kind in words beside its star count, so
- * nothing is carried by colour alone (WCAG 1.4.1).
- */
-const nodeSparks = (index: number): SparkRow[] =>
-    form.legacies[index].sparks.filter((spark) => !isBlankSpark(spark)).map((spark) => ({
-        kind: spark.kind,
-        kind_label: props.sparkKinds[spark.kind] ?? spark.kind,
-        target: spark.target === '' ? null : spark.target,
-        stars: spark.stars === '' ? null : Number(spark.stars),
-    }));
-
 const errorFor = (index: number, field = 'legacy_id'): string | undefined =>
     (form.errors as Record<string, string | undefined>)[`legacies.${index}.${field}`];
 
-const ancestorError = (index: number, slot: number): string | undefined =>
-    (form.errors as Record<string, string | undefined>)[`legacies.${index}.ancestors.${slot}`];
+const parents = (): (ParentCard | null)[] => [props.parentA, props.parentB];
+
+const pickOptions = (): { value: string; label: string }[] => [
+    { value: '', label: 'Not chosen' },
+    ...props.roster.map((row) => ({ value: String(row.id), label: row.label })),
+];
 </script>
 
 <template>
@@ -266,21 +244,9 @@ const ancestorError = (index: number, slot: number): string | undefined =>
             </a>
         </template>
 
-        <!-- No breadcrumb: "← Back to legacy" pointed at this same URL, and its `Link` was never
-             imported, so it rendered an empty `<nav aria-label="Breadcrumb">` and a resolve warning.
-             The step bar above lists all six steps, so nothing is lost. Steps 1 and 2 carry the same
-             note. -->
-
-        <!-- The position is carried by the eyebrow in the title band above, so this block only adds
-             the subject line. -->
-        <header class="mb-4">
-            <p class="mt-1 text-sm text-ink-muted">The two parents this career will be bred from.</p>
-        </header>
-
         <p class="max-w-3xl text-sm text-ink-muted">
-            The two parents this career will be bred from are entered here as you read them in the client,
-            before any run exists. Their own two ancestors each are part of the record, so the diagram holds
-            six nodes.
+            A run starts with the sparks its parents carry. Both slots are optional; a run with no parents
+            starts from the card's own base.
         </p>
 
         <p
@@ -291,345 +257,103 @@ const ancestorError = (index: number, slot: number): string | undefined =>
             <span>{{ notice }}</span>
         </p>
 
-        <div class="mt-3 flex flex-wrap items-baseline gap-x-1 text-sm text-ink">
-            Trainee:
-            <strong v-if="props.trainee" class="text-ink-strong">
-                {{ props.trainee.name }}
-                <span v-if="props.trainee.name_ja" lang="ja" class="font-normal text-ink-muted">
-                    {{ props.trainee.name_ja }}
-                </span>
-            </strong>
-            <AbsenceValue
-                v-else
-                compact
-                reason="No trainee has been chosen in this setup draft yet, so the graph has no first node."
-            />
-            <span aria-hidden="true">&middot;</span>
-            <span v-if="props.scenarioLabel" class="text-ink-muted">{{ props.scenarioLabel }}</span>
-            <template v-else>
-                Scenario:
-                <AbsenceValue compact reason="No scenario has been chosen in this setup draft yet." />
-            </template>
-        </div>
-
-        <p v-if="!props.hasSelection" class="mt-2 text-sm text-ink-muted">
-            No Legacy is recorded for this setup yet. Nothing is stored until you save, and a figure you have
-            not read is left blank rather than filled in.
-        </p>
-        <p v-else class="mt-2 text-sm text-ink-muted">
-            This setup already holds a Legacy. Saving below replaces it whole; a Spark you remove here is
-            gone, not hidden.
-        </p>
-
         <!-- The library is empty on a fresh install, and a pick control with no rows is not a choice. Said
              here as a named absence with the way to fill it, rather than leaving the two slots looking like
              controls that are merely unused. -->
         <p
             v-if="props.rosterTotal === 0"
-             class="mt-3 rounded-lg border border-dashed border-rule bg-panel p-3 text-sm text-ink-muted"
+            class="mt-3 rounded-lg border border-dashed border-rule bg-panel p-3 text-sm text-ink-muted"
         >
             No Veterans recorded yet. The Veteran library is where a parent is picked from, and it holds a
-            run once you complete one, so this step cannot name a parent until then. Record the parents you
-            read below as ancestors instead, or open the Legacy Lab to see the library.
+            run once you complete one, so this step cannot name a parent until then.
         </p>
         <p v-else-if="props.rosterTotal > props.roster.length" class="mt-3 text-sm text-ink-muted">
             The library holds {{ props.rosterTotal }} rows and this pick list shows the first
             {{ props.roster.length }}. The rest are on the Legacy Lab browse screen.
         </p>
 
-        <ol class="mt-4 grid grid-cols-1 items-start gap-4 min-[1081px]:grid-cols-2">
-            <li class="rounded-lg border-2 border-rule bg-panel p-3">
-                <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Trainee</p>
-                <div class="mt-1 text-lg font-semibold text-ink-strong">
-                    <span v-if="props.graph.trainee.name">{{ props.graph.trainee.name }}</span>
-                    <AbsenceValue v-else compact reason="No trainee chosen in this draft yet." />
-                </div>
-            </li>
-
-            <li
-                v-for="(parent, index) in props.graph.parents"
-                :key="parent.slot"
-                class="ml-3 border-l-2 border-rule pl-3"
+        <!-- The HFW's two parent slots (`career-legacy.html:87-120`): one card per parent, with the
+             recorded name, the veteran's scenario and save date, and the draft's sparks. The chosen card
+             takes the pick border and the positive pill; the empty slot stays neutral. -->
+        <div class="mt-4 grid grid-cols-1 gap-4 min-[1081px]:grid-cols-2">
+            <article
+                v-for="(card, index) in parents()"
+                :key="index"
+                class="rounded-lg border bg-panel p-4"
+                :class="card !== null ? 'border-2 border-primary-action' : 'border-dashed border-rule'"
             >
-                <ul class="space-y-2">
-                    <li>
-                        <AncestryNode
-                            :label="parent.label"
-                            :name="roster.find((row) => String(row.id) === form.legacies[index].legacy_id)?.name ?? parent.name"
-                            :rank="parent.rank"
-                            :rank-label="parent.rank_label"
-                            :is-guest="form.legacies[index].is_guest"
-                            :sparks="nodeSparks(index)"
-                            :probability="parent.probability"
-                            :control-name="`legacies.${index}.legacy_id`"
-                            :model-value="form.legacies[index].legacy_id"
-                            :options="roster"
-                            :error="errorFor(index)"
-                            assignable
-                            @update:model-value="assignParent(index, String($event))"
-                        />
+                <h2 class="flex items-center justify-between text-lg font-semibold text-ink-strong">
+                    <span>{{ index === 0 ? 'Parent A' : 'Parent B' }}</span>
+                    <span
+                        class="rounded-full px-2 py-0.5 text-xs font-semibold"
+                        :class="card !== null ? 'bg-ok/15 text-ok' : 'bg-sunken text-ink-muted'"
+                    >
+                        {{ card !== null ? 'Chosen' : 'Not chosen' }}
+                    </span>
+                </h2>
 
-                        <ol class="mt-2 ml-3 space-y-2 border-l-2 border-rule pl-3">
-                            <li
-                                v-for="(ancestor, ancestorIndex) in parent.ancestors"
-                                :key="ancestor.slot"
-                                 class="rounded-lg border border-rule bg-panel p-3"
-                            >
-                                <div class="mt-3 space-y-2" aria-label="Legacy details">
-                                    <label class="block text-xs font-medium text-ink" :for="`ancestor-${parent.slot}-${ancestorIndex}`">
-                                        {{ ancestor.slot }}
-                                    </label>
-                                    <BaseInput
-                                        :id="`ancestor-${parent.slot}-${ancestorIndex}`"
-                                        v-model="form.legacies[index].ancestors[ancestorIndex]"
-                                        type="text"
-                                        list="known-umamusume-names"
-                                        autocomplete="off"
-                                        :error="ancestorError(index, ancestorIndex)"
-                                        :aria-describedby="ancestorError(index, ancestorIndex) ? `ancestor-${parent.slot}-${ancestorIndex}-error` : undefined"
-                                    />
-                                    <p v-if="ancestorError(index, ancestorIndex)" :id="`ancestor-${parent.slot}-${ancestorIndex}-error`" class="mt-1 text-xs text-risk">
-                                        {{ ancestorError(index, ancestorIndex) }}
-                                    </p>
-                                    <p v-else class="mt-1 text-xs text-ink-muted">
-                                        Enter the name as you read it. Blank stays N/A.
-                                    </p>
+                <template v-if="card !== null">
+                    <div class="mt-2 text-[15px] font-extrabold text-ink-strong">
+                        {{ card.name }}
+                        <span v-if="card.japanese" lang="ja" class="text-xs font-semibold text-ink-muted">
+                            {{ card.japanese }}
+                        </span>
+                    </div>
+                    <div class="mt-0.5 text-xs text-ink-muted">
+                        <span v-if="card.scenario">{{ card.scenario }}</span>
+                        <template v-if="card.stars !== null"> · {{ '★'.repeat(card.stars) }}</template>
+                        <template v-if="card.savedAt !== null"> · saved {{ card.savedAt }}</template>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-1.5">
+                        <span
+                            v-for="(spark, sparkIndex) in card.sparks"
+                            :key="sparkIndex"
+                            class="rounded-full border border-rule bg-raised px-2 py-0.5 text-xs text-ink"
+                        >
+                            {{ spark.family }} spark<template v-if="spark.stat !== null"> · {{ spark.stat }}</template>
+                            <template v-if="spark.stars !== null"> · ★{{ spark.stars }}</template>
+                        </span>
+                    </div>
+                </template>
+                <p v-else class="mt-2 text-sm text-ink-muted">
+                    Pick from your veteran library, or leave this slot empty.
+                </p>
 
-                                    <!-- The two rank fields the parents already carry, per grandparent. Four
-                                         of the six ranks in the source's tree sit on these nodes (R3-09), and
-                                         the labels are the parents' words so one screen states one kind of
-                                         fact in one way. -->
-                                    <label class="mt-2 block text-xs font-medium text-ink" :for="`ancestor-rank-letter-${parent.slot}-${ancestorIndex}`">
-                                        Own rank (letters)
-                                    </label>
-                                    <BaseInput
-                                        :id="`ancestor-rank-letter-${parent.slot}-${ancestorIndex}`"
-                                        v-model="form.legacies[index].ancestors_rank_letters[ancestorIndex]"
-                                        type="text"
-                                        list="known-rank-letters"
-                                        autocomplete="off"
-                                    />
+                <div class="mt-3">
+                    <label class="block text-xs font-medium text-ink" :for="`legacy-pick-${index}`">
+                        {{ card === null ? 'Choose a veteran' : 'Change the veteran' }}
+                    </label>
+                    <BaseSelect
+                        :id="`legacy-pick-${index}`"
+                        :model-value="form.legacies[index].legacy_id"
+                        :name="`legacies.${index}.legacy_id`"
+                        :options="pickOptions()"
+                        :error="errorFor(index)"
+                        @update:model-value="assignParent(index, String($event))"
+                    />
+                    <p v-if="errorFor(index)" :id="`legacy-pick-${index}-error`" class="mt-1 text-xs text-risk">
+                        {{ errorFor(index) }}
+                    </p>
+                </div>
 
-                                    <label class="mt-2 block text-xs font-medium text-ink" :for="`ancestor-rank-${parent.slot}-${ancestorIndex}`">
-                                        Own rank (stars)
-                                    </label>
-                                    <BaseInput
-                                        :id="`ancestor-rank-${parent.slot}-${ancestorIndex}`"
-                                        v-model="form.legacies[index].ancestors_rank[ancestorIndex]"
-                                        type="number"
-                                        min="0"
-                                    />
-
-                                    <details class="mt-2 rounded-md border border-rule bg-panel p-2">
-                                        <summary class="flex min-h-11 cursor-pointer items-center text-xs font-medium text-ink">
-                                            Add spark to grandparent
-                                            <span class="sr-only"> {{ ancestor.slot }}</span>
-                                        </summary>
-
-                                        <ul v-if="form.legacies[index].ancestors_sparks[ancestorIndex].length > 0" class="mt-2 space-y-2">
-                                            <li
-                                                v-for="(spark, sparkIndex) in form.legacies[index].ancestors_sparks[ancestorIndex]"
-                                                :key="sparkIndex"
-                                                class="flex flex-wrap items-end gap-2 rounded-md border border-rule bg-panel p-2"
-                                            >
-                                                <label class="flex flex-col gap-1 text-xs text-ink">
-                                                    <span>Kind</span>
-                                                    <BaseSelect
-                                                        v-model="spark.kind"
-                                                        :options="Object.keys(props.sparkKinds).map(kind => ({ value: kind, label: props.sparkKinds[kind] }))"
-                                                    />
-                                                </label>
-
-                                                <label class="flex flex-col gap-1 text-xs text-ink">
-                                                    <span>Applies to</span>
-                                                    <BaseSelect
-                                                        v-model="spark.category"
-                                                        :options="SPARK_CATEGORIES.map(category => ({ value: category, label: category }))"
-                                                        @change="spark.target = ''"
-                                                    />
-                                                </label>
-
-                                                <label class="flex flex-col gap-1 text-xs text-ink">
-                                                    <span>Target</span>
-                                                    <BaseSelect
-                                                        v-model="spark.target"
-                                                        :options="[{ value: '', label: 'Not recorded' }, ...(props.sparkTargets[spark.category] || []).map(target => ({ value: target, label: target }))]"
-                                                    />
-                                                </label>
-
-                                                <label class="flex flex-col gap-1 text-xs text-ink">
-                                                    <span>Stars</span>
-                                                    <BaseInput
-                                                        v-model="spark.stars"
-                                                        type="number"
-                                                        min="1"
-                                                        max="3"
-                                                    />
-                                                </label>
-
-                                                <button
-                                                    type="button"
-                                                    class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken transition-colors duration-150 ease-out"
-                                                    @click="removeAncestorSpark(index, ancestorIndex, sparkIndex)"
-                                                >
-                                                    Remove Spark
-                                                    <span class="sr-only"> from {{ ancestor.slot }}</span>
-                                                </button>
-                                            </li>
-                                        </ul>
-                                        <p v-else class="mt-1 text-xs text-ink-muted">
-                                            {{ ancestor.sparks_label }}
-                                        </p>
-
-                                        <button
-                                            type="button"
-                                            class="mt-2 min-h-11 rounded-md border border-rule px-3 text-sm font-medium text-ink"
-                                            @click="addAncestorSpark(index, ancestorIndex)"
-                                        >
-                                            Add spark to grandparent
-                                            <span class="sr-only"> {{ ancestor.slot }}</span>
-                                        </button>
-                                    </details>
-                                </div>
-                            </li>
-                        </ol>
-
-                         <div class="mt-3 rounded-md border border-rule bg-panel p-3">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                                {{ parent.label }} as you read her
-                            </p>
-
-                            <label class="mt-2 block text-xs font-medium text-ink" :for="`rank-letter-${parent.slot}`">
-                                Own rank (letters)
-                            </label>
-                                 <BaseInput
-                                     :id="`rank-letter-${parent.slot}`"
-                                     v-model="form.legacies[index].rank_letter"
-                                     type="text"
-                                     list="known-rank-letters"
-                                     autocomplete="off"
-                                     :aria-describedby="errorFor(index, 'rank_letter') ? `rank-letter-${parent.slot}-error` : undefined"
-                                   />
-                            <!-- A refused letter is a fact about this field, and the save that carried it
-                                 was dropped whole. The refusal prints beside the control that caused it,
-                                 in words, and names itself to the field (`ancestor-*` errors do the same). -->
-                            <p
-                                v-if="errorFor(index, 'rank_letter')"
-                                :id="`rank-letter-${parent.slot}-error`"
-                                class="mt-1 text-xs text-risk"
-                            >
-                                {{ errorFor(index, 'rank_letter') }}
-                            </p>
-                            <p class="mt-1 text-xs text-ink-muted">
-                                The letter the client shows, from its own set. Blank stays not recorded.
-                            </p>
-
-                            <label class="mt-3 block text-xs font-medium text-ink" :for="`rank-${parent.slot}`">
-                                Own rank (stars)
-                            </label>
-                             <BaseInput
-                                 :id="`rank-${parent.slot}`"
-                                 v-model="form.legacies[index].rank"
-                                 type="number"
-                                 min="0"
-                               />
-                            <p class="mt-1 text-xs text-ink-muted">
-                                Blank stays N/A. Unbounded on purpose: the sources give no ceiling on a
-                                Legacy's own star count.
-                            </p>
-
-                                     <BaseCheckbox
-                                      :id="`is-guest-${parent.slot}`"
-                                      v-model="form.legacies[index].is_guest"
-                                      :name="`legacies.${index}.is_guest`"
-                                      label="Rented for the run"
-                                    />
-
-                            <fieldset class="mt-3">
-                                <legend class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                                    Sparks
-                                </legend>
-
-                                <ul v-if="form.legacies[index].sparks.length > 0" class="mt-2 space-y-2">
-                                    <li
-                                        v-for="(spark, sparkIndex) in form.legacies[index].sparks"
-                                        :key="sparkIndex"
-                                        class="flex flex-wrap items-end gap-2 rounded-md border border-rule bg-panel p-2"
-                                    >
-                                        <label class="flex flex-col gap-1 text-xs text-ink">
-                                            <span>Kind</span>
-<BaseSelect
-          v-model="spark.kind"
-          :options="Object.keys(props.sparkKinds).map(kind => ({ value: kind, label: props.sparkKinds[kind] }))"
-        />
-                                        </label>
-
-                                        <label class="flex flex-col gap-1 text-xs text-ink">
-                                            <span>Applies to</span>
-<BaseSelect
-          v-model="spark.category"
-          :options="SPARK_CATEGORIES.map(category => ({ value: category, label: category }))"
-          @change="spark.target = ''"
-        />
-                                        </label>
-
-                                        <label class="flex flex-col gap-1 text-xs text-ink">
-                                            <span>Target</span>
-<BaseSelect
-          v-model="spark.target"
-          :options="[{ value: '', label: 'Not recorded' }, ...(props.sparkTargets[spark.category] || []).map(target => ({ value: target, label: target }))]"
-        />
-                                        </label>
-
-                                        <label class="flex flex-col gap-1 text-xs text-ink">
-                                            <span>Stars</span>
-<BaseInput
-          v-model="spark.stars"
-          type="number"
-          min="1"
-          max="3"
-        />
-                                        </label>
-
-                                        <button
-                                            type="button"
-                                            class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken transition-colors duration-150 ease-out"
-                                            @click="removeSpark(index, sparkIndex)"
-                                        >
-                                            Remove Spark
-                                            <span class="sr-only"> from {{ parent.label }}</span>
-                                        </button>
-                                    </li>
-                                </ul>
-                                <p
-                                    v-else
-                                    class="mt-1 text-xs text-ink-muted"
-                                >
-                                    No Sparks recorded.
-                                </p>
-
-                                <button
-                                    type="button"
-                                    class="mt-2 min-h-11 rounded-md border border-rule px-3 text-sm font-medium text-ink"
-                                    @click="addSpark(index)"
-                                >
-                                    Add Spark
-                                    <span class="sr-only"> to {{ parent.label }}</span>
-                                </button>
-                            </fieldset>
-                        </div>
-                    </li>
-                </ul>
-            </li>
-        </ol>
-
-        <datalist id="known-umamusume-names">
-            <option v-for="name in props.knownNames" :key="name" :value="name" />
-        </datalist>
-
-        <datalist id="known-rank-letters">
-            <option v-for="letter in props.rankLetters" :key="letter" :value="letter" />
-        </datalist>
+                <div class="mt-3 flex flex-wrap gap-2">
+                    <a
+                        v-if="card !== null"
+                        :href="`/legacy/${card.runId}`"
+                        class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-3 text-sm font-semibold text-ink hover:bg-panel"
+                    >
+                        Inspect
+                    </a>
+                    <button
+                        type="button"
+                        class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-3 text-sm font-semibold text-ink hover:bg-panel"
+                        @click="clearParent(index)"
+                    >
+                        Leave empty
+                    </button>
+                </div>
+            </article>
+        </div>
 
         <!--
           DOMAIN OVERRIDE (DM-3): four spark families; HFW draws three
@@ -685,56 +409,87 @@ const ancestorError = (index: number, slot: number): string | undefined =>
             </table>
         </section>
 
-        <section class="mt-4 rounded-lg border border-rule bg-panel p-4" aria-labelledby="projected-start">
-            <h2 id="projected-start" class="text-lg font-semibold text-ink-strong">Projected start</h2>
+        <div class="mt-4 grid grid-cols-1 gap-4 min-[1081px]:grid-cols-2">
+            <!--
+              DOMAIN OVERRIDE (ADR-0020 §3): the wireframe's Projected start table prints the
+              `cap + 16 per ★3` sum as a number; this tool prices no pair, so the projected column
+              states the absence and the two parent columns print only what the record holds.
+            -->
+            <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="projected-start">
+                <h2 id="projected-start" class="text-lg font-semibold text-ink-strong">Projected start</h2>
+                <p class="mt-1 text-sm text-ink-muted">
+                    What the two parents add to this run, before a single turn is played. The recorded Blue
+                    spark against a stat is what a parent column prints; the projected sum is never
+                    computed, because an inheritance outcome is not this tool's to derive (ADR-0020 §3).
+                </p>
 
-            <p class="mt-1 text-sm text-ink-muted">
-                One column per parent chosen. Only the cap a parent's Blue spark names moves; every other
-                row stays where the scenario put it.
-            </p>
+                <table class="mt-2 w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                            <th class="py-2 pr-3">Stat</th>
+                            <th class="pr-3 text-right">Scenario cap</th>
+                            <th class="pr-3 text-right">From Parent A</th>
+                            <th class="pr-3 text-right">From Parent B</th>
+                            <th class="text-right">Projected</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="stat in props.statOrder" :key="stat" class="border-b border-rule">
+                            <td class="py-2 pr-3 text-ink">{{ stat }}</td>
+                            <td class="pr-3 text-right font-mono tabular-nums text-ink-muted">
+                                {{ props.scenarioCaps[stat] ?? '—' }}
+                            </td>
+                            <td class="pr-3 text-right font-mono tabular-nums text-ink">
+                                <template v-if="props.parentA?.sparks.some((s) => s.family === 'Blue' && s.stat === stat)">
+                                    ★{{ props.parentA.sparks.find((s) => s.family === 'Blue' && s.stat === stat)?.stars ?? '?' }} Blue
+                                </template>
+                                <template v-else>—</template>
+                            </td>
+                            <td class="pr-3 text-right font-mono tabular-nums text-ink">
+                                <template v-if="props.parentB?.sparks.some((s) => s.family === 'Blue' && s.stat === stat)">
+                                    ★{{ props.parentB.sparks.find((s) => s.family === 'Blue' && s.stat === stat)?.stars ?? '?' }} Blue
+                                </template>
+                                <template v-else>—</template>
+                            </td>
+                            <td class="text-right font-mono tabular-nums text-ink-muted">—</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
 
-            <table class="mt-2 w-full text-sm">
-                <thead>
-                    <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">
-                        <th class="py-2 pr-3">Stat</th>
-                        <th class="pr-3">Scenario cap</th>
-                        <th>After both parents</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="parent in props.graph.parents" :key="`projected-${parent.slot}`" class="border-b border-rule">
-                        <td class="py-2 pr-3 text-ink">{{ parent.label }}</td>
-                        <td class="pr-3 font-mono text-ink-muted tabular-nums">{{ parent.rank === null ? '—' : parent.rank }}</td>
-                        <td class="font-mono text-ink tabular-nums">
-                            <template v-if="parent.sparks.some((spark) => spark.kind === 'blue')">
-                                +{{ parent.sparks.filter((spark) => spark.kind === 'blue').length * 16 }} cap
-                            </template>
-                            <template v-else>no Blue spark, so no cap moves</template>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="parents-differ">
+                <h2 id="parents-differ" class="text-lg font-semibold text-ink-strong">Parents must differ</h2>
+                <p class="mt-2 text-sm leading-relaxed text-ink-muted">
+                    A veteran cannot be its own parent, and the two slots cannot hold the same record. The
+                    picker enforces the first rule by hiding the trainee you are running; the second by
+                    refusing an already-chosen record.
+                </p>
+                <p class="note mt-3 text-sm text-ink-muted">
+                    Choosing no parents is a legitimate build, not an error. The run record carries two
+                    nullable parent ids for exactly that reason, and no screen invents a default pair.
+                </p>
+            </section>
+        </div>
 
-            <p class="note mt-2">
-                This projection is arithmetic on the published rule, not a reading off the client. It assumes
-                every Blue spark on the record is ★3, which is what the row above states per spark.
-            </p>
-        </section>
-
-        <p class="note mt-4">
-            Parents must differ: a trainee cannot be her own parent, the same Veteran record cannot fill both
-            slots, and leaving both empty is a legitimate state rather than an error.
+        <p v-if="!props.hasSelection" class="mt-2 text-sm text-ink-muted">
+            No Legacy is recorded for this setup yet. Nothing is stored until you save, and a figure you have
+            not read is left blank rather than filled in.
         </p>
+        <p v-else class="mt-2 text-sm text-ink-muted">
+            This setup already holds a Legacy. Saving below replaces it whole; a Spark you remove here is
+            gone, not hidden.
+        </p>
+
         <fieldset class="mt-4 max-w-sm rounded-lg border border-rule bg-panel p-3">
-            <legend class="text-xs font-semibold uppercase tracking-wide text-ink-muted px-1">Pair</legend>
+            <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-ink-muted">Pair</legend>
             <div class="mt-2">
                 <label class="block text-xs font-medium text-ink" for="affinity">Affinity</label>
-                 <BaseSelect
-                     id="affinity"
-                     v-model="form.affinity"
-                     name="affinity"
-                     :options="[{ value: '', label: 'Not recorded' }, ...props.affinityGrades.map(grade => ({ value: grade, label: grade }))]"
-                   />
+                <BaseSelect
+                    id="affinity"
+                    v-model="form.affinity"
+                    name="affinity"
+                    :options="[{ value: '', label: 'Not recorded' }, ...props.affinityGrades.map(grade => ({ value: grade, label: grade }))]"
+                />
                 <p class="mt-1 text-xs text-ink-muted">
                     The grade you read for the pair, not a score. This tool does not price it.
                 </p>
@@ -762,10 +517,6 @@ const ancestorError = (index: number, slot: number): string | undefined =>
             </button>
 
             <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving the Legacy…</p>
-
-            <!-- Both doors moved to the head band above (`#actions`), where the HFW draws them. What stood
-                 here was a "Back: Target" outline and an underlined "Continue to deck", below the ancestry
-                 graph and below the save button, so the step's exits sat after every panel on the page. -->
         </div>
     </SetupLayout>
 </template>

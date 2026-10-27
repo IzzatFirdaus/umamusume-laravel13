@@ -1,9 +1,13 @@
 import { test, expect } from '@playwright/test';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { buildAxe } from '../utils/accessibility';
+import { verifyPage } from './fixtures/wizard-verify';
 
 /*
  * Rendered-copy and behaviour evidence for the career setup wizard's steps 4 and 5 (`SCR-CAR-008`
- * ancestry, `SCR-CAR-009` deck; PRD FR-G-1 / FR-A-4, `ADR-0020` §1 and §3, under `ADR-0010` and
+ * legacy, `SCR-CAR-009` deck; PRD FR-G-1 / FR-A-4, `ADR-0020` §1 and §3, under `ADR-0010` and
  * `ADR-0014`). The server-side `CareerLegacyDeckStepsTest` asserts the resolved props, the draft
  * round trips and the refusals; these assert what only a browser can reach: the rendered copy, the
  * keyboard path and where focus lands after a save, the 44px sweep, the 320px reflow and the
@@ -17,7 +21,7 @@ import { buildAxe } from '../utils/accessibility';
  *
  * The fixture is the app's own seeded scratch database (`playwright.config.ts`): 67 trainees, 559
  * support cards, and **zero Veterans** — the state a fresh install meets, asserted as itself. The
- * ancestry step therefore offers no parent picks and says so; the deck picker has real cards.
+ * legacy step therefore offers no library picks and says so; the deck picker has real cards.
  *
  * Axe coverage is provided by `tests/browser/accessibility.spec.ts`: `@axe-core/playwright` is installed
  * and scans pages against `wcag2a`, `wcag2aa`, and `wcag21aa`; this spec retains the hand-rolled checks
@@ -51,7 +55,15 @@ async function assertMinHeight(page: import('@playwright/test').Page, selector: 
 }
 
 test.describe('Setup step 4 — Legacy', () => {
-    test('renders the six-node graph and its empty states on a draft with nothing chosen', async ({ page }) => {
+    /*
+     * Phase D retirement note. The cases that pinned the six-node ancestry editor on this step
+     * (ancestor name inputs, Add Spark buttons, rank and rank-letter fields, the rented checkbox,
+     * spark chips and the star-roll disclosure) retired with the editor: `career-legacy.html:87-120`
+     * draws two parent cards instead, and full ancestor recording is the run-scoped Legacy builder's
+     * surface, covered by `legacy.spec.ts`. The payload round trip that guarantees a re-save never
+     * erases a recorded ancestry is `CareerLegacyDeckStepsTest`'s half.
+     */
+    test('renders the two parent slots, the mechanism table and the projected-start table', async ({ page }) => {
         await hydrate(page, '/career/setup/legacy');
 
         await expect(page.getByRole('heading', { name: 'Legacy', level: 1 })).toBeVisible();
@@ -59,181 +71,151 @@ test.describe('Setup step 4 — Legacy', () => {
         await expect(
             page.getByRole('navigation', { name: 'Setup steps' }).getByRole('listitem', { name: 'Legacy' }),
         ).toHaveAttribute('aria-current', 'step');
-        // All six steps are live links: Preflight landed with D7, so no step renders as a named
-        // absence in the nav.
-        await expect(
-            page.getByRole('navigation', { name: 'Setup steps' }).getByText('not built'),
-        ).toHaveCount(0);
 
-        // The same record-only sentence the Legacy Lab carries, from its one owner. `toContainText`, not
-        // `toHaveText`: the banner's `textContent` includes the `aria-hidden` glyph.
+        // The same record-only sentence the Legacy Lab carries, from its one owner.
         await expect(page.getByRole('note')).toContainText(RECORD_ONLY_NOTICE);
 
-        // Every absence is a named one with its reason, never a dash or a default. The identity
-        // line's two moved into AbsenceValue disclosures (DESIGN.md §5.6): the marker is the
-        // summary, the reason is its accessible name, and both are in the document.
-        const identityLine = page.getByText('Trainee:');
-        await expect(identityLine.getByText('N/A')).toHaveCount(2);
-        await expect(identityLine.getByText('Scenario:')).toBeVisible();
-        await expect(identityLine).toContainText(/so the graph has no first node/);
-        await expect(identityLine).toContainText(/No scenario has been chosen in this setup draft yet/);
-        await expect(page.getByText(/No Legacy is recorded for this setup yet/)).toBeVisible();
-
-        // The library the pick controls would select from is empty on a fresh install, and the
-        // emptiness is disclosed with the way to fill it rather than left as two unused controls.
+        // The library is empty on the scratch database, and the emptiness is disclosed with the way
+        // to fill it rather than left as two unused controls.
         await expect(page.getByText(/No Veterans recorded yet/)).toBeVisible();
 
-        // Six nodes: the trainee, two parents, four ancestor entry slots. The structure is list
-        // markup, so the entry slots are countable inputs rather than drawn boxes (`AncestryNode`).
-        // Scoped to the name fields: a grandparent now carries her own rank inputs too, and those ids
-        // start with `ancestor-` as well (R3-09).
-        await expect(page.locator('input[id^="ancestor-parent_"]')).toHaveCount(4);
-        // The absent name is scoped by its own title, not by its words: the pick control's own
-        // "Not chosen" option carries the same words, so a text query matched four elements where
-        // the two absent names were meant.
-        await expect(page.locator('[title="No Umamusume chosen for this node yet."]')).toHaveCount(2);
-        await expect(page.getByText('No Sparks recorded.')).toHaveCount(4);
+        // Two parent cards, each `Not chosen` while the slot is empty: the pill sits inside the
+        // card's own heading; each pick control's blank option carries the same words, so the pill
+        // assertion is scoped to the headings rather than counted page-wide.
+        const headingA = page.getByRole('heading', { name: 'Parent A' });
+        const headingB = page.getByRole('heading', { name: 'Parent B' });
+        await expect(headingA).toBeVisible();
+        await expect(headingB).toBeVisible();
+        await expect(headingA.getByText('Not chosen')).toBeVisible();
+        await expect(headingB.getByText('Not chosen')).toBeVisible();
+        // `getByText` is a case-insensitive substring match, so the bare word would also match each
+        // "Not chosen"; the positive pill is asserted as an exact string.
+        await expect(page.getByText('Chosen', { exact: true })).toHaveCount(0);
 
-        // The chance a Spark rolls is a named absence on each parent node, and the reason is on the
-        // disclosure rather than in a footnote or a hover (`ADR-0020` §3: no star-roll table exists).
-        await expect(page.getByText('Spark chance')).toHaveCount(2);
-        await expect(page.locator('summary', { hasText: 'star-roll' })).toHaveCount(2);
+        // The mechanism table: the wireframe's three families plus the DM-3 Green and White rows the
+        // domain adds, and the enhanced spark's named absence in place of a rate.
+        const mechanism = page.locator('section[aria-labelledby="inheritance-does"]');
+        // Exact strings and the cell role: the Pink row's own prose mentions the Blue spark, so a
+        // plain text lookup resolves to two cells.
+        for (const family of ['Blue spark', 'Pink spark', 'Unique-skill factor', 'Green spark', 'White spark', 'Enhanced spark']) {
+            await expect(mechanism.getByRole('cell', { name: family, exact: true })).toBeVisible();
+        }
+        await expect(mechanism.locator('tbody tr')).toHaveCount(6);
+        // The enhanced spark's rate is a named absence rendered through `AbsenceValue`: the
+        // disclosure's summary, never a number.
+        await expect(mechanism.locator('summary')).toHaveCount(1);
+
+        // The projected-start table is per stat, five rows, and no projected figure is computed
+        // (`ADR-0020` §3): every cell prints the named absence or the recorded ceiling.
+        const projected = page.locator('section[aria-labelledby="projected-start"]');
+        await expect(projected.locator('tbody tr')).toHaveCount(5);
+        await expect(projected.getByRole('columnheader', { name: 'Projected' })).toBeVisible();
+        await expect(projected.getByText(/not this tool's to derive/)).toBeVisible();
+
+        // The parents-must-differ note the wireframe carries, and the empty-slot disclosure.
+        await expect(page.getByRole('heading', { name: 'Parents must differ' })).toBeVisible();
+        await expect(page.getByText(/Choosing no parents is a legitimate build/)).toBeVisible();
+
+        // The six-node graph and its editor are gone from this step: no SVG, no ancestor inputs, no
+        // spark rows, no rank fields.
+        await expect(page.locator('.canvas svg')).toHaveCount(0);
+        await expect(page.locator('input[id^="ancestor-"]')).toHaveCount(0);
+        await expect(page.getByRole('button', { name: /Add Spark/ })).toHaveCount(0);
+        await expect(page.locator('input[id^="rank-"]')).toHaveCount(0);
     });
 
-    test('sizes the ancestry controls to the 44px contract', async ({ page }) => {
+    test('sizes the step controls to the 44px contract', async ({ page }) => {
         await hydrate(page, '/career/setup/legacy');
 
-        const selectors = [
-            '#legacy-save',
-            '#affinity',
-            '#legacies\\.0\\.legacy_id',
-            '#legacies\\.1\\.legacy_id',
-            '#rank-parent_a',
-            '#ancestor-parent_a-0',
-            '#ancestor-parent_b-1',
-        ];
-        for (const selector of selectors) {
+        for (const selector of ['#legacy-save', '#affinity', '#legacy-pick-0', '#legacy-pick-1']) {
             await assertMinHeight(page, selector);
         }
-
-        for (const button of await page.getByRole('button', { name: /^Add Spark/ }).all()) {
+        for (const button of await page.getByRole('button', { name: 'Leave empty' }).all()) {
             const box = await button.boundingBox();
-            expect(box?.height ?? 0, 'an Add Spark button is not sized to the 44px contract').toBeGreaterThanOrEqual(44);
+            expect(box?.height ?? 0, 'a Leave empty control is not sized to the 44px contract').toBeGreaterThanOrEqual(44);
         }
     });
 
-    test('records the entered ancestry, reads it back from stored data, and returns focus to the save', async ({ page }) => {
+    test('saves an empty selection, reads it back from stored data, and returns focus to the save', async ({ page }) => {
         await hydrate(page, '/career/setup/legacy');
 
-        // Ancestors are typed names, not library picks, which is what makes this whole path
-        // reachable on a database with no Veterans: the entry the Trainer read off the client is the
-        // record (`ADR-0010` Consequences §2), and a pick would need a library row this scratch
-        // database does not hold.
-        await page.locator('#ancestor-parent_a-0').fill('Grass Wonder');
-        await page.locator('#ancestor-parent_a-1').fill('Mill Raptor');
-        await page.locator('#rank-parent_a').fill('4');
-        await page.getByRole('button', { name: /^Add Spark/ }).first().click();
-        // `6fa0d01` split the old free-text "Applies to" into a category select and a Target select, so
-        // the value is picked from each list rather than typed. `Stars` needs `exact` because the label
-        // is a case-insensitive substring of each parent's own "Own rank (stars)".
-        await page.getByLabel('Applies to').selectOption('Stat');
-        await page.getByLabel(/^Target/).selectOption('Speed');
-        await page.getByLabel('Stars', { exact: true }).fill('2');
+        // Two empty slots are a legitimate build and a stored record, not an error.
         await page.locator('#affinity').selectOption('◎');
         await page.getByRole('button', { name: 'Save Legacy' }).click();
         await expect(page.getByText('Legacy recorded.')).toBeVisible();
 
-        // The stored state is read from the draft on the way back, not kept in client memory: the
-        // disclosure line, the re-seeded inputs and the node all print what the session holds.
+        // The stored state is read from the draft on the way back, not kept in client memory.
         await expect(page.getByText(/This setup already holds a Legacy/)).toBeVisible();
-        await expect(page.locator('#ancestor-parent_a-0')).toHaveValue('Grass Wonder');
-        await expect(page.locator('#ancestor-parent_a-1')).toHaveValue('Mill Raptor');
-        await expect(page.locator('#rank-parent_a')).toHaveValue('4');
+        await expect(page.getByText(/No Legacy is recorded for this setup yet/)).toHaveCount(0);
         await expect(page.locator('#affinity')).toHaveValue('◎');
-        // `5876f64` made the node's rank two fields, the letter the Trainer read and the star count beside
-        // it, so the read-back prints the named letter absence with the entered star count.
-        await expect(page.getByText('Rank not recorded, 4★').first()).toBeVisible();
 
-        // The Spark reads back as one chip whose accessible name carries kind, target and count in
-        // words, never colour alone (WCAG 1.4.1).
-        await expect(page.getByText('Blue Spark, Speed, 2 stars').first()).toBeVisible();
-
-        // Focus returns to the control the Trainer pressed, after the new props land (`onSuccess`
-        // plus `nextTick`, WCAG 2.4.3).
+        // Focus returns to the control the Trainer pressed, after the new props land (WCAG 2.4.3).
         await expect(page.locator('#legacy-save')).toBeFocused();
     });
 
-    test('treats a rented parent as an entered fact and reads the flag back on the node', async ({ page }) => {
+    test('every control on the step carries an accessible name', async ({ page }) => {
         await hydrate(page, '/career/setup/legacy');
-
-        // One checkbox per parent, in slot order; the second is Parent B's.
-        await page.getByLabel('Rented for the run').nth(1).check();
-        await page.getByRole('button', { name: 'Save Legacy' }).click();
-        await expect(page.getByText('Legacy recorded.')).toBeVisible();
-
-        await expect(page.locator('input[type="checkbox"]').nth(1)).toBeChecked();
-        await expect(page.locator('input[type="checkbox"]').first()).not.toBeChecked();
-        await expect(page.getByText('Rented from a friend')).toBeVisible();
-    });
-
-    test('names the refusal where the rank letter was typed, and does not report a save', async ({ page }) => {
-        await hydrate(page, '/career/setup/legacy');
-
-        // A letter outside the client's set. The request refuses it and drops the whole Legacy write,
-        // so the Trainer needs to see which field the refusal is about: before this case the screen
-        // printed nothing at all and the presses looked like they had done nothing (Phase 1 walk,
-        // 2026-10-11).
-        await page.locator('#rank-letter-parent_a').fill('SS');
-        await page.getByRole('button', { name: 'Save Legacy' }).click();
-
-        await expect(page.getByText(/rank_letter is invalid/)).toBeVisible();
-        await expect(page.locator('#rank-letter-parent_a')).toHaveAttribute(
-            'aria-describedby',
-            'rank-letter-parent_a-error',
-        );
-        await expect(page.getByText('Legacy recorded.')).toHaveCount(0);
-    });
-
-    test('every Spark control carries an accessible name, on a parent and on a grandparent alike (R3-16)', async ({ page }) => {
-        await hydrate(page, '/career/setup/legacy');
-
-        // The walk reached these rows by DOM reads because it could not name them. A Spark row renders
-        // only after it is added, so the screen's other cases never put one in the tree.
-        await page.getByRole('button', { name: 'Add Spark' }).first().click();
-
-        // The disclosure's `<summary>` is exposed as a named generic, not a button, so the row is addressed
-        // by its text. The `Add spark to grandparent …` control inside it is a real button.
-        const grandparent = page.locator('details').filter({ hasText: 'Add spark to grandparent Grandparent A1' });
-        await grandparent.locator('summary').click();
-        await grandparent.getByRole('button', { name: 'Add spark to grandparent Grandparent A1' }).click();
-
-        // The direct form of the finding: both `Target` selects answer to the name their label states.
-        // An unnamed control is not matched here, so this count is the assertion and not a precondition.
-        await expect(page.getByRole('combobox', { name: 'Target' })).toHaveCount(2);
-        await expect(page.getByRole('combobox', { name: 'Applies to' })).toHaveCount(2);
 
         const results = await buildAxe(page).analyze();
         const unnamed = results.violations.filter((violation) => violation.id === 'label');
         expect(unnamed, JSON.stringify(unnamed, null, 2)).toEqual([]);
     });
 
-    test('a grandparent rank read off the client reaches the contract (R3-09)', async ({ page }) => {
+    test('keeps the page to one primary action and the card ceiling', async ({ page }) => {
         await hydrate(page, '/career/setup/legacy');
 
-        // The rank fields on a grandparent, entered in the parents' own words. Walk 3 read four of the six
-        // ranks in the tree off the grandparents and the step had nowhere to put any of them.
-        await page.locator('#ancestor-parent_a-0').fill('Daiwa Scarlet');
-        await page.locator('#ancestor-rank-letter-parent_a-0').fill('UG');
-        await page.getByRole('button', { name: 'Save Legacy' }).click();
-        await expect(page.getByText('Legacy recorded.')).toBeVisible();
+        // `Save Legacy` is a secondary write control beside the fields it writes; the single primary
+        // is the head band's `Continue to deck`.
+        await expect(page.locator('main .bg-primary-action, main a.bg-primary-action')).toHaveCount(1);
 
-        // The stored read-back is the browser-observable half of R3-09: the rank letter the Trainer
-        // read off the client is now a field the step re-seeds from the draft. Preflight prints the
-        // parent count and the Affinity grade, not each grandparent's rank, so this case reads the
-        // rank where the screen actually renders it; the payload half is `CareerLegacyDeckStepsTest`'s.
-        await hydrate(page, '/career/setup/legacy');
-        await expect(page.locator('#ancestor-rank-letter-parent_a-0')).toHaveValue('UG');
-        await expect(page.locator('#ancestor-parent_a-0')).toHaveValue('Daiwa Scarlet');
+        for (const card of await page.locator('article').all()) {
+            const descendants = await card.locator('*').count();
+            expect(descendants, 'a parent card is over the 25-descendant ceiling').toBeLessThan(25);
+        }
+    });
+
+    /*
+     * HFW-OVERRIDE (markup: element paths) — the same measured constraint the trainee step's three-diff
+     * case records: the app and the wireframe are two DOM implementations of one design, so
+     * `visual-diff`'s positional selectors can never pair and the raw `excess`/`missing` buckets read
+     * "the implementations differ", not "the app draws something the design does not". They are written
+     * to the JSON artifacts as this phase's evidence, and the regressions this page must not re-acquire —
+     * the six-node graph, the ancestor inputs, the spark editors — are asserted on the served page by
+     * the cases above, which is the sharper question.
+     *
+     * HFW-OVERRIDE (mock: parent cards) — the wireframe's two cards show chosen mock veterans with spark
+     * tags, and its projected-start table prints the `cap + 16 per ★3` sums; the scratch database holds
+     * zero Veterans, so the app renders the empty slots, the library disclosure, and the projected
+     * column as named absences — `ADR-0020` §3 forbids the sum, and the page carries the
+     * `DOMAIN OVERRIDE (ADR-0020 §3)` comment where the wireframe prints it. Recorded rather than faked.
+     */
+    test('three-diff against career-legacy.html writes the phase evidence', async ({ page }) => {
+        const hfw = pathToFileURL(
+            resolve(process.cwd(), 'docs/design-research/frontend-v2-wireframes/career-legacy.html'),
+        ).href;
+
+        const dir = resolve(process.cwd(), '.scratch-uma/wizard-parity');
+        mkdirSync(dir, { recursive: true });
+
+        for (const [name, viewport] of [['1280', { width: 1280, height: 800 }], ['390', { width: 390, height: 844 }]] as const) {
+            const at = await verifyPage(page, {
+                appUrl: '/career/setup/legacy',
+                hfwUrl: hfw,
+                rootSelector: '.canvas',
+                ...viewport,
+            });
+
+            writeFileSync(join(dir, `legacy-diff-${name}.json`), `${JSON.stringify(at, null, 2)}\n`);
+        }
+
+        // Computed drift is asserted for the head band, the region Phase A.2 rewrote against this page.
+        const report = await verifyPage(page, {
+            appUrl: '/career/setup/legacy',
+            hfwUrl: hfw,
+            rootSelector: '.canvas',
+        });
+        const filtered = report.computed.filter((entry) => entry.selector.includes('hrow-actions'));
+        expect(filtered, `computed drift: ${JSON.stringify(filtered)}`).toEqual([]);
     });
 });
 
@@ -244,7 +226,7 @@ test.describe('Setup step 5 — Support deck', () => {
         await expect(page.getByRole('heading', { name: 'Build the six-card deck', level: 1 })).toBeVisible();
         await expect(page.getByText('Step 5 of 6').first()).toBeVisible();
         await expect(
-            page.getByRole('navigation', { name: 'Setup steps' }).getByRole('listitem', { name: 'Support deck' }),
+            page.getByRole('navigation', { name: 'Setup steps' }).getByRole('listitem', { name: 'Deck' }),
         ).toHaveAttribute('aria-current', 'step');
 
         // No scenario in the draft yet, and the page says so through `AbsenceValue`'s disclosure:
@@ -367,9 +349,10 @@ test.describe('Setup step 5 — Support deck', () => {
     });
 
     test('carries the ancestry and the deck through the steps and writes no run behind them', async ({ page }) => {
-        // Step 4 first: one entered ancestry.
+        // Step 4 first: one recorded grade. The ancestry-entry half of this case retired with the
+        // step's editor (Phase D); the draft key it now proves carries is the Affinity grade.
         await hydrate(page, '/career/setup/legacy');
-        await page.locator('#ancestor-parent_a-0').fill('Grass Wonder');
+        await page.locator('#affinity').selectOption('◎');
         await page.getByRole('button', { name: 'Save Legacy' }).click();
         await expect(page.getByText('Legacy recorded.')).toBeVisible();
 
@@ -401,7 +384,7 @@ test.describe('Setup step 5 — Support deck', () => {
         // round trip uses the same door a Trainer uses.
         await page.getByRole('link', { name: 'Back', exact: true }).click();
         await page.locator('#app > *').first().waitFor();
-        await expect(page.locator('#ancestor-parent_a-0')).toHaveValue('Grass Wonder');
+        await expect(page.locator('#affinity')).toHaveValue('◎');
         await expect(page.getByText(/This setup already holds a Legacy/)).toBeVisible();
 
         // And forward again: the deck survived the round trip too.

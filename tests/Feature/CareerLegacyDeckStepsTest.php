@@ -90,7 +90,10 @@ function wizardFixture(): array
     return ['cards' => $cards, 'parents' => $parents, 'trainee' => Umamusume::factory()->create()];
 }
 
-it('renders the ancestry step with six nodes, the library it can pick from and nothing stored', function (): void {
+it('renders the legacy step with two empty parent slots, the library it can pick from and nothing stored', function (): void {
+    // Phase D: the six-node graph moved off this screen to `InheritanceEvent.vue:442-450`; the step
+    // renders the wireframe's two parent cards (`career-legacy.html:87-120`) and the `graph` prop is
+    // retired with the graph.
     $fixture = wizardFixture();
     SetupDraft::write(['umamusume_id' => $fixture['trainee']->id]);
 
@@ -103,24 +106,18 @@ it('renders the ancestry step with six nodes, the library it can pick from and n
             ->where('scenarioLabel', null)
             ->where('hasSelection', false)
             ->where('affinity', null)
-            // Six nodes, in the client's order, each with its two ancestors and no name until someone
-            // enters one. The trainee row is the draft's own choice, not a stored seventh node.
-            ->where('graph.trainee.name', $fixture['trainee']->name)
-            ->has('graph.parents', 2)
-            ->has('graph.parents.0.ancestors', 2)
-            ->where('graph.parents.0.slot', 'parent_a')
-            ->where('graph.parents.0.name', null)
-            ->where('graph.parents.0.rank', null)
-            ->where('graph.parents.1.ancestors.0.slot', 'Grandparent B1')
-            // The chance a Spark rolls is an absent value with its reason attached, never a number.
-            ->where('graph.parents.0.probability.value', null)
-            ->has('graph.parents.0.probability.title')
+            ->where('payload', null)
+            // Two slots, both empty until a library pick is made.
+            ->where('parentA', null)
+            ->where('parentB', null)
+            // The scenario ceilings and the stat matrix order the projected-start table reads out.
+            ->has('scenarioCaps', 5)
+            ->has('statOrder', 5)
             // Two library rows, and the pick controls select them by id.
             ->has('roster', 2)
             ->where('rosterTotal', 2)
             ->where('parents', [null, null])
             // The vocabularies arrive from their owners rather than being typed into the page.
-            ->where('sparkKinds', AncestryGraph::SPARK_KIND_LABELS)
             ->where('affinityGrades', LegacySelectionPayload::AFFINITY_GRADES)
             ->where('notice', LegacyController::RECORD_ONLY_NOTICE));
 
@@ -174,13 +171,19 @@ it('round-trips the six-node payload through the draft and reads it back on the 
             ->where('hasSelection', true)
             ->where('affinity', '◎')
             ->where('parents', $fixture['parents'])
-            ->where('graph.parents.0.rank', 4)
-            ->where('graph.parents.0.sparks.0.kind_label', 'Blue')
-            ->where('graph.parents.0.ancestors.1.name', 'Mill Raptor')
-            // A parent's name is read through the library row she was picked from, the same way the run
+            // The two parent cards carry what the recorded payload holds: rank, sparks, and each
+            // parent's name read through the library row she was picked from, the same way the run
             // screen reads it through its two foreign keys.
-            ->where('graph.parents.1.name', Veteran::find($fixture['parents'][1])->trainingRun->umamusume->name)
-            ->where('graph.parents.1.spark_counts.0.count', 0));
+            ->where('parentA.stars', 4)
+            ->where('parentA.sparks.0.family', 'Blue')
+            ->where('parentA.sparks.0.stat', 'Speed')
+            ->where('parentA.sparks.0.stars', 2)
+            ->where('parentA.name', Veteran::find($fixture['parents'][0])->trainingRun->umamusume->name)
+            ->where('parentB.name', Veteran::find($fixture['parents'][1])->trainingRun->umamusume->name)
+            ->where('parentB.sparks', [])
+            // The round-trip keeps the record whole: ancestors the run-scoped builder owns stay in the
+            // posted payload and read back unchanged even though this step no longer edits them.
+            ->where('payload.legacies.0.ancestors.1', 'Mill Raptor'));
 
     // The two steps wrote no run. `TrainingRun::count()` is not zero here because the fixture's own
     // `Veteran::factory()` rows each carry a Completed run (`VeteranFactory::definition()`), so the
@@ -469,7 +472,7 @@ it('keeps the ancestry and the deck through a visit to another step and back', f
     $this->get(route('career.legacy'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('graph.parents.0.ancestors.0.name', 'Grass Wonder')
+            ->where('payload.legacies.0.ancestors.0', 'Grass Wonder')
             ->where('parents.0', $fixture['parents'][0]));
 
     $this->get(route('career.deck'))
