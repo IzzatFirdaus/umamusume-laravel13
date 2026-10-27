@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ArtworkAssetController;
 use App\Http\Middleware\HandleInertiaRequests;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -35,6 +36,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             HandleInertiaRequests::class,
         ]);
+    })
+    ->withSchedule(function (Schedule $schedule): void {
+        // Independent Training plays out with the app closed (§1.1.7), so the scheduler is the only
+        // actor that closes a session whose 50-minute window has passed.
+        $schedule->command('independent-training:complete')->everyMinute();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Unified API error shape (ARCHITECTURE §4): { "error": { "code", "message" } }
