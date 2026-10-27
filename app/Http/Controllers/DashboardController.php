@@ -127,7 +127,7 @@ class DashboardController extends Controller
     private function activeCareer(): ?array
     {
         $run = TrainingRun::query()
-            ->with('umamusume')
+            ->with(['umamusume', 'independentTrainingRun'])
             ->where('status', RunStatus::Active)
             ->latest('id')
             ->first();
@@ -178,9 +178,34 @@ class DashboardController extends Controller
             // loopback mirror url resolved server-side, never composed in Vue (`ADR-0021` read half,
             // `DESIGN.md` §4.7); null is the mirror's normal partial answer and paints nothing.
             'artworkURL' => VeteranRow::portraitUrl($run),
+            // The Independent Training overlay (§1.1.7), when this run is an idle session. The card
+            // that reads it swaps the Resume action for the timer while the 50-minute window is open.
+            'indep' => $this->independentStatus($run),
             // "Resume" continues the career, so it opens the Cockpit (SCREEN-009, `SCR-CAR-011`), the
             // screen the run is read from every turn, not the record sheet that logs its turns.
             'resume_url' => route('runs.cockpit', $run),
+        ];
+    }
+
+    /**
+     * The Independent Training overlay's own state (§1.1.7), or null for a normal career. The timer card
+     * reads `in_progress` to swap the Resume action for the 50-minute window; `completes_at` is an
+     * ISO-8601 instant the client counts down from, and `policy_label` is the focus the Trainer fixed.
+     *
+     * @return array{in_progress: bool, completes_at: string|null, policy_label: string|null}|null
+     */
+    private function independentStatus(TrainingRun $run): ?array
+    {
+        $itr = $run->independentTrainingRun;
+
+        if ($itr === null) {
+            return null;
+        }
+
+        return [
+            'in_progress' => $itr->isInProgress(),
+            'completes_at' => $itr->completes_at?->toIso8601String(),
+            'policy_label' => $itr->policy->label(),
         ];
     }
 

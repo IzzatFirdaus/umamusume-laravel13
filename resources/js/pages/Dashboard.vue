@@ -57,6 +57,8 @@ interface ActiveCareer {
     resource: { label: string; value: number | null; value_hint: string } | null;
     resume_url: string;
     artworkURL: string | null;
+    /** Independent Training overlay (§1.1.7), present when this run is an idle session. */
+    indep: { in_progress: boolean; completes_at: string | null; policy_label: string | null } | null;
 }
 
 interface VeteranRow {
@@ -179,6 +181,22 @@ const tileGrid = computed<string>(() =>
 );
 
 const totalTurns = computed<number>(() => props.activeCareer?.total_turns ?? 0);
+
+// The 50-minute countdown for an Independent Training session (§1.1.7), computed from the stored
+// completion instant so it is correct on load without a poll. `mm:ss`, clamped at zero.
+const indepRemaining = computed<string | null>(() => {
+    const completes = props.activeCareer?.indep?.completes_at;
+
+    if (completes === null || completes === undefined) {
+        return null;
+    }
+
+    const seconds = Math.max(0, Math.floor((new Date(completes).getTime() - Date.now()) / 1000));
+    const mm = Math.floor(seconds / 60);
+    const ss = seconds % 60;
+
+    return `${mm}:${String(ss).padStart(2, '0')}`;
+});
 
 /*
  * The lede is the wireframe's own sentence with its three figures bound to live props
@@ -320,6 +338,18 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                                     reason="No turn has been logged, so this career is not standing anywhere on the calendar yet."
                                 />
                             </p>
+                            <!-- Independent Training (§1.1.7): while the 50-minute window is open the
+                                 Resume action yields the timer and the one-at-a-time rule. -->
+                            <template v-if="props.activeCareer.indep?.in_progress">
+                                <p class="mt-1 text-sm font-semibold text-ink-strong">
+                                    Independent Training in progress
+                                    <template v-if="props.activeCareer.indep.policy_label"> · {{ props.activeCareer.indep.policy_label }}</template>
+                                    <template v-if="indepRemaining !== null"> · {{ indepRemaining }} remaining</template>
+                                </p>
+                                <p class="mt-0.5 text-xs text-ink-muted">
+                                    You cannot start another training until this one completes.
+                                </p>
+                            </template>
                         </div>
                         <LinkButton :href="props.activeCareer.resume_url" variant="primary">Open cockpit</LinkButton>
                     </div>
