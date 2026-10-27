@@ -91,11 +91,10 @@ function stepClass(index: number): string[] {
  * user that the step changed: the URL moved, the headings did not. Two things fix that without
  * touching the shell.
  *
- *  - The step's `h1` takes focus. It is NOT moved: since 1.3 the heading sits in the shell's title
- *    band, and the shell decides whether that band is `#head` or `#title`. This finds whichever `h1`
- *    the page rendered, gives it `tabindex="-1"` so a heading can take programmatic focus, and focuses
- *    it. The attribute is added here rather than in `AppLayout` so the shell keeps owning position and
- *    this layout owns the wizard's own focus policy.
+ *  - The step's `h1` takes focus. It is NOT moved: the head band is the wizard's own (rendered inside
+ *    `main`, below the shell bar), so this finds whichever `h1` the band drew and gives it
+ *    `tabindex="-1"` so a heading can take programmatic focus, then focuses it. The attribute is added
+ *    here rather than in the band's markup so this layout keeps owning the wizard's own focus policy.
  *  - `document.title` becomes the step's title. The step label is the honest subject: a Trainer with
  *    six setup tabs open needs to tell them apart from the tab strip.
  *
@@ -105,11 +104,11 @@ function stepClass(index: number): string[] {
 onMounted(async () => {
     await nextTick();
 
-    // The shell renders the heading in its banner, but `#head` and `#title` are slot NAMES, not
-    // element ids: the first version queried `#head h1, #title h1` and matched nothing, which the
-    // spec caught as a missing tabindex rather than a missing heading. The heading is simply the
-    // page's one `h1`, which is the property `page-header.spec.ts` already guarantees on every
-    // pilot page.
+    // The wizard draws the heading in its own head band (inside `main`), whether the step rendered
+    // `PageHeader` or filled `#title`. `#head`/`#title` are slot NAMES, not element ids: the first
+    // version queried `#head h1, #title h1` and matched nothing, which the spec caught as a missing
+    // tabindex rather than a missing heading. The heading is simply the page's one `h1`, which
+    // `page-header.spec.ts` already guarantees on every pilot page.
     const heading = document.querySelector<HTMLElement>('main h1, h1');
 
     if (heading === null) {
@@ -133,13 +132,42 @@ onMounted(async () => {
 
 <template>
     <AppLayout>
-        <!-- A step that renders `PageHeader` supplies the whole title band through `#head`, the same
-             contract `AppLayout` documents for its own pages: the band renders `#head` or `#title`,
-             never both, so exactly one `h1` reaches the document. Step 6 adopted it; the `#title` path
-             stays for the five steps that still fill the band. -->
-        <template v-if="$slots.head" #head><slot name="head" /></template>
-        <template v-if="$slots.eyebrow && !$slots.head" #eyebrow><slot name="eyebrow" /></template>
-        <template v-if="!$slots.head" #title><slot name="title" /></template>
+        <!--
+          The head band, drawn INSIDE the canvas rather than in the shell's banner.
+
+          The HFW puts it there (`.main > .phead`), and `main` is the subtree the parity harness compares,
+          so the band has to render here for the shell to match its wireframe. Owner ruling 2026-10-27:
+          the wizard is the one surface whose `h1` sits in `main`; every other page keeps `PageHeader`
+          in the shell's `#head` and its heading in the banner. The shell layout is not edited.
+
+          A step that renders `PageHeader` (1 and 6) supplies the band through `#head` and the component
+          carries its own markers; the other five fill `#eyebrow`/`#title` and the band below draws the
+          same marker skeleton around them. Either way the position is visible text in
+          `.hrow-actions > .hrow-position`, which is where the wireframe puts it.
+        -->
+        <template v-if="$slots.head"><slot name="head" /></template>
+        <div v-else data-region="phead">
+            <p
+                v-if="$slots.eyebrow"
+                data-region="eyebrow"
+                class="text-xs font-extrabold uppercase tracking-[0.12em] text-ink-muted"
+            >
+                <slot name="eyebrow" />
+            </p>
+            <div data-region="hrow" class="flex flex-wrap items-end justify-between gap-x-5 gap-y-3">
+                <h1
+                    tabindex="-1"
+                    class="mt-[7px] min-w-0 truncate text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong"
+                >
+                    <slot name="title" />
+                </h1>
+                <div data-region="hrow-actions" class="flex flex-wrap items-center gap-2 pb-1 md:shrink-0">
+                    <span data-region="hrow-position" class="text-xs text-ink-muted">Step {{ props.step }} of {{ steps.length }}</span>
+                    <slot name="actions" />
+                </div>
+            </div>
+            <div class="mt-4 border-t border-rule-soft" aria-hidden="true" data-region="hr" />
+        </div>
 
         <!-- The step list is the wireframe's stepper: a status readout, not a second navigation.
              `aria-current="step"` carries the position for assistive tech (WCAG 1.4.1), and the four
@@ -152,34 +180,32 @@ onMounted(async () => {
              `@3xl:`/`@4xl:` step layouts - see the note on `wrapperClass` above), so the sticky
              containing block moves with the page instead of the scrollport and the nav scrolled away
              with everything else. `tests/browser/containment.spec.ts` pins the current behaviour. -->
-        <nav aria-label="Setup steps" class="mb-4">
-            <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
-                <div class="stepper" role="list" data-setup-steps>
-                    <span
-                        v-for="(item, index) in steps"
-                        :key="item.label"
-                        role="listitem"
-                        :class="['step', ...stepClass(index)]"
-                        :aria-current="index + 1 === props.step ? 'step' : undefined"
-                        :aria-label="item.label"
-                    >
-                        <span class="n" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
-                    </span>
+        <div :class="wrapperClass" class="@container" data-layout-container data-region="canvas">
+            <nav aria-label="Setup steps" class="mb-4">
+                <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+                    <div class="stepper" role="list" data-setup-steps>
+                        <span
+                            v-for="(item, index) in steps"
+                            :key="item.label"
+                            role="listitem"
+                            :class="['step', ...stepClass(index)]"
+                            :aria-current="index + 1 === props.step ? 'step' : undefined"
+                            :aria-label="item.label"
+                        >
+                            <span class="n" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
+                        </span>
+                    </div>
+                    <Link href="/" :class="leaveLink">Leave setup</Link>
                 </div>
-                <Link href="/" :class="leaveLink">Leave setup</Link>
-            </div>
 
-            <p class="sr-only">Step {{ props.step }} of {{ steps.length }}</p>
+                <div class="step-legend" aria-hidden="true">
+                    <span><i class="l-done" />Saved</span>
+                    <span><i class="l-partial" />Started unfinished</span>
+                    <span><i class="l-empty" />Not started</span>
+                    <span><i class="l-current" />Current</span>
+                </div>
+            </nav>
 
-            <div class="step-legend" aria-hidden="true">
-                <span><i class="l-done" />Saved</span>
-                <span><i class="l-partial" />Started unfinished</span>
-                <span><i class="l-empty" />Not started</span>
-                <span><i class="l-current" />Current</span>
-            </div>
-        </nav>
-
-        <div :class="wrapperClass" class="@container" data-layout-container>
             <!--
               What the Trainer has already decided, above the step they are on. The three steps that
               landed first each printed their own "Stored choice:" line, so a Trainer on step 4 could
@@ -189,15 +215,6 @@ onMounted(async () => {
             <ChoicesSoFar v-if="props.choices" :choices="props.choices" />
 
             <slot />
-
-            <!--
-              The action bar, when a step wants the shell to own it. The steps that landed before
-              this slice render `StickyFooter` themselves (it has to be the root element of whatever
-              holds it, so wrapping one here would break its own sticky range); a step from 3.2 onward
-              can fill `#actions` instead and the shell places it at the foot of the step content.
-              Empty for every current step, so nothing renders and nothing moves.
-            -->
-            <slot name="actions" />
         </div>
     </AppLayout>
 </template>

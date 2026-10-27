@@ -358,6 +358,7 @@ const CAREER_TURNS = 72;
                 eyebrow="New career"
                 title="Before the first turn"
                 description="One screen listing what will be created, what the run will be measured against, and the things worth knowing before you commit."
+                position="Step 6 of 6"
             />
         </template>
 

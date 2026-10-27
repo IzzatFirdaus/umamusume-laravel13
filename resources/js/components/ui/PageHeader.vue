@@ -21,35 +21,60 @@ withDefaults(
         eyebrow?: string;
         /** Optional one-line sentence under the name, held to a readable measure. */
         description?: string;
+        /**
+         * The step position, e.g. "Step 1 of 6". The wizard supplies it: the HFW puts the position in
+         * the head band's action row (`.hrow-actions > .hrow-position`) rather than in a save bar, and
+         * the parity harness reads it there.
+         */
+        position?: string;
     }>(),
-    { eyebrow: undefined, description: undefined },
+    { eyebrow: undefined, description: undefined, position: undefined },
 );
 </script>
 
 <template>
-    <div class="flex flex-wrap items-end justify-between gap-x-5 gap-y-3">
-        <div class="min-w-0 max-w-prose">
-            <p
-                v-if="eyebrow"
-                class="text-xs font-extrabold uppercase tracking-[0.12em] text-ink-muted"
+    <!--
+      The HFW's head band shape: `.phead > .eyebrow, .hrow, .hr` (`.hrow > [h1 + .lede], .hrow-actions`).
+      The markers are `data-region` because the app draws this band with Tailwind utilities rather than
+      the corpus' classes, and the wizard parity harness compares rendered markers, not Tailwind strings
+      (`tests/browser/fixtures/hfw-structure.ts`).
+
+      The eyebrow is a sibling ABOVE `.hrow`, not a line inside the title block: the wireframe draws it
+      that way and the harness compares marker order, so nesting it would report a false divergence. The
+      visual result is unchanged (the eyebrow is a full-width 12px line either way and the h1 keeps its
+      7px offset).
+    -->
+    <div data-region="phead">
+        <p
+            v-if="eyebrow"
+            data-region="eyebrow"
+            class="text-xs font-extrabold uppercase tracking-[0.12em] text-ink-muted"
+        >
+            {{ eyebrow }}
+        </p>
+        <div data-region="hrow" class="flex flex-wrap items-end justify-between gap-x-5 gap-y-3">
+            <div class="min-w-0 max-w-prose">
+                <!-- `tabindex="-1"` so a route change can move focus here rather than leaving it on the
+                     link that was clicked; the heading is not in the tab order otherwise (WCAG 2.4.3).
+                     No `focus:outline-none`: a focused element must never lose its indicator (WCAG 2.4.7),
+                     and the app-wide `:focus-visible` ring in app.css already draws it. -->
+                <h1 tabindex="-1" class="mt-[7px] truncate text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong">
+                    {{ title }}
+                </h1>
+                <p v-if="description" data-region="lede" class="mt-[5px] text-[13px] text-ink-muted">
+                    {{ description }}
+                </p>
+            </div>
+            <div
+                v-if="$slots.actions || position"
+                data-region="hrow-actions"
+                class="flex flex-wrap items-center gap-2 pb-1 md:shrink-0"
             >
-                {{ eyebrow }}
-            </p>
-            <!-- `tabindex="-1"` so a route change can move focus here rather than leaving it on the
-                 link that was clicked; the heading is not in the tab order otherwise (WCAG 2.4.3).
-                 No `focus:outline-none`: a focused element must never lose its indicator (WCAG 2.4.7),
-                 and the app-wide `:focus-visible` ring in app.css already draws it. -->
-            <h1 tabindex="-1" class="mt-[7px] truncate text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong">
-                {{ title }}
-            </h1>
-            <p v-if="description" class="mt-[5px] text-[13px] text-ink-muted">
-                {{ description }}
-            </p>
-        </div>
-        <div v-if="$slots.actions" class="flex flex-wrap items-center gap-2 pb-1 md:shrink-0">
-            <slot name="actions" />
+                <span v-if="position" data-region="hrow-position" class="text-xs text-ink-muted">{{ position }}</span>
+                <slot name="actions" />
+            </div>
         </div>
         <!-- The HFW's hairline closes the head band (`.phead .hr`): 16px of air, then one rule. -->
-        <div class="mt-4 basis-full border-t border-rule-soft" aria-hidden="true" data-page-head-rule />
+        <div class="mt-4 border-t border-rule-soft" aria-hidden="true" data-page-head-rule data-region="hr" />
     </div>
 </template>

@@ -339,7 +339,7 @@ function removeAt(index: number): void {
 <template>
     <SetupLayout :step="3" :visited="props.visited" :saved="props.saved" :choices="props.choices">
         <Head title="Your target" />
-        <template #eyebrow>Setup · Step 3 of 6</template>
+        <template #eyebrow>New career</template>
         <template #title>Your target</template>
 
         <!-- No breadcrumb: "← Back to target" pointed at this same URL, a control that navigates to the

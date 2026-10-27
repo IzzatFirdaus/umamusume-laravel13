@@ -336,7 +336,7 @@ const sortLabel = computed(
 <template>
     <SetupLayout :step="2" :visited="props.visited" :saved="props.saved" :choices="props.choices">
         <Head title="Choose a trainee" />
-        <template #eyebrow>Setup · Step 2 of 6</template>
+        <template #eyebrow>New career</template>
         <template #title>Choose a trainee</template>
 
         <!-- No breadcrumb: "Back to trainee" pointed at this same URL. The step bar above lists all

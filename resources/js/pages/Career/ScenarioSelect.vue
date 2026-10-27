@@ -159,9 +159,9 @@ const ruleFamilyTitle = 'How this scenario advances its training facility level,
                 eyebrow="New career"
                 title="Which scenario is this run?"
                 description="The scenario decides which panels the cockpit composes, which caps apply, and which systems exist. It cannot be changed after the first turn."
+                position="Step 1 of 6"
             >
                 <template #actions>
-                    <span class="self-center text-xs text-ink-muted">Step 1 of 6</span>
                     <LinkButton href="/" variant="secondary">Cancel</LinkButton>
                     <!-- One filled action (HFW annotation: "Continue to trainee" is the only filled
                          button; Cancel is an outline). Disabled until a card holds, because the next

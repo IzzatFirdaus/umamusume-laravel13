@@ -239,7 +239,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
 <template>
     <SetupLayout :step="4" :visited="props.visited" :saved="props.saved">
         <Head title="Legacy" />
-        <template #eyebrow>Setup · Step 4 of 6</template>
+        <template #eyebrow>New career</template>
         <template #title>Legacy</template>
 
         <!-- No breadcrumb: "← Back to legacy" pointed at this same URL, and its `Link` was never

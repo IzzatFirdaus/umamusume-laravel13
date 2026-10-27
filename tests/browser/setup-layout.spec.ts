@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { SHELL_MARKERS, assertStructurallyEqual, capture } from './fixtures/hfw-structure';
 
 /*
  * The setup wizard's shell, SetupLayout (`ADR-0020` §1; plan §5 Slice 4).
@@ -43,5 +46,36 @@ test.describe('SetupLayout shell', () => {
         // No save-bar markup on any wizard page: the one primary action is the page-head Continue.
         await expect(page.locator('[data-save-bar], .save-bar')).toHaveCount(0);
         await expect(page.locator('footer [role="toolbar"], [data-setup-save]')).toHaveCount(0);
+    });
+
+    /*
+     * The shell, measured against the wireframe rather than read off the source.
+     *
+     * The comparison is over `SHELL_MARKERS` on purpose: the step body (its cards, notes and pills) is
+     * each page's own case, so gating the shell on a page-body marker would make this case fail for a
+     * reason this file does not own. `main` is the captured subtree on both sides
+     * (`docs/design-research/frontend-v2-wireframes/career-scenario.html`).
+     */
+    test('renders the HFW shell structure', async ({ page }) => {
+        const hfw = pathToFileURL(
+            resolve(process.cwd(), 'docs/design-research/frontend-v2-wireframes/career-scenario.html'),
+        ).href;
+
+        await page.goto('/career/setup/scenario');
+        await page.locator('#app > *').first().waitFor();
+        const app = await capture(page, 'main', { markers: SHELL_MARKERS, slug: 'scenario', side: 'app' });
+
+        await page.goto(hfw);
+        const wireframe = await capture(page, 'main', { markers: SHELL_MARKERS, slug: 'scenario', side: 'hfw' });
+
+        /*
+         * No `rect` here, unlike the instruction's sketch. The captured root is the whole of `main`, and
+         * its HEIGHT is not a structural property: the app renders a live draft strip, a real step body
+         * and the shell's own chrome, while the wireframe is a static document, so the two heights
+         * differ by design (measured 2026-10-27: width matched inside 40px, height differed by 243px).
+         * A height tolerance on this root would assert that the page is a wireframe, which is not the
+         * claim. Per-card sizes are compared where a card is the captured root.
+         */
+        assertStructurallyEqual(app, wireframe, { regions: 'subset', grid: true });
     });
 });

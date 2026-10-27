@@ -224,8 +224,9 @@ export function assertStructurallyEqual(
         const tol = opts.rect.tol ?? 0;
         const dw = Math.abs(app.rect.w - hfw.rect.w);
         const dh = Math.abs(app.rect.h - hfw.rect.h);
+        const boxes = `app=${Math.round(app.rect.w)}x${Math.round(app.rect.h)} hfw=${Math.round(hfw.rect.w)}x${Math.round(hfw.rect.h)}`;
 
-        expect(dw, `width differs by ${Math.round(dw)}px (tolerance ${tol})`).toBeLessThanOrEqual(tol);
-        expect(dh, `height differs by ${Math.round(dh)}px (tolerance ${tol})`).toBeLessThanOrEqual(tol);
+        expect(dw, `width differs by ${Math.round(dw)}px (tolerance ${tol}); ${boxes}`).toBeLessThanOrEqual(tol);
+        expect(dh, `height differs by ${Math.round(dh)}px (tolerance ${tol}); ${boxes}`).toBeLessThanOrEqual(tol);
     }
 }

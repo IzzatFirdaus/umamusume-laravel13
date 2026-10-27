@@ -313,7 +313,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
 <template>
     <SetupLayout :step="5" :visited="props.visited" :saved="props.saved">
         <Head title="Build the six-card deck" />
-        <template #eyebrow>New career · Step 5 of 6</template>
+        <template #eyebrow>New career</template>
         <template #title>Build the six-card deck</template>
 
         <!-- No breadcrumb: "← Back to deck" pointed at this same URL, and its `Link` was never
