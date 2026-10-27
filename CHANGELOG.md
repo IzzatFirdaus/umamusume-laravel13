@@ -47,6 +47,33 @@ markup, a derived prop, or a test.
 - **Legacy compare: absence reasons are text** - the two rank rows, the Spark-count split and the Spark
   chance row carried their reasons in `title` only; they now print them.
 
+### Added in the gate close-out (same release, second commit series)
+
+- **Legacy Lab: saved pairs** (S7.1) - `LegacyController@index` projects every run that carries a
+  `legacy_selection` as one pair (two parents, the blue grades, the pink range and the hint families), and
+  the browse page lists them under **Saved legacies** above the Veteran library. Additive and read-only:
+  no table, no write, no score.
+- **Inheritance: slot-open nodes and Skip this moment** (S7.2, corrected page) - the ancestry now draws
+  both grandparent slots per parent, with an unfilled slot dashed and labelled **slot open**, and the
+  screen offers **Skip this moment** because inheritance is optional at all three of its moments. The
+  phrases live in `inheritance.html`, not in any Legacy page.
+- **Database: one grouped count query** (S9.1) - the hub's four live area counts come from one
+  `UNION ALL` instead of four round trips, pinned by `DatabaseIndexCountsTest`.
+- **Database: strip and breadcrumb on every area page** (S9.3) - `Skills`, `Supports` and `Trainees` were
+  the three areas without the shared sub-navigation strip, and only the hub carried a breadcrumb; all
+  nine now carry both.
+- **Error pages: three exits each** (S11.3) - the 419 gained a Careers door and the 500 a Database door,
+  so every document offers one filled action and two outline ones. Pinned by `ErrorPageCopyTest` (all
+  three views) and `errors.spec.ts` (the reachable 404).
+- **Cockpit: the support-data note** (S5.4/S5.5) - the HFW's `.mockbar` states that its support data is
+  illustrative; the bar is a wireframe artifact, so the same warning ships as a `.note` on the scenario
+  card for Trackblazer and Our Grand Concert, naming the scenario matrix's own verification stamp.
+- New browser specs: `cockpit-shell.spec.ts`, `legacy-index.spec.ts`, `database-subpages.spec.ts`,
+  `errors.spec.ts`.
+- **Rendered copy: no dash glyphs** - the `Nothing decisive —` line, the Careers `Trainee A–Z` option,
+  the Legacy `1–3 hint levels` cell and the pair projection's `★1–★2` range now use words or a plain
+  hyphen, because `RenderedCopyHygieneTest` bans em and en dashes in shipped copy.
+
 ### Documentation
 
 - `docs/proposals/frontend-development-update-plan.md` - **DM-3 amended**: four family roles across

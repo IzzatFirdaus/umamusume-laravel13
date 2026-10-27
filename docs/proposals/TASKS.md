@@ -692,6 +692,151 @@ The commit's subject acquired a UTF-8 BOM from `Out-File -Encoding utf8` on firs
 once, immediately, with a BOM-free writer to strip it. The amended hash is the one above; the original
 `0fa022ef` never left this branch.
 
+### Attribution incident — this hand-back is committed under `ad876208`, not `0201d8e7`
+
+Recorded rather than repaired. While this close-out was running, a peer committed `ad876208`
+(`feat(legacy,inheritance,database,errors): … (S7.1, S9.1, S9.3, S11.3)`) onto the same branch. A
+subsequent `git commit --amend --no-edit` — intended to fold this hand-back into `0201d8e7` — amended
+the peer's HEAD instead, because the peer's commit had landed in the interim. Result: **the hand-back
+section you are reading lives in `ad876208`**, whose message is the peer's and says nothing about ST-4.
+
+What is and is not affected:
+
+- `0201d8e7` itself is intact and unmodified: same 16 files, same stat, same subject, and it is still
+  the commit that carries every ST-4 code and spec change. Its `--stat` shows no peer file.
+- The peer's code changes are untouched — only a docs file was appended to their commit.
+- Nothing was reset, rebased, or force-pushed; `85d24959`, `c2c72c13`, `1ca9caa3` all still resolve
+  as ancestors.
+
+Not repaired because repairing it means rewriting a commit this sub-task does not own (`git reset` +
+recommit of `ad876208`), which the close-out brief forbids. The main session owns whichever of these it
+prefers: (a) leave it, accepting that an ST-4 docs section rides a peer commit; or (b) rewrite
+`ad876208` to drop the `TASKS.md` hunk and re-land it under an ST-4 subject. Option (a) is what stands.
+
+---
+
+# Round 4 — gates, sweeps and the re-cut (2026-10-27 12:00 +08)
+
+Session: `hf-gates-and-slices-2026-10-27`. The sections above are round 3's; the §1.5/Gate/Report
+sections below are this session's, appended rather than interleaved so no peer write is overwritten.
+
+**Attribution incident observed and accepted.** My first slice commit was amended by the ST-4 session
+into `ad876208` (their note above says so), so the commit carrying this session's S7.1/S9.1/S9.3/S11.3
+work is `ad876208`, not the hash it was created under. Its tree is intact; only a docs file was appended.
+Not repaired: rewriting it means rewriting a commit this session does not own.
+
+## Phase 7.4 gates — 2026-10-27
+
+Worktree `D:\Projects\td-release` at **`06642b9d`** (branch `master`), `node_modules`/`vendor` junctions,
+`storage`/`.env` copied, built there.
+
+| Gate | Result |
+|---|---|
+| `npm run typecheck` | **exit 0** |
+| `npm run lint:ui` | **exit 0, no `[debt-increase]` line** — the clean tree is inside the 219 baseline; the 220th finding the working tree reports is the peer's `Review/Index.vue:300` |
+| `npm run build` | **exit 0** |
+| `vendor/bin/pint --test --format agent` (session PHP paths) | **passed**; it fixed `unary_operator_spaces`/`no_unused_imports` in `DatabaseController.php`, and the fixed file is mirrored into the gate tree so the tagged content is the gated content |
+| `vendor/bin/phpstan analyse` (session `app` paths) | **No errors**, level 6. Tests are outside phpstan's scope by config (`paths: app`), proven by analysing an accepted control file and getting 61 `method.notFound` errors the gate never asks for |
+| `php tools/lore.php` | **11 hits / 7 files**, none in shipped vocabulary; delta unknown (no baseline figure in context) |
+| `node tools/ui-framework-audit.mjs` | the `UNVERIFIED` path is pinned by `FrameworkAuditExitTest` (exit 2, reason printed); against a live server it is **not run** |
+| `php artisan test` (full, session tree) | **1994 passed, 15 failed, every failure attributed below — 0 this session's** |
+| `npx playwright test` (full, gate worktree) | **603 tests** — result recorded in the run note below |
+
+**Pest in a worktree is unusable on this host, recorded rather than worked around.** `php artisan test`
+inside `../td-release` produced 1589 instant failures with `A facade root has not been set`
+(`LessonEvidenceBoundaryTest.php:46`), and the same subset in a second throwaway worktree failed 71
+tests with **0 assertions**. The Pest gate therefore ran in the session tree, and the citation census —
+pure git — ran in a throwaway worktree for attribution.
+
+**The 15 Pest failures, attributed:**
+
+| Test | Cause | Evidence |
+|---|---|---|
+| `DocCitationParityTest` (754 dead vs 708 baseline) | **pre-existing** | `python tools/doc_census.py` in a throwaway worktree at `1ca9caa3` (before any of this session's work) also reads **754**. The dead targets are repo-wide rot — `CONSTRAINTS.md` (147), `PLAN.md` (48), `RAW-FINDINGS.md` (25) |
+| `DesignTokensTest` ×2 (95 tokens vs 94), `DesignDocEnforcementTest` | peer WIP `resources/css/app.css` (` M`) | the count reads the working-tree stylesheet |
+| `KeyboardPathTest` ×2, `RulesetVersionVocabularyTest`, `SupportDeckBuilderTest` | peer commit **`0201d8e7` (ST-4)** | the failures quote `AppLayout.vue` and the career pages' new opening (`const { visiting, visitFailed } = useVisitState();`); those files are committed, so the regression is committed peer work |
+| `NoStaleRunRecordLinksTest`, `EmptyStateCommandNamesTest` | peer commit `0201d8e7` | run doors and the README Web-surface table moved with ST-4 |
+| `FrontendAuditFixesTest` | peer WIP `SupportCardController`/`SupportCardEffects` | the failure names `SupportCardController.php`, a file this session never opened |
+| `RenderedCopyHygieneTest` (em dash) | peer-dirty pages (BuildTarget, DeckSelect, LegacySelect, TraineeProfile, Review/Detail, Review/Index, Veterans/Show) + committed `CareerTimeline`/`SupportSlot` | this session's own dashes are fixed: `Nothing decisive:`, `Trainee A-Z`, `1 to 3 hint levels`, `★1 to ★2`; the earlier run listed `Legacy/Compare.vue`, `Legacy/Index.vue` and `Runs/Index.vue`, and none appears now |
+
+**Two regressions this session introduced and fixed before the tag:** the nine Database pages were
+re-encoded as mojibake by a PowerShell string edit (caught by `RenderedCopyHygieneTest`'s
+double-encoded-UTF-8 case; repaired by restoring from `ad876208~1`'s parent and re-applying the edits
+through Node, which decodes and re-encodes UTF-8), and the new support-data note broke the Trackblazer
+320px reflow (`trackblazer-panel.spec.ts:430`), fixed by removing the unbreakable path token from the copy.
+
+## Final report — 2026-10-27
+
+**1. Per-slice status.** S3 (round 3) done; S5.1–S5.6 done (S5.1–S5.5 verified as already satisfied,
+S5.6 landed in round 3, the shell spec and the support-data note landed here); S7.1 done; S7.2 **blocked** on
+`legacy_selection`'s payload shape; S7.3 done (round 3); S8 verified, no change needed; S9.1/S9.3 done;
+S9.2 done (round 3 + the strip/breadcrumb here); S11.1 verified; S11.3 done (three exits each).
+Veterans and TraineeProfile remain blocked on peer-dirty files.
+
+**2. `DOMAIN OVERRIDE` inventory.** 10 sites: DM-1 ×2 (`CareerTimeline.vue:9`, `Career/Timeline.vue:184`),
+DM-3 ×3 (`Career/InheritanceEvent.vue:318`, `Career/LegacySelect.vue:611`, `Legacy/Index.vue:354`),
+DM-8 ×2 (`Career/DeckSelect.vue:370`, `components/support/SupportSlot.vue:171`), plus three copy-only
+overrides that name no DM (`Legacy/Index.vue:334`, `Runs/Import.vue:335`, `:519`). This session added one
+`HFW OVERRIDE (copy, not visual)` on the Cockpit's scenario card.
+
+**3. Tests written.** `cockpit-shell.spec.ts` (4), `legacy-index.spec.ts` (1), `database-subpages.spec.ts`
+(10), `errors.spec.ts` (1), `DatabaseIndexCountsTest.php` (2), `ErrorPageCopyTest.php` (4).
+**Rewritten:** `cockpit-shell.spec.ts` twice (the column-geometry assertion and a turn write for the
+one-primary check) — both were my own wrong assumptions, corrected rather than weakened.
+**Retired:** none.
+
+**4. Changed files.** Shell/pages: `Career/InheritanceEvent.vue`, `Career/Cockpit.vue`, `Legacy/Index.vue`,
+`Legacy/Compare.vue`, `Runs/Index.vue`, the nine `Database/*.vue`. Controller: `LegacyController`,
+`DatabaseController`. Views: `errors/419`, `errors/500`. Tests: the six above. Docs: `TASKS.md`,
+`frontend-development-update-plan.md`, `CHANGELOG.md`.
+
+**5. Commands and results.** Every command and its output is in the gate table above and in the phase
+sections; logs were written per run and quoted here rather than attached.
+
+**6. Commits.** `1ca9caa3` (tag resolution + peer remeasure), `ad876208` (slice work, amended by the ST-4
+session), `06642b9d` (encoding repair, dash removal, phpstan typing), plus the docs commit at the end.
+Tag: `3.0.0` deleted and re-cut per §1.2 — see the tag section above and the release note below.
+
+**7. The 46-baseline re-check.** Not produced as a table this session: the full browser suite is the only
+instrument that can name per-spec:line results, and its run is recorded below. Round 3's batch already
+showed `ura-panel`, `unity-cup-panel`, `trackblazer-panel` and `grand-concert-panel` green, which is 8+3+2
+of the 46; those remain closed.
+
+**8. Visual-verification blocker.** Screenshots remain unavailable; every acceptance criterion above is a
+DOM measurement (`getBoundingClientRect`, `getComputedStyle`, class tokens, text assertions), named per
+slice in the phase tables.
+
+**9. Safe defaults chosen.** Resolution A for the tag (delete, re-cut); Path B for the lint baseline
+(no bump while the peer file is dirty); "three exits" implemented as one filled + two outline on all
+three error documents; the honesty column filed rather than fabricated; DM-6 filed rather than guessed.
+
+**10. Prior-session claims re-verified.** Round 3's `career-training-detail` 21 and
+`career-deck-select` 14 both reproduce at `1ca9caa3` (35 passed, 5.1m); `FrameworkAuditExit` 1 passed.
+`runs-create-forms:48` stays green per round 3 and was not re-attributed.
+
+**11. Plan amendments.** One block appended to `frontend-development-update-plan.md` recording DM-3's
+five keys, S7.2's payload block, the corrected page for "Skip this moment"/"slot open", the framework
+audit's exit code needing no erratum, and the two filed deviations.
+
+**12. Tag resolution.** Recorded at the top of this round-4 section with all four command outputs;
+`3.0.0` was deleted (`was 7d7f783b`, target `c2c72c13`) and is re-cut by §7.6 on the gated commit.
+
+**13. Deferred items.** A blocked (payload shape), B closed (landed on the Inheritance screen), C closed
+(date sourced from `config/scenarios.php`), D blocked (peer-dirty, mtimes recorded), E blocked (peer-dirty;
+the clean tree is green, so no bump is owed).
+
+**14. Foreign files at hand-back.** `Career/TraineeProfile.vue` (01:44:01), `Veterans/Index.vue` (01:57:52),
+`Veterans/Show.vue` (02:01:16), `Review/Index.vue` (02:37:50) — all still ` M`, plus the peer work that
+arrived during the session (`SkillsPlanner*`, `SupportCardEffects`, `config/uma.php`, `docs/adr/0011`,
+`docs/adr/0029`, `Review/Detail.vue`, two test files). None was edited by this session.
+
+**15. `85d24959`** remains round 1's home; it was read for blame only and never reset, rebased, split or
+amended.
+
+**16. Worktrees.** `../td-release` is removed at the end of the session; `../td-base`, `../td-slice1`,
+`../td-rel4`, `../td-census` and `../td-attrib` were removed as they were finished with.
+
+
 
 
 

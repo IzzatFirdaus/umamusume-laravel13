@@ -8,6 +8,32 @@
 artifact; where its visuals contradict a verified game mechanic, **the mechanic wins** and the
 deviation is marked in the Vue template with `<!-- DOMAIN OVERRIDE: [reason] -->`.
 
+> **Amended 2026-10-27 (v3.0.0 close-out session, `hf-gates-and-slices-2026-10-27`).** Four
+> corrections, each with the evidence that produced it:
+>
+> 1. **DM-3 reads "four family roles across five colour keys"** (amended 2026-10-27, commit
+>    `70631a60`): `LegacySelectionPayload::SPARK_KINDS` is `blue, pink, green, white, scenario`, and
+>    `white` is one label over two dataset categories. §13 DM-3's acceptance therefore means all five
+>    keys render, not four.
+> 2. **S7.2's "one spark per parent by radio" is not a UI slice.** `training_runs.legacy_selection` is
+>    one column holding one selection (`ADR-0010`), read through
+>    `TrainingRun::legacySelection()`; there is no per-run candidate-spark catalogue and no pair table,
+>    so radios choosing *one stored spark* would change what the column stores and what
+>    `StoreLegacySelectionRequest` accepts. Filed, not built.
+> 3. **"Skip this moment" and "slot open" belong to `inheritance.html`, not to any Legacy page.** The
+>    phrases exist (7 hits, all in `inheritance.html`), so round 3's "no such phrase" note was scoped
+>    too narrowly; the slice landed on `Career/InheritanceEvent.vue` instead of `Legacy/Builder.vue`.
+> 4. **The framework audit's exit code is not in this plan**, so no erratum is owed: the ported
+>    `tools/ui-framework-audit.mjs` already exits **2** with `UNVERIFIED` when Playwright or Chromium is
+>    absent, and `tests/Feature/FrameworkAuditExitTest.php` pins that. The earlier instruction's
+>    "exits 0" reading was of the upstream HFW copy under `docs/design-research/`, not of the tool.
+>
+> Deviations recorded rather than built: the "Effects documented?" column on Races/Events/ShopItems
+> (no per-row flag in those payloads; each row's own `N/A` plus reason is the same honesty at the grain
+> the data has), and DM-6's four running strategies (they live in the wizard's build-target selects,
+> which were peer-dirty this session).
+
+
 ---
 
 ## 0. Purpose and contract
