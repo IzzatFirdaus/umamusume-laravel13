@@ -1,4 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { assertStructurallyEqual, capture } from './fixtures/hfw-structure';
+import { captureBoth } from './fixtures/wizard-screenshots';
 
 /*
  * Rendered-copy, state and accessibility evidence for SCREEN-005 (Build Target) and the shared
@@ -244,5 +248,40 @@ test.describe('Build Target and the provenance badge', () => {
         await expect(page.getByRole('img', { name: 'Calculated' })).toBeVisible();
 
         expect(consoleErrors, `console errors: ${consoleErrors.join(' | ')}`).toEqual([]);
+    });
+
+    /*
+     * The step body, measured against the wireframe rather than read off the source (see the scenario
+     * step's case for the harness contract). `.canvas` on both sides; `regions: 'subset'` requires the
+     * wireframe's markers in order — the warn, the `.g-side` grid, the stat card with its five fields and
+     * its totals rows and note, then the Distance card with its note, the Stamina floor card and the
+     * Saved default card. `grid: true` compares the first grid's track count at 1280, which is the
+     * two-column shell on both sides.
+     */
+    test('renders the two-column g-side shell, HFW structure', async ({ page }) => {
+        const hfw = pathToFileURL(
+            resolve(process.cwd(), 'docs/design-research/frontend-v2-wireframes/career-target.html'),
+        ).href;
+
+        await page.goto('/career/setup/target');
+        await page.locator('#app > *').first().waitFor();
+        const app = await capture(page, '.canvas', { slug: 'target', side: 'app' });
+
+        // Caught by the side-by-side pass, not by the structure: the step's subject line printed twice,
+        // once from a leftover `<header>` block and once from the intro paragraph. The wireframe says it
+        // once, under the name. Pinned so the duplicate cannot come back. Asserted while still on the
+        // app page: the comparison below navigates to the wireframe, where the sentence does not exist.
+        await expect(page.getByText('The target is what this career is built to reach')).toHaveCount(1);
+
+        await page.goto(hfw);
+        const wireframe = await capture(page, '.canvas', { slug: 'target', side: 'hfw' });
+
+        assertStructurallyEqual(app, wireframe, { regions: 'subset', grid: true });
+
+        // The 390 pair alongside the 1280 pair, so the side-by-side pass sees both viewports. Gated on
+        // the same flag the structural capture uses, so a plain suite run writes no PNGs.
+        if (process.env.WIZARD_SCREENSHOTS === '1') {
+            await captureBoth(page, 'target');
+        }
     });
 });

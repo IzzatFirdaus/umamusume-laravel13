@@ -346,12 +346,6 @@ function removeAt(index: number): void {
              page it is on. The step bar above lists all six steps and the carried-choices strip states
              the scenario and the trainee, so nothing is lost. Steps 1 and 2 carry the same note. -->
 
-        <!-- The position is carried by the eyebrow in the title band above, so this block only adds
-             the subject line. -->
-        <header class="mb-4">
-            <p class="mt-1 text-sm text-ink-muted">The target is what this career is built to reach.</p>
-        </header>
-
         <!-- The wireframe's labelled-defect pattern, kept in its shape. It states the failure the step
              exists to prevent rather than describing the implementation: a career whose target was never
              entered reads as a career with no goal at the moment it is committed. -->
@@ -411,7 +405,16 @@ function removeAt(index: number): void {
              letting the server refuse with its named bound, which is the message this page renders
              with its own `aria-describedby` and focus. -->
         <form class="mt-5 mx-auto max-w-4xl space-y-6" novalidate @submit.prevent="submit">
-            <fieldset class="rounded-lg border border-rule bg-panel p-4">
+            <!--
+              The wireframe's two-column canvas. `.g-side` is `minmax(0,2.1fr) minmax(0,1fr)` and it
+              collapses below 821px (frontend-v2-wireframes/assets/shell.css:404,406), so both the
+              breakpoint and the proportions are the wireframe's own rather than a separate measure:
+              the same reason the card grid keeps `min-[821px]:`. The blocks sit at their existing
+              indentation so the move reads as two wrapper lines rather than a re-indent of the form.
+            -->
+            <div class="grid gap-6 min-[821px]:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
+            <div class="space-y-6">
+            <fieldset data-region="card" class="rounded-lg border border-rule bg-panel p-4">
                 <legend class="px-1 text-lg font-semibold text-ink-strong">What the career is for</legend>
 
                 <div class="grid gap-4 min-[821px]:grid-cols-2">
@@ -478,7 +481,7 @@ function removeAt(index: number): void {
                      is stated rather than filled with an option the write would refuse. -->
             </fieldset>
 
-            <fieldset class="rounded-lg border border-rule bg-panel p-4">
+            <fieldset data-region="card" class="rounded-lg border border-rule bg-panel p-4">
                 <legend class="px-1 text-lg font-semibold text-ink-strong">Stat targets & ceilings</legend>
 
                 <p class="text-sm text-ink-muted">
@@ -487,7 +490,12 @@ function removeAt(index: number): void {
                 </p>
 
                 <div class="mt-4 space-y-4">
-                    <div v-for="stat in props.statOrder" :key="stat" :data-stat="stat" class="grid gap-3 min-[821px]:grid-cols-2">
+                    <!-- Each stat is one `.field`: the wireframe puts the value, its denominator and the share of
+                             the cap in a single labelled group, so the cap is read with the number rather
+                             than matched up from a column header elsewhere. `data-region` rather than the
+                             corpus' `.field` class because `.field` is unlayered in app.css and would win
+                             over the utilities this row already carries. -->
+                        <div v-for="stat in props.statOrder" :key="stat" :data-stat="stat" data-region="field" class="grid gap-3 min-[821px]:grid-cols-2">
                         <!-- Target column -->
                         <div class="space-y-1">
                             <BaseInput
@@ -575,7 +583,7 @@ function removeAt(index: number): void {
             <!-- The totals block: what the entered figures add up to, beside the one published build the
                  page names and the ceiling the five caps sum to. Three different claims, three rows, and
                  the note says which one is a requirement (none of them is). -->
-            <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="target-totals">
+            <section data-region="card" class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="target-totals">
                 <h2 id="target-totals" class="text-lg font-semibold text-ink-strong">Totals</h2>
 
                 <div class="mt-2" data-field="target-totals">
@@ -601,16 +609,20 @@ function removeAt(index: number): void {
                 </p>
             </section>
 
-            <!-- The distance bands carry their edges, and the 1400 m row states the conflict instead of
-                 resolving it: three sources disagree and this tool holds no ruling. -->
-            <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="distance-bands">
+            </div>
+
+            <!-- The right column of the wireframe's `.g-side`: Distance, then Stamina floor. The 1400 m
+                 row is the wireframe's `.note` inside the Distance card (career-target.html:159), not a
+                 warning band: the page states a source disagreement rather than refusing a submit. -->
+            <div class="space-y-6">
+            <section data-region="card" class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="distance-bands">
                 <h2 id="distance-bands" class="text-lg font-semibold text-ink-strong">Distance bands</h2>
 
                 <ul class="mt-2 flex flex-wrap gap-1.5 text-xs">
                     <li v-for="band in props.distanceBands" :key="band" class="pill pill-outline">{{ band }}</li>
                 </ul>
 
-                <p class="warn mt-2" data-field="distance-conflict">
+                <p class="note mt-2" data-field="distance-conflict">
                     <b>1400 m is disputed.</b>
                     Game8 files it as {{ props.distanceBands[0] }}, the client's export code 2 reads as
                     {{ props.distanceBands[1] }}, and the client's own skills gate on
@@ -621,7 +633,7 @@ function removeAt(index: number): void {
             </section>
 
             <!-- The stamina floor per band, read from the scenario's own stanza rather than restated. -->
-            <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="distance-floor">
+            <section data-region="card" class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="distance-floor">
                 <h2 id="distance-floor" class="text-lg font-semibold text-ink-strong">Floor per distance band</h2>
 
                 <table v-if="Object.keys(props.finaleTargets.staminaByDistance).length > 0" class="mt-2 w-full text-sm">
@@ -647,8 +659,10 @@ function removeAt(index: number): void {
                     the floor the finale expects, not a target to overshoot.
                 </p>
             </section>
+            </div>
+            </div>
 
-            <fieldset class="rounded-lg border border-rule bg-panel p-4">
+            <fieldset data-region="card" class="rounded-lg border border-rule bg-panel p-4">
                 <legend class="px-1 text-lg font-semibold text-ink-strong">Skill priorities</legend>
 
                 <p class="text-sm text-ink-muted">
@@ -727,31 +741,41 @@ function removeAt(index: number): void {
                 </p>
             </fieldset>
 
-            <!-- Saved defaults are a preference, not this run's target: applying them fills the five
-                 fields from the Trainer's own stored numbers, and the note says where they live when none
-                 is set. The primary is the wizard's Continue, which is also the write. -->
+            <!-- The wireframe's fourth card: the saved default is a preference the Trainer applies, not this
+                 run's target. Its three preset buttons are deliberately not built: `statDefaults` holds one
+                 stored spread, and naming presets the tool does not hold would be an invented figure
+                 (AGENTS.md §5), so the card carries the one control the payload supports and where to set
+                 it. The submit stays outside the card because it is the step's write, not a default. -->
+            <section data-region="card" class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="target-saved-default">
+                <h2 id="target-saved-default" class="text-lg font-semibold text-ink-strong">Target from a saved default</h2>
+                <p class="mt-1 text-sm text-ink-muted">Settings can hold a default spread so a new run does not start blank.</p>
+
+                <div class="mt-3 flex flex-wrap items-center gap-3">
+                    <BaseButton type="button" variant="secondary" :disabled="props.statDefaults === null" @click="applyDefaults">
+                        Use saved defaults
+                    </BaseButton>
+                    <Link href="/settings" class="inline-flex min-h-11 items-center text-sm text-ink underline">
+                        Set defaults in Settings
+                    </Link>
+                </div>
+
+                <p class="mt-3 text-xs text-ink-muted">
+                    <template v-if="props.statDefaults === null">
+                        No saved stat defaults exist, so there is nothing to apply. Settings is where they are set.
+                    </template>
+                    <template v-else>
+                        Saved defaults are your own preference. Applying them replaces the five figures above;
+                        they are never applied to a run whose target is already stored.
+                    </template>
+                </p>
+            </section>
+
             <div class="flex flex-wrap items-center gap-3">
                 <BaseButton type="submit" variant="primary" :disabled="form.processing">
                     {{ form.processing ? 'Saving…' : 'Save target' }}
                 </BaseButton>
-                <BaseButton type="button" variant="secondary" :disabled="props.statDefaults === null" @click="applyDefaults">
-                    Use saved defaults
-                </BaseButton>
-                <Link href="/settings" class="inline-flex min-h-11 items-center text-sm text-ink underline">
-                    Set defaults in Settings
-                </Link>
                 <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving your target…</p>
             </div>
-
-            <p class="text-xs text-ink-muted">
-                <template v-if="props.statDefaults === null">
-                    No saved stat defaults exist, so there is nothing to apply. Settings is where they are set.
-                </template>
-                <template v-else>
-                    Saved defaults are your own preference. Applying them replaces the five figures above;
-                    they are never applied to a run whose target is already stored.
-                </template>
-            </p>
         </form>
     </SetupLayout>
 </template>
