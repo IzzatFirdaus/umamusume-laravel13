@@ -144,8 +144,6 @@ const props = defineProps<{
     };
     edit: Record<'scenario' | 'trainee' | 'target' | 'legacy' | 'deck', string>;
     startAction: string;
-    /** Independent Training (§1.1.7): the three policies the mode offers. */
-    policy_options: { value: string; label: string }[];
 }>();
 
 /** One row of the review checklist: a step, its state, its summary, and its one door back. */
@@ -159,12 +157,14 @@ interface ChecklistRow {
     edit: string;
 }
 
-// Independent Training (§1.1.7): the idle mode's inputs ride the form directly. The policy is the one
-// required choice; rotation and priority skills default server-side to the client's own defaults.
-const form = useForm({
-    independent: false,
-    policy: 'balanced',
-});
+/*
+ * The write carries nothing of its own. `StartCareerRequest::prepareForValidation()` composes every run
+ * fact out of the session draft, so the request body is empty by design — a hand-made POST cannot
+ * smuggle in a trainee, a deck or an ancestry the steps never accepted. Independent Training's three
+ * inputs (`independent`, `policy`, `rotation`) are gone with their controls (Phase E2): the HFW draws
+ * neither the mode switch nor the policy radios, and the request's rules for them stay nullable.
+ */
+const form = useForm({});
 const alert = ref<HTMLElement | null>(null);
 
 // A refused write comes back with the section's message. The alert is focused rather than left for a
@@ -369,8 +369,8 @@ const CAREER_TURNS = 72;
             >
                 <!--
                   The HFW's head-band pair (`career-preflight.html:61-65`). Both controls used to sit in a
-                  row inside the "This run" card, at the foot of its training-policy fieldset, so the screen's
-                  one write was below a card the Trainer had to reach by scrolling.
+                  row inside the "This run" card, below a fieldset the Trainer had to reach by scrolling, so
+                  the screen's one write was under everything it commits.
 
                   "Create the run" is this step's write and it stays a method call rather than a form submit:
                   `PreflightController@store` is a PUT composed from the draft, and the button's disabled
@@ -389,7 +389,7 @@ const CAREER_TURNS = 72;
                         :disabled="!canStart || form.processing"
                         @click="start"
                     >
-                        {{ form.processing ? 'Starting…' : form.independent ? 'Start Independent Training' : 'Create the run' }}
+                        {{ form.processing ? 'Starting…' : 'Create the run' }}
                     </button>
                 </template>
             </PageHeader>
@@ -618,47 +618,9 @@ const CAREER_TURNS = 72;
                     </p>
                     <p v-if="startBlocker !== null" class="mt-2 text-sm text-ink">{{ startBlocker }}</p>
 
-                    <!-- Independent Training (§1.1.7): the entry tab. The idle mode runs its 50 minutes
-                         with the app closed; choosing it swaps the policy selector in. Rotation and
-                         priority skills stay at the client's defaults, so only the policy is asked. -->
-                    <fieldset class="mt-3">
-                        <legend class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Career mode</legend>
-                        <div class="mt-1.5 flex flex-wrap gap-2">
-                            <button
-                                type="button"
-                                class="inline-flex min-h-11 items-center rounded-md border px-4 text-sm font-medium"
-                                :class="form.independent ? 'border-rule bg-raised text-ink' : 'border-pick bg-pick text-on-pick'"
-                                @click="form.independent = false"
-                            >
-                                Normal Career
-                            </button>
-                            <button
-                                type="button"
-                                class="inline-flex min-h-11 items-center rounded-md border px-4 text-sm font-medium"
-                                :class="form.independent ? 'border-pick bg-pick text-on-pick' : 'border-rule bg-raised text-ink'"
-                                @click="form.independent = true"
-                            >
-                                Independent Training
-                            </button>
-                        </div>
-                    </fieldset>
-
-                    <fieldset v-if="form.independent" class="mt-3">
-                        <legend class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Training policy</legend>
-                        <div class="mt-1.5 flex flex-wrap gap-x-4 gap-y-2">
-                            <label v-for="option in props.policy_options" :key="option.value" class="inline-flex items-center gap-1.5 text-sm text-ink">
-                                <input v-model="form.policy" type="radio" name="policy" :value="option.value" class="accent-pick" />
-                                {{ option.label }}
-                            </label>
-                        </div>
-                        <p class="mt-1.5 text-xs text-ink-muted">
-                            Balanced is recommended: the Stamina and Sprint policies skew stats and cost win rate.
-                        </p>
-                    </fieldset>
-
-                    <!-- "Create the run" and "Back to deck" moved to the head band above (`#actions`), where
-                         the HFW draws them. Only the policy note keeps its place here, beside the radios it
-                         describes. -->
+                    <!-- The mode switch and the policy radios are cut (Phase E2): `career-preflight.html:176-186`
+                         draws the Commit card and nothing else. The write and its back door live in the head
+                         band above (`#actions`), where the wireframe draws them. -->
                 </section>
             </div>
         </div>

@@ -29,8 +29,9 @@ import { expect, type Page } from '@playwright/test';
  *
  * Coupling to watch: step 3 is driven by its current field names (`select[name="purpose"]`,
  * `input[name="targets[Speed]"]`, the "Save target" button) and step 5 by its slot ids and the
- * dialog's own "Equip" and "Save deck" buttons. A wizard pass that restructures either step has to
- * move this helper with it.
+ * dialog's own "Equip" and "Owned" controls. A wizard pass that restructures either step has to
+ * move this helper with it. Dated note 2026-10-28 (Phase E): the page-level "Save deck" submit is
+ * gone — every slot write saves on its own — so the walk's last deck action is the ownership press.
  */
 const WRITE = { timeout: 60_000 } as const;
 
@@ -81,7 +82,9 @@ export async function walkWizard(
     await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     await page.selectOption('select[name="purpose"]', 'StoryClear');
-    await page.selectOption('select[name="distance"]', 'Medium');
+    // `distance` is a radio group on the Distance card, not a select: the target step's own 2026-10-2x
+    // rebuild moved it there (`BuildTarget.vue`, the wireframe's `career-target.html:141-158`).
+    await page.locator('input[name="distance"][value="Medium"]').check();
     await page.selectOption('select[name="surface"]', 'Turf');
     await page.selectOption('select[name="style"]', 'Pace Chaser');
 
@@ -89,7 +92,10 @@ export async function walkWizard(
         await page.locator(`input[name="targets[${stat}]"]`).fill('800');
     }
 
-    await page.getByRole('button', { name: 'Save target' }).click();
+    // The step's write is its head-band forward door (`BuildTarget.vue`, Phase A.2): a submit bound to
+    // the form by id, labelled with the wireframe's own words. The old page-level "Save target" button
+    // is gone, so the walk presses the door it actually has.
+    await page.getByRole('button', { name: 'Continue to legacy' }).click();
     await page.locator('#app > *').first().waitFor();
 
     if (options.onLegacy) {
@@ -111,8 +117,9 @@ export async function walkWizard(
         'true',
         WRITE,
     );
-    await page.getByRole('button', { name: 'Save deck' }).click();
-    await page.locator('#app > *').first().waitFor();
+    // The ownership press is the last write: the slot's Owned button writes on click (there is no
+    // page-level `Save deck` since Phase E, and the forward door writes before it navigates), so the
+    // `aria-pressed` assertion above is already the round trip's confirmation.
 
     return traineeName;
 }
@@ -133,8 +140,10 @@ export async function startCareer(
 
     await page.goto('/career/setup/preflight', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    // The completable-start case: `aria-disabled` is `false` once the scenario and the trainee are in.
-    await page.getByRole('button', { name: 'Start career' }).click();
+    // The completable-start case: the button is enabled once a scenario and a trainee are in. Its label
+    // is the wireframe's own (`career-preflight.html:64`, "Create the run"); the Phase E2 cut removed
+    // the Independent-Training branch that used to swap the text.
+    await page.getByRole('button', { name: 'Create the run' }).click();
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
 
     return page.url().replace(/\/cockpit$/, '');
