@@ -845,6 +845,154 @@ amended.
 **16. Worktrees.** `../td-release` is removed at the end of the session; `../td-base`, `../td-slice1`,
 `../td-rel4`, `../td-census` and `../td-attrib` were removed as they were finished with.
 
+---
+
+# Main agent — round 5, Phases 5–7 (2026-10-27 14:50 +08)
+
+Session: `main-agent-phase5-2026-10-27`. The round-5 brief splits Phases 0–4 (ST-4 agent) from
+Phases 5–7 (main agent). **At this session's start no ST-4 follow-up hand-back exists:** this file has
+no `## ST-4 follow-up — hand-back` section, and `D:\Projects\td-wedge` is at `d55927cd` with only an
+untracked probe file. The ST-4 follow-up is visibly in flight there: `.wedge-plain.txt` (mtime
+2026-10-27 13:46:07) records `career-scenario-select.spec.ts:297` and `:57` failing in 2.1m, and
+`tests/browser/zz-committed-scenario.spec.ts` (13:57:56) is an untracked probe in the shared tree.
+Phases 6.2–6.6 (release docs) and Phase 7 (tag) depend on that hand-back and stay blocked; this
+section records what Phase 5 and the independent half of Phase 6.5 could measure.
+
+## Phase 5 — peer-blocked re-measurement (2026-10-27 14:50 +08)
+
+Tree at measurement: HEAD `d55927cd`, branch `master`, `git tag -l '3.0.*'` empty, 41 working-tree
+entries.
+
+| Item | `git status --short` line | mtime | Outcome |
+|---|---|---|---|
+| 5.1 `Career/TraineeProfile.vue` | ` M resources/js/pages/Career/TraineeProfile.vue` | 2026-10-27 01:44:01 | `blocked — resources/js/pages/Career/TraineeProfile.vue uncommitted, mtime 2026-10-27 01:44:01, peer-owned` |
+| 5.2 `Veterans/Index.vue` | ` M resources/js/pages/Veterans/Index.vue` | 2026-10-27 01:57:52 | `blocked — resources/js/pages/Veterans/Index.vue uncommitted, mtime 2026-10-27 01:57:52, peer-owned` |
+| 5.3 `Veterans/Show.vue` | ` M resources/js/pages/Veterans/Show.vue` | 2026-10-27 02:01:16 | `blocked — resources/js/pages/Veterans/Show.vue uncommitted, mtime 2026-10-27 02:01:16, peer-owned` |
+| 5.4 `Review/Index.vue` | ` M resources/js/pages/Review/Index.vue` | 2026-10-27 02:37:50 | `blocked — resources/js/pages/Review/Index.vue:300, peer uncommitted, mtime 2026-10-27 02:37:50` |
+
+The four mtimes are identical to round 4's hand-back: no peer has written these files since. None was
+edited. The two surfaces that were peer-dirty in round 4 and are now clean are
+`Career/ScenarioSelect.vue` (03:05:37) and `resources/css/app.css` (04:41:58); clearing them is the
+ST-4 agent's Phase 0.3/3 work, not this session's.
+
+### 5.4 lint — 221, not 220: a second peer finding arrived
+
+`npm run lint:ui` on the working tree prints
+`resources/js:0  [debt-increase] arbitrary-value count 221 exceeds baseline 219` and **exits 0**
+(log: `.scratch-uma/main-2026-10-27/lint-ui.log`). The clean worktree at HEAD
+(`D:\Projects\td-wedge`, `node_modules` linked) prints **219** and exits 0
+(`lint-ui-clean.log`). Diffing the two finding sets leaves exactly two additions, both peer-owned:
+
+| file:line | value | file mtime |
+|---|---|---|
+| `resources/js/pages/Review/Index.vue:300` | `[minmax(0,1fr)_22rem]` | 2026-10-27 02:37:50 |
+| `resources/js/pages/Career/SkillsPlanner.vue:374` | `[1fr_auto]` | 2026-10-27 10:20:10 |
+
+Round 4 recorded 220 and named only the first. `SkillsPlanner.vue:374` is the 221st and arrived after
+that measurement, so the rise is a peer write, not a re-count. `tools/ui-lint-baseline.json` stays at
+`count: 219`. **This is a filing, not a fix: the gate cannot see the regression**, because the
+`[debt-increase]` line prints but the process exits 0. Changing the exit code is outside this phase.
+
+### 5.5 Legacy builder radios — re-confirmed blocked
+
+Re-read at `d55927cd` (HEAD line numbers; the working tree's `TrainingRun.php` is peer-dirty but its
+diff does not touch this read path):
+
+- `app/Models/TrainingRun.php:247` — `legacySelection(): ?LegacySelectionPayload` reads the single
+  `$this->legacy_selection` column (`:249`) and hydrates one payload (`:253`).
+- `app/Models/Legacy/LegacySelectionPayload.php:43` — `KEYS = ['legacies', 'affinity']`: one
+  selection per run.
+- `app/Http/Controllers/LegacyController.php:125-126` — the saved-pair projection states the same
+  fact: a pair "is stored as one `training_runs.legacy_selection` column (`ADR-0010`), so 'a saved
+  pair' is a run that carries a selection, not two Veteran rows."
+
+`blocked — payload shape: one selection per run; radios need a behaviour change, ADR-0010/ADR-0015`
+(confirmed 2026-10-27). No code change; the block is the deliverable.
+
+### 5.6 tag decision — Law A not satisfied
+
+- **Law A** (tag on any commit whose full suite completed, every failure attributed): **not
+  satisfied.** The full Playwright suite has not completed on this tree; round 4 stopped at test
+  153/603 on the `career-scenario-select.spec.ts:297` wedge, and the ST-4 follow-up that owns Phases
+  3–4 has not handed back.
+- **Law B** (prefer a commit whose non-peer failures are zero): **not measurable** for the same
+  reason.
+- `3.0.0` stays absent. **No tag was cut in this session.**
+
+## Phase 6.5 — independent doc verification (2026-10-27)
+
+| Claim | Result |
+|---|---|
+| `AGENTS.md` §9 `count: 219` correction (recorded in `c2c72c13`) | **present** at `AGENTS.md:517`, with the 2026-10-27 date and the "any new one fails at 219 + 1" sentence. No edit owed. |
+| `AGENTS.md` §13 migration ruleblock | **removed in this session's commit.** Its banner says "removed at Phase 6 exit", and `docs/proposals/frontend-architecture-plan.md:1006` records "Phase 6 — 2.1.0 released 2026-10-23. Definition of done satisfied". The surviving intent (tokens only, no `dark:`, reuse existing primitives) stays in §7 and §13's remaining bullets; what goes is the migration-scoped re-spell rule and its `ponytail:` escape clause. A §20 change-log row records the removal. |
+| `SCREEN_SPEC.md` | **no new screen, no rows owed**: Steps 5.2 and 5.3 are blocked, and no screen was restructured this session. |
+| `frontend-development-update-plan.md` amendments | the 2026-10-27 block at `:12-31` already carries DM-3's five keys, S7.2's payload block, the corrected "Skip this moment" page, and the framework-audit exit note. **One line remains owed:** the `career-scenario-select:297` wedge classification, which Phase 3 owns and has not produced. No duplicate block was appended. |
+
+## Hand-back state — main agent (2026-10-27 14:50 +08)
+
+- **Tag:** absent (`git tag -l '3.0.*'` empty). Not re-cut.
+- **Blocked on the ST-4 hand-back:** Phase 2 (six Pest regressions), Phase 3 (wedge), Phase 4 (full
+  browser suite + 46-baseline table), and the `## ST-4 follow-up — hand-back` section that names the
+  commit to tag.
+- **Ready when it lands:** `CHANGELOG.md` §3.0.0 (Phase 6.2), `VERSION.md` (Phase 6.3),
+  `primitive-reconciliation.md` §7.4 (Phase 6.6), the final report (Phase 8), and
+  `git tag -a 3.0.0 -m "HFW parity, v3.0.0"` (Phase 7).
+- **Foreign files at hand-back.** Full working-tree list with mtimes, all peer-owned, none edited by
+  this session:
+
+```text
+?? 2026-10-27 13:37:16  .r5state.txt
+?? 2026-10-27 14:00:14  .scratch-wedge.txt
+ M 2026-10-27 11:48:39  app/Http/Controllers/Career/RaceDecisionController.php
+ M 2026-10-27 11:47:36  app/Http/Controllers/Career/RacePlannerController.php
+ M 2026-10-27 10:17:19  app/Http/Controllers/Career/SkillsPlannerController.php
+ M 2026-10-27 12:28:41  app/Http/Controllers/DatabaseController.php
+ M 2026-10-27 01:44:01  app/Http/Controllers/ReviewController.php
+ M 2026-10-27 12:19:01  app/Models/RaceCatalogSlot.php
+ M 2026-10-27 12:20:49  app/Models/ScenarioRace.php
+ M 2026-10-27 12:19:58  app/Models/ScenarioSlot.php
+ M 2026-10-27 12:27:31  app/Models/TrainingRun.php
+ M 2026-10-27 12:22:09  app/Services/DataPipeline/Contracts/RaceCatalogSourceParser.php
+ M 2026-10-27 12:21:38  app/Services/DataPipeline/Parsers/GametoraRaceCatalogParser.php
+?? 2026-10-27 11:06:14  app/Services/HintDiscount.php
+ M 2026-10-27 10:23:40  app/Services/SupportCardEffects.php
+ M 2026-10-27 11:11:59  config/uma.php
+ M 2026-10-27 12:24:02  database/factories/ScenarioRaceFactory.php
+ M 2026-10-27 12:23:18  database/factories/ScenarioSlotFactory.php
+?? 2026-10-27 13:54:24  database/migrations/2026_10_27_120000_drop_per_race_maiden_gate_columns.php
+ M 2026-10-27 12:23:18  database/seeders/ScenarioSlotSeeder.php
+ M 2026-10-27 10:26:07  docs/adr/0011-skills-reference-import.md
+ M 2026-10-27 10:27:31  docs/adr/0029-per-run-measurement-columns.md
+ M 2026-10-27 11:11:23  resources/js/components/career/CareerStatePanel.vue
+ M 2026-10-27 10:20:10  resources/js/pages/Career/SkillsPlanner.vue
+ M 2026-10-27 01:44:01  resources/js/pages/Career/TraineeProfile.vue
+ M 2026-10-27 13:26:03  resources/js/pages/Database/Races.vue
+ M 2026-10-27 01:44:01  resources/js/pages/Review/Detail.vue
+ M 2026-10-27 02:37:50  resources/js/pages/Review/Index.vue
+ M 2026-10-27 01:57:52  resources/js/pages/Veterans/Index.vue
+ M 2026-10-27 02:01:16  resources/js/pages/Veterans/Show.vue
+ M 2026-10-27 11:34:48  tests/Feature/CareerRaceDecisionTest.php
+ M 2026-10-27 13:26:03  tests/Feature/DatabaseTest.php
+ M 2026-10-27 10:25:09  tests/Feature/DeckAnalysisReachedEffectsTest.php
+ M 2026-10-27 13:45:19  tests/Feature/RaceSlotPanelComposerTest.php
+?? 2026-10-27 01:44:01  tests/Feature/ReviewDetailPayloadTest.php
+ M 2026-10-27 13:28:27  tests/Feature/Schema/ScenarioSlotMigrationTest.php
+ M 2026-10-27 10:23:09  tests/Feature/SkillSpendCoverageTest.php
+?? 2026-10-27 02:23:19  tests/browser/annotation-sweep.spec.ts
+ M 2026-10-27 01:50:48  tests/browser/career-scenario-select.spec.ts
+ M 2026-10-27 01:44:01  tests/browser/dashboard.spec.ts
+?? 2026-10-27 13:57:56  tests/browser/zz-committed-scenario.spec.ts
+```
+
+  Two of those entries are session-scratch files at the repository root (`.r5state.txt`,
+  `.scratch-wedge.txt`). AGENTS.md §9 requires every session artifact under
+  `.scratch-uma/<session>/`, so both are filed here rather than moved or deleted: they are not this
+  session's files.
+
+- **`85d24959` and `ad876208`** both resolve (`git log -1 --oneline`); neither was reset, rebased,
+  split, or amended. `ad876208` still carries the ST-4 hand-back as recorded in the attribution
+  incident above (162 added `TASKS.md` lines in that commit's stat); not repaired.
+
 
 
 
