@@ -389,7 +389,7 @@ const CAREER_TURNS = 72;
                         :disabled="!canStart || form.processing"
                         @click="start"
                     >
-                        {{ form.processing ? 'Starting…' : 'Create the run' }}
+                        {{ form.processing ? 'Starting…' : form.independent ? 'Start Independent Training' : 'Create the run' }}
                     </button>
                 </template>
             </PageHeader>
