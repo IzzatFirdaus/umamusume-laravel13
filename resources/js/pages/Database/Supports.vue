@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*
- * The Database hub's Supports area (SCREEN-023, plan Ã‚Â§8 D17).
+ * The Database hub's Supports area (SCREEN-023, plan §8 D17).
  *
  * The support-card catalog, on the Database URL. The same shared list body the catalog mounts, behind
  * `SupportCardController::databaseIndex`. See `Trainees.vue` for why this is a shared screen rather

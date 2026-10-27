@@ -46,6 +46,6 @@ it('offers exactly three exits on the 419 and the 500, and one filled of the thr
         $main = substr($html, (int) strpos($html, '<main'));
         $anchors = substr_count($main, '<a ');
 
-        expect($anchors, "{$view} does not offer three exits")->toBeGreaterThanOrEqual(3);
+        expect($anchors)->toBeGreaterThanOrEqual(3, "{$view} does not offer three exits");
     }
 });

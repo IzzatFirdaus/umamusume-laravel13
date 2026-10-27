@@ -355,7 +355,7 @@ function applyFilters(): void {
                                      flat stat boost at career start. The HFW drew them beside the stat families;
                                      they are labelled here as what they are, so the four colours stay correct. -->
                                 <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Green &amp; White sparks, hint / skill</th>
-                                <td class="py-2 text-right text-ink">1–3 hint levels; never a flat stat at start</td>
+                                <td class="py-2 text-right text-ink">1 to 3 hint levels; never a flat stat at start</td>
                             </tr>
                         </tbody>
                     </table>

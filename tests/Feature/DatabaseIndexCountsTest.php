@@ -28,7 +28,7 @@ it('sends a live count for every area that has a table, and null where the rows 
     // would collide on the second insert rather than measuring the count.
     RaceCatalogSlot::factory()->create();
 
-    test()->get('/database')
+    $this->get('/database')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->has('areas', 9)
@@ -56,7 +56,7 @@ it('reads the four live counts in one query rather than four', function (): void
         $queries[] = $query->sql;
     });
 
-    test()->get('/database')->assertOk();
+    $this->get('/database')->assertOk();
 
     // The page also reads its filter vocabulary and the scenario matrix, so the request is never
     // literally one statement. What this pins is that the four AREA counts are not four additional

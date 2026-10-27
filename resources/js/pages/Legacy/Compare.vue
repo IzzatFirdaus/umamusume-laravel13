@@ -290,7 +290,7 @@ const differences = computed((): Difference[] => {
                 v-if="allColumnsIdentical"
                 class="mt-6 rounded-md border border-rule bg-status-caution px-3 py-2 text-sm text-status-caution-ink"
             >
-                Nothing decisive — all selected runs share every value, so no row in the difference
+                Nothing decisive: all selected runs share every value, so no row in the difference
                 column can be read as a reason to pick one.
             </p>
 

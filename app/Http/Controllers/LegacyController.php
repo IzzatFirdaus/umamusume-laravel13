@@ -144,21 +144,25 @@ class LegacyController extends Controller
             ->get()
             ->map(static function (TrainingRun $run): array {
                 $sparks = [];
-                foreach ($run->legacySelection()?->legacies ?? [] as $legacy) {
-                    foreach ((array) ($legacy['sparks'] ?? []) as $spark) {
-                        $sparks[] = (array) $spark;
+                $selection = $run->legacySelection();
+
+                if ($selection !== null) {
+                    foreach ($selection->legacies as $legacy) {
+                        foreach ($legacy['sparks'] as $spark) {
+                            $sparks[] = $spark;
+                        }
                     }
                 }
 
                 $ofKind = static fn (string ...$kinds): array => array_values(array_filter(
                     $sparks,
-                    static fn (array $spark): bool => in_array($spark['kind'] ?? null, $kinds, true),
+                    static fn (array $spark): bool => in_array($spark['kind'], $kinds, true),
                 ));
 
                 $stars = static function (array $list): array {
                     $values = [];
                     foreach ($list as $spark) {
-                        if (is_int($spark['stars'] ?? null)) {
+                        if (is_int($spark['stars'])) {
                             $values[] = $spark['stars'];
                         }
                     }
@@ -172,8 +176,8 @@ class LegacyController extends Controller
 
                 $blueGrades = [];
                 foreach ($blue as $spark) {
-                    $target = is_string($spark['target'] ?? null) ? $spark['target'] : null;
-                    $star = is_int($spark['stars'] ?? null) ? $spark['stars'] : null;
+                    $target = is_string($spark['target']) ? $spark['target'] : null;
+                    $star = is_int($spark['stars']) ? $spark['stars'] : null;
                     $blueGrades[] = trim(($target ?? 'Target not recorded').($star === null ? '' : ' ★'.$star));
                 }
 
@@ -182,12 +186,12 @@ class LegacyController extends Controller
                     $pink === [] => 'No pink Spark recorded',
                     $pinkStars === [] => 'Star counts not recorded',
                     min($pinkStars) === max($pinkStars) => '★'.min($pinkStars),
-                    default => '★'.min($pinkStars).'–★'.max($pinkStars),
+                    default => '★'.min($pinkStars).' to ★'.max($pinkStars),
                 };
 
                 $hintCounts = [];
                 foreach ($hints as $spark) {
-                    $kind = is_string($spark['kind'] ?? null) ? $spark['kind'] : 'unrecorded';
+                    $kind = $spark['kind'];
                     $hintCounts[$kind] = ($hintCounts[$kind] ?? 0) + 1;
                 }
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*
- * The Database hub's Skills area (SCREEN-023, plan Ã‚Â§8 D17).
+ * The Database hub's Skills area (SCREEN-023, plan §8 D17).
  *
  * The skill search, on the Database URL. The same shared list body the skill search mounts, behind
  * `SkillController::databaseIndex`. See `Trainees.vue` for why this is a shared screen rather than a

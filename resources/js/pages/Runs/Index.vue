@@ -160,7 +160,7 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                         Newest first
                     </option>
                     <option value="oldest" :selected="props.filters.sort === 'oldest'">Oldest first</option>
-                    <option value="trainee" :selected="props.filters.sort === 'trainee'">Trainee A–Z</option>
+                    <option value="trainee" :selected="props.filters.sort === 'trainee'">Trainee A-Z</option>
                 </select>
             </label>
             <button

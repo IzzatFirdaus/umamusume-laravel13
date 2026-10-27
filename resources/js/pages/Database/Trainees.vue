@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*
- * The Database hub's Trainees area (SCREEN-023, plan Ã‚Â§8 D17).
+ * The Database hub's Trainees area (SCREEN-023, plan §8 D17).
  *
  * The Umamusume catalog, on the Database URL. It renders the same shared list body the catalog index
  * mounts, and the controller behind this route is `CatalogController::databaseIndex`, which runs that
