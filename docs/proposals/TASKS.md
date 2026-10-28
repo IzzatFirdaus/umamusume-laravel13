@@ -1076,6 +1076,231 @@ untracked probe). This session created none and removed none.
 
 **Tag decision:** Law A not satisfied; Law B not measurable. `3.0.0` stays absent.
 
+---
+
+# v3.0.0 parity audit — Task A (2026-10-28, rev. 2)
+
+**Verdict: parity unverified is confirmed.** 54 HFW pages were compared against the built app at
+`http://127.0.0.1:8000` with the rebuilt manifest (2026-10-28 ~23:50). Result: **17 near, 32 divergent,
+1 blank/crash, 4 not applicable**. `3.0.0` is **not cut** (§13.1: some pages divergent).
+
+## Method and limits
+
+- Viewport 1280×1000; HFW opened from `file:///D:/Projects/umamusume-laravel13/docs/design-research/frontend-v2-wireframes/<page>.html`.
+- Data used: run 26 (Unity Cup, Active) for lifecycle pages, run 24 (URA Finale, Completed) for
+  result/cockpit-finale/save-veteran, veteran 8, catalog `special-week`, support card 1, skill 1,
+  candidate 1.
+- The stored Layout width preference was **Wide** (the owner's row). The audit did not write a
+  preference row; `standard` was not measured by a write. Composition (grids) does not change between
+  Standard and Wide; only the measure does.
+- Screenshots and DOM extracts: `.scratch-uma/session-2026-10-28/audit/out/` (`audit.json`,
+  `*.app.png`, `*.hfw.png`, `pairs/`). The scratch dir is session apparatus, not a repository artifact.
+- The app was rebuilt before the audit; a pre-rebuild pass produced identical verdicts except where
+  noted. `career-save-veteran` was confirmed blank both before and after the rebuild.
+- Each page was read in the split-view montage (`.scratch-uma/session-2026-10-28/audit/out/pairs/`), not from the ledger.
+
+## Shell verdict — near
+
+| Region | Verdict | Evidence / deviation |
+|---|---|---|
+| Rail grouping | pass | Play / My data / Library / System labels render; ten destinations keep their names and marks; collapse keeps `sr-only` words and `title` |
+| Topbar | pass | crumb, "2 active careers" status pill, Help icon-button, brand chrome, 48px bar |
+| Page head | pass | eyebrow + h1 (one per document) + lede + actions; h1 lives in the banner region |
+| Canvas | pass | same measure as topbar; `@container` intact |
+| Mobile bar | pass | Home / Career / Legacy / Deck / More at 390px, `aria-label="Primary mobile"`, no horizontal overflow (scrollWidth 390 = innerWidth) |
+| Nesting | deviation | app wraps `.topbar` **and** `.phead` in `<header>`; HFW makes `.phead` a sibling of `.topbar` inside `main`. Visual order is identical; DOM region nesting is not. Recorded, not treated as a page defect. |
+| Layout mode | deviation | stored preference is Wide; the wireframe has no preference row. Measure differs by design. |
+
+## Severe findings (fix before any near/divergent repair)
+
+1. **`career-save-veteran` renders a blank page.** `CareerLayout.vue:64` computes
+   `props.runUrl.match(...)` for the crumb, and `Career/SaveVeteran.vue` does not pass `run-url`, so
+   the layout throws `TypeError: Cannot read properties of undefined (reading 'match')`, the Inertia
+   root unmounts, and the page renders 0 characters. Reproduced on both an Active and a Completed run.
+2. **`/career/snapshot/review` renders the Setup form, not the review.** The h1 reads "Record an
+   existing career" and no "Not provided" tiles, no confirm/edit pair, no snapshot stepper. The route's
+   state handling needs the read-back branch before this screen can be audited as a review.
+3. **Two cockpit variants cannot be verified from local data.** There is no Trackblazer or Grand
+   Concert run in the dev database (runs 15–24 URA, 25–26 Unity Cup), so those pairs render the Unity
+   Cup shell. Marked `not applicable`, not "divergent", until a run exists.
+
+## Per-page verdicts
+
+`near` = region order matches, divergences are copy/measure/data-presentation only, no annotation
+ruling broken. `divergent` = region order, composition, primitives, or a ruling differs.
+`absent` = blank or unreachable. `n/a` = variant merged by ruling or no data.
+
+| HFW page | Route | Verdict | First defect |
+|---|---|---|---|
+| index | / | near | KPI "Careers running 2" vs 1 (data); Recent veterans footer "All veterans" not visible in sample |
+| dashboard | / | n/a | index.html wins by §4.1; variant not rendered |
+| runs-index | /training-runs | near | filters need "Apply filters"; HFW filters act on change; extra Sort control |
+| runs-create | /training-runs/create | near | helper copy only; fields/optional labels match |
+| import | /training-runs/import | near | preview button says "Preview import" vs "Read the text"; extra required Trainee/Status; importer checklist differs |
+| import-preview | (POST preview) | n/a | no GET route; state exists only after a preview POST |
+| career-scenario | /career/setup/scenario | near | reversibility table has 2 rows (Scenario, Trainee), HFW has 4 (Build target, Legacy and deck missing) |
+| career-trainee | /career/setup/trainee | divergent | no "Selected · Preview profile" region; roster paginates 25/page vs HFW 6/page; Surface/Distance/Style filters render Any only |
+| career-profile | /career/setup/trainee/1 | near | no portrait slot beside h1; forms table truncated; growth zeros match |
+| career-target | /career/setup/target | divergent | stat target fields lack "/ 1400 cap" + "% of cap"; no total comparison; stamina-floor table absent |
+| career-legacy | /career/setup/legacy | near | inheritance table lacks SOURCE column; Enhanced spark row differs; parent slots empty (draft state) |
+| career-deck | /career/setup/deck | near | slots carry ownership radios but no gauge/remove shape; no "Suggest for …"; empty deck (data) |
+| career-preflight | /career/setup/preflight | divergent | "What this scenario asks" is a generic N/A table, not the HFW's scenario facts; checks print Missing, no pass/warning states; no "1 warning" pill |
+| cockpit-ura-finale | /training-runs/24/cockpit | divergent | info banner absent; stat bars lack percentage marks; advisor/obligations shape differs |
+| cockpit-unity-cup | /training-runs/26/cockpit | divergent | info banner absent; no % marks; advisor warning lacks "55 turns ago"; obligations table differs |
+| cockpit-trackblazer | — | n/a | no Trackblazer run in local data |
+| cockpit-grand-concert | — | n/a | no Grand Concert run in local data |
+| training-decision | /training-runs/26/training | divergent | app: facility-level inputs + three training option cards; HFW: five radio disciplines (kbd 1–5, gains/energy inline) + Rest/Recreation/Race + Recorded outcome + savebar |
+| race-decision | /training-runs/26/races | divergent | app: mandatory-races table + readiness + calendar select; HFW: available-this-turn table with Enter, selected race detail + placement payouts + savebar |
+| career-race-planner | /training-runs/26/races/planner | divergent | no 3-col Planning/Held/Readiness cards; no mandatory/upcoming tables or Compare; no reward comparison |
+| event-decision | /training-runs/26/events | divergent | app: coach recommendation/current state/known outcomes/record form; HFW: event copy + 3 options + outcome fields + provenance + savebar |
+| inheritance | /training-runs/26/inheritance | divergent | app: milestones + predicted sparks; HFW: ancestry diagram + per-parent spark tables + result-of-pick + savebar |
+| skills-planner | /training-runs/26/skills | divergent | no SP budget card, no filters/plan table; app lists purchasable skills + hint discounts |
+| run-deck | /training-runs/26/deck | divergent | app: two-column slot editor + picker; HFW: six-card grid with gauges + savebar |
+| timeline | /training-runs/26/timeline | divergent | no filters (Kind/Year) or record table; app renders a phase reader instead |
+| result | /training-runs/24/result | divergent | app: outcome tiles + skills/aptitudes/race history; HFW: srow final stats against cap + finale-ready check + banked factors |
+| career-save-veteran | /training-runs/24/veteran | absent | blank page: CareerLayout `runUrl.match` TypeError |
+| career-snapshot-entry | /career/snapshot | divergent | no Snapshot stepper (Entry/Setup/Review) |
+| career-snapshot-setup | /career/snapshot/setup | divergent | no stepper; no Back/Review snapshot head actions |
+| career-snapshot-review | /career/snapshot/review | divergent | renders the Setup form; no "Not provided" tiles, no confirm/edit |
+| legacy | /legacy | near | one saved pair in data; value table/parents card match |
+| legacy-builder | /legacy/26 | divergent | app: trainee + parent selects + grandparent inputs; HFW: two parent spark tables + preview + tiles + savebar |
+| legacy-compare | /legacy/compare | divergent | selection screen only; no comparison table, difference column, starting-caps cards |
+| veterans | /veterans | divergent | rows are prose cards, not the 7-column table; factor grades print 0; no Compare action, no Factor grades/Team eligibility cards |
+| veteran-detail | /veterans/8 | divergent | Factors card absent (factors lead in HFW); no "Use as a parent" primary; final-stats shape differs |
+| veterans-compare | /veterans/compare | divergent | selection screen only; no Difference column or per-veteran verdict cards |
+| catalog | /umamusume | divergent | Surface/Distance/Running style filters absent; growth row "not stored"; 25/page vs 6/page; lede copy differs |
+| catalog-detail | /umamusume/special-week | divergent | ★4/★5 columns absent; growth all "Not recorded"; costume strip/layout differs |
+| support-cards | /support-cards | divergent | Availability column instead of Server; no Server filter; page size differs |
+| support-card-detail | /support-cards/1 | near | no "Add to a deck" primary; second effects card missing; limit-break state unrecorded (data) |
+| skills | /skills | divergent | no Distance filter; no Open action column; pagination shape differs |
+| skill-detail | /skills/1 | divergent | hint-level cost table and Related table absent |
+| database | /database | near | tiles match; counts differ (data); no "Current · 2026-09-27" who-pill |
+| database-sources | /database/sources | divergent | no "Matrix verified" banner; sources render as cards with URLs vs HFW Source/Tier/Supplies/Read/State table |
+| database-scenarios | /database/scenarios | near | outlier bolding/notes differ; matrices match |
+| database-races | /database/races | divergent | filters absent; extra Year/Tier/Gate columns; Distance bands + What a race pays cards absent |
+| database-events | /database/events | near | DOM shapes match; not visually sampled below the fold |
+| database-shop-items | /database/shop-items | near | grid composition differs (HFW g-2+g-3); ratings column matches |
+| database-sparks | /database/sparks | near | blue table lacks Cap added / Per two parents columns; inheritance loop below fold |
+| review | /review | divergent | queue renders 25 dense rows; HFW's "How a match is decided" and "Why this exists" cards absent |
+| review-detail | /review/1 | divergent | savebar is an inline verdict card; HFW's Best-match card + fixed Not answered/Reject/Confirm pair |
+| preferences | /preferences | near | extra theme option "Evangelion Unit-01"; extra "Numeric failure estimate"; widths shown |
+| help | /help | divergent | "Unknown" tag row and absence note missing; keyboard rows differ (no 1–5); right column differs |
+| error-404 | /this-page-does-not-exist | near | body matches HFW; app renders no shell chrome (Blade error document, by design) |
+| error-419 | — | n/a | no GET route; static Blade document not route-audited |
+| error-500 | — | n/a | no GET route; static Blade document not route-audited |
+
+## Verdict counts
+
+- **near — 17:** index, runs-index, runs-create, import, career-scenario, career-profile, career-legacy,
+  career-deck, legacy, support-card-detail, database, database-scenarios, database-events,
+  database-shop-items, database-sparks, preferences, error-404.
+- **divergent — 32:** career-trainee, career-target, career-preflight, cockpit-ura-finale,
+  cockpit-unity-cup, training-decision, race-decision, career-race-planner, event-decision, inheritance,
+  skills-planner, run-deck, timeline, result, career-snapshot-entry, career-snapshot-setup,
+  career-snapshot-review, legacy-builder, legacy-compare, veterans, veteran-detail, veterans-compare,
+  catalog, catalog-detail, support-cards, skills, skill-detail, database-sources, database-races, review,
+  review-detail, help.
+- **absent — 1:** career-save-veteran.
+- **n/a — 4:** dashboard (merged index ruling), import-preview (POST-only), cockpit-trackblazer and
+  cockpit-grand-concert (no run of those scenarios).
+- **not route-audited — 2:** error-419, error-500 (Blade documents; no GET route).
+
+## Repair order for Task C (from the evidence, not the slice order)
+
+1. **`career-save-veteran` crash** (one-line guard in `CareerLayout.vue` + a browser spec that asserts
+   the page renders its h1), then the snapshot review state.
+2. **Shared composition:** the HFW grid primitives `.card`/`.tile`/`.srow`/`.slot` are absent on
+   pages whose composition otherwise matches (e.g. career-trainee has the grid but no `.card`,
+   `veterans-compare` has no grid at all). Fix the primitive vocabulary at component level before page
+   templates.
+3. **Lifecycle screens (the 32 divergent majority):** training-decision, race-decision, race-planner,
+   event, inheritance, skills-planner, run-deck, timeline, result — each needs the HFW region model, not
+   a copy pass. These are rewrites, planned as one slice per screen with its browser spec re-baselined.
+4. **Wizard remainder:** career-trainee selected/preview region + page size; career-target cap/hint/total;
+   career-preflight scenario-facts + pass/warning checks; legacy-builder two-parent spark picker.
+5. **Library/legacy/veterans/review:** catalog filters + growth; catalog detail ★4/★5; support-cards
+   Server column; skills filters/Open; skill-detail hint ladder; veterans table + factor grades;
+   veteran-detail factors-lead; both compare screens; review cards/savebar.
+6. **Copy/identifier pass** after structure: rate limiting the em-dash/identifier/lore findings already
+   red at HEAD (they are attributed, not part of the parity verdicts).
+
+**Tag:** stays absent per §13.1 until Task D re-audits these pages to at most "near" with every remaining
+deviation recorded as a documented deviation.
+
+---
+
+# Task C — repair pass (2026-10-29)
+
+Working from the Task A verdict table, not from the ledger. Each slice lands as its own commit with its
+spec re-baselined; the audit row is the entry state and the delta below is the evidence that moved.
+
+## C1 — Severe 1: the Save Veteran blank page (`f0624c3e`)
+
+- **Cause.** `CareerLayout.vue` read `props.runUrl.match(...)`; `SaveVeteran.vue` passed
+  `props.run.run_url`, which does not exist (the controller sends `run_url` top-level), so the layout
+  threw and the Inertia root unmounted.
+- **Fix.** The caller passes the top-level prop; the layout degrades to the scenario-only crumb when no
+  URL arrives. The identity-disclosure fixture also stopped finding the status control: its owner
+  predicate used `querySelector('details select#status')`, whose ancestor part matches the scope node
+  itself, so every container looked nested; it now compares the inner disclosures against the select.
+- **Evidence.** `npx playwright test career-save-veteran -g "renders the record screen"` → **1 passed
+  (1.3m)**; `npm run typecheck` → exit 0.
+
+## C2 — Severe 2: the review URL rendered the Setup form (`8595beba`)
+
+- **Cause.** GET `/career/snapshot/review` used the submit-time FormRequest; an empty query failed
+  validation and redirected to Setup.
+- **Fix.** The route reads the setup query when present, the session draft otherwise, and renders the
+  HFW's empty review (eight `Not provided` tiles) with the snapshot stepper and a disabled confirm.
+  Rules moved to a static `fieldRules()` so the GET validates the same contract without a submit.
+- **Evidence.** `php artisan test SnapshotReviewTest SaveVeteranTest` → **exit 0**, including two new
+  cases (bare visit; session-draft read-back); `npx playwright test career-snapshot -g "states that
+  nothing has been entered"` → **passed**; pint passed.
+
+## C3 — Primitive vocabulary at component level (`e6f898ae`)
+
+`resources/js/components/ui/{Tile,Note,Pill}.vue` now emit `.tile`/`.note`/`.pill` beside their house
+utilities, so the CSS the parity pass ported is reachable from the components that exist for those
+shapes. `ui/Card.vue` already emitted `.card`; `.srow` is used directly by the three stat readers.
+Adoption in the remaining pages lands with each page's repair slice, per the audit's Task C order.
+
+## C4 — training-decision, screen 1 of 9 (`2b44b45b`)
+
+| Item | Before (audit) | After |
+|---|---|---|
+| Region model | Advisor, facility inputs, three training cards, record form | Disciplines, Other actions, Why Rest, Recorded outcome, savebar |
+| h1 | "Training decision" | "Pick this turn's action" (HFW) |
+| Disciplines | none (cards) | 5 radio rows, kbd 1–5, feeder line, published gains, signed Energy |
+| Other actions | Rest/Recreation buttons below the form | 3 radios: Rest (Recommended), Recreation, Race |
+| Why Rest | none | advisor reason + band line + rest distribution + note |
+| Recorded outcome | inside a 20-field form | the HFW's four fields; client totals/turn/facility behind one disclosure |
+| Savebar | none | status + Undo turn N + Discard + Record turn N (one filled action) |
+| Wit Energy | cost suppressed in payload | row's refund carried signed (`E+5`) and printed "+5 Energy" |
+
+**Deviations, documented in the page:** (1) `HFW OVERRIDE (write fields)` — the turn request requires
+the five client totals and the turn number, so they stay in one collapsed disclosure; (2) the failure
+line says "failure rate not published" instead of a percentage, because no source in this repository
+publishes a ranked discipline failure table; (3) a discipline with no recorded facility level states the
+absence rather than a Level-1 figure, which is the DM rule the page already held.
+
+**Verdict delta.** training-decision: **divergent → near**. Evidence: DOM vs HFW headings equal
+(Disciplines / Other actions / Why Rest / Recorded outcome), 8 radios, 1 savebar, grids `g-side:2`
+`g-3:3` `g-2:2`, console clean; the only extra card is the documented write-field disclosure.
+
+**Gates.** `php artisan test CareerTrainingDetailTest` → **34 passed (472 assertions)**;
+`npx playwright test career-training-detail` → **8 passed**; `npm run typecheck` → 0;
+`npm run build` → 0; `pint --test` → passed. Test edits are re-baselines at the shipped structure (the
+old file pinned the cards/Advisor model), and the two feature cases that pinned Wit's suppressed cost
+now pin the signed refund the page prints.
+
+## C5 — remaining screens (not yet started)
+
+The audit's other 31 divergent pages and the `near` re-examinations are unchanged. Order stays as the
+audit's repair list: the other eight lifecycle screens (race-decision, career-race-planner,
+event-decision, inheritance, skills-planner, run-deck, timeline, result), then the wizard remainder,
+then library/legacy/veterans/review, then the copy/identifier pass. `3.0.0` remains **absent**.
+
+
 
 
 
