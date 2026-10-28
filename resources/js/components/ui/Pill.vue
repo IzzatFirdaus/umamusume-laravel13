@@ -16,7 +16,7 @@ defineProps<{
 
 <template>
     <span
-        class="inline-flex items-center gap-1.5 rounded-pill px-2.5 py-[3px] text-[11.5px] font-extrabold leading-[1.45]"
+        class="pill inline-flex items-center gap-1.5 rounded-pill px-2.5 py-[3px] text-[11.5px] font-extrabold leading-[1.45]"
         :class="{
             'bg-chrome text-on-chrome': (tone ?? 'battery') === 'battery',
             'bg-brand-accent-soft text-brand-accent-ink': tone === 'accent',

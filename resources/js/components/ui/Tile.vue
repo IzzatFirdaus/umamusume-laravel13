@@ -27,7 +27,7 @@ withDefaults(
 </script>
 
 <template>
-    <div class="rounded-sm border border-rule bg-raised px-2.5 py-2">
+    <div class="tile rounded-sm border border-rule bg-raised px-2.5 py-2">
         <div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">{{ label }}</div>
         <div
             class="mt-0.5 font-extrabold leading-[1.3]"

@@ -8,7 +8,7 @@
  * (`ink-faint` must never carry a label).
  -->
 <template>
-    <p class="flex items-start gap-2.5 rounded-sm border border-dashed border-rule bg-raised px-3 py-2.5 text-xs leading-[1.45] text-ink-muted">
+    <p class="note flex items-start gap-2.5 rounded-sm border border-dashed border-rule bg-raised px-3 py-2.5 text-xs leading-[1.45] text-ink-muted">
         <span class="flex-none font-extrabold text-ink-muted" aria-hidden="true">○</span>
         <span><slot /></span>
     </p>
