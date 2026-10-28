@@ -87,7 +87,7 @@ test.describe('Build Target and the provenance badge', () => {
         await expect(speed.locator('[data-field="percent-of-cap"]')).toContainText('100% of cap');
 
 
-        await page.getByRole('button', { name: 'Save target' }).click();
+        await page.getByRole('button', { name: 'Continue to legacy' }).click();
 
         // The PUT redirects back to this step and the stored state is read from the draft.
         await expect(page.getByText('Build target saved.')).toBeVisible();
@@ -112,7 +112,7 @@ test.describe('Build Target and the provenance badge', () => {
         await page.getByLabel('Guts', { exact: true }).fill('600');
         await page.getByLabel('Wit', { exact: true }).fill('500');
 
-        await page.getByRole('button', { name: 'Save target' }).click();
+        await page.getByRole('button', { name: 'Continue to legacy' }).click();
 
         // The server is the authority on the clamp: the message names the bound it enforced and is
         // referenced from the input that caused it.
@@ -142,7 +142,7 @@ test.describe('Build Target and the provenance badge', () => {
         await page.getByLabel('Guts', { exact: true }).fill('600');
         await page.getByLabel('Wit', { exact: true }).fill('500');
 
-        await page.getByRole('button', { name: 'Save target' }).click();
+        await page.getByRole('button', { name: 'Continue to legacy' }).click();
 
         await expect(page.getByText('Build target saved.')).toBeVisible();
 
@@ -203,7 +203,7 @@ test.describe('Build Target and the provenance badge', () => {
         );
         expect(overflow, 'the document scrolls horizontally at 320px').toBe(true);
 
-        await expect(page.getByRole('button', { name: 'Save target' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Continue to legacy' })).toBeVisible();
 
         expect(consoleErrors, `console errors: ${consoleErrors.join(' | ')}`).toEqual([]);
     });
