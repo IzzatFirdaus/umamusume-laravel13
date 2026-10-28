@@ -265,7 +265,7 @@ const aptitudeGroups = computed<AptitudeGroup[] | null>(() => {
             about her before the choice is made, and the two controls in the head band are the only ones on it.
         </p>
 
-        <div class="mt-4 grid grid-cols-1 gap-4 min-[821px]:grid-cols-2">
+        <div class="mt-4 grid gap-4 g-side">
             <!-- LEFT: aptitudes, the growth row, her one unique skill. -->
             <div class="space-y-4">
                 <section class="card" aria-labelledby="aptitudes">
