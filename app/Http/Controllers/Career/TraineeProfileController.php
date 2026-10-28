@@ -154,6 +154,16 @@ class TraineeProfileController extends Controller
                 ];
             })->values()->all(),
             'selected' => $draft['umamusume_id'],
+            // The growth row's five cells, in the display order `config/scenarios.php` owns. The
+            // catalogue holds no growth figure (`TraineeSelectController` omits the filter for exactly
+            // that reason), so every axis is a real zero: this tool records no growth bonus for a
+            // trainee and a run starts from her own baseline. A null would mean "not recorded"; none
+            // is produced today, and the page renders that word rather than inventing a percentage.
+            'growth' => $this->growthRow(),
+            // The wireframe's linked-scenarios pills. No per-trainee link list exists on this payload
+            // (the wireframe's own note says the same), so the labels are the scenarios this tool can
+            // run, read from config in display order.
+            'scenarioLinks' => $this->scenarioLabels(),
             'scenarioLabel' => SetupDraft::scenarioLabel(),
             'scenarioPending' => $draft['scenario'] === null,
             // The catalog detail's select action posts to the same store route as the roster. The URL is
@@ -170,6 +180,50 @@ class TraineeProfileController extends Controller
                 ],
             ],
         ]);
+    }
+
+    /**
+     * The five growth cells the page prints, all zero. The value is not read from `umamusume` because
+     * no growth column exists; it is the run's own starting assumption (a trainee contributes no growth
+     * bonus this tool records), stated as data so the page never hard-codes the figure.
+     *
+     * @return array<string, int>
+     */
+    private function growthRow(): array
+    {
+        $axes = config('scenarios.stat_order');
+
+        if (! is_array($axes)) {
+            return [];
+        }
+
+        return array_fill_keys(array_values(array_filter($axes, 'is_string')), 0);
+    }
+
+    /**
+     * The scenario labels this tool can run, in config order, for the linked-scenarios pills. The
+     * labels live in `config/scenarios.php`; a component or page that hard-coded a scenario name would
+     * be the defect `AGENTS.md` §7 names.
+     *
+     * @return list<string>
+     */
+    private function scenarioLabels(): array
+    {
+        $scenarios = config('scenarios.scenarios');
+
+        if (! is_array($scenarios)) {
+            return [];
+        }
+
+        $labels = [];
+
+        foreach ($scenarios as $scenario) {
+            if (is_array($scenario) && is_string($scenario['label'] ?? null)) {
+                $labels[] = $scenario['label'];
+            }
+        }
+
+        return $labels;
     }
 
     /**

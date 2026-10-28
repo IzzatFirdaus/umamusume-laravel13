@@ -138,17 +138,11 @@ test.describe('wizard head band actions', () => {
     });
 
     /*
-     * Blocked by a peer session, not by this phase.
-     *
-     * `resources/js/pages/Career/TraineeProfile.vue` carries a 427-line rewrite in flight (mtime
-     * 2026-10-27 01:44:01), so Phase 4 — which owns this page — cannot start and this phase may not edit
-     * the file. The page already prints "Choose a different trainee" and "Continue to build target", but
-     * both still sit in the body rather than in `.hrow-actions`, so asserting the pair here would fail
-     * against a file no phase in this slice is allowed to change.
-     *
-     * When Phase 4 lands, delete `fixme` and this case joins the loop above.
+     * Phase 4 put the profile step's pair in the head band, where `career-profile.html:64-68` draws it.
+     * Before that the page kept both doors in the body and this case was a `fixme`; it now joins the
+     * door assertions above on the served page.
      */
-    test.fixme('profile: head band carries "Choose a different trainee" and the forward door', async ({ page }) => {
+    test('profile: head band carries "Choose a different trainee" and the forward door', async ({ page }) => {
         await open(page, '/career/setup/trainee/1');
 
         const row = actions(page);

@@ -43,16 +43,10 @@ test.describe('setup wizard sweep', () => {
             await expect(page.locator('h1')).toHaveCount(1);
 
             // The head band carries the wireframe's back + forward pair, exactly two controls. A third
-            // control there is a page-level action the wireframe draws somewhere else.
-            //
-            // Profile is the exception and it is Phase 4, blocked on a peer rewrite of
-            // `TraineeProfile.vue` (mtime 2026-10-27 01:44:01): its two doors still sit in the body.
-            // `wizard-actions.spec.ts:151` records the same fixme; the pair is asserted below for the
-            // six steps whose files this branch owns.
-            if (step.name !== 'profile') {
-                const actions = page.locator('[data-region="hrow-actions"] a, [data-region="hrow-actions"] button');
-                await expect(actions).toHaveCount(2);
-            }
+            // control there is a page-level action the wireframe draws somewhere else. Phase 4 put the
+            // profile step's pair in the band, so the rule now holds on all seven steps.
+            const actions = page.locator('[data-region="hrow-actions"] a, [data-region="hrow-actions"] button');
+            await expect(actions).toHaveCount(2);
 
             // Six steps, one of them current. The stepper is a status readout, not a second nav.
             await expect(page.locator('[data-setup-steps] .step')).toHaveCount(6);
@@ -99,14 +93,6 @@ test.describe('setup wizard sweep', () => {
         });
     }
 
-    // Phase 4 is blocked on a peer rewrite of `TraineeProfile.vue` (mtime 2026-10-27 01:44:01): its two
-    // doors still render in the body, not in the head band. `wizard-actions.spec.ts:151` records the same
-    // fixme. Remove this with the Phase 4 commit, which puts the pair in the band.
-    test.fixme('profile: the head band carries the back + forward pair (Phase 4 blocked)', async ({ page }) => {
-        await open(page, PAGES[2]);
-        await expect(page.locator('[data-region="hrow-actions"] a, [data-region="hrow-actions"] button')).toHaveCount(2);
-    });
-
     for (const step of PAGES) {
         test(`${step.name}: the words the wireframes do not draw never reappear`, async ({ page }) => {
             await open(page, step);
@@ -123,19 +109,23 @@ test.describe('setup wizard sweep', () => {
         test(`${step.name}: both themes keep the same region set`, async ({ page }) => {
             // The wireframes are light-only, so the HFW cannot answer this: the check is app-side. A
             // theme that hides a region is a region that exists only by accident of colour.
+            //
+            // The theme is the app's own switch, `html[data-theme="dark"]` (`app.css:395`,
+            // `useTheme.ts`), not a `.dark` class: the first version toggled a class no stylesheet
+            // reads, so both counts described the light theme and the case could not fail.
             await open(page, step);
             const light = await page.locator('[data-region]').count();
 
             await page.evaluate(() => {
-                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
             });
             const dark = await page.locator('[data-region]').count();
 
             await page.evaluate(() => {
-                document.documentElement.classList.remove('dark');
+                document.documentElement.removeAttribute('data-theme');
             });
 
-            expect(dark, 'region count under .dark').toBe(light);
+            expect(dark, 'region count under [data-theme="dark"]').toBe(light);
         });
     }
 });

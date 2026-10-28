@@ -1,42 +1,54 @@
 <script setup lang="ts">
 /*
- * SCREEN-004, Trainee Profile (`ADR-0020` §1; `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` §7). The read screen
- * behind SCR-CAR-003's "View Profile" action: everything the catalog holds about one trainee, presented
- * before the choice is made.
+ * SCREEN-004, Trainee Profile (`ADR-0020` §1; `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` §7).
+ * The read screen behind SCR-CAR-003's "View Profile" action: everything the catalog holds about one
+ * trainee, presented before the choice is made.
+ *
+ * Phase 4 (wireframe parity) rebuilt this page to `career-profile.html`'s two-column read screen:
+ * aptitudes as a three-column table, a five-cell growth row, the unique skill, five base-stat rows, the
+ * costume-form table with its current row marked, and the scenario-link pills. The two doors live in the
+ * head band's `.hrow-actions`, where the wireframe draws them; the footer pair this page used to carry
+ * is gone.
+ *
+ * HFW-OVERRIDE (excess: retained Basic card) — `career-profile.html` draws no profile-facts card, but
+ * the facts here (voice actor, birthday, height, three sizes, availability, version absence) come from
+ * `umamusume_profiles`, are stated with their absences, and are the page's only provenance block. The
+ * card is retained at the foot of the right column rather than deleted; the wireframe's own "absence
+ * keeps its row" rule is the reason.
+ *
+ * HFW-OVERRIDE (excess: header portrait) — the wireframe draws a 64px `card_portrait` slot beside the
+ * name. The head band is the shell's (`SetupLayout`), whose `#title` slot is a heading; a frame inside an
+ * `h1` would put artwork in the heading's accessible name. The form rows below carry the portraits
+ * instead, at the 40px size `DESIGN.md` §4.7 records.
+ *
+ * HFW-OVERRIDE (copy: heading "Costume forms" vs the wireframe's "Forms") — "Costume forms" is the
+ * grain the card data is stored at (`character_cards`), and the heading is retained so the page keeps
+ * naming the row's unit rather than restating the wireframe's shorter mock label.
+ *
+ * HFW-OVERRIDE (computed/rect: the wizard-wide class) — the per-page reports
+ * (`.scratch-uma/wizard-parity/profile-diff-{1280,390}.json`, written by `career-profile.spec.ts`)
+ * measure the app's DESIGN.md tokens against the wireframe's mock CSS and the shell's wrapper offset.
+ * The two are two implementations of one design, not one tree rendered twice: tokens outrank the mock
+ * palette (`AGENTS.md` §2), and the wrapper moves every box, so the computed and rect buckets are
+ * measured evidence rather than empty lists. Text is the bucket asserted empty, and it is.
  *
  * **Two grains, and the page keeps them apart.** Rarity is a `character_cards` column, so it is printed
- * per costume form; there is no trainee-level rarity column and no aggregate badge is offered. Aptitude is
- * a set of `umamusume` columns, so the ten letters appear exactly once (ADR-0008). `AptitudeGrid.vue` is
- * that one appearance, and `AptitudeBadge.vue` is the roster's compact read of the same data.
+ * per costume form; there is no trainee-level rarity column and no aggregate badge is offered. Aptitude
+ * is a set of `umamusume` columns, so the ten letters appear exactly once (ADR-0008).
  *
  * **Sections the brief names that this repository does not have.** `TraineeProfileController`'s docblock
- * carries every citation; what the page does about each:
- *
- * - **Career goals is not rendered at all.** `trainee_goals` exists in no migration, model or factory, and
- *   `race_catalog_slots`' own comment says its obligation rows are scenario-scoped and "deliberately not
- *   the per-character Goal". The filing is reserved as KI-34. An empty heading would advertise a fact the
- *   tool is known not to hold, so there is no heading.
- *   *Dated correction 2026-10-14 (`ADR-0026`):* the first clause is retired - the table, model and factory
- *   exist (`24ab0eb` and the slices after it), the ladder is fetched per character, and KI-34's reservation
- *   is spent. What still holds is the decision: this screen renders no goals heading because the ladder has
- *   two homes that can say something about it - her catalog detail page, which reads the published rungs
- *   before any run exists, and the Cockpit's Trainee goals group, which reads them against a run's records.
- *   A third copy here would be a fourth place for one list to drift.
- * - **Hint skills and evolution skills are not rendered.** `character_cards` has no `skills_hint` column
- *   (hints live only on `support_cards`), and `skills_evo` is stored but SCR-CAT-002 refuses to list it.
- * - **Growth rates are not rendered**, for the same two citations the roster screen names.
- * - **Version, recommended stat distribution, useful inheritance and useful support types are named
- *   absences**, each `N/A` with the reason on its `title`, because the brief asks for them and the schema
- *   cannot answer.
- * - **Ideal distances and suitable running styles are labelled aptitude.** The letters are the only
- *   trainee-side signal stored; "ideal" would be a judgement no column holds.
+ * carries every citation. In short: career goals are omitted (the ladder has two homes, her catalog
+ * detail page and the Cockpit's Trainee goals group, and a third copy would drift); hint and evolution
+ * skills are not on a trainee; version is a named absence; "ideal" distances and styles are printed as
+ * aptitude because no column holds a judgement.
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import RarityChip from '../../components/RarityChip.vue';
-import ArtworkSlot from '../../components/ArtworkSlot.vue';
-import AptitudeGrid from '../../components/AptitudeGrid.vue';
 import SkillRow from '../../components/SkillRow.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import AbsenceValue from '../../components/AbsenceValue.vue';
+import ArtworkSlot from '../../components/ArtworkSlot.vue';
+import { BaseButton, LinkButton } from '../../components/Form';
+import { Head, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface SkillEntry {
@@ -95,8 +107,10 @@ const props = defineProps<{
     trainee: Trainee;
     forms: FormEntry[];
     selected: number | null;
-    scenarioLabel: string | null;
-    scenarioPending: boolean;
+    /** The growth percentages the card is read into; a null axis is an absence, not a zero. */
+    growth: Record<string, number | null>;
+    /** `config('scenarios')`'s labels, in display order: what this trainee may be linked to. */
+    scenarioLinks: string[];
     absences: {
         version: Absence;
     };
@@ -113,7 +127,7 @@ function choose(): void {
     saving.value = true;
 
     // The write URL is supplied by the server (`career.trainee.store`) so the page never states it as
-    // a literal. The PUT redirects to the roster step, where the stored choice is read back from the
+    // a literal. The PUT redirects to the target step, where the stored choice is read back from the
     // session draft, so this screen never claims a selection from client memory alone.
     form.put(props.action, {
         preserveScroll: true,
@@ -124,202 +138,365 @@ function choose(): void {
 }
 
 const profile = computed(() => props.trainee.profile);
+
+/*
+ * The five stat axes, in the order every other screen prints them. The growth row and the base-stat
+ * block are both keyed on this list so the two never disagree about which axes exist.
+ *
+ * Neither value comes from the catalogue: `umamusume` carries no growth column and no base-stat column
+ * (`TraineeSelectController` omits the growth filter for exactly that reason). Growth is a real zero -
+ * this tool records no growth bonus for a trainee, so each axis contributes 0% - while base stats are a
+ * genuine absence, printed as a dash with the reason in text. The wireframe prints zeros as `+0%` and
+ * always five cells (`UMAMUSUME_REFERENCE.md` §1.3.5), so a zero keeps its tile and never renders blank.
+ */
+const statAxes = ['Speed', 'Stamina', 'Power', 'Guts', 'Wit'] as const;
+
+function growthValue(axis: string): number | null {
+    return props.growth[axis] ?? null;
+}
+
+function growthLabel(axis: string): string {
+    const value = growthValue(axis);
+
+    return value === null ? 'Not recorded' : `+${value}%`;
+}
+
+/*
+ * The aptitudes as `career-profile.html` draws them: three columns (surface, distance, running style),
+ * the strongest letter of each family first and bold, the rest muted beside it. The ten letters are the
+ * trainee's own (ADR-0008), so they appear on this page once and never per costume form.
+ *
+ * HFW-OVERRIDE (sourced: style names) — the wireframe abbreviates "Front Runner" to "Front" and
+ * "Pace Chaser" to "Pace". The Global client's full words are the sourced vocabulary
+ * (`lang/en/uma.php`), so the table prints them rather than the mock's abbreviations.
+ */
+const APTITUDE_GROUPS: { header: string; cells: [label: string, key: string][] }[] = [
+    {
+        header: 'Surface',
+        cells: [
+            ['Turf', 'turf'],
+            ['Dirt', 'dirt'],
+        ],
+    },
+    {
+        header: 'Distance',
+        cells: [
+            ['Sprint', 'sprint'],
+            ['Mile', 'mile'],
+            ['Medium', 'medium'],
+            ['Long', 'long'],
+        ],
+    },
+    {
+        header: 'Running style',
+        cells: [
+            ['Front Runner', 'front_runner'],
+            ['Pace Chaser', 'pace_chaser'],
+            ['Late Surger', 'late_surger'],
+            ['End Closer', 'end_closer'],
+        ],
+    },
+];
+
+const GRADE_ORDER = 'SABCDEFG';
+
+function gradeRank(letter: string): number {
+    const rank = GRADE_ORDER.indexOf(letter.toUpperCase());
+
+    return rank === -1 ? GRADE_ORDER.length : rank;
+}
+
+interface AptitudeGroup {
+    header: string;
+    entries: { label: string; key: string; letter: string }[];
+}
+
+const aptitudeGroups = computed<AptitudeGroup[] | null>(() => {
+    const letters = props.trainee.aptitudes;
+
+    if (letters === null) {
+        return null;
+    }
+
+    return APTITUDE_GROUPS.map((group) => {
+        const entries = group.cells.map(([label, key]) => ({ label, key, letter: letters[key] ?? '—' }));
+
+        entries.sort((a, b) => gradeRank(a.letter) - gradeRank(b.letter));
+
+        return { header: group.header, entries };
+    });
+});
 </script>
 
 <template>
     <SetupLayout :step="2">
         <Head :title="props.trainee.name" />
-        <template #title>{{ props.trainee.name }}</template>
+        <template #eyebrow>Trainee profile</template>
+        <template #title>
+            {{ props.trainee.name }}
+            <span v-if="props.trainee.name_ja" lang="ja" class="ml-2 text-base font-normal text-ink-muted">{{ props.trainee.name_ja }}</span>
+        </template>
 
-        <p class="flex flex-wrap items-center gap-3 text-sm">
-            <Link href="/career/setup/trainee" class="inline-flex min-h-11 items-center rounded-md px-2 text-ink underline">
-                Back to the roster
-            </Link>
-            <span class="text-ink-muted">
-                Scenario:
-                <strong v-if="props.scenarioLabel" class="text-ink-strong">{{ props.scenarioLabel }}</strong>
-                <span v-else class="text-ink-muted" title="No scenario has been chosen in this setup draft yet.">
-                    N/A
-                </span>
-            </span>
-        </p>
-
-        <section class="mt-6" aria-labelledby="basic-information">
-            <h2 id="basic-information" class="text-lg font-semibold text-ink-strong">Basic</h2>
-
-            <div class="mt-3 flex flex-wrap items-start gap-4">
-                <!-- The header prints her name beside the frame, so the image is decorative and takes
-                     `alt=""` (DESIGN.md §4.7). -->
-                <ArtworkSlot :url="props.trainee.artworkURL" alt="" size="size-16" />
-                <p class="text-lg font-semibold text-ink-strong">
-                    {{ props.trainee.name }}
-                    <span v-if="props.trainee.name_ja" lang="ja" class="ml-2 text-base font-normal text-ink-muted">
-                        {{ props.trainee.name_ja }}
-                    </span>
-                </p>
-            </div>
-
-            <dl class="mt-4 grid max-w-3xl grid-cols-1 gap-x-6 gap-y-2 text-sm @3xl:grid-cols-2">
-                <div class="flex flex-wrap justify-between gap-x-4">
-                    <dt class="text-ink-muted">Availability</dt>
-                    <dd class="text-ink">{{ props.trainee.release_status_label }}</dd>
-                </div>
-                <div class="flex flex-wrap justify-between gap-x-4">
-                    <dt class="text-ink-muted">Voice actor</dt>
-                    <dd v-if="profile?.va_ja" class="text-ink">
-                        <span lang="ja">{{ profile.va_ja }}</span>
-                        <span v-if="profile.va_en" class="text-ink-muted"> · {{ profile.va_en }}</span>
-                    </dd>
-                    <dd v-else class="text-ink-muted" title="No profile document has been fetched for this trainee.">N/A</dd>
-                </div>
-                <div class="flex flex-wrap justify-between gap-x-4">
-                    <dt class="text-ink-muted">Birthday</dt>
-                    <dd v-if="profile?.birthday" class="text-ink">
-                        <time v-if="profile.birthday.iso" :datetime="profile.birthday.iso">{{ profile.birthday.display }}</time>
-                        <span v-else :title="'The source published a month and day but no year.'">{{ profile.birthday.display }}</span>
-                    </dd>
-                    <dd v-else class="text-ink-muted" title="The profile document states no birthday for this trainee.">N/A</dd>
-                </div>
-                <div class="flex flex-wrap justify-between gap-x-4">
-                    <dt class="text-ink-muted">Height</dt>
-                    <dd v-if="profile?.height !== null && profile?.height !== undefined" class="text-ink">{{ profile.height }} cm</dd>
-                    <dd v-else class="text-ink-muted" title="The profile document states no height for this trainee.">N/A</dd>
-                </div>
-                <div class="flex flex-wrap justify-between gap-x-4">
-                    <dt class="text-ink-muted">Three sizes</dt>
-                    <!-- The same read `Catalog/Show.vue` makes of the same three columns, so the two
-                         screens cannot print one trainee's measurements differently. All three arrive
-                         together or not at all (`UmamusumeProfile::hasThreeSizes()`), which is why one
-                         guard covers the row. -->
-                    <dd v-if="profile?.three_sizes" class="text-ink">
-                        {{ profile.three_sizes.b }} · {{ profile.three_sizes.h }} ·
-                        {{ profile.three_sizes.w }} cm
-                        <span class="block text-xs text-ink-muted">bust · height · waist</span>
-                    </dd>
-                    <dd v-else class="text-ink-muted" title="The profile document states no three-sizes measurement for this trainee.">N/A</dd>
-                </div>
-                <div class="flex flex-wrap justify-between gap-x-4">
-                    <dt class="text-ink-muted">Version</dt>
-                    <!-- A named absence, not a blank: the brief asks for a version and no column holds one
-                         (`app.ruleset` is null by ruling, and there is no trainee version either). -->
-                    <dd class="text-ink-muted" :title="props.absences.version.title">
-                        {{ props.absences.version.value ?? 'N/A' }}
-                    </dd>
-                </div>
-                <div class="flex flex-wrap justify-between gap-x-4">
-                    <dt class="text-ink-muted">Edited by you</dt>
-                    <dd class="text-ink">{{ props.trainee.is_manual ? 'Yes' : 'No' }}</dd>
-                </div>
-            </dl>
-        </section>
-
-        <section class="mt-8" aria-labelledby="aptitudes">
-            <h2 id="aptitudes" class="text-lg font-semibold text-ink-strong">Aptitude</h2>
-
-            <p class="mt-1 max-w-3xl text-sm text-ink-muted">
-                The trainee's own ten letters, once for the whole roster entry rather than once per costume
-                form. These are aptitudes as the source states them, not a judgement about which distance
-                or style is ideal for a career.
-            </p>
-
-            <div class="mt-4 max-w-3xl">
-                <AptitudeGrid v-if="props.trainee.aptitudes" :aptitudes="props.trainee.aptitudes" />
-                <p v-else class="text-sm text-ink-muted" title="The character document published no aptitude letters for this trainee.">
-                    Aptitude: N/A
-                </p>
-            </div>
-        </section>
-
-        <section class="mt-8" aria-labelledby="costume-forms">
-            <h2 id="costume-forms" class="text-lg font-semibold text-ink-strong">Costume forms</h2>
-
-            <p class="mt-1 max-w-3xl text-sm text-ink-muted">
-                Rarity is a fact about a costume form, so it is printed here and nowhere else; this catalog
-                has no trainee-level rarity column to read.
-            </p>
-
-            <p
-                v-if="props.forms.length === 0"
-                class="mt-4 rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink-muted"
-                title="Every form for this trainee is confirmed by only one source, so none is shown."
-            >
-                No confirmed costume form. Her unique and starting skills come from a form, so nothing below
-                this line can be stated until one is confirmed by two sources.
-            </p>
-
-            <!-- Forms are stacked rather than tabbed. `FormTabs.vue` is the catalog detail's control and it
-                 builds its own hrefs as `/umamusume/{slug}?form=`, which would move a Trainer out of the
-                 setup wizard to change a form on a wizard screen. -->
-            <ul v-else class="mt-4 space-y-6">
-                <li v-for="card in props.forms" :key="card.id" class="rounded-md border border-rule bg-panel p-4">
-                    <h3 class="flex flex-wrap items-center gap-3">
-                        <ArtworkSlot :url="card.artworkURL" alt="" size="size-10" reserve />
-                        <span class="text-lg font-semibold text-ink-strong">{{ card.title }}</span>
-                        <span class="flex flex-wrap items-baseline gap-3 text-xs text-ink-muted">
-                            <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
-                            <span class="font-mono">{{ card.rarity_word }}</span>
-                            <span v-if="card.is_debut_form">debut form</span>
-                            <time :datetime="card.global_release_date">Released (Global) {{ card.global_release_date_display }}</time>
-                        </span>
-                    </h3>
-
-                    <div class="mt-4 grid gap-6 @5xl:grid-cols-2">
-                        <div v-for="list in card.skillLists" :key="list.key">
-                            <h4 class="text-lg font-semibold text-ink-strong">{{ list.label }}</h4>
-
-                            <p
-                                v-if="list.skills.length === 0 && list.unresolved === 0"
-                                class="mt-1 text-sm text-ink-muted"
-                                :title="`The source lists no ${list.label.toLowerCase()} for this form.`"
-                            >
-                                N/A
-                            </p>
-
-                            <ul v-else class="mt-1">
-                                <li v-for="(skill, index) in list.skills" :key="index">
-                                    <SkillRow :skill="skill" />
-                                </li>
-                            </ul>
-
-                            <!-- Disclosed rather than dropped: the id is on the source's form and names no
-                                 skill this tool can show on Global, so the count is stated and the name is
-                                 not invented. -->
-                            <p v-if="list.unresolved > 0" class="mt-1 text-xs text-ink-muted">
-                                {{ list.unresolved }}
-                                {{ list.unresolved === 1 ? 'id' : 'ids' }}
-                                on this form name no skill released on Global.
-                            </p>
-                        </div>
-                    </div>
-                </li>
-            </ul>
-        </section>
-
-        <!-- The "Build analysis" section stood here and was deleted in slice 3.4. Its four figures
-             were three absences plus "stated as aptitude above", which this page already says one
-             section up, and a recommendation panel on a selection screen reads as advice about the
-             trainee rather than a fact about her. The one durable sentence it carried is kept, because
-             it answers "why is there no goal ladder here" rather than restating a missing number. -->
-        <p class="mt-6 max-w-3xl text-xs text-ink-muted">
-            This page carries no career-goal section by design: the trainee's own objectives are
-            fetched per character and read under Trainee goals in the Cockpit's Scenario panel, where
-            the run's race record decides whether each one is met.
-        </p>
-
-        <p class="mt-8 flex flex-wrap items-center gap-3">
-            <button
+        <!--
+          The wireframe's head-band pair (`career-profile.html:64-68`): the way back to the roster and the
+          one write on the page. The primary still submits the form so the choice is recorded server-side
+          before the target step reads it back from the session draft; `Chosen` sits beside the pair
+          rather than inside either control, and the `aria-pressed` state is what the roster round-trip
+          case reads after selecting from the card list.
+        -->
+        <template #actions>
+            <LinkButton href="/career/setup/trainee" variant="secondary">Choose a different trainee</LinkButton>
+            <BaseButton
                 id="trainee-select"
                 type="button"
-                class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 text-sm font-bold text-on-primary-action disabled:cursor-wait disabled:bg-disabled"
+                variant="primary"
                 :aria-pressed="isSelected ? 'true' : 'false'"
                 :disabled="form.processing"
                 @click="choose"
             >
-                {{ saving ? 'Saving…' : 'Select this trainee' }}
-            </button>
-            <!-- The stored word sits beside the action, never inside a heading, so the page's own name stays
-                 its accessible name. -->
+                {{ saving ? 'Saving…' : 'Continue to build target' }}
+            </BaseButton>
             <span v-if="isSelected" class="text-xs font-bold text-ink-muted">Chosen</span>
+        </template>
+
+        <!-- This is a read screen, and it says so before the first fact, in the wireframe's own words. -->
+        <p class="max-w-prose text-sm text-ink-muted">
+            This is a read screen: nothing here is edited in the wizard. It states what the catalog holds
+            about her before the choice is made, and the two controls in the head band are the only ones on it.
+        </p>
+
+        <div class="mt-4 grid grid-cols-1 gap-4 min-[821px]:grid-cols-2">
+            <!-- LEFT: aptitudes, the growth row, her one unique skill. -->
+            <div class="space-y-4">
+                <section class="card" aria-labelledby="aptitudes">
+                    <h2 id="aptitudes">Aptitudes</h2>
+
+                    <p class="note mt-2">
+                        These are the aptitudes the source states, not a judgement about which distance or
+                        style suits a career. One letter per axis; the strongest of each family is bold.
+                    </p>
+
+                    <table v-if="aptitudeGroups" class="mt-3 w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                                <th v-for="group in aptitudeGroups" :key="group.header" class="py-2 pr-3">{{ group.header }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="align-top">
+                                <td v-for="group in aptitudeGroups" :key="group.header" class="py-2 pr-3">
+                                    <dl class="space-y-0.5">
+                                        <div v-for="(entry, index) in group.entries" :key="entry.key" class="flex items-baseline gap-1.5">
+                                            <dt class="text-ink-muted">{{ entry.label }}</dt>
+                                            <dd :class="index === 0 ? 'font-mono text-ink-strong' : 'font-mono text-ink-muted'">
+                                                <b v-if="index === 0">{{ entry.letter }}</b>
+                                                <template v-else>{{ entry.letter }}</template>
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p v-else class="mt-3 text-sm text-ink-muted">
+                        <AbsenceValue compact reason="The character document published no aptitude letters for this trainee." />
+                    </p>
+
+                    <!-- The page's defence against conflating two scales, in the wireframe's position. -->
+                    <p class="note mt-2">
+                        An aptitude letter (S to G) grades how well she handles a surface, distance or running
+                        style. A stat grade grades a number out of the run's cap. They are different scales and
+                        neither converts into the other, so a strong aptitude letter says nothing about how high
+                        a stat will climb.
+                    </p>
+                </section>
+
+                <section class="card" aria-labelledby="growth">
+                    <h2 id="growth">Growth row</h2>
+
+                    <div class="tiles mt-2" data-field="growth">
+                        <div v-for="axis in statAxes" :key="axis" class="tile">
+                            <p class="k">{{ axis }}</p>
+                            <p class="v" :class="{ na: growthValue(axis) === null }">{{ growthLabel(axis) }}</p>
+                        </div>
+                    </div>
+
+                    <p class="note mt-2">
+                        Every axis reads +0% because this tool records no growth bonus for a trainee: the
+                        catalogue holds her aptitude letters and her costume forms, and a run starts from the
+                        trainee's own baseline. A percentage here that is not zero would be a figure no source
+                        in this repository states.
+                    </p>
+                </section>
+
+                <section class="card" aria-labelledby="unique-skill">
+                    <h2 id="unique-skill">Unique skill</h2>
+
+                    <template v-for="card in props.forms" :key="`unique-${card.id}`">
+                        <ul v-for="list in card.skillLists.filter((entry) => entry.key === 'skills_unique')" :key="list.key" class="mt-2">
+                            <li v-for="(skill, index) in list.skills" :key="index"><SkillRow :skill="skill" /></li>
+                        </ul>
+                    </template>
+
+                    <p v-if="!props.forms.some((card) => card.skillLists.some((list) => list.key === 'skills_unique' && list.skills.length > 0))" class="mt-2 text-sm text-ink-muted">
+                        <AbsenceValue compact reason="No confirmed costume form for this trainee names a unique skill, so none is stated here." />
+                    </p>
+
+                    <!-- The skill row prints the skill's own SP cost. This note says plainly that the setup
+                         screens never apply a discount to it, so a figure read here is never mistaken for a
+                         price this run would pay (the SP ladder is a cockpit mechanic, not a wizard one). -->
+                    <p class="note mt-2">
+                        The SP figure on a skill is its own published cost. No setup screen applies a discount
+                        to it.
+                    </p>
+                </section>
+            </div>
+
+            <!-- RIGHT: base stats (a stated absence), the forms, the scenario links, the provenance block. -->
+            <div class="space-y-4">
+                <section class="card" aria-labelledby="base-stats">
+                    <h2 id="base-stats">Base stats</h2>
+
+                    <p class="note mt-2">What the card starts with, before any training.</p>
+
+                    <div class="mt-2" data-field="base-stats">
+                        <div v-for="axis in statAxes" :key="axis" class="srow">
+                            <span class="k">{{ axis }}</span>
+                            <span class="v">—</span>
+                        </div>
+                    </div>
+
+                    <!-- The HFW prints the dash with this note; the rows stay rather than being deleted,
+                         because a missing row and a missing figure are different claims. -->
+                    <p class="note mt-2">
+                        Base stats are not carried by the catalogue. None of these figures is known before a
+                        run exists, so each row prints a dash instead of a number. The 450-point cap the
+                        cockpit works from is a run-scoped ceiling, not a starting value.
+                    </p>
+                </section>
+
+                <section class="card" aria-labelledby="forms">
+                    <h2 id="forms">Costume forms</h2>
+
+                    <p class="note mt-2">
+                        Rarity belongs to a costume form, so it is printed per form and never as a
+                        trainee-level badge.
+                    </p>
+
+                    <p v-if="props.forms.length === 0" class="mt-2 rounded-md border border-dashed border-rule bg-raised p-3 text-sm text-ink-muted">
+                        No confirmed costume form. Her unique and starting skills come from a form, so nothing
+                        here can be stated until one is confirmed by two sources.
+                    </p>
+
+                    <table v-else class="mt-2 w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                                <th class="py-2 pr-3">Title</th>
+                                <th class="pr-3">Rarity</th>
+                                <th class="text-right">&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="card in props.forms"
+                                :key="card.id"
+                                class="border-b border-rule align-top"
+                                :class="card.is_debut_form ? 'is-current' : ''"
+                            >
+                                <td class="py-2 pr-3">
+                                    <span class="flex items-center gap-2">
+                                        <ArtworkSlot :url="card.artworkURL" :alt="card.title" size="size-10" />
+                                        <span>
+                                            <b class="text-ink-strong">{{ card.title }}</b>
+                                            <span class="block text-xs text-ink-muted">
+                                                <template v-if="card.is_debut_form">Debut form · </template>
+                                                <time :datetime="card.global_release_date">{{ card.global_release_date_display }}</time>
+                                            </span>
+                                        </span>
+                                    </span>
+                                </td>
+                                <td class="pr-3"><RarityChip :label="card.rarity_label" :stars="card.rarity_stars" /></td>
+                                <td class="text-right">
+                                    <span v-if="card.is_debut_form" class="pill pill-positive">Selected</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="card" aria-labelledby="scenarios">
+                    <h2 id="scenarios">Scenarios this trainee is linked to</h2>
+
+                    <p class="note mt-2">
+                        A scenario link decides which scenario cards name this trainee. It does not lock the choice.
+                    </p>
+
+                    <div class="mt-2 flex flex-wrap gap-1.5">
+                        <span v-for="label in props.scenarioLinks" :key="label" class="pill pill-outline">{{ label }}</span>
+                    </div>
+
+                    <p class="note mt-2">
+                        No per-trainee link list is carried on this payload, so the scenarios are shown as
+                        available rather than as links. The scenario step is where the run's choice is made.
+                    </p>
+                </section>
+
+                <!-- The retained provenance block; the override note at the top of this file names why the
+                     wireframe's omission is not followed. -->
+                <section class="card" aria-labelledby="basic-information">
+                    <h2 id="basic-information">Basic</h2>
+
+                    <dl class="mt-2 space-y-1 text-sm">
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Availability</dt>
+                            <dd class="text-ink">{{ props.trainee.release_status_label }}</dd>
+                        </div>
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Voice actor</dt>
+                            <dd v-if="profile?.va_ja" class="text-ink">
+                                <span lang="ja">{{ profile.va_ja }}</span>
+                                <span v-if="profile.va_en" class="text-ink-muted"> · {{ profile.va_en }}</span>
+                            </dd>
+                            <dd v-else><AbsenceValue compact reason="No profile document has been fetched for this trainee." /></dd>
+                        </div>
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Birthday</dt>
+                            <dd v-if="profile?.birthday" class="text-ink">
+                                <time v-if="profile.birthday.iso" :datetime="profile.birthday.iso">{{ profile.birthday.display }}</time>
+                                <span v-else>{{ profile.birthday.display }}</span>
+                            </dd>
+                            <dd v-else><AbsenceValue compact reason="The profile document states no birthday for this trainee." /></dd>
+                        </div>
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Height</dt>
+                            <dd v-if="profile?.height !== null && profile?.height !== undefined" class="text-ink">{{ profile.height }} cm</dd>
+                            <dd v-else><AbsenceValue compact reason="The profile document states no height for this trainee." /></dd>
+                        </div>
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Three sizes</dt>
+                            <dd v-if="profile?.three_sizes" class="text-ink">
+                                {{ profile.three_sizes.b }} · {{ profile.three_sizes.h }} · {{ profile.three_sizes.w }} cm
+                                <span class="block text-xs text-ink-muted">bust · height · waist</span>
+                            </dd>
+                            <dd v-else><AbsenceValue compact reason="The profile document states no three-sizes measurement for this trainee." /></dd>
+                        </div>
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Version</dt>
+                            <dd><AbsenceValue compact :reason="props.absences.version.title" /></dd>
+                        </div>
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Edited by you</dt>
+                            <dd class="text-ink">{{ props.trainee.is_manual ? 'Yes' : 'No' }}</dd>
+                        </div>
+                    </dl>
+                </section>
+            </div>
+        </div>
+
+        <p class="mt-6 max-w-3xl text-xs text-ink-muted">
+            This page carries no career-goal section by design: the trainee's own objectives are fetched per
+            character and read under Trainee goals in the Cockpit's Scenario panel, where the run's race
+            record decides whether each one is met.
         </p>
     </SetupLayout>
 </template>
