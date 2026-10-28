@@ -45,12 +45,17 @@ truth for mechanics; the two ADRs that contradicted it were amended rather than 
 - Colour-token pin reconciled 94 → 95 (`DesignTokensTest`, `DESIGN.md`), measured against the
   stylesheet rather than carried forward.
 
-## [3.0.0] - 2026-10-27
+## [3.0.0] - unreleased
 
-The HFW-parity release. The v3 frontend slices landed across the preceding sessions (S3a-S3c, S5, S6,
-S7a, S8, S9, S11 as commits `f0e89dbd` through `e4a6e2fb`); this release closes the remainder and files
-what it did not close. No new route, screen, API field, or schema change: every item below is copy,
-markup, a derived prop, or a test.
+**Not tagged.** `git tag -l '3.0.*'` is empty. The 2026-10-28 parity audit against the HFW found 32
+divergent pages, 1 blank page and 17 near pages, so `3.0.0` waits for the repair pass and its re-audit
+(`docs/proposals/TASKS.md` § "v3.0.0 parity audit — Task A"). This section records what the tree
+contains today; it is not a release note until the tag exists, and whoever cuts the tag dates it.
+
+The HFW-parity work. The v3 frontend slices landed across the preceding sessions (S3a-S3c, S5, S6,
+S7a, S8, S9, S11 as commits `f0e89dbd` through `e4a6e2fb`); this section collects the remainder and
+files what it did not close. No new route, screen, API field, or schema change: every item below is
+copy, markup, a derived prop, or a test.
 
 ### Added
 
