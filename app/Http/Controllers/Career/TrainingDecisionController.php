@@ -430,15 +430,20 @@ class TrainingDecisionController extends Controller
             'notes' => $notes,
         ];
 
-        // Wit's published cost is deliberately absent, absence line included: the Energy row keeps
-        // the advisor's declared constant, which is the artifact's own cost value for Wit anyway.
+        // Wit's row states a refund, not a cost, and the wireframe prints it as "+5 Energy". The
+        // scenario table's own value is the figure, so it is carried for Wit as well; the signed
+        // reading is the page's, and a positive value means the discipline returns Energy.
         $cost = null;
 
-        if ($stat !== 'Wit' && is_int($row['energy'] ?? null)) {
+        if (is_int($row['energy'] ?? null)) {
             $cost = [
                 'level' => $level,
                 'value' => $row['energy'],
-                'text' => 'E'.strtr((string) $row['energy'], ['-' => "\u{2212}"]),
+                // Signed, the way the page prints it: a discipline that spends Energy reads E−N and
+                // one that returns it reads E+N.
+                'text' => ((int) $row['energy']) < 0
+                    ? 'E'.strtr((string) $row['energy'], ['-' => "\u{2212}"])
+                    : 'E+'.$row['energy'],
                 'server' => (string) ($tables['server'] ?? 'JP'),
                 'source' => (string) ($tables['source'] ?? ''),
                 'notes' => $notes,

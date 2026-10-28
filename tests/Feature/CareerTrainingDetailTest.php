@@ -296,11 +296,12 @@ it('carries the scenario matrix published per-level row keyed to the facility le
                 && $published['cost']['value'] === -21
                 && $published['cost']['text'] === 'E−21'
                 && $published['risk_reason'] === config('scenarios.scenarios.unity_cup.risk_absence.reason'))
-            // Wit renders its gains row but carries no published cost: its rows state a refund,
-            // not a cost, and the advisor's own wit_cost constant governs that row. Its risk row
-            // is the engine's own RiskNotMeasured word, so no published reason rides it.
+            // Wit's row states a refund, and the parity pass carries it as the signed figure the
+            // HFW prints (+5 Energy). Its risk row is the engine's own RiskNotMeasured word, so no
+            // published reason rides it.
             ->where('options.4.published.gains.text', '+8 Wit, +2 Speed, +5 SP')
-            ->where('options.4.published.cost', null)
+            ->where('options.4.published.cost.value', 5)
+            ->where('options.4.published.cost.text', 'E+5')
             ->where('options.4.published.risk_reason', null));
 });
 
@@ -419,13 +420,10 @@ it('resolves a published row for every discipline on every scenario the matrix c
                             return false;
                         }
 
-                        // Wit carries no published cost anywhere; the four Energy disciplines do,
-                        // and Unity Cup's divergence note rides only its own entries.
-                        if ($stat === 'Wit') {
-                            if ($option['published']['cost'] !== null) {
-                                return false;
-                            }
-                        } elseif ($option['published']['cost'] === null
+                        // Every discipline carries the row's own Energy figure, signed: the four
+                        // Energy disciplines spend it, Wit returns it as a refund. Unity Cup's
+                        // divergence note rides only its own entries.
+                        if ($option['published']['cost'] === null
                             || $option['published']['cost']['value'] !== $row['energy']) {
                             return false;
                         }

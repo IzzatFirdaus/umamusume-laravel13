@@ -31,8 +31,9 @@
  * because TypeScript 7 ships no `lib/typescript.js` for `@vue/compiler-sfc` to load (plan §11).
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
-import TrainingCard from '../../components/career/TrainingCard.vue';
-import { BaseInput, BaseSelect, BaseRadio } from '../../components/Form';
+import { BaseInput, BaseSelect } from '../../components/Form';
+import PageHeader from '../../components/ui/PageHeader.vue';
+import Note from '../../components/ui/Note.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
@@ -421,6 +422,82 @@ function onKeydown(event: KeyboardEvent): void {
 
 onMounted(() => window.addEventListener('keydown', onKeydown));
 onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
+
+/*
+ * The HFW's five-discipline list, built from the options the controller already sends. The feeder
+ * routing is the game's own ([Both], UMAMUSUME_REFERENCE.md §1.1.1); the gains and the Energy figure
+ * are the published per-level row the run's facility level selects, and a run that never recorded a
+ * level prints the absence rather than a Level-1 stand-in.
+ */
+const FEEDER: Record<string, string> = {
+    Speed: 'Feeds Power',
+    Stamina: 'Feeds Guts',
+    Power: 'Feeds Stamina',
+    Guts: 'Feeds Speed and Power',
+    Wit: 'Feeds Speed',
+};
+
+const signedEnergy = (value: number | null): string => {
+    if (value === null) {
+        return 'Energy not recorded';
+    }
+
+    return value < 0 ? `−${Math.abs(value)} Energy` : `+${value} Energy`;
+};
+
+const disciplines = computed(() =>
+    props.options.map((option, index) => ({
+        choice: option.choice,
+        key: option.key,
+        shortcut: index + 1,
+        feeder: FEEDER[option.key] ?? '',
+        recommended: option.key === props.advisor.action,
+        gains: option.published.gains?.text ?? null,
+        gainsAbsence: option.published.gains_absence,
+        level: option.published.gains?.level ?? null,
+        energy: option.published.cost?.value ?? null,
+    })),
+);
+
+const otherActions = computed(() => [
+    ...props.write.extra_choices.map((extra) => ({
+        value: extra.value,
+        label: extra.label,
+        note: extra.note,
+        recommended: extra.recommended,
+        href: null as string | null,
+    })),
+    {
+        value: 'race',
+        label: 'Race',
+        note: 'Optional race · see the race desk',
+        recommended: false,
+        href: `/training-runs/${props.run.id}/races`,
+    },
+]);
+
+const chooseAction = (value: string, href: string | null): void => {
+    if (href !== null) {
+        window.location.href = href;
+
+        return;
+    }
+
+    choose(value);
+};
+
+const discard = (): void => {
+    window.history.back();
+};
+
+const undoableTurn = computed(() => Math.max(1, props.write.turn - 1));
+
+const energyBandNote = computed(() =>
+    props.energy.state === 'exact' && props.energy.value !== null
+        ? `Energy ${props.energy.value}.`
+        : `${props.energy.label}. A band is the reading; the exact figure is not recorded.`,
+);
+
 </script>
 
 <template>
@@ -430,442 +507,277 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
         :scenario-label="props.run.scenario_label"
         :status-label="props.run.status_label"
         :status="props.run.status"
-        :position="props.positionLabel"
+        :position="positionLabel"
         :run-url="props.run.run_url"
         current="training"
     >
-        <Head :title="`Training decision: ${props.run.trainee}`" />
-        <template #title>Training decision</template>
+        <Head :title="'Training decision: ' + props.run.trainee" />
 
-        <p v-if="visiting" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
-        <p v-if="visitFailed" role="alert" class="mb-4 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
+        <template #head>
+            <PageHeader
+                eyebrow="Training decision"
+                title="Pick this turn's action"
+                description="Five disciplines, rest, recreation and an optional race. The advisor's recommendation is marked; nothing is committed until you record the turn."
+            >
+                <template #actions>
+                    <a
+                        :href="props.run.cockpit_url"
+                        class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong"
+                    >Back to cockpit</a>
+                </template>
+            </PageHeader>
+        </template>
+
+        <p v-if="visiting" role="status" class="mb-3 text-sm text-ink-muted">Loading…</p>
+        <p v-if="visitFailed" role="alert" class="mb-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
             That turn did not go through. Nothing was saved; try again.
         </p>
 
-        <p class="mb-4 flex flex-wrap items-baseline gap-x-2 text-sm text-ink-muted">
-            <span>The five training actions, as this run can state them.</span>
-            <span v-if="props.run.trainee_ja !== null" lang="ja">{{ props.run.trainee_ja }}</span>
-        </p>
+        <form id="training-record-form" @submit.prevent="recordTurn">
+            <div class="grid gap-4 g-side">
+                <div class="flex flex-col gap-4">
+                    <section class="card" aria-labelledby="disciplines-heading">
+                        <h2 id="disciplines-heading">Disciplines</h2>
+                        <p class="sub">
+                            {{ energyBandNote }} Wit costs no Energy. Figures are the published Lv base the
+                            run recorded for each facility, before multipliers.
+                        </p>
 
-        <p v-if="positionLabel !== null" class="mb-4 text-sm text-ink-muted">
-            This run stands at {{ positionLabel }}. The deficits below are against the stats recorded
-            there, and the next turn the form writes is {{ props.write.turn }}.
-        </p>
+                        <div class="flex flex-col gap-2.5">
+                            <label
+                                v-for="discipline in disciplines"
+                                :key="discipline.choice"
+                                class="flex flex-wrap items-center gap-3 rounded-md px-3 py-[11px]"
+                                :class="
+                                    choice === discipline.choice
+                                        ? 'border-2 border-pick-line bg-green-tint'
+                                        : 'border border-rule-soft bg-raised'
+                                "
+                            >
+                                <input
+                                    type="radio"
+                                    name="pick"
+                                    :checked="choice === discipline.choice"
+                                    :aria-label="discipline.key + ' training'"
+                                    @change="choose(discipline.choice)"
+                                >
+                                <span class="min-w-0 flex-1 basis-[190px]">
+                                    <span class="font-extrabold text-ink-strong">
+                                        <span class="mr-1.5 inline-flex min-w-[18px] justify-center rounded border border-rule px-1 font-mono text-[11px]">{{ discipline.shortcut }}</span>
+                                        {{ discipline.key }}
+                                        <span v-if="discipline.key === 'Wit'" class="ml-1 rounded bg-brand-accent-soft px-1.5 py-0.5 text-[10.5px] font-bold text-brand-accent-ink">no Energy</span>
+                                        <span v-if="discipline.recommended" class="ml-1 rounded bg-status-positive px-1.5 py-0.5 text-[10.5px] font-bold text-status-positive-ink">Recommended</span>
+                                    </span>
+                                    <span class="block text-[11.5px] text-ink-muted">
+                                        {{ discipline.feeder }} · Lv {{ discipline.level ?? 'not recorded' }} base ·
+                                        failure rate not published
+                                    </span>
+                                </span>
+                                <span class="text-right font-mono text-[12.5px] text-ink-strong">
+                                    <template v-if="discipline.gains !== null">{{ discipline.gains }}</template>
+                                    <span v-else class="font-semibold text-ink-muted">{{ discipline.gainsAbsence }}</span>
+                                </span>
+                                <span
+                                    class="text-right font-mono text-[12.5px] font-extrabold"
+                                    :class="discipline.energy !== null && discipline.energy > 0 ? 'text-[var(--up)]' : 'text-[var(--down)]'"
+                                >{{ signedEnergy(discipline.energy) }}</span>
+                            </label>
+                        </div>
 
-        <p class="mb-4 text-sm text-ink">
-            {{ props.energy.label }}
-        </p>
+                        <Note class="mt-3">
+                            <b>Published per-level figures, before multipliers.</b> A discipline with no
+                            recorded facility level states that absence rather than a Level-1 number, and
+                            no source publishes a ranked discipline failure table, so the failure line
+                            says so instead of printing a percentage.
+                        </Note>
+                    </section>
 
-        <section
-            v-if="props.write.previous === null"
-            aria-labelledby="training-empty-heading"
-            class="mb-4 rounded-md border border-dashed border-rule bg-raised p-4"
-        >
-            <h2 id="training-empty-heading" class="text-lg font-semibold text-ink-strong">No turn recorded yet</h2>
-            <p class="mt-1 text-sm text-ink">
-                This run has logged no turn, so the cards have no entered stat to read a deficit from and
-                no Energy to subtract a cost from. The advisor ranks nothing and says why, rather than
-                assuming a starting state. Record the first turn and this screen fills in beside it.
-            </p>
-            <a :href="props.run.run_url" class="mt-2 inline-flex min-h-11 items-center font-medium text-ink-strong underline">
-                Record the first turn on the Cockpit
-            </a>
-        </section>
+                    <section class="card" aria-labelledby="other-actions-heading">
+                        <h2 id="other-actions-heading">Other actions</h2>
+                        <div class="grid gap-2.5 g-3">
+                            <label
+                                v-for="action in otherActions"
+                                :key="action.value"
+                                class="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2.5"
+                                :class="
+                                    choice === action.value
+                                        ? 'border-2 border-pick-line bg-green-tint'
+                                        : 'border border-rule-soft bg-raised'
+                                "
+                            >
+                                <input
+                                    type="radio"
+                                    name="pick"
+                                    :checked="choice === action.value"
+                                    :aria-label="action.label"
+                                    @change="chooseAction(action.value, action.href)"
+                                >
+                                <span>
+                                    <span class="block font-extrabold text-ink-strong">
+                                        {{ action.label }}
+                                        <span v-if="action.recommended" class="ml-1 rounded bg-status-positive px-1.5 py-0.5 text-[10.5px] font-bold text-status-positive-ink">Recommended</span>
+                                    </span>
+                                    <span class="block text-[11.5px] text-ink-muted">{{ action.note }}</span>
+                                </span>
+                            </label>
+                        </div>
+                    </section>
+                </div>
 
-        <section aria-labelledby="training-advisor-heading" class="mb-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="training-advisor-heading" class="text-lg font-semibold text-ink-strong">Advisor</h2>
+                <div class="flex flex-col gap-4">
+                    <section class="card" aria-labelledby="why-rest-heading">
+                        <h2 id="why-rest-heading">Why {{ props.advisor.action ?? 'this action' }}</h2>
+                        <ul class="list-disc pl-[18px] text-[12.5px] leading-[1.6] text-ink">
+                            <li v-if="props.advisor.reason !== null">{{ props.advisor.reason }}</li>
+                            <li v-if="bandWord !== null">This turn is {{ bandWord }}; the line it is measured against is the sourced 50.</li>
+                            <li>
+                                Rest pays <b>+50 on 58.1%</b> of results, +70 on 25.4%, +30 on 12.8%, and
+                                +30 with <b>Late-Night Feeling</b> on 3.7% (n=3,833).
+                            </li>
+                            <li v-if="chosen !== null && chosen.energy_after !== null">
+                                Energy after this training is calculated at
+                                <span class="font-mono">{{ chosen.energy_after.min }}–{{ chosen.energy_after.max }}</span>,
+                                not read from the client.
+                            </li>
+                        </ul>
+                        <Note class="mt-2.5">
+                            Below 50 Energy the failure curve changes character rather than degrading
+                            linearly, which is why the advisory line sits where it does.
+                        </Note>
+                    </section>
 
-            <p v-if="props.advisor.absence !== null" class="mt-1 text-sm text-ink">
-                {{ props.advisor.absence }}
-            </p>
-
-            <p v-else-if="props.advisor.action === null" class="mt-1 text-sm text-ink">
-                The advisor names no recommendation for this turn.
-            </p>
-
-            <p v-else-if="recommended === null" class="mt-1 text-sm text-ink">
-                The advisor recommends
-                <span class="font-semibold text-ink-strong">{{ props.advisor.action }}</span>
-                for this turn. It is not one of the five training actions, so no card below carries the
-                marker; the record form holds it as its own choice.
-            </p>
-
-            <p v-else class="mt-1 text-sm text-ink">
-                The advisor recommends
-                <span class="font-semibold text-ink-strong">{{ recommended.key }}</span>:
-                <span v-if="recommended.reason !== null">{{ recommended.reason }}</span>
-                The marker sits on that card alone.
-            </p>
-
-            <!-- The band is a word and a figure, never a colour, and 50 is the only Energy line any
-                 source states (`ADR-0001` §3). -->
-            <p v-if="bandWord !== null" class="mt-2 text-sm text-ink-muted">
-                This turn is {{ bandWord }}; the line it is measured against is the sourced 50.
-            </p>
-        </section>
-
-        <!-- The five facility levels the client's ladder shows beside each training, above the cards
-             whose Expected gains they describe. They used to sit inside "Record the turn" below the
-             cards, so the preview was unreachable until the Trainer scrolled past it (R4-26). Optional
-             by design: a turn logged without reading the ladder records no level, and a zero would
-             claim a facility at its floor. -->
-        <section aria-labelledby="facility-levels-heading" class="mt-6 rounded-md border border-rule bg-panel p-4">
-            <h2 id="facility-levels-heading" class="text-lg font-semibold text-ink-strong">Facility levels this turn</h2>
-            <p class="mt-1 text-sm text-ink-muted">
-                One to five, the ladder's own range. Leave a facility blank when this turn did not read it.
-            </p>
-            <div class="mt-2 grid grid-cols-2 gap-3 @4xl:grid-cols-5">
-                <label v-for="field in facilityFields" :key="field.name" class="flex flex-col gap-1">
-                    <span class="text-ink-muted">{{ field.label }}</span>
-                    <BaseInput
-                        :id="`turn-${field.name}`"
-                        v-model="form[field.name]"
-                        type="number"
-                        :name="field.name"
-                        min="1"
-                        max="5"
-                        :aria-describedby="describedBy(field.name)"
-                        :error="errorOf(field.name)"
-                    />
-                </label>
-            </div>
-        </section>
-
-        <section aria-labelledby="training-options-heading">
-            <h2 id="training-options-heading" class="text-lg font-semibold text-ink-strong">Training options</h2>
-
-            <div class="mt-3 grid grid-cols-1 gap-4 min-[1081px]:grid-cols-2 min-[1281px]:grid-cols-3">
-                <TrainingCard
-                    v-for="option in props.options"
-                    :key="option.choice"
-                    :option="option"
-                    :scenario-label="props.run.scenario_label"
-                    :deck-recorded="props.deck.recorded"
-                    :chosen="choice === option.choice"
-                    :turn="props.write.turn"
-                    :has-previous-turn="props.write.previous !== null"
-                    @train="choose(option.choice)"
-                />
-            </div>
-        </section>
-
-        <section aria-labelledby="training-record-heading" class="mt-6 rounded-md border border-rule bg-panel p-4">
-            <h2 id="training-record-heading" ref="recordHeading" tabindex="-1" class="text-lg font-semibold text-ink-strong">Record the turn</h2>
-
-            <p class="mt-1 text-sm text-ink">
-                <template v-if="chosenLabel !== null">
-                    Chosen: <span class="font-semibold text-ink-strong">{{ chosenLabel }}</span>.
-                    <template v-if="chosen !== null">{{ chosenSummary }}</template>
-                    <template v-else-if="chosenExtra !== null">{{ chosenExtra.note }}</template>
-                </template>
-                <template v-else>
-                    Press <span class="font-semibold text-ink-strong">Train</span> on one card, or pick
-                    one of the two turn choices below, to say what this turn was. Nothing is chosen yet.
-                </template>
-                Every number below is what the client shows after the turn resolves. This tool does not
-                project them, so an empty field is the honest state and the write refuses a turn that has
-                not been read.
-            </p>
-
-            <!-- The contract for the accelerator, printed rather than memorised (HFW training-decision;
-                 H7). It names the same keys `onKeydown` listens for, and it sits beside the commit action
-                 so a Trainer who never reads the chart still finds it. -->
-            <p class="mt-2 text-xs text-ink-muted">
-                Keyboard:
-                <kbd class="rounded border border-rule bg-raised px-1 font-mono text-[11px]">1</kbd>–<kbd class="rounded border border-rule bg-raised px-1 font-mono text-[11px]">5</kbd>
-                pick a discipline,
-                <kbd class="rounded border border-rule bg-raised px-1 font-mono text-[11px]">Enter</kbd>
-                records the choice you are holding,
-                <kbd class="rounded border border-rule bg-raised px-1 font-mono text-[11px]">Esc</kbd>
-                steps back. Keys stand down while a field has focus.
-            </p>
-
-            <!-- Rest and Recreation, the two turn choices that are not trainings. They are not cards:
-                 SCR-CAR-012 rules them turn choices, and the five cards are the five. Both keep Energy
-                 and Mood editable, because no source in the corpus publishes a recovery or an outing
-                 figure for the client to be checked against (`ADR-0001` §3). -->
-            <div class="mt-3 flex flex-wrap gap-2">
-                <button
-                    v-for="extra in props.write.extra_choices"
-                    :key="extra.value"
-                    type="button"
-                    :aria-pressed="choice === extra.value"
-                    :class="[
-                        'inline-flex min-h-11 items-center gap-x-2 rounded-md border-2 px-4 text-sm font-bold transition-colors duration-150 ease-out',
-                        choice === extra.value ? 'border-pick-line bg-raised text-ink-strong' : 'border-rule text-ink hover:border-green-line',
-                    ]"
-                    @click="choose(extra.value)"
-                >
-                    {{ extra.label }}
-                    <span v-if="extra.recommended" class="font-bold">
-                        <span aria-hidden="true">★</span> RECOMMENDED
-                    </span>
-                </button>
-            </div>
-
-            <!-- Rest figures, modal first (DM-7): the shape is a distribution, not a threshold. The
-                 corpus has no "50 Energy = failure" line, so the page says what is measured — one modal
-                 recovery and three branches — and prints the numbers rather than a warning word. -->
-            <p class="mt-3 text-xs text-ink-muted">
-                <b class="text-ink">Rest is rolled.</b> The modal result is
-                <span class="font-mono">+50 Energy</span> at <span class="font-mono">58.1%</span> of
-                <span class="font-mono">n=3,833</span>; then <span class="font-mono">+70</span> at
-                <span class="font-mono">25.4%</span>, <span class="font-mono">+30</span> at
-                <span class="font-mono">12.8%</span>, and <span class="font-mono">+30 + Late-Night Feeling</span>
-                at <span class="font-mono">3.7%</span>. Energy risk bends around 50 rather than falling off a
-                cliff there, so plan the turn around what the run can still afford.
-            </p>
-            <div
-                v-if="form.hasErrors"
-                ref="alert"
-                role="alert"
-                tabindex="-1"
-                class="mt-3 max-w-3xl rounded-md border border-risk bg-raised p-3 text-sm text-risk"
-            >
-                <p class="font-semibold">The turn was not recorded.</p>
-                <ul class="mt-1 list-disc pl-5">
-                    <li v-for="(message, key) in form.errors" :key="key">{{ message }}</li>
-                </ul>
-            </div>
-
-            <form class="mt-3 grid max-w-3xl grid-cols-2 gap-3 text-sm @4xl:grid-cols-3" @submit.prevent="recordTurn">
-                <label class="flex flex-col gap-1">
-                    <span class="text-ink-muted">Turn *</span>
-                    <BaseInput
-                        id="turn-turn"
-                        v-model="form.turn"
-                        type="number"
-                        name="turn"
-                        min="1"
-                        required
-                        :aria-describedby="describedBy('turn')"
-                        :error="errorOf('turn')"
-                    />
-                </label>
-
-                <label v-for="field in statFields" :key="field.name" class="flex flex-col gap-1">
-                    <span class="text-ink-muted">{{ field.label }} *</span>
-                    <BaseInput
-                        :id="`turn-${field.name}`"
-                        v-model="form[field.name]"
-                        type="number"
-                        :name="field.name"
-                        min="0"
-                        :max="capFor(field.label)"
-                        :placeholder="placeholder(field.name)"
-                        required
-                        :aria-describedby="describedBy(field.name)"
-                        :error="errorOf(field.name)"
-                    />
-                </label>
-
-                <label v-for="field in optionalFields" :key="field.name" class="flex flex-col gap-1">
-                    <span class="text-ink-muted">{{ field.label }}</span>
-                    <BaseInput
-                        :id="`turn-${field.name}`"
-                        v-model="form[field.name]"
-                        type="number"
-                        :name="field.name"
-                        min="0"
-                        :max="field.max"
-                        :placeholder="placeholder(field.name)"
-                        :aria-describedby="describedBy(field.name)"
-                        :error="errorOf(field.name)"
-                    />
-                </label>
-
-                <!-- Energy as a state, not only a number: a figure when the Trainer read one, a band when
-                     the client showed a level, and the named absence when neither. The three stay apart on
-                     the screen the way they are kept apart in the store. -->
-                <fieldset
-                    id="turn-energy-field"
-                    class="flex flex-col gap-1 rounded-md"
-                    :class="emphasizedField === 'energy' ? 'border-2 border-pick-line p-2' : ''"
-                >
-                    <legend class="text-ink-muted">Energy</legend>
-                    <div class="flex flex-wrap gap-3">
-                        <BaseRadio
-                            v-for="state in energyStates"
-                            :key="state.value"
-                            v-model="form.energy_state"
-                            :value="state.value"
-                            name="energy_state"
-                            :label="state.label"
-                            inline
-                        />
-                    </div>
-                    <BaseInput
-                        v-if="form.energy_state === 'exact'"
-                        id="turn-energy"
-                        v-model="form.energy"
-                        type="number"
-                        name="energy"
-                        min="0"
-                        max="100"
-                        :placeholder="placeholder('energy')"
-                        :aria-describedby="describedBy('energy')"
-                        :error="errorOf('energy')"
-                    />
-                    <BaseSelect
-                        v-else-if="form.energy_state === 'band'"
-                        id="turn-energy-band"
-                        v-model="form.energy_band"
-                        name="energy_band"
-                        :options="energyBands.map(band => ({ value: band.value, label: band.label }))"
-                        aria-label="Energy band"
-                        :aria-describedby="describedBy('energy_band')"
-                        :error="errorOf('energy_band')"
-                    />
-                    <p v-else class="text-xs text-ink-muted">
-                        Not recorded
-                    </p>
-                </fieldset>
-
-                <label
-                    id="turn-mood-field"
-                    class="flex flex-col gap-1 rounded-md"
-                    :class="emphasizedField === 'mood' ? 'border-2 border-pick-line p-2' : ''"
-                >
-                    <span class="text-ink-muted">Mood</span>
-                    <BaseSelect
-                        id="turn-mood"
-                        v-model="form.mood"
-                        name="mood"
-                        :options="[{ value: '', label: 'not recorded' }, ...props.write.moods.map(tier => ({ value: tier, label: tier }))]"
-                        :aria-describedby="describedBy('mood')"
-                        :error="errorOf('mood')"
-                    />
-                </label>
-
-                <label class="flex flex-col gap-1">
-                    <span class="text-ink-muted">Outcome *</span>
-                    <BaseSelect
-                        id="turn-outcome"
-                        v-model="form.outcome"
-                        name="outcome"
-                        :options="outcomeOptions"
-                        required
-                        :aria-describedby="describedBy('outcome')"
-                        :error="errorOf('outcome')"
-                        />
-                    </label>
-
-                    <label v-if="outcomeIsFailure" class="flex flex-col gap-1">
-                    <span class="text-ink-muted">Penalty kind *</span>
-                    <BaseSelect
-                        id="turn-penalty_kind"
-                        v-model="form.penalty_kind"
-                        name="penalty_kind"
-                        :options="[
-                            { value: '', label: 'Choose' },
-                            { value: 'energy', label: 'Energy' },
-                            { value: 'mood', label: 'Mood' },
-                            { value: 'stat', label: 'A stat' }
-                        ]"
-                        required
-                        :aria-describedby="describedBy('penalty_kind')"
-                        :error="errorOf('penalty_kind')"
-                                            />
-                    </label>
-
-                <!-- The Performance observation pair (Our Grand Concert only, the dated rail row in
-                     SCREEN_SPEC.md). A change, never a level: the corpus publishes no starting value,
-                     so the delta is a signed integer with no min, no max and no placeholder, and the
-                     empty type records nothing for the turn. -->
-                <template v-if="props.write.performance.enabled">
-                    <BaseSelect
-                        id="turn-performance-type"
-                        v-model="performanceType"
-                        name="performance[type]"
-                        label="Performance type"
-                        :options="[{ value: '', label: 'none, nothing to record' }, ...props.write.performance.types.map(word => ({ value: word, label: word }))]"
-                        :aria-describedby="errorOf('performance.type') === undefined ? undefined : 'turn-performance-type-error'"
-                        :error="errorOf('performance.type')"
-                    />
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink-muted">Performance change</span>
-                        <BaseInput
-                            id="turn-performance-delta"
-                            v-model="performanceDelta"
-                            type="number"
-                            name="performance[delta]"
-                            step="1"
-                            :aria-describedby="errorOf('performance.delta') === undefined ? undefined : 'turn-performance-delta-error'"
-                            :error="errorOf('performance.delta')"
-                        />
-                    </label>
-                </template>
-
-                <!-- The two readings the client prints before a turn resolves: the failure rate and the
-                     preview gains. Transcribed, not computed: the tool stores what the Trainer read
-                     and never projects an outcome (`ADR-0016`, `PRD.md` §6.11). Optional by design, so
-                     a turn logged without reading them stores neither. -->
-                <details class="rounded-md border border-rule bg-raised p-3 @4xl:col-span-3">
-                    <summary class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong">
-                        Preview readings
-                    </summary>
-                    <div class="mt-2 grid grid-cols-2 gap-3 @4xl:grid-cols-6">
-                        <label class="col-span-2 flex flex-col gap-1 @4xl:col-span-1">
-                            <span class="text-ink-muted">Failure rate</span>
-                            <BaseInput
-                                id="turn-failure_rate"
-                                v-model="form.failure_rate"
-                                type="number"
-                                name="failure_rate"
-                                min="0"
-                                max="100"
-                                :aria-describedby="describedBy('failure_rate')"
-                                :error="errorOf('failure_rate')"
-                            />
-                        </label>
-                        <template v-for="field in previewFields" :key="field.name">
+                    <section class="card" aria-labelledby="training-record-heading">
+                        <h2 id="training-record-heading" ref="recordHeading" tabindex="-1">Recorded outcome</h2>
+                        <p class="sub">Written only after the turn is committed.</p>
+                        <div class="grid gap-2.5 g-2">
                             <label class="flex flex-col gap-1">
-                                <span class="text-ink-muted">{{ field.label }}</span>
-                                <BaseInput
-                                    :id="`turn-preview_gains-${field.name}`"
-                                    v-model="form.preview_gains[field.name]"
-                                    type="number"
-                                    :name="`preview_gains[${field.name}]`"
-                                    :aria-describedby="errorOf(`preview_gains.${field.name}`) === undefined ? undefined : `turn-preview_gains-${field.name}-error`"
-                                    :error="errorOf(`preview_gains.${field.name}`)"
+                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Energy after</span>
+                                <BaseInput id="turn-energy" v-model="form.energy" type="number" name="energy" min="0" max="100" placeholder="—" :error="errorOf('energy')" />
+                            </label>
+                            <label class="flex flex-col gap-1">
+                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Mood after</span>
+                                <BaseSelect
+                                    id="turn-mood"
+                                    v-model="form.mood"
+                                    name="mood"
+                                    :options="[{ value: '', label: 'Unchanged' }, ...props.write.moods.map((mood) => ({ value: mood, label: mood }))]"
+                                    :error="errorOf('mood')"
                                 />
                             </label>
-                        </template>
-                        <p class="mt-2 text-xs text-ink-muted">
-                        What the client showed: the failure percentage and the gains it previewed. Enter
-                        a negative number when the preview showed a drop. Leave them blank when this turn
-                        did not read them.
-                    </p>
+                            <label class="flex flex-col gap-1">
+                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Fans</span>
+                                <BaseInput id="turn-fans" v-model="form.fans" type="number" name="fans" min="0" :placeholder="placeholder('fans')" :error="errorOf('fans')" />
+                            </label>
+                            <label class="flex flex-col gap-1">
+                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Skill points</span>
+                                <BaseInput id="turn-sp" v-model="form.sp" type="number" name="sp" min="0" :placeholder="placeholder('sp')" :error="errorOf('sp')" />
+                            </label>
+                        </div>
+                        <Note class="mt-2.5">
+                            These fields exist because the client shows them, not because the tool
+                            computes them. An empty field records "not read off the screen", which is
+                            different from a zero.
+                        </Note>
+                    </section>
+
+                    <div v-if="form.hasErrors" ref="alert" role="alert" tabindex="-1" class="rounded-md border border-risk bg-raised p-3 text-sm text-risk">
+                        <p class="font-semibold">The turn was not recorded.</p>
+                        <ul class="mt-1 list-disc pl-5">
+                            <li v-for="(message, key) in form.errors" :key="key">{{ message }}</li>
+                        </ul>
+                    </div>
+
+                    <div class="savebar">
+                        <span class="text-xs text-ink-muted">
+                            {{ chosenLabel ?? 'No action selected' }} selected ·
+                            <span class="kbd">1</span>–<span class="kbd">5</span> pick ·
+                            <span class="kbd">Enter</span> records ·
+                            <span class="kbd">Esc</span> back
+                        </span>
+                        <button type="button" class="btn btn-quiet min-h-11" title="The build has no undo; this screen proposes one.">Undo turn {{ undoableTurn }}</button>
+                        <button type="button" class="btn min-h-11" @click="discard()">Discard</button>
+                        <button type="submit" class="btn btn-primary min-h-11" :disabled="form.processing">
+                            {{ form.processing ? 'Recording…' : 'Record turn ' + props.write.turn }}
+                        </button>
+                    </div>
                 </div>
+            </div>
+
+            <!-- HFW OVERRIDE (write fields): the wireframe draws only the four outcome fields, but the
+                 request this form posts requires the turn number and the five client-read totals. They
+                 stay available, collapsed, so the visible page is the wireframe's and the write still
+                 validates against the boundary that already owns it. -->
+            <details class="card mt-4">
+                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">Client totals this turn (required to record)</summary>
+                <p class="mt-1 text-sm text-ink-muted">
+                    What the client shows after the turn resolves. This tool does not project these, so
+                    they start empty and the request refuses a turn that was not read.
+                </p>
+                <div class="mt-3 grid max-w-3xl grid-cols-2 gap-3 text-sm @4xl:grid-cols-3">
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Turn *</span>
+                        <BaseInput id="turn-turn" v-model="form.turn" type="number" name="turn" min="1" required :aria-describedby="describedBy('turn')" :error="errorOf('turn')" />
+                    </label>
+                    <label v-for="field in statFields" :key="field.name" class="flex flex-col gap-1">
+                        <span class="text-ink-muted">{{ field.label }} *</span>
+                        <BaseInput
+                            :id="'turn-' + field.name"
+                            v-model="form[field.name]"
+                            type="number"
+                            :name="field.name"
+                            min="0"
+                            :max="capFor(field.label)"
+                            :placeholder="placeholder(field.name)"
+                            required
+                            :aria-describedby="describedBy(field.name)"
+                            :error="errorOf(field.name)"
+                        />
+                    </label>
+                    <label v-for="field in facilityFields" :key="'facility-' + field.name" class="flex flex-col gap-1">
+                        <span class="text-ink-muted">{{ field.label }} level</span>
+                        <BaseInput
+                            :id="'facility-' + field.name"
+                            v-model="form[field.name]"
+                            type="number"
+                            :name="field.name"
+                            min="1"
+                            max="5"
+                            :error="errorOf(field.name)"
+                        />
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Outcome</span>
+                        <BaseSelect id="turn-outcome" v-model="form.outcome" name="outcome" :options="outcomeOptions" :error="errorOf('outcome')" />
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Energy state</span>
+                        <BaseSelect id="turn-energy-state" v-model="form.energy_state" name="energy_state" :options="energyStates" :error="errorOf('energy_state')" />
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Energy band</span>
+                        <BaseSelect id="turn-energy-band" v-model="form.energy_band" name="energy_band" :options="energyBands" :error="errorOf('energy_band')" />
+                    </label>
+                    <label v-if="outcomeIsFailure" class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Penalty</span>
+                        <BaseSelect id="turn-penalty" v-model="form.penalty_kind" name="penalty_kind" :options="[{ value: '', label: 'None recorded' }, { value: 'energy', label: 'Energy' }, { value: 'mood', label: 'Mood' }, { value: 'both', label: 'Both' }]" :error="errorOf('penalty_kind')" />
+                    </label>
+                    <template v-if="props.write.performance.enabled">
+                        <label class="flex flex-col gap-1">
+                            <span class="text-ink-muted">Performance type</span>
+                            <BaseSelect id="turn-performance-type" v-model="performanceType" name="performance_type" :options="[{ value: '', label: 'Not recorded' }, ...props.write.performance.types.map((type) => ({ value: type, label: type }))]" />
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-ink-muted">Performance delta</span>
+                            <BaseInput id="turn-performance-delta" v-model="performanceDelta" type="number" name="performance_delta" />
+                        </label>
+                    </template>
+                </div>
+                <p class="mt-2 text-xs text-ink-muted">
+                    Keyboard: <span class="kbd">1</span>–<span class="kbd">5</span> pick a discipline,
+                    <span class="kbd">Enter</span> records the held choice, <span class="kbd">Esc</span> steps
+                    back. Keys stand down while a field has focus.
+                </p>
             </details>
-
-            <div class="flex flex-wrap items-end gap-3 @4xl:col-span-3">
-                    <button
-                        type="submit"
-                        class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 text-sm font-bold text-on-primary-action disabled:cursor-wait disabled:bg-disabled"
-                        :disabled="form.processing"
-                    >
-                        {{ form.processing ? 'Sending…' : `Record turn ${props.write.turn}` }}
-                    </button>
-                    <p class="max-w-3xl text-xs text-ink-muted">
-                        The write lands on the Cockpit, where the recorded turn appears in the correction
-                        selector ({{ props.run.trainee }}, turn {{ props.write.turn }}).
-                    </p>
-                </div>
-            </form>
-        </section>
-
-        <p class="mt-4 text-sm text-ink">
-            <template v-if="props.deck.recorded">
-                {{ props.deck.slots }} of six Support Card slots are recorded for this run, and each card
-                above counts only the ones whose type reads its training.
-            </template>
-            <template v-else>
-                No Support Cards are recorded for this run, so no card above can count a support.
-                <a :href="props.run.deck_url" class="inline-flex min-h-11 items-center font-medium text-ink-strong underline">
-                    Record this run&apos;s deck
-                </a>
-            </template>
-        </p>
+        </form>
     </CareerLayout>
 </template>
