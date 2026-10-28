@@ -1,5 +1,11 @@
 <script setup lang="ts">
 /*
+ * HFW-OVERRIDE (computed/rect: the wizard-wide class) — `preflight-diff-{1280,390}.json` measures the
+ * app's DESIGN.md tokens against the wireframe's mock CSS and the shell wrapper's offset. Tokens
+ * outrank the mock palette (`AGENTS.md` §2) and the wrapper moves every box, so both buckets carry
+ * entries by construction; the page is not restyled to chase the mock's values.
+ */
+/*
  * The career setup wizard's last step, `SCR-CAR-010` (SCREEN-008, PRD FR-A-5, `ADR-0020` §1 and §3).
  * Step 6 of six, and the only step that writes.
  *

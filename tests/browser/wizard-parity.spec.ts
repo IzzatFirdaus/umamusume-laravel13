@@ -34,6 +34,15 @@ async function open(page: Page, step: Step): Promise<void> {
     await page.locator('#app > *').first().waitFor();
 }
 
+/*
+ * HFW-OVERRIDE (computed/rect: the trainee step) — `TraineeSelect.vue` is peer-owned this session,
+ * so its class-level record lives here rather than in the page: `trainee-diff-{1280,390}.json`
+ * (written by `career-trainee-select.spec.ts`) measures the app's DESIGN.md tokens against the
+ * wireframe's mock CSS and the shell wrapper's offset. Tokens outrank the mock palette
+ * (`AGENTS.md` §2) and the wrapper moves every box, so both buckets carry entries by construction;
+ * the page is not restyled to chase the mock's values.
+ */
+
 test.describe('setup wizard sweep', () => {
     for (const step of PAGES) {
         test(`${step.name}: one h1, one head band, six stepper items, one filled action`, async ({ page }) => {

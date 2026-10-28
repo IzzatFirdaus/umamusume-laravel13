@@ -1,5 +1,11 @@
 <script setup lang="ts">
 /*
+ * HFW-OVERRIDE (computed/rect: the wizard-wide class) — `target-diff-{1280,390}.json` measures the
+ * app's DESIGN.md tokens against the wireframe's mock CSS and the shell wrapper's offset. Tokens
+ * outrank the mock palette (`AGENTS.md` §2) and the wrapper moves every box, so both buckets carry
+ * entries by construction; the page is not restyled to chase the mock's values.
+ */
+/*
  * SCREEN-005, Build Target (`ADR-0020` §1; `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` SCREEN-005). Step 3 of
  * the setup wizard, headed "Your target".
  *

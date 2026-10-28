@@ -1,5 +1,11 @@
 <script setup lang="ts">
 /*
+ * HFW-OVERRIDE (computed/rect: the wizard-wide class) — `scenario-diff-{1280,390}.json` measures the
+ * app's DESIGN.md tokens against the wireframe's mock CSS and the shell wrapper's offset. Tokens
+ * outrank the mock palette (`AGENTS.md` §2) and the wrapper moves every box, so both buckets carry
+ * entries by construction; the page is not restyled to chase the mock's values.
+ */
+/*
  * SCREEN-002, Scenario Selection (`ADR-0020` §1; plan §8 D2). Step 1 of the setup wizard.
  *
  * Every value on a card arrives already derived by `ScenarioSelectController`: the page prints props

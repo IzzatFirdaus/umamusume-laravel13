@@ -1,5 +1,11 @@
 <script setup lang="ts">
 /*
+ * HFW-OVERRIDE (computed/rect: the wizard-wide class) — `deck-diff-{1280,390}.json` measures the
+ * app's DESIGN.md tokens against the wireframe's mock CSS and the shell wrapper's offset. Tokens
+ * outrank the mock palette (`AGENTS.md` §2) and the wrapper moves every box, so both buckets carry
+ * entries by construction; the page is not restyled to chase the mock's values.
+ */
+/*
  * The career setup wizard's support-deck step, `SCR-CAR-009` (PRD FR-A-4, `ADR-0020` §1, under
  * `ADR-0014`). Step 5 of six.
  *
