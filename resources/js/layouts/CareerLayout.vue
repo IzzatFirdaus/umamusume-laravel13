@@ -61,7 +61,11 @@ const breadcrumb = computed(() => {
      *
      * DOMAIN OVERRIDE (R4-01): the run id is printed, which the wireframe has no way to draw.
      */
-    const runId = props.runUrl.match(/training-runs\/(\d+)/)?.[1];
+    // A career screen may legitimately hold no run URL (the Save Veteran screen's controller passes
+    // one, but a page that predates it or a blocked state may not); an absent URL must degrade to the
+    // scenario-only crumb rather than throw in the layout, which unmounts the whole Inertia root and
+    // leaves a blank page. Found by the 2026-10-28 parity audit.
+    const runId = (props.runUrl ?? '').match(/training-runs\/(\d+)/)?.[1];
     const scenario = runId ? `${props.scenarioLabel} #${runId}` : props.scenarioLabel;
 
     return [{ label: props.trainee }, { label: scenario }, { label: screen }].filter((part) => part.label.length > 0);

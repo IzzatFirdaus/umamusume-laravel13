@@ -174,7 +174,7 @@ function save(): void {
         :trainee="props.run.trainee"
         :scenario-label="props.run.scenario_label"
         :status-label="props.run.status_label"
-        :run-url="props.run.run_url"
+        :run-url="props.run_url"
     >
         <Head :title="`Save Veteran: ${props.run.trainee}`" />
         <template #title>Save Veteran</template>

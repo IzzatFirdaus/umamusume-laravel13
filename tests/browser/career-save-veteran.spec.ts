@@ -185,3 +185,21 @@ test('passes an axe scan at WCAG A and AA', async ({ page }) => {
 
     expect(results.violations).toEqual([]);
 });
+
+test('renders the record screen instead of a blank Inertia root', async ({ page }) => {
+    // The 2026-10-28 parity audit found this route blank: CareerLayout read .match on an undefined
+    // run URL and the thrown error unmounted #app. The page's own heading and a live main region are
+    // the two things a blank render cannot fake, and a TypeError in the console names the cause if
+    // the wiring regresses.
+    const errors: string[] = [];
+    page.on('console', (message) => {
+        if (message.type() === 'error') errors.push(message.text());
+    });
+
+    await openSaveVeteran(page, 'Special Week');
+
+    await expect(page.locator('#app')).not.toBeEmpty();
+    await expect(page.getByRole('heading', { name: 'Save Veteran', level: 1 })).toBeVisible();
+    await expect(page.locator('main')).toContainText('What this career recorded');
+    expect(errors.filter((text) => /TypeError/.test(text))).toEqual([]);
+});
