@@ -43,10 +43,10 @@ it('renders an unreachable section as non-focusable text, not a link wearing ari
     expect($template)->not->toContain('role="link"')
         ->and($template)->not->toContain('aria-disabled')
         ->and($template)->not->toContain('tabindex="0"')
-        ->and($template)->not->toContain(':title="unavailableTitle(tab.key)"')
-        // The helper survives, because the reason it words is now printed as prose.
-        ->and($template)->toContain('unavailableTitle(tab.key)')
-        ->and($template)->toContain('unreachableTabs');
+        ->and($template)->not->toContain(':title=')
+        // The helpers survive, because the reason they word is still printed as visible prose.
+        ->and($template)->toContain('unavailableReason(step.key)')
+        ->and($template)->toContain('unreachableSteps');
 
     // The unreachable branch is still a span, and still carries NO href and NO click handler, so a
     // later edit that turns it into a Link reds here.
@@ -69,12 +69,14 @@ it('marks exactly one live section with aria-current', function (): void {
     $source = (string) file_get_contents(base_path('resources/js/components/career/CareerSectionNav.vue'));
 
     // Nine sections in the career's own order, and the live one is chosen by the `current` key rather
-    // than by position.
-    foreach (['Cockpit', 'Training', 'Races', 'Skills', 'Events', 'Legacy', 'Deck', 'Timeline', 'Result'] as $label) {
+    // than by position. `Inheritance` is the HFW's own label for this step
+    // (`cockpit-unity-cup.html:77`); the run-scoped Legacy Lab is a different screen.
+    foreach (['Cockpit', 'Training', 'Races', 'Skills', 'Events', 'Inheritance', 'Deck', 'Timeline', 'Result'] as $label) {
         expect($source)->toContain("label: '{$label}'");
     }
 
-    expect(substr_count($source, "'page' : undefined"))->toBe(1);
+    // `aria-current="step"`, the value the HFW and the wizard stepper both use, not `page`.
+    expect(substr_count($source, "'step' : undefined"))->toBe(2);
 });
 
 it('mounts the nav in the layout and drops the per-screen door pair', function (): void {

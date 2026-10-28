@@ -277,7 +277,7 @@ test('names the ask when a filter reaches no card rather than showing an empty f
     await expect(page.getByText(/Nothing matches rarity R \+ type Group/)).toBeVisible();
 });
 
-test('carries the career nav with a run-scoped Legacy link', async ({ page }) => {
+test('carries the career stepper with a run-scoped Inheritance link', async ({ page }) => {
     // R4-29. Walk 4 read `Legacy` as pointing at `/legacy`, losing the run, and concluded the career
     // nav was absent from this page. It is not absent — the deck builder mounts `CareerSectionNav` —
     // but the global `Legacy Lab` link in `AppLayout` also renders here, and the two were
@@ -287,15 +287,18 @@ test('carries the career nav with a run-scoped Legacy link', async ({ page }) =>
     const runId = url.match(/\/training-runs\/(\d+)\/deck$/)?.[1] ?? '';
     expect(runId, 'the deck URL names no run id').not.toBe('');
 
-    const nav = page.getByRole('navigation', { name: 'Career sections' });
+    const nav = page.getByRole('navigation', { name: 'Career', exact: true });
     await expect(nav).toBeVisible();
 
-    // Run-scoped, not the global lab: `CareerSectionNav` builds `/legacy/{run}` from the cockpit URL.
-    const legacy = nav.getByRole('link', { name: 'Legacy', exact: true });
-    await expect(legacy).toHaveAttribute('href', new RegExp(`/legacy/${runId}$`));
+    // Run-scoped, not a global tool: `CareerSectionNav` builds the event from the cockpit URL.
+    // 2026-10-28: the step is `Inheritance`, not `Legacy`. The cockpit HFWs name this step after the
+    // career's inheritance event (`cockpit-unity-cup.html:77`) and `/training-runs/{run}/inheritance`
+    // is that screen, so the run-scoped property this case guards still holds; only the label moved.
+    const inheritance = nav.getByRole('link', { name: 'Inheritance', exact: true });
+    await expect(inheritance).toHaveAttribute('href', `/training-runs/${runId}/inheritance`);
 
     // Deck is the live section on the deck screen.
-    await expect(nav.getByRole('link', { name: 'Deck', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(nav.getByRole('link', { name: 'Deck', exact: true })).toHaveAttribute('aria-current', 'step');
 });
 
 test('stores the per-run card level on the run deck and reads it back', async ({ page }) => {

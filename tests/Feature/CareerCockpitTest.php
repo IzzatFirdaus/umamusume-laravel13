@@ -891,25 +891,19 @@ it('does not hand a re-logged turn the failed chip of the turn that used the num
  * is markup the Inertia props cannot prove: `run.id` in the payload was never the missing part.
  */
 it('names the run in the career header, not only in the URL', function (): void {
-    $nav = (string) file_get_contents(base_path('resources/js/components/career/CareerSectionNav.vue'));
+    // 2026-10-28: the nav's identity strip went with the cockpit parity pass — no cockpit HFW draws a
+    // second identity band, and the nav is now the wireframe's bare `.stepper`. The run id it carried
+    // is not dropped with it: R4-01/R4-02 still hold, and the id now rides on the topbar crumb's
+    // scenario segment (`Unity Cup #25`), which every career screen renders through `CareerLayout`.
+    $layout = (string) file_get_contents(base_path('resources/js/layouts/CareerLayout.vue'));
 
-    // The format is the Careers row's and the Legacy builder's: `#{{ id }}`, one spelling for one fact.
-    expect($nav)->toContain('Run #{{ runId }}')
-        // Beside the trainee, in the strip's first line, not buried in the nav row below it.
-        ->and($nav)->toContain('{{ props.trainee }}');
-
-    // The id lives inside the identity paragraph that also prints the trainee, so it is header
-    // furniture rather than a line under the nine tabs. Bounded by markup, not by a byte count: the
-    // trainee line is the `card` section's first <p>, and it closes before the nav element opens.
-    $headerAt = strpos($nav, 'aria-label="Career"');
-    $navAt = strpos($nav, 'aria-label="Career sections"');
-    $idAt = strpos($nav, 'Run #{{ runId }}');
-
-    expect($headerAt)->not->toBeFalse()
-        ->and($navAt)->not->toBeFalse()
-        ->and($idAt)->not->toBeFalse()
-        ->and((int) $idAt)->toBeGreaterThan((int) $headerAt)
-        ->and((int) $idAt)->toBeLessThan((int) $navAt);
+    // One spelling for one fact, matching the Careers row and the Legacy builder.
+    expect($layout)->toContain('#${runId}')
+        // Derived from the run URL the screen already passes, so no payload key was needed.
+        ->and($layout)->toContain('training-runs\\/(\\d+)')
+        // And the nav no longer carries a second copy of it.
+        ->and((string) file_get_contents(base_path('resources/js/components/career/CareerSectionNav.vue')))
+        ->not->toContain('Run #');
 });
 
 it('gives two careers of one trainee two different header identities', function (): void {

@@ -52,11 +52,19 @@ const { layoutWidthClass } = useLayout();
 const breadcrumb = computed(() => {
     const screen = props.current ? props.current.charAt(0).toUpperCase() + props.current.slice(1) : 'Cockpit';
 
-    return [
-        { label: props.trainee },
-        { label: props.scenarioLabel },
-        { label: screen },
-    ].filter((part) => part.label.length > 0);
+    /*
+     * R4-01/R4-02: two careers of one trainee in one scenario had two identical headers, and the id
+     * they differ by lived only in the URL. The HFW draws no run identifier anywhere — a static
+     * wireframe holds one run per file, so it structurally cannot say which one — but a real Careers
+     * list can hold two. It rides on the scenario part rather than as a fourth part, so the crumb
+     * keeps the HFW's three-segment shape.
+     *
+     * DOMAIN OVERRIDE (R4-01): the run id is printed, which the wireframe has no way to draw.
+     */
+    const runId = props.runUrl.match(/training-runs\/(\d+)/)?.[1];
+    const scenario = runId ? `${props.scenarioLabel} #${runId}` : props.scenarioLabel;
+
+    return [{ label: props.trainee }, { label: scenario }, { label: screen }].filter((part) => part.label.length > 0);
 });
 
 /*
