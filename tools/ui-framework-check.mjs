@@ -10,6 +10,10 @@
  *
  * Exit 0 when clean or reporting debt; exit 1 on a violation under --strict. Rule 8 is disabled until
  * `tools/ui-lint-baseline.json` exists; it then fails only when the debt COUNT grows.
+ *
+ * `[debt-increase]` exits 1 even without --strict. A ratchet that prints its finding and exits zero
+ * cannot be seen by CI, which is the one job the ratchet has (plan §5.4 observation, 2026-10-28).
+ * Ordinary findings keep the historical "report only" behaviour; only the count regression is fatal.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -217,4 +221,8 @@ if (findings.length === 0) {
 
 console.error(`ui-framework-check: ${findings.length} finding(s)`);
 for (const f of findings) console.error(`  ${f.file}:${f.line}  [${f.rule}] ${f.detail}`);
-process.exit(process.argv.includes('--strict') ? 1 : 0);
+
+// A debt increase is a gate failure on its own: --strict widens the gate to every finding, it does not
+// create the only path to a non-zero exit.
+const debtIncrease = findings.some((f) => f.rule === 'debt-increase');
+process.exit(process.argv.includes('--strict') || debtIncrease ? 1 : 0);
