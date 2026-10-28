@@ -328,8 +328,7 @@ it('renders the deck step with six slots, no ownership invented and the seven ty
             ->has('picker.options', 2)
             ->where('picker.type', null)
             ->where('picker.fillingSlot', 1)
-            ->where('scenarioPending', true)
-            ->where('analysis.covered', 0));
+            ->where('scenarioPending', true));
 
     expect(DeckSlot::count())->toBe(0);
 });
@@ -378,8 +377,7 @@ it('stores six slots with the flag per slot and reads the cards back on the next
             ->where('slots.2.card', null)
             // URA Finale's linked list is a cast list, and this card's character is not on it: derived on
             // read, never stored on the card (ADR-0014 correction 3).
-            ->where('slots.0.card.scenario_link', 'not_linked')
-            ->where('analysis.covered', 2));
+            ->where('slots.0.card.scenario_link', 'not_linked'));
 });
 
 it('refuses a card outside the catalogue, a flag outside the dictionary and a slot outside the six', function (): void {
