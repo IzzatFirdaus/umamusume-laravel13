@@ -35,9 +35,13 @@ class StoreSnapshotRequest extends FormRequest
     public const STATE_FIELDS = ['speed', 'stamina', 'power', 'guts', 'wit', 'energy', 'fans', 'skill_points'];
 
     /**
+     * The rules as a plain array, so the review GET can validate the same contract without
+     * instantiating a request that has nothing to submit (the audit found the bare review URL
+     * bouncing to the setup form because the FormRequest refused an empty query).
+     *
      * @return array<string, mixed>
      */
-    public function rules(): array
+    public static function fieldRules(): array
     {
         return [
             'umamusume_id' => ['required', 'integer', Rule::exists('umamusume', 'id')],
@@ -60,5 +64,13 @@ class StoreSnapshotRequest extends FormRequest
             'field_states' => ['nullable', 'array'],
             'field_states.*' => ['nullable', 'string', Rule::enum(SnapshotFieldState::class)],
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        return self::fieldRules();
     }
 }

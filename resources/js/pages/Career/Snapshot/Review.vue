@@ -27,11 +27,20 @@ interface ReviewField {
 const props = defineProps<{
     fields: ReviewField[];
     payload: Record<string, unknown>;
+    /** False when no setup form has been read back yet: every field is "Not provided". */
+    has_draft: boolean;
     /** The position the snapshot names, in the client's words; null only if the form carried none. */
     position_label?: string | null;
     action: string;
     back: string;
+    entry: string;
 }>();
+
+const steps = [
+    { key: 'entry', label: 'Entry', href: props.entry },
+    { key: 'setup', label: 'Setup', href: props.back },
+    { key: 'review', label: 'Review', href: '#' },
+];
 
 const form = useForm(props.payload);
 
@@ -77,12 +86,35 @@ const treatment = (state: string): string => {
             statements, and the run keeps them apart.
         </p>
 
+        <!-- The HFW's snapshot stepper: Entry / Setup / Review, with the live step named as well as
+             tinted. The bare review URL is the "nothing entered" state, so it is a legitimate stop
+             rather than a blank form. -->
+        <nav aria-label="Snapshot steps" class="mt-3 flex flex-wrap items-center gap-2 text-sm">
+            <template v-for="step in steps" :key="step.key">
+                <a
+                    v-if="step.href !== '#'"
+                    :href="step.href"
+                    class="inline-flex min-h-11 items-center rounded-full border border-rule px-3 font-medium text-ink hover:bg-raised"
+                >{{ step.label }}</a>
+                <span
+                    v-else
+                    aria-current="step"
+                    class="inline-flex min-h-11 items-center rounded-full border-2 border-pick-line bg-green-tint px-3 font-bold text-ink-strong"
+                >{{ step.label }}</span>
+            </template>
+        </nav>
+
+        <p v-if="!props.has_draft" role="status" class="mt-3 max-w-3xl rounded-md border border-dashed border-rule bg-raised px-3 py-2 text-sm text-ink-muted">
+            No snapshot has been entered yet, so every field reads "Not provided". Fill the form first;
+            this screen is the read-back, not the entry.
+        </p>
+
         <p v-if="props.position_label" class="mt-2 max-w-3xl text-sm font-medium text-ink-strong">
             Position: {{ props.position_label }}
         </p>
 
         <section aria-labelledby="snapshot-review-heading" class="mt-6 max-w-3xl rounded-md border border-rule bg-panel p-4">
-            <ul class="mt-3 grid grid-cols-1 gap-2 @3xl:grid-cols-2">
+            <ul class="mt-3 grid gap-2 g-2">
                 <li
                     v-for="field in props.fields"
                     :key="field.key"
@@ -111,7 +143,7 @@ const treatment = (state: string): string => {
         <div class="mt-6 flex flex-wrap items-center gap-3">
             <button
                 type="button"
-                :disabled="form.processing"
+                :disabled="form.processing || !props.has_draft"
                 class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 text-sm font-bold text-on-primary-action disabled:opacity-60"
                 @click="submit"
             >

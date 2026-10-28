@@ -136,3 +136,30 @@ it('names the snapshot position through the same owner the race header reads', f
             ->where('nextTurn.year_label', 'Senior Year')
             ->where('nextTurn.position_label', 'Early October'));
 });
+
+it('opens on a bare visit with every field not provided instead of bouncing to the form', function (): void {
+    // The 2026-10-28 parity audit found this URL rendering the Setup heading: the GET used the
+    // submit-time FormRequest, so an empty query failed validation and the redirect landed on the
+    // form. The HFW's review is a real state with nothing entered, and every field reads
+    // "Not provided" there.
+    $this->get(route('career.snapshot.review'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/Snapshot/Review')
+            ->where('has_draft', false)
+            ->where('position_label', null)
+            ->has('fields', 8)
+            ->where('fields.0.display', 'Not provided · Speed')
+            ->where('fields.7.display', 'Not provided · Skill Points')
+            ->where('entry', route('career.snapshot')));
+});
+
+it('reads back the session draft after the setup form opened the review once', function (): void {
+    $this->get(route('career.snapshot.review', reviewPayload()))->assertOk();
+
+    $this->get(route('career.snapshot.review'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('has_draft', true)
+            ->where('fields.0.display', 'Known · Speed 607'));
+});

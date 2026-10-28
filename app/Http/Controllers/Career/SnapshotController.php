@@ -15,6 +15,7 @@ use App\Services\Career\CareerPositionLabel;
 use App\Services\CareerCalendar;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -89,23 +90,60 @@ class SnapshotController extends Controller
      * row is written, not after. The validated payload travels to the page so the confirm button
      * re-posts exactly what was read back rather than re-collecting it.
      */
-    public function review(StoreSnapshotRequest $request): Response
+    public function review(Request $request): Response
     {
-        $data = $request->validated();
+        $data = $this->reviewData($request);
 
-        // Parked for `setup()`: the review screen's Back returns to the form, and the Trainer should
-        // meet their own entries rather than an empty one.
-        $request->session()->put('career.snapshot.draft', $data);
+        if ($data !== []) {
+            // Parked for `setup()`: the review screen's Back returns to the form, and the Trainer
+            // should meet their own entries rather than an empty one.
+            $request->session()->put('career.snapshot.draft', $data);
+        }
 
         return Inertia::render('Career/Snapshot/Review', [
             'fields' => $this->reviewFields($data),
             'payload' => $data,
+            'has_draft' => $data !== [],
             // The position the snapshot names, through the same owner the race header and the
-            // Dashboard use, so the read-back and the cockpit cannot spell it two ways.
-            'position_label' => $this->positionLabel($data),
+            // Dashboard use, so the read-back and the cockpit cannot spell it two ways. A review
+            // opened with no draft has no position to name rather than a wrong one.
+            'position_label' => $this->hasPosition($data) ? $this->positionLabel($data) : null,
             'action' => route('career.snapshot.store'),
             'back' => route('career.snapshot.setup'),
+            'entry' => route('career.snapshot'),
         ]);
+    }
+
+    /**
+     * The payload the review reads: the form's own GET query when the setup screen submitted it,
+     * otherwise the draft parked in the session by an earlier read, otherwise nothing.
+     *
+     * The bare review URL is a real state, not an error: the HFW's review draws every field as
+     * "Not provided" when no snapshot has been entered, and the confirm has nothing to re-post.
+     *
+     * @return array<string, mixed>
+     */
+    private function reviewData(Request $request): array
+    {
+        $query = $request->query();
+
+        if (array_key_exists('career_year', $query) || array_key_exists('umamusume_id', $query)) {
+            return Validator::make($query, StoreSnapshotRequest::fieldRules())->validate();
+        }
+
+        $draft = $request->session()->get('career.snapshot.draft');
+
+        return is_array($draft) ? $draft : [];
+    }
+
+    /**
+     * Whether the payload names a position the shared label can derive.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function hasPosition(array $data): bool
+    {
+        return isset($data['career_year'], $data['career_month'], $data['career_phase']);
     }
 
     /**

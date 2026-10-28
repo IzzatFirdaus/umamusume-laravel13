@@ -191,3 +191,19 @@ test.describe('Snapshot review', () => {
         expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
     });
 });
+
+test.describe('Snapshot review, bare visit', () => {
+    test('states that nothing has been entered, with every field not provided', async ({ page }) => {
+        // The audit's severe finding: this URL used to render the Setup heading because the GET
+        // validated like a submit. The HFW's empty review is a real screen: eight Not provided tiles,
+        // the stepper naming Review, and a confirm with nothing to re-post.
+        await page.goto('/career/snapshot/review', { waitUntil: 'networkidle' });
+        await page.locator('#app > *').first().waitFor();
+
+        await expect(page.getByRole('heading', { name: 'Review snapshot', level: 1 })).toBeVisible();
+        await expect(page.getByRole('navigation', { name: 'Snapshot steps' })).toBeVisible();
+        await expect(page.locator('[data-state="not_provided"]')).toHaveCount(8);
+        await expect(page.getByRole('status').filter({ hasText: 'No snapshot has been entered yet' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Record snapshot' })).toBeDisabled();
+    });
+});
