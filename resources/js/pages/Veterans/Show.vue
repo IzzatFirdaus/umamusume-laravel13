@@ -43,7 +43,17 @@ const doorClass =
 <template>
     <AppLayout>
         <Head :title="`Veteran: ${props.veteran.trainee}`" />
-        <template #title>Veteran: {{ props.veteran.trainee }}</template>
+        <template #eyebrow>Veteran</template>
+        <template #title>{{ props.veteran.trainee }}</template>
+
+        <!-- The wireframe's one-line lede: which career this record came out of, said before the
+             figures. It prints `run N` rather than a saved date because no column holds the date a
+             career was filed, and a date the schema does not carry is not a date this page may print. -->
+        <p class="max-w-3xl text-sm text-ink-muted">
+            {{ props.veteran.scenario_label }} · from run {{ props.veteran.run_id }} ·
+            {{ props.career.turns }} {{ props.career.turns === 1 ? 'turn' : 'turns' }} recorded. The
+            final totals and every factor this record can carry.
+        </p>
 
         <section aria-labelledby="veteran-record" class="mt-4 rounded-md border border-rule bg-raised p-4">
             <h2 id="veteran-record" class="text-lg font-semibold text-ink-strong">
