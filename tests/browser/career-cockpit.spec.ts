@@ -68,6 +68,25 @@ async function openCockpit(page: import('@playwright/test').Page): Promise<void>
 function recordedCard(page: import('@playwright/test').Page) {
     return page.getByRole('region', { name: 'Recorded action' });
 }
+async function openDisclosure(page: import('@playwright/test').Page, region: string): Promise<void> {
+    const details = page.locator(`details[data-region="${region}"]`);
+
+    if ((await details.count()) === 0) {
+        throw new Error(`no ${region} disclosure on this page`);
+    }
+
+    if (!(await details.evaluate((el) => el.hasAttribute('open')))) {
+        await details.locator('summary').first().click();
+        await expect(details).toHaveAttribute('open', '');
+    }
+}
+
+/**
+ * The run's write surfaces and the action grid: "Career tools".
+ */
+async function openRunTools(page: import('@playwright/test').Page): Promise<void> {
+    await openDisclosure(page, 'run-tools');
+}
 
 test('walks the recorded-action card through its three states', async ({ page }) => {
     const cockpitUrl = await newCareer(page);
@@ -266,6 +285,7 @@ test('lays out at 1280, 768 and 320 without a horizontal scroll', async ({ page 
 
 test('walks the action grid from the keyboard with a visible focus ring', async ({ page }) => {
     await openCockpit(page);
+    await openRunTools(page);
 
     // Scoped to the Actions region: the section nav (audit 2026-10-12 §3.6) adds a "Races in this
     // run" link whose name also starts with "Race", and the grid's own entry is the one meant here.
@@ -339,6 +359,7 @@ test('quiets transitions when the operating system asks for reduced motion', asy
 
 test('sizes the cockpit controls to the 44px contract', async ({ page }) => {
     await openCockpit(page);
+    await openRunTools(page);
 
     // WCAG 2.2 SC 2.5.8, floor 44px (plan §12.1). The same sweep `dashboard.spec.ts` runs.
     // Every grid entry is scoped to the Actions region: the section nav renders real `Training`,
@@ -455,6 +476,7 @@ test('records Energy through the cockpit correction and then marks one action', 
 
 test('passes an axe scan at WCAG A and AA', async ({ page }) => {
     await openCockpit(page);
+    await openRunTools(page);
 
     // `buildAxe` scopes to `#app`, which is what makes this deterministic: Inertia's NProgress bar is
     // appended to `<body>` as a sibling of the app root and carries an invalid `role="bar"` (KI-63).
@@ -516,6 +538,7 @@ test('reads one turn number in the header and in the correction selector', async
 
 test('names the run state in the DOM, and only the one that applies', async ({ page }) => {
     await openCockpit(page);
+    await openRunTools(page);
 
     await expect(page.locator('[data-run-state="active"]')).toHaveCount(1);
     await expect(page.locator('[data-run-state="completed"]')).toHaveCount(0);
@@ -550,6 +573,7 @@ test('keeps every settings disclosure closed on load for a finished career', asy
 
 test('the scenario panels read before the advisor, above the scenario strip', async ({ page }) => {
     await openCockpit(page);
+    await openRunTools(page);
 
     // Tree order, not visual order: `querySelectorAll` answers in document order, which is the order a
     // screen reader and a keyboard reach the regions. The HFW parity slice put the scenario card in the
@@ -604,6 +628,7 @@ test('a completed URA career draws its four recorded mandatory races as a ladder
 test('keeps every section landmark name after the Section adoption', async ({ page }) => {
     // Three of the five resolve BY NAME on an active career.
     await openCockpit(page);
+    await openRunTools(page);
     await expect(page.getByRole('region', { name: 'No turn recorded yet' })).toHaveCount(1);
     await expect(page.getByRole('region', { name: 'Scenario', exact: true })).toHaveCount(1);
     // The fifth pairing is the one Ruling 1 left hand-rolled, so its name is the invariant that proves
@@ -757,23 +782,21 @@ test('shows the sourced mood effect headline beside the mood', async ({ page }) 
     await expect(state.getByText(/training \+20%, running \+4%/)).toBeVisible();
 });
 
-test('names the run in the career header', async ({ page }) => {
+test('names the run in the top bar crumb', async ({ page }) => {
     // R4-01/R4-02: the id lived only in the URL, so two careers of one trainee in one scenario were
-    // two identical headers. The strip prints it beside the trainee, in the same `Run #N` spelling the
-    // Legacy builder uses, and this case is the one that proves it reached the rendered DOM rather
-    // than only the component source.
+    // two identical headers. The parity pass then cut the identity strip that used to print it, and
+    // the id moved to the crumb's scenario segment, which is the one place the shell names the run:
+    // `{trainee} · {scenario} #{id} · {screen}`, the shape every cockpit HFW draws.
     await openCockpit(page);
 
     const id = page.url().match(/\/training-runs\/(\d+)\/cockpit$/)?.[1] ?? '';
     expect(id, 'the cockpit URL names no run id').not.toBe('');
 
-    const career = page.getByRole('region', { name: 'Career', exact: true });
-    await expect(career.getByText(`Run #${id}`, { exact: true })).toBeVisible();
+    const crumb = page.locator('.topbar .crumb, [data-shell-crumb]').first();
+    await expect(crumb).toBeVisible();
+    await expect(crumb).toContainText(`#${id}`);
 
-    // It is header furniture, not a line under the tabs: the id sits above the section nav.
-    const identityBox = await career.getByText(`Run #${id}`, { exact: true }).boundingBox();
-    const navBox = await page.getByRole('navigation', { name: 'Career sections' }).boundingBox();
-    expect(identityBox, 'the run id is not rendered').not.toBeNull();
-    expect(navBox, 'the section nav is not rendered').not.toBeNull();
-    expect(identityBox!.y, 'the run id renders below the section nav').toBeLessThan(navBox!.y);
+    // The screen's own name closes the crumb, and the trainee opens it, so the run is fully
+    // identified without the reader leaving the top bar.
+    await expect(crumb).toContainText('Cockpit');
 });
