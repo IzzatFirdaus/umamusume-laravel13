@@ -412,6 +412,46 @@ const headAction = computed((): { label: string; href: string } | null => {
         : null;
 });
 
+/**
+ * The scenario table's four team readings. They are computed rather than printed from the panel so
+ * the card's surface matches `cockpit-unity-cup.html`, which draws them as table rows and nowhere
+ * else. Each value is absent rather than zero when nothing recorded it.
+ */
+const teamLine = computed((): string => {
+    const team = teamState.value;
+
+    if (team === null) {
+        return 'N/A, not recorded';
+    }
+
+    const parts = [team.team_name, team.team_motto].filter((part): part is string => part !== null && part !== '');
+
+    return parts.length === 0 ? 'N/A, not recorded' : parts.join(' \u00b7 ');
+});
+
+const teamLeague = computed((): string => (teamState.value?.team_league_placement === null || teamState.value === null
+    ? 'N/A'
+    : String(teamState.value.team_league_placement)));
+
+/**
+ * The HFW prints `11 (inside 10-12)`: the combined Spirit and Extreme count, named against the band
+ * the matrix publishes. Both halves are separate columns, so the total is their sum and never a
+ * stored figure; a run with neither records the absence.
+ */
+const teamBursts = computed((): string => {
+    const team = teamState.value;
+
+    if (team === null || (team.spirit_bursts_count === null && team.extreme_bursts_count === null)) {
+        return 'N/A';
+    }
+
+    const total = (team.spirit_bursts_count ?? 0) + (team.extreme_bursts_count ?? 0);
+
+    return total >= 10 && total <= 12 ? `${total} (inside 10-12)` : String(total);
+});
+
+const teamRank = computed((): string => 'not recorded');
+
 /** The Skills planner's URL, derived the way `CareerSectionNav` derives its steps. */
 const skillsUrl = computed((): string => `${props.run.run_url.replace(/\/cockpit$/, '')}/skills`);
 
@@ -966,26 +1006,63 @@ const jumpToShop = (): void => {
                          annotation 2). A reached finale prints its record; an unreached one prints the
                          advisor's own proximity when it has one, and says so when nothing dates it.
                          No control lives here: the Unity Cup region pins that. -->
-                    <p class="flex flex-wrap items-baseline gap-x-2 text-sm" data-region="scenario-finale">
-                        <span class="font-semibold text-ink-strong">Finale:</span>
-                        <template v-if="finaleLine !== null">
-                            <span class="text-ink">{{ finaleLine }}</span>
-                            <span v-if="finaleTurnsAway !== null" class="pill pill-caution">
-                                {{ finaleTurnsAway }} {{ finaleTurnsAway === 1 ? 'turn' : 'turns' }} away
-                            </span>
-                        </template>
-                        <span v-else class="text-ink-muted">
-                            N/A. This run's scenario has no finale row in the catalogue, so no countdown is
-                            computed.
-                        </span>
-                    </p>
-
-                    <!-- The shell switches on the matrix's own flags and widget keys and knows no
-                         scenario name (plan §9 E1, gate G-33). The prop's own shape is declared at
-                         `components/scenario/ScenarioPanel.vue`; the page forwards it untouched. -->
-                    <div class="mt-3">
-                        <ScenarioPanel :scenario="props.scenario as never" />
+                    <!-- The card's surface is the HFW's: two pills and a label/value table. Every row
+                         is a reading this page already carries, and none is invented for a scenario
+                         that does not have it, so a scenario without the team system draws the finale
+                         row alone and the boards below carry the rest. -->
+                    <div class="mb-2 flex flex-wrap gap-x-2 gap-y-1">
+                        <span class="pill pill-accent">{{ props.run.scenario_label }}</span>
+                        <span class="pill pill-outline">Guide held</span>
                     </div>
+
+                    <table class="t">
+                        <tbody>
+                            <tr data-region="scenario-finale">
+                                <td>Finale</td>
+                                <td>
+                                    <template v-if="finaleLine !== null">
+                                        <b v-if="finaleTurnsAway !== null">
+                                            {{ finaleTurnsAway }} {{ finaleTurnsAway === 1 ? 'turn' : 'turns' }} away
+                                        </b>
+                                        <span v-else>{{ finaleLine }}</span>
+                                    </template>
+                                    <span v-else class="text-ink-muted">
+                                        N/A. This run's scenario has no finale row in the catalogue.
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr v-if="composesTeamPanel">
+                                <td>Team</td>
+                                <td>{{ teamLine }}</td>
+                            </tr>
+                            <tr v-if="composesTeamPanel">
+                                <td>League</td>
+                                <td class="font-mono tabular-nums">{{ teamLeague }}</td>
+                            </tr>
+                            <tr v-if="composesTeamPanel">
+                                <td>Bursts</td>
+                                <td class="font-mono tabular-nums">{{ teamBursts }}</td>
+                            </tr>
+                            <tr v-if="composesTeamPanel">
+                                <td>Team rank</td>
+                                <td><span class="pill pill-neutral">{{ teamRank }}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- HFW-OVERRIDE (scenario-extension): no cockpit HFW draws the boards this
+                         scenario composes, and SCREEN_SPEC.md SCR-CAR-011 keeps them on this screen.
+                         They stay reachable and closed, so the visible page is the wireframe's while
+                         the panels it does not draw are one press away. The shell switches on the
+                         matrix's own flags and widget keys and knows no scenario name (G-33). -->
+                    <details data-region="scenario-detail" class="mt-3">
+                        <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
+                            Scenario detail
+                        </summary>
+                        <div class="mt-2">
+                            <ScenarioPanel :scenario="props.scenario as never" />
+                        </div>
+                    </details>
 
                     <!-- HFW OVERRIDE (copy, not visual) — `cockpit-trackblazer.html` prints a `.mockbar`
                          stating that its support data is illustrative. A wireframe artifact is not
@@ -1039,13 +1116,24 @@ const jumpToShop = (): void => {
             </div>
         </div>
 
-        <!-- The seven action entries keep their own region below the decision, the way the HFW keeps the
-             page head's primary and the advisor's rail as the only claims about what to do next: the
-             grid is the set of doors, not a second ranking. A closed career keeps it behind the same
-             disclosure it had. -->
-        <div class="mt-4">
-            <ActionGrid v-if="isActive" :actions="props.actions" />
+        <!-- The action grid is the set of doors a turn leads into, not a second ranking. No cockpit
+             HFW draws it: `cockpit-unity-cup.html` reaches those screens through the stepper and the
+             "Where to go" card, and the page head already carries the decision's single primary. It
+             moves inside the run's tools disclosure rather than off the screen, so every door stays
+             reachable while the visible page is the wireframe's. Trackblazer's Pro Shop rides with it
+             for the same reason (plan Â§9 E4, design-2.0 Â§28). -->
 
+        <!--
+          The run's own write surfaces, behind one disclosure. SCREEN_SPEC.md SCR-CAR-011 gives the
+          Cockpit the run identity, the cap composition, the roster, the run's races, the turn
+          correction and the action grid; no cockpit HFW draws any of them. Collapsed rather than
+          deleted so the doors stay reachable, and closed so the visible page is the wireframe's.
+          HFW-OVERRIDE (write-paths): the HFW has no write surfaces and no disclosure.
+        -->
+        <details class="mt-4 rounded-lg border border-rule bg-panel p-4" data-region="run-tools">
+            <summary class="min-h-11 cursor-pointer text-lg font-semibold text-ink-strong">Career tools</summary>
+
+            <ActionGrid v-if="isActive" class="mt-4" :actions="props.actions" />
 
             <!-- Trackblazer's Pro Shop is reachable from the Cockpit's action area (plan §9
                  E4, design-2.0 §28 "The Shop should be quickly accessible from the Career
@@ -1061,17 +1149,6 @@ const jumpToShop = (): void => {
             >
                 Shop
             </button>
-        </div>
-
-        <!--
-          The run's own write surfaces, behind one disclosure. SCREEN_SPEC.md SCR-CAR-011
-          gives the Cockpit the run identity, the cap composition, the roster, the run's races
-          and the turn correction; no cockpit HFW draws any of them. Collapsed rather than
-          deleted so the doors stay reachable, and closed so the visible page is the HFW's.
-          HFW-OVERRIDE (write-paths): the HFW has no write surfaces and no disclosure.
-        -->
-        <details class="mt-4 rounded-lg border border-rule bg-panel p-4" data-region="run-tools">
-            <summary class="min-h-11 cursor-pointer text-lg font-semibold text-ink-strong">Career tools</summary>
 
         <section
             class="mt-4 rounded-lg border border-rule bg-panel p-4"
