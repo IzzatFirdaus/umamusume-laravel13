@@ -38,8 +38,13 @@
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
-import CockpitIdentityCard from '../../components/career/CockpitIdentityCard.vue';
-import StatSummary from '../../components/career/StatSummary.vue';
+/*
+ * `StatSummary` is no longer imported: the parity pass cut the summary strip, because no cockpit HFW
+ * draws a second reading of the header's facts above the canvas. Its own copy defect went with it —
+ * on a completed run it printed "No recommendation. See the advisor." while the advisor was
+ * correctly absent. The component file is left in place for the Careers list to adopt or for
+ * deletion in a follow-up; nothing in this tree renders it.
+ */
 import CareerStatePanel from '../../components/career/CareerStatePanel.vue';
 import ActionGrid from '../../components/career/ActionGrid.vue';
 import AdvisorRail from '../../components/career/AdvisorRail.vue';
@@ -407,6 +412,9 @@ const headAction = computed((): { label: string; href: string } | null => {
         : null;
 });
 
+/** The Skills planner's URL, derived the way `CareerSectionNav` derives its steps. */
+const skillsUrl = computed((): string => `${props.run.run_url.replace(/\/cockpit$/, '')}/skills`);
+
 /**
  * "Where to go": the screens a career's turn leads into, from the doors this page already carries.
  * Every href is a prop or an action-grid entry, so no destination is spelled here and none can drift
@@ -420,11 +428,24 @@ const whereToGo = computed((): { label: string; href: string }[] => {
         links.push({ label: 'Race decision', href: race.href });
     }
 
+    links.push({ label: 'Skills planner', href: skillsUrl.value });
     links.push({ label: 'Run deck', href: props.run.deck_url });
     links.push({ label: 'Timeline', href: props.run.timeline_url });
     links.push({ label: 'Career result', href: props.run.result_url });
 
     return links;
+});
+
+/**
+ * The completed card's Races tile. The URA HFW prints "4 of 4", a recorded-of-mandatory
+ * ratio; the strip carries the recorded rows and no mandatory total, so the tile prints
+ * the count it does have rather than a denominator it would be inventing.
+ * HFW-OVERRIDE (text: races-denominator).
+ */
+const raceCount = computed((): number | null => {
+    const run = (props.raceStrip as { run?: unknown[] }).run;
+
+    return Array.isArray(run) ? run.length : null;
 });
 
 /** The five Performance types with this run's latest recorded reading for each, or null. */
@@ -467,18 +488,6 @@ const capSparkText = computed((): string => {
         .map((spark) => `${spark.stat ?? 'Unstated'} ${'★'.repeat(spark.stars ?? 0)} (${spark.source})`)
         .join(', ');
 });
-
-// The section nav's targets are the headings the screen already carries (audit 2026-10-12 §3.6).
-// The hrefs are fragment ids, which Inertia leaves to the browser, so these are plain anchors.
-const sectionLinks = [
-    { href: '#career-header-heading', label: 'Position' },
-    { href: '#cockpit-header-edit', label: 'Run identity' },
-    { href: '#career-state-heading', label: 'Stats and state' },
-    { href: '#career-actions-heading', label: 'Actions' },
-    { href: '#career-scenario-heading', label: 'Scenario' },
-    { href: '#career-timeline-heading', label: 'Races in this run' },
-    { href: '#career-advisor-heading', label: 'Advisor' },
-];
 
 /*
  * The Unity Cup team editor (R2-14). The team system is the scenario's own, so the matrix's
@@ -573,15 +582,6 @@ const turnSelector = ref<HTMLSelectElement | null>(null);
 const runState = computed((): string => props.run.status.toLowerCase());
 const isActive = computed((): boolean => props.run.status === 'Active');
 
-// The summary line reads only stored figures. A stat with no reading is `N/A`, the same marker the rows
-// below it use, and no total turn count is printed because nothing in the props states one.
-const summaryStats = computed((): string =>
-    props.state.stats
-        .map((stat: { label: string; current: number | null }): string =>
-            `${stat.label} ${stat.current === null ? 'N/A' : stat.current.toLocaleString('en-US')}`,
-        )
-        .join(' · '),
-);
 
 /*
  * F2, plan §9.6 ruling 2: arbitrary-turn correction. `?edit_turn=<id>` names the turn the form opens
@@ -829,49 +829,8 @@ const jumpToShop = (): void => {
             That screen did not load. Nothing was saved; try again.
         </p>
 
-        <!-- The condensed read, above the wayfinder so the nav slides beneath it while the page scrolls.
-             It is a second READING of the header's own facts and never a second primary: the outline
-             affordance moves a Trainer to the advisor, and the filled primary is the page head's. The
-             class a source scan counts is deliberately absent here. -->
-        <StatSummary
-            :turn="props.header.turn"
-            :total-turns="props.header.total_turns"
-            :energy-text="props.header.energy_text"
-            :mood="props.header.mood"
-            :fans="props.header.fans"
-            :skill-points="props.header.skill_points"
-            :recommended="isActive ? (props.advisor.decision.recommended?.action ?? null) : null"
-        />
-
-        <!-- The page's own wayfinder (audit 2026-10-12 §3.6): anchors into the regions the screen
-             already names, never tabs - SCREEN_SPEC.md §SCR-CAR-011 forbids hiding a region at a
-             breakpoint, and tabs hide panels by definition.
-
-             `md:sticky md:top-0 md:z-10` was here and is REMOVED, along with the sentence that claimed
-             it: the nav sits inside `main`, which carries `container-type: inline-size` (load-bearing
-             for this page's `@4xl:` grid), so the sticky containing block moves with the page and the
-             nav scrolled away with everything else. Retired rather than left as a no-op so the source
-             does not claim a behaviour the page does not have; `tests/browser/containment.spec.ts`
-             pins the current behaviour deliberately. -->
-        <nav aria-label="On this page" class="mb-4 border-b border-rule bg-page py-1 md:-mx-6 md:px-6">
-            <ul class="flex flex-wrap gap-1 text-sm">
-                <li v-for="link in sectionLinks" :key="link.href">
-                    <a :href="link.href" class="inline-flex min-h-11 items-center rounded-md px-3 text-ink hover:bg-raised hover:text-ink-strong transition-colors duration-150 ease-out">{{ link.label }}</a>
-                </li>
-            </ul>
-        </nav>
 
         <div :data-run-state="runState" class="contents">
-        <CockpitIdentityCard
-            :trainee="props.run.trainee"
-            :trainee-ja="props.run.trainee_ja"
-            :header="props.header"
-            :total-turns="props.header.total_turns"
-            :countdown="props.scenarioCountdown"
-            :card-title="props.identity.card_title"
-            :trainee-rarity="props.identity.trainee_rarity"
-            :potential-level="props.identity.potential_level"
-        />
 
         <!-- The empty state names what is missing, why it matters and what to do (plan §10). It sits
              above the grid rather than replacing it: the grid's own entries are still the doors, and
@@ -898,10 +857,12 @@ const jumpToShop = (): void => {
         <Section
             v-if="!isActive"
             id="cockpit-summary-heading"
-            :title="`${props.run.trainee} · ${props.run.scenario_label}`"
+            title="This run is complete."
             class="rounded-lg border border-rule bg-panel p-4"
         >
-            <p class="mt-1 text-sm font-semibold text-ink-strong" data-region="closed-outcome">{{ closedOutcome }}</p>
+            <p class="mt-1 text-sm text-ink" data-region="closed-outcome">
+                Nothing is being decided, so nothing is ranked and nothing is refused.
+            </p>
             <ul class="tiles mt-3 grid-cols-2 @4xl:grid-cols-4">
                 <li class="tile">
                     <p class="k">Finale</p>
@@ -912,12 +873,23 @@ const jumpToShop = (): void => {
                 </li>
                 <li class="tile">
                     <p class="k">Turn</p>
-                    <p class="v font-mono tabular-nums">{{ turnPhrase }}</p>
+                    <!-- DOMAIN OVERRIDE (DM-1): a completed run is past the 72-turn grid, so the
+                         tile prints the stored turn alone, the way the HFW prints "Turn 75", and
+                         not the finale-phase phrase the grid's denominator would force. -->
+                    <p v-if="props.run.status === 'Completed'" class="v font-mono tabular-nums">{{ props.header.turn }}</p>
+                    <p v-else class="v font-mono tabular-nums">{{ turnPhrase }}</p>
                     <p
                         v-if="turnDisagreement !== null"
                         class="mt-1 text-xs text-ink-muted"
                         data-field="turn-discrepancy"
                     >{{ turnDisagreement }}</p>
+                </li>
+                <li class="tile">
+                    <p class="k">Races</p>
+                    <div class="v font-mono tabular-nums">
+                        <template v-if="raceCount !== null">{{ raceCount }}</template>
+                        <AbsenceValue v-else compact reason="No race entry is recorded for this run." />
+                    </div>
                 </li>
                 <li class="tile">
                     <p class="k">Skill points</p>
@@ -926,22 +898,7 @@ const jumpToShop = (): void => {
                         <AbsenceValue v-else compact reason="No turn entry for this run records Skill Points." />
                     </div>
                 </li>
-                <li class="tile">
-                    <p class="k">Fans</p>
-                    <div class="v font-mono tabular-nums">
-                        <template v-if="props.header.fans !== null">{{ props.header.fans.toLocaleString('en-US') }}</template>
-                        <AbsenceValue v-else compact reason="No turn entry for this run records a fan count." />
-                    </div>
-                </li>
             </ul>
-            <p class="mt-3 font-mono text-sm tabular-nums text-ink-strong">{{ summaryStats }}</p>
-            <a
-                v-if="props.run.status === 'Completed'"
-                :href="props.run.result_url"
-                class="mt-3 inline-flex min-h-11 items-center rounded-md border border-rule px-4 font-semibold text-ink-strong underline"
-            >
-                Open the Career Result
-            </a>
         </Section>
 
         <!-- The HFW's two-column body. Left: the run's stats, its scenario reading and the scenario's
@@ -956,6 +913,7 @@ const jumpToShop = (): void => {
                     :fan-ladder="props.identity.fan_ladder"
                     :mood-effect="props.moodEffect"
                     denominator-label="cap"
+                    :title="isActive ? 'Stats and state' : 'Final stats'"
                 />
 
                 <!-- Our Grand Concert's reading: five types, shared out of the turn-entry screen, and
@@ -1060,21 +1018,12 @@ const jumpToShop = (): void => {
                 </Section>
             </div>
 
-            <div data-region="advisor" class="flex min-w-0 flex-col gap-4">
-                <AdvisorRail v-if="isActive" :decision="props.advisor.decision" :race-url="raceDoor" :timeline-url="props.run.timeline_url" />
-
-                <!-- A career that has ended has no turn being decided, so the advisor's own refusal is not
-                     the answer this region owes. One statement and the one door a finished career still has. -->
-                <Section
-                    v-else
-                    id="career-closed-heading"
-                    :title="props.run.status === 'Completed' ? 'This run is complete.' : 'This run is retired.'"
-                    class="rounded-lg border border-rule bg-panel p-4"
-                >
-                    <p class="mt-1 text-sm text-ink">
-                        Nothing is being decided, so nothing is ranked and nothing is refused.
-                    </p>
-                </Section>
+            <div class="flex min-w-0 flex-col gap-4">
+                <!-- Ruling 1: the advisor region is absent on a completed run, not empty. Gating the
+                     wrapper rather than the rail is what makes the DOM agree with the page. -->
+                <div v-if="isActive" data-region="advisor">
+                    <AdvisorRail :decision="props.advisor.decision" :race-url="raceDoor" :timeline-url="props.run.timeline_url" />
+                </div>
 
                 <!-- HFW parity: every variant's right column ends with its doors, and Unity Cup's own
                      keybox names the section. Every href is a prop or an action-grid entry, so no
@@ -1097,12 +1046,6 @@ const jumpToShop = (): void => {
         <div class="mt-4">
             <ActionGrid v-if="isActive" :actions="props.actions" />
 
-            <details v-else data-region="run-tools" class="mt-3 rounded-lg border border-rule bg-panel p-4">
-                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
-                    Run tools
-                </summary>
-                <ActionGrid class="mt-3" :actions="props.actions" />
-            </details>
 
             <!-- Trackblazer's Pro Shop is reachable from the Cockpit's action area (plan §9
                  E4, design-2.0 §28 "The Shop should be quickly accessible from the Career
@@ -1119,6 +1062,16 @@ const jumpToShop = (): void => {
                 Shop
             </button>
         </div>
+
+        <!--
+          The run's own write surfaces, behind one disclosure. SCREEN_SPEC.md SCR-CAR-011
+          gives the Cockpit the run identity, the cap composition, the roster, the run's races
+          and the turn correction; no cockpit HFW draws any of them. Collapsed rather than
+          deleted so the doors stay reachable, and closed so the visible page is the HFW's.
+          HFW-OVERRIDE (write-paths): the HFW has no write surfaces and no disclosure.
+        -->
+        <details class="mt-4 rounded-lg border border-rule bg-panel p-4" data-region="run-tools">
+            <summary class="min-h-11 cursor-pointer text-lg font-semibold text-ink-strong">Career tools</summary>
 
         <section
             class="mt-4 rounded-lg border border-rule bg-panel p-4"
@@ -1609,6 +1562,8 @@ const jumpToShop = (): void => {
                 </details>
             </details>
         </section>
+        </details>
+
         </div>
     </CareerLayout>
 </template>

@@ -72,11 +72,16 @@ const breadcrumb = computed(() => {
  * of active careers. `Turn 67 · Active` while the run is on the 72-turn grid, `Completed` once it is
  * past it. The turn figure is omitted rather than guessed when the payload has no position.
  */
+/**
+ * Whether this run is still being played. The stepper's presence and the `who` pill's tone are the
+ * same question, so both read it from here rather than from two interpretations of `status`.
+ */
+const isActiveRun = computed((): boolean => props.status === 'active' || props.statusLabel.toLowerCase() === 'active');
+
 const whoPill = computed(() => {
-    const active = props.status === 'active' || props.statusLabel.toLowerCase() === 'active';
     const turn = props.position?.match(/turn\s+(\d+)/i)?.[1];
 
-    if (!active) {
+    if (!isActiveRun.value) {
         return { label: props.statusLabel, tone: 'neutral' as const };
     }
 
@@ -113,11 +118,14 @@ const whoPill = computed(() => {
 
         <div :class="[layoutWidthClass, 'mx-auto w-full']" data-layout-container>
             <!--
-              The run's identity and its nine sections, from one place. This replaced the older
-              "Cockpit / Dashboard" door pair (slice 4.1): the global navigation still carries the
-              Dashboard, and a per-screen pair of doors is the drift the nav exists to remove.
+              HFW-OVERRIDE (stepper-consistency): `cockpit-unity-cup.html` draws the stepper and the
+              trackblazer and grand-concert pages omit it, while `cockpit-ura-finale.html` — the one
+              completed run — draws none. The stepper is therefore the active-run pattern, and a
+              completed career loses it: there is no next turn to navigate, and the Result screen the
+              stepper's last step points at is the only door such a run still has.
             -->
             <CareerSectionNav
+                v-if="isActiveRun"
                 :trainee="props.trainee"
                 :trainee-ja="props.traineeJa"
                 :scenario-label="props.scenarioLabel"

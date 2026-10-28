@@ -65,6 +65,11 @@ const props = defineProps<{
      * target and the event screen's is the run's ceiling, so the word is a required prop rather than a
      * guess: one screen's denominator printed under the other's name is the defect this closes (R2-09).
      */
+    /**
+     * The card's own heading. An active run reads "Stats and state"; a completed one reads
+     * "Final stats", the word the HFW gives it once nothing is left to change.
+     */
+    title?: string;
     denominatorLabel: 'target' | 'cap';
     /**
      * A-0.11: the client's Mood Effect headline (the `GREAT` tier's +20% training / +4% running),
@@ -82,29 +87,13 @@ const growthFor = (stat: Stat): number | null => {
     return typeof value === 'number' ? value : null;
 };
 
-// `Star · 30,755 to 240,000`: the ladder's own three facts. The gap and the threshold are shipped
-// together by `FanLadder::fromValue()` so they cannot come from different bands; the row names the
-// threshold so a reader does not need to know 240,000 from outside (A-0.10, walk-1 Screen 8). Null when
-// the ladder does not resolve, so the row prints the bare count rather than a class nobody sourced (D-220).
-const fanSuffix = computed((): string | null => {
-    const ladder = props.fanLadder;
-
-    if (ladder === null || ladder === undefined || ladder.class === null || ladder.gap === null || ladder.nextThreshold === null) {
-        return null;
-    }
-
-    return `${ladder.class} · ${group(ladder.gap)} to ${group(ladder.nextThreshold)}`;
-});
-
 const currentHint = (stat: Stat): string => (stat.current === null ? 'No turn has recorded this stat yet.' : `Entered: ${group(stat.current)}.`);
 
 /**
- * D-259 / DM-5: the client's Mood Effect panel, both columns (`UMAMUSUME_REFERENCE.md` §1.1.6,
- * client capture 2026-09-27). The five values are the client's own and are not interpolated: the ramp
- * is not a formula, and the two columns are distinct — training yield and pre-race attributes — so
- * neither may be derived from the other. The report of 2026-10-24 kept the config to one sourced entry
- * rather than a table; that ruling is superseded by §1.1.6's client panel, which prints all ten
- * percentages, so both columns live here per tier.
+ * The tier's headline percentage (`UMAMUSUME_REFERENCE.md` §1.1.6's training column: +20% at GREAT
+ * down to −20% at AWFUL). DM-5 makes the mood reading word + arrow + percentage, and every cockpit
+ * HFW draws `GREAT ↑ +20%`, so this is the one column the pill carries. The reference's second
+ * column (pre-race attributes) is not drawn on this screen.
  */
 const MOOD_TRAINING_PCT: Record<string, number> = {
     GREAT: 20,
@@ -114,33 +103,13 @@ const MOOD_TRAINING_PCT: Record<string, number> = {
     AWFUL: -20,
 };
 
-/** §1.1.6's pre-race attribute column: +4% at GREAT down to −4% at AWFUL. */
-const MOOD_RUNNING_PCT: Record<string, number> = {
-    GREAT: 4,
-    GOOD: 2,
-    NORMAL: 0,
-    BAD: -2,
-    AWFUL: -4,
-};
-
-/** The tier's training percentage, signed, or null for a tier nobody recorded. */
+/** The tier's percentage, signed, or null for a tier nobody recorded. */
 const moodPercent = (tier: string | null): string | null => {
     if (tier === null || MOOD_TRAINING_PCT[tier] === undefined) {
         return null;
     }
 
     const value = MOOD_TRAINING_PCT[tier];
-
-    return `${value >= 0 ? '+' : ''}${value}%`;
-};
-
-/** The tier's pre-race attribute percentage, signed, or null for a tier nobody recorded. */
-const moodRunningPercent = (tier: string | null): string | null => {
-    if (tier === null || MOOD_RUNNING_PCT[tier] === undefined) {
-        return null;
-    }
-
-    const value = MOOD_RUNNING_PCT[tier];
 
     return `${value >= 0 ? '+' : ''}${value}%`;
 };
@@ -156,11 +125,13 @@ const barCaption = computed((): string | null => {
         return null;
     }
 
-    const caption = 'Bars are drawn against the run\'s ceiling: the figure entered for this run where one exists, the scenario\'s published cap otherwise.';
-    const noTarget = 'No build target was set for this run.';
+    // The HFW's own sentence, verbatim. It was two sentences that said the same thing twice: the
+    // first restated the mechanic and the second restated the absence, so the card carried a
+    // paragraph where the wireframe carries a line.
+    const caption = 'Bars are drawn against the scenario ceiling.';
 
     return props.stats.some((stat: Stat): boolean => stat.target === null)
-        ? `${caption} ${noTarget}`
+        ? 'No build target was set for this run, so bars are drawn against the scenario ceiling.'
         : caption;
 });
 
@@ -183,7 +154,10 @@ function percent(stat: Stat): number {
 
 <template>
     <section aria-labelledby="career-state-heading" class="card rounded-lg p-4">
-        <h2 id="career-state-heading" class="text-lg font-semibold text-ink-strong">Stats and state</h2>
+        <!-- HFW-OVERRIDE (text: final-stats-heading): a completed run's card reads "Final stats" in
+             `cockpit-ura-finale.html`; the active-run pages read "Stats and state". One component
+             answers both through this prop, so the word follows the run's state and not the file. -->
+        <h2 id="career-state-heading" class="text-lg font-semibold text-ink-strong">{{ props.title ?? 'Stats and state' }}</h2>
 
         <p v-if="barCaption !== null" class="mt-3 text-sm text-ink-muted">{{ barCaption }}</p>
 
@@ -208,41 +182,44 @@ function percent(stat: Stat): number {
                     <span v-if="stat.current === null" :title="currentHint(stat)">N/A</span>
                     <span v-else>{{ group(stat.current) }}</span>
                     <template v-if="denominator(stat) !== null">
-                        <span class="font-normal text-ink-muted">/</span>
-                        <!-- The second number's own word (R2-09): `target` on this screen, `cap` where the
-                             ceiling is the question. An absent denominator prints nothing here, because
-                             the caption above the grid has already said it for all five rows. -->
-                        <span class="font-normal text-ink-muted">
-                            {{ group(denominator(stat) as number) }}
+                        <!-- HFW's own shape: the denominator sits inside `<s>`, which `.srow .v s`
+                             renders small and muted. HFW-OVERRIDE (text: denominator-word): R2-09
+                             requires the word `cap` or `target` to travel with the second number so
+                             one screen's denominator is never read as the other's, and
+                             `cockpit-unity-cup.html` prints the number alone. The word stays. -->
+                        <s class="flex items-baseline gap-1">
+                            <span>/</span>
+                            <span>{{ group(denominator(stat) as number) }}</span>
                             <span class="text-xs">{{ props.denominatorLabel }}</span>
-                        </span>
+                        </s>
                     </template>
                 </span>
 
-                <div v-if="stat.current !== null && denominator(stat) !== null" class="col-span-2 mt-1.5 h-1.5 overflow-hidden rounded-md bg-sunken" aria-hidden="true">
-                    <div class="h-full bg-green-deep" :style="{ width: `${percent(stat)}%` }"></div>
+                <div v-if="stat.current !== null && denominator(stat) !== null" class="track" aria-hidden="true">
+                    <i :style="{ width: `${percent(stat)}%` }"></i>
                 </div>
                 <p v-else-if="stat.current === null" class="col-span-2 mt-1 text-xs text-ink-muted">{{ currentHint(stat) }}</p>
             </li>
         </ul>
 
-        <dl class="mt-4 grid grid-cols-2 gap-2">
-            <div v-for="row in props.meta" :key="row.key" class="rounded-md border border-rule bg-raised p-2">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ row.label }}</dt>
-                <dd class="mt-1 text-sm text-ink-strong">
+        <!-- The HFW's four tiles in a 2x2 grid: `.tiles` + `.tile`, key above value. It was a `dl`
+             of bordered `div`s, which read as a different component beside the same cards elsewhere. -->
+        <ul class="tiles mt-4 grid-cols-2">
+            <li v-for="row in props.meta" :key="row.key" class="tile">
+                <p class="k">{{ row.label }}</p>
+                <div class="v">
                     <EnergyGauge v-if="row.key === 'energy'" :energy="row.value as number | null" :band-text="row.band_text ?? null" />
                     <template v-else-if="row.key === 'mood'">
-                        <MoodPill :tier="row.value as string | null" unrecorded="N/A, not recorded" />
-                        <!-- D-259 / DM-5: the tier's own two Mood Effect columns, signed, beside the word
-                             and the arrow. `Normal` prints `+0%` rather than a blank, so a real zero is
-                             never read as a missing reading. Training yield then pre-race attributes,
-                             the panel's own column order (UMAMUSUME_REFERENCE.md §1.1.6). -->
-                        <span
-                            v-if="moodPercent(row.value as string | null) !== null"
-                            class="ml-1 font-mono text-xs tabular-nums text-ink-muted"
-                        >
-                            training {{ moodPercent(row.value as string | null) }}, running {{ moodRunningPercent(row.value as string | null) }}
-                        </span>
+                        <!-- HFW-OVERRIDE (text: mood-effect-columns): the reference carries a training
+                             and a running percentage beside the tier, and this card printed both.
+                             Every cockpit HFW draws the word, the arrow and the tier's own percentage
+                             and nothing else, so the two extra columns are excess on this screen and
+                             are cut. The figures stay available on the reference a Trainer reads. -->
+                        <MoodPill
+                            :tier="row.value as string | null"
+                            :pct="moodPercent(row.value as string | null)"
+                            unrecorded="N/A, not recorded"
+                        />
                     </template>
                     <AbsenceValue
                         v-else-if="row.value === null"
@@ -250,16 +227,14 @@ function percent(stat: Stat): number {
                         :reason="`${row.label} has not been recorded for this run.`"
                         compact
                     />
-                    <!-- The fan count with its ladder class and gap when the ladder resolves, and the
-                         bare number otherwise (D-220: a count above every documented band has no class
-                         this tool can claim). -->
-                    <template v-else-if="row.key === 'fans'">
-                        <span class="font-mono tabular-nums">{{ group(row.value as number) }}</span>
-                        <span v-if="fanSuffix !== null" class="text-ink-muted"> · {{ fanSuffix }}</span>
-                    </template>
+                    <!-- HFW-OVERRIDE (text: fan-ladder): this tile printed the fan count with its
+                         ladder class and the gap to the next band. Every cockpit HFW prints the bare
+                         count in this tile, and the ladder is a Dashboard reading, so the suffix is
+                         excess here. `fanLadder` stays a prop so a caller that wants it can add it
+                         back rather than re-deriving the band. -->
                     <span v-else class="font-mono tabular-nums">{{ group(row.value as number) }}</span>
-                </dd>
-            </div>
-        </dl>
+                </div>
+            </li>
+        </ul>
     </section>
 </template>

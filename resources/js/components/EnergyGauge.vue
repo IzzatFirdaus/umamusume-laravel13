@@ -37,10 +37,14 @@ const stateClass = computed(() => {
     <div class="flex flex-col gap-1">
         <!-- A band is a reading the Trainer did make: the client showed a level instead of a number, and
              printing `Energy N/A` over it claimed an absence (R3-01). No gauge is drawn, because a bar
-             would state a figure nobody read. -->
-        <span v-if="!recorded && bandText !== null" class="font-mono text-sm text-ink-muted">
-            Energy {{ bandText }}
-            <span class="font-sans text-xs">· the level the client showed, not a figure</span>
+             would state a figure nobody read.
+
+             HFW-OVERRIDE (text: energy-band-gloss): this printed `Energy Low band · the level the
+             client showed, not a figure`. The tile's own label already says Energy, and every cockpit
+             HFW prints the band word alone (`Low band`), which DM-7 makes the reading. The words are
+             the band, so the gloss explained a distinction the tile does not present. -->
+        <span v-if="!recorded && bandText !== null" class="font-mono tabular-nums">
+            {{ bandText }}
         </span>
         <!-- Absent, not zero: an empty gauge would say the trainee is exhausted on a run
              that has not logged a turn (D-220). -->

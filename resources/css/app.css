@@ -1128,6 +1128,24 @@ html[data-theme='eva01'] {
     color:var(--color-ink-muted);
 }
 
+/* .track: ported from shell.css; resolves to house tokens. The stat bar that
+   belongs to `.srow`; `.srow` was ported without it, so the Cockpit drew the
+   same bar in Tailwind and the two diverged on radius and height. */
+.track {
+    grid-column:1/-1;
+    height:5px;
+    border-radius:5px;
+    background:var(--color-sunken);
+    overflow:hidden;
+    position:relative;
+}
+
+.track > i {
+    display:block;
+    height:100%;
+    background:var(--color-ink-faint);
+}
+
 /* .card:has(> table.t): ported from shell.css; resolves to house tokens. */
 .card:has(> table.t) {
     overflow-x:auto;

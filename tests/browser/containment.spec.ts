@@ -47,17 +47,26 @@ async function driftAfterScrollTo(page: import('@playwright/test').Page, selecto
     return before - after;
 }
 
-test('the containment keeps the wayfinder and the summary strip from sticking', async ({ page }) => {
+test('the containment keeps the stepper and the run tools from sticking', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(`/training-runs/${uraCompletedRun()}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    // Both scroll away by the full distance. A sticky element would drift by ~0.
-    const wayfinder = await driftAfterScrollTo(page, 'nav[aria-label="On this page"]', 200);
-    const strip = await driftAfterScrollTo(page, '[aria-label="Run summary"]', 200);
+    /*
+     * 2026-10-28: the two probes were `nav[aria-label="On this page"]` and `[aria-label="Run
+     * summary"]`. Both elements are gone from the cockpit — the parity pass cut the wayfinder and the
+     * summary strip because no cockpit HFW draws either, so the two names this case measured no longer
+     * exist on any page. The PROPERTY under test is unchanged and still load-bearing: `main` carries
+     * `container-type: inline-size`, that makes it the sticky containing block, and a descendant that
+     * asks to stick therefore scrolls with the page instead of pinning. Retargeted to the two elements
+     * that now hold the same positions in the same container, rather than deleted, so the gate still
+     * guards the containment.
+     */
+    const stepper = await driftAfterScrollTo(page, 'nav[aria-label="Career"]', 200);
+    const tools = await driftAfterScrollTo(page, '[data-region="run-tools"]', 200);
 
-    expect(wayfinder, `the wayfinder drifted ${wayfinder}px, so something made it stick`).toBeGreaterThanOrEqual(190);
-    expect(strip, `the strip drifted ${strip}px, so something made it stick`).toBeGreaterThanOrEqual(190);
+    expect(stepper, `the stepper drifted ${stepper}px, so something made it stick`).toBeGreaterThanOrEqual(190);
+    expect(tools, `the run tools drifted ${tools}px, so something made it stick`).toBeGreaterThanOrEqual(190);
 });
 
 test('the wizard footer still sticks, because the step wrapper reaches the scrollport', async ({ page }) => {
