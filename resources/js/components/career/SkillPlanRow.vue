@@ -105,7 +105,7 @@ async function move(delta: number): Promise<void> {
                 type="number"
                 min="1"
                 max="6"
-                class="min-h-11 w-20 rounded-[var(--radius-md)] border border-rule bg-raised px-2 text-sm text-ink"
+                class="min-h-11 w-20 rounded-md border border-rule bg-raised px-2 text-sm text-ink"
                 :value="props.row.recorded.current_level ?? ''"
                 :aria-label="`Level for ${props.row.name}`"
                 @change="onLevel"

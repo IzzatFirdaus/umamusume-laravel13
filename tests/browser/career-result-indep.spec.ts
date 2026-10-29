@@ -37,9 +37,9 @@ test('renders the completion banner with fans, sashes and the six limits', async
 
     // The six limits, in the words the reference states them.
     const limits = banner.locator('p').filter({ hasText: 'awards no race trophies' });
-    await expect(limits).toContainText('no race trophies', { exact: false });
-    await expect(limits).toContainText('Winning Live or Gallery', { exact: false });
-    await expect(limits).toContainText('Career events or concerts', { exact: false });
-    await expect(limits).toContainText('rest', { exact: false });
-    await expect(limits).toContainText('growth-rate row', { exact: false });
+    await expect(limits).toContainText('no race trophies');
+    await expect(limits).toContainText('Winning Live or Gallery');
+    await expect(limits).toContainText('Career events or concerts');
+    await expect(limits).toContainText('rest');
+    await expect(limits).toContainText('growth-rate row');
 });

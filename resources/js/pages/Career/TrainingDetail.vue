@@ -13,8 +13,8 @@
  * `AbsenceValue.vue`, whose disclosure carries the exclusion; `TrainingCard.vue` and
  * `CareerTrainingDetailTest` hold that line together.
  *
- * **The write is a direct record.** `Train` on a card holds that card's choice for the form below —
- * carried, never re-asked (WCAG 3.3.7) — and the form posts to `runs.turns.store` with the
+ * **The write is a direct record.** `Train` on a card holds that card's choice for the form below -
+ * carried, never re-asked (WCAG 3.3.7) - and the form posts to `runs.turns.store` with the
  * `StoreTurnEntryRequest` that already validates it, no preview step in between. The previous flow
  * carried a `stage=preview` intermediate that redirected to the run record screen, whose rail then
  * gated the confirm (F2, plan §9.6; owner ruling on group R-2). That record screen is retired and the
@@ -150,7 +150,7 @@ const chosenLabel = computed(() => chosen.value?.key ?? chosenExtra.value?.label
  * The one field the chosen action actually moves, marked the way a chosen card is (`border-pick-line`):
  * Energy for a rest, Mood for an outing, and neither for a training, whose movement is the five totals
  * above. It is a second signal beside the field's own label, never the only one, and it claims nothing
- * about magnitude — no source publishes a recovery or an outing figure (`ADR-0001` §3).
+ * about magnitude - no source publishes a recovery or an outing figure (`ADR-0001` §3).
  */
 const emphasizedField = computed<'energy' | 'mood' | null>(() => {
     if (choice.value === 'rest') {
@@ -373,8 +373,8 @@ const capFor = (label: string): number =>
     props.options.find((option) => option.key === label)?.cap ?? 0;
 
 /*
- * The accelerator, and the contract printed for it (HFW `training-decision.html`: 1–5 pick, Enter
- * records, Escape goes back; H7 — an accelerator a Trainer has to already know is not discoverable).
+ * The accelerator, and the contract printed for it (HFW `training-decision.html`: 1-5 pick, Enter
+ * records, Escape goes back; H7 - an accelerator a Trainer has to already know is not discoverable).
  *
  * The listener stands down on typing surfaces: a number typed into "Turn" must pick nothing, and Enter
  * inside a field keeps the browser's own submit path instead of recording twice. A focused button keeps
@@ -636,7 +636,7 @@ const energyBandNote = computed(() =>
                             </li>
                             <li v-if="chosen !== null && chosen.energy_after !== null">
                                 Energy after this training is calculated at
-                                <span class="font-mono">{{ chosen.energy_after.min }}–{{ chosen.energy_after.max }}</span>,
+                                <span class="font-mono">{{ chosen.energy_after.min }}-{{ chosen.energy_after.max }}</span>,
                                 not read from the client.
                             </li>
                         </ul>
@@ -652,7 +652,7 @@ const energyBandNote = computed(() =>
                         <div class="grid gap-2.5 g-2">
                             <label class="flex flex-col gap-1">
                                 <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Energy after</span>
-                                <BaseInput id="turn-energy" v-model="form.energy" type="number" name="energy" min="0" max="100" placeholder="—" :error="errorOf('energy')" />
+                                <BaseInput id="turn-energy" v-model="form.energy" type="number" name="energy" min="0" max="100" placeholder="-" :error="errorOf('energy')" />
                             </label>
                             <label class="flex flex-col gap-1">
                                 <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Mood after</span>
@@ -690,7 +690,7 @@ const energyBandNote = computed(() =>
                     <div class="savebar">
                         <span class="text-xs text-ink-muted">
                             {{ chosenLabel ?? 'No action selected' }} selected ·
-                            <span class="kbd">1</span>–<span class="kbd">5</span> pick ·
+                            <span class="kbd">1</span>-<span class="kbd">5</span> pick ·
                             <span class="kbd">Enter</span> records ·
                             <span class="kbd">Esc</span> back
                         </span>
@@ -773,7 +773,7 @@ const energyBandNote = computed(() =>
                     </template>
                 </div>
                 <p class="mt-2 text-xs text-ink-muted">
-                    Keyboard: <span class="kbd">1</span>–<span class="kbd">5</span> pick a discipline,
+                    Keyboard: <span class="kbd">1</span>-<span class="kbd">5</span> pick a discipline,
                     <span class="kbd">Enter</span> records the held choice, <span class="kbd">Esc</span> steps
                     back. Keys stand down while a field has focus.
                 </p>

@@ -3,7 +3,7 @@
  * The vertical rail for SCREEN-018 (plan §8 D14), grouped the way the domain counts.
  *
  * **DM-1 override in force.** The HFW draws one flat table; this renders the same record as a
- * collapsible group per career year (`DESIGN-CORPUS.md` §5: "grouping by phase, collapsible — exactly
+ * collapsible group per career year (`DESIGN-CORPUS.md` §5: "grouping by phase, collapsible - exactly
  * the shape a 24-turn run needs"). A career is `TrainingRun::TURNS_PER_YEAR` (24) turns a year for
  * three years; the groups are those years, and a row past the grid is the finale phase rather than
  * turn 73. `<!-- DOMAIN OVERRIDE (DM-1): three 24-turn years; the HFW draws one flat list -->`
@@ -120,7 +120,7 @@ const groups = computed<Group[]>(() => {
                 label: outside ? 'After the grid · finale block' : label,
                 span: outside
                     ? `Outside the ${props.totalTurns}-turn grid; never numbered ${props.totalTurns + 1}`
-                    : `Turns ${first}–${last}`,
+                    : `Turns ${first}-${last}`,
                 caption: outside
                     ? `${rows.length} entr${rows.length === 1 ? 'y' : 'ies'} outside the grid`
                     : `${turns} of ${TURNS_PER_YEAR} turns recorded · ${rows.length} entries`,
