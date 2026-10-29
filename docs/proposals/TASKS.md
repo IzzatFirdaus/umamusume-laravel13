@@ -1498,6 +1498,35 @@ The S9 prop-delta gaps belong to their owning slices: `SupportCardController.glo
 `DatabaseController.areas[].badge`, `VeteranController.used_as_parent_count`. `3.0.0` remains
 **absent**.
 
+## C14 — Task D re-audit, first sweep: the nine lifecycle screens (2026-10-29)
+
+The manual parity gate, run on the running app at 1280px against the HFW set, with fresh full-page
+screenshots in `.scratch-uma/session-2026-10-28/audit/out/v2-*.app.png` beside the wireframe shots,
+plus a DOM extract of `h1`/`h2`/region counts `v2-summary.json`. All nine routes answered **200** and
+logged **no console errors**.
+
+| Screen | h1 (app = HFW) | Verdict | Remaining deviation seen in the split view |
+|---|---|---|---|
+| training-decision | yes | near | savebar names the next turn (68) where the HFW names the current one (67); facility levels are this run's data; the shell's Result status strip is extra |
+| race-decision | yes | near | this run's maiden lock blocks every row, so the row's own Enter is replaced by the reason text (documented `DOMAIN OVERRIDE`); no pager |
+| career-race-planner | yes | near | target-alignment table sits inside the comparison card (`HFW OVERRIDE`); Compare stays enabled on a locked row |
+| event-decision | yes | near | options are trainer transcription (no event catalogue); four outcome figures print "Not recorded"; keying rows in a disclosure |
+| inheritance | yes | near | per-parent radios deferred under `ADR-0010`; Change prints an em dash |
+| skills-planner | yes | near | Type/Hints filters disabled, Discount em dash (no columns); budget bar also carries the commit |
+| run-deck | yes | near | picker and deck analysis in disclosures; 16 `.card` nodes against the HFW's 6 because of those disclosures |
+| timeline | yes | near | client-side pager; Undo stays a proposal |
+| result | yes | near | race history / scenario periods / skills / next-step are extra read regions; stats render as cards with cap bars, not `.srow` rows |
+
+**career-scenario (peer worktree, not committed here).** The page in the working tree already matches
+`career-scenario.html`: 5 cards, 5 pills, 16 tags, 1 table, 4 radios, 6 steps — the same counts the
+wireframe renders — and its "What changes after this step" table has the wireframe's four rows. The file
+carries another session's uncommitted rewrite, so this round records the observation and makes no edit
+or commit there.
+
+**Conclusion of the first sweep.** The nine repaired screens are **near** with the deviations above
+documented on the pages; no repaired screen is divergent. `3.0.0` stays **absent** until the wizard,
+library, tools and copy pass are re-audited the same way.
+
 
 
 
