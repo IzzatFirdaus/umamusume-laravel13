@@ -56,17 +56,12 @@ final class VeteranController extends Controller
             'veterans' => $rows,
             'order' => $order,
             'filters' => [
-                'trainee' => $filters['trainee'],
+                'search' => $filters['search'],
                 'scenario' => $filters['scenario'],
                 'tag' => $filters['tags'][0] ?? null,
             ],
-            // The filter form's pick lists. The trainee roster is a Trainer's own scale (tens, not
-            // thousands) and this is a personal library, so it is unpaginated and uncached, the same
-            // reading `LegacyController::index()` takes for the browse list's facets.
-            'trainees' => Umamusume::query()
-                ->orderBy('name')
-                ->pluck('name', 'id')
-                ->all(),
+            // The filter form's pick list. The trainee roster left with the name search (owner ruling
+            // 2026-10-28: `veterans.html:71` draws a search box, not a roster select).
             'scenarios' => array_map(
                 static fn (array $definition): string => $definition['label'],
                 config('scenarios.scenarios'),

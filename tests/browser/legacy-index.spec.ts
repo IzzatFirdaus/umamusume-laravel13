@@ -45,39 +45,39 @@ async function runWithPair(page: Page): Promise<string> {
     return runUrl;
 }
 
-test('lists the saved pair as the unit, with its three values', async ({ page }) => {
+test('lists the saved pair as a table row and states what a legacy is worth', async ({ page }) => {
     const runUrl = await runWithPair(page);
     const runId = runUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
 
     await page.goto('/legacy', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    // The three regions `legacy.html` draws. "Saved legacies" is the page's own new unit and sits
-    // first; "What a legacy is worth" and "Parents available" already live in the reference aside, so
-    // they are read there rather than looked for twice on the page.
+    // The three regions the HFW draws (`legacy.html:70-113`): the pair table on the left, the worth and
+    // parent cards in the reference column.
     const saved = page.getByRole('heading', { name: 'Saved legacies', level: 2 });
-    const library = page.getByRole('heading', { name: 'Veteran library', level: 2 });
     const reference = page.getByRole('complementary', { name: 'Legacy reference' });
     await expect(saved).toBeVisible();
-    await expect(library).toBeVisible();
     await expect(reference.getByRole('heading', { name: 'What a legacy is worth', level: 2 })).toBeVisible();
     await expect(reference.getByRole('heading', { name: 'Parents available', level: 2 })).toBeVisible();
 
-    const savedTop = (await saved.boundingBox())?.y ?? 0;
-    const libraryTop = (await library.boundingBox())?.y ?? 0;
-    expect(savedTop).toBeLessThan(libraryTop);
+    // Owner ruling 2026-10-28: the veteran library, its filters and its pager are not on this page.
+    await expect(page.getByRole('heading', { name: 'Veteran library', level: 2 })).toHaveCount(0);
+    await expect(page.getByLabel('Tag')).toHaveCount(0);
 
-    // The pair is a row, keyed by the run that carries it.
-    const pair = page.locator(`[data-pair-run="${runId}"]`);
-    await expect(pair).toBeVisible();
+    // The wireframe's columns, in its order.
+    const table = page.locator('table').filter({ has: page.getByRole('columnheader', { name: 'Parent A' }) });
+    await expect(table.getByRole('columnheader', { name: 'Legacy' })).toBeVisible();
+    await expect(table.getByRole('columnheader', { name: 'Parent B' })).toBeVisible();
+    await expect(table.getByRole('columnheader', { name: 'Blue sparks' })).toBeVisible();
 
-    // The three values, each as its own labelled row, and each printed (never a bare dash).
-    for (const label of ['Blue grades', 'Pink range', 'Unique-skill hints']) {
-        await expect(pair.getByText(label, { exact: true })).toBeVisible();
-    }
+    // The pair is one row, keyed by the run that carries it, and its Open door is the builder.
+    const row = table.locator('tbody tr').filter({ hasText: `run #${runId}` });
+    await expect(row).toBeVisible();
+    await expect(row.getByRole('link', { name: 'Open' })).toHaveAttribute('href', new RegExp(`/legacy/${runId}$`));
 
-    // The worth table is three rows: blue, pink, and the hint/skill family.
-    await expect(reference.locator('table tbody tr')).toHaveCount(3);
+    // The worth table is the wireframe's six rows.
+    const worth = reference.getByRole('region', { name: 'What a legacy is worth' });
+    await expect(worth.locator('table tbody tr')).toHaveCount(6);
 
     // One filled action on the page, and it is Compare (the slice's ruling).
     await expect(page.locator('a.bg-primary-action')).toHaveCount(1);

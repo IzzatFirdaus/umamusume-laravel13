@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Legacy;
 
 use App\Models\CharacterCard;
+use App\Models\Legacy\LegacySelectionPayload;
 use App\Models\TrainingRun;
 use App\Models\Veteran;
 use App\Services\DataPipeline\ArtworkMirror;
@@ -18,11 +19,12 @@ use App\Services\DataPipeline\ArtworkMirror;
  * mapping would be two shapes for one row, and the first screen to gain a column would silently print a
  * different Veteran than the other does, so the shape has one owner here.
  *
- * **It reads; it derives nothing** (PRD FR-G-4, `ADR-0020` §3). No factor analysis, no spark count, no
- * legacy value, no ranking: those are the held computations, and a row that carried one would put a score
- * on a screen whose contract says the library stores and searches. Everything here is a stored column, a
- * route, or — for `portrait_url` — an id-derived mirror path the render reads back (`ADR-0021`), which is
- * the same read-not-derive shape the catalog's own header portrait takes.
+ * **It reads; it derives nothing** (PRD FR-G-4, `ADR-0020` §3). No factor analysis, no legacy value, no
+ * ranking: those are the held computations, and a row that carried one would put a score on a screen whose
+ * contract says the library stores and searches. The spark counts the library's table prints
+ * (`veterans.html:80`) are records — a tally of stored entries, not a price — and everything else here is
+ * a stored column, a route, or — for `portrait_url` — an id-derived mirror path the render reads back
+ * (`ADR-0021`), which is the same read-not-derive shape the catalog's own header portrait takes.
  *
  * Both link fields are always present and both print: the library names the trainee with `veteran_url`,
  * and the Legacy Lab now links the same name while still offering `builder_url` where a read-back exists.
@@ -35,7 +37,8 @@ final class VeteranRow
     /**
      * @return array{id: int, run_id: int, label: string, trainee: string, trainee_ja: string|null, scenario_label: string,
      *               status_label: string, tags: list<string>, notes: string|null,
-     *               hasSelection: bool, builder_url: string|null, veteran_url: string, portrait_url: string|null}
+     *               hasSelection: bool, builder_url: string|null, veteran_url: string, portrait_url: string|null,
+     *               saved_at: string|null, blue: int, pink: int, unique: int, compare_url: string}
      */
     public static function from(Veteran $veteran): array
     {
@@ -64,7 +67,39 @@ final class VeteranRow
             // The frame of the form this career was trained in, resolved server-side by the helper below.
             // The url is never composed in Vue (`ADR-0021` read half, `DESIGN.md` §4.7).
             'portrait_url' => self::portraitUrl($run),
+            // The library table's own columns (`veterans.html:80-119`): when the record was filed, and
+            // the stored spark tallies. Each count is entries in the payload, never a derived price.
+            'saved_at' => $veteran->created_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
+            'blue' => self::sparkCount($payload, 'blue'),
+            'pink' => self::sparkCount($payload, 'pink'),
+            'unique' => self::sparkCount($payload, 'green'),
+            'compare_url' => route('legacy.compare', ['runs' => [$run->id]]),
         ];
+    }
+
+    /**
+     * How many stored sparks of one kind the payload carries.
+     *
+     * A tally of records, not a price: `ADR-0020` §3 keeps the inherited-stat arithmetic out of the
+     * library, and counting entries is not that arithmetic.
+     */
+    private static function sparkCount(?LegacySelectionPayload $payload, string $kind): int
+    {
+        if ($payload === null) {
+            return 0;
+        }
+
+        $count = 0;
+
+        foreach ($payload->legacies as $legacy) {
+            foreach ($legacy['sparks'] as $spark) {
+                if ($spark['kind'] === $kind) {
+                    $count++;
+                }
+            }
+        }
+
+        return $count;
     }
 
     /**

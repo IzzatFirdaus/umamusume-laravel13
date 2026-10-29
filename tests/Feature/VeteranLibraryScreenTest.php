@@ -77,9 +77,10 @@ it('names each thing the library cannot do instead of offering an empty control'
             ->where('absences.0.label', 'Favorite, archive, delete'));
 });
 
-it('prints one filed career through the row the Legacy Lab prints', function (): void {
-    // The reason `VeteranRow` exists: the two lists read one shape, so a Veteran cannot mean one thing on
-    // the library and another thing on the browse surface. The shared keys are asserted value by value.
+it('prints one filed career through the row the library table draws', function (): void {
+    // `VeteranRow` keeps the row's shape in one place. The Legacy Lab no longer lists Veterans (owner
+    // ruling 2026-10-28: it lists saved pairs), so the values are asserted here rather than against a
+    // second surface's copy.
     $veteran = veteranScreenFiled(
         Umamusume::factory()->create(['name' => 'Measured March']),
         'ura_finale',
@@ -88,10 +89,8 @@ it('prints one filed career through the row the Legacy Lab prints', function ():
     );
 
     $library = test()->get(route('veterans.index'))->assertOk()->inertiaProps('veterans.data');
-    $legacy = test()->get(route('legacy.index'))->assertOk()->inertiaProps('veterans.data');
 
-    expect($library[0])->toMatchArray($legacy[0])
-        ->and($library[0]['trainee'])->toBe('Measured March')
+    expect($library[0]['trainee'])->toBe('Measured March')
         ->and($library[0]['scenario_label'])->toBe('URA Finale')
         ->and($library[0]['status_label'])->toBe($veteran->trainingRun->status->label())
         ->and($library[0]['tags'])->toBe(['Mile', 'Speed'])
@@ -99,7 +98,13 @@ it('prints one filed career through the row the Legacy Lab prints', function ():
         // The page's own Compare control is built from this key, so a row that loses it silently loses the
         // comparison entry rather than failing loudly.
         ->and($library[0]['run_id'])->toBe($veteran->training_run_id)
-        ->and($library[0]['veteran_url'])->toBe(route('veterans.show', $veteran));
+        ->and($library[0]['veteran_url'])->toBe(route('veterans.show', $veteran))
+        // The table's own columns: when it was filed, and the stored spark tallies (records, not prices).
+        ->and($library[0]['saved_at'])->toBeString()
+        ->and($library[0]['blue'])->toBeInt()
+        ->and($library[0]['pink'])->toBeInt()
+        ->and($library[0]['unique'])->toBeInt()
+        ->and($library[0]['compare_url'])->toBe(route('legacy.compare', ['runs' => [$veteran->training_run_id]]));
 });
 
 it('opens one Veteran with the career facts it was built from', function (): void {
@@ -159,11 +164,18 @@ it('filters the library by the three facets the query answers', function (): voi
     $kept = veteranScreenFiled($march, 'ura_finale', ['Mile']);
     veteranScreenFiled($other, 'trackblazer', ['Long']);
 
-    test()->get(route('veterans.index', ['trainee' => $march->id]))
+    // The library's own control is a name search (`veterans.html:71`); the id facet still answers on
+    // the query, but the page no longer offers a roster select.
+    test()->get(route('veterans.index', ['search' => 'March']))
         ->assertInertia(fn (Assert $page) => $page
             ->has('veterans.data', 1)
             ->where('veterans.data.0.id', $kept->id)
-            ->where('filters.trainee', $march->id));
+            ->where('filters.search', 'March'));
+
+    test()->get(route('veterans.index', ['trainee' => $march->id]))
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('veterans.data', 1)
+            ->where('veterans.data.0.id', $kept->id));
 
     test()->get(route('veterans.index', ['scenario' => 'trackblazer']))
         ->assertInertia(fn (Assert $page) => $page->has('veterans.data', 1));

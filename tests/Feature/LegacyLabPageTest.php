@@ -82,69 +82,67 @@ function activeRun(string $name = 'Symboli Rudolf', array $attributes = []): Tra
     ]);
 }
 
-it('browses the Veteran library through the three filters C3 answers', function (): void {
-    $mileSpeed = legacyVeteran('Special Week');
-    $turfStamina = legacyVeteran('Nice Nature');
+it('lists saved legacies as one row per pair, with both parent columns', function (): void {
+    $parentA = Umamusume::factory()->create(['name' => 'Special Week']);
+    $parentB = Umamusume::factory()->create(['name' => 'Tokai Teio']);
 
-    Veteran::query()->update(['tags' => null]);
+    $run = activeRun('Symboli Rudolf', [
+        'inheritance_parent_a_id' => $parentA->id,
+        'inheritance_parent_b_id' => $parentB->id,
+        'legacy_selection' => sixNodePayload(),
+    ]);
 
-    $mileSpeed->update(['tags' => ['Mile', 'Turf', 'Speed']]);
-    $turfStamina->update(['tags' => ['Long', 'Turf', 'Stamina']]);
+    // A run with no Legacy Select is not a saved pair, so it is not a row.
+    activeRun('Silence Suzuka');
 
     test()->get('/legacy')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Legacy/Index')
-            ->count('veterans.data', 2)
-            // The three facets are the three `ListVeterans` implements. `spark`, `style` and `rating`
-            // are absent from the props on purpose: no query answers them (plan §7 C3), and a facet
-            // that returns every row is a filter that does not filter.
-            ->has('filters')
-            ->has('scenarios')
-            ->has('trainees')
-            ->where('totalCount', 2)
+            ->has('pairs', 1)
+            ->where('pairs.0.run_id', $run->id)
+            ->where('pairs.0.parent_a', 'Special Week')
+            ->where('pairs.0.parent_b', 'Tokai Teio')
+            // The blue column is the star count read off the payload, not a computed price.
+            ->where('pairs.0.blue_grades', 'Speed ★2')
+            // No Veteran rows in this fixture: the live parent count is zero, not the pair count.
+            ->where('totalCount', 0)
             ->where('notice', 'Record only. This screen stores and compares what you enter. It does not compute inheritance.')
-        );
-
-    // The tag facet narrows: one tag matches both, two match neither, and the one that matches one
-    // proves the query filters rather than answering everything.
-    test()->get('/legacy?tag=Turf')
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->count('veterans.data', 2));
-
-    test()->get('/legacy?tag=Mile')
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->count('veterans.data', 1)
-            ->where('veterans.data.0.id', $mileSpeed->id)
-            ->where('filters.tag', 'Mile'));
-
-    // A scenario that does not exist is refused and named, not ignored (ADR-0018's reasoning).
-    test()->get('/legacy?scenario=not_a_scenario')
-        ->assertRedirect(route('legacy.index'))
-        ->assertSessionHasErrors('scenario');
-
-    test()->get('/legacy?trainee=999999')
-        ->assertRedirect(route('legacy.index'))
-        ->assertSessionHasErrors('trainee');
+            // Owner ruling 2026-10-28: the veteran library's list, its filters and its pager moved to
+            // `/veterans`; this page does not carry a second copy of them.
+            ->missing('veterans')
+            ->missing('filters')
+            ->missing('trainees')
+            ->missing('scenarios'));
 });
 
-it('states the two empty states apart on the browse surface', function (): void {
-    // No records at all: what is missing, why it matters, what to do.
+it('names an empty parent slot rather than labelling the pair without it', function (): void {
+    activeRun('Symboli Rudolf', [
+        'inheritance_parent_a_id' => Umamusume::factory()->create(['name' => 'Special Week'])->id,
+        'legacy_selection' => sixNodePayload(),
+    ]);
+
     test()->get('/legacy')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->count('veterans.data', 0)
-            ->where('totalCount', 0));
+            ->where('pairs.0.parent_a', 'Special Week')
+            ->where('pairs.0.parent_b', null));
+});
 
-    // Records exist but the filter excludes them: a different absence, and pointing a Trainer at
-    // "finish a run" here would be the wrong instruction (design-2.0 §29).
-    legacyVeteran('Special Week');
-
-    test()->get('/legacy?tag=Nostalgic')
+it('states the no-saved-pairs absence and keeps the live parent count', function (): void {
+    test()->get('/legacy')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->count('veterans.data', 0)
+            ->component('Legacy/Index')
+            ->has('pairs', 0)
+            ->where('totalCount', 0));
+
+    legacyVeteran('Special Week');
+
+    test()->get('/legacy')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('pairs', 0)
             ->where('totalCount', 1));
 });
 
@@ -516,6 +514,12 @@ it('accepts three runs and renders the comparison without redirect', function ()
             ->where('columns.0.run_id', $runs[0]->id)
             ->where('columns.1.run_id', $runs[1]->id)
             ->where('columns.2.run_id', $runs[2]->id)
+            // The wireframe's starting-cap cards: five rows per column, and Wit is the scenario's
+            // published cap because this build stores no entered Wit ceiling (ADR-0025).
+            ->has('columns.0.caps', 5)
+            ->where('columns.0.caps.0.stat', 'speed')
+            ->where('columns.0.caps.4.label', 'Wit')
+            ->where('columns.0.caps.4.note', fn (mixed $note): bool => is_string($note) && $note !== '')
         );
 });
 

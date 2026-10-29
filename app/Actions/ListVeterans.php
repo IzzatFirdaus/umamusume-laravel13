@@ -35,12 +35,13 @@ final class ListVeterans
      * concrete class is what `paginate()` returns anyway, so this narrows the promise to the truth
      * rather than widening it.
      *
-     * @param  array{trainee?: int|null, scenario?: string|null, tags?: list<string>}  $filters
+     * @param  array{search?: string|null, trainee?: int|null, scenario?: string|null, tags?: list<string>}  $filters
      * @param  'newest'|'oldest'  $order  the library's own recording order; see the note in the body
      * @return LengthAwarePaginator<int, Veteran>
      */
     public function handle(array $filters = [], mixed $pageSize = null, string $order = 'newest'): LengthAwarePaginator
     {
+        $search = $filters['search'] ?? null;
         $trainee = $filters['trainee'] ?? null;
         $scenario = $filters['scenario'] ?? null;
         $tags = $filters['tags'] ?? [];
@@ -48,6 +49,14 @@ final class ListVeterans
         // `characterCard` is the chosen-form frame the row reads first; `umamusume.cards` is the identity
         // frame its fallback falls back to. Both are loaded so neither path is a query per row.
         $query = Veteran::query()->with('trainingRun.characterCard', 'trainingRun.umamusume.cards');
+
+        // The row prints the trainee's name, so the library's search matches what is printed, in
+        // either of the two name columns the row can show (`veterans.html:71`).
+        if (filled($search)) {
+            $query->whereHas('trainingRun.umamusume', fn (Builder $inner): Builder => $inner
+                ->where('name', 'like', '%'.$search.'%')
+                ->orWhere('name_ja', 'like', '%'.$search.'%'));
+        }
 
         if ($trainee !== null) {
             $query->whereHas('trainingRun', fn (Builder $run): Builder => $run->where('umamusume_id', $trainee));

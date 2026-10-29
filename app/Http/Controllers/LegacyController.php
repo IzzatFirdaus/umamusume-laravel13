@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\ListVeterans;
 use App\Enums\RunStatus;
 use App\Http\Requests\LegacyCompareRequest;
-use App\Http\Requests\LegacySearchRequest;
 use App\Http\Requests\StoreLegacySelectionRequest;
 use App\Models\Legacy\LegacySelectionPayload;
 use App\Models\Skill;
@@ -16,6 +14,7 @@ use App\Models\Umamusume;
 use App\Models\Veteran;
 use App\Services\Legacy\AncestryGraph;
 use App\Services\Legacy\VeteranRow;
+use App\Services\ScenarioCaps;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -49,11 +48,9 @@ use Inertia\Response;
  * (`ADR-0010` Decision), and the graph is how a person reads it. The Trainee row is the run's own
  * `umamusume`, which is what it would be in the client.
  *
- * **Filter vocabulary.** The screen spec lists eleven candidate facets; `ListVeterans` implements
- * three (`trainee`, `scenario`, `tags`) and the rating facet is refused by C3 on the record that no
- * source records a rating. This controller exposes exactly what the query answers. Distance, surface,
- * style and Spark type are searchable *as the Trainer's own tags* — the facets are the tags, not
- * derived fields — and a tag that is not a Spark is not turned into one.
+ * **Filter vocabulary.** The veteran library's facet set (`trainee`, `scenario`, `tags`) lives on
+ * `/veterans`; this surface lists saved pairs and carries no filter form (owner ruling 2026-10-28).
+ * The rating facet stays refused by C3 on the record that no source records a rating.
  */
 class LegacyController extends Controller
 {
@@ -73,48 +70,23 @@ class LegacyController extends Controller
     private const PAIR_LIMIT = 12;
 
     /**
-     * `GET /legacy` — browse the recorded Veterans and open a builder on one.
+     * `GET /legacy` — the saved legacies, one row per run that carries a Legacy Select.
      *
-     * The list is `ListVeterans` unchanged, paginated and mapped to arrays; the only addition is a
-     * per-row flag for whether that Veteran has a Legacy read-back on its run, which is what makes a
-     * row openable in the builder rather than a dead end.
+     * The wireframe's page (`legacy.html:54-113`): the pair table on the left, what a legacy is worth
+     * and how many parents the library holds on the right. The veteran library's own list, its
+     * filters and its pager live on `/veterans`; this surface no longer repeats them.
      */
-    public function index(LegacySearchRequest $request, ListVeterans $veterans): Response
+    public function index(): Response
     {
-        $filters = $request->filters();
-
-        $rows = $veterans
-            ->handle($filters, $request->query('pageSize'))
-            ->withQueryString()
-            ->through(fn (Veteran $veteran): array => VeteranRow::from($veteran));
-
-        // Slice 7 prop-drift fix: this method used to pass a `roster` prop the page never declared
-        // (`Legacy/Index.vue` lists Veterans and opens the builder per row; the picker roster belongs to
-        // the builder, which builds its own through `roster()` below). Dropping the dead payload rather
-        // than declaring an unused prop, the same ruling §7.3 records for `VeteranController@index`.
-        $totalCount = Veteran::query()->count();
-
+        // Owner ruling 2026-10-28: this surface is the wireframe's saved-legacies page
+        // (`legacy.html:54-113`). The veteran library moved to `/veterans` and the builder stays at
+        // `/legacy/{run}`, so the page no longer carries a second, filtered copy of the library here.
         return Inertia::render('Legacy/Index', [
-            'veterans' => $rows,
-            // Slice 7.1: the saved pairs. A Legacy Select is ONE object — two parents plus their four
-            // ancestor slots — and it is stored as one `training_runs.legacy_selection` column
-            // (`ADR-0010`), so "a saved pair" is a run that carries a selection, not two Veteran rows.
-            // The projection is additive and read-only: no table, no write, no derived score.
+            // A Legacy Select is ONE object — two parents plus their four ancestor slots — stored as
+            // one `training_runs.legacy_selection` column (`ADR-0010`); "a saved pair" is a run that
+            // carries a selection, not two Veteran rows. Read-only: no table, no write, no derived score.
             'pairs' => $this->savedPairs(),
-            'filters' => [
-                'trainee' => $filters['trainee'],
-                'scenario' => $filters['scenario'],
-                'tag' => $filters['tags'][0] ?? null,
-            ],
-            'trainees' => Umamusume::query()
-                ->orderBy('name')
-                ->pluck('name', 'id')
-                ->all(),
-            'scenarios' => array_map(
-                static fn (array $definition): string => $definition['label'],
-                config('scenarios.scenarios'),
-            ),
-            'totalCount' => $totalCount,
+            'totalCount' => Veteran::query()->count(),
             'notice' => self::RECORD_ONLY_NOTICE,
         ]);
     }
@@ -130,9 +102,13 @@ class LegacyController extends Controller
      * sparks' stars, and the unique-skill hint family is the green plus white sparks, which are hint
      * levels rather than flat stat boosts (DM-3).
      *
+     * `parent_a`/`parent_b` are the two names the wireframe's table prints as its own columns
+     * (`legacy.html:80-101`); each is null when that slot holds no parent, and the page prints the
+     * absence rather than a pair label hiding which half is missing.
+     *
      * @return list<array{run_id: int, trainee: string, scenario_label: string, pair_label: string,
-     *     blue_grades: string, pink_range: string, hint_family: string, builder_url: string,
-     *     compare_url: string}>
+     *     parent_a: string|null, parent_b: string|null, blue_grades: string, pink_range: string,
+     *     hint_family: string, builder_url: string, compare_url: string}>
      */
     private function savedPairs(): array
     {
@@ -207,6 +183,8 @@ class LegacyController extends Controller
                         ? (string) (config('scenarios.scenarios.'.$run->scenarioKey().'.label') ?? $run->scenarioKey())
                         : 'No scenario set',
                     'pair_label' => $names === [] ? 'Parent names not recorded' : implode(' × ', $names),
+                    'parent_a' => $run->inheritanceParentA?->name,
+                    'parent_b' => $run->inheritanceParentB?->name,
                     'blue_grades' => $blueGrades === [] ? 'No blue Spark recorded' : implode(', ', $blueGrades),
                     'pink_range' => $pinkRange,
                     'hint_family' => $hintCounts === []
@@ -318,6 +296,8 @@ class LegacyController extends Controller
                 'notes' => $veteran?->notes,
                 'hasSelection' => $payload !== null,
                 'graph' => $this->graph($payload, $run),
+                // The wireframe's two starting-cap cards (`legacy-compare.html:90-115`).
+                'caps' => $this->startingCaps($run),
             ];
         }
 
@@ -328,6 +308,47 @@ class LegacyController extends Controller
             'sparkKinds' => AncestryGraph::SPARK_KIND_LABELS,
             'notice' => self::RECORD_ONLY_NOTICE,
         ]);
+    }
+
+    /**
+     * The five starting ceilings the compare page prints per column.
+     *
+     * `ScenarioCaps::forRun()` is the one owner of the arithmetic (`ADR-0015`/`ADR-0025`): the run's
+     * entered ceiling where it states one, the scenario's published cap otherwise. Wit is the one stat
+     * with no entered column (`ADR-0025` deliberately stores no `cap_wit`), so it prints the scenario's
+     * cap and says so; a run with no scenario gets N/A with the reason rather than the base-cap number
+     * wearing a scenario's name.
+     *
+     * @return list<array{stat: string, label: string, value: int|null, note: string|null}>
+     */
+    private function startingCaps(TrainingRun $run): array
+    {
+        // `ScenarioCaps` keys its matrix with the config's capitalized stat names, not slugs.
+        $caps = ScenarioCaps::forRun($run);
+        $labels = ['Speed' => 'Speed', 'Stamina' => 'Stamina', 'Power' => 'Power', 'Guts' => 'Guts', 'Wit' => 'Wit'];
+
+        $rows = [];
+
+        foreach ($labels as $stat => $label) {
+            if ($stat === 'Wit') {
+                $value = $run->hasScenario() ? ScenarioCaps::stat($run->scenarioKey(), 'Wit') : null;
+
+                $rows[] = [
+                    'stat' => strtolower($stat),
+                    'label' => $label,
+                    'value' => $value,
+                    'note' => $value === null
+                        ? 'No scenario is set on this run, and this build stores no entered Wit ceiling.'
+                        : "The scenario's published cap; this build stores no entered Wit ceiling.",
+                ];
+
+                continue;
+            }
+
+            $rows[] = ['stat' => strtolower($stat), 'label' => $label, 'value' => $caps[$stat], 'note' => null];
+        }
+
+        return $rows;
     }
 
     /**

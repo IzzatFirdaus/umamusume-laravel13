@@ -10,7 +10,8 @@ use Illuminate\Validation\Rule;
 /**
  * The Veteran library's filter set for the Legacy Lab browse surface (PRD FR-G-2, `ADR-0020` §3).
  *
- * These are exactly the three filters `ListVeterans` implements: `trainee`, `scenario` and `tags`.
+ * These are exactly the filters `ListVeterans` implements: `search` (the trainee's name, the
+ * library's own control per `veterans.html:71`), `trainee`, `scenario` and `tags`.
  * The screen spec's own candidate list names six more (blue / pink / green / white Sparks, running
  * style, skills, race history, scenario factor, Affinity) and C3 answers none of them, so none of them
  * appear here. A facet the query cannot answer is a facet that would answer every row, which is a
@@ -40,6 +41,9 @@ class LegacySearchRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // The library's name search (`veterans.html:71`): the row prints the trainee's name, so
+            // the control that narrows by name is a search rather than a roster pick.
+            'search' => ['nullable', 'string', 'max:120'],
             'trainee' => ['nullable', 'integer', 'exists:umamusume,id'],
             'scenario' => ['nullable', 'string', Rule::in(array_keys(config('scenarios.scenarios')))],
             // One free-text tag. `ListVeterans` is an all-of query over a json list, so this is one
@@ -66,7 +70,7 @@ class LegacySearchRequest extends FormRequest
     {
         $clean = [];
 
-        foreach (['trainee', 'scenario', 'tag'] as $key) {
+        foreach (['search', 'trainee', 'scenario', 'tag'] as $key) {
             $value = $this->input($key);
 
             $clean[$key] = is_string($value) && trim($value) === '' ? null : $value;
@@ -79,16 +83,17 @@ class LegacySearchRequest extends FormRequest
      * The filter array `ListVeterans::handle()` takes. A blank tag is no tag, and the action treats an
      * empty list as no filter, so a cleared field does not narrow the library to nothing.
      *
-     * @return array{trainee: int|null, scenario: string|null, tags: list<string>}
+     * @return array{search: string|null, trainee: int|null, scenario: string|null, tags: list<string>}
      */
     public function filters(): array
     {
-        /** @var array{trainee?: int|null, scenario?: string|null, tag?: string|null} $validated */
+        /** @var array{search?: string|null, trainee?: int|null, scenario?: string|null, tag?: string|null} $validated */
         $validated = $this->validated();
 
         $tag = $validated['tag'] ?? null;
 
         return [
+            'search' => isset($validated['search']) ? trim((string) $validated['search']) : null,
             'trainee' => isset($validated['trainee']) ? (int) $validated['trainee'] : null,
             'scenario' => $validated['scenario'] ?? null,
             'tags' => $tag === null ? [] : [trim((string) $tag)],

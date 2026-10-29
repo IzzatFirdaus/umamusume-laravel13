@@ -124,10 +124,13 @@ test('says the library holds nothing filed rather than showing a blank list', as
         await expect(page.getByRole('link', { name: 'Find parents for this build' })).toBeVisible();
 
         // The three facets the query answers, and no others.
-        await expect(page.getByRole('combobox', { name: 'Trainee' })).toBeVisible();
+        // The wireframe's filter row (`veterans.html:71-75`): a name search where the roster select
+        // used to be, then the scenario facet, the tag field and Clear.
+        await expect(page.getByLabel('Search')).toBeVisible();
         await expect(page.getByRole('combobox', { name: 'Scenario' })).toBeVisible();
         await expect(page.getByRole('textbox', { name: 'Tag' })).toBeVisible();
         await expect(page.getByRole('button', { name: 'Filter' })).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Clear' })).toBeVisible();
 
         // The brief's unsupportable features are stated as absences with their reason on the page.
         // The "Not in this build" section is now a collapsible <details> element.
