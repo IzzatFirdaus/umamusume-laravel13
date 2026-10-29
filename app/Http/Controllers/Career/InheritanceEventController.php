@@ -11,6 +11,7 @@ use App\Models\Legacy\LegacySelectionPayload;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
+use App\Services\ScenarioCaps;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -76,7 +77,37 @@ class InheritanceEventController extends Controller
             'milestones' => $milestones,
             'write' => $this->writeSection($run),
             'empty' => $this->emptyState($run, $legacy),
+            // The caps the HFW's before/after table compares against: the entered ceiling where the
+            // run carries one, the scenario's published cap otherwise. Never the two collapsed.
+            'caps' => $this->caps($run),
         ]);
+    }
+
+    /**
+     * The five caps this run actually carries, in the matrix's stat order.
+     *
+     * @return list<array{stat: string, value: int|null, source: string}>
+     */
+    private function caps(TrainingRun $run): array
+    {
+        $published = ScenarioCaps::scenarioCaps($run);
+        $entered = ScenarioCaps::enteredCaps($run);
+
+        $rows = [];
+
+        foreach (['Speed', 'Stamina', 'Power', 'Guts', 'Wit'] as $stat) {
+            $enteredValue = $entered[$stat] ?? null;
+            $publishedValue = $published[$stat] ?? null;
+            $value = $enteredValue ?? $publishedValue;
+
+            $rows[] = [
+                'stat' => $stat,
+                'value' => $value,
+                'source' => $enteredValue !== null ? 'entered' : ($publishedValue !== null ? 'scenario' : 'not recorded'),
+            ];
+        }
+
+        return $rows;
     }
 
     public function store(StoreInheritanceEventRequest $request, TrainingRun $run): RedirectResponse

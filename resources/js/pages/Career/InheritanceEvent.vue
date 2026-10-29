@@ -25,9 +25,11 @@
  * `@vue/compiler-sfc` to load (plan §11).
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
+import Note from '../../components/ui/Note.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import SparkChip from '../../components/legacy/SparkChip.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
 import { BaseInput, BaseSelect, BaseTextarea } from '../../components/Form';
@@ -107,9 +109,53 @@ const props = defineProps<{
     milestones: Milestone[];
     write: WriteSection;
     empty: string | null;
+    caps: { stat: string; value: number | null; source: string }[];
 }>();
 
 const { visiting, visitFailed } = useVisitState();
+
+/*
+ * The HFW's ancestry picture and before/after table. The run stores one legacy selection
+ * (ADR-0010: one json column), so the spark tables list what each parent carries and the screen
+ * says that per-parent radios would change what that column holds; this is the documented
+ * deviation on the page.
+ */
+const parentA = computed<LegacyParent | null>(() => props.legacy?.parents[0] ?? null);
+const parentB = computed<LegacyParent | null>(() => props.legacy?.parents[1] ?? null);
+
+const grandparent = (parent: LegacyParent | null, index: number): string | null =>
+    parent?.ancestors[index] ?? null;
+
+const sparkCarries = (spark: LegacyParent['sparks'][number]): string => {
+    if (spark.kind === 'blue') {
+        return spark.target === null ? 'Moves a stat' : `Moves ${spark.target}`;
+    }
+
+    if (spark.kind === 'pink') {
+        return spark.target === null ? 'Lifts an aptitude grade' : `Lifts ${spark.target} aptitude`;
+    }
+
+    if (spark.kind === 'green' || spark.kind === 'white') {
+        return 'Skill hint';
+    }
+
+    return 'Scenario spark';
+};
+
+const blueSparks = computed(() =>
+    [parentA.value, parentB.value]
+        .flatMap((parent) => parent?.sparks ?? [])
+        .filter((spark) => spark.kind === 'blue'),
+);
+
+const blueStars = computed(() => blueSparks.value.reduce((sum, spark) => sum + (spark.stars ?? 0), 0));
+
+const undoableTurn = computed(() => Math.max(1, (props.write.turns.at(-1)?.turn ?? 0)));
+
+const skip = (): void => {
+    router.visit(props.run.cockpit_url);
+};
+
 
 const form = useForm({
     turn: '',
@@ -118,6 +164,10 @@ const form = useForm({
     deltas: null as Record<string, unknown> | null,
     origin_note: '',
 });
+
+// The turn the entry is recorded on: one past the last logged turn.
+const initialTurn = (props.write.turns.at(-1)?.turn ?? 0) + 1;
+form.turn = String(initialTurn);
 
 const alert = ref<HTMLElement | null>(null);
 
@@ -207,430 +257,190 @@ const statusGlyphClass = (status: Milestone['status']): string => {
         :scenario-label="props.run.scenario_label"
         :status-label="props.run.status_label"
         :run-url="props.run.run_url"
+        current="inheritance"
     >
-        <Head :title="`Inheritance: ${props.run.trainee}`" />
-        <template #title>Inheritance</template>
+        <Head :title="'Inheritance event: ' + props.run.trainee" />
+        <template #head>
+            <PageHeader
+                eyebrow="Inheritance event"
+                title="Choose what to inherit"
+                description="The inheritance moment happens at career start, Classic and Senior. Pick the spark you want carried from each parent; the run's caps move by the result."
+            >
+                <template #actions>
+                    <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">Back to cockpit</a>
+                </template>
+            </PageHeader>
+        </template>
 
-        <p v-if="visiting" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
-        <p v-if="visitFailed" role="alert" class="mb-4 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
+        <p v-if="visiting" role="status" class="mb-3 text-sm text-ink-muted">Loading…</p>
+        <p v-if="visitFailed" role="alert" class="mb-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
             That screen did not load. Nothing was saved; try again.
         </p>
 
-        <p class="max-w-3xl text-sm text-ink-muted">
-            Track the three inheritance moments in this career. The Predicted section shows the Sparks
-            carried by the chosen parents and grandparents. The Observed section records what actually
-            fired in the game. No inheritance outcome is computed - this tool does not derive a result.
-        </p>
+        <form @submit.prevent="submitEvent">
+            <section class="card" aria-labelledby="ancestry-heading">
+                <h2 id="ancestry-heading">Inheritance</h2>
+                <p class="sub">Two parents and two grandparents behind each, per the six-ancestor rule. A repeated ancestor contributes compatibility 0.</p>
 
-        <!-- Empty state when no legacy selection exists -->
-             <section
-                 v-if="props.empty"
-                 aria-labelledby="inheritance-empty-heading"
-                 class="mt-4 rounded-md border border-dashed border-rule bg-panel p-4"
-             >
-            <h2 id="inheritance-empty-heading" class="text-lg font-semibold text-ink-strong">
-                No Legacy configuration yet
-            </h2>
-            <p class="mt-2 text-sm text-ink">{{ props.empty }}</p>
-            <div class="mt-3 flex flex-wrap gap-2">
-                <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">
-                    Back to Cockpit
-                </a>
-                <a href="/career/setup/legacy" class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-3 font-semibold text-on-primary-action">
-                    Enter Legacy Now
-                </a>
-            </div>
-        </section>
+                <div class="mt-2 flex flex-col gap-2" role="group" aria-label="Six ancestor slots">
+                    <div class="grid gap-2 g-3">
+                        <div class="rounded-md border border-dashed border-rule bg-raised px-3 py-2">
+                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Grandparent</span>
+                            <span class="block text-sm text-ink">{{ grandparent(parentA, 0) ?? 'Not set' }}</span>
+                            <span class="block text-[11px] text-ink-muted">{{ grandparent(parentA, 0) === null ? 'slot open' : 'recorded ancestor' }}</span>
+                        </div>
+                        <div class="rounded-md border border-dashed border-rule bg-raised px-3 py-2">
+                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Grandparent</span>
+                            <span class="block text-sm text-ink">{{ grandparent(parentA, 1) ?? 'Not set' }}</span>
+                            <span class="block text-[11px] text-ink-muted">{{ grandparent(parentA, 1) === null ? 'slot open' : 'recorded ancestor' }}</span>
+                        </div>
+                        <div class="rounded-md border border-rule bg-panel px-3 py-2">
+                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Parent A</span>
+                            <span class="block text-sm font-semibold text-ink-strong">{{ parentA?.name ?? 'Not set' }}</span>
+                            <span class="block text-[11px] text-ink-muted">{{ parentA === null ? 'slot open' : props.run.scenario_label }}</span>
+                        </div>
+                        <div class="rounded-md border-2 border-pick-line bg-green-tint px-3 py-2">
+                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Trainee</span>
+                            <span class="block text-sm font-semibold text-ink-strong">{{ props.run.trainee }}</span>
+                            <span class="block text-[11px] text-ink-muted">{{ props.run.scenario_label }}</span>
+                        </div>
+                    </div>
 
-        <!-- Main content when legacy configuration exists -->
-        <div v-else>
-            <!-- Milestone Timeline -->
-            <section
-                aria-labelledby="inheritance-milestones-heading"
-                class="mt-4 rounded-md border border-rule bg-panel p-4"
-            >
-                <h2 id="inheritance-milestones-heading" class="text-lg font-semibold text-ink-strong">
-                    Inheritance Milestones
-                </h2>
-                <p class="mt-1 text-sm text-ink-muted">
-                    Three fixed moments: career start, Classic Early April, Senior Early April.
-                    Glyphs: ● completed · ◉ current · ○ upcoming · × missed
-                </p>
-
-                <ol class="mt-3 space-y-2" role="list" aria-label="Inheritance milestones">
-                     <li
-                         v-for="milestone in props.milestones"
-                         :key="milestone.key"
-                         class="flex items-center gap-3 rounded-md border border-rule bg-panel p-3"
-                     >
-                        <span
-                            :class="statusGlyphClass(milestone.status)"
-                            :title="milestone.title"
-                            :aria-label="`${milestone.label}, ${milestone.status}`"
-                        >
-                            {{ milestone.glyph }}
-                        </span>
-                        <span class="text-sm font-medium text-ink-strong">{{ milestone.label }}</span>
-                        <span class="text-xs text-ink-muted">{{ milestone.status }}</span>
-                    </li>
-                </ol>
+                    <div class="grid gap-2 g-3">
+                        <div class="rounded-md border border-dashed border-rule bg-raised px-3 py-2">
+                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Grandparent</span>
+                            <span class="block text-sm text-ink">{{ grandparent(parentB, 0) ?? 'Not set' }}</span>
+                            <span class="block text-[11px] text-ink-muted">{{ grandparent(parentB, 0) === null ? 'slot open' : 'recorded ancestor' }}</span>
+                        </div>
+                        <div class="rounded-md border border-dashed border-rule bg-raised px-3 py-2">
+                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Grandparent</span>
+                            <span class="block text-sm text-ink">{{ grandparent(parentB, 1) ?? 'Not set' }}</span>
+                            <span class="block text-[11px] text-ink-muted">{{ grandparent(parentB, 1) === null ? 'slot open' : 'recorded ancestor' }}</span>
+                        </div>
+                        <div class="rounded-md border border-rule bg-panel px-3 py-2">
+                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Parent B</span>
+                            <span class="block text-sm font-semibold text-ink-strong">{{ parentB?.name ?? 'Not set' }}</span>
+                            <span class="block text-[11px] text-ink-muted">{{ parentB === null ? 'slot open' : props.run.scenario_label }}</span>
+                        </div>
+                        <div class="rounded-md border border-rule bg-raised px-3 py-2">
+                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Compatibility</span>
+                            <span class="block text-sm font-semibold text-ink-strong">{{ props.legacy?.affinity ?? 'Not recorded' }}</span>
+                            <span class="block text-[11px] text-ink-muted">raises trigger chance and payout</span>
+                        </div>
+                    </div>
+                </div>
             </section>
 
-            <!-- Predicted Section -->
-            <section
-                aria-labelledby="inheritance-predicted-heading"
-                class="mt-4 rounded-md border border-rule bg-panel p-4"
-            >
-            <header class="flex flex-wrap items-center justify-between gap-2">
-                <h2 id="inheritance-predicted-heading" class="text-lg font-semibold text-ink-strong">
-                    Predicted Sparks
-                </h2>
-                <ProvenanceBadge
-                    state="estimated"
-                    title="Sourced probabilities from the chosen parents and grandparents. No outcome is computed."
-                />
-            </header>
+            <div class="mt-3.5 grid gap-3.5 g-2">
+                <section v-for="parent in [parentA, parentB]" :key="parent?.slot ?? 'none'" class="card" :aria-labelledby="'parent-' + (parent?.slot ?? 'none') + '-heading'">
+                    <h2 :id="'parent-' + (parent?.slot ?? 'none') + '-heading'">
+                        {{ parent === null ? 'Parent' : (parent.slot.endsWith('a') ? 'Parent A · ' : 'Parent B · ') + (parent.name ?? 'Not set') }}
+                    </h2>
+                    <p class="sub">{{ parent === null ? 'No parent recorded for this slot' : (parent.is_guest ? 'Guest · ' : '') + '★'.repeat(parent.rank ?? 0) + ' · ' + props.run.scenario_label }}</p>
 
-            <p class="mt-2 text-sm text-ink-muted">
-                Parent and grandparent Sparks from the Legacy configuration. Counts are what the Trainer
-                entered; star ratings are roll probabilities, not guarantees.
-            </p>
-
-            <!-- Aggregated predicted sparks by kind -->
-            <div v-if="sortedPredictedSparks.length > 0" class="mt-3 space-y-2">
-                 <div
-                     v-for="spark in sortedPredictedSparks"
-                     :key="spark.kind"
-                     class="flex flex-wrap items-center gap-2 rounded-md border border-rule bg-panel p-2"
-                 >
-                    <span class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                        {{ spark.kind_label }}
-                    </span>
-                    <span class="text-sm font-medium text-ink-strong">{{ spark.total_count }} Spark{{ spark.total_count > 1 ? 's' : '' }}</span>
-                    <span class="flex-1"></span>
-                    <span class="text-xs text-ink-muted">Total across both parents and grandparents</span>
-                </div>
-            </div>
-            <p v-else class="mt-3 text-sm text-ink-muted">
-                No Sparks recorded in the Legacy configuration.
-            </p>
-
-            <!-- DOMAIN OVERRIDE (DM-3): five Spark families, not the three the wireframe draws.
-                 The payload carries Blue, Pink, Green, White and Scenario; dropping two to match
-                 the drawing would hide Sparks the Trainer entered. -->
-            <div v-if="parentFamilyRows.length > 0" class="mt-4">
-                <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                    Sparks by family, per parent
-                </p>
-                <p class="mt-1 text-xs text-ink-muted">
-                    A family this parent records no Spark in prints “None recorded” rather than a zero:
-                    the count is absent from the payload, not measured as nothing.
-                </p>
-                <div
-                    class="mt-2 overflow-x-auto"
-                    role="region"
-                    tabindex="0"
-                    aria-label="Sparks by family for each parent"
-                >
-                    <table class="w-full border-collapse text-sm">
-                        <caption class="sr-only">
-                            Spark count per family for each parent in the Legacy configuration
-                        </caption>
+                    <p v-if="parent === null || parent.sparks.length === 0" class="text-sm text-ink">
+                        {{ parent === null ? 'No parent is recorded in this slot.' : 'This parent carries no recorded spark.' }}
+                    </p>
+                    <table v-else class="t mt-1 w-full border-collapse text-sm">
                         <thead>
-                            <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                                <th scope="col" class="py-2 pr-3">Parent</th>
-                                <th
-                                    v-for="family in sparkKindOrder"
-                                    :key="family"
-                                    scope="col"
-                                    class="py-2 pr-3 text-center"
-                                >
-                                    {{ sparkFamilyLabels[family] }}
-                                </th>
-                            </tr>
+                            <tr><th class="text-left">Spark</th><th class="text-left">Grade</th><th class="text-left">What it carries</th><th class="text-right"></th></tr>
                         </thead>
                         <tbody>
-                            <tr
-                                v-for="parent in parentFamilyRows"
-                                :key="parent.label"
-                                class="border-b border-rule last:border-0"
-                            >
-                                <th scope="row" class="py-2 pr-3 text-left font-medium text-ink-strong">
-                                    {{ parent.label }}
-                                    <span class="block text-xs font-normal text-ink-muted">
-                                        {{ parent.name ?? 'Name not recorded' }}
-                                        <template v-if="parent.isGuest"> · guest</template>
-                                    </span>
-                                </th>
-                                <td
-                                    v-for="family in parent.families"
-                                    :key="family.kind"
-                                    class="py-2 pr-3 text-center"
-                                >
-                                    <span
-                                        v-if="family.count === null"
-                                        class="text-xs text-ink-muted"
-                                    >
-                                        None recorded
-                                    </span>
-                                    <span v-else class="font-mono tabular-nums text-ink">{{ family.count }}</span>
-                                </td>
+                            <tr v-for="spark in parent.sparks" :key="spark.kind + '-' + (spark.target ?? '') + '-' + (spark.stars ?? '')" class="border-b border-rule-soft">
+                                <td class="py-2 pr-3"><b>{{ spark.kind_label }}{{ spark.target === null ? '' : ' · ' + spark.target }}</b></td>
+                                <td class="py-2 pr-3">{{ spark.stars === null ? 'N/A' : '★' + spark.stars }}</td>
+                                <td class="py-2 pr-3">{{ sparkCarries(spark) }}</td>
+                                <td class="py-2 text-right text-xs text-ink-muted">recorded</td>
                             </tr>
                         </tbody>
                     </table>
+                </section>
+            </div>
+
+            <Note class="mt-2.5">
+                <b>One selection per run is what this tool stores.</b> The moment grants one spark per parent, but the
+                run carries a single legacy selection, so this screen lists the sparks each parent carries and the
+                run's recorded selection rather than promising per-parent radios the column cannot hold.
+            </Note>
+
+            <section class="card mt-3.5" aria-labelledby="result-heading">
+                <h2 id="result-heading">Result of this pick</h2>
+                <table class="t mt-1 w-full border-collapse text-sm">
+                    <thead><tr><th class="text-left">Stat</th><th class="text-right">Before</th><th class="text-right">Change</th><th class="text-right">After</th></tr></thead>
+                    <tbody>
+                        <tr v-for="row in props.caps" :key="row.stat" :class="row.source === 'entered' ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft">
+                            <td class="py-2 pr-3"><b>{{ row.stat }}</b> cap <span class="text-xs text-ink-muted">({{ row.source }})</span></td>
+                            <td class="py-2 pr-3 text-right font-mono">{{ row.value ?? 'N/A' }}</td>
+                            <td class="py-2 pr-3 text-right font-mono text-ink-muted">—</td>
+                            <td class="py-2 text-right font-mono">{{ row.value ?? 'N/A' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="mt-2.5 grid gap-2.5 g-3">
+                    <div class="tile"><div class="k">Blue sparks</div><div class="v font-mono text-sm">{{ blueSparks.length }} recorded · {{ blueStars }}★</div></div>
+                    <div class="tile"><div class="k">Aptitude shifts</div><div class="v text-sm text-ink-muted">none recorded this pick</div></div>
+                    <div class="tile"><div class="k">Skill hints</div><div class="v text-sm text-ink-muted">none recorded this pick</div></div>
                 </div>
+                <Note class="mt-2.5">
+                    <b>The cap raise is the loop.</b> Two ★3 blue parents raise a cap by 16 each at the start of a
+                    career, and this run's ceilings are already above its scenario's published cap where an entered
+                    ceiling was recorded; inheritance adds to the entered value, never to the published one.
+                </Note>
+            </section>
+
+            <div class="savebar">
+                <span class="dirty" role="status">
+                    {{ props.legacy === null ? 'No legacy selection recorded' : 'Legacy selection recorded' }}
+                </span>
+                <button type="button" class="btn min-h-11" @click="skip()">Skip this moment</button>
+                <button type="submit" class="btn btn-primary min-h-11" :disabled="form.processing">
+                    {{ form.processing ? 'Recording…' : 'Record inheritance' }}
+                </button>
             </div>
 
-            <!-- Expected Inheritance (NOT computed) -->
-            <div class="mt-4 rounded-md border border-rule bg-sunken p-3">
-                <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Expected Inheritance</p>
-                <p class="mt-1 flex items-center gap-2">
-                    <span
-                        :title="props.predicted.expected_inheritance.title"
-                        class="font-mono text-ink"
-                    >
-                        {{ props.predicted.expected_inheritance.label }}
-                    </span>
-                    <span class="inline-flex items-center rounded-full bg-pick px-1.5 py-0.5 text-[0.6rem] font-semibold text-on-pick"
-                        title="Sourced probabilities only. No computed total."
-                    >
-                        Not computed
-                    </span>
-                </p>
-                <p class="mt-1 text-xs text-ink-muted">
-                    Inheritance outcome computation is banned. This tool records what the
-                    Trainer enters; it does not derive an outcome.
-                </p>
-            </div>
+            <!-- HFW OVERRIDE (write fields): recording this moment writes a TurnEvent; the wireframe's
+                 savebar is a pick, but the schema holds the event, so the keying fields live here. -->
+            <details class="card mt-3.5">
+                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">Record what this moment granted (required to record)</summary>
+                <div class="mt-2 grid max-w-3xl grid-cols-2 gap-3 text-sm @4xl:grid-cols-4">
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Turn *</span>
+                        <BaseInput v-model="form.turn" type="number" name="turn" min="1" max="72" required :error="form.errors.turn" />
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Source *</span>
+                        <BaseInput v-model="form.source_name" name="source_name" maxlength="100" required :error="form.errors.source_name" />
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Choice *</span>
+                        <BaseInput v-model="form.choice_label" name="choice_label" maxlength="200" required :error="form.errors.choice_label" />
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Note</span>
+                        <BaseInput v-model="form.origin_note" name="origin_note" maxlength="1000" placeholder="Optional" :error="form.errors.origin_note" />
+                    </label>
+                </div>
+            </details>
+        </form>
 
-            <!-- Sourced Star-Roll Odds Table (REFERENCE §1.5.3) -->
-            <div class="mt-4">
-                <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                    Sourced Star-Roll Probabilities (Estimated)
-                </p>
-                <p class="mt-1 text-xs text-ink-muted">
-                    Transcribed from a Game8 guide dated 2026-08-24, which states probabilities rather than
-                    guarantees. Shown as Estimated; never summed into a single number.
-                </p>
-                <div class="mt-2 overflow-x-auto" role="region" tabindex="0" aria-label="Sourced star-roll probabilities">
-                    <table class="w-full text-sm text-ink" role="table">
-                        <thead>
-                            <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                                <th class="p-2">Final Stat Value</th>
-                                <th class="p-2 text-center">1 Star</th>
-                                <th class="p-2 text-center">2 Stars</th>
-                                <th class="p-2 text-center">3 Stars</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr
-                                v-for="row in props.predicted.star_roll_table"
-                                :key="row.stat_range"
-                                class="border-b border-rule"
-                            >
-                                <td class="p-2 font-medium">{{ row.stat_range }}</td>
-                                <td class="p-2 text-center tabular-nums">{{ row.one_star }}</td>
-                                <td class="p-2 text-center tabular-nums">{{ row.two_star }}</td>
-                                <td class="p-2 text-center tabular-nums">{{ row.three_star }}</td>
-                            </tr>
-                        </tbody>
-</table>
-            </div>
-        </div>
-        </section>
-
-        <!-- The ancestry as nodes, `inheritance.html:80-101`: two parents, four grandparent slots.
-             A slot the Legacy configuration leaves empty is DRAWN and reads `slot open` with a dashed
-             border, because the rule provides it and hiding it would misstate how many ancestors the
-             configuration holds (`inheritance.html:202`). -->
-        <section
-            aria-labelledby="inheritance-ancestry-heading"
-            class="mt-4 rounded-md border border-rule bg-panel p-4"
-        >
-            <h2 id="inheritance-ancestry-heading" class="text-lg font-semibold text-ink-strong">Ancestry</h2>
-            <p class="mt-1 text-sm text-ink-muted">
-                Each parent brings two grandparent slots. A slot the configuration leaves empty is still
-                drawn, marked <b>slot open</b>: the rule provides it, this Legacy has not filled it.
-            </p>
-
-            <ul class="mt-3 space-y-3" role="list" aria-label="Ancestry">
-                <li v-for="parent in props.legacy?.parents ?? []" :key="parent.slot">
-                    <p class="flex flex-wrap items-baseline gap-2">
-                        <span class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ parent.label }}</span>
-                        <span v-if="parent.name !== null" class="text-sm font-semibold text-ink-strong">{{ parent.name }}</span>
-                        <span v-else class="text-sm text-ink-muted">Not set</span>
-                        <span v-if="parent.isGuest" class="text-xs text-ink-muted">· guest</span>
-                    </p>
-
-                    <ul class="mt-1 grid gap-2 sm:grid-cols-2" role="list">
-                        <li
-                            v-for="(ancestor, ancestorIndex) in ancestorSlots(parent)"
-                            :key="`${parent.slot}-ancestor-${ancestorIndex}`"
-                            class="rounded-md border p-2"
-                            :class="ancestor === null ? 'border-dashed border-rule bg-panel' : 'border-rule bg-raised'"
-                            :data-slot-state="ancestor === null ? 'open' : 'filled'"
-                        >
-                            <span class="block text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                                Grandparent {{ ancestorIndex + 1 }}
-                            </span>
-                            <span v-if="ancestor !== null" class="text-sm font-medium text-ink-strong">{{ ancestor }}</span>
-                            <span v-else class="text-sm text-ink-muted">
-                                Not set <span class="text-xs">· slot open</span>
-                            </span>
-                        </li>
-                    </ul>
+        <details class="card mt-3.5">
+            <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">Observed inheritance events ({{ props.observed.events.length }})</summary>
+            <p v-if="props.observed.events.length === 0" class="mt-1 text-sm text-ink-muted">No inheritance event has been recorded on this run.</p>
+            <ul v-else class="mt-2 flex flex-col gap-2 text-sm">
+                <li v-for="event in props.observed.events" :key="event.id" class="rounded-md border border-rule-soft bg-raised px-3 py-2">
+                    Turn {{ event.turn }} · {{ event.source_name }} — {{ event.choice_label ?? 'choice not recorded' }}
                 </li>
             </ul>
+        </details>
 
-            <!-- Inheritance is optional at every one of its three moments (`inheritance.html:200`), so
-                 the screen offers leaving without a record rather than implying the moment is mandatory. -->
-            <p class="mt-3 text-sm text-ink-muted">
-                Inheritance is optional at every one of its three moments; leaving without a record is a
-                valid answer.
-            </p>
-            <a
-                :href="props.run.cockpit_url"
-                class="mt-2 inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
-            >
-                Skip this moment
-            </a>
-        </section>
-
-        <!-- Observed Section -->
-        <section
-            aria-labelledby="inheritance-observed-heading"
-            class="mt-4 rounded-md border border-rule bg-panel p-4"
-        >
-            <header class="flex flex-wrap items-center justify-between gap-2">
-                <h2 id="inheritance-observed-heading" class="text-lg font-semibold text-ink-strong">
-                    Observed Outcomes
-                </h2>
-            </header>
-
-            <p class="mt-2 text-sm text-ink-muted">
-                What the Trainer actually saw in the game: which Sparks activated at each inheritance
-                moment. Each entry is a Confirmed record.
-            </p>
-
-            <!-- Recorded events list -->
-            <div v-if="props.observed.events.length > 0" class="mt-3 space-y-2">
-                 <div
-                     v-for="event in props.observed.events"
-                     :key="event.id"
-                     class="rounded-md border border-rule bg-panel p-3"
-                 >
-                    <div class="flex flex-wrap items-start gap-2">
-                        <span class="inline-flex min-w-[7rem] shrink-0 text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                            Turn {{ event.turn }}
-                        </span>
-                        <span class="inline-flex min-w-[10rem] shrink-0 text-sm font-medium text-ink-strong">
-                            {{ event.source_name }}
-                        </span>
-                        <span v-if="event.choice_label" class="text-sm text-ink">
-                            {{ event.choice_label }}
-                        </span>
-                        <span v-else class="text-sm text-ink-muted">No detail recorded</span>
-                        <span class="flex-1"></span>
-                    </div>
-                    <p v-if="event.origin_note" class="mt-1 text-xs text-ink-muted">{{ event.origin_note }}</p>
-                    <p v-if="event.deltas" class="mt-1 text-xs font-mono text-ink-muted">
-                        Deltas: {{ JSON.stringify(event.deltas) }}
-                    </p>
-                </div>
-            </div>
-            <p v-else class="mt-3 text-sm text-ink-muted">
-                {{ props.observed.provenance }}
-            </p>
-
-            <!-- Record new observed event form -->
-             <form
-                 v-if="props.write.turns.length > 0"
-                 class="mt-4 rounded-md border border-rule bg-panel p-3"
-                 @submit.prevent="submitEvent"
-             >
-                <h3 class="text-lg font-semibold text-ink-strong">Record an inheritance event</h3>
-                <p class="mt-1 text-xs text-ink-muted">
-                    Enter what you saw in the client. This creates a Confirmed TurnEvent of type Inheritance.
-                </p>
-
-                <div
-                    v-if="form.hasErrors"
-                    ref="alert"
-                    role="alert"
-                    tabindex="-1"
-                    class="mt-2 rounded-md border border-risk bg-raised p-2 text-sm text-risk"
-                >
-                    <p class="font-semibold">The event was not recorded.</p>
-                    <ul class="mt-1 list-disc pl-5">
-                        <li v-for="(message, key) in form.errors" :key="key">{{ message }}</li>
-                    </ul>
-                </div>
-
-                <div class="mt-3 grid grid-cols-1 gap-3 @3xl:grid-cols-2 @5xl:grid-cols-3">
-<BaseSelect
-  v-model="form.turn"
-  name="turn"
-  label="Turn *"
-  required
-  :options="[{ value: '', label: 'Select turn' }, ...props.write.turns.map(t => ({ value: t.turn, label: `Turn ${t.turn}` }))]"
-  :error="form.errors.turn"
-/>
-
-<BaseSelect
-  v-model="form.source_name"
-  name="source_name"
-  label="Source *"
-  required
-  :options="[{ value: '', label: 'Select source' }, ...props.write.sources.map(s => ({ value: s, label: s }))]"
-  :error="form.errors.source_name"
-/>
-
-<BaseInput
-  v-model="form.choice_label"
-  type="text"
-  name="choice_label"
-  label="Detail"
-  placeholder="e.g., Blue Speed ★★★, Pink Mile ★★"
-  :error="form.errors.choice_label"
-/>
-                </div>
-
-                <div class="mt-3 grid grid-cols-1 gap-3">
-<BaseTextarea
-  v-model="form.origin_note"
-  name="origin_note"
-  label="Notes"
-  rows="2"
-  placeholder="Any additional context…"
-  :error="form.errors.origin_note"
-/>
-                </div>
-
-                <div class="mt-3 flex flex-wrap items-center gap-2">
-                    <button
-                        id="inheritance-submit"
-                        type="submit"
-                        class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action disabled:opacity-60 disabled:cursor-wait"
-                        :disabled="form.processing"
-                    >
-                        {{ form.processing ? 'Recording…' : 'Record Event' }}
-                    </button>
-                    <p v-if="form.processing" role="status" class="text-sm text-ink-muted">
-                        Recording the inheritance event…
-                    </p>
-                </div>
-            </form>
-            <p v-else class="mt-3 text-sm text-ink-muted">
-                No turns logged yet. Record at least one turn on the Cockpit before adding an
-                inheritance event.
-            </p>
-        </section>
-
-        <div class="mt-4 max-w-sm">
-            <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">
-                Back to Cockpit
-            </a>
-        </div>
-    </div>
+        <details class="card mt-3.5">
+            <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">Inheritance milestones</summary>
+            <ul class="mt-2 flex flex-col gap-1.5 text-sm">
+                <li v-for="milestone in props.milestones" :key="milestone.key" class="flex items-center gap-2">
+                    <span aria-hidden="true">{{ milestone.glyph }}</span>
+                    <span>{{ milestone.label }} — {{ milestone.status }}</span>
+                </li>
+            </ul>
+        </details>
     </CareerLayout>
 </template>
