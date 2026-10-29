@@ -355,18 +355,11 @@ it('never renders a visible N/A without a title, and never as a disclosure summa
 function configIdentifierDebt(): array
 {
     return [
-        // config/advisor.php
+        // config/advisor.php: the 2026-10-18 debt, still held (not part of the 2026-10-29 cleanup).
         'config/advisor.php:34', 'config/advisor.php:42', 'config/advisor.php:49', 'config/advisor.php:56',
         // config/reference.php: cleared by slice 2.2, when the provenance moved to /database/sources.
-        // config/scenarios.php (held)
-        'config/scenarios.php:152', 'config/scenarios.php:166', 'config/scenarios.php:298',
-        'config/scenarios.php:350', 'config/scenarios.php:364', 'config/scenarios.php:468',
-        'config/scenarios.php:487', 'config/scenarios.php:500', 'config/scenarios.php:551',
-        'config/scenarios.php:577', 'config/scenarios.php:765', 'config/scenarios.php:772',
-        'config/scenarios.php:825', 'config/scenarios.php:889', 'config/scenarios.php:897',
-        'config/scenarios.php:948', 'config/scenarios.php:976', 'config/scenarios.php:1072',
-        'config/scenarios.php:1073', 'config/scenarios.php:1077', 'config/scenarios.php:1087',
-        'config/scenarios.php:1090', 'config/scenarios.php:1138',
+        // config/scenarios.php: cleared by the 2026-10-29 cleanup — every file-path and decision
+        // citation moved from the display string to a comment above the value. No entries remain.
     ];
 }
 

@@ -59,9 +59,9 @@ it('renders one card per scenario the matrix composes, each derived from config'
             ->where('scenarios.3.metadata.planning_focus', 'Its guide says to focus on training rather than stacking races.')
             ->where('scenarios.3.metadata.planning_focus_source', 'Game8, Grand Live (Grand Concert) Scenario Guide (archives/607337), page updated 2026-07-26')
             // The one cell no publisher names stays an absence, and it carries the recorded search
-            // verbatim, including why the plan document's own §9 hierarchy is not a published focus.
+            // verbatim; the exact file citations live in the config comment above the value.
             ->where('scenarios.0.metadata.planning_focus', null)
-            ->where('scenarios.0.metadata.planning_focus_reason', 'No repo master names a planning focus for this scenario. Searched: docs/URA-Finale-plan.md, docs/scenarios/01-ura-finale.md, docs/UMAMUSUME_REFERENCE.md. The 2026-10-16 publisher pass found none either: Game8\'s URA Finale guide states a scenario comparison and a Summer camp tip, and the plan\'s §9 advisor hierarchy is this tool\'s own decision order, not a published planning focus.')
+            ->where('scenarios.0.metadata.planning_focus_reason', 'No repository guide names a planning focus for this scenario. The scenario guides and the mechanics reference were searched. The 2026-10-16 publisher pass found none either: Game8\'s URA Finale guide states a scenario comparison and a Summer camp tip, and the plan\'s advisor hierarchy is this tool\'s own decision order, not a published planning focus.')
             ->where('scenarios.1.metadata.planning_focus', config('scenarios.scenarios.unity_cup.metadata.planning_focus')));
 });
 

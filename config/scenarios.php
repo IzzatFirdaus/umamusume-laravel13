@@ -149,7 +149,9 @@ return [
                 // renders with, verbatim from the research record, never paraphrased on the way through.
                 // The 2026-10-16 publisher pass is appended to it rather than replacing it, and it
                 // records why the plan document's §9 was not used as the value.
-                'planning_focus_reason' => 'No repo master names a planning focus for this scenario. Searched: docs/URA-Finale-plan.md, docs/scenarios/01-ura-finale.md, docs/UMAMUSUME_REFERENCE.md. The 2026-10-16 publisher pass found none either: Game8\'s URA Finale guide states a scenario comparison and a Summer camp tip, and the plan\'s §9 advisor hierarchy is this tool\'s own decision order, not a published planning focus.',
+                // Searched: docs/URA-Finale-plan.md, docs/scenarios/01-ura-finale.md,
+                // docs/UMAMUSUME_REFERENCE.md; the plan document's §9 was not used as the value.
+                'planning_focus_reason' => 'No repository guide names a planning focus for this scenario. The scenario guides and the mechanics reference were searched. The 2026-10-16 publisher pass found none either: Game8\'s URA Finale guide states a scenario comparison and a Summer camp tip, and the plan\'s advisor hierarchy is this tool\'s own decision order, not a published planning focus.',
             ],
             'live_on_global' => '2025-06-26',
             /*
@@ -163,7 +165,9 @@ return [
             'ruleset_version' => [
                 'date' => '2026-07-01',
                 'event' => 'July 1, 2026 rework raised caps from 1200 to 1400 in all five stats, added Happy Meek duels, and granted +200 per-stat cap bonus. Config records cap_bonus at [200,200,200,200,200].',
-                'source' => 'UMAMUSUME_REFERENCE.md §2.2.1, SCENARIO-PUBLISHER-REFERENCES.md line 982, docs/URA-Finale-plan.md line 16',
+                // Source: UMAMUSUME_REFERENCE.md §2.2.1, SCENARIO-PUBLISHER-REFERENCES.md line 982,
+                // docs/URA-Finale-plan.md line 16.
+                'source' => 'The mechanics reference guide and the scenario publisher references',
             ],
             'cap_bonus' => ['Speed' => 200, 'Stamina' => 200, 'Power' => 200, 'Guts' => 200, 'Wit' => 200],
             'widgets' => ['turn', 'energy', 'fans'],
@@ -301,7 +305,8 @@ return [
             | instead, so no per-level Wit energy figure renders from this table.
             */
             'training_tables' => [
-                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1854-1874 (GameWith 257432)',
+                // Source: SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1854-1874 (GameWith 257432).
+                'source' => 'GameWith 257432, transcribed in the scenario publisher references',
                 'server' => 'JP',
                 'notes' => [
                     'The 2026-07-01 Global rework raised stat caps and added Happy Meek duels but did not alter base training gains or energy costs per any source in this repository. JP values remain the only published figures.',
@@ -353,7 +358,8 @@ return [
             */
             'risk_absence' => [
                 'reason' => 'No publisher states a ranked discipline-level risk table. The failure outcome ranges are global across all scenarios (section 1.5 of the training-mechanics extraction).',
-                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470 (GameWith 257432)',
+                // Source: SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470 (GameWith 257432).
+                'source' => 'GameWith 257432, transcribed in the scenario publisher references',
                 'server' => 'JP',
             ],
         ],
@@ -367,7 +373,9 @@ return [
             'ruleset_version' => [
                 'date' => '2026-07-01',
                 'event' => 'July 1, 2026 rework raised caps (1200→1300 per stat, Wit to 1800), added Extreme Spirit Bursts, removed the Energy cost on Special Training, and changed Spirit Burst hints to use the card\'s own hint pool.',
-                'source' => 'UMAMUSUME_REFERENCE.md §2.2.2, docs/scenarios/02-unity-cup.md:28, SCENARIO-PUBLISHER-REFERENCES.md line 568',
+                // Source: UMAMUSUME_REFERENCE.md §2.2.2, docs/scenarios/02-unity-cup.md:28,
+                // SCENARIO-PUBLISHER-REFERENCES.md line 568.
+                'source' => 'The mechanics reference guide and the scenario publisher references',
             ],
             'cap_bonus' => ['Speed' => 100, 'Stamina' => 100, 'Power' => 100, 'Guts' => 100, 'Wit' => 600],
             'widgets' => ['turn', 'energy', 'fans', 'team_rank', 'spirit_bursts'],
@@ -472,7 +480,8 @@ return [
                 ['ranks' => ['A'], 'level' => 4],
                 ['ranks' => ['S'], 'level' => 5],
             ],
-            'notes' => 'Facility level is a team property, so a level chip must name its cause (D-222). '
+            // D-222: facility level is a team property, so a level chip must name its cause.
+            'notes' => 'Facility level is a team property, so a level chip must name its cause. '
                 .'Rank S+ sits above S and grants a second hint rather than a higher facility.',
             /*
             | The card's own metadata. Every line below restates a fact this entry already holds (the
@@ -491,7 +500,8 @@ return [
                 'recommended_use_source' => 'Game8, Unity Cup Update Guide (archives/545572), page updated 2026-07-07',
                 'key_mechanics' => [
                     'A team race every six months against one of three NPC teams, strongest to weakest; a loss lowers league rank.',
-                    'Facility level is a team property, set by the team rank from G through S (D-222).',
+                    // D-222: facility level is a team property, set by the team rank.
+                    'Facility level is a team property, set by the team rank from G through S.',
                     'Spirit Bursts from teammates charge and spend, and the burst count sets the exclusive-skill reward band.',
                 ],
             ],
@@ -504,7 +514,9 @@ return [
             | SP payout, carried in the note below rather than merged into the numbers.
             */
             'training_tables' => [
-                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1876-1884 (GameWith 257432 Aoharu table) + docs/scenarios/02-unity-cup.md:87-106 (GameTora post-rework)',
+                // Source: SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1876-1884 (GameWith 257432
+                // Aoharu table) and docs/scenarios/02-unity-cup.md:87-106 (GameTora post-rework).
+                'source' => 'GameWith 257432 and GameTora, transcribed in the scenario publisher references',
                 'server' => 'JP + Global(rework)',
                 'notes' => [
                     'Global SP payouts for Unity Cup match URA Finale (+2 SP on Energy disciplines) after the 2026-07-01 rework, not the JP +4 values. The base stat gains are unchanged.',
@@ -555,7 +567,9 @@ return [
             */
             'risk_absence' => [
                 'reason' => 'No publisher states a ranked discipline-level risk table. The failure outcome ranges are global across all scenarios (section 1.5 of the training-mechanics extraction).',
-                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470 (GameWith 257432) + docs/scenarios/02-unity-cup.md:113-119',
+                // Source: SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470 (GameWith 257432)
+                // and docs/scenarios/02-unity-cup.md:113-119.
+                'source' => 'GameWith 257432, transcribed in the scenario publisher references',
                 'server' => 'JP + Global(rework)',
             ],
         ],
@@ -581,7 +595,9 @@ return [
             'ruleset_version' => [
                 'date' => '2026-03-12',
                 'event' => 'March 12, 2026 Global launch as the third permanent scenario. No subsequent rework documented in any source in this repository.',
-                'source' => 'UMAMUSUME_REFERENCE.md §2.2.3, SCENARIO-PUBLISHER-REFERENCES.md line 339, docs/Trackblazer-plan.md line 56',
+                // Source: UMAMUSUME_REFERENCE.md §2.2.3, SCENARIO-PUBLISHER-REFERENCES.md line 339,
+                // docs/Trackblazer-plan.md line 56.
+                'source' => 'The mechanics reference guide and the scenario publisher references',
             ],
             'cap_bonus' => ['Speed' => 0, 'Stamina' => 700, 'Power' => 0, 'Guts' => 0, 'Wit' => 300],
             'widgets' => ['turn', 'energy', 'fans', 'grade_points', 'shop_coins'],
@@ -770,14 +786,17 @@ return [
                 'Speed Training Application' => 'Only with coin surplus',
                 'Miracle Cure' => 'Optional, worth holding one',
             ],
-            'shop_worth_source' => 'docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 199-222 (uma.guide\'s own "Worth" ratings; the master dates the page 2026-04-29).',
+            // Source: docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 199-222
+            // (uma.guide's own "Worth" ratings; the master dates the page 2026-04-29).
+            'shop_worth_source' => 'uma.guide\'s own "Worth" ratings, dated 2026-04-29.',
             /*
             | The Summer reserve is the publisher's Tip at line 273, in its own words. The tool
             | derives no reserve figure of its own and prints none beside it: a number this build
             | invented would read as a game rule.
             */
             'shop_reserve' => ['label' => 'Keep at least 100 coins banked heading into Summer', 'coins' => 100],
-            'shop_reserve_source' => 'docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md line 273 (uma.guide\'s Tip), which also warns the shop resets on Summer\'s first turn.',
+            // Source: docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md line 273 (uma.guide's Tip).
+            'shop_reserve_source' => 'uma.guide\'s tip, which also warns the shop resets on Summer\'s first turn.',
             /*
             | Race Fatigue keys on the length of the race chain and on nothing else. The odds table is
             | transcribed from docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 231-236
@@ -830,7 +849,8 @@ return [
                     'The publisher does not say whether "3 races" counts the race about to run or only the races already run, so this surface prints the row its own label names and settles nothing.',
                     'Race fatigue cannot occur after Late December, and no source says which year\'s Late December closes it.',
                 ],
-                'recovery_source' => 'docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 242-244 (uma.guide).',
+                // Source: docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 242-244 (uma.guide).
+                'recovery_source' => 'uma.guide.',
                 'recovery_events' => [
                     ['when' => 'Classic, Early February', 'effect' => 'Mood +1'],
                     ['when' => 'Classic, Early March', 'effect' => 'Energy +20'],
@@ -894,7 +914,8 @@ return [
             'finale' => ['kind' => 'points_league', 'races' => 3],
             'notes' => 'No mandatory race goals, so the race calendar is absent rather than empty, and no '
                 .'Scenario Link character exists here. Racing is the strategy in this scenario and is '
-                .'discouraged in Unity Cup, so any race advisory must be scenario-gated (D-225).',
+                // D-225: the race advisory is scenario-gated because racing is not this scenario's strategy.
+                .'discouraged in Unity Cup, so any race advisory must be scenario-gated.',
             /*
             | The published per-level training table, transcribed from the 2026-10-15
             | scenario-field-metadata artifact (GameWith 257432 Climax table). Keys and Guts'
@@ -902,7 +923,9 @@ return [
             | table is JP: Global launched Trackblazer with these values and no rework is recorded.
             */
             'training_tables' => [
-                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1888-1894 (GameWith 257432 Climax table)',
+                // Source: SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1888-1894
+                // (GameWith 257432 Climax table).
+                'source' => 'GameWith 257432\'s Climax table, transcribed in the scenario publisher references',
                 'server' => 'JP',
                 'notes' => [
                     'Climax (JP) maps to Trackblazer on Global. JP values are the only published figures; Global launched with these values and no subsequent rework was documented in sources in this repository.',
@@ -953,7 +976,8 @@ return [
             */
             'risk_absence' => [
                 'reason' => 'No publisher states a ranked discipline-level risk table. The failure outcome ranges are global across all scenarios.',
-                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470 + SCENARIO-PUBLISHER-REFERENCES.md line 1226',
+                // Source: SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470 and line 1226.
+                'source' => 'The scenario publisher references',
                 'server' => 'JP + Global',
             ],
         ],
@@ -981,7 +1005,9 @@ return [
             'ruleset_version' => [
                 'date' => '2026-07-22',
                 'event' => 'July 22, 2026 Global launch. The performance track was extracted from Game8 and GameTora on 2026-10-05 (primary read). No subsequent rework documented.',
-                'source' => 'UMAMUSUME_REFERENCE.md §2.2.4, docs/scenarios/07-grand-concert.md:37, Our-Grand-Concert-plan.md note on notice 899',
+                // Source: UMAMUSUME_REFERENCE.md §2.2.4, docs/scenarios/07-grand-concert.md:37,
+                // Our-Grand-Concert-plan.md note on notice 899.
+                'source' => 'The mechanics reference guide and the Grand Concert scenario guide',
             ],
             'cap_bonus' => ['Speed' => 400, 'Stamina' => 100, 'Power' => 100, 'Guts' => 300, 'Wit' => 100],
             'widgets' => ['turn', 'energy', 'fans'],
@@ -1080,12 +1106,15 @@ return [
             | here measures is the text on the client's own screens, so no panel can be drawn from a guide
             | without inventing the words above it (D-165, D-241).
             */
-            'panel_absence' => 'The mechanics for this scenario are sourced, but no capture of the client\'s own screens exists yet, so nothing the concert itself is on draws here. The trainee\'s own objective ladder is the one panel this entry composes, and that is a career fact rather than a concert mechanic (ADR-0026).',
-            'panel_absence_title' => 'Sourced in docs/scenarios/07-grand-concert.md. The client\'s own screen text is not measured in this build.',
+            // ADR-0026: the trainee's objective ladder is a career fact, not a concert mechanic.
+            'panel_absence' => 'The mechanics for this scenario are sourced, but no capture of the client\'s own screens exists yet, so nothing the concert itself is on draws here. The trainee\'s own objective ladder is the one panel this entry composes, and that is a career fact rather than a concert mechanic.',
+            // Source: docs/scenarios/07-grand-concert.md.
+            'panel_absence_title' => 'Sourced in the Grand Concert scenario guide. The client\'s own screen text is not measured in this build.',
             'notes' => 'Live on `[Global]` since 2026-07-22 and caps Speed highest of any scenario here. '
                 .'Mechanics sourced 2026-10-05 by a primary read; every panel stays off because the client '
                 .'strings behind them are still third-party renderings, so the strip renders baseline plus the '
-                .'published caps (D-241, gate G-41).',
+                // D-241 / gate G-41: the panels stay off while the client strings are third-party renderings.
+                .'published caps.',
 
             /*
             | The published per-level training table, transcribed from the 2026-10-15
@@ -1095,10 +1124,13 @@ return [
             | unpublished, which the notes state.
             */
             'training_tables' => [
-                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1896-1904 (GameWith 257432 Grand Live table) + docs/scenarios/07-grand-concert.md:64-70',
+                // Source: SCENARIO-PUBLISHER-REFERENCES.md §4.4 lines 1896-1904 (GameWith 257432
+                // Grand Live table) and docs/scenarios/07-grand-concert.md:64-70.
+                'source' => 'GameWith 257432, transcribed in the scenario publisher references',
                 'server' => 'JP',
                 'notes' => [
-                    'Grand Live (JP) maps to Our Grand Concert on Global. The Performance gain values (200 each at start, +50 per concert) come from GameTora. No cost curves for Lessons or Songs are published; these remain UNVERIFIED per docs/scenarios/07-grand-concert.md:205.',
+                    // UNVERIFIED per docs/scenarios/07-grand-concert.md:205 (no published cost curves).
+                    'Grand Live (JP) maps to Our Grand Concert on Global. The Performance gain values (200 each at start, +50 per concert) come from GameTora. No cost curves for Lessons or Songs are published; these remain UNVERIFIED.',
                     'Training also pays Performance (the scenario resource) in addition to stats. GameTora supplies the numbers no official page prints: 200 each at start, +50 per successful concert.',
                 ],
                 'per_level' => [
@@ -1146,7 +1178,8 @@ return [
             */
             'risk_absence' => [
                 'reason' => 'No publisher states a ranked discipline-level risk table. The failure outcome ranges are global across all scenarios.',
-                'source' => 'SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470',
+                // Source: SCENARIO-PUBLISHER-REFERENCES.md §1.5 lines 1447-1470.
+                'source' => 'The scenario publisher references',
                 'server' => 'JP',
             ],
         ],
