@@ -488,6 +488,11 @@ What to run, by class of change:
 | TypeScript, Vue, or Blade assets                    | `npm run typecheck`, and `npm run build` if a page references assets                                                                                                                  |
 | Anything crossing layers                            | the full suite, then the hand-off sequence below                                                                                                                                      |
 
+**Every flow a user completes needs a spec that walks it end to end.** A page spec is not a
+substitute: when a primary's redirect, order or gate is the behavior, the spec enters at the
+flow's start, asserts the URL after each primary, and deletes anything it creates in
+`afterEach` (`tests/browser/wizard-flow.spec.ts` is the pattern).
+
 Hand-off sequence (the bar's own order): targeted tests green -> `php artisan test --compact`
 -> `vendor/bin/pint --test --format agent <paths>` -> `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`
 -> `npm run typecheck` -> `npm run lint:ui` -> `composer lore` and `composer lore-code` with a ruling per hit ->
