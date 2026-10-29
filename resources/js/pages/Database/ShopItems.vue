@@ -15,6 +15,7 @@
  * modelled, so no row is marked best value and no row is selected.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
 import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import DataTable, { type DataTableColumn } from '../../components/ui/DataTable.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
@@ -43,16 +44,59 @@ interface ScenarioItem {
     effect: string;
 }
 
+interface ShopRule {
+    rule: string;
+    detail: string;
+}
+
 const props = defineProps<{
     rows: ShopRow[];
     scenarioShop: { label: string; rotation_turns: number; items: ScenarioItem[] };
     source: { section: string; anchor: string };
     totalCount: number;
+    /** One publisher's "Worth" ratings, keyed by the item name it matched exactly. */
+    ratings: Record<string, string>;
+    ratingsSource: string;
     // The controller sends it (DatabaseController's shopItems), and the SourceNote under the table
     // renders it: without the declaration the re-check pointer this area's siblings all carry was
     // silently dropped, and no gate looked at the prop path.
     recheck: { text: string; url: string };
 }>();
+
+/*
+ * The wireframe's shop rules (`database-shop-items.html:86-100`). The rotation figure is the scenario
+ * config's own; the rest are the guide's published constraints, and the last row says which claim the
+ * repository records as unconfirmed instead of printing a duration for it.
+ */
+const shopRules = computed<ShopRule[]>(() => [
+    { rule: 'Unlock', detail: 'After the Debut race' },
+    { rule: 'Refresh', detail: `Every ${props.scenarioShop.rotation_turns} turns` },
+    { rule: 'Copies per item', detail: '5' },
+    { rule: 'Sales', detail: '10-20%' },
+    { rule: 'Stacking', detail: 'Multi-turn items cannot be used while active' },
+    { rule: 'Overwrite', detail: 'A lower-grade item used before a higher one is wasted' },
+]);
+
+const ratedCount = computed<number>(() =>
+    props.scenarioShop.items.filter((item) => props.ratings[item.name] !== undefined).length,
+);
+
+/** How many of the catalogue's rows the table shows before "Show all" is pressed. */
+const shown = ref(10);
+const visibleItems = computed<ScenarioItem[]>(() => props.scenarioShop.items.slice(0, shown.value));
+
+/** The ported pill class for one publisher rating, by what the rating says. */
+function ratingClass(rating: string): string {
+    if (rating.startsWith('Must Buy')) {
+        return 'pill pill-positive';
+    }
+
+    if (rating.startsWith('Skip') || rating.startsWith('Generally Skip')) {
+        return 'pill pill-neutral';
+    }
+
+    return 'pill pill-caution';
+}
 
 const selected = ref<ShopRow | null>(null);
 const trigger = ref<HTMLElement | null>(null);
@@ -104,7 +148,13 @@ const close = async (): Promise<void> => {
 <template>
     <AppLayout :breadcrumb="[{ label: 'Database', href: '/database' }, { label: 'Shop Items' }]">
         <Head title="Shop Items" />
-        <template #title>Shop Items</template>
+        <template #head>
+            <PageHeader
+                eyebrow="Shop items"
+                title="Pro Shop catalogue"
+                :description="`${props.scenarioShop.items.length} items, costs and effects transcribed from one publisher's list. Ratings are that guide's opinion, labelled as such on every row.`"
+            />
+        </template>
 
         <DatabaseNav />
 
@@ -120,7 +170,109 @@ const close = async (): Promise<void> => {
             :recheck="props.recheck"
         />
 
-        <p class="mt-6 text-sm text-ink-muted">{{ props.totalCount }} catalogue rows</p>
+        <!-- The wireframe's main catalogue (`database-shop-items.html:69-84`): cost, effect and the
+             publisher's rating on every row, ten at a time with a client "Show all". -->
+        <section class="card mt-4" aria-labelledby="scenario-shop">
+            <table class="w-full border-collapse">
+                <caption class="sr-only">
+                    {{ props.scenarioShop.label }} Pro Shop items, with one publisher's rating
+                </caption>
+                <thead>
+                    <tr>
+                        <th class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Item</th>
+                        <th class="border-b border-rule px-2 py-2 text-right text-xs font-semibold text-ink-strong">Cost</th>
+                        <th class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Effect</th>
+                        <th class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">
+                            Rating (one guide)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item in visibleItems" :key="item.name">
+                        <th scope="row" class="border-b border-rule px-2 py-3 text-left text-sm font-medium text-ink">
+                            {{ item.name }}
+                        </th>
+                        <td class="border-b border-rule px-2 py-3 text-right font-mono tabular-nums text-sm text-ink">{{ item.cost }}</td>
+                        <td class="border-b border-rule px-2 py-3 text-sm text-ink">{{ item.effect }}</td>
+                        <td class="border-b border-rule px-2 py-3 text-sm text-ink">
+                            <span
+                                v-if="props.ratings[item.name]"
+                                :class="ratingClass(props.ratings[item.name])"
+                                :title="props.ratingsSource"
+                            >{{ props.ratings[item.name] }}</span>
+                            <span v-else>N/A<span class="sr-only">: this publisher names no rating for the item.</span></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-rule pt-3">
+                <p class="text-xs text-ink-muted">
+                    {{ props.scenarioShop.items.length }} items · showing
+                    {{ Math.min(shown, props.scenarioShop.items.length) }}
+                </p>
+                <button
+                    v-if="shown < props.scenarioShop.items.length"
+                    type="button"
+                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
+                    @click="shown = props.scenarioShop.items.length"
+                >Show all</button>
+            </div>
+        </section>
+
+        <div class="mt-4 grid gap-4 g-2">
+            <section class="card" aria-labelledby="shop-rules">
+                <h2 id="shop-rules">Shop rules</h2>
+                <table class="mt-2 w-full border-collapse text-sm">
+                    <tbody>
+                        <tr v-for="rule in shopRules" :key="rule.rule" class="border-b border-rule last:border-b-0">
+                            <th scope="row" class="w-40 py-2 pr-3 text-left font-medium text-ink">{{ rule.rule }}</th>
+                            <td class="py-2 text-ink">{{ rule.detail }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="note mt-3">
+                    <span class="g" aria-hidden="true">○</span>
+                    <span>
+                        "Race-triggered items last 3 turns" is recorded as <b>unconfirmed</b>. No source in the
+                        repository states a duration for that class, so the catalogue does not print one.
+                    </span>
+                </p>
+            </section>
+
+            <section class="card" aria-labelledby="shop-ratings">
+                <h2 id="shop-ratings">What the ratings are</h2>
+                <p class="mt-2 text-sm text-ink-muted">
+                    The "Rating" column is one publisher's priorities, transcribed. It is not this tool's
+                    recommendation: <b>no row is recommended</b>, and a rating appears only where the
+                    publisher's item matched the catalogue's cost and effect exactly.
+                </p>
+                <div class="mt-3 grid grid-cols-3 gap-2">
+                    <div class="tile">
+                        <div class="k">Items</div>
+                        <div class="v font-mono text-sm">{{ props.scenarioShop.items.length }}</div>
+                    </div>
+                    <div class="tile">
+                        <div class="k">Rated</div>
+                        <div class="v font-mono text-sm">{{ ratedCount }}</div>
+                    </div>
+                    <div class="tile">
+                        <div class="k">Source</div>
+                        <div class="v text-sm">1 guide</div>
+                    </div>
+                </div>
+                <p class="note mt-3">
+                    <span class="g" aria-hidden="true">○</span>
+                    <span>
+                        Coins scale with placement, 100 for first and less below. Grade Points and Shop Coins
+                        are independent counters: a Pre-OP win pays the same coins as a G1 win but a fifth of
+                        the Grade Points.
+                    </span>
+                </p>
+            </section>
+        </div>
+
+        <h2 class="mt-8 text-lg font-semibold text-ink-strong">Catalogue</h2>
+        <p class="mt-1 text-sm text-ink-muted">{{ props.totalCount }} catalogue rows</p>
 
         <section
             v-if="props.rows.length === 0"
@@ -186,31 +338,5 @@ const close = async (): Promise<void> => {
             <p class="text-xs text-ink-muted">{{ selected.source_title }}</p>
         </ReferenceDrawer>
 
-        <!--
-            The Pro Shop block: the scenario matrix's own `shop_items`, reused verbatim. Its cost column
-            is the client's price, and the rotation length is the matrix's configured fact.
-        -->
-        <section aria-labelledby="scenario-shop" class="mt-10">
-            <h3 id="scenario-shop" class="text-lg font-semibold text-ink-strong">
-                {{ props.scenarioShop.label }} Pro Shop
-            </h3>
-
-            <p class="mt-2 max-w-3xl text-sm text-ink-muted">
-                The item class this scenario sells, read from the scenario's own config. The rotation runs
-                {{ props.scenarioShop.rotation_turns }} turns; which items are on offer in a given
-                rotation is not modelled, so this is the catalogue and not a live lineup.
-            </p>
-
-            <p class="mt-4 text-sm text-ink-muted">
-                {{ props.scenarioShop.items.length }} catalogue items
-            </p>
-
-            <DataTable
-                class="mt-2"
-                caption="Pro Shop catalogue items"
-                :columns="proShopColumns"
-                :rows="props.scenarioShop.items"
-            />
-        </section>
     </AppLayout>
 </template>

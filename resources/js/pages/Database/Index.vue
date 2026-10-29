@@ -22,7 +22,7 @@ const props = defineProps<{
 }>();
 
 const group = (n: number): string => n.toLocaleString('en-US');
-const tile = 'flex flex-col justify-between rounded-md border border-rule bg-panel p-4 hover:border-brand-chrome transition-colors duration-150 ease-out';
+const tile = 'card flex flex-col justify-between transition-colors duration-150 ease-out';
 
 // The source ledger is the answer to every provenance question, so its tile carries the pick border
 // (`database.html`'s one accented tile). Named by its label rather than its URL so the accent moves
@@ -62,7 +62,7 @@ const isLedger = (label: string): boolean => label === 'Data sources';
         </p>
 
         <nav aria-label="Reference data" class="mt-4">
-            <ul class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <ul class="grid gap-3 g-3">
                 <li v-for="(area, index) in props.areas" :key="area.label">
                     <!-- The tile's name is its area, not its area plus its count: the count and the
                          description ride along as the description, so the door is addressable by the
@@ -72,16 +72,17 @@ const isLedger = (label: string): boolean => label === 'Data sources';
                         :prefetch="'hover'"
                         :aria-label="area.label"
                         :aria-describedby="`database-area-${index}`"
-                        :class="[tile, isLedger(area.label) ? 'border-brand-chrome' : '']"
+                        :class="[tile, isLedger(area.label) ? 'is-picked' : '']"
                     >
                         <span class="flex items-baseline justify-between gap-3">
-                            <b class="text-sm font-bold text-ink-strong">{{ area.label }}</b>
+                            <b class="text-base font-bold text-ink-strong">{{ area.label }}</b>
                             <span v-if="area.count !== null" class="font-mono text-sm font-bold tabular-nums text-ink-strong">
                                 {{ group(area.count) }}
                             </span>
                             <span
                                 v-else
-                                class="inline-flex shrink-0 items-center rounded-full border border-rule px-2 py-0.5 text-xs font-semibold text-ink-muted"
+                                class="pill"
+                                :class="isLedger(area.label) ? 'pill-positive' : 'pill-outline'"
                             >{{ area.tag }}</span>
                         </span>
                         <span :id="`database-area-${index}`" class="mt-1.5 text-xs text-ink-muted">{{ area.description }}</span>

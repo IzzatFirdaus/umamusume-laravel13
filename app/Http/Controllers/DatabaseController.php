@@ -119,6 +119,7 @@ class DatabaseController extends Controller
                 'turn' => $slot->turn,
                 'tier' => $slot->tier,
                 'distance' => $slot->distance,
+                'distance_band' => $slot->distance_band,
                 'surface' => $slot->surface,
                 'fans_needed' => $slot->fans_needed,
                 'is_mandatory' => $slot->is_mandatory,
@@ -187,6 +188,13 @@ class DatabaseController extends Controller
                 'caps' => $caps,
                 'widgets' => $widgets,
                 'panels' => $panels,
+                // The dated instant a source pins this scenario's numbering to (the rework or the
+                // launch), never a ruleset version: no source defines a Global version, so that line
+                // stays N/A and the two facts are not merged (`database-scenarios.html:112-124`).
+                'ruleset' => [
+                    'date' => (string) ($definition['ruleset_version']['date'] ?? ''),
+                    'event' => (string) ($definition['ruleset_version']['event'] ?? ''),
+                ],
                 'partially_documented' => (bool) ($definition['partially_documented'] ?? false),
                 'notes' => (string) $definition['notes'],
             ];
@@ -286,6 +294,11 @@ class DatabaseController extends Controller
                 'rotation_turns' => (int) config('scenarios.scenarios.trackblazer.shop.rotation_turns'),
                 'items' => $scenarioShopItems,
             ],
+            // The publisher's own "Worth" ratings, keyed by item name, and the sentence that says whose
+            // opinion they are. Both come from the scenario config (`shop_worth`, `shop_worth_source`);
+            // the page prints them under a header that names the source, never as this tool's advice.
+            'ratings' => (array) config('scenarios.scenarios.trackblazer.shop_worth', []),
+            'ratingsSource' => (string) config('scenarios.scenarios.trackblazer.shop_worth_source', ''),
             'recheck' => [
                 'text' => (string) ($shop['recheck']['text'] ?? ''),
                 'url' => (string) ($shop['recheck']['url'] ?? ''),

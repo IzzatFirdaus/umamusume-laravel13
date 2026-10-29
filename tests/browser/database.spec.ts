@@ -57,18 +57,19 @@ test('the hub lists the nine areas and no deferred section', async ({ page }) =>
     // The door the audit found missing, asserted on its destination rather than on existing at all.
     await expect(areas.getByRole('link', { name: 'Data sources', exact: true })).toHaveAttribute('href', /\/database\/sources$/);
 
-    // The ledger tile carries the hub's one pick border (database.html): it is the answer to every
-    // provenance question, so it is the tile the page points at rather than one of eight equals.
+    // The ledger tile carries the hub's one pick border (database.html, keybox 3): it is the answer
+    // to every provenance question, so it is the tile the page points at rather than one of eight
+    // equals. The state is `.card.is-picked` — the unlayered primitive state, because a utility
+    // colour would lose to `.card`'s own border.
     //
-    // Read as class TOKENS, not as a substring: every tile carries `hover:border-brand-chrome` from the
-    // shared `tile` constant, so `/border-brand-chrome/` matches all nine and proves nothing.
+    // Read as class TOKENS, not as a substring, so a shared base class cannot match every tile.
     const tokensOf = async (label: string): Promise<string[]> =>
         (await areas.getByRole('link', { name: label, exact: true }).getAttribute('class') ?? '')
             .split(/\s+/)
             .filter(Boolean);
 
-    expect(await tokensOf('Data sources')).toContain('border-brand-chrome');
-    expect(await tokensOf('Trainees')).not.toContain('border-brand-chrome');
+    expect(await tokensOf('Data sources')).toContain('is-picked');
+    expect(await tokensOf('Trainees')).not.toContain('is-picked');
 
     // The three areas that were once "Not in this build" are destinations now, so the section that
     // named them absent is deleted rather than softened: a heading saying otherwise would be false.
@@ -151,9 +152,24 @@ test('the Data sources page lists every dataset and names no repository path', a
     await page.goto('/database/sources', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByRole('heading', { name: 'Data sources', level: 1 })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Fetched', level: 2 })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Transcribed', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Where every figure came from', level: 1 })).toBeVisible();
+
+    // The wireframe's one ledger (`database-sources.html:90-136`): every dataset is a row, the kind
+    // is a word, and the publisher is one link rather than a printed file path (keybox 1).
+    await expect(page.getByRole('heading', { name: 'Sources', level: 2 })).toBeVisible();
+    const ledger = page.getByRole('table', { name: /Every source this tool reads/ });
+    await expect(ledger).toBeVisible();
+    await expect(ledger.getByRole('row')).toHaveCount(13);
+    await expect(ledger.getByRole('link', { name: 'Open source' })).toHaveCount(12);
+    await expect(ledger.getByText('Fetched', { exact: true })).toHaveCount(9);
+    await expect(ledger.getByText('Transcribed', { exact: true })).toHaveCount(3);
+    await expect(page.locator('body')).not.toContainText('https://');
+
+    // The wireframe's two closing sections: a live disagreement is printed as one, and the page says
+    // why it exists instead of printing file paths (database-sources.html).
+    await expect(page.getByRole('heading', { name: 'Open conflicts', level: 2 })).toBeVisible();
+    await expect(page.getByText('Is 1400 m Sprint or Mile?')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'What this page is for', level: 2 })).toBeVisible();
 
     // A transcribed dataset is named by subject, and the page carries no section number or file path.
     await expect(page.getByText('Recurring event types').first()).toBeVisible();
@@ -190,17 +206,23 @@ test('the Shop Items view renders the catalogue and the reused Pro Shop block', 
     await page.goto('/database/shop-items', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByRole('heading', { name: 'Shop Items', level: 1 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Pro Shop catalogue', level: 1 })).toBeVisible();
     await expect(page.getByText('10 catalogue rows')).toBeVisible();
     await expect(page.getByText('Alarm Clock', { exact: true })).toBeVisible();
 
     // The two currency rows say so in words, never by colour alone.
     await expect(page.getByText('Currency').first()).toBeVisible();
 
-    // The scenario block is the matrix's own shop, read from config, with its rotation length.
-    await expect(page.getByRole('heading', { name: 'Trackblazer Pro Shop', level: 3 })).toBeVisible();
-    await expect(page.getByText('19 catalogue items')).toBeVisible();
-    await expect(page.getByText('Speed Notepad', { exact: true })).toBeVisible();
+    // The scenario block is the matrix's own shop, read from config, with its client-side size
+    // control: ten of its nineteen rows first, the rest on "Show all" (database-shop-items.html).
+    const proShop = page.getByRole('table', { name: /Pro Shop items, with one publisher's rating/ });
+    await expect(proShop).toBeVisible();
+    await expect(page.getByText('19 items · showing 10')).toBeVisible();
+    await expect(proShop.getByText('Speed Notepad', { exact: true })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Show all' }).click();
+    await expect(page.getByText('19 items · showing 19')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Show all' })).toHaveCount(0);
 
     // The catalogue and the Pro Shop are two tables, and the price sits in the column it belongs
     // to rather than in a row of prose.
@@ -209,16 +231,14 @@ test('the Shop Items view renders the catalogue and the reused Pro Shop block', 
     await expect(catalogue.getByRole('columnheader', { name: 'Spend site' })).toBeVisible();
     await expect(catalogue.getByRole('columnheader', { name: 'Kind' })).toBeVisible();
 
-    const proShop = page.getByRole('table', { name: 'Pro Shop catalogue items' });
-    await expect(proShop).toBeVisible();
-    await expect(proShop.getByRole('columnheader', { name: 'Cost (coins)' })).toBeVisible();
+    await expect(proShop.getByRole('columnheader', { name: 'Cost' })).toBeVisible();
 });
 
 test('the Sparks view renders the categories and the star-roll odds table', async ({ page }) => {
     await page.goto('/database/sparks', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByRole('heading', { name: 'Sparks', level: 1 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Spark families and grades', level: 1 })).toBeVisible();
     await expect(page.getByText('6 Spark categories')).toBeVisible();
     await expect(page.getByText('Blue Sparks', { exact: true })).toBeVisible();
 
@@ -264,8 +284,8 @@ test('the race database renders whichever state the catalogue is in', async ({ p
     await page.goto('/database/races', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByRole('heading', { name: 'Race database', level: 2 })).toBeVisible();
-
+    // The page draws one of exactly two states: the offline explanation, or the slot table. The
+    // wireframe gives the table no heading of its own, so the branch below is the assertion.
     const offline = page.getByRole('heading', { name: 'The race database is offline' });
     const table = page.getByRole('region', { name: 'Race slots, scrollable' });
 
@@ -280,6 +300,9 @@ test('the race database renders whichever state the catalogue is in', async ({ p
     }
 
     await expect(table).toBeVisible();
+
+    // The band the wireframe's table asks for is a stored column, printed beside the metres.
+    await expect(table.getByRole('columnheader', { name: 'Band' })).toBeVisible();
 
     // The canonical pager states the range: which slice of the whole this is, and how big the whole
     // is. The line it replaced said "410 of 410 slots" above a table holding 25 rows, which read as
@@ -326,7 +349,7 @@ test('the scenario matrix prints config/scenarios.php, verification date and all
     await page.goto('/database/scenarios', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByRole('heading', { name: 'Scenario matrix', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Scenario matrix', level: 1 })).toBeVisible();
 
     // The config's own date, named as a verification date rather than an update (config/scenarios.php:41-42).
     await expect(page.getByText(/Verified 2026-09-27 against/)).toBeVisible();
@@ -571,4 +594,46 @@ test('the support-card area passes an axe scan at WCAG A and AA', async ({ page 
     await openAllDisclosures(page);
     const results = await buildAxe(page).analyze();
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
+test('the area strip is the HFW subnav with one current area', async ({ page }) => {
+    const cases: { url: string; current: string | null }[] = [
+        { url: '/database', current: null },
+        { url: '/database/races', current: 'Races' },
+        { url: '/umamusume', current: 'Trainees' },
+        { url: '/support-cards', current: 'Support cards' },
+        { url: '/skills', current: 'Skills' },
+    ];
+
+    for (const { url, current } of cases) {
+        await page.goto(url, { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
+
+        const strip = page.getByRole('navigation', { name: 'Reference data areas' });
+        await expect(strip).toHaveClass(/subnav/);
+        await expect(strip.locator('.subnav-hub')).toHaveText('Database');
+        await expect(strip.locator('.subnav-sep')).toHaveCount(1);
+        await expect(strip.locator('.subnav-item')).toHaveCount(9);
+
+        if (current === null) {
+            // The hub is a filled pill already; only the accessible state marks it, as database.html draws it.
+            await expect(strip.locator('.subnav-item.is-current')).toHaveCount(0);
+            await expect(strip.locator('.subnav-hub')).toHaveAttribute('aria-current', 'page');
+        } else {
+            await expect(strip.locator('.subnav-item.is-current')).toHaveText([current]);
+            await expect(strip.locator('.subnav-item.is-current')).toHaveAttribute('aria-current', 'page');
+        }
+    }
+
+    // At 320 the strip scrolls inside itself, never the document (the ported `.subnav` rule).
+    await page.setViewportSize({ width: 320, height: 900 });
+    await page.goto('/umamusume', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const strip = page.getByRole('navigation', { name: 'Reference data areas' });
+    expect(await strip.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
+    const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(1);
 });

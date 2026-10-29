@@ -11,8 +11,13 @@
  *
  * Density is allowed on this screen only (plan §13, "Deliberately traded"): a reference table is dense
  * by nature. The table still scrolls inside its own container at 320px, never the page.
+ *
+ * HFW-OVERRIDE (column: course) - the wireframe's lead column is Course, and this build stores only
+ * the source's numeric `track_id` with no name mapping anywhere, so a Course column would print an id.
+ * The distance band the same design asks for *is* stored (`distance_band`) and prints beside Distance.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
 import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import Pagination from '../../components/ui/Pagination.vue';
 import { Head, router } from '@inertiajs/vue3';
@@ -24,6 +29,7 @@ interface Slot {
     turn: number | null;
     tier: string | null;
     distance: number | null;
+    distance_band: string | null;
     surface: string | null;
     fans_needed: number | null;
     is_mandatory: boolean;
@@ -69,17 +75,15 @@ function goToPage(page: number): void {
 <template>
     <AppLayout :breadcrumb="[{ label: 'Database', href: '/database' }, { label: 'Races' }]">
         <Head title="Races" />
-        <template #title>Races</template>
+        <template #head>
+            <PageHeader
+                eyebrow="Races"
+                title="Race catalog"
+                description="Grade, surface, distance band and the fan threshold an obligation reads. Filter to the races a trainee's aptitude actually permits."
+            />
+        </template>
 
         <DatabaseNav />
-
-        <h2 class="text-lg font-semibold text-ink-strong">Race database</h2>
-
-        <p class="mt-4 max-w-3xl text-sm text-ink-muted">
-            Every slot of the shared [Global] career calendar, one row per race per turn. The run's race
-            calendar, the Race Decision screen and the rows a Trainer records against a race all read from
-            this table.
-        </p>
 
         <section
             v-if="props.totalCount === 0"
@@ -115,7 +119,7 @@ function goToPage(page: number): void {
             >
                 <table class="w-full min-w-[40rem] text-sm">
                     <caption class="sr-only">
-                        Career race slots: race, year, turn, tier, distance, surface, fan gate and entry gate
+                        Career race slots: race, year, turn, tier, distance, distance band, surface, fan gate and entry gate
                     </caption>
                     <thead>
                         <tr class="border-b border-rule bg-sunken text-left text-xs text-ink-muted">
@@ -124,6 +128,7 @@ function goToPage(page: number): void {
                             <th scope="col" class="py-1.5 px-3 font-semibold">Turn</th>
                             <th scope="col" class="py-1.5 px-3 font-semibold">Tier</th>
                             <th scope="col" class="py-1.5 px-3 font-semibold">Distance</th>
+                            <th scope="col" class="py-1.5 px-3 font-semibold">Band</th>
                             <th scope="col" class="py-1.5 px-3 font-semibold">Surface</th>
                             <th scope="col" class="py-1.5 px-3 font-semibold">Fans needed</th>
                             <th scope="col" class="py-1.5 px-3 font-semibold">Gate</th>
@@ -146,6 +151,19 @@ function goToPage(page: number): void {
                             <td class="py-1.5 px-3 text-ink">
                                 <span v-if="slot.distance === null">N/A</span>
                                 <span v-else>{{ slot.distance }} m</span>
+                            </td>
+                            <!-- Keybox 1: the asterisk marks the derived edge the sources dispute; the
+                                 cell's aria-label carries the reason for a screen reader, because an
+                                 absolutely positioned `sr-only` span inside the scroll region escapes its
+                                 clip and widened the document at 320px (measured 88px). -->
+                            <td
+                                class="py-1.5 px-3 text-ink"
+                                :aria-label="slot.distance === 1400
+                                    ? `${slot.distance_band}, on the disputed 1400 m boundary; the export's band is printed`
+                                    : undefined"
+                            >
+                                <span v-if="slot.distance_band === null">N/A</span>
+                                <span v-else>{{ slot.distance_band }}<template v-if="slot.distance === 1400">*</template></span>
                             </td>
                             <td class="py-1.5 px-3 text-ink">
                                 <span v-if="slot.surface === null">N/A</span>
@@ -172,21 +190,102 @@ function goToPage(page: number): void {
                         </tr>
                     </tbody>
                 </table>
-                <p class="mt-2 text-xs text-ink-muted">
+                <p class="mt-2 px-3 pb-2 text-xs text-ink-muted">
                     N/A marks a field the source records nothing for. It is not a zero, and no column
-                    here fills a gap with a guess.
+                    here fills a gap with a guess. A band marked * sits on the disputed 1400 m boundary.
                 </p>
+                <div class="px-3 pb-3">
+                    <Pagination
+                        :page="props.slots.current_page"
+                        :pages="props.slots.last_page"
+                        :from="props.slots.from ?? 0"
+                        :to="props.slots.to ?? 0"
+                        :total="props.slots.total"
+                        noun="slots"
+                        @navigate="goToPage"
+                    />
+                </div>
             </div>
-
-            <Pagination
-                :page="props.slots.current_page"
-                :pages="props.slots.last_page"
-                :from="props.slots.from ?? 0"
-                :to="props.slots.to ?? 0"
-                :total="props.slots.total"
-                noun="slots"
-                @navigate="goToPage"
-            />
         </template>
+        <!-- The wireframe's two reference cards (`database-races.html:103-127`). The years, turns and
+             gates above stay as this build's own career-slot columns (the mock draws none), printed
+             before these; the bands and the payout are published mechanics, so they are stated here. -->
+        <div class="mt-4 grid gap-4 g-2">
+            <section class="card" aria-labelledby="race-bands">
+                <h2 id="race-bands">Distance bands</h2>
+                <table class="mt-2 w-full border-collapse text-sm">
+                    <thead>
+                        <tr>
+                            <th class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Band</th>
+                            <th class="border-b border-rule px-2 py-2 text-right text-xs font-semibold text-ink-strong">Metres</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-rule">
+                            <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Sprint</th>
+                            <td class="py-2 text-right font-mono tabular-nums text-ink">≤ 1400</td>
+                        </tr>
+                        <tr class="border-b border-rule">
+                            <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Mile</th>
+                            <td class="py-2 text-right font-mono tabular-nums text-ink">1401-1800</td>
+                        </tr>
+                        <tr class="border-b border-rule">
+                            <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Medium</th>
+                            <td class="py-2 text-right font-mono tabular-nums text-ink">1801-2400</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Long</th>
+                            <td class="py-2 text-right font-mono tabular-nums text-ink">≥ 2401</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="note mt-3">
+                    <span class="g" aria-hidden="true">○</span>
+                    <span>
+                        The 1400 m boundary is an open conflict: one guide places it in Sprint, the export
+                        files it under distance code 2, which reads as Mile. The catalogue prints the
+                        export's band, marks a 1400 m row with *, and does not encode a winner.
+                    </span>
+                </p>
+            </section>
+
+            <section class="card" aria-labelledby="race-payout">
+                <h2 id="race-payout">What a race pays</h2>
+                <table class="mt-2 w-full border-collapse text-sm">
+                    <thead>
+                        <tr>
+                            <th class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Grade</th>
+                            <th class="border-b border-rule px-2 py-2 text-right text-xs font-semibold text-ink-strong">Stat</th>
+                            <th class="border-b border-rule px-2 py-2 text-right text-xs font-semibold text-ink-strong">Skill Pt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-rule">
+                            <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">G1</th>
+                            <td class="py-2 text-right font-mono tabular-nums text-ink">+10</td>
+                            <td class="py-2 text-right font-mono tabular-nums text-ink">+45</td>
+                        </tr>
+                        <tr class="border-b border-rule">
+                            <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">G2 · G3</th>
+                            <td class="py-2 text-right font-mono tabular-nums text-ink">+8</td>
+                            <td class="py-2 text-right font-mono tabular-nums text-ink">+35</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">OP · Pre-OP</th>
+                            <td class="py-2 text-right font-mono tabular-nums text-ink">+5</td>
+                            <td class="py-2 text-right font-mono tabular-nums text-ink">+30</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="note mt-3">
+                    <span class="g" aria-hidden="true">○</span>
+                    <span>
+                        First place at 0 Race Bonus in the standard career families. <b>Trackblazer pays the
+                        same stat gain at a lower SP figure</b> (G1 +35, G2-G3 +25, OP-Pre-OP +20). Second
+                        and third are not published.
+                    </span>
+                </p>
+            </section>
+        </div>
     </AppLayout>
 </template>

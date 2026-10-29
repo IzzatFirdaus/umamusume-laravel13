@@ -15,9 +15,11 @@
  * Density is allowed on this screen only (plan §13, "Deliberately traded").
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
 import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import DataTable, { type DataTableColumn } from '../../components/ui/DataTable.vue';
 import { Head } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 interface Cap {
     stat: string;
@@ -28,6 +30,7 @@ interface Cap {
 interface Scenario {
     label: string;
     live_on_global: string;
+    ruleset: { date: string; event: string };
     caps: Cap[];
     widgets: { label: string }[];
     panels: { label: string; enabled: boolean }[];
@@ -42,6 +45,11 @@ const props = defineProps<{
 }>();
 
 const bonusText = (bonus: number): string => (bonus > 0 ? `+${bonus}` : `${bonus}`);
+
+const th = 'border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong';
+const thNum = 'border-b border-rule px-2 py-2 text-right text-xs font-semibold text-ink-strong';
+const td = 'border-b border-rule px-2 py-3 align-top text-sm text-ink';
+const tdNum = 'border-b border-rule px-2 py-3 text-right align-top font-mono tabular-nums text-sm text-ink';
 
 /*
  * The caps table and the panels table are the shared `DataTable` primitive, so a screen reader
@@ -71,16 +79,154 @@ const capRows = (scenario: Scenario): Record<string, unknown>[] =>
 
 const panelRows = (scenario: Scenario): Record<string, unknown>[] =>
     scenario.panels.map((panel) => ({ label: panel.label, enabled: panel.enabled }));
+
+/*
+ * The wireframe's three tables (`database-scenarios.html:69-124`), all read off the same matrix:
+ * the caps with each row's outlier marked, the panel composition as a matrix, and the ruleset date.
+ */
+const entries = computed<[string, Scenario][]>(() => Object.entries(props.scenarios));
+const statNames = computed<string[]>(() => entries.value[0]?.[1].caps.map((cap) => cap.stat) ?? []);
+const panelNames = computed<string[]>(() => entries.value[0]?.[1].panels.map((panel) => panel.label) ?? []);
+
+const capOf = (scenario: Scenario, stat: string): number =>
+    scenario.caps.find((cap) => cap.stat === stat)?.cap ?? 0;
+
+/**
+ * The stat a row marks as its outlier: the row's highest cap when it is strictly above the second
+ * highest. URA Finale's row is flat, so it marks none — which is the wireframe's own reading (bold
+ * marks the outlier, not the maximum).
+ */
+const outlier = (scenario: Scenario): string | null => {
+    const caps = [...scenario.caps].sort((a, b) => b.cap - a.cap);
+
+    if (caps.length < 2 || caps[0].cap === caps[1].cap) {
+        return null;
+    }
+
+    return caps[0].stat;
+};
+
+const panelState = (scenario: Scenario, label: string): boolean =>
+    scenario.panels.find((panel) => panel.label === label)?.enabled ?? false;
 </script>
 
 <template>
     <AppLayout :breadcrumb="[{ label: 'Database', href: '/database' }, { label: 'Scenarios' }]">
         <Head title="Scenarios" />
-        <template #title>Scenarios</template>
+        <template #head>
+            <PageHeader
+                eyebrow="Scenarios"
+                title="Scenario matrix"
+                description="Four permanent Global scenarios. This table is the composition source: the cockpit renders exactly these panels and no others."
+            />
+        </template>
 
         <DatabaseNav />
 
-        <h2 class="text-lg font-semibold text-ink-strong">Scenario matrix</h2>
+        <!-- The wireframe's matrix-verification bar (`database-scenarios.html:55`): a verification
+             date records when the matrix was checked, not when it was fetched. -->
+        <p class="mt-4 rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink-muted">
+            <span aria-hidden="true" class="mr-2 text-status-positive">i</span>
+            <b class="text-ink-strong">Matrix verified {{ props.verifiedAt }}.</b>
+            A verification date records when the matrix was checked against its sources. Nothing on this
+            page was fetched today.
+        </p>
+
+        <!-- The three wireframe tables (`database-scenarios.html:69-124`), read off the matrix. -->
+        <section class="card" aria-labelledby="scenario-caps">
+            <h2 id="scenario-caps">Caps</h2>
+            <div class="mt-2 overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr>
+                            <th :class="th">Scenario</th>
+                            <th :class="th">Live on Global</th>
+                            <th v-for="stat in statNames" :key="stat" :class="thNum">{{ stat }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="[key, scenario] in entries" :key="key">
+                            <th scope="row" :class="[td, 'text-left font-medium']">{{ scenario.label }}</th>
+                            <td :class="[td, 'font-mono']">{{ scenario.live_on_global }}</td>
+                            <td v-for="stat in statNames" :key="stat" :class="tdNum">
+                                <b v-if="outlier(scenario) === stat">{{ capOf(scenario, stat) }}</b>
+                                <template v-else>{{ capOf(scenario, stat) }}</template>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="note mt-3">
+                <span class="g" aria-hidden="true">○</span>
+                <span>
+                    The bold figure in each row is that scenario's outlier, and the outlier is its
+                    mechanical identity. Base is {{ props.baseCap }} for every stat; the hard ceiling is
+                    2000. Bold marks the outlier, not the maximum.
+                </span>
+            </p>
+        </section>
+
+        <section class="card mt-4" aria-labelledby="scenario-panels">
+            <h2 id="scenario-panels">Panels each scenario composes</h2>
+            <div class="mt-2 overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr>
+                            <th :class="th">Panel</th>
+                            <th v-for="[key, scenario] in entries" :key="key" :class="thNum">{{ scenario.label }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="panel in panelNames" :key="panel">
+                            <th scope="row" :class="[td, 'text-left font-medium']">{{ panel }}</th>
+                            <td v-for="[key, scenario] in entries" :key="key" :class="tdNum">
+                                {{ panelState(scenario, panel) ? 'on' : 'off' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="note mt-3">
+                <span class="g" aria-hidden="true">○</span>
+                <span>
+                    An off panel draws nothing at all. The cockpit never shows an empty box for a system
+                    its scenario does not use, which is why URA Finale looks sparser than Unity Cup and
+                    both are correct.
+                </span>
+            </p>
+        </section>
+
+        <section class="card mt-4" aria-labelledby="scenario-ruleset">
+            <h2 id="scenario-ruleset">Ruleset dates</h2>
+            <div class="mt-2 overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr>
+                            <th :class="th">Scenario</th>
+                            <th :class="th">Date</th>
+                            <th :class="th">What it marks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="[key, scenario] in entries" :key="key">
+                            <th scope="row" :class="[td, 'text-left font-medium']">{{ scenario.label }}</th>
+                            <td :class="[td, 'font-mono']">{{ scenario.ruleset.date }}</td>
+                            <td :class="td">{{ scenario.ruleset.event }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="note mt-3">
+                <span class="g" aria-hidden="true">○</span>
+                <span>
+                    A ruleset date is <b>not</b> an app ruleset version. No source defines a Global
+                    ruleset version, so the version line elsewhere reads <code>N/A</code> and the two
+                    facts are never merged into one label.
+                </span>
+            </p>
+        </section>
+
+        <h2 class="mt-8 text-lg font-semibold text-ink-strong">Per-scenario detail</h2>
 
         <p class="mt-4 max-w-3xl text-sm text-ink-muted">
             The scenario's composition matrix, printed as it is. Caps are the base plus a per-stat
@@ -118,7 +264,7 @@ const panelRows = (scenario: Scenario): Record<string, unknown>[] =>
                     </div>
                 </div>
 
-                <div class="mt-4 grid gap-5 @5xl:grid-cols-2">
+                <div class="mt-4 grid gap-5 g-2">
                     <div>
                         <h4 class="text-lg font-semibold text-ink-strong">Caps</h4>
 

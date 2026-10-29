@@ -19,6 +19,7 @@
  * for a table this small).
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
 import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import DataTable, { type DataTableColumn } from '../../components/ui/DataTable.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
@@ -101,6 +102,41 @@ const oddsColumns: DataTableColumn[] = [
     { key: 'three_stars', label: '3 stars', align: 'right', mono: true },
 ];
 
+/*
+ * The wireframe's reference rows (`database-sparks.html:76-133`). Every figure is the guide's own
+ * (`UMAMUSUME_REFERENCE.md` §1.5.1-§1.5.3), and the blue card keeps the DM-3 correction the Legacy page
+ * records: a blue spark's *starting* effect is the stat ladder, while the +16 is the breakthrough's cap
+ * raise from an inherited ★3 factor, and only ★3 is published for that cap.
+ */
+const families: { family: string; carries: string; applied: string }[] = [
+    { family: 'Blue', carries: "A stat's cap, by a fixed step per grade", applied: 'Run start, Classic inheritance, Senior inheritance' },
+    { family: 'Pink', carries: 'An aptitude grade', applied: 'Same three moments' },
+    { family: 'White', carries: 'Skill hints', applied: 'When the spark is granted' },
+    { family: 'Unique', carries: "The trainee's own skill", applied: 'Same three moments' },
+];
+
+const blueValues: { label: string; value: string }[] = [
+    { label: '★1', value: '+5 stat at career start' },
+    { label: '★2', value: '+12 stat at career start' },
+    { label: '★3', value: '+21 stat at career start' },
+    { label: '★3 inherited', value: '+16 to that stat’s cap' },
+];
+
+const pinkValues: { label: string; value: string }[] = [
+    { label: '★1 · 4 · 7 · 10-18', value: '+1 / +2 / +3 / +4 aptitude grade' },
+];
+
+const inheritanceLoop: { step: string; what: string }[] = [
+    { step: '1', what: 'Train to a final total.' },
+    { step: '2', what: 'Bank the factor grade into a veteran record.' },
+    { step: '3', what: 'Inherit the +16 per ★3 at the next run’s start.' },
+    { step: '4', what: 'Train past the previous ceiling.' },
+];
+
+const th = 'border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong';
+const td = 'border-b border-rule px-2 py-3 align-top text-sm text-ink';
+const tdValue = 'border-b border-rule px-2 py-3 align-top text-right font-mono text-sm text-ink';
+
 const open = (row: Category, event: MouseEvent): void => {
     trigger.value = event.currentTarget as HTMLElement;
     selected.value = row;
@@ -116,7 +152,13 @@ const close = async (): Promise<void> => {
 <template>
     <AppLayout :breadcrumb="[{ label: 'Database', href: '/database' }, { label: 'Sparks' }]">
         <Head title="Sparks" />
-        <template #title>Sparks</template>
+        <template #head>
+            <PageHeader
+                eyebrow="Sparks"
+                title="Spark families and grades"
+                description="What a parent passes on. Three families, five grades, and one rule that decides a build: blue raises stats and their ceiling, pink shifts aptitudes."
+            />
+        </template>
 
         <DatabaseNav />
 
@@ -132,7 +174,111 @@ const close = async (): Promise<void> => {
             :recheck="props.recheck"
         />
 
-        <p class="mt-6 text-sm text-ink-muted">{{ props.totalCount }} Spark categories</p>
+        <!-- The wireframe's three reference blocks (`database-sparks.html:76-133`), above the
+             catalogue's own category rows: families first, then the two value ladders, then the loop
+             that explains why a cap raise compounds. -->
+        <section class="card mt-4" aria-labelledby="spark-families">
+            <h2 id="spark-families">Families</h2>
+            <table class="mt-2 w-full border-collapse">
+                <thead>
+                    <tr>
+                        <th :class="th">Family</th>
+                        <th :class="th">Carries</th>
+                        <th :class="th">Applied at</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="family in families" :key="family.family">
+                        <th scope="row" :class="[td, 'text-left font-medium']">{{ family.family }}</th>
+                        <td :class="td">{{ family.carries }}</td>
+                        <td :class="td">{{ family.applied }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <div class="mt-4 grid gap-4 g-2">
+            <section class="card" aria-labelledby="spark-blue-values">
+                <h2 id="spark-blue-values">Blue spark values</h2>
+                <table class="mt-2 w-full border-collapse">
+                    <thead>
+                        <tr>
+                            <th :class="th">Grade</th>
+                            <th :class="[th, 'text-right']">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="row in blueValues" :key="row.label">
+                            <th scope="row" :class="[td, 'text-left font-medium']">{{ row.label }}</th>
+                            <td :class="tdValue">{{ row.value }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="note mt-3">
+                    <span class="g" aria-hidden="true">○</span>
+                    <span>
+                        Blue is the stat spark: it pays a flat stat at career start and, inherited at ★3,
+                        raises that stat's <b>cap</b> by +16. The +5 / +12 / +21 ladder is the starting
+                        stat, so the cap raise is the breakthrough mechanic, not a fourth grade. Only the
+                        ★3 cap figure is published.
+                    </span>
+                </p>
+            </section>
+
+            <section class="card" aria-labelledby="spark-pink-values">
+                <h2 id="spark-pink-values">Pink spark values</h2>
+                <table class="mt-2 w-full border-collapse">
+                    <thead>
+                        <tr>
+                            <th :class="th">Grade</th>
+                            <th :class="[th, 'text-right']">Aptitude shift</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="row in pinkValues" :key="row.label">
+                            <th scope="row" :class="[td, 'text-left font-medium']">{{ row.label }}</th>
+                            <td :class="tdValue">{{ row.value }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="note mt-3">
+                    <span class="g" aria-hidden="true">○</span>
+                    <span>
+                        Pink is the aptitude spark. Its shift is measured in grade letters, not a stat
+                        figure, which is why this table has no stat column.
+                    </span>
+                </p>
+            </section>
+        </div>
+
+        <section class="card mt-4" aria-labelledby="spark-inheritance-loop">
+            <h2 id="spark-inheritance-loop">The inheritance loop</h2>
+            <table class="mt-2 w-full border-collapse">
+                <thead>
+                    <tr>
+                        <th :class="th">Step</th>
+                        <th :class="th">What happens</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="step in inheritanceLoop" :key="step.step">
+                        <th scope="row" :class="[td, 'text-left font-mono']">{{ step.step }}</th>
+                        <td :class="td">{{ step.what }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="note mt-3">
+                <span class="g" aria-hidden="true">○</span>
+                <span>
+                    The loop repeats at every inheritance moment. Because the ★3 factor raises the
+                    ceiling rather than a starting value, the payoff compounds across a run instead of
+                    arriving once.
+                </span>
+            </p>
+        </section>
+
+        <h2 class="mt-8 text-lg font-semibold text-ink-strong">Spark categories</h2>
+        <p class="mt-1 text-sm text-ink-muted">{{ props.totalCount }} Spark categories</p>
 
         <section
             v-if="props.categories.length === 0"

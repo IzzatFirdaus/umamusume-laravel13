@@ -1,19 +1,25 @@
 <script setup lang="ts">
 /*
- * The HFW `.subnav` strip (database.html): the hub plus the nine reference-data areas, on every
- * Database screen. It is the area switcher the hub's tiles and the rail cannot provide at the
- * reading position, so a Trainer moving between areas never has to go back through the hub.
+ * The HFW `.subnav` strip (database.html:69-73, catalog.html:66-70, support-cards.html:66-69,
+ * skills.html:66-69 and the three detail pages): the hub plus the nine reference-data areas. It is
+ * the area switcher the hub's tiles and the global rail cannot provide at the reading position, so a
+ * Trainer moving between areas never has to go back through the hub.
  *
- * The current item is marked by `aria-current="page"` and a rule rather than by colour alone. The
- * URLs are the registered routes' own paths; this component is the one place the list lives.
+ * It mounts on every Database page and every Library page that the HFW draws it on. The current item
+ * is marked by weight, fill and `aria-current="page"` rather than colour alone. The hub carries
+ * `aria-current` only: `.subnav-item.is-current` swaps the text to `ink-strong`, which would fight the
+ * filled pill's `on-brand-chrome` if the hub took the item state as well.
+ *
+ * Three areas have two live URLs (`/umamusume` and `/database/trainees`, and the same for support
+ * cards and skills). The aliases keep the right item current on both.
  */
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
-const AREAS: ReadonlyArray<{ label: string; href: string }> = [
-    { label: 'Trainees', href: '/umamusume' },
-    { label: 'Support cards', href: '/support-cards' },
-    { label: 'Skills', href: '/skills' },
+const AREAS: ReadonlyArray<{ label: string; href: string; aliases?: string[] }> = [
+    { label: 'Trainees', href: '/umamusume', aliases: ['/database/trainees'] },
+    { label: 'Support cards', href: '/support-cards', aliases: ['/database/supports'] },
+    { label: 'Skills', href: '/skills', aliases: ['/database/skills'] },
     { label: 'Races', href: '/database/races' },
     { label: 'Scenarios', href: '/database/scenarios' },
     { label: 'Events', href: '/database/events' },
@@ -24,25 +30,29 @@ const AREAS: ReadonlyArray<{ label: string; href: string }> = [
 
 const page = usePage();
 const path = computed<string>(() => page.url.split('?')[0]);
-const isCurrent = (href: string): boolean => path.value === href || path.value.startsWith(`${href}/`);
+const onHub = computed<boolean>(() => path.value === '/database');
+
+const isCurrent = (area: { href: string; aliases?: string[] }): boolean =>
+    [area.href, ...(area.aliases ?? [])].some(
+        (href) => path.value === href || path.value.startsWith(`${href}/`),
+    );
 </script>
 
 <template>
-    <nav aria-label="Reference data areas" class="flex flex-wrap items-center gap-x-1 gap-y-1 border-b border-rule pb-2 text-sm">
+    <nav aria-label="Reference data areas" class="subnav">
         <Link
             href="/database"
-            class="inline-flex min-h-11 items-center px-2 font-semibold"
-            :class="path === '/database' ? 'text-ink-strong underline' : 'text-ink hover:underline'"
-            :aria-current="path === '/database' ? 'page' : undefined"
+            class="subnav-hub"
+            :aria-current="onHub ? 'page' : undefined"
         >Database</Link>
-        <span aria-hidden="true" class="px-1 text-ink-faint">|</span>
+        <span class="subnav-sep" aria-hidden="true" />
         <Link
             v-for="area in AREAS"
             :key="area.href"
             :href="area.href"
-            class="inline-flex min-h-11 items-center px-2"
-            :class="isCurrent(area.href) ? 'font-semibold text-ink-strong underline' : 'text-ink-muted hover:text-ink hover:underline'"
-            :aria-current="isCurrent(area.href) ? 'page' : undefined"
+            class="subnav-item"
+            :class="isCurrent(area) ? 'is-current' : ''"
+            :aria-current="isCurrent(area) ? 'page' : undefined"
         >{{ area.label }}</Link>
     </nav>
 </template>

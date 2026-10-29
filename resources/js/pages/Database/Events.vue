@@ -15,6 +15,7 @@
  * drawer (§32), never in a modal (§31).
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
 import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import DataTable, { type DataTableColumn } from '../../components/ui/DataTable.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
@@ -87,7 +88,13 @@ const close = async (): Promise<void> => {
 <template>
     <AppLayout :breadcrumb="[{ label: 'Database', href: '/database' }, { label: 'Events' }]">
         <Head title="Events" />
-        <template #title>Events</template>
+        <template #head>
+            <PageHeader
+                eyebrow="Events"
+                title="Event catalog"
+                description="Support-card and trainee event chains. The options and their outcomes are the client's; no effect is modelled where no source publishes one."
+            />
+        </template>
 
         <DatabaseNav />
 
@@ -171,5 +178,46 @@ const close = async (): Promise<void> => {
             <p class="text-ink-muted">Cadence: {{ selected.cadence }}</p>
             <p class="text-xs text-ink-muted">{{ selected.source_title }}</p>
         </ReferenceDrawer>
+        <!-- The wireframe's two reference cards (`database-events.html:83-109`). The catalogue above is
+             this build's own subject - the recurring event types and their cadence - so the cards state
+             the in-game event sources and the retry rules, which is what a lookup after a bad outcome
+             needs. HFW-OVERRIDE (data: catalogue subject): the mock's rows are event chains; this
+             catalogue holds recurring event types, which no chain table could honestly print. -->
+        <div class="mt-4 grid gap-4 g-2">
+            <section class="card" aria-labelledby="event-sources">
+                <h2 id="event-sources">Where events come from</h2>
+                <table class="mt-2 w-full border-collapse text-sm">
+                    <tbody>
+                        <tr class="border-b border-rule">
+                            <th scope="row" class="w-56 py-2 pr-3 text-left font-medium text-ink">Support-card events</th>
+                            <td class="py-2 text-ink">Fires from the card in the deck.</td>
+                        </tr>
+                        <tr class="border-b border-rule">
+                            <th scope="row" class="w-56 py-2 pr-3 text-left font-medium text-ink">Trainee secret events</th>
+                            <td class="py-2 text-ink">Fires on a schedule; <b>not</b> in Trackblazer.</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="w-56 py-2 pr-3 text-left font-medium text-ink">Scenario events</th>
+                            <td class="py-2 text-ink">Fires from the scenario's own logic.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="card" aria-labelledby="event-retry">
+                <h2 id="event-retry">Retry rules</h2>
+                <p class="mt-2 text-sm text-ink-muted">
+                    An event choice is final. The Alarm Clock is the game's retry item and it covers
+                    <b>goal races</b> whose placing was missed, and a lost Team Race: not an event.
+                </p>
+                <p class="note mt-3">
+                    <span class="g" aria-hidden="true">○</span>
+                    <span>
+                        A guide narrows the Alarm Clock further: a player may use up to three per run. The
+                        catalogue states the item's own limits rather than implying an unbounded undo.
+                    </span>
+                </p>
+            </section>
+        </div>
     </AppLayout>
 </template>

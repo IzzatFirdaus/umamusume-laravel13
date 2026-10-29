@@ -117,6 +117,7 @@ it('renders the Races table with N/A for unrecorded values when populated', func
             ->has('slots.data.0.tier')
             ->has('slots.data.0.turn')
             ->has('slots.data.0.distance')
+            ->has('slots.data.0.distance_band')
             ->has('slots.data.0.surface')
             ->has('slots.data.0.fans_needed')
             ->has('slots.data.0.is_mandatory')
