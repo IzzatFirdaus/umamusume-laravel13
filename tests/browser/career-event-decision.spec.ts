@@ -4,20 +4,14 @@ import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';
 
 /*
- * Rendered-copy, keyboard and accessibility evidence for SCREEN-012, the Event Decision
- * (`SCR-CAR-014`, plan §8 D11). `CareerEventDecisionTest` asserts the resolved props — the
- * refusal, the grouped known outcomes, the incomplete flag, the store. These cases assert what
- * only a browser reaches: the advisor's rendered refusal, the N/A titles a sighted Trainer
- * hovers, the radio picker's keyboard behaviour, the 44px sweep on the record form, the
- * incomplete-outcome warning glyph, and an axe scan.
- *
- * Fixture strategy: create a run and log two turns over `runs.turns.store` (no rendered surface
- * creates a turn since the run screen became a redirect). Writes get 60s because `php artisan serve`
- * is a single-process `php -S`.
+ * Rendered evidence for SCREEN-012, the Event Decision, re-baselined at the HFW's region model after
+ * the 2026-10-28 parity audit: What the event shows, Options, Record the outcome, This event's
+ * provenance and the savebar. The event's own copy is the client's and is never transcribed by this
+ * tool, so the option rows are the trainer's transcription (known choices become radios when the run
+ * has any); that is the documented deviation in the page.
  */
 
 const WRITE = { timeout: 60_000 } as const;
-
 const createdRunUrls: string[] = [];
 
 test.afterEach(async ({ page }) => {
@@ -26,11 +20,7 @@ test.afterEach(async ({ page }) => {
     }
 });
 
-/**
- * A career with logged turns, then the Event Decision screen for it. Two turns are enough for
- * the record form and one recorded choice to reappear in the picker.
- */
-async function openEventDecision(page: import('@playwright/test').Page): Promise<void> {
+async function openEventDecision(page: import('@playwright/test').Page): Promise<string> {
     await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     await page.locator('#trainee-combobox').fill('Rice Shower');
@@ -38,149 +28,101 @@ async function openEventDecision(page: import('@playwright/test').Page): Promise
     await page.selectOption('select[name="scenario"]', { value: 'trackblazer' });
     await page.getByRole('button', { name: 'Create run' }).click();
     await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
-    createdRunUrls.push(page.url());
 
     const runId = page.url().match(/\/training-runs\/(\d+)/)?.[1] ?? '';
     const runUrl = page.url().replace(/\/cockpit$/, '');
+    createdRunUrls.push(page.url());
 
     await recordTurns(page, runId, 2);
 
     await page.goto(`${runUrl}/events`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
+
+    return runUrl;
 }
 
-test('refuses a recommendation and shows the current career state with N/A titles', async ({ page }) => {
+test('renders the HFW region model with one savebar', async ({ page }) => {
     await openEventDecision(page);
 
-    await expect(page.getByRole('heading', { name: 'Coach recommendation' })).toBeVisible();
-    await expect(page.getByText('No recommendation available')).toBeVisible();
-    await expect(page.getByText(/holds no event advice/)).toBeVisible();
-
-    await expect(page.getByRole('heading', { name: 'Current career state' })).toBeVisible();
-
-    // The no-run figures on a fresh state are N/A with a reason, never a default zero.
-    const naValues = page.locator('dd[title], dd span[title]');
-    const naCount = await naValues.count();
-    expect(naCount).toBeGreaterThan(0);
-    for (let i = 0; i < naCount; i++) {
-        await expect(naValues.nth(i)).toHaveAttribute('title', /.+/);
-    }
-
-    // No held computation anywhere in the main surface.
-    await expect(page.locator('main')).not.toContainText('confidence');
-    await expect(page.locator('main')).not.toContainText('win probability');
+    await expect(page.getByRole('heading', { name: 'A training event is asking', level: 1 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'What the event shows', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Record the outcome', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: "This event's provenance", level: 2 })).toBeVisible();
+    await expect(page.locator('main table')).toHaveCount(1);
+    await expect(page.locator('.savebar')).toHaveCount(1);
+    await expect(page.locator('.savebar .btn-primary')).toHaveCount(1);
 });
 
-test('records a choice by keyboard and the choice returns as a known outcome', async ({ page }) => {
+test('states the event-copy rule and keeps the keying fields behind one disclosure', async ({ page }) => {
     await openEventDecision(page);
 
-    await expect(page.getByRole('heading', { name: 'Record an event choice' })).toBeVisible();
+    await expect(page.getByText(/Event text is the client's own copy/)).toBeVisible();
+    await expect(page.getByText('No option predicts its outcome.')).toBeVisible();
 
-    await page.getByRole('combobox', { name: 'Turn *' }).first().focus();
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('Enter');
+    const details = page.locator('details').filter({ hasText: 'Where this event came from (required to record)' });
 
-    await page.getByRole('combobox', { name: 'Source *' }).first().focus();
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('Enter');
+    await expect(details).not.toHaveAttribute('open', '');
+    await expect(page.locator('input[name="source_name"]')).toBeHidden();
+});
 
-    await page.locator('input[name="source_name"]').fill('Go Beyond');
-    await page.locator('input[name="choice_label"]').fill('Option A');
-    await page.locator('textarea[name="origin_note"]').fill('+30 Energy, +10 Mood');
+test('prints the provenance rows and the held outcome fields as absences', async ({ page }) => {
+    await openEventDecision(page);
 
-    await page.getByRole('button', { name: 'Record choice' }).click();
+    await expect(page.getByText('Client screen')).toBeVisible();
+    await expect(page.getByText('Not published')).toBeVisible();
+    await expect(page.getByText(/Alarm Clock covers goal races only/)).toBeVisible();
+    // Four marked absence cells, not every occurrence of the words: the card's own sentence quotes
+    // them too, and a text count would read five.
+    await expect(page.locator('[data-outcome="not-recorded"]')).toHaveCount(4);
+});
 
+test('records a transcribed choice and the run lists it afterwards', async ({ page }) => {
+    const runUrl = await openEventDecision(page);
+
+    await page.getByText('Where this event came from (required to record)').click();
+    await page.selectOption('select[name="event_type"]', { value: 'SupportCard' });
+    await page.locator('input[name="source_name"]').fill('The reporter asks for a quote');
+    await page.locator('input[name="support_card_name"]').fill('Special Week');
+    await page.locator('input[name="choice_label"]').fill('Say something kind.');
+
+    await expect(page.locator('.savebar')).toContainText('Say something kind. selected');
+
+    await page.getByRole('button', { name: 'Record event' }).click();
     await expect(page.getByText('Event choice recorded.')).toBeVisible(WRITE);
 
-    // The history card carries the source label, the choice and the recorded outcome.
-    await expect(page.getByText('Go Beyond').first()).toBeVisible();
-    await expect(page.getByText('Option A').first()).toBeVisible();
-    await expect(page.getByText('+30 Energy, +10 Mood').first()).toBeVisible();
+    await page.goto(`${runUrl}/events`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.getByText('Recorded events on this run').click();
 
-    // Known outcomes group now exists.
-    await expect(page.getByRole('heading', { name: 'Known outcomes on this run' })).toBeVisible();
-    await expect(page.getByText('Known outcomes on this run').locator('..').getByText('Go Beyond')).toBeVisible();
-
-    // Now pick the same event again: the keyboard radio group appears, nothing preselected,
-    // and choosing one fills the choice field.
-    const radios = page.locator('input[name="known_choice"]');
-    await expect(radios).toHaveCount(1);
-    await expect(page.locator('input[name="choice_label"]')).toHaveValue('');
-
-    await radios.first().focus();
-    await page.keyboard.press('Space');
-    await expect(page.locator('input[name="choice_label"]')).toHaveValue('Option A');
+    await expect(page.getByText(/The reporter asks for a quote/)).toBeVisible();
 });
 
-test('flags a recorded choice with no outcome as incomplete', async ({ page }) => {
+test('sizes the event controls to the 44px contract', async ({ page }) => {
     await openEventDecision(page);
 
-    await page.getByRole('combobox', { name: 'Turn *' }).first().focus();
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('Enter');
+    const undersized = await page.locator('main a, main button, main select, main summary').evaluateAll((nodes) =>
+        nodes.filter((node) => {
+            const box = node.getBoundingClientRect();
 
-    await page.getByRole('combobox', { name: 'Source *' }).first().focus();
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('Enter');
+            return box.width > 0 && box.height > 0 && box.height < 44;
+        }).length,
+    );
 
-    await page.locator('input[name="source_name"]').fill('Team Meeting');
-    await page.locator('input[name="choice_label"]').fill('Drill');
-    // Deliberately no outcome note: the warning is the point of this case.
-
-    await page.getByRole('button', { name: 'Record choice' }).click();
-    await expect(page.getByText('Event choice recorded.')).toBeVisible(WRITE);
-
-    // The glyph-and-word warning, with its title reason.
-    const warning = page.getByText(/Event outcome incomplete/).first();
-    await expect(warning).toBeVisible();
-    await expect(warning).toHaveAttribute('title', /choose manually/i);
+    expect(undersized).toBe(0);
 });
 
-test('sizes the event form controls to the 44px contract', async ({ page }) => {
+test('reflows at 320px without pushing the page sideways', async ({ page }) => {
     await openEventDecision(page);
+    await page.setViewportSize({ width: 320, height: 900 });
 
-    const controls = [
-        page.getByRole('combobox', { name: 'Turn *' }).first(),
-        page.getByRole('combobox', { name: 'Source *' }).first(),
-        page.locator('input[name="source_name"]'),
-        page.locator('input[name="choice_label"]'),
-        page.getByRole('button', { name: 'Record choice' }),
-        page.locator('textarea[name="origin_note"]'),
-    ];
-
-    for (const control of controls) {
-        const box = await control.boundingBox();
-        expect(box?.height ?? 0, 'an event form control is not sized to the 44px contract')
-            .toBeGreaterThanOrEqual(44);
-    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)).toBe(false);
 });
 
 test('passes an axe scan at WCAG A and AA', async ({ page }) => {
     await openEventDecision(page);
 
-    const results = await buildAxe(page).analyze();
+    const axe = await buildAxe(page);
+    const results = await axe.analyze();
 
-    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
-});
-
-test('names the missing turns instead of showing an enabled empty form', async ({ page }) => {
-    // A run with no logged turns: the record form is replaced by the named absence.
-    await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.locator('#trainee-combobox').fill('Agnes Digital');
-    await page.keyboard.press('Enter');
-    await page.selectOption('select[name="scenario"]', { value: 'unity_cup' });
-    await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
-    createdRunUrls.push(page.url());
-
-    const runId = page.url().match(/training-runs\/(\d+)/)?.[1];
-    await page.goto(`/training-runs/${runId}/events`, { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-
-    await expect(page.getByText('No turns logged yet.')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Record an event choice' })).toHaveCount(0);
-
-    // The empty history is the page's `empty` copy, not a blank list.
-    await expect(page.getByText(/No event choices recorded yet/)).toBeVisible();
+    expect(results.violations).toEqual([]);
 });

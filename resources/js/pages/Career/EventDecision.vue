@@ -18,7 +18,8 @@
  * `@vue/compiler-sfc` to load (plan §11).
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
-import EventCard from '../../components/career/EventCard.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
+import Note from '../../components/ui/Note.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
@@ -93,8 +94,15 @@ const form = useForm({
     choice_index: null as number | null,
     choice_label: '',
     support_card_name: '',
+    bond_delta: '',
     origin_note: '',
 });
+
+// The turn the entry is recorded on: one past the last logged turn, the same rule the other
+// decision screens use; the Undo control names the turn before it.
+const initialTurn = (props.write.turns.at(-1)?.turn ?? 0) + 1;
+const undoableTurn = Math.max(1, initialTurn - 1);
+form.turn = String(initialTurn);
 
 const alert = ref<HTMLElement | null>(null);
 
@@ -181,274 +189,203 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
         :scenario-label="props.run.scenario_label"
         :status-label="props.run.status_label"
         :run-url="props.run.run_url"
+        current="events"
     >
-        <Head :title="`Event decision: ${props.run.trainee}`" />
-        <template #title>Event decision</template>
+        <Head :title="'Event decision: ' + props.run.trainee" />
+        <template #head>
+            <PageHeader
+                eyebrow="Event decision"
+                title="A training event is asking"
+                description="Pick one option. The event resolves immediately and cannot be re-run; an Alarm Clock retries a lost goal race, not an event."
+            >
+                <template #actions>
+                    <a :href="props.run.run_url" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">Back to cockpit</a>
+                </template>
+            </PageHeader>
+        </template>
 
-        <p v-if="visiting" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
-        <p v-if="visitFailed" role="alert" class="mb-4 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
+        <p v-if="visiting" role="status" class="mb-3 text-sm text-ink-muted">Loading…</p>
+        <p v-if="visitFailed" role="alert" class="mb-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
             That screen did not load. Nothing was saved; try again.
         </p>
 
-        <p class="max-w-3xl text-sm text-ink-muted">
-            Record the event that fired, the choice you made, and what it gave. Known outcomes come
-            only from this run's own recorded choices; this tool does not look up events it has not
-            seen, and it computes no score or probability for a choice.
-        </p>
+        <form @submit.prevent="submitChoice">
+            <div class="grid gap-4 g-side">
+                <section class="card" aria-labelledby="event-what-heading">
+                    <h2 id="event-what-heading">What the event shows</h2>
 
-        <!-- The advisor's refusal (design-2.0 §36): the engine holds no event advice, so the rail
-             says so and the Trainer chooses. Nothing is recommended and nothing is preselected. -->
-        <section
-            aria-labelledby="event-advisor-heading"
-            class="mt-4 rounded-md border border-rule bg-panel p-4"
-        >
-            <h2 id="event-advisor-heading" class="text-lg font-semibold text-ink-strong">Coach recommendation</h2>
-            <p class="mt-1 text-sm text-ink-strong">
-                <span v-if="props.advisor.recommendation !== null">{{ props.advisor.recommendation }}</span>
-                <span v-else title="TrainerAdvisor holds advice for training actions only.">
-                    No recommendation available
-                </span>
-            </p>
-            <ul class="mt-1 list-disc space-y-0.5 pl-5 text-sm text-ink-muted">
-                <li v-for="(reason, index) in props.advisor.reasons" :key="index">{{ reason }}</li>
-            </ul>
-        </section>
+                    <div class="mt-2 rounded-md border border-rule-soft bg-raised p-4">
+                        <div class="flex flex-wrap items-baseline gap-2.5">
+                            <span class="text-[15px] font-extrabold text-ink-strong">
+                                {{ form.source_name === '' ? 'Name the event as the client shows it' : form.source_name }}
+                            </span>
+                            <span class="pill pill-neutral">{{ form.event_type === '' ? 'Source not set' : form.event_type }}</span>
+                            <span v-if="form.support_card_name !== ''" class="pill pill-neutral">{{ form.support_card_name }}</span>
+                        </div>
+                        <p class="mt-2.5 text-[13px] leading-[1.6] text-ink">
+                            Event text is the client's own copy. This tool does not transcribe or paraphrase it; the
+                            fields below record the words the client shows, so the screen never invents event copy.
+                        </p>
+                        <Note class="mt-2.5">
+                            A real event screen prints what the client prints. What is stored here is the trainer's
+                            own transcription of it.
+                        </Note>
+                    </div>
 
-        <!-- Current career state, the same shape the Cockpit prints: five stats against targets
-             and the ScenarioCaps ceiling, plus Energy, Mood, Fans and Skill Points. -->
-        <section aria-labelledby="event-state-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="event-state-heading" class="text-lg font-semibold text-ink-strong">Current career state</h2>
-            <dl class="mt-3 grid grid-cols-2 gap-3 @3xl:grid-cols-3 @5xl:grid-cols-5">
-                 <div
-                     v-for="stat in props.state.stats"
-                     :key="stat.key"
-                     class="rounded-md border border-rule bg-panel p-2"
-                 >
-                    <dt class="text-xs text-ink-muted">{{ stat.label }}</dt>
-                    <dd class="mt-0.5 font-mono text-sm tabular-nums text-ink-strong">
-                        <span :title="statTitle(stat)">{{ statValue(stat) }}</span>
-                        <span class="text-xs font-normal text-ink-muted">/{{ stat.cap }} cap</span>
-                    </dd>
-                </div>
-            </dl>
-            <dl class="mt-3 grid grid-cols-2 gap-3 @3xl:grid-cols-4">
-                 <div
-                     v-for="item in props.state.meta"
-                     :key="item.key"
-                     class="rounded-md border border-rule bg-panel p-2"
-                 >
-                    <dt class="text-xs text-ink-muted">{{ item.label }}</dt>
-                    <dd class="mt-0.5 font-mono text-sm tabular-nums text-ink-strong">
-                        <!-- A band reading rides on `band_text` (R3-01): the number is genuinely absent and
-                             the level is not, so `N/A` would state an absence the Trainer already filled. -->
-                        <span :title="metaTitle(item)">{{ item.value ?? item.band_text ?? 'N/A' }}</span>
-                    </dd>
-                </div>
-            </dl>
-        </section>
+                    <p class="mt-3 text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Options</p>
 
-        <!-- Known outcomes: derived from this run's recorded choices, grouped by event name. -->
-        <section aria-labelledby="event-known-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="event-known-heading" class="text-lg font-semibold text-ink-strong">Known outcomes on this run</h2>
-            <p class="mt-1 text-sm text-ink-muted">
-                Choices you recorded before, grouped by event. An outcome marked incomplete means
-                no result was entered when the choice fired.
-            </p>
-
-             <p
-                 v-if="props.known.length === 0"
-                 class="mt-3 rounded-md border border-dashed border-rule bg-panel p-4 text-sm text-ink"
-             >
-                No recorded choices yet. The first entry below becomes the first known outcome.
-            </p>
-            <ul v-else class="mt-3 flex flex-col gap-2">
-                 <li
-                     v-for="group in props.known"
-                     :key="`${group.event_type}|${group.source_name}`"
-                     class="rounded-md border border-rule bg-panel p-3"
-                 >
-                    <p class="flex flex-wrap items-baseline gap-2 text-sm">
-                        <span class="rounded-md bg-pick px-1.5 py-0.5 text-xs font-semibold text-on-pick">{{ group.source_label }}</span>
-                        <span class="font-semibold text-ink-strong">{{ group.source_name }}</span>
-                    </p>
-                    <ul class="mt-2 flex flex-col gap-1">
-                        <li
-                            v-for="choice in group.choices"
+                    <div class="mt-1 flex flex-col gap-2.5">
+                        <label
+                            v-for="(choice, index) in knownForName?.choices ?? []"
                             :key="choice.label"
-                            class="flex flex-wrap items-baseline gap-2 text-sm"
+                            class="flex cursor-pointer items-start gap-2.5 rounded-md px-3 py-[11px]"
+                            :class="form.choice_label === choice.label ? 'border-2 border-pick-line bg-green-tint' : 'border border-rule-soft bg-raised'"
                         >
-                            <span class="text-ink">{{ choice.label }}</span>
-                            <span
-                                v-if="choice.outcome_recorded && choice.outcome !== null"
-                                class="text-ink-muted"
-                            >{{ choice.outcome }}</span>
-                            <span
-                                v-else
-                                class="rounded-full border border-risk px-2 py-0.5 text-xs font-semibold text-risk"
-                                title="No recorded outcome was entered for this choice. Choose manually."
-                            >⚠ Outcome incomplete</span>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </section>
+                            <input
+                                type="radio"
+                                name="known_choice"
+                                class="mt-0.5"
+                                :checked="form.choice_label === choice.label"
+                                @change="selectChoice(index, choice.label)"
+                            >
+                            <span class="min-w-0 flex-1">
+                                <span class="block text-[13.5px] font-bold text-ink-strong">{{ choice.label }}</span>
+                                <span class="mt-0.5 block text-[11.5px] text-ink-muted">
+                                    Selecting shown; outcome not predicted.
+                                    <span v-if="choice.outcome_recorded && choice.outcome !== null"> Recorded outcome: {{ choice.outcome }}.</span>
+                                </span>
+                            </span>
+                        </label>
 
-        <!-- Recorded history, newest first. -->
-        <section aria-labelledby="event-history-heading" class="mt-4">
-            <h2 id="event-history-heading" class="text-lg font-semibold text-ink-strong">Recorded events</h2>
+                        <label class="flex flex-col gap-1 rounded-md border border-rule-soft bg-raised px-3 py-[11px]">
+                            <span class="text-[13.5px] font-bold text-ink-strong">The option's own words</span>
+                            <BaseInput v-model="form.choice_label" name="choice_label" maxlength="200" placeholder="Type the option the client showed" :error="form.errors.choice_label" />
+                            <span class="text-[11.5px] text-ink-muted">Selecting shown; outcome not predicted.</span>
+                        </label>
+                    </div>
 
-             <p
-                 v-if="props.empty !== null"
-                 class="mt-2 rounded-md border border-dashed border-rule bg-panel p-4 text-sm text-ink"
-             >
-                {{ props.empty }}
-            </p>
-            <ul v-else class="mt-3 flex flex-col gap-3">
-                <li v-for="event in props.events" :key="event.id">
-                    <EventCard v-bind="event" />
-                </li>
-            </ul>
-        </section>
+                    <p v-if="knownForName === null" class="mt-2 text-xs text-ink-muted">
+                        No recorded choices for this event yet. The first entry becomes the first known outcome.
+                    </p>
 
-        <!-- The record form. Disabled only when the run has no turns to record against, which is
-             a named absence, not a default. -->
-        <form
-            v-if="props.write.turns.length > 0"
-            aria-labelledby="event-form-heading"
-            class="mt-4 rounded-md border border-rule bg-panel p-4"
-            @submit.prevent="submitChoice"
-        >
-            <h2 id="event-form-heading" class="text-lg font-semibold text-ink-strong">Record an event choice</h2>
-            <p class="mt-1 text-sm text-ink-muted">
-                Store what fired and what you chose. This creates a TurnEvent on the selected turn.
-            </p>
+                    <Note class="mt-2.5">
+                        <b>No option predicts its outcome.</b> The app is forbidden to invent a score, a percentage
+                        or a "best pick" for an event whose results no source publishes. It records the choice and
+                        the effect you report afterwards.
+                    </Note>
 
-            <div
-                v-if="form.hasErrors"
-                ref="alert"
-                role="alert"
-                tabindex="-1"
-                class="mt-3 rounded-md border border-risk bg-raised p-2 text-sm text-risk"
-            >
-                <p class="font-semibold">The choice was not recorded.</p>
-                <ul class="mt-1 list-disc pl-5">
-                    <li v-for="(message, key) in form.errors" :key="key">{{ message }}</li>
-                </ul>
-            </div>
+                    <!-- HFW OVERRIDE (write fields): the wireframe's event row is client copy. The rows the
+                         database needs to key the entry (turn, source, event name, support card) stay below the
+                         copy block, compact, because the request requires them. -->
+                    <details class="mt-3">
+                        <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">Where this event came from (required to record)</summary>
+                        <div class="mt-2 grid max-w-3xl grid-cols-2 gap-3 text-sm @4xl:grid-cols-4">
+                            <label class="flex flex-col gap-1">
+                                <span class="text-ink-muted">Turn *</span>
+                                <BaseInput v-model="form.turn" type="number" name="turn" min="1" max="72" required :error="form.errors.turn" />
+                            </label>
+                            <label class="flex flex-col gap-1">
+                                <span class="text-ink-muted">Source *</span>
+                                <BaseSelect v-model="form.event_type" name="event_type" :options="[{ value: '', label: 'Choose' }, ...props.write.sources]" :error="form.errors.event_type" />
+                            </label>
+                            <label class="flex flex-col gap-1">
+                                <span class="text-ink-muted">Event name *</span>
+                                <BaseInput v-model="form.source_name" name="source_name" maxlength="100" required :error="form.errors.source_name" />
+                            </label>
+                            <label class="flex flex-col gap-1">
+                                <span class="text-ink-muted">Support card</span>
+                                <BaseInput v-model="form.support_card_name" name="support_card_name" maxlength="100" :error="form.errors.support_card_name" />
+                            </label>
+                        </div>
+                    </details>
+                </section>
 
-            <div class="mt-3 grid grid-cols-1 gap-3 @3xl:grid-cols-2 @5xl:grid-cols-3">
-<BaseSelect
-  v-model="form.turn"
-  name="turn"
-  label="Turn *"
-  required
-  :options="[{ value: '', label: 'Select turn' }, ...props.write.turns.map(t => ({ value: t.turn, label: `Turn ${t.turn}` }))]"
-  :error="form.errors.turn"
-/>
+                <div class="flex flex-col gap-4">
+                    <section class="card" aria-labelledby="event-outcome-heading">
+                        <h2 id="event-outcome-heading">Record the outcome</h2>
+                        <p class="sub">After the client resolves the event, record what it did.</p>
+                        <div class="grid gap-2.5 g-2">
+                            <div class="flex flex-col gap-1">
+                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Energy</span>
+                                <span data-outcome="not-recorded" class="rounded-md border border-dashed border-rule bg-raised px-2 py-2 text-sm text-ink-muted">Not recorded</span>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Mood</span>
+                                <span data-outcome="not-recorded" class="rounded-md border border-dashed border-rule bg-raised px-2 py-2 text-sm text-ink-muted">Not recorded</span>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Skill points</span>
+                                <span data-outcome="not-recorded" class="rounded-md border border-dashed border-rule bg-raised px-2 py-2 text-sm text-ink-muted">Not recorded</span>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Stat changed</span>
+                                <span data-outcome="not-recorded" class="rounded-md border border-dashed border-rule bg-raised px-2 py-2 text-sm text-ink-muted">Not recorded</span>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-xs text-ink-muted">
+                            No column holds an event's Energy, Mood, Skill-Point or stat delta, so those four state
+                            "not recorded" rather than a zero. The note and the bond change are the two outcome
+                            fields this tool can store.
+                        </p>
+                        <div class="mt-3 grid gap-2.5 g-2">
+                            <label class="flex flex-col gap-1">
+                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Bond change</span>
+                                <BaseInput v-model="form.bond_delta" type="number" name="bond_delta" placeholder="Optional" :error="form.errors.bond_delta" />
+                            </label>
+                            <label class="flex flex-col gap-1">
+                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Note</span>
+                                <BaseInput v-model="form.origin_note" name="origin_note" maxlength="1000" placeholder="Optional" :error="form.errors.origin_note" />
+                            </label>
+                        </div>
+                        <Note class="mt-2.5">
+                            An empty field records "not read off the screen", which is different from a zero.
+                        </Note>
+                    </section>
 
-<BaseSelect
-  v-model="form.event_type"
-  name="event_type"
-  label="Source *"
-  required
-  :options="[{ value: '', label: 'Select source' }, ...props.write.sources.map(s => ({ value: s.value, label: s.label }))]"
-  :error="form.errors.event_type"
-/>
+                    <section class="card" aria-labelledby="event-provenance-heading">
+                        <h2 id="event-provenance-heading">This event's provenance</h2>
+                        <table class="t mt-1 w-full border-collapse text-sm">
+                            <tbody>
+                                <tr class="border-b border-rule-soft"><th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Source</th><td class="py-2">Client screen</td></tr>
+                                <tr class="border-b border-rule-soft"><th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Effect table</th><td class="py-2"><span class="pill pill-caution">Not published</span></td></tr>
+                                <tr><th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Retryable</th><td class="py-2">No — Alarm Clock covers goal races only</td></tr>
+                            </tbody>
+                        </table>
+                        <Note class="mt-2.5">
+                            An Alarm Clock retries a goal race whose placing was missed; it does not re-open an event
+                            choice.
+                        </Note>
+                    </section>
 
-<BaseInput
-  v-model="form.source_name"
-  type="text"
-  name="source_name"
-  label="Event name *"
-  required
-  placeholder="e.g., Go Beyond"
-  :error="form.errors.source_name"
-/>
-            </div>
+                    <div v-if="form.hasErrors" ref="alert" role="alert" tabindex="-1" class="rounded-md border border-risk bg-raised p-3 text-sm text-risk">
+                        <p class="font-semibold">The event was not recorded.</p>
+                        <ul class="mt-1 list-disc pl-5">
+                            <li v-for="(message, key) in form.errors" :key="key">{{ message }}</li>
+                        </ul>
+                    </div>
 
-            <!-- Known choices for this event, as a keyboard radio group. Nothing is preselected;
-                 the manual field below stays the fallback for an unseen choice. -->
-             <fieldset
-                 v-if="knownForName !== null"
-                 class="mt-3 rounded-md border border-rule bg-panel p-3"
-             >
-                <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                    Choices seen on this run
-                </legend>
-                <BaseRadio
-                  v-for="(choice, index) in knownForName.choices"
-                  :key="choice.label"
-                  v-model="form.choice_label"
-                  :id="`known_choice_${index}`"
-                  name="known_choice"
-                  :value="choice.label"
-                  :label="null"
-                >
-                  <span class="text-ink">{{ choice.label }}</span>
-                  <span v-if="choice.outcome_recorded && choice.outcome !== null" class="text-ink-muted">
-                      {{ choice.outcome }}
-                  </span>
-                  <span
-                      v-else
-                      class="rounded-full border border-risk px-2 py-0.5 text-xs font-semibold text-risk"
-                      title="No recorded outcome was entered for this choice. Choose manually."
-                  >⚠ Outcome incomplete</span>
-                </BaseRadio>
-            </fieldset>
-
-            <div class="mt-3 grid grid-cols-1 gap-3 @3xl:grid-cols-2">
-<BaseInput
-  v-model="form.choice_label"
-  type="text"
-  name="choice_label"
-  label="Choice you made *"
-  required
-  placeholder="Option A, Encourage, …"
-  :error="form.errors.choice_label"
-/>
-
-<BaseInput
-  v-model="form.support_card_name"
-  type="text"
-  name="support_card_name"
-  label="Support card (if the event came from one)"
-  placeholder="e.g., Kitasan Black"
-  :error="form.errors.support_card_name"
-/>
-            </div>
-
-<BaseTextarea
-  v-model="form.origin_note"
-  name="origin_note"
-  label="What the choice gave"
-  rows="2"
-  placeholder="e.g., +30 Energy, +10 Mood"
-  :error="form.errors.origin_note"
-/>
-
-            <div class="mt-3 flex flex-wrap items-center gap-2">
-                <button
-                    id="event-submit"
-                    type="submit"
-                    class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action disabled:opacity-60 disabled:cursor-wait"
-                    :disabled="form.processing"
-                >
-                    {{ form.processing ? 'Recording…' : 'Record choice' }}
-                </button>
-                <p v-if="form.processing" role="status" class="text-sm text-ink-muted">
-                    Recording the choice…
-                </p>
+                    <div class="savebar">
+                        <span class="dirty" role="status">
+                            {{ form.choice_label === '' ? 'No option selected' : form.choice_label + ' selected' }}
+                        </span>
+                        <button type="button" class="btn btn-quiet min-h-11" title="The build has no undo; this screen proposes one.">Undo turn {{ undoableTurn }}</button>
+                        <a :href="props.run.run_url" class="btn min-h-11 inline-flex items-center">Skip</a>
+                        <button type="submit" class="btn btn-primary min-h-11" :disabled="form.processing">
+                            {{ form.processing ? 'Recording…' : 'Record event' }}
+                        </button>
+                    </div>
+                </div>
             </div>
         </form>
-         <p v-else class="mt-4 rounded-md border border-dashed border-rule bg-panel p-4 text-sm text-ink">
-            No turns logged yet. Record at least one turn on the Cockpit before recording an
-            event choice.
-        </p>
 
-        <div class="mt-4 max-w-sm">
-            <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">
-                Back to Cockpit
-            </a>
-        </div>
+        <details class="card mt-4">
+            <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">Recorded events on this run</summary>
+            <p v-if="props.events.length === 0" class="mt-1 text-sm text-ink">{{ props.empty }}</p>
+            <ul v-else class="mt-2 flex flex-col gap-2 text-sm">
+                <li v-for="event in props.events" :key="event.id" class="rounded-md border border-rule-soft bg-raised px-3 py-2">
+                    Turn {{ event.turn }} · {{ event.source_label }} · {{ event.source_name }} — {{ event.choice_label ?? 'choice not recorded' }}
+                </li>
+            </ul>
+        </details>
     </CareerLayout>
 </template>
