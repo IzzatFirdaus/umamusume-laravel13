@@ -37,7 +37,10 @@ class SupportCardController extends Controller
 {
     public function index(SupportCardSearchRequest $request): Response
     {
-        return $this->renderPage('SupportCards/Index', $this->indexProps($request));
+        // Five rows: the wireframe's page size (`support-cards.html:86-141` draws five), a page a
+        // Trainer can compare without scrolling. `?pageSize=` still wins, so the old 25-row view is a
+        // URL away.
+        return $this->renderPage('SupportCards/Index', $this->indexProps($request, 5));
     }
 
     /**
@@ -63,11 +66,16 @@ class SupportCardController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function indexProps(SupportCardSearchRequest $request): array
+    private function indexProps(SupportCardSearchRequest $request, int $perPage = PageSize::DEFAULT): array
     {
+        $q = $request->validated('q');
         $rarity = $request->validated('rarity');
         $type = $request->validated('type');
         $status = $request->validated('status');
+        // The wireframe scopes the library to one server and defaults to Global
+        // (`support-cards.html:76`: a Global/JP select with Global selected), so the default view is
+        // the Global catalogue rather than every row the export holds.
+        $server = $request->validated('server') ?? SupportCardSearchRequest::SERVERS[0];
         $sort = $request->validated('sort');
 
         // Read once for the page, not once per row: twenty-five cards ask the same 35 dictionary rows
@@ -75,10 +83,9 @@ class SupportCardController extends Controller
         $dictionary = SupportCardEffects::dictionary();
 
         // §7-9 chose one page-size rule for all three surfaces over this screen's fixed constant,
-        // so `?pageSize=` honours and clamps here as it does on the catalog. The default is the
-        // number the constant carried, 25, so a filter nobody touched looks the same as before.
-        $cards = $this->ordered($this->filtered($rarity, $type, $status), $sort)
-            ->paginate(PageSize::clamp($request->query('pageSize')))
+        // so `?pageSize=` honours and clamps here as it does on the catalog.
+        $cards = $this->ordered($this->filtered($q, $rarity, $type, $status, $server), $sort)
+            ->paginate(PageSize::clamp($request->query('pageSize'), $perPage))
             ->withQueryString()
             ->through(function (SupportCard $card) use ($dictionary): array {
                 $effects = SupportCardEffects::atCap($card, $dictionary);
@@ -118,21 +125,38 @@ class SupportCardController extends Controller
 
         return [
             'cards' => $cards,
+            'q' => $q,
             'rarity' => $rarity,
             'type' => $type,
             'status' => $status,
+            'server' => $server,
+            'servers' => SupportCardSearchRequest::SERVERS,
+            // The scope line the wireframe's pager carries: "251 cards on [Global]"
+            // (`support-cards.html:148`). Counted on the server facet alone, so a type or rarity
+            // narrowing does not change the number that says how big the server's catalogue is.
+            'serverCount' => $this->serverCount($server),
             'sort' => $sort,
             'rarityWords' => $this->rarityWords(),
             'typeWords' => $this->typeWords(),
             'availabilities' => SupportCard::AVAILABILITIES,
             'sorts' => $this->sortLabels(),
-            // Two whole-table reads on a 559-row table, taken once per page rather than once per row
-            // (`support-cards.html` annotations 3 and 4). Both state facts about the catalogue that no
-            // single row can: how the seven types divide, and which vocabulary effects no card carries.
+            // Three whole-table reads on a 559-row table, taken once per page rather than once per row
+            // (`support-cards.html` annotations 3 and 4). They state facts about the catalogue that no
+            // single row can: how the seven types divide, which effects decide a deck slot, and which
+            // vocabulary effects no card carries.
             'typeCounts' => $this->typeCounts(),
+            'decidingEffects' => $this->decidingEffects($dictionary),
             'uncoveredEffects' => $this->uncoveredEffects($dictionary),
             'totalCount' => SupportCard::query()->count(),
-            'askedFor' => $this->describeAsk($rarity, $type, $status),
+            // How much of the catalogue the default Global view is a view of. Query source:
+            // `support_cards` rows where `release_global` is not null - the same predicate the stored
+            // `release_status` column resolves to 'Global' (migration
+            // 2026_09_30_142618_create_support_cards_and_support_effects_tables.php:46-52). The
+            // dispatch named this `global_count`; it ships camel-cased so the top-level props keep
+            // one naming rule beside `totalCount` and `typeCounts`. `release_en` is the source
+            // document's key for the same fact and is not a column on this table.
+            'globalCount' => SupportCard::query()->whereNotNull('release_global')->count(),
+            'askedFor' => $this->describeAsk($q, $rarity, $type, $status),
         ];
     }
 
@@ -164,31 +188,77 @@ class SupportCardController extends Controller
     }
 
     /**
-     * The seven types with their row counts, in the order `SupportCard::TYPES` states them.
+     * The five effects that decide a deck slot, in the wireframe's order (`support-cards.html:170-179`).
      *
-     * The `global` column is the availability split the page exists to make concrete: a JP guide's
-     * deck advice can be about a card Global has not received, and the counts say so on the page
-     * (`support-cards.html` annotation 3).
+     * The ids are the export's, never the printed names: `support_effects` is the join target for
+     * `support_cards.effects`, and a later fetch could re-word a label (AGENTS.md §5). Each name is
+     * resolved through the dictionary, so an id the vocabulary drops removes its row rather than
+     * printing an unnamed one.
      *
-     * @return list<array{type: string, label: string, total: int, global: int}>
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @return list<array{effect_id: int, name: string, description: string}>
+     */
+    private function decidingEffects(array $dictionary): array
+    {
+        $effects = [];
+
+        foreach (self::DECIDING_EFFECTS as $effectId => $description) {
+            $entry = $dictionary[$effectId] ?? null;
+
+            if ($entry === null) {
+                continue;
+            }
+
+            $effects[] = ['effect_id' => $effectId, 'name' => $entry['name'], 'description' => $description];
+        }
+
+        return $effects;
+    }
+
+    /**
+     * The five rows above, keyed by the export's effect id. Descriptions are the wireframe's mechanics
+     * copy (`support-cards.html:173-177`), not data: the catalogue states values, not why an effect
+     * matters.
+     *
+     * @var array<int, string>
+     */
+    private const DECIDING_EFFECTS = [
+        1 => "Multiplies the tile's payout. Two cards multiply: 1.25 × 1.30 = 1.625.",
+        14 => 'Raises the gauge the card starts with, so it can reach orange sooner.',
+        19 => 'Raises how often the card appears at its preferred facility.',
+        27 => 'Shrinks the failure roll on a shared tile.',
+        31 => 'Scales the Energy Wit friendship training returns.',
+    ];
+
+    /**
+     * The seven types with their per-rarity counts and the Global SSR subset, in `SupportCard::TYPES`
+     * order.
+     *
+     * The wireframe's rule (`support-cards.html:155-166`): the JP column counts records in the export,
+     * the Global column counts cards the Global client has received. In this schema those are one
+     * table's `rarity` and `release_status` columns, so all four numbers come from one grouped read.
+     *
+     * @return list<array{type: string, label: string, r: int, sr: int, ssr: int, global_ssr: int}>
      */
     private function typeCounts(): array
     {
         $rows = SupportCard::query()
-            ->selectRaw("type, count(*) as total, sum(case when release_status = 'Global' then 1 else 0 end) as global_count")
+            ->selectRaw("type, sum(case when rarity = 1 then 1 else 0 end) as r, sum(case when rarity = 2 then 1 else 0 end) as sr, sum(case when rarity = 3 then 1 else 0 end) as ssr, sum(case when rarity = 3 and release_status = 'Global' then 1 else 0 end) as global_ssr")
             ->groupBy('type')
             ->get()
             ->keyBy('type');
 
-        return array_values(array_map(
+        return array_map(
             static fn (string $type): array => [
                 'type' => $type,
                 'label' => SupportCard::typeWord($type),
-                'total' => (int) ($rows->get($type)->total ?? 0),
-                'global' => (int) ($rows->get($type)->global_count ?? 0),
+                'r' => (int) ($rows->get($type)->r ?? 0),
+                'sr' => (int) ($rows->get($type)->sr ?? 0),
+                'ssr' => (int) ($rows->get($type)->ssr ?? 0),
+                'global_ssr' => (int) ($rows->get($type)->global_ssr ?? 0),
             ],
             SupportCard::TYPES,
-        ));
+        );
     }
 
     /**
@@ -331,7 +401,9 @@ class SupportCardController extends Controller
                 'scenario_label' => $slot->trainingRun->scenario ? ($scenarioLabels[$slot->trainingRun->scenario] ?? $slot->trainingRun->scenario) : 'No scenario set',
                 'status_label' => $slot->trainingRun->status->label(),
                 'card_level' => $slot->card_level,
-                'url' => route('runs.show', $slot->trainingRun),
+                // The run's own door is the cockpit, not the retired compatibility doorway a
+                // link would send a Trainer through a redirect to reach.
+                'url' => route('runs.cockpit', $slot->trainingRun),
             ])
             ->values()
             ->all();
@@ -342,9 +414,10 @@ class SupportCardController extends Controller
      * repeating a query back at them. An empty set of conditions cannot reach that state: with rows in
      * the table and no filter, the first page has rows.
      */
-    private function describeAsk(?string $rarity, ?string $type, ?string $status): string
+    private function describeAsk(?string $q, ?string $rarity, ?string $type, ?string $status): string
     {
         $parts = array_filter([
+            $q === null ? null : "the name \"{$q}\"",
             $rarity === null ? null : 'rarity '.CardRarity::from((int) $rarity)->word(),
             $type === null ? null : "type {$type}",
             $status === null ? null : "availability {$status}",
@@ -415,12 +488,39 @@ class SupportCardController extends Controller
     /**
      * @return Builder<SupportCard>
      */
-    private function filtered(?string $rarity, ?string $type, ?string $status): Builder
+    private function filtered(?string $q, ?string $rarity, ?string $type, ?string $status, ?string $server = null): Builder
     {
         return SupportCard::query()
-            ->when($rarity !== null, fn (Builder $q): Builder => $q->where('rarity', (int) $rarity))
-            ->when($type !== null, fn (Builder $q): Builder => $q->where('type', $type))
-            ->when($status !== null, fn (Builder $q): Builder => $q->where('release_status', $status));
+            ->when($q !== null, function (Builder $query) use ($q): void {
+                // The row prints `char_name` beside `title_en`, and a search field a Trainer types the
+                // printed label into has to answer both, including the Japanese name the source stores.
+                // SQLite has no default LIKE escape character, so the clause names one and `%`/`_` are
+                // escaped first: unescaped, a `%` would return the whole catalogue (KI-26's trap).
+                $pattern = '%'.addcslashes($q, '\\%_').'%';
+
+                $query->where(static fn (Builder $inner): Builder => $inner
+                    ->whereRaw("char_name LIKE ? ESCAPE '\\'", [$pattern])
+                    ->orWhereRaw("title_en LIKE ? ESCAPE '\\'", [$pattern])
+                    ->orWhereRaw("name_ja LIKE ? ESCAPE '\\'", [$pattern]));
+            })
+            ->when($rarity !== null, fn (Builder $query): Builder => $query->where('rarity', (int) $rarity))
+            ->when($type !== null, fn (Builder $query): Builder => $query->where('type', $type))
+            ->when($status !== null, fn (Builder $query): Builder => $query->where('release_status', $status))
+            // Global means the Global client has the card; JP means it has not received it yet, which
+            // is the export's own split (`release_global` null). A two-server facet, not a third state.
+            ->when($server === 'Global', fn (Builder $query): Builder => $query->whereNotNull('release_global'))
+            ->when($server === 'JP', fn (Builder $query): Builder => $query->whereNull('release_global'));
+    }
+
+    /**
+     * How many cards the selected server holds, ignoring the other facets.
+     */
+    private function serverCount(string $server): int
+    {
+        return SupportCard::query()
+            ->when($server === 'Global', fn (Builder $query): Builder => $query->whereNotNull('release_global'))
+            ->when($server === 'JP', fn (Builder $query): Builder => $query->whereNull('release_global'))
+            ->count();
     }
 
     /**

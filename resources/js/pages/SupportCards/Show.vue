@@ -17,6 +17,7 @@
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
+import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import RarityChip from '../../components/RarityChip.vue';
 import SkillRow from '../../components/SkillRow.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
@@ -144,6 +145,8 @@ const statedAt = (stage: EffectStage): string =>
             </PageHeader>
         </template>
 
+        <DatabaseNav />
+
         <div v-if="props.card.artworkURL || hasJapanese" class="mb-4 flex items-center gap-3">
             <!-- No link: this page is the card, so a frame around it would be a link to itself
                  (`DESIGN.md` §4.7, the header slot's no-action case). Decorative alt, because the name
@@ -152,8 +155,8 @@ const statedAt = (stage: EffectStage): string =>
             <p v-if="hasJapanese" lang="ja" class="text-sm text-ink-muted">{{ japaneseName }}</p>
         </div>
 
-        <div class="grid grid-cols-1 gap-4 @4xl:grid-cols-3">
-            <div class="@4xl:col-span-2">
+        <div class="grid gap-4 g-side">
+            <div>
                 <div class="card">
                     <h2>Effects, as the source states them</h2>
                     <p class="sub">Each row lists the card levels the source gives a value for, and the last of them is the cap. A level between two stated anchors carries no entry, which is not the same thing as a zero.</p>
@@ -224,7 +227,7 @@ const statedAt = (stage: EffectStage): string =>
             <div>
                 <div class="card">
                     <h2>Card</h2>
-                    <div class="grid grid-cols-2 gap-2">
+                    <div class="grid gap-2 g-2">
                         <div class="tile">
                             <div class="k">Rarity</div>
                             <div class="v flex items-baseline gap-2">

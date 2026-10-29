@@ -68,20 +68,50 @@ it('lists every card with the label a Trainer reads and a link to its own page',
             ->where('totalCount', 2));
 });
 
-it('shows the rarity word, the type word and the availability the source states', function (): void {
+it('counts the Global half of the catalogue apart from the whole table', function (): void {
+    // The side tasks delta the parity pass filed as `SupportCardController.global_count`; the prop
+    // ships as `globalCount`. It exists because the default view is one server's (the wireframe's
+    // Global facet), so the row count on the table is not the size of the catalogue, and a Trainer
+    // comparing the two needs both stated. Query source: `release_global is not null`, which is what
+    // the generated `release_status` column calls 'Global'.
+    SupportCard::factory()->create(['char_name' => 'Global One']);
+    SupportCard::factory()->jpOnly()->create(['char_name' => 'Japan Only Two']);
+
+    test()->get('/support-cards')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('totalCount', 2)
+            ->where('globalCount', 1));
+});
+
+it('scopes the library to one server, defaulting to Global, and names the scope line', function (): void {
+    // The wireframe's Server facet is two servers with Global selected and no all-servers option
+    // (`support-cards.html:76`), and the table does not repeat availability on every row because the
+    // list is already one server's. The per-row `release_status` stays in the payload for the Database
+    // area and for these assertions.
     SupportCard::factory()->ssr()->wit()->create(['char_name' => 'Silence Suzuka']);
     SupportCard::factory()->jpOnly()->create(['char_name' => 'Gold Ship']);
 
     test()->get('/support-cards')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
+            ->where('server', 'Global')
+            ->where('serverCount', 1)
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'Silence Suzuka [Tracen Academy]')
+            ->where('cards.data.0.rarity_word', 'SSR')
+            ->where('cards.data.0.type_label', 'Wit')
+            ->where('cards.data.0.release_status', 'Global'));
+
+    test()->get('/support-cards?server=JP')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('server', 'JP')
+            ->where('serverCount', 1)
+            ->has('cards.data', 1)
             ->where('cards.data.0.name', 'Gold Ship [Tracen Academy]')
             ->where('cards.data.0.rarity_word', 'R')
-            ->where('cards.data.0.release_status', 'JP-only')
-            ->where('cards.data.1.name', 'Silence Suzuka [Tracen Academy]')
-            ->where('cards.data.1.rarity_word', 'SSR')
-            ->where('cards.data.1.type_label', 'Wit')
-            ->where('cards.data.1.release_status', 'Global'));
+            ->where('cards.data.0.release_status', 'JP-only'));
 });
 
 it('summarizes each card\'s effects at cap on the row', function (): void {
@@ -109,25 +139,84 @@ it('names an effect the dictionary has no row for instead of inventing a label',
             ->where('cards.data.0.effects.0.display', '5'));
 });
 
-it('paginates at twenty-five cards and carries the filter through the link', function (): void {
+it('paginates at five cards, keeps twenty-five a URL away, and carries the filter through the link', function (): void {
     foreach (range(1, 26) as $index) {
         SupportCard::factory()->create(['char_name' => sprintf('Trainee %02d', $index)]);
     }
 
+    // Five rows is the wireframe's page size (`support-cards.html:86-141`).
     test()->get('/support-cards')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('cards.data', 25)
+            ->has('cards.data', 5)
             ->where('cards.data.0.name', 'Trainee 01 [Tracen Academy]')
-            ->where('cards.data.24.name', 'Trainee 25 [Tracen Academy]')
+            ->where('cards.data.4.name', 'Trainee 05 [Tracen Academy]')
             ->where('cards.total', 26)
             ->where('totalCount', 26));
+
+    // The clamp still honours an explicit size, so the old 25-row view survives as a URL.
+    test()->get('/support-cards?pageSize=25')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 25)
+            ->where('cards.data.24.name', 'Trainee 25 [Tracen Academy]'));
 
     test()->get('/support-cards?page=2&rarity=1')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 5)
+            ->where('cards.data.0.name', 'Trainee 06 [Tracen Academy]'));
+});
+
+it('searches the three stored name fields, escapes LIKE metacharacters, and names the ask', function (): void {
+    SupportCard::factory()->create([
+        'char_name' => 'Special Week',
+        'title_en' => '[Tracen Academy]',
+        'name_ja' => 'スペシャルウィーク',
+    ]);
+    SupportCard::factory()->create([
+        'char_name' => 'Silence Suzuka',
+        'title_en' => '[Beyond This Shining Moment]',
+        'name_ja' => 'サイレンススズカ',
+    ]);
+    SupportCard::factory()->create([
+        'char_name' => '100% Real',
+        'title_en' => '[Percent]',
+        'name_ja' => 'ヒャクパーセント',
+    ]);
+
+    test()->get('/support-cards?q=Silence')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
             ->has('cards.data', 1)
-            ->where('cards.data.0.name', 'Trainee 26 [Tracen Academy]'));
+            ->where('cards.data.0.name', 'Silence Suzuka [Beyond This Shining Moment]'));
+
+    // The epithet and the Japanese name are the other two stored fields, and the row prints both.
+    test()->get('/support-cards?q=Shining')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'Silence Suzuka [Beyond This Shining Moment]'));
+
+    test()->get('/support-cards?q=サイレンス')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'Silence Suzuka [Beyond This Shining Moment]'));
+
+    // `%` is a LIKE wildcard. Unescaped, this would return all three cards instead of the one whose
+    // name states it (the KI-26 trap).
+    test()->get('/support-cards?q=%25')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', '100% Real [Percent]'));
+
+    test()->get('/support-cards?q=Nothing')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 0)
+            ->where('askedFor', 'the name "Nothing"'));
 });
 
 it('narrows by rarity, by type and by availability', function (): void {
@@ -523,23 +612,49 @@ it('prints no friendship bonus for a Pal card, and none invented for a card that
             ->where('cards.data.1.friendship', null));
 });
 
-it('counts the seven types and names the effects no card carries', function (): void {
+it('counts the seven types by rarity, names the effects that decide a deck slot, and the ones no card carries', function (): void {
     effectRow(1, 'Friendship Bonus');
     effectRow(2, 'Mood Effect');
     cardWithEffects(['char_name' => 'Special Week']);
     SupportCard::factory()->speed()->create(['char_name' => 'Silence Suzuka']);
 
     // The first card carries effect 1 and the second carries the factory vector's effect 1 too, so
-    // Mood Effect (id 2) is the vocabulary row no card here states a value for.
+    // Mood Effect (id 2) is the vocabulary row no card here states a value for. Only Friendship Bonus
+    // is in the deciding set, so the other four ids are dropped rather than printed unnamed.
     test()->get('/support-cards')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->has('typeCounts', 7)
             ->where('typeCounts.0.type', 'speed')
-            ->where('typeCounts.0.total', 1)
-            ->where('typeCounts.0.global', 1)
+            ->where('typeCounts.0.r', 1)
+            ->where('typeCounts.0.sr', 0)
+            ->where('typeCounts.0.ssr', 0)
+            ->where('typeCounts.0.global_ssr', 0)
             ->where('typeCounts.3.type', 'guts')
-            ->where('typeCounts.3.total', 1)
+            ->where('typeCounts.3.r', 1)
+            ->where('typeCounts.3.ssr', 0)
+            ->has('decidingEffects', 1)
+            ->where('decidingEffects.0.effect_id', 1)
+            ->where('decidingEffects.0.name', 'Friendship Bonus')
+            ->where('decidingEffects.0.description', "Multiplies the tile's payout. Two cards multiply: 1.25 × 1.30 = 1.625.")
             ->where('uncoveredEffects.0.effect_id', 2)
             ->where('uncoveredEffects.0.name', 'Mood Effect'));
+});
+
+it('reconciles the type counts with the catalog total and the Global SSR count', function (): void {
+    SupportCard::factory()->ssr()->speed()->create();
+    SupportCard::factory()->sr()->stamina()->create();
+    SupportCard::factory()->create(['rarity' => CardRarity::OneStar, 'type' => 'guts']);
+    SupportCard::factory()->ssr()->speed()->jpOnly()->create();
+
+    test()->get('/support-cards')->assertOk()->assertInertia(function (Assert $page): void {
+        /** @var list<array{r: int, sr: int, ssr: int, global_ssr: int}> $rows */
+        $rows = $page->toArray()['props']['typeCounts'];
+
+        $total = array_sum(array_map(static fn (array $row): int => $row['r'] + $row['sr'] + $row['ssr'], $rows));
+        $globalSsr = array_sum(array_column($rows, 'global_ssr'));
+
+        expect($total)->toBe(4)
+            ->and($globalSsr)->toBe(1);
+    });
 });

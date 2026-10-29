@@ -99,9 +99,10 @@ function focusRow(): void {
     <li
         :id="`deck-slot-${position}`"
         tabindex="-1"
-        class="card flex flex-wrap items-start gap-x-4 gap-y-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
+        class="card flex flex-col gap-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
         :style="is_friend || !card ? 'border-style:dashed' : undefined"
     >
+        <div class="flex min-w-0 items-start gap-3">
         <ArtworkSlot
             v-if="card"
             :url="card.artworkURL"
@@ -114,7 +115,7 @@ function focusRow(): void {
 
         <div class="flex min-w-0 flex-1 flex-col gap-1">
             <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <span class="font-semibold text-[var(--color-ink-strong)]">{{ label }}</span>
+                <span class="font-semibold text-ink-strong">{{ label }}</span>
                 <span v-if="is_friend" class="pill pill-neutral">
                     Friend slot
                 </span>
@@ -122,14 +123,14 @@ function focusRow(): void {
 
             <!-- An empty slot is a deliberate statement a Trainer makes, so it reads as a statement
                  rather than as a blank control: the card is not equipped, and here is where to put it. -->
-            <p v-if="!card" class="text-[var(--color-ink-muted)]">
+            <p v-if="!card" class="text-ink-muted">
                 Not equipped.
             </p>
 
             <template v-else>
                 <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <a :href="card.url" class="font-semibold text-[var(--color-ink)] hover:underline transition-colors duration-150 ease-out">{{ card.name }}</a>
-                    <span class="font-mono text-xs text-[var(--color-ink-muted)]">{{ card.rarity_word }}</span>
+                    <a :href="card.url" class="font-semibold text-ink hover:underline transition-colors duration-150 ease-out">{{ card.name }}</a>
+                    <span class="font-mono text-xs text-ink-muted">{{ card.rarity_word }}</span>
                     <SupportTypeMark :type="card.type" :label="card.type_label" />
                 </div>
 
@@ -144,42 +145,48 @@ function focusRow(): void {
                     </span>
                     <span
                         v-else-if="card.scenario_link === 'not_linked'"
-                        class="text-[var(--color-ink-muted)]"
+                        class="text-ink-muted"
                     >
                         Not a Scenario Link
                     </span>
                     <span
                         v-else
-                        class="text-[var(--color-ink-muted)]"
-                        :title="card.scenario_link_note ?? 'The Scenario Link badge cannot be derived for this card.'"
+                        class="text-ink-muted"
                     >
                         Scenario Link: N/A
+                        <span v-if="card.scenario_link_note" class="sr-only">: {{ card.scenario_link_note }}</span>
+                        <span v-else class="sr-only">: The Scenario Link badge cannot be derived for this card.</span>
                     </span>
                 </p>
 
-                <p
-                    v-if="card.effects.length > 0"
-                    class="flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-xs text-[var(--color-ink-muted)]"
-                >
-                    <!-- D-20: an absent dictionary row is marked by the source's own id, never labelled
-                         with an invented word. -->
-                    <span v-for="effect in card.effects" :key="effect.effect_id">
-                        {{ effect.name ?? `[Unverified] effect ${effect.effect_id}` }} {{ effect.display }}
-                    </span>
-                </p>
+                <!-- The wireframe's filled slot is one compact row (name, type, gauge, one effect
+                     line), and the full effect list is reference detail rather than the decision the
+                     slot states. It stays reachable in a disclosure so the six-slot grid keeps the
+                     wireframe's density instead of growing a wall of numbers per card. -->
+                <details v-if="card.effects.length > 0" class="text-xs text-ink-muted">
+                    <summary class="cursor-pointer">Card effects ({{ card.effects.length }})</summary>
+                    <p class="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono">
+                        <!-- D-20: an absent dictionary row is marked by the source's own id, never labelled
+                             with an invented word. -->
+                        <span v-for="effect in card.effects" :key="effect.effect_id">
+                            {{ effect.name ?? `[Unverified] effect ${effect.effect_id}` }} {{ effect.display }}
+                        </span>
+                    </p>
+                </details>
 
                 <!-- DOMAIN OVERRIDE (DM-8): Pal cards print "No friendship bonus" prose when the
                      field is null. The client gives a Pal card no friendship gauge at all, so a blank
                      chip would read as "not checked yet" rather than as the mechanic. -->
-                <p v-if="card.type === 'friend'" class="text-xs text-[var(--color-ink-muted)]">
+                <p v-if="card.type === 'friend'" class="text-xs text-ink-muted">
                     Event effectiveness &middot; failure protection &middot; event recovery.
-                    <strong class="text-[var(--color-ink-strong)]">No friendship bonus</strong> — Pal
+                    <strong class="text-ink-strong">No friendship bonus</strong>: Pal
                     cards earn their slot through events.
                 </p>
             </template>
         </div>
+        </div>
 
-        <div class="flex shrink-0 flex-col items-end gap-2">
+        <div class="flex flex-wrap items-end gap-3 border-t border-rule-soft pt-2">
             <!-- ADR-0029 D1: the level the card was at in this run, a numerator only. The cap and the
                  limit-break count are collection state ADR-0014 declines and this control never asks for. -->
             <div v-if="card" class="flex flex-col gap-1">
@@ -188,7 +195,7 @@ function focusRow(): void {
                     type="number"
                     min="1"
                     max="50"
-                    class="min-h-11 w-20 rounded-[var(--radius-md)] border border-rule bg-raised px-2 text-sm text-ink"
+                    class="min-h-11 w-20 rounded-md border border-rule bg-raised px-2 text-sm text-ink"
                     :value="cardLevel ?? ''"
                     :aria-label="`Level for ${label}`"
                     @input="onLevel"
@@ -202,24 +209,23 @@ function focusRow(): void {
                 role="group"
                 :aria-label="`Ownership of ${label}`"
             >
-                <span class="text-xs text-[var(--color-ink-muted)]">Ownership</span>
+                <span class="text-xs text-ink-muted">Ownership</span>
                 <!-- Neither button pressed and the value named as absent: the state is in words, not in an
                      unfilled control a Trainer has to interpret. -->
                 <span
                     v-if="ownership === null"
-                    class="text-xs text-[var(--color-ink-muted)]"
-                    title="No ownership has been recorded for this slot yet."
-                >N/A</span>
+                    class="text-xs text-ink-muted"
+                >N/A<span class="sr-only">: No ownership has been recorded for this slot yet.</span></span>
                 <div class="flex gap-1">
                     <button
                         v-for="option in (['OWNED', 'RENTED'] as const)"
                         :key="option"
                         type="button"
-                        class="min-h-11 rounded-[var(--radius-md)] border border-[var(--color-rule)] px-3 text-xs font-semibold"
+                        class="min-h-11 rounded-md border border-rule px-3 text-xs font-semibold"
                         :class="
                             ownership === option
-                                ? 'bg-[var(--color-raised)] text-[var(--color-ink-strong)] underline decoration-2 underline-offset-4'
-                                : 'bg-transparent text-[var(--color-ink-muted)] hover:bg-[var(--color-sunken)]'
+                                ? 'bg-raised text-ink-strong underline decoration-2 underline-offset-4'
+                                : 'bg-transparent text-ink-muted hover:bg-sunken'
                         "
                         :aria-pressed="ownership === option"
                         @click="emit('ownership', position, option)"
@@ -231,7 +237,7 @@ function focusRow(): void {
 
             <button
                 type="button"
-                class="min-h-11 rounded-[var(--radius-pill)] border border-[var(--color-rule)] px-3 text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-sunken)] focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
+                class="min-h-11 rounded-pill border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
                 :aria-label="card ? `Replace the card in ${label}` : `Choose a card for ${label}`"
                 @click="emit('replace', position, $event)"
             >
@@ -242,7 +248,7 @@ function focusRow(): void {
             <button
                 v-if="card"
                 type="button"
-                class="min-h-11 rounded-[var(--radius-pill)] border border-[var(--color-rule)] px-3 text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-sunken)] focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
+                class="min-h-11 rounded-pill border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
                 :aria-label="`Set ${label} to not equipped`"
                 @click="emit('clear', position)"
             >
@@ -250,6 +256,6 @@ function focusRow(): void {
             </button>
         </div>
 
-        <p v-if="error" role="alert" class="w-full text-xs text-[var(--color-risk)]">{{ error }}</p>
+        <p v-if="error" role="alert" class="w-full text-xs text-risk">{{ error }}</p>
     </li>
 </template>

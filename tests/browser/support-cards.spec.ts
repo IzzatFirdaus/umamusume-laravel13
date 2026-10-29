@@ -18,17 +18,20 @@ test('links the Support Cards screen from the primary navigation and marks it cu
     await expect(link).toHaveAttribute('aria-current', 'page');
 });
 
-test('sizes the four pickers and the submit to the 44px contract', async ({ page }) => {
+test('sizes the search box, the four pickers and the submit to the 44px contract', async ({ page }) => {
     await page.goto('/support-cards');
     await page.locator('#app > *').first().waitFor();
 
-    // KI-29 / DESIGN.md §6.14: the four selects and the submit are 44px tall. The selects are
-    // addressed by name rather than by label: the sort picker offers a "Rarity" option and a "Type"
-    // option, so a label query for those words is ambiguous. The label is then found through the
-    // `for` association the select carries, because `BaseSelect` renders the label BESIDE the
+    // KI-29 / DESIGN.md §6.14: the search box, the four selects and the submit are 44px tall. The
+    // selects are addressed by name rather than by label: the sort picker offers a "Rarity" option and
+    // a "Type" option, so a label query for those words is ambiguous. The label is then found through
+    // the `for` association the select carries, because `BaseSelect` renders the label BESIDE the
     // select: the old `label:has(select[name=...])` selector assumed a wrapping label and matched
     // nothing, which is why this case was red on the tree before this slice.
-    for (const [name, word] of [['rarity', 'Rarity'], ['type', 'Type'], ['status', 'Availability'], ['sort', 'Sort by']]) {
+    const search = await page.getByLabel('Search').boundingBox();
+    expect(search?.height ?? 0, 'the search box is not sized to the 44px contract').toBeGreaterThanOrEqual(44);
+
+    for (const [name, word] of [['rarity', 'Rarity'], ['type', 'Type'], ['server', 'Server'], ['sort', 'Sort by']]) {
         const select = page.locator(`select[name="${name}"]`);
         const id = await select.getAttribute('id');
         await expect(page.locator(`label[for="${id}"]`)).toContainText(word);
@@ -45,7 +48,9 @@ test('renders each row with the label, the rarity word and the type word', async
     await page.goto('/support-cards');
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByText(/\d+ of \d+ support cards/)).toBeVisible();
+    // The wireframe's scope line (`support-cards.html:148`): the list is one server's, defaulting
+    // to Global, so the count names that server rather than every row the export holds.
+    await expect(page.getByText(/\d+ cards on \[Global\]/)).toBeVisible();
 
     // The first row is the alphabetically first card, Admire Groove's R form.
     const firstRow = page.locator('#support-card-results > tr').first();
@@ -53,20 +58,19 @@ test('renders each row with the label, the rarity word and the type word', async
     await expect(firstRow.getByRole('img', { name: 'One Star' })).toBeVisible();
     await expect(firstRow.getByText(/^R$/)).toBeVisible();
     await expect(firstRow).toContainText('Speed');
-    await expect(firstRow).toContainText('JP-only');
     // The row summarizes the effect at its highest stated anchor, not a level-50 interpolation.
     await expect(firstRow).toContainText('Friendship Bonus 15%');
 });
 
 test('keeps the chosen facets selected and names a filter that matched nothing', async ({ page }) => {
-    await page.goto('/support-cards?rarity=3&type=guts&status=Global&sort=released');
+    await page.goto('/support-cards?rarity=3&type=guts&server=Global&sort=released');
     await page.locator('#app > *').first().waitFor();
 
     // The rarity picker is the one that can silently read "All": PHP keys its map on ints while the
     // query string carries text.
     await expect(page.locator('select[name="rarity"]')).toHaveValue('3');
     await expect(page.locator('select[name="type"]')).toHaveValue('guts');
-    await expect(page.locator('select[name="status"]')).toHaveValue('Global');
+    await expect(page.locator('select[name="server"]')).toHaveValue('Global');
     await expect(page.locator('select[name="sort"]')).toHaveValue('released');
 
     // A valid facet combination with no rows says so and names the ask rather than reading as an
@@ -74,6 +78,61 @@ test('keeps the chosen facets selected and names a filter that matched nothing',
     await page.goto('/support-cards?rarity=1&type=group');
     await page.locator('#app > *').first().waitFor();
     await expect(page.getByText(/Nothing matches rarity R \+ type group/)).toBeVisible();
+});
+
+test('puts the name search first, matches a printed label, and shows five rows', async ({ page }) => {
+    await page.goto('/support-cards');
+    await page.locator('#app > *').first().waitFor();
+
+    // The wireframe's filter row starts with the name search (`support-cards.html:72-73`), and its
+    // placeholder is the field's own subject.
+    const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'Filter' }) });
+    await expect(form.locator('label').first()).toContainText('Search');
+    await expect(page.getByLabel('Search')).toHaveAttribute('placeholder', 'Card name');
+
+    // Five rows: the wireframe's page size, not the catalogue's old 25.
+    await expect(page.locator('#support-card-results > tr')).toHaveCount(5);
+
+    await page.getByLabel('Search').fill('Special Week');
+    await page.getByRole('button', { name: 'Filter' }).click();
+    await expect(page).toHaveURL(/q=Special/);
+
+    const rows = page.locator('#support-card-results > tr');
+    const matched = await rows.count();
+    expect(matched, 'the name search returned nothing').toBeGreaterThan(0);
+    expect(matched, 'one page cannot hold more than five rows').toBeLessThanOrEqual(5);
+
+    for (let index = 0; index < matched; index += 1) {
+        await expect(rows.nth(index), `row ${index} does not carry the searched name`).toContainText('Special Week');
+    }
+
+    // A search that matches nothing names the ask rather than reading as an empty catalogue.
+    await page.goto('/support-cards?q=nothing-matches-this');
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.getByText(/Nothing matches the name "nothing-matches-this"/)).toBeVisible();
+});
+
+test('states the seven types by rarity and the five effects that decide a deck slot', async ({ page }) => {
+    await page.goto('/support-cards');
+    await page.locator('#app > *').first().waitFor();
+
+    const types = page.locator('.card').filter({ has: page.getByRole('heading', { name: 'The seven types' }) });
+    await expect(types.getByRole('columnheader', { name: 'JP R/SR/SSR' })).toBeVisible();
+    await expect(types.getByRole('columnheader', { name: 'Global SSR' })).toBeVisible();
+    await expect(types.locator('tbody tr')).toHaveCount(7);
+    await expect(types.locator('tbody tr').first()).toContainText('Speed');
+    await expect(types.locator('tbody tr').first()).toContainText(/\d+ \/ \d+ \/ \d+/);
+
+    // The wireframe's five deciding effects, by the export's own names (`support-cards.html:170-179`).
+    const effects = page.locator('.card').filter({ has: page.getByRole('heading', { name: 'Effects that decide a deck slot' }) });
+    await expect(effects.locator('tbody tr')).toHaveCount(5);
+
+    for (const name of ['Friendship Bonus', 'Initial Friendship Gauge', 'Specialty Priority', 'Failure Protection', 'Wit Friendship Recovery']) {
+        await expect(effects.getByRole('cell', { name, exact: true }), `${name} is not a row`).toBeVisible();
+    }
+
+    // The card it replaced spoke about vocabulary no card carries; that fact is now the closing note.
+    await expect(page.getByRole('heading', { name: 'Effects no card carries' })).toHaveCount(0);
 });
 
 test('renders one card\'s own page with the fields the source states', async ({ page }) => {

@@ -9,17 +9,20 @@
  * for that type the absence is the deciding fact.
  *
  * Two catalogue-wide facts sit under the table, where no single row can carry them: the seven types
- * with their card counts and the Global split, and the vocabulary effects no card in this catalogue
- * carries. The second one matters because an effect family with zero cards is a documented mechanism
- * the data cannot show; a catalogue that silently omitted it would look complete.
+ * with their per-rarity and Global SSR counts (`support-cards.html:152-167`), and the five effects that
+ * decide a deck slot (`:169-184`). The second card's closing note states how many dictionary effects no
+ * card here carries, so a documented mechanism with zero coverage is named rather than silently
+ * omitted.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
+import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import Pagination from '../../components/ui/Pagination.vue';
 import RarityChip from '../../components/RarityChip.vue';
 import SupportTypeMark from '../../components/support/SupportTypeMark.vue';
 import BaseSelect from '../../components/Form/BaseSelect.vue';
+import BaseInput from '../../components/Form/BaseInput.vue';
 import BaseButton from '../../components/Form/BaseButton.vue';
 import { LinkButton } from '../../components/Form';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
@@ -61,8 +64,16 @@ interface Paginator<T> {
 interface TypeCount {
     type: string;
     label: string;
-    total: number;
-    global: number;
+    r: number;
+    sr: number;
+    ssr: number;
+    global_ssr: number;
+}
+
+interface DecidingEffect {
+    effect_id: number;
+    name: string;
+    description: string;
 }
 
 interface UncoveredEffect {
@@ -72,15 +83,22 @@ interface UncoveredEffect {
 
 const props = defineProps<{
     cards: Paginator<Card>;
+    q: string | null;
     rarity: string | null;
     type: string | null;
     status: string | null;
+    /** The selected server, Global or JP; the wireframe defaults to Global. */
+    server: string;
+    servers: string[];
+    /** How many cards the selected server holds, counted on the facet alone. */
+    serverCount: number;
     sort: string | null;
     rarityWords: Record<string, string>;
     typeWords: Record<string, string>;
     availabilities: string[];
     sorts: Record<string, string>;
     typeCounts: TypeCount[];
+    decidingEffects: DecidingEffect[];
     uncoveredEffects: UncoveredEffect[];
     totalCount: number;
     askedFor: string;
@@ -89,17 +107,19 @@ const props = defineProps<{
 const page = usePage();
 const errors = computed(() => (page.props.errors as Record<string, string | undefined> | undefined) ?? {});
 
+const q = ref(props.q ?? '');
 const rarity = ref(props.rarity ?? '');
 const type = ref(props.type ?? '');
-const status = ref(props.status ?? '');
+const server = ref(props.server);
 const sort = ref(props.sort ?? '');
 const loading = ref(false);
 
 function params(): Record<string, string | number | undefined> {
     return {
+        q: q.value || undefined,
         rarity: rarity.value || undefined,
         type: type.value || undefined,
-        status: status.value || undefined,
+        server: server.value || undefined,
         sort: sort.value || undefined,
     };
 }
@@ -147,14 +167,25 @@ const isPal = (card: Card): boolean => card.type === 'friend';
             />
         </template>
 
-        <!-- One inline filter row. The four facets are the request's own; there is no name search,
-             because the support-card request accepts none and a control the server cannot answer is a
-             control that lies. -->
+        <DatabaseNav />
+
+        <!-- One inline filter row, in the wireframe's order: the name search first, then the facets
+             (`support-cards.html:72-78`). Every control the server answers is here; the query's own
+             `q` is a grouped match on the three stored name fields. -->
         <form
             class="flex flex-wrap items-end gap-3"
             :aria-busy="loading ? 'true' : null"
             @submit.prevent="applyFilters"
         >
+            <BaseInput
+                id="support-card-q"
+                v-model="q"
+                name="q"
+                type="search"
+                label="Search"
+                placeholder="Card name"
+                :error="errors.q"
+            />
             <BaseSelect
                 id="support-card-rarity"
                 v-model="rarity"
@@ -173,14 +204,17 @@ const isPal = (card: Card): boolean => card.type === 'friend';
                 placeholder="All"
                 :error="errors.type"
             />
+            <!-- The wireframe's Server facet: Global or JP, Global selected, no all-servers option.
+                 The table then does not repeat availability on every row, because the list is
+                 already one server's. -->
             <BaseSelect
-                id="support-card-status"
-                v-model="status"
-                name="status"
-                label="Availability"
-                :options="[{ value: '', label: 'All' }, ...props.availabilities.map((option) => ({ value: option, label: option }))]"
-                placeholder="All"
-                :error="errors.status"
+                id="support-card-server"
+                v-model="server"
+                name="server"
+                label="Server"
+                :options="props.servers.map((option) => ({ value: option, label: option }))"
+                placeholder="Global"
+                :error="errors.server"
             />
             <BaseSelect
                 id="support-card-sort"
@@ -221,18 +255,14 @@ const isPal = (card: Card): boolean => card.type === 'friend';
         </div>
 
         <template v-else>
-            <div class="mt-4 overflow-x-auto rounded-md border border-rule bg-panel">
+            <div class="card mt-4 overflow-x-auto">
                 <table class="w-full border-collapse">
                     <thead>
                         <tr>
                             <th :class="th">Card</th>
                             <th :class="th">Type</th>
                             <th :class="th">Rarity</th>
-                            <!-- The HFW's table starts at the friendship bonus, because its
-                                 catalogue is one server's. This one holds both, so availability is a
-                                 column rather than a filter-only fact: a JP-only card must say so on
-                                 its own row. -->
-                            <th :class="th">Availability</th>
+
                             <th :class="th">Friendship bonus</th>
                             <th :class="th">Key effects</th>
                             <th :class="thNum"><span class="sr-only">Open the card</span></th>
@@ -273,7 +303,6 @@ const isPal = (card: Card): boolean => card.type === 'friend';
                                     <span>{{ card.rarity_word }}</span>
                                 </span>
                             </td>
-                            <td :class="td">{{ card.release_status }}</td>
                             <td :class="td">
                                 <span v-if="card.friendship" class="font-mono">{{ card.friendship.display }}</span>
                                 <template v-else-if="isPal(card)">
@@ -303,33 +332,36 @@ const isPal = (card: Card): boolean => card.type === 'friend';
                 </table>
 
                 <div class="flex flex-wrap items-center justify-between gap-3 border-t border-rule px-2 py-2">
-                    <p class="text-xs text-ink-muted">{{ props.cards.total }} of {{ props.totalCount }} support cards</p>
-                    <p class="text-xs text-ink-muted">
-                        Availability is a column on every row; the filter narrows it, never hides it.
+                    <p class="text-xs text-ink-muted" data-field="server-scope">
+                        {{ props.serverCount }} cards on [{{ props.server }}]
                     </p>
+                    <p class="text-xs text-ink-muted">{{ props.cards.total }} shown</p>
+                </div>
+
+                <!-- The wireframe puts the pager inside the table card, bottom-right
+                     (`support-cards.html:150-163`), rather than as a band under it. -->
+                <div class="px-2 pb-2">
+                    <Pagination
+                        :page="props.cards.current_page"
+                        :pages="props.cards.last_page"
+                        :from="props.cards.from ?? 0"
+                        :to="props.cards.to ?? 0"
+                        :total="props.cards.total"
+                        noun="cards"
+                        @navigate="goToPage"
+                    />
                 </div>
             </div>
 
-            <Pagination
-                :page="props.cards.current_page"
-                :pages="props.cards.last_page"
-                :from="props.cards.from ?? 0"
-                :to="props.cards.to ?? 0"
-                :total="props.cards.total"
-                noun="cards"
-                @navigate="goToPage"
-            />
-
-            <div class="mt-4 grid grid-cols-1 gap-4 @4xl:grid-cols-2">
+            <div class="mt-4 grid gap-4 g-2">
                 <div class="card">
                     <h2>The seven types</h2>
-                    <p class="sub">Seven is at the top of the short-term band, so the counts are read as one column.</p>
                     <table class="w-full border-collapse">
                         <thead>
                             <tr>
                                 <th :class="th">Type</th>
-                                <th :class="thNum">Cards</th>
-                                <th :class="thNum">On Global</th>
+                                <th :class="thNum">JP R/SR/SSR</th>
+                                <th :class="thNum">Global SSR</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -337,39 +369,37 @@ const isPal = (card: Card): boolean => card.type === 'friend';
                                 <td :class="td">
                                     <SupportTypeMark :type="row.type" :label="row.label" />
                                 </td>
-                                <td :class="tdNum">{{ row.total }}</td>
-                                <td :class="tdNum">{{ row.global }}</td>
+                                <td :class="tdNum">{{ row.r }} / {{ row.sr }} / {{ row.ssr }}</td>
+                                <td :class="tdNum">{{ row.global_ssr }}</td>
                             </tr>
                         </tbody>
                     </table>
                     <p class="note mt-3">
                         <span class="g" aria-hidden="true">○</span>
                         <span>
-                            Counts are rows in this catalogue. On Global counts cards carrying a Global
+                            Counts are records in the export; Global counts cards carrying a Global
                             release date, so the two columns together are the JP/Global asymmetry.
                         </span>
                     </p>
                 </div>
 
                 <div class="card">
-                    <h2>Effects no card carries</h2>
-                    <p class="sub">Vocabulary the source defines, and the cards in this catalogue that use it.</p>
-                    <p class="text-sm text-ink">
-                        {{ props.uncoveredEffects.length }} effect{{ props.uncoveredEffects.length === 1 ? '' : 's' }}
-                        in the dictionary {{ props.uncoveredEffects.length === 1 ? 'is' : 'are' }} carried by
-                        no card here:
-                    </p>
-                    <ul v-if="props.uncoveredEffects.length > 0" class="mt-2 flex flex-wrap gap-1.5">
-                        <li v-for="effect in props.uncoveredEffects" :key="effect.effect_id" class="tag auto">
-                            {{ effect.name ?? `Unnamed effect ${effect.effect_id}` }}
-                        </li>
-                    </ul>
+                    <h2>Effects that decide a deck slot</h2>
+                    <table class="w-full border-collapse">
+                        <tbody>
+                            <tr v-for="effect in props.decidingEffects" :key="effect.effect_id">
+                                <td :class="td">{{ effect.name }}</td>
+                                <td :class="td">{{ effect.description }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                     <p class="note mt-3">
                         <span class="g" aria-hidden="true">○</span>
                         <span>
-                            A zero is a stated count, not a missing row: an effect with no card is a
-                            mechanism this catalogue cannot show, so no screen offers a line for it. An
-                            effect the dictionary does not name prints its source id.
+                            <b>Cap-setting effects exist in the vocabulary but are carried by zero of the
+                            {{ props.totalCount }} cards.</b>
+                            {{ props.uncoveredEffects.length }} effects in the dictionary have no card behind
+                            them here, so no screen offers a line for a cap raised by support cards.
                         </span>
                     </p>
                 </div>
