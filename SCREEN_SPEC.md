@@ -3396,8 +3396,19 @@ batches reading each page's own component: 28 satisfied in full, 1 satisfied in 
 control refusal (`TraineeSelect.vue:340` keeps the pick border and tint but is a toggle, not a radio, because
 "no trainee" must be exitable), 1 not applicable, and 5 on `dashboard.html` superseded by an owner steering
 record (`Dashboard.vue:14-16`: "`index.html` is the dashboard reference, not `dashboard.html` — the two draw
-different boards"). **29 remain unconcluded**, and this line says so rather than letting a verified count read
+different boards"). **21 remain unconcluded**, and this line says so rather than letting a verified count read
 as a total.
+
+A fourth batch added seven more, all satisfied with the interface string or the shipped shape as proof. Two
+of them are the reason this sweep cannot be automated:
+
+- **`race-decision` handles an absence twice over.** The odds are named as published by Trackblazer and not
+  published by URA Finale or Unity Cup (`RaceDecision.vue:372-373`), and the 2nd/3rd payout cells stay blank
+  because only first place is sourced (`:346`). Stated absence, with its reason, in both places.
+- **`import` has no separate preview screen.** `Runs/Import.vue` carries the `Preview` and `PreviewRow`
+  shapes together with the textarea, so review-before-commit is one screen rather than two. A sweep hunting
+  for an `ImportPreview.vue` would have filed a false defect — which is what happened to me twice on this
+  axis already.
 
 Three more batches decided 13 further claims, and two of them are worth knowing:
 
