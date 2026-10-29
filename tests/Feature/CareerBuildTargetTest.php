@@ -88,7 +88,7 @@ it('stores the entered target in the setup draft and reads it back on the next r
     SetupDraft::write(['scenario' => 'ura_finale']);
 
     $this->put(route('career.target.store'), draftTargetPayload())
-        ->assertRedirect(route('career.target'));
+        ->assertRedirect(route('career.legacy'));
 
     // `payload()`'s own key order, rebuilt from the stat matrix rather than from the post order.
     expect(SetupDraft::buildTarget())->toBe(draftTargetPayload());
@@ -133,7 +133,7 @@ it('accepts a wholly unset target and records no target at all (D4)', function (
         'style' => null,
         'targets' => array_fill_keys($stats, null),
         'skill_priorities' => [],
-    ])->assertRedirect(route('career.target'))->assertSessionHasNoErrors();
+    ])->assertRedirect(route('career.legacy'))->assertSessionHasNoErrors();
 
     expect(SetupDraft::buildTarget())->toBeNull();
 });
@@ -169,7 +169,7 @@ it('clears a stored target when the whole target is unset again', function (): v
         'style' => null,
         'targets' => array_fill_keys($stats, null),
         'skill_priorities' => [],
-    ])->assertRedirect(route('career.target'))->assertSessionHasNoErrors();
+    ])->assertRedirect(route('career.legacy'))->assertSessionHasNoErrors();
 
     expect(SetupDraft::buildTarget())->toBeNull();
 });

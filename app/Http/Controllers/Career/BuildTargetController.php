@@ -127,7 +127,7 @@ class BuildTargetController extends Controller
             'caps' => $request->postedCaps(),
         ]);
 
-        return redirect()->route('career.target')->with('status', 'Build target saved.');
+        return redirect()->route('career.legacy')->with('status', 'Build target saved.');
     }
 
     /**
