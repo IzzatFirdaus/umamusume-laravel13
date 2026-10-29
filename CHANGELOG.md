@@ -90,6 +90,10 @@ the legacy builder's `+32`/`1432` preview figures (same clause), the catalog det
 columns (no such columns exist), and the skill detail's class code, two Related rows and "In your runs"
 (no class-code column, and no per-run hint level).
 
+The tag-decision report for this pass, the five-condition table, the quiet-box readings, the B-1 diagnosis and
+the annotation sweep with its decision rows are written under
+`.scratch-uma/mvs_4f49056156564f6c8c5dc2426cdb8c29/` (session apparatus, not tracked). They are cited from
+`SCREEN_SPEC.md` §4.25, which carries the per-screen deltas and the sweep's measured coverage.
 Open at this writing: `full-career-journey.spec.ts` is red and peer-owned, because its locator matches two
 `details` elements and the fix is `details[data-region="team-state"]`. The full browser suite was not run,
 because the host failed the quiet-box precondition. The legacy builder still takes free-form parent entry
