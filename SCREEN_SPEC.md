@@ -3396,8 +3396,19 @@ batches reading each page's own component: 28 satisfied in full, 1 satisfied in 
 control refusal (`TraineeSelect.vue:340` keeps the pick border and tint but is a toggle, not a radio, because
 "no trainee" must be exitable), 1 not applicable, and 5 on `dashboard.html` superseded by an owner steering
 record (`Dashboard.vue:14-16`: "`index.html` is the dashboard reference, not `dashboard.html` — the two draw
-different boards"). **51 remain unconcluded**, and this line says so rather than letting a verified count read
+different boards"). **29 remain unconcluded**, and this line says so rather than letting a verified count read
 as a total.
+
+Three more batches decided 13 further claims, and two of them are worth knowing:
+
+- **Inheritance's "radios" is a refusal on `ADR-0010`, not a defect.** That ADR stores one legacy selection in
+  one json column, so per-parent radios would change what the column holds. `InheritanceEvent.vue:117-121`
+  says exactly that and calls it "the documented deviation on the page"; `:361` prints "One selection per run
+  is what this tool stores." Reading the claim against the schema, not against the wireframe, is what keeps
+  this from being a second KI-135.
+- **The error pages are excluded by their own docblocks** — `404`, `419` and `500` each state that the keybox
+  "is wireframe documentation and is not shipped" — so those claims are not applicable to the build. Their
+  substance was verified anyway, because declining to ship annotations is not a licence to ship worse copy.
 
 The pattern worth knowing: this repository records its deliberate deviations at the code site, in the page's
 own docblock with its reason, so a keybox claim is usually resolved by reading the component rather than by
