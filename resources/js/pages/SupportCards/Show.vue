@@ -141,6 +141,19 @@ const statedAt = (stage: EffectStage): string =>
             <PageHeader eyebrow="Support card" :title="props.card.name">
                 <template #actions>
                     <LinkButton href="/support-cards" variant="secondary">Back to cards</LinkButton>
+                    <!--
+                        "Add to a deck" (`support-card-detail.html:66`).
+
+                        A deck belongs to a run or to a setup draft, never to the catalogue, so this
+                        opens the one deck surface that needs no existing context: `career/setup/deck`
+                        renders its six empty slots when no draft exists (`DeckSelectController:66`,
+                        `SetupDraft::deck() ?? $this->emptySlots()`) rather than redirecting. That is
+                        why the link is honest from here — it lands somewhere the Trainer can act,
+                        not on an error.
+
+                        It is deliberately the only filled action on the page.
+                    -->
+                    <LinkButton href="/career/setup/deck" variant="primary">Add to a deck</LinkButton>
                 </template>
             </PageHeader>
         </template>
@@ -301,9 +314,20 @@ const statedAt = (stage: EffectStage): string =>
 
                 <div class="card">
                     <h2>Where this card is used</h2>
-                    <p v-if="props.usedBy.length === 0" class="text-sm text-ink-muted">
-                        No run's deck holds this card yet.
-                    </p>
+                    <!-- The wireframe's empty state is a NAMED ROW with a neutral pill
+                         (`support-card-detail.html:170`), not a bare sentence. A card no run holds is
+                         a normal state rather than a warning, so it reads as a labelled row carrying
+                         the neutral pill the rest of the app uses for "known and unremarkable". -->
+                    <table v-if="props.usedBy.length === 0" class="w-full border-collapse">
+                        <tbody>
+                            <tr>
+                                <td :class="td">This card is in no run's deck.</td>
+                                <td :class="[td, 'text-right']">
+                                    <span class="pill pill-neutral">Not used</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                     <table v-else class="w-full border-collapse">
                         <tbody>
                             <tr v-for="run in props.usedBy" :key="run.run_id">

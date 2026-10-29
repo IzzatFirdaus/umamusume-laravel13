@@ -580,7 +580,9 @@ it('answers where the card is used from the runs whose deck holds it', function 
             ->where('usedBy.0.trainee_name', 'Rice Shower')
             ->where('usedBy.0.status_label', 'Active')
             ->where('usedBy.0.card_level', 45)
-            ->where('usedBy.0.url', route('runs.show', $run)));
+            // The run's own door is its cockpit. `runs.show` is the compatibility doorway that
+            // redirects there, so asserting it would pin a hop the Trainer never sees.
+            ->where('usedBy.0.url', route('runs.cockpit', $run)));
 });
 
 it('splits the row into the character name and the card\'s own epithet', function (): void {

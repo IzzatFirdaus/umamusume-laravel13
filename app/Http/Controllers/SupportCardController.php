@@ -75,7 +75,16 @@ class SupportCardController extends Controller
         // The wireframe scopes the library to one server and defaults to Global
         // (`support-cards.html:76`: a Global/JP select with Global selected), so the default view is
         // the Global catalogue rather than every row the export holds.
-        $server = $request->validated('server') ?? SupportCardSearchRequest::SERVERS[0];
+        // Availability and server state the same fact one way or the other: `JP-only` is a card the
+        // export has not marked released, which is what the `JP` server scope selects. A status given
+        // without a server therefore names the server, so `?status=JP-only` answers the card it names
+        // instead of returning nothing. An explicit `server` still wins, and `Unreleased` names no
+        // server, so it keeps the wireframe's Global default.
+        $server = $request->validated('server')
+            ?? match ($status) {
+                'JP-only' => 'JP',
+                default => SupportCardSearchRequest::SERVERS[0],
+            };
         $sort = $request->validated('sort');
 
         // Read once for the page, not once per row: twenty-five cards ask the same 35 dictionary rows

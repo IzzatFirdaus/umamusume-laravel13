@@ -169,9 +169,11 @@ const isPal = (card: Card): boolean => card.type === 'friend';
 
         <DatabaseNav />
 
-        <!-- One inline filter row, in the wireframe's order: the name search first, then the facets
-             (`support-cards.html:72-78`). Every control the server answers is here; the query's own
-             `q` is a grouped match on the three stored name fields. -->
+        <!-- One inline filter row, in the wireframe's order: the name search first, then Type and
+             Rarity, then Server and Sort (`support-cards.html:72-78`). Every control the server
+             answers is here; the query's own `q` is a grouped match on the three stored name fields.
+             The Type/Rarity pair was reversed until R6 while this comment claimed the wireframe's
+             order — corrected in both places together. -->
         <form
             class="flex flex-wrap items-end gap-3"
             :aria-busy="loading ? 'true' : null"
@@ -186,15 +188,10 @@ const isPal = (card: Card): boolean => card.type === 'friend';
                 placeholder="Card name"
                 :error="errors.q"
             />
-            <BaseSelect
-                id="support-card-rarity"
-                v-model="rarity"
-                name="rarity"
-                label="Rarity"
-                :options="[{ value: '', label: 'All' }, ...Object.entries(props.rarityWords).map(([value, word]) => ({ value, label: word }))]"
-                placeholder="All"
-                :error="errors.rarity"
-            />
+            <!-- Type BEFORE Rarity, which is the wireframe's order (`support-cards.html:73-77`:
+                 Search, Type, Rarity, Server, Clear). The page shipped them the other way round while
+                 its own comment claimed it was "in the wireframe's order" — the comment was the
+                 defect, so the order is corrected here and the comment with it. -->
             <BaseSelect
                 id="support-card-type"
                 v-model="type"
@@ -203,6 +200,15 @@ const isPal = (card: Card): boolean => card.type === 'friend';
                 :options="[{ value: '', label: 'All' }, ...Object.entries(props.typeWords).map(([value, word]) => ({ value, label: word }))]"
                 placeholder="All"
                 :error="errors.type"
+            />
+            <BaseSelect
+                id="support-card-rarity"
+                v-model="rarity"
+                name="rarity"
+                label="Rarity"
+                :options="[{ value: '', label: 'All' }, ...Object.entries(props.rarityWords).map(([value, word]) => ({ value, label: word }))]"
+                placeholder="All"
+                :error="errors.rarity"
             />
             <!-- The wireframe's Server facet: Global or JP, Global selected, no all-servers option.
                  The table then does not repeat availability on every row, because the list is

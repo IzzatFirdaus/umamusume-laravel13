@@ -52,14 +52,18 @@ test('renders each row with the label, the rarity word and the type word', async
     // to Global, so the count names that server rather than every row the export holds.
     await expect(page.getByText(/\d+ cards on \[Global\]/)).toBeVisible();
 
-    // The first row is the alphabetically first card, Admire Groove's R form.
+    // The first row is the alphabetically first card the Global scope holds. Admire Groove's forms
+    // are JP-only (`release_global` null) and so are out of this list by construction, which is the
+    // scope line asserted above doing its job; Admire Vega's `[Aim for the Brightest]` is the first
+    // Global row by `char_name`, then `title_en`.
     const firstRow = page.locator('#support-card-results > tr').first();
-    await expect(firstRow).toContainText('Admire Groove');
-    await expect(firstRow.getByRole('img', { name: 'One Star' })).toBeVisible();
-    await expect(firstRow.getByText(/^R$/)).toBeVisible();
-    await expect(firstRow).toContainText('Speed');
+    await expect(firstRow).toContainText('Admire Vega');
+    await expect(firstRow).toContainText('Aim for the Brightest');
+    await expect(firstRow.getByRole('img', { name: 'Two Star' })).toBeVisible();
+    await expect(firstRow.getByText(/^SR$/)).toBeVisible();
+    await expect(firstRow).toContainText('Guts');
     // The row summarizes the effect at its highest stated anchor, not a level-50 interpolation.
-    await expect(firstRow).toContainText('Friendship Bonus 15%');
+    await expect(firstRow).toContainText('Friendship Bonus 30%');
 });
 
 test('keeps the chosen facets selected and names a filter that matched nothing', async ({ page }) => {
