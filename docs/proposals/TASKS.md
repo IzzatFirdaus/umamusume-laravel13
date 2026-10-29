@@ -1440,12 +1440,35 @@ primary, console clean.
 failure is not this slice: the class pins a sentence in `resources/js/pages/Career/DeckSelect.vue`,
 a peer session's in-flight edit that is not committed here.
 
-## C11 — remaining screens (not yet started)
+## C11 — timeline, screen 8 of 9 (`14265dc3`)
 
-Seven of the nine lifecycle screens are repaired. **30 pages remain divergent**: the audit's 28 less
-three done, plus the five `near` re-verdicts the side-task S6 below moved to divergent (runs-index,
+| Item | Before (audit) | After |
+|---|---|---|
+| Region model | collapsible rail of entries + finale card | g-4 counts, Kind/Year filters, one record table + pager, four phase groups |
+| h1 | "Career timeline" | "Every logged turn, race and event" (HFW) |
+| Table | rail rows with BEFORE/END blocks | Turn spine, Position, Kind, What happened, Energy, SP |
+| Position | absent | controller sends each row's calendar label via `CareerPosition` |
+| Blanks | stat absence prose | Energy/SP print an em dash, with the blank-not-zero note |
+| Phases | none | Junior / Classic / Senior / After the grid, collapsible, first open |
+
+**Deviations, documented in the page:** pagination is client-side over the already-fetched list; the
+Undo control stays a proposal like the wireframe's own.
+
+**Verdict delta.** timeline: **divergent → near**. Evidence: headings equal (The record / Phase
+grouping), table headers exactly the wireframe's six, blank-not-zero note present, console clean. One
+defect found and fixed in-slice: the position label used PHP double-quoted interpolation and the page
+500'd on an undefined variable; it now concatenates.
+
+**Gates.** `php artisan test CareerTimelineTest` → **5 passed (138 assertions)**;
+`npx playwright test career-timeline` → **8 passed**; `npm run typecheck` → 0; `npm run build` → 0;
+pint passed.
+
+## C12 — remaining screens (not yet started)
+
+Eight of the nine lifecycle screens are repaired. **29 pages remain divergent**: the audit's 28 less
+four done, plus the five `near` re-verdicts the side-task S6 below moved to divergent (runs-index,
 preferences, support-cards, support-card-detail, career-scenario). Order stays as the audit's repair
-list: the last two lifecycle screens (timeline, result), then the wizard remainder
+list: the last lifecycle screen (result), then the wizard remainder
 (career-trainee/target/preflight/legacy + career-scenario), then library/legacy/veterans/review
 (including runs-index and preferences), then the copy/identifier pass. The S9 prop-delta gaps belong to
 their owning slices: `SupportCardController.global_count`, `DatabaseController.areas[].badge`,
