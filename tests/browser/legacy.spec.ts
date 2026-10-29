@@ -89,41 +89,34 @@ async function createActiveRun(page: import('@playwright/test').Page, traineeNam
 }
 
 test.describe('Legacy Lab browse', () => {
-    test('states the empty library in words and carries no record-only banner', async ({ page }) => {
+    test('states the empty saved-legacies list and carries no record-only banner', async ({ page }) => {
         await page.goto('/legacy', { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
-        // Plan 2.5: the record-only banner lives once, on the builder, as a help popover. The browse
-        // surface does not repeat it.
+        // Plan 2.5: the record-only banner lives once, on the builder, as a help popover.
         await expect(page.getByText(RECORD_ONLY_NOTICE)).toHaveCount(0);
 
-        // design-2.0 §29: the empty state says what is missing, why it matters and what to do. The
-        // seeded scratch database holds no Veterans, so this is the state a Trainer meets first.
-        await expect(page.getByText(/No Veterans recorded yet/)).toBeVisible();
-        await expect(page.getByText(/A Veteran is a completed run/)).toBeVisible();
+        // design-2.0 §29: the empty state says what is missing, why it matters and what to do.
+        await expect(page.getByRole('heading', { name: 'Saved legacies', level: 2 })).toBeVisible();
+        await expect(page.getByText(/No saved pair yet/)).toBeVisible();
+        await expect(page.getByText(/becomes a pair this list can compare/)).toBeVisible();
 
-        // The three facets C3's `ListVeterans` answers, and no others. The spec's own candidate list
-        // named eleven; offering a facet the query cannot answer would be a filter that returns every
-        // row while looking filtered.
-        await expect(page.getByLabel('Trainee')).toBeVisible();
-        await expect(page.getByLabel('Scenario')).toBeVisible();
-        await expect(page.getByLabel('Tag')).toBeVisible();
-        await expect(page.getByRole('button', { name: 'Filter' })).toBeVisible();
+        // Owner ruling 2026-10-28: the veteran library's facet form is not on this page.
+        await expect(page.getByLabel('Trainee')).toHaveCount(0);
+        await expect(page.getByLabel('Tag')).toHaveCount(0);
+        await expect(page.getByRole('button', { name: 'Filter' })).toHaveCount(0);
     });
 
     test('sizes the browse controls to the 44px contract', async ({ page }) => {
         await page.goto('/legacy', { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
-        // WCAG 2.2 SC 2.5.8, floor 44px (plan §12.1). `skills.spec.ts` caught the same class of
-        // defect on the skills Filter button during slice A2, so the sweep is repeated here.
-        for (const name of ['Trainee', 'Scenario', 'Tag']) {
-            const box = await page.getByLabel(name).boundingBox();
+        // WCAG 2.2 SC 2.5.8, floor 44px (plan §12.1). The page's controls are the head-band Compare
+        // door and the veteran-library link; both are real targets and both carry the floor.
+        for (const name of ['Compare two pairs', 'Open the veteran library']) {
+            const box = await page.getByRole('link', { name }).boundingBox();
             expect(box?.height ?? 0, `${name} is not sized to the 44px contract`).toBeGreaterThanOrEqual(44);
         }
-
-        const submit = await page.getByRole('button', { name: 'Filter' }).boundingBox();
-        expect(submit?.height ?? 0, 'the Filter button is not sized to the 44px contract').toBeGreaterThanOrEqual(44);
     });
 
     test('links the Legacy Lab from the primary navigation and marks it current', async ({ page }) => {
@@ -356,6 +349,20 @@ test.describe('Legacy Lab compare', () => {
         await expect(page.getByText(/nothing here is scored, ranked or totalled/i)).toBeVisible();
         await expect(table.getByRole('cell').filter({ hasText: /best/i })).toHaveCount(0);
         await expect(table.getByRole('cell').filter({ hasText: /score/i })).toHaveCount(0);
+
+        // The wireframe's starting-cap pair (`legacy-compare.html:90-115`): one card per column, five
+        // stat rows each, and Wit named because this build stores no entered Wit ceiling.
+        for (const letter of ['A', 'B']) {
+            const heading = page.getByRole('heading', { name: `Starting caps · legacy ${letter}`, level: 2 });
+            await expect(heading).toBeVisible();
+
+            const card = heading.locator('xpath=ancestor::section');
+            await expect(card.locator('tbody tr')).toHaveCount(5);
+
+            for (const stat of ['Speed', 'Stamina', 'Power', 'Guts', 'Wit']) {
+                await expect(card.getByRole('rowheader', { name: stat })).toBeVisible();
+            }
+        }
     });
 
     test('scrolls the comparison at 320px without hiding the right-hand columns', async ({ page }) => {

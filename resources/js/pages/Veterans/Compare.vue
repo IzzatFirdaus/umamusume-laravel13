@@ -165,6 +165,89 @@ const isEmptyDiff = computed<boolean>(() => {
     );
 });
 
+/*
+ * The difference column (`veterans-compare.html`, keyboxes 1–4). One verdict per stored property:
+ * `same` when every selected career agrees, a side-tagged gap when two numeric columns differ, and a
+ * named count when text differs. Matching rows still print, so a reader can see the row was compared.
+ * No aggregate winner is computed; the wireframe forbids a recommendation and ADR-0020 §3 keeps the
+ * derived factor analysis out of the record screens.
+ */
+type Difference = { property: string; verdict: string };
+
+function verdictOf(values: (string | number | null)[]): string {
+    if (values.length < 2) {
+        return 'single column';
+    }
+
+    const present = values.filter((value): value is string | number => value !== null && value !== '');
+
+    if (present.length === 0) {
+        return 'same';
+    }
+
+    if (present.length < values.length) {
+        if (values.length === 2) {
+            const only = values[0] !== null && values[0] !== ''
+                ? 'A'
+                : values[1] !== null && values[1] !== '' ? 'B' : null;
+
+            return only === null ? 'differs (one side absent)' : `only ${only} records it`;
+        }
+
+        return `differs (${present.length} of ${values.length} recorded)`;
+    }
+
+    const distinct = new Set(present.map((value) => String(value)));
+
+    if (distinct.size === 1) {
+        return 'same';
+    }
+
+    const numbers = present.map((value) => Number(value));
+
+    if (numbers.every((value) => Number.isFinite(value))) {
+        if (values.length === 2) {
+            const higher = numbers[0] > numbers[1] ? 'A' : 'B';
+
+            return `+${Math.max(...numbers) - Math.min(...numbers)} to ${higher}`;
+        }
+
+        // More than two columns cannot be tagged with one letter; name the two extremes instead
+        // ("A +80 vs C"), so the reader still knows which sides carry the gap.
+        const high = numbers.indexOf(Math.max(...numbers));
+        const low = numbers.indexOf(Math.min(...numbers));
+
+        return high === low
+            ? `differs by ${Math.max(...numbers) - Math.min(...numbers)}`
+            : `${String.fromCharCode(65 + high)} +${Math.max(...numbers) - Math.min(...numbers)} vs ${String.fromCharCode(65 + low)}`;
+    }
+
+    return `differs (${distinct.size} values)`;
+}
+
+const differences = computed<Difference[]>(() => {
+    const columns = orderedColumns.value;
+    const of = (read: (column: Column) => string | number | null): (string | number | null)[] =>
+        columns.map(read);
+
+    return [
+        { property: 'Scenario', verdict: verdictOf(of((column) => column.scenario_label)) },
+        { property: 'Status', verdict: verdictOf(of((column) => column.status_label)) },
+        { property: 'Turns logged', verdict: verdictOf(of((column) => column.career.turns)) },
+        { property: 'Energy', verdict: verdictOf(of((column) => column.career.energy)) },
+        { property: 'Fans', verdict: verdictOf(of((column) => column.career.fans)) },
+        ...statKeys.map((key) => ({ property: key, verdict: verdictOf(of((column) => column.stats[key])) })),
+        { property: 'Skills recorded', verdict: verdictOf(of((column) => column.counts.skills)) },
+        { property: 'Races recorded', verdict: verdictOf(of((column) => column.counts.races)) },
+        ...props.aptitude_axes.map((axis) => ({
+            property: axis.label,
+            verdict: verdictOf(of((column) => column.aptitudes.find((aptitude) => aptitude.key === axis.key)?.letter ?? null)),
+        })),
+        { property: 'Tags', verdict: verdictOf(of((column) => column.tags.join(', '))) },
+        { property: 'Notes', verdict: verdictOf(of((column) => column.notes)) },
+    ];
+});
+
 /** Keep the pager on a career that still exists after a tick or untick changes the column set. */
 watch(orderedColumns, (columns) => {
     if (activeCareer.value >= columns.length) {
@@ -260,7 +343,11 @@ watch(orderedColumns, () => {
 <template>
     <AppLayout>
         <Head title="Compare Veterans" />
-        <template #title>Compare Veterans</template>
+        <!-- The wireframe titles the comparison with the selected careers, not with the screen's
+             function ("Vodka · Daiwa Scarlet · Maruzensky"); the picker state keeps the function. -->
+        <template #title>
+            {{ orderedColumns.length > 0 ? [...new Set(orderedColumns.map((column) => column.trainee))].join(' · ') : 'Compare Veterans' }}
+        </template>
 
         <p v-if="loading" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
 
@@ -577,6 +664,36 @@ watch(orderedColumns, () => {
                     <div class="comparison-scroll-mirror-fill" :style="{ width: `${tableWidth}px` }" />
                 </div>
             </div>
+
+            <!-- The wireframe's difference column (`veterans-compare.html`, keyboxes 1–4), kept as its
+                 own reading of the matrix: the matrix can carry up to six careers, and a seventh column
+                 would push the values it summarises off the viewport. Matching rows print and say same. -->
+            <section class="card mt-4" aria-labelledby="veteran-differences">
+                <h2 id="veteran-differences">Where they differ</h2>
+                <p class="sub">
+                    One row per stored property. A row that matches still prints and says <b>same</b>; a
+                    row that differs names the difference and the side it favours.
+                </p>
+                <div class="mt-2 overflow-x-auto" role="region" tabindex="0" aria-label="Veteran differences, scrollable">
+                    <table class="w-full border-collapse text-sm">
+                        <thead>
+                            <tr class="border-b border-rule">
+                                <th scope="col" class="px-3 py-2 text-left font-semibold text-ink-strong">Property</th>
+                                <th scope="col" class="px-3 py-2 text-left font-semibold text-ink-strong">Difference</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="row in differences" :key="row.property" class="border-b border-rule last:border-b-0">
+                                <th scope="row" class="px-3 py-2 text-left font-medium text-ink">{{ row.property }}</th>
+                                <td class="px-3 py-2 font-mono tabular-nums text-ink">{{ row.verdict }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p v-if="isEmptyDiff" class="mt-3 text-sm text-ink" role="note">
+                    Nothing decisive: all selected careers share every value.
+                </p>
+            </section>
 
             <!-- `Note` moved out of the table: a long-form paragraph does not belong in a comparison cell
                  where it cannot wrap and reads as the same text repeated once per column. Each selected

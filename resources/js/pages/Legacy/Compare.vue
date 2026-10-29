@@ -40,6 +40,13 @@ interface ParentNode {
     probability: { value: null; title: string };
 }
 
+interface StartingCap {
+    stat: string;
+    label: string;
+    value: number | null;
+    note: string | null;
+}
+
 interface CompareColumn {
     veteran_id: number;
     run_id: number;
@@ -48,6 +55,7 @@ interface CompareColumn {
     notes: string | null;
     hasSelection: boolean;
     graph: { trainee: { name: string | null }; parents: ParentNode[] };
+    caps: StartingCap[];
 }
 
 const props = defineProps<{
@@ -172,6 +180,20 @@ function differenceOf(values: (string | number | null)[]): string {
         return 'same'; // nothing is recorded on any column, so there is nothing that differs
     }
 
+    // A recorded value against an absent one is a difference, not a match: saying "same" there
+    // would make the column claim a comparison that never happened.
+    if (present.length < values.length) {
+        if (values.length === 2) {
+            const only = present.length === 1
+                ? (values[0] !== null && values[0] !== '' ? 'A' : 'B')
+                : null;
+
+            return only === null ? 'differs (one side absent)' : `only ${only} records it`;
+        }
+
+        return `differs (${present.length} of ${values.length} recorded)`;
+    }
+
     const distinct = new Set(present.map((value) => String(value)));
 
     if (distinct.size === 1) {
@@ -181,7 +203,22 @@ function differenceOf(values: (string | number | null)[]): string {
     const numbers = present.map((value) => Number(value));
 
     if (numbers.every((value) => Number.isFinite(value))) {
-        return `differs by ${Math.max(...numbers) - Math.min(...numbers)}`;
+        // Two columns name the side the difference favours, as the wireframe's "+24 to A" does; a
+        // number alone leaves the reader to work out which legacy is ahead.
+        if (values.length === 2) {
+            const higher = numbers[0] > numbers[1] ? 'A' : 'B';
+
+            return `+${Math.max(...numbers) - Math.min(...numbers)} to ${higher}`;
+        }
+
+        // More than two columns cannot be tagged with one letter; name the two extremes instead
+        // ("A +80 vs C"), so the reader still knows which sides carry the gap.
+        const high = numbers.indexOf(Math.max(...numbers));
+        const low = numbers.indexOf(Math.min(...numbers));
+
+        return high === low
+            ? `differs by ${Math.max(...numbers) - Math.min(...numbers)}`
+            : `${String.fromCharCode(65 + high)} +${Math.max(...numbers) - Math.min(...numbers)} vs ${String.fromCharCode(65 + low)}`;
     }
 
     return `differs (${distinct.size} values)`;
@@ -224,8 +261,8 @@ const differences = computed((): Difference[] => {
 
 <template>
     <AppLayout>
-        <Head title="Compare Legacy selections" />
-        <template #title>Compare Legacy selections</template>
+        <Head title="Compare two legacies" />
+        <template #title>Compare two legacies</template>
 
         <h2 class="text-lg font-semibold text-ink-strong">Compare recorded selections</h2>
 
@@ -575,6 +612,40 @@ const differences = computed((): Difference[] => {
 
             <p class="mt-3 text-xs text-ink-muted">
                 Affinity is stored per run and is not priced by this tool.
+            </p>
+
+            <!-- The wireframe's starting-cap cards (`legacy-compare.html:90-115`): one card per column.
+                 The run's entered ceiling overrides the scenario's published cap; Wit has no entered
+                 column, so it prints the scenario's cap and says so. -->
+            <div class="mt-4 grid gap-4 g-2">
+                <section
+                    v-for="(column, index) in columns"
+                    :key="column.run_id"
+                    class="card"
+                    :aria-labelledby="`legacy-caps-${column.run_id}`"
+                >
+                    <h2 :id="`legacy-caps-${column.run_id}`">
+                        Starting caps · legacy {{ String.fromCharCode(65 + index) }}
+                    </h2>
+                    <table class="mt-2 w-full border-collapse text-sm">
+                        <tbody>
+                            <tr v-for="cap in column.caps" :key="cap.stat" class="border-b border-rule last:border-b-0">
+                                <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">{{ cap.label }}</th>
+                                <td class="py-2 text-right font-mono tabular-nums text-ink">
+                                    <template v-if="cap.value !== null">{{ cap.value }}</template>
+                                    <template v-else>
+                                        <span :title="cap.note ?? undefined">N/A</span>
+                                        <span class="sr-only">: {{ cap.note }}</span>
+                                    </template>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+            <p class="mt-2 text-xs text-ink-muted">
+                An entered ceiling overrides the scenario's published cap. Wit prints the scenario's cap:
+                this build stores no entered Wit ceiling.
             </p>
         </template>
     </AppLayout>
