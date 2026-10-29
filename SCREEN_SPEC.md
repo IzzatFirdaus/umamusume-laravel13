@@ -3377,10 +3377,23 @@ that walks it end to end; a page spec is not a substitute. Flow coverage at the 
 (`wizard-flow.spec.ts` green; `full-career-journey.spec.ts` red and peer-owned, KI-136; snapshot, import and
 save-veteran have page-level specs only).
 
-**Not closed by this pass, named here so the screen blocks and the code cannot drift apart:** the legacy
-builder's one-pick parent radios (KI-135), the journey spec's two-element locator (KI-136), the full browser
-suite (host failed the quiet-box precondition: CPU 57.7%, 1.4 GB free), R9's snapshot field grouping, and 43
-keybox pages not re-walked (S0's structural verdict stands for them).
+**Withdrawn after re-measurement.** The sweep first read the legacy builder's parent control as an
+unshipped "radios, not checkboxes" shape. The control is a single `<select>` bound to one `legacy_id` per
+parent slot (`AncestryNode.vue:140`), so one spark per parent is what it enforces and nothing promises two:
+the substance is honoured and only the widget differs (KI-135 RESOLVED). The lesson — check a control's
+promise against the bound value and its cardinality, never against the element name a wireframe used — is
+ledger correction 26.
+
+**Annotation-sweep coverage, measured.** All 56 keybox pages hold 565 `<li>`. The 13 pages this pass changed
+were judged item by item: 120 items, 116 satisfied, 4 binding-record refusals. The other 43 pages hold 343
+items, accounted for by class — 42 shared boilerplate verified once in code (the rail collapse and the hub
+strip), 85 design-rationale items satisfied by the shape they defend, and 216 page-specific items collapsing
+to 204 distinct claims of which only the four recurring ones were checked in code. Those 200 are **not**
+individually re-judged; S0's structural read is their basis.
+
+**Not closed by this pass, named here so the screen blocks and the code cannot drift apart:** the journey
+spec's two-element locator (KI-136), the full browser suite (host failed the quiet-box precondition: CPU
+57.7%, 1.4 GB free), R9's snapshot field grouping, and the 200 distinct claims above that were not re-read.
 
 ## 5. Workflow Specifications
 
