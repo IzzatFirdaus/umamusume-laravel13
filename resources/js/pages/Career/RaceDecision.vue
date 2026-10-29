@@ -18,7 +18,8 @@
  * and win figure are held on `ADR-0016` and print `N/A` with the reason.
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
-import RaceCard from '../../components/career/RaceCard.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
+import Note from '../../components/ui/Note.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
@@ -47,6 +48,12 @@ interface Race {
     placement: string | null;
     fans_gain: number | null;
     grade_points: number | null;
+    surface: string | null;
+    distance_label: string | null;
+    distance_band: string | null;
+    aptitude: { surface: string | null; distance: string | null; label: string };
+    blocked_reason: string | null;
+    payout: { tier: string; stat: number; sp: number; source: string; verified_at: string } | null;
 }
 
 const props = defineProps<{
@@ -130,6 +137,77 @@ const monthOptions = Array.from({ length: 12 }, (_, i) => String(i + 1));
 function submitManual(): void {
     manualForm.post(props.entry.action, { preserveScroll: true });
 }
+
+/*
+ * The HFW's race decision: one table of the races this turn offers, one selected race's detail, and
+ * one commit. Entering is the same calendar write RaceCard's drawer posts; recording a result stays
+ * available in a disclosure because it is how a completed race clears an objective.
+ */
+const selectedId = ref<number | null>(
+    (props.races.find((race) => race.blocked_reason === null) ?? props.races[0])?.id ?? null,
+);
+
+const selected = computed(() => props.races.find((race) => race.id === selectedId.value) ?? null);
+
+const selectRace = (id: number): void => {
+    selectedId.value = id;
+};
+
+const trainingUrl = computed(() => props.run.run_url.replace(/\/cockpit$/, '/training'));
+
+const undoableTurn = computed(() => Math.max(1, (props.nextTurn?.turn ?? 1) - 1));
+
+const enterForm = useForm({ turn_entry_id: '' });
+
+const enterRace = (): void => {
+    if (selected.value === null) {
+        return;
+    }
+
+    enterForm
+        .transform(() => ({
+            entry_mode: 'calendar',
+            race_catalog_slot_id: String(selected.value?.id),
+            status: 'Entered',
+            turn_entry_id: null,
+        }))
+        .post(props.entry.action, { preserveScroll: true });
+};
+
+const enterFormFor = (race: Race): void => {
+    enterForm
+        .transform(() => ({
+            entry_mode: 'calendar',
+            race_catalog_slot_id: String(race.id),
+            status: 'Entered',
+            turn_entry_id: null,
+        }))
+        .post(props.entry.action, { preserveScroll: true });
+};
+
+const resultForm = useForm({ placement: '' });
+
+const recordResult = (): void => {
+    if (selected.value === null) {
+        return;
+    }
+
+    resultForm
+        .transform(() => ({
+            entry_mode: 'calendar',
+            race_catalog_slot_id: String(selected.value?.id),
+            status: 'Completed',
+            placement: resultForm.placement,
+        }))
+        .post(props.entry.action, { preserveScroll: true });
+};
+
+const aptitudePill = (race: Race): string => {
+    const letter = race.aptitude.distance ?? race.aptitude.surface ?? 'N/A';
+
+    return letter;
+};
+
 </script>
 
 <template>
@@ -137,292 +215,237 @@ function submitManual(): void {
         :trainee="props.run.trainee"
         :scenario-label="props.run.scenario_label"
         :status-label="props.run.status_label"
+        :position="props.nextTurn?.position_label ?? null"
         :run-url="props.run.run_url"
+        current="races"
     >
-        <Head :title="`Race decision: ${props.run.trainee}`" />
-        <template #title>Race decision</template>
+        <Head :title="'Race decision: ' + props.run.trainee" />
 
-        <p v-if="visiting" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
-        <p v-if="visitFailed" role="alert" class="mb-4 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
+        <template #head>
+            <PageHeader
+                eyebrow="Race decision"
+                title="Enter a race, or skip the turn"
+                description="Races pay fans, Skill Points and stat gains; a training turn usually pays more stats. Pick the race or close this screen."
+            >
+                <template #actions>
+                    <a
+                        :href="props.run.run_url"
+                        class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong"
+                    >Back to cockpit</a>
+                </template>
+            </PageHeader>
+        </template>
+
+        <p v-if="visiting" role="status" class="mb-3 text-sm text-ink-muted">Loading…</p>
+        <p v-if="visitFailed" role="alert" class="mb-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
             That screen did not load. Nothing was saved; try again.
         </p>
 
-        <section aria-labelledby="race-turn-heading" class="rounded-md border border-rule bg-panel p-4">
-            <h2 id="race-turn-heading" class="text-lg font-semibold text-ink-strong">The turn being decided</h2>
-            <p v-if="props.nextTurn !== null" class="mt-1 text-sm text-ink">
-                {{ props.nextTurn.year_label }} ·
-                {{ props.nextTurn.position_label }} ·
-                <span class="font-mono tabular-nums">Turn {{ props.nextTurn.turn_index }}</span>
-                <span class="text-ink-muted">({{ props.nextTurn.turn }} of the year)</span>
-            </p>
-            <p v-else class="mt-1 text-sm text-ink">N/A <span class="text-xs text-ink-muted">· no turn is being decided</span></p>
-        </section>
-
-        <!-- Level 1, Critical (design-2.0 §4): a career obligation gets strong emphasis, a glyph and a
-             clear word. The glyph is aria-hidden and the word carries the meaning, so the state never
-             rests on colour alone. -->
-        <section
-            v-if="props.deadlines.length > 0"
-            aria-labelledby="race-deadlines-heading"
-            class="mt-4 rounded-md border-2 border-goal-line bg-raised p-4"
-        >
-            <h2 id="race-deadlines-heading" class="text-lg font-semibold text-ink-strong">
-                <span aria-hidden="true" class="font-mono font-bold text-goal-line">!</span>
-                Mandatory races
-            </h2>
-            <p class="mt-1 text-sm text-ink">
-                The races this scenario obliges whichever trainee is running. A mandatory race is a
-                career rule; it is not the same claim as a Goal, which is per-trainee and has no source here.
-            </p>
-
-            <ol class="mt-3 flex flex-col gap-1.5">
-                <li
-                    v-for="deadline in props.deadlines"
-                    :key="deadline.id"
-                    class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 rounded-md border border-rule bg-panel px-3 py-2 text-sm"
-                >
-                    <span class="min-w-0 flex-1">
-                        <span class="font-semibold text-ink-strong">{{ deadline.title }}</span>
-                        <span class="ml-1.5 text-xs text-ink-muted">
-                            {{ deadline.year_label }}
-                            <template v-if="deadline.turn !== null"> · Turn {{ deadline.turn }}</template>
-                            <!-- The same words the planner uses for the one case that has no turn: a
-                                 mandatory race after December sits outside the turn count, and printing
-                                 the year alone left it looking like the turn had gone missing. -->
-                            <template v-else> · the post-December block</template>
-                        </span>
-                        <span v-if="deadline.is_next" class="ml-1.5 text-xs font-bold text-ink-strong">
-                            <span aria-hidden="true">!</span> NEXT
-                        </span>
-                    </span>
-                    <span class="shrink-0 text-xs font-bold text-ink-strong">{{ deadline.state }}</span>
-                </li>
-            </ol>
-        </section>
-
-        <p v-if="nextDeadline !== null" class="mt-2 text-sm text-ink">
-            <span aria-hidden="true" class="font-mono font-bold text-goal-line">!</span>
-            Next obligation: <span class="font-semibold text-ink-strong">{{ nextDeadline.title }}</span>,
-            {{ nextDeadline.year_label }} turn {{ nextDeadline.turn }}. It reads "{{ nextDeadline.state }}".
-        </p>
-
-        <section aria-labelledby="race-readiness-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="race-readiness-heading" class="text-lg font-semibold text-ink-strong">Readiness</h2>
-            <p class="mt-1 text-sm text-ink">
-                <span class="font-semibold text-ink-strong" :title="props.readiness.title">{{ props.readiness.label }}</span>
-                <span class="ml-2 text-ink-muted">No readiness band is computed for this race.</span>
-            </p>
-        </section>
-
-        <section aria-labelledby="race-list-heading" class="mt-4">
-            <h2 id="race-list-heading" class="text-lg font-semibold text-ink-strong">Races to decide between</h2>
-
-            <!-- The branch switch. Two buttons that navigate the query string, the pattern
-                 `RacePanel` uses; the branch is server-resolved so this form never submits the
-                 branch the page no longer shows. -->
-            <div class="mt-2 flex flex-wrap gap-2" aria-label="Race entry mode">
-                <button
-                    v-for="mode in modes"
-                    :key="mode.key"
-                    type="button"
-                    :aria-pressed="props.entry_mode === mode.key ? 'true' : 'false'"
-                    class="inline-flex min-h-11 items-center rounded-md border px-3 text-sm font-medium"
-                    :class="props.entry_mode === mode.key ? 'border-pick-line bg-pick/10 text-ink-strong' : 'border-rule text-ink-muted'"
-                    @click="switchMode(mode.key)"
-                >
-                    {{ mode.label }}
-                </button>
-            </div>
-
-            <template v-if="props.entry_mode === 'calendar'">
-                <!-- The door to the Scenario Race Planner, which draws the whole calendar rather than
-                     this turn. A screen reachable only by URL is a defect (D14). -->
-                <p class="mt-2 text-sm">
-                    <Link :href="props.planner_url" class="inline-flex min-h-11 items-center rounded-md px-3 font-semibold text-ink underline">
-                        Plan the whole calendar
-                    </Link>
+        <div class="grid gap-4 g-side">
+            <section class="card" aria-labelledby="available-heading">
+                <h2 id="available-heading">Available this turn</h2>
+                <p class="sub">
+                    The calendar's races at this turn. Every row states the grade, the surface and the
+                    distance band, and the trainee's own letter for that axis.
                 </p>
 
-                 <p
-                     v-if="props.empty !== null"
-                     class="mt-2 rounded-md border border-dashed border-rule bg-panel p-4 text-sm text-ink"
-                 >
-                    {{ props.empty }}
+                <p v-if="props.races.length === 0" class="mt-2 text-sm text-ink">
+                    {{ props.empty ?? 'No race is scheduled on this turn.' }}
                 </p>
-                <!-- The comparison is a table, not two card grids: the decision is a comparison across the
-                     races offered at this turn, and a table is what puts the same fact on the same line
-                     for both. The cards below stay because the write lives in their drawer. -->
-                <div v-if="props.races.length > 0" class="mt-3 overflow-x-auto" role="region" tabindex="0" aria-label="Compare the races offered this turn">
-                    <table class="w-full border-collapse text-sm">
-                        <caption class="sr-only">The races this turn offers, compared on the facts the catalogue holds</caption>
+
+                <table v-else class="t mt-2 w-full border-collapse text-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-left">Race</th>
+                            <th scope="col" class="text-left">Grade</th>
+                            <th scope="col" class="text-left">Surface · distance</th>
+                            <th scope="col" class="text-right">Fans needed</th>
+                            <th scope="col" class="text-right">Skill Pt</th>
+                            <th scope="col" class="text-right"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr
+                            v-for="race in props.races"
+                            :key="race.id"
+                            :class="race.id === selectedId ? 'is-current bg-green-tint' : ''"
+                            class="cursor-pointer border-b border-rule-soft"
+                            @click="selectRace(race.id)"
+                        >
+                            <td class="py-2 pr-3">
+                                <b>{{ race.title }}</b>
+                                <span
+                                    v-if="race.distance_label"
+                                    class="block text-xs text-ink-muted"
+                                >{{ race.distance_label }}</span>
+                                <span v-if="race.is_mandatory" class="ml-1 rounded bg-brand-accent-soft px-1.5 py-0.5 text-[10px] font-bold text-brand-accent-ink">Mandatory</span>
+                            </td>
+                            <td class="py-2 pr-3">{{ race.tier ?? 'N/A' }}</td>
+                            <td class="py-2 pr-3" :title="race.aptitude.label">
+                                {{ race.surface ?? 'Surface not recorded' }} · {{ race.distance_band ?? 'band not recorded' }}
+                                <span class="pill pill-neutral ml-1 align-[1px]">{{ aptitudePill(race) }}</span>
+                            </td>
+                            <td class="py-2 pr-3 text-right font-mono">{{ race.fans_needed ?? '-' }}</td>
+                            <td class="py-2 pr-3 text-right font-mono">{{ race.payout ? '+' + race.payout.sp : '-' }}</td>
+                            <td class="py-2 text-right">
+                                <button
+                                    v-if="race.blocked_reason === null"
+                                    type="button"
+                                    class="btn btn-primary btn-sm min-h-11"
+                                    @click.stop="enterFormFor(race)"
+                                >{{ enterForm.processing ? 'Entering…' : 'Enter' }}</button>
+                                <button
+                                    v-else
+                                    type="button"
+                                    class="btn btn-sm min-h-11"
+                                    disabled
+                                    :title="race.blocked_reason"
+                                >{{ race.maiden_gated ? 'Maiden lock not cleared' : 'Blocked' }}</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <div class="flex flex-col gap-4">
+                <section v-if="selected !== null" class="card" aria-labelledby="race-detail-heading">
+                    <h2 id="race-detail-heading">{{ selected.title }}</h2>
+
+                    <div class="mt-2 grid gap-2.5 g-2">
+                        <div class="tile"><div class="k">Grade</div><div class="v">{{ selected.tier ?? 'N/A' }}</div></div>
+                        <div class="tile"><div class="k">Distance</div><div class="v font-mono">{{ selected.distance_label ?? 'N/A' }}</div></div>
+                        <div class="tile"><div class="k">Aptitude</div><div class="v text-sm">{{ selected.aptitude.label }}</div></div>
+                        <div class="tile"><div class="k">Skill Points</div><div class="v font-mono">{{ selected.payout ? '+' + selected.payout.sp : 'N/A' }}</div></div>
+                    </div>
+
+                    <p class="mt-3 text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Placement payouts</p>
+                    <table class="t mt-1 w-full border-collapse text-sm">
                         <thead>
-                            <tr class="border-b border-rule text-left text-ink-muted">
-                                <th scope="col" class="py-2 pr-3 font-medium">Race</th>
-                                <th scope="col" class="py-2 pr-3 font-medium">Tier</th>
-                                <th scope="col" class="py-2 pr-3 font-medium">Turn</th>
-                                <th scope="col" class="py-2 pr-3 font-medium">Fan gate</th>
-                                <th scope="col" class="py-2 pr-3 font-medium">Open?</th>
-                                <th scope="col" class="py-2 pr-3 font-medium">Obligation</th>
-                                <th scope="col" class="py-2 font-medium">Recorded</th>
+                            <tr>
+                                <th scope="col" class="text-left">Placement</th>
+                                <th scope="col" class="text-right">Skill Pt</th>
+                                <th scope="col" class="text-right">Stat</th>
+                                <th scope="col" class="text-right">Fans</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="race in props.races" :key="race.id" class="border-b border-rule last:border-0">
-                                <td class="py-2 pr-3 text-ink-strong">{{ race.title }}</td>
-                                <td class="py-2 pr-3 text-ink-muted">{{ race.tier ?? 'No tier recorded' }}</td>
-                                <td class="py-2 pr-3 font-mono tabular-nums text-ink-muted">{{ race.turn ?? 'Not on the grid' }}</td>
-                                <td class="py-2 pr-3 font-mono tabular-nums text-ink">
-                                    {{ race.fans_needed === null ? 'None' : race.fans_needed }}
-                                </td>
-                                <!-- The refusal reason, on the row rather than only inside the card, and
-                                     never hidden: a race this run cannot enter says why here. -->
-                                <td class="py-2 pr-3">
-                                    <span v-if="!race.maiden_gated" class="text-ink">Open</span>
-                                    <span v-else class="text-ink-muted">Closed: maiden rule, this race opens only once she has won one</span>
-                                </td>
-                                <td class="py-2 pr-3 text-ink-muted">
-                                    <span v-if="race.is_mandatory">Mandatory</span>
-                                    <span v-else-if="race.goal">{{ race.goal }}</span>
-                                    <span v-else>Optional</span>
-                                </td>
-                                <td class="py-2 text-ink-muted">{{ race.status ?? 'Not reached' }}</td>
+                            <tr class="is-current">
+                                <td><b>1st</b></td>
+                                <td class="text-right font-mono"><b>{{ selected.payout ? selected.payout.sp : '-' }}</b></td>
+                                <td class="text-right font-mono">{{ selected.payout ? '+' + selected.payout.stat : '-' }}</td>
+                                <td class="text-right font-mono">scales</td>
                             </tr>
+                            <tr><td>2nd</td><td class="text-right font-mono">-</td><td class="text-right font-mono">-</td><td class="text-right font-mono">scales</td></tr>
+                            <tr><td>3rd</td><td class="text-right font-mono">-</td><td class="text-right font-mono">-</td><td class="text-right font-mono">scales</td></tr>
                         </tbody>
                     </table>
-                </div>
 
-                <ul v-if="props.races.length > 0" class="mt-3 flex flex-col gap-3">
-                    <RaceCard
-                        v-for="race in props.races"
-                        :key="race.id"
-                        :race="race"
-                        :readiness="props.readiness"
-                        :entry="props.entry"
-                        :skip-url="props.run.run_url"
-                    />
-                </ul>
-            </template>
+                    <Note class="mt-2.5">
+                        <b>Only the 1st-place figure is sourced.</b> A first-place finish at 0 Race Bonus pays
+                        G1 +10 stat / +45 SP, G2-G3 +8 / +35 and OP-Pre-OP +5 / +30; Trackblazer pays the same
+                        stat at a lower SP. Second and third are <b>not published</b>, so those cells stay blank
+                        rather than extrapolated.
+                    </Note>
+                    <Note class="mt-2">
+                        The 34-percent Race Bonus breakpoint is the one the guide names for URA Finale and
+                        Unity Cup; the 50-percent row is Trackblazer's. A planner must print the payout the
+                        client shows rather than recompute it.
+                    </Note>
 
-            <!-- The manual free-race arm (F2, plan §9.6 ruling 3). Posts `entry_mode=manual` to
-                 `runs.races.store`, which also creates the `scenario_slots` row of kind
-                 `free_race`. -->
-            <template v-else>
-                <p class="mt-2 text-sm text-ink">
-                    Some races are not on the career calendar: a rival's event, a scenario-only race.
-                    Record one here and it appears in the run's race log the same way a calendar race does.
+                    <details class="mt-3">
+                        <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">Record the result of this race</summary>
+                        <form class="mt-2 flex flex-wrap items-end gap-3" @submit.prevent="recordResult">
+                            <label class="flex flex-col gap-1">
+                                <span class="text-xs text-ink-muted">Placement</span>
+                                <BaseInput v-model="resultForm.placement" type="number" name="placement" min="1" max="99" />
+                            </label>
+                            <BaseButton type="submit" variant="primary" :disabled="resultForm.processing">
+                                {{ resultForm.processing ? 'Recording…' : 'Record result' }}
+                            </BaseButton>
+                        </form>
+                    </details>
+                </section>
+
+                <section class="card" aria-labelledby="consecutive-heading">
+                    <h2 id="consecutive-heading">Consecutive races</h2>
+                    <p class="text-[12.5px] text-ink-muted">
+                        Races in a row raise the failure risk. Trackblazer publishes the odds; URA Finale and
+                        Unity Cup do not, so this screen states the count and not a probability.
+                    </p>
+                    <div class="srow mt-2">
+                        <span class="k">Races in a row so far</span>
+                        <span class="v font-mono">not recorded</span>
+                    </div>
+                    <Note class="mt-2">
+                        No probability is printed for this scenario. Inventing one would be the "score" the app
+                        is forbidden to add.
+                    </Note>
+                </section>
+
+                <p v-if="enterForm.hasErrors" role="alert" class="rounded-md border border-risk bg-raised p-2 text-sm text-risk">
+                    <span v-for="(message, key) in enterForm.errors" :key="key" class="block">{{ message }}</span>
                 </p>
 
-                <form
-                    class="mt-3 grid max-w-3xl grid-cols-2 gap-3 text-sm @4xl:grid-cols-3"
-                    :aria-busy="manualForm.processing"
-                    @submit.prevent="submitManual"
-                >
-                     <label class="flex flex-col gap-1">
-                         <span class="text-ink-muted">Race title *</span>
-                         <BaseInput
-                           v-model="manualForm.title"
-                           type="text"
-                           name="title"
-                           required
-                           maxlength="255"
-                           placeholder="e.g. Practice Race"
-                         />
-                     </label>
-                     <label class="flex flex-col gap-1">
-                         <span class="text-ink-muted">Month *</span>
-                         <BaseSelect
-                           v-model="manualForm.month"
-                           name="month"
-                           required
-                           :options="monthOptions.map(month => ({ value: month, label: month }))"
-                         />
-                     </label>
-                    <label class="flex flex-col gap-1">
-                        <span class="text-ink-muted">Half *</span>
-                         <BaseSelect
-                           v-model="manualForm.half"
-                           name="half"
-                           required
-                           :options="[{ value: '', label: 'select' }, { value: 'Early', label: 'Early' }, { value: 'Late', label: 'Late' }]"
-                         />
-                    </label>
-                     <label class="flex flex-col gap-1">
-                         <span class="text-ink-muted">Tier (optional)</span>
-                         <BaseInput
-                           v-model="manualForm.tier"
-                           type="text"
-                           name="tier"
-                           maxlength="10"
-                         />
-                     </label>
-                     <label class="flex flex-col gap-1">
-                         <span class="text-ink-muted">Outcome</span>
-                         <BaseSelect
-                           v-model="manualForm.status"
-                           name="status"
-                           :options="props.race_statuses.map(status => ({ value: status, label: status }))"
-                         />
-                     </label>
-                     <label class="flex flex-col gap-1">
-                         <span class="text-ink-muted">Placement</span>
-                         <BaseInput
-                           v-model="manualForm.placement"
-                           type="number"
-                           name="placement"
-                           min="1"
-                           max="99"
-                         />
-                     </label>
-                     <label class="flex flex-col gap-1">
-                         <span class="text-ink-muted">Fans gained</span>
-                         <BaseInput
-                           v-model="manualForm.fans_gain"
-                           type="number"
-                           name="fans_gain"
-                           min="0"
-                         />
-                     </label>
-                     <label class="flex flex-col gap-1">
-                         <span class="text-ink-muted">Logged turn</span>
-                         <BaseSelect
-                           v-model="manualForm.turn_entry_id"
-                           name="turn_entry_id"
-                           :options="[{ value: '', label: 'not named' }, ...props.entry.turns.map(turn => ({ value: String(turn.id), label: `Turn ${turn.turn}` }))]"
-                         />
-                     </label>
-                     <div class="flex items-end">
-                         <BaseButton
-                           type="submit"
-                           variant="primary"
-                           :disabled="manualForm.processing"
-                         >
-                           {{ manualForm.processing ? 'Saving…' : 'Record race' }}
-                         </BaseButton>
-                     </div>
-                    <p
-                        v-if="manualForm.hasErrors"
-                        ref="alertRef"
-                        role="alert"
-                        tabindex="-1"
-                        class="@4xl:col-span-3 rounded-md border border-risk bg-raised p-2 text-sm text-risk"
-                    >
-                        <span v-for="(message, key) in manualForm.errors" :key="key" class="block">{{ message }}</span>
-                    </p>
-                </form>
-
-                <div v-if="props.manual_slots.length > 0" class="mt-4">
-                    <h3 class="text-lg font-semibold text-ink-strong">Races entered by hand</h3>
-                    <ul class="mt-2 flex flex-col gap-1.5" aria-label="Hand-entered races">
-                        <li
-                            v-for="slot in props.manual_slots"
-                            :key="slot.id"
-                            class="rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink"
-                        >
-                            {{ slot.title }}
-                        </li>
-                    </ul>
+                <div class="savebar">
+                    <span class="dirty" role="status">
+                        {{ selected !== null ? selected.title + ' selected' : 'No race chosen' }}
+                    </span>
+                    <button type="button" class="btn btn-quiet min-h-11" title="The build has no undo; this screen proposes one.">Undo turn {{ undoableTurn }}</button>
+                    <a :href="trainingUrl" class="btn min-h-11 inline-flex items-center">Train instead</a>
+                    <button
+                        type="button"
+                        class="btn btn-primary min-h-11"
+                        :disabled="selected === null || selected.blocked_reason !== null || enterForm.processing"
+                        @click="enterRace()"
+                    >{{ enterForm.processing ? 'Entering…' : 'Enter a race' }}</button>
                 </div>
-            </template>
-        </section>
+            </div>
+        </div>
+
+        <!-- HFW OVERRIDE (manual race): the wireframe draws only calendar races; the app can record a
+             free race that no calendar row holds. It stays available, collapsed. -->
+        <details class="card mt-4">
+            <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">Race not on the calendar</summary>
+            <form class="mt-3 grid max-w-3xl grid-cols-2 gap-3 text-sm @4xl:grid-cols-3" :aria-busy="manualForm.processing" @submit.prevent="submitManual">
+                <label class="flex flex-col gap-1">
+                    <span class="text-ink-muted">Race title *</span>
+                    <BaseInput v-model="manualForm.title" type="text" name="title" required maxlength="255" placeholder="e.g. Practice Race" />
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-ink-muted">Month *</span>
+                    <BaseSelect v-model="manualForm.month" name="month" required :options="monthOptions.map(month => ({ value: month, label: month }))" />
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-ink-muted">Half *</span>
+                    <BaseSelect v-model="manualForm.half" name="half" required :options="[{ value: '', label: 'select' }, { value: 'Early', label: 'Early' }, { value: 'Late', label: 'Late' }]" />
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-ink-muted">Tier (optional)</span>
+                    <BaseInput v-model="manualForm.tier" type="text" name="tier" maxlength="10" />
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-ink-muted">Outcome</span>
+                    <BaseSelect v-model="manualForm.status" name="status" :options="props.race_statuses.map(status => ({ value: status, label: status }))" />
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-ink-muted">Placement</span>
+                    <BaseInput v-model="manualForm.placement" type="number" name="placement" min="1" max="99" />
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-ink-muted">Fans gained</span>
+                    <BaseInput v-model="manualForm.fans_gain" type="number" name="fans_gain" min="0" />
+                </label>
+                <div class="flex items-end">
+                    <BaseButton type="submit" variant="primary" :disabled="manualForm.processing">
+                        {{ manualForm.processing ? 'Saving…' : 'Record race' }}
+                    </BaseButton>
+                </div>
+                <p v-if="manualForm.hasErrors" ref="alertRef" role="alert" tabindex="-1" class="rounded-md border border-risk bg-raised p-2 text-sm text-risk @4xl:col-span-3">
+                    <span v-for="(message, key) in manualForm.errors" :key="key" class="block">{{ message }}</span>
+                </p>
+            </form>
+        </details>
+
+        <p v-if="manualForm.hasErrors || enterForm.hasErrors" class="sr-only" role="alert">The race write was refused.</p>
     </CareerLayout>
 </template>

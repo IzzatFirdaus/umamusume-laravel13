@@ -522,4 +522,31 @@ return [
         'running' => 4,
     ],
 
+    /*
+     * The post-race payout a first-place finish pays at 0% Race Bonus, per grade family. Source:
+     * UMAMUSUME_REFERENCE.md's 2026-10-15 payout table (Game8.co "Race Bonus Explained", [Global],
+     * fetched 2026-10-15). Standard careers pay G1 +10 stat / +45 SP, G2-G3 +8 / +35 and OP-Pre-OP
+     * +5 / +30; Trackblazer pays the same stat at a lower SP (G1 +10 / +35, G2-G3 +10 / +25, OP-Pre-OP
+     * +10 / +20). Second and third place are not published anywhere this repository reads, so no row
+     * here carries them and the screen leaves those cells blank rather than extrapolating.
+     *
+     * @var array{source: string, verified_at: string, families: array<string, array<string, array{stat: int, sp: int}>>}
+     */
+    'race_payouts' => [
+        'source' => 'Game8.co "Race Bonus Explained", 2026-06-26, [Global]; transcribed in UMAMUSUME_REFERENCE.md (2026-10-15 payout table)',
+        'verified_at' => '2026-10-15',
+        'families' => [
+            'standard' => [
+                'g1' => ['stat' => 10, 'sp' => 45],
+                'g2_g3' => ['stat' => 8, 'sp' => 35],
+                'op' => ['stat' => 5, 'sp' => 30],
+            ],
+            'trackblazer' => [
+                'g1' => ['stat' => 10, 'sp' => 35],
+                'g2_g3' => ['stat' => 10, 'sp' => 25],
+                'op' => ['stat' => 10, 'sp' => 20],
+            ],
+        ],
+    ],
+
 ];

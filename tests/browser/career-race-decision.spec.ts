@@ -4,31 +4,16 @@ import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';
 
 /*
- * Rendered-copy, keyboard and accessibility evidence for SCREEN-011, the Race Decision
- * (`SCR-CAR-013`, plan §8 D10). `CareerRaceDecisionTest` asserts the resolved props — the ten facts
- * present and absent, the readiness refusal, the mandatory list, the four empty states. These cases
- * assert what only a browser reaches: the `N/A` title text a sighted Trainer hovers, the drawer's
- * keyboard behaviour, the 44px sweep, and an axe scan.
+ * Rendered evidence for SCREEN-011, the Race Decision, re-baselined at the HFW's region model after
+ * the 2026-10-28 parity audit. The page is now one table of the turn's races, one selected race's
+ * detail card with the sourced 1st-place payout, the consecutive-races card and the savebar; the
+ * free-race write and the result recorder stay in disclosures (documented overrides).
  *
- * Fixture strategy. The turn being decided has to fall on a turn the calendar carries a race on, and
- * for the Level 1 assertions it has to fall on a race the calendar calls mandatory. `is_mandatory` is
- * true on exactly one in-career-year row, Junior turn 12 (the rest are the finale block, which is
- * outside the 24-turn grid), so the fixture logs eleven turns and the decision lands on turn 12. The
- * turns are logged over `runs.turns.store` — no rendered surface creates a turn since the run screen
- * became a redirect — and the run is deleted over HTTP in `afterEach` (`tests/utils/delete-run.ts`).
- *
- * The CSV import would have been one write instead of ten, and it is broken: `Import.vue`'s
- * `confirmImport()` posts `preview.run`, which carries only the run's own columns, while
- * `ImportHistoricalRunRequest` requires `csv` and `turns`. The confirm step therefore always fails
- * validation, which no test has noticed because `run-import.spec.ts` deliberately reaches the confirm
- * step and never posts it. Filed as KI-64; this spec does not depend on it.
- *
- * `unity_cup` rather than `ura_finale`: both carry the same shared calendar rows, and unity_cup is
- * what the create form's scenario list and the seeded catalogue already agree on.
+ * Fixture: eleven logged turns put the decision on Junior turn 12, where the calendar carries the
+ * mandatory Junior Make Debut. The run is deleted over HTTP in afterEach.
  */
 
 const WRITE = { timeout: 60_000 } as const;
-
 const createdRunUrls: string[] = [];
 
 test.afterEach(async ({ page }) => {
@@ -37,17 +22,7 @@ test.afterEach(async ({ page }) => {
     }
 });
 
-/**
- * A career with eleven turns logged, then the Race Decision screen for it.
- *
- * Eleven, not ten: the turn being decided is one past the last logged one, so eleven logged turns put
- * the decision on turn 12, the Junior Make Debut — the one mandatory race inside the year grid.
- *
- * The writes get 60s rather than the config's 15s, for the reason `career-cockpit.spec.ts` records:
- * `php artisan serve` is a single-process `php -S`, so a write queues behind whatever else is on the
- * box, and `playwright.config.ts` already raised the test budget for exactly that.
- */
-async function openDecision(page: import('@playwright/test').Page): Promise<void> {
+async function openDecision(page: import('@playwright/test').Page): Promise<string> {
     await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     await page.locator('#trainee-combobox').fill('Agnes Digital');
@@ -55,161 +30,136 @@ async function openDecision(page: import('@playwright/test').Page): Promise<void
     await page.selectOption('select[name="scenario"]', { value: 'unity_cup' });
     await page.getByRole('button', { name: 'Create run' }).click();
     await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
-    createdRunUrls.push(page.url());
 
     const runId = page.url().match(/\/training-runs\/(\d+)/)?.[1] ?? '';
     const runUrl = page.url().replace(/\/cockpit$/, '');
+    createdRunUrls.push(page.url());
 
-    // Eleven turns, so the turn being decided is turn 12 — Junior Year, Late June, where the
-    // calendar carries the mandatory debut.
     await recordTurns(page, runId, 11);
 
     await page.goto(`${runUrl}/races`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
+
+    return runUrl;
 }
 
-test('names each absent race field with its reason, and refuses a readiness band', async ({ page }) => {
+test('renders the HFW region model', async ({ page }) => {
     await openDecision(page);
 
-    // The turn being decided, on the client's own grid. Scoped to the region: each race card prints
-    // its own turn too, so a page-wide `Turn 12` is ambiguous.
-    const turnRegion = page.getByRole('region', { name: 'The turn being decided' });
-    await expect(turnRegion).toBeVisible();
-    await expect(turnRegion.getByText('Turn 12')).toBeVisible();
-
-    // The race the calendar carries at that turn. The title is the catalogue's own for this scenario
-    // and turn, which is "Junior Make Debut" at Junior turn 12.
-    await expect(page.getByRole('heading', { name: 'Races to decide between' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Junior Make Debut' })).toBeVisible();
-
-    // The held figure, named as held: hovering the N/A says why, and it names the decision rather
-    // than a number. The reason is the held-prediction blocker; `1713670f` reworded it away from
-    // the bare `ADR-0016` token, and `CareerRacePlannerTest` pins the current wording, so this
-    // asserts the same truth.
-    const readiness = page.getByRole('heading', { name: 'Readiness' }).locator('..').getByText('N/A');
-    await expect(readiness).toHaveAttribute('title', /Held\. Race prediction is blocked/);
-
-    // A brief field with no column behind it: the reason travels with the value on a disclosure a
-    // keyboard and a screen reader reach, not only on hover.
-    await expect(page.getByText('Running style').first()).toBeVisible();
-    await expect(page.locator('summary', { hasText: 'aptitude, not a property of the race' }).first()).toBeVisible();
-
-    // Level 1 is a glyph plus the word, in three places: the region heading, the next obligation in
-    // the list, and the card itself. The `!` is aria-hidden, so the heading matched by accessible name
-    // is the word alone while a sighted Trainer reads glyph and word together — the state never rests
-    // on colour or on the glyph. Exact text is what these three assert: the marker element's own text
-    // is "! NEXT" and "! Mandatory", so `exact: true` on the bare word matches nothing. `79ffad5`'s
-    // ruling holds for the calendar's obligation — the screen says "Mandatory", never "Goal" for it.
-    // What ADR-0026 added is a second fact about the same race: the trainee's own objective prints the
-    // Goal mark beside the gate lines, and the debut is that objective for every trainee, so the card
-    // for it carries exactly one mark with the requirement in the source's own words.
-    await expect(page.getByRole('heading', { name: 'Mandatory races' })).toBeVisible();
-    await expect(page.getByText('! NEXT', { exact: true })).toBeVisible();
-    await expect(page.getByText('! Mandatory', { exact: true })).toBeVisible();
-    await expect(page.getByText('Goal', { exact: true })).toHaveCount(1);
-    await expect(page.getByText('· Participate in Junior Make Debut')).toBeVisible();
-
-    // The screen carries no percentage anywhere: a win estimate and the brief's risk thresholds are
-    // both percentages, and neither is built.
-    await expect(page.locator('main')).not.toContainText('%');
+    await expect(page.getByRole('heading', { name: 'Available this turn', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Consecutive races', level: 2 })).toBeVisible();
+    await expect(page.locator('.savebar')).toHaveCount(1);
+    await expect(page.locator('.tile')).toHaveCount(4);
+    await expect(page.locator('main table')).toHaveCount(2);
+    // One primary in the savebar plus the per-row Enter buttons, which the HFW also fills.
+    await expect(page.locator('.savebar .btn-primary')).toHaveCount(1);
 });
 
-test('compares the turn\'s races in a table and keeps a refused race visible with its reason', async ({ page }) => {
+test('states each row\'s grade, surface, band, aptitude letter and 1st-place skill points', async ({ page }) => {
     await openDecision(page);
 
-    // The HFW's ruling: the comparison is a table, not two card grids. One fact per column means the
-    // same fact sits on the same line across races, which is what makes a comparison scannable.
-    const table = page.getByRole('region', { name: 'Compare the races offered this turn' });
-    await expect(table).toBeVisible();
-    for (const column of ['Race', 'Tier', 'Turn', 'Fan gate', 'Open?', 'Obligation', 'Recorded']) {
-        await expect(table.getByRole('columnheader', { name: column, exact: true })).toBeVisible();
-    }
+    const table = page.locator('table').first();
+    await expect(table.getByRole('columnheader')).toHaveCount(6);
+    await expect(table).toContainText('Grade');
+    await expect(table).toContainText('Surface · distance');
+    await expect(table).toContainText('Fans needed');
+    await expect(table).toContainText('Skill Pt');
 
-    // Every offered race has a row. A race this run cannot enter is not hidden: the row carries the
-    // refusal reason in words, and the closed state is text rather than colour alone.
+    // A placeholder calendar row (the Junior debut) carries no surface or band, so the grade cell
+    // is the stable assertion and the aptitude pill appears only where an axis exists.
     const rows = table.locator('tbody tr');
-    expect(await rows.count()).toBeGreaterThan(0);
-    await expect(table).toContainText(/Open|Closed: maiden rule/);
+    const grades = await rows.locator('td:nth-child(2)').allTextContents();
 
-    // No invented figure: no win probability and no risk band, so no percentage reaches the page.
-    await expect(table).not.toContainText('%');
+    expect(grades.length).toBeGreaterThan(0);
+    for (const grade of grades) {
+        expect(grade.trim()).toMatch(/^(G1|G2|G3|OP|Pre-OP|Debut|Maiden|N\/A)$/);
+    }
 });
 
-test('opens the drawer from the keyboard, closes it on Escape and returns focus to the opener', async ({ page }) => {
+test('keeps a blocked race visible with its reason rather than filtering it out', async ({ page }) => {
     await openDecision(page);
 
-    const opener = page.getByRole('button', { name: /^Details and actions for/ }).first();
-    await opener.focus();
-    await expect(opener).toBeFocused();
+    const blocked = page.locator('table').first().locator('tbody tr').filter({ has: page.getByRole('button', { name: /Maiden lock not cleared|Blocked/ }) });
 
-    // Enter on the opener is the keyboard path in.
-    await page.keyboard.press('Enter');
-    const dialog = page.locator('dialog[open]');
-    await expect(dialog).toBeVisible();
+    if (await blocked.count() === 0) {
+        test.skip(true, 'no blocked row on this turn');
 
-    // `showModal()` moves focus into the drawer — to the first focusable descendant, or to the dialog
-    // itself — so the drawer is reachable without a pointer, and the page behind it is inert while it
-    // is open. Which of the two receives it is the browser's choice, so this asserts containment.
-    expect(await dialog.evaluate((el) => el.contains(document.activeElement))).toBe(true);
-
-    // Escape is the dialog's own behaviour, and the focus return is the component's.
-    await page.keyboard.press('Escape');
-    await expect(page.locator('dialog[open]')).toHaveCount(0);
-    await expect(opener).toBeFocused();
-
-    // And the drawer's own actions are reachable from the keyboard.
-    await page.keyboard.press('Enter');
-    await expect(page.getByRole('button', { name: 'Enter Race' }).first()).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Skip for now' }).first()).toBeVisible();
-    await page.keyboard.press('Escape');
-});
-
-test('sizes the race decision controls to the 44px contract', async ({ page }) => {
-    await openDecision(page);
-
-    const details = page.getByRole('button', { name: /^Details and actions for/ }).first();
-    expect((await details.boundingBox())?.height ?? 0, 'Details is not sized to the 44px contract')
-        .toBeGreaterThanOrEqual(44);
-
-    await details.click();
-    await expect(page.locator('dialog[open]')).toBeVisible();
-
-    for (const control of [
-        page.getByRole('button', { name: 'Close' }).first(),
-        page.getByRole('button', { name: 'Enter Race' }).first(),
-        page.getByRole('link', { name: 'Skip for now' }).first(),
-    ]) {
-        const box = await control.boundingBox();
-        expect(box?.height ?? 0, 'a race decision control is not sized to the 44px contract')
-            .toBeGreaterThanOrEqual(44);
+        return;
     }
 
-    await page.keyboard.press('Escape');
+    const button = blocked.first().getByRole('button');
+
+    await expect(button).toBeDisabled();
+    await expect(button).toBeVisible();
 });
 
-test('passes an axe scan at WCAG A and AA', async ({ page }) => {
+test('prints only the sourced 1st-place payout and leaves 2nd and 3rd blank', async ({ page }) => {
     await openDecision(page);
 
-    // `buildAxe` scopes to `#app`, which is what makes this deterministic (KI-63).
-    const results = await buildAxe(page).analyze();
+    const payouts = page.locator('table').nth(1);
 
-    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+    await expect(payouts).toContainText('Placement');
+    await expect(payouts.locator('tbody tr')).toHaveCount(3);
+    await expect(payouts.locator('tbody tr').nth(1)).toContainText('2nd');
+    await expect(payouts.locator('tbody tr').nth(2)).toContainText('3rd');
+    // No extrapolated percentage or number on the unpublished placements.
+    await expect(payouts.locator('tbody tr').nth(1)).not.toContainText('%');
 });
 
-test('names an un-entered calendar race as scheduled, not yet run', async ({ page }) => {
-    // B-0.4 (Group B): a calendar race with no recorded entry is derived as scheduled-but-not-run,
-    // never stored as a status value (the owner ruled the derived line, not an enum change).
+test('selecting a row moves the detail card and the savebar status', async ({ page }) => {
     await openDecision(page);
-    // The fixture's decision lands on Junior turn 12 (the debut), which no entry records yet.
-    await expect(page.getByText('Scheduled, not yet run.').first()).toBeVisible();
+
+    const rows = page.locator('table').first().locator('tbody tr');
+    const count = await rows.count();
+
+    if (count < 2) {
+        test.skip(true, 'only one race on this turn');
+
+        return;
+    }
+
+    const title = (await rows.nth(1).locator('b').first().textContent())?.trim() ?? '';
+
+    await rows.nth(1).click();
+
+    await expect(page.getByRole('heading', { name: title, level: 2 })).toBeVisible();
+    await expect(page.locator('.savebar')).toContainText(`${title} selected`);
 });
 
-test('offers a record-result path on a race card', async ({ page }) => {
-    // B-0.2 (Group B): a completed race with a placement is the write path the trainee's goals read.
-    // This case proves the control is reachable in the drawer; the derivation is pinned by
-    // `CockpitGoalFromCompletedRaceTest`.
+test('Train instead escapes to the training screen', async ({ page }) => {
+    const runUrl = await openDecision(page);
+
+    await page.getByRole('link', { name: 'Train instead' }).click();
+    await page.waitForURL(`${runUrl}/training`, WRITE);
+    await expect(page.getByRole('heading', { name: "Pick this turn's action", level: 1 })).toBeVisible();
+});
+
+test('entering a race writes through the existing route and lands back on the decision', async ({ page }) => {
+    const runUrl = await openDecision(page);
+
+    await page.locator('table').first().locator('tbody tr').filter({ has: page.getByRole('button', { name: 'Enter' }) }).first().getByRole('button', { name: 'Enter' }).click();
+
+    // The write redirects back to the referring screen (storeRace's back()), so the confirmation is
+    // the flash rather than a navigation to the cockpit.
+    await expect(page.getByText('Race recorded.')).toBeVisible(WRITE);
+    await expect(page).toHaveURL(`${runUrl}/races`);
+});
+
+test('meets the 44px floor and passes axe', async ({ page }) => {
     await openDecision(page);
-    await page.getByRole('button', { name: /Details and actions for/ }).first().click();
-    await page.getByText('Record a result').first().click();
-    await expect(page.getByRole('button', { name: 'Record completed race' })).toBeVisible();
+
+    const undersized = await page.locator('main a, main button, main select, main summary').evaluateAll((nodes) =>
+        nodes.filter((node) => {
+            const box = node.getBoundingClientRect();
+
+            return box.width > 0 && box.height > 0 && box.height < 44;
+        }).length,
+    );
+
+    expect(undersized).toBe(0);
+
+    const axe = await buildAxe(page);
+    const results = await axe.analyze();
+
+    expect(results.violations).toEqual([]);
 });

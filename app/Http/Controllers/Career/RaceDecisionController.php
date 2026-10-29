@@ -207,6 +207,93 @@ class RaceDecisionController extends Controller
             'placement' => $entry?->placementOrdinal(),
             'fans_gain' => $entry?->fans_gain,
             'grade_points' => $entry?->grade_points_earned,
+            // The HFW's row face: grade, surface and band as words, the trainee's two aptitude letters
+            // beside them, and the 1st-place payout the reference table states for this grade family.
+            // A race she cannot enter keeps its reason on the row rather than disappearing.
+            'surface' => $slot->surface,
+            'distance_label' => $slot->distance === null ? null : $slot->distanceLabel(),
+            'distance_band' => $slot->distance_band,
+            'aptitude' => $this->aptitudeFor($run, $slot),
+            'blocked_reason' => $run->maidenGates($slot, $maidenCleared)
+                ? 'The maiden lock is not cleared; this race opens only once a Debut or Maiden is won.'
+                : null,
+            'payout' => $this->payoutFor($run, $slot),
+        ];
+    }
+
+    /**
+     * This trainee's own letters for the race's surface and distance band, and the sentence the row
+     * prints beside them.
+     *
+     * The letters are read, never derived from a metre count: the band is the export's own word
+     * (RaceFacts records the 1400 m disagreement), so a band the export does not name yields an
+     * absence here too.
+     *
+     * @return array{surface: string|null, distance: string|null, label: string}
+     */
+    private function aptitudeFor(TrainingRun $run, RaceCatalogSlot $slot): array
+    {
+        $surfaceKey = match ($slot->surface) {
+            'Turf' => 'aptitude_turf',
+            'Dirt' => 'aptitude_dirt',
+            default => null,
+        };
+
+        $bandKey = match ($slot->distance_band) {
+            'Sprint' => 'aptitude_sprint',
+            'Mile' => 'aptitude_mile',
+            'Medium' => 'aptitude_medium',
+            'Long' => 'aptitude_long',
+            default => null,
+        };
+
+        $surface = $surfaceKey === null ? null : $run->umamusume->{$surfaceKey};
+        $distance = $bandKey === null ? null : $run->umamusume->{$bandKey};
+
+        return [
+            'surface' => is_string($surface) && $surface !== '' ? $surface : null,
+            'distance' => is_string($distance) && $distance !== '' ? $distance : null,
+            'label' => trim(
+                ($slot->surface ?? 'Surface not recorded').' '.($surface ?? 'N/A')
+                .' · '
+                .($slot->distance_band ?? 'Band not recorded').' '.($distance ?? 'N/A'),
+            ),
+        ];
+    }
+
+    /**
+     * The 1st-place payout the reference table states for this grade and scenario family, or null
+     * where no published row covers the grade (Debut and Maiden are outside the table).
+     *
+     * @return array{tier: string, stat: int, sp: int, source: string, verified_at: string}|null
+     */
+    private function payoutFor(TrainingRun $run, RaceCatalogSlot $slot): ?array
+    {
+        $tier = match ($slot->tier) {
+            'G1' => 'g1',
+            'G2', 'G3' => 'g2_g3',
+            'OP', 'Pre-OP' => 'op',
+            default => null,
+        };
+
+        if ($tier === null) {
+            return null;
+        }
+
+        $family = $run->scenarioKey() === 'trackblazer' ? 'trackblazer' : 'standard';
+        /** @var array{stat: int, sp: int}|null $row */
+        $row = config('uma.race_payouts.families.'.$family.'.'.$tier);
+
+        if (! is_array($row)) {
+            return null;
+        }
+
+        return [
+            'tier' => $slot->tier,
+            'stat' => (int) $row['stat'],
+            'sp' => (int) $row['sp'],
+            'source' => (string) config('uma.race_payouts.source'),
+            'verified_at' => (string) config('uma.race_payouts.verified_at'),
         ];
     }
 
