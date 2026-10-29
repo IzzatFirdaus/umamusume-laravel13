@@ -1293,12 +1293,38 @@ absence rather than a Level-1 figure, which is the DM rule the page already held
 old file pinned the cards/Advisor model), and the two feature cases that pinned Wit's suppressed cost
 now pin the signed refund the page prints.
 
-## C5 — remaining screens (not yet started)
+## C5 — race-decision, screen 2 of 9 (`06a85efa`)
 
-The audit's other 31 divergent pages and the `near` re-examinations are unchanged. Order stays as the
-audit's repair list: the other eight lifecycle screens (race-decision, career-race-planner,
-event-decision, inheritance, skills-planner, run-deck, timeline, result), then the wizard remainder,
-then library/legacy/veterans/review, then the copy/identifier pass. `3.0.0` remains **absent**.
+| Item | Before (audit) | After |
+|---|---|---|
+| Region model | turn header, mandatory deadlines, readiness N/A, race cards + drawer | Available-this-turn table, selected race card, consecutive races, savebar |
+| h1 | "Race decision" | "Enter a race, or skip the turn" (HFW) |
+| Row face | cards | table: Race, Grade, Surface · distance + aptitude pill, Fans needed, Skill Pt, Enter |
+| Detail | card drawer | four tiles (Grade, Distance, Aptitude, Skill Points) + placement payouts + 2 provenance notes |
+| Payout | absent/no column | 1st place from a new sourced `config/uma.php` `race_payouts` table; 2nd/3rd blank |
+| Savebar | none | status + Undo turn N + Train instead + Enter a race (one filled action in the bar; rows also carry Enter, as the HFW does) |
+
+**Deviations, documented in the page:** (1) aptitude letters are printed but do **not** gate entry — in
+the client aptitude is a performance penalty, so a row is blocked only by the run's real maiden lock,
+and the disabled button's own text says so (`DOMAIN OVERRIDE`); (2) no course column exists, so a row
+names distance only; (3) the consecutive-race count has no source and prints "not recorded" rather than
+0; (4) the free-race form and the result recorder stay in disclosures (`HFW OVERRIDE`).
+
+**Verdict delta.** race-decision: **divergent → near**. Evidence: DOM vs HFW headings equal (Available
+this turn / selected race / Consecutive races), 4 tiles, 3 notes, 2 tables, 1 savebar, console clean.
+
+**Gates.** `php artisan test CareerRaceDecisionTest` → **19 passed (368 assertions)**;
+`npx playwright test career-race-decision` → **9 passed**; `npm run typecheck` → 0; `npm run build` → 0;
+pint passed. One copy fix inside the slice: the HFW's Race Bonus note says "34% / 50%", but this slice's
+own guard forbids a percent sign on the surface (it is the shape a win estimate takes), so the note says
+"34-percent" and the guard stays intact.
+
+## C6 — remaining screens (not yet started)
+
+The audit's other 30 divergent pages and the `near` re-examinations are unchanged. Order stays as the
+audit's repair list: the other seven lifecycle screens (career-race-planner, event-decision,
+inheritance, skills-planner, run-deck, timeline, result), then the wizard remainder, then
+library/legacy/veterans/review, then the copy/identifier pass. `3.0.0` remains **absent**.
 
 
 
