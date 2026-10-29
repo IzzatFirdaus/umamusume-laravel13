@@ -17,6 +17,7 @@
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
+import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import Pagination from '../../components/ui/Pagination.vue';
 import RarityChip from '../../components/RarityChip.vue';
@@ -144,6 +145,8 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
             />
         </template>
 
+        <DatabaseNav />
+
         <!-- One inline filter row, above the cards. A plain Inertia visit so the pending state and a
              rejected facet both stay readable on the field that caused them. -->
         <form
@@ -213,7 +216,7 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
         <template v-else>
             <p class="mt-6 text-sm text-ink-muted">{{ props.umamusumes.total }} of {{ props.totalCount }} trainees</p>
 
-            <ul id="catalog-results" class="mt-3 grid grid-cols-1 gap-3 @2xl:grid-cols-2 @4xl:grid-cols-3">
+            <ul id="catalog-results" class="mt-3 grid gap-3 g-3">
                 <li v-for="trainee in props.umamusumes.data" :key="trainee.id">
                     <!-- The card is one link: the whole tile is the target, and the row holds no second
                          control, so nothing inside it competes for the click. The frame is decorative

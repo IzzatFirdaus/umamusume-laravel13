@@ -17,6 +17,7 @@
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
+import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import { LinkButton } from '../../components/Form';
 import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -50,6 +51,15 @@ interface Holder {
     slug: string;
     url: string;
 }
+
+/** The client's published hint-discount ladder (`UMAMUSUME_REFERENCE.md` §1.1.4), a reference only. */
+const HINT_LADDER = [
+    { level: 'Lv1', discount: 10 },
+    { level: 'Lv2', discount: 20 },
+    { level: 'Lv3', discount: 30 },
+    { level: 'Lv4', discount: 35 },
+    { level: 'Lv Max', discount: 40 },
+];
 
 const props = defineProps<{
     skill: Skill;
@@ -96,23 +106,27 @@ const effectLine = (effect: Effect): string => `type ${effect.type}: ${effect.va
     >
         <Head :title="props.skill.name" />
         <template #head>
-            <PageHeader eyebrow="Skill" :title="props.skill.name" :description="lede">
+            <PageHeader
+                eyebrow="Skill"
+                :title="props.skill.name_ja !== null && props.skill.name_ja !== props.skill.name
+                    ? `${props.skill.name} ${props.skill.name_ja}`
+                    : props.skill.name"
+                :description="lede"
+            >
                 <template #actions>
                     <LinkButton href="/skills" variant="secondary">Back to search</LinkButton>
                 </template>
             </PageHeader>
         </template>
 
-        <!-- The index's dedupe rule carried over: 18 of the 623 Global rows store the same string in
-             both name columns, and printing the pair would repeat the name. -->
-        <p
-            v-if="props.skill.name_ja !== null && props.skill.name_ja !== props.skill.name"
-            lang="ja"
-            class="mb-4 text-sm text-ink-muted"
-        >{{ props.skill.name_ja }}</p>
+        <DatabaseNav />
 
-        <div class="grid grid-cols-1 gap-4 @4xl:grid-cols-3">
-            <section aria-labelledby="mechanics" class="@4xl:col-span-2">
+        <!-- The index's dedupe rule carried over: 18 of the 623 Global rows store the same string in
+             both name columns, and printing the pair would repeat the name. The Japanese name now
+             rides in the h1, where the wireframe puts it. -->
+
+        <div class="grid gap-4 g-side">
+            <section aria-labelledby="mechanics">
                 <div class="card">
                     <h2 id="mechanics">The source's own engine data</h2>
                     <p class="sub">Shown as-is. These are the export's tokens, not client labels.</p>
@@ -155,7 +169,9 @@ const effectLine = (effect: Effect): string => `type ${effect.type}: ${effect.va
                                     <th scope="row" :class="tdLabel">Base cost</th>
                                     <td :class="[tdValue, 'font-mono']">
                                         <template v-if="props.skill.sp_cost !== null">{{ props.skill.sp_cost }} SP</template>
-                                        <span title="The source states no SP cost for this class of skill.">N/A</span><span class="sr-only">: the source states no SP cost for this class of skill.</span>
+                                        <template v-else>
+                                            <span title="The source states no SP cost for this class of skill.">N/A</span><span class="sr-only">: the source states no SP cost for this class of skill.</span>
+                                        </template>
                                     </td>
                                 </tr>
                                 <tr>
@@ -193,6 +209,35 @@ const effectLine = (effect: Effect): string => `type ${effect.type}: ${effect.va
                         Activation conditions, effect values and distance or style qualifiers are not
                         recorded for this skill. The cost and the type are; the description block below
                         states why no readable sentence accompanies them.
+                    </p>
+                </div>
+
+                <!-- The wireframe's hint-level reference (`skill-detail.html`, keybox 3). ADR-0011 and
+                     ADR-0029 store no hint level, so the ladder is printed as the client's published
+                     reference; no per-skill discounted price is derived on this page. -->
+                <div class="card mt-4" aria-labelledby="hint-ladder">
+                    <h2 id="hint-ladder">Displayed cost at each hint level</h2>
+                    <p class="sub">
+                        The client's published discount ladder. This catalogue stores no hint level, so
+                        it prints the ladder itself and derives no price for this skill.
+                    </p>
+                    <table class="mt-2 w-full border-collapse text-sm">
+                        <thead>
+                            <tr class="border-b border-rule">
+                                <th scope="col" class="py-1.5 pr-3 text-left text-xs font-semibold text-ink-strong">Hint level</th>
+                                <th scope="col" class="py-1.5 text-right text-xs font-semibold text-ink-strong">Discount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="row in HINT_LADDER" :key="row.level" class="border-b border-rule last:border-b-0">
+                                <th scope="row" class="py-1.5 pr-3 text-left font-medium text-ink">{{ row.level }}</th>
+                                <td class="py-1.5 text-right font-mono tabular-nums text-ink">{{ row.discount }}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="note mt-2">
+                        A run's planner applies this ladder to its own hint level; the catalogue holds no
+                        run, so no discounted figure is asserted here.
                     </p>
                 </div>
             </section>
@@ -258,7 +303,7 @@ const effectLine = (effect: Effect): string => `type ${effect.type}: ${effect.va
                         <LinkButton href="/database/sources" variant="secondary" size="sm">Source ledger</LinkButton>
                     </div>
                     <p v-if="props.skill.source_url" class="mt-2 text-xs text-ink-muted">
-                        <a :href="props.skill.source_url" class="break-all text-ink-strong underline">{{ props.skill.source_url }}</a>
+                        <a :href="props.skill.source_url" rel="noreferrer noopener" target="_blank" class="text-ink-strong underline">Open the source</a>
                     </p>
                 </div>
             </div>

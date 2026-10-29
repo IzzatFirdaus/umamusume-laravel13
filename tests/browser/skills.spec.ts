@@ -28,7 +28,7 @@ test('sizes the search controls to the 44px contract and names the miss', async 
     await page.locator('#app > *').first().waitFor();
 
     // KI-29 / DESIGN.md §6.14: the search field, the type picker and the submit are 44px tall.
-    for (const name of ['Search', 'Type']) {
+    for (const name of ['Search', 'Unique', 'Type']) {
         const box = await page.getByLabel(name).boundingBox();
         expect(box?.height ?? 0, `${name} is not sized to the 44px contract`).toBeGreaterThanOrEqual(44);
     }
@@ -191,4 +191,101 @@ test('the skill detail passes an axe scan at WCAG A and AA', async ({ page }) =>
     await openAllDisclosures(page);
     const results = await buildAxe(page).analyze();
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
+/*
+ * The filter row's order and the condition note's home, both read off the HFW
+ * (`skills.html:72-78`, `:132-137`). Two deliberate absences ride with them, recorded in the page's
+ * own HFW-OVERRIDE blocks: no Distance facet (no column answers it) and name-only search (no readable
+ * effect text is stored).
+ */
+test('orders the filters as the HFW draws them and keeps the condition note inside the table card', async ({ page }) => {
+    await page.goto('/skills');
+    await page.locator('#app > *').first().waitFor();
+
+    const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'Filter' }) });
+    await expect(form.locator('label').nth(0)).toContainText('Search');
+    await expect(form.locator('label').nth(1)).toContainText('Unique');
+    await expect(form.locator('label').nth(2)).toContainText('Type');
+
+    const unique = page.getByLabel('Unique');
+    await expect(unique).toHaveValue('');
+    await expect(unique.locator('option')).toHaveText(['Any', 'Unique only']);
+    await expect(unique.locator('option[value=""]')).toBeEnabled();
+    await expect(page.getByLabel('Type').locator('option[value=""]')).toHaveCount(1);
+    await expect(page.getByLabel('Type').locator('option[value=""]')).toBeEnabled();
+
+    await expect(page.getByLabel('Distance'), 'a Distance facet the catalogue cannot answer').toHaveCount(0);
+
+    const table = page.locator('#skill-results');
+    const card = table.locator('xpath=ancestor::div[contains(@class,"overflow-x-auto")]');
+    const note = card.getByText(/The condition column prints the export's own tokens/);
+    await expect(note).toBeVisible();
+
+    const noteBottom = await note.evaluate((node) => node.getBoundingClientRect().bottom);
+    const pagerTop = await page.locator('nav[aria-label="Pagination"]').evaluate((node) => node.getBoundingClientRect().top);
+    expect(noteBottom, 'the note sits above the pager').toBeLessThanOrEqual(pagerTop);
+});
+
+test('shows absence labels only for missing skill values', async ({ page }) => {
+    const response = await page.goto('/skills');
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('#skill-results tr')).not.toHaveCount(0);
+
+    const populated = page.locator('#skill-results tr');
+    let populatedCells = 0;
+    for (const row of await populated.all()) {
+        for (const column of [1, 2, 3]) {
+            const cell = row.locator('td').nth(column);
+            const value = (await cell.innerText()).trim();
+            if (value.startsWith('N/A')) {
+                await expect(cell.locator('[title]')).toHaveCount(1);
+                continue;
+            }
+            populatedCells++;
+            await expect(cell).not.toContainText('N/A');
+        }
+    }
+    expect(populatedCells).toBeGreaterThan(0);
+
+    await page.goto('/skills?search=lookatcurren');
+    const missingCost = page.locator(`#skill-results [title="${NO_SP_COST_TITLE}"]`);
+    await expect(missingCost).toBeVisible();
+    await expect(missingCost).toHaveText('N/A');
+});
+
+test('the hint ladder is a reference and the base cost never prints its absence beside a value', async ({ page }) => {
+    // The wireframe's ladder row (skill-detail.html, keybox 3). ADR-0011/ADR-0029 store no hint
+    // level, so the page prints the published ladder as a reference and derives no per-skill price.
+    await page.goto('/skills/1');
+    await page.locator('#app > *').first().waitFor();
+
+    const ladder = page
+        .getByRole('heading', { name: 'Displayed cost at each hint level' })
+        .locator('xpath=following::table[1]');
+    await expect(ladder).toBeVisible();
+    await expect(ladder.getByRole('row')).toHaveCount(6);
+    await expect(ladder).toContainText('Lv1');
+    await expect(ladder).toContainText('Lv Max');
+    await expect(ladder).toContainText('40%');
+    // A reference, not a price: no SP figure is derived from the ladder.
+    await expect(ladder).not.toContainText('SP');
+
+    // A value and its absence are mutually exclusive in the Base-cost cell. Before the fix the
+    // cell printed "180 SP" and the N/A twin at once because the absence span had no v-else.
+    const costCell = page
+        .getByRole('rowheader', { name: 'Base cost' })
+        .locator('xpath=following-sibling::td[1]');
+    await expect(costCell).toContainText('SP');
+    await expect(costCell).not.toContainText('N/A');
+
+    // And the absent case still names the absence, on the skill whose cost is null.
+    await page.goto('/skills/370');
+    await page.locator('#app > *').first().waitFor();
+    const absentCell = page
+        .getByRole('rowheader', { name: 'Base cost' })
+        .locator('xpath=following-sibling::td[1]');
+    await expect(absentCell).toContainText('N/A');
+    // Its sr-only reason names the SP cost, so the absence assertion is "no numeric SP figure".
+    await expect(absentCell).not.toContainText(/\d+ SP/);
 });

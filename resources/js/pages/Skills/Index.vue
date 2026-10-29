@@ -10,13 +10,22 @@
  * The type is a word in a neutral pill, never a colour: skills carry no saturated identity hue in this
  * system. Rows the source leaves untyped print N/A with the reason, and the type filter's own
  * "Unspecified" choice is how they are found again.
+ *
+ * HFW-OVERRIDE (filters: Distance) - `skills.html:76-77` draws a Distance facet. This catalogue stores
+ * no distance column: distance exists only inside the condition tokens (`distance_type==2` and
+ * friends), so a picker over it would be a control the server cannot answer. The footer states the
+ * absence rather than quietly dropping the control.
+ *
+ * HFW-OVERRIDE (search: effect text) - `skills.html:73` promises "Skill name or effect text". No
+ * readable effect text is stored (G-SK-20), so the field matches the normalized name key only and its
+ * placeholder says "Part of a skill name"; the footer states that too.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
+import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import Pagination from '../../components/ui/Pagination.vue';
 import BaseInput from '../../components/Form/BaseInput.vue';
 import BaseSelect from '../../components/Form/BaseSelect.vue';
-import BaseCheckbox from '../../components/Form/BaseCheckbox.vue';
 import BaseButton from '../../components/Form/BaseButton.vue';
 import { LinkButton } from '../../components/Form';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
@@ -59,14 +68,14 @@ const errors = computed(() => (page.props.errors as Record<string, string | unde
 
 const search = ref(props.search ?? '');
 const type = ref(props.type ?? '');
-const unique = ref(props.unique);
+const unique = ref(props.unique ? '1' : '');
 const loading = ref(false);
 
 function params(): Record<string, string | number | undefined> {
     return {
         search: search.value || undefined,
         type: type.value || undefined,
-        unique: unique.value ? 1 : undefined,
+        unique: unique.value === '1' ? 1 : undefined,
     };
 }
 
@@ -108,6 +117,8 @@ const tdMono = 'border-b border-rule px-2 py-3 align-top font-mono text-xs text-
             />
         </template>
 
+        <DatabaseNav />
+
         <form
             class="flex flex-wrap items-end gap-3"
             :aria-busy="loading ? 'true' : null"
@@ -125,23 +136,25 @@ const tdMono = 'border-b border-rule px-2 py-3 align-top font-mono text-xs text-
                 />
             </label>
             <label class="flex flex-col gap-1 text-xs font-semibold text-ink-muted">
+                Unique
+                <BaseSelect
+                    id="skill-unique"
+                    v-model="unique"
+                    name="unique"
+                    :options="[{ value: '', label: 'Any' }, { value: '1', label: 'Unique only' }]"
+                    :error="errors.unique"
+                />
+            </label>
+            <label class="flex flex-col gap-1 text-xs font-semibold text-ink-muted">
                 Type
                 <BaseSelect
                     id="skill-type"
                     v-model="type"
                     name="type"
                     :options="[{ value: '', label: 'All' }, ...props.types.map((option) => ({ value: option, label: option })), { value: props.unspecifiedType, label: props.unspecifiedType }]"
-                    placeholder="All"
                     :error="errors.type"
                 />
             </label>
-            <BaseCheckbox
-                id="skill-unique"
-                v-model="unique"
-                name="unique"
-                value="1"
-                label="Unique only"
-            />
             <BaseButton type="submit" variant="primary" size="md" :loading="loading">
                 Filter
             </BaseButton>
@@ -177,7 +190,7 @@ const tdMono = 'border-b border-rule px-2 py-3 align-top font-mono text-xs text-
         </div>
 
         <template v-else>
-            <div class="mt-4 overflow-x-auto rounded-md border border-rule bg-panel">
+            <div class="card mt-4 overflow-x-auto">
                 <table class="w-full border-collapse">
                     <thead>
                         <tr>
@@ -214,15 +227,21 @@ const tdMono = 'border-b border-rule px-2 py-3 align-top font-mono text-xs text-
                             </td>
                             <td :class="td">
                                 <span v-if="skill.type" class="pill pill-outline">{{ skill.type }}</span>
-                                <span title="The source's effect codes give this skill no type word.">N/A</span><span class="sr-only">: the source's effect codes give this skill no type word.</span>
+                                <template v-else>
+                                    <span title="The source's effect codes give this skill no type word.">N/A</span><span class="sr-only">: the source's effect codes give this skill no type word.</span>
+                                </template>
                             </td>
                             <td :class="tdMono">
                                 <span v-if="engineCondition(skill)">{{ engineCondition(skill) }}</span>
-                                <span title="The source states no activation condition for this skill.">N/A</span><span class="sr-only">: the source states no activation condition for this skill.</span>
+                                <template v-else>
+                                    <span title="The source states no activation condition for this skill.">N/A</span><span class="sr-only">: the source states no activation condition for this skill.</span>
+                                </template>
                             </td>
                             <td :class="tdNum">
                                 <template v-if="skill.sp_cost !== null">{{ skill.sp_cost }} SP</template>
-                                <span title="The source states no SP cost for this class of skill.">N/A</span><span class="sr-only">: the source states no SP cost for this class of skill.</span>
+                                <template v-else>
+                                    <span title="The source states no SP cost for this class of skill.">N/A</span><span class="sr-only">: the source states no SP cost for this class of skill.</span>
+                                </template>
                             </td>
                             <td :class="[td, 'text-right']">
                                 <LinkButton :href="`/skills/${skill.id}`" variant="secondary" size="sm">Open</LinkButton>
@@ -230,20 +249,33 @@ const tdMono = 'border-b border-rule px-2 py-3 align-top font-mono text-xs text-
                         </tr>
                     </tbody>
                 </table>
+                <!-- The wireframe puts this note inside the table card, above the pager
+                     (`skills.html:132-137`), because it explains the column the reader is looking at. -->
+                <p class="note border-t border-rule px-2 py-2">
+                    <span class="g" aria-hidden="true">○</span>
+                    <span>
+                        The condition column prints the export's own tokens. A race is simulated in phases
+                        and the skill layer keys on phase flags rather than stat comparisons: the export
+                        carries <code>phase&gt;=2</code>, <code>phase_random</code>,
+                        <code>is_lastspurt==1</code> and <code>is_last_straight==1</code> across its
+                        entries.
+                    </span>
+                </p>
                 <p class="border-t border-rule px-2 py-2 text-xs text-ink-muted">
                     {{ props.skills.total }} of {{ props.totalCount }} skills available on Global
                 </p>
+                <div class="px-2 pb-2">
+                    <Pagination
+                        :page="props.skills.current_page"
+                        :pages="props.skills.last_page"
+                        :from="props.skills.from ?? 0"
+                        :to="props.skills.to ?? 0"
+                        :total="props.skills.total"
+                        noun="skills"
+                        @navigate="goToPage"
+                    />
+                </div>
             </div>
-
-            <Pagination
-                :page="props.skills.current_page"
-                :pages="props.skills.last_page"
-                :from="props.skills.from ?? 0"
-                :to="props.skills.to ?? 0"
-                :total="props.skills.total"
-                noun="skills"
-                @navigate="goToPage"
-            />
         </template>
 
         <p class="mt-6 max-w-3xl text-xs text-ink-muted">
@@ -252,7 +284,8 @@ const tdMono = 'border-b border-rule px-2 py-3 align-top font-mono text-xs text-
             rows show no word at all; the Type filter's “{{ props.unspecifiedType }}” choice finds those
             rows. Cost is the base cost only: a hint discount is per run, so the run planner owns it.
             Search matches the skill's name; no readable effect text is stored, so effect text cannot be
-            searched.
+            searched. Distance cannot be filtered separately: the catalogue stores it only inside the
+            condition tokens, not in a distance column.
         </p>
     </AppLayout>
 </template>

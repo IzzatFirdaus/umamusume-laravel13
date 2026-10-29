@@ -14,6 +14,7 @@
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
+import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import AptitudeGrid from '../../components/AptitudeGrid.vue';
 import SkillRow from '../../components/SkillRow.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
@@ -179,19 +180,28 @@ const cardH2 = 'text-base font-bold text-ink-strong';
     >
         <Head :title="props.trainee.name" />
         <template #head>
-            <PageHeader eyebrow="Trainee" :title="props.trainee.name">
+            <!-- The wireframe's h1 carries the Japanese name beside the English one; the index's
+                 dedupe rule applies, so the pair prints only when the two strings differ. -->
+            <PageHeader
+                eyebrow="Trainee"
+                :title="props.trainee.name_ja !== null && props.trainee.name_ja !== props.trainee.name
+                    ? `${props.trainee.name} ${props.trainee.name_ja}`
+                    : props.trainee.name"
+            >
                 <template #actions>
                     <LinkButton href="/umamusume" variant="secondary">Back to catalog</LinkButton>
                 </template>
             </PageHeader>
         </template>
 
+        <DatabaseNav />
+
         <p v-if="props.trainee.is_japan_only" class="mb-4 rounded-md border border-ink-faint bg-raised px-3 py-2 text-sm text-ink">
             Not yet released on Global. The data below is JP-sourced.
         </p>
 
-        <div class="grid grid-cols-1 gap-4 @4xl:grid-cols-3">
-            <div class="@4xl:col-span-2">
+        <div class="grid gap-4 g-side">
+            <div>
                 <!-- Base values and growth: the region stays, the values state their absence. -->
                 <div class="card">
                     <h2>Base stats and growth</h2>
