@@ -50,6 +50,11 @@ async function builderUrl(page: import('@playwright/test').Page, scenario: strin
     const url = `${runUrl}/deck`;
     await page.goto(url, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
+
+    // The HFW draws the six cards only; the picker and the analysis sit in two disclosures below.
+    await page.locator('summary').filter({ hasText: 'Choose a card' }).click();
+    await page.locator('summary').filter({ hasText: 'Deck analysis' }).click();
+
     return url;
 }
 
@@ -101,7 +106,7 @@ test('sizes every control on the screen to the 44px contract', async ({ page }) 
 
     for (const [selector, what] of [
         ['button:has-text("Filter")', 'Filter'],
-        ['button:has-text("Confirm deck")', 'Confirm deck'],
+        ['button:has-text("Save deck")', 'Save deck'],
         ['button:has-text("Owned")', 'an Owned toggle'],
         ['button:has-text("Choose a card")', 'a Choose a card button'],
     ] as const) {
@@ -295,7 +300,8 @@ test('carries the career stepper with a run-scoped Inheritance link', async ({ p
     // career's inheritance event (`cockpit-unity-cup.html:77`) and `/training-runs/{run}/inheritance`
     // is that screen, so the run-scoped property this case guards still holds; only the label moved.
     const inheritance = nav.getByRole('link', { name: 'Inheritance', exact: true });
-    await expect(inheritance).toHaveAttribute('href', `/training-runs/${runId}/inheritance`);
+    // route() renders an absolute URL; the guard matches its run-scoped tail.
+    await expect(inheritance).toHaveAttribute('href', new RegExp('/training-runs/' + runId + '/inheritance$'));
 
     // Deck is the live section on the deck screen.
     await expect(nav.getByRole('link', { name: 'Deck', exact: true })).toHaveAttribute('aria-current', 'step');
@@ -309,7 +315,7 @@ test('stores the per-run card level on the run deck and reads it back', async ({
     await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped');
 
     await page.getByLabel('Level for Slot 1').fill('35');
-    await page.getByRole('button', { name: 'Confirm deck' }).click();
+    await page.getByRole('button', { name: 'Save deck' }).click();
     await page.waitForURL(/\/cockpit$/);
 
     await page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -325,11 +331,15 @@ test('uses the reached effect basis when a level is recorded and the catalogue m
     await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped');
 
     await page.getByLabel('Level for Slot 1').fill('35');
-    await page.getByRole('button', { name: 'Confirm deck' }).click();
+    await page.getByRole('button', { name: 'Save deck' }).click();
     await page.waitForURL(/\/cockpit$/);
 
     await page.goto(url, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
+
+    // The HFW draws the six cards only; the analysis sits in a disclosure, so re-open it after the
+    // fresh navigation a save performs.
+    await page.locator('summary').filter({ hasText: 'Deck analysis' }).click();
 
     const analysis = page.locator('#deck-analysis-heading').locator('..');
     await expect(analysis.getByText('(at Lv 35)').first()).toBeVisible();
@@ -337,11 +347,13 @@ test('uses the reached effect basis when a level is recorded and the catalogue m
 
     // Clearing the level returns the card to the catalogue maximum.
     await page.getByLabel('Level for Slot 1').fill('');
-    await page.getByRole('button', { name: 'Confirm deck' }).click();
+    await page.getByRole('button', { name: 'Save deck' }).click();
     await page.waitForURL(/\/cockpit$/);
 
     await page.goto(url, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
+
+    await page.locator('summary').filter({ hasText: 'Deck analysis' }).click();
 
     const cleared = page.locator('#deck-analysis-heading').locator('..');
     await expect(cleared.getByText('(catalogue maximum)').first()).toBeVisible();

@@ -278,8 +278,8 @@ function save(): void {
 
 <template>
     <AppLayout>
-        <Head title="Support deck" />
-        <template #title>Support deck</template>
+        <Head title="This run's six slots" />
+        <template #title>This run's six slots</template>
 
         <CareerSectionNav
             :trainee="run.name ?? ''"
@@ -291,23 +291,18 @@ function save(): void {
             class="mt-3"
         />
 
-        <p class="mt-1 text-sm text-ink-muted">
-            <template v-if="run.name">
-                {{ run.name }} &middot; {{ run.status_label }} &middot;
-            </template>
-            <template v-if="run.scenario_label">
-                {{ run.scenario_label }}
-            </template>
-            <template v-else> No scenario chosen</template>
-            &middot;
-            <a :href="run.run_url" class="underline">Open the run</a>
-        </p>
+        <div class="mt-1 flex flex-wrap items-start justify-between gap-3">
+            <p class="max-w-3xl text-sm text-ink">
+                The deck is run-scoped: changing it here does not touch any other career. Effects apply from the next turn.
+            </p>
+            <a :href="run.run_url" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">Back to cockpit</a>
+        </div>
 
         <p v-if="errors.deck" class="mt-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk" role="alert">
             {{ errors.deck }}
         </p>
 
-        <div class="mt-5 grid grid-cols-1 gap-6 @5xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <div class="mt-5">
             <!-- The six slots -->
             <section aria-labelledby="deck-slots-heading">
                 <h3 id="deck-slots-heading" class="text-lg font-semibold text-ink-strong">The six slots</h3>
@@ -317,7 +312,7 @@ function save(): void {
                     position: any card may sit in it.
                 </p>
 
-                <ul class="mt-3 space-y-2">
+                <ul class="mt-3 grid gap-3 g-3">
                     <SupportSlot
                         v-for="slot in slots"
                         :key="slot.position"
@@ -338,26 +333,24 @@ function save(): void {
                     run after a reload. A slot you have not classified reads as N/A rather than as Owned.
                 </p>
 
-                <form class="mt-4 flex flex-wrap items-center gap-3" @submit.prevent="save">
-                    <button
-                        type="submit"
-                        class="h-11 rounded-md bg-primary-action px-5 font-semibold text-on-primary-action"
-                        :disabled="form.processing"
-                    >
-                        Confirm deck
+                <div class="savebar mt-4">
+                    <span class="dirty" role="status">{{ slots.filter((slot) => slot.card !== null).length }} of 6 slots filled</span>
+                    <a :href="run.run_url" class="btn min-h-11 inline-flex items-center">Cancel</a>
+                    <button type="button" class="btn btn-primary min-h-11" :disabled="form.processing" @click="save">
+                        {{ form.processing ? 'Saving…' : 'Save deck' }}
                     </button>
-                    <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving the deck…</p>
-                    <!-- The sentence stands on its own, ungated: the write replaces all six positions,
-                         so the warning matters most exactly when the visible slots are empty, and
-                         gating it on the currently-covered count hid it at the moment it applied. -->
-                    <span class="text-xs text-ink-muted">
-                        Confirming replaces the whole deck: slots left empty are cleared.
-                    </span>
-                </form>
+                </div>
+                <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving the deck…</p>
+                <p class="mt-1 text-xs text-ink-muted">
+                    Saving replaces the whole deck: slots left empty are cleared.
+                </p>
             </section>
 
-            <!-- The picker -->
-            <section aria-labelledby="deck-picker-heading">
+            <!-- HFW OVERRIDE (write fields): Swap/Add on a slot opens this picker; the wireframe
+                 shows the six cards only, so the picker stays one disclosure below them. -->
+            <details class="card mt-5">
+                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">Choose a card</summary>
+            <section aria-labelledby="deck-picker-heading" class="mt-2">
                 <h3 id="deck-picker-heading" class="text-lg font-semibold text-ink-strong">Choose a card</h3>
 
                 <p class="mt-1 text-sm text-ink-muted">
@@ -493,8 +486,12 @@ function save(): void {
                     </nav>
                 </template>
             </section>
+            </details>
         </div>
 
+        <details class="card mt-5">
+            <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">Deck analysis</summary>
+            <div class="mt-2">
         <DeckAnalysis
             :covered="analysis.covered"
             :categories="analysis.categories"
@@ -502,5 +499,7 @@ function save(): void {
             :strengths="analysis.strengths"
             :weaknesses="analysis.weaknesses"
         />
+            </div>
+        </details>
     </AppLayout>
 </template>
