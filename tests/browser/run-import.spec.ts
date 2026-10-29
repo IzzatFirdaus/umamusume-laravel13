@@ -60,10 +60,16 @@ test('sizes the import form controls to the 44px contract', async ({ page }) => 
     await page.goto('/training-runs/import');
     await page.locator('#app > *').first().waitFor();
 
-    for (const selector of ['select[name="umamusume_id"]', 'select[name="scenario"]', 'select[name="status"]', 'input[name="file"]']) {
+    for (const selector of ['select[name="umamusume_id"]', 'select[name="scenario"]', 'select[name="status"]']) {
         const box = await page.locator(selector).boundingBox();
         expect(box?.height ?? 0, `${selector} is not sized to the 44px contract`).toBeGreaterThanOrEqual(44);
     }
+
+    // The upload control is behind the Upload door, so it is measured there.
+    await page.getByRole('button', { name: 'Upload' }).click();
+    const file = await page.locator('input[name="file"]').boundingBox();
+    expect(file?.height ?? 0, 'input[name="file"] is not sized to the 44px contract').toBeGreaterThanOrEqual(44);
+    await page.getByRole('button', { name: 'Paste' }).click();
 
     const submit = await page.getByRole('button', { name: 'Preview import' }).boundingBox();
     expect(submit?.height ?? 0, 'the Preview import button is not sized to the 44px contract').toBeGreaterThanOrEqual(44);
@@ -151,19 +157,23 @@ test('commits the previewed file: confirm writes the run and the page leaves the
 // Slice 3 step 1.3's two additions. The import page's own annotation 3 makes the textarea the primary
 // control, above the upload path, and import-preview annotation 2 makes every field state itself as
 // found or missing rather than defaulting silently.
-test('puts the paste box first and above the upload path, so the textarea is the primary control', async ({ page }) => {
+test('offers Paste and Upload as one control each, with the paste box as the primary one', async ({ page }) => {
     await page.goto('/training-runs/import');
     await page.locator('#app > *').first().waitFor();
 
-    const textarea = page.locator('textarea[name="csv"]');
-    const upload = page.locator('input[name="file"]');
-    const paste = await textarea.boundingBox();
-    const file = await upload.boundingBox();
+    const group = page.getByRole('group', { name: 'Where the text comes from' });
+    await expect(group.getByRole('button', { name: 'Paste' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(group.getByRole('button', { name: 'Upload' })).toHaveAttribute('aria-pressed', 'false');
 
-    // Region order: the paste box's top is above the upload control's, and it is the taller of the two.
-    expect(paste?.y ?? 0).toBeLessThan(file?.y ?? Number.MAX_SAFE_INTEGER);
-    expect(paste?.height ?? 0).toBeGreaterThan(120);
+    const textarea = page.locator('textarea[name="csv"]');
+    await expect(textarea).toBeVisible();
     await expect(textarea).toHaveAttribute('rows', /^(8|9|10)$/);
+    await expect(page.locator('input[name="file"]')).toHaveCount(0);
+
+    await group.getByRole('button', { name: 'Upload' }).click();
+    await expect(group.getByRole('button', { name: 'Upload' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('input[name="file"]')).toBeVisible();
+    await expect(textarea).toHaveCount(0);
 });
 
 test('tags every previewed field found or missing, and names what to do about a miss', async ({ page }) => {
@@ -191,3 +201,77 @@ test('tags every previewed field found or missing, and names what to do about a 
     }
 });
 
+
+/*
+ * The Phase 8 capabilities the wireframe asks for on top of the original two-step flow: the column
+ * mapping (import.html "Map the columns"), the row-size selector over the preview, and the
+ * fill/drop pair. The mapping's refusals live in `HistoricalRunImportTest`; these are the halves
+ * only a browser reaches.
+ */
+test('maps a sheet whose columns are in another order, and previews the right values', async ({ page }) => {
+    await page.goto('/training-runs/import');
+    await page.locator('#app > *').first().waitFor();
+
+    const foreign = ['speed', 'turn', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'mood', 'fans'];
+    await page.locator('textarea[name="csv"]').fill([foreign.join(','), '640,7,400,300,250,200,40,,70,GOOD,1200'].join('\n'));
+
+    const mapping = page.getByRole('heading', { name: 'Map the columns', level: 3 });
+    await expect(mapping).toBeVisible();
+
+    const selects = page.locator('select[name^="mapping["]');
+    await expect(selects).toHaveCount(foreign.length);
+
+    // The names the file shares with the importer are pre-selected; the two moved columns are set by
+    // the Trainer, which is what the selectors exist for.
+    await page.locator('select[name="mapping[0]"]').selectOption('speed');
+    await page.locator('select[name="mapping[1]"]').selectOption('turn');
+
+    await page.locator('select[name="umamusume_id"]').selectOption({ index: 1 });
+    await page.locator('select[name="status"]').selectOption('Completed');
+    await page.getByRole('button', { name: 'Preview import' }).click();
+
+    await expect(page.getByRole('heading', { name: 'Confirm the import', level: 2 })).toBeVisible();
+    const region = page.getByRole('region', { name: 'Rows to import' });
+    const row = region.locator('tbody tr').first();
+    await expect(row.locator('td').nth(0)).toHaveText('7');
+    await expect(row.locator('td').nth(1)).toHaveText('640');
+});
+
+test('draws only a page of parsed rows without changing the count the import writes', async ({ page }) => {
+    await page.goto('/training-runs/import');
+    await page.locator('#app > *').first().waitFor();
+
+    const rows = Array.from({ length: 30 }, (_, index) => okRow(String(index + 1)));
+    await fillForm(page, csv(rows));
+
+    const region = page.getByRole('region', { name: 'Rows to import' });
+    await expect(region.locator('tbody tr')).toHaveCount(25);
+    await expect(page.getByText('Showing 25 of 30 turn rows; the import writes all of them.')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Import 30 turns' })).toBeVisible();
+
+    await page.locator('select[name="row_limit"]').selectOption('10');
+    await expect(region.locator('tbody tr')).toHaveCount(10);
+
+    await page.locator('select[name="row_limit"]').selectOption('all');
+    await expect(region.locator('tbody tr')).toHaveCount(30);
+});
+
+test('fills to the first required miss and drops only the optional fields', async ({ page }) => {
+    await page.goto('/training-runs/import');
+    await page.locator('#app > *').first().waitFor();
+
+    await fillForm(page, csv([okRow('1')]));
+
+    // Make the trainee the first required miss, read the verdict back so the clear has rendered, then
+    // ask the page to fill it.
+    await page.locator('#preview-umamusume_id').selectOption('');
+    await expect(page.locator('#preview-umamusume_id-label')).toContainText('missing');
+    await page.getByRole('button', { name: 'Fill missing' }).click();
+    await expect(page.locator('#preview-umamusume_id')).toBeFocused();
+
+    // Drop clears the two optional fields and leaves the required pair alone.
+    await page.getByRole('button', { name: 'Drop missing' }).click();
+    await expect(page.locator('select[name="scenario"]')).toHaveValue('');
+    await expect(page.locator('textarea[name="notes"]')).toHaveValue('');
+    await expect(page.getByText('Trainee and Status are required.')).toBeVisible();
+});

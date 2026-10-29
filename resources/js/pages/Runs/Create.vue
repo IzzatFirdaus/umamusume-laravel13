@@ -154,7 +154,7 @@ function submit(): void {
                      matrix for `scenario`, because the request validates it against its keys: free text
                      here could only ever produce a rejected submission. Leaving it empty is a real option
                      and renders the baseline strip. -->
-                <div class="mt-4 grid gap-4 md:grid-cols-2">
+                <div class="mt-4 grid gap-4 g-2">
                     <Select
                         :model-value="form.scenario"
                         id="create-scenario"
@@ -251,7 +251,7 @@ function submit(): void {
                 </div>
 
                 <FormField
-                    label="Notes (optional)"
+                    label="Notes"
                     :required="false"
                     :error="form.errors.notes"
                     id="create-notes"

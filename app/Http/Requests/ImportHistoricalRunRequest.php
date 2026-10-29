@@ -50,6 +50,13 @@ class ImportHistoricalRunRequest extends StoreTrainingRunRequest
     private const MAX_ROWS = 200;
 
     /**
+     * Why the posted column mapping cannot be read, when it cannot. Set while parsing so a refusal
+     * reports the mapping rather than the generic "no usable turn rows" sentence, which would send a
+     * Trainer to re-check a header that was read fine.
+     */
+    private ?string $mappingProblem = null;
+
+    /**
      * A refused submit returns to the import form, never to `back()`.
      *
      * `back()` resolves from the session's previous URL, and between the preview and the commit the
@@ -94,17 +101,42 @@ class ImportHistoricalRunRequest extends StoreTrainingRunRequest
             return;
         }
 
-        $rows = self::parse($csv);
+        $rows = self::parse($csv, $this->mapping());
 
         if ($rows === null) {
             // Unparseable or wrong-shaped. `csv.bad` is what the message is reported against, so the
             // form re-shows the textarea the Trainer pasted into rather than clearing it.
+            $this->mappingProblem = $this->mapping() === null ? null : self::mappingProblem($csv, (array) $this->mapping());
             $this->merge(['csv' => $csv, 'turns' => []]);
 
             return;
         }
 
         $this->merge(['turns' => $rows]);
+    }
+
+    /**
+     * The posted column mapping, or null when the form posted none.
+     *
+     * A mapping is a list aligned to the file's own columns, each entry naming the import column that
+     * column supplies, or `''` to leave it out. When it is present the header line need not be the
+     * app's own order: a sheet with the same eight columns in another order is a mapping away from
+     * importing, and refusing it would make the Trainer re-order a sheet by hand.
+     *
+     * @return list<string|null>|null
+     */
+    private function mapping(): ?array
+    {
+        $mapping = $this->input('mapping');
+
+        if (! is_array($mapping)) {
+            return null;
+        }
+
+        return array_values(array_map(
+            static fn (mixed $target): ?string => is_string($target) ? trim($target) : null,
+            $mapping
+        ));
     }
 
     /**
@@ -124,6 +156,8 @@ class ImportHistoricalRunRequest extends StoreTrainingRunRequest
 
         $rules['csv'] = ['required', 'string'];
         $rules['file'] = ['nullable', 'file', 'mimes:csv,txt', 'max:1024'];
+        $rules['mapping'] = ['nullable', 'array'];
+        $rules['mapping.*'] = ['nullable', 'string', Rule::in(self::HEADERS)];
         $rules['turns'] = ['required', 'array', 'min:1', 'max:'.self::MAX_ROWS];
         $rules['turns.*.turn'] = ['required', 'integer', 'min:1', 'distinct'];
 
@@ -183,6 +217,9 @@ class ImportHistoricalRunRequest extends StoreTrainingRunRequest
                 .implode(', ', self::HEADERS).'.',
             'turns.*.turn.distinct' => 'Two rows claim the same turn number. Turn numbers are unique within a run.',
             'csv.required' => 'Paste the run\'s CSV or choose the file to import.',
+            // Laravel's default for a wildcard key names the field ("The selected mapping.0 is invalid."),
+            // which tells the Trainer nothing about the choice they have to make.
+            'mapping.*' => 'That file column cannot be mapped. Map it to one of: '.implode(', ', self::HEADERS).'.',
         ];
 
         /*
@@ -214,6 +251,20 @@ class ImportHistoricalRunRequest extends StoreTrainingRunRequest
         $rows = (array) $this->input('turns', []);
 
         $validator->after(function (Validator $validator) use ($rows): void {
+            if ($this->mappingProblem !== null) {
+                $validator->errors()->add('mapping', $this->mappingProblem);
+
+                /*
+                 * The mapping is what stopped the parse, so `turns` is empty and the generic
+                 * `turns.required` sentence would fire on top of the real reason. It names the header as
+                 * the culprit, and the header was read fine — the mapping was not. The refusal that
+                 * explains the mapping is the one the Trainer needs, so the generic sentence is dropped
+                 * rather than shown beside it.
+                 */
+                $validator->errors()->forget('turns');
+                $validator->errors()->forget('turns.required');
+            }
+
             $errors = $validator->errors();
 
             foreach ($errors->messages() as $key => $messages) {
@@ -255,14 +306,20 @@ class ImportHistoricalRunRequest extends StoreTrainingRunRequest
     }
 
     /**
-     * The parsed rows, or null when the text is not a run export.
+     * The parsed rows, or null when the text is not a run export (or the mapping cannot be read).
      *
      * Blank lines are skipped rather than counted: a file saved from a spreadsheet usually ends in one,
      * and treating it as a row of empty cells would reject a file that is otherwise exact.
      *
+     * With no mapping the header must equal `HEADERS` exactly, and the columns are read in that order.
+     * With a mapping the header may be any order: each entry names the import column its file column
+     * supplies, `''` ignores that column, and the mapping must be a bijection onto `HEADERS`:
+     * `mappingProblem()` is the one place that rule is stated, so the parser and the refusal agree.
+     *
+     * @param  list<string|null>|null  $mapping
      * @return list<array<string, string|null>>|null
      */
-    public static function parse(string $csv): ?array
+    public static function parse(string $csv, ?array $mapping = null): ?array
     {
         $csv = preg_replace('/^\xEF\xBB\xBF/', '', $csv) ?? $csv;
         $lines = preg_split('/\R/', trim($csv)) ?: [];
@@ -275,13 +332,27 @@ class ImportHistoricalRunRequest extends StoreTrainingRunRequest
         // The escape argument is passed explicitly: PHP 8.5 deprecates relying on its default, and an
         // empty escape is the correct reading of this app's own export, which emits bare commas and no
         // backslash quoting. Passing it keeps the import symmetrical with the writer.
-        $header = array_map(
-            static fn (?string $h): string => is_string($h) ? strtolower(trim($h)) : '',
-            str_getcsv($lines[0], ',', '"', '')
-        );
+        $header = self::headerCells($lines[0]);
 
-        if ($header !== self::HEADERS) {
-            return null;
+        if ($mapping === null) {
+            if ($header !== self::HEADERS) {
+                return null;
+            }
+
+            /** @var array<string, int> $sourceByTarget */
+            $sourceByTarget = array_flip(self::HEADERS);
+        } else {
+            if (count($mapping) !== count($header) || self::mappingProblem($csv, $mapping) !== null) {
+                return null;
+            }
+
+            $sourceByTarget = [];
+
+            foreach ($mapping as $index => $target) {
+                if (is_string($target) && $target !== '') {
+                    $sourceByTarget[$target] = $index;
+                }
+            }
         }
 
         $rows = [];
@@ -291,14 +362,14 @@ class ImportHistoricalRunRequest extends StoreTrainingRunRequest
 
             // A short row is a hole in the transcription, not an empty trailing cell, and padding it
             // would let `fans` land in `energy`. Reject the file instead of guessing which column moved.
-            if (count($cells) !== count(self::HEADERS)) {
+            if (count($cells) !== count($header)) {
                 return null;
             }
 
             $row = [];
 
-            foreach (self::HEADERS as $i => $key) {
-                $value = trim((string) $cells[$i]);
+            foreach (self::HEADERS as $key) {
+                $value = trim((string) $cells[$sourceByTarget[$key]]);
                 $row[$key] = $value === '' ? null : $value;
             }
 
@@ -310,5 +381,67 @@ class ImportHistoricalRunRequest extends StoreTrainingRunRequest
         }
 
         return $rows === [] ? null : $rows;
+    }
+
+    /**
+     * Why a posted mapping cannot be read, or null when it is a bijection onto `HEADERS`.
+     *
+     * Every import column must be supplied exactly once: a duplicate would read one column twice and
+     * silently drop another, an unknown name imports nothing, and a gap would fail the per-turn rules
+     * with a row error the Trainer cannot trace back to the mapping. The message names which of the
+     * three it is, because "the header is wrong" is not true of a file whose header was read fine.
+     *
+     * @param  list<string|null>  $mapping
+     */
+    public static function mappingProblem(string $csv, array $mapping): ?string
+    {
+        $lines = preg_split('/\R/', trim(preg_replace('/^\xEF\xBB\xBF/', '', $csv) ?? $csv)) ?: [];
+        $header = self::headerCells($lines[0] ?? '');
+
+        if (count($mapping) !== count($header)) {
+            return 'The mapping must name one import column for each of the file\'s '.count($header).' columns.';
+        }
+
+        $seen = [];
+
+        foreach ($mapping as $target) {
+            if ($target === null || $target === '') {
+                continue;
+            }
+
+            if (! in_array($target, self::HEADERS, true)) {
+                return 'The mapping names "'.$target.'", which is not a column this importer reads.';
+            }
+
+            if (isset($seen[$target])) {
+                return 'Two file columns both map to "'.$target.'". Each import column is supplied once.';
+            }
+
+            $seen[$target] = true;
+        }
+
+        $missing = array_values(array_diff(self::HEADERS, array_keys($seen)));
+
+        if ($missing !== []) {
+            return 'The mapping leaves '.implode(', ', $missing).' unmapped. Every column the importer writes needs one source column.';
+        }
+
+        return null;
+    }
+
+    /**
+     * The first line's cells, normalised the way both the strict and the mapped read need.
+     *
+     * @return list<string>
+     */
+    private static function headerCells(string $line): array
+    {
+        /** @var list<string> $cells */
+        $cells = array_map(
+            static fn (?string $h): string => is_string($h) ? strtolower(trim($h)) : '',
+            str_getcsv($line, ',', '"', '')
+        );
+
+        return $cells;
     }
 }

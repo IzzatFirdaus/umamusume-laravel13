@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
+import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import StatusPill from '../../components/StatusPill.vue';
@@ -9,6 +10,8 @@ import { LinkButton } from '../../components/Form';
 interface Run {
     id: number;
     name: string;
+    /** The row portrait's mirrored url, or null when the mirror holds none (`DESIGN.md` §4.7). */
+    artworkURL: string | null;
     trainee_ja: string | null;
     card_title: string | null;
     rarity: number | null;
@@ -197,10 +200,15 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                     A run holds the turns you log against one Umamusume in one scenario, so there is
                     nothing to list until you start one.
                 </p>
+                <!-- IA-5: an empty state shows the shape of what would fill it, without inventing a
+                     record. The words are the table's own column order, so the example cannot drift. -->
+                <p class="mt-2 font-mono text-xs text-ink-muted">
+                    A row reads: Trainee &middot; Scenario &middot; 12 / 72 &middot; Junior Year &middot; Active
+                </p>
             </template>
         </div>
 
-        <div v-else class="mt-4 overflow-x-auto rounded-md border border-rule bg-panel">
+        <div v-else class="card mt-4 overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">
@@ -224,11 +232,21 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                         :class="isActive(run) ? 'is-current bg-status-positive/10' : ''"
                     >
                         <td class="px-4 py-3">
-                            <b class="text-ink-strong">{{ run.name }}</b>
-                            <br />
-                            <span class="text-xs text-ink-muted">
-                                {{ metaLine(run) }}<template v-if="metaLine(run)"> · </template>#{{ run.id }}
-                                <template v-if="run.rarity !== null"> · ★{{ run.rarity }}</template>
+                            <span class="flex items-center gap-2.5">
+                                <!-- HFW-OVERRIDE (structure: run row portrait) - owner enhancement, not
+                                     the drawing: `runs-index.html` draws no picture on this list. The
+                                     frame is decorative (the name beside it is the row's name) and
+                                     carries no link, because the row's one door is its Actions cell. A
+                                     file the mirror lacks reserves the square and paints nothing. -->
+                                <ArtworkSlot :url="run.artworkURL" alt="" size="size-10" reserve />
+                                <span class="min-w-0">
+                                    <b class="text-ink-strong">{{ run.name }}</b>
+                                    <br />
+                                    <span class="text-xs text-ink-muted">
+                                        {{ metaLine(run) }}<template v-if="metaLine(run)"> · </template>#{{ run.id }}
+                                        <template v-if="run.rarity !== null"> · ★{{ run.rarity }}</template>
+                                    </span>
+                                </span>
                             </span>
                         </td>
                         <td class="px-3 py-3">

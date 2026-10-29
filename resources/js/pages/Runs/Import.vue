@@ -31,6 +31,7 @@ interface PreviewRow {
 interface Preview {
     csv: string;
     turns: PreviewRow[];
+    mapping: string[] | null;
     run: Record<string, unknown>;
     source: string;
 }
@@ -84,8 +85,82 @@ const importStatusOptions = computed(() =>
 );
 
 function onFile(event: Event): void {
-    form.file = (event.target as HTMLInputElement).files?.[0] ?? null;
+    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
+    form.file = file;
+
+    // Only the first line is read, and only to draw the mapping selectors: the request still reads
+    // the uploaded file itself, so this is a display aid and never the value that gets imported.
+    if (file === null) {
+        fileHeaders.value = [];
+        return;
+    }
+
+    void file.text().then((text) => {
+        const first = text.split(/\r?\n/).find((line) => line.trim() !== '') ?? '';
+        fileHeaders.value = first.trim() === '' ? [] : first.split(',').map((cell) => cell.trim().toLowerCase());
+    });
 }
+
+/*
+ * Paste or upload: one source, two doors. The HFW draws a segmented control over the source card and
+ * this build keeps the same pair, because the textarea and the filename picker were both always shown
+ * and the Trainer had to work out which one the request would read.
+ */
+const mode = ref<'paste' | 'upload'>('paste');
+
+/*
+ * Column mapping (import.html "Map the columns"). The file's own first line is read in the browser
+ * only to draw the selectors; the server re-validates the mapping as a bijection onto the importer's
+ * columns before it parses anything, so a tampered page cannot import a column twice.
+ *
+ * When the first line is the app's own header order the selectors stay hidden and nothing is posted:
+ * the export this app writes must go back in with no extra step.
+ */
+const CANONICAL = ['turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'mood', 'fans'];
+
+const fileHeaders = ref<string[]>([]);
+
+const sourceHeaders = computed<string[]>(() => {
+    if (mode.value === 'upload') {
+        return fileHeaders.value;
+    }
+
+    const first = form.csv.split(/\r?\n/).find((line) => line.trim() !== '') ?? '';
+
+    return first.trim() === '' ? [] : first.split(',').map((cell) => cell.trim().toLowerCase());
+});
+
+const mapping = ref<string[]>([]);
+
+watch(
+    sourceHeaders,
+    (headers) => {
+        mapping.value = headers.map((header) => (CANONICAL.includes(header) ? header : ''));
+    },
+    { immediate: true },
+);
+
+const needsMapping = computed(
+    () => sourceHeaders.value.length > 0 && sourceHeaders.value.join(',') !== CANONICAL.join(','),
+);
+
+const mappingProblem = computed<string | null>(() => {
+    if (!needsMapping.value) {
+        return null;
+    }
+
+    const chosen = mapping.value.filter((target) => target !== '');
+
+    if (new Set(chosen).size !== chosen.length) {
+        return 'Two file columns map to the same import column. Each column is supplied once.';
+    }
+
+    const missing = CANONICAL.filter((target) => !chosen.includes(target));
+
+    return missing.length === 0 ? null : `Still unmapped: ${missing.join(', ')}.`;
+});
+
+form.transform((data) => (needsMapping.value ? { ...data, mapping: mapping.value } : data));
 
 function previewRow(row: string | null): string {
     return row ?? '';
@@ -235,6 +310,46 @@ const previewFields = computed(() => [
 const foundCount = computed(() => previewFields.value.filter((field) => field.found).length);
 const missingCount = computed(() => previewFields.value.length - foundCount.value);
 
+/*
+ * The two missing-field controls the HFW pairs under the counts. Fill moves focus to the first
+ * *required* field the file did not settle, because that is the one the commit will refuse on; drop
+ * clears only the two optional fields, so an import cannot lose the trainee or the status by pressing
+ * the wrong button, and the note beside them says so.
+ */
+function fillMissing(): void {
+    const first = previewFields.value.find((field) => field.required && !field.found);
+
+    if (first !== undefined) {
+        document.getElementById(`preview-${first.key}`)?.focus();
+    }
+}
+
+function dropMissing(): void {
+    runEdits.value.scenario = '';
+    runEdits.value.notes = '';
+}
+
+/*
+ * How many of the parsed rows the table draws. The import writes every row either way: this is a
+ * reading aid for a two-hundred-turn sheet, not a filter, and the line above the table says so.
+ */
+const rowLimit = ref<number | 'all'>(25);
+const rowLimitOptions = [
+    { value: '10', label: '10 rows' },
+    { value: '25', label: '25 rows' },
+    { value: '50', label: '50 rows' },
+    { value: 'all', label: 'All rows' },
+];
+const rowLimitValue = computed({
+    get: () => String(rowLimit.value),
+    set: (value: string) => {
+        rowLimit.value = value === 'all' ? 'all' : Number(value);
+    },
+});
+const visibleTurns = computed(() =>
+    rowLimit.value === 'all' ? props.preview?.turns ?? [] : (props.preview?.turns ?? []).slice(0, rowLimit.value),
+);
+
 function fieldState(key: string): { found: boolean; required: boolean; missing: string } {
     const field = previewFields.value.find((candidate) => candidate.key === key);
 
@@ -260,6 +375,9 @@ function confirmImport(): void {
         ...runEdits.value,
         csv: props.preview.csv,
         turns: props.preview.turns,
+        // The preview's own payload carries the mapping it was read with, so a remapped file commits
+        // under the same reading the preview showed instead of failing the strict header check.
+        mapping: props.preview.mapping,
     }, {
         onFinish: () => {
             submitting.value = false;
@@ -303,7 +421,7 @@ const breadcrumb = computed(() =>
 
             <!-- Three counts at the top (import-preview annotation 4): found, missing and source, so a
                  Trainer knows at a glance how much review remains. -->
-            <div class="grid gap-3 sm:grid-cols-3">
+            <div class="grid gap-3 g-3">
                 <Card>
                     <div class="border-l-4 border-status-positive pl-3">
                         <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Found</p>
@@ -328,9 +446,23 @@ const breadcrumb = computed(() =>
                 :aria-busy="submitting"
                 @submit.prevent="confirmImport"
             >
-                <div class="flex flex-col gap-4 xl:col-span-2">
+                <div class="min-w-0 flex flex-col gap-4 xl:col-span-2">
                     <Card>
                         <h2>Identity and position</h2>
+
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <button
+                                type="button"
+                                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
+                                @click="fillMissing"
+                            >Fill missing</button>
+                            <button
+                                type="button"
+                                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
+                                @click="dropMissing"
+                            >Drop missing</button>
+                            <span class="text-xs text-ink-muted">Fill moves to the first required field; drop clears Scenario and Notes only. Trainee and Status are required.</span>
+                        </div>
 
                         <!-- DOMAIN OVERRIDE: the HFW gives every parsed turn cell an edit box. This app's
                              commit step re-parses `turns` from `csv` server-side (ImportHistoricalRunRequest
@@ -338,7 +470,7 @@ const breadcrumb = computed(() =>
                              file's own value. The run-level fields are the edit boxes; the rows are the
                              read-only review table below, and changing a row means correcting the file, which
                              is what "Start over" is for. -->
-                        <div class="grid gap-4 md:grid-cols-2">
+                        <div class="grid gap-4 g-2">
                             <div>
                                 <label for="preview-umamusume_id" id="preview-umamusume_id-label" class="flex items-center gap-2 text-sm font-medium text-ink">
                                     Trainee
@@ -433,6 +565,22 @@ const breadcrumb = computed(() =>
                             recorded them is not lost, it just has no column here yet.
                         </p>
 
+                        <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
+                            <p class="text-xs text-ink-muted">
+                                Showing {{ visibleTurns.length }} of {{ preview.turns.length }} turn
+                                row{{ preview.turns.length === 1 ? '' : 's' }}; the import writes all of them.
+                            </p>
+                            <label class="flex flex-col gap-1 text-xs font-semibold text-ink-muted">
+                                Rows shown
+                                <BaseSelect
+                                    id="import-row-limit"
+                                    v-model="rowLimitValue"
+                                    name="row_limit"
+                                    :options="rowLimitOptions"
+                                />
+                            </label>
+                        </div>
+
                         <div class="overflow-x-auto" role="region" tabindex="0" aria-label="Rows to import">
                             <table class="w-full border-collapse text-sm">
                                 <caption class="sr-only">Every turn row that will be written</caption>
@@ -453,7 +601,7 @@ const breadcrumb = computed(() =>
                                 </thead>
                                 <tbody>
                                     <tr
-                                        v-for="(row, index) in preview.turns"
+                                        v-for="(row, index) in visibleTurns"
                                         :key="index"
                                         class="border-b border-rule font-mono text-xs tabular-nums"
                                     >
@@ -526,13 +674,36 @@ const breadcrumb = computed(() =>
                 :aria-busy="form.processing"
                 @submit.prevent="form.post('/training-runs/import/preview', { forceFormData: true })"
             >
-                <div class="xl:col-span-2">
+                <div class="min-w-0 xl:col-span-2">
                     <Card padding="lg">
                         <h2>Source</h2>
+
+                        <!-- The HFW's segmented control (import.html): one source, two doors. -->
+                        <div
+                            class="mb-4 inline-flex rounded-md border border-rule p-1"
+                            role="group"
+                            aria-label="Where the text comes from"
+                        >
+                            <button
+                                type="button"
+                                class="inline-flex min-h-11 items-center rounded px-3 text-sm font-medium transition-colors duration-150 ease-out"
+                                :class="mode === 'paste' ? 'bg-primary-action text-on-primary-action' : 'text-ink'"
+                                :aria-pressed="mode === 'paste'"
+                                @click="mode = 'paste'"
+                            >Paste</button>
+                            <button
+                                type="button"
+                                class="inline-flex min-h-11 items-center rounded px-3 text-sm font-medium transition-colors duration-150 ease-out"
+                                :class="mode === 'upload' ? 'bg-primary-action text-on-primary-action' : 'text-ink'"
+                                :aria-pressed="mode === 'upload'"
+                                @click="mode = 'upload'"
+                            >Upload</button>
+                        </div>
 
                         <!-- The textarea is the primary control, set large (import annotation 3): pasting
                              the sheet is the common case and gets more space than the filename picker. -->
                         <BaseTextarea
+                            v-if="mode === 'paste'"
                             :model-value="form.csv"
                             id="import-csv"
                             name="csv"
@@ -548,9 +719,9 @@ const breadcrumb = computed(() =>
                         <!-- The request's own HEADERS joined for reading, while the paste field's placeholder carries
                              the same list joined for pasting. Restored: `63d1cdd2` dropped this line as a stale change
                              while `run-import.spec.ts:53` kept asserting it, which left the tree red. -->
-                        <p class="mt-1 font-mono text-xs text-ink-muted">{{ headers.join(', ') }}</p>
+                        <p v-if="mode === 'paste'" class="mt-1 font-mono text-xs text-ink-muted">{{ headers.join(', ') }}</p>
 
-                        <div class="mt-4">
+                        <div v-if="mode === 'upload'" class="mt-4">
                             <BaseInput
                                 type="file"
                                 id="import-file"
@@ -562,7 +733,37 @@ const breadcrumb = computed(() =>
                             />
                         </div>
 
-                        <div class="mt-4 grid gap-4 md:grid-cols-2">
+                        <!-- Column mapping: drawn only when the file's own first line is not the app's
+                             header order. The selectors are a reading aid; the request refuses a mapping
+                             that is not a bijection onto its columns (ImportHistoricalRunRequest). -->
+                        <div v-if="needsMapping" class="mt-4 rounded-md border border-rule bg-panel p-4">
+                            <h3 class="text-sm font-semibold text-ink-strong">Map the columns</h3>
+                            <p class="mt-1 text-xs text-ink-muted">
+                                The first line is not this app's header order. Say which import column each
+                                file column supplies; an ignored column is not imported.
+                            </p>
+                            <div class="mt-3 grid gap-3 g-2">
+                                <label
+                                    v-for="(header, index) in sourceHeaders"
+                                    :key="index"
+                                    class="flex flex-col gap-1 text-xs font-semibold text-ink-muted"
+                                >
+                                    {{ header === '' ? `Column ${index + 1}` : header }}
+                                    <BaseSelect
+                                        :id="`import-mapping-${index}`"
+                                        :model-value="mapping[index] ?? ''"
+                                        :name="`mapping[${index}]`"
+                                        :options="[{ value: '', label: 'Ignore' }, ...headers.map((h) => ({ value: h, label: h }))]"
+                                        @update:model-value="(v: string | number | null) => (mapping[index] = String(v ?? ''))"
+                                    />
+                                </label>
+                            </div>
+                            <p v-if="mappingProblem !== null" class="mt-2 text-xs text-risk" role="status">
+                                {{ mappingProblem }}
+                            </p>
+                        </div>
+
+                        <div class="mt-4 grid gap-4 g-2">
                             <BaseSelect
                                 :model-value="form.umamusume_id"
                                 id="import-umamusume_id"
@@ -631,7 +832,7 @@ const breadcrumb = computed(() =>
                             <tbody>
                                 <tr class="border-b border-rule align-top">
                                     <td class="py-1 pr-3 text-ink-muted">Header row</td>
-                                    <td>The first line must be the header this app exports, exactly.</td>
+                                    <td>The first line is the header. This app's own order goes straight in; any other order is mapped in the Source card before the preview.</td>
                                 </tr>
                                 <tr class="border-b border-rule align-top">
                                     <td class="py-1 pr-3 text-ink-muted">Turn numbers</td>

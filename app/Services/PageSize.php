@@ -15,6 +15,10 @@ namespace App\Services;
  * The numbers are the ones `CatalogController`, `SkillController` and the three API controllers
  * each restated as `min(100, max(1, ...))`. Extracting them changes no behaviour: absent is the
  * default, `?pageSize=` still lands on the floor, and 200 still lands on the ceiling.
+ *
+ * A surface whose default is not 25 passes its own (`SupportCardController::index()` shows the five
+ * rows its wireframe draws). That is a parameter, not a second constant: the floor and ceiling are the
+ * same rule on every surface.
  */
 class PageSize
 {
@@ -24,8 +28,8 @@ class PageSize
 
     public const DEFAULT = 25;
 
-    public static function clamp(mixed $raw): int
+    public static function clamp(mixed $raw, int $default = self::DEFAULT): int
     {
-        return min(self::MAX, max(self::MIN, (int) ($raw ?? self::DEFAULT)));
+        return min(self::MAX, max(self::MIN, (int) ($raw ?? $default)));
     }
 }

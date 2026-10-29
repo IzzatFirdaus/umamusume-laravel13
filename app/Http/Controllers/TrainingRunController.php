@@ -41,6 +41,7 @@ use App\Services\CareerCalendar;
 use App\Services\DataPipeline\ArtworkMirror;
 use App\Services\DeckAnalysis;
 use App\Services\IndependentTraining\Lifecycle;
+use App\Services\Legacy\VeteranRow;
 use App\Services\PageSize;
 use App\Services\SupportCardEffects;
 use Illuminate\Http\RedirectResponse;
@@ -76,7 +77,10 @@ class TrainingRunController extends Controller
 
         return Inertia::render('Runs/Index', [
             'runs' => TrainingRun::query()
-                ->with(['umamusume', 'characterCard'])
+                // `umamusume.cards` is eager-loaded for the row portrait: `VeteranRow::portraitUrl()`
+                // falls back to the debut/first card when the run recorded no chosen form, and
+                // without the batch each of the 25 rows would issue its own cards query.
+                ->with(['umamusume.cards', 'characterCard'])
                 // One inline filter row (HFW runs-index annotation 1). `all` and an absent key are
                 // the same answer: no filter.
                 ->when($search !== null, fn ($query) => $query->whereHas(
@@ -119,6 +123,10 @@ class TrainingRunController extends Controller
                         // in the same scenario are two rows a Trainer can tell apart.
                         'id' => $run->id,
                         'name' => $run->umamusume->name,
+                        // The row portrait (owner enhancement, not the HFW: `runs-index.html` draws no
+                        // picture). The chosen form first, else the debut/first card, else null, which
+                        // the page renders as the reserved absence cell (`DESIGN.md` §4.7).
+                        'artworkURL' => VeteranRow::portraitUrl($run),
                         'trainee_ja' => $run->umamusume->name_ja,
                         'card_title' => $run->characterCard?->title,
                         'rarity' => $run->trainee_rarity ?? $run->characterCard?->rarity,
@@ -1197,6 +1205,10 @@ class TrainingRunController extends Controller
             'preview' => [
                 'csv' => (string) $validated['csv'],
                 'turns' => $validated['turns'],
+                // The commit re-parses the same text, so the mapping the preview read it with travels
+                // with it: without this a remapped file would be refused on the confirm step by the
+                // strict header check it never used on the first one.
+                'mapping' => $request->input('mapping'),
                 'run' => $request->only(['umamusume_id', 'scenario', 'status', 'notes']),
                 // Shown before the write so the Trainer sees the provenance string the run will carry.
                 // It sits beside `run` rather than inside it: `run` is the body the confirm step posts

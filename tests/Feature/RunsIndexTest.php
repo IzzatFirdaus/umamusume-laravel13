@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Enums\RunStatus;
+use App\Models\CharacterCard;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 
 /*
@@ -232,4 +234,43 @@ it('paginates at twenty-five and reaches a second page', function (): void {
         ->assertInertia(fn (Assert $page) => $page
             ->has('runs.data', 1)
             ->where('runs.current_page', 2));
+});
+
+/*
+ * The row portrait is an owner enhancement, not the wireframe: `runs-index.html` draws none. The
+ * resolution is `VeteranRow::portraitUrl()`'s, reused rather than re-decided: the run's chosen form
+ * first, else the trainee's debut/first card, else null. The frame is keyed on the publisher's
+ * `card_id`, which is the only key the mirror's path answers to.
+ */
+it('sends the run portrait keyed on the chosen card, and the debut form when no card was chosen', function (): void {
+    Storage::fake('local');
+
+    $umamusume = Umamusume::factory()->create(['name' => 'Special Week']);
+    CharacterCard::factory()->debut()->create(['umamusume_id' => $umamusume->id, 'card_id' => 100101]);
+    $chosen = CharacterCard::factory()->create(['umamusume_id' => $umamusume->id, 'card_id' => 100201]);
+
+    Storage::disk('local')->put('artwork/characters/portrait/trainee/256/100101.png', 'PNG');
+    Storage::disk('local')->put('artwork/characters/portrait/trainee/256/100201.png', 'PNG');
+
+    TrainingRun::factory()->create(['umamusume_id' => $umamusume->id, 'character_card_id' => $chosen->id]);
+    // Newest first, so the card-less run is the first row: its identity frame is the debut form.
+    TrainingRun::factory()->create(['umamusume_id' => $umamusume->id, 'character_card_id' => null]);
+
+    test()->get('/training-runs')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('runs.data.0.artworkURL', route('artwork.show', ['kind' => 'card_portrait', 'id' => 100101]))
+            ->where('runs.data.1.artworkURL', route('artwork.show', ['kind' => 'card_portrait', 'id' => 100201])));
+});
+
+it('sends a null portrait when the mirror holds no file, rather than a default frame', function (): void {
+    Storage::fake('local');
+
+    $umamusume = Umamusume::factory()->create(['name' => 'Special Week']);
+    CharacterCard::factory()->debut()->create(['umamusume_id' => $umamusume->id, 'card_id' => 100101]);
+    TrainingRun::factory()->create(['umamusume_id' => $umamusume->id, 'character_card_id' => null]);
+
+    test()->get('/training-runs')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('runs.data.0.artworkURL', null));
 });

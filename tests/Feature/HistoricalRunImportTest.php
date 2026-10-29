@@ -301,3 +301,111 @@ it('refuses an unknown trainee and a missing turn body', function (): void {
     test()->post(route('runs.import.store'), importPayload($source))
         ->assertSessionHasErrors(['csv']);
 });
+
+/*
+ * Column mapping (import.html "Map the columns"). The mapping is a list aligned to the file's own
+ * columns naming the import column each one supplies; it must be a bijection onto HEADERS. These
+ * cases pin the one refusal the parser cannot express by itself — a mapping that is readable but
+ * wrong — and the happy path a sheet with another column order takes.
+ */
+
+/**
+ * Text with the given header order, from rows keyed by import column.
+ *
+ * @param  list<string>  $header
+ * @param  list<array<string, string|int|null>>  $rows
+ */
+function importCsvInOrder(array $header, array $rows): string
+{
+    $lines = [implode(',', $header)];
+
+    foreach ($rows as $row) {
+        $cells = [];
+
+        foreach ($header as $column) {
+            $cells[] = (string) ($row[$column] ?? '');
+        }
+
+        $lines[] = implode(',', $cells);
+    }
+
+    return implode("\n", $lines);
+}
+
+it('imports a sheet whose columns are in another order once the mapping names them', function (): void {
+    $source = importRun();
+
+    $header = ['mood', 'turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'fans'];
+    $mapping = ['mood', 'turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'fans'];
+
+    $csv = importCsvInOrder($header, [importTurn(['turn' => 7, 'speed' => 321])]);
+
+    test()->post(route('runs.import.store'), importPayload($source, ['csv' => $csv, 'mapping' => $mapping]))
+        ->assertRedirect();
+
+    $entry = importedRun($source->id)->turnEntries()->firstWhere('turn', 7);
+
+    expect($entry)->not->toBeNull();
+    expect($entry->speed)->toBe(321);
+    expect($entry->mood)->toBe(MoodTier::Good);
+});
+
+it('carries the mapping through the preview so the commit reads the same columns', function (): void {
+    $source = importRun();
+
+    $header = ['turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'fans', 'mood'];
+    $mapping = ['turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'fans', 'mood'];
+
+    test()->post(route('runs.import.preview'), importPayload($source, [
+        'csv' => importCsvInOrder($header, [importTurn()]),
+        'mapping' => $mapping,
+    ]))->assertInertia(fn (Assert $page): Assert => $page
+        ->component('Runs/Import')
+        ->where('preview.mapping', $mapping)
+        ->has('preview.turns', 1));
+});
+
+it('refuses a mapping that names a column twice', function (): void {
+    $source = importRun();
+
+    $csv = importCsv([importTurn()]);
+    $mapping = ImportHistoricalRunRequest::HEADERS;
+    $mapping[1] = 'speed';
+    $mapping[2] = 'speed';
+
+    test()->post(route('runs.import.store'), importPayload($source, ['csv' => $csv, 'mapping' => $mapping]))
+        ->assertSessionHasErrors(['mapping' => 'Two file columns both map to "speed". Each import column is supplied once.'])
+        // The header was read fine; the mapping was not. The generic header sentence would send the
+        // Trainer to re-check a header that is correct.
+        ->assertSessionDoesntHaveErrors(['turns']);
+
+    expect(TrainingRun::query()->whereKeyNot($source->id)->count())->toBe(0);
+});
+
+it('refuses a mapping naming a column this importer does not read', function (): void {
+    $source = importRun();
+
+    $csv = importCsv([importTurn()]);
+    $mapping = ImportHistoricalRunRequest::HEADERS;
+    $mapping[0] = 'turns';
+
+    test()->post(route('runs.import.store'), importPayload($source, ['csv' => $csv, 'mapping' => $mapping]))
+        ->assertSessionHasErrors(['mapping' => 'The mapping names "turns", which is not a column this importer reads.'])
+        ->assertSessionDoesntHaveErrors(['turns']);
+
+    expect(TrainingRun::query()->whereKeyNot($source->id)->count())->toBe(0);
+});
+
+it('refuses a mapping that leaves an import column unmapped', function (): void {
+    $source = importRun();
+
+    $csv = importCsv([importTurn()]);
+    $mapping = ImportHistoricalRunRequest::HEADERS;
+    $mapping[0] = '';
+
+    test()->post(route('runs.import.store'), importPayload($source, ['csv' => $csv, 'mapping' => $mapping]))
+        ->assertSessionHasErrors(['mapping' => 'The mapping leaves turn unmapped. Every column the importer writes needs one source column.'])
+        ->assertSessionDoesntHaveErrors(['turns']);
+
+    expect(TrainingRun::query()->whereKeyNot($source->id)->count())->toBe(0);
+});

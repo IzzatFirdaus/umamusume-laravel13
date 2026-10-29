@@ -81,3 +81,46 @@ test('the sort control reorders the list and keeps the choice in the URL', async
     await expect(sort).toHaveValue('trainee');
     await expect(page).toHaveURL(/sort=trainee/);
 });
+
+/*
+ * The row portrait is an owner enhancement, not the HFW: `runs-index.html` draws no picture on this
+ * list. Every row still carries one slot, so the name column starts at one x whether or not the
+ * mirror holds a file (`ArtworkSlot`'s `reserve`), and the frame is never a link because the row's
+ * one door is its Actions cell.
+ */
+test('gives every run row one reserved portrait slot and no extra door', async ({ page }) => {
+    const recordUrl = await startCareer(page);
+    created.push(recordUrl);
+
+    await page.goto('/training-runs', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const rows = page.locator('tbody > tr');
+    const count = await rows.count();
+    expect(count, 'the started career is not in the list').toBeGreaterThan(0);
+
+    for (let index = 0; index < count; index += 1) {
+        const row = rows.nth(index);
+        await expect(row.locator('[data-artwork-slot]'), `row ${index} has no portrait slot`).toHaveCount(1);
+        await expect(row.locator('a [data-artwork-slot]'), `row ${index} makes the frame a link`).toHaveCount(0);
+    }
+
+    const slot = rows.first().locator('[data-artwork-slot]');
+    const tag = await slot.evaluate((el) => el.tagName);
+
+    if (tag === 'IMG') {
+        // The frame is decorative: the row already prints the trainee's name beside it.
+        await expect(slot).toHaveAttribute('alt', '');
+        await expect(slot).toHaveAttribute('src', /\/artwork\/card_portrait\/\d+$/);
+    } else {
+        // Absence is reserved and transparent, never a grey placeholder (DESIGN.md §4.7).
+        const box = await slot.boundingBox();
+        expect(box?.width ?? 0, 'the reserved slot has no rendered width').toBeGreaterThanOrEqual(40);
+        expect(box?.height ?? 0, 'the reserved slot has no rendered height').toBeGreaterThanOrEqual(40);
+        await expect(slot).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    }
+
+    // The slot does not push the document sideways at the standard measure.
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow, 'the row portrait introduced horizontal overflow at 1280').toBeLessThanOrEqual(0);
+});
