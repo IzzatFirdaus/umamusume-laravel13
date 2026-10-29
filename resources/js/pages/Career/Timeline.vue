@@ -12,7 +12,8 @@
  * `@vue/compiler-sfc` to load (plan §11).
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
-import CareerTimeline from '../../components/career/CareerTimeline.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
+import Note from '../../components/ui/Note.vue';
 import { Head } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
@@ -36,6 +37,7 @@ const props = defineProps<{
         corrected: boolean;
         correction_id: string | null;
         decision_url: string;
+        position: string;
     }[];
     filters: { available: string[]; active: string[] };
     empty: string | null;
@@ -71,6 +73,53 @@ const recordedTurns = computed(() => props.entries.filter((entry) => entry.kind 
 const raceCount = computed(() => props.entries.filter((entry) => entry.kind === 'race').length);
 const eventCount = computed(() => props.entries.filter((entry) => entry.kind === 'event').length);
 
+
+// The HFW's filters are two selects over the already-fetched list; both reset the page.
+const kindFilter = ref('');
+const yearFilter = ref('');
+const page = ref(1);
+const PAGE_SIZE = 15;
+
+const kindOptions = computed(() => [...new Set(props.entries.map((entry) => entry.kind_label))].sort());
+
+const yearOptions = computed(() => {
+    const years = new Set<string>();
+    for (const entry of props.entries) {
+        const head = entry.position.split(' · ')[0];
+        if (head !== 'After the grid') {
+            years.add(head);
+        }
+    }
+
+    return [...years];
+});
+
+const filteredEntries = computed(() =>
+    props.entries.filter((entry) => {
+        const kindOk = kindFilter.value === '' || entry.kind_label === kindFilter.value;
+        const yearOk = yearFilter.value === '' || entry.position.startsWith(yearFilter.value);
+
+        return kindOk && yearOk;
+    }),
+);
+
+const pageCount = computed(() => Math.max(1, Math.ceil(filteredEntries.value.length / PAGE_SIZE)));
+const visibleEntries = computed(() => filteredEntries.value.slice((page.value - 1) * PAGE_SIZE, page.value * PAGE_SIZE));
+
+const clearFilters = (): void => {
+    kindFilter.value = '';
+    yearFilter.value = '';
+    page.value = 1;
+};
+
+const energyOf = (entry: { after: Record<string, number | null> | null }): number | null => entry.after?.energy ?? null;
+const spOf = (entry: { after: Record<string, number | null> | null }): number | null => entry.after?.sp ?? null;
+
+const lastTurn = computed(() => Math.max(0, ...props.entries.map((entry) => entry.turn)));
+const resultUrl = computed(() => props.run.cockpit_url.replace(/\/cockpit$/, '/result'));
+
+const phaseCount = (head: string): number => props.entries.filter((entry) => entry.position.startsWith(head)).length;
+
 const finaleText = computed(() => {
     if (props.finale === null) {
         return 'No finale row';
@@ -90,127 +139,105 @@ const finaleText = computed(() => {
         :scenario-label="props.run.scenario_label"
         :status-label="props.run.status_label"
         :run-url="props.run.run_url"
+        current="timeline"
     >
-        <Head :title="`Career timeline: ${props.run.trainee}`" />
-        <template #title>Career timeline</template>
+        <Head :title="'Career timeline: ' + props.run.trainee" />
+        <template #head>
+            <PageHeader
+                eyebrow="Career timeline"
+                title="Every logged turn, race and event"
+                :description="props.run.trainee + '\u2019s ' + props.run.scenario_label + ' career, in order. ' + props.entries.length + ' entries recorded. This is the auditable record behind the Result screen.'"
+            >
+                <template #actions>
+                    <a :href="resultUrl" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">Career result</a>
+                    <button type="button" class="btn btn-quiet min-h-11" title="The build has no undo; this screen proposes one.">Undo turn {{ lastTurn }}</button>
+                    <a href="/training-runs" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">All careers</a>
+                </template>
+            </PageHeader>
+        </template>
 
-        <p v-if="visiting" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
-        <p v-if="visitFailed" role="alert" class="mb-4 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
+        <p v-if="visiting" role="status" class="mb-3 text-sm text-ink-muted">Loading…</p>
+        <p v-if="visitFailed" role="alert" class="mb-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
             That screen did not load. Nothing was saved; try again.
         </p>
 
-        <p class="max-w-3xl text-sm text-ink-muted">
-            The run's recorded turns, races and events, oldest first. Each row's BEFORE stat block
-            is the previous logged turn; the END OF TURN block is the row's own absolute values, because
-            each turn stores the end-of-turn reading rather than an expected-then-actual pair. A row
-            marked "Updated" was edited after its first save; the Cockpit is where the edit happened.
-        </p>
-
-        <!-- The HFW's four counts, read off the payload. No aggregate and no score: four facts, one per
-             tile, and the final tile is the finale's own state rather than a derived grade. -->
-        <section aria-labelledby="timeline-counts-heading" class="mt-4">
-            <h2 id="timeline-counts-heading" class="sr-only">What this career has recorded</h2>
-            <dl class="grid grid-cols-2 gap-3 min-[1081px]:grid-cols-4">
-                <div class="rounded-md border border-rule bg-panel p-3">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Turns recorded</dt>
-                    <dd class="mt-1 font-mono text-xl font-semibold tabular-nums text-ink-strong">
-                        {{ recordedTurns }} <span class="text-sm font-normal text-ink-muted">of {{ props.total_turns }}</span>
-                    </dd>
-                </div>
-                <div class="rounded-md border border-rule bg-panel p-3">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Races entered</dt>
-                    <dd class="mt-1 font-mono text-xl font-semibold tabular-nums text-ink-strong">{{ raceCount }}</dd>
-                </div>
-                <div class="rounded-md border border-rule bg-panel p-3">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Events</dt>
-                    <dd class="mt-1 font-mono text-xl font-semibold tabular-nums text-ink-strong">{{ eventCount }}</dd>
-                </div>
-                <div class="rounded-md border border-rule bg-panel p-3">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Finale</dt>
-                    <dd class="mt-1 text-base font-semibold text-ink-strong">{{ finaleText }}</dd>
-                </div>
-            </dl>
-        </section>
-
-        <section
-            v-if="props.origin !== null"
-            aria-labelledby="timeline-origin-heading"
-            class="mt-4 rounded-md border border-rule bg-panel p-4"
-        >
-            <h2 id="timeline-origin-heading" class="text-lg font-semibold text-ink-strong">Timeline opens here</h2>
-            <p class="mt-1 text-sm text-ink">
-                {{ props.origin.year_label }} · {{ props.origin.month_label }} · Turn {{ props.origin.turn }}
-                <span v-if="props.origin.imported" class="ml-2 text-xs text-ink-muted">imported from a snapshot</span>
-            </p>
-        </section>
-
-        <section
-            v-if="props.filters.available.length > 0"
-            aria-labelledby="timeline-filter-heading"
-            class="mt-4 rounded-md border border-rule bg-panel p-4"
-        >
-            <h2 id="timeline-filter-heading" class="text-lg font-semibold text-ink-strong">Filter by type</h2>
-            <p class="mt-1 text-xs text-ink-muted">
-                Toggle a type to hide its rows. Empty filter shows everything (showing {{ visibleCount }} of {{ props.entries.length }}).
-            </p>
-            <ul class="mt-3 flex flex-wrap gap-2" role="group" aria-label="Filter timeline rows by type">
-                <li v-for="label in props.filters.available" :key="label">
-                    <button
-                        type="button"
-                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-xs font-semibold aria-pressed:bg-pick aria-pressed:text-on-pick"
-                        :aria-pressed="activeKinds.includes(label)"
-                        @click="toggleKind(label)"
-                    >
-                        {{ label }}
-                    </button>
-                </li>
-            </ul>
-            <p v-if="filterCount > 0" class="mt-2 text-xs text-ink-muted">
-                {{ filterCount }} filter{{ filterCount === 1 ? '' : 's' }} active.
-            </p>
-        </section>
-
-        <p
-            v-if="props.empty !== null"
-            class="mt-4 rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink"
-        >
-            {{ props.empty }}
-        </p>
-
-        <CareerTimeline v-else :entries="props.entries" :active-kinds="activeKinds" :total-turns="props.total_turns" />
-
-        <!-- DM-1: the finale is the block after the grid, so it is its own section and never a row
-             numbered 73. -->
-        <!-- DOMAIN OVERRIDE (DM-1): finale block sits outside the 72-turn grid -->
-        <section aria-labelledby="timeline-finale-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="timeline-finale-heading" class="text-lg font-semibold text-ink-strong">After the grid · finale block</h2>
-            <template v-if="props.finale !== null">
-                <p class="mt-1 text-sm text-ink">
-                    <span class="font-semibold">{{ props.finale.label ?? 'This scenario has no label for it' }}</span>
-                    · {{ props.finale.reached ? 'reached' : 'not reached yet' }}
-                </p>
-                <p class="mt-1 text-sm text-ink">
-                    {{ props.finale.reached
-                        ? props.finale.outcome === null
-                            ? 'Reached, with no outcome recorded against it. The Result screen prints the same absence.'
-                            : `Outcome: ${props.finale.outcome}${props.finale.placement === null ? '' : ` · ${props.finale.placement}`}`
-                        : 'The grid has not run out yet, so nothing has been recorded here.' }}
-                </p>
-                <p class="mt-1 text-xs text-ink-muted">
-                    The twelve months of each year are 24 turns; the finale follows Senior Late December and
-                    is not one of the {{ props.total_turns }} numbered turns.
-                </p>
-            </template>
-            <p v-else class="mt-1 text-sm text-ink-muted">
-                This scenario declares no finale row in the career calendar, so there is nothing to report here.
-                That is an absence in the catalogue, not a missing result.
-            </p>
-        </section>
-
-        <div class="mt-4 max-w-sm">
-            <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">
-                Back to Cockpit
-            </a>
+        <div class="grid gap-3 g-4">
+            <div class="card"><div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Turns recorded</div><div class="font-mono text-[22px] font-extrabold text-ink-strong">{{ recordedTurns }}</div></div>
+            <div class="card"><div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Races entered</div><div class="font-mono text-[22px] font-extrabold text-ink-strong">{{ raceCount }}</div></div>
+            <div class="card"><div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Events</div><div class="font-mono text-[22px] font-extrabold text-ink-strong">{{ eventCount }}</div></div>
+            <div class="card"><div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Finale</div><div class="text-base font-extrabold text-ink-strong">{{ finaleText }}</div></div>
         </div>
+
+        <div class="mt-3.5 flex flex-wrap items-end gap-2.5">
+            <label class="flex flex-col gap-1">
+                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Kind</span>
+                <select v-model="kindFilter" name="kind" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm" @change="page = 1">
+                    <option value="">All entries</option>
+                    <option v-for="kind in kindOptions" :key="kind" :value="kind">{{ kind }}</option>
+                </select>
+            </label>
+            <label class="flex flex-col gap-1">
+                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Year</span>
+                <select v-model="yearFilter" name="year" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm" @change="page = 1">
+                    <option value="">All years</option>
+                    <option v-for="year in yearOptions" :key="year" :value="year">{{ year }}</option>
+                </select>
+            </label>
+            <button type="button" class="btn btn-quiet min-h-11" @click="clearFilters">Clear</button>
+        </div>
+
+        <section class="card mt-3" aria-labelledby="timeline-record-heading">
+            <h2 id="timeline-record-heading">The record</h2>
+            <p v-if="props.entries.length === 0" class="mt-1 text-sm text-ink">{{ props.empty }}</p>
+            <p v-else-if="filteredEntries.length === 0" class="mt-1 text-sm text-ink">No entry matches those filters.</p>
+            <template v-else>
+                <div class="overflow-x-auto">
+                    <table class="t w-full min-w-[44rem] border-collapse text-sm">
+                        <thead>
+                            <tr><th class="text-right">Turn</th><th class="text-left">Position</th><th class="text-left">Kind</th><th class="text-left">What happened</th><th class="text-right">Energy</th><th class="text-right">SP</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="entry in visibleEntries" :key="entry.key" :class="entry.corrected ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft">
+                                <td class="py-2 pr-3 text-right font-mono">{{ entry.turn }}</td>
+                                <td class="py-2 pr-3">{{ entry.position }}</td>
+                                <td class="py-2 pr-3">{{ entry.kind_label }}</td>
+                                <td class="py-2 pr-3"><b>{{ entry.action_label }}</b> <span class="text-ink-muted">· {{ entry.result }}</span></td>
+                                <td class="py-2 pr-3 text-right font-mono">{{ energyOf(entry) ?? '—' }}</td>
+                                <td class="py-2 pr-3 text-right font-mono">{{ spOf(entry) ?? '—' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm">
+                    <span class="text-ink-muted">{{ filteredEntries.length }} entries · showing {{ visibleEntries.length }}</span>
+                    <div class="flex gap-2">
+                        <button type="button" class="btn btn-sm min-h-11" :disabled="page <= 1" @click="page = Math.max(1, page - 1)">Previous</button>
+                        <button type="button" class="btn btn-sm min-h-11" :disabled="page >= pageCount" @click="page = Math.min(pageCount, page + 1)">Next</button>
+                    </div>
+                </div>
+            </template>
+            <Note class="mt-2.5">
+                Turn numbers are the run's own; the position is the calendar's label for that turn. Energy and SP are
+                blank where the import did not capture them — a blank is "not recorded", never zero.
+            </Note>
+        </section>
+
+        <section class="card mt-3.5" aria-labelledby="timeline-phase-heading">
+            <h2 id="timeline-phase-heading">Phase grouping</h2>
+            <p class="sub">Collapsed by phase, the shape a 72-turn run needs. The open phase is the one you are reading.</p>
+            <details open class="mt-2">
+                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-extrabold text-ink-strong">Junior Year · {{ phaseCount('Junior') }} entries</summary>
+                <p class="mt-1 text-xs text-ink-muted">Turns 1–24. Duration unknown for most entries; the Debut race is the one dated obligation.</p>
+            </details>
+            <details class="mt-2">
+                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-extrabold text-ink-strong">Classic Year · {{ phaseCount('Classic') }} entries</summary>
+            </details>
+            <details class="mt-2">
+                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-extrabold text-ink-strong">Senior Year · {{ phaseCount('Senior') }} entries</summary>
+            </details>
+            <details class="mt-2">
+                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-extrabold text-ink-strong">After the grid · finale block ({{ phaseCount('After the grid') }})</summary>
+            </details>
+        </section>
     </CareerLayout>
 </template>

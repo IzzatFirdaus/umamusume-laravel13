@@ -4,20 +4,14 @@ import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';
 
 /*
- * Rendered-copy, keyboard and accessibility evidence for SCREEN-018, the Career Timeline
- * (`SCR-CAR-017`, plan §8 D14). `CareerTimelineTest` pins the props shape and the BEFORE/AFTER
- * mapping; these cases assert what only a browser reaches: the rail's glyph alongside text,
- * the disclosure's keyboard path, the audit pane opening and showing the five audit rows, the
- * type filter's aria-pressed state, the 320px reflow and 44px sweep, reduced motion, and an
- * axe scan against `#app` (the same scope rule every career spec uses).
+ * Rendered evidence for SCREEN-018, the Career Timeline, re-baselined at the HFW's region model after
+ * the 2026-10-28 parity audit: the four-count strip, the Kind/Year filters, one record table with the
+ * Turn spine and the blank Energy/SP cells, the pager, and the collapsible phase grouping.
  *
- * Fixture strategy: create a run, log two turns over `runs.turns.store` (no rendered surface creates
- * a turn since the run screen became a redirect), then walk to the timeline. Writes get 60s because
- * `php artisan serve` is a single-process `php -S`.
+ * Fixture: a Trackblazer career with two logged turns, deleted over HTTP in afterEach.
  */
 
 const WRITE = { timeout: 60_000 } as const;
-
 const createdRunUrls: string[] = [];
 
 test.afterEach(async ({ page }) => {
@@ -26,10 +20,7 @@ test.afterEach(async ({ page }) => {
     }
 });
 
-/**
- * A career with two logged turns, then the Timeline screen for it.
- */
-async function openTimeline(page: import('@playwright/test').Page): Promise<void> {
+async function createRun(page: import('@playwright/test').Page): Promise<string> {
     await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     await page.locator('#trainee-combobox').fill('Rice Shower');
@@ -37,153 +28,109 @@ async function openTimeline(page: import('@playwright/test').Page): Promise<void
     await page.selectOption('select[name="scenario"]', { value: 'trackblazer' });
     await page.getByRole('button', { name: 'Create run' }).click();
     await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
+
     const runUrl = page.url().replace(/\/cockpit$/, '');
     createdRunUrls.push(runUrl);
 
+    return runUrl;
+}
+
+async function openTimeline(page: import('@playwright/test').Page): Promise<string> {
+    const runUrl = await createRun(page);
     const runId = runUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
     await recordTurns(page, runId, 2);
 
     await page.goto(`${runUrl}/timeline`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
+
+    return runUrl;
 }
 
 test('renders the empty state when no turns have been logged', async ({ page }) => {
-    await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.locator('#trainee-combobox').fill('Rice Shower');
-    await page.keyboard.press('Enter');
-    await page.selectOption('select[name="scenario"]', { value: 'trackblazer' });
-    await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
-    const runUrl = page.url().replace(/\/cockpit$/, '');
-    createdRunUrls.push(runUrl);
+    const runUrl = await createRun(page);
 
     await page.goto(`${runUrl}/timeline`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByRole('heading', { name: 'Career timeline' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Every logged turn, race and event', level: 1 })).toBeVisible();
     await expect(page.getByText(/No turns have been recorded/)).toBeVisible();
 });
 
-test('renders the rail with glyph alongside text and the audit opens by keyboard', async ({ page }) => {
+test('renders the HFW region model: four counts, one record table and the pager', async ({ page }) => {
     await openTimeline(page);
 
-    // Rows live in one ordered list per career year now, so the rail's spine is reached through the
-    // first phase's list rather than one flat `ol`.
-    const firstRow = page.locator('ol[aria-label$="entries, oldest first"] > li').first();
-    const firstDetails = firstRow.locator('details');
-    const firstSummary = firstDetails.locator('summary');
-
-    await expect(firstSummary).toBeVisible();
-
-    // The glyph and the text appear in the same row — never state through glyph alone.
-    await expect(firstSummary).toContainText('●');
-    await expect(firstSummary).toContainText(/Turn recorded/);
-
-    // DM-1: the turn number is the spine, first in the row and monospaced. Two logged turns give
-    // T1 and T2, and the column must start at the same offset in both rows or it stops scanning.
-    await expect(firstSummary).toContainText('T1');
-    const spine = page.locator('ol[aria-label$="entries, oldest first"] > li summary > span').first();
-    expect(await spine.evaluate((el) => getComputedStyle(el).fontFamily)).toContain('mono');
-
-    // Closed by default: the disclosure is collapsed, so `details.open` is false.
-    expect(await firstDetails.evaluate((el: HTMLDetailsElement) => el.open)).toBe(false);
-
-    // Keyboard activation opens the audit pane and the contents become visible.
-    await firstSummary.focus();
-    await page.keyboard.press('Enter');
-    expect(await firstDetails.evaluate((el: HTMLDetailsElement) => el.open)).toBe(true);
-    await expect(firstDetails.locator('dt', { hasText: 'BEFORE' })).toBeVisible();
-    await expect(firstDetails.locator('dt', { hasText: 'ACTION' })).toBeVisible();
-    await expect(firstDetails.locator('dt', { hasText: 'RESULT' })).toBeVisible();
-
-    // One end-of-turn block, not an EXPECTED/ACTUAL pair. ADR-0003 stores the absolute reading, so the
-    // pair printed the same five numbers twice, one heading claiming an expectation the tool refuses.
-    await expect(firstDetails.locator('dt', { hasText: 'END OF TURN' })).toBeVisible();
-    await expect(firstDetails.locator('dt', { hasText: /EXPECTED|ACTUAL/ })).toHaveCount(0);
-});
-
-test('toggles a type filter and shows only the active kind', async ({ page }) => {
-    await openTimeline(page);
-
-    const turnChip = page.getByRole('group', { name: 'Filter timeline rows by type' }).getByRole('button', { name: 'Turn' });
-    await expect(turnChip).toHaveAttribute('aria-pressed', 'false');
-    await turnChip.click();
-    await expect(turnChip).toHaveAttribute('aria-pressed', 'true');
-
-    // Two turn rows keep showing; the spec logged two turns and posted no race or event rows.
-    await expect(page.locator('ol[aria-label$="entries, oldest first"] > li')).toHaveCount(2);
-});
-
-test('groups the rail by career year, and the finale sits outside the grid', async ({ page }) => {
-    await openTimeline(page);
-
-    // DM-1: a career is three 24-turn years, and the group caption carries the denominator so a
-    // half-logged year reads as what it is rather than as a complete one.
-    const junior = page.getByRole('heading', { name: 'Junior Year' });
-    await expect(junior).toBeVisible();
-    await expect(page.getByText('Turns 1–24')).toBeVisible();
-    await expect(page.getByText(/2 of 24 turns recorded/)).toBeVisible();
-
-    // The finale is its own section after the grid. It is never a row numbered past the grid, and
-    // the section says so in words rather than implying a 73rd turn.
-    const finale = page.getByRole('region', { name: /After the grid/ });
-    await expect(finale).toBeVisible();
-    await expect(finale).toContainText('not one of the 72 numbered turns');
-    await expect(page.locator('ol[aria-label$="entries, oldest first"] summary', { hasText: 'T73' })).toHaveCount(0);
-
-    // The counts strip reads the career's own denominator, not the number of rows.
-    await expect(page.getByText('of 72')).toBeVisible();
-});
-
-test('prints a blank as not recorded rather than as zero', async ({ page }) => {
-    await openTimeline(page);
-
-    const firstRow = page.locator('ol[aria-label$="entries, oldest first"] > li').first();
-    await firstRow.locator('summary').click();
-
-    // A turn recorded without a stat reading leaves the cell empty and states the rule once, so a
-    // blank never reads as a zero and the absence never hides behind a tooltip.
-    await expect(firstRow).toContainText('Blank means not recorded, never zero');
-    await expect(firstRow).not.toContainText('N/A');
-
-    // The first logged turn has no previous turn, which is a different absence from a missing stat
-    // and says so in its own words.
-    await expect(firstRow).toContainText('this is the first logged turn');
-});
-
-test('keeps min-h-11 tap targets on the filter chips and reflows at 320 px', async ({ page }) => {
-    await openTimeline(page);
-
-    const chips = page.getByRole('group', { name: 'Filter timeline rows by type' }).getByRole('button');
-    const chipCount = await chips.count();
-    expect(chipCount).toBeGreaterThan(0);
-    for (let i = 0; i < chipCount; i++) {
-        const height = await chips.nth(i).evaluate((element) => element.getBoundingClientRect().height);
-        expect(height).toBeGreaterThanOrEqual(44);
+    for (const label of ['Turns recorded', 'Races entered', 'Events', 'Finale']) {
+        await expect(page.locator('main').getByText(label, { exact: true }).first()).toBeVisible();
     }
 
+    await expect(page.getByRole('heading', { name: 'The record', level: 2 })).toBeVisible();
+    await expect(page.locator('main table')).toHaveCount(1);
+
+    const headers = await page.locator('main table thead th').allTextContents();
+    expect(headers.map((header) => header.trim())).toEqual(['Turn', 'Position', 'Kind', 'What happened', 'Energy', 'SP']);
+
+    await expect(page.getByText(/entries · showing/)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Phase grouping', level: 2 })).toBeVisible();
+});
+
+test('filters by kind and clears back to every entry', async ({ page }) => {
+    await openTimeline(page);
+
+    const before = await page.locator('main table tbody tr').count();
+    expect(before).toBeGreaterThan(0);
+
+    await page.selectOption('select[name="kind"]', 'Turn');
+    await expect(page.locator('main table tbody tr').first()).toContainText('Turn');
+
+    await page.getByRole('button', { name: 'Clear', exact: true }).click();
+    await expect(page.locator('main table tbody tr')).toHaveCount(before);
+});
+
+test('groups the log by phase and keeps the finale block outside the grid', async ({ page }) => {
+    await openTimeline(page);
+
+    for (const phase of ['Junior Year', 'Classic Year', 'Senior Year', 'After the grid']) {
+        await expect(page.locator('summary', { hasText: phase })).toBeVisible();
+    }
+});
+
+test('prints a blank Energy or SP as an em dash, never a zero', async ({ page }) => {
+    await openTimeline(page);
+
+    const firstRow = page.locator('main table tbody tr').first();
+    await expect(firstRow).toContainText('—');
+    await expect(page.getByText(/a blank is "not recorded", never zero/)).toBeVisible();
+});
+
+test('sizes the controls to the 44px contract and reflows at 320px', async ({ page }) => {
+    await openTimeline(page);
+
+    const undersized = await page.locator('main a, main button, main select, main summary').evaluateAll((nodes) =>
+        nodes.filter((node) => {
+            const box = node.getBoundingClientRect();
+
+            return box.width > 0 && box.height > 0 && box.height < 44;
+        }).length,
+    );
+
+    expect(undersized).toBe(0);
+
     await page.setViewportSize({ width: 320, height: 700 });
-    await expect(page.locator('ol[aria-label$="entries, oldest first"]').first()).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Career timeline' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'The record', level: 2 })).toBeVisible();
 });
 
-test('passes the axe A + AA scan on the timeline page', async ({ page }) => {
-    await openTimeline(page);
-    await buildAxe(page).analyze();
-});
-
-test('renders no write control, so the timeline is read-only', async ({ page }) => {
+test('renders no write form, so the timeline stays read-only', async ({ page }) => {
     await openTimeline(page);
 
-    // `SCREEN_SPEC.md` states the Timeline is read-only (SCR-CAR-017): it renders the run's recorded
-    // turns, races and events, and its one write is a link to the Cockpit's correction rather than a
-    // form here. A submit control, a form, or a link into a turn write on this page would break that
-    // contract, so all three are asserted absent. The Cockpit door is a `GET` and is not a write.
     await expect(page.locator('form')).toHaveCount(0);
     await expect(page.locator('button[type="submit"]')).toHaveCount(0);
-    await expect(page.locator('a[href*="runs.turns"]')).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Every logged turn, race and event', level: 1 })).toBeVisible();
+});
 
-    // Positive control: the read-only screen rendered rather than an empty document.
-    await expect(page.getByRole('heading', { name: 'Career timeline' })).toBeVisible();
+test('passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await openTimeline(page);
+
+    const results = await buildAxe(page).analyze();
+
+    expect(results.violations).toEqual([]);
 });

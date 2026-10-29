@@ -188,7 +188,30 @@ class TimelineController extends Controller
             }
         }
 
+        // The HFW's Position column: the calendar's own label for the row's turn, read back through
+        // `CareerPosition` so the page never re-derives year/phase arithmetic. A row outside the
+        // 72-turn grid is the finale block.
+        foreach ($entries as $index => $entry) {
+            $turn = (int) $entry['turn'];
+            $entries[$index]['position'] = $this->positionLabel($turn);
+        }
+
         return $entries;
+    }
+
+    /**
+     * The row's calendar position as "Junior · Late Jun", or the finale block's own name.
+     */
+    private function positionLabel(int $turn): string
+    {
+        if ($turn < 1 || $turn > CareerCalendar::TURNS_PER_CAREER) {
+            return 'After the grid';
+        }
+
+        $position = CareerPosition::fromTurnIndex($turn);
+        $year = str_replace(' Year', '', $position->year->label());
+
+        return $year.' · '.$position->phase->value.' '.substr(CareerCalendar::monthLabel($position->month), 0, 3);
     }
 
     /**
