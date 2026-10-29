@@ -1418,12 +1418,34 @@ equal, the three budget labels present, tables and savebar match, console clean.
 `npm run build` → 0. Two spec defects found and fixed in-slice: the search box needed a native input
 (shared `BaseInput` does not forward `name`), and `Clear` needed `exact` against `Clear plan`.
 
-## C10 — remaining screens (not yet started)
+## C10 — run-deck, screen 7 of 9 (`5d0dea63`)
 
-Six of the nine lifecycle screens are repaired. **31 pages remain divergent**: the audit's 28 less two
-done, plus the five `near` re-verdicts the side-task S6 below moved to divergent (runs-index,
+| Item | Before (audit) | After |
+|---|---|---|
+| Region model | run strip, six-slot list, always-open picker, always-open analysis | This run's six slots as six cards, one savebar; picker and analysis behind disclosures |
+| h1 | "Support deck" | "This run's six slots" (HFW) |
+| Slots | list rows | g-3 cards: filled card keeps Swap/Remove, level and ownership; empty slot is a dashed card with Add a card |
+| Save | per-page "Confirm deck" under the list | savebar: "N of 6 slots filled" + Cancel + Save deck (one filled action) |
+| Picker / analysis | permanent panels | disclosures, so no write or read surface lost |
+
+**Deviations, documented in the page:** the wireframe draws only the six cards, so the card picker and
+the deck analysis stay in two disclosures (`HFW OVERRIDE`); gauge/friendship figures the schema does
+not hold still print as absences inside each card.
+
+**Verdict delta.** run-deck: **divergent → near**. Evidence: DOM vs HFW h1 equal, one savebar, one
+primary, console clean.
+
+**Gates.** `npx playwright test support-deck` → **17 passed**; `npm run typecheck` → 0;
+`npm run build` → 0. `php artisan test SupportDeckBuilderTest` → **26 passed, 1 failed**, and the
+failure is not this slice: the class pins a sentence in `resources/js/pages/Career/DeckSelect.vue`,
+a peer session's in-flight edit that is not committed here.
+
+## C11 — remaining screens (not yet started)
+
+Seven of the nine lifecycle screens are repaired. **30 pages remain divergent**: the audit's 28 less
+three done, plus the five `near` re-verdicts the side-task S6 below moved to divergent (runs-index,
 preferences, support-cards, support-card-detail, career-scenario). Order stays as the audit's repair
-list: the other three lifecycle screens (run-deck, timeline, result), then the wizard remainder
+list: the last two lifecycle screens (timeline, result), then the wizard remainder
 (career-trainee/target/preflight/legacy + career-scenario), then library/legacy/veterans/review
 (including runs-index and preferences), then the copy/identifier pass. The S9 prop-delta gaps belong to
 their owning slices: `SupportCardController.global_count`, `DatabaseController.areas[].badge`,
