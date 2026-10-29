@@ -1341,12 +1341,40 @@ the "Nothing to compare yet" state present, console clean.
 **Gates.** `php artisan test CareerRacePlannerTest` → exit 0; `npx playwright test career-race-planner`
 → **7 passed**; `npm run typecheck` → 0; `npm run build` → 0; pint passed.
 
-## C7 — remaining screens (not yet started)
+## C7 — event-decision, screen 4 of 9 (`4d2aadea`)
 
-The audit's other 29 divergent pages and the `near` re-examinations are unchanged. Order stays as the
-audit's repair list: the other six lifecycle screens (event-decision, inheritance, skills-planner,
-run-deck, timeline, result), then the wizard remainder, then library/legacy/veterans/review, then the
-copy/identifier pass. `3.0.0` remains **absent**.
+| Item | Before (audit) | After |
+|---|---|---|
+| Region model | coach recommendation, career state, known outcomes, recorded events, form | What the event shows, Options, Record the outcome, This event's provenance, savebar |
+| h1 | "Event decision" | "A training event is asking" (HFW) |
+| Options | picker buried in the form | known choices as radios (when the run has any) + one transcription row; "Selecting shown; outcome not predicted" |
+| Outcome | none | four absence cells (no columns hold event deltas) + Bond change + Note as the storable fields |
+| Provenance | none | table: Source client screen / Effect table Not published / Retryable No |
+| Savebar | none | status + Undo turn N + Skip + Record event (one filled action) |
+
+**Deviations, documented in the page:** (1) no event catalogue exists, so the HFW's illustrative three
+options become the run's known choices plus a transcription row — the page states it records the
+trainer's transcription and never invents event copy; (2) the four client outcome figures print "Not
+recorded" because no column holds them; (3) the keying rows (turn, source, event name, support card) stay
+behind one disclosure; (4) "Recorded events on this run" stays in a disclosure.
+
+**Verdict delta.** event-decision: **divergent → near**. Evidence: DOM vs HFW headings equal, one
+provenance table, one savebar, console clean.
+
+**Gates.** `php artisan test CareerEventDecisionTest` → **9 passed (173 assertions)**;
+`npx playwright test career-event-decision` → **7 passed**; `npm run typecheck` → 0; `npm run build` → 0.
+
+## C8 — remaining screens (not yet started)
+
+Four screens of the nine lifecycle screens are repaired. **33 pages remain divergent**: the audit's 28
+after those four, plus the five `near` re-verdicts the side-task S6 below moved to divergent
+(runs-index, preferences, support-cards, support-card-detail, career-scenario). Order stays as the
+audit's repair list: the other five lifecycle screens (inheritance, skills-planner, run-deck, timeline,
+result), then the wizard remainder (career-trainee/target/preflight/legacy + career-scenario), then
+library/legacy/veterans/review (including runs-index and preferences), then the copy/identifier pass.
+The S9 prop-delta gaps are part of their owning slices: `SupportCardController.global_count`,
+`DatabaseController.areas[].badge`, `VeteranController.used_as_parent_count`. `3.0.0` remains
+**absent**.
 
 
 
