@@ -57,6 +57,43 @@ S7a, S8, S9, S11 as commits `f0e89dbd` through `e4a6e2fb`); this section collect
 files what it did not close. No new route, screen, API field, or schema change: every item below is
 copy, markup, a derived prop, or a test.
 
+**Parity pass completed 2026-10-30.** The repair pass this section was waiting for has landed:
+every divergent and near page is either repaired with its spec re-baselined in the same commit, or
+dropped with the binding record that bars the work. The tag is still withheld; `VERSION.md` carries the
+two conditions that remain open, which are a peer-owned flow spec and a quiet-box run of the full suite.
+
+The parity pass itself:
+
+- **Review detail savebar** (`ecfff488`) - a `role="status"` line with Reject/Confirm, a rarity mark on the
+  best-match card, "Use this" on the other-costume row, and "Back to queue". `CandidateForm` gained a
+  `variant` prop rather than a second component: one request contract, one `useForm`.
+- **Veterans** (`a936d59d`) - head Compare door, corrected Factors reason.
+- **Legacy builder** (`384cd054`) - preview card and savebar.
+- **Preflight** (`445288d9`) - "What this scenario asks" prints the scenario's own rules from
+  `config/scenarios.php`.
+- **Catalog** (`1154ddf8`) - Surface, Distance and Running-style facets, contract-tested first per
+  ADR-0018, folded into the cache key so an absent facet keeps the byte-identical old key.
+- **Support cards** (`d6a27620`) - "Add to a deck", a labelled "Not used" row, and Type-before-Rarity
+  order. Availability and server state the same fact, so `?status=JP-only` now selects the JP scope
+  instead of returning nothing against the Global default; an explicit `server` still wins.
+- **Skill detail** (`3ee9d709`) - the ladder's `None / 0%` row, and a Related count read off the stored
+  `condition_groups`.
+- **Database** (`479a1cbb`, `658f1a1a`) - Races filter row (its "no facet" ruling was stale against the
+  wireframe and the page's own lede), Sources matrix banner, and the Sparks "Per two parents" column
+  computed from each row's amount.
+- **Help** (`4c360b7e`) - the shipped-but-unused `.trust-calculated` / `.trust-estimated` /
+  `.trust-unknown` primitives now carry the tag legend.
+- **`AGENTS.md` §9** (`f53900d0`) - the standing flow-spec rule, verbatim from the owner's reply.
+
+Refused, each with the record that bars it: veteran factor grades and the Factors table (`ADR-0020` §3),
+the legacy builder's `+32`/`1432` preview figures (same clause), the catalog detail's ★4/★5/Total
+columns (no such columns exist), and the skill detail's class code, two Related rows and "In your runs"
+(no class-code column, and no per-run hint level).
+
+Open at this writing: `full-career-journey.spec.ts` is red and peer-owned, because its locator matches two
+`details` elements and the fix is `details[data-region="team-state"]`. The full browser suite was not run,
+because the host failed the quiet-box precondition. The legacy builder still takes free-form parent entry
+where its keybox requires one-pick radios.
 ### Added
 
 - **Careers row sort** (S3) - the list's fourth control. `RunSearchRequest` accepts `sort`

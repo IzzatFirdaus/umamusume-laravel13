@@ -3782,3 +3782,45 @@ state and the `All changes saved` line.
 **Distance closed.** The wireframe's "One save model across the screen. One bar, one verb, disabled
 when clean." is now built on the Preferences screen: one page head carries the state line and the
 one verb, and the verb is disabled while the form is clean.
+
+## KI-135 — the legacy builder takes free-form parent entry where its keybox requires one-pick radios
+
+**State:** OPEN. Filed 2026-10-30 by the HFW parity pass (S10.1 annotation sweep).
+
+**Defect.** `legacy-builder.html`'s annotation key, item 2, says: "One pick per parent. Radios, not
+checkboxes: the moment grants one spark per parent and the control must not promise two." The shipped
+builder still lets a Trainer enter a parent freely, which promises a shape the inheritance moment does
+not grant.
+
+**Why it is not a refusal.** No ADR bars it. `ADR-0020` §3 bans *deriving* an outcome; choosing one
+parent per slot is a recording decision, which the same clause permits. The payload already carries the
+parent picks.
+
+**Repair.** Replace the free-form parent editors with one-pick radios per parent in
+`resources/js/pages/Legacy/Builder.vue`, re-baseline `tests/browser/legacy-builder.spec.ts` in the same
+commit, and re-run the R4 gates. Owned by R4, whose preview-card and savebar work landed at `384cd054`
+without this item.
+
+**Proven by.** `s10-annotation-sweep.md` (deviation 1) and the keybox read of `legacy-builder.html`.
+
+## KI-136 — `full-career-journey.spec.ts` locator matches two disclosures
+
+**State:** OPEN, peer-owned (the file is dirty in another session's working tree).
+
+**Defect.** The journey walk resolves its team editor with
+`page.locator('details', { has: page.locator('input[name="team_name"]') })`, which matches **two**
+`details` elements: `data-region="run-tools"` nests `data-region="team-state"`, so a descendant match on
+the team-name field finds both. Playwright fails strict mode at `:120` and the walk stops there.
+
+**Measured.** `npx playwright test full-career-journey.spec.ts` in a session-private pair
+(`PLAYWRIGHT_PORT=8181` plus its scratch DB): 1 failed, with the two matches printed in the call log.
+
+**Repair, one line:**
+
+```diff
+-    const teamEditor = page.locator('details', { has: page.locator('input[name="team_name"]') });
++    const teamEditor = page.locator('details[data-region="team-state"]');
+```
+
+**Proven by.** `s10-b1-final.md`. This blocks tag condition (b): flow coverage is 1 of 5 while the walk
+is red.

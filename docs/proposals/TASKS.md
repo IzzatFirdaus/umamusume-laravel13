@@ -194,7 +194,7 @@ layout and scenario panels (S5)*). Each bullet was checked against the tree befo
 
 | Bullet | State | Evidence |
 |---|---|---|
-| 2.1 shell order: identity card, then the two-column grid, then the race strip, then the scenario panel | already satisfied | `Cockpit.vue` renders `CockpitIdentityCard` (line 865) before the `@4xl:grid-cols-[2fr_1fr]` body; `RunRaceStrip` sits after it |
+| 2.1 shell order: stats card, then the two-column grid, then the race strip, then the scenario panel | **superseded at `530d62b9`** | The identity card was deleted because no cockpit HFW draws one (verified: zero `identity` hits in `cockpit-unity-cup.html`, `cockpit-ura-finale.html`, `cockpit-trackblazer.html`). The shipped first block is `CareerStatePanel` (`section[aria-labelledby="career-state-heading"]`). Re-baselined in `tests/browser/cockpit-shell.spec.ts` at R1 (`7aea74cc`). |
 | 2.1 one primary action, the same one the Next Decision card offers | already satisfied | `headAction` is the decision's own action (`<LinkButton variant="primary">`, line 820) |
 | 2.1 finale countdown inside the scenario card | already satisfied | `Cockpit.vue:1007` draws it in the scenario card, and `finaleTurnsAway` is the only countdown source |
 | 2.1 advisor rail `v-if="isActive"`, no empty rail on a Completed run | already satisfied | `Cockpit.vue:1035`; `ActionGrid` and the timeline heading are gated the same way |
@@ -491,8 +491,8 @@ green. So Phase A landed as verification plus two additions, not a rewrite.
 
 | Bullet | State | Evidence |
 |---|---|---|
-| S5.1 identity card first, one primary, countdown in the scenario card, rail gated on `isActive` | already satisfied | `Cockpit.vue`: `CockpitIdentityCard` at `:865`, head action at `:820`, `[data-region="scenario-finale"]` inside the Scenario section at `:1011`, `AdvisorRail v-if="isActive"` at `:1035` |
-| S5.1 the shell spec the brief asks for | **gap → landed** | new `tests/browser/cockpit-shell.spec.ts`: identity above both body regions, one filled action, the 390px reflow, the countdown inside the scenario card and **not** in the advisor, and a Completed run with no advisor rail and its outcome printed first |
+| S5.1 stats card first, one primary, countdown in the scenario card, rail gated on `isActive` | **re-baselined at R1** | `CareerStatePanel` (`career-state-heading`) is the shipped first block per `530d62b9`; the head action, `[data-region="scenario-finale"]` inside the Scenario section and `AdvisorRail v-if="isActive"` are unchanged in meaning. `cockpit-shell.spec.ts` pins this shape after `7aea74cc`. |
+| S5.1 shell spec brief asks for | **landed, then re-baselined** | `tests/browser/cockpit-shell.spec.ts` was red at baseline because it pinned the deleted `CockpitIdentityCard`; R1 (`7aea74cc`) re-baselined it to the shipped first block (`CareerStatePanel`). The 390px reflow, one filled action and countdown-inside-scenario assertions are unchanged. |
 | S5.2 URA finale: outcome first, entered caps, no rail | already satisfied | `ura-panel.spec.ts` green in the batch below |
 | S5.3 Unity Cup: five bars, pill-caution, "Where to go" | already satisfied | `unity-cup-panel.spec.ts` green below |
 | S5.4 Trackblazer: shortfall lead figure, currencies in one sentence, no `.mockbar` | already satisfied | `TrackblazerPanel.vue:610-617`; `grep mockbar resources/js` → 0 hits |
