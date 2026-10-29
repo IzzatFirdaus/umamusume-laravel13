@@ -35,6 +35,14 @@ test('the trust vocabulary names the three exceptions and states that an unmarke
 
     await expect(tags.getByText('An unmarked figure is confirmed')).toBeVisible();
 
+    // Each level renders through its own shipped `.trust-*` primitive, not the flat `.tag`: the
+    // three are visually distinct (colour and border), which is the whole point of the legend
+    // (`help.html:106-108`). A single shared class would make the three rows indistinguishable.
+    await expect(tags.locator('.trust.trust-calculated')).toHaveCount(1);
+    await expect(tags.locator('.trust.trust-estimated')).toHaveCount(1);
+    await expect(tags.locator('.trust.trust-unknown')).toHaveCount(1);
+    await expect(tags.locator('.tag')).toHaveCount(0);
+
     // "Confirmed" is a state, not a chip: the page must not print it as a fourth mark.
     await expect(tags.getByRole('row').filter({ hasText: /^\s*✓?\s*Confirmed/ })).toHaveCount(0);
 });

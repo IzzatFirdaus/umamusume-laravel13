@@ -25,10 +25,10 @@ import { Head, Link } from '@inertiajs/vue3';
 
 // The trust vocabulary, in the order a Trainer meets it. `confirmed` is deliberately absent: an
 // unmarked figure IS the confirmed state, which is why the card says so above the table.
-const tags: { mark: string; name: string; meaning: string }[] = [
-    { mark: '∑', name: 'Calculated', meaning: 'The tool derived it from values you entered. The rule is stated beside it.' },
-    { mark: '~', name: 'Estimated', meaning: 'An approximate figure, or one resting on a single source.' },
-    { mark: '?', name: 'Unknown', meaning: 'Not recorded, or not published. It is not a zero.' },
+const tags: { mark: string; name: string; variant: string; meaning: string }[] = [
+    { mark: '∑', variant: 'trust-calculated', name: 'Calculated', meaning: 'The tool derived it from values you entered. The rule is stated beside it.' },
+    { mark: '~', variant: 'trust-estimated', name: 'Estimated', meaning: 'An approximate figure, or one resting on a single source.' },
+    { mark: '?', variant: 'trust-unknown', name: 'Unknown', meaning: 'Not recorded, or not published. It is not a zero.' },
 ];
 
 const rules: { name: string; fact: string }[] = [
@@ -107,7 +107,7 @@ const keys: { key: string; does: string }[] = [
                         <tbody>
                             <tr v-for="tag in tags" :key="tag.name" class="border-b border-rule last:border-b-0">
                                 <th scope="row" class="w-40 py-2 pr-3 text-left font-semibold text-ink-strong">
-                                    <span class="tag"><span aria-hidden="true" class="mr-1 font-mono">{{ tag.mark }}</span>{{ tag.name }}</span>
+                                    <span :class="['trust', tag.variant]"><span aria-hidden="true" class="mr-1 font-mono">{{ tag.mark }}</span>{{ tag.name }}</span>
                                 </th>
                                 <td class="py-2 text-ink">{{ tag.meaning }}</td>
                             </tr>
