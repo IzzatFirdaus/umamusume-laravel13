@@ -137,48 +137,10 @@ const allCardsHidden = computed<boolean>(() => DASHBOARD_CARD_IDS.every((id) => 
 const group = (n: number): string => n.toLocaleString('en-US');
 
 /*
- * The wireframe's grids (shell.css:399-406), ported onto container queries.
- *
- * Container, not viewport, because the shell's rail is a fixed 236px column: the canvas these grids
- * resolve against is the viewport minus that rail, and `main` is the `@container` they read. Measured
- * in the browser rather than assumed: the canvas is 1044px wide at a 1280px viewport.
- *
- * The wireframe's two bands are viewport media queries (1080px and 820px, shell.css:405-406), so they
- * are mapped across by that 236px offset rather than copied verbatim -- copying them would push every
- * collapse point a whole band late and draw a two-across KPI row at 1280, which is not the picture
- * index.html paints:
- *
- *   wireframe viewport   1080    820      ->  canvas   844    584
- *
- *   .g-side  two columns at 584px of canvas, one below    (shell.css:404-406)
- *   .g-4     four at 844px, two at 584px, one below       (shell.css:402/405/406)
- *   .g-3     three at 844px, two at 584px, one below      (shell.css:401/405/406)
- *
- * Compact keeps one column at every width, because a narrower measure is the point of that mode --
- * the wireframe's own note says the same (shell.css:412).
- *
- * Grid children are separated by the grid's 14px gap alone; the `.card + .card` stack margin that
- * would add 14px on top of it is zeroed by `resources/css/app.css` next to the primitive.
+ * The wireframe's grids (shell.css:399-406) are the shared `.g-side` / `.g-4` / `.g-3` primitives.
+ * Their canvas crossings (844/584 for the wireframe's 1080/820 viewports) and the Compact
+ * one-column rule live in `resources/css/layout-grid.css`, so every page reads one owner.
  */
-const sideGrid = computed<string>(() =>
-    dashboardLayout.value === 'compact'
-        ? 'grid grid-cols-1 gap-3.5'
-        : 'grid grid-cols-1 gap-3.5 @[584px]:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]',
-);
-
-const kpiGrid = computed<string>(() =>
-    dashboardLayout.value === 'compact'
-        ? 'grid grid-cols-1 gap-3.5'
-        : 'grid grid-cols-1 gap-3.5 @[584px]:grid-cols-2 @[844px]:grid-cols-4',
-);
-
-// `.g-3` inside the resume card. Three tiles side by side is the wireframe's drawing at 1280
-// (index.html:87-100); two is the step it takes below that, and one is the phone.
-const tileGrid = computed<string>(() =>
-    dashboardLayout.value === 'compact'
-        ? 'grid grid-cols-1 gap-2.5'
-        : 'grid grid-cols-1 gap-2.5 @[584px]:grid-cols-2 @[844px]:grid-cols-3',
-);
 
 const totalTurns = computed<number>(() => props.activeCareer?.total_turns ?? 0);
 
@@ -302,7 +264,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
 
         <div v-else class="flex flex-col gap-3.5" data-dashboard-root :data-layout="dashboardLayout">
             <!-- ROW ONE: Pick up where you left off | Needs you (index.html:71-131) -->
-            <div :class="sideGrid" data-dashboard-row="pickup">
+            <div class="grid gap-3.5 g-side" data-dashboard-row="pickup">
                 <section
                     v-if="props.activeCareer && !isCardHidden('active_career')"
                     role="region"
@@ -366,7 +328,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                          (Unity Cup) the resource is already tile three and tile two falls back to
                          Energy. The Turn tile carries "of 72" as the wireframe's quiet suffix, which
                          is the whole of the turn-length fact on this board. -->
-                    <div :class="tileGrid" class="mt-1.5">
+                    <div class="mt-1.5 grid gap-2.5 g-3">
                         <Tile
                             label="Turn"
                             :value="group(props.activeCareer.turn)"
@@ -459,7 +421,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                             </p>
                             <Link
                                 href="/database/sources"
-                                class="text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
+                                class="inline-flex min-h-11 items-center text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
                             >Source ledger</Link>
                         </div>
 
@@ -473,7 +435,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                             </div>
                             <Link
                                 :href="props.recentVeterans.library_url"
-                                class="text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
+                                class="inline-flex min-h-11 items-center text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
                             >Open the library</Link>
                         </div>
 
@@ -493,7 +455,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                             </div>
                             <Link
                                 href="/review"
-                                class="text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
+                                class="inline-flex min-h-11 items-center text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
                             >Open review</Link>
                         </div>
                     </div>
@@ -503,7 +465,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
             <!-- KPI strip: the wireframe's `.g-4` (index.html:133-154). Four figures, each a door to
                  the screen that owns its list where the wireframe draws one. "Careers running" leads
                  because it is the figure the resume card above features. -->
-            <div :class="kpiGrid" data-dashboard-row="kpi">
+            <div class="grid gap-3.5 g-4" data-dashboard-row="kpi">
                 <section class="card" aria-labelledby="kpi-careers-heading" data-card="kpi_careers">
                     <h2 id="kpi-careers-heading" class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Careers running</h2>
                     <p class="text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.careersRunning) }}</p>
@@ -520,7 +482,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                          catalogue's own door beside it. -->
                     <p class="font-mono text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.catalogueTrainees) }}</p>
                     <p class="text-[11.5px] text-ink-muted">
-                        <Link href="/catalog" class="underline underline-offset-2 hover:decoration-2">Browse catalog</Link>
+                        <Link href="/catalog" class="inline-flex min-h-11 items-center underline underline-offset-2 hover:decoration-2">Browse catalog</Link>
                     </p>
                 </section>
 
@@ -528,7 +490,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                     <h2 id="kpi-skills-heading" class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Skills</h2>
                     <p class="font-mono text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.skills) }}</p>
                     <p class="text-[11.5px] text-ink-muted">
-                        <Link href="/skills" class="underline underline-offset-2 hover:decoration-2">Skill search</Link>
+                        <Link href="/skills" class="inline-flex min-h-11 items-center underline underline-offset-2 hover:decoration-2">Skill search</Link>
                     </p>
                 </section>
 
@@ -536,13 +498,13 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                     <h2 id="kpi-support-heading" class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Support cards</h2>
                     <p class="font-mono text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.supportCards) }}</p>
                     <p class="text-[11.5px] text-ink-muted">
-                        <Link href="/support-cards" class="underline underline-offset-2 hover:decoration-2">Browse cards</Link>
+                        <Link href="/support-cards" class="inline-flex min-h-11 items-center underline underline-offset-2 hover:decoration-2">Browse cards</Link>
                     </p>
                 </section>
             </div>
 
             <!-- ROW TWO: Recent veterans | Quick actions (index.html:156-186) -->
-            <div :class="sideGrid" data-dashboard-row="veterans">
+            <div class="grid gap-3.5 g-side" data-dashboard-row="veterans">
                 <section
                     v-show="!isCardHidden('recent_veterans')"
                     role="region"

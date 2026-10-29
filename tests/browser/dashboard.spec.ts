@@ -98,6 +98,11 @@ test('renders the wireframe rows in its order and none of its meta blocks', asyn
     await expect(page.getByRole('heading', { name: /Annotation key/i })).toHaveCount(0);
     // The wireframe's own provenance chip is a document artifact too.
     await expect(page.getByText('Static wireframe')).toHaveCount(0);
+
+    // The wireframe's class names, as a second, copy-independent net: a block pasted in from the
+    // document would arrive carrying `.keybox`/`.toc` whether or not its heading text survived.
+    await expect(page.locator('.keybox')).toHaveCount(0);
+    await expect(page.locator('.toc')).toHaveCount(0);
 });
 
 test('the two side rows lay out as a wide column and a narrow one', async ({ page }) => {
