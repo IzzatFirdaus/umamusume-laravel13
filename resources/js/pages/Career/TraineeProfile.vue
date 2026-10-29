@@ -219,7 +219,7 @@ const aptitudeGroups = computed<AptitudeGroup[] | null>(() => {
     }
 
     return APTITUDE_GROUPS.map((group) => {
-        const entries = group.cells.map(([label, key]) => ({ label, key, letter: letters[key] ?? '—' }));
+        const entries = group.cells.map(([label, key]) => ({ label, key, letter: letters[key] ?? '-' }));
 
         entries.sort((a, b) => gradeRank(a.letter) - gradeRank(b.letter));
 
@@ -362,7 +362,7 @@ const aptitudeGroups = computed<AptitudeGroup[] | null>(() => {
                     <div class="mt-2" data-field="base-stats">
                         <div v-for="axis in statAxes" :key="axis" class="srow">
                             <span class="k">{{ axis }}</span>
-                            <span class="v">—</span>
+                            <span class="v">-</span>
                         </div>
                     </div>
 

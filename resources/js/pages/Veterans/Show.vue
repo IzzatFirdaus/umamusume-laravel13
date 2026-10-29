@@ -168,7 +168,7 @@ const doorClass =
                 </p>
                 <p v-else class="mt-1 text-sm">
                     <span>N/A</span>
-                    <span class="text-ink-muted"> tagged — no tag was recorded on this Veteran</span>
+                    <span class="text-ink-muted"> tagged: no tag was recorded on this Veteran</span>
                 </p>
             </div>
 

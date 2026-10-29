@@ -148,7 +148,7 @@ const tdNum = 'border-b border-rule px-2 py-3 text-right align-top font-mono tab
 /** The five factor families the reference card names, with the published grade arithmetic. */
 const factorGrades: { family: string; note: string }[] = [
     { family: 'Blue · stat', note: 'One stat +5 / +12 / +21 at career start, for ★1 / ★2 / ★3.' },
-    { family: 'Pink · aptitude', note: '+1 / +2 / +3 / +4 grades at ★1 / 4 / 7 / 10–18.' },
+    { family: 'Pink · aptitude', note: '+1 / +2 / +3 / +4 grades at ★1 / 4 / 7 / 10-18.' },
 ];
 </script>
 
