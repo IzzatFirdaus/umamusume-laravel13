@@ -1463,16 +1463,40 @@ defect found and fixed in-slice: the position label used PHP double-quoted inter
 `npx playwright test career-timeline` → **8 passed**; `npm run typecheck` → 0; `npm run build` → 0;
 pint passed.
 
-## C12 — remaining screens (not yet started)
+## C12 — result, screen 9 of 9 (`49893dec`)
 
-Eight of the nine lifecycle screens are repaired. **29 pages remain divergent**: the audit's 28 less
-four done, plus the five `near` re-verdicts the side-task S6 below moved to divergent (runs-index,
-preferences, support-cards, support-card-detail, career-scenario). Order stays as the audit's repair
-list: the last lifecycle screen (result), then the wizard remainder
-(career-trainee/target/preflight/legacy + career-scenario), then library/legacy/veterans/review
-(including runs-index and preferences), then the copy/identifier pass. The S9 prop-delta gaps belong to
-their owning slices: `SupportCardController.global_count`, `DatabaseController.areas[].badge`,
-`VeteranController.used_as_parent_count`. `3.0.0` remains **absent**.
+| Item | Before (audit) | After |
+|---|---|---|
+| Head | no hero doors | lede + Open the timeline + Bank as a veteran (primary) |
+| Outcome strip | four tiles, one accented | unchanged (already the wireframe's shape) |
+| Final stats | "Final build" card, no denominator | "Final stats", each stat prints `current / cap` and a cap bar |
+| Right column | none | Finale-ready check (800/600 guides, met/close/short), What can be banked, Export |
+| Cap | not in the payload | controller sends each stat's published cap from `ScenarioCaps` |
+
+**Deviations, documented in the page:** race history, scenario periods, skills and the next-step region
+stay as extra read regions the wireframe does not draw (they are the app's own record); factor grades
+print "Not computed" rather than an invented star (`ADR-0020` §3); the stats render as cards with cap
+bars rather than the wireframe's `.srow` rows.
+
+**Verdict delta.** result: **divergent → near**. Evidence: h1 has the wireframe's `trainee · scenario`
+shape, headings Final stats / Finale-ready check / What can be banked / Export all present, console clean.
+
+**Gates.** `php artisan test CareerResultTest` → green; `npx playwright test career-result` → **7 passed**
+(run before the Export card was added; the card is static, and the build after it passed);
+`npm run typecheck` → 0; `npm run build` → 0; pint passed.
+
+**All nine lifecycle screens are now repaired.** The remaining divergent set is the wizard/library/tools
+tail.
+
+## C13 — remaining screens (not yet started)
+
+**28 pages remain divergent**: the audit's 32 plus the five `near` re-verdicts the side-task S6 below
+moved to divergent (37), less the nine lifecycle screens repaired (C4–C12). Order stays as the audit's
+repair list: the wizard remainder (career-trainee/target/preflight/legacy + career-scenario), then
+library/legacy/veterans/review (including runs-index and preferences), then the copy/identifier pass.
+The S9 prop-delta gaps belong to their owning slices: `SupportCardController.global_count`,
+`DatabaseController.areas[].badge`, `VeteranController.used_as_parent_count`. `3.0.0` remains
+**absent**.
 
 
 
