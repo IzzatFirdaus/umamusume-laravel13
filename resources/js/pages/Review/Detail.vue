@@ -5,7 +5,7 @@ import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import StatusPill from '../../components/StatusPill.vue';
 import SuggestionHint from '../../components/review/SuggestionHint.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 interface Candidate {
     id: number;
@@ -27,6 +27,14 @@ const props = defineProps<{
     aliasLanguages: { value: string; label: string }[];
 }>();
 
+/*
+ * The form owns the `useForm`, so the other-candidate row's "Use this" action calls into it rather
+ * than carrying a second copy of the submit contract (`CandidateForm`'s exposed `chooseRecord`).
+ * Typed narrowly to the one method the page uses.
+ */
+const candidateForm = ref<{ chooseRecord: (id: number) => void } | null>(null);
+
+
 interface BestMatch {
     id: number;
     slug: string;
@@ -34,6 +42,13 @@ interface BestMatch {
     name_ja: string | null;
     costume: string | null;
     aptitudes: { key: string; label: string; letter: string | null }[];
+    /**
+     * The rarity mark the HFW draws on this card (`review-detail.html:90`). Derived server-side from
+     * the trainee's own character cards (`ReviewController@show()`, the same expression
+     * `CatalogController` uses). Null when the trainee has no card row — the card then states the
+     * absence in words rather than printing a zero-star mark.
+     */
+    max_rarity: { label: string; stars: number } | null;
 }
 
 interface OtherForm {
@@ -141,6 +156,18 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                             </span>
                         </p>
 
+                        <!-- The rarity mark the HFW draws beside the name (`review-detail.html:90`).
+                             Present when the trainee has a character card; when none exists the mark
+                             states the absence in words instead of printing a zero-star reading. -->
+                        <p class="mt-2 flex flex-wrap gap-1.5">
+                            <span v-if="props.bestMatch.max_rarity" class="pill pill-neutral">
+                                {{ props.bestMatch.max_rarity.label }}
+                            </span>
+                            <span v-else class="pill pill-neutral" title="No character card is stored for this record">
+                                Rarity not recorded
+                            </span>
+                        </p>
+
                         <ul v-if="props.bestMatch.aptitudes.length > 0" class="mt-2 flex list-none flex-wrap gap-1.5">
                             <li
                                 v-for="axis in props.bestMatch.aptitudes"
@@ -219,7 +246,18 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                                 and rarity differ.
                             </td>
                             <td class="py-2 text-right">
-                                <span class="pill pill-neutral">Other form</span>
+                                <!-- "Use this" is a real action, not a state label: the HFW makes
+                                     the other form an answer (`review-detail.html:109`). It adopts
+                                     that record and commits in one press, through the form that owns
+                                     the submit contract (`CandidateForm`'s exposed `chooseRecord`). -->
+                                <button
+                                    type="button"
+                                    :aria-label="`Use ${form.name} as the match`"
+                                    class="inline-flex min-h-11 items-center justify-center rounded-full border border-rule bg-raised px-3 text-sm font-semibold text-ink-strong transition-colors duration-150 ease-out hover:bg-panel"
+                                    @click="candidateForm?.chooseRecord(form.id)"
+                                >
+                                    Use this
+                                </button>
                             </td>
                         </tr>
                         <tr>
@@ -271,10 +309,12 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                 />
 
                 <CandidateForm
+                    ref="candidateForm"
                     :candidate="props.candidate"
                     :alias-languages="props.aliasLanguages"
                     :accented="true"
                     :default-expanded="true"
+                    variant="savebar"
                 />
             </section>
 
