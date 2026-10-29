@@ -25,6 +25,7 @@ import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import { BaseInput, BaseSelect, BaseButton } from '../../components/Form';
+import { useLayout } from '../../composables/useLayout';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 
@@ -85,6 +86,12 @@ const props = defineProps<{
      * page shown, and a lookup there answered `N/A` beside a flash saying she was set (D5).
      */
     selectedName: string | null;
+    /**
+     * The chosen trainee as the roster renders her — portrait, form list and aptitudes included — so the
+     * echo card can picture her and name her forms when the page shown is filtered past her. Null before
+     * a pick.
+     */
+    selectedTrainee: TraineeRow | null;
     scenarioLabel: string | null;
     scenarioPending: boolean;
     filters: {
@@ -105,6 +112,10 @@ const props = defineProps<{
     rosterUrl: string;
     /** `route('career.target')`, the step this screen advances to. */
     targetUrl: string;
+    /** `route('career.scenario')`, the step behind the head band's back door. */
+    scenarioUrl: string;
+    /** `route('career.trainee.profile')` for the stored trainee, or null before a pick. */
+    profileUrl: string | null;
 }>()
 
 const page = usePage();
@@ -141,6 +152,23 @@ const filterValues = ref<Record<string, string>>({
 const sortBy = ref(props.sortBy);
 const direction = ref(props.direction);
 const loading = ref(false);
+
+/*
+ * The roster's shape, read from the shell's width preference.
+ *
+ * `career-trainee.html:110` draws `.grid.g-3`, and `shell.css:412` collapses every grid to one column
+ * when the layout is compact, whatever the viewport is: three 231px cards inside a 716px measure is what
+ * the app drew before this existed, which is three columns the wireframe never shows. Inside standard
+ * and wide the wireframe's own breakpoints decide (`shell.css:405-406`: two columns below 1081px, one
+ * below 821px), and the gap is its 14px `.grid` rule rather than a 12px guess. This is the same
+ * mechanism `Dashboard.vue`'s grid computeds use, so the preference has one owner.
+ */
+const { mode: layoutMode } = useLayout();
+const rosterGrid = computed<string>(() =>
+    layoutMode.value === 'compact'
+        ? 'mt-6 grid grid-cols-1 gap-3.5'
+        : 'mt-6 grid grid-cols-1 gap-3.5 min-[821px]:grid-cols-2 min-[1081px]:grid-cols-3',
+);
 
 const chosen = ref<number | null>(null);
 const selectForm = useForm<{ umamusume_id: number | null; character_card_id: number | null }>({
@@ -225,6 +253,14 @@ function applyFilters(): void {
         {
             preserveState: true,
             preserveScroll: true,
+            /*
+             * A filter read changes the roster and nothing else, so it asks for `trainees` only. Without
+             * this the read races the write: type a name, click the card inside the 250ms debounce, and the
+             * filter response — computed from a session the PUT had not reached — replaces `selectedName`
+             * with null and the echo card the Trainer just earned disappears. Measured: the same click
+             * rendered the echo on one run and not the next.
+             */
+            only: ['trainees'],
             onStart: () => {
                 loading.value = true;
             },
@@ -284,6 +320,22 @@ function clearFilters(): void {
     });
 }
 
+/**
+ * Stand down the pending filter read before a write.
+ *
+ * The debounce fires 250ms after the last keystroke, so a Trainer who types a name and clicks a card
+ * immediately has two visits racing for one screen: Inertia cancels the visit already in flight, and the
+ * one that loses is the write that was about to confirm the pick. Clearing the timer leaves the write
+ * alone. `applyFilters` also asks for `trainees` only, so a read that was already on the wire cannot
+ * re-render the selection away either.
+ */
+function standDownFilter(): void {
+    if (filterTimer !== null) {
+        clearTimeout(filterTimer);
+        filterTimer = null;
+    }
+}
+
 function choose(trainee: TraineeRow): void {
     // The row is a toggle, not a radio: this screen already renders `Stored choice: N/A`, so "no trainee"
     // is a state a Trainer can be in, and a state you can enter has to be exitable. Clicking the chosen
@@ -292,6 +344,7 @@ function choose(trainee: TraineeRow): void {
     chosen.value = trainee.id;
     selectForm.umamusume_id = deselect ? null : trainee.id;
     selectForm.character_card_id = deselect ? null : (pickedForm.value[trainee.id] ?? null);
+    standDownFilter();
 
     // The write URL is supplied by the server (`career.trainee.store`) so the page never states it as
     // a literal. Focus is restored in `onSuccess` after the new props land, because the component
@@ -321,19 +374,42 @@ function headlineForm(row: TraineeRow): FormRow | null {
 }
 
 /**
- * The stored pick, as the "Selected" card at the foot of the roster states it (`career-trainee.html:191-200`).
+ * The stored pick, as the "Selected" card under the filter row states it (`career-trainee.html:191-200`).
  *
- * Read from `selectedName` rather than from `trainees.data`: the roster is filtered and paginated, so the
- * chosen trainee is often not on the page, and a lookup there used to answer `N/A` beside a flash saying she
- * was set (D5). The aptitude sentence and the form title are refinements: they print only when the row is
- * on the page shown, and their absence leaves the name and the link intact.
+ * Read from `selectedTrainee` rather than from `trainees.data`: the roster is paginated and filtered, so
+ * the chosen trainee is often not on the page shown, and a lookup there answered `N/A` beside a flash
+ * saying she was set (D5). The server sends her own row, so the frame, the form picker and the aptitude
+ * sentence all print whatever the draft names, whether or not she is on this page.
  */
-const selectedRow = computed<TraineeRow | null>(
-    () => props.trainees.data.find((trainee) => trainee.id === props.selected) ?? null,
+const selectedHeadlineForm = computed<FormRow | null>(() =>
+    props.selectedTrainee === null ? null : headlineForm(props.selectedTrainee),
 );
 
+const selectedFormOptions = computed(() =>
+    (props.selectedTrainee?.forms ?? []).map((form) => ({ value: form.id, label: form.title })),
+);
+
+/**
+ * Re-stating the pick with a different form. One trainee can hold several costume forms — a base form and
+ * a seasonal one — and `character_card_id` decides the run's rarity, so the write is the same draft PUT
+ * the card row uses (R3-06). A single-form trainee never sees this control: there is nothing to choose.
+ */
+function pickSelectedForm(cardId: string | number | null): void {
+    if (props.selected === null || cardId === null) {
+        return;
+    }
+
+    const id = Number(cardId);
+    pickedForm.value[props.selected] = id;
+    selectForm.umamusume_id = props.selected;
+    selectForm.character_card_id = id;
+    standDownFilter();
+
+    selectForm.put(props.action, { preserveScroll: true });
+}
+
 const selectedSummary = computed<string | null>(() => {
-    const row = selectedRow.value;
+    const row = props.selectedTrainee;
 
     if (row === null || row.aptitudes === null) {
         return null;
@@ -367,7 +443,16 @@ const sortLabel = computed(
     <SetupLayout :step="2" :visited="props.visited" :saved="props.saved" :choices="props.choices">
         <Head title="Choose a trainee" />
         <template #eyebrow>New career</template>
-        <template #title>Choose a trainee</template>
+        <template #title>Who are you training?</template>
+
+        <!-- The wireframe's lede, in the title band where it draws it, on the live count rather than the
+             mock's number: `career-trainee.html:75` prints "71 trainees are catalogued", and this roster
+             prints however many rows the catalog holds today (the same rule the pager line follows). -->
+        <template #lede>
+            {{ props.trainees.total }} trainee{{ props.trainees.total === 1 ? '' : 's' }} are catalogued.
+            Filter by aptitude if you are building toward a specific race, then pick the card you are
+            running.
+        </template>
 
         <!--
           The HFW's head-band pair (`career-trainee.html:61-65`): Back to the scenario, then the one filled
@@ -379,17 +464,22 @@ const sortLabel = computed(
           the target step rather than a profile: profile is a per-record read page reached from a card, not
           a step the wizard walks through, so the destination is `props.targetUrl` and the sentence names
           the step the Trainer lands on.
+
+          The two carry the house button scale (`buttonStyles.ts`: `text-sm px-4 rounded-md`) rather than
+          the wireframe's `.btn` numbers (13.5px, 15px inline, 10px corner): the wizard's own `BaseButton`
+          rows use the house scale, so a step whose head-band pair measured differently from its body
+          buttons is the worse outcome. HFW-OVERRIDE (computed: button scale).
         -->
         <template #actions>
             <Link
-                href="/career/setup/scenario"
-                class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel"
+                :href="props.scenarioUrl"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel"
             >
                 Back
             </Link>
             <Link
                 :href="props.targetUrl"
-                class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 font-semibold text-on-primary-action hover:bg-primary-action/90"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 text-sm font-semibold text-on-primary-action hover:bg-primary-action/90"
             >
                 Continue to build target
             </Link>
@@ -398,28 +488,28 @@ const sortLabel = computed(
         <!-- No breadcrumb: "Back to trainee" pointed at this same URL. The step bar above lists all
              six steps, and the carried-choices strip states the scenario, so nothing is lost. -->
 
-        <!-- The position is carried by the eyebrow in the title band above, so this block only adds
-             the one-sentence subject line. -->
-        <header class="mb-4">
-            <p class="mt-1 text-sm text-ink-muted">Pick the trainee the career is built on.</p>
-        </header>
-
-        <p class="max-w-3xl text-sm text-ink-muted">
-            The roster is the catalog this tool has fetched. Pick the trainee the career is built on; the
-            profile screen behind each row states what is known about her before committing.
-        </p>
+        <!-- One lede, in the head band above. This paragraph used to sit here and repeat the subject line
+             the header block also printed; the wireframe keeps the sentence in `.phead`, so it moved
+             there and this block went away. -->
 
         <!-- The scenario is stated once, by the carried-choices strip above (slice 3.2). This page
              used to repeat it here with its own "Change scenario" link; the strip's entry is that link. -->
 
-        <!-- Filter bar in bordered container -->
-        <div class="mt-5 rounded-md border border-rule bg-raised p-4">
-            <form data-region="filters" class="mx-auto w-full max-w-4xl flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
-                <!-- Each control sits in a `contents` box carrying the wireframe's `.field` marker. The box
-                     is layout-invisible (`display: contents`), so the controls stay the form's own flex
-                     items; `BaseInput`/`BaseSelect` render a fragment (a labelled branch and a bare one),
-                     so a `data-region` handed to the component itself is dropped rather than forwarded. -->
-                <div class="contents" data-region="field">
+        <!-- The filter row sits on the page background, as the wireframe draws it
+             (`career-trainee.html:88-107`): the controls carry their own edges, and a box around the
+             row would add a second boundary the drawing does not have. -->
+        <div class="mt-5">
+            <form data-region="filters" class="flex flex-wrap items-end gap-2.25 text-sm" @submit.prevent="applyFilters">
+                <!-- Each control sits in its own flex item carrying the wireframe's `.field` marker and
+                     its own flex basis (`career-trainee.html:88-107`: search `1 1 240px`, the two letter
+                     facets `0 1 150px`, running style `0 1 160px`, sort `0 1 170px`). The basis is what
+                     makes the row WRAP rather than squeeze: at Compact the wireframe's row breaks into
+                     three lines and every control keeps a readable width, while an unbasis'd row shrank
+                     five selects into 716px. The row's `gap-2.25` is the wireframe's 9px `.filters` gap
+                     (`shell.css:964`). `BaseInput`/`BaseSelect` render a fragment (a labelled
+                     branch and a bare one), so a `data-region` handed to the component itself is dropped
+                     rather than forwarded, which is why the marker is on this box. -->
+                <div class="min-w-0 grow basis-60" data-region="field">
                     <BaseInput
                         v-model="filterValues.search"
                         type="text"
@@ -429,7 +519,13 @@ const sortLabel = computed(
                         label="Search"
                     />
                 </div>
-                <div v-for="facet in props.facets" :key="facet.param" class="contents" data-region="field">
+                <div
+                    v-for="facet in props.facets"
+                    :key="facet.param"
+                    class="min-w-0"
+                    :class="facet.param === 'style' ? 'basis-40' : 'basis-37.5'"
+                    data-region="field"
+                >
                     <BaseSelect
                         v-model="filterValues[facet.param]"
                         :id="`filter-${facet.param}`"
@@ -439,7 +535,7 @@ const sortLabel = computed(
                         placeholder="Any"
                     />
                 </div>
-                <div class="contents" data-region="field">
+                <div class="min-w-0 basis-42.5" data-region="field">
                     <BaseSelect
                         v-model="sortBy"
                         id="filter-sortBy"
@@ -464,6 +560,53 @@ const sortLabel = computed(
             </p>
         </div>
 
+        <!-- The chosen trainee, restated under the search and sort row so the pick reads before the roster
+             does. `selectedName` and `selectedTrainee` come from the server rather than from the page's own
+             rows: the roster is filtered and paginated, so the pick is usually not on the page shown, and a
+             lookup there once answered `N/A` beside a flash saying she had been set (D5). The card renders
+             only when a trainee is actually chosen - the wireframe has no empty state, and "nothing chosen"
+             is already said by the strip above. -->
+        <div v-if="props.selectedName" data-field="selected-trainee" data-region="card" class="card mt-3.5">
+            <h2>Selected</h2>
+            <div class="mt-2 flex flex-wrap items-center gap-3.5">
+                <ArtworkSlot :url="props.selectedTrainee?.artworkURL ?? null" alt="" size="size-16" reserve data-region="slot" />
+
+                <div class="min-w-0 flex-1 basis-64">
+                    <p class="text-card-name font-extrabold text-ink-strong">
+                        {{ props.selectedName }}
+                        <span v-if="selectedHeadlineForm" class="font-semibold text-ink-muted">
+                            {{ selectedHeadlineForm.title }}
+                        </span>
+                    </p>
+                    <p class="text-xs text-ink-muted">
+                        <template v-if="selectedSummary">{{ selectedSummary }}.</template>
+                        The form you pick sets this run's rarity and potential.
+                    </p>
+                </div>
+
+                <!-- Only a trainee the catalog holds in more than one form is asked which one: a base form
+                     and a seasonal form are a real choice, a single form is not a question. -->
+                <div v-if="(props.selectedTrainee?.forms.length ?? 0) > 1" class="basis-40">
+                    <BaseSelect
+                        :model-value="selectedHeadlineForm?.id ?? null"
+                        id="selected-form"
+                        name="selected-form"
+                        label="Form"
+                        :options="selectedFormOptions"
+                        @update:model-value="pickSelectedForm"
+                    />
+                </div>
+
+                <a
+                    v-if="props.profileUrl"
+                    :href="props.profileUrl"
+                    class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-3 text-sm font-bold text-ink hover:bg-sunken transition-colors duration-150 ease-out"
+                >
+                    Preview profile
+                </a>
+            </div>
+        </div>
+
         <p v-if="loading" role="status" class="mt-3 text-sm text-ink-muted">Loading the roster...</p>
 
         <!-- A refused filter is announced where it was typed. The three aptitude facets share one message
@@ -481,13 +624,22 @@ const sortLabel = computed(
 
         <p v-if="selectForm.processing" role="status" class="mt-3 text-sm text-ink-muted">Saving your choice...</p>
 
-        <p
+        <!-- The empty state carries the recovery action, not just a description of it. The wireframe has no
+             empty state at all, so this block is the app's own: a Trainer who filtered the roster down to
+             nothing should not have to find the row's `Clear` above the grid to get back (H9, IA-5). -->
+        <div
             v-if="props.trainees.data.length === 0 && !loading"
-            class="mt-8 rounded-lg border border-dashed border-rule bg-raised p-4 text-sm text-ink-muted"
+            data-region="empty"
+            class="mt-8 rounded-card border border-dashed border-rule bg-raised p-4 text-sm text-ink-muted"
         >
-            No trainee matches these filters. The roster is filled by seed data or `php artisan uma:fetch`;
-            clearing the filters shows every row the catalog holds.
-        </p>
+            <p>
+                No trainee matches these filters. The roster is filled by seed data or php artisan uma:fetch;
+                clearing the filters shows every row the catalog holds.
+            </p>
+            <BaseButton type="button" variant="secondary" class="mt-3" @click="clearFilters">
+                Clear filters
+            </BaseButton>
+        </div>
 
         <!--
           One card per trainee, three to a row (`career-trainee.html:111-181`).
@@ -502,20 +654,23 @@ const sortLabel = computed(
           is a real `<button>` with `aria-pressed`: the choice is a toggle, because "no trainee" is a state
           the draft can hold and a state you can enter has to be exitable. The button keeps a 44px hit area
           and draws the small disc the wireframe draws, so the target is large and the affordance is the one
-          the design shows. Its words live in an `sr-only` span: the card's own text names the trainee, so a
-          visible "Select" on every card would be 25 copies of one word.
+          the design shows. Its words live in an `sr-only` span: a visible "Select" on every card would be
+          25 copies of one word. The name node is the button's `aria-describedby`, because the button comes
+          first in the card's reading order: without it a keyboard or screen-reader user reaches a control
+          announced only as "Select", before the page has said which trainee it belongs to (WCAG 4.1.2).
         -->
         <div
             v-else
-            class="mt-6 grid grid-cols-1 gap-3 min-[821px]:grid-cols-2 min-[1081px]:grid-cols-3"
+            :class="rosterGrid"
+            data-region="card-grid"
         >
             <div
                 v-for="row in props.trainees.data"
                 :key="row.id"
                 :data-trainee-card="row.id"
                 data-region="card"
-                class="cursor-pointer rounded-lg border-2 bg-panel p-3.5 transition-colors duration-150 ease-out"
-                :class="props.selected === row.id ? 'border-pick-line bg-green-tint' : 'border-rule hover:bg-raised'"
+                class="card cursor-pointer transition-colors duration-150 ease-out"
+                :class="props.selected === row.id ? 'is-chosen' : ''"
                 @click="choose(row)"
             >
                 <div class="flex items-start gap-2.5">
@@ -524,6 +679,7 @@ const sortLabel = computed(
                         type="button"
                         class="flex size-11 shrink-0 items-center justify-center rounded-md disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                         :aria-pressed="props.selected === row.id ? 'true' : 'false'"
+                        :aria-describedby="`card-name-${row.id}`"
                         :disabled="selectForm.processing"
                         @click.stop="choose(row)"
                     >
@@ -540,7 +696,7 @@ const sortLabel = computed(
                     <ArtworkSlot :url="row.artworkURL" alt="" size="size-10" reserve data-region="slot" />
 
                     <div class="min-w-0 flex-1">
-                        <p class="text-[15px] font-extrabold text-ink-strong">{{ row.name }}</p>
+                        <p :id="`card-name-${row.id}`" class="text-card-name font-extrabold text-ink-strong">{{ row.name }}</p>
                         <p class="text-xs text-ink-muted">
                             <span v-if="row.name_ja" lang="ja">{{ row.name_ja }}</span>
                             <template v-if="headlineForm(row)">
@@ -552,14 +708,14 @@ const sortLabel = computed(
                             <span
                                 v-if="headlineForm(row)"
                                 data-region="pill-neutral"
-                                class="inline-flex items-center rounded-full border border-rule bg-raised px-2 py-0.5 font-semibold text-ink"
+                                class="pill pill-neutral"
                             >
                                 {{ headlineForm(row)?.rarity_stars }} {{ headlineForm(row)?.rarity_word }}
                             </span>
-                            <span data-region="pill-outline" class="inline-flex items-center rounded-full border border-rule bg-raised px-2 py-0.5 text-ink-muted">
+                            <span data-region="pill-outline" class="pill pill-outline">
                                 {{ formPillLabel(row.form_count) }}
                             </span>
-                            <span data-region="pill-positive" class="inline-flex items-center rounded-full border border-pick-line bg-raised px-2 py-0.5 text-ink">
+                            <span data-region="pill-positive" class="pill pill-positive">
                                 {{ row.release_status_label }}
                             </span>
                         </div>
@@ -581,12 +737,20 @@ const sortLabel = computed(
                                              vocabulary is the full form (`lang/en/uma.php:109-112`: Front Runner,
                                              Pace Chaser, Late Surger, End Closer), and the label is the
                                              controller's `aptitudeAxes` rather than a literal here, so the
-                                             card prints the sourced name. Source vocabulary wins over mock. -->
+                                             card prints the sourced name. Source vocabulary wins over mock.
+
+                                             The letter is bound to its label with a non-breaking space: at the
+                                             three-column measure a value cell is ~205px wide, and a plain space
+                                             let the row break between "Front runner" and "G" so a bare letter
+                                             became a whole line of its own. `whitespace-nowrap` on the span also
+                                             cures the orphan but makes the whole run unbreakable, which scrolled
+                                             the page sideways at 320px (measured: 500px of content in a 320px
+                                             window); the label's own spaces stay breakable here. -->
                                         <span
                                             :class="row.aptitudes[cell.value] === strongest(row.aptitudes, axes)
                                                 ? 'font-bold text-ink-strong'
                                                 : ''"
-                                        >{{ cell.label }} {{ row.aptitudes[cell.value] ?? 'N/A' }}</span>
+                                        >{{ cell.label }}&nbsp;{{ row.aptitudes[cell.value] ?? 'N/A' }}</span>
                                     </template>
                                 </dd>
                             </template>
@@ -597,16 +761,17 @@ const sortLabel = computed(
 
                         <!-- R3-06's costume picker is not on the card: `career-trainee.html:110-160` draws a
                              pick control, a portrait, a name, three pills and three aptitude rows, and no
-                             per-card select. The form is chosen on the profile screen, which is where the
-                             draft's `character_card_id` is written; the card still states the stored pick
-                             through `headlineForm`, so the rarity pill keeps naming the form in play. -->
+                             per-card select. A trainee with more than one form is asked which one on the
+                             selected card above the roster, which writes the draft's `character_card_id`;
+                             the card here still states the stored pick through `headlineForm`, so the
+                             rarity pill keeps naming the form in play. -->
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- No per-card "Profile" link: the wireframe's card is one big pick target and its only profile
-             affordance is the `Preview profile` control on the selected card below
+             affordance is the `Preview profile` control on the selected card above the roster
              (`career-trainee.html:196`). Two doors to the same read page, one of them repeated on every
              card, made the roster read as a list of links. -->
         <!-- Two doors, not a row of numbers: `career-trainee.html:180-186` draws `Previous` and `Next` and
@@ -649,36 +814,6 @@ const sortLabel = computed(
                 Next
             </span>
         </nav>
-
-        <!-- The chosen trainee, restated once at the foot of the roster (`career-trainee.html:191-200`). Read
-             from `selectedName` rather than from the page's own rows: the roster is filtered and paginated,
-             so the pick is usually not on the page shown, and a lookup there once answered `N/A` beside a
-             flash saying she had been set (D5). The card renders only when a trainee is actually chosen -
-             the wireframe has no empty state, and "nothing chosen" is already said by the strip above. -->
-        <div v-if="props.selectedName" data-field="selected-trainee" data-region="card" class="mt-3.5 rounded-lg border border-rule bg-panel p-4">
-            <h2 class="text-sm font-bold text-ink-strong">Selected</h2>
-            <div class="mt-2 flex flex-wrap items-center gap-3.5">
-                <div class="min-w-0 flex-1 basis-64">
-                    <p class="text-[15px] font-extrabold text-ink-strong">
-                        {{ props.selectedName }}
-                        <span v-if="selectedRow && headlineForm(selectedRow)" class="font-semibold text-ink-muted">
-                            {{ headlineForm(selectedRow)?.title }}
-                        </span>
-                    </p>
-                    <p class="text-xs text-ink-muted">
-                        <template v-if="selectedSummary">{{ selectedSummary }}.</template>
-                        The form you pick sets this run's rarity and potential.
-                    </p>
-                </div>
-                <a
-                    v-if="props.selected"
-                    :href="`/career/setup/trainee/${props.selected}`"
-                    class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-3 text-sm font-bold text-ink hover:bg-sunken transition-colors duration-150 ease-out"
-                >
-                    Preview profile
-                </a>
-            </div>
-        </div>
 
         <!-- The forward door moved to the head band above (`#actions`), where the HFW draws it. The copy
              that stood here said it was the same destination "at the point the choice is made", which was

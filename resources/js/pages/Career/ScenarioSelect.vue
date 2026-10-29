@@ -22,10 +22,9 @@
  * says which way the next click goes.
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
-import PageHeader from '../../components/ui/PageHeader.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import { BaseButton, LinkButton } from '../../components/Form';
-import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref } from 'vue';
 
 interface Optimizes {
@@ -148,28 +147,25 @@ function continueStep(): void {
 <template>
     <SetupLayout :step="1" :visited="props.visited" :saved="props.saved">
         <Head title="Which scenario is this run?" />
-        <template #head>
-            <PageHeader
-                eyebrow="New career"
-                title="Which scenario is this run?"
-                description="The scenario decides which panels the cockpit composes, which caps apply, and which systems exist. It cannot be changed after the first turn."
-                position="Step 1 of 6"
+        <template #eyebrow>New career</template>
+        <template #title>Which scenario is this run?</template>
+        <template #lede>
+            The scenario decides which panels the cockpit composes, which caps apply, and which systems
+            exist. It cannot be changed after the first turn.
+        </template>
+        <template #actions>
+            <LinkButton href="/" variant="secondary">Cancel</LinkButton>
+            <!-- One filled action (HFW annotation: "Continue to trainee" is the only filled
+                 button; Cancel is an outline). Disabled until a card holds, because the next
+                 step needs a scenario to compose against. -->
+            <BaseButton
+                type="button"
+                variant="primary"
+                :disabled="props.selected === null || form.processing"
+                @click="continueStep"
             >
-                <template #actions>
-                    <LinkButton href="/" variant="secondary">Cancel</LinkButton>
-                    <!-- One filled action (HFW annotation: "Continue to trainee" is the only filled
-                         button; Cancel is an outline). Disabled until a card holds, because the next
-                         step needs a scenario to compose against. -->
-                    <BaseButton
-                        type="button"
-                        variant="primary"
-                        :disabled="props.selected === null || form.processing"
-                        @click="continueStep"
-                    >
-                        Continue to trainee
-                    </BaseButton>
-                </template>
-            </PageHeader>
+                Continue to trainee
+            </BaseButton>
         </template>
 
         <p
@@ -205,16 +201,16 @@ function continueStep(): void {
           the footer is what commits the step.
         -->
         <fieldset v-else class="mt-6">
-            <legend class="text-sm font-semibold text-ink-strong">Which scenario is this career in?</legend>
+            <legend class="sr-only">Which scenario is this career in?</legend>
 
-            <div class="mt-3 grid grid-cols-1 gap-4 min-[821px]:grid-cols-2">
+            <div class="mt-3 grid gap-4 g-2">
                 <div
                     v-for="card in props.scenarios"
                     :key="card.key"
                     data-scenario-card
                     data-region="card"
-                    class="relative rounded-lg border border-rule bg-panel p-4"
-                    :class="props.selected === card.key ? 'border-2 border-pick-line bg-green-tint' : ''"
+                    class="card"
+                    :class="props.selected === card.key ? 'is-chosen' : ''"
                 >
                 <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <label
@@ -237,7 +233,7 @@ function continueStep(): void {
                             @keydown.arrow.up="prevCard"
                             @keydown.arrow.down="nextCard"
                         >
-                        <h2 class="text-lg font-semibold text-ink-strong">{{ card.label }}</h2>
+                        <h2 class="text-base font-bold text-ink-strong">{{ card.label }}</h2>
                     </label>
                     <!-- The HFW's card face order: name, then the baseline pill, then the release date,
                          then the paragraph and the tag row. The pill and the tag sit OUTSIDE the `h2`:
@@ -247,7 +243,7 @@ function continueStep(): void {
                     <span
                         v-if="card.live_on_global"
                         data-region="tag"
-                        class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink-muted"
+                        class="tag"
                     >Global · {{ card.live_on_global }}</span>
                     <!-- Glyph and word, so the documentation state is never carried by colour or by the
                          dot alone (WCAG 1.4.1). -->
@@ -286,17 +282,20 @@ function continueStep(): void {
                         v-for="tag in card.card_tags"
                         :key="`compose-${tag}`"
                         data-region="tag"
-                        class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink-muted"
+                        class="tag auto"
                     >{{ tag }}</span>
+                    <!-- `.tag.you` is the provenance pair's trainer-side mark: Performance input is
+                         the one tag on a card face the Trainer supplies rather than one the matrix
+                         composes (plan §0 rule 10). -->
                     <span
                         v-if="card.performance_input"
                         data-region="tag"
-                        class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink-muted"
+                        class="tag you"
                     >Performance input</span>
                     <span
                         v-if="card.caps_label"
                         data-region="tag"
-                        class="rounded-full border border-rule px-2 py-0.5 text-xs text-ink"
+                        class="tag"
                     >{{ card.caps_label }}</span>
                 </div>
 
@@ -315,10 +314,10 @@ function continueStep(): void {
              would otherwise learn by getting it wrong. -->
         <section
             data-region="card"
-            class="mt-4 rounded-md border border-rule bg-panel p-4"
+            class="card mt-4"
             aria-labelledby="scenario-reversibility"
         >
-            <h2 id="scenario-reversibility" class="text-lg font-semibold text-ink-strong">What changes after this step</h2>
+            <h2 id="scenario-reversibility">What changes after this step</h2>
             <table class="mt-2 w-full text-sm">
                 <thead>
                     <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">

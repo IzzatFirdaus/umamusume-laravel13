@@ -68,6 +68,25 @@ test.describe('Accessibility', () => {
     });
 
     /*
+     * The trainee step's selection echo is the wizard's only surface that renders a labelled `select`
+     * inside a card, and it appears only once a trainee with more than one costume form is chosen. No
+     * page-wide scan covered the route before, so the control entered the tree with no axe pass behind
+     * it. This case puts the route in the scanned set with the echo open.
+     */
+    test('trainee step passes WCAG axe scan with the selection echo and its form picker', async ({ page }) => {
+        await page.goto('/career/setup/trainee?search=Rice Shower');
+        await page.locator('#app > *').first().waitFor();
+
+        await page.locator('[data-trainee-card]').first().click();
+        await expect(page.locator('select#selected-form')).toBeVisible();
+
+        await openAllDisclosures(page);
+        const results = await buildAxe(page).analyze();
+
+        expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+    });
+
+    /*
      * A-91 (plan slice 1.4). A `role="list"` container whose children are not `listitem`s is an
      * `aria-required-children` violation at critical impact. Three surfaces carried one: the
      * Dashboard's career strip, the wizard's Legacy step, and the scenario step's facts grid. The

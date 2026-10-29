@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*
- * HFW-OVERRIDE (computed/rect: the wizard-wide class) — `deck-diff-{1280,390}.json` measures the
+ * HFW-OVERRIDE (computed/rect: the wizard-wide class) - `deck-diff-{1280,390}.json` measures the
  * app's DESIGN.md tokens against the wireframe's mock CSS and the shell wrapper's offset. Tokens
  * outrank the mock palette (`AGENTS.md` §2) and the wrapper moves every box, so both buckets carry
  * entries by construction; the page is not restyled to chase the mock's values.
@@ -144,14 +144,14 @@ const deckCards = computed(() =>
 
 /**
  * The duplicate check. The client spends a duplicate on a limit break rather than equipping it twice,
- * and `StoreDraftDeckRequest` refuses a save that repeats a card — so this row states the rule the save
+ * and `StoreDraftDeckRequest` refuses a save that repeats a card - so this row states the rule the save
  * already enforces rather than adding a second, client-side one.
  */
 const duplicateCount = computed(() => deckCards.value.length - new Set(deckCards.value.map((card) => card.id)).size);
 
 /**
  * Cards whose stated effects include a friendship bonus. Read from the effect name the export uses
- * (`Friendship Bonus`), because that is the source of truth for the mechanic — not a type rule: the
+ * (`Friendship Bonus`), because that is the source of truth for the mechanic - not a type rule: the
  * friend card carries none, which is exactly why that row prints the absence instead of a blank.
  */
 const friendshipCount = computed(
@@ -175,8 +175,8 @@ function addCard(event: Event): void {
 /**
  * A refusal names the slot in the words the slot already carries on this screen. The validation key is a
  * field path (`deck.3.ownership`, `deck.2.support_card_id`), and a Trainer reading it learns the shape of
- * the request rather than which of the six slots to fix. `deck` itself is the whole-deck refusal — the
- * duplicate pair — and it has no slot to name.
+ * the request rather than which of the six slots to fix. `deck` itself is the whole-deck refusal - the
+ * duplicate pair - and it has no slot to name.
  */
 function errorLabel(field: string): string {
     const position = field.split('.')[1];
@@ -187,7 +187,7 @@ function errorLabel(field: string): string {
 
 /**
  * The one navigation that is not a save: aiming the picker. The draft already holds every pick, so a
- * filter change has nothing to carry and a GET cannot lose one — which is the whole reason this step can
+ * filter change has nothing to carry and a GET cannot lose one - which is the whole reason this step can
  * keep its slots out of the URL. It carries the current filter too, because retargeting the picker is not
  * a reason to drop a Type or a name the Trainer just narrowed the list with.
  */
@@ -323,6 +323,10 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
         <Head title="Build the six-card deck" />
         <template #eyebrow>New career</template>
         <template #title>Build the six-card deck</template>
+        <template #lede>
+            Six slots. Every card earns its place by the training it boosts, the events it brings, or the
+            friendship gauge it starts with.
+        </template>
 
         <!--
           The HFW's head-band pair (`career-deck.html:61-68`). The step's two doors used to sit in a row at
@@ -335,7 +339,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
         <template #actions>
             <Link
                 href="/career/setup/legacy"
-                class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel"
             >
                 Back
             </Link>
@@ -349,7 +353,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
             -->
             <button
                 type="button"
-                class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 font-semibold text-on-primary-action hover:bg-primary-action/90 disabled:cursor-wait disabled:opacity-60"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 text-sm font-semibold text-on-primary-action hover:bg-primary-action/90 disabled:cursor-wait disabled:opacity-60"
                 :disabled="form.processing"
                 @click="saveAndContinue()"
             >
@@ -362,25 +366,18 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
              The step bar above lists all six steps, so nothing is lost. Steps 1 and 2 carry the same
              note. -->
 
-        <!-- The position is carried by the eyebrow in the title band above, so this block only adds
-             the subject line. -->
-        <header class="mb-4">
-            <p class="mt-1 text-sm text-ink-muted">A deck is the six cards equipped before the career starts.</p>
-        </header>
-
-        <p class="max-w-3xl text-sm text-ink-muted">
-            Six slots. Every card earns its place by the training it boosts, the events it brings, or the
-            friendship gauge it starts with. Position six is the friend slot, and that role belongs to the
-            position: any card may sit in it.
-        </p>
-
-        <div class="mt-3 text-sm text-ink-muted">
+        <!-- The lede is in the head band, where the wireframe draws it (`career-deck.html:58-59`).
+             The paragraph that repeated the lede and the second subject line are gone; the scenario
+             label stays because a card's Scenario Link cannot be checked without one, and an absent
+             scenario has to name itself (`DESIGN.md` §5(a)). -->
+        <p class="mt-3 text-sm text-ink-muted">
+            Scenario:
             <template v-if="props.scenarioLabel">{{ props.scenarioLabel }}</template>
-            <template v-else>
-                Scenario:
-                <AbsenceValue reason="No scenario has been chosen in this setup draft yet, so a card's Scenario Link cannot be checked against a linked list." />
-            </template>
-        </div>
+            <AbsenceValue
+                v-else
+                reason="No scenario has been chosen in this setup draft yet, so a card's Scenario Link cannot be checked against a linked list."
+            />
+        </p>
 
         <p
             v-if="form.errors.deck"
@@ -396,7 +393,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
              desktop (`frontend-architecture-plan.md`, container-query note). -->
         <div class="mt-5 grid gap-5 min-[1081px]:grid-cols-[minmax(0,1fr)_22rem]">
             <section class="card" aria-labelledby="draft-slots-heading">
-                <h2 id="draft-slots-heading" class="text-lg font-semibold text-ink-strong">
+                <h2 id="draft-slots-heading">
                     Deck
                     <span class="text-xs font-semibold text-ink-muted">{{ equippedCount }} of 6 slots filled</span>
                 </h2>
@@ -412,6 +409,11 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                   distinct. The client separates a rented friend card from the five owned positions, so the
                   slot states its ownership rather than leaving the Trainer to infer it from the card name.
                 -->
+                <!-- HFW-OVERRIDE (structure: slot grid) - `career-deck.html` draws three columns at
+                     Wide and two at Standard; this list is two at every desktop width and one below
+                     761px, because each slot card carries a level field and an owned/rented pair and a
+                     third track at Standard width leaves neither legible. The compact mode still
+                     collapses it to one column through the shell's own width cap. -->
                 <ul class="mt-3 grid list-none grid-cols-1 gap-4 min-[761px]:grid-cols-2">
                     <SupportSlot
                         v-for="slot in props.slots"
@@ -433,7 +435,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                 <div class="mt-3 flex flex-wrap gap-3">
                     <button
                         type="button"
-                        class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel"
+                        class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel"
                         @click="addCard"
                     >
                         Add a card
@@ -514,7 +516,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                     <p class="note mt-3 text-xs text-ink-muted">
                         A card reaches friendship training at gauge <b>80</b>, which the client draws as the
                         fourth mark and colours orange. The gauge rises about +5 per joint training, so a card
-                        with no head start needs most of a run to get there — which is why the "Initial
+                        with no head start needs most of a run to get there: which is why the "Initial
                         Friendship Gauge" effect is the one that matters.
                     </p>
                 </section>

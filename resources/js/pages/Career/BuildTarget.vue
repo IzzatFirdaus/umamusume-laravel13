@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*
- * HFW-OVERRIDE (computed/rect: the wizard-wide class) — `target-diff-{1280,390}.json` measures the
+ * HFW-OVERRIDE (computed/rect: the wizard-wide class) - `target-diff-{1280,390}.json` measures the
  * app's DESIGN.md tokens against the wireframe's mock CSS and the shell wrapper's offset. Tokens
  * outrank the mock palette (`AGENTS.md` §2) and the wrapper moves every box, so both buckets carry
  * entries by construction; the page is not restyled to chase the mock's values.
@@ -12,7 +12,7 @@
  * **The page prints props and assembles nothing the server did not send.** The purpose options arrive
  * labelled through `uma.build_purpose`, the option vocabularies arrive as `BuildTargetPayload`'s own
  * constants, the stat matrix arrives as `statOrder`, and the caps arrive pre-computed by
- * `ScenarioCaps::forRun()` — the same call the write validates against (`ADR-0015`). That is why this
+ * `ScenarioCaps::forRun()` - the same call the write validates against (`ADR-0015`). That is why this
  * file names no stat, no band, no surface, no style and no scenario: `CareerBuildTargetTest` greps for
  * exactly that.
  *
@@ -60,7 +60,7 @@ const props = defineProps<{
     /** The Trainer's stored stat-target defaults (SCREEN-024), applied only where no target is stored. */
     statDefaults: Record<string, number> | null;
     /**
-     * One ceiling per stat, from `ScenarioCaps::forRun` — the entered ceiling where the draft carries
+     * One ceiling per stat, from `ScenarioCaps::forRun` - the entered ceiling where the draft carries
      * one, the base cap alone when no scenario is chosen yet. This is the bound the write enforces.
      */
     caps: Record<string, number>;
@@ -264,9 +264,13 @@ function applyDefaults(): void {
 
 <template>
     <SetupLayout :step="3" :visited="props.visited" :saved="props.saved" :choices="props.choices">
-        <Head title="Your target" />
+        <Head title="What are you building toward?" />
         <template #eyebrow>New career</template>
-        <template #title>Your target</template>
+        <template #title>What are you building toward?</template>
+        <template #lede>
+            Five stat targets and the distance you are building for. These are your own goals, not a game
+            rule, and the cockpit's bars are drawn against them.
+        </template>
 
         <!--
           The HFW's head-band pair (`career-target.html:61-65`). The forward action is this step's write, not
@@ -281,7 +285,7 @@ function applyDefaults(): void {
         <template #actions>
             <Link
                 href="/career/setup/trainee"
-                class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel"
             >
                 Back
             </Link>
@@ -305,7 +309,7 @@ function applyDefaults(): void {
 
         <!--
           The page is the wireframe's page and nothing else (`career-target.html:87-195`): the warn band,
-          then `.g-side` — stat targets with their totals on the left; distance, stamina floor and the
+          then `.g-side` - stat targets with their totals on the left; distance, stamina floor and the
           saved default on the right. Four blocks the app used to add around that shell are gone, each
           because the HFW does not draw it: a `Summary` card that restated the whole form as one
           sentence; a "Scenario: … Back: Trainee / Change scenario" line duplicating the step bar's
@@ -324,7 +328,7 @@ function applyDefaults(): void {
              native constraint validation would block the submit with a browser bubble instead of
              letting the server refuse with its named bound, which is the message this page renders
              with its own `aria-describedby` and focus. -->
-        <form id="build-target-form" class="mt-5 mx-auto max-w-4xl space-y-6" novalidate @submit.prevent="submit">
+        <form id="build-target-form" class="mt-5 mx-auto max-w-4xl" novalidate @submit.prevent="submit">
             <!--
               The wireframe's two-column canvas. `.g-side` is `minmax(0,2.1fr) minmax(0,1fr)` and it
               collapses below 821px (frontend-v2-wireframes/assets/shell.css:404,406), so both the
@@ -332,8 +336,8 @@ function applyDefaults(): void {
               the same reason the card grid keeps `min-[821px]:`. The blocks sit at their existing
               indentation so the move reads as two wrapper lines rather than a re-indent of the form.
             -->
-            <div class="grid gap-6 min-[821px]:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
-            <div class="space-y-6">
+            <div class="grid gap-3.5 min-[821px]:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
+            <div class="space-y-3.5">
             <!--
               HFW-OVERRIDE (required by the write): purpose, surface and style are asked for here although
               `career-target.html` draws no such fieldset.
@@ -349,8 +353,8 @@ function applyDefaults(): void {
               `distance` is the one of the four the HFW does ask for, as the radio group in the Distance
               card below, so it is NOT repeated here; the group owns it and posts the same field name.
             -->
-            <section data-region="card" class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="target-purpose-heading">
-                <h2 id="target-purpose-heading" class="text-lg font-semibold text-ink-strong">What the career is for</h2>
+            <section data-region="card" class="card" aria-labelledby="target-purpose-heading">
+                <h2 id="target-purpose-heading">What the career is for</h2>
 
                 <div class="mt-2 grid gap-4 min-[821px]:grid-cols-2">
                     <BaseSelect
@@ -384,10 +388,10 @@ function applyDefaults(): void {
                 <p v-if="errorOf('style')" role="alert" class="mt-2 text-sm text-risk">{{ errorOf('style') }}</p>
             </section>
 
-            <section data-region="card" class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="stat-targets-heading">
-                <h2 id="stat-targets-heading" class="text-lg font-semibold text-ink-strong">Stat targets</h2>
+            <section data-region="card" class="card" aria-labelledby="stat-targets-heading">
+                <h2 id="stat-targets-heading">Stat targets</h2>
 
-                <p class="text-sm text-ink-muted">
+                <p class="sub">
                     Each target is compared against the run's scenario cap, so a target above the cap is
                     refused at preflight rather than silently clipped.
                 </p>
@@ -418,13 +422,13 @@ function applyDefaults(): void {
                             <!--
                               The wireframe's field is one label, one number, its denominator and its
                               share of the cap (`career-target.html:101-125`). The three lines this cell
-                              used to add — a second copy of the cap, a bar restating the same figure,
-                              and a named absence standing where the number goes — all said what the
+                              used to add - a second copy of the cap, a bar restating the same figure,
+                              and a named absence standing where the number goes - all said what the
                               denominator already says, so they are gone and an empty field is simply
                               empty.
                             -->
                             <span class="font-mono text-xs text-ink-muted tabular-nums" data-field="denominator">
-                                {{ entered(stat) ?? '—' }} / {{ cap(stat) }} cap
+                                {{ entered(stat) ?? '-' }} / {{ cap(stat) }} cap
                             </span>
                             <span class="text-xs text-ink-muted" data-field="percent-of-cap">
                                 <template v-if="entered(stat) !== null">{{ percent(stat) }}% of cap</template>
@@ -474,7 +478,7 @@ function applyDefaults(): void {
               be read as a group, but it no longer claims `data-region="card"`: a card marker here made the
               page render five cards where the HFW draws four.
             -->
-            <section class="rounded-lg border border-rule bg-panel p-4" aria-label="Total against the published sample">
+            <section class="card" aria-label="Total against the published sample">
                 <!--
                   The wireframe labels this block "Total against the published sample" and gives it no
                   heading of its own (`career-target.html:128-138`): it is the third part of the Stat
@@ -488,11 +492,11 @@ function applyDefaults(): void {
                 <div class="mt-2" data-field="target-totals">
                     <div class="srow">
                         <span class="k">Your total</span>
-                        <span class="v font-mono tabular-nums">{{ totalTarget === null ? '—' : totalTarget }}</span>
+                        <span class="v font-mono tabular-nums">{{ totalTarget === null ? '-' : totalTarget }}</span>
                     </div>
                     <div class="srow">
                         <span class="k">Published Global sample build <em>Special Week</em></span>
-                        <span class="v font-mono tabular-nums">—</span>
+                        <span class="v font-mono tabular-nums">-</span>
                     </div>
                     <div class="srow">
                         <span class="k">Sum of the five scenario caps</span>
@@ -513,10 +517,10 @@ function applyDefaults(): void {
             <!-- The right column of the wireframe's `.g-side`: Distance, then Stamina floor. The 1400 m
                  row is the wireframe's `.note` inside the Distance card (career-target.html:159), not a
                  warning band: the page states a source disagreement rather than refusing a submit. -->
-            <div class="space-y-6">
-            <section data-region="card" class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="distance-bands">
-                <h2 id="distance-bands" class="text-lg font-semibold text-ink-strong">Distance</h2>
-                <p class="text-sm text-ink-muted">Sets the stamina floor the advisor warns about before a race.</p>
+            <div class="space-y-3.5">
+            <section data-region="card" class="card" aria-labelledby="distance-bands">
+                <h2 id="distance-bands">Distance</h2>
+                <p class="sub">Sets the stamina floor the advisor warns about before a race.</p>
 
                 <!--
                   The wireframe asks for the distance as a radio group with each band's own sentence
@@ -550,20 +554,20 @@ function applyDefaults(): void {
                 <p v-if="errorOf('distance')" role="alert" class="mt-2 text-sm text-risk">{{ errorOf('distance') }}</p>
 
                 <p class="note mt-2" data-field="distance-conflict">
-                    <b>1400 m is disputed.</b>
-                    Game8 files it as {{ props.distanceBands[0] }}, the client's export code 2 reads as
-                    {{ props.distanceBands[1] }}, and the client's own skills gate on
-                    <code>distance_type == 2</code>. This tool states the disagreement rather than picking a
-                    side, so a 1400 m race can be typed either way as long as the skill gate it is planned
-                    against uses the same reading.
+                    <b>Band edges are Game8's. 1400 m is an open conflict:</b>
+                    Game8 places it in {{ props.distanceBands[0] }}, the data export files every 1400 m
+                    course under distance code 2, which reads as {{ props.distanceBands[1] }}, and the
+                    client's own skills tagged for that band gate on <code>distance_type == 2</code>. This tool
+                    states the disagreement rather than picking a side, so a 1400 m race can be typed
+                    either way as long as the skill gate it is planned against uses the same reading.
                 </p>
             </section>
 
             <!-- The stamina floor per band, read from the scenario's own stanza rather than restated. -->
-            <section data-region="card" class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="distance-floor">
-                <h2 id="distance-floor" class="text-lg font-semibold text-ink-strong">Stamina floor</h2>
+            <section data-region="card" class="card" aria-labelledby="distance-floor">
+                <h2 id="distance-floor">Stamina floor</h2>
 
-                <p class="text-sm text-ink-muted">What the advisor checks before recommending a Medium or Long race.</p>
+                <p class="sub">What the advisor checks before recommending a Medium or Long race.</p>
 
                 <table v-if="Object.keys(props.finaleTargets.staminaByDistance).length > 0" class="mt-2 w-full text-sm">
                     <thead>
@@ -594,9 +598,9 @@ function applyDefaults(): void {
                  stored spread, and naming presets the tool does not hold would be an invented figure
                  (AGENTS.md §5), so the card carries the one control the payload supports and where to set
                  it. The submit stays outside the card because it is the step's write, not a default. -->
-            <section data-region="card" class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="target-saved-default">
-                <h2 id="target-saved-default" class="text-lg font-semibold text-ink-strong">Target from a saved default</h2>
-                <p class="mt-1 text-sm text-ink-muted">Settings can hold a default spread so a new run does not start blank.</p>
+            <section data-region="card" class="card" aria-labelledby="target-saved-default">
+                <h2 id="target-saved-default">Target from a saved default</h2>
+                <p class="sub">Settings can hold a default spread so a new run does not start blank.</p>
 
                 <div class="mt-3 flex flex-wrap items-center gap-3">
                     <BaseButton type="button" variant="secondary" :disabled="props.statDefaults === null" @click="applyDefaults">

@@ -61,6 +61,23 @@ test.describe('setup wizard sweep', () => {
             await expect(page.locator('[data-setup-steps] .step')).toHaveCount(6);
             await expect(page.locator('[data-setup-steps] [aria-current="step"]')).toHaveCount(1);
 
+            // The owner's single right toolbar (`HFW-OVERRIDE (structure: wizard toolbar)`,
+            // `SetupLayout.vue`): the chips live in the head band's action column and finish above the
+            // rule on every step, not in the step body where the wireframe draws them.
+            await expect(
+                page.locator('[data-region="hrow-actions"] [data-setup-steps]'),
+                `${step.name}: the stepper is the toolbar's first block`,
+            ).toHaveCount(1);
+
+            const chips = await page.locator('[data-setup-steps]').boundingBox();
+            const rule = await page.locator('[data-region="hr"]').boundingBox();
+
+            if (chips === null || rule === null) {
+                throw new Error(`${step.name}: the stepper or the head band rule is not laid out`);
+            }
+
+            expect(chips.y + chips.height, `${step.name}: the stepper sits above the rule`).toBeLessThanOrEqual(rule.y);
+
             // One filled action per page: the forward door. Finding two means a card grew a primary.
             await expect(page.locator('.bg-primary-action')).toHaveCount(1);
         });

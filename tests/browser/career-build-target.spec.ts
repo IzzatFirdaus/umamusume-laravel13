@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { assertStructurallyEqual, capture } from './fixtures/hfw-structure';
+import { BODY_MARKERS, assertStructurallyEqual, capture } from './fixtures/hfw-structure';
 import { captureBoth } from './fixtures/wizard-screenshots';
 
 /*
@@ -29,7 +29,7 @@ test.describe('Build Target and the provenance badge', () => {
         await page.goto('/career/setup/target');
         await page.locator('#app > *').first().waitFor();
 
-        await expect(page.getByRole('heading', { name: 'Your target' }).first()).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'What are you building toward?' }).first()).toBeVisible();
         await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByRole('listitem', { name: 'Build target' })).toHaveAttribute('aria-current', 'step');
         await expect(page.getByText('Step 3 of 6').first()).toBeVisible();
         // All six steps are live links since D7: the `to: null` branch stays in `SetupLayout` for the
@@ -89,11 +89,18 @@ test.describe('Build Target and the provenance badge', () => {
 
         await page.getByRole('button', { name: 'Continue to legacy' }).click();
 
-        // The PUT redirects back to this step and the stored state is read from the draft.
+        // The PUT advances the wizard to its next step, with the flash carried across. This case used to
+        // assert the save-and-stay shape, which is the defect the 2026-10-29 walkthrough found: a Trainer
+        // could not leave the step at all.
+        await expect(page).toHaveURL(/\/career\/setup\/legacy$/);
         await expect(page.getByText('Build target saved.')).toBeVisible();
+
+        // The write is proven by re-reading this step from the draft.
+        await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
         await expect(page.getByLabel('Purpose')).toHaveValue('StoryClear');
         await expect(page.getByLabel('Speed', { exact: true })).toHaveValue('1200');
-        await expect(speed.locator('[data-field="denominator"]')).toContainText('1200 / 1200 cap');
+        await expect(page.locator('[data-stat="Speed"] [data-field="denominator"]')).toContainText('1200 / 1200 cap');
     });
 
     test('refuses a stat above the cap, ties the message to its input and moves focus there', async ({ page }) => {
@@ -144,10 +151,14 @@ test.describe('Build Target and the provenance badge', () => {
 
         await page.getByRole('button', { name: 'Continue to legacy' }).click();
 
+        // Same re-baseline as the first case: the primary advances to the legacy step.
+        await expect(page).toHaveURL(/\/career\/setup\/legacy$/);
         await expect(page.getByText('Build target saved.')).toBeVisible();
 
-        // Both halves of the save read back: the ceiling as a stored field, and the bound the page draws
-        // for the target that needed it.
+        // Both halves of the save read back on this step: the ceiling as a stored field, and the bound the
+        // page draws for the target that needed it.
+        await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
         await expect(page.getByLabel('Speed ceiling')).toHaveValue('1250');
         await expect(page.getByLabel('Speed', { exact: true })).toHaveValue('1250');
         await expect(page.getByText('1250 cap')).toHaveCount(1);
@@ -223,7 +234,7 @@ test.describe('Build Target and the provenance badge', () => {
 
         await page.goto('/career/setup/target');
         await page.locator('#app > *').first().waitFor();
-        const app = await capture(page, '.canvas', { slug: 'target', side: 'app' });
+        const app = await capture(page, '.canvas', { markers: BODY_MARKERS, slug: 'target', side: 'app' });
 
         // Caught by the side-by-side pass, not by the structure: the step's subject line printed twice,
         // once from a leftover `<header>` block and once from the intro paragraph. The wireframe says it
@@ -234,7 +245,7 @@ test.describe('Build Target and the provenance badge', () => {
         await expect(page.locator('[data-region="card"]')).toHaveCount(5);
 
         await page.goto(hfw);
-        const wireframe = await capture(page, '.canvas', { slug: 'target', side: 'hfw' });
+        const wireframe = await capture(page, '.canvas', { markers: BODY_MARKERS, slug: 'target', side: 'hfw' });
 
         assertStructurallyEqual(app, wireframe, { regions: 'subset', grid: true });
 

@@ -41,7 +41,10 @@ async function draftThroughDeck(page: import('@playwright/test').Page): Promise<
         'true',
         WRITE,
     );
-    await page.getByRole('button', { name: 'Save deck' }).click();
+    // No page-level "Save deck" exists any more: Phase E cut it (`career-deck-select.spec.ts:215`), and
+    // the forward door is the step's one submit-shaped control, writing the deck before it navigates.
+    // Clicking the dead label waited three minutes for a button the page deliberately does not draw.
+    await page.getByRole('button', { name: 'Continue to preflight' }).click();
     await page.locator('#app > *').first().waitFor();
 
     await page.goto('/career/setup/preflight', { waitUntil: 'domcontentloaded' });

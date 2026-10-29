@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*
- * HFW-OVERRIDE (computed/rect: the wizard-wide class) — `legacy-diff-{1280,390}.json` measures the
+ * HFW-OVERRIDE (computed/rect: the wizard-wide class) - `legacy-diff-{1280,390}.json` measures the
  * app's DESIGN.md tokens against the wireframe's mock CSS and the shell wrapper's offset. Tokens
  * outrank the mock palette (`AGENTS.md` §2) and the wrapper moves every box, so both buckets carry
  * entries by construction; the page is not restyled to chase the mock's values.
@@ -15,7 +15,7 @@
  * banner arrives here as the `notice` prop from its one owner.
  *
  * **Two slots, not a graph (Phase D).** The wireframe (`career-legacy.html:87-120`) draws two parent
- * cards — `Parent A` and `Parent B`, each carrying a `Chosen` / `Not chosen` pill, the recorded name,
+ * cards - `Parent A` and `Parent B`, each carrying a `Chosen` / `Not chosen` pill, the recorded name,
  * the veteran's scenario and save date, and the sparks the draft already holds. The six-node graph the
  * step used to draw moved to where it is read: `InheritanceEvent.vue:442-450` renders the ancestry on
  * the run, which is the one surface that can name every node from a persisted payload.
@@ -103,8 +103,8 @@ const props = defineProps<{
  * out, because a half-read screen is a real state the payload exists to hold (`ADR-0010` Consequences
  * §3) and a zero would be a claim.
  *
- * The ancestor and spark rows are not edited on this step any more — the run-scoped Legacy Lab is
- * where a recorded node is built — but a stored payload is read back whole on save, so re-saving a
+ * The ancestor and spark rows are not edited on this step any more - the run-scoped Legacy Lab is
+ * where a recorded node is built - but a stored payload is read back whole on save, so re-saving a
  * pick never erases the record behind it.
  */
 const form = useForm({
@@ -222,9 +222,13 @@ const pickOptions = (): { value: string; label: string }[] => [
 
 <template>
     <SetupLayout :step="4" :visited="props.visited" :saved="props.saved">
-        <Head title="Legacy" />
+        <Head title="Inherit from two parents" />
         <template #eyebrow>New career</template>
-        <template #title>Legacy</template>
+        <template #title>Inherit from two parents</template>
+        <template #lede>
+            A run starts with the sparks its parents carry. Both slots are optional; a run with no parents
+            starts from the card's own base.
+        </template>
 
         <!--
           The HFW's head-band pair (`career-legacy.html:61-65`). Both doors used to live at the foot of the
@@ -238,22 +242,17 @@ const pickOptions = (): { value: string; label: string }[] => [
         <template #actions>
             <a
                 href="/career/setup/target"
-                class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel"
             >
                 Back
             </a>
             <a
                 href="/career/setup/deck"
-                class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 font-semibold text-on-primary-action hover:bg-primary-action/90"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 text-sm font-semibold text-on-primary-action hover:bg-primary-action/90"
             >
                 Continue to deck
             </a>
         </template>
-
-        <p class="max-w-3xl text-sm text-ink-muted">
-            A run starts with the sparks its parents carry. Both slots are optional; a run with no parents
-            starts from the card's own base.
-        </p>
 
         <p
             role="note"
@@ -285,18 +284,23 @@ const pickOptions = (): { value: string; label: string }[] => [
             <article
                 v-for="(card, index) in parents()"
                 :key="index"
-                class="rounded-lg border bg-panel p-4"
-                :class="card !== null ? 'border-2 border-primary-action' : 'border-dashed border-rule'"
+                class="card"
+                :class="card !== null ? 'is-picked' : ''"
             >
-                <h2 class="flex items-center justify-between text-lg font-semibold text-ink-strong">
-                    <span>{{ index === 0 ? 'Parent A' : 'Parent B' }}</span>
-                    <span
-                        class="rounded-full px-2 py-0.5 text-xs font-semibold"
-                        :class="card !== null ? 'bg-ok/15 text-ok' : 'bg-sunken text-ink-muted'"
-                    >
-                        {{ card !== null ? 'Chosen' : 'Not chosen' }}
-                    </span>
-                </h2>
+                <!-- The slot header is not a `.card > h2` title: the wireframe draws the parent name
+                     and its state pill on one row with no rule under it, so a wrapper keeps the
+                     primitive's heading rule off this one. -->
+                <header class="flex items-center justify-between">
+                    <h2 class="flex w-full items-center justify-between text-lg font-semibold text-ink-strong">
+                        <span>{{ index === 0 ? 'Parent A' : 'Parent B' }}</span>
+                        <span
+                            class="pill"
+                            :class="card !== null ? 'pill-positive' : 'pill-neutral'"
+                        >
+                            {{ card !== null ? 'Chosen' : 'Not chosen' }}
+                        </span>
+                    </h2>
+                </header>
 
                 <template v-if="card !== null">
                     <div class="mt-2 text-[15px] font-extrabold text-ink-strong">
@@ -314,7 +318,7 @@ const pickOptions = (): { value: string; label: string }[] => [
                         <span
                             v-for="(spark, sparkIndex) in card.sparks"
                             :key="sparkIndex"
-                            class="rounded-full border border-rule bg-raised px-2 py-0.5 text-xs text-ink"
+                            class="tag"
                         >
                             {{ spark.family }} spark<template v-if="spark.stat !== null"> · {{ spark.stat }}</template>
                             <template v-if="spark.stars !== null"> · ★{{ spark.stars }}</template>
@@ -369,10 +373,11 @@ const pickOptions = (): { value: string; label: string }[] => [
           the row above it prints, so all four are named here and the override is recorded rather than
           hidden.
         -->
-        <section class="mt-5 rounded-lg border border-rule bg-panel p-4" aria-labelledby="inheritance-does">
-            <h2 id="inheritance-does" class="text-lg font-semibold text-ink-strong">What inheritance actually does</h2>
+        <section class="card mt-5" aria-labelledby="inheritance-does">
+            <h2 id="inheritance-does">What inheritance actually does</h2>
 
-            <table class="mt-2 w-full text-sm">
+            <div class="mt-2 overflow-x-auto" role="region" tabindex="0" aria-label="What inheritance actually does, scrollable">
+                <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">
                         <th class="py-2 pr-3">Mechanism</th>
@@ -413,6 +418,16 @@ const pickOptions = (): { value: string; label: string }[] => [
                     </tr>
                 </tbody>
             </table>
+            </div>
+
+            <!-- The wireframe's own note inside this card (`career-legacy.html:146`): it names the loop
+                 the +16 rule belongs to, so the number above reads as one step rather than a bonus. -->
+            <p class="note mt-3">
+                <b>The cap raise is the loop.</b> Train to a final total, bank the factor grade, inherit the
+                +16 per ★3, then train past the previous ceiling. A run with two ★3 blue parents therefore
+                starts with a higher ceiling than the scenario publishes, which is why the cockpit shows an
+                entered ceiling beside the scenario's rather than one number.
+            </p>
         </section>
 
         <div class="mt-4 grid grid-cols-1 gap-4 min-[1081px]:grid-cols-2">
@@ -421,15 +436,16 @@ const pickOptions = (): { value: string; label: string }[] => [
               `cap + 16 per ★3` sum as a number; this tool prices no pair, so the projected column
               states the absence and the two parent columns print only what the record holds.
             -->
-            <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="projected-start">
-                <h2 id="projected-start" class="text-lg font-semibold text-ink-strong">Projected start</h2>
-                <p class="mt-1 text-sm text-ink-muted">
+            <section class="card" aria-labelledby="projected-start">
+                <h2 id="projected-start">Projected start</h2>
+                <p class="sub">
                     What the two parents add to this run, before a single turn is played. The recorded Blue
                     spark against a stat is what a parent column prints; the projected sum is never
                     computed, because an inheritance outcome is not this tool's to derive (ADR-0020 §3).
                 </p>
 
-                <table class="mt-2 w-full text-sm">
+                <div class="mt-2 overflow-x-auto" role="region" tabindex="0" aria-label="Projected start, scrollable">
+                <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">
                             <th class="py-2 pr-3">Stat</th>
@@ -443,35 +459,36 @@ const pickOptions = (): { value: string; label: string }[] => [
                         <tr v-for="stat in props.statOrder" :key="stat" class="border-b border-rule">
                             <td class="py-2 pr-3 text-ink">{{ stat }}</td>
                             <td class="pr-3 text-right font-mono tabular-nums text-ink-muted">
-                                {{ props.scenarioCaps[stat] ?? '—' }}
+                                {{ props.scenarioCaps[stat] ?? '-' }}
                             </td>
                             <td class="pr-3 text-right font-mono tabular-nums text-ink">
                                 <template v-if="props.parentA?.sparks.some((s) => s.family === 'Blue' && s.stat === stat)">
                                     ★{{ props.parentA.sparks.find((s) => s.family === 'Blue' && s.stat === stat)?.stars ?? '?' }} Blue
                                 </template>
-                                <template v-else>—</template>
+                                <template v-else>-</template>
                             </td>
                             <td class="pr-3 text-right font-mono tabular-nums text-ink">
                                 <template v-if="props.parentB?.sparks.some((s) => s.family === 'Blue' && s.stat === stat)">
                                     ★{{ props.parentB.sparks.find((s) => s.family === 'Blue' && s.stat === stat)?.stars ?? '?' }} Blue
                                 </template>
-                                <template v-else>—</template>
+                                <template v-else>-</template>
                             </td>
-                            <td class="text-right font-mono tabular-nums text-ink-muted">—</td>
+                            <td class="text-right font-mono tabular-nums text-ink-muted">-</td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
             </section>
 
-            <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="parents-differ">
-                <h2 id="parents-differ" class="text-lg font-semibold text-ink-strong">Parents must differ</h2>
+            <section class="card" aria-labelledby="parents-differ">
+                <h2 id="parents-differ">Parents must differ</h2>
                 <p class="mt-2 text-sm leading-relaxed text-ink-muted">
                     A veteran cannot be its own parent, and the two slots cannot hold the same record. The
                     picker enforces the first rule by hiding the trainee you are running; the second by
                     refusing an already-chosen record.
                 </p>
                 <p class="note mt-3 text-sm text-ink-muted">
-                    Choosing no parents is a legitimate build, not an error. The run record carries two
+                    Choosing no parents is a legitimate build, not an error. The run carries two
                     nullable parent ids for exactly that reason, and no screen invents a default pair.
                 </p>
             </section>
@@ -516,7 +533,7 @@ const pickOptions = (): { value: string; label: string }[] => [
                 id="legacy-save"
                 type="button"
                 :disabled="form.processing"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel disabled:cursor-wait disabled:opacity-60"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel disabled:cursor-wait disabled:opacity-60"
                 @click="saving"
             >
                 {{ form.processing ? 'Saving…' : 'Save Legacy' }}

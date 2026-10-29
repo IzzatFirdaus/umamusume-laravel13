@@ -151,6 +151,53 @@ it('names the stored trainee even when she is not in the roster shown (D5)', fun
             ->where('trainees.data.0.name', 'Special Week'));
 });
 
+it('sends the chosen trainee her own row, so the echo card can picture her and name her forms', function (): void {
+    // The echo card moved under the search and sort row, and it offers the form choice a multi-form
+    // trainee actually has. Both need data the paginated roster may not carry, so the server sends her
+    // own row: the same `row()` the list uses, which keeps the two cards from disagreeing about the
+    // frame or the form order.
+    $chosen = rosterTrainee('Rice Shower', ['turf' => 'A', 'mile' => 'B', 'long' => 'A']);
+    CharacterCard::factory()->create([
+        'umamusume_id' => $chosen->id,
+        'card_id' => 103001,
+        'title' => '[Rosy Dreams]',
+        'is_debut_form' => true,
+        'global_release_date' => '2021-02-24',
+    ]);
+    CharacterCard::factory()->create([
+        'umamusume_id' => $chosen->id,
+        'card_id' => 103002,
+        'title' => '[Vampire Makeover!]',
+        'is_debut_form' => false,
+        'global_release_date' => '2021-10-29',
+    ]);
+    $other = rosterTrainee('Special Week', ['turf' => 'A', 'long' => 'B', 'pace_chaser' => 'A']);
+    CharacterCard::factory()->create(['umamusume_id' => $other->id, 'card_id' => 101001, 'is_debut_form' => true]);
+    SetupDraft::write(['umamusume_id' => $chosen->id]);
+
+    // The filter excludes Rice Shower. `selectedTrainee` still names her two forms, so the picker above
+    // the roster has something real to offer while the page shown lists only Special Week.
+    $this->get(route('career.trainee', ['search' => 'Special Week']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('selectedName', 'Rice Shower')
+            ->where('selectedTrainee.name', 'Rice Shower')
+            ->has('trainees.data', 1)
+            ->has('selectedTrainee.forms', 2)
+            // Debut first, the catalog's own order: the frame and the stated form are the same one.
+            ->where('selectedTrainee.forms.0.title', '[Rosy Dreams]')
+            ->where('selectedTrainee.forms.1.title', '[Vampire Makeover!]')
+            // The key is always sent. Whether it holds a url is the mirror's state, not this page's.
+            ->has('selectedTrainee.artworkURL')
+            ->where('profileUrl', route('career.trainee.profile', ['umamusume' => $chosen->id])));
+
+    $this->get('/career/setup/trainee')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('selectedTrainee.aptitudes.turf', 'A')
+            ->where('selectedTrainee.form_count', 2));
+});
+
 it('renders the roster paginated, with no stored choice and no draft write', function (): void {
     rosterTrainee('Special Week', ['turf' => 'A', 'long' => 'B', 'pace_chaser' => 'A']);
     rosterTrainee('Silence Suzuka', ['turf' => 'A', 'long' => 'A', 'pace_chaser' => 'C']);
@@ -164,6 +211,10 @@ it('renders the roster paginated, with no stored choice and no draft write', fun
             ->where('trainees.data.0.name', 'Silence Suzuka')
             // Nothing chosen yet, so the screen never implies a choice nobody made.
             ->where('selected', null)
+            ->where('selectedTrainee', null)
+            ->where('profileUrl', null)
+            // The step's two literal doors resolve server-side, so a route rename reaches them.
+            ->where('scenarioUrl', route('career.scenario'))
             ->where('scenarioLabel', null)
             ->where('scenarioPending', true)
             ->where('sortBy', 'name')

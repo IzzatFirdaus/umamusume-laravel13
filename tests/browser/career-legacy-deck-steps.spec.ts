@@ -66,7 +66,7 @@ test.describe('Setup step 4 — Legacy', () => {
     test('renders the two parent slots, the mechanism table and the projected-start table', async ({ page }) => {
         await hydrate(page, '/career/setup/legacy');
 
-        await expect(page.getByRole('heading', { name: 'Legacy', level: 1 })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Inherit from two parents', level: 1 })).toBeVisible();
         await expect(page.getByText('Step 4 of 6').first()).toBeVisible();
         await expect(
             page.getByRole('navigation', { name: 'Setup steps' }).getByRole('listitem', { name: 'Legacy' }),
@@ -246,7 +246,7 @@ test.describe('Setup step 5 — Support deck', () => {
 
         // The flag is `N/A` with a reason before any write. A default of "Owned" would be the
         // invented fact the Floor forbids.
-        await expect(page.locator('[title="No ownership has been recorded for this slot yet."]')).toHaveCount(6);
+        await expect(page.getByText('No ownership has been recorded for this slot yet.')).toHaveCount(6);
 
         // The seven-types legend and the ownership-prose block are cut (Phase E): `career-deck.html`
         // draws neither. The type words still render inside the picker's dialog legend
@@ -295,7 +295,7 @@ test.describe('Setup step 5 — Support deck', () => {
         // A clear is a statement too: the slot returns to its named empty text and the flag to `N/A`.
         await page.getByRole('button', { name: 'Set Slot 1 to not equipped' }).click();
         await expect(page.locator('#deck-slot-1')).toContainText('Not equipped');
-        await expect(page.locator('[title="No ownership has been recorded for this slot yet."]')).toHaveCount(6);
+        await expect(page.getByText('No ownership has been recorded for this slot yet.')).toHaveCount(6);
     });
 
     test('sizes the deck-step controls to the 44px contract', async ({ page }) => {
@@ -342,6 +342,32 @@ test.describe('Setup step 5 — Support deck', () => {
             () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
         );
         expect(overflow, 'the document scrolls horizontally at 320px').toBe(true);
+    });
+
+    test('reflows the legacy tables inside their own regions at 320px', async ({ page }) => {
+        await hydrate(page, '/career/setup/legacy');
+        await page.setViewportSize({ width: 320, height: 720 });
+        await page.locator('#app > *').first().waitFor();
+
+        // DESIGN.md §6: a wide table scrolls inside its own focusable container, never the document.
+        // Measured 2026-10-28: both legacy tables painted 331px into a 320px viewport and the document
+        // scrolled 44px sideways, because neither had a container.
+        //
+        // The outcome that rule pins is the document's: it never scrolls sideways. Whether a given
+        // table is wide enough to need its container is a content fact, re-measured 2026-10-29 after
+        // the card primitive landed: the mechanism table fits 254px and the projected-start table
+        // still scrolls (331px into 254px). Both must sit in a focusable region either way.
+        for (const label of ['What inheritance actually does, scrollable', 'Projected start, scrollable']) {
+            const region = page.getByRole('region', { name: label });
+            await expect(region).toBeVisible();
+            await expect(region).toHaveAttribute('tabindex', '0');
+            await expect(region.locator('table')).toHaveCount(1);
+        }
+
+        const overflow = await page.evaluate(
+            () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        );
+        expect(overflow, 'the document scrolls horizontally at 320px').toBeLessThanOrEqual(1);
     });
 
     test('carries the ancestry and the deck through the steps and writes no run behind them', async ({ page }) => {

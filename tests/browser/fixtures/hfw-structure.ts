@@ -27,7 +27,7 @@ import { saveShot } from './wizard-screenshots';
  *    head band is `.phead`, and that is compared.
  *  - `.g-2` / `.g-3` / `.g-4` / `.g-side` are NOT separate markers; the wireframe puts them ON the same
  *    element as `.grid` (`<div class="grid g-2">`) and the app renders the same element as
- *    `grid grid-cols-1 min-[Npx]:grid-cols-2`. Both sides therefore resolve to `grid`, and the column
+ *    `grid grid-cols-1 min-[821px]:grid-cols-2`. Both sides therefore resolve to `grid`, and the column
  *    shape is compared through `gridSignature` below rather than through the class name.
  */
 
@@ -42,7 +42,7 @@ export type Structure = {
     rect: { w: number; h: number };
 };
 
-/** The wizard shell: the head band every step renders through `PageHeader` + `SetupLayout`. */
+/** The wizard shell: the head band every step renders through `SetupLayout`. */
 export const SHELL_MARKERS = [
     'phead',
     'hrow-actions',
@@ -56,6 +56,19 @@ export const SHELL_MARKERS = [
     'step-legend',
     'step',
 ];
+
+/*
+ * The step chips and their legend. The wireframe draws them in `canvas > .stepper`
+ * (`career-scenario.html:70-85`); the owner's 2026-10-28 ruling moved them into the head band's
+ * right toolbar (`HFW-OVERRIDE (structure: wizard toolbar)` in `SetupLayout.vue`). A structure
+ * comparison that kept demanding the body position would fail for a deliberate deviation, so the
+ * band and body marker sets below exclude them and `setup-layout.spec.ts` asserts the toolbar
+ * placement on its own.
+ */
+const STEP_MARKERS = ['stepper', 'step-legend', 'step'];
+
+/** The head band + canvas skeleton, without the chips the toolbar override moved above the rule. */
+export const BAND_MARKERS = SHELL_MARKERS.filter((marker) => !STEP_MARKERS.includes(marker));
 
 /** The step bodies: cards, tiles, tables, filters, pills. */
 export const PAGE_MARKERS = [
@@ -80,6 +93,9 @@ export const PAGE_MARKERS = [
 ];
 
 export const MARKERS = [...SHELL_MARKERS, ...PAGE_MARKERS];
+
+/** The step body's markers, without the chips the toolbar override moved into the head band. */
+export const BODY_MARKERS = MARKERS.filter((marker) => !STEP_MARKERS.includes(marker));
 
 export type CaptureOptions = {
     /** Restrict the marker vocabulary, e.g. `SHELL_MARKERS` for the shell-only case. */

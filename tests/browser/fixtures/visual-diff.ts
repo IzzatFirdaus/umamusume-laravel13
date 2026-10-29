@@ -45,8 +45,10 @@ export type Computed = {
 };
 
 export type ElementSnapshot = {
-    /** Unique inside its own document; the join key between the two sides. */
+    /** Unique inside its own document; the primary join key between the two sides. */
     selector: string;
+    /** `data-region` value when the element carries one, else `null`; the secondary join key. */
+    region: string | null;
     tag: string;
     /** The element's own text nodes, trimmed; `null` when it has none. */
     text: string | null;
@@ -59,6 +61,8 @@ export type DiffReport = {
     excess: ElementSnapshot[];
     /** In the wireframe, not in the app. */
     missing: ElementSnapshot[];
+    /** The pairs compared for rect/computed drift, in app document order. */
+    paired: Array<{ selector: string; app: ElementSnapshot; hfw: ElementSnapshot }>;
     rectDrift: Array<{ selector: string; app: Rect; hfw: Rect; dx: number; dy: number; dw: number; dh: number }>;
     computedDrift: Array<{ selector: string; prop: string; app: string; hfw: string }>;
 };
@@ -253,6 +257,7 @@ export async function captureSnapshot(page: Page, rootSelector: string): Promise
 
             return {
                 selector: pathOf(el),
+                region: el.getAttribute('data-region') ?? null,
                 tag: el.tagName.toLowerCase(),
                 text: ownText(el),
                 rect: { x: box.x, y: box.y, w: box.width, h: box.height },
@@ -283,22 +288,113 @@ export function diffSnapshots(
 ): DiffReport {
     const tol = { ...DEFAULT_TOLERANCE, ...(tolerance.rect ?? {}) };
 
+    // Pairing is three passes, most evidence first.
+    //
+    // 1. Exact selector. The strongest key: same named block in the same position.
+    // 2. `data-region`. The shell may wrap the stepper in a `<nav>` where the wireframe draws it bare,
+    //    which shifts every positional path below the wrapper. A region name survives that shift, so
+    //    pairs the element that is semantically the same thing.
+    // 3. Tag + own text. Text is the page's content; where both sides print the same words in the same
+    //    element kind, they are the same element even if a wrapper moved it. Only non-null text keys,
+    //    and only when the key is unique on each side, so a repeated "Back" cannot pair with the wrong
+    //    Back.
+    //
+    // Only elements that fail all three passes land in `excess` / `missing`. Rect and computed drift are
+    // measured over the `paired` set: without this, a path mismatch between the two documents would
+    // leave the measurable buckets empty and report "0 drift" where the truth is "nothing comparable".
+
     const appBySelector = new Map(app.map((entry) => [entry.selector, entry]));
     const hfwBySelector = new Map(hfw.map((entry) => [entry.selector, entry]));
 
-    const excess = app.filter((entry) => !hfwBySelector.has(entry.selector));
-    const missing = hfw.filter((entry) => !appBySelector.has(entry.selector));
+    const paired: DiffReport['paired'] = [];
+    const appLeft = new Map<string, ElementSnapshot>();
+    const hfwLeft = new Map<string, ElementSnapshot>();
+
+    for (const entry of app) {
+        const other = hfwBySelector.get(entry.selector);
+
+        if (other === undefined) {
+            appLeft.set(entry.selector, entry);
+        } else {
+            paired.push({ selector: entry.selector, app: entry, hfw: other });
+            hfwBySelector.delete(entry.selector);
+        }
+    }
+
+    for (const [selector, entry] of hfwBySelector) {
+        if (!appBySelector.has(selector)) {
+            hfwLeft.set(selector, entry);
+        }
+    }
+
+    // Pass 2: pair leftovers by region. Groups are ordered by document order on each side and zipped,
+    // so a repeated region (six slot rows) still pairs row 1 with row 1.
+    const appRegions = new Map<string, ElementSnapshot[]>();
+    const hfwRegions = new Map<string, ElementSnapshot[]>();
+
+    for (const entry of appLeft.values()) {
+        if (entry.region !== null) {
+            (appRegions.get(entry.region) ?? appRegions.set(entry.region, []).get(entry.region)!).push(entry);
+        }
+    }
+
+    for (const entry of hfwLeft.values()) {
+        if (entry.region !== null) {
+            (hfwRegions.get(entry.region) ?? hfwRegions.set(entry.region, []).get(entry.region)!).push(entry);
+        }
+    }
+
+    for (const [region, appGroup] of appRegions) {
+        const hfwGroup = hfwRegions.get(region) ?? [];
+
+        for (let index = 0; index < Math.min(appGroup.length, hfwGroup.length); index += 1) {
+            const a = appGroup[index];
+            const h = hfwGroup[index];
+            paired.push({ selector: a.selector, app: a, hfw: h });
+            appLeft.delete(a.selector);
+            hfwLeft.delete(h.selector);
+        }
+    }
+
+    // Pass 3: pair by tag + own text, unique on each side.
+    const appTextKeys = new Map<string, ElementSnapshot[]>();
+    const hfwTextKeys = new Map<string, ElementSnapshot[]>();
+
+    const textKey = (entry: ElementSnapshot): string => `${entry.tag}|${(entry.text ?? '').toLowerCase()}`;
+
+    for (const entry of appLeft.values()) {
+        if (entry.text !== null) {
+            (appTextKeys.get(textKey(entry)) ?? appTextKeys.set(textKey(entry), []).get(textKey(entry))!).push(entry);
+        }
+    }
+
+    for (const entry of hfwLeft.values()) {
+        if (entry.text !== null) {
+            (hfwTextKeys.get(textKey(entry)) ?? hfwTextKeys.set(textKey(entry), []).get(textKey(entry))!).push(entry);
+        }
+    }
+
+    for (const [key, appGroup] of appTextKeys) {
+        const hfwGroup = hfwTextKeys.get(key) ?? [];
+
+        if (appGroup.length !== 1 || hfwGroup.length !== 1) {
+            continue;
+        }
+
+        const a = appGroup[0];
+        const h = hfwGroup[0];
+        paired.push({ selector: a.selector, app: a, hfw: h });
+        appLeft.delete(a.selector);
+        hfwLeft.delete(h.selector);
+    }
+
+    const excess = [...appLeft.values()];
+    const missing = [...hfwLeft.values()];
 
     const rectDrift: DiffReport['rectDrift'] = [];
     const computedDrift: DiffReport['computedDrift'] = [];
 
-    for (const [selector, a] of appBySelector) {
-        const h = hfwBySelector.get(selector);
-
-        if (h === undefined) {
-            continue;
-        }
-
+    for (const { selector, app: a, hfw: h } of paired) {
         const dx = a.rect.x - h.rect.x;
         const dy = a.rect.y - h.rect.y;
         const dw = a.rect.w - h.rect.w;
@@ -315,7 +411,7 @@ export function diffSnapshots(
         }
     }
 
-    return { excess, missing, rectDrift, computedDrift };
+    return { excess, missing, paired, rectDrift, computedDrift };
 }
 
 /**

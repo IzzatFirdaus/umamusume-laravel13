@@ -106,6 +106,10 @@ class TraineeSelectController extends Controller
             'selectedName' => $draft['umamusume_id'] === null
                 ? null
                 : Umamusume::query()->whereKey($draft['umamusume_id'])->value('name'),
+            // The chosen trainee as the roster renders her, so the echo card can picture her and offer her
+            // forms even when the page shown is filtered or paginated past her. `row()` is the one builder,
+            // so the echo card and the roster card cannot disagree about the portrait or the form order.
+            'selectedTrainee' => $this->selectedTrainee($draft['umamusume_id'], $mirror),
             // The wizard carries the scenario forward instead of asking again, so the step names it. The
             // label comes from `SetupDraft`, which reads `config/scenarios.php`, so no scenario name is
             // written into this page or this controller (D-240, gate G-33).
@@ -136,6 +140,13 @@ class TraineeSelectController extends Controller
             'action' => route('career.trainee.store'),
             'rosterUrl' => route('career.trainee'),
             'targetUrl' => route('career.target'),
+            // The two other doors on this step. They were literals in the page, which is the one place on
+            // the screen a route rename would not survive: the head band's back door and the selected
+            // card's profile link now resolve here, where the route table is the only owner.
+            'scenarioUrl' => route('career.scenario'),
+            'profileUrl' => $draft['umamusume_id'] === null
+                ? null
+                : route('career.trainee.profile', ['umamusume' => $draft['umamusume_id']]),
         ]);
     }
 
@@ -210,6 +221,31 @@ class TraineeSelectController extends Controller
         return redirect()
             ->route('career.scenario')
             ->with('status', "Trainee set: {$umamusume->name}.");
+    }
+
+    /**
+     * The chosen trainee as the roster renders her, or null before a pick.
+     *
+     * `row()` is called rather than a second shape being built here, so the echo card at the top of the
+     * step and the roster card below it cannot disagree about the portrait or the form order. The lookup
+     * is by key and ignores the page's own filters: a Trainer who filters the roster away from her still
+     * sees the pick she made (the D5 rule that `selectedName` already carries, widened to the frame and
+     * the form list).
+     *
+     * @return array<string, mixed>|null
+     */
+    private function selectedTrainee(?int $umamusumeId, ArtworkMirror $mirror): ?array
+    {
+        if ($umamusumeId === null) {
+            return null;
+        }
+
+        $umamusume = Umamusume::query()
+            ->whereKey($umamusumeId)
+            ->with(['cards' => $this->cardScope()])
+            ->first();
+
+        return $umamusume === null ? null : $this->row($umamusume, $mirror);
     }
 
     /**

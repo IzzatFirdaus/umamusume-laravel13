@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import AppLayout from '../../../layouts/AppLayout.vue';
+import PageHeader from '../../../components/ui/PageHeader.vue';
 import { BaseButton, BaseCheckbox, BaseInput, BaseSelect, BaseTextarea } from '../../../components/Form';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, reactive } from 'vue';
 
 /*
@@ -121,17 +122,42 @@ const submit = (): void => {
 <template>
     <AppLayout>
         <Head title="Record an existing career" />
-        <template #title>Record an existing career</template>
+        <!-- The HFW's head band (`career-snapshot-setup.html:55-66`): an eyebrow, the title and its
+             lede, and the pair of actions to the right. PageHeader draws the band inside the shell's
+             banner, so the page keeps one `h1` and the actions sit where the wireframe puts them
+             instead of only at the foot of the form. -->
+        <template #head>
+            <PageHeader
+                eyebrow="Snapshot"
+                title="Record an existing career"
+                description="Enter what your client shows right now. The position becomes the run's own position, and a field you leave empty is recorded as not provided rather than guessed at. You will read the snapshot back before it is written."
+            >
+                <template #actions>
+                    <Link
+                        href="/career/snapshot"
+                        class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel"
+                    >
+                        Back
+                    </Link>
+                    <BaseButton type="submit" form="snapshot-form" variant="primary" :disabled="form.processing">
+                        {{ form.processing ? 'Reading back…' : 'Review snapshot' }}
+                    </BaseButton>
+                </template>
+            </PageHeader>
+        </template>
 
-        <p class="max-w-3xl text-sm text-ink-muted">
-            Enter what your client shows right now. The position becomes the run's own position, and a
-            field you leave empty is recorded as not provided rather than guessed at. You will read the
-            snapshot back before it is written.
-        </p>
+        <!-- The wireframe's three-step readout (`career-snapshot-setup.html:68-72`). It is a status
+             readout, not a second wizard: the keybox says this form is one pass, so the chips say
+             which door the Trainer came through and nothing is clickable. -->
+        <nav aria-label="Snapshot steps" class="stepper mb-4" role="list">
+            <span class="step is-empty" role="listitem"><span class="n" aria-hidden="true">1</span>Entry</span>
+            <span class="step" role="listitem" aria-current="step"><span class="n" aria-hidden="true">2</span>Setup</span>
+            <span class="step is-empty" role="listitem"><span class="n" aria-hidden="true">3</span>Review</span>
+        </nav>
 
-        <form class="mt-6 max-w-3xl space-y-6" @submit.prevent="submit">
-            <section aria-labelledby="snapshot-scenario-heading" class="rounded-md border border-rule bg-raised p-4">
-                <h2 id="snapshot-scenario-heading" class="text-lg font-semibold text-ink-strong">Scenario</h2>
+        <form id="snapshot-form" class="max-w-3xl space-y-6" @submit.prevent="submit">
+            <section aria-labelledby="snapshot-scenario-heading" class="card">
+                <h2 id="snapshot-scenario-heading">Scenario</h2>
                 <BaseSelect
                   v-model="form.scenario"
                   name="scenario"
@@ -142,8 +168,8 @@ const submit = (): void => {
                 />
             </section>
 
-            <section aria-labelledby="snapshot-trainee-heading" class="rounded-md border border-rule bg-raised p-4">
-                <h2 id="snapshot-trainee-heading" class="text-lg font-semibold text-ink-strong">Trainee</h2>
+            <section aria-labelledby="snapshot-trainee-heading" class="card">
+                <h2 id="snapshot-trainee-heading">Trainee</h2>
                 <BaseSelect
                   v-model="form.umamusume_id"
                   name="umamusume_id"
@@ -154,13 +180,13 @@ const submit = (): void => {
                 />
             </section>
 
-            <section aria-labelledby="snapshot-position-heading" class="rounded-md border border-rule bg-raised p-4">
-                <h2 id="snapshot-position-heading" class="text-lg font-semibold text-ink-strong">Career position</h2>
+            <section aria-labelledby="snapshot-position-heading" class="card">
+                <h2 id="snapshot-position-heading">Career position</h2>
                 <p class="mt-1 text-xs text-ink-muted">
                     Where the career stands, as the client spells it. This run starts from here; it does
                     not start from turn 1.
                 </p>
-                <div class="mt-3 grid grid-cols-1 gap-3 @3xl:grid-cols-3">
+                <div class="mt-3 grid gap-3 g-3">
                     <BaseSelect
                       v-model="form.career_year"
                       name="career_year"
@@ -191,8 +217,8 @@ const submit = (): void => {
                 </span>
             </section>
 
-            <section aria-labelledby="snapshot-state-heading" class="rounded-md border border-rule bg-raised p-4">
-                <h2 id="snapshot-state-heading" class="text-lg font-semibold text-ink-strong">Current state</h2>
+            <section aria-labelledby="snapshot-state-heading" class="card">
+                <h2 id="snapshot-state-heading">Current state</h2>
                 <p class="mt-1 text-xs text-ink-muted">
                     The numbers the client shows now. Type a number when you have read it, tick "I don't
                     know this value" when the client does not show it, or leave it blank when you have not
@@ -223,7 +249,7 @@ const submit = (): void => {
                         />
                     </div>
                 </div>
-                <div class="mt-3 grid grid-cols-1 gap-3 @3xl:grid-cols-3">
+                <div class="mt-3 grid gap-3 g-3">
                     <div v-for="field in META_FIELDS" :key="field.key" class="flex flex-col gap-1">
                         <BaseInput
                             :id="`snapshot-${field.key}`"
@@ -247,8 +273,8 @@ const submit = (): void => {
                     </div>
                 </section>
 
-            <section aria-labelledby="snapshot-notes-heading" class="rounded-md border border-rule bg-raised p-4">
-                <h2 id="snapshot-notes-heading" class="text-lg font-semibold text-ink-strong">Notes</h2>
+            <section aria-labelledby="snapshot-notes-heading" class="card">
+                <h2 id="snapshot-notes-heading">Notes</h2>
                 <BaseTextarea
                   id="snapshot-notes"
                   v-model="form.notes"
@@ -260,11 +286,14 @@ const submit = (): void => {
                 />
             </section>
 
-            <section aria-labelledby="snapshot-later-heading" class="rounded-md border border-dashed border-rule bg-raised p-4">
-                <h2 id="snapshot-later-heading" class="text-lg font-semibold text-ink-strong">Recorded on their own screens</h2>
-                <p class="mt-1 text-sm text-ink-muted">
+            <!-- `.card` + the wireframe's own inline dashed edge (`career-snapshot-setup.html:168`); the
+             style is inline there because the unlayered `.card` border wins over a dashed utility. -->
+        <section aria-labelledby="snapshot-later-heading" class="card" style="border-style: dashed">
+                <h2 id="snapshot-later-heading">Recorded on their own screens</h2>
+                <p class="sub">
                     A run's Legacy and its support deck have one write path each, and this form is not
-                    it: re-entering them here would give the same fact two writers.
+                    it: re-entering them here would give the same fact two writers. Record them on the
+                    screens that own the write.
                 </p>
                 <div class="mt-3 flex flex-wrap gap-3">
                     <a href="/legacy" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">Legacy Lab</a>
@@ -272,22 +301,16 @@ const submit = (): void => {
                 </div>
             </section>
 
+            <!-- The submit lives once, in the head band (`DESIGN.md`: one accent per screen);
+                 the foot keeps the exit and the write's own status line. -->
             <div class="flex flex-wrap items-center gap-3">
-                <BaseButton
-                    type="submit"
-                    variant="primary"
-                    :disabled="form.processing"
-                >
-                    {{ form.processing ? 'Reading back…' : 'Review snapshot' }}
-                </BaseButton>
                 <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Reading the snapshot back…</p>
-                <BaseButton
-                    type="button"
-                    variant="secondary"
-                    @click="() => router.visit('/career/snapshot')"
+                <Link
+                    href="/career/snapshot"
+                    class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel"
                 >
                     Back
-                </BaseButton>
+                </Link>
             </div>
         </form>
     </AppLayout>

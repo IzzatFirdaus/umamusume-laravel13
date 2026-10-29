@@ -38,19 +38,16 @@ export type VerifyReport = {
     missing: string[];
 };
 
-/** Own-text drift over the elements both sides draw. */
-function textDrift(app: ElementSnapshot[], hfw: ElementSnapshot[]): string[] {
-    const hfwBySelector = new Map(hfw.map((entry) => [entry.selector, entry]));
+/** Own-text drift over the elements both sides draw, measured on the report's paired set. */
+function textDrift(report: DiffReport): string[] {
     const lines: string[] = [];
 
-    for (const entry of app) {
-        const other = hfwBySelector.get(entry.selector);
-
-        if (other === undefined || other.text === entry.text) {
+    for (const { selector, app, hfw } of report.paired) {
+        if (hfw.text === app.text) {
             continue;
         }
 
-        lines.push(`${entry.selector}: app="${entry.text ?? ''}" hfw="${other.text ?? ''}"`);
+        lines.push(`${selector}: app="${app.text ?? ''}" hfw="${hfw.text ?? ''}"`);
     }
 
     return lines;
@@ -75,7 +72,7 @@ export async function verifyPage(page: Page, opts: VerifyOptions): Promise<Verif
     const report = diffSnapshots(app, hfw);
 
     return {
-        text: textDrift(app, hfw),
+        text: textDrift(report),
         computed: report.computedDrift,
         rect: report.rectDrift,
         excess: report.excess.map((entry) => entry.selector),

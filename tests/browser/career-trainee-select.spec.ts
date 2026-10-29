@@ -228,6 +228,100 @@ test.describe('Trainee Selection and Profile', () => {
         );
     });
 
+    test('restates the pick under the filter row, with her frame and her form choice', async ({ page }) => {
+        await page.goto('/career/setup/trainee');
+        await page.locator('#app > *').first().waitFor();
+
+        await page.getByLabel('Search').fill('Rice Shower');
+        await expect(card(page, 'Rice Shower')).toBeVisible();
+        await card(page, 'Rice Shower').getByRole('button', { name: 'Select', exact: true }).click();
+
+        const selected = page.locator('[data-field="selected-trainee"]');
+        await expect(selected).toBeVisible();
+
+        // The echo card belongs to the pick, not to the end of the list: it sits between the search-and-sort
+        // row and the roster, and the pager stays last. `querySelectorAll` returns document order, so this
+        // reads the positions rather than trusting a margin class.
+        const order = await page.evaluate(() =>
+            Array.from(
+                document.querySelectorAll(
+                    '.canvas form[data-region="filters"], .canvas [data-field="selected-trainee"], .canvas [data-trainee-card], .canvas [data-region="pager"]',
+                ),
+            ).map(
+                (node) =>
+                    node.getAttribute('data-field') ??
+                    node.getAttribute('data-region') ??
+                    node.tagName.toLowerCase(),
+            ),
+        );
+        expect(order.slice(0, 2)).toEqual(['filters', 'selected-trainee']);
+        expect(order.at(-1)).toBe('pager');
+
+        // `ADR-0021`'s display half, and `DESIGN.md` §7: the frame is served by the app's own origin,
+        // never by the asset host. Rice Shower's debut form is mirrored on this tree, so the image is
+        // asserted rather than the reserve cell.
+        const frame = selected.locator('img[data-artwork-slot]');
+        await expect(frame).toHaveCount(1);
+
+        const frameSrc = new URL((await frame.getAttribute('src')) ?? '');
+        expect(frameSrc.pathname).toMatch(/^\/artwork\/card_portrait\/\d+$/);
+        expect(frameSrc.origin, 'the frame comes from the loopback app, not the asset host').toBe(
+            new URL(page.url()).origin,
+        );
+
+        // Two forms in the catalog, so the card asks which one. `career-trainee.html:191-200` states the
+        // form in the name line; the picker is how a Trainer changes the one the draft holds.
+        const picker = selected.locator('select#selected-form');
+        await expect(picker).toBeVisible();
+        await expect(picker.locator('option')).toHaveCount(2);
+
+        const second = (await picker.locator('option').nth(1).textContent())?.trim() ?? '';
+        const secondValue = (await picker.locator('option').nth(1).getAttribute('value')) ?? '';
+        await picker.selectOption({ index: 1 });
+
+        // The write is the same draft PUT the card row uses, so the run's rarity follows the form stated.
+        // The name line is asserted, not the bare words: the option carries the same text, and
+        // `getByText` across the card resolves to both controls.
+        await expect(page.getByText('Trainee set: Rice Shower.')).toBeVisible();
+        await expect(selected.locator('p').first()).toContainText(second);
+        await expect(picker).toHaveValue(secondValue);
+    });
+
+    /*
+     * The roster filters from a 250ms debounce, and Inertia cancels the visit already in flight when a
+     * new one starts. Before `standDownFilter()` existed that meant a Trainer who typed a name and
+     * clicked a card inside the debounce window had their *write* cancelled by their own filter read:
+     * no draft row, no flash, and no echo card, so the screen showed a pick that had not been taken.
+     * Measured on this tree as the same click rendering the echo on one run and not the next.
+     */
+    test('a pick made while the filter read is still pending lands and echoes', async ({ page }) => {
+        await page.goto('/career/setup/trainee');
+        await page.locator('#app > *').first().waitFor();
+
+        await page.getByLabel('Search').fill('Rice Shower');
+
+        // The click lands inside the debounce window on purpose: that is the race being closed.
+        await card(page, 'Rice Shower').getByRole('button', { name: 'Select', exact: true }).click();
+
+        await expect(page.getByText('Trainee set: Rice Shower.')).toBeVisible();
+        await expect(page.locator('[data-field="selected-trainee"]')).toBeVisible();
+    });
+
+    test('asks no form question of a trainee the catalog holds in one form', async ({ page }) => {
+        await page.goto('/career/setup/trainee');
+        await page.locator('#app > *').first().waitFor();
+
+        await page.getByLabel('Search').fill('Admire Vega');
+        await expect(card(page, 'Admire Vega')).toBeVisible();
+        await card(page, 'Admire Vega').getByRole('button', { name: 'Select', exact: true }).click();
+
+        const selected = page.locator('[data-field="selected-trainee"]');
+        await expect(selected.locator('img[data-artwork-slot]')).toHaveCount(1);
+
+        // One form is not a choice. A picker here would be a control with exactly one answer.
+        await expect(selected.locator('select')).toHaveCount(0);
+    });
+
     test('a selected trainee can be deselected back to no choice', async ({ page }) => {
         await page.goto('/career/setup/trainee');
         await page.locator('#app > *').first().waitFor();
@@ -299,7 +393,11 @@ test.describe('Trainee Selection and Profile', () => {
         await page.getByLabel('Distance').selectOption('G');
         await expect(page.getByText('No trainee matches these filters.')).toBeVisible();
 
-        await page.getByRole('button', { name: 'Clear', exact: true }).click();
+        // The empty state carries the way out, not just the description of it (H9, IA-5): a Trainer who
+        // filtered to nothing clears from where they are instead of hunting for the row's control.
+        const empty = page.locator('[data-region="empty"]');
+        await expect(empty.getByRole('button', { name: 'Clear filters' })).toBeVisible();
+        await empty.getByRole('button', { name: 'Clear filters' }).click();
         await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(25);
     });
 
@@ -562,8 +660,33 @@ test.describe('Trainee Selection and Profile', () => {
         // wireframe abbreviates to `Front`, `Pace`, `Late`, `End`. Recorded on the card's own comment too.
         //
         // Computed style is asserted for the filter row, which is the region this phase rewrote. A
-        // whole-subtree colour diff runs at Phase H against a common baseline.
-        const filtered = report.computed.filter((entry) => entry.selector.includes('[data-region="filters"]'));
-        expect(filtered, `computed drift: ${JSON.stringify(filtered)}`).toEqual([]);
+        // whole-subtree colour diff runs at Phase H against a common baseline. Two recorded categories
+        // come off that bucket, each named and each pinned so the record cannot rot into live drift:
+        //
+        // HFW-OVERRIDE (type: field caption) — the wireframe's `.field .k` is a 10px, weight-800,
+        // uppercase, letter-spaced block with a 4px bottom margin (`shell.css:496`); the shipped caption
+        // is `BaseSelect`'s `text-sm font-medium` span, because DESIGN.md §2.2's owner-signed Metadata
+        // tier governs a form label and 10px sits below it. The tier is re-asserted below, so a caption
+        // that moves off it fails here.
+        //
+        // HFW-OVERRIDE (palette: colour between two token sets) — `color` and `borderColor` compare this
+        // app's sampled reference palette against the wireframe sheet's own values, which is the
+        // common-baseline run Phase H owns. `<option>` colour is UA-rendered from the select's colour.
+        const caption = (selector: string): boolean => /label\.text-sm\b.*> span:nth-child\(1\)$/.test(selector);
+        const option = (selector: string): boolean => selector.includes('> option');
+        const drift = report.computed.filter((entry) => entry.selector.includes('[data-region="filters"]'));
+        const recorded = drift.filter((entry) => caption(entry.selector) || option(entry.selector));
+        const unrecorded = drift.filter((entry) => !caption(entry.selector) && !option(entry.selector));
+
+        expect(unrecorded, `unrecorded computed drift: ${JSON.stringify(unrecorded)}`).toEqual([]);
+
+        const recordedProps = [...new Set(recorded.map((entry) => entry.prop))].sort();
+        expect(
+            recordedProps,
+            `recorded drift carries props outside the two overrides: ${recordedProps.join(', ')}`,
+        ).toEqual(['borderColor', 'color', 'display', 'fontSize', 'fontWeight', 'lineHeight', 'margin']);
+
+        const captionSizes = [...new Set(recorded.filter((entry) => entry.prop === 'fontSize').map((entry) => entry.app))];
+        expect(captionSizes, 'the shipped caption must stay on the signed Metadata tier').toEqual(['14px']);
     });
 });

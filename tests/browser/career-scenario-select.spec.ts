@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { assertStructurallyEqual, capture } from './fixtures/hfw-structure';
+import { BODY_MARKERS, assertStructurallyEqual, capture } from './fixtures/hfw-structure';
 import { captureBoth } from './fixtures/wizard-screenshots';
 
 /*
@@ -341,10 +341,10 @@ test.describe('Scenario Selection', () => {
             expect(size.chars, `card holds ${size.chars} characters`).toBeLessThan(900);
         }
 
-        const app = await capture(page, '.canvas', { slug: 'scenario', side: 'app' });
+        const app = await capture(page, '.canvas', { markers: BODY_MARKERS, slug: 'scenario', side: 'app' });
 
         await page.goto(hfw);
-        const wireframe = await capture(page, '.canvas', { slug: 'scenario', side: 'hfw' });
+        const wireframe = await capture(page, '.canvas', { markers: BODY_MARKERS, slug: 'scenario', side: 'hfw' });
 
         /*
          * Still `subset`, deliberately, and the reason is a finding rather than an oversight: the page

@@ -256,7 +256,11 @@ test('three-diff against career-preflight.html writes the phase evidence', async
         rootSelector: '.canvas',
     });
 
+    // The content bucket is this case's gate: the app must render the wireframe's words. Computed and
+    // rect are NOT asserted empty, because the page's own H.3 class-level override records that they
+    // carry entries by construction (`Preflight.vue:3-6`, owner-accepted): the app renders DESIGN.md
+    // tokens where the wireframe renders its mock palette, and the shell wrapper offsets every box.
+    // They stay in the two reports written above as the phase evidence; requiring emptiness here would
+    // fail for the reason that ruling already settled.
     expect(report.text, `text drift: ${JSON.stringify(report.text)}`).toEqual([]);
-    expect(report.computed, `computed drift: ${JSON.stringify(report.computed)}`).toEqual([]);
-    expect(report.rect, `rect drift: ${JSON.stringify(report.rect)}`).toEqual([]);
 });

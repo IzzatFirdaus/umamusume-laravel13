@@ -36,7 +36,9 @@ async function fillSetupAndReview(page: import('@playwright/test').Page): Promis
     await page.locator('input[name="stamina"]').fill(String(STARTING_STATE.stats.stamina));
     await page.locator('input[name="power"]').fill(String(STARTING_STATE.stats.power));
 
-    await page.getByRole('button', { name: 'Review snapshot' }).click();
+    // The page draws the wireframe's pair in the head band and the same submit at the foot of the
+    // form, so both buttons carry the label. The head one is the wireframe's first action.
+    await page.locator('[data-region="hrow-actions"]').getByRole('button', { name: 'Review snapshot' }).click();
     await page.waitForURL(/\/career\/snapshot\/review/, WRITE);
     await page.locator('#app > *').first().waitFor();
 }

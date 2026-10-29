@@ -40,7 +40,6 @@
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
-import PageHeader from '../../components/ui/PageHeader.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 
@@ -366,39 +365,36 @@ const CAREER_TURNS = 72;
 <template>
     <SetupLayout :step="props.step" :visited="props.visited" :saved="props.saved">
         <Head title="Before the first turn" />
-        <template #head>
-            <PageHeader
-                eyebrow="New career"
-                title="Before the first turn"
-                description="One screen listing what will be created, what the run will be measured against, and the things worth knowing before you commit."
-                position="Step 6 of 6"
-            >
-                <!--
-                  The HFW's head-band pair (`career-preflight.html:61-65`). Both controls used to sit in a
-                  row inside the "This run" card, below a fieldset the Trainer had to reach by scrolling, so
-                  the screen's one write was under everything it commits.
+        <template #eyebrow>New career</template>
+        <template #title>Before the first turn</template>
+        <template #lede>
+            One screen listing what will be created, what the run will be measured against, and the
+            things worth knowing before you commit.
+        </template>
+        <!--
+          The HFW's head-band pair (`career-preflight.html:61-65`). Both controls used to sit in a
+          row inside the "This run" card, below a fieldset the Trainer had to reach by scrolling, so
+          the screen's one write was under everything it commits.
 
-                  "Create the run" is this step's write and it stays a method call rather than a form submit:
-                  `PreflightController@store` is a PUT composed from the draft, and the button's disabled
-                  state reads `canStart`, which is the same gate the request re-checks.
-                -->
-                <template #actions>
-                    <Link
-                        :href="props.edit.deck"
-                        class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:bg-panel"
-                    >
-                        Back to deck
-                    </Link>
-                    <button
-                        type="button"
-                        class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 font-semibold text-on-primary-action hover:bg-primary-action/90 disabled:opacity-60"
-                        :disabled="!canStart || form.processing"
-                        @click="start"
-                    >
-                        {{ form.processing ? 'Starting…' : 'Create the run' }}
-                    </button>
-                </template>
-            </PageHeader>
+          "Create the run" is this step's write and it stays a method call rather than a form submit:
+          `PreflightController@store` is a PUT composed from the draft, and the button's disabled
+          state reads `canStart`, which is the same gate the request re-checks.
+        -->
+        <template #actions>
+            <Link
+                :href="props.edit.deck"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel"
+            >
+                Back to deck
+            </Link>
+            <button
+                type="button"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 text-sm font-semibold text-on-primary-action hover:bg-primary-action/90 disabled:opacity-60"
+                :disabled="!canStart || form.processing"
+                @click="start"
+            >
+                {{ form.processing ? 'Starting…' : 'Create the run' }}
+            </button>
         </template>
 
         <!-- The refusal, when the server finds a section that no longer validates. Nothing below blocks;
@@ -422,61 +418,61 @@ const CAREER_TURNS = 72;
              queries: the columns must follow the window, not the shell's content box. -->
         <div class="grid grid-cols-1 gap-3.5 min-[821px]:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
             <div class="space-y-3.5">
-                <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="run-heading">
-                    <h2 id="run-heading" class="text-sm font-bold text-ink-strong">This run</h2>
+                <section class="card" aria-labelledby="run-heading">
+                    <h2 id="run-heading">This run</h2>
 
                     <div class="mt-2.5 grid grid-cols-2 gap-2.5 min-[1081px]:grid-cols-4">
-                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
-                            <p class="text-xs text-ink-muted">Trainee</p>
-                            <p class="text-sm text-ink-strong">
+                        <div class="tile">
+                            <p class="k">Trainee</p>
+                            <p class="v">
                                 <template v-if="props.contract.build.trainee">{{ props.contract.build.trainee.name }}</template>
                                 <AbsenceValue v-else compact reason="No trainee has been chosen in this draft." />
                             </p>
                         </div>
-                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
-                            <p class="text-xs text-ink-muted">Form</p>
-                            <p class="text-sm text-ink-strong">
+                        <div class="tile">
+                            <p class="k">Form</p>
+                            <p class="v">
                                 <template v-if="props.contract.build.trainee">as chosen above</template>
                                 <AbsenceValue v-else compact reason="No trainee has been chosen in this draft, so no costume form is named." />
                             </p>
                         </div>
-                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
-                            <p class="text-xs text-ink-muted">Scenario</p>
-                            <p class="text-sm text-ink-strong">
+                        <div class="tile">
+                            <p class="k">Scenario</p>
+                            <p class="v">
                                 <template v-if="props.contract.build.scenario">{{ props.contract.build.scenario.label }}</template>
                                 <AbsenceValue v-else compact reason="No scenario has been chosen in this draft." />
                             </p>
                         </div>
-                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
-                            <p class="text-xs text-ink-muted">Distance</p>
-                            <p class="text-sm text-ink-strong">
+                        <div class="tile">
+                            <p class="k">Distance</p>
+                            <p class="v">
                                 <template v-if="props.contract.build.target">{{ props.contract.build.target.distance }}</template>
                                 <AbsenceValue v-else compact reason="The target step has not been entered." />
                             </p>
                         </div>
-                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
-                            <p class="text-xs text-ink-muted">Parents</p>
-                            <p class="text-sm text-ink-strong">{{ parentsSummary }}</p>
+                        <div class="tile">
+                            <p class="k">Parents</p>
+                            <p class="v">{{ parentsSummary }}</p>
                         </div>
-                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
-                            <p class="text-xs text-ink-muted">Deck</p>
-                            <p class="text-sm text-ink-strong">
+                        <div class="tile">
+                            <p class="k">Deck</p>
+                            <p class="v">
                                 <template v-if="props.contract.deck">
                                     {{ props.contract.deck.equipped }} of {{ props.contract.deck.slots.length }}
                                 </template>
                                 <AbsenceValue v-else compact reason="The deck step has not been entered." />
                             </p>
                         </div>
-                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
-                            <p class="text-xs text-ink-muted">Target total</p>
-                            <p class="text-sm font-mono tabular-nums text-ink-strong">
+                        <div class="tile">
+                            <p class="k">Target total</p>
+                            <p class="v font-mono tabular-nums">
                                 <template v-if="targetTotal !== null">{{ targetTotal.toLocaleString('en-US') }}</template>
                                 <AbsenceValue v-else compact reason="The target step has not been entered." />
                             </p>
                         </div>
-                        <div class="rounded-md border border-rule bg-raised px-2.5 py-2">
-                            <p class="text-xs text-ink-muted">Career length</p>
-                            <p class="text-sm font-mono tabular-nums text-ink-strong">{{ CAREER_TURNS }} turns</p>
+                        <div class="tile">
+                            <p class="k">Career length</p>
+                            <p class="v font-mono tabular-nums">{{ CAREER_TURNS }} turns</p>
                         </div>
                     </div>
 
@@ -493,8 +489,8 @@ const CAREER_TURNS = 72;
                      wizard has, so the state and the door back to the step that owns it are on the same line.
                      The ids survive from the list this replaced: they are the hooks the spec and the
                      screen's own deep links use. -->
-                <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="checks-heading">
-                    <h2 id="checks-heading" class="text-sm font-bold text-ink-strong">Checks</h2>
+                <section class="card" aria-labelledby="checks-heading">
+                    <h2 id="checks-heading">Checks</h2>
                     <p role="status" class="mt-1 text-sm text-ink">{{ attention }}</p>
 
                     <table class="mt-2.5 w-full text-left text-sm">
@@ -544,14 +540,22 @@ const CAREER_TURNS = 72;
                             </tr>
                         </tbody>
                     </table>
+
+                    <!-- The wireframe's own note inside the Checks card (`career-preflight.html:146`):
+                         a warning is a stated fact, not a block, and it is printed once. -->
+                    <p v-if="rows.some((row) => checkState(row) === 'Warning')" class="note mt-2.5">
+                        <b>A warning is not a block.</b> The one warning here is a deck with empty slots,
+                        which is a legitimate choice: the run commits either way and the warning is stated
+                        once, not repeated on every screen.
+                    </p>
                 </section>
             </div>
 
             <div class="space-y-3.5">
                 <!-- What the run will be measured against. Every row is a fact the draft or the ruleset
                      holds; a row this tool cannot answer is absent rather than invented. -->
-                <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="asks-heading">
-                    <h2 id="asks-heading" class="text-sm font-bold text-ink-strong">What this scenario asks</h2>
+                <section class="card" aria-labelledby="asks-heading">
+                    <h2 id="asks-heading">What this scenario asks</h2>
                     <table class="mt-2.5 w-full text-left text-sm">
                         <caption class="sr-only">The target this run will be measured against</caption>
                         <tbody>
@@ -593,8 +597,8 @@ const CAREER_TURNS = 72;
                 <!-- Product gaps, each naming what is missing and what the screen does instead. None says
                      "not built": that is developer language in a user interface
                      (`career-preflight.html:160-174`). -->
-                <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="gaps-heading">
-                    <h2 id="gaps-heading" class="text-sm font-bold text-ink-strong">What is not built yet</h2>
+                <section class="card" aria-labelledby="gaps-heading">
+                    <h2 id="gaps-heading">What is not built yet</h2>
                     <ul class="mt-2 list-disc space-y-1 pl-5 text-xs text-ink-muted">
                         <li>Per-discipline facility training counts are not recorded, so no facility level can be shown.</li>
                         <li>
@@ -615,8 +619,8 @@ const CAREER_TURNS = 72;
                 <!-- The commitment itself. `Start career` is the page's only filled action, and it is honest
                      about what it needs: a scenario and a trainee, which is exactly what
                      `StartCareerRequest` refuses without. -->
-                <section class="rounded-lg border border-rule bg-panel p-4" aria-labelledby="commit-heading">
-                    <h2 id="commit-heading" class="text-sm font-bold text-ink-strong">Commit</h2>
+                <section class="card" aria-labelledby="commit-heading">
+                    <h2 id="commit-heading">Commit</h2>
                     <p class="mt-2 text-xs text-ink-muted">
                         Creating the run writes the trainee, scenario, target, parents and deck. Turn 1 is
                         recorded from the cockpit, not here, so nothing is marked played until a turn is
