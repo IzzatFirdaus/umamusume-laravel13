@@ -371,7 +371,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                         <tr v-for="row in props.caps" :key="row.stat" :class="row.source === 'entered' ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft">
                             <td class="py-2 pr-3"><b>{{ row.stat }}</b> cap <span class="text-xs text-ink-muted">({{ row.source }})</span></td>
                             <td class="py-2 pr-3 text-right font-mono">{{ row.value ?? 'N/A' }}</td>
-                            <td class="py-2 pr-3 text-right font-mono text-ink-muted">—</td>
+                            <td class="py-2 pr-3 text-right font-mono text-ink-muted" title="This tool computes no inheritance change; the cap beside it is the stored figure.">N/A</td>
                             <td class="py-2 text-right font-mono">{{ row.value ?? 'N/A' }}</td>
                         </tr>
                     </tbody>
@@ -428,7 +428,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
             <p v-if="props.observed.events.length === 0" class="mt-1 text-sm text-ink-muted">No inheritance event has been recorded on this run.</p>
             <ul v-else class="mt-2 flex flex-col gap-2 text-sm">
                 <li v-for="event in props.observed.events" :key="event.id" class="rounded-md border border-rule-soft bg-raised px-3 py-2">
-                    Turn {{ event.turn }} · {{ event.source_name }} — {{ event.choice_label ?? 'choice not recorded' }}
+                    Turn {{ event.turn }} · {{ event.source_name }} · {{ event.choice_label ?? 'choice not recorded' }}
                 </li>
             </ul>
         </details>
@@ -438,7 +438,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
             <ul class="mt-2 flex flex-col gap-1.5 text-sm">
                 <li v-for="milestone in props.milestones" :key="milestone.key" class="flex items-center gap-2">
                     <span aria-hidden="true">{{ milestone.glyph }}</span>
-                    <span>{{ milestone.label }} — {{ milestone.status }}</span>
+                    <span>{{ milestone.label }}: {{ milestone.status }}</span>
                 </li>
             </ul>
         </details>

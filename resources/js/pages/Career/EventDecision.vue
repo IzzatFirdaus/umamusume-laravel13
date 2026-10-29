@@ -348,7 +348,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                             <tbody>
                                 <tr class="border-b border-rule-soft"><th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Source</th><td class="py-2">Client screen</td></tr>
                                 <tr class="border-b border-rule-soft"><th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Effect table</th><td class="py-2"><span class="pill pill-caution">Not published</span></td></tr>
-                                <tr><th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Retryable</th><td class="py-2">No — Alarm Clock covers goal races only</td></tr>
+                                <tr><th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Retryable</th><td class="py-2">No: Alarm Clock covers goal races only</td></tr>
                             </tbody>
                         </table>
                         <Note class="mt-2.5">
@@ -383,7 +383,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
             <p v-if="props.events.length === 0" class="mt-1 text-sm text-ink">{{ props.empty }}</p>
             <ul v-else class="mt-2 flex flex-col gap-2 text-sm">
                 <li v-for="event in props.events" :key="event.id" class="rounded-md border border-rule-soft bg-raised px-3 py-2">
-                    Turn {{ event.turn }} · {{ event.source_label }} · {{ event.source_name }} — {{ event.choice_label ?? 'choice not recorded' }}
+                    Turn {{ event.turn }} · {{ event.source_label }} · {{ event.source_name }} · {{ event.choice_label ?? 'choice not recorded' }}
                 </li>
             </ul>
         </details>

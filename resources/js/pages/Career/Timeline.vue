@@ -202,8 +202,8 @@ const finaleText = computed(() => {
                                 <td class="py-2 pr-3">{{ entry.position }}</td>
                                 <td class="py-2 pr-3">{{ entry.kind_label }}</td>
                                 <td class="py-2 pr-3"><b>{{ entry.action_label }}</b> <span class="text-ink-muted">· {{ entry.result }}</span></td>
-                                <td class="py-2 pr-3 text-right font-mono">{{ energyOf(entry) ?? '—' }}</td>
-                                <td class="py-2 pr-3 text-right font-mono">{{ spOf(entry) ?? '—' }}</td>
+                                <td class="py-2 pr-3 text-right font-mono" title="This turn recorded no energy figure.">{{ energyOf(entry) ?? 'N/A' }}</td>
+                                <td class="py-2 pr-3 text-right font-mono" title="This turn recorded no skill-point figure.">{{ spOf(entry) ?? 'N/A' }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -217,8 +217,8 @@ const finaleText = computed(() => {
                 </div>
             </template>
             <Note class="mt-2.5">
-                Turn numbers are the run's own; the position is the calendar's label for that turn. Energy and SP are
-                blank where the import did not capture them — a blank is "not recorded", never zero.
+                Turn numbers are the run's own; the position is the calendar's label for that turn. Energy and SP print
+                N/A where the import did not capture them: an N/A is "not recorded", never zero.
             </Note>
         </section>
 
@@ -227,7 +227,7 @@ const finaleText = computed(() => {
             <p class="sub">Collapsed by phase, the shape a 72-turn run needs. The open phase is the one you are reading.</p>
             <details open class="mt-2">
                 <summary class="flex min-h-11 cursor-pointer items-center text-sm font-extrabold text-ink-strong">Junior Year · {{ phaseCount('Junior') }} entries</summary>
-                <p class="mt-1 text-xs text-ink-muted">Turns 1–24. Duration unknown for most entries; the Debut race is the one dated obligation.</p>
+                <p class="mt-1 text-xs text-ink-muted">Turns 1-24. Duration unknown for most entries; the Debut race is the one dated obligation.</p>
             </details>
             <details class="mt-2">
                 <summary class="flex min-h-11 cursor-pointer items-center text-sm font-extrabold text-ink-strong">Classic Year · {{ phaseCount('Classic') }} entries</summary>

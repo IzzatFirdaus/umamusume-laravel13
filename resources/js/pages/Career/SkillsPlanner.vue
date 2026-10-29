@@ -390,7 +390,7 @@ const coverageConstants = computed(() =>
                                 </td>
                                 <td class="py-2 pr-3">{{ row.is_unique ? 'Unique' : 'Standard' }}</td>
                                 <td class="py-2 pr-3 text-right font-mono">{{ row.sp_cost ?? 'N/A' }}</td>
-                                <td class="py-2 pr-3 text-right font-mono text-ink-muted" title="No column records a hint level per skill; a hinted cost would be invented here.">—</td>
+                                <td class="py-2 pr-3 text-right font-mono text-ink-muted" title="No column records a hint level per skill; a hinted cost would be invented here.">N/A</td>
                                 <td class="py-2 pr-3 text-right font-mono"><b>{{ row.sp_cost ?? 'N/A' }}</b></td>
                                 <td class="py-2 text-right">
                                     <span v-if="row.recorded !== null" class="pill pill-neutral">{{ row.recorded.status }}</span>
@@ -426,7 +426,7 @@ const coverageConstants = computed(() =>
                 </tbody>
             </table>
             <Note class="mt-2.5">
-                The ladder steps +10, +10, +10, +5, +5 — not linear past Lv3. The measured sample reconciles
+                The ladder steps +10, +10, +10, +5, +5, and it is not linear past Lv3. The measured sample reconciles
                 exactly: 130 → 104 / 91 / 84, and 160 → 144 / 128 / 112 / 96. The one rounding case is
                 130 × 0.65 = 84.5, floored to 84. "Lv Max" is a caption, not a fifth number.
             </Note>

@@ -94,12 +94,35 @@ test('groups the log by phase and keeps the finale block outside the grid', asyn
     }
 });
 
-test('prints a blank Energy or SP as an em dash, never a zero', async ({ page }) => {
+test('prints an unrecorded Energy or SP as a labelled N/A, never a dash and never a zero', async ({ page }) => {
+    // Re-baselined 2026-10-29: this case pinned the em dash as the absence glyph, which `AGENTS.md` §5
+    // and `RenderedCopyHygieneTest` ban ("never a default and never a dash"). The intent it guards -
+    // an unrecorded figure stays unrecorded rather than reading as 0 - is unchanged, so the
+    // assertions now sweep every Energy and SP cell: none may print a glyph, and every `N/A` must
+    // carry its reason. Sweeping the column rather than row 1 keeps the case honest whatever the
+    // seeded run happened to record.
     await openTimeline(page);
 
-    const firstRow = page.locator('main table tbody tr').first();
-    await expect(firstRow).toContainText('—');
-    await expect(page.getByText(/a blank is "not recorded", never zero/)).toBeVisible();
+    const cells = page.locator('main table tbody tr td:nth-child(5), main table tbody tr td:nth-child(6)');
+    expect(await cells.count(), 'the log renders its Energy and SP columns').toBeGreaterThan(0);
+
+    const shapes = await cells.evaluateAll((nodes) =>
+        nodes.map((node) => ({
+            text: (node.textContent ?? '').trim(),
+            title: node.getAttribute('title'),
+        })),
+    );
+
+    for (const cell of shapes) {
+        expect(cell.text, 'no absence glyph in a figure cell').not.toBe('—');
+        expect(cell.text, 'no absence glyph in a figure cell').not.toBe('–');
+
+        if (cell.text === 'N/A') {
+            expect(cell.title, 'an N/A names why the figure is absent').toBeTruthy();
+        }
+    }
+
+    await expect(page.getByText(/an N\/A is "not recorded", never zero/)).toBeVisible();
 });
 
 test('sizes the controls to the 44px contract and reflows at 320px', async ({ page }) => {
