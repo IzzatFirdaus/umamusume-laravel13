@@ -1319,12 +1319,34 @@ pint passed. One copy fix inside the slice: the HFW's Race Bonus note says "34% 
 own guard forbids a percent sign on the surface (it is the shape a win estimate takes), so the note says
 "34-percent" and the guard stays intact.
 
-## C6 — remaining screens (not yet started)
+## C6 — career-race-planner, screen 3 of 9 (`602bba4e`)
 
-The audit's other 30 divergent pages and the `near` re-examinations are unchanged. Order stays as the
-audit's repair list: the other seven lifecycle screens (career-race-planner, event-decision,
-inheritance, skills-planner, run-deck, timeline, result), then the wizard remainder, then
-library/legacy/veterans/review, then the copy/identifier pass. `3.0.0` remains **absent**.
+| Item | Before (audit) | After |
+|---|---|---|
+| Region model | deadline, planning/held cards, Section comparison, four card groups | Deadlines, g-3 (Planning from / Held figures / Readiness), Mandatory table, Upcoming table, Reward comparison |
+| h1 | "Race planner" | "Plan the calendar" (HFW) |
+| Rows | cards | table: Race, Grade, Surface · distance + aptitude pill, Turn, Fans needed, Compare |
+| Comparison | always-visible tables | empty state first; table with one Property column per chosen race once 2–4 picked; Clear selection |
+| Blocked rows | hidden behind card state | visible with "Maiden lock not cleared"; Compare stays enabled |
+
+**Deviations, documented in the page:** (1) Compare stays enabled on a maiden-locked row with the reason
+printed beside it — planning is where a locked race is weighed (`DOMAIN OVERRIDE`); (2) the run's
+target-alignment table stays inside the comparison card (`HFW OVERRIDE`); (3) the planner has no savebar,
+because it is read-only in the wireframe too.
+
+**Verdict delta.** career-race-planner: **divergent → near**. Evidence: DOM vs HFW headings equal
+(Deadlines / Planning from / Held figures / Readiness / Mandatory / Upcoming / Reward comparison), 2 tables,
+the "Nothing to compare yet" state present, console clean.
+
+**Gates.** `php artisan test CareerRacePlannerTest` → exit 0; `npx playwright test career-race-planner`
+→ **7 passed**; `npm run typecheck` → 0; `npm run build` → 0; pint passed.
+
+## C7 — remaining screens (not yet started)
+
+The audit's other 29 divergent pages and the `near` re-examinations are unchanged. Order stays as the
+audit's repair list: the other six lifecycle screens (event-decision, inheritance, skills-planner,
+run-deck, timeline, result), then the wizard remainder, then library/legacy/veterans/review, then the
+copy/identifier pass. `3.0.0` remains **absent**.
 
 
 
@@ -1332,4 +1354,113 @@ library/legacy/veterans/review, then the copy/identifier pass. `3.0.0` remains *
 
 
 
+
+
+---
+
+# Side tasks - 2026-10-29
+
+Support pass for the main agent's Task C repair. Command -> result -> files -> commit hash. The guard rail
+(the two severe fixes, the 32 divergent pages, the 17 near pages, spec re-baselines, the 3.0.0 tag) was
+not crossed; the two places the side pass touched a repair-slice file are named below and left uncommitted
+on the main agent's own dirty files.
+
+## S1 - the four peer-dirty files (resolved: all committed)
+
+Each file carried a coherent, plan-directed diff from a prior session; none was dead WIP, so none was reverted.
+
+| File | Commit | What the diff was |
+|---|---|---|
+| resources/js/pages/Career/TraineeProfile.vue | 20f0f2f9 | one-line swap to the shared .g-side grid primitive |
+| resources/js/pages/Veterans/Show.vue | ad361fcd | the wireframe's eyebrow + one-line lede (scenario, run id, turns) |
+| resources/js/pages/Veterans/Index.vue | feat(veterans): the library is the wireframe's table | rebuild toward veterans.html |
+| resources/js/pages/Review/Index.vue | b9f791e7 | one-table grammar under 'Confirm or reject matches', dead StatusPill/pillFor removed |
+
+All four are now committed and out of the modified set.
+
+## S2 - apparatus hygiene
+
+- zz-committed-scenario.spec.ts and zz-tmp-scaleprobe.spec.ts -> moved to .scratch-uma/session-2026-10-28/probes/ (content preserved, not deleted).
+- .lint-out.txt -> deleted (today's own lint redirect).
+- assets/data/README - assets_data.md (byte-identical duplicate of README.md, 15,021 bytes) -> left in place per plan rule 6; filed as a foreign duplicate.
+- .r5state.txt, .scratch-wedge.txt, docs/framework-ui-ux/_audit-prompt.md -> foreign 2026-10-27 files, left in place; filed.
+
+## S3 - the five pre-existing Pest classes (all green: 21 passed, 778 assertions)
+
+| Class | Nature | Fix | Commit |
+|---|---|---|---|
+| KeyboardPathTest | stale pin | skip-link target matched as attribute; wide rail w-[236px] not w-64 | 5c6971e5 |
+| RulesetVersionVocabularyTest | stale pin | scenario card, Dashboard, Settings stopped printing the version fact; surfaces shrink to ScenarioPanel/Result/Preflight (count 3) | 5c6971e5 |
+| ScenarioMetadataTest | stale pin | Optimizes/Systems grid cut; guard pins the shipped card face by render gate (v-if), still pins payload keeps ruleset/rule_family/ruleset_date | 5c6971e5 |
+| NoStaleRunRecordLinksTest | real copy/link defect | APPLIED, UNCOMMITTED - LegacySelect.vue 'The run record' -> 'The run'; SupportCardController.php route('runs.show') -> route('runs.cockpit') | none (rides main agent's dirty files) |
+| RenderedCopyHygieneTest | real copy defect | APPLIED - em/en dashes removed from rendered copy in 15 files; 3 committed in 14dbedec, the rest uncommitted | 14dbedec (3 files) |
+
+Side effect to flag. The uncommitted dash removal was a whole-file glyph replacement, so em/en dashes in
+comment prose of the dirty files were also normalised to - / :. Rendered copy is correct per D-79; the
+comment prose is a cosmetic change the main agent sees when committing those files. No rendered dash remains.
+
+## S4 - lint:ui exit-code defect
+
+tools/ui-framework-check.mjs printed [debt-increase] and exited 0. Now any debt-increase is fatal on its
+own (--strict still widens the gate; baseline stays 219). tests/Feature/UiLintDebtExitTest.php pins exit 1
+on a synthetic baseline-plus-one tree and exit 0 while the count holds. Commit 8ab5af09; test green.
+
+## S5 - release documents truth
+
+VERSION.md and CHANGELOG.md no longer claim a 3.0.0 tag; both say the tag is pending the repair pass and its
+re-audit. Commit a87b174b.
+
+## S6 - near re-check (17 pages)
+
+Re-verdict from the 2026-10-28 audit evidence (split-view screenshots + DOM extract). No repair done.
+
+| Page | Audit | Re-verdict | Reason |
+|---|---|---|---|
+| runs-index | near | divergent | Apply filters button where HFW filters act on change; extra Sort; page size |
+| preferences | near | divergent | invented UI: Evangelion Unit-01 theme option + Numeric failure estimate control |
+| support-cards | near | divergent | Availability column instead of Server; no Server filter |
+| support-card-detail | near | divergent | missing Add-to-deck primary; second effects card missing |
+| career-scenario | near | divergent | reversibility table 2 rows vs HFW 4 (annotation 3) |
+| index | near | near | KPI count and veterans footer are data/placement only |
+| runs-create | near | near | helper copy only |
+| import | near | near | button label and right-column content differ (copy) |
+| career-profile | near | near | portrait slot and forms truncation are data/layout |
+| career-legacy | near | near | empty parent slots (draft); SOURCE column copy |
+| career-deck | near | near | empty deck (data); gauge/remove shape absent (data) |
+| legacy | near | near | one saved pair in data |
+| database | near | near | tiles match; counts are data |
+| database-scenarios | near | near | outlier bolding/note wording |
+| database-events | near | near | DOM shape matches |
+| database-shop-items | near | near | grid composition (cosmetic) |
+| database-sparks | near | near | blue table lacks two columns (copy) |
+| error-404 | near | near | body matches; no shell chrome by design |
+
+Net: five near pages move to divergent (runs-index, preferences, support-cards, support-card-detail,
+career-scenario). The main agent's repair order should absorb them.
+
+## S9 - prop-delta verification
+
+| Delta | Where | Result |
+|---|---|---|
+| SupportCardController type_counts | indexProps -> typeCounts() | present (seven types x r/sr/ssr + global_ssr) |
+| SupportCardController global_count | - | MISSING - emits totalCount (559) and type_counts.global_ssr, not the plan's global_count (release_en). File for support-cards slice. |
+| DatabaseController areas[].count | index() areas | present (live counts; null + reason for the rest) |
+| DatabaseController areas[].badge | - | MISSING - badge named in a docblock but not emitted. File for database slice. |
+| VeteranController grades | VeteranRow | present - blue/pink/unique from stored sparks |
+| VeteranController used_as_parent_count | - | MISSING. File for veteran-detail slice. |
+| DashboardController counts.catalogueTrainees | index() | present (external_ref join) |
+
+## S10 - lore baselines
+
+- php tools/lore.php -> .scratch-uma/session-2026-10-28/lore-baseline.txt
+- php tools/lore.php code -> .scratch-uma/session-2026-10-28/lore-baseline-code.txt
+
+The main agent diffs these after any copy-carrying repair. (Docs-mode output is a full-match dump, not a
+single count; both files are on disk for diffing.)
+
+## S7 - 46-baseline
+
+Deferred. A full npm run test:browser baseline on a HEAD that moves with every repair slice is a moving
+target; Task D re-audit supersedes it, and the suite wedged at ~153/603 in prior attempts. Not run this
+session; recorded rather than implied.
 
