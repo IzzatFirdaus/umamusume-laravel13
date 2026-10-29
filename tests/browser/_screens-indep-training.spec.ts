@@ -14,7 +14,7 @@ import { deleteSeededSession, seedCompletedSession, seedInProgressSession } from
  * The leading underscore keeps it out of the default pattern's alphabet for readers looking for specs.
  */
 
-const DIR = 'docs/research-scratch/hfw-parity/indep-training';
+const DIR = '.scratch-uma/session-2026-10-29/screenshots';
 
 const VIEWPORTS = [
     { suffix: '1280', width: 1280, height: 800 },
