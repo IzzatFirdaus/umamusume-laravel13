@@ -1535,6 +1535,45 @@ library, tools and copy pass are re-audited the same way.
 
 
 
+
+## C15 — peer-worktree parity observation: wizard, library and tools (2026-10-29)
+
+Read-only. A concurrent session holds 106 files in flight, including every remaining audited page and
+several of this task's committed slices. Nothing below was edited or committed by this task: the app
+was loaded at 1280px beside each wireframe and compared on `h1` and region counts
+(`.scratch-uma/session-2026-10-28/audit/out/v4-summary.json`, `catalog-verify.json`; screenshots
+`v4-*.app.png`).
+
+| Page | Route | `h1` app = HFW | Note |
+|---|---|---|---|
+| career-scenario | /career/setup/scenario | yes | counts identical to the wireframe (5 cards / 5 pills / 16 tags / 1 table / 4 radios / 6 steps) |
+| career-trainee | /career/setup/trainee | yes | — |
+| career-target | /career/setup/target | yes | — |
+| career-legacy | /career/setup/legacy | yes | — |
+| career-deck | /career/setup/deck | yes | — |
+| career-preflight | /career/setup/preflight | yes | — |
+| support-cards | /support-cards | yes | Server column under repair in the peer copy |
+| support-card-detail | /support-cards/1 | name differs | the `h1` is the seeded card's own name; the wireframe illustrates a different card, so this is data, not vocabulary |
+| skills | /skills | yes | — |
+| skill-detail | /skills/1 | name differs | the `h1` is the seeded skill's own name (Gourmand); data |
+| veterans | /veterans | yes | — |
+| veteran-detail | /veterans/8 | name differs | the `h1` is the recorded veteran's own name (Maruzensky); data |
+| legacy | /legacy | yes | — |
+| review | /review | yes | — |
+| runs-index | /training-runs | yes | — |
+| preferences | /preferences | yes | — |
+| catalog | /umamusume | yes | 25 seeded cards against the wireframe's 6 illustrations; counts are data |
+
+**Also verified in the same sweep.** The nine repaired lifecycle screens were re-captured while the peer's
+edits sat on top of them: all answers 200, no console errors, and every region count identical to the
+C14 baseline, so the in-flight cosmetic sweep has not regressed those slices. One 404 resource request
+was logged on the library routes (an artwork path), not a page failure.
+
+**Conclusion.** The remaining set is being repaired on a current wireframe-shaped structure; the pages
+already read as `near` in the running app. The formal verdicts and the tag decision still belong to the
+committing session, and `3.0.0` remains **absent** here.
+
+
 ---
 
 # Side tasks - 2026-10-29
