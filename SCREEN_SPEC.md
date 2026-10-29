@@ -3349,6 +3349,39 @@ Complete and refused. A refusal re-renders this screen with the stacked error li
 
 `tests/browser/career-snapshot.spec.ts`.
 
+### 4.25 HFW parity pass — per-screen state deltas (2026-10-30)
+
+This is a dated delta record, not a rewrite of the screen blocks above. Each row names what changed on
+that screen during the parity pass, the commit that carries it, and the state it introduces or retires.
+A screen not listed did not change. Read the row against its own screen's block above, which remains the
+authoritative description of everything the pass did not touch.
+
+| Screen | Route | Change and state | Commit |
+|---|---|---|---|
+| SCR-REV-002 review detail | `GET /review/{id}` | The verdict control is a **savebar**: a `role="status"` line reading "Not yet answered" until a verdict is picked, then "Reject this match" and "Confirm this match" as the two answers. `CandidateForm` takes `variant: 'row' \| 'savebar'`; the queue renders **no** form, so `savebar` is the only consumer in the app. The best-match card states the proposed record's maximum rarity as a neutral pill, or "Not recorded" in words. The other-costume row offers "Use this" as an action rather than a state label. Head action "Back to queue". | `153169bc`, `ecfff488` |
+| SCR-VET-001 veterans library | `GET /veterans` | Head-level **Compare** door. The factor-grade facet stays absent and the page states why: `ADR-0020` §3 with `PRD FR-G-4` authorise the library as recording and ban derivation, so a grade column would derive an outcome the rule forbids. The Factors table is refused on the same clause. | `a936d59d` |
+| SCR-LEG-002 legacy builder | `GET /legacy/builder` | A **preview card** in the wizard's "Projected start" shape, and a **savebar** with "Unsaved legacy", Discard, and one primary save. The wireframe's `+32` / `1432` preview figures stay refused (same ADR clause; `Career/LegacySelect.vue:29-30,435-437,442-444` already refuses them in place). **Open:** the keybox requires one-pick parent radios and the builder still takes free-form parent entry — KI-135. | `384cd054` |
+| SCR-CAR-005 preflight | `GET /career/preflight` | "What this scenario asks" prints the scenario's **own** rules from `config/scenarios.php` (repetition, fan gates with both surfaces, finale targets by distance) rather than prose. The warning pill stays unwired: its removal was deliberate at `PreflightController:111-113`. | `445288d9` |
+| SCR-CAT-001 catalog | `GET /catalog` | Three facets added — **Surface**, **Distance**, **Running-style** — filtering on the `aptitude_*` columns rather than on grades, with the vocabularies exposed as constants so the schema, the rule and the test read one list. Contract-tested first per `ADR-0018`; an unknown value is refused onto the canonical URL. The facets are folded into the cache key, so an absent facet keeps the byte-identical old key and no invalidation is needed. | `1154ddf8` |
+| SCR-CAT-002 catalog detail | `GET /catalog/{id}` | **Unchanged, by evidence.** The ★4 / ★5 / Total columns are refused: no base, stat or total column exists in any table (only `release_status` matched a `%stat%` probe). The page already documents the absence ("Not recorded" cells plus a note). | — (dropped) |
+| SCR-SUP-001 support cards | `GET /support-cards` | Filters now read **Type before Rarity**, which is the wireframe's order; the in-code comment that claimed the old order was the wireframe's is corrected with it. The scope line still names one server. | `d6a27620` |
+| SCR-SUP-002 support card detail | `GET /support-cards/{id}` | New state: **"Add to a deck"** as the page's only filled action, opening `/career/setup/deck` (which renders its six empty slots when no draft exists rather than redirecting, `DeckSelectController:66`). The unused state is a **labelled row carrying a neutral "Not used" pill**, not a bare sentence. The where-used link points at the run's cockpit, which is its own door; `runs.show` is the compatibility doorway that redirects. | `d6a27620` |
+| SCR-SKL-002 skill detail | `GET /skills/{id}` | The hint ladder now opens at the wireframe's **None / 0%** row (7 rows, not 6). A **Related** card carries the one count this schema can answer — skills sharing the row's exact stored `condition_groups` — and states "Not recorded" for the two class-code rows, for the class-code row of the engine table, and for "In your runs": no table carries a class code, and none stores a per-run hint level. No price is derived (ADR-0011, ADR-0029). | `3ee9d709` |
+| SCR-DB-004 Database races | `GET /database/races` | The **filter row** the wireframe draws and the lede promised: Search (matches `title`), Grade (`tier`), Surface, Distance (`distance_band`), Clear. Each facet reads a column the table already prints. The controller's "no facet" ruling was stale and is replaced. `totalCount` stays the whole calendar, not the answer's size; the chosen facets are echoed so a picker never resets to "Any". | `479a1cbb` |
+| SCR-DB-008 Database sources | `GET /database/sources` | New state: the **"Matrix verified <date>"** banner, read from `config('scenarios.verified_at')` — the same value the Scenarios page prints, so two screens cannot disagree about a recorded date. It states verification, not freshness. | `479a1cbb` |
+| SCR-DB-007 Database sparks | `GET /database/sparks` | The Blue table gains the wireframe's **"Per two parents"** column, computed as `amount * 2` from each row's own amount rather than typed as a second figure. The column header stays **"Value"**, not the wireframe's "Cap added": three of the four rows are the starting stat the spark pays and only the inherited row touches a cap (the DM-3 correction this page already records). The table now takes its accessible name from its own heading, which it did not have. | `658f1a1a` |
+| SCR-SYS-001 help | `GET /help` | The tag legend renders through the shipped `.trust-calculated` / `.trust-estimated` / `.trust-unknown` primitives instead of one flat `.tag`, so the three levels are visually distinct on the page whose job is distinguishing them. The meaning sentences are unchanged. | `4c360b7e` |
+
+**Standing rule recorded in `AGENTS.md` §9 by this same pass.** Every flow a user completes needs a spec
+that walks it end to end; a page spec is not a substitute. Flow coverage at the end of the pass is **1 of 5**
+(`wizard-flow.spec.ts` green; `full-career-journey.spec.ts` red and peer-owned, KI-136; snapshot, import and
+save-veteran have page-level specs only).
+
+**Not closed by this pass, named here so the screen blocks and the code cannot drift apart:** the legacy
+builder's one-pick parent radios (KI-135), the journey spec's two-element locator (KI-136), the full browser
+suite (host failed the quiet-box precondition: CPU 57.7%, 1.4 GB free), R9's snapshot field grouping, and 43
+keybox pages not re-walked (S0's structural verdict stands for them).
+
 ## 5. Workflow Specifications
 
 ### WF-001 — Run lifecycle
