@@ -69,7 +69,7 @@ test('an Active career is told it is still running, and offered the Cockpit', as
 
     // The one state that still has a turn to decide is the one that keeps its Cockpit door.
     await expect(page.getByRole('link', { name: 'Back to the Cockpit' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Final build' })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Final stats' })).toHaveCount(0);
 });
 
 test('a Retired career is a different absence, with no Cockpit door anywhere on the page', async ({ page }) => {
@@ -86,7 +86,7 @@ test('a Retired career is a different absence, with no Cockpit door anywhere on 
     // state does offer the Cockpit as a read door and the career bar always does: counting cockpit
     // hrefs would assert the opposite of what the page does.
     await expect(page.locator('a[href$="/training"]')).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: 'Final build' })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Final stats' })).toHaveCount(0);
 
     // It does offer the read-only doors the empty state carries.
     await expect(page.getByRole('link', { name: 'Career Timeline' })).toBeVisible();
@@ -99,7 +99,7 @@ test('a Completed career renders the three sections and the Save Veteran door', 
     await page.goto(`${createdRunUrls[createdRunUrls.length - 1]}/result`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByRole('heading', { name: 'Final build' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Final stats' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Race history' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Scenario result' })).toBeVisible();
 
@@ -177,7 +177,7 @@ test('keeps the 44px floor and reflows at 320 px', async ({ page }) => {
     }
 
     await page.setViewportSize({ width: 320, height: 700 });
-    await expect(page.getByRole('heading', { name: 'Final build' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Final stats' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Race history' })).toBeVisible();
 });
 

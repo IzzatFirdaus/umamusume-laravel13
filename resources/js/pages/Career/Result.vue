@@ -17,6 +17,7 @@
  * `@vue/compiler-sfc` to load (plan §11).
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
+import Note from '../../components/ui/Note.vue';
 import AptitudeBadge from '../../components/AptitudeBadge.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import { Head } from '@inertiajs/vue3';
@@ -30,6 +31,7 @@ interface StatRow {
     target: number | null;
     deficit: number | null;
     deficit_title: string | null;
+    cap: number | null;
 }
 
 const props = defineProps<{
@@ -127,6 +129,49 @@ const finaleHeadline = computed<string>(() => {
 
     return [props.finale_state.outcome, props.finale_state.placement].filter((part) => part !== null).join(' · ');
 });
+
+/** The cap bar's width. No cap means no bar rather than a denominator of zero. */
+const statPct = (stat: StatRow): number => {
+    if (stat.current === null || stat.cap === null || stat.cap <= 0) {
+        return 0;
+    }
+
+    return Math.min(100, Math.round((stat.current / stat.cap) * 100));
+};
+
+const readiness = computed(() => {
+    const speed = props.build.stats.find((stat) => stat.key === 'Speed')?.current ?? null;
+    const stamina = props.build.stats.find((stat) => stat.key === 'Stamina')?.current ?? null;
+
+    const verdict = (value: number | null, guide: number): { text: string; tone: string } => {
+        if (value === null) {
+            return { text: 'not recorded', tone: 'pill-neutral' };
+        }
+
+        if (value >= guide) {
+            return { text: value + ' · met', tone: 'pill-positive' };
+        }
+
+        if (value >= guide * 0.9) {
+            return { text: value + ' · close', tone: 'pill-caution' };
+        }
+
+        return { text: value + ' · short', tone: 'pill-neutral' };
+    };
+
+    return [
+        { label: 'Speed against "around 800, or an A rank"', ...verdict(speed, 800) },
+        { label: 'Stamina against 600 (Medium)', ...verdict(stamina, 600) },
+        { label: 'Finale itself', text: finaleHeadline.value, tone: 'pill-positive' },
+    ];
+});
+
+const bankable = [
+    { factor: 'Basic ability · Speed', title: 'Grade held on ADR-0020 §3: no column records a factor grade at bank time.' },
+    { factor: 'Aptitude · Turf', title: 'Grade held on ADR-0020 §3: the aptitude letter is recorded, its factor grade is not.' },
+    { factor: 'Unique skill', title: 'Grade held on ADR-0020 §3: the unique skill is recorded, its factor grade is not.' },
+];
+
 </script>
 
 <template>
@@ -138,7 +183,7 @@ const finaleHeadline = computed<string>(() => {
         :run-url="props.run.run_url"
     >
         <Head :title="`Career result: ${props.run.trainee}`" />
-        <template #title>Career result</template>
+        <template #title>{{ props.run.trainee }} · {{ props.run.scenario_label }}</template>
 
         <p v-if="visiting" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
         <p v-if="visitFailed" role="alert" class="mb-4 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
@@ -199,6 +244,19 @@ const finaleHeadline = computed<string>(() => {
             <!-- Leads with the outcome and the final totals, then the one finding worth printing.
                  No aggregate: four facts, and the accented tile is the finale's own state rather
                  than a grade computed from the rest. -->
+            <div class="mt-3 flex flex-wrap items-start justify-between gap-3">
+                <p class="max-w-3xl text-sm text-ink">
+                    {{ props.run.status_label }} · <span class="font-mono">Turn {{ props.headline.turn ?? 'N/A' }}</span>
+                    · {{ props.finale_state?.label ?? 'No finale row' }} {{ props.finale_state?.placement ?? '' }}.
+                    The final totals this run produced, and what can be banked from it.
+                </p>
+                <div class="flex flex-wrap gap-2">
+                    <a :href="props.run.timeline_url" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">Open the timeline</a>
+                    <a v-if="props.save_veteran.available" :href="props.save_veteran.url" class="btn btn-primary min-h-11 inline-flex items-center">Bank as a veteran</a>
+                    <span v-else class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm text-ink-muted" :title="props.save_veteran.reason">Bank as a veteran</span>
+                </div>
+            </div>
+
             <section aria-labelledby="result-headline-heading" class="mt-4">
                 <h2 id="result-headline-heading" class="sr-only">How this career ended</h2>
                 <dl class="grid grid-cols-2 gap-3 min-[1081px]:grid-cols-4">
@@ -240,6 +298,50 @@ const finaleHeadline = computed<string>(() => {
                 </p>
             </section>
 
+            <div class="mt-3.5 grid gap-3.5 g-2">
+                <section class="card" aria-labelledby="result-ready-heading">
+                    <h2 id="result-ready-heading">Finale-ready check</h2>
+                    <p class="sub">Measured against URA Finale's published targets.</p>
+                    <table class="t mt-1 w-full border-collapse text-sm">
+                        <tbody>
+                            <tr v-for="row in readiness" :key="row.label" class="border-b border-rule-soft">
+                                <td class="py-2 pr-3">{{ row.label }}</td>
+                                <td class="py-2 text-right"><span class="pill" :class="row.tone">{{ row.text }}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <Note class="mt-2.5">
+                        These published figures are a recommendation, not a gate: no source says a run is refused
+                        for missing them, and this screen does not imply it.
+                    </Note>
+                </section>
+
+                <section class="card" aria-labelledby="result-bank-heading">
+                    <h2 id="result-bank-heading">What can be banked</h2>
+                    <table class="t mt-1 w-full border-collapse text-sm">
+                        <thead><tr><th class="text-left">Factor</th><th class="text-left">Grade</th><th class="text-right"></th></tr></thead>
+                        <tbody>
+                            <tr v-for="row in bankable" :key="row.factor" class="border-b border-rule-soft">
+                                <td class="py-2 pr-3">{{ row.factor }}</td>
+                                <td class="py-2 pr-3 text-ink-muted" :title="row.title">Not computed</td>
+                                <td class="py-2 text-right"><span class="pill pill-positive">Bankable</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="mt-2 text-xs text-ink-muted">
+                        Banking saves a Veteran Umamusume record later runs can inherit from. Factor grades are held
+                        on ADR-0020 §3, so this screen prints "Not computed" rather than a star it cannot source.
+                    </p>
+                </section>
+                <section class="card" aria-labelledby="result-export-heading">
+                    <h2 id="result-export-heading">Export</h2>
+                    <p class="mt-1 text-sm text-ink-muted">
+                        No export route is built, so neither download exists. The record is readable on the
+                        timeline.
+                    </p>
+                </section>
+            </div>
+
             <p class="mt-4 max-w-3xl text-sm text-ink-muted">
                 {{ props.run.trainee }}'s finished career, as the run recorded it. Every figure below is a
                 stored or entered value, and each deficit is measured against the target you set. The tool
@@ -248,7 +350,7 @@ const finaleHeadline = computed<string>(() => {
 
             <!-- Final build -->
             <section aria-labelledby="result-build-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-                <h2 id="result-build-heading" class="text-lg font-semibold text-ink-strong">Final build</h2>
+                <h2 id="result-build-heading" class="text-lg font-semibold text-ink-strong">Final stats</h2>
 
                 <dl class="mt-3 grid grid-cols-2 gap-3 min-[761px]:grid-cols-3 min-[1081px]:grid-cols-5">
                     <div v-for="stat in props.build.stats" :key="stat.key" class="rounded-md border border-rule bg-raised p-3">
@@ -257,7 +359,9 @@ const finaleHeadline = computed<string>(() => {
                             <span :title="stat.current === null ? 'No turn was logged, so this stat has no recorded value.' : null">
                                 {{ statValue(stat.current) }}
                             </span>
+                            <s class="ml-1 text-xs font-normal text-ink-muted">/ {{ stat.cap ?? 'N/A' }}</s>
                         </dd>
+                        <div class="track mt-1"><i :style="{ width: statPct(stat) + '%' }"></i></div>
                         <p class="mt-1 text-xs text-ink-muted">
                             Target
                             <span

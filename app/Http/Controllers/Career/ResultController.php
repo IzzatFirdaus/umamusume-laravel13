@@ -13,6 +13,7 @@ use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Services\Advisor\TrainerAdvisor;
 use App\Services\Scenario\FinaleReader;
+use App\Services\ScenarioCaps;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -228,6 +229,9 @@ class ResultController extends Controller
                 'current' => $latest?->statValue($stat),
                 'target' => $target?->targets[$stat] ?? null,
                 'deficit' => $deficits[$stat] ?? null,
+                // The published cap this stat's bar measures against (HFW's 1400); null when the
+                // scenario publishes none.
+                'cap' => ScenarioCaps::scenarioCaps($run)[$stat] ?? null,
                 'deficit_title' => $this->deficitTitle($target !== null, $latest !== null),
             ];
         }
