@@ -120,6 +120,16 @@ it('composes every entered step into one contract', function (): void {
             // Build: trainee, scenario, target, and the six legacy members.
             ->where('contract.build.trainee.name', $fixture['trainee']->name)
             ->where('contract.build.scenario.label', 'URA Finale')
+            // The asks rows (`career-preflight.html:152-155`), read from `config/scenarios.php` rather
+            // than computed. Pinned here because the payload extension is what lets the screen print
+            // them at all: the facility rule is one word, the fan gates carry turf and dirt separately
+            // (the wireframe prints "Valentine's 60,000 turf"), and the stamina floor is per distance.
+            ->where('contract.build.scenario.asks.facility_level_source', 'repetition')
+            ->has('contract.build.scenario.asks.fan_gates')
+            ->where('contract.build.scenario.asks.fan_gates.0.label', "Valentine's Day")
+            ->where('contract.build.scenario.asks.fan_gates.0.turf', 60000)
+            ->where('contract.build.scenario.asks.fan_gates.0.dirt', 40000)
+            ->where('contract.build.scenario.asks.stamina_by_distance.Medium', 600)
             ->where('contract.build.target.purpose', 'StoryClear')
             ->where('contract.build.target.purpose_label', 'Story Clear')
             ->where('contract.build.target.distance', 'Medium')

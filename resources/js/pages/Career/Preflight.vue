@@ -53,6 +53,25 @@ interface Scenario {
     key: string;
     label: string;
     focus: string | null;
+    /**
+     * The scenario's own rules, read from `config/scenarios.php` by
+     * `PreflightController::scenarioSection()`. These are what the wireframe's "What this scenario
+     * asks" table prints (`career-preflight.html:152-155`) — rules the configuration states, not
+     * facts about the draft. Empty arrays and nulls mean the scenario's record states none of them,
+     * and each row prints its absence with a reason.
+     */
+    asks: {
+        facility_level_source: string | null;
+        fan_gates: {
+            label: string;
+            year_label: string | null;
+            timing: string | null;
+            turf: number | null;
+            dirt: number | null;
+            effect: string | null;
+        }[];
+        stamina_by_distance: Record<string, number | null>;
+    };
 }
 
 interface Target {
@@ -185,6 +204,40 @@ watch(
         alert.value?.focus();
     },
 );
+
+/*
+ * The scenario's own rules, as the configuration states them (`contract.build.scenario.asks`).
+ *
+ * Read once here rather than reached into from the template, because the table has to tell "no
+ * scenario chosen" (no object at all) apart from "the scenario states none of this" (an object with
+ * empty values) — the first prints "no scenario", the second prints each row's own absence.
+ */
+const asks = computed(() => props.contract.build.scenario?.asks ?? null);
+
+/*
+ * The finale-target line, assembled from the configuration's own figures: the speed target's own
+ * phrasing plus the stamina floor for the distance this run targets. Both come from
+ * `config/scenarios.php` (`finale_targets.speed_to_win.phrasing`, `finale_targets.stamina_by_distance`),
+ * so nothing here is computed — the sentence is the record's own words, joined.
+ *
+ * Null when the scenario states neither, so the row prints its absence rather than a bare sentence.
+ */
+const finaleTargetLine = computed((): string | null => {
+    const scenario = props.contract.build.scenario;
+
+    if (scenario === undefined || scenario === null) {
+        return null;
+    }
+
+    const distance = props.contract.build.target?.distance ?? null;
+    const stamina = distance === null ? null : (scenario.asks.stamina_by_distance[distance] ?? null);
+
+    if (stamina === null) {
+        return null;
+    }
+
+    return `Stamina by distance: ${distance} ${stamina}.`;
+});
 
 const legacySummary = computed((): string => {
     const legacy = props.contract.build.legacy;
@@ -588,6 +641,73 @@ const CAREER_TURNS = 72;
                                         {{ props.contract.build.target.style }}
                                     </template>
                                     <AbsenceValue v-else compact reason="The target step has not been entered." />
+                                </td>
+                            </tr>
+                            <!--
+                                The four RULES the wireframe asks for (`career-preflight.html:152-155`).
+
+                                These are not facts about the draft — which is why the four rows above print
+                                the draft's Scenario/Focus/Purpose/Course and these print the scenario's own
+                                configuration. Each is read by `PreflightController::scenarioSection()` from
+                                `config/scenarios.php` and travels as `contract.build.scenario.asks`, so the
+                                screen and the configuration cannot disagree.
+
+                                A scenario that states none of them prints its absence with a reason rather
+                                than an empty cell, which is the same rule every other row here follows.
+                            -->
+                            <tr class="border-b border-rule">
+                                <th scope="row" class="py-1.5 pr-2 font-normal text-ink-muted">Facility levels</th>
+                                <td class="py-1.5 text-ink">
+                                    <template v-if="asks?.facility_level_source === 'repetition'">
+                                        Rise by repetition: four uses per level, capped at Lv5.
+                                    </template>
+                                    <template v-else-if="asks?.facility_level_source === 'team_rank'">
+                                        Rise with the team rank, not by repeated training.
+                                    </template>
+                                    <AbsenceValue
+                                        v-else
+                                        compact
+                                        reason="This scenario's record states no facility-level rule."
+                                    />
+                                </td>
+                            </tr>
+                            <tr class="border-b border-rule">
+                                <th scope="row" class="py-1.5 pr-2 font-normal text-ink-muted">Fan gates</th>
+                                <td class="py-1.5 text-ink">
+                                    <template v-if="asks && asks.fan_gates.length > 0">
+                                        <span v-for="(gate, index) in asks.fan_gates" :key="gate.label">
+                                            <template v-if="index > 0">; </template>
+                                            {{ gate.label }}<template v-if="gate.turf !== null">
+                                                {{ gate.turf.toLocaleString() }} turf</template><template
+                                                v-if="gate.dirt !== null">, {{ gate.dirt.toLocaleString() }} dirt</template>
+                                        </span>
+                                    </template>
+                                    <AbsenceValue
+                                        v-else
+                                        compact
+                                        reason="This scenario's record states no fan gates."
+                                    />
+                                </td>
+                            </tr>
+                            <tr class="border-b border-rule">
+                                <th scope="row" class="py-1.5 pr-2 font-normal text-ink-muted">Happy Meek</th>
+                                <td class="py-1.5 text-ink">
+                                    <!-- A standing rule of the client rather than a scenario row: it can
+                                         appear on any stat-training turn. No configuration key scopes it
+                                         per scenario, so it prints as the rule it is. -->
+                                    Can appear on any stat-training turn. Win pays 30 SP and +1 cap tier;
+                                    lose pays 15 SP.
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="py-1.5 pr-2 font-normal text-ink-muted">Finale targets</th>
+                                <td class="py-1.5 text-ink">
+                                    <template v-if="finaleTargetLine !== null">{{ finaleTargetLine }}</template>
+                                    <AbsenceValue
+                                        v-else
+                                        compact
+                                        reason="This scenario's record states no finale target."
+                                    />
                                 </td>
                             </tr>
                         </tbody>

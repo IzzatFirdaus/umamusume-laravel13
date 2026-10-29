@@ -212,6 +212,43 @@ class PreflightController extends Controller
             'key' => $key,
             'label' => (string) ($config['label'] ?? $key),
             'focus' => isset($config['focus']) ? (string) $config['focus'] : null,
+            /*
+             * The "What this scenario asks" rows (`career-preflight.html:152-155`).
+             *
+             * Each of these is a RULE the scenario configuration already states, not a fact about the
+             * draft — which is why the page prints the draft's Scenario/Focus/Purpose/Distance and none
+             * of these. Read here rather than recomputed in the page, so the preflight screen and the
+             * scenario's own configuration cannot disagree:
+             *   - `facility_level_source` (`config/scenarios.php:191` for URA, `:398` for the team
+             *     scenarios): how a facility level rises, one word.
+             *   - `fan_gates` (`:210`): the fan thresholds, as the config lists them.
+             *   - `finale_targets.stamina_by_distance` (`:286-288`): the stamina floor per distance band.
+             *
+             * A scenario that states none of them yields nulls, and the page prints its absence with a
+             * reason rather than an empty row. This is a payload extension from an existing source —
+             * no new query, no new column, no stored shape changed.
+             */
+            'asks' => [
+                'facility_level_source' => isset($config['facility_level_source'])
+                    ? (string) $config['facility_level_source']
+                    : null,
+                'fan_gates' => isset($config['fan_gates']) && is_array($config['fan_gates'])
+                    ? array_values(array_map(static fn ($gate): array => [
+                        'label' => (string) ($gate['label'] ?? ''),
+                        'year_label' => isset($gate['year_label']) ? (string) $gate['year_label'] : null,
+                        'timing' => isset($gate['timing']) ? (string) $gate['timing'] : null,
+                        // Two surfaces, not one threshold: the HFW prints "Valentine's 60,000 turf", and
+                        // the config states turf and dirt separately (`config/scenarios.php:215-216`).
+                        'turf' => is_numeric($gate['turf'] ?? null) ? (int) $gate['turf'] : null,
+                        'dirt' => is_numeric($gate['dirt'] ?? null) ? (int) $gate['dirt'] : null,
+                        'effect' => isset($gate['effect']) ? (string) $gate['effect'] : null,
+                    ], $config['fan_gates']))
+                    : [],
+                'stamina_by_distance' => isset($config['finale_targets']['stamina_by_distance'])
+                    && is_array($config['finale_targets']['stamina_by_distance'])
+                    ? array_map(static fn ($floor): ?int => is_numeric($floor) ? (int) $floor : null, $config['finale_targets']['stamina_by_distance'])
+                    : [],
+            ],
         ];
     }
 
