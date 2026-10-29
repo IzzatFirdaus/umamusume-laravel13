@@ -492,11 +492,19 @@ function applyDefaults(): void {
                 <div class="mt-2" data-field="target-totals">
                     <div class="srow">
                         <span class="k">Your total</span>
-                        <span class="v font-mono tabular-nums">{{ totalTarget === null ? '-' : totalTarget }}</span>
+                        <span class="v font-mono tabular-nums">
+                            <span
+                                v-if="totalTarget === null"
+                                title="No total is printed because at least one of the five targets is still empty."
+                            >N/A</span>
+                            <template v-else>{{ totalTarget }}</template>
+                        </span>
                     </div>
                     <div class="srow">
                         <span class="k">Published Global sample build <em>Special Week</em></span>
-                        <span class="v font-mono tabular-nums">-</span>
+                        <span class="v font-mono tabular-nums">
+                            <span title="This repository stores no sample-build column, so the published sample total cannot be sourced.">N/A</span>
+                        </span>
                     </div>
                     <div class="srow">
                         <span class="k">Sum of the five scenario caps</span>
@@ -507,7 +515,7 @@ function applyDefaults(): void {
                 <p class="note mt-2">
                     The published Global sample is one publisher's build, not a requirement and not this
                     tool's recommendation: it is a figure to compare against, and a career below it is not
-                    a worse career. This repository stores no sample-build column, so the row prints a dash
+                    a worse career. This repository stores no sample-build column, so the row prints N/A
                     rather than a number it cannot source.
                 </p>
             </section>
