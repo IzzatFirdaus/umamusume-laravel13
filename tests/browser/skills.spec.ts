@@ -264,7 +264,11 @@ test('the hint ladder is a reference and the base cost never prints its absence 
         .getByRole('heading', { name: 'Displayed cost at each hint level' })
         .locator('xpath=following::table[1]');
     await expect(ladder).toBeVisible();
-    await expect(ladder.getByRole('row')).toHaveCount(6);
+    await expect(ladder.getByRole('row')).toHaveCount(7);
+    // The wireframe's ladder opens at None / 0% (`skill-detail.html:101`), the row a Trainer reads a
+    // hinted skill against. A published reference row, not a computed price.
+    await expect(ladder.getByRole('row').nth(1)).toContainText('None');
+    await expect(ladder.getByRole('row').nth(1)).toContainText('0%');
     await expect(ladder).toContainText('Lv1');
     await expect(ladder).toContainText('Lv Max');
     await expect(ladder).toContainText('40%');

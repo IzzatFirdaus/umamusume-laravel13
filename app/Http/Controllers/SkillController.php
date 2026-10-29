@@ -147,7 +147,33 @@ class SkillController extends Controller
             // read one row against the whole (`skill-detail.html`, "Entries"). It is the same count the
             // index states, read through the same scope, so the two screens cannot disagree.
             'catalogueCount' => $this->availableCount(),
+            // The wireframe's "Related" card asks for three counts (`skill-detail.html:134-141`). One
+            // of the three is a fact this schema holds: skills sharing this row's exact stored
+            // condition groups. The other two are keyed on a class code, and no column in this
+            // database carries one, so they are stated as an absence rather than printed as a
+            // number this app cannot compute.
+            'relatedSameCondition' => $this->countSharingCondition($model),
         ]);
+    }
+
+    /**
+     * How many other Global skills carry this skill's exact stored condition groups.
+     *
+     * Compared as the stored JSON, not as prose: `condition_groups` is the source's own structure
+     * (`skills.html` annotation 1), so an exact match is the only comparison that cannot drift from
+     * what the export wrote.
+     */
+    private function countSharingCondition(Skill $model): ?int
+    {
+        if ($model->condition_groups === null) {
+            return null;
+        }
+
+        return Skill::query()
+            ->availableOnGlobal()
+            ->whereKeyNot($model->id)
+            ->where('condition_groups', json_encode($model->condition_groups))
+            ->count();
     }
 
     /**

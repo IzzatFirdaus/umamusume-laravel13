@@ -234,3 +234,38 @@ it('states how many skills the Global catalogue holds for the provenance card', 
             ->component('Skills/Show')
             ->where('catalogueCount', 2));
 });
+
+it('counts the skills that share the stored condition groups, and states nothing when none are stored', function (): void {
+    // The wireframe's Related card asks for "Same condition" (`skill-detail.html:137`). It reads the
+    // stored structure, so the count is the export's own comparison and not a phrase this app infers.
+    $groups = [['condition' => 'phase==1&corner!=0', 'precondition' => null]];
+
+    $skill = skillDetailSkill(['name' => 'Conditioned Skill', 'condition_groups' => $groups]);
+    skillDetailSkill(['name' => 'Twin Condition', 'condition_groups' => $groups]);
+    skillDetailSkill(['name' => 'Different Condition', 'condition_groups' => [
+        ['condition' => 'phase==2', 'precondition' => null],
+    ]]);
+    // Out of the Global scope, so it is not one of the skills the count names.
+    Skill::factory()->create([
+        'name' => 'Japan Only Twin',
+        'condition_groups' => $groups,
+        'release_status' => ReleaseStatus::JapanOnly,
+        'name_is_client' => false,
+    ]);
+
+    $this->get(route('skills.show', $skill))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Skills/Show')
+            ->where('relatedSameCondition', 1));
+
+    // A row storing no groups has nothing to compare, so the count is absent rather than zero: the
+    // page prints "Not recorded" instead of claiming no other skill shares a condition it does not have.
+    $bare = skillDetailSkill(['name' => 'Bare Skill', 'condition_groups' => null]);
+
+    $this->get(route('skills.show', $bare))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Skills/Show')
+            ->where('relatedSameCondition', null));
+});

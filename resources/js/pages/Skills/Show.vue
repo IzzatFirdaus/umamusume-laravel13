@@ -10,10 +10,12 @@
  * skill exists in this repository, so the block prints "No client string." instead of the export's
  * English (which is the publisher's wording, not the client's) or a paraphrase of the tokens above.
  *
- * Two regions the HFW draws are not on this page and are not faked: "Related" would need condition-set
- * comparison across the catalogue, and "In your runs" would need a per-run hint level, neither of which
- * this tool stores. The class code is withheld on purpose: it is the export's integer and renders
- * nothing.
+ * Two of the wireframe's "Related" rows and its "In your runs" region are absences this schema
+ * forces, and each says so in place rather than being faked. "Same condition" is a fact the stored
+ * `condition_groups` can answer and is counted. "Same class code" and "Same class code and type" are
+ * keyed on a class code, and no column in this database carries one. "In your runs" needs a per-run
+ * hint level, and no table stores one. The class code row of the engine table is withheld for the
+ * same reason: there is nothing to print.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
@@ -54,6 +56,7 @@ interface Holder {
 
 /** The client's published hint-discount ladder (`UMAMUSUME_REFERENCE.md` §1.1.4), a reference only. */
 const HINT_LADDER = [
+    { level: 'None', discount: 0 },
     { level: 'Lv1', discount: 10 },
     { level: 'Lv2', discount: 20 },
     { level: 'Lv3', discount: 30 },
@@ -69,6 +72,11 @@ const props = defineProps<{
     eventHolders: Holder[];
     /** How many skills the Global catalogue holds, for the provenance card's scope line. */
     catalogueCount: number;
+    /**
+     * How many other Global skills carry this skill's exact stored condition groups, or null when
+     * this row stores none (nothing to compare, so it is stated rather than counted as zero).
+     */
+    relatedSameCondition: number | null;
 }>();
 
 const holderGroups = computed(() => [
@@ -253,6 +261,42 @@ const effectLine = (effect: Effect): string => `type ${effect.type}: ${effect.va
                             replacement for them. Where a client string exists it prints verbatim; for a
                             skill none does, because no client-vocabulary source for descriptions exists in
                             this repository. The block is empty by ruling rather than by omission.
+                        </span>
+                    </p>
+                </div>
+
+                <!-- The wireframe's "Related" card (`skill-detail.html:134-141`) asks for three
+                     counts. One is answerable from what this schema stores and is counted; the other
+                     two are keyed on a class code and no column carries one, so each states its
+                     absence instead of printing a number the app cannot compute. -->
+                <div class="card">
+                    <h2>Related</h2>
+                    <table class="w-full border-collapse">
+                        <tbody>
+                            <tr>
+                                <th scope="row" :class="tdLabel">Same condition</th>
+                                <td :class="[tdValue, 'text-right font-mono tabular-nums']">
+                                    <template v-if="props.relatedSameCondition === null">Not recorded</template>
+                                    <template v-else>{{ props.relatedSameCondition }} {{ props.relatedSameCondition === 1 ? 'skill' : 'skills' }}</template>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row" :class="tdLabel">Same class code</th>
+                                <td :class="[tdValue, 'text-right']">Not recorded</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" :class="tdLabel">Same class code and type</th>
+                                <td :class="[tdValue, 'text-right']">Not recorded</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="note mt-2">
+                        <span class="g" aria-hidden="true">○</span>
+                        <span>
+                            The first count reads the stored condition groups, so it is the export's own
+                            comparison. A class code is the export's integer and no column in this
+                            database carries one, so those two rows say they are not recorded rather than
+                            printing zero.
                         </span>
                     </p>
                 </div>
