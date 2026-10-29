@@ -32,6 +32,13 @@ class SupportCardSearchRequest extends FormRequest
     public const SORTS = ['rarity', 'released'];
 
     /**
+     * The two servers the wireframe's filter offers, in its order (`support-cards.html:76`).
+     *
+     * @var list<string>
+     */
+    public const SERVERS = ['Global', 'JP'];
+
+    /**
      * Where a refused facet lands. The default is `back()`, which with no referer resolves to `/` and
      * sends the Trainer to the run list from a filter they typed on the card catalog. Naming the route
      * keeps the failure on the screen that caused it, where the field error is rendered beside the
@@ -50,12 +57,19 @@ class SupportCardSearchRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // The card-name search (`support-cards.html:73`): a Trainer reads the row's printed label,
+            // so the controller matches it against the three stored name fields rather than a chip.
+            'q' => ['nullable', 'string', 'max:120'],
             'rarity' => ['nullable', Rule::in(array_map(
                 static fn (CardRarity $case): string => (string) $case->value,
                 CardRarity::cases()
             ))],
             'type' => ['nullable', Rule::in(SupportCard::TYPES)],
             'status' => ['nullable', Rule::in(SupportCard::AVAILABILITIES)],
+            // The wireframe's Server facet (`support-cards.html:76`): two servers, Global default. The
+            // three-state Availability facet above stays accepted for the Database-area route, but the
+            // library page scopes to one server rather than repeating availability on every row.
+            'server' => ['nullable', Rule::in(self::SERVERS)],
             'sort' => ['nullable', Rule::in(self::SORTS)],
         ];
     }
@@ -63,10 +77,19 @@ class SupportCardSearchRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         // A GET form submits an unchosen select as `""`, and an empty facet means "no narrowing", not
-        // "the row whose value is the empty string".
+        // "the row whose value is the empty string". A search box submits spaces the same way: a
+        // whitespace-only ask would match nothing while reading as "search for nothing".
         $this->merge(array_combine(
-            $keys = ['rarity', 'type', 'status', 'sort'],
-            array_map(fn (string $key): mixed => $this->input($key) === '' ? null : $this->input($key), $keys)
+            $keys = ['q', 'rarity', 'type', 'status', 'server', 'sort'],
+            array_map(function (string $key): mixed {
+                $value = $this->input($key);
+
+                if (is_string($value)) {
+                    $value = trim($value);
+                }
+
+                return $value === '' ? null : $value;
+            }, $keys)
         ));
     }
 }
