@@ -1574,6 +1574,35 @@ already read as `near` in the running app. The formal verdicts and the tag decis
 committing session, and `3.0.0` remains **absent** here.
 
 
+
+## C16 — cockpit-unity-cup and cockpit-ura-finale (`252c1d82`)
+
+Both cockpit variants share one page, so one slice covers both. Audit entry: divergent — "info banner
+absent; stat bars lack percentage marks; advisor warning lacks 55 turns ago; obligations table differs".
+
+| Item | Before (audit) | After |
+|---|---|---|
+| Obligations | row list (mark + word), "N/A" for undated | HFW table: Obligation / State / Due; state pill carries the word (current, ahead, met, unknown); due mono; "no date" where the calendar dates nothing |
+| Overdue warning | "Junior Make Debut is due and not recorded." | adds "It fell due on turn 12, 55 turns ago." from the page's own position |
+| Stat percentages | HFW prints a +X% beside each stat | the app prints the card's growth rate when the run recorded one, and omits it otherwise (no default +0%) |
+| Info banner | HFW `.info` | not reproduced: it is a pointer to a separate research document, not app copy |
+
+**Verdict delta.** both cockpit variants: **divergent → near**. Evidence: the Advisor DOM on run 26 now
+carries one table with the wireframe's four rows and its words, and the warning prints the wireframe's
+own "55 turns ago"; no horizontal scroll at 320px.
+
+**Gates.** `php artisan test CareerCockpitTest` → green; `npx playwright test career-cockpit -g "lists the
+career obligations"` → passed after re-baselining that case to the table; `npm run typecheck` → 0;
+`npm run build` → 0. The full `career-cockpit`, `cockpit-shell` and `career-cockpit-forms` files ran
+red in this tree; those failures live in files the concurrent session holds uncommitted
+(`career-cockpit-forms.spec.ts`, `BaseSelect`, `PageHeader`, `SetupLayout` among the 106), so they are
+not attributed to this slice and must be re-run after that worktree lands.
+
+**Remaining divergent set.** 26 pages: wizard remainder (career-trainee/target/preflight + legacy
+builder), library/legacy/veterans/review/compare, catalog/catalog-detail, support-cards/support-card-detail,
+skills/skill-detail, database-sources/database-races, review/review-detail, help, snapshot entry/setup,
+plus the copy/identifier pass. `3.0.0` remains **absent**.
+
 ---
 
 # Side tasks - 2026-10-29
