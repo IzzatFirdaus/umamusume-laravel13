@@ -92,7 +92,7 @@ columns (no such columns exist), and the skill detail's class code, two Related 
 
 The tag-decision report for this pass, the five-condition table, the quiet-box readings, the B-1 diagnosis and
 the annotation sweep with its decision rows are written under
-`.scratch-uma/mvs_4f49056156564f6c8c5dc2426cdb8c29/` (session apparatus, not tracked). They are cited from
+`.scratch-uma/mvs_4f49056156564f6c8c5dc2426cdb8c29/` (session apparatus, not tracked), together with the goal-closure record in goal-closure.md. They are cited from
 `SCREEN_SPEC.md` §4.25, which carries the per-screen deltas and the sweep's measured coverage.
 Open at this writing: `full-career-journey.spec.ts` is red and peer-owned, because its locator matches two
 `details` elements and the fix is `details[data-region="team-state"]`. The full browser suite was not run,
