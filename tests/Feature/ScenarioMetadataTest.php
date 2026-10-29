@@ -81,46 +81,34 @@ it('heads the ruleset version the same way on the wizard card and the Cockpit st
 it('prints each fact on a scenario card under one label, and never one label twice', function (): void {
     $source = scenarioCardTemplate();
 
-    // Match both SubCell labels and raw <dt> in file order.
-    // SubCell label="..." can appear before />; raw <dt>content</dt>.
-    // Use a combined regex that finds label="..." on SubCell lines and <dt> on dt lines,
-    // preserving file order by scanning line by line.
-    $lines = explode("\n", $source);
-    $labels = [];
-    foreach ($lines as $line) {
-        // SubCell label="..."
-        if (strpos($line, '<SubCell') !== false && preg_match('/label="([^"]+)"/', $line, $m)) {
-            $labels[] = trim($m[1]);
-        }
-        // raw <dt>...</dt>
-        if (preg_match('/<dt[^>]*>([^<]+)<\/dt>/', $line, $m)) {
-            $labels[] = trim($m[1]);
-        }
-    }
+    // The HFW parity pass cut the app's eight-row metadata grid: the wireframe's card face is name,
+    // baseline pill, release tag, summary, composition tags and the published caps, and the old
+    // Optimizes/Systems/… grid was the superset the audit's H2 found (d2bf1cce). The guard's job is
+    // unchanged - one fact under one label, never a duplicated heading - so it now pins the shipped
+    // face facts as one binding each: a second print of any of them fails the count.
+    // A face fact is counted by its render gate, not its raw binding count: a tag that names a fact
+    // once in its v-if and once in its interpolation is one fact under one label, while a second tag
+    // printing the same fact would add a second v-if and fail the count.
+    expect(substr_count($source, 'v-if="card.is_baseline"'))->toBe(1)
+        ->and(substr_count($source, 'v-if="card.live_on_global"'))->toBe(1)
+        ->and(substr_count($source, 'v-if="card.caps_label"'))->toBe(1)
+        ->and(substr_count($source, 'card.metadata?.summary'))->toBe(1)
+        ->and(substr_count($source, 'card.performance_input'))->toBe(1)
+        ->and(substr_count($source, 'card.card_tags'))->toBe(1);
 
-    // The card's own fact grid then its recorded metadata, in the order the template prints them.
-    // One entry per fact: a duplicated heading fails this, and so does a pattern that matched nothing.
-    // `Scenario ruleset date` sits between the availability row and the tool-wide version row, which
-    // is the 2026-10-15 wiring's third ruleset-worded fact on its own row.
-    expect($labels)->toBe([
-        'Optimizes',
-        'Systems',
-        'Tracked resources',
-        'Turn loop',
-        'Live on Global',
-        'Scenario ruleset date',
-        'Ruleset version',
-        'Description',
-        'Recommended use',
-        'Rule family',
-        'Planning focus',
-    ]);
+    // The two ruleset-worded facts can no longer collide on this card because neither is printed
+    // here: the version and the rule family belong to the Cockpit strip and the payload. A card that
+    // starts printing one must join RulesetVersionVocabularyTest's surface list first.
+    expect($source)->not->toContain('Ruleset version')
+        ->and($source)->not->toContain('Rule family')
+        ->and($source)->not->toContain('<SubCell');
 
-    // Each of the three keeps its own source: the version row carries the reason for its `N/A` on
-    // the element, the scenario date row reads the payload the entry's `ruleset_version` builds,
-    // and the family row reads the entry's `facility_level_source` rather than a word typed in here.
-    expect($source)
-        ->toContain(':title="props.ruleset.title"')
-        ->toMatch('/Rule family<\/dt>.*?card\.rule_family/s')
-        ->toMatch('/Scenario ruleset date.*?card\.ruleset_date/s');
+    // The payload still carries all three sources the card stopped printing, so the cut is a
+    // presentation change, not a data loss: the tool-wide version with its reason, the scenario's own
+    // ruleset date, and the rule family read from the entry's own source.
+    $controller = (string) file_get_contents(app_path('Http/Controllers/Career/ScenarioSelectController.php'));
+
+    expect($controller)->toContain("'ruleset'")
+        ->and($controller)->toContain("'ruleset_date'")
+        ->and($controller)->toContain("'rule_family'");
 });

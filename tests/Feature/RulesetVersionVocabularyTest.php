@@ -20,12 +20,16 @@ use Illuminate\Support\Facades\File;
  * @var array<string, string>
  */
 const RULESET_VERSION_SURFACES = [
-    'pages/Career/ScenarioSelect.vue' => '/>Ruleset version</',
+    // The wizard's scenario card stopped printing the version fact in the HFW parity pass: the
+    // wireframe's card carries name, baseline, release tag, composition tags, caps and summary, and
+    // the metadata grid that held the version row was the app's superset that the card cut.
+    // ScenarioMetadataTest still pins the payload carries it. The Dashboard and the Settings screen
+    // stopped printing the fact in the parity pass (the data-status tile and the settings band were
+    // cut), so the list names the three surfaces that still print it; a surface that starts again has
+    // to join this list, which is the count guard's job.
     'components/scenario/ScenarioPanel.vue' => '/^\s*Ruleset version:$/m',
-    'pages/Dashboard.vue' => '/^\s*Ruleset version:$/m',
     'pages/Career/Result.vue' => '/^\s*Ruleset version:$/m',
     'pages/Career/Preflight.vue' => '/^\s*Ruleset version:$/m',
-    'pages/Preferences/Edit.vue' => '/>Global Ruleset Version</',
 ];
 
 it('heads the Global ruleset version the same way on every surface that prints it', function (): void {
@@ -37,7 +41,7 @@ it('heads the Global ruleset version the same way on every surface that prints i
 
     // The count is the guard. A surface that starts printing this fact has to join the list, and one that
     // stops printing it cannot leave the list standing as the record of what the tool shows.
-    expect(RULESET_VERSION_SURFACES)->toHaveCount(6);
+    expect(RULESET_VERSION_SURFACES)->toHaveCount(3);
 });
 
 it('never heads the Global ruleset version with a word that is not version', function (): void {

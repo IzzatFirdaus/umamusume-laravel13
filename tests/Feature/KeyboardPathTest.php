@@ -31,8 +31,11 @@ it('offers a skip link whose target exists', function (): void {
     // A skip link that points at nothing is worse than none: it is a trap for the exact
     // person it exists for. Both halves are asserted, not just the anchor, and the text is
     // tied to the anchor rather than to the file.
+    // The target is matched as an attribute, not as one written-out tag: `<main>` carries its id on
+    // a line of its own, and a pin on the exact spelling fails on formatting rather than on the rule
+    // (the skip link's target exists). The anchor half stays an exact match.
     expect($layout)->toMatch('/<a\s+[^>]*href="#main"[^>]*>\s*Skip to content\s*<\/a>/')
-        ->and($layout)->toContain('<main id="main"');
+        ->and($layout)->toMatch('/<main\b[^>]*\bid="main"/');
 });
 
 it('hides the skip link until it has focus', function (): void {
@@ -103,8 +106,11 @@ it('collapses the rail to marks without removing any destination name', function
         ->and(substr_count($layout, '<NavGlyph v-if="railCollapsed" :name="item.icon" />'))->toBe(3);
 
     // Both widths exist, and the width change is a motion that reduced-motion turns off.
+    // The wide rail is the wireframe's measured 236px column, not Tailwind's 256px `w-64`; the
+    // collapsed rail is the 56px mark column. Pinned to the shipped widths, either spelling fails if
+    // a width silently changes.
     expect($layout)->toContain("'w-14'")
-        ->and($layout)->toContain("'w-64'")
+        ->and($layout)->toContain("'w-[236px]'")
         ->and($layout)->toContain('transition-[width]')
         ->and($layout)->toContain('motion-reduce:transition-none');
 
