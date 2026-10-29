@@ -85,6 +85,13 @@ const props = defineProps<{
     affinityGrades: string[];
     rankLetters: string[];
     sparkTargets: { Stat: string[]; Aptitude: string[]; Skill: string[] };
+    /**
+     * The run's starting ceilings per stat, already owned by `ScenarioCaps::forRun()` server-side
+     * (`LegacyController::startingCaps()`, which prints the run's entered ceiling where it states one
+     * and the scenario's published cap otherwise). The preview table's `Scenario cap` column reads
+     * this; no arithmetic is done in the page, and `note` carries the reason when `value` is null.
+     */
+    caps: { stat: string; label: string; value: number | null; note: string | null }[];
     notice: string;
 }>();
 
@@ -163,6 +170,14 @@ const form = useForm({
         })),
     })),
 });
+
+/*
+ * The draft as it opened, captured once. The savebar's status word and its Discard control both read
+ * from this: "Unsaved legacy" means the draft differs from the record, and Discard restores exactly
+ * this snapshot. Captured after `useForm` seeds from the payload, so it is the stored selection rather
+ * than an empty draft.
+ */
+const pristineSnapshot = JSON.stringify(form.data());
 
 const errorFor = (slot: string): string | undefined => {
     const errors = form.errors as Record<string, string | undefined>;
@@ -249,6 +264,55 @@ function requestConfirm(): void {
     }
 
     confirmDialog.value?.showModal();
+}
+
+/*
+ * The preview's parent columns.
+ *
+ * Each parent cell prints the spark the record holds for that stat — its family and star rank, e.g.
+ * "★3 Blue" — which is what `Career/LegacySelect.vue` prints for the same table. It never prints a
+ * cap contribution, because summing one is the derivation ADR-0020 §3 bars (see the card's own
+ * DOMAIN OVERRIDE comment).
+ */
+function parentSparkFor(parentIndex: number, statLabel: string): string | null {
+    const sparks = form.legacies[parentIndex]?.sparks ?? [];
+    const match = sparks.find((spark) => spark.category === 'Stat' && spark.target === statLabel);
+
+    if (match === undefined) {
+        return null;
+    }
+
+    const stars = match.stars === '' ? '?' : match.stars;
+
+    return `★${stars} ${match.kind}`;
+}
+
+/** The recorded blue sparks across both parents — a count of what the record holds, not a price. */
+const blueSparkCount = computed((): number =>
+    form.legacies.reduce(
+        (total, parent) => total + parent.sparks.filter((spark) => spark.kind === 'blue').length,
+        0,
+    ),
+);
+
+/**
+ * Whether the draft differs from what the record already stores.
+ *
+ * The savebar shows Discard only when there is something to discard, so this compares the serialised
+ * form against the payload the page opened with. Comparing the two JSON strings is deliberate: every
+ * field in `form` is a scalar or a list of scalars, so the string is a faithful stand-in for the
+ * draft and costs nothing to recompute.
+ */
+const isDirty = computed((): boolean => JSON.stringify(form.data()) !== pristineSnapshot);
+
+/*
+ * Discard returns the form to the state it opened in, without a round trip: the payload is already in
+ * the page, so re-seeding from it is both cheaper and safer than reloading and losing the run context.
+ */
+function discard(): void {
+    form.defaults(JSON.parse(pristineSnapshot) as typeof form.data);
+    form.reset();
+    form.clearErrors();
 }
 
 function submit(): void {
@@ -673,6 +737,83 @@ const hasAnyNode = computed(() =>
                  <p v-if="form.errors.affinity" class="mt-1 text-xs text-risk">{{ form.errors.affinity }}</p>
              </div>
 
+            <!--
+                The preview card (`legacy-builder.html:100-121`).
+
+                DOMAIN OVERRIDE (ADR-0020 §3): the wireframe prints `Scenario cap 1400 | From this
+                legacy +32 | Starting ceiling 1432` and a "Blue total +32" tile. Those are sums — a
+                predicted cap derived from the picks — and ADR-0020 §3 keeps derivation out of this
+                tool: "Nothing computes a Spark firing, an affinity payout, an offspring, or an
+                'expected inheritance' … it does not derive an outcome."
+
+                This is not a new reading of that clause. `Career/LegacySelect.vue:29-30`, `:435-437`
+                and `:442-444` already refused the identical figure on the identical grounds and shipped
+                the absence instead, printing each parent column as the recorded spark (`★3 Blue`)
+                rather than a priced sum. Two screens disagreeing about whether a number may be derived
+                would be worse than one screen short of the wireframe, so this card adopts the wizard's
+                shape: the columns the wireframe draws, the figures the record actually holds.
+            -->
+            <section class="card mt-4" aria-labelledby="legacy-preview">
+                <h2 id="legacy-preview" class="text-lg font-semibold text-ink-strong">
+                    Preview for a new run
+                </h2>
+                <p class="mt-1 text-xs text-ink-muted">
+                    What these two parents add to a run, before a single turn is played. Each parent
+                    column prints the spark the record holds; the projected sum is never computed,
+                    because an inheritance outcome is not this tool's to derive (ADR-0020 §3).
+                </p>
+
+                <div class="mt-3 overflow-x-auto" role="region" tabindex="0" aria-label="Preview for a new run, scrollable">
+                    <table class="t">
+                        <thead>
+                            <tr>
+                                <th scope="col">Stat</th>
+                                <th scope="col" class="n">Scenario cap</th>
+                                <th scope="col" class="n">From Parent A</th>
+                                <th scope="col" class="n">From Parent B</th>
+                                <th scope="col" class="n">Projected</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="cap in props.caps" :key="cap.stat">
+                                <th scope="row" class="text-left font-normal">{{ cap.label }}</th>
+                                <td class="n font-mono tabular-nums">
+                                    <template v-if="cap.value !== null">{{ cap.value }}</template>
+                                    <span v-else class="text-ink-muted" :title="cap.note ?? undefined">N/A</span>
+                                </td>
+                                <td class="n font-mono tabular-nums">
+                                    {{ parentSparkFor(0, cap.label) ?? '-' }}
+                                </td>
+                                <td class="n font-mono tabular-nums">
+                                    {{ parentSparkFor(1, cap.label) ?? '-' }}
+                                </td>
+                                <td class="n text-ink-muted">not computed</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tiles mt-3 sm:grid-cols-3">
+                    <div class="tile">
+                        <div class="k">Blue sparks recorded</div>
+                        <div class="v">{{ blueSparkCount }}</div>
+                    </div>
+                    <div class="tile">
+                        <div class="k">Aptitude shifts</div>
+                        <div class="v na">none this pick</div>
+                    </div>
+                    <div class="tile">
+                        <div class="k">Skill hints</div>
+                        <div class="v na">none this pick</div>
+                    </div>
+                </div>
+
+                <p class="note mt-3 text-xs text-ink-muted">
+                    Picking one blue per parent is the maximum this pair offers. Choosing Memory instead
+                    of a spark leaves that parent contributing nothing to the run's caps.
+                </p>
+            </section>
+
             <p
                 v-if="form.errors.legacies"
                 role="alert"
@@ -681,27 +822,42 @@ const hasAnyNode = computed(() =>
                 {{ form.errors.legacies }}
             </p>
 
-<div class="mt-5 flex flex-wrap items-center gap-3">
-                 <BaseButton
-                     type="button"
-                     variant="primary"
-                     :disabled="form.processing"
-                     @click="requestConfirm"
-                 >
-                     {{ form.processing ? 'Saving…' : 'Confirm Inheritance' }}
-                 </BaseButton>
+            <!--
+                The savebar (`legacy-builder.html:123-127`).
 
-                 <a
-                     :href="`/legacy/compare?runs[]=${run.id}`"
-                     class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
-                 >
-                     Compare this run
-                 </a>
+                One filled action, a status word, and a Discard that appears only when there is
+                something to discard. The wireframe's status slot is `.dirty`; it reads "Unsaved legacy"
+                while the draft differs from the stored selection and "Saved" once it does not.
+            -->
+            <div class="savebar mt-5">
+                <span class="dirty" role="status">{{ isDirty ? 'Unsaved legacy' : 'Saved' }}</span>
 
-                 <p v-if="hasAnyNode" class="text-sm text-ink-muted">
-                     Nothing is saved until you confirm.
-                 </p>
-             </div>
+                <button
+                    v-if="isDirty"
+                    type="button"
+                    class="inline-flex min-h-11 items-center rounded-full border border-rule bg-raised px-4 font-semibold text-ink-strong transition-colors duration-150 ease-out hover:bg-panel"
+                    :disabled="form.processing"
+                    @click="discard"
+                >
+                    Discard
+                </button>
+
+                <a
+                    :href="`/legacy/compare?runs[]=${run.id}`"
+                    class="inline-flex min-h-11 items-center rounded-full border border-rule bg-raised px-4 font-semibold text-ink-strong transition-colors duration-150 ease-out hover:bg-panel"
+                >
+                    Compare this run
+                </a>
+
+                <BaseButton
+                    type="button"
+                    variant="primary"
+                    :disabled="form.processing"
+                    @click="requestConfirm"
+                >
+                    {{ form.processing ? 'Saving…' : 'Save legacy' }}
+                </BaseButton>
+            </div>
 
             <!-- Destructive confirmation. A native `<dialog>` opened with `showModal()`: the focus
                  trap, the Escape close and the inert background are the platform's, and the shadow is

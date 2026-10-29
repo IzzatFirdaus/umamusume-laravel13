@@ -239,6 +239,12 @@ class LegacyController extends Controller
             // is a claim about a client screen that cannot be completed that way.
             'hasSelection' => $payload !== null,
             'graph' => $this->graph($payload, $run),
+            // The preview table's `Scenario cap` column (`legacy-builder.html:103`). Same owner as the
+            // compare page's starting-cap cards (`:300`): `startingCaps()` reads `ScenarioCaps::forRun()`,
+            // which prints the run's ENTERED ceiling where it states one and the scenario's published cap
+            // otherwise, with Wit carrying its reason because `ADR-0025` stores no `cap_wit`. Reused
+            // rather than recomputed, so the builder and the compare screen cannot disagree about a cap.
+            'caps' => $this->startingCaps($run),
             // The stored grade, so the select opens on what the run holds rather than on "Not recorded".
             // The edit form seeds from the payload for every field it carries; a re-confirm that wrote
             // blank would drop a grade the Trainer already read.

@@ -221,7 +221,7 @@ test.describe('Legacy Lab builder', () => {
         }
 
         // The primary action and the note that nothing is saved until it is pressed.
-        await expect(page.getByRole('button', { name: 'Confirm Inheritance' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Save legacy' })).toBeVisible();
         // The same sentence is also inside the confirm dialog, so the page's own note is addressed
         // directly rather than by text - two matches trip strict mode.
         await expect(
@@ -248,7 +248,7 @@ test.describe('Legacy Lab builder', () => {
         // step's own walk pins the same control the same way.
         await page.getByLabel('Stars', { exact: true }).first().fill('2');
 
-        await page.getByRole('button', { name: 'Confirm Inheritance' }).click();
+        await page.getByRole('button', { name: 'Save legacy' }).click();
 
         // The write lands on the compare surface for the same run, which is the "now what does this
         // look like" answer to a confirmation.
@@ -318,7 +318,7 @@ test.describe('Legacy Lab compare', () => {
             await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
             await page.locator('#app > *').first().waitFor();
             await page.getByLabel('Assign to Parent A').selectOption({ index: 0 });
-            await page.getByRole('button', { name: 'Confirm Inheritance' }).click();
+            await page.getByRole('button', { name: 'Save legacy' }).click();
             await page.waitForURL(/\/legacy\/compare/, { waitUntil: 'domcontentloaded' });
         }
 
@@ -417,7 +417,7 @@ test.describe('Legacy Lab compare', () => {
             await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
             await page.locator('#app > *').first().waitFor();
             await page.getByLabel('Assign to Parent A').selectOption({ index: 0 });
-            await page.getByRole('button', { name: 'Confirm Inheritance' }).click();
+            await page.getByRole('button', { name: 'Save legacy' }).click();
             await page.waitForURL(/\/legacy\/compare/, { waitUntil: 'domcontentloaded' });
         }
 

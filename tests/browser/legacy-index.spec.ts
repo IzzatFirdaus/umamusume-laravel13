@@ -39,7 +39,7 @@ async function runWithPair(page: Page): Promise<string> {
     await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     await page.getByLabel('Assign to Parent A').selectOption({ index: 0 });
-    await page.getByRole('button', { name: 'Confirm Inheritance' }).click();
+    await page.getByRole('button', { name: 'Save legacy' }).click();
     await page.waitForURL(/\/legacy\/compare/, { waitUntil: 'domcontentloaded' });
 
     return runUrl;

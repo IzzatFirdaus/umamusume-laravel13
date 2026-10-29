@@ -74,7 +74,7 @@ async function openInheritanceEvent(page: import('@playwright/test').Page): Prom
     await page.getByRole('textbox', { name: 'Applies to' }).nth(2).fill('Stamina');
     await page.getByRole('spinbutton', { name: 'Stars' }).nth(2).fill('2');
 
-    await page.getByRole('button', { name: 'Confirm Inheritance' }).click();
+    await page.getByRole('button', { name: 'Save legacy' }).click();
     await page.waitForURL(/\/legacy\/compare/, WRITE);
 
     await page.goto(`/training-runs/${runId}/inheritance`, { waitUntil: 'domcontentloaded' });

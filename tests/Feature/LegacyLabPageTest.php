@@ -187,6 +187,16 @@ it('draws the six-node graph in the client order, from the run and its payload',
             // edit form from the payload. The graph is read-only display; the form is what a re-confirm
             // posts, and a form that opened blank would write blank over a recorded selection.
             ->where('affinity', '◎')
+            // The preview table's `Scenario cap` column. Five stat rows, each carrying the ceiling
+            // `ScenarioCaps::forRun()` owns — the same source the compare page's starting-cap cards
+            // read (`LegacyController:300`), so the two screens cannot disagree about a cap. A null
+            // `value` always comes with a `note`, which is how the page prints an absence instead of a
+            // bare dash.
+            ->has('caps', 5)
+            ->has('caps.0.stat')
+            ->has('caps.0.label')
+            ->has('caps.0.value')
+            ->has('caps.0.note')
         );
 });
 
