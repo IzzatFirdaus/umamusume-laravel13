@@ -1628,6 +1628,65 @@ preflight + legacy builder), library/legacy/veterans/compare, catalog/catalog-de
 support-cards/support-card-detail, skills/skill-detail, database-sources/database-races,
 review/review-detail, help, plus the copy/identifier pass. `3.0.0` remains **absent**.
 
+
+## C18 — wizard flow repaired, and every flow walked (2026-10-29 ticket, `309d4c49`)
+
+The manual walkthrough found `/career/setup/target` could not be left: its primary saved the target and
+stayed on the route with the flash. `BuildTargetController::store()` now redirects to `career.legacy`,
+keeping `Build target saved.`; `CareerBuildTargetTest` re-baselines its three redirect assertions at
+`career.legacy` (still asserting the redirect, the write and the flash). The page needed no change: it
+submits and trusts the server's redirect.
+
+### The walk, as a user (1280px, fresh session)
+
+| Step | Primary | Click -> URL | Advances | Flash |
+|---|---|---|---|---|
+| Scenario | Continue to trainee | /career/setup/trainee | yes | Scenario set. (from the card write) |
+| Trainee | Continue to build target | /career/setup/target | yes (link) | Trainee set: name (from the card write) |
+| Profile | (not on the linear path; reached from a card's profile link) | — | n/a | — |
+| Target | Continue to legacy | /career/setup/legacy | **yes, fixed** | Build target saved. |
+| Legacy | Continue to deck | /career/setup/deck | yes | — |
+| Deck | Continue to preflight | /career/setup/preflight | yes | — |
+| Preflight | Create the run | /training-runs/{id}/cockpit | yes | Career started for name, run #id. |
+
+The walk ran twice (once to find the target defect, once after the fix) and created run 30, which was
+deleted from the dev database; the import walk's run 31 was deleted too.
+
+### Structural fix: `tests/browser/wizard-flow.spec.ts`
+
+One test walks scenario -> trainee -> target -> legacy -> deck -> preflight -> cockpit, asserting the URL
+after each primary and deleting the created run in `afterEach`. It is green. This is now the standing
+requirement for the plan's mechanics: **a flow a user completes must have a spec that walks it end to
+end**; page specs are not a substitute.
+
+### The other three flows, walked
+
+- **Snapshot** — entry -> setup -> review: advances (`Review snapshot` lands on the review read-back with
+  the stepper). The review's own confirm is the commit and redirects to the cockpit per
+  `SnapshotController::store()`; the commit itself was not exercised in this walk.
+- **Import** — import -> preview -> commit: works end to end in this working tree. `Import.vue` now posts
+  `csv` and `turns` on confirm, so KI-64 is addressed in the concurrent session's uncommitted file; the
+  walk created run 31 (preview title "Here is what the text says" -> cockpit) and the run was deleted.
+  The fix itself is not committed here.
+- **Save Veteran** — the server contract advances: `SaveVeteranController::store()` redirects to
+  `veterans.show` with the veteran's name in the flash. The UI walk was blocked opening the cockpit's
+  nested status disclosure; the redirect and the page's own spec are the evidence, and the UI walk is
+  filed as a follow-up rather than claimed.
+
+### Uncommitted on purpose
+
+`tests/browser/career-build-target.spec.ts` now asserts the URL is `/career/setup/legacy` after the click
+and then re-reads the target step to prove the write; the file also carries the concurrent session's
+in-flight edits, so the edit is applied in the worktree and left uncommitted (the same handling the side
+task used for its applied-but-uncommitted changes).
+
+**Gates.** `php artisan test CareerBuildTargetTest` -> **13 passed (111 assertions)**;
+`npx playwright test wizard-flow.spec.ts` -> **1 passed**; `npx playwright test career-build-target.spec.ts`
+-> **7 passed**; `npm run typecheck` -> 0; `npm run build` -> 0; `pint --test` on the controller and the
+feature test -> passed; `phpstan analyse` on the changed controller -> no errors.
+
+**Tag.** `3.0.0` remains **absent**. Task D now includes flow walkthroughs, not page verdicts alone.
+
 ---
 
 # Side tasks - 2026-10-29
