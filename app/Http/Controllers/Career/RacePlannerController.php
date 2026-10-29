@@ -323,6 +323,44 @@ class RacePlannerController extends Controller
             'grade_points' => $entry?->grade_points_earned,
             'comparison' => $this->comparisonCells($run, $slot),
             'alignment' => $this->alignmentCells($run, $slot),
+            // The HFW's row face: the trainee's two letters beside the race's own surface and band,
+            // and the reason a row cannot be compared when the run's maiden lock still holds it.
+            'aptitude' => $this->aptitudeFor($run, $slot),
+            'blocked_reason' => $run->maidenGates($slot, $maidenCleared)
+                ? 'The maiden lock is not cleared; this race opens only once a Debut or Maiden is won.'
+                : null,
+        ];
+    }
+
+    /**
+     * This trainee's own letters for the race's surface and distance band.
+     *
+     * @return array{surface: string|null, distance: string|null, label: string}
+     */
+    private function aptitudeFor(TrainingRun $run, RaceCatalogSlot $slot): array
+    {
+        $surfaceKey = match ($slot->surface) {
+            'Turf' => 'aptitude_turf',
+            'Dirt' => 'aptitude_dirt',
+            default => null,
+        };
+
+        $bandKey = match ($slot->distance_band) {
+            'Sprint' => 'aptitude_sprint',
+            'Mile' => 'aptitude_mile',
+            'Medium' => 'aptitude_medium',
+            'Long' => 'aptitude_long',
+            default => null,
+        };
+
+        $surface = $surfaceKey === null ? null : $run->umamusume->{$surfaceKey};
+        $distance = $bandKey === null ? null : $run->umamusume->{$bandKey};
+
+        return [
+            'surface' => is_string($surface) && $surface !== '' ? $surface : null,
+            'distance' => is_string($distance) && $distance !== '' ? $distance : null,
+            'label' => ($slot->surface ?? 'Surface not recorded').' '.($surface ?? 'N/A')
+                .' · '.($slot->distance_band ?? 'Band not recorded').' '.($distance ?? 'N/A'),
         ];
     }
 

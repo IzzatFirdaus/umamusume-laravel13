@@ -18,6 +18,8 @@
  * would make the Trainer hold the difference in their head.
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
+import Note from '../../components/ui/Note.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import RacePlanList from '../../components/career/RacePlanList.vue';
 import AlertRow from '../../components/scenario/AlertRow.vue';
@@ -52,6 +54,8 @@ interface Race {
     grade_points: number | null;
     comparison: Cell[];
     alignment: Cell[];
+    aptitude: { surface: string | null; distance: string | null; label: string };
+    blocked_reason: string | null;
 }
 
 interface Group {
@@ -147,6 +151,23 @@ const comparisonAbsent = computed<string[]>(() => {
 function clearSelection(): void {
     selected.value = [];
 }
+
+/** The selected race's own comparison cell, by key. */
+function comparisonValue(race: Race, key: string): string | null {
+    return cell(race, key, 'comparison')?.value ?? null;
+}
+
+const disciplineLabel = (race: Race): string => {
+    const surface = comparisonValue(race, 'surface') ?? 'surface not recorded';
+    const band = comparisonValue(race, 'distance_band') ?? 'band not recorded';
+
+    return `${surface} · ${band}`;
+};
+
+const aptitudePill = (race: Race): string => race.aptitude.distance ?? race.aptitude.surface ?? 'N/A';
+
+const racesUrl = computed(() => props.run.run_url.replace(/\/cockpit$/, '/races'));
+
 </script>
 
 <template>
@@ -155,264 +176,206 @@ function clearSelection(): void {
         :scenario-label="props.run.scenario_label"
         :status-label="props.run.status_label"
         :run-url="props.run.run_url"
+        current="races"
     >
-        <Head :title="`Race planner: ${props.run.trainee}`" />
-        <template #title>Race planner</template>
+        <Head :title="'Race planner: ' + props.run.trainee" />
 
-        <p v-if="visiting" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
-        <p v-if="visitFailed" role="alert" class="mb-4 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
+        <template #head>
+            <PageHeader
+                eyebrow="Race planner"
+                title="Plan the calendar"
+                description="Every race the scenario catalogue holds, grouped by obligation. Pick two to four and their rewards line up side by side; win probability and expected risk are held and print N/A."
+            >
+                <template #actions>
+                    <a :href="props.run.run_url" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">Back to cockpit</a>
+                    <a :href="racesUrl" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">This turn's race</a>
+                </template>
+            </PageHeader>
+        </template>
+
+        <p v-if="visiting" role="status" class="mb-3 text-sm text-ink-muted">Loading…</p>
+        <p v-if="visitFailed" role="alert" class="mb-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
             That screen did not load. Nothing was saved; try again.
         </p>
 
-        <!-- Level 1, Critical (design-2.0 §4): a glyph plus the word, never colour alone. It is raised
-             by the calendar — the obligation's turn has arrived and nothing is recorded against it —
-             and the region otherwise states only the next obligation and its turn. First on the screen
-             because it is the only block here that reports something the Trainer has not yet answered. -->
-        <section v-if="props.deadline.next !== null" aria-labelledby="race-planner-deadline-heading" class="rounded-md border border-rule bg-panel p-4">
-            <h2 id="race-planner-deadline-heading" class="text-lg font-semibold text-ink-strong">Deadlines</h2>
-            <AlertRow
-                v-if="props.deadline.alert !== null"
-                glyph="▲"
-                :text="props.deadline.alert.text"
-                :detail="props.deadline.alert.detail"
-                tone="critical"
-            />
-            <p class="mt-2 text-sm text-ink">
-                Next mandatory race:
-                <span class="font-semibold text-ink-strong">{{ props.deadline.next.title }}</span>,
-                {{ props.deadline.next.year_label }}
-                <template v-if="props.deadline.next.turn !== null"> turn {{ props.deadline.next.turn }}</template>
-                <template v-else> (the post-December block)</template>.
-                It reads "{{ props.deadline.next.state }}".
+        <section class="card" aria-labelledby="deadline-heading">
+            <h2 id="deadline-heading">Deadlines</h2>
+            <p v-if="props.deadline.next !== null" class="mt-1 text-sm">
+                Next mandatory race: <b class="text-ink-strong">{{ props.deadline.next.title }}</b>,
+                <span class="font-mono">Turn {{ props.deadline.next.turn ?? 'N/A' }}</span>.
             </p>
-            <p class="mt-1 text-xs text-ink-muted">
-                This states the next obligation the run has not cleared. Whether the rest of the career
-                keeps its deadlines is not something this tool predicts.
+            <p v-else class="mt-1 text-sm text-ink">No mandatory race is outstanding on this calendar.</p>
+            <p v-if="props.deadline.alert !== null" role="status" class="mt-1 rounded-md border border-risk bg-raised px-2 py-1 text-sm text-risk">
+                {{ props.deadline.alert.text }} {{ props.deadline.alert.detail }}
+            </p>
+            <p class="mt-1.5 text-xs text-ink-muted">
+                This states the next obligation the run has not cleared. Whether the rest of the career keeps its deadlines is not something this tool predicts.
             </p>
         </section>
 
-        <section aria-labelledby="race-planner-position-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="race-planner-position-heading" class="text-lg font-semibold text-ink-strong">Planning from</h2>
-            <p v-if="props.nextTurn !== null" class="mt-1 text-sm text-ink">
-                {{ props.nextTurn.year_label }} ·
-                <span class="font-mono tabular-nums">Turn {{ props.nextTurn.turn }}</span>
-            </p>
-            <p v-else class="mt-1 text-sm text-ink">
-                N/A <span class="text-xs text-ink-muted">· no turn has been logged, so there is no position to plan from</span>
-            </p>
-        </section>
-
-        <!-- The two figures the brief asks for that this tool must not state. Each prints the
-             controller's reason as visible text; neither is a band, a percentage or a number. -->
-        <section aria-labelledby="race-planner-held-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="race-planner-held-heading" class="text-lg font-semibold text-ink-strong">Held figures</h2>
-            <dl class="mt-2 flex flex-col gap-1 text-sm">
-                <div class="flex flex-wrap items-baseline gap-x-2">
-                    <dt class="text-ink">Win probability</dt>
-                    <dd class="font-semibold text-ink-strong">
-                        {{ props.held.win_probability.label }}
-                    </dd>
-                </div>
-                <p class="text-xs text-ink-muted">{{ props.held.win_probability.title }}</p>
-                <div class="flex flex-wrap items-baseline gap-x-2">
-                    <dt class="text-ink">Expected risk</dt>
-                    <dd class="font-semibold text-ink-strong">
-                        {{ props.held.expected_risk.label }}
-                    </dd>
-                </div>
-                <p class="text-xs text-ink-muted">{{ props.held.expected_risk.title }}</p>
-            </dl>
-        </section>
-
-        <!-- No calendar at all: one sentence naming what is missing and what to do. -->
-        <p
-            v-if="props.empty !== null"
-            class="mt-4 max-w-3xl rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink"
-        >
-            {{ props.empty }}
-        </p>
-        <template v-else>
-            <RacePlanList
-                v-for="group in orderedGroups"
-                :key="group.key"
-                :group="group"
-                :readiness="props.readiness"
-                :entry="props.entry"
-                :skip-url="props.run.run_url"
-                :selected="selected"
-                :limit="LIMIT"
-                @toggle="toggle"
-            />
-
-            <section aria-labelledby="race-planner-comparison-heading" class="mt-6">
-                <h2 id="race-planner-comparison-heading" class="text-lg font-semibold text-ink-strong">
-                    Reward comparison
-                </h2>
-
-                <!--
-                  The tray states the selection once, above the table it fills. It is not sticky:
-                  the plan's "N selected, Compare" tray was written for a layout that could pin
-                  it, and this one cannot (Ruling 5, and `main`'s containment), so it is a static
-                  region carrying the count, the names, and the way to start again. The count and
-                  the names are the same facts the `Compare` control on each card shows, so the
-                  two cannot disagree.
-                -->
-                <Section
-                    id="race-planner-compare-tray"
-                    title="Selected races"
-                    :level="3"
-                    description="The races chosen for comparison, and the way to start again."
-                    class="mt-2"
-                >
-                    <p class="mt-2 text-sm text-ink" data-region="compare-tray-count">
-                        <span class="font-semibold text-ink-strong">{{ chosen.length }}</span>
-                        of {{ LIMIT }} chosen
-                    </p>
-
-                    <ul v-if="chosen.length > 0" class="mt-1 flex flex-col gap-1" aria-label="Chosen races">
-                        <li v-for="race in chosen" :key="race.id" class="text-sm text-ink">
-                            <span class="font-semibold text-ink-strong">{{ race.title }}</span>
-                            <span class="ml-1.5 text-xs text-ink-muted">{{ race.year_label }}</span>
-                        </li>
-                    </ul>
-
-                    <button
-                        type="button"
-                        class="mt-2 inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm font-semibold text-ink disabled:opacity-40"
-                        :disabled="chosen.length === 0"
-                        @click="clearSelection"
-                    >
-                        Clear selection
-                    </button>
-                </Section>
-
-                <p
-                    v-if="chosen.length < 2"
-                    class="mt-2 max-w-3xl rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink"
-                >
-                    Nothing to compare yet. Pick two to four races with the "Compare" control on any
-                    card above and their rewards line up here, one property per row.
+        <div class="mt-3.5 grid gap-3.5 g-3">
+            <section class="card" aria-labelledby="planning-heading">
+                <h2 id="planning-heading">Planning from</h2>
+                <p class="mt-1 text-sm">
+                    <template v-if="props.nextTurn !== null">{{ props.nextTurn.year_label }} · <span class="font-mono">Turn {{ props.nextTurn.turn }}</span></template>
+                    <template v-else>No turn is being planned.</template>
                 </p>
-                <template v-else>
-                    <!--
-                      The properties no chosen race carries, named once. Per cell the same fact
-                      would print as an "N/A" under every column of that row, which is the
-                      repetition `AbsenceNote` exists to remove; the cell keeps its own reason in
-                      its title, and this sentence says which rows are the absent ones.
-                    -->
-                    <AbsenceNote
-                        v-if="comparisonAbsent.length > 0"
-                        class="mt-2"
-                        :labels="comparisonAbsent"
-                    />
+            </section>
+            <section class="card" aria-labelledby="held-heading">
+                <h2 id="held-heading">Held figures</h2>
+                <p class="mt-1 text-sm">Win probability: <b class="nai" :title="props.held.win_probability.title">{{ props.held.win_probability.label }}</b></p>
+                <p class="mt-1 text-sm">Expected risk: <b class="nai" :title="props.held.expected_risk.title">{{ props.held.expected_risk.label }}</b></p>
+            </section>
+            <section class="card" aria-labelledby="readiness-heading">
+                <h2 id="readiness-heading">Readiness</h2>
+                <p class="mt-1 text-sm"><span :title="props.readiness.title">{{ props.readiness.label }}</span></p>
+            </section>
+        </div>
 
-                    <!-- The scroll container carries the focus stop rather than the table, so a screen
-                         reader reads a table and 320px can still reach every column (WCAG 1.4.10). -->
-                    <div
-                        role="region"
-                        aria-label="Selected races, rewards side by side"
-                        tabindex="0"
-                        class="mt-3 overflow-x-auto rounded-md border border-rule"
-                    >
-                        <table class="w-full min-w-[40rem] border-collapse bg-raised text-sm">
-                            <caption class="px-3 py-2 text-left text-xs text-ink-muted">
-                                Recorded and sourced values only. A cell with no source behind it reads
-                                N/A, and its title says why.
-                            </caption>
-                            <thead>
-                                <tr class="border-b border-rule">
-                                    <th scope="col" class="px-3 py-2 text-left font-semibold text-ink-strong">Property</th>
-                                    <th
-                                        v-for="race in chosen"
-                                        :key="race.id"
-                                        scope="col"
-                                        class="px-3 py-2 text-left font-semibold text-ink-strong"
-                                    >
-                                        {{ race.title }}
-                                        <span class="block text-xs font-normal text-ink-muted">
-                                            {{ race.year_label }}
-                                            <template v-if="race.turn !== null"> · Turn {{ race.turn }}</template>
-                                        </span>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="row in props.comparison.rows" :key="row.key" class="border-b border-rule">
-                                    <th scope="row" class="px-3 py-2 text-left font-medium text-ink">{{ row.label }}</th>
-                                    <td
-                                        v-for="race in chosen"
-                                        :key="race.id"
-                                        class="px-3 py-2 text-ink"
-                                        :title="cell(race, row.key, 'comparison')?.title ?? undefined"
-                                    >
-                                        {{ cell(race, row.key, 'comparison')?.value ?? 'N/A' }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+        <template v-if="props.groups !== null">
+            <section class="card mt-3.5" aria-labelledby="mandatory-heading">
+                <h2 id="mandatory-heading">Mandatory</h2>
+                <p class="sub">Races the scenario requires. A missed obligation is the one thing this calendar raises.</p>
+                <p v-if="props.groups.mandatory.races.length === 0" class="text-sm text-ink">{{ props.groups.mandatory.empty }}</p>
+                <table v-else class="t mt-2 w-full border-collapse text-sm">
+                    <thead>
+                        <tr>
+                            <th class="text-left">Race</th><th class="text-left">Grade</th><th class="text-left">Surface · distance</th>
+                            <th class="text-right">Turn</th><th class="text-right">Fans needed</th><th class="text-right"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="race in props.groups.mandatory.races" :key="race.id" :class="selected.includes(race.id) ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft">
+                            <td class="py-2 pr-3">
+                                <b>{{ race.title }}</b>
+                                <span class="block text-xs text-ink-muted">{{ comparisonValue(race, 'distance') ?? 'Distance not recorded' }}</span>
+                            </td>
+                            <td class="py-2 pr-3">{{ race.tier ?? 'N/A' }}</td>
+                            <td class="py-2 pr-3" :title="race.aptitude.label">
+                                {{ disciplineLabel(race) }}
+                                <span class="pill pill-neutral ml-1 align-[1px]">{{ aptitudePill(race) }}</span>
+                            </td>
+                            <td class="py-2 pr-3 text-right font-mono">{{ race.turn ?? 'N/A' }}</td>
+                            <td class="py-2 pr-3 text-right font-mono">{{ race.fans_needed ?? 'N/A' }}</td>
+                            <td class="py-2 text-right">
+                                <button type="button" class="btn btn-sm min-h-11" @click="toggle(race.id)">Compare</button>
+                                <span v-if="race.blocked_reason !== null" class="ml-1 block text-[10.5px] text-ink-muted" :title="race.blocked_reason">{{ race.maiden_gated ? 'Maiden lock not cleared' : 'Blocked' }}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p v-if="props.groups.mandatory.truncated !== null" class="mt-1.5 text-xs text-ink-muted">{{ props.groups.mandatory.truncated }}</p>
+            </section>
 
-                    <h3 class="mt-6 flex flex-wrap items-center gap-x-2 text-lg font-semibold text-ink-strong">
-                        Target alignment
-                        <!-- Calculated: the cell is derived from two recorded values, so it is a
-                             comparison rather than a reading. Never a score and never a percentage. -->
-                        <ProvenanceBadge
-                            state="calculated"
-                        />
-                    </h3>
-                    <!--
-                      The alignment group's absence, named once. The controller states the fact
-                      (`alignment.absence` is non-null exactly when the run records no build
-                      target) and the row labels are the alignment rows' own, so the sentence says
-                      which properties are the absent ones rather than that something is. The
-                      remedy stays in each cell's title, which already carries it.
-                    -->
-                    <AbsenceNote
-                        v-if="alignmentAbsent.length > 0"
-                        class="mt-1"
-                        :labels="alignmentAbsent"
-                    />
-                    <p v-else class="mt-1 text-sm text-ink-muted">
-                        Each race against the build target this run records.
-                    </p>
-
-                    <div
-                        role="region"
-                        aria-label="Selected races against the build target"
-                        tabindex="0"
-                        class="mt-3 overflow-x-auto rounded-md border border-rule"
-                    >
-                        <table class="w-full min-w-[40rem] border-collapse bg-raised text-sm">
-                            <thead>
-                                <tr class="border-b border-rule">
-                                    <th scope="col" class="px-3 py-2 text-left font-semibold text-ink-strong">Property</th>
-                                    <th
-                                        v-for="race in chosen"
-                                        :key="race.id"
-                                        scope="col"
-                                        class="px-3 py-2 text-left font-semibold text-ink-strong"
-                                    >
-                                        {{ race.title }}
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="row in props.alignment.rows" :key="row.key" class="border-b border-rule">
-                                    <th scope="row" class="px-3 py-2 text-left font-medium text-ink">{{ row.label }}</th>
-                                    <td
-                                        v-for="race in chosen"
-                                        :key="race.id"
-                                        class="px-3 py-2 text-ink"
-                                        :title="cell(race, row.key, 'alignment')?.title ?? undefined"
-                                    >
-                                        {{ cell(race, row.key, 'alignment')?.value ?? 'N/A' }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </template>
+            <section class="card mt-3.5" aria-labelledby="upcoming-heading">
+                <h2 id="upcoming-heading">Upcoming</h2>
+                <p class="sub">Optional races before the next obligation, filtered to this trainee's aptitude.</p>
+                <p v-if="props.groups.upcoming.races.length === 0" class="text-sm text-ink">{{ props.groups.upcoming.empty }}</p>
+                <table v-else class="t mt-2 w-full border-collapse text-sm">
+                    <thead>
+                        <tr>
+                            <th class="text-left">Race</th><th class="text-left">Grade</th><th class="text-left">Surface · distance</th>
+                            <th class="text-right">Turn</th><th class="text-right">Fans needed</th><th class="text-right"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="race in props.groups.upcoming.races" :key="race.id" :class="selected.includes(race.id) ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft">
+                            <td class="py-2 pr-3">
+                                <b>{{ race.title }}</b>
+                                <span class="block text-xs text-ink-muted">{{ comparisonValue(race, 'distance') ?? 'Distance not recorded' }}</span>
+                            </td>
+                            <td class="py-2 pr-3">{{ race.tier ?? 'N/A' }}</td>
+                            <td class="py-2 pr-3" :title="race.aptitude.label">
+                                {{ disciplineLabel(race) }}
+                                <span class="pill" :class="race.aptitude.distance === 'G' || race.aptitude.surface === 'G' ? 'pill-neutral' : 'pill-positive'">{{ aptitudePill(race) }}</span>
+                            </td>
+                            <td class="py-2 pr-3 text-right font-mono">{{ race.turn ?? 'N/A' }}</td>
+                            <td class="py-2 pr-3 text-right font-mono">{{ race.fans_needed ?? 'N/A' }}</td>
+                            <td class="py-2 text-right">
+                                <button type="button" class="btn btn-sm min-h-11" @click="toggle(race.id)">Compare</button>
+                                <span v-if="race.blocked_reason !== null" class="ml-1 block text-[10.5px] text-ink-muted" :title="race.blocked_reason">{{ race.maiden_gated ? 'Maiden lock not cleared' : 'Blocked' }}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p v-if="props.groups.upcoming.truncated !== null" class="mt-1.5 text-xs text-ink-muted">{{ props.groups.upcoming.truncated }}</p>
             </section>
         </template>
+
+        <p v-else-if="props.empty !== null" class="card mt-3.5 text-sm text-ink">{{ props.empty }}</p>
+
+        <section class="card mt-3.5" aria-labelledby="compare-heading">
+            <h2 id="compare-heading">Reward comparison</h2>
+            <p class="sub">Pick two to four races with the Compare control above and their rewards line up here, one property per row.</p>
+
+            <template v-if="chosen.length < 2">
+                <div class="mt-2 rounded-md border border-dashed border-rule bg-raised p-4" role="status">
+                    <h3 class="text-[15px] font-semibold text-ink-strong">Nothing to compare yet</h3>
+                    <p class="mt-1 text-sm text-ink-muted">
+                        Choose at least two races above. The comparison shows recorded and sourced values
+                        only; a cell with no source behind it reads N/A, and its title says why.
+                    </p>
+                </div>
+            </template>
+
+            <template v-else>
+                <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                    <span class="text-ink-muted">{{ chosen.length }} races selected</span>
+                    <button type="button" class="btn btn-sm min-h-11" @click="clearSelection">Clear selection</button>
+                </div>
+                <div class="mt-2 overflow-x-auto">
+                    <table class="t w-full min-w-[40rem] border-collapse text-sm">
+                        <thead>
+                            <tr>
+                                <th class="text-left">Property</th>
+                                <th v-for="race in chosen" :key="race.id" class="text-left">{{ race.title }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="row in props.comparison.rows" :key="row.key" class="border-b border-rule-soft">
+                                <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">{{ row.label }}</th>
+                                <td v-for="race in chosen" :key="row.key + '-' + race.id" class="py-2 pr-3">
+                                    <span v-if="comparisonValue(race, row.key) !== null">{{ comparisonValue(race, row.key) }}</span>
+                                    <span v-else class="text-ink-muted" :title="cell(race, row.key, 'comparison')?.title ?? undefined">N/A</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="mt-2 text-xs text-ink-muted">
+                    The comparison shows recorded and sourced values only. Rows every chosen race leaves
+                    blank: {{ comparisonAbsent.length > 0 ? comparisonAbsent.join(', ') : 'none' }}.
+                </p>
+
+                <!-- HFW OVERRIDE (target alignment): the wireframe compares races against each other; the
+                     app also compares each race's band/surface with the run's recorded build target, which
+                     is the question a target exists to answer. -->
+                <p class="mt-3 text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Target alignment</p>
+                <p v-if="!props.alignment.recorded" class="text-sm text-ink-muted">{{ props.alignment.absence }}</p>
+                <div v-else class="mt-1 overflow-x-auto">
+                    <table class="t w-full min-w-[40rem] border-collapse text-sm">
+                        <thead>
+                            <tr>
+                                <th class="text-left">Property</th>
+                                <th v-for="race in chosen" :key="'a-' + race.id" class="text-left">{{ race.title }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="row in props.alignment.rows" :key="row.key" class="border-b border-rule-soft">
+                                <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">{{ row.label }}</th>
+                                <td v-for="race in chosen" :key="'a-' + row.key + '-' + race.id" class="py-2 pr-3">
+                                    <span v-if="cell(race, row.key, 'alignment')?.value">{{ cell(race, row.key, 'alignment')?.value }}</span>
+                                    <span v-else class="text-ink-muted" :title="cell(race, row.key, 'alignment')?.title ?? undefined">N/A</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p v-if="alignmentAbsent.length > 0" class="mt-1.5 text-xs text-ink-muted">
+                    Target alignment fields with no recorded target: {{ alignmentAbsent.join(', ') }}.
+                </p>
+            </template>
+        </section>
     </CareerLayout>
 </template>
