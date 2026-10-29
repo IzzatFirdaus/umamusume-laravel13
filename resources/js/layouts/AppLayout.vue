@@ -450,12 +450,28 @@ const moreIsCurrent = computed(() =>
                             <b v-else>Trainer Desk</b>
                         </span>
                         <span class="flex-1" />
-                        <!-- The `who` pill. A run-scoped screen supplies the run's own state here
-                             (HFW topbar `.who`: `Turn 67 · Active`, or `Completed`), because on a
-                             career screen the count of careers is not the fact the Trainer needs.
-                             Every other screen keeps the count, which is shared from the middleware
-                             so it costs no per-controller query. Absent at zero: no career is a
-                             normal state, not a warning. -->
+                        <!--
+                          THE `#who` SLOT CONTRACT (stated once; S8).
+
+                          The HFW topbar carries one state pill at `.who`. Its contract:
+
+                          * A page MAY fill `#who` with exactly ONE pill describing the fact a
+                            Trainer needs on that screen. A run-scoped screen supplies the run's own
+                            state (`Turn 67 · Active`, or `Completed`) because the count of careers is
+                            not that fact.
+                          * A page that fills nothing gets the shell default: the shared active-career
+                            count, which costs no per-controller query because the middleware shares it.
+                          * Absent at zero. No active career is a normal state, not a warning, so the
+                            pill does not render at all (`v-if="activeCareerCount > 0"`).
+                          * One pill only. This is a status line, not a toolbar; a page needing two
+                            facts states the second inside its own canvas.
+
+                          OWNERSHIP OF THE THREE PAGE FILLS: the review queue's "N pending", the
+                          preflight "N warning" and the veterans "N banked" pills are page-side work
+                          and DO NOT land in S8. S8 is shell-only by its own gate ("do not take file
+                          claims on page files during S8"), so each fill lands with the slice that
+                          owns its page, carrying prop + query source + pin in one commit.
+                        -->
                         <slot name="who">
                             <span
                                 v-if="activeCareerCount > 0"
@@ -495,6 +511,25 @@ const moreIsCurrent = computed(() =>
                     <h1 class="min-w-0 text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong focus:outline-none">
                         <slot name="title" />
                     </h1>
+                    <!-- The HFW's `.lede`: the one sentence under the name, at a readable measure.
+                         It sits on the fallback path only because `PageHeader` already renders the
+                         same marker from its `description` prop (`PageHeader.vue:64`); a page that
+                         adopts `PageHeader` stops filling this band, so the two never both print.
+                         Same 5px offset and 13px size as `PageHeader`'s lede, so the band's DOM does
+                         not change shape when a page migrates. -->
+                    <p
+                        v-if="$slots.lede"
+                        data-region="lede"
+                        class="mt-[5px] max-w-prose text-[13px] text-ink-muted"
+                    >
+                        <slot name="lede" />
+                    </p>
+                    <!-- The HFW's `.phead .hr`, and the marker `PageHeader` renders from its own
+                         template (`PageHeader.vue:78`). The fallback band draws it too so the two
+                         paths produce the SAME `.phead` DOM — eyebrow, hrow, lede, hr — and a page's
+                         head does not change shape when it migrates from this band to `PageHeader`.
+                         `aria-hidden` because it is a hairline, not content. -->
+                    <div class="mt-4 border-t border-rule-soft" aria-hidden="true" data-page-head-rule data-region="hr" />
                 </div>
             </header>
             <!-- The canvas. `@container` is `container-type: inline-size` and it is LOAD-BEARING:

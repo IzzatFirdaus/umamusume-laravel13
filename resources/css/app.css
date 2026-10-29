@@ -923,6 +923,82 @@ html[data-theme='eva01'] {
     margin-top:14px;
 }
 
+/* `table.t`: ported from shell.css:576-614. The HFW's data-table grammar.
+
+   This rule was missing while its consumer shipped: `.card:has(> table.t)` landed at the port
+   (below), but `table.t` itself did not, so every HFW `<table class="t">` had to be hand-rolled in
+   Tailwind at each page. `.t` is therefore a primitive gap rather than a new abstraction, and the
+   original plan §6's no-speculative-abstraction rule governs components, not CSS primitives.
+
+   The scroll contract is the load-bearing half and is why the card, not the page, scrolls: WCAG
+   1.4.10 Reflow allows two-dimensional scrolling for "parts of the content which require
+   two-dimensional layout for usage or meaning", and a data table is exactly that. Restacking rows
+   would cost the column alignment. The page's own width stays at the viewport.
+
+   Numbers are the wireframe's own: 12.5px body, 7px/9px cell padding, 10px uppercase kicker with
+   .06em tracking, one `--rule-soft` hairline per row. The 44px cell target for a radio or checkbox
+   is the house tap floor, applied to the CELL because the cell is the target; the dot stays 20px so
+   the drawing is unchanged. */
+table.t {
+    width:100%;
+    border-collapse:collapse;
+    font-size:12.5px;
+}
+
+table.t th,
+table.t td {
+    text-align:left;
+    padding:7px 9px;
+    border-bottom:1px solid var(--color-rule-soft);
+    vertical-align:top;
+}
+
+table.t thead th {
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--color-ink-muted);
+}
+
+/* A numeric column reads right-aligned; the wireframe marks it `n` rather than sniffing content. */
+table.t td.n,
+table.t th.n {
+    text-align:right;
+}
+
+table.t td:has(> input[type="radio"]),
+table.t td:has(> input[type="checkbox"]) {
+    height:44px;
+    min-height:44px;
+    min-width:44px;
+    padding-top:0;
+    padding-bottom:0;
+    vertical-align:middle;
+}
+
+table.t td:has(> input[type="radio"]) input,
+table.t td:has(> input[type="checkbox"]) input {
+    width:20px;
+    height:20px;
+    margin:0;
+}
+
+table.t tbody tr:hover {
+    background:var(--color-raised);
+}
+
+/* The current row of a list — the running career, the selected entry. Tint plus weight, so the
+   state does not ride on colour alone. */
+table.t tr.is-current {
+    background:var(--color-green-tint);
+}
+
+table.t tr.is-current td {
+    font-weight:700;
+    color:var(--color-ink-strong);
+}
+
 /* A card that is a direct child of a grid is separated by the grid's gap alone, never by the
    column-stack margin above. This is the wireframe's own `style="margin:0"` on every card inside a
    grid (index.html:72, :110, :134, :157, :176): without it the second card of every grid row sits
