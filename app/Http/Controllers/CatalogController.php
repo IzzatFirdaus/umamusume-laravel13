@@ -100,10 +100,22 @@ class CatalogController extends Controller
         $showUnconfirmed = $request->boolean('show_unconfirmed');
         $searchKey = $search !== null && $search !== '' ? $normalizer->normalize((string) $search) : null;
 
+        // The three aptitude facets (`catalog.html:75-77`). Each value names a COLUMN — the aptitudes
+        // are ten columns on `umamusume`, one letter grade each — so the filter is "that axis is
+        // recorded at all", not "that letter". A trainee with a null on the axis genuinely has no
+        // aptitude there and is correctly excluded; filtering by grade would be a different feature.
+        // Validated by `CatalogSearchRequest` above, so an unknown value never reaches this line.
+        $surface = $request->validated('surface');
+        $distance = $request->validated('distance');
+        $style = $request->validated('style');
+
         $query = Umamusume::query()
             ->with(['cards' => $this->cardScope($showUnconfirmed)])
             ->when(! $showAllStatus && $statusEnum === null, fn (Builder $q): Builder => $q->where('release_status', ReleaseStatus::GlobalReleased->value))
             ->when($statusEnum !== null, fn (Builder $q): Builder => $q->where('release_status', $statusEnum->value))
+            ->when($surface !== null, fn (Builder $q): Builder => $q->whereNotNull('aptitude_'.$surface))
+            ->when($distance !== null, fn (Builder $q): Builder => $q->whereNotNull('aptitude_'.$distance))
+            ->when($style !== null, fn (Builder $q): Builder => $q->whereNotNull('aptitude_'.$style))
             ->when($searchKey !== null, function (Builder $q) use ($searchKey): void {
                 // normalize() strips separators but not LIKE's own metacharacters, and
                 // the term is bound as a parameter, so without this escape a Trainer
@@ -122,7 +134,7 @@ class CatalogController extends Controller
                 });
             });
 
-        [$items, $total] = $this->cached($query, $status, $searchKey, $page, $pageSize, $showUnconfirmed);
+        [$items, $total] = $this->cached($query, $status, $searchKey, $page, $pageSize, $showUnconfirmed, $surface, $distance, $style);
 
         // `withQueryString()` because the paginator is built by hand here: without it the
         // pager links carry a bare `?page=N` and paging silently reverts status, search
@@ -204,6 +216,12 @@ class CatalogController extends Controller
                 ->map(static fn (ReleaseStatus $status): array => ['value' => $status->value, 'label' => $status->label()])
                 ->all(),
             'currentStatus' => $statusEnum?->value,
+            // The three aptitude facets, echoed so a reload keeps the selection the URL carries. Read
+            // from `validated()` like `status`, so only a value the rule accepted is ever echoed back
+            // into a control.
+            'currentSurface' => $surface,
+            'currentDistance' => $distance,
+            'currentStyle' => $style,
             'search' => $search,
             'showAllStatus' => $showAllStatus,
             'showUnconfirmed' => $showUnconfirmed,
@@ -708,7 +726,7 @@ class CatalogController extends Controller
      * @param  Builder<Umamusume>  $query
      * @return array{0: Collection<int, Umamusume>, 1: int}
      */
-    private function cached($query, ?string $status, ?string $searchKey, int $page, int $pageSize, bool $showUnconfirmed): array
+    private function cached($query, ?string $status, ?string $searchKey, int $page, int $pageSize, bool $showUnconfirmed, ?string $surface = null, ?string $distance = null, ?string $style = null): array
     {
         // Read, never written, and with no TTL of its own (F-10 / N-4): the counter is the promotion's, and
         // a `remember` here installed an expiring zero that a later increment inherited, so the page group
@@ -719,7 +737,13 @@ class CatalogController extends Controller
         // row shows, not which parent rows exist or how many there are, because
         // `cardScope()` constrains only the eager load. It stays in the key so a future
         // scope that filters parents by card state cannot reuse a page cached without it.
-        $base = "catalog:list:v{$version}:".md5("{$status}|{$searchKey}|".($showUnconfirmed ? '1' : '0'));
+        // The three aptitude facets join the key because they CHANGE WHICH ROWS EXIST, not merely
+        // what a row shows: the filter is applied to the list query itself. Without them here, a
+        // Turf-only page and an unfiltered page at the same status/search/page would share one cached
+        // id list, and the second Trainer to ask would be handed the first one's rows. They are
+        // appended rather than folded into the status slot so an absent facet keeps producing the
+        // byte-identical key it produced before this feature, and no existing entry is invalidated.
+        $base = "catalog:list:v{$version}:".md5("{$status}|{$searchKey}|".($showUnconfirmed ? '1' : '0')."|{$surface}|{$distance}|{$style}");
 
         /** @var list<int> $ids */
         $ids = Cache::remember(

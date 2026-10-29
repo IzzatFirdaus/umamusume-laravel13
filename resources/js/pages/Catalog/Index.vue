@@ -74,6 +74,14 @@ const props = defineProps<{
     askedFor: string;
     statuses: { value: string; label: string }[];
     currentStatus: string | null;
+    /**
+     * The three aptitude facets as the URL carries them, echoed so a reload keeps the selection.
+     * Each is an AXIS key (`turf`, `medium`, `pace_chaser`), validated server-side by
+     * `CatalogSearchRequest`; null means no filter chosen on that axis.
+     */
+    currentSurface: string | null;
+    currentDistance: string | null;
+    currentStyle: string | null;
     search: string | null;
     showAllStatus: boolean;
     showUnconfirmed: boolean;
@@ -86,7 +94,38 @@ const errors = computed(() => (page.props.errors as Record<string, string | unde
 const search = ref(props.search ?? '');
 const status = ref(props.showAllStatus ? 'all' : (props.currentStatus ?? ''));
 const showUnconfirmed = ref(props.showUnconfirmed);
+// The three aptitude facets. Seeded from the payload so a reload keeps the selection, and each is
+// the AXIS key (`turf`, `medium`, `pace_chaser`), not a grade — see the filter row's own comment.
+const surface = ref(props.currentSurface ?? '');
+const distance = ref(props.currentDistance ?? '');
+const style = ref(props.currentStyle ?? '');
 const loading = ref(false);
+
+/*
+ * The facet vocabularies, as the server validates them (`CatalogSearchRequest::SURFACES`,
+ * `DISTANCES`, `STYLES`). Declared here rather than fetched: a facet whose options came from the
+ * data would offer a value the rule refuses the moment the last trainee with that aptitude left the
+ * catalogue, and the shipped contract refuses unknown values (ADR-0018). The labels are the words a
+ * Trainer reads on a card, and the values are the column keys the request validates.
+ */
+const aptitudeFacets = {
+    surface: [
+        { value: 'turf', label: 'Turf' },
+        { value: 'dirt', label: 'Dirt' },
+    ],
+    distance: [
+        { value: 'sprint', label: 'Sprint' },
+        { value: 'mile', label: 'Mile' },
+        { value: 'medium', label: 'Medium' },
+        { value: 'long', label: 'Long' },
+    ],
+    style: [
+        { value: 'front_runner', label: 'Front Runner' },
+        { value: 'pace_chaser', label: 'Pace Chaser' },
+        { value: 'late_surger', label: 'Late Surger' },
+        { value: 'end_closer', label: 'End Closer' },
+    ],
+};
 
 function applyFilters(): void {
     router.get(
@@ -94,6 +133,9 @@ function applyFilters(): void {
         {
             search: search.value || undefined,
             status: status.value || undefined,
+            surface: surface.value || undefined,
+            distance: distance.value || undefined,
+            style: style.value || undefined,
             show_unconfirmed: showUnconfirmed.value ? 1 : undefined,
         },
         {
@@ -163,6 +205,49 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                     name="search"
                     placeholder="Trainee or card name"
                     :error="errors.search"
+                />
+            </label>
+            <!--
+                The three aptitude facets (`catalog.html:75-77`: Search, Surface, Distance,
+                Running style, Release, Clear).
+
+                Each value names an AXIS, not a grade: the aptitudes are ten columns on the trainee,
+                so choosing "Turf" filters to trainees who have a Turf aptitude recorded at all. The
+                wireframe's cards print the letters ("Turf A"), and reading a letter is the card's job,
+                not the filter's. An unknown value is refused server-side onto the canonical catalog
+                (`CatalogSearchRequest`, ADR-0018), so nothing here can send a value the rule rejects.
+            -->
+            <label class="flex flex-col gap-1" :class="fieldLabel">
+                Surface
+                <BaseSelect
+                    v-model="surface"
+                    id="trainee-surface"
+                    name="surface"
+                    :options="[{ value: '', label: 'Any' }, ...aptitudeFacets.surface]"
+                    placeholder="Any"
+                    :error="errors.surface"
+                />
+            </label>
+            <label class="flex flex-col gap-1" :class="fieldLabel">
+                Distance
+                <BaseSelect
+                    v-model="distance"
+                    id="trainee-distance"
+                    name="distance"
+                    :options="[{ value: '', label: 'Any' }, ...aptitudeFacets.distance]"
+                    placeholder="Any"
+                    :error="errors.distance"
+                />
+            </label>
+            <label class="flex flex-col gap-1" :class="fieldLabel">
+                Running style
+                <BaseSelect
+                    v-model="style"
+                    id="trainee-style"
+                    name="style"
+                    :options="[{ value: '', label: 'Any' }, ...aptitudeFacets.style]"
+                    placeholder="Any"
+                    :error="errors.style"
                 />
             </label>
             <label class="flex flex-col gap-1" :class="fieldLabel">

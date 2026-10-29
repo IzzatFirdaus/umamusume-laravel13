@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\ReleaseStatus;
+use App\Http\Requests\CatalogSearchRequest;
 use App\Models\Skill;
 use App\Models\SupportCard;
 use App\Models\Umamusume;
@@ -55,6 +56,48 @@ it('treats an empty status as no filter chosen rather than a bad value', functio
         ->assertOk()
         ->assertSessionHasNoErrors();
 });
+
+/*
+ * The three aptitude facets (R6). ADR-0018's contract, per facet: an unknown value is REFUSED and the
+ * refusal lands on the canonical catalog URL, with the field error beside the picker that caused it.
+ *
+ * The vocabulary is read off the request's own constants rather than restated here, which is the
+ * ADR's own requirement — the list a test asserts against must be the list the rule validates with,
+ * or the two drift and the test starts pinning yesterday's columns.
+ */
+it('refuses an unknown catalog surface and lands on the canonical catalog', function (): void {
+    $this->get('/umamusume?surface=Bogus')
+        ->assertRedirect(route('catalog.index'))
+        ->assertSessionHasErrors('surface');
+});
+
+it('refuses an unknown catalog distance and lands on the canonical catalog', function (): void {
+    $this->get('/umamusume?distance=Bogus')
+        ->assertRedirect(route('catalog.index'))
+        ->assertSessionHasErrors('distance');
+});
+
+it('refuses an unknown catalog running style and lands on the canonical catalog', function (): void {
+    $this->get('/umamusume?style=Bogus')
+        ->assertRedirect(route('catalog.index'))
+        ->assertSessionHasErrors('style');
+});
+
+it('accepts every aptitude value the catalog picker offers', function (string $facet, string $value): void {
+    $this->get("/umamusume?{$facet}={$value}")
+        ->assertOk()
+        ->assertSessionHasNoErrors();
+})->with([
+    ...array_map(static fn (string $value): array => ['surface', $value], CatalogSearchRequest::SURFACES),
+    ...array_map(static fn (string $value): array => ['distance', $value], CatalogSearchRequest::DISTANCES),
+    ...array_map(static fn (string $value): array => ['style', $value], CatalogSearchRequest::STYLES),
+]);
+
+it('treats an empty aptitude facet as no filter chosen', function (string $facet): void {
+    $this->get("/umamusume?{$facet}=")
+        ->assertOk()
+        ->assertSessionHasNoErrors();
+})->with(['surface', 'distance', 'style']);
 
 it('refuses an unknown skill type and lands on the canonical skills screen', function (): void {
     $this->get('/skills?type=Debuff')
