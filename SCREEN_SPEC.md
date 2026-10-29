@@ -3391,8 +3391,18 @@ design-rationale items satisfied by the shape they defend, leaving 216 page-spec
 **134 now carry positive code evidence or a formal not-applicable ruling** — 39 matched verbatim interface
 strings, 70 matched every distinctive noun of the claim, 4 recurring claims checked individually, and 21
 error-page claims formally not applicable because all three error views state in their own docblock that
-the keybox "is wireframe documentation and is not shipped". **82 remain unconcluded**, and this line says so
-rather than letting a verified count read as a total.
+the keybox "is wireframe documentation and is not shipped". **82 remained unconcluded at that point. Thirty-one of them have since been decided page by page**, in two
+batches reading each page's own component: 28 satisfied in full, 1 satisfied in substance with a documented
+control refusal (`TraineeSelect.vue:340` keeps the pick border and tint but is a toggle, not a radio, because
+"no trainee" must be exitable), 1 not applicable, and 5 on `dashboard.html` superseded by an owner steering
+record (`Dashboard.vue:14-16`: "`index.html` is the dashboard reference, not `dashboard.html` — the two draw
+different boards"). **51 remain unconcluded**, and this line says so rather than letting a verified count read
+as a total.
+
+The pattern worth knowing: this repository records its deliberate deviations at the code site, in the page's
+own docblock with its reason, so a keybox claim is usually resolved by reading the component rather than by
+inference. That is also why the sweep found one defect and four refusals rather than the dozens a
+claim-by-claim diff would suggest.
 
 **Not closed by this pass, named here so the screen blocks and the code cannot drift apart:** the journey
 spec's two-element locator (KI-136), the full browser suite (host failed the quiet-box precondition: CPU
