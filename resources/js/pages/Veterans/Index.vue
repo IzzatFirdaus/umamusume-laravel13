@@ -8,9 +8,25 @@
  * the Legacy builder and the compare picker. Two cards under the table carry the published factor
  * grades and the team arithmetic; the "not in this build" disclosure stays as the last section.
  *
- * HFW-OVERRIDE (filters: factor grades) - `veterans.html:124-138` prints the factor-grade reference
- * card; the wireframe's own filter row has no grade facet, and none is added: no column stores a
- * grade, they are derived from sparks this library only counts.
+ * HFW-OVERRIDE (filters: factor grades) - CORRECTED at R3. The previous text claimed "the
+ * wireframe's own filter row has no grade facet" and cited `veterans.html:124-138`, which is the
+ * factor-grade reference CARD. Both halves were wrong about the wireframe: `veterans.html:73`, inside
+ * the `.filters` row at `:70-75`, draws exactly this control -
+ * `<select>` with `Any / ★3 / ★2 / ★1` under the label "Factor grade".
+ *
+ * The facet is still not built, and now for a reason that is true and binding rather than a
+ * misreading. `ADR-0020` §3 ("A Veteran library is authorized as recording ... Explicitly unchanged,
+ * per ADR-0010: no inheritance engine. Nothing computes a Spark firing, an affinity payout, an
+ * offspring, or an 'expected inheritance.' ... The library stores and searches what the trainer
+ * entered; it does not derive an outcome"), with `PRD FR-G-4` behind it, bars computing a grade:
+ * a factor grade is derived from stored sparks, which is the derivation that clause forbids.
+ * `App\Services\Legacy\VeteranRow` states the same rule at its own docblock ("It reads; it derives
+ * nothing") and exposes only the blue/pink/unique COUNTS, "entries in the payload, never a derived
+ * price".
+ *
+ * And there is no column to read: `veterans` holds 7 columns (id, training_run_id, tags, notes,
+ * created_at, updated_at, tags_normalized) - no grade. So the facet waits on a ruling that would have
+ * to lift ADR-0020 §3 or add a stored grade, not on this page.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
@@ -160,7 +176,17 @@ const factorGrades: { family: string; note: string }[] = [
                 eyebrow="Veterans"
                 title="Veteran library"
                 :description="libraryLede"
-            />
+            >
+                <!-- The head-level Compare door. `compare_url` has always been passed
+                     (`VeteranController@index`); until now it was rendered per row only, so the
+                     library had no way to start a comparison without first finding two rows. The
+                     HFW puts the action in the head band, where a screen-level verb belongs. -->
+                <template #actions>
+                    <LinkButton :href="props.compare_url" variant="secondary">
+                        Compare veterans
+                    </LinkButton>
+                </template>
+            </PageHeader>
         </template>
 
         <!-- The wireframe's filter row: the name search first, then the two facets and Clear

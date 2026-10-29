@@ -267,7 +267,16 @@ final class VeteranController extends Controller
             ],
             [
                 'label' => 'The Factors view',
-                'reason' => 'The factor inventory is the Spark set, which is the same unsourced table the sort above names.',
+                // Corrected at R3. The previous reason ("the factor inventory is the Spark set, which
+                // is the same unsourced table the sort above names") described a missing source. The
+                // binding reason is stronger and is a rule, not a gap: ADR-0020 §3 (with PRD FR-G-4
+                // behind it) authorises the Veteran library as RECORDING and keeps the inheritance
+                // engine banned — "Nothing computes a Spark firing, an affinity payout, an offspring,
+                // or an 'expected inheritance' ... The library stores and searches what the trainer
+                // entered; it does not derive an outcome." A per-factor grade is derived from stored
+                // sparks, so it is that derivation. `Legacy\VeteranRow` says the same in its own
+                // docblock ("It reads; it derives nothing") and carries only counts.
+                'reason' => 'A factor grade would be derived from the stored sparks, and ADR-0020 §3 keeps derivation out of this library: it records and searches what the Trainer entered. The record carries spark counts, not a graded inventory.',
             ],
             // The fourth absence this list carried — comparison and "find parents for this build" — is built
             // as of this slice's write half: `veterans.compare` lines careers up and `find_parents_url` runs
