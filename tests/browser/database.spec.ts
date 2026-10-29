@@ -265,6 +265,17 @@ test('the Sparks view renders the categories and the star-roll odds table', asyn
     // `exact` is load-bearing: every other cell in the table ends in "0%" ("about 90%"), so a
     // substring match here resolves to seven elements instead of the one true zero.
     await expect(odds.getByText('0%', { exact: true })).toBeVisible();
+
+    // The wireframe's "Per two parents" column (`database-sparks.html:89`) is computed, not typed:
+    // running two of the same family doubles the figure, so each cell is twice its Value cell. The
+    // column stays "Value" and not the wireframe's "Cap added", because three of the four rows are
+    // the starting stat the spark pays and only the inherited row touches a cap.
+    const blue = page.getByRole('table', { name: /Blue spark values/ });
+    await expect(blue.getByRole('columnheader', { name: 'Per two parents' })).toBeVisible();
+    await expect(blue.getByRole('columnheader', { name: 'Value' })).toBeVisible();
+    const starThree = blue.getByRole('row').filter({ hasText: '★3' }).first();
+    await expect(starThree).toContainText('+21 stat at career start');
+    await expect(starThree).toContainText('+42 stat at career start');
 });
 
 for (const area of AREAS) {

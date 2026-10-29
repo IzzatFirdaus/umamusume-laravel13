@@ -115,11 +115,21 @@ const families: { family: string; carries: string; applied: string }[] = [
     { family: 'Unique', carries: "The trainee's own skill", applied: 'Same three moments' },
 ];
 
-const blueValues: { label: string; value: string }[] = [
-    { label: '★1', value: '+5 stat at career start' },
-    { label: '★2', value: '+12 stat at career start' },
-    { label: '★3', value: '+21 stat at career start' },
-    { label: '★3 inherited', value: '+16 to that stat’s cap' },
+/**
+ * The blue figures, each with the amount split out so the wireframe's "Per two parents" column
+ * (`database-sparks.html:89`) is arithmetic over the published ladder rather than a second typed
+ * number. That column exists because running two of the same family doubles the figure, and a typed
+ * twin would be a figure nobody computed.
+ *
+ * The column is `Value` and not the wireframe's `Cap added`: three of the four rows are the starting
+ * stat the spark pays, and only the inherited row touches a cap (the DM-3 correction this page
+ * already records). Heading them "cap added" would be a claim about the ladder that is not true.
+ */
+const blueValues: { label: string; amount: number; phrase: string }[] = [
+    { label: '★1', amount: 5, phrase: 'stat at career start' },
+    { label: '★2', amount: 12, phrase: 'stat at career start' },
+    { label: '★3', amount: 21, phrase: 'stat at career start' },
+    { label: '★3 inherited', amount: 16, phrase: 'to that stat’s cap' },
 ];
 
 const pinkValues: { label: string; value: string }[] = [
@@ -200,17 +210,19 @@ const close = async (): Promise<void> => {
         <div class="mt-4 grid gap-4 g-2">
             <section class="card" aria-labelledby="spark-blue-values">
                 <h2 id="spark-blue-values">Blue spark values</h2>
-                <table class="mt-2 w-full border-collapse">
+                <table class="mt-2 w-full border-collapse" aria-labelledby="spark-blue-values">
                     <thead>
                         <tr>
                             <th :class="th">Grade</th>
                             <th :class="[th, 'text-right']">Value</th>
+                            <th :class="[th, 'text-right']">Per two parents</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="row in blueValues" :key="row.label">
                             <th scope="row" :class="[td, 'text-left font-medium']">{{ row.label }}</th>
-                            <td :class="tdValue">{{ row.value }}</td>
+                            <td :class="tdValue">+{{ row.amount }} {{ row.phrase }}</td>
+                            <td :class="[tdValue, 'font-mono tabular-nums']">+{{ row.amount * 2 }} {{ row.phrase }}</td>
                         </tr>
                     </tbody>
                 </table>
