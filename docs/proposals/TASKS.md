@@ -1603,6 +1603,31 @@ builder), library/legacy/veterans/review/compare, catalog/catalog-detail, suppor
 skills/skill-detail, database-sources/database-races, review/review-detail, help, snapshot entry/setup,
 plus the copy/identifier pass. `3.0.0` remains **absent**.
 
+
+## C17 — career-snapshot-entry, with the snapshot review re-read (`bc735e93`)
+
+| Item | Before (audit) | After |
+|---|---|---|
+| Stepper | absent | HFW nav: Entry live (word + current mark), Setup and Review links |
+| Copy block | bare bordered box | shared `.card` primitive, same copy |
+| Review (re-read) | audit entry pointed at C2 | stepper present, h1 "Review snapshot", bare visit shows the empty read-back state |
+
+**Verdict delta.** career-snapshot-entry: **divergent → near**. career-snapshot-review is **near**: its
+stepper, h1 and read-back state match `career-snapshot-review.html`; with no draft it correctly shows the
+empty state instead of eight zeros.
+
+**Evidence.** DOM vs HFW on `/career/snapshot`: h1 equal, the same three step labels, one `.card`, one
+filled action. No console errors.
+
+**Gates.** `php artisan test SnapshotEntryTest SnapshotReviewTest` → **11 passed (131 assertions)**;
+`npm run typecheck` → 0; `npm run build` → 0. The `career-snapshot` browser spec is one of the
+concurrent session's uncommitted files and was neither edited nor re-baselined here.
+
+**Remaining divergent set.** 24 pages: career-snapshot-setup, wizard remainder (career-trainee/target/
+preflight + legacy builder), library/legacy/veterans/compare, catalog/catalog-detail,
+support-cards/support-card-detail, skills/skill-detail, database-sources/database-races,
+review/review-detail, help, plus the copy/identifier pass. `3.0.0` remains **absent**.
+
 ---
 
 # Side tasks - 2026-10-29
