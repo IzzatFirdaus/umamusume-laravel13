@@ -9,6 +9,8 @@ use App\Enums\AliasLanguage;
 use App\Enums\CandidateStatus;
 use App\Http\Requests\ResolveMatchCandidateRequest;
 use App\Models\MatchCandidate;
+use App\Models\Umamusume;
+use App\Models\UmamusumeAlias;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -79,6 +81,8 @@ class ReviewController extends Controller
     {
         $candidate->loadMissing('suggestedUmamusume');
 
+        $suggested = $candidate->suggestedUmamusume;
+
         return Inertia::render('Review/Detail', [
             'candidate' => [
                 'id' => $candidate->id,
@@ -88,9 +92,36 @@ class ReviewController extends Controller
                 'match_tier_label' => $candidate->match_tier->label(),
                 'source_key' => $candidate->source_key,
                 'created_at' => $candidate->created_by_fetch_at->toDateString(),
-                'suggestion' => $candidate->suggestedUmamusume?->name,
+                'suggestion' => $suggested?->name,
                 'suggested_umamusume_id' => $candidate->suggested_umamusume_id,
             ],
+            /*
+             * The record the engine proposed, in the shape the "Best match" card prints. The stored
+             * suggestion is used rather than a fresh `CrossReferenceMatcher` call: it is what the
+             * fetch wrote down, so the screen shows the decision that is actually pending instead of
+             * a second opinion that could disagree with the row under review.
+             */
+            'bestMatch' => $suggested === null ? null : [
+                'id' => $suggested->id,
+                'slug' => $suggested->slug,
+                'name' => $suggested->name,
+                'name_ja' => $suggested->name_ja,
+                'costume' => self::costumeOf($suggested->name),
+                'aptitudes' => $suggested->aptitudeAxes(),
+            ],
+            /*
+             * The other forms of the same trainee. A costume is not a column: it is a bracketed prefix
+             * inside `name` (`[Rosy Dreams] Rice Shower`), so two forms share a name and differ in
+             * growth. They are listed apart rather than collapsed, because collapsing them is what
+             * would make a costume tag meaningless on the row above.
+             */
+            'otherForms' => $suggested === null
+                ? []
+                : self::otherFormsOf($suggested),
+            'hasAlias' => $candidate->proposed_name !== ''
+                && UmamusumeAlias::query()
+                    ->whereRaw('lower(alias) = lower(?)', [$candidate->proposed_name])
+                    ->exists(),
             'aliasLanguages' => collect(AliasLanguage::cases())
                 ->map(fn (AliasLanguage $language): array => [
                     'value' => $language->value,
@@ -98,6 +129,41 @@ class ReviewController extends Controller
                 ])
                 ->all(),
         ]);
+    }
+
+    /**
+     * The bracketed costume prefix of a catalog name, or null when the row carries none.
+     */
+    private static function costumeOf(string $name): ?string
+    {
+        return preg_match('/^\[([^\]]+)\]\s*/', $name, $matches) === 1 ? $matches[1] : null;
+    }
+
+    /**
+     * The other catalog forms of the same trainee: same name with the costume prefix removed.
+     *
+     * @return list<array{id: int, name: string, costume: string|null, slug: string}>
+     */
+    private static function otherFormsOf(Umamusume $suggested): array
+    {
+        $base = preg_replace('/^\[[^\]]+\]\s*/', '', $suggested->name) ?? $suggested->name;
+
+        return Umamusume::query()
+            ->whereKeyNot($suggested->id)
+            ->where(function ($query) use ($base): void {
+                $query->where('name', 'like', '%'.$base.'%')
+                    ->orWhere('name', $base);
+            })
+            ->orderBy('name')
+            ->limit(10)
+            ->get()
+            ->map(fn (Umamusume $form): array => [
+                'id' => $form->id,
+                'name' => $form->name,
+                'costume' => self::costumeOf($form->name),
+                'slug' => $form->slug,
+            ])
+            ->all();
     }
 
     /**

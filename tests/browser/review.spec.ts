@@ -42,7 +42,7 @@ test('every control on the queue meets the 44px floor', async ({ page }) => {
     await expectTapTargets(page.locator('main a, main button, main select, main input'), 4);
 });
 
-test('each card explains itself: count, pill, badge, reason, and one primary-action accent', async ({ page }) => {
+test('each row explains itself: confidence, source, match and the door to the decision', async ({ page }) => {
     seedPendingCandidates(2, { suggested: true });
     seedPendingCandidates(2);
     await page.goto('/review');
@@ -53,41 +53,19 @@ test('each card explains itself: count, pill, badge, reason, and one primary-act
         test.skip(true, 'No pending candidates in the scratch database.');
     }
 
-    // #11 replaced the "N of M items to resolve" sentence with a progress bar; the count now lives
-    // beside the bar as "N of M resolved" and is pinned by the progress case below.
-    const card = page.locator('main ul > li').first();
+    const row = page.locator('#review-results tr').first();
 
-    // 6A.6 + 6A.2: a status pill and a shared provenance badge carry what the metadata row used to
-    // print as bare `tier · source · date` text; the date keeps its own element beside the badge.
-    await expect(card.getByText(/^(Fuzzy match|No match)$/)).toBeVisible();
-    await expect(card.locator('[role="img"]').first()).toBeVisible();
-    await expect(card.locator('time')).toBeVisible();
-
-    // 6A.1 + 6A.9: every card carries either the reason it has no suggestion or the hint that
-    // names the id it does suggest.
-    await expect(card.getByText(/No suggestion:|Suggested id:/)).toBeVisible();
-
-    // DESIGN.md §5 (b), 2026-10-17: one provenance-state label per fact, and `ProvenanceBadge` is the
-    // single owner of the state word. Before this case a no-match row rendered both
-    // `StatusBadge("No match")` and the badge's `Unknown` for the same tier fact — two labels, one
-    // state. A `toHaveCount(0)` on the pill would pass on a card that never had one, so this asserts
-    // the badge is still present (the state word survives) and the duplicate word is gone.
-    await expect(card.locator('[role="img"]').first()).toBeVisible();
-    // The badge is the one label left, so its state word is the card's state word. Asserted on the
-    // badge's accessible name rather than on visible text: the state is spelled in the badge's
-    // `aria-label`, and the duplicate pill was the only visible copy of it.
-    await expect(card.locator('[role="img"]').first()).toHaveAttribute('aria-label', /^(Unknown|Estimated|Calculated)/);
-    await expect(card.getByText('No match', { exact: true })).toHaveCount(0);
-
-    // 6A.4, 6A.3 and 6A.10 moved to review-detail.spec.ts with the form: the accented primary, the
-    // visible "Verdict" label and the `aria-busy` form are the detail page's now (FQ-10).
-    //
-    // What the queue still owns is the identity it always carried: the card explains itself, and the
-    // row it summarises links to the page that decides.
-    await expect(card.getByTestId('review-detail-link')).toBeVisible();
+    // The wireframe's columns (`review.html:80-101`): the candidate names itself and its source, the
+    // question is stated, the proposal (or its absence) is printed, the state word is the badge's, and
+    // the row's one door goes to the page that decides.
+    await expect(row.locator('time')).toBeVisible();
+    await expect(row.locator('[role="img"]').first()).toBeVisible();
+    await expect(row.locator('[role="img"]').first()).toHaveAttribute('aria-label', /^(Unknown|Estimated|Calculated)/);
+    await expect(row.getByText(/Why this name is here|No suggestion:|Suggested id:/)).toBeVisible();
+    await expect(row.getByTestId('review-detail-link')).toBeVisible();
 });
 
-test('lists the rows the engine could suggest before the ones it could not', async ({ page }) => {
+test('keeps the engine\'s suggestion-first order in the table', async ({ page }) => {
     seedPendingCandidates(1, { suggested: true });
     seedPendingCandidates(2);
     await page.goto('/review');
@@ -98,10 +76,8 @@ test('lists the rows the engine could suggest before the ones it could not', asy
         test.skip(true, 'No pending candidates in the scratch database.');
     }
 
-    // The seeded queue holds exactly one suggested row, and every seeded row shares one fetch
-    // timestamp, so before the ordering fix the list opened on a row with no suggestion at all.
     // 6A.1's suggestion-first order is what puts the click-decidable row where the Trainer meets it.
-    await expect(page.locator('main ul > li').first()).toContainText('Suggested id:');
+    await expect(page.locator('#review-results tr').first()).toContainText('Suggested id:');
 });
 
 // MOVED (FQ-10): "gates Resolve on a chosen verdict" now asserts on the detail page, where the verdict
@@ -110,39 +86,34 @@ test('lists the rows the engine could suggest before the ones it could not', asy
 // MOVED (FQ-10): "lines the three controls up on one baseline" now asserts on the detail page, where
 // `review-form-row` renders. See tests/browser/review-detail.spec.ts.
 
-test('splits the queue into the decidable half and the research half', async ({ page }) => {
+test('holds both halves of the queue in one table, suggested rows first', async ({ page }) => {
     seedPendingCandidates(2, { suggested: true });
     seedPendingCandidates(3);
 
     await page.goto('/review');
     await page.locator('#app > *').first().waitFor();
 
-    // The controller answers one paginated list, already ordered suggestion-first, so the split is
-    // presentation: two named sections, and no card in the wrong half. The counts are read from the
-    // page rather than pinned, because the queue is shared state: a seed that is already there (the
-    // pipeline's own pending rows) lands in one of these sections too.
-    const decidable = page.locator('section[aria-labelledby="review-with-suggestion"]');
-    const research = page.locator('section[aria-labelledby="review-without-suggestion"]');
+    // One Pending table (`review.html:69-101`): the split is the order the controller already states,
+    // not two sections. The membership rule is read off the rows.
+    const rows = page.locator('#review-results tr');
+    const total = await rows.count();
+    expect(total, 'the table holds the whole page of candidates').toBe(5);
 
-    await expect(decidable).toBeVisible();
-    await expect(research).toBeVisible();
+    const suggested = await page.getByText('Suggested id:').count();
+    const noMatch = await page.getByText('No match', { exact: true }).count();
+    expect(suggested, 'two seeded rows carry a suggestion').toBe(2);
+    expect(noMatch, 'three seeded rows carry none').toBe(3);
 
-    // The heading carries its own count, and the count matches the cards under it.
-    const decidableHeading = (await decidable.locator('h3').innerText()).replace(/\s+/g, ' ').trim();
-    const researchHeading = (await research.locator('h3').innerText()).replace(/\s+/g, ' ').trim();
-    const decidableCards = await decidable.locator('ul > li').count();
-    const researchCards = await research.locator('ul > li').count();
-
-    expect(decidableHeading).toBe(`Needs a decision (${decidableCards})`);
-    expect(researchHeading).toBe(`No fuzzy match (${researchCards})`);
-
-    // The membership rule: a suggestion in the first half, none in the second. The second half's
-    // state word is the badge's now, not the removed "No match" pill (DESIGN.md §5 (b)), so it is
-    // counted on the badge's accessible name.
-    await expect(decidable.getByText('Suggested id:')).toHaveCount(decidableCards);
-    await expect(research.getByText('Suggested id:')).toHaveCount(0);
-    await expect(research.locator('[role="img"][aria-label^="Unknown"]')).toHaveCount(researchCards);
-    await expect(research.getByText('No match', { exact: true })).toHaveCount(0);
+    // Every suggested row precedes every no-match row: the first `suggested` rows are the decidable
+    // ones, and the rest state the absence.
+    for (let index = 0; index < total; index += 1) {
+        const row = rows.nth(index);
+        if (index < suggested) {
+            await expect(row, `row ${index} should carry a suggestion`).toContainText('Suggested id:');
+        } else {
+            await expect(row, `row ${index} should state no match`).toContainText('No match');
+        }
+    }
 });
 
 test('shows review progress and keeps the pager reachable', async ({ page }) => {
@@ -203,7 +174,7 @@ test('measures the queue against the shell gutter', async ({ page }) => {
     const edges = await page.evaluate(() => {
         const main = document.querySelector('main') as HTMLElement;
         const band = main.querySelector('[data-shell-band]') as HTMLElement | null;
-        const row = document.querySelector('section[aria-labelledby] ul > li') as HTMLElement | null;
+        const row = document.querySelector('#review-results tr') as HTMLElement | null;
         const grip = band ?? main;
         const style = getComputedStyle(grip);
 
@@ -228,24 +199,14 @@ test('summarises a no-match row on one line and links to the page that decides',
     await page.goto('/review');
     await page.locator('#app > *').first().waitFor();
 
-    const research = page.locator('section[aria-labelledby="review-without-suggestion"]');
-    const decidable = page.locator('section[aria-labelledby="review-with-suggestion"]');
+    // The last row is a no-match row (the controller orders suggestions first).
+    const row = page.locator('#review-results tr').last();
+    await expect(row).toContainText('No catalog record carries this name.');
 
-    // FQ-10 moved the verdict form to its own page. Both halves therefore summarise and link: the
-    // decidable half keeps its comparison, the research half keeps its one line.
-    const openCard = decidable.locator('ul > li').first();
-    await expect(openCard.getByTestId('review-detail-link')).toBeVisible();
-
-    const row = research.locator('ul > li').first();
-
-    // The disclosure the old case drove is gone, not merely hidden: there is no toggle to expand.
-    await expect(row.getByRole('button', { name: /the verdict form for / })).toHaveCount(0);
-    await expect(row.getByTestId('review-detail-link')).toBeVisible();
-
-    // One line still means one line. The old case proved it by opening and closing a disclosure; the
-    // new shape proves the same user-visible fact by measuring the row it now renders.
+    // The row is a summary and a door: a candidate cell of name, Japanese name and source, and one
+    // 44px Review control. No form, no verdict controls (`FQ-10` moved those to the detail page).
     const height = await row.evaluate((element) => element.getBoundingClientRect().height);
-    expect(height, 'the research row is a single summary line').toBeLessThanOrEqual(64);
+    expect(height, 'the research row is a summary, not a form').toBeLessThanOrEqual(96);
 
     // The link names the row's own candidate, so twenty of them stay distinguishable by a screen reader.
     await expect(row.getByTestId('review-detail-link')).toHaveAttribute('aria-label', /^Review /);
@@ -266,28 +227,24 @@ test('the summarised queue fits on one screen', async ({ page }) => {
     await page.locator('#app > *').first().waitFor();
 
     const measured = await page.evaluate(() => {
-        const section = document.querySelector('section[aria-labelledby="review-without-suggestion"]') as HTMLElement | null;
-        const cards = [...(section?.querySelectorAll('ul > li') ?? [])] as HTMLElement[];
+        const cards = [...document.querySelectorAll('#review-results tr')] as HTMLElement[];
 
         return {
             height: document.documentElement.scrollHeight,
-            cards: document.querySelectorAll('main ul > li').length,
-            sectionHeight: section === null ? 0 : Math.round(section.getBoundingClientRect().height),
-            decidableHeight: Math.round((document.querySelector('section[aria-labelledby="review-with-suggestion"]') as HTMLElement | null)?.getBoundingClientRect().height ?? 0),
+            cards: cards.length,
+            rows: cards.length,
             pageChrome: Math.round(document.querySelector('main')!.getBoundingClientRect().top) + 134,
             cardHeights: cards.slice(0, 3).map((c) => Math.round(c.getBoundingClientRect().height)),
-            // FQ-10 removed every inline form, so "collapsed" is no longer a `display:none` form to
-            // count: the evidence is that no row carries a form at all, and that the row it does render
-            // is one summary line.
+            // FQ-10 removed every inline form, so the evidence is that no row carries a form at all,
+            // and that the row it does render is one summary line.
             forms: cards.filter((c) => c.querySelector('form') !== null).length,
             cardCount: cards.length,
         };
     });
 
     console.log(
-        `REVIEW-COLLAPSE total=${measured.height}px research=${measured.sectionHeight}px `
-        + `decidable=${measured.decidableHeight}px row=${measured.cardHeights[0]}px `
-        + `forms=${measured.forms}/${measured.cardCount}`,
+        `REVIEW-COLLAPSE total=${measured.height}px rows=${measured.rows} `
+        + `row=${measured.cardHeights[0]}px forms=${measured.forms}/${measured.cardCount}`,
     );
 
     // Before the collapse the same 25 cards measured 4,949px, because every no-match row carried
@@ -299,9 +256,9 @@ test('the summarised queue fits on one screen', async ({ page }) => {
     expect(measured.forms, 'no queue row carries a verdict form').toBe(0);
 
     // The acceptance is per-row, and that is the honest unit. A page-level number also encodes the
-    // seed's mix (the decidable section is expanded by design) and the shell chrome, neither of
-    // which the collapse governs. A collapsed row is one 44px control plus the card's own padding.
-    expect(measured.cardHeights[0], 'a summarised row is one line, not a form').toBeLessThanOrEqual(56);
+    // seed's mix and the shell chrome, neither of which the row shape governs. A row is the candidate's
+    // three printed lines plus one 44px Review control, and nothing else.
+    expect(measured.cardHeights[0], 'a queue row is a summary, not a form').toBeLessThanOrEqual(96);
 
     // The page still moves a long way down from where it started: 4,949 -> under 2,700. It does not
     // reach the proposal's ~1,000-1,400 estimate, and cannot without breaking the tree's 44px tap
