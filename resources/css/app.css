@@ -50,6 +50,23 @@
        shell has no stock utility to carry 1536px; this key is what makes `max-w-shell-wide` exist. */
     --container-shell-wide: 96rem;
 
+    /*
+     * The head band's lede, from the wireframe's own rule (`shell.css:364`) plus the compact override
+     * at `:414`: 13px, held to 66 characters and tightened to 60 when the layout is compact. Neither
+     * number has a stock utility (`text-sm` is 14px, `text-xs` 12px, `max-w-prose` 65ch), and §2.3
+     * forbids an arbitrary value at the call site, so they live here and `text-lede` / `max-w-lede` are
+     * what the templates say. The eyebrow is NOT in this set: DESIGN.md §2.2's owner-signed Metadata
+     * tier is `text-xs`, which outranks the wireframe's 11px, and the band keeps the tier.
+     */
+    --text-lede: 13px;
+    --container-lede: 66ch;
+    --container-lede-compact: 60ch;
+
+    /* A roster card's name line, the wireframe's 15px (`career-trainee.html:118`). Token rather than
+       `text-[15px]` at the call site because §2.3 bans the arbitrary value, and the step prints a card
+       name in two places: the roster row and the selection echo. */
+    --text-card-name: 15px;
+
     /* Stat tiles never squeeze below a readable value: `auto-fit` folds the row count instead of
        shrinking "1,910" or "Support cards" past the point where they ellipsis. A token because
        §2.3 forbids an arbitrary value at the call site. */
@@ -947,6 +964,25 @@ html[data-theme='eva01'] {
     color:var(--color-ink-muted);
 }
 
+/* .card.is-chosen / .card.is-picked: the wireframe's selected option card
+   (`career-scenario.html:95`, `career-trainee.html:117`), where the mock carries the state as an
+   inline style over `.card`. It is a rule here because `.card` is unlayered and would beat the
+   same declarations written as Tailwind utilities: the first wiring used utilities and measured a
+   white card with a rule-coloured 2px border, so two of the three selection signals were dead.
+   `.is-chosen` is the option-card state (pick border plus green tint); `.is-picked` is the parent
+   slot's state, which the legacy wireframe draws with the pick border and no tint. Colour never
+   carries either state alone: the pages print a check word or a Chosen pill beside it. */
+.card.is-chosen {
+    border-color:var(--color-pick-line);
+    border-width:2px;
+    background:var(--color-green-tint);
+}
+
+.card.is-picked {
+    border-color:var(--color-pick-line);
+    border-width:2px;
+}
+
 /* .pill: ported from shell.css; resolves to house tokens. */
 .pill {
     display:inline-flex;
@@ -1665,6 +1701,51 @@ html[data-theme='eva01'] {
 /* .savebar .btn: ported from shell.css; resolves to house tokens. */
 .savebar .btn {
     flex:1 1 auto;
+}
+
+/*
+ * The wizard band's two-block row (`HFW-OVERRIDE (structure: wizard toolbar)`, `SetupLayout.vue`).
+ *
+ * The owner's single right toolbar carries six 44px chips, so title and toolbar share a row only where
+ * the shell's `main` container is wide enough for both: past the wide layout's measure (~1248px of
+ * canvas) the title keeps most of the row, and below it the toolbar wraps to its own right-aligned row
+ * above the rule rather than squeezing the title into a column of wrapping words. The breakpoint is
+ * the container's own width, not the viewport's, because the rail is a fixed 236px column.
+ */
+.wizard-hrow {
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:12px 20px;
+    align-items:end;
+}
+
+/* The toolbar column hugs the rule's right edge; its inner rows follow it. */
+.wizard-hrow > [data-region="hrow-actions"] {
+    justify-self:end;
+}
+
+@container (min-width:1045px) {
+    .wizard-hrow {
+        grid-template-columns:minmax(0,1fr) auto;
+    }
+}
+
+/* Compact keeps the stacked band at every width: a narrower measure is the point of that mode. */
+[data-layout='compact'] .wizard-hrow {
+    grid-template-columns:minmax(0,1fr);
+}
+
+/* The ported `.stepper`/`.step-legend` margins below belong to the step-body stack the chips used to
+   sit in; in the toolbar the column's own gap is the only spacing, and both rows align to the right
+   edge the toolbar ends on. */
+[data-region="hrow-actions"] .stepper {
+    margin-bottom:0;
+    justify-content:flex-end;
+}
+
+[data-region="hrow-actions"] .step-legend {
+    margin:0;
+    justify-content:flex-end;
 }
 
 /* .stepper: ported from shell.css; resolves to house tokens. */

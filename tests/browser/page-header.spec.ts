@@ -20,16 +20,14 @@ import { test, expect } from '@playwright/test';
  */
 
 const PILOTS: { url: string; title: string; eyebrow: string }[] = [
-    { url: '/', title: 'Dashboard', eyebrow: 'Overview' },
-    { url: '/training-runs', title: 'Careers', eyebrow: 'Overview' },
-    { url: '/skills', title: 'Skill search', eyebrow: 'Reference' },
-    { url: '/veterans', title: 'Veteran library', eyebrow: 'Library' },
-    { url: '/database', title: 'Database', eyebrow: 'Data Quality' },
-    // Not a PageHeader pilot in the plan's sense: this page is on the list because it was the one
-    // Database screen that rendered its own in-body `<h1>` at `text-2xl` instead of filling the shell's
-    // `#title`. It is held to the same property, and passing here is what proves the shell emits the
-    // page's only title.
-    { url: '/database/sources', title: 'Data sources', eyebrow: 'Data Quality' },
+    { url: '/', title: 'Trainer Desk', eyebrow: 'Dashboard' },
+    { url: '/training-runs', title: 'Training runs', eyebrow: 'Careers' },
+    { url: '/skills', title: 'Skill search', eyebrow: 'Skills' },
+    { url: '/veterans', title: 'Veteran library', eyebrow: 'Veterans' },
+    { url: '/database', title: 'Reference data', eyebrow: 'Database' },
+    // The source ledger now renders PageHeader at the HFW's title and eyebrow (the pass-1 rebuild):
+    // the old "Data sources" fallback title no longer exists on the page.
+    { url: '/database/sources', title: 'Where every figure came from', eyebrow: 'Source ledger' },
 ];
 
 for (const pilot of PILOTS) {
@@ -49,11 +47,16 @@ for (const pilot of PILOTS) {
         await expect(h1).toHaveClass(/font-extrabold/);
         await expect(h1).toHaveClass(/text-ink-strong/);
 
-        // The eyebrow is the quiet line above the name, not a second title.
-        const eyebrow = page.getByText(pilot.eyebrow, { exact: true }).first();
-        await expect(eyebrow).toBeVisible();
+        // The eyebrow is the quiet line above the name, not a second title. `data-region="eyebrow"`
+        // is the component's own marker, so a rail link with the same word cannot be picked up. Its
+        // size is the 11px eyebrow step (`text-eyebrow` or the fallback band's `text-[11px]`),
+        // asserted by computed size so the type-token migration cannot make this case stale.
+        const eyebrow = page.locator('[data-region="eyebrow"]');
+        await expect(eyebrow).toHaveCount(1);
+        await expect(eyebrow).toHaveText(pilot.eyebrow);
         await expect(eyebrow).toHaveClass(/uppercase/);
-        await expect(eyebrow).toHaveClass(/text-xs/);
+        const eyebrowSize = await eyebrow.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+        expect(eyebrowSize).toBeLessThanOrEqual(12);
 
         // Shipped position, recorded so a silent move fails here (see the note above).
         expect(await h1.evaluate((el) => el.closest('header') !== null)).toBe(true);

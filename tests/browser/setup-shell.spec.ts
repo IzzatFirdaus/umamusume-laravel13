@@ -20,10 +20,10 @@ import { test, expect } from '@playwright/test';
 const STEPS: { url: string; label: string; title: string }[] = [
     { url: '/career/setup/scenario', label: 'Scenario', title: 'Which scenario is this run?' },
     { url: '/career/setup/trainee', label: 'Trainee', title: 'Choose a trainee' },
-    { url: '/career/setup/target', label: 'Your target', title: '' },
-    { url: '/career/setup/legacy', label: 'Legacy', title: '' },
-    { url: '/career/setup/deck', label: 'Support deck', title: '' },
-    { url: '/career/setup/preflight', label: 'Preflight', title: 'Review and start' },
+    { url: '/career/setup/target', label: 'Build target', title: 'What are you building toward?' },
+    { url: '/career/setup/legacy', label: 'Legacy', title: 'Inherit from two parents' },
+    { url: '/career/setup/deck', label: 'Support deck', title: 'Build the six-card deck' },
+    { url: '/career/setup/preflight', label: 'Preflight', title: 'Before the first turn' },
 ];
 
 for (const step of STEPS) {

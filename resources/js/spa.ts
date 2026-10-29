@@ -1,6 +1,9 @@
 import { createApp, defineComponent, h, type DefineComponent } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { useTheme } from './composables/useTheme';
+// The HFW grid primitive, loaded after `app.css` through this entry so a peer build cannot leave a
+// top-level CSS entry out of the manifest (that produced a Vite 500 for every page mid-run).
+import '../css/layout-grid.css';
 
 // Glob over nested page dirs, resolved lazily. The reason this is a glob and not a dynamic
 // `import(\`./pages/${name}.vue\`)` is unchanged: a template import matches only a single path segment in

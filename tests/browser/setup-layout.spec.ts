@@ -1,14 +1,17 @@
 import { test, expect } from '@playwright/test';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { SHELL_MARKERS, assertStructurallyEqual, capture } from './fixtures/hfw-structure';
+import { BAND_MARKERS, assertStructurallyEqual, capture } from './fixtures/hfw-structure';
 
 /*
  * The setup wizard's shell, SetupLayout (`ADR-0020` §1; plan §5 Slice 4).
  *
  * The stepper is a status readout, not a second navigation: six `.step` spans under a `role="list"`,
- * the current one `aria-current="step"`, and a four-mark legend that names the states. The position
- * ("Step N of 6") lives in the page head, and there is no save bar on any wizard page. These are the
+ * the current one `aria-current="step"`, and a four-mark legend that names the states. The owner's
+ * 2026-10-28 ruling moved it out of the step body and into the head band's single right toolbar, above
+ * the rule (`HFW-OVERRIDE (structure: wizard toolbar)` in `SetupLayout.vue`), so this file asserts that
+ * placement rather than the wireframe's `canvas > .stepper` position. The position ("Step N of 6")
+ * stays in the same row as the two doors, and there is no save bar on any wizard page. These are the
  * shell invariants every step shares, asserted here once rather than per page.
  */
 
@@ -34,6 +37,22 @@ test.describe('SetupLayout shell', () => {
         await expect(legend.getByText('Started unfinished')).toBeVisible();
         await expect(legend.getByText('Not started')).toBeVisible();
         await expect(legend.getByText('Current')).toBeVisible();
+
+        // The owner's single right toolbar: chips and legend in the head band's action column, above
+        // the rule, not in the step body. Measured rather than read off the markup: the chips' bottom
+        // edge has to land above the rule's top edge.
+        const band = page.locator('[data-region="hrow-actions"]');
+        await expect(band.locator('[data-setup-steps]')).toHaveCount(1);
+        await expect(band.locator('.step-legend')).toHaveCount(1);
+
+        const chips = await page.locator('[data-setup-steps]').boundingBox();
+        const rule = await page.locator('[data-region="hr"]').boundingBox();
+
+        if (chips === null || rule === null) {
+            throw new Error('the stepper or the head band rule is not laid out');
+        }
+
+        expect(chips.y + chips.height, 'the stepper sits above the rule').toBeLessThanOrEqual(rule.y);
     });
 
     test('states the position in the page head and renders no save bar', async ({ page }) => {
@@ -51,10 +70,11 @@ test.describe('SetupLayout shell', () => {
     /*
      * The shell, measured against the wireframe rather than read off the source.
      *
-     * The comparison is over `SHELL_MARKERS` on purpose: the step body (its cards, notes and pills) is
+     * The comparison is over `BAND_MARKERS` on purpose: the step body (its cards, notes and pills) is
      * each page's own case, so gating the shell on a page-body marker would make this case fail for a
-     * reason this file does not own. `main` is the captured subtree on both sides
-     * (`docs/design-research/frontend-v2-wireframes/career-scenario.html`).
+     * reason this file does not own, and the six step chips are excluded because the toolbar override
+     * deliberately moved them above the rule (asserted in the first case). `main` is the captured
+     * subtree on both sides (`docs/design-research/frontend-v2-wireframes/career-scenario.html`).
      */
     test('renders the HFW shell structure', async ({ page }) => {
         const hfw = pathToFileURL(
@@ -63,10 +83,10 @@ test.describe('SetupLayout shell', () => {
 
         await page.goto('/career/setup/scenario');
         await page.locator('#app > *').first().waitFor();
-        const app = await capture(page, 'main', { markers: SHELL_MARKERS, slug: 'scenario', side: 'app' });
+        const app = await capture(page, 'main', { markers: BAND_MARKERS, slug: 'scenario', side: 'app' });
 
         await page.goto(hfw);
-        const wireframe = await capture(page, 'main', { markers: SHELL_MARKERS, slug: 'scenario', side: 'hfw' });
+        const wireframe = await capture(page, 'main', { markers: BAND_MARKERS, slug: 'scenario', side: 'hfw' });
 
         /*
          * No `rect` here, unlike the instruction's sketch. The captured root is the whole of `main`, and

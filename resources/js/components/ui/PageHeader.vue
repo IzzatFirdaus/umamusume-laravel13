@@ -56,9 +56,9 @@ withDefaults(
             <div class="min-w-0 max-w-prose">
                 <!-- `tabindex="-1"` so a route change can move focus here rather than leaving it on the
                      link that was clicked; the heading is not in the tab order otherwise (WCAG 2.4.3).
-                     No `focus:outline-none`: a focused element must never lose its indicator (WCAG 2.4.7),
-                     and the app-wide `:focus-visible` ring in app.css already draws it. -->
-                <h1 tabindex="-1" class="mt-[7px] truncate text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong">
+                     `focus:outline-none` keeps a non-operable heading from drawing a control ring
+                     (NRM-1); the layout's focus move still announces the new page to assistive tech. -->
+                <h1 tabindex="-1" class="mt-[7px] min-w-0 text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong focus:outline-none">
                     {{ title }}
                 </h1>
                 <p v-if="description" data-region="lede" class="mt-[5px] text-[13px] text-ink-muted">

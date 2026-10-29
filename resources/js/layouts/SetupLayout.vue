@@ -12,7 +12,10 @@
  * `aria-current="step"` are what tell a Trainer which step they are on, not the absence of a sidebar.
  *
  * The step bar stays the wizard's own sub-navigation, so "which step am I on and what is next" is
- * answered one level above the page rather than competing with the product destinations.
+ * answered one level above the page rather than competing with the product destinations. It sits in
+ * the head band's right toolbar rather than in the step body; the HFW puts it in `.canvas`
+ * (`career-scenario.html:70-85`) and the owner moved it, so that position is recorded as an
+ * `HFW-OVERRIDE (structure: wizard toolbar)` on the band below.
  *
  * A step whose slice has not landed is a named absence (`to: null`), the same rule `AppLayout`
  * `items[]` uses. All six steps are live: the ancestry step (D5-wizard) and the deck step (D6-wizard)
@@ -21,7 +24,7 @@
  * of its own screen needs it, and because a named absence is the honest answer rather than a dead link.
  */
 import AppLayout from './AppLayout.vue';
-import { computed, onMounted, nextTick } from 'vue';
+import { onMounted, nextTick } from 'vue';
 import { useLayout } from '../composables/useLayout';
 
 const props = defineProps<{
@@ -40,16 +43,13 @@ const props = defineProps<{
     choices?: { label: string; value: string | null; url: string | null }[];
 }>();
 
-// The wizard honours the same width preference as the shell, so its wide steps (the deck's
-// master/detail, the scenario matrix) get the wide screen the Trainer asked for. `container-type:
-// inline-size` is what lets an inner step lay itself out off the wrapper's resolved width instead
-// of the viewport, so the sidebar collapse never re-breaks a step. The `AppLayout` `main` carries
-// the same measure via `useLayout`; this wrapper re-states it so the step grid inside is the thing
-// that fills, and so SetupLayout applies the shared map rather than its own inline one.
-const { mode, layoutWidthClass } = useLayout();
-const wrapperClass = computed(() => {
-    return `${layoutWidthClass.value} mx-auto w-full`;
-});
+// The wizard honours the same width preference as the shell through `AppLayout`'s `main`, which
+// already carries the mode's max-width and padding. This wrapper re-stated the same cap, which
+// nested a second max-width inside the first and made the step body narrower than the head band by
+// the shell's own gutter; it also re-declared `container-type: inline-size` so an inner step could lay
+// itself out off its own resolved width. The class stays because `.canvas` is the HFW's body marker
+// (`career-scenario.html:70`) and `data-layout-container` is what `containment.spec.ts` reads.
+const { mode } = useLayout();
 
 /*
  * The six step names are the wireframe's own words, not this layout's (`career-scenario.html:73-78`):
@@ -110,11 +110,11 @@ function stepClass(index: number): string[] {
 onMounted(async () => {
     await nextTick();
 
-    // The wizard draws the heading in its own head band (inside `main`), whether the step rendered
-    // `PageHeader` or filled `#title`. `#head`/`#title` are slot NAMES, not element ids: the first
-    // version queried `#head h1, #title h1` and matched nothing, which the spec caught as a missing
-    // tabindex rather than a missing heading. The heading is simply the page's one `h1`, which
-    // `page-header.spec.ts` already guarantees on every pilot page.
+    // The wizard draws the heading in its own head band (inside `main`), from the step's `#title`
+    // slot. `#title` is a slot NAME, not an element id: the first version queried `#head h1, #title
+    // h1` and matched nothing, which the spec caught as a missing tabindex rather than a missing
+    // heading. The heading is simply the page's one `h1`, which `page-header.spec.ts` already
+    // guarantees on every pilot page.
     const heading = document.querySelector<HTMLElement>('main h1, h1');
 
     if (heading === null) {
@@ -139,20 +139,30 @@ onMounted(async () => {
 <template>
     <AppLayout>
         <!--
-          The head band, drawn INSIDE the canvas rather than in the shell's banner.
+          The head band, drawn INSIDE the main subtree rather than in the shell's banner.
 
-          The HFW puts it there (`.main > .phead`), and `main` is the subtree the parity harness compares,
-          so the band has to render here for the shell to match its wireframe. Owner ruling 2026-10-27:
-          the wizard is the one surface whose `h1` sits in `main`; every other page keeps `PageHeader`
-          in the shell's `#head` and its heading in the banner. The shell layout is not edited.
+          The HFW puts it there (`.main > .phead`), and `main` is the subtree the parity harness
+          compares, so the band has to render here for the shell to match its wireframe. Owner ruling
+          2026-10-27: the wizard is the one surface whose `h1` sits in `main`; every other page keeps
+          `PageHeader` in the shell's `#head` and its heading in the banner. The shell layout is not
+          edited.
 
-          A step that renders `PageHeader` (1 and 6) supplies the band through `#head` and the component
-          carries its own markers; the other five fill `#eyebrow`/`#title` and the band below draws the
-          same marker skeleton around them. Either way the position is visible text in
-          `.hrow-actions > .hrow-position`, which is where the wireframe puts it.
+          Every step supplies `#eyebrow`/`#title`/`#lede`/`#actions`; the band draws one skeleton around
+          them, so a step cannot render a second, differently shaped head.
+
+          HFW-OVERRIDE (structure: wizard toolbar) - owner ruling 2026-10-28: the six step chips and
+          their legend leave the step body and join `Step N of 6`, Cancel and Continue in one
+          right-aligned toolbar inside `hrow-actions`, above the rule. The wireframe draws the chips in
+          `canvas > .stepper` (`career-scenario.html:70-85`) and puts only the position and the two
+          buttons beside the title (`:61-65`). The band keeps the wireframe's
+          `phead > eyebrow + hrow + hr` skeleton; `tests/browser/setup-layout.spec.ts` excludes the
+          three stepper markers from the band comparison and asserts this placement instead of the
+          body position.
         -->
-        <template v-if="$slots.head"><slot name="head" /></template>
-        <div v-else data-region="phead">
+        <div data-region="phead">
+            <!-- `text-xs` rather than the wireframe's 11px (`shell.css:361`): DESIGN.md §2.2's
+                 owner-signed Metadata tier is `text-xs text-ink-muted`, and the visual system outranks
+                 a prototype sheet. HFW-OVERRIDE (computed: eyebrow size). -->
             <p
                 v-if="$slots.eyebrow"
                 data-region="eyebrow"
@@ -160,62 +170,89 @@ onMounted(async () => {
             >
                 <slot name="eyebrow" />
             </p>
-            <div data-region="hrow" class="flex flex-wrap items-end justify-between gap-x-5 gap-y-3">
-                <h1
-                    tabindex="-1"
-                    class="mt-[7px] min-w-0 truncate text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong"
-                >
-                    <slot name="title" />
-                </h1>
-                <div data-region="hrow-actions" class="flex flex-wrap items-center gap-2 pb-1 md:shrink-0">
-                    <span data-region="hrow-position" class="text-xs text-ink-muted">Step {{ props.step }} of {{ steps.length }}</span>
-                    <slot name="actions" />
+            <div data-region="hrow" class="wizard-hrow">
+                <!-- The title and its lede are one block, the actions the other, so the band keeps the
+                     wireframe's shape: `.hrow > [div > h1 + p.lede] + .hrow-actions` (`career-trainee.html:56-66`).
+                     Putting the lede directly in the band as a sibling of the pair pushed the actions onto
+                     a line of their own at every width; the band's own column behaviour lives in
+                     `.wizard-hrow` in `app.css`, which is where the compact stacking decision is recorded. -->
+                <div class="min-w-0">
+                    <h1
+                        tabindex="-1"
+                        class="mt-[7px] min-w-0 text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong focus:outline-none"
+                    >
+                        <slot name="title" />
+                    </h1>
+                    <!-- The wireframe's lede belongs to the title band, not to the step body
+                         (`career-trainee.html:58-59`: `.phead > .hrow > div > h1 + p.lede`). A step that
+                         supplies it gets it under its own heading. The 13px size and the 66ch measure are
+                         the wireframe's (`shell.css:364`), and compact tightens the measure to 60ch
+                         exactly as `shell.css:414` does - both are tokens in `app.css`, because no stock
+                         utility carries either number. -->
+                    <p
+                        v-if="$slots.lede"
+                        data-region="lede"
+                        class="mt-1.25 text-lede text-ink-muted"
+                        :class="mode === 'compact' ? 'max-w-lede-compact' : 'max-w-lede'"
+                    >
+                        <slot name="lede" />
+                    </p>
+                </div>
+
+                <!--
+                  The single right toolbar (owner ruling 2026-10-28). Reading order is the reading a
+                  Trainer does: where am I (six chips), what do they mean (legend), where am I exactly
+                  (position), what moves me (the step's own pair). The chips are status spans under
+                  `role="list"`, the current one carries `aria-current="step"` (WCAG 1.4.1: colour never
+                  carries it alone), and the four legend marks name the states so "amber means you
+                  started this one" is written down rather than inferred from a colour. `.wizard-hrow`,
+                  `.stepper` and `.step-legend` carry the placement and ported rules in `app.css`, so
+                  this template states structure and never a colour or a margin.
+                -->
+                <div data-region="hrow-actions" class="flex min-w-0 flex-col gap-2">
+                    <nav aria-label="Setup steps" class="flex flex-col gap-1.5">
+                        <!--
+                          One exit, one label, in the wireframe's position: the HFW's stepper row carries the six
+                          steps and nothing else, and the only leave-wizard control it draws is the head band's
+                          `Cancel` (`career-scenario.html:63`). The extra exit link that used to sit at the end of
+                          this row printed a second name for the same destination on every step and appeared nowhere
+                          in the wireframe, so it is gone rather than restyled.
+                        -->
+                        <div class="stepper" role="list" data-setup-steps>
+                            <span
+                                v-for="(item, index) in steps"
+                                :key="item.label"
+                                role="listitem"
+                                :class="['step', ...stepClass(index)]"
+                                :aria-current="index + 1 === props.step ? 'step' : undefined"
+                                :aria-label="item.label"
+                            >
+                                <span class="n" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
+                            </span>
+                        </div>
+
+                        <div class="step-legend" aria-hidden="true">
+                            <span><i class="l-done" />Saved</span>
+                            <span><i class="l-partial" />Started unfinished</span>
+                            <span><i class="l-empty" />Not started</span>
+                            <span><i class="l-current" />Current</span>
+                        </div>
+                    </nav>
+
+                    <div class="flex flex-wrap items-center justify-end gap-2">
+                        <span data-region="hrow-position" class="text-xs text-ink-muted">Step {{ props.step }} of {{ steps.length }}</span>
+                        <slot name="actions" />
+                    </div>
                 </div>
             </div>
             <div class="mt-4 border-t border-rule-soft" aria-hidden="true" data-region="hr" />
         </div>
 
-        <!-- The step list is the wireframe's stepper: a status readout, not a second navigation.
-             `aria-current="step"` carries the position for assistive tech (WCAG 1.4.1), and the four
-             legend marks name the states so "amber means you started this one" is written down rather
-             than inferred from a colour. The `.step`/`.step-legend` rules are ported into `app.css`,
-             so this template states structure and never a colour.
-
-             `md:sticky` was here and is REMOVED: it never did anything. This nav sits inside the
-             `AppLayout` `main`, which carries `container-type: inline-size` (load-bearing for the
-             `@3xl:`/`@4xl:` step layouts - see the note on `wrapperClass` above), so the sticky
-             containing block moves with the page instead of the scrollport and the nav scrolled away
-             with everything else. `tests/browser/containment.spec.ts` pins the current behaviour. -->
-        <div :class="wrapperClass" class="canvas @container" data-layout-container data-region="canvas">
-            <nav aria-label="Setup steps" class="mb-4">
-                <!--
-                  One exit, one label, in the wireframe's position: the HFW's stepper row carries the six
-                  steps and nothing else, and the only leave-wizard control it draws is the head band's
-                  `Cancel` (`career-scenario.html:63`). The extra exit link that used to sit at the end of
-                  this row printed a second name for the same destination on every step and appeared nowhere
-                  in the wireframe, so it is gone rather than restyled.
-                -->
-                <div class="stepper" role="list" data-setup-steps>
-                    <span
-                        v-for="(item, index) in steps"
-                        :key="item.label"
-                        role="listitem"
-                        :class="['step', ...stepClass(index)]"
-                        :aria-current="index + 1 === props.step ? 'step' : undefined"
-                        :aria-label="item.label"
-                    >
-                        <span class="n" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
-                    </span>
-                </div>
-
-                <div class="step-legend" aria-hidden="true">
-                    <span><i class="l-done" />Saved</span>
-                    <span><i class="l-partial" />Started unfinished</span>
-                    <span><i class="l-empty" />Not started</span>
-                    <span><i class="l-current" />Current</span>
-                </div>
-            </nav>
-
+        <!-- The step body. The stepper is no longer in here: it moved to the toolbar above the rule.
+             `md:sticky` was never here on this wrapper, and the nav that carried it is gone from the
+             body entirely, so the sticky note that used to guard `main`'s `container-type` no longer
+             applies to a stepper. `containment.spec.ts` still pins the container's behaviour. -->
+        <div class="canvas @container" data-layout-container data-region="canvas">
             <slot />
         </div>
     </AppLayout>

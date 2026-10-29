@@ -27,15 +27,16 @@ const page = usePage();
  * shell is one renderer, every page inherits it. The class map lives in `useLayout.ts` as
  * `LAYOUT_WIDTH_CLASSES`, so the shell and the wizard share one source of truth.
  */
-const { layoutWidthClass } = useLayout();
+const { mode, layoutWidthClass } = useLayout();
 
 /*
  * The shell's measure, as the wireframe applies it: one centring band per region, `26px` of side
  * padding at desktop and `16px` below the rail's breakpoint. It is a class string rather than a
- * wrapper so each band (bar content, page head, canvas) caps itself, which is what keeps the bar's
- * own background running the full width while its content stops at the measure.
+ * wrapper so each band (bar content, page head, canvas) caps itself at the same measure as `main`,
+ * which is what keeps the bar's own background running the full width while its content stops at
+ * the measure.
  */
-const bandClass = 'mx-auto w-full px-4 md:px-[26px]';
+const bandClass = computed(() => `mx-auto w-full ${layoutWidthClass.value} px-4 md:px-[26px]`);
 
 /*
  * The bar's crumb (HFW `.topbar > .crumb`). A page may pass its own trail — `Database / Sources` is
@@ -307,7 +308,7 @@ const moreIsCurrent = computed(() =>
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-page text-ink">
+    <div class="flex min-h-screen bg-page text-ink" :data-layout="mode">
         <!-- The visit progress indicator (KI-63's replacement) teleports its element to <body>, so
              every shell that renders through this layout carries it and no page imports it. -->
         <VisitProgressBar />
@@ -334,11 +335,11 @@ const moreIsCurrent = computed(() =>
                     class="flex min-w-0 items-center gap-2 px-1 text-xs font-bold tracking-wide text-ink-strong"
                 >
                     <span aria-hidden="true">TD</span>
-                    <span :class="railCollapsed ? 'sr-only' : 'truncate'">TRAINER DESK</span>
+                    <span :class="railCollapsed ? 'sr-only' : ''">TRAINER DESK</span>
                 </span>
                 <button
                     type="button"
-                    class="ml-auto inline-flex min-h-11 shrink-0 items-center justify-center rounded-md px-2 text-xs font-medium text-ink hover:bg-raised hover:text-ink-strong transition-colors duration-150 ease-out"
+                    class="ml-auto inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md px-2 text-xs font-medium text-ink hover:bg-raised hover:text-ink-strong transition-colors duration-150 ease-out"
                     :aria-expanded="!railCollapsed"
                     aria-controls="primary-nav-rail"
                     :title="railCollapsed ? 'Expand navigation' : undefined"
@@ -432,7 +433,7 @@ const moreIsCurrent = computed(() =>
                              scenario while `Races` and `Save Veteran` in the same set bold the screen, so
                              the crumb follows the set's dominant rule and bolds its leaf. -->
                         <span
-                            class="min-w-0 truncate text-[12.5px] [&_b]:font-extrabold"
+                            class="min-w-0 text-[12.5px] [&_b]:font-extrabold"
                             data-shell-crumb
                         >
                             <template v-if="breadcrumbParts.length">
@@ -486,11 +487,12 @@ const moreIsCurrent = computed(() =>
                 >
                     <p
                         v-if="$slots.eyebrow"
+                        data-region="eyebrow"
                         class="text-[11px] font-extrabold uppercase tracking-[0.12em] text-ink-muted"
                     >
                         <slot name="eyebrow" />
                     </p>
-                    <h1 class="truncate text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong">
+                    <h1 class="min-w-0 text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong focus:outline-none">
                         <slot name="title" />
                     </h1>
                 </div>
@@ -510,7 +512,7 @@ const moreIsCurrent = computed(() =>
             <main
                 id="main"
                 data-layout-container
-                class="@container min-w-0 w-full flex-1 pb-24 md:pb-0"
+                class="@container mx-auto min-w-0 w-full flex-1 pb-24 md:pb-0"
                 :class="layoutWidthClass"
             >
                 <!-- Always mounted, so the live region exists before its message does (WCAG 4.1.3). -->
