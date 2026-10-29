@@ -9,6 +9,14 @@
  * timeline and cockpit screens are all scoped to one career, so the turn loop names them as text and
  * links only the screens a Trainer can open from here. And nothing claims a control the build does
  * not have: the keyboard table lists what is wired, and Undo is described as the gap it is.
+ *
+ * HFW-OVERRIDE (keyboard: keys) - `help.html:96-103` lists 1-5, Enter, Esc and Tab as a guided-flow key
+ * map. Only Tab/Shift+Tab, Enter/Space, Esc (the mobile More disclosure) and the skip link are wired,
+ * so the table names those; printing 1-5 would document controls that do nothing.
+ *
+ * HFW-OVERRIDE (rules: career length) - the sixth row states the 72-turn grid the app enforces
+ * (`CareerCalendar::TURNS_PER_CAREER`); `help.html:150-159` draws five.
+ * HFW-OVERRIDE (copy: import) - CSV import persists each supplied turn, not just a current position.
  */
 import AppLayout from '../layouts/AppLayout.vue';
 import PageHeader from '../components/ui/PageHeader.vue';
@@ -55,7 +63,7 @@ const keys: { key: string; does: string }[] = [
             </PageHeader>
         </template>
 
-        <div class="grid items-start gap-4 @7xl:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
+        <div class="grid items-start gap-4 g-side">
             <div class="space-y-4">
                 <section class="card" aria-labelledby="help-loop">
                     <h2 id="help-loop" class="text-lg font-semibold text-ink-strong">The turn loop</h2>
@@ -66,10 +74,10 @@ const keys: { key: string; does: string }[] = [
                         <li>Record the outcome. The turn is written only after the action resolves.</li>
                         <li>The timeline keeps every turn with its deltas, so the run can be read back.</li>
                     </ol>
-                    <p class="mt-3 rounded-md border border-dashed border-rule bg-raised px-3 py-2 text-sm text-ink-muted">
-                        <span aria-hidden="true" class="mr-1">○</span>
+                    <p class="note mt-3">
+                        <span class="g" aria-hidden="true">○</span>
                         <span>
-                            <b class="text-ink-strong">Undo.</b> A committed turn cannot be taken back from
+                            <b>Undo.</b> A committed turn cannot be taken back from
                             this build: there is no Undo last turn control. Correct a wrong value on the
                             screen that owns it. This is stated as a gap rather than drawn as a button that
                             would do nothing.
@@ -99,14 +107,14 @@ const keys: { key: string; does: string }[] = [
                         <tbody>
                             <tr v-for="tag in tags" :key="tag.name" class="border-b border-rule last:border-b-0">
                                 <th scope="row" class="w-40 py-2 pr-3 text-left font-semibold text-ink-strong">
-                                    <span aria-hidden="true" class="mr-1 font-mono">{{ tag.mark }}</span>{{ tag.name }}
+                                    <span class="tag"><span aria-hidden="true" class="mr-1 font-mono">{{ tag.mark }}</span>{{ tag.name }}</span>
                                 </th>
                                 <td class="py-2 text-ink">{{ tag.meaning }}</td>
                             </tr>
                         </tbody>
                     </table>
-                    <p class="mt-3 rounded-md border border-dashed border-rule bg-raised px-3 py-2 text-sm text-ink-muted">
-                        <span aria-hidden="true" class="mr-1">○</span>
+                    <p class="note mt-3">
+                        <span class="g" aria-hidden="true">○</span>
                         <span>
                             Absence is a normal result. A field the importer cannot find stays empty and
                             prints N/A with its reason. Nothing is filled with a default, because a default
@@ -120,8 +128,8 @@ const keys: { key: string; does: string }[] = [
                 <section class="card" aria-labelledby="help-source">
                     <h2 id="help-source" class="text-lg font-semibold text-ink-strong">Where the numbers come from</h2>
                     <p class="mt-1 text-sm text-ink-muted">
-                        Every figure on a screen points at a source. The ledger lists them, with the date
-                        each was read, so a stale figure can be recognised as stale.
+                        The source ledger lists fetched datasets and transcribed references. Its date
+                        notes explain when the data was read and what needs checking again.
                     </p>
                     <LinkButton href="/database/sources" variant="secondary" class="mt-3">Open the source ledger</LinkButton>
                 </section>
@@ -136,9 +144,15 @@ const keys: { key: string; does: string }[] = [
                             </tr>
                         </tbody>
                     </table>
-                    <p class="mt-2 text-xs text-ink-muted">
-                        Each row is a link in a built product. Here they are text, because there is no
-                        screen behind them yet and an inert control that looks live is a defect.
+                    <!-- The wireframe's note in this card (`help.html:130`): the rows are text, and
+                         saying why is the honest alternative to an inert control. -->
+                    <p class="note mt-3">
+                        <span class="g" aria-hidden="true">○</span>
+                        <span>
+                            Each row states the rule in place; there is no target page behind it, so the
+                            row is text rather than a link. An inert control that looks live is the defect
+                            this avoids.
+                        </span>
                     </p>
                 </section>
 
@@ -155,10 +169,17 @@ const keys: { key: string; does: string }[] = [
                                 </td>
                             </tr>
                             <tr class="border-b border-rule">
+                                <th scope="row" class="py-2 pr-3 text-left font-semibold text-ink-strong">A race looks unavailable</th>
+                                <td class="py-2 text-ink">
+                                    Its row states the gate: the fan requirement and the maiden gate are
+                                    printed rather than hidden.
+                                </td>
+                            </tr>
+                            <tr class="border-b border-rule">
                                 <th scope="row" class="py-2 pr-3 text-left font-semibold text-ink-strong">A turn count disagrees</th>
                                 <td class="py-2 text-ink">
-                                    An import records a position, not a history. The preview states that
-                                    consequence before the commit.
+                                    A CSV import saves only the turn rows you supply. Check their turn
+                                    numbers in the preview before importing.
                                 </td>
                             </tr>
                             <tr>

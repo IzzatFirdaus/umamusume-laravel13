@@ -45,6 +45,16 @@ test('undo is described as a gap and no inert control is drawn', async ({ page }
     await expect(page.getByRole('button', { name: /Undo/ })).toHaveCount(0);
 });
 
+test('explains CSV turn history without prototype promises', async ({ page }) => {
+    const diagnostic = page.getByRole('region', { name: 'If something looks wrong' });
+    await expect(diagnostic.getByRole('row').filter({ hasText: 'A turn count disagrees' })).toContainText(
+        'A CSV import saves only the turn rows you supply. Check their turn numbers in the preview before importing.',
+    );
+    await expect(page.getByText('position, not a history')).toHaveCount(0);
+    await expect(page.getByText('Each row is a link in a built product')).toHaveCount(0);
+    await expect(page.getByText('Every figure on a screen points at a source')).toHaveCount(0);
+});
+
 test('every link on the page reaches a route this app serves', async ({ page }) => {
     const hrefs = await page.locator('main a[href]').evaluateAll((nodes) =>
         nodes.map((n) => n.getAttribute('href')),
@@ -66,8 +76,11 @@ test('every link on the page reaches a route this app serves', async ({ page }) 
 test('the wireframe apparatus is absent and the console stays clean', async ({ page }) => {
     const errors: string[] = [];
     page.on('console', (message) => {
-        if (message.type() === 'error') errors.push(message.text());
+        if (message.type() === 'error' || message.type() === 'warning') errors.push(message.text());
     });
+    page.on('pageerror', (error) => errors.push(error.message));
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.getByRole('heading', { name: 'How this works', level: 1 })).toBeVisible();
 
     await expect(page.getByText('Annotation key')).toHaveCount(0);
     await expect(page.getByText('Static wireframe')).toHaveCount(0);

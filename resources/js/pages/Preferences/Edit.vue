@@ -306,12 +306,11 @@ function runBackup(): void {
             </PageHeader>
         </template>
 
-        <!-- HFW `.grid g-side` (shell.css:404): 2.1fr / 1fr, collapsing to one column at 820px. This
-             is the window's width, so the breakpoints are media queries, not container queries —
-             a container query resolves against the shell's content box and would lag the window. -->
+        <!-- HFW `.grid g-side`: 2.1fr / 1fr, collapsing to one column in Compact. The crossings live
+             in `resources/css/layout-grid.css`. -->
         <form
             id="preferences-form"
-            class="grid grid-cols-1 gap-3.5 min-[821px]:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)] [&>*]:m-0"
+            class="grid gap-3.5 g-side [&>*]:m-0"
             :aria-busy="form.processing"
             @submit.prevent="submit"
         >
@@ -356,10 +355,9 @@ function runBackup(): void {
                         What a new career's build-target step starts from. Empty means the step starts
                         blank.
                     </p>
-                    <!-- HFW `.grid g-3` (shell.css:401,405-406): three columns that go to two below
-                         1080px and to one below 820px, measured against the window. The sixth cell is
-                         the default scenario, which is the preference the sixth cell stores. -->
-                    <div class="grid grid-cols-1 gap-2.5 min-[821px]:grid-cols-2 min-[1081px]:grid-cols-3">
+                    <!-- HFW `.grid g-3`: three columns, two below the wide crossing, one in Compact.
+                         The sixth cell is the default scenario, the preference it stores. -->
+                    <div class="grid gap-2.5 g-3">
                         <!-- Each field is wrapped because `BaseInput` renders its label and its hint as
                              two roots: unwrapped, the hint becomes a cell of this grid on its own and
                              the field grid stops being the wireframe's three columns.
