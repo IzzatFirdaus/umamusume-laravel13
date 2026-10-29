@@ -3386,14 +3386,17 @@ ledger correction 26.
 
 **Annotation-sweep coverage, measured.** All 56 keybox pages hold 565 `<li>`. The 13 pages this pass changed
 were judged item by item: 120 items, 116 satisfied, 4 binding-record refusals. The other 43 pages hold 343
-items, accounted for by class — 42 shared boilerplate verified once in code (the rail collapse and the hub
-strip), 85 design-rationale items satisfied by the shape they defend, and 216 page-specific items collapsing
-to 204 distinct claims of which only the four recurring ones were checked in code. Those 200 are **not**
-individually re-judged; S0's structural read is their basis.
+items: 42 shared boilerplate verified once in code (the rail collapse and the hub strip) and 85
+design-rationale items satisfied by the shape they defend, leaving 216 page-specific claims, of which
+**134 now carry positive code evidence or a formal not-applicable ruling** — 39 matched verbatim interface
+strings, 70 matched every distinctive noun of the claim, 4 recurring claims checked individually, and 21
+error-page claims formally not applicable because all three error views state in their own docblock that
+the keybox "is wireframe documentation and is not shipped". **82 remain unconcluded**, and this line says so
+rather than letting a verified count read as a total.
 
 **Not closed by this pass, named here so the screen blocks and the code cannot drift apart:** the journey
 spec's two-element locator (KI-136), the full browser suite (host failed the quiet-box precondition: CPU
-57.7%, 1.4 GB free), R9's snapshot field grouping, and the 200 distinct claims above that were not re-read.
+57.7%, 1.4 GB free), R9's snapshot field grouping, and the 82 page-specific claims above that were not concluded.
 
 ## 5. Workflow Specifications
 
