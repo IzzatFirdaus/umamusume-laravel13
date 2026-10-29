@@ -124,6 +124,34 @@ it('renders the Races table with N/A for unrecorded values when populated', func
             ->has('slots.data.0.is_special_race'));
 });
 
+it('narrows the race calendar by the facets its own filter row offers', function (): void {
+    // The wireframe draws Search, Grade, Surface and Distance over this table
+    // (`database-races.html:72-77`), and each one reads a column the table already prints.
+    RaceCatalogSlot::factory()->create(['title' => 'Hopeful Stakes', 'tier' => 'G1', 'surface' => 'Turf', 'distance_band' => 'Medium']);
+    RaceCatalogSlot::factory()->create(['title' => 'Unicorn Stakes', 'tier' => 'G3', 'surface' => 'Dirt', 'distance_band' => 'Mile']);
+
+    $this->get('/database/races?q=Hopeful')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('slots.total', 1)
+            ->where('slots.data.0.title', 'Hopeful Stakes')
+            // The facet is echoed so the picker paints the narrowing the Trainer chose.
+            ->where('filters.q', 'Hopeful'));
+
+    $this->get('/database/races?grade=G3')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('slots.data.0.title', 'Unicorn Stakes'));
+
+    $this->get('/database/races?surface=Dirt&distance=Mile')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('slots.total', 1)->where('slots.data.0.title', 'Unicorn Stakes'));
+
+    // `totalCount` stays the whole calendar: it is the table's size, not the answer's.
+    $this->get('/database/races?grade=G3')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('totalCount', 2));
+});
+
 it('renders the Scenarios matrix with the config values and PARTIALLY DOCUMENTED badge', function (): void {
     $this->get('/database/scenarios')
         ->assertOk()
@@ -228,6 +256,9 @@ it('renders the Data sources page with one row per dataset', function (): void {
             ->component('Database/Sources')
             ->has('fetched')
             ->has('transcribed')
+            // The wireframe states the matrix's verification date beside the ledger
+            // (`database-sources.html:74`), read from the one place it is recorded.
+            ->where('matrixVerifiedAt', (string) config('scenarios.verified_at'))
             // A fetched dataset names its URL, never a repository path.
             ->where('fetched.0.name', 'gametora-characters')
             ->where('fetched.0.url', fn (string $url): bool => str_starts_with($url, 'https://'))

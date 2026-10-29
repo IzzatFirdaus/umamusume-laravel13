@@ -42,6 +42,8 @@ const props = defineProps<{
     docName: string;
     fetched: FetchedDataset[];
     transcribed: TranscribedDataset[];
+    /** The recorded date the scenario matrix was checked against its sources. */
+    matrixVerifiedAt: string;
 }>();
 
 /*
@@ -72,6 +74,16 @@ const CONFLICTS: ReadonlyArray<{ question: string; state: string }> = [
         </template>
 
         <DatabaseNav />
+
+        <!-- The wireframe states the matrix's verification date beside this ledger
+             (`database-sources.html:74`). It records when the matrix was checked against the
+             sources, not when anything was fetched, and says so. -->
+        <p class="mt-4 rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink-muted">
+            <span aria-hidden="true" class="mr-2 text-status-positive">i</span>
+            <b class="text-ink-strong">Matrix verified {{ props.matrixVerifiedAt }}.</b>
+            The verification date records when the matrix was checked against these sources.
+            Nothing on this page was fetched today.
+        </p>
 
         <!-- The wireframe's tier vocabulary (`database-sources.html:76-89`). A tier is a property of the
              source, not of a dataset, so it is stated once here and the lists below keep their dates. -->

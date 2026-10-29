@@ -101,12 +101,33 @@ class DatabaseController extends Controller
      * this table is written by a fetch, not by promotion, so a cached page would keep answering after
      * a re-fetch. The table is 410 rows, so the query is the whole cost.
      *
-     * No facet either. The table is five pages and the columns already carry the year, so a filter
-     * here would be a second surface over the same rows without a third use for it.
+     * The wireframe draws a filter row over this table (`database-races.html:72-77`: Search, Grade,
+     * Surface, Distance, Clear) and the page's own lede promises it, so the facets are answered here
+     * rather than left to the five-page scroll. Every one of them reads a column this table already
+     * stores: the search matches `title`, and Grade, Surface and Distance read `tier`, `surface` and
+     * `distance_band`. Nothing is derived and nothing needs a new query.
      */
     public function races(Request $request): Response
     {
+        $q = $request->query('q');
+        $q = is_string($q) ? trim($q) : null;
+        $grade = $request->query('grade');
+        $grade = is_string($grade) ? trim($grade) : null;
+        $surface = $request->query('surface');
+        $surface = is_string($surface) ? trim($surface) : null;
+        $distance = $request->query('distance');
+        $distance = is_string($distance) ? trim($distance) : null;
+
         $slots = RaceCatalogSlot::query()
+            // SQLite has no default LIKE escape character, so the clause names one and the pattern
+            // escapes `%`/`_` first: unescaped, a `%` would return the whole calendar (KI-26's trap).
+            ->when($q !== null && $q !== '', static fn ($query) => $query->whereRaw(
+                "title LIKE ? ESCAPE '\\'",
+                ['%'.addcslashes($q, '\\%_').'%'],
+            ))
+            ->when($grade !== null && $grade !== '', static fn ($query) => $query->where('tier', $grade))
+            ->when($surface !== null && $surface !== '', static fn ($query) => $query->where('surface', $surface))
+            ->when($distance !== null && $distance !== '', static fn ($query) => $query->where('distance_band', $distance))
             ->orderBy('year')
             ->orderBy('turn')
             ->orderBy('sort_order')
@@ -129,6 +150,15 @@ class DatabaseController extends Controller
         return Inertia::render('Database/Races', [
             'slots' => $slots,
             'totalCount' => RaceCatalogSlot::query()->count(),
+            // Echoed so a picker paints the facet the Trainer chose, which is the same contract the
+            // support-card catalog states: a select that reads "Any" after a filter has been applied
+            // tells the Trainer their narrowing was lost.
+            'filters' => [
+                'q' => $q,
+                'grade' => $grade,
+                'surface' => $surface,
+                'distance' => $distance,
+            ],
         ]);
     }
 
@@ -429,6 +459,10 @@ class DatabaseController extends Controller
             'docName' => 'the reference guide',
             'fetched' => $fetched,
             'transcribed' => $transcribed,
+            // The wireframe states the matrix's verification date beside this ledger
+            // (`database-sources.html:74`), and it is the same recorded value the Scenarios page
+            // prints, read from the one place it is written so two screens cannot disagree.
+            'matrixVerifiedAt' => (string) config('scenarios.verified_at'),
         ]);
     }
 

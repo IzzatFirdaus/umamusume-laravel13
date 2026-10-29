@@ -21,6 +21,7 @@ import PageHeader from '../../components/ui/PageHeader.vue';
 import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import Pagination from '../../components/ui/Pagination.vue';
 import { Head, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 interface Slot {
     id: number;
@@ -48,7 +49,49 @@ interface Paginator<T> {
 const props = defineProps<{
     slots: Paginator<Slot>;
     totalCount: number;
+    /** The facets the request carried, echoed so each picker paints what the Trainer chose. */
+    filters: {
+        q: string | null;
+        grade: string | null;
+        surface: string | null;
+        distance: string | null;
+    };
 }>();
+
+/**
+ * The filter row the wireframe draws over this table (`database-races.html:72-77`), reading only
+ * values the table stores: the search matches the race title, and the three selects read `tier`,
+ * `surface` and `distance_band`. Clear returns to the un-narrowed table.
+ */
+const q = ref(props.filters.q ?? '');
+const grade = ref(props.filters.grade ?? '');
+const surface = ref(props.filters.surface ?? '');
+const distance = ref(props.filters.distance ?? '');
+
+const gradeOptions = ['G1', 'G2', 'G3', 'OP', 'Maiden', 'Debut'];
+const surfaceOptions = ['Turf', 'Dirt'];
+const distanceOptions = ['Sprint', 'Mile', 'Medium', 'Long'];
+
+function apply(): void {
+    router.get(
+        window.location.pathname,
+        {
+            q: q.value || undefined,
+            grade: grade.value || undefined,
+            surface: surface.value || undefined,
+            distance: distance.value || undefined,
+        },
+        { preserveState: true, preserveScroll: true },
+    );
+}
+
+function clear(): void {
+    q.value = '';
+    grade.value = '';
+    surface.value = '';
+    distance.value = '';
+    apply();
+}
 
 const gates = (slot: Slot): string[] =>
     [
@@ -84,6 +127,65 @@ function goToPage(page: number): void {
         </template>
 
         <DatabaseNav />
+
+        <!--
+            The wireframe's filter row (`database-races.html:72-77`). Every control reads a column
+            this table stores, so a facet here narrows the same rows the table prints rather than
+            becoming a second surface over them.
+        -->
+        <form
+            v-if="props.totalCount > 0"
+            class="mt-4 flex flex-wrap items-end gap-3"
+            @submit.prevent="apply"
+        >
+            <label class="field flex-1 basis-56">
+                <span class="k">Search</span>
+                <input
+                    v-model="q"
+                    name="q"
+                    type="search"
+                    placeholder="Race name"
+                    class="min-h-11 w-full rounded-md border border-rule bg-panel px-3 text-sm text-ink"
+                >
+            </label>
+            <label class="field basis-32">
+                <span class="k">Grade</span>
+                <select v-model="grade" name="grade" class="min-h-11 w-full rounded-md border border-rule bg-panel px-2 text-sm text-ink">
+                    <option value="">Any</option>
+                    <option v-for="option in gradeOptions" :key="option" :value="option">{{ option }}</option>
+                </select>
+            </label>
+            <label class="field basis-32">
+                <span class="k">Surface</span>
+                <select v-model="surface" name="surface" class="min-h-11 w-full rounded-md border border-rule bg-panel px-2 text-sm text-ink">
+                    <option value="">Any</option>
+                    <option v-for="option in surfaceOptions" :key="option" :value="option">{{ option }}</option>
+                </select>
+            </label>
+            <label class="field basis-36">
+                <span class="k">Distance</span>
+                <select v-model="distance" name="distance" class="min-h-11 w-full rounded-md border border-rule bg-panel px-2 text-sm text-ink">
+                    <option value="">Any</option>
+                    <option v-for="option in distanceOptions" :key="option" :value="option">{{ option }}</option>
+                </select>
+            </label>
+            <button
+                type="submit"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule bg-panel px-4 text-sm font-semibold text-ink"
+            >
+                Filter
+            </button>
+            <button
+                type="button"
+                class="inline-flex min-h-11 items-center rounded-md px-3 text-sm text-ink-muted underline"
+                @click="clear"
+            >
+                Clear
+            </button>
+            <span v-if="props.slots.total === 0" class="basis-full text-sm text-ink-muted">
+                No race matches these facets.
+            </span>
+        </form>
 
         <section
             v-if="props.totalCount === 0"
