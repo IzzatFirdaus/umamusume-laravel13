@@ -3783,25 +3783,32 @@ state and the `All changes saved` line.
 when clean." is now built on the Preferences screen: one page head carries the state line and the
 one verb, and the verb is disabled while the form is clean.
 
-## KI-135 — the legacy builder takes free-form parent entry where its keybox requires one-pick radios
+## KI-135 — the legacy builder picks a parent with a select where its keybox names radios (substance honoured, shape differs)
 
-**State:** OPEN. Filed 2026-10-30 by the HFW parity pass (S10.1 annotation sweep).
+**State:** RESOLVED on re-measurement, 2026-10-30, same session. Filed as a defect by the S10.1
+sweep and withdrawn after reading the control it accused. Kept in the register because the mis-filing is
+the lesson, not the defect.
 
-**Defect.** `legacy-builder.html`'s annotation key, item 2, says: "One pick per parent. Radios, not
-checkboxes: the moment grants one spark per parent and the control must not promise two." The shipped
-builder still lets a Trainer enter a parent freely, which promises a shape the inheritance moment does
-not grant.
+**What the sweep claimed.** `legacy-builder.html` item 2 says: "One pick per parent. Radios, not
+checkboxes: the moment grants one spark per parent and the control must not promise two." The sweep read the
+builder's parent editors as free-form entry and filed this as an unshipped control shape.
 
-**Why it is not a refusal.** No ADR bars it. `ADR-0020` §3 bans *deriving* an outcome; choosing one
-parent per slot is a recording decision, which the same clause permits. The payload already carries the
-parent picks.
+**What the code actually does.** Each parent slot carries exactly **one** `legacy_id`, bound to a
+single `<select>` in `AncestryNode.vue:140` (`assignable`, `BaseSelect`, one `model-value`, one
+`@update:model-value`). It is under a real `<label>`, it is in the tab order, and it is arrow-keyable. There
+is no checkbox anywhere in the parent pick, so nothing promises two picks: the mechanic the keybox states —
+one spark per parent — is exactly what the control enforces.
 
-**Repair.** Replace the free-form parent editors with one-pick radios per parent in
-`resources/js/pages/Legacy/Builder.vue`, re-baseline `tests/browser/legacy-builder.spec.ts` in the same
-commit, and re-run the R4 gates. Owned by R4, whose preview-card and savebar work landed at `384cd054`
-without this item.
+**The real difference, and why it is not a defect.** The keybox names *radios*; the build renders a *select*.
+Both are single-select controls and both promise one value. A native select is also the better instrument here:
+the roster a parent is picked from is a library of hundreds of rows, and a radio group of that size is a wall
+of inputs where a select is one control with typeahead. The keybox's own reason (do not promise two) is
+honoured; only its suggested widget differs.
 
-**Proven by.** `s10-annotation-sweep.md` (deviation 1) and the keybox read of `legacy-builder.html`.
+**Correction to the pass's own record.** `s10-annotation-sweep.md` counted this as deviation 1 of 5 and
+`s10-tag-decision.md` used it to hold condition (c) unmet. Both are amended: deviation 1 is withdrawn, and
+condition (c) moves to **met**. The lesson is filed as correction 26 in the ledger: a claim about a *control
+promise* must be checked against the bound value, not against the element name the wireframe used.
 
 ## KI-136 — `full-career-journey.spec.ts` locator matches two disclosures
 
