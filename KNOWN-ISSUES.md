@@ -3812,7 +3812,11 @@ promise* must be checked against the bound value, not against the element name t
 
 ## KI-136 — `full-career-journey.spec.ts` locator matches two disclosures
 
-**State:** OPEN, peer-owned (the file is dirty in another session's working tree).
+**State:** OPEN, peer-owned (the file is dirty in another session's working tree). **Amended 2026-10-30:** the
+diagnosed defect is *fixed in the working tree* and the walk now proceeds past it, but the file is **not
+committed**, because the walk then fails at a second, distinct defect (KI-137). See
+`corrections/b1-second-blocker-128.md` for the JSON evidence and the three fixes that together should bring
+the walk green.
 
 **Defect.** The journey walk resolves its team editor with
 `page.locator('details', { has: page.locator('input[name="team_name"]') })`, which matches **two**
@@ -3831,3 +3835,37 @@ the team-name field finds both. Playwright fails strict mode at `:120` and the w
 
 **Proven by.** `s10-b1-final.md`. This blocks tag condition (b): flow coverage is 1 of 5 while the walk
 is red.
+## KI-137 — the whole-career walk fails at three separate stale or ambiguous assertions, not one
+
+**State:** OPEN. Filed 2026-10-30 while resolving B-1 / KI-136.
+
+**Defect.** `tests/browser/full-career-journey.spec.ts` is one walk with three assertions that the shipped
+app can no longer satisfy. The first is the one KI-136 names. The second and third are behind it, so the
+walk never reached them until the first was fixed.
+
+| Line | Assertion | Why it fails |
+|---|---|---|
+| `:114` | `page.locator('details', { has: page.locator('input[name="team_name"]') })` | Strict mode: matches both `data-region="run-tools"` (`Cockpit.vue:1144`) and the `data-region="team-state"` disclosure it nests (`Cockpit.vue:1450`). **KI-136** |
+| `:128` | `await expect(page.getByText('Blue Bloom')).toBeVisible();` | Strict mode: the team name renders twice, in a `<td>` of the team table and in a read-back `<dd>`. |
+| `:133` | `page.locator('section[aria-labelledby="career-header-heading"]').getByText('★3 · Potential 2')` | The `CockpitIdentityCard` was removed from the cockpit at `530d62b9`; nothing imports it, so the section is not rendered. This is the *second occurrence* of the stale assertion the peer's own re-baseline already fixed at `:102-107`. |
+
+**Measured.** `npx playwright test tests/browser/full-career-journey.spec.ts` in a session-private pair
+(`PLAYWRIGHT_PORT=8182`, `PLAYWRIGHT_SCRATCH_DB` under the session apparatus), JSON reporter:
+`expected: 0 unexpected: 1`, `duration_ms: 38616`, failing at `:128` with
+"strict mode violation: getByText('Blue Bloom') resolved to 2 elements" — the `:114` strict-mode failure is
+gone, so the first fix works. The `:133` failure is source-verified (three independent checks: `530d62b9`
+removed the usage, `import CockpitIdentityCard` occurs zero times in `resources/js`, and `Cockpit.vue:352-357`
+records the same) rather than measured, because the walk stops at `:128`.
+
+**Fixes, in order:** `:114` becomes `page.locator('details[data-region="team-state"]')`; `:128` takes a
+scoped locator such as `page.getByRole('cell', { name: 'Blue Bloom' })`; `:133` uses the same identity
+read-back the peer already used at `:107-111` (reload, `openIdentityDisclosure`, `#trainee_rarity`,
+`#potential_level`). The `:114` fix is applied in the working tree and verified; the other two are named here
+and deliberately not applied, because a second blocker is an escalation trigger rather than something to
+chase in the same pass.
+
+**Also found while verifying:** `resources/js/components/career/CockpitIdentityCard.vue` is an orphaned file —
+it still exists on disk (last touched by `2f4b32da`) and is imported by nothing. Removing it is a separate
+housekeeping call, not part of this defect.
+
+**Proven by** `.scratch-uma/mvs_4f49056156564f6c8c5dc2426cdb8c29/corrections/b1-second-blocker-128.md`.
