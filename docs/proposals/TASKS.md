@@ -1391,13 +1391,40 @@ declaration and blanked the page with a TDZ ReferenceError.
 `npx playwright test career-inheritance-event` → **7 passed**; `npm run typecheck` → 0;
 `npm run build` → 0; pint passed.
 
-## C9 — remaining screens (not yet started)
+## C9 — skills-planner, screen 6 of 9 (`64015676`)
 
-Five of the nine lifecycle screens are repaired. **32 pages remain divergent**: the audit's 28 less one
+| Item | Before (audit) | After |
+|---|---|---|
+| Region model | target card, coverage, purchasable list, hint card, four group editors, add form | budget bar, filters, one skills table, hint-ladder card, savebar |
+| h1 | "Skills planner" | "Spend N Skill Points" (HFW, N = the run's recorded SP) |
+| Budget | coverage card below the fold | SP / Planned spend / Remaining / Learn planned skills in one bar, remaining at top |
+| Table | group editors | checkbox, Skill, Family, Base, Discount, Cost, status (Planned / Too expensive / acquired), client-side paging |
+| Ladder | hint-discount card | why the ladder is not linear, five rows 10/20/30/35/40 + sourced note |
+| Savebar | none | status + Clear plan + Learn planned skills |
+
+**Deviations, documented in the page:** (1) Type and Hints filters render disabled with a title because
+no column carries a skill type or a per-skill hint level; (2) Discount prints an em dash for the same
+reason, and Cost equals Base until a hinted cost has a source; (3) planning is local until "Learn planned
+skills" posts the checked ids through the existing skills-sync route with status `Learned`
+(`HFW OVERRIDE`: the wireframe separates planning from learning, the app's one write marks
+acquisition); (4) the build target, coverage, purchasable list, recorded groups and add form stay in one
+disclosure.
+
+**Verdict delta.** skills-planner: **divergent → near**. Evidence: DOM vs HFW h1 and ladder heading
+equal, the three budget labels present, tables and savebar match, console clean.
+
+**Gates.** `php artisan test CareerSkillsPlannerTest` → **25 passed (352 assertions)**;
+`npx playwright test career-skills-planner` → **7 passed**; `npm run typecheck` → 0;
+`npm run build` → 0. Two spec defects found and fixed in-slice: the search box needed a native input
+(shared `BaseInput` does not forward `name`), and `Clear` needed `exact` against `Clear plan`.
+
+## C10 — remaining screens (not yet started)
+
+Six of the nine lifecycle screens are repaired. **31 pages remain divergent**: the audit's 28 less two
 done, plus the five `near` re-verdicts the side-task S6 below moved to divergent (runs-index,
 preferences, support-cards, support-card-detail, career-scenario). Order stays as the audit's repair
-list: the other four lifecycle screens (skills-planner, run-deck, timeline, result), then the wizard
-remainder (career-trainee/target/preflight/legacy + career-scenario), then library/legacy/veterans/review
+list: the other three lifecycle screens (run-deck, timeline, result), then the wizard remainder
+(career-trainee/target/preflight/legacy + career-scenario), then library/legacy/veterans/review
 (including runs-index and preferences), then the copy/identifier pass. The S9 prop-delta gaps belong to
 their owning slices: `SupportCardController.global_count`, `DatabaseController.areas[].badge`,
 `VeteranController.used_as_parent_count`. `3.0.0` remains **absent**.
