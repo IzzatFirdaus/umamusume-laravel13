@@ -1364,17 +1364,43 @@ provenance table, one savebar, console clean.
 **Gates.** `php artisan test CareerEventDecisionTest` → **9 passed (173 assertions)**;
 `npx playwright test career-event-decision` → **7 passed**; `npm run typecheck` → 0; `npm run build` → 0.
 
-## C8 — remaining screens (not yet started)
+## C8 — inheritance, screen 5 of 9 (`3e76d033`)
 
-Four screens of the nine lifecycle screens are repaired. **33 pages remain divergent**: the audit's 28
-after those four, plus the five `near` re-verdicts the side-task S6 below moved to divergent
-(runs-index, preferences, support-cards, support-card-detail, career-scenario). Order stays as the
-audit's repair list: the other five lifecycle screens (inheritance, skills-planner, run-deck, timeline,
-result), then the wizard remainder (career-trainee/target/preflight/legacy + career-scenario), then
-library/legacy/veterans/review (including runs-index and preferences), then the copy/identifier pass.
-The S9 prop-delta gaps are part of their owning slices: `SupportCardController.global_count`,
-`DatabaseController.areas[].badge`, `VeteranController.used_as_parent_count`. `3.0.0` remains
-**absent**.
+| Item | Before (audit) | After |
+|---|---|---|
+| Region model | milestones, predicted sparks, ancestry section, two forms | Inheritance card with six ancestor slots, Parent A/B spark tables, Result of this pick, savebar |
+| h1 | "Inheritance" | "Choose what to inherit" (HFW) |
+| Ancestry | separate section | two branches: grandparents, Parent A/B, trainee, compatibility |
+| Parent tables | predicted totals only | Spark / Grade / What it carries per recorded spark, families named in words |
+| Result | none | five caps with Before / Change / After, three tiles (Blue sparks, Aptitude shifts, Skill hints), cap-raise note |
+| Savebar | none | status + Skip this moment + Record inheritance (one filled action) |
+
+**Deviations, documented in the page:** (1) per-parent spark radios are **not built** — `ADR-0010`
+stores one legacy selection per run, so the tables list each parent's sparks and the page says so
+(the plan's named deferral); (2) Change prints an em dash and After equals Before because no per-pick
+cap change is computed for a stored selection; (3) spark numbers stay as stars and targets, with no
+invented stat/cap arithmetic; (4) milestones and observed events stay in disclosures, and the write keeps
+its keying fields in one.
+
+**Verdict delta.** inheritance: **divergent → near**. Evidence: DOM vs HFW headings equal (Inheritance /
+Parent A / Parent B / Result of this pick), 3 tiles, 3 tables, 1 savebar, console clean. One runtime
+defect found and fixed inside the slice: the new script initialised `form.turn` before the `useForm`
+declaration and blanked the page with a TDZ ReferenceError.
+
+**Gates.** `php artisan test CareerInheritanceEventTest` → green (13 passed);
+`npx playwright test career-inheritance-event` → **7 passed**; `npm run typecheck` → 0;
+`npm run build` → 0; pint passed.
+
+## C9 — remaining screens (not yet started)
+
+Five of the nine lifecycle screens are repaired. **32 pages remain divergent**: the audit's 28 less one
+done, plus the five `near` re-verdicts the side-task S6 below moved to divergent (runs-index,
+preferences, support-cards, support-card-detail, career-scenario). Order stays as the audit's repair
+list: the other four lifecycle screens (skills-planner, run-deck, timeline, result), then the wizard
+remainder (career-trainee/target/preflight/legacy + career-scenario), then library/legacy/veterans/review
+(including runs-index and preferences), then the copy/identifier pass. The S9 prop-delta gaps belong to
+their owning slices: `SupportCardController.global_count`, `DatabaseController.areas[].badge`,
+`VeteranController.used_as_parent_count`. `3.0.0` remains **absent**.
 
 
 
