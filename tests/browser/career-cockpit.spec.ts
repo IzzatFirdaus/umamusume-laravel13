@@ -224,16 +224,24 @@ test('lists the career obligations the calendar states, each as a mark and a wor
     const advisor = page.getByRole('region', { name: 'Advisor' });
     await expect(advisor.getByRole('heading', { name: 'Objectives' })).toBeVisible();
 
-    const debut = advisor.getByRole('listitem').filter({ hasText: 'Junior Make Debut' });
+    // The wireframe's obligations table: one row per obligation, the state as a pill that carries its
+    // word, and the due turn in its own column ("no date" where the calendar dates nothing).
+    await expect(advisor.getByRole('columnheader', { name: 'Obligation' })).toBeVisible();
+    await expect(advisor.getByRole('columnheader', { name: 'State' })).toBeVisible();
+    await expect(advisor.getByRole('columnheader', { name: 'Due' })).toBeVisible();
+
+    const debut = advisor.locator('tbody tr').filter({ hasText: 'Junior Make Debut' });
     await expect(debut).toBeVisible();
-    // State is a word and a mark, never a colour (WCAG 1.4.1): the word carries it on its own.
-    await expect(debut.getByText('Ahead', { exact: true })).toBeVisible();
+    // State is a word and a mark, never a colour (WCAG 1.4.1): the pill's word carries it.
+    await expect(debut.getByText('ahead', { exact: true })).toBeVisible();
     await expect(debut.getByText('Junior Year · Turn 12')).toBeVisible();
 
-    // An obligation the source cannot date prints N/A with the reason, and is never ranked at turn zero.
-    const undated = advisor.getByRole('listitem').filter({ hasText: 'Undated' }).first();
-    await expect(undated.getByText('N/A')).toBeVisible();
-    await expect(undated.getByText('N/A')).toHaveAttribute('title', /no turn/i);
+    // An obligation the source cannot date prints "no date" with the reason, and is never ranked at
+    // turn zero.
+    const undated = advisor.locator('tbody tr').filter({ hasText: 'no date' }).first();
+    await expect(undated.getByText('unknown', { exact: true })).toBeVisible();
+    await expect(undated.getByText('no date')).toBeVisible();
+    await expect(undated.getByText('no date')).toHaveAttribute('title', /does not date/i);
 
     // Every row states its provenance by name, not by glyph alone.
     await expect(advisor.getByRole('img', { name: /^Calculated/ }).first()).toBeVisible();

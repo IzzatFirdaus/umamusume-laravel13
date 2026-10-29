@@ -29,7 +29,6 @@ import { computed } from 'vue';
 
 import AlertRow from '../scenario/AlertRow.vue';
 import AbsenceValue from '../AbsenceValue.vue';
-import ObjectiveRow from './ObjectiveRow.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import RecordedActionCard from './RecordedActionCard.vue';
 import type { ProvenanceState } from '../../types';
@@ -106,8 +105,13 @@ const props = withDefaults(
         raceUrl: string | null;
         /** The same rule for FD-4's card: the full action history is the Timeline's, and the page owns that door. */
         timelineUrl?: string | null;
+        /**
+         * The position the page is being read at. Used only to state how long an overdue obligation has
+         * been due ("55 turns ago" in the wireframe); null prints no arithmetic.
+         */
+        currentTurn?: number | null;
     }>(),
-    { timelineUrl: null },
+    { timelineUrl: null, currentTurn: null },
 );
 
 const refusal = computed(() => props.decision.refusal);
@@ -124,6 +128,30 @@ const due = computed(() => objectives.value.find((row) => row.state === 'current
 // composes no obligations, and saying so beats an empty box.
 const hasObjectives = computed(() => objectives.value.length > 0);
 
+/** How long the one due obligation has been due, or null when the page has no position to measure from. */
+const turnsAgo = computed<number | null>(() => {
+    if (due.value === null || due.value.due_turn === null || props.currentTurn === null) {
+        return null;
+    }
+
+    const delta = props.currentTurn - due.value.due_turn;
+
+    return delta > 0 ? delta : null;
+});
+
+const statePill = (state: string): { word: string; cls: string } => {
+    switch (state) {
+        case 'current':
+            return { word: 'current', cls: 'pill-caution' };
+        case 'completed':
+            return { word: 'met', cls: 'pill-positive' };
+        case 'upcoming':
+            return { word: 'ahead', cls: 'pill-neutral' };
+        default:
+            return { word: 'unknown', cls: 'pill-neutral' };
+    }
+};
+
 // An empty `missing` is the other refusal: every input is recorded and nothing was short of its target.
 const incompleteData = computed(
     () => refusal.value !== null && refusal.value.missing.length > 0,
@@ -137,21 +165,27 @@ const incompleteData = computed(
                 Objectives
             </h3>
 
-            <ol class="mt-1 space-y-2">
-                <ObjectiveRow
-                    v-for="row in objectives"
-                    :key="`${row.state}-${row.label}`"
-                    :label="row.label"
-                    :state="row.state"
-                    :due_turn="row.due_turn"
-                    :due_label="row.due_label"
-                    :consequence="row.consequence"
-                    :source="row.source"
-                    :badge="row.badge"
-                    :title="row.title"
-                    :url="due === row ? props.raceUrl : null"
-                />
-            </ol>
+            <!-- The wireframe's obligations table (Obligation / State / Due): a table, not a row list,
+                 so the three aligned columns carry the comparison. The state is a pill AND a word, and
+                 an undated row prints "no date" rather than a dash. The provenance badge and the door
+                 stay inside the obligation cell. -->
+            <table class="t mt-2 w-full border-collapse text-sm">
+                <thead>
+                    <tr><th class="text-left">Obligation</th><th class="text-left">State</th><th class="text-right">Due</th></tr>
+                </thead>
+                <tbody>
+                    <tr v-for="row in objectives" :key="row.state + '-' + row.label" :class="row.state === 'current' ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft align-top">
+                        <td class="py-2 pr-3">
+                            <a v-if="due === row && props.raceUrl !== null" :href="props.raceUrl" class="font-semibold text-ink-strong hover:underline">{{ row.label }}</a>
+                            <b v-else class="text-ink-strong">{{ row.label }}</b>
+                            <ProvenanceBadge :state="row.badge" :title="row.title" />
+                            <span v-if="row.consequence !== null" class="mt-0.5 block text-xs text-ink-muted">{{ row.consequence }}</span>
+                        </td>
+                        <td class="py-2 pr-3"><span class="pill" :class="statePill(row.state).cls">{{ statePill(row.state).word }}</span></td>
+                        <td class="py-2 text-right font-mono" :title="row.due_turn === null ? 'The calendar does not date this obligation.' : null">{{ row.due_label ?? 'no date' }}</td>
+                    </tr>
+                </tbody>
+            </table>
 
             <!-- The one obligation the calendar puts at or before this turn, marked the way the HFW
                  marks its current row: a caution pill carrying the word, beside the sentence that
@@ -163,7 +197,7 @@ const incompleteData = computed(
                     class="min-w-0 flex-1"
                     glyph="▲"
                     tone="critical"
-                    :text="`${due.label} is due and not recorded.`"
+                    :text="due.label + ' is due and not recorded.' + (turnsAgo === null ? '' : ` It fell due on turn ${due.due_turn}, ${turnsAgo} turns ago.`)"
                     detail="The calendar puts it at or before the turn being decided and no race is recorded against it."
                 />
             </div>

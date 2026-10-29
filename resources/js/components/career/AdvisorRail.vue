@@ -20,8 +20,10 @@ const props = withDefaults(
         raceUrl?: string | null;
         /** Forwarded to FD-4's recorded-action card: the full action history is the Timeline's. */
         timelineUrl?: string | null;
+        /** Forwarded so an overdue obligation can say how long it has been due. */
+        currentTurn?: number | null;
     }>(),
-    { raceUrl: null, timelineUrl: null },
+    { raceUrl: null, timelineUrl: null, currentTurn: null },
 );
 </script>
 
@@ -43,6 +45,7 @@ const props = withDefaults(
             :decision="props.decision as never"
             :race-url="props.raceUrl"
             :timeline-url="props.timelineUrl"
+            :current-turn="props.currentTurn"
         />
 
         <p class="mt-3 text-xs text-ink-muted">

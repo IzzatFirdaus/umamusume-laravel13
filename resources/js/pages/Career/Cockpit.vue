@@ -1099,7 +1099,12 @@ const jumpToShop = (): void => {
                 <!-- Ruling 1: the advisor region is absent on a completed run, not empty. Gating the
                      wrapper rather than the rail is what makes the DOM agree with the page. -->
                 <div v-if="isActive" data-region="advisor">
-                    <AdvisorRail :decision="props.advisor.decision" :race-url="raceDoor" :timeline-url="props.run.timeline_url" />
+                    <AdvisorRail
+                        :decision="props.advisor.decision"
+                        :race-url="raceDoor"
+                        :timeline-url="props.run.timeline_url"
+                        :current-turn="props.header.turn === 0 ? null : props.header.turn"
+                    />
                 </div>
 
                 <!-- HFW parity: every variant's right column ends with its doors, and Unity Cup's own
