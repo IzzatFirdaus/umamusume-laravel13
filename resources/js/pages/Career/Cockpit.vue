@@ -347,8 +347,14 @@ const closedOutcome = computed((): string => {
 
 /**
  * The page-head line. Position and scenario, with the closed run's outcome in front of them: the one
- * fact a finished career owes first. Identity stars and the card form stay on the identity card so
- * one figure is not printed three times on one screen.
+ * fact a finished career owes first.
+ *
+ * CORRECTED at R1: this used to say "Identity stars and the card form stay on the identity card so
+ * one figure is not printed three times on one screen". That component was deleted at `530d62b9`
+ * ("Deleted, because no cockpit HFW draws them: … the `CockpitIdentityCard` …"), so the sentence
+ * pointed a reader at a shape this file no longer renders. Stars and the card form now live in the
+ * "Run identity" write surface inside the closed "Career tools" disclosure, reached from the Actions
+ * area; the page head still prints neither, which is what the deduplication rule asks for.
  */
 const lede = computed((): string => {
     const parts: string[] = [];

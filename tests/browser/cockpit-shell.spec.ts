@@ -40,7 +40,24 @@ async function createRun(page: Page, status: 'Active' | 'Completed'): Promise<st
     return runUrl;
 }
 
-const identity = (page: Page): Locator => page.locator('section[aria-labelledby="career-header-heading"]');
+/*
+ * RE-BASELINED at R1 (9949f7e5 + this commit). The two cases below used to pin
+ * `section[aria-labelledby="career-header-heading"]`, the `CockpitIdentityCard`'s own section.
+ * That component was deleted at `530d62b9` — its commit body reads "Deleted, because no cockpit
+ * HFW draws them: … the `CockpitIdentityCard` …" — and the premise checks out: the string
+ * "identity" appears zero times in `cockpit-unity-cup.html`, `cockpit-ura-finale.html` and
+ * `cockpit-trackblazer.html`, and its one hit in `cockpit-grand-concert.html` is the prose
+ * "this scenario's identity in numbers", not a card.
+ *
+ * So the spec was pinning a shape the wireframe never had: the defect was here, not in the page.
+ * The shipped cockpit's first full-width region is `CareerStatePanel`
+ * (`section[aria-labelledby="career-state-heading"]`, titled "Stats and state" on an active run
+ * and "Final stats" on a completed one), which is the block the HFW actually draws first.
+ *
+ * This is a re-baseline, not a weakening: the ordering assertion (first block above the body)
+ * keeps its meaning, and the one-filled-action and no-sideways-scroll assertions are untouched.
+ */
+const stats = (page: Page): Locator => page.locator('section[aria-labelledby="career-state-heading"]');
 const scenario = (page: Page): Locator => page.getByRole('region', { name: 'Scenario' });
 const advisor = (page: Page): Locator => page.locator('section[aria-labelledby="career-advisor-heading"]');
 
@@ -74,7 +91,7 @@ async function top(locator: Locator): Promise<number> {
     return box!.y;
 }
 
-test('puts the identity card first, then the body, at 1440px', async ({ page }) => {
+test('puts stats and the advisor on one row, with the scenario card below them, at 1440px', async ({ page }) => {
     const runUrl = await createRun(page, 'Active');
     // 1440 rather than the project's 1280: the body's two-column breakpoint is a CONTAINER query
     // (`@4xl`), and at 1280 the container is narrower than the breakpoint, so the body stacks. The
@@ -86,34 +103,37 @@ test('puts the identity card first, then the body, at 1440px', async ({ page }) 
     await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    await expect(identity(page)).toBeVisible();
+    await expect(stats(page)).toBeVisible();
     await expect(scenario(page)).toBeVisible();
     await expect(advisor(page)).toBeVisible();
 
-    const identityTop = await top(identity(page));
+    const statsTop = await top(stats(page));
+    const advisorTop = await top(advisor(page));
+    const scenarioTop = await top(scenario(page));
 
-    // Identity first: above both body regions, which is the HFW's one full-width card.
-    expect(identityTop).toBeLessThan(await top(scenario(page)));
-    expect(identityTop).toBeLessThan(await top(advisor(page)));
+    // MEASURED at 1440 (dev run 26): stats y=288, advisor y=288, scenario y=790. The stats card is
+    // the LEFT COLUMN of the body grid, not a full-width band above it — so it shares a top edge with
+    // the advisor rather than sitting above it. That is the shipped shape and the assertion now pins
+    // it. (The pre-re-baseline version asserted identity-above-advisor, which held only while the
+    // full-width identity card existed.)
+    expect(Math.abs(statsTop - advisorTop), 'stats and the advisor are the two columns of one row').toBeLessThanOrEqual(2);
 
-    // The scenario card is BELOW the body grid rather than beside the advisor, which is why this test
-    // does not assert a shared top edge: the shell's order is identity → body (stats left, advisor
-    // right) → race strip → scenario card, and geometry is asserted where the layout is stable (the
-    // 390px reflow case below), not where a container query decides the column count.
-    expect(await top(advisor(page))).toBeLessThan(await top(scenario(page)));
+    // Both body columns come before the scenario card, which closes the canvas below them.
+    expect(statsTop).toBeLessThan(scenarioTop);
+    expect(advisorTop).toBeLessThan(scenarioTop);
 
     // One filled action on the page head, and it is the action the Next decision card offers.
     const primaries = page.locator('a.bg-primary-action, button.bg-primary-action');
     await expect(primaries).toHaveCount(1);
 });
 
-test('reflows to one column at 390px without losing the identity card or the advisor', async ({ page }) => {
+test('reflows to one column at 390px without losing the stats card or the advisor', async ({ page }) => {
     const runUrl = await createRun(page, 'Active');
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    await expect(identity(page)).toBeVisible();
+    await expect(stats(page)).toBeVisible();
     await expect(advisor(page)).toBeVisible();
 
     // Single column: the advisor no longer shares a top edge with the left column; it follows it.
