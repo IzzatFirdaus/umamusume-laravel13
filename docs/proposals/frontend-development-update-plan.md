@@ -681,6 +681,22 @@ has a query source named; no prop invented to satisfy a static HFW figure.
 - Add `help` route only (Slice 11). No other route changes. Wizard, snapshot, cockpit,
   and library routes are untouched.
 
+### 7.6 Prop deltas — corrections recorded 2026-10-29
+
+The three deltas collected in §7.3 were re-measured against the shipped tree; the owner ruled on
+them on 2026-10-29 (`DECISIONS-2026-10-29.md`, `.scratch-uma/session-2026-10-29/proposals/`):
+
+- **`globalCount` (SupportCardController).** Shipped as `globalCount` — camelCase — from
+  `SupportCard::query()->whereNotNull('release_global')->count()` at `:158`, pinned by
+  `SupportCardPageTest:71`. The plan's earlier `global_count` / `release_en` named a parser key,
+  not the stored column; the correction landed with the prop (`ca7d4828`).
+- **`DatabaseController.areas[].badge` — dropped.** `area.tag` already ships and the Hub binds
+  it; the Races "Catalog" badge in `database.html` is a mock figure over a live count — the count
+  wins, and the deviation is recorded.
+- **`VeteranController.used_as_parent_count` — dropped.** There is no legacies table and no
+  per-veteran parentage; `StartCareerRequest` collapses the picked veteran to `traineeId` and
+  ancestors are stored as names, so the metric requires a new schema, not a delta.
+
 ---
 
 ## 8. Phase 5 — Annotation compliance sweep (final gate, Slice 12)

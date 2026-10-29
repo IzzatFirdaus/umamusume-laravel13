@@ -1687,6 +1687,105 @@ feature test -> passed; `phpstan analyse` on the changed controller -> no errors
 
 **Tag.** `3.0.0` remains **absent**. Task D now includes flow walkthroughs, not page verdicts alone.
 
+**Dated correction (2026-10-29, post-wizard continuation pass; measured at HEAD `4b09b1b6`,
+re-measured at `f76bed8c`).** The section above is left standing; three of its statements are
+superseded:
+
+- **`tests/browser/career-build-target.spec.ts` is committed, not uncommitted.** It landed at
+  `4b09b1b6` ("feat(career): align wizard pages to the HFW (S4 remainder)"). HEAD and the working
+  tree both assert `/career/setup/legacy$` after the click (`:92-95`, `:154-156`), and
+  `git diff HEAD -- tests/browser/career-build-target.spec.ts` is empty. **HEAD is self-consistent:**
+  `CareerBuildTargetTest` and the browser spec agree on `career.legacy`; nothing is waiting on this
+  file to land.
+- **KI-64 was already closed when the Import walk was recorded.** The register closed it on
+  2026-10-09 at `851ed51`, and HEAD's `confirmImport()` posts `csv` and `turns`
+  (`HEAD:resources/js/pages/Runs/Import.vue:261-262`). The file's working-tree diff is a different
+  slice, not the KI-64 fix: import column mapping (source mode toggle, `mapping` validation in
+  `ImportHistoricalRunRequest`, preview round-trip, fill/drop missing). By the end of this pass it
+  was staged by the second agent (10 files, 686 insertions, alongside a Runs-index slice).
+- **Save Veteran walk: environmental, not a defect. C19 is not opened.** The save primary is not in
+  the Cockpit and no `<details>` wraps it. `Result.vue:568-572` renders the Save Veteran anchor when
+  `save_veteran.available`; `SaveVeteran.vue:404-413` renders the primary, and the file has zero
+  `<details>`. The cockpit's collapsed `Career tools` disclosure (`Cockpit.vue:1138`, HFW-OVERRIDE at
+  `:1130-1137`) hides the doors to Timeline and Result, not the save; a finished career also reaches
+  Result from `Runs/Index.vue:81`. For an Active run the Result door correctly reads "Not available
+  yet" (`ResultController::saveVeteranSection()`, `:434-448`). The walk was blocked on navigation,
+  not on a hidden save.
+
+## C21 — lifecycle screens: commit state verified (2026-10-29)
+
+C19 not opened: the Save Veteran walk was environmental (C18 correction). C20 not opened: the
+second main agent session was running (`68c558bb-0ce3-4915-9db5-05c24e15ec47`) and the handoff was
+delivered in writing.
+
+Two HEADs were measured because the tree moved during the pass: `4b09b1b6` at the start, `f76bed8c`
+at the end. The lifecycle rows below were identical at both; four commits landed between them
+(`f3d2261b`, `400b8175`, `ca7d4828`, `f76bed8c`).
+
+| Ledger | Page file | Worktree | Feature commit | Last commit touching it |
+|---|---|---|---|---|
+| C8 inheritance (screen 5) | `resources/js/pages/Career/InheritanceEvent.vue` | clean | `3e76d033` | `75694dad` |
+| C9 skills-planner (screen 6) | `resources/js/pages/Career/SkillsPlanner.vue` | clean | `64015676` | `75694dad` |
+| C10 run-deck (screen 7) | `resources/js/pages/Career/DeckSelect.vue` | clean | `5d0dea63` | `4b09b1b6` |
+| C11 timeline (screen 8) | `resources/js/pages/Career/Timeline.vue` | clean | `14265dc3` | `75694dad` |
+| C12 result (screen 9) | `resources/js/pages/Career/Result.vue` | clean | `49893dec` | `49893dec` |
+
+The brief called the deck screen `RunDeck`; the page is `DeckSelect.vue` and ledger C10 names it
+run-deck. No lifecycle page has an uncommitted diff.
+
+**Lifecycle-adjacent files.** The four files staged at the start of the pass
+(`resources/js/components/career/CareerTimeline.vue`, `SkillPlanRow.vue`,
+`resources/js/pages/Career/TrainingDetail.vue`, `tests/browser/career-result-indep.spec.ts`) are now
+committed at `f3d2261b` ("fix(career): normalise prose dashes and the skill-plan row radius"), 17
+insertions / 17 deletions. They were the S3 dash removal plus a `rounded-[var(--radius-md)]` to
+`rounded-md` swap and a no-op `{ exact: false }` removal; their worktree is clean.
+
+**Handoff delivered to the second main agent** (session `68c558bb`, message sent 2026-10-29):
+- `career-build-target.spec.ts` is already committed (`4b09b1b6`); nothing to pick up.
+- KI-64 is already at HEAD (`851ed51`); the staged import slice is a different purpose.
+- The staged set at message time was 10 files / 686 insertions: import column mapping plus a
+  Runs-index slice (`PageSize`, `Runs/Create`, `Runs/Index`, their tests). `TrainingRunController.php`
+  is two-purpose (import-preview `mapping` prop and the Runs-index `VeteranRow::portraitUrl`).
+- Asked them to confirm (a) `f3d2261b` is theirs, (b) the commit boundary with both purposes named,
+  and (c) they will land the standing rule.
+- Standing rule handed for `AGENTS.md` section 9, between the change-class table and the hand-off
+  sequence paragraph:
+
+> **Every flow a user completes needs a spec that walks it end to end.** A page spec is not a
+> substitute: when a primary's redirect, order or gate is the behavior, the spec enters at the
+> flow's start, asserts the URL after each primary, and deletes anything it creates in
+> `afterEach` (`tests/browser/wizard-flow.spec.ts` is the pattern).
+
+This pass committed nothing and staged nothing.
+
+**State moved again during the pass (measured at `868c173c`).** The records above stand at their own
+HEADs; this addendum carries the later state:
+
+- HEAD went `4b09b1b6` -> `f76bed8c` -> `399728ad` -> `0ec6aadf` -> `868c173c`. The five lifecycle
+  pages were re-checked at `868c173c`: unchanged and clean, same hashes as the table.
+- The staged import slice recorded above landed at `399728ad` ("feat(runs): import column mapping +
+  the careers list/create HFW alignment"). The staged set at `868c173c` is a different peer slice
+  (10 files, 310 insertions / 446 deletions), not this pass's.
+- The standing rule is **not yet in `AGENTS.md`**: the sentence has no match there and the file's
+  last commit is `55f5a202`. It is held by the second agent (confirmation (c) outstanding).
+- No side-tasks session existed at any measurement, so `commit-manifest.md`,
+  `wizard-flow-measure.md`, the three proposals, the Pest triage and the 46-baseline were not
+  available; none is this pass's to produce.
+- **Peer-dirty reds filed, not fixed** (reported in the handoff brief; not re-run this pass, and the
+  peer slices named below touched these paths after the report, so their current state is
+  unverified):
+  - SupportCard row rendering: `tests/browser/support-cards.spec.ts:47` ("renders each row label,
+    rarity word and type word"). A Playwright failure artifact for this case existed mid-pass and
+    was removed by a concurrent run.
+  - Run-import refusal: `tests/browser/run-import.spec.ts:123` ("refuses a file the app never
+    wrote...").
+  - Runs-create trainee: `tests/browser/runs-create.spec.ts:23` (the trainee combobox region order)
+    and `tests/browser/runs-create-forms.spec.ts:53` (`#trainee-combobox`).
+  - Veterans library: `tests/browser/veterans.spec.ts` (library list and nav cases; the file was
+    staged mid-pass).
+  Peer commits touching these paths after the brief: `ca7d4828` (support-cards), `399728ad`
+  (runs/import), `0ec6aadf` (legacy/veterans).
+
 ---
 
 # Side tasks - 2026-10-29
@@ -1791,7 +1890,20 @@ single count; both files are on disk for diffing.)
 
 ## S7 - 46-baseline
 
-Deferred. A full npm run test:browser baseline on a HEAD that moves with every repair slice is a moving
-target; Task D re-audit supersedes it, and the suite wedged at ~153/603 in prior attempts. Not run this
-session; recorded rather than implied.
+**Redefined 2026-10-29 (owner ruling).** The 46-item count is retired: the list exists nowhere in
+the repository, and a gate that cannot enumerate its items cannot be closed. The gate is now:
+**the full browser suite passes at commit X, with every failure attributed to a base-worktree
+reproduction.** Named precondition: a quiet box (`<30% CPU, >6GB free, zero peer runs`) — prior
+attempts measured void under load. Reasoning:
+`.scratch-uma/session-2026-10-29/proposals/proposal-46-baseline.md`.
+
+## Browser suite is not read-only (decision 2026-10-29)
+
+`tests/browser/_screens-indep-training.spec.ts:17` screenshots into four tracked PNGs under
+`docs/research-scratch/hfw-parity/indep-training/`, so running the suite dirties the tree. Decision:
+move the screenshots to `.scratch-uma/session-2026-10-29/screenshots/` (the destination is already
+inside the gitignored `.scratch-uma/` tree), remove the four PNGs from tracking, and update the
+spec path. No tracked markdown cites the old directory, so there is nothing to repoint. The move is
+a named follow-up commit: the four PNGs plus the spec line. The AGENTS.md §9 sentence ("a gate that
+dirties the tree is not a gate") is owner-authored and handed over separately.
 
