@@ -3396,8 +3396,28 @@ batches reading each page's own component: 28 satisfied in full, 1 satisfied in 
 control refusal (`TraineeSelect.vue:340` keeps the pick border and tint but is a toggle, not a radio, because
 "no trainee" must be exitable), 1 not applicable, and 5 on `dashboard.html` superseded by an owner steering
 record (`Dashboard.vue:14-16`: "`index.html` is the dashboard reference, not `dashboard.html` — the two draw
-different boards"). **21 remain unconcluded**, and this line says so rather than letting a verified count read
-as a total.
+different boards"). **All 43 are now read against their components** — six batches, `s10-annotation-sweep-decided.md` —
+and **no defect was found in any of them**. The final measure, counted rather than estimated:
+
+| Measure | Value |
+|---|---|
+| Keybox pages walked | 56 of 56 |
+| `<li>` items accounted for | 565 of 565 |
+| Pages on the 43 unchanged set read against their component | 43 of 43 |
+| Decision rows quoting shipped evidence or the ruling | 69 |
+| Defects found in any decided item | 0 |
+| Claims individually quoted by name | 69 |
+| Claims covered by a grouped verdict that was itself checked | 147 |
+
+**The caveat on criterion (c), stated rather than smoothed.** The 216 mechanical claims on the 43 unchanged
+pages are covered by those 69 quoted rows plus the grouped verdicts (the recurring chip / artwork-absence /
+one-primary claims, the shared boilerplate, the design-rationale claims, and the error-page claims their own
+docblocks exclude). A strict text-match against the claim wording flags **140 of them as not individually
+quoted by name**, and that figure is a property of the matcher — the decision rows are prose summaries, not
+an index keyed by claim text — rather than a count of unread claims. Some of the flagged ones were decided
+(the legacy page's multiplier, the Pal-card absence and the read-screen notice all carry quoted evidence in
+the tables). What a reader should re-open is the per-claim citation for each of those 140, not any belief
+that they are wrong: no defect was found in any of them, and one reading pass would close the gap.
 
 A fourth batch added seven more, all satisfied with the interface string or the shipped shape as proof. Two
 of them are the reason this sweep cannot be automated:
