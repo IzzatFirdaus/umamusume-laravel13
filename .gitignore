@@ -28,6 +28,9 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 *.lnk
+# A tool once wrote an unexpanded %SystemDrive% as a relative path; the directory is apparatus
+# litter, not project state, and `git add -A` would sweep it into a commit.
+/%SystemDrive%/
 
 # OS: macOS
 .DS_Store
