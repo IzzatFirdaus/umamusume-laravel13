@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Enums\CardRarity;
+use App\Models\CharacterCard;
 use App\Models\MatchCandidate;
 use App\Models\Umamusume;
 use App\Models\UmamusumeAlias;
@@ -42,6 +44,43 @@ it('sends the proposed record with its costume split out of the name', function 
             ->where('bestMatch.costume', 'Rosy Dreams')
             ->has('bestMatch.aptitudes')
         );
+});
+
+/*
+ * The rarity mark (`review-detail.html:90`, `pill pill-neutral "★★★ SSR"`). The rarity lives on the
+ * character card, not on `umamusume`, so `show()` eager-loads `suggestedUmamusume.cards` and derives
+ * the maximum with `CatalogController`'s own expression. Both halves are pinned: a trainee with cards
+ * prints the highest card's label and star count, and a trainee with none prints null so the page can
+ * state the absence rather than a zero-star mark.
+ */
+it('sends the proposed record max rarity from its character cards', function (): void {
+    $umamusume = Umamusume::factory()->create(['name' => 'Rice Shower', 'slug' => 'rice-shower']);
+
+    CharacterCard::factory()->for($umamusume)->create(['rarity' => CardRarity::OneStar]);
+    CharacterCard::factory()->for($umamusume)->create(['rarity' => CardRarity::ThreeStar]);
+
+    $candidate = MatchCandidate::factory()->create([
+        'proposed_name' => 'Rice Shower',
+        'suggested_umamusume_id' => $umamusume->id,
+    ]);
+
+    test()->get("/review/{$candidate->id}")
+        ->assertInertia(fn (Assert $page): Assert => $page
+            ->where('bestMatch.max_rarity.label', CardRarity::ThreeStar->label())
+            ->where('bestMatch.max_rarity.stars', CardRarity::ThreeStar->stars())
+        );
+});
+
+it('sends a null rarity when the proposed record has no card', function (): void {
+    $umamusume = Umamusume::factory()->create(['name' => 'No Card', 'slug' => 'no-card']);
+
+    $candidate = MatchCandidate::factory()->create([
+        'proposed_name' => 'No Card',
+        'suggested_umamusume_id' => $umamusume->id,
+    ]);
+
+    test()->get("/review/{$candidate->id}")
+        ->assertInertia(fn (Assert $page): Assert => $page->where('bestMatch.max_rarity', null));
 });
 
 it('lists the other forms of the same trainee apart from the proposed one', function (): void {

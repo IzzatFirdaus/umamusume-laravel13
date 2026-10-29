@@ -7,7 +7,9 @@ namespace App\Http\Controllers;
 use App\Actions\ResolveMatchCandidate;
 use App\Enums\AliasLanguage;
 use App\Enums\CandidateStatus;
+use App\Enums\CardRarity;
 use App\Http\Requests\ResolveMatchCandidateRequest;
+use App\Models\CharacterCard;
 use App\Models\MatchCandidate;
 use App\Models\Umamusume;
 use App\Models\UmamusumeAlias;
@@ -79,9 +81,19 @@ class ReviewController extends Controller
      */
     public function show(MatchCandidate $candidate): Response
     {
-        $candidate->loadMissing('suggestedUmamusume');
+        // `cards` rides the same eager load as the trainee itself: the Best match card prints the
+        // rarity mark the HFW draws (`review-detail.html:90`, `pill pill-neutral "★★★ SSR"`), and the
+        // rarity lives on the character card, not on `umamusume`. Loading it here costs one relation
+        // on one already-read row rather than a lazy query per render, and the derivation below is
+        // `CatalogController`'s own expression (`:135-137`, `:159`) so the two screens cannot disagree
+        // about what a trainee's rarity is.
+        $candidate->loadMissing('suggestedUmamusume.cards');
 
         $suggested = $candidate->suggestedUmamusume;
+
+        $maxRarity = $suggested === null || $suggested->cards->isEmpty()
+            ? null
+            : CardRarity::from((int) $suggested->cards->max(static fn (CharacterCard $card): int => $card->rarity->value));
 
         return Inertia::render('Review/Detail', [
             'candidate' => [
@@ -108,6 +120,9 @@ class ReviewController extends Controller
                 'name_ja' => $suggested->name_ja,
                 'costume' => self::costumeOf($suggested->name),
                 'aptitudes' => $suggested->aptitudeAxes(),
+                // Null when no card row exists: the card prints the absence in words rather than a
+                // zero-star mark, because a trainee with no catalogue card is a real state here.
+                'max_rarity' => $maxRarity === null ? null : ['label' => $maxRarity->label(), 'stars' => $maxRarity->stars()],
             ],
             /*
              * The other forms of the same trainee. A costume is not a column: it is a bracketed prefix
