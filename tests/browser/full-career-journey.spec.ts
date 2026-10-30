@@ -65,7 +65,7 @@ function scratchRunCount(): number {
 async function walkToPreflight(page: import('@playwright/test').Page): Promise<string> {
     return walkWizard(page, 'unity_cup', {
         onLegacy: async (step) => {
-            await expect(step.getByRole('heading', { name: 'Legacy', level: 1 })).toBeVisible();
+            await expect(step.getByRole('heading', { name: 'Inherit from two parents', level: 1 })).toBeVisible();
             await expect(step.getByText('Step 4 of 6').first()).toBeVisible();
         },
     });
@@ -85,7 +85,7 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
 
     await page.goto('/career/setup/preflight', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await page.getByRole('button', { name: 'Start career' }).click();
+    await page.getByRole('button', { name: 'Create the run' }).click();
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
 
     // And Preflight is the run's birth: exactly one row more than the walk started with.
@@ -102,11 +102,19 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     await page.locator('input[name="growth_rate[Speed]"]').fill('10');
     await page.getByRole('button', { name: 'Save identity' }).click();
     await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
-    await expect(
-        page.locator('section[aria-labelledby="career-header-heading"]').getByText('★3 · Potential 2'),
-    ).toBeVisible();
+    // The old `CockpitIdentityCard` header this used to assert is no longer rendered by the shipped
+    // cockpit, so the walk reads the save back where it now lives: the identity editor after a reload.
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await openIdentityDisclosure(page);
+    await expect(page.locator('#trainee_rarity')).toHaveValue('3');
+    await expect(page.locator('#potential_level')).toHaveValue('2');
 
-    const teamEditor = page.locator('details', { has: page.getByText('Edit team state') });
+    // Neither the label text nor the team-name field is unique here: `run-tools` nests the
+    // team-state disclosure, so a descendant match on the field finds both and the walk fails on
+    // strict mode before the assertion. Naming the panel by its own attribute is what makes the
+    // selector single.
+    const teamEditor = page.locator('details[data-region="team-state"]');
     // The panel is `open` while the career is active — Cockpit.vue sets `:open="isActive"`, because the
     // panel the Active screen has always shown stays shown and only closes once the career has ended.
     // The journey used to click the summary first, which TOGGLED IT CLOSED and left the input hidden, so
@@ -117,15 +125,24 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     await teamEditor.locator('input[name="spirit_bursts_count"]').fill('6');
     await teamEditor.getByRole('button', { name: 'Save team state' }).click();
     await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
-    await expect(page.getByText('Blue Bloom')).toBeVisible();
+    // The saved name now appears twice on the cockpit: the Scenario card's own table prints it as
+    // the `Team` row's cell (Cockpit.vue:1024-1040, outside any disclosure and always visible), and
+    // UnityCupPanel repeats it inside the closed `scenario-detail` disclosure as a hidden `<dd>`. A
+    // bare getByText resolves to two elements, so the walk names the visible cell it means.
+    await expect(page.getByRole('cell', { name: 'Blue Bloom' })).toBeVisible();
 
     // Reload: the identity and the team state are read back from storage, not from the form.
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await expect(
-        page.locator('section[aria-labelledby="career-header-heading"]').getByText('★3 · Potential 2'),
-    ).toBeVisible();
-    await expect(page.getByText('Blue Bloom')).toBeVisible();
+    // The old CockpitIdentityCard header this used to assert is no longer rendered by the shipped
+    // cockpit (removed at 530d62b9, zero imports in resources/js), so the reload reads the save back
+    // where it now lives - the identity editor - exactly as the peer's re-baseline does at :105-111.
+    await openIdentityDisclosure(page);
+    await expect(page.locator('#trainee_rarity')).toHaveValue('3');
+    await expect(page.locator('#potential_level')).toHaveValue('2');
+    // The Scenario card's Team row survives the reload in the same always-visible cell, so the
+    // scoped cell locator keeps this assertion single-element too.
+    await expect(page.getByRole('cell', { name: 'Blue Bloom' })).toBeVisible();
 
     // --- One guided turn, recorded on Training Detail (Slice 1.4's surface) ---
     await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
