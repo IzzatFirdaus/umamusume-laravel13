@@ -3897,3 +3897,53 @@ Not applied here: fourth-blocker boundary.
 
 **Proven by** `.scratch-uma/mvs_4f49056156564f6c8c5dc2426cdb8c29/corrections/b1-second-blocker-128.md`
 (the earlier escalation) and the `b1-pass4.json` timeout. See also the four-locator record below.
+
+## KI-139 — the walk's deck door lives inside a disclosure the walk never opens
+
+**State:** OPEN. Filed 2026-10-30, fifth blocker resolving B-1/KI-136/KI-137/KI-138. KI-138 is
+fixed in the working tree, and fixing it moved the walk to this line. Per the dispatch boundary a
+fifth one-off patch is not applied; this entry is the aggregate close the previous four entries
+pointed at.
+
+**Defect.** `tests/browser/full-career-journey.spec.ts:176` clicks
+`page.getByRole('link', { name: "Edit this run's deck" })`. The link exists
+(`resources/js/pages/Career/Cockpit.vue:1276-1283`) but sits inside
+`<details data-region="run-tools">` (`Cockpit.vue:1144`), which renders closed, so nothing with
+that accessible name reaches the accessibility tree and the click times out at 300 s.
+
+**Why.** `Cockpit.vue:356` records the ruling that the Run identity write surface lives inside
+the closed "Career tools" disclosure, and the block comment above the door list says doors that
+read rather than write stay outside it — which is why two other doors to the same URL
+(`/training-runs/{run}/deck`) are unconditionally rendered: the run tab bar's `Deck` and the
+"Where to go" list's `Run deck`. The walk was written when the identity surface was open.
+
+**Evidence.** Session-private pair `PLAYWRIGHT_PORT=8187`, `PLAYWRIGHT_SCRATCH_DB` under the
+session apparatus, JSON reporter: `expected: 0 unexpected: 1 flaky: 0`, `duration: 326466 ms`,
+`status: timedOut`, `file: full-career-journey.spec.ts:176:68`, call log
+`waiting for getByRole('link', { name: 'Edit this run\'s deck' })`. The page snapshot taken at
+the failure shows `link "Deck"` and `link "Run deck"` both present and `generic "Career tools"`
+collapsed.
+
+**The pattern this closes.** Five blockers in one walk, one class — a locator or a
+control-location assumption the shipped Cockpit no longer satisfies:
+
+| # | Line | Assumed | Ships | Issue |
+|---|---|---|---|---|
+| 1 | `:114` | one `details` holding `input[name="team_name"]` | two, nested | KI-136 |
+| 2 | `:128` | team name renders once | twice | KI-137 |
+| 3 | `:133` | `CockpitIdentityCard` header | removed at `530d62b9` | KI-137 |
+| 4 | `:150` | `Train` inside a training card | savebar on Training Detail | KI-138, fixed |
+| 5 | `:176` | `Edit this run's deck` is rendered | inside closed `run-tools` | this entry |
+
+Each fix exposed the next, which is the signature of a file written against a shape four parity
+commits replaced rather than of four independent typos. The remaining steps of the walk have not
+been read against the shipped screens at all.
+
+**Fix — one re-baseline pass, not a sixth patch.** Read the whole walk against the shipped
+screens in the shape `tests/browser/career-training-detail.spec.ts` took after the 2026-10-28
+parity audit ("a re-baseline, not a weakening: every claim the old file made that still applies is
+present"), seeded with the five rows above. The deck step should take the unconditional
+`Run deck` door rather than opening a write disclosure the walk does not need to read.
+
+**Proven by** `.scratch-uma/mvs_c29bb439b4eb461ab84682c2f1604577/corrections/journey-pass5-176.md`
+and `.scratch-uma/mvs_c29bb439b4eb461ab84682c2f1604577/journey-run1.json`.
