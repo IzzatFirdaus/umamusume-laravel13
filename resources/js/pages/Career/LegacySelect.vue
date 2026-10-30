@@ -36,7 +36,7 @@ import AbsenceValue from '../../components/AbsenceValue.vue';
 import { BaseSelect } from '../../components/Form';
 import AncestorEditor from '../../components/legacy/AncestorEditor.vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { nextTick } from 'vue';
+import { nextTick, ref } from 'vue';
 
 interface SparkDraft {
     kind: string;
@@ -119,10 +119,14 @@ const props = defineProps<{
  * stored payload is read back whole on save, so re-saving a
  * pick never erases the record behind it.
  */
+/** True while a slot is in manual-name mode; the picker then shows the name input instead of a row. */
+const manual = ref([false, false]);
+
 const form = useForm({
     affinity: props.affinity ?? '',
     legacies: (props.payload?.legacies ?? []).map((legacy, index) => ({
         legacy_id: String(props.parents[index] ?? ''),
+        name: (legacy as { name?: string }).name ?? '',
         rank: legacy.rank === null ? '' : String(legacy.rank),
         rank_letter: legacy.rank_letter ?? '',
         is_guest: legacy.is_guest,
@@ -132,12 +136,18 @@ const form = useForm({
         ancestors_sparks: (legacy.ancestors_sparks ?? []).map((list) =>
             list.map((spark) => ({
                 kind: spark.kind,
+                // Same transient recovery as the parent's own Sparks: the editor filters its target
+                // list by this category, and the stored payload keeps only the target string.
+                category: sparkCategoryFor(spark.target),
                 target: spark.target ?? '',
                 stars: spark.stars === null ? '' : spark.stars,
             })),
         ),
         sparks: (legacy.sparks ?? []).map((spark) => ({
             kind: spark.kind,
+            // The category is a transient form field (the payload stores only the target); the
+            // editor needs it to filter the target list, so it is recovered from the stored target.
+            category: sparkCategoryFor(spark.target),
             target: spark.target ?? '',
             stars: spark.stars === null ? '' : spark.stars,
         })),
@@ -149,6 +159,7 @@ const form = useForm({
 while (form.legacies.length < 2) {
     form.legacies.push({
         legacy_id: '',
+        name: '',
         rank: '',
         rank_letter: '',
         is_guest: false,
@@ -170,6 +181,7 @@ const saving = (): void => {
         legacies: data.legacies.map((legacy) => ({
             ...legacy,
             legacy_id: legacy.legacy_id === '' ? null : Number(legacy.legacy_id),
+            name: legacy.name === '' ? null : legacy.name,
             rank: legacy.rank === '' ? null : Number(legacy.rank),
             rank_letter: legacy.rank_letter === '' ? null : legacy.rank_letter,
             ancestors_rank_letters: legacy.ancestors_rank_letters.map((letter: string) => (letter === '' ? null : letter)),
@@ -187,6 +199,9 @@ const saving = (): void => {
                 .filter((spark) => !isBlankSpark(spark))
                 .map((spark) => ({
                     kind: spark.kind,
+                    // Transient: the request validates the target against this category at the write
+                    // boundary and stores neither.
+                    category: spark.category,
                     target: spark.target === '' ? null : spark.target,
                     stars: spark.stars === '' ? null : Number(spark.stars),
                 })),
@@ -205,11 +220,24 @@ const saving = (): void => {
 };
 
 function assignParent(index: number, value: string): void {
+    if (value === '__manual__') {
+        // Two writers, one fact: a slot either picks a library row or holds a typed name, never both.
+        // legacy_id stays '' so the picker never carries a value the server would refuse.
+        form.legacies[index].legacy_id = '';
+        manual.value[index] = true;
+        form.legacies[index].name = form.legacies[index].name ?? '';
+
+        return;
+    }
+
+    manual.value[index] = false;
     form.legacies[index].legacy_id = value;
 }
 
 function clearParent(index: number): void {
     form.legacies[index].legacy_id = '';
+    manual.value[index] = false;
+    form.legacies[index].name = '';
 }
 
 /**
@@ -217,6 +245,27 @@ function clearParent(index: number): void {
  * count: the server discards the same shape (`StoreLegacySelectionRequest::payload()`), and this keeps
  * the posted payload honest while it is still a draft.
  */
+/**
+ * The category a stored target belongs to, recovered for the transient form field. The payload keeps
+ * only the target string (ADR-0010), so the editor re-derives what it already knew from the list the
+ * server validated against.
+ */
+function sparkCategoryFor(target: string | null): string {
+    if (target === null || target === '') {
+        return 'Stat';
+    }
+
+    if (props.sparkTargets.Stat.includes(target)) {
+        return 'Stat';
+    }
+
+    if (props.sparkTargets.Aptitude.includes(target)) {
+        return 'Aptitude';
+    }
+
+    return 'Skill';
+}
+
 function isBlankSpark(spark: SparkDraft): boolean {
     return spark.target === '' && spark.stars === '';
 }
@@ -357,6 +406,114 @@ const pickOptions = (): { value: string; label: string }[] => [
                         :error="errorFor(index)"
                         @update:model-value="assignParent(index, String($event))"
                     />
+                    <div v-if="manual[index]" class="mt-2">
+                        <label class="block text-xs font-medium text-ink" :for="`legacy-name-${index}`">
+                            Parent name
+                        </label>
+                        <BaseInput
+                            :id="`legacy-name-${index}`"
+                            v-model="form.legacies[index].name"
+                            :name="`legacies.${index}.name`"
+                            type="text"
+                            list="known-umamusume-names"
+                            autocomplete="off"
+                        />
+                        <p class="mt-1 text-xs text-ink-muted">
+                            The name of the Umamusume who finished the career, as you read it. The list is
+                            the catalogue of trainees this tool knows, offered as a spelling aid; a name
+                            not in it is still storable, because a friend's finished run is never a local
+                            row (UMAMUSUME_REFERENCE.md §1.5.4).
+                        </p>
+
+                        <!-- The parent's own record, the same three facts the payload stores for a
+                             library pick. Entered here, read by the projected-start table in realtime. -->
+                        <div class="mt-2 grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-medium text-ink" :for="`legacy-rank-letter-${index}`">
+                                    Rank (letters)
+                                </label>
+                                <BaseInput
+                                    :id="`legacy-rank-letter-${index}`"
+                                    v-model="form.legacies[index].rank_letter"
+                                    :name="`legacies.${index}.rank_letter`"
+                                    type="text"
+                                    list="known-rank-letters"
+                                    autocomplete="off"
+                                />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-ink" :for="`legacy-rank-${index}`">
+                                    Rank (stars)
+                                </label>
+                                <BaseInput
+                                    :id="`legacy-rank-${index}`"
+                                    v-model="form.legacies[index].rank"
+                                    :name="`legacies.${index}.rank`"
+                                    type="number"
+                                    min="0"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- The parent's own Sparks: kind, category, target, stars. The same boundary the
+                             server validates - a Stat category whose target is not a stat is refused
+                             (StoreLegacySelectionRequest::assertTargetMatchesCategory). -->
+                        <details class="mt-2 rounded-md border border-rule bg-panel p-2">
+                            <summary class="flex min-h-11 cursor-pointer items-center text-xs font-medium text-ink">
+                                Sparks for this parent
+                            </summary>
+                            <ul v-if="form.legacies[index].sparks.length > 0" class="mt-2 space-y-2">
+                                <li
+                                    v-for="(spark, sparkIndex) in form.legacies[index].sparks"
+                                    :key="sparkIndex"
+                                    class="flex flex-wrap items-end gap-2 rounded-md border border-rule bg-panel p-2"
+                                >
+                                    <BaseSelect
+                                        :id="`legacy-spark-kind-${index}-${sparkIndex}`"
+                                        v-model="spark.kind"
+                                        label="Kind"
+                                        :options="Object.keys(props.sparkKinds).map((kind) => ({ value: kind, label: props.sparkKinds[kind] }))"
+                                    />
+                                    <BaseSelect
+                                        :id="`legacy-spark-category-${index}-${sparkIndex}`"
+                                        v-model="spark.category"
+                                        label="Category"
+                                        :options="['Stat', 'Aptitude', 'Skill'].map((category) => ({ value: category, label: category }))"
+                                        @change="spark.target = ''"
+                                    />
+                                    <BaseSelect
+                                        :id="`legacy-spark-target-${index}-${sparkIndex}`"
+                                        v-model="spark.target"
+                                        label="Target"
+                                        :options="[{ value: '', label: 'Not recorded' }, ...(props.sparkTargets[(spark.category as 'Stat' | 'Aptitude' | 'Skill')] || []).map((target) => ({ value: target, label: target }))]"
+                                    />
+                                    <BaseInput
+                                        :id="`legacy-spark-stars-${index}-${sparkIndex}`"
+                                        v-model="spark.stars"
+                                        type="number"
+                                        min="1"
+                                        max="3"
+                                        label="Stars"
+                                    />
+                                    <button
+                                        type="button"
+                                        class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-3 text-xs font-semibold text-ink hover:bg-panel"
+                                        @click="form.legacies[index].sparks.splice(sparkIndex, 1)"
+                                    >
+                                        Remove Spark
+                                    </button>
+                                </li>
+                            </ul>
+                            <button
+                                type="button"
+                                class="mt-2 inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-3 text-xs font-semibold text-ink hover:bg-panel"
+                                @click="form.legacies[index].sparks.push({ kind: 'blue', category: 'Stat', target: '', stars: 1 })"
+                            >
+                                Add Spark
+                            </button>
+                        </details>
+                    </div>
+
                     <p v-if="errorFor(index)" :id="`legacy-pick-${index}-error`" class="mt-1 text-xs text-risk">
                         {{ errorFor(index) }}
                     </p>
@@ -417,14 +574,14 @@ const pickOptions = (): { value: string; label: string }[] => [
                                 {{ props.scenarioCaps[stat] ?? '-' }}
                             </td>
                             <td class="pr-3 text-right font-mono tabular-nums text-ink">
-                                <template v-if="props.parentA?.sparks.some((s) => s.family === 'Blue' && s.stat === stat)">
-                                    ★{{ props.parentA.sparks.find((s) => s.family === 'Blue' && s.stat === stat)?.stars ?? '?' }} Blue
+                                <template v-if="form.legacies[0]?.sparks.some((s) => s.kind === 'blue' && s.target === stat)">
+                                    ★{{ form.legacies[0].sparks.find((s) => s.kind === 'blue' && s.target === stat)?.stars ?? '?' }} Blue
                                 </template>
                                 <template v-else>-</template>
                             </td>
                             <td class="pr-3 text-right font-mono tabular-nums text-ink">
-                                <template v-if="props.parentB?.sparks.some((s) => s.family === 'Blue' && s.stat === stat)">
-                                    ★{{ props.parentB.sparks.find((s) => s.family === 'Blue' && s.stat === stat)?.stars ?? '?' }} Blue
+                                <template v-if="form.legacies[1]?.sparks.some((s) => s.kind === 'blue' && s.target === stat)">
+                                    ★{{ form.legacies[1].sparks.find((s) => s.kind === 'blue' && s.target === stat)?.stars ?? '?' }} Blue
                                 </template>
                                 <template v-else>-</template>
                             </td>

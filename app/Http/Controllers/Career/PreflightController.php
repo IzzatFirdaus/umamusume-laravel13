@@ -211,7 +211,11 @@ class PreflightController extends Controller
         return [
             'key' => $key,
             'label' => (string) ($config['label'] ?? $key),
-            'focus' => isset($config['focus']) ? (string) $config['focus'] : null,
+            // The focus sentence is the scenario's own guide, stored under `metadata.planning_focus`.
+            // URA Finale deliberately has none (`metadata.planning_focus_reason` says why), and the
+            // page prints that reason rather than a bare N/A.
+            'focus' => isset($config['metadata']['planning_focus']) ? (string) $config['metadata']['planning_focus'] : null,
+            'focus_reason' => isset($config['metadata']['planning_focus_reason']) ? (string) $config['metadata']['planning_focus_reason'] : null,
             /*
              * The "What this scenario asks" rows (`career-preflight.html:152-155`).
              *
@@ -248,6 +252,11 @@ class PreflightController extends Controller
                     && is_array($config['finale_targets']['stamina_by_distance'])
                     ? array_map(static fn ($floor): ?int => is_numeric($floor) ? (int) $floor : null, $config['finale_targets']['stamina_by_distance'])
                     : [],
+                // The speed half of the finale target, in the source's own hedge ("around 800 Speed,
+                // or an A rank") rather than a rounded number.
+                'speed_phrasing' => isset($config['finale_targets']['speed_to_win']['phrasing'])
+                    ? (string) $config['finale_targets']['speed_to_win']['phrasing']
+                    : null,
             ],
         ];
     }
@@ -273,7 +282,16 @@ class PreflightController extends Controller
         }
 
         $parents = AncestryGraph::parentNames(SetupDraft::legacyParents());
-        $graph = AncestryGraph::build($payload, $trainee?->name, $parents[0], $parents[1]);
+
+        // A slot typed by name has no library id for `parentNames` to resolve, so the payload's own
+        // name is the fallback; the count Preflight prints ("N of two parents recorded") must read 2 of 2
+        // for a manual pair, not 0 of 2.
+        $graph = AncestryGraph::build(
+            $payload,
+            $trainee?->name,
+            $parents[0] ?? ($payload->legacies[0]['name'] ?? null),
+            $parents[1] ?? ($payload->legacies[1]['name'] ?? null),
+        );
 
         return [
             'affinity' => $payload->affinity,

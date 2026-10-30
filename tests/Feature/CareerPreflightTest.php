@@ -130,6 +130,12 @@ it('composes every entered step into one contract', function (): void {
             ->where('contract.build.scenario.asks.fan_gates.0.turf', 60000)
             ->where('contract.build.scenario.asks.fan_gates.0.dirt', 40000)
             ->where('contract.build.scenario.asks.stamina_by_distance.Medium', 600)
+            // The speed half travels in the source's own hedge, so the finale row can print it even
+            // before the target step names a distance band.
+            ->where('contract.build.scenario.asks.speed_phrasing', 'around 800 Speed, or an A rank')
+            // URA's own record carries no focus sentence, and the reason it says so travels with it.
+            ->where('contract.build.scenario.focus', null)
+            ->where('contract.build.scenario.focus_reason', 'No repository guide names a planning focus for this scenario. The scenario guides and the mechanics reference were searched. The 2026-10-16 publisher pass found none either: Game8\'s URA Finale guide states a scenario comparison and a Summer camp tip, and the plan\'s advisor hierarchy is this tool\'s own decision order, not a published planning focus.')
             ->where('contract.build.target.purpose', 'StoryClear')
             ->where('contract.build.target.purpose_label', 'Story Clear')
             ->where('contract.build.target.distance', 'Medium')
@@ -160,6 +166,26 @@ it('composes every entered step into one contract', function (): void {
             ->where('contract.warnings', [])
             ->where('startAction', route('career.preflight.store'))
         );
+});
+
+it('reads the focus sentence from the scenario metadata, and states the duel only for URA Finale', function (): void {
+    $fixture = preflightFixture();
+    $draft = preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'], ['scenario' => 'unity_cup']);
+    session([SetupDraft::SESSION_KEY => $draft]);
+
+    test()->get(route('career.preflight'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/Preflight')
+            ->where('contract.build.scenario.key', 'unity_cup')
+            // Unity Cup's guide names a planning focus, and it now travels to the page.
+            ->where('contract.build.scenario.focus', 'Wit carries the scenario\'s own cap bonus; team rank and Spirit Burst counts decide the exclusive-skill payout.')
+            ->where('contract.build.scenario.focus_reason', null)
+            // The duel is URA's own system: a non-URA scenario states no fan gates and no finale
+            // targets, so those rows print their absence rather than URA's figures.
+            ->where('contract.build.scenario.asks.fan_gates', [])
+            ->where('contract.build.scenario.asks.stamina_by_distance', [])
+            ->where('contract.build.scenario.asks.speed_phrasing', null));
 });
 
 it('names each missing section as its own warning and never claims the contract is complete', function (): void {
@@ -454,4 +480,29 @@ it('survives all three child reruns with every merged key intact on an Inertia J
 
     // Deck rows were created: preflightDraft fills all six slots, so six rows
     expect(DeckSlot::count())->toBe($beforeSlots + 6);
+});
+it('counts a manual parent pair as two recorded parents', function (): void {
+    // A rented-parent pair (UMAMUSUME_REFERENCE.md §1.5.4) has no library rows, so the count that
+    // once read "0 of two parents recorded" must read the payload names as the record: the pin
+    // is the count itself, not merely the absence of an exception.
+    $fixture = preflightFixture();
+
+    $draft = preflightDraft($fixture['trainee'], $fixture['cards'], [null, null], [
+        'legacy_selection' => [
+            'affinity' => '◎',
+            'legacies' => [
+                ['rank' => 3, 'is_guest' => false, 'name' => 'Silence Suzuka', 'ancestors' => ['', ''], 'sparks' => []],
+                ['rank' => null, 'is_guest' => true, 'name' => 'Tokai Teio', 'ancestors' => ['', ''], 'sparks' => []],
+            ],
+        ],
+    ]);
+
+    session([SetupDraft::SESSION_KEY => $draft]);
+
+    $this->get(route('career.preflight'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('contract.build.legacy.members.0.name', 'Silence Suzuka')
+            ->where('contract.build.legacy.members.1.name', 'Tokai Teio')
+        );
 });

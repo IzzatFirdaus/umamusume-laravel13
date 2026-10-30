@@ -92,3 +92,13 @@ a Legacy Select that offers aptitude *context* does.
   which builds on this allowance)
 - `App\Models\Legacy\LegacySelectionPayload`; `tests/Feature/LegacySelectionSchemaTest.php`
 - `docs/UMAMUSUME_REFERENCE.md` §1.5, §1.5.1, §1.5.2, §1.5.3, §1.5.4
+### Amendment 2026-10-30 — a manual parent's name joins the shape
+
+**Decision.** legacies.*.name is added to the optional per-legacy keys, stored only when a payload actually carries one, on the ncestors_meta precedent. A slot may hold either a library pick (legacy_id) or a typed name, never both: the library row wins, and the wizard does not offer the name input while a row is picked.
+
+**Why.** UMAMUSUME_REFERENCE.md §1.5.4 records the case directly: a parent may be a friend's finished Umamusume, rented from the friend list. A rented parent has no Veteran row, so legacy_id cannot represent her, and without this key the whole case was unrecordable. is_guest already marked exactly this state and is unchanged: it is written through the payload, and no wizard control was added for it.
+
+**Boundaries kept.** The key is optional, not required: a payload written before this amendment keeps validating, and an absent name keeps the byte-identical old shape. ame is a string of at most 255 characters and nothing is resolved from it - no library lookup, no derived figure. The existing refusals (the same library row twice, a parent who is the trainee herself) apply to ids only and are not extended to typed names, which is stated on the page rather than hidden.
+
+**Readers branched.** Every surface that prints a parent name resolves the stored library id first and falls back to the payload name: the wizard card builder, the Preflight count and its legacy line, the inheritance event, and the Legacy Lab graph. LegacySelectionSchemaTest carries three cases: a payload with and without the key both validate while an unknown key is still refused, a rented-parent payload round-trips, and a payload without a name reads back in the pre-change shape.
+

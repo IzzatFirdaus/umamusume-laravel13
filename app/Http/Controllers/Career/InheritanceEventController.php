@@ -159,7 +159,9 @@ class InheritanceEventController extends Controller
         foreach ($legacy->legacies as $index => $legacyData) {
             $slot = $index === 0 ? 'parent_a' : 'parent_b';
             $label = $index === 0 ? 'Parent A' : 'Parent B';
-            $name = $parentNames[$index] ?? null;
+            // The stored relation wins; a slot typed by name has no inheritance_parent row, so the
+            // payload's own name is the fallback (UMAMUSUME_REFERENCE.md §1.5.4's rented-parent case).
+            $name = $parentNames[$index] ?? ($legacyData['name'] ?? null);
 
             $sparks = [];
             foreach ($legacyData['sparks'] as $spark) {

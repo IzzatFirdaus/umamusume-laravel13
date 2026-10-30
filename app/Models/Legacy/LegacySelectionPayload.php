@@ -156,7 +156,7 @@ final readonly class LegacySelectionPayload
         self::assertKeysAllowing(
             $legacy,
             self::LEGACY_KEYS,
-            ['ancestors_meta', 'rank_letter', 'ancestors_sparks', 'ancestors_rank_letters', 'ancestors_rank'],
+            ['ancestors_meta', 'rank_letter', 'ancestors_sparks', 'ancestors_rank_letters', 'ancestors_rank', 'name'],
             "Legacy #{$index}",
         );
 
@@ -198,6 +198,17 @@ final readonly class LegacySelectionPayload
             'ancestors' => array_values($legacy['ancestors']),
             'sparks' => $sparks,
         ];
+
+        // A slot filled from outside the library: the parent's own name, with no veteran id behind it.
+        // Stored on the same rule as the companion below - only when the payload carries one - so a
+        // library row's record keeps the exact shape it had, and an exact-shape reader never meets a
+        // null it did not ask for. `UMAMUSUME_REFERENCE.md` §1.5.4 is the case: a parent may be a
+        // friend's finished Umamusume, rented from the friend list, and never a local row.
+        $name = self::manualName($index, $legacy['name'] ?? null);
+
+        if ($name !== null) {
+            $record['name'] = $name;
+        }
 
         // Only a payload that actually carries the companion stores it: a names-only record keeps the
         // exact shape it had before this key existed, so an exact-shape reader is not disturbed by a
@@ -366,6 +377,28 @@ final readonly class LegacySelectionPayload
         }
 
         return $letter;
+    }
+
+    /**
+     * A slot's parent name when the Trainer typed one instead of picking a library row.
+     *
+     * A blank string is not a name: it is what an empty input posts, and treating it as one would give
+     * every library slot a `name` key holding nothing. Null is the only "no manual name" answer, which
+     * is why the caller stores the key only when this returns a string.
+     */
+    private static function manualName(int|string $index, mixed $name): ?string
+    {
+        if ($name === null) {
+            return null;
+        }
+
+        if (! is_string($name)) {
+            throw new InvalidArgumentException("Legacy #{$index} name is not a string: ".gettype($name).'.');
+        }
+
+        $trimmed = trim($name);
+
+        return $trimmed === '' ? null : $trimmed;
     }
 
     /**

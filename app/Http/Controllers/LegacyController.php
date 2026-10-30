@@ -475,11 +475,13 @@ class LegacyController extends Controller
     {
         $parentNames = $this->parentNames($run);
 
+        // The foreign key resolves the library pick; a slot typed by name has no row behind it, so the
+        // payload's own name is the fallback (the same branch the wizard and the Preflight read).
         return AncestryGraph::build(
             $payload,
             $run?->umamusume?->name,
-            $parentNames[0],
-            $parentNames[1],
+            $parentNames[0] ?? ($payload?->legacies[0]['name'] ?? null),
+            $parentNames[1] ?? ($payload?->legacies[1]['name'] ?? null),
         );
     }
 

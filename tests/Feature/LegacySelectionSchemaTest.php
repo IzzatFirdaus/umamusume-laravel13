@@ -182,3 +182,43 @@ function legacyRun(array $payload): TrainingRun
 {
     return TrainingRun::factory()->create(['legacy_selection' => $payload]);
 }
+it('accepts a manual parent name and still refuses an unknown key', function (): void {
+    // A rented parent (UMAMUSUME_REFERENCE.md §1.5.4) has no Veteran row, so the slot carries a
+    // typed name with no legacy_id. Both shapes - with and without the key - must validate.
+    $with = legacyPayload();
+    $with['legacies'][0]['name'] = 'Tokai Teio';
+
+    expect(LegacySelectionPayload::fromArray($with)->toArray())->toBe($with);
+
+    $without = legacyPayload();
+
+    expect(LegacySelectionPayload::fromArray($without)->toArray())->toBe($without);
+
+    // The exact-match allowlist still bites: an unknown key is the shape refusal, not the new one.
+    $unknown = legacyPayload();
+    $unknown['legacies'][0]['costume'] = 'X';
+
+    expect(fn () => LegacySelectionPayload::fromArray($unknown))->toThrow(InvalidArgumentException::class);
+});
+
+it('round-trips a rented parent with is_guest through the shape unchanged', function (): void {
+    // The rented-parent case the reference names: a friend's finished Umamusume, marked as rented.
+    // is_guest is not new - it was already in LEGACY_KEYS - so this is a schema round-trip only;
+    // whether the wizard offers a control for the flag is a separate decision and does not gate it.
+    $payload = legacyPayload();
+    $payload['legacies'][0]['name'] = 'Silence Suzuka';
+    $payload['legacies'][0]['is_guest'] = true;
+
+    expect(LegacySelectionPayload::fromArray($payload)->toArray())->toBe($payload);
+});
+
+it('keeps the pre-change shape when no name is present', function (): void {
+    // The one new key is omitted when absent, not written as null: an exact-shape reader that
+    // predates the key never meets a null it did not ask for.
+    $without = legacyPayload();
+
+    $read = LegacySelectionPayload::fromArray($without)->toArray();
+
+    expect($read)->toBe($without);
+    expect(array_key_exists('name', $read['legacies'][0]))->toBeFalse();
+});

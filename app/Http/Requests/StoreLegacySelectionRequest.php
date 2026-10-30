@@ -92,6 +92,12 @@ class StoreLegacySelectionRequest extends FormRequest
             'affinity' => ['nullable', 'string', Rule::in(LegacySelectionPayload::AFFINITY_GRADES)],
             'legacies' => ['present', 'array', 'max:'.LegacySelectionPayload::MAX_ANCESTORS],
             'legacies.*.legacy_id' => ['nullable', 'integer', 'exists:veterans,id'],
+            // A slot filled from outside the library: the parent's own name, with no veteran id behind
+            // it. `UMAMUSUME_REFERENCE.md` §1.5.4 is the case - a parent may be a friend's finished
+            // Umamusume, rented from the friend list, and never a local row. The library id wins when
+            // both are present (see `payload()`), so this is an alternative to a pick, not a rename of
+            // one.
+            'legacies.*.name' => ['nullable', 'string', 'max:255'],
             // Unbounded on purpose, and this is the one place a reader may expect a `max` and not find
             // one. `ADR-0010` Consequences §3 refuses to cap a Legacy's own rank: the corpus states that
             // three stars guarantees a unique-skill Spark (§1.5.1) and states no ceiling on the

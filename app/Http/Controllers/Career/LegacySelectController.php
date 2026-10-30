@@ -87,7 +87,29 @@ class LegacySelectController extends Controller
             $veteran = $veteranId === null ? null : $picked->get($veteranId);
 
             if ($veteran === null) {
-                $parents[] = null;
+                // A slot filled from outside the library: the payload carries the parent's own name
+                // and no veteran id behind it (UMAMUSUME_REFERENCE.md §1.5.4's rented-parent case).
+                // The card still builds from the payload alone; what a library card would hold and the
+                // payload does not carry stays null, because a typed name has no row to resolve from.
+                $slotPayload = (array) ($slotPayloads[$slot] ?? []);
+                $manualName = $slotPayload['name'] ?? null;
+
+                if (! is_string($manualName) || trim($manualName) === '') {
+                    $parents[] = null;
+
+                    continue;
+                }
+
+                $parents[] = [
+                    'veteranId' => null,
+                    'runId' => null,
+                    'name' => trim($manualName),
+                    'japanese' => null,
+                    'scenario' => null,
+                    'stars' => isset($slotPayload['rank']) && is_numeric($slotPayload['rank']) ? (int) $slotPayload['rank'] : null,
+                    'savedAt' => null,
+                    'sparks' => self::slotSparks($slotPayload),
+                ];
 
                 continue;
             }
@@ -99,20 +121,7 @@ class LegacySelectController extends Controller
                 ? (string) config('scenarios.scenarios.'.$run->scenario.'.label', $run->scenario)
                 : null;
 
-            /** @var array<int, array{family: string, stat: string|null, stars: int|null}> $sparks */
-            $labels = LegacySelectionPayload::sparkKindLabels();
-            $sparks = array_map(static function (mixed $spark) use ($labels): array {
-                $spark = (array) $spark;
-                $kind = (string) ($spark['kind'] ?? '');
-
-                return [
-                    // The [Global] display label for the recorded kind, so the card prints `Blue spark`
-                    // and the projected-start table's per-stat match reads the same word.
-                    'family' => $labels[$kind] ?? ucfirst($kind),
-                    'stat' => isset($spark['target']) && is_string($spark['target']) ? $spark['target'] : null,
-                    'stars' => isset($spark['stars']) && is_numeric($spark['stars']) ? (int) $spark['stars'] : null,
-                ];
-            }, (array) ($slotPayload['sparks'] ?? []));
+            $sparks = self::slotSparks($slotPayload);
 
             $parents[] = [
                 'veteranId' => $veteran->id,
@@ -202,6 +211,30 @@ class LegacySelectController extends Controller
      * keys in one statement for the same reason. A refused write stores neither — the Form Request answers
      * before the controller runs, and the draft keeps what it had.
      */
+    /**
+     * One slot's recorded Sparks as the cards print them: the [Global] display label per kind, the
+     * target as the stat it names, and the star count. Shared by the library and the manual-name
+     * branches so the two card shapes cannot disagree about one payload.
+     *
+     * @param  array<string, mixed>  $slotPayload
+     * @return list<array{family: string, stat: string|null, stars: int|null}>
+     */
+    private static function slotSparks(array $slotPayload): array
+    {
+        $labels = LegacySelectionPayload::sparkKindLabels();
+
+        return array_map(static function (mixed $spark) use ($labels): array {
+            $spark = (array) $spark;
+            $kind = (string) ($spark['kind'] ?? '');
+
+            return [
+                'family' => $labels[$kind] ?? ucfirst($kind),
+                'stat' => isset($spark['target']) && is_string($spark['target']) ? $spark['target'] : null,
+                'stars' => isset($spark['stars']) && is_numeric($spark['stars']) ? (int) $spark['stars'] : null,
+            ];
+        }, (array) ($slotPayload['sparks'] ?? []));
+    }
+
     public function store(StoreDraftLegacyRequest $request): RedirectResponse
     {
         SetupDraft::write([
