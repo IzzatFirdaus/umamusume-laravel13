@@ -7,8 +7,9 @@ import { deleteRun } from '../utils/delete-run';
  * green suite (2026-10-29 walkthrough). This case clicks the primary at each step and asserts the URL
  * moves on, ending at the cockpit a real run is created in.
  *
- * The step-3 profile screen is not on this linear path: it is reached from a trainee card's profile link,
- * and the forward primary on the trainee step goes straight to the build target.
+ * The trainee profile is on this linear path now: the trainee step's forward door opens it
+ * (`career-trainee.html:64`) and its own primary continues to the build target
+ * (`career-profile.html:67`), which is also where that step's back door returns.
  */
 
 const createdRunUrls: string[] = [];
@@ -45,11 +46,24 @@ test('a user can complete the setup wizard from scenario to a created run', asyn
     await clickPrimary(page, 'Continue to trainee');
     await expect(page).toHaveURL(/\/career\/setup\/trainee$/);
 
-    // Step 2 — trainee.
+    // Step 2 — trainee. The card click stores the pick; the forward door opens the profile.
     await page.locator('[data-trainee-card]').first().click();
     await expect(page.getByText(/Trainee set:/)).toBeVisible();
     await clickPrimary(page, 'Continue to build target');
+    await expect(page).toHaveURL(/\/career\/setup\/trainee\/\d+$/);
+
+    // Step 2's read screen. Its chips read the same draft: step 1 saved, step 2 current and saved, so
+    // the current chip is done rather than "started unfinished".
+    await expect(page.getByRole('listitem', { name: 'Scenario, saved' })).toBeVisible();
+    const currentChip = page.locator('[data-setup-steps] .step[aria-current="step"]');
+    await expect(currentChip).toHaveClass(/is-done/);
+    await expect(currentChip).toHaveAttribute('aria-label', 'Trainee, current step');
+
+    await clickPrimary(page, 'Continue to build target');
     await expect(page).toHaveURL(/\/career\/setup\/target$/);
+
+    // The target's back door returns to the profile the Trainer just read (`career-target.html:63`).
+    await expect(page.getByRole('link', { name: 'Back', exact: true })).toHaveAttribute('href', /\/career\/setup\/trainee\/\d+$/);
 
     // Step 3 — build target. The step's validation is all-or-nothing: any entered value makes purpose,
     // distance, surface, style and all five stats required together, so a real completion fills them all.

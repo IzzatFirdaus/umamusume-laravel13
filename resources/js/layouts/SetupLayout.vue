@@ -66,8 +66,13 @@ const steps = [
     { label: 'Preflight' },
 ];
 
-const isCompleted = (index: number): boolean =>
-    (props.visited?.includes(index + 1) === true || props.saved?.includes(index + 1) === true) && index + 1 !== props.step;
+/*
+ * The two draft states a chip reads, kept apart because the legend names them apart: a step with
+ * stored data is "Saved", a step only opened is "Started, unfinished". The class and the spoken
+ * state use the same pair, so a chip is never painted done while it is announced unfinished.
+ */
+const hasSaved = (number: number): boolean => props.saved?.includes(number) === true;
+const hasVisited = (number: number): boolean => props.visited?.includes(number) === true;
 
 /*
  * The step list's three states, as the HFW's `.step` modifiers rather than as links.
@@ -82,11 +87,30 @@ const isCompleted = (index: number): boolean =>
 function stepClass(index: number): string[] {
     const number = index + 1;
 
+    // The current chip's done paint is overridden by `.step[aria-current="step"]`, so this only makes
+    // the class truthful; the visible state stays "Current".
     if (number === props.step) {
-        return ['is-partial'];
+        return hasSaved(number) ? ['is-done'] : ['is-partial'];
     }
 
-    return isCompleted(index) ? ['is-done'] : ['is-empty'];
+    if (hasSaved(number)) {
+        return ['is-done'];
+    }
+
+    return hasVisited(number) ? ['is-partial'] : ['is-empty'];
+}
+
+/** The state word each chip announces; the legend is aria-hidden, so the chip itself must say it. */
+function stateWord(number: number): string {
+    if (number === props.step) {
+        return 'current step';
+    }
+
+    if (hasSaved(number)) {
+        return 'saved';
+    }
+
+    return hasVisited(number) ? 'started, unfinished' : 'not started';
 }
 
 
@@ -176,27 +200,38 @@ onMounted(async () => {
                      Putting the lede directly in the band as a sibling of the pair pushed the actions onto
                      a line of their own at every width; the band's own column behaviour lives in
                      `.wizard-hrow` in `app.css`, which is where the compact stacking decision is recorded. -->
-                <div class="min-w-0">
-                    <h1
-                        tabindex="-1"
-                        class="mt-[7px] min-w-0 text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong focus:outline-none"
-                    >
-                        <slot name="title" />
-                    </h1>
-                    <!-- The wireframe's lede belongs to the title band, not to the step body
-                         (`career-trainee.html:58-59`: `.phead > .hrow > div > h1 + p.lede`). A step that
-                         supplies it gets it under its own heading. The 13px size and the 66ch measure are
-                         the wireframe's (`shell.css:364`), and compact tightens the measure to 60ch
-                         exactly as `shell.css:414` does - both are tokens in `app.css`, because no stock
-                         utility carries either number. -->
-                    <p
-                        v-if="$slots.lede"
-                        data-region="lede"
-                        class="mt-1.25 text-lede text-ink-muted"
-                        :class="mode === 'compact' ? 'max-w-lede-compact' : 'max-w-lede'"
-                    >
-                        <slot name="lede" />
-                    </p>
+                <!--
+                  The optional media slot sits beside the heading, never inside it: `career-profile.html`
+                  draws the trainee portrait as a sibling of the `h1` (`:57-62`), and an image inside the
+                  heading would enter its accessible name. A step that passes nothing keeps the same box
+                  the title block had.
+                -->
+                <div class="flex min-w-0 items-center gap-3.5">
+                    <div v-if="$slots['title-media']" class="shrink-0">
+                        <slot name="title-media" />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <h1
+                            tabindex="-1"
+                            class="mt-[7px] min-w-0 text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong focus:outline-none"
+                        >
+                            <slot name="title" />
+                        </h1>
+                        <!-- The wireframe's lede belongs to the title band, not to the step body
+                             (`career-trainee.html:58-59`: `.phead > .hrow > div > h1 + p.lede`). A step that
+                             supplies it gets it under its own heading. The 13px size and the 66ch measure are
+                             the wireframe's (`shell.css:364`), and compact tightens the measure to 60ch
+                             exactly as `shell.css:414` does - both are tokens in `app.css`, because no stock
+                             utility carries either number. -->
+                        <p
+                            v-if="$slots.lede"
+                            data-region="lede"
+                            class="mt-1.25 text-lede text-ink-muted"
+                            :class="mode === 'compact' ? 'max-w-lede-compact' : 'max-w-lede'"
+                        >
+                            <slot name="lede" />
+                        </p>
+                    </div>
                 </div>
 
                 <!--
@@ -225,7 +260,7 @@ onMounted(async () => {
                                 role="listitem"
                                 :class="['step', ...stepClass(index)]"
                                 :aria-current="index + 1 === props.step ? 'step' : undefined"
-                                :aria-label="item.label"
+                                :aria-label="`${item.label}, ${stateWord(index + 1)}`"
                             >
                                 <span class="n" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
                             </span>

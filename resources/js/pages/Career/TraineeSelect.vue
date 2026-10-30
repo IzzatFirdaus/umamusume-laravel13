@@ -24,7 +24,7 @@
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
-import { BaseInput, BaseSelect, BaseButton } from '../../components/Form';
+import { BaseInput, BaseSelect, BaseButton, LinkButton } from '../../components/Form';
 import { useLayout } from '../../composables/useLayout';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
@@ -110,8 +110,6 @@ const props = defineProps<{
     action: string;
     /** `route('career.trainee')`, supplied by the server so the filter never hard-codes the URL. */
     rosterUrl: string;
-    /** `route('career.target')`, the step this screen advances to. */
-    targetUrl: string;
     /** `route('career.scenario')`, the step behind the head band's back door. */
     scenarioUrl: string;
     /** `route('career.trainee.profile')` for the stored trainee, or null before a pick. */
@@ -460,15 +458,24 @@ const sortLabel = computed(
           which put the step's exit after the whole card grid and gave the step no back door at all — the
           two facts `eca5a628` left open when it cut the shell's extra exit link.
 
-          The label is the wireframe's ("Continue to build target") even though this app's next screen is
-          the target step rather than a profile: profile is a per-record read page reached from a card, not
-          a step the wizard walks through, so the destination is `props.targetUrl` and the sentence names
-          the step the Trainer lands on.
+          The wireframe sends this door to the trainee profile (`career-trainee.html:64`), and the profile's
+          own primary continues to the target: the read screen is step 2's middle, not a side page. The
+          label is the wireframe's on both screens.
 
-          The two carry the house button scale (`buttonStyles.ts`: `text-sm px-4 rounded-md`) rather than
-          the wireframe's `.btn` numbers (13.5px, 15px inline, 10px corner): the wizard's own `BaseButton`
-          rows use the house scale, so a step whose head-band pair measured differently from its body
-          buttons is the worse outcome. HFW-OVERRIDE (computed: button scale).
+          HFW-OVERRIDE (copy: same label, two destinations) - "Continue to build target" opens the profile
+          here and the build target there (`career-trainee.html:64`, `career-profile.html:67`), so the same
+          words lead to two screens one step apart. The owner ruled the wireframe's label stands; the
+          framework's consistency heuristic (H4/TOG-8) is recorded here rather than fixed by renaming one
+          of the pair.
+
+          Until a trainee holds, the same door is native-disabled with the reason printed beside it
+          (`NRM-2`): the wireframe's mock always has a pick, and a Continue that lands on a page with
+          nothing to read is worse than a disabled button that says why.
+
+          The pair carries the house button scale (`buttonStyles.ts`) rather than the wireframe's `.btn`
+          numbers (13.5px, 15px inline, 10px corner): the wizard's own `BaseButton` rows use the house
+          scale, so a step whose head-band pair measured differently from its body buttons is the worse
+          outcome. HFW-OVERRIDE (computed: button scale).
         -->
         <template #actions>
             <Link
@@ -477,12 +484,20 @@ const sortLabel = computed(
             >
                 Back
             </Link>
-            <Link
-                :href="props.targetUrl"
-                class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 text-sm font-semibold text-on-primary-action hover:bg-primary-action/90"
+            <span v-if="props.profileUrl === null" id="trainee-continue-hint" class="text-xs text-ink-muted">
+                Choose a trainee to continue.
+            </span>
+            <LinkButton v-if="props.profileUrl" :href="props.profileUrl" variant="primary">
+                Continue to build target
+            </LinkButton>
+            <BaseButton
+                v-else
+                variant="primary"
+                disabled
+                aria-describedby="trainee-continue-hint"
             >
                 Continue to build target
-            </Link>
+            </BaseButton>
         </template>
 
         <!-- No breadcrumb: "Back to trainee" pointed at this same URL. The step bar above lists all

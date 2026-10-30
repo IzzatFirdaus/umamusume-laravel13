@@ -28,8 +28,12 @@ test.describe('SetupLayout shell', () => {
         await expect(steps).toHaveCount(6);
         await expect(nav.locator('a.step, button.step')).toHaveCount(0);
 
-        // The current step carries aria-current="step" (WCAG 1.4.1: colour never carries it alone).
+        // The current step carries aria-current="step" (WCAG 1.4.1: colour never carries it alone), and
+        // its accessible name says which state it is in: the legend is aria-hidden, so the chip itself
+        // has to carry the word.
         await expect(nav.getByRole('listitem', { name: 'Scenario' })).toHaveAttribute('aria-current', 'step');
+        await expect(nav.getByRole('listitem', { name: 'Scenario, current step' })).toBeVisible();
+        await expect(nav.getByRole('listitem', { name: 'not started' })).toHaveCount(5);
 
         // The legend names the four states, so "amber means you started this one" is written down.
         const legend = nav.locator('.step-legend');
@@ -53,6 +57,22 @@ test.describe('SetupLayout shell', () => {
         }
 
         expect(chips.y + chips.height, 'the stepper sits above the rule').toBeLessThanOrEqual(rule.y);
+    });
+
+    test('a visited but unsaved step reads started, unfinished', async ({ page }) => {
+        // Opening step 1 marks it visited; leaving without a scenario means it is not saved. Once step
+        // 2 is the current one, step 1 is the non-current chip the legend calls "Started unfinished".
+        await page.goto('/career/setup/scenario');
+        await page.locator('#app > *').first().waitFor();
+        await page.goto('/career/setup/trainee');
+        await page.locator('#app > *').first().waitFor();
+
+        const nav = page.getByRole('navigation', { name: 'Setup steps' });
+        const scenario = nav.getByRole('listitem', { name: 'Scenario, started, unfinished' });
+
+        await expect(scenario).toBeVisible();
+        await expect(scenario).toHaveClass(/is-partial/);
+        await expect(nav.getByRole('listitem', { name: 'Trainee, current step' })).toHaveAttribute('aria-current', 'step');
     });
 
     test('states the position in the page head and renders no save bar', async ({ page }) => {

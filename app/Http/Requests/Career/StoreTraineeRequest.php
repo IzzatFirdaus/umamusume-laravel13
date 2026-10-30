@@ -49,6 +49,12 @@ class StoreTraineeRequest extends FormRequest
              */
             'character_card_id' => ['nullable', 'integer', Rule::exists('character_cards', 'id')
                 ->where('umamusume_id', $this->input('umamusume_id'))],
+            /*
+             * The trainee profile's own primary advances the wizard, so it asks for the next step by
+             * name. The allowlist is one value on purpose: the roster's card click and the catalog's
+             * carry door keep the read-back redirect, and no other destination is offered.
+             */
+            'next' => ['nullable', 'in:target'],
         ];
     }
 

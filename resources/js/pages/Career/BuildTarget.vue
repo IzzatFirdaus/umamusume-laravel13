@@ -84,6 +84,8 @@ const props = defineProps<{
     styles: string[];
     scenarioLabel: string | null;
     scenarioPending: boolean;
+    /** The step before this one: the stored trainee's profile, or the roster before a pick. */
+    backUrl: string;
     /** `route('career.target.store')`, supplied by the server so the page never hard-codes the URL. */
     action: string;
     /**
@@ -278,13 +280,13 @@ function applyDefaults(): void {
           which is what lets it sit in the head band while the fields stay in the canvas. The write endpoint
           is unchanged (`career.target.store`), and the label is the wireframe's.
 
-          `Back` points at the trainee step, which is this app's previous screen. The wireframe's own back
-          link targets `career-profile.html`, but profile is a per-record read page here rather than a step
-          in the flow, so the honest previous step is the roster.
+          `Back` points at the wireframe's own previous screen (`career-target.html:63`): the trainee
+          profile, which is now the step between the roster and this one. The roster is the server's
+          fallback for a draft with no trainee.
         -->
         <template #actions>
             <Link
-                href="/career/setup/trainee"
+                :href="props.backUrl"
                 class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel"
             >
                 Back

@@ -82,6 +82,13 @@ test.describe('wizard head band actions', () => {
             const filled = row.locator('.bg-primary-action, [data-variant="primary"]');
             await expect(filled, `${step.slug} has exactly one filled head-band action`).toHaveCount(1);
             await expect(filled).toHaveText(step.forward);
+
+            if (step.slug === 'trainee') {
+                // A fresh visit has no pick, so the forward door is disabled and prints why it is
+                // (`NRM-2`). The label stays the wireframe's.
+                await expect(doors.last()).toBeDisabled();
+                await expect(page.getByText('Choose a trainee to continue.')).toBeVisible();
+            }
         });
     }
 

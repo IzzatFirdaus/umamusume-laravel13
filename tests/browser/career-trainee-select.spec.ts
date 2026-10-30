@@ -70,9 +70,13 @@ test.describe('Trainee Selection and Profile', () => {
         await page.goto('/career/setup/trainee');
         await page.locator('#app > *').first().waitFor();
 
-        const forward = page.getByRole('link', { name: 'Continue to build target' });
+        // No trainee is picked on a fresh visit, so the forward door is disabled and says why. It opens
+        // the step's read screen once a pick exists; the flow case below asserts that href.
+        const forward = page.getByRole('button', { name: 'Continue to build target' });
         await expect(forward).toBeVisible();
-        await expect(forward).toHaveAttribute('href', /\/career\/setup\/target$/);
+        await expect(forward).toBeDisabled();
+        await expect(forward).toHaveAttribute('aria-describedby', 'trainee-continue-hint');
+        await expect(page.getByText('Choose a trainee to continue.')).toBeVisible();
         await expect(forward).toHaveClass(/bg-primary-action/);
 
         const back = page.getByRole('link', { name: 'Back', exact: true });
@@ -447,13 +451,36 @@ test.describe('Trainee Selection and Profile', () => {
         // The profile has no table: the roster's row role does not exist here. The page's own
         // heading carries the name, and the footer button carries the chosen state.
         await expect(page.getByRole('heading', { name: /Admire Vega/ }).first()).toBeVisible();
-        await expect(page.getByRole('button', { name: 'Continue to build target', exact: true })).toHaveAttribute('aria-pressed', 'true');
+        // The primary is a submit button, not a toggle, so its state is the "Chosen" readout beside it.
+        await expect(page.getByRole('button', { name: 'Continue to build target', exact: true })).toBeVisible();
         await expect(page.getByText('Chosen', { exact: true })).toBeVisible();
 
         await page.getByRole('link', { name: 'Choose a different trainee' }).click();
         await page.waitForURL(/\/career\/setup\/trainee$/);
 
         await expect(page.locator(`#${actionId}`)).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    test('the roster forward door opens the profile, whose primary continues to the build target', async ({ page }) => {
+        // The wireframe's own flow (`career-trainee.html:64`, `career-profile.html:67`): the profile is
+        // step 2's middle, not a side page reached only from the selected card.
+        await page.goto('/career/setup/trainee');
+        await page.locator('#app > *').first().waitFor();
+
+        await page.locator('[data-trainee-card]').first().click();
+        await expect(page.getByText(/Trainee set:/)).toBeVisible();
+
+        const forward = page.getByRole('link', { name: 'Continue to build target' });
+        await expect(forward).toHaveAttribute('href', /\/career\/setup\/trainee\/\d+$/);
+        await forward.click();
+        await page.waitForURL(/\/career\/setup\/trainee\/\d+$/);
+
+        // The profile writes the choice and asks for the next step by name, so the PUT lands on step 3.
+        await page.getByRole('button', { name: 'Continue to build target', exact: true }).click();
+        await page.waitForURL(/\/career\/setup\/target$/);
+
+        // The target's back door returns to the profile it came from (`career-target.html:63`).
+        await expect(page.getByRole('link', { name: 'Back', exact: true })).toHaveAttribute('href', /\/career\/setup\/trainee\/\d+$/);
     });
 
     test('renders the same success flash when the card is clicked (R3-31)', async ({ page }) => {
@@ -471,23 +498,21 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(page.locator('[data-field="selected-trainee"]')).toContainText('Admire Vega');
     });
 
-    test('renders the profile with basic facts, one aptitude grid and skills at card grain', async ({ page }) => {
+    test('renders the profile at card grain, with the Basic facts card gone', async ({ page }) => {
         await page.goto('/career/setup/trainee/33');
         await page.locator('#app > *').first().waitFor();
 
-        // Basic: the facts the profile document holds, with no row for a fact it does not.
-        await expect(page.getByRole('heading', { name: 'Basic' })).toBeVisible();
-        await expect(page.getByText('Mar 12, 1996')).toBeVisible();
-        await expect(page.getByText('157 cm')).toBeVisible();
-        await expect(page.getByText('85 · 82 · 57 cm')).toBeVisible();
-        await expect(page.getByText('bust · height · waist')).toBeVisible();
-        await expect(page.getByText('咲々木瞳')).toBeVisible();
-        await expect(page.getByText('Hitomi Sasaki')).toBeVisible();
+        // The wireframe's right column ends at the scenario pills; the old Basic facts card was removed
+        // for parity, and its payload left with it. The catalog detail page still states those facts.
+        await expect(page.getByRole('heading', { name: 'Basic' })).toHaveCount(0);
+        await expect(page.getByText('Mar 12, 1996')).toHaveCount(0);
+        await expect(page.getByText('157 cm')).toHaveCount(0);
+        await expect(page.getByText('85 · 82 · 57 cm')).toHaveCount(0);
+        await expect(page.getByText(/No column records a version/)).toHaveCount(0);
 
-        // Aptitude appears once for the trainee: ten letters, none of them per costume form.
+        // Aptitude appears once for the trainee, one bold strongest entry per family.
         const grid = page.locator('section[aria-labelledby="aptitudes"]');
-        await expect(grid.locator('dt')).toHaveCount(10);
-        await expect(grid.locator('dd')).toHaveCount(10);
+        await expect(grid.locator('tbody td > b')).toHaveCount(3);
 
         // Rarity is the form's own fact, printed beside the form it belongs to.
         await expect(page.getByRole('heading', { name: 'Costume forms' })).toBeVisible();
@@ -501,24 +526,14 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(page.getByText('Shooting Star of Dioskouroi')).toBeVisible();
         await expect(page.getByText('N/A SP')).toBeVisible();
 
-        // The Build analysis section is GONE (slice 3.4). It held three absences plus "stated as
-        // aptitude above", which this page already says one section up, and a recommendation panel on
-        // a selection screen reads as advice about the trainee rather than a fact about her. The one
-        // durable sentence it carried (why there is no goal ladder here) survives as prose.
+        // The two rows the wireframe keeps for figures this catalogue does not hold.
+        await expect(page.getByText(/No growth figure is stored/)).toBeVisible();
+        await expect(page.getByText(/No base-stat figure is stored/)).toBeVisible();
+
+        // The Build analysis section is GONE (slice 3.4); its durable sentence survives as prose.
         await expect(page.getByRole('heading', { name: 'Build analysis' })).toHaveCount(0);
-        await expect(page.locator('[title*="Recommending a stat distribution"]')).toHaveCount(0);
-        await expect(page.locator('[title*="carries no umamusume_id by ruling"]')).toHaveCount(0);
-
-        // The version absence survives and still carries its reason.
-        await expect(page.getByText(/No column records a version/).first()).toBeVisible();
-
-        // The kept sentence still explains the absent goal ladder, and names where the ladder lives.
         await expect(page.getByText(/no career-goal section by design/)).toBeVisible();
-
-        // Career goals and growth rates are omitted entirely: the schema holds neither, so no heading
-        // and no row advertises a fact the tool is known not to have.
         await expect(page.getByRole('heading', { name: 'Career goals' })).toHaveCount(0);
-        await expect(page.getByText('Growth rate')).toHaveCount(0);
     });
 
     test('sizes every trainee control to the 44px contract', async ({ page }) => {

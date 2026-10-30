@@ -144,7 +144,6 @@ class TraineeSelectController extends Controller
             // UnityCupEditor.vue:20 already receive URLs. No Ziggy dependency is introduced.
             'action' => route('career.trainee.store'),
             'rosterUrl' => route('career.trainee'),
-            'targetUrl' => route('career.target'),
             // The two other doors on this step. They were literals in the page, which is the one place on
             // the screen a route rename would not survive: the head band's back door and the selected
             // card's profile link now resolve here, where the route table is the only owner.
@@ -183,10 +182,18 @@ class TraineeSelectController extends Controller
         // "Chosen", not "Selected", because the state word on the card is the one the wizard's own
         // vocabulary uses, and the message names the trainee rather than an id.
         $trainee = Umamusume::find((int) $traineeId);
+        $status = $trainee === null ? 'Trainee set.' : "Trainee set: {$trainee->name}.";
+
+        // The profile read screen is part of step 2, so its own primary advances to step 3 rather
+        // than returning to the roster. Every other caller (a roster card click, the catalog carry)
+        // keeps the read-back redirect, where the stored choice is what the screen states.
+        if ($request->validated('next') === 'target') {
+            return redirect()->route('career.target')->with('status', $status);
+        }
 
         return redirect()
             ->route('career.trainee', $this->filterQuery($request))
-            ->with('status', $trainee === null ? 'Trainee set.' : "Trainee set: {$trainee->name}.");
+            ->with('status', $status);
     }
 
     /**

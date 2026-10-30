@@ -8,7 +8,6 @@ use App\Models\CharacterCard;
 use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
-use App\Models\UmamusumeProfile;
 use App\Services\Career\SetupDraft;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -446,6 +445,25 @@ it('stores the chosen trainee in the draft and reads her back after navigation',
     expect(SetupDraft::read())->toBe(['scenario' => 'trackblazer', 'umamusume_id' => $trainee->id]);
 });
 
+it('advances to the build target when the profile asks for the next step by name', function (): void {
+    $trainee = rosterTrainee('Tokai Teio', ['turf' => 'A']);
+    $card = CharacterCard::factory()->for($trainee)->debut()->create();
+
+    $this->put('/career/setup/trainee', [
+        'umamusume_id' => $trainee->id,
+        'character_card_id' => $card->id,
+        'next' => 'target',
+    ])->assertRedirect(route('career.target'));
+
+    // The form travels with the trainee it belongs to, so continuing from the profile keeps the pick.
+    expect(SetupDraft::read()['umamusume_id'])->toBe($trainee->id);
+    expect(SetupDraft::characterCardId())->toBe($card->id);
+
+    // The clear branch lands on the roster regardless of `next`: there is no trainee to continue with.
+    $this->put('/career/setup/trainee', ['umamusume_id' => null, 'next' => 'target'])
+        ->assertRedirect(route('career.trainee'));
+});
+
 it('creates no run when a trainee is chosen, and refuses one who is not in the catalog', function (): void {
     $trainee = rosterTrainee('Special Week', ['turf' => 'A']);
 
@@ -461,13 +479,11 @@ it('creates no run when a trainee is chosen, and refuses one who is not in the c
     expect(SetupDraft::read()['umamusume_id'])->toBe($trainee->id);
 });
 
-it('renders the profile with basic facts, aptitude once and the four skill lists per form', function (): void {
+it('renders the profile with the aptitude letters once and the four skill lists per form', function (): void {
     $trainee = rosterTrainee('Tokai Teio', [
         'turf' => 'A', 'dirt' => 'G', 'sprint' => 'F', 'mile' => 'E', 'medium' => 'A',
         'long' => 'B', 'front_runner' => 'G', 'pace_chaser' => 'A', 'late_surger' => 'C', 'end_closer' => 'B',
     ]);
-
-    UmamusumeProfile::factory()->for($trainee)->create();
 
     $unique = Skill::factory()->create([
         'name' => 'Peacemaker',
@@ -497,12 +513,13 @@ it('renders the profile with basic facts, aptitude once and the four skill lists
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Career/TraineeProfile')
+            // Step 2's read screen is on the wizard's path, so it sends the same chip lists as the
+            // roster and records the visit itself; a fresh session has no stored choice yet.
+            ->where('visited', [2])
+            ->where('saved', [])
             ->where('trainee.name', 'Tokai Teio')
             ->where('trainee.aptitudes.long', 'B')
             ->has('trainee.aptitudes', 10)
-            ->has('trainee.profile')
-            ->where('trainee.profile.height', 158)
-            ->has('trainee.profile.birthday.iso')
             ->where('forms.0.rarity_word', 'SSR')
             ->where('forms.0.skillLists.0.label', 'Unique skill')
             ->where('forms.0.skillLists.0.skills.0.name', 'Peacemaker')
@@ -511,7 +528,16 @@ it('renders the profile with basic facts, aptitude once and the four skill lists
             ->where('forms.0.skillLists.0.skills.0.sp_cost', null)
             ->where('forms.0.skillLists.0.unresolved', 0)
             ->where('forms.0.skillLists.1.skills.0.name', 'Ahead Spirit')
-            ->where('selected', null));
+            ->where('selected', null)
+            ->where('selectedCardId', null)
+            ->where('rosterUrl', route('career.trainee'))
+            ->has('absences.growth.absence')
+            ->has('absences.baseStats.absence')
+            // The Basic facts card left for wireframe parity, and its payload with it. The catalog detail
+            // page still states voice actor, birthday, height, sizes and version.
+            ->missing('trainee.profile')
+            ->missing('growth')
+            ->missing('absences.version'));
 });
 
 it('counts a skill id that resolves to no Global skill instead of dropping it silently', function (): void {
@@ -540,23 +566,27 @@ it('counts a skill id that resolves to no Global skill instead of dropping it si
             ->where('forms.0.skillLists.2.unresolved', 1));
 });
 
-it('names the one profile absence left after the Build analysis section was deleted', function (): void {
+it('names the growth and base-stat absences the wireframe rows keep their place for', function (): void {
     $trainee = rosterTrainee('Silence Suzuka', ['turf' => 'A']);
 
     $this->get('/career/setup/trainee/'.$trainee->id)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            // Each named absence carries its reason as a title, so the screen states the gap in words.
-            ->where('absences.version.value', null)
-            ->has('absences.version.title')
-            // Slice 3.4 deleted the Build analysis section, and its three figures left with it: each
-            // was an absence the page no longer prints. The keys are gone rather than kept as dead
-            // payload, so this asserts their absence instead of their shape.
+            // One visible reason per block, printed by the page: five identical per-cell disclosures
+            // would tax the reader without adding a fact.
+            ->where('absences.growth.value', null)
+            ->has('absences.growth.absence')
+            ->where('absences.baseStats.value', null)
+            ->has('absences.baseStats.absence')
+            // The version absence left with the Basic facts card; the catalog detail page still states it.
+            ->missing('absences.version')
+            ->missing('trainee.profile')
+            // Slice 3.4 deleted the Build analysis section, and its three figures left with it.
             ->missing('absences.stat_distribution')
             ->missing('absences.inheritance')
             ->missing('absences.support_types')
-            // Career goals is omitted entirely: `trainee_goals` has never been migrated, and the filing is
-            // reserved as KI-34. A key here would be a heading waiting for data that does not exist.
+            // Career goals is omitted entirely: the ladder has two homes (the catalog detail and the
+            // Cockpit's Trainee goals group), and a third copy would drift.
             ->missing('goals')
             ->missing('trainee.goals')
             ->missing('trainee.growth_rates')

@@ -8,19 +8,17 @@ use App\Http\Controllers\Controller;
 use App\Models\CharacterCard;
 use App\Models\Skill;
 use App\Models\Umamusume;
-use App\Models\UmamusumeProfile;
 use App\Services\Career\SetupDraft;
 use App\Services\DataPipeline\ArtworkMirror;
 use Closure;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Trainee Profile, `SCREEN-004` (PRD FR-A-1, FR-A-4, `ADR-0020` §1). The read screen behind SCR-CAR-003's
- * "View Profile" action, and the wizard's second step rather than a third copy of the catalog.
+ * Trainee Profile, `SCREEN-004` (PRD FR-A-1, FR-A-4, `ADR-0020` §1). The read screen SCR-CAR-003's
+ * forward door opens, and the middle of the wizard's second step rather than a third copy of the catalog.
  *
  * **What this screen is for.** SCREEN-004's purpose in `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` §7 is to give
  * the Trainer build-relevant information *before* committing to a trainee, so it prints what the catalog
@@ -47,8 +45,9 @@ use Inertia\Response;
  *   The section stays omitted here for the reason on `TraineeProfile.vue`: the published rungs read on her
  *   catalog detail page, where no run is needed, and against a run's records in the Cockpit's Trainee goals
  *   group, and a third copy of one list is a third place for it to drift.
- * - **Growth rates and "Version"** are absent for the reasons on `TraineeSelectController` and on the
- *   `version` slot below, which is a named absence with its reason rather than a blank.
+ * - **Growth rates** are a stated absence on the page: the catalogue holds no `stat_bonus` column, so the
+ *   row keeps its five cells and prints `N/A` under one visible reason. **Version** left with the Basic
+ *   facts card, which no wireframe draws; the catalog detail page still states it.
  * - **Hint skills** are not on a trainee at all: `character_cards` has no `skills_hint` column, and hints
  *   live only on `support_cards`.
  * - **Evolution skills** are stored on `skills_evo` but `SCREEN_SPEC.md` SCR-CAT-002's own ruling refuses
@@ -56,15 +55,17 @@ use Inertia\Response;
  * - **"Ideal distances" and "suitable running styles"** are printed as **aptitude**. The ten letters are
  *   the only trainee-side signal in the schema; whether one of them is "ideal" is a judgement no column
  *   holds, and labelling it as one would be the invented claim `AGENTS.md` §5 forbids.
- * - **"Recommended stat distribution", "useful inheritance", "useful support types"** are named absences.
- *   `support_cards` deliberately carries no `umamusume_id`
+ * - **"Recommended stat distribution", "useful inheritance", "useful support types"** are not rendered at
+ *   all: the Build analysis section that held them was deleted in slice 3.4. `support_cards` deliberately
+ *   carries no `umamusume_id`
  *   (`database/migrations/2026_09_30_151945_correct_support_card_schema_and_constraints.php:36-38`: "None
  *   is added here: nothing in this slice reads a support card's trainee through the local catalogue"), so
  *   a useful-support-types list would have to join on `char_name` *text* — a name match, not data.
  *   "Useful inheritance" is the inheritance computation `ADR-0020` §3 bans, and a recommended stat
  *   distribution is a recommendation, which the Planner's no-prediction rule (PRD §6) also declines.
  *
- * **Not cached** (`AGENTS.md` §8). One indexed lookup on the primary key plus four bounded loads.
+ * **Not cached** (`AGENTS.md` §8). One indexed lookup on the primary key plus a bounded card load and one
+ * skill lookup.
  */
 class TraineeProfileController extends Controller
 {
@@ -75,7 +76,11 @@ class TraineeProfileController extends Controller
      */
     public function show(Umamusume $umamusume, ArtworkMirror $mirror): Response
     {
-        $umamusume->loadMissing(['profile', 'cards' => $this->cardScope()]);
+        // The profile is step 2's middle, so opening it is walking the step: the shell's chips read the
+        // same `visited`/`saved` lists every other step sends.
+        SetupDraft::markVisited(2);
+
+        $umamusume->loadMissing(['cards' => $this->cardScope()]);
 
         /** @var Collection<int, CharacterCard> $cards */
         $cards = $umamusume->cards;
@@ -93,15 +98,14 @@ class TraineeProfileController extends Controller
         $headerCard = $cards->first(static fn (CharacterCard $card): bool => $card->is_debut_form) ?? $cards->first();
 
         return Inertia::render('Career/TraineeProfile', [
+            'visited' => SetupDraft::visited(),
+            'choices' => SetupDraft::summary(),
+            'saved' => SetupDraft::saved(),
             'trainee' => [
                 'id' => $umamusume->id,
-                'slug' => $umamusume->slug,
                 'name' => $umamusume->name,
                 'name_ja' => $umamusume->name_ja,
-                'release_status_label' => $umamusume->release_status->label(),
-                'is_manual' => $umamusume->is_manual,
                 'aptitudes' => $this->aptitudes($umamusume),
-                'profile' => $this->profileShape($umamusume->profile),
                 'artworkURL' => $headerCard === null
                     ? null
                     : $mirror->url('card_portrait', (int) $headerCard->card_id),
@@ -154,50 +158,37 @@ class TraineeProfileController extends Controller
                 ];
             })->values()->all(),
             'selected' => $draft['umamusume_id'],
-            // The growth row's five cells, in the display order `config/scenarios.php` owns. The
-            // catalogue holds no growth figure (`TraineeSelectController` omits the filter for exactly
-            // that reason), so every axis is a real zero: this tool records no growth bonus for a
-            // trainee and a run starts from her own baseline. A null would mean "not recorded"; none
-            // is produced today, and the page renders that word rather than inventing a percentage.
-            'growth' => $this->growthRow(),
+            // Continuing from this screen writes the viewed trainee, so the form carries the costume form
+            // only when the draft already names this same trainee: a switch to another trainee must clear
+            // the old form (R3-06), and the store's exists-join would refuse a card from the old one.
+            'selectedCardId' => $draft['umamusume_id'] === $umamusume->id ? SetupDraft::characterCardId() : null,
             // The wireframe's linked-scenarios pills. No per-trainee link list exists on this payload
             // (the wireframe's own note says the same), so the labels are the scenarios this tool can
             // run, read from config in display order.
             'scenarioLinks' => $this->scenarioLabels(),
             'scenarioLabel' => SetupDraft::scenarioLabel(),
             'scenarioPending' => $draft['scenario'] === null,
+            // The roster, named server-side because the page's back door must not hard-code a route.
+            'rosterUrl' => route('career.trainee'),
             // The catalog detail's select action posts to the same store route as the roster. The URL is
             // supplied server-side the way CareerLayout.vue:11 and UnityCupEditor.vue:20 already receive
             // URLs. No Ziggy dependency is introduced.
             'action' => route('career.trainee.store'),
-            // The one absence this page still prints, named with its reason. The other three
-            // (stat distribution, useful inheritance, useful support types) left with the Build
-            // analysis section in slice 3.4: that section was deleted, so its payload went with it.
+            // Two named absences, one reason each. The catalogue stores neither figure: the Growth Rate
+            // row is `stat_bonus`, absent from every table this tool owns, and the base five are the
+            // export's starting allocation, which the catalogue also does not carry. A reason per block
+            // rather than per cell keeps five identical disclosures from taxing the reader.
             'absences' => [
-                'version' => [
+                'growth' => [
                     'value' => null,
-                    'title' => 'No column records a version for a trainee, and app.ruleset is null by ruling.',
+                    'absence' => 'No growth figure is stored for any costume form, so no percentage is known for any axis. The client prints the row as five cells and a real zero as +0%; here each cell states N/A so an absent figure is never read as a zero.',
+                ],
+                'baseStats' => [
+                    'value' => null,
+                    'absence' => "No base-stat figure is stored, so none of the five is known before a run exists. The export's five base values sum to 450 for a three-star card, 425 for two stars and 400 for one; those are starting totals, not a ceiling.",
                 ],
             ],
         ]);
-    }
-
-    /**
-     * The five growth cells the page prints, all zero. The value is not read from `umamusume` because
-     * no growth column exists; it is the run's own starting assumption (a trainee contributes no growth
-     * bonus this tool records), stated as data so the page never hard-codes the figure.
-     *
-     * @return array<string, int>
-     */
-    private function growthRow(): array
-    {
-        $axes = config('scenarios.stat_order');
-
-        if (! is_array($axes)) {
-            return [];
-        }
-
-        return array_fill_keys(array_values(array_filter($axes, 'is_string')), 0);
     }
 
     /**
@@ -251,59 +242,6 @@ class TraineeProfileController extends Controller
             'late_surger' => $umamusume->aptitude_late_surger,
             'end_closer' => $umamusume->aptitude_end_closer,
         ];
-    }
-
-    /**
-     * The profile block as an explicit array, or null when no profile fetch has written one.
-     *
-     * Both `hasFullBirthday()` and `hasThreeSizes()` are honoured rather than the raw columns: a
-     * partially-present birthday must not be printed as a date, and a partially-present measurement must
-     * not be printed as a whole one. There is no weight column on `umamusume_profiles`, which is why the
-     * block carries height and stops there.
-     *
-     * @return array<string, mixed>|null
-     */
-    private function profileShape(?UmamusumeProfile $profile): ?array
-    {
-        if ($profile === null) {
-            return null;
-        }
-
-        return [
-            'va_ja' => $profile->va_ja,
-            'va_en' => $profile->va_en,
-            'height' => $profile->height,
-            'birthday' => $this->birthday($profile),
-            'three_sizes' => $profile->hasThreeSizes()
-                ? ['b' => $profile->three_sizes_b, 'h' => $profile->three_sizes_h, 'w' => $profile->three_sizes_w]
-                : null,
-        ];
-    }
-
-    /**
-     * The birthday, split so a missing year reads as a missing year and never as a January 1st. Same
-     * shape and same reason as `CatalogController::birthday()`; `birth_year` is the only part the
-     * document ever omits (D-220).
-     *
-     * @return array{iso: string|null, display: string}|null
-     */
-    private function birthday(UmamusumeProfile $profile): ?array
-    {
-        if ($profile->hasFullBirthday()) {
-            return [
-                'iso' => sprintf('%04d-%02d-%02d', $profile->birth_year, $profile->birth_month, $profile->birth_day),
-                'display' => Carbon::create($profile->birth_year, $profile->birth_month, $profile->birth_day)->format('M j, Y'),
-            ];
-        }
-
-        if ($profile->birth_month !== null && $profile->birth_day !== null) {
-            return [
-                'iso' => null,
-                'display' => Carbon::create(2000, $profile->birth_month, $profile->birth_day)->format('M j').' · year not published',
-            ];
-        }
-
-        return null;
     }
 
     /**

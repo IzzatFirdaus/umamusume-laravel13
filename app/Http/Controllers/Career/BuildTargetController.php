@@ -97,6 +97,10 @@ class BuildTargetController extends Controller
             'styles' => BuildTargetPayload::STYLES,
             'scenarioLabel' => SetupDraft::scenarioLabel(),
             'scenarioPending' => SetupDraft::read()['scenario'] === null,
+            // The wireframe's back door returns to the trainee profile (`career-target.html:63`), which
+            // is now the step before this one. The roster is the fallback for a draft with no trainee,
+            // so a direct visit still has a way back.
+            'backUrl' => $this->backUrl(),
             // The step's write URL, supplied server-side the way CareerLayout.vue:11 and
             // UnityCupEditor.vue:20 already receive URLs. No Ziggy dependency is introduced.
             'action' => route('career.target.store'),
@@ -128,6 +132,23 @@ class BuildTargetController extends Controller
         ]);
 
         return redirect()->route('career.legacy')->with('status', 'Build target saved.');
+    }
+
+    /**
+     * The screen the back door returns to: the stored trainee's profile, or the roster before a pick.
+     *
+     * The profile route binds the id it is given, so a draft naming a trainee the catalog no longer
+     * holds would 404 on the way back; the draft's id is written through an `exists` rule and the
+     * roster is the honest fallback, so the link is built only when the id is an int and leaves the
+     * binding to answer for the row.
+     */
+    private function backUrl(): string
+    {
+        $umamusumeId = SetupDraft::read()['umamusume_id'];
+
+        return is_int($umamusumeId)
+            ? route('career.trainee.profile', ['umamusume' => $umamusumeId])
+            : route('career.trainee');
     }
 
     /**
