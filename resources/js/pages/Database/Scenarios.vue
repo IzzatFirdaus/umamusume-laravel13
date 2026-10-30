@@ -197,7 +197,7 @@ const panelState = (scenario: Scenario, label: string): boolean =>
         </section>
 
         <section class="card mt-4" aria-labelledby="scenario-ruleset">
-            <h2 id="scenario-ruleset">Ruleset dates</h2>
+            <h2 id="scenario-ruleset">Last rework</h2>
             <div class="mt-2 overflow-x-auto">
                 <table class="w-full border-collapse">
                     <thead>
@@ -219,7 +219,7 @@ const panelState = (scenario: Scenario, label: string): boolean =>
             <p class="note mt-3">
                 <span class="g" aria-hidden="true">○</span>
                 <span>
-                    A ruleset date is <b>not</b> an app ruleset version. No source defines a Global
+                    A rework date is <b>not</b> an app ruleset version. No source defines a Global
                     ruleset version, so the version line elsewhere reads <code>N/A</code> and the two
                     facts are never merged into one label.
                 </span>
