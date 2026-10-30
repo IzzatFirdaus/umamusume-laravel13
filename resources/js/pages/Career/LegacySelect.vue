@@ -365,6 +365,108 @@ const pickOptions = (): { value: string; label: string }[] => [
             </article>
         </div>
 
+        <!-- The projection and the affinity reading sit side by side: the grade is the record the
+             projection is read against, and the save control belongs beside the fields it writes
+             (`career-legacy-deck-steps.spec.ts:167` records that intent). -->
+        <div class="mt-4 grid grid-cols-1 gap-4 min-[1081px]:grid-cols-2">
+            <!--
+              DOMAIN OVERRIDE (ADR-0020 §3): the wireframe's Projected start table prints the
+              `cap + 16 per ★3` sum as a number; this tool prices no pair, so the projected column
+              states the absence and the two parent columns print only what the record holds.
+            -->
+            <section class="card" aria-labelledby="projected-start">
+                <h2 id="projected-start">Projected start</h2>
+                <p class="sub">
+                    What the two parents add to this run, before a single turn is played. The recorded Blue
+                    spark against a stat is what a parent column prints; the projected sum is never
+                    computed, because an inheritance outcome is not this tool's to derive (ADR-0020 §3).
+                </p>
+
+                <div class="mt-2 overflow-x-auto" role="region" tabindex="0" aria-label="Projected start, scrollable">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                            <th class="py-2 pr-3">Stat</th>
+                            <th class="pr-3 text-right">Scenario cap</th>
+                            <th class="pr-3 text-right">From Parent A</th>
+                            <th class="pr-3 text-right">From Parent B</th>
+                            <th class="text-right">Projected</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="stat in props.statOrder" :key="stat" class="border-b border-rule">
+                            <td class="py-2 pr-3 text-ink">{{ stat }}</td>
+                            <td class="pr-3 text-right font-mono tabular-nums text-ink-muted">
+                                {{ props.scenarioCaps[stat] ?? '-' }}
+                            </td>
+                            <td class="pr-3 text-right font-mono tabular-nums text-ink">
+                                <template v-if="props.parentA?.sparks.some((s) => s.family === 'Blue' && s.stat === stat)">
+                                    ★{{ props.parentA.sparks.find((s) => s.family === 'Blue' && s.stat === stat)?.stars ?? '?' }} Blue
+                                </template>
+                                <template v-else>-</template>
+                            </td>
+                            <td class="pr-3 text-right font-mono tabular-nums text-ink">
+                                <template v-if="props.parentB?.sparks.some((s) => s.family === 'Blue' && s.stat === stat)">
+                                    ★{{ props.parentB.sparks.find((s) => s.family === 'Blue' && s.stat === stat)?.stars ?? '?' }} Blue
+                                </template>
+                                <template v-else>-</template>
+                            </td>
+                            <td class="text-right font-mono tabular-nums text-ink-muted">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            </section>
+
+            <section class="card" aria-labelledby="pair-affinity">
+                <h2 id="pair-affinity">Pair Affinity</h2>
+                <div class="mt-2">
+                    <label class="block text-xs font-medium text-ink" for="affinity">Affinity</label>
+                    <BaseSelect
+                        id="affinity"
+                        v-model="form.affinity"
+                        name="affinity"
+                        :options="[{ value: '', label: 'Not recorded' }, ...props.affinityGrades.map(grade => ({ value: grade, label: grade }))]"
+                    />
+                    <p class="mt-1 text-xs text-ink-muted">
+                        The grade you read for the pair, not a score. This tool does not price it.
+                    </p>
+                    <p v-if="form.errors.affinity" class="mt-1 text-xs text-risk">{{ form.errors.affinity }}</p>
+                </div>
+
+            <p v-if="!props.hasSelection" class="mt-2 text-sm text-ink-muted">
+                No Legacy is recorded for this setup yet. Nothing is stored until you save, and a figure you have
+                not read is left blank rather than filled in.
+            </p>
+            <p v-else class="mt-2 text-sm text-ink-muted">
+                This setup already holds a Legacy. Saving below replaces it whole; a Spark you remove here is
+                gone, not hidden.
+            </p>
+
+            <p
+                v-if="form.errors.legacies"
+                role="alert"
+                class="mt-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk"
+            >
+                {{ form.errors.legacies }}
+            </p>
+
+            <div class="mt-5 flex flex-wrap items-center gap-3">
+                <button
+                    id="legacy-save"
+                    type="button"
+                    :disabled="form.processing"
+                    class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel disabled:cursor-wait disabled:opacity-60"
+                    @click="saving"
+                >
+                    {{ form.processing ? 'Saving…' : 'Save Legacy' }}
+                </button>
+
+                <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving the Legacy…</p>
+            </div>
+            </section>
+        </div>
+
         <!--
           DOMAIN OVERRIDE (DM-3): four spark families; HFW draws three
           The wireframe draws Blue, Pink and the unique-skill factor. Mechanics has four families, because
@@ -430,116 +532,19 @@ const pickOptions = (): { value: string; label: string }[] => [
             </p>
         </section>
 
-        <div class="mt-4 grid grid-cols-1 gap-4 min-[1081px]:grid-cols-2">
-            <!--
-              DOMAIN OVERRIDE (ADR-0020 §3): the wireframe's Projected start table prints the
-              `cap + 16 per ★3` sum as a number; this tool prices no pair, so the projected column
-              states the absence and the two parent columns print only what the record holds.
-            -->
-            <section class="card" aria-labelledby="projected-start">
-                <h2 id="projected-start">Projected start</h2>
-                <p class="sub">
-                    What the two parents add to this run, before a single turn is played. The recorded Blue
-                    spark against a stat is what a parent column prints; the projected sum is never
-                    computed, because an inheritance outcome is not this tool's to derive (ADR-0020 §3).
-                </p>
-
-                <div class="mt-2 overflow-x-auto" role="region" tabindex="0" aria-label="Projected start, scrollable">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">
-                            <th class="py-2 pr-3">Stat</th>
-                            <th class="pr-3 text-right">Scenario cap</th>
-                            <th class="pr-3 text-right">From Parent A</th>
-                            <th class="pr-3 text-right">From Parent B</th>
-                            <th class="text-right">Projected</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="stat in props.statOrder" :key="stat" class="border-b border-rule">
-                            <td class="py-2 pr-3 text-ink">{{ stat }}</td>
-                            <td class="pr-3 text-right font-mono tabular-nums text-ink-muted">
-                                {{ props.scenarioCaps[stat] ?? '-' }}
-                            </td>
-                            <td class="pr-3 text-right font-mono tabular-nums text-ink">
-                                <template v-if="props.parentA?.sparks.some((s) => s.family === 'Blue' && s.stat === stat)">
-                                    ★{{ props.parentA.sparks.find((s) => s.family === 'Blue' && s.stat === stat)?.stars ?? '?' }} Blue
-                                </template>
-                                <template v-else>-</template>
-                            </td>
-                            <td class="pr-3 text-right font-mono tabular-nums text-ink">
-                                <template v-if="props.parentB?.sparks.some((s) => s.family === 'Blue' && s.stat === stat)">
-                                    ★{{ props.parentB.sparks.find((s) => s.family === 'Blue' && s.stat === stat)?.stars ?? '?' }} Blue
-                                </template>
-                                <template v-else>-</template>
-                            </td>
-                            <td class="text-right font-mono tabular-nums text-ink-muted">-</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            </section>
-
-            <section class="card" aria-labelledby="parents-differ">
-                <h2 id="parents-differ">Parents must differ</h2>
-                <p class="mt-2 text-sm leading-relaxed text-ink-muted">
-                    A veteran cannot be its own parent, and the two slots cannot hold the same record. The
-                    picker enforces the first rule by hiding the trainee you are running; the second by
-                    refusing an already-chosen record.
-                </p>
-                <p class="note mt-3 text-sm text-ink-muted">
-                    Choosing no parents is a legitimate build, not an error. The run carries two
-                    nullable parent ids for exactly that reason, and no screen invents a default pair.
-                </p>
-            </section>
-        </div>
-
-        <p v-if="!props.hasSelection" class="mt-2 text-sm text-ink-muted">
-            No Legacy is recorded for this setup yet. Nothing is stored until you save, and a figure you have
-            not read is left blank rather than filled in.
-        </p>
-        <p v-else class="mt-2 text-sm text-ink-muted">
-            This setup already holds a Legacy. Saving below replaces it whole; a Spark you remove here is
-            gone, not hidden.
-        </p>
-
-        <fieldset class="mt-4 max-w-sm rounded-lg border border-rule bg-panel p-3">
-            <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-ink-muted">Pair</legend>
-            <div class="mt-2">
-                <label class="block text-xs font-medium text-ink" for="affinity">Affinity</label>
-                <BaseSelect
-                    id="affinity"
-                    v-model="form.affinity"
-                    name="affinity"
-                    :options="[{ value: '', label: 'Not recorded' }, ...props.affinityGrades.map(grade => ({ value: grade, label: grade }))]"
-                />
-                <p class="mt-1 text-xs text-ink-muted">
-                    The grade you read for the pair, not a score. This tool does not price it.
-                </p>
-                <p v-if="form.errors.affinity" class="mt-1 text-xs text-risk">{{ form.errors.affinity }}</p>
-            </div>
-        </fieldset>
-
-        <p
-            v-if="form.errors.legacies"
-            role="alert"
-            class="mt-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk"
-        >
-            {{ form.errors.legacies }}
-        </p>
-
-        <div class="mt-5 flex flex-wrap items-center gap-3">
-            <button
-                id="legacy-save"
-                type="button"
-                :disabled="form.processing"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel disabled:cursor-wait disabled:opacity-60"
-                @click="saving"
-            >
-                {{ form.processing ? 'Saving…' : 'Save Legacy' }}
-            </button>
-
-            <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving the Legacy…</p>
-        </div>
+        <!-- Full width now: the rule is a statement about the pair, so it reads across the page
+             while its prose stays at a readable measure rather than running the full width. -->
+        <section class="card mt-4" aria-labelledby="parents-differ">
+            <h2 id="parents-differ">Parents must differ</h2>
+            <p class="mt-2 max-w-3xl text-sm leading-relaxed text-ink-muted">
+                A veteran cannot be its own parent, and the two slots cannot hold the same record. The
+                picker enforces the first rule by hiding the trainee you are running; the second by
+                refusing an already-chosen record.
+            </p>
+            <p class="note mt-3 max-w-3xl text-sm text-ink-muted">
+                Choosing no parents is a legitimate build, not an error. The run carries two
+                nullable parent ids for exactly that reason, and no screen invents a default pair.
+            </p>
+        </section>
     </SetupLayout>
 </template>

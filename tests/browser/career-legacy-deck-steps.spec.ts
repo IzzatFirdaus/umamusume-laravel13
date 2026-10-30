@@ -124,6 +124,55 @@ test.describe('Setup step 4 — Legacy', () => {
         await expect(page.locator('input[id^="rank-"]')).toHaveCount(0);
     });
 
+    test('places the projection beside the affinity card and the save inside it', async ({ page }) => {
+        await hydrate(page, '/career/setup/legacy');
+
+        // The projection is read against the affinity grade, so the two cards share one row and the
+        // save control sits beside the fields it writes rather than at the foot of the page.
+        const projected = page.locator('section[aria-labelledby="projected-start"]');
+        const affinity = page.locator('section[aria-labelledby="pair-affinity"]');
+        await expect(affinity).toBeVisible();
+        await expect(affinity.getByRole('heading', { name: 'Pair Affinity' })).toBeVisible();
+        await expect(affinity.locator('#affinity')).toBeVisible();
+        await expect(affinity.locator('#legacy-save')).toBeVisible();
+
+        // Siblings in one grid: same parent box, and each is the other's next element sibling at the
+        // grid level. That is what 'beside' means here, so it is asserted rather than assumed.
+        const sameParent = await page.evaluate(() => {
+            const start = document.querySelector('section[aria-labelledby="projected-start"]');
+            const pair = document.querySelector('section[aria-labelledby="pair-affinity"]');
+            if (start === null || pair === null) return null;
+            return { same: start.parentElement === pair.parentElement, adjacent: start.nextElementSibling === pair };
+        });
+        expect(sameParent, 'the projection and the affinity card are not siblings in one row').toEqual({
+            same: true,
+            adjacent: true,
+        });
+
+        // The projection now precedes the mechanism table, because the table explains what the numbers
+        // in it do and a reader arrives needing the numbers first.
+        const order = await page.evaluate(() => {
+            const start = document.querySelector('section[aria-labelledby="projected-start"]');
+            const does = document.querySelector('section[aria-labelledby="inheritance-does"]');
+            const differ = document.querySelector('section[aria-labelledby="parents-differ"]');
+            if (start === null || does === null || differ === null) return null;
+            return {
+                startBeforeDoes: Boolean(start.compareDocumentPosition(does) & Node.DOCUMENT_POSITION_FOLLOWING),
+                doesBeforeDiffer: Boolean(does.compareDocumentPosition(differ) & Node.DOCUMENT_POSITION_FOLLOWING),
+            };
+        });
+        expect(order, 'the cards are not in the order the step states').toEqual({
+            startBeforeDoes: true,
+            doesBeforeDiffer: true,
+        });
+
+        // `Parents must differ` is a full-width statement of the rule now, so it keeps the readable
+        // measure on its prose rather than running the width of the page.
+        const differ = page.locator('section[aria-labelledby="parents-differ"]');
+        for (const paragraph of await differ.locator('p').all()) {
+            await expect(paragraph).toHaveClass(/max-w-3xl/);
+        }
+    });
     test('sizes the step controls to the 44px contract', async ({ page }) => {
         await hydrate(page, '/career/setup/legacy');
 
