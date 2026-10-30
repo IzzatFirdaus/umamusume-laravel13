@@ -86,7 +86,12 @@ class TraineeSelectController extends Controller
         $this->applyFacets($query, $request);
         $this->applySort($query, $request);
 
-        $trainees = $query->paginate(PageSize::clamp($request->query('pageSize')), ['*'], 'page')
+        // Six rows, and never more. This step is a picker, so the roster is read a page at a time and
+        // the pager carries the rest; `?pageSize=` still honours a smaller ask, which is why the cap is
+        // a `min` over the shared clamp rather than a second page-size constant.
+        $perPage = min(6, PageSize::clamp($request->query('pageSize'), 6));
+
+        $trainees = $query->paginate($perPage, ['*'], 'page')
             ->withQueryString()
             ->through(fn (Umamusume $umamusume): array => $this->row($umamusume, $mirror));
 

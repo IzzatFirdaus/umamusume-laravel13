@@ -597,10 +597,14 @@ const sortLabel = computed(
                     />
                 </div>
 
+                <!-- `self-end` lines the control up with the `Form` select rather than with its label:
+                     `BaseSelect` renders a label above a 44px select, so a bare 44px button centred on
+                     that whole stack sits a label-height low. Aligning the bottoms puts the two controls
+                     on one line, and it only moves this button - the name block above keeps its centre. -->
                 <a
                     v-if="props.profileUrl"
                     :href="props.profileUrl"
-                    class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-3 text-sm font-bold text-ink hover:bg-sunken transition-colors duration-150 ease-out"
+                    class="inline-flex min-h-11 items-center self-end rounded-md border border-rule bg-raised px-3 text-sm font-bold text-ink hover:bg-sunken transition-colors duration-150 ease-out"
                 >
                     Preview profile
                 </a>

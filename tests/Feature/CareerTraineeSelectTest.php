@@ -383,7 +383,7 @@ it('orders an aptitude sort by the client scale, not by the alphabet', function 
             ->where('trainees.data.0.name', 'Worst Letter'));
 });
 
-it('caps the page size through the shared rule rather than trusting the query', function (): void {
+it('caps the page size at the six rows this picker shows rather than trusting the query', function (): void {
     for ($i = 0; $i < 3; $i++) {
         rosterTrainee('Roster Trainee '.str_pad((string) $i, 2, '0', STR_PAD_LEFT), ['turf' => 'A']);
     }
@@ -394,10 +394,20 @@ it('caps the page size through the shared rule rather than trusting the query', 
             ->has('trainees.data', 2)
             ->where('trainees.total', 3));
 
-    // A nonsense size is a bigger or smaller page, not a refused request (`PageSize`, ADR-0018).
+    // With no ask, the picker shows its own six rows: the count is the roster's, the page is not.
+    $this->get('/career/setup/trainee')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('trainees.data', 3)
+            ->where('trainees.per_page', 6)
+            ->where('trainees.total', 3));
+
+    // A nonsense size is a smaller page, not a refused request (`PageSize`, ADR-0018). The ceiling
+    // here is this surface's own six rows: the picker shows at most six and the pager carries the
+    // rest, so `?pageSize=5000` lands on 6 rather than on the shared maximum.
     $this->get('/career/setup/trainee?pageSize=5000')
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->where('trainees.per_page', 100));
+        ->assertInertia(fn (Assert $page) => $page->where('trainees.per_page', 6));
 });
 
 it('preserves the picker filter through a select redirect', function (): void {

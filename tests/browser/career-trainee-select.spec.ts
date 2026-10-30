@@ -127,7 +127,7 @@ test.describe('Trainee Selection and Profile', () => {
         // live total rather than the page's own row count.
         const denominator = page.locator('[data-field="denominator"]');
         await expect(denominator).toContainText(/^\d+ trainees · page 1 of \d+ · sorted by Name$/);
-        await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(25);
+        await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(6);
         await expect(denominator).toContainText('trainees');
     });
 
@@ -196,7 +196,7 @@ test.describe('Trainee Selection and Profile', () => {
 
 
 
-        await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(25);
+        await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(6);
         await expect(page.locator('[data-field="denominator"]')).toContainText('trainees');
 
         // The wireframe's "Selected" card is absent until a trainee is actually chosen: it restates a pick,
@@ -398,7 +398,7 @@ test.describe('Trainee Selection and Profile', () => {
         const empty = page.locator('[data-region="empty"]');
         await expect(empty.getByRole('button', { name: 'Clear filters' })).toBeVisible();
         await empty.getByRole('button', { name: 'Clear filters' }).click();
-        await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(25);
+        await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(6);
     });
 
     test('refuses a bad filter value and states the reason where it was typed', async ({ page }) => {
@@ -408,7 +408,7 @@ test.describe('Trainee Selection and Profile', () => {
         await page.locator('#app > *').first().waitFor();
 
         await expect(page.getByRole('alert')).toContainText('Aptitude letters are S, A, B, C, D, E, F and G.');
-        await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(25);
+        await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveCount(6);
     });
 
     test('selects a trainee by keyboard, restores focus, and keeps the choice across the profile screen', async ({ page }) => {
@@ -647,13 +647,13 @@ test.describe('Trainee Selection and Profile', () => {
         }
 
         // HFW-OVERRIDE (mock: roster rows) — the wireframe lists three mock trainees at its own page 1
-        // of 12 and prints its own denominator; the app paginates the live roster at 25 rows
-        // (`PageSize::DEFAULT`), so its page 1 is a different 25 rows and its denominator reads
-        // `page 1 of 3`. Recorded rather than faked.
+        // of 12 and prints its own denominator; the app paginates the live roster at six rows, which is
+        // the wireframe's own page size in the paragraph below, so its page 1 is a different six rows
+        // and its denominator reads `page 1 of 12`. Recorded rather than faked.
 
-        // HFW-OVERRIDE (rect: page height) — the app's roster is real data paginated at 25 rows
-        // (`PageSize::DEFAULT`) while the wireframe's mock lists one page of 6, so the page is taller on
-        // the app side. Rows above the fold are unaffected.
+        // HFW-OVERRIDE (rect: page height) — the app's roster is real data paginated at six rows, the
+        // same page size the wireframe's mock uses, so the heights now agree; the wireframe still prints
+        // three mock rows where the app prints real ones. Rows above the fold are unaffected.
         //
         // HFW-OVERRIDE (sourced) — the card's running-style axis prints the sourced full names
         // (`Front Runner`, `Pace Chaser`, `Late Surger`, `End Closer`; `lang/en/uma.php:109-112`) where the
