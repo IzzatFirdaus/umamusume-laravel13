@@ -227,6 +227,75 @@ test.describe('Setup step 4 — Legacy', () => {
         await expect(page.locator('#legacy-save')).toBeFocused();
     });
 
+    test('reaches the manual parent entry from the picker and keeps it through a save', async ({ page }) => {
+        await hydrate(page, '/career/setup/legacy');
+
+        // The sentinel is the only way into manual mode: without it `assignParent`'s
+        // `if (value === '__manual__')` branch is unreachable, `manual[index]` is permanently false,
+        // and every editor behind it stays hidden. That gap shipped once; this case is the pin.
+        const picker = page.locator('#legacy-pick-0');
+        await expect(
+            picker.getByRole('option', { name: 'Not in my library - enter a name' }),
+        ).toHaveCount(1);
+
+        await picker.selectOption('__manual__');
+
+        // Every editor the mode promises, each on its own id so a silent rename fails here.
+        const name = page.locator('#legacy-name-0');
+        await expect(name).toBeVisible();
+        await expect(name).toHaveAttribute('list', 'known-umamusume-names');
+        await expect(page.locator('#legacy-rank-letter-0')).toBeVisible();
+        await expect(page.locator('#legacy-rank-0')).toBeVisible();
+        await expect(page.getByText('Sparks for this parent').first()).toBeVisible();
+
+        await name.fill('Silence Suzuka');
+        await page.locator('#legacy-rank-letter-0').fill('A');
+        await page.locator('#legacy-rank-0').fill('3');
+
+        await page.getByRole('button', { name: 'Save Legacy' }).click();
+        await expect(page.getByText('Legacy recorded.')).toBeVisible();
+
+        // The round-trip is the half a fresh page cannot prove: the name comes back, the picker
+        // still reads the sentinel rather than "Not chosen", and the editors are still open.
+        await expect(page.locator('#legacy-name-0')).toHaveValue('Silence Suzuka');
+        await expect(page.locator('#legacy-name-0')).toBeVisible();
+        await expect(page.locator('#legacy-pick-0')).toHaveValue('__manual__');
+        await expect(page.locator('#legacy-rank-letter-0')).toHaveValue('A');
+    });
+
+    test('updates the projected start from the form without a save', async ({ page }) => {
+        await hydrate(page, '/career/setup/legacy');
+
+        // The probe the source reading needed. A parent typed by name reaches manual mode, and the
+        // parent's OWN Sparks are what the projected column binds to (`form.legacies[i].sparks`).
+        // A grandparent's Sparks live in `ancestors_sparks` and cannot move this column.
+        await page.locator('#legacy-pick-0').selectOption('__manual__');
+        await page.locator('#legacy-name-0').fill('Silence Suzuka');
+
+        const speedRow = page
+            .locator('section[aria-labelledby="projected-start"] tbody tr')
+            .filter({ hasText: 'Speed' });
+        const fromParentA = speedRow.locator('td').nth(2);
+
+        await expect(fromParentA).toHaveText('-');
+
+        const shots = join(process.cwd(), '.scratch-uma', 'session_31b8f2ea', 'legacy-realtime-probe');
+        mkdirSync(shots, { recursive: true });
+        await page.setViewportSize({ width: 1280, height: 900 });
+        await page.screenshot({ path: join(shots, 'before-1280.png'), fullPage: true });
+
+        // Add the parent's own Blue Speed spark at three stars through its editor.
+        await page.getByText('Sparks for this parent').first().click();
+        await page.getByRole('button', { name: /Add Spark/ }).first().click();
+        await page.locator('#legacy-spark-target-0-0').selectOption('Speed');
+        await page.locator('#legacy-spark-stars-0-0').fill('3');
+
+        // No save: the cell follows the form.
+        await expect(fromParentA).toContainText('Blue');
+        await expect(fromParentA).toContainText('3');
+
+        await page.screenshot({ path: join(shots, 'after-1280.png'), fullPage: true });
+    });
     test('every control on the step carries an accessible name', async ({ page }) => {
         await hydrate(page, '/career/setup/legacy');
 

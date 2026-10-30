@@ -33,7 +33,7 @@
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
-import { BaseSelect } from '../../components/Form';
+import { BaseInput, BaseSelect } from '../../components/Form';
 import AncestorEditor from '../../components/legacy/AncestorEditor.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { nextTick, ref } from 'vue';
@@ -70,6 +70,8 @@ const props = defineProps<{
         affinity: string | null;
         legacies: {
             legacy_id: number | null;
+            /** A parent typed by name rather than picked from the library (ADR-0010, 2026-10-30). */
+            name: string | null;
             rank: number | null;
             rank_letter: string | null;
             is_guest: boolean;
@@ -119,14 +121,29 @@ const props = defineProps<{
  * stored payload is read back whole on save, so re-saving a
  * pick never erases the record behind it.
  */
+/**
+ * A slot is in manual-name mode when the payload carries a name and no library id: the picker then
+ * shows the sentinel and the editors render, so a saved manual parent reads back as what it is
+ * rather than as "Not chosen".
+ */
+function manualFor(index: number): boolean {
+    const legacy = props.payload?.legacies?.[index];
+
+    return legacy !== undefined && legacy.legacy_id === null && (legacy.name ?? '') !== '';
+}
+
 /** True while a slot is in manual-name mode; the picker then shows the name input instead of a row. */
-const manual = ref([false, false]);
+const manual = ref([manualFor(0), manualFor(1)]);
+
+/** The picker's own value: the sentinel while the slot is manual, the library id otherwise. */
+const pickValue = (index: number): string =>
+    manual.value[index] ? '__manual__' : (form.legacies[index]?.legacy_id ?? '');
 
 const form = useForm({
     affinity: props.affinity ?? '',
     legacies: (props.payload?.legacies ?? []).map((legacy, index) => ({
         legacy_id: String(props.parents[index] ?? ''),
-        name: (legacy as { name?: string }).name ?? '',
+        name: legacy.name ?? '',
         rank: legacy.rank === null ? '' : String(legacy.rank),
         rank_letter: legacy.rank_letter ?? '',
         is_guest: legacy.is_guest,
@@ -282,6 +299,11 @@ const parents = (): (ParentCard | null)[] => [props.parentA, props.parentB];
 const pickOptions = (): { value: string; label: string }[] => [
     { value: '', label: 'Not chosen' },
     ...props.roster.map((row) => ({ value: String(row.id), label: row.label })),
+    // A parent who is not a saved Veteran: a friend's finished Umamusume, rented from the friend
+    // list (UMAMUSUME_REFERENCE.md §1.5.4), has no Veteran row to pick. The sentinel is a picker
+    // value only and never reaches the form's legacy_id, which the server validates against the
+    // veterans table; `assignParent` clears that id and seeds the name when this is chosen.
+    { value: '__manual__', label: 'Not in my library - enter a name' },
 ];
 </script>
 
@@ -400,7 +422,7 @@ const pickOptions = (): { value: string; label: string }[] => [
                     </label>
                     <BaseSelect
                         :id="`legacy-pick-${index}`"
-                        :model-value="form.legacies[index].legacy_id"
+                        :model-value="pickValue(index)"
                         :name="`legacies.${index}.legacy_id`"
                         :options="pickOptions()"
                         :error="errorFor(index)"
