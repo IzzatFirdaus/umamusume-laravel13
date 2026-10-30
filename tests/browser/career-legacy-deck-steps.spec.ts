@@ -92,18 +92,31 @@ test.describe('Setup step 4 — Legacy', () => {
         // "Not chosen"; the positive pill is asserted as an exact string.
         await expect(page.getByText('Chosen', { exact: true })).toHaveCount(0);
 
-        // The mechanism table: the wireframe's three families plus the DM-3 Green and White rows the
-        // domain adds, and the enhanced spark's named absence in place of a rate.
+        // The mechanism table: the five kinds the payload and the Spark editor already offer, each with
+        // the figure the corpus gives it. `scr-car-008-legacy-source-accuracy-2026-10-30.md` records why
+        // this list is five and not the wireframe's three, and why the sixth row the page used to print
+        // ('Unique-skill factor') is gone: inheriting a unique skill IS the Green Spark, so the two rows
+        // stated one mechanism twice.
         const mechanism = page.locator('section[aria-labelledby="inheritance-does"]');
-        // Exact strings and the cell role: the Pink row's own prose mentions the Blue spark, so a
+        // Exact strings and the cell role: the Pink row's own prose mentions the Blue Spark, so a
         // plain text lookup resolves to two cells.
-        for (const family of ['Blue spark', 'Pink spark', 'Unique-skill factor', 'Green spark', 'White spark', 'Enhanced spark']) {
-            await expect(mechanism.getByRole('cell', { name: family, exact: true })).toBeVisible();
+        for (const kind of ['Blue Spark', 'Pink Spark', 'Green Spark', 'White Spark', 'Scenario Spark']) {
+            await expect(mechanism.getByRole('cell', { name: kind, exact: true })).toBeVisible();
         }
-        await expect(mechanism.locator('tbody tr')).toHaveCount(6);
-        // The enhanced spark's rate is a named absence rendered through `AbsenceValue`: the
-        // disclosure's summary, never a number.
-        await expect(mechanism.locator('summary')).toHaveCount(1);
+        await expect(mechanism.locator('tbody tr')).toHaveCount(5);
+        // No named absence stands in this table any more. The row that carried one ('Enhanced spark') was
+        // removed for being unsourced rather than reworded, and every row left prints a figure a cited
+        // source states, so the disclosure the page used to count here has nothing left to hold.
+        await expect(mechanism.locator('summary')).toHaveCount(0);
+        // The Blue and Pink figures are the career-start stat award and the aptitude grade ladder; the
+        // page had them swapped, so both are pinned here in the words the table prints.
+        await expect(mechanism.getByRole('cell', { name: /\+5, \+12 or \+21 to the stat it names/ })).toBeVisible();
+        await expect(mechanism.getByRole('cell', { name: /One aptitude grade at one star/ })).toBeVisible();
+        // The cap raise is stated once, in the note, where the ceiling is the subject.
+        await expect(mechanism.getByText(/lifts the cap of the stat it names by 16/)).toBeVisible();
+        // `factor` is not in shipped copy: the client's word is Spark, and `lang/en/uma.php:90` is the
+        // terms map that says so.
+        await expect(mechanism.getByText(/factor/i)).toHaveCount(0);
 
         // The projected-start table is per stat, five rows, and no projected figure is computed
         // (`ADR-0020` §3): every cell prints the named absence or the recorded ceiling.
@@ -111,10 +124,19 @@ test.describe('Setup step 4 — Legacy', () => {
         await expect(projected.locator('tbody tr')).toHaveCount(5);
         await expect(projected.getByRole('columnheader', { name: 'Projected' })).toBeVisible();
         await expect(projected.getByText(/not this tool's to derive/)).toBeVisible();
+        // The draft this harness carries has no scenario, so the ceiling column is headed for what it
+        // prints: the 1200 baseline, not a scenario's numbers.
+        await expect(projected.getByRole('columnheader', { name: 'Base cap' })).toBeVisible();
+        await expect(projected.getByRole('columnheader', { name: 'Scenario cap' })).toHaveCount(0);
 
-        // The parents-must-differ note the wireframe carries, and the empty-slot disclosure.
+        // The parents-must-differ note the wireframe carries, and the empty-slot disclosure. Both are
+        // stated against the code that performs them: the picker lists the library unfiltered and the
+        // save is what refuses (`assertNoOwnTrainee`, `assertParentsDiffer`), and the empty pair is this
+        // screen's allowance rather than a client rule.
         await expect(page.getByRole('heading', { name: 'Parents must differ' })).toBeVisible();
-        await expect(page.getByText(/Choosing no parents is a legitimate build/)).toBeVisible();
+        await expect(page.getByText(/The save refuses two cases/)).toBeVisible();
+        await expect(page.getByText(/Leaving both slots empty is this screen's choice/)).toBeVisible();
+        await expect(page.getByText(/hiding the trainee you are running/)).toHaveCount(0);
 
         // DELIBERATELY RETIRED, not weakened. This case used to assert the ancestor editor was
         // *absent* from this step: no SVG, no ancestor inputs, no spark rows, no rank fields. That
@@ -262,6 +284,7 @@ test.describe('Setup step 4 — Legacy', () => {
         await expect(page.locator('#legacy-pick-0')).toHaveValue('__manual__');
         await expect(page.locator('#legacy-rank-letter-0')).toHaveValue('A');
     });
+
 
     test('updates the projected start from the form without a save', async ({ page }) => {
         await hydrate(page, '/career/setup/legacy');

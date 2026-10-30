@@ -28,11 +28,10 @@
  *
  * **Projection is a named absence.** The wireframe's Projected start table prints `cap + 16 per ★3`
  * arithmetic per parent. `ADR-0020` §3 forbids computing an inheritance outcome, so the projected
- * column states the named absence and the note says why; the recorded Blue spark against a stat is
- * what the two parent columns print.
+ * column prints no sum and the note says why; the recorded Blue Spark against a stat is what the two
+ * parent columns print.
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
-import AbsenceValue from '../../components/AbsenceValue.vue';
 import { BaseInput, BaseSelect } from '../../components/Form';
 import AncestorEditor from '../../components/legacy/AncestorEditor.vue';
 import { Head, useForm } from '@inertiajs/vue3';
@@ -440,11 +439,16 @@ const pickOptions = (): { value: string; label: string }[] => [
                             list="known-umamusume-names"
                             autocomplete="off"
                         />
+                        <!--
+                          Why a name outside the catalogue is still a record: `UMAMUSUME_REFERENCE.md`
+                          §1.5.4 states that one parent may be a friend's finished Umamusume, rented from
+                          the friend list, and such a run is never a local row. The datalist is a spelling
+                          aid built from this tool's own catalogue, not the set of names that can be stored.
+                        -->
                         <p class="mt-1 text-xs text-ink-muted">
                             The name of the Umamusume who finished the career, as you read it. The list is
                             the catalogue of trainees this tool knows, offered as a spelling aid; a name
-                            not in it is still storable, because a friend's finished run is never a local
-                            row (UMAMUSUME_REFERENCE.md §1.5.4).
+                            not in it is still storable, because a friend's finished run is never a local row.
                         </p>
 
                         <!-- The parent's own record, the same three facts the payload stores for a
@@ -574,8 +578,8 @@ const pickOptions = (): { value: string; label: string }[] => [
                 <h2 id="projected-start">Projected start</h2>
                 <p class="sub">
                     What the two parents add to this run, before a single turn is played. The recorded Blue
-                    spark against a stat is what a parent column prints; the projected sum is never
-                    computed, because an inheritance outcome is not this tool's to derive (ADR-0020 §3).
+                    Spark against a stat is what a parent column prints; the projected sum is never
+                    computed, because an inheritance outcome is not this tool's to derive.
                 </p>
 
                 <div class="mt-2 overflow-x-auto" role="region" tabindex="0" aria-label="Projected start, scrollable">
@@ -583,7 +587,16 @@ const pickOptions = (): { value: string; label: string }[] => [
                     <thead>
                         <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">
                             <th class="py-2 pr-3">Stat</th>
-                            <th class="pr-3 text-right">Scenario cap</th>
+                            <!--
+                              The column is the base cap while the draft carries no scenario, because that
+                              is what the server sends: `ScenarioCaps::scenarioCaps()` returns
+                              `config('scenarios.base_cap')` (1200, the baseline every stat starts under)
+                              when the run has no scenario, and the scenario's own ceilings once it has one.
+                              Naming the column "Scenario cap" over a draft with no scenario would credit
+                              those numbers to a scenario the run has not chosen, which `REFERENCE` §1.3.4
+                              also forbids for a run's observed ceilings.
+                            -->
+                            <th class="pr-3 text-right">{{ props.scenarioLabel === null ? 'Base cap' : 'Scenario cap' }}</th>
                             <th class="pr-3 text-right">From Parent A</th>
                             <th class="pr-3 text-right">From Parent B</th>
                             <th class="text-right">Projected</th>
@@ -704,12 +717,15 @@ const pickOptions = (): { value: string; label: string }[] => [
         </section>
 
         <!--
-          DOMAIN OVERRIDE (DM-3): four spark families; HFW draws three
-          The wireframe draws Blue, Pink and the unique-skill factor. Mechanics has four families, because
-          Green (unique-skill hints) and White (skill hints and competition) both exist and a parent's
-          spark list can carry either. Drawing three would make the page silently disagree with the data
-          the row above it prints, so all four are named here and the override is recorded rather than
-          hidden.
+          DOMAIN OVERRIDE (DM-3): five spark kinds; HFW draws three
+          The wireframe draws Blue, Pink and the unique-skill factor. The reference names five kinds,
+          because the skill-carrying Sparks split by colour and the scenario has its own: Green carries a
+          parent's own unique skill, White carries skill hints and competition bonuses, and Scenario comes
+          from clearing a scenario's final conditions (`UMAMUSUME_REFERENCE.md` §1.5.2). A parent's recorded
+          Spark list can hold any of them, so all five are named here and the override is recorded rather
+          than hidden. The row the wireframe draws apart from the colours is not a sixth mechanism: a
+          unique skill is inherited AS the Green Spark (§1.5.1, §1.5.2), so printing both would state one
+          mechanism twice.
         -->
         <section class="card mt-5" aria-labelledby="inheritance-does">
             <h2 id="inheritance-does">What inheritance actually does</h2>
@@ -724,47 +740,107 @@ const pickOptions = (): { value: string; label: string }[] => [
                     </tr>
                 </thead>
                 <tbody>
+                    <!--
+                      The Blue Spark's career-start payout is +5, +12 or +21 for one, two or three stars
+                      (`UMAMUSUME_REFERENCE.md` §1.5.2). The three moments are §1.5.1's: career start,
+                      early April of the classic year, early April of the senior year, and §1.5.1 states
+                      career-start determinism for the stat and aptitude kinds. The +16 per ★3 this row
+                      used to print is §1.3.4's Breakthrough rule, a cap raise rather than a stat award,
+                      and it is stated in the note under this table where the cap loop is what the sentence
+                      is about.
+                    -->
                     <tr class="border-b border-rule align-top">
-                        <td class="py-2 pr-3 font-semibold text-ink-strong">Blue spark</td>
-                        <td class="pr-3 text-ink">+16 to the stat's cap per ★3</td>
-                        <td class="text-ink-muted">At run start, and again at both inheritance moments.</td>
+                        <td class="py-2 pr-3 font-semibold text-ink-strong">Blue Spark</td>
+                        <td class="pr-3 text-ink">+5, +12 or +21 to the stat it names, for one, two or three stars</td>
+                        <td class="text-ink-muted">At career start, and again at both April inheritance moments.</td>
                     </tr>
+                    <!--
+                      Pink is the aptitude Spark: one grade at one star, two at four, three at seven and
+                      four at ten to eighteen (§1.5.2). §1.5.3 carries the two ceilings this row states,
+                      and the star thresholds behind the 4, 7 and 10 are that section's roll, not a grade
+                      this tool assigns.
+                    -->
                     <tr class="border-b border-rule align-top">
-                        <td class="py-2 pr-3 font-semibold text-ink-strong">Pink spark</td>
-                        <td class="pr-3 text-ink">+5 / +12 / +21 by grade</td>
-                        <td class="text-ink-muted">Same three moments as the Blue spark, on the aptitude it names.</td>
+                        <td class="py-2 pr-3 font-semibold text-ink-strong">Pink Spark</td>
+                        <td class="pr-3 text-ink">One aptitude grade at one star, two at four, three at seven, four at ten to eighteen</td>
+                        <td class="text-ink-muted">
+                            The same three moments, on the aptitude it names. It cannot lift an aptitude
+                            above A before the run starts, or by more than four grades.
+                        </td>
                     </tr>
+                    <!--
+                      Green carries the parent's own unique skill as one to three hint levels (§1.5.2), and
+                      §1.5.1 makes that carry certain once the parent herself stands at three stars. The
+                      point-cost cut is §1.4.4's hint-level rule (10% a level, 30% at level 3); the older
+                      gloss on this row, that a hint only raises the chance a skill is offered, is not what
+                      the sources state. The cap lift a unique-skill Spark also carries is §1.3.4's
+                      Breakthrough clause and belongs to the note below, which is where this page talks
+                      about ceilings. This row claims no deterministic career start, because §1.5.1 states
+                      that only for stat and aptitude kinds.
+                    -->
                     <tr class="border-b border-rule align-top">
-                        <td class="py-2 pr-3 font-semibold text-ink-strong">Unique-skill factor</td>
-                        <td class="pr-3 text-ink">Inherits her unique skill as a factor</td>
-                        <td class="text-ink-muted">Read at run start; a factor is not a cost and carries no SP price here.</td>
+                        <td class="py-2 pr-3 font-semibold text-ink-strong">Green Spark</td>
+                        <td class="pr-3 text-ink">
+                            Her own unique skill, carried as one to three hint levels. Each level cuts that
+                            skill's point cost by 10%, so a third level costs 30% less.
+                        </td>
+                        <td class="text-ink-muted">
+                            Certain once the parent herself stands at three stars. The sources put it at the
+                            inheritance moments but state a deterministic career start only for the Blue and
+                            Pink kinds.
+                        </td>
                     </tr>
+                    <!--
+                      White is two kinds the export counts separately (§1.5.2): a skill Spark paying a hint
+                      of level +1 to +5, or a small stat top-up when the skill is already learned, and a
+                      competition Spark paid from top-grade wins at 3, 6 or 9 to a stat, sometimes with a
+                      hint. §1.5.1 is explicit that a white Spark never fires at career start, which is the
+                      timing this row's column had no value for before.
+                    -->
                     <tr class="border-b border-rule align-top">
-                        <td class="py-2 pr-3 font-semibold text-ink-strong">Green spark</td>
-                        <td class="pr-3 text-ink">Unique-skill hints</td>
-                        <td class="text-ink-muted">Hints raise the chance a skill is offered, not its level.</td>
+                        <td class="py-2 pr-3 font-semibold text-ink-strong">White Spark</td>
+                        <td class="pr-3 text-ink">
+                            A skill hint of level +1 to +5, or a small top-up to a stat if that skill is
+                            already learned. From top-grade wins: 3, 6 or 9 to a stat per event, sometimes
+                            with a hint.
+                        </td>
+                        <td class="text-ink-muted">Mid-run only. A White Spark never fires at career start.</td>
                     </tr>
-                    <tr class="border-b border-rule align-top">
-                        <td class="py-2 pr-3 font-semibold text-ink-strong">White spark</td>
-                        <td class="pr-3 text-ink">Skill hints and competition bonuses</td>
-                        <td class="text-ink-muted">Same reading as Green: a hint, not a granted skill.</td>
-                    </tr>
+                    <!--
+                      Scenario Sparks come from clearing a scenario's final conditions and pay about 10 to
+                      30 to a stat, over 200 when stacked (§1.5.2). The editor already offers this kind
+                      (`LegacySelectionPayload::sparkKindLabels()` and `AncestryGraph::SPARK_KIND_LABELS`),
+                      so the table was naming five kinds in the form and four in the reading. No source puts
+                      a Scenario Spark at career start, so the timing column says so rather than guessing.
+                    -->
                     <tr class="align-top">
-                        <td class="py-2 pr-3 font-semibold text-ink-strong">Enhanced spark</td>
-                        <td class="pr-3"><AbsenceValue compact reason="No source in this repository states an enhanced spark's rate, so none is printed." /></td>
-                        <td class="text-ink-muted">Named because the client shows it; unpriced because this tool holds no figure.</td>
+                        <td class="py-2 pr-3 font-semibold text-ink-strong">Scenario Spark</td>
+                        <td class="pr-3 text-ink">
+                            About 10 to 30 to a stat, and over 200 when stacked, from clearing a scenario's
+                            final conditions.
+                        </td>
+                        <td class="text-ink-muted">
+                            From the scenario whose conditions were cleared. No source places this kind at
+                            career start, so no moment is claimed here.
+                        </td>
                     </tr>
                 </tbody>
             </table>
             </div>
 
-            <!-- The wireframe's own note inside this card (`career-legacy.html:146`): it names the loop
-                 the +16 rule belongs to, so the number above reads as one step rather than a bonus. -->
+            <!--
+              The wireframe's own note inside this card (`career-legacy.html:146`): it names the loop the
+              cap raise belongs to, so the ceiling figures elsewhere on this step read as one step rather
+              than a bonus. The +16 and the unique-skill clause are both `UMAMUSUME_REFERENCE.md` §1.3.4's
+              Breakthrough row, which is a `[JP]` rule stated at the three inheritance moments of §1.5.1;
+              it is the cap mechanic, which is why the number lives here and not in the Blue row above.
+            -->
             <p class="note mt-3">
-                <b>The cap raise is the loop.</b> Train to a final total, bank the factor grade, inherit the
-                +16 per ★3, then train past the previous ceiling. A run with two ★3 blue parents therefore
-                starts with a higher ceiling than the scenario publishes, which is why the cockpit shows an
-                entered ceiling beside the scenario's rather than one number.
+                <b>The cap raise is the loop.</b> A Blue Spark that rolls three stars lifts the cap of the
+                stat it names by 16, at career start and at both April inheritance moments. Two such Sparks
+                on one stat therefore begin a run above the ceiling the scenario publishes, which is why the
+                cockpit shows an entered ceiling beside the scenario's rather than one number. A Green Spark
+                lifts caps as well, in proportion to how its donor grew.
             </p>
         </section>
 
@@ -772,14 +848,34 @@ const pickOptions = (): { value: string; label: string }[] => [
              while its prose stays at a readable measure rather than running the full width. -->
         <section class="card mt-4" aria-labelledby="parents-differ">
             <h2 id="parents-differ">Parents must differ</h2>
+            <!--
+              What the save actually refuses, read out of the request that performs it. Both clauses are
+              `StoreLegacySelectionRequest`: `assertNoOwnTrainee` rejects a slot naming the run's own
+              trainee, and `assertParentsDiffer` rejects the same library row twice. Neither is a picker
+              behaviour: `pickOptions()` lists the library unfiltered, so the trainee you are running is
+              still on offer and the refusal arrives on the write. The older sentence on this page credited
+              the picker with hiding that row, which it does not do.
+              `UMAMUSUME_REFERENCE.md` §1.5.4 is the rule behind both ("The two parents must be different
+              Umamusume and neither may be the trainee herself"), and §1.5.4's repeat case is the third
+              sentence: two Veterans of one trainee are stored rather than policed, because pricing what a
+              repeat costs is exactly the computation `ADR-0020` §3 bans here.
+            -->
             <p class="mt-2 max-w-3xl text-sm leading-relaxed text-ink-muted">
-                A veteran cannot be its own parent, and the two slots cannot hold the same record. The
-                picker enforces the first rule by hiding the trainee you are running; the second by
-                refusing an already-chosen record.
+                Both slots may name any veteran in your library. The save refuses two cases: a slot naming
+                the trainee you are running, and a slot naming the same veteran twice. Two entries naming
+                the same character in different records are stored, because this screen records what you
+                enter rather than pricing what a repeat would cost.
             </p>
+            <!--
+              The client's own rule is that two ancestors are chosen when a run starts
+              (`UMAMUSUME_REFERENCE.md` §1.5.4). Empty slots are this tool's allowance, not a claim about
+              the client: `training_runs.inheritance_parent_*` are nullable columns and the draft carries
+              two nullable ids, so a Trainer can record what they have not read off the client yet.
+            -->
             <p class="note mt-3 max-w-3xl text-sm text-ink-muted">
-                Choosing no parents is a legitimate build, not an error. The run carries two
-                nullable parent ids for exactly that reason, and no screen invents a default pair.
+                Leaving both slots empty is this screen's choice, not the client's: the run carries two
+                nullable parent ids so a Trainer can record what they do not know yet, and no screen
+                invents a default pair.
             </p>
         </section>
     
