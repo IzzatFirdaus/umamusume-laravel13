@@ -3869,3 +3869,31 @@ it still exists on disk (last touched by `2f4b32da`) and is imported by nothing.
 housekeeping call, not part of this defect.
 
 **Proven by** `.scratch-uma/mvs_4f49056156564f6c8c5dc2426cdb8c29/corrections/b1-second-blocker-128.md`.
+## KI-138 — the walk's Train step waits for a button that no longer lives inside the training card
+
+**State:** OPEN. Filed 2026-10-30, fourth blocker while resolving B-1/KI-136/KI-137. Filed per the
+dispatch boundary: a fourth locator fix is not applied in this pass.
+
+**Defect.** `full-career-journey.spec.ts:150` clicks
+`page.getByRole('article').filter({ hasText: /^Speed/ }).getByRole('button', { name: 'Train' })` and
+the button never renders: the run timed out (300 s) waiting for it. The walk reached the Training
+decision surface — the snapshot shows the five training radios — but the Train action is no longer
+inside the card.
+
+**Why.** `TrainingCard.vue:383-388` records the ruling: "`TrainingDetail.vue`, which is the screen's one
+filled commit action" — the Train action moved out of the card and onto the Training Detail screen as the
+single filled commit. The card keeps two secondary buttons; the primary Train button is a screen-level
+action the card no longer draws.
+
+**Evidence.** Session-private pair `PLAYWRIGHT_PORT=8185`, JSON reporter: `expected: 0 unexpected: 1`,
+`duration: 324105 ms`, `status: timedOut` — "Test timeout of 300000ms exceeded", call log
+"waiting for getByRole('article').filter({ hasText: /^Speed/ }).getByRole('button', { name: 'Train' })".
+The page snapshot shows the training radios and the buttons "Undo turn 1", "Discard" and
+"Record turn 1" — no Train button inside any article. Source: `TrainingCard.vue:383-388`.
+
+**Fix.** The walk should click the screen-level Train action on Training Detail instead of a card-internal
+button, matching the moved action (the button on `TrainingDetail.vue` that submits the chosen discipline).
+Not applied here: fourth-blocker boundary.
+
+**Proven by** `.scratch-uma/mvs_4f49056156564f6c8c5dc2426cdb8c29/corrections/b1-second-blocker-128.md`
+(the earlier escalation) and the `b1-pass4.json` timeout. See also the four-locator record below.
