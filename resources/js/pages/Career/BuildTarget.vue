@@ -328,15 +328,18 @@ function applyDefaults(): void {
              native constraint validation would block the submit with a browser bubble instead of
              letting the server refuse with its named bound, which is the message this page renders
              with its own `aria-describedby` and focus. -->
-        <form id="build-target-form" class="mt-5 mx-auto max-w-4xl" novalidate @submit.prevent="submit">
+        <form id="build-target-form" class="mt-5" novalidate @submit.prevent="submit">
             <!--
               The wireframe's two-column canvas. `.g-side` is `minmax(0,2.1fr) minmax(0,1fr)` and it
               collapses below 821px (frontend-v2-wireframes/assets/shell.css:404,406), so both the
-              breakpoint and the proportions are the wireframe's own rather than a separate measure:
-              the same reason the card grid keeps `min-[821px]:`. The blocks sit at their existing
-              indentation so the move reads as two wrapper lines rather than a re-indent of the form.
+              breakpoint and the proportions are the wireframe's own rather than a separate measure.
+              They are ported once, in `layout-grid.css`, and that file also carries the mode override
+              which makes Compact a composition rather than only a narrower cap -- so this page uses
+              the shared classes instead of restating them, and its own measure is the shell's. The
+              blocks sit at their existing indentation so the move reads as two wrapper lines rather
+              than a re-indent of the form.
             -->
-            <div class="grid gap-3.5 min-[821px]:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
+            <div class="grid g-side gap-3.5">
             <div class="space-y-3.5">
             <!--
               HFW-OVERRIDE (required by the write): purpose, surface and style are asked for here although
@@ -356,7 +359,7 @@ function applyDefaults(): void {
             <section data-region="card" class="card" aria-labelledby="target-purpose-heading">
                 <h2 id="target-purpose-heading">What the career is for</h2>
 
-                <div class="mt-2 grid gap-4 min-[821px]:grid-cols-2">
+                <div class="mt-2 grid g-2 gap-4">
                     <BaseSelect
                         v-model="form.purpose"
                         :id="controlId('purpose')"
@@ -402,7 +405,7 @@ function applyDefaults(): void {
                              than matched up from a column header elsewhere. `data-region` rather than the
                              corpus' `.field` class because `.field` is unlayered in app.css and would win
                              over the utilities this row already carries. -->
-                        <div v-for="stat in props.statOrder" :key="stat" :data-stat="stat" data-region="field" class="grid gap-3 min-[821px]:grid-cols-2">
+                        <div v-for="stat in props.statOrder" :key="stat" :data-stat="stat" data-region="field" class="grid g-2 gap-3">
                         <!-- Target column -->
                         <div class="space-y-1">
                             <BaseInput

@@ -30,6 +30,10 @@ const GRIDS: { path: string; grids: [selector: string, tracks: number][] }[] = [
     { path: '/database', grids: [['main .g-3', 3]] },
     { path: '/umamusume', grids: [['#catalog-results', 3]] },
     { path: '/support-cards', grids: [['main .g-2', 2]] },
+    // The wizard's target step draws the HFW's two-column canvas (`career-target.html:94`), and it
+    // was the one wizard step left out of this contract - which is why it kept two columns in
+    // Compact and read as `standard` whatever the width preference said.
+    { path: '/career/setup/target', grids: [['main .g-side', 2]] },
 ];
 
 async function tracks(page: Page, selector: string): Promise<number> {
