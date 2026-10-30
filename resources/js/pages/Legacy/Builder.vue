@@ -29,6 +29,7 @@ import { computed, ref } from 'vue';
 import BaseInput from '@/components/Form/BaseInput.vue';
 import BaseSelect from '@/components/Form/BaseSelect.vue';
 import BaseCheckbox from '@/components/Form/BaseCheckbox.vue';
+import AncestorEditor from '@/components/legacy/AncestorEditor.vue';
 import BaseButton from '@/components/Form/BaseButton.vue';
 
 interface SparkRow {
@@ -239,13 +240,6 @@ function removeSpark(index: number, sparkIndex: number): void {
     form.legacies[index].sparks.splice(sparkIndex, 1);
 }
 
-function addAncestorSpark(index: number, ancestorIndex: number): void {
-    form.legacies[index].ancestors_sparks[ancestorIndex].push({ kind: 'blue', category: 'Stat', target: '', stars: 1 });
-}
-
-function removeAncestorSpark(index: number, ancestorIndex: number, sparkIndex: number): void {
-    form.legacies[index].ancestors_sparks[ancestorIndex].splice(sparkIndex, 1);
-}
 
 const confirmDialog = ref<HTMLDialogElement | null>(null);
 
@@ -450,141 +444,17 @@ const hasAnyNode = computed(() =>
                                     :key="ancestor.slot"
                                      class="rounded-md border border-rule bg-panel p-3"
                                 >
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                                        {{ ancestor.slot }}
-                                    </p>
-                                    <p class="mt-2 text-xs text-ink-muted">
-                                        Stored by name; leave blank if you have not recorded one. Ranks are
-                                        unbounded and blank stays not recorded.
-                                    </p>
+                                    <AncestorEditor
+                                        :legacy="form.legacies[index]"
+                                        :ancestor-index="ancestorIndex"
+                                        :slot="parent.slot"
+                                        :label="ancestor.slot"
+                                        :spark-kinds="sparkKinds"
+                                        :spark-targets="sparkTargets"
+                                        :empty-sparks-label="ancestor.sparks_label"
+                                        :error="ancestorError(index, ancestorIndex)"
+                                    />
 
-<label class="mt-1 block text-xs font-medium text-ink" :for="`ancestor-${parent.slot}-${ancestorIndex}`">
-                                         {{ ancestor.slot }}
-                                     </label>
-                                     <BaseInput
-                                         :id="`ancestor-${parent.slot}-${ancestorIndex}`"
-                                         v-model="form.legacies[index].ancestors[ancestorIndex]"
-                                         type="text"
-                                         list="known-umamusume-names"
-                                         autocomplete="off"
-                                         :aria-describedby="ancestorError(index, ancestorIndex) ? `ancestor-${parent.slot}-${ancestorIndex}-error` : undefined"
-                                         :error="ancestorError(index, ancestorIndex)"
-                                     />
-                                     <p
-                                         v-if="ancestorError(index, ancestorIndex)"
-                                         :id="`ancestor-${parent.slot}-${ancestorIndex}-error`"
-                                         class="mt-1 text-xs text-risk"
-                                     >
-                                         {{ ancestorError(index, ancestorIndex) }}
-                                     </p>
-
-                                    <!-- The grandparent's two rank fields, the same two facts the wizard
-                                         step carries per ancestor (R3-09: four of the six ranks in the
-                                         tree sit on these nodes). The labels say grandparent rather than
-                                         the wizard's "Own rank" because this screen has two kinds of rank
-                                         in one column and the Builder's browser spec pins `Own rank` to
-                                         the parent's star count; the wording names the node instead. -->
-<label
-                                         class="mt-2 block text-xs font-medium text-ink"
-                                         :for="`ancestor-rank-letter-${parent.slot}-${ancestorIndex}`"
-                                     >
-                                         Grandparent rank (letters)
-                                     </label>
-                                     <BaseInput
-                                         :id="`ancestor-rank-letter-${parent.slot}-${ancestorIndex}`"
-                                         v-model="form.legacies[index].ancestors_rank_letters[ancestorIndex]"
-                                         type="text"
-                                         list="known-rank-letters"
-                                         autocomplete="off"
-                                     />
-
-                                     <label
-                                         class="mt-2 block text-xs font-medium text-ink"
-                                         :for="`ancestor-rank-${parent.slot}-${ancestorIndex}`"
-                                     >
-                                         Grandparent rank (stars)
-                                     </label>
-                                     <BaseInput
-                                         :id="`ancestor-rank-${parent.slot}-${ancestorIndex}`"
-                                         v-model="form.legacies[index].ancestors_rank[ancestorIndex]"
-                                         type="number"
-                                         min="0"
-                                     />
-
-                                    <!-- The grandparent's own Sparks, the same record the wizard step edits.
-                                         The category select and the target it filters are the wizard's
-                                         shape, so a write is refused at the boundary when a Stat target is
-                                         not a stat (`StoreLegacySelectionRequest::assertTargetMatchesCategory`).
-                                         The disclosure wording avoids the parent's own Add Spark control so
-                                         the two editors are named apart. -->
-                                    <details class="mt-2 rounded-md border border-rule bg-panel p-2">
-                                        <summary class="flex min-h-11 cursor-pointer items-center text-xs font-medium text-ink">
-                                            <!-- The ancestor's own name in the visible word: four identical
-                                                 "Grandparent Sparks" summaries are told apart by proximity
-                                                 alone, and the word is the state's carrier (the rule the
-                                                 sr-only span below the old summary served). -->
-                                            Sparks for {{ ancestor.slot }}
-                                        </summary>
-
-<ul
-                                            v-if="form.legacies[index].ancestors_sparks[ancestorIndex].length > 0"
-                                            class="mt-2 space-y-2"
-                                        >
-                                            <li
-                                                v-for="(spark, sparkIndex) in form.legacies[index].ancestors_sparks[ancestorIndex]"
-                                                :key="sparkIndex"
-                                                 class="flex flex-wrap items-end gap-2 rounded-md border border-rule bg-panel p-2"
-                                            >
-                                                <BaseSelect
-                                                    :id="`ancestor-spark-kind-${parent.slot}-${ancestorIndex}-${sparkIndex}`"
-                                                    v-model="spark.kind"
-                                                    label="Kind"
-                                                    :options="Object.keys(sparkKinds).map(kind => ({ value: kind, label: sparkKinds[kind] }))"
-                                                  />
-                                                <BaseSelect
-                                                    :id="`ancestor-spark-category-${parent.slot}-${ancestorIndex}-${sparkIndex}`"
-                                                    v-model="spark.category"
-                                                    label="Category"
-                                                    :options="SPARK_CATEGORIES.map(category => ({ value: category, label: category }))"
-                                                    @change="spark.target = ''"
-                                                  />
-                                                <BaseSelect
-                                                    :id="`ancestor-spark-target-${parent.slot}-${ancestorIndex}-${sparkIndex}`"
-                                                    v-model="spark.target"
-                                                    label="Target"
-                                                    :options="[{ value: '', label: 'Not recorded' }, ...(sparkTargets[spark.category] || []).map(target => ({ value: target, label: target }))]"
-                                                  />
-                                                <BaseInput
-                                                    :id="`ancestor-spark-stars-${parent.slot}-${ancestorIndex}-${sparkIndex}`"
-                                                    v-model="spark.stars"
-                                                    type="number"
-                                                    min="1"
-                                                    max="3"
-                                                    label="Stars"
-                                                  />
-                                                <button
-                                                    type="button"
-                                                    class="min-h-11 rounded-md border border-rule px-3 text-sm font-medium text-ink"
-                                                    @click="removeAncestorSpark(index, ancestorIndex, sparkIndex)"
-                                                >
-                                                    Remove grandparent Spark
-                                                    <span class="sr-only"> from {{ ancestor.slot }}</span>
-                                                </button>
-                                            </li>
-                                        </ul>
-                                        <p v-else class="mt-1 text-xs text-ink-muted">
-                                            {{ ancestor.sparks_label }}
-                                        </p>
-
-                                        <button
-                                            type="button"
-                                            class="mt-2 min-h-11 rounded-md border border-rule px-3 text-sm font-medium text-ink"
-                                            @click="addAncestorSpark(index, ancestorIndex)"
-                                        >
-                                            Add grandparent Spark
-                                            <span class="sr-only"> to {{ ancestor.slot }}</span>
-                                        </button>
-                                    </details>
                                 </li>
                             </ol>
 
@@ -848,6 +718,19 @@ const hasAnyNode = computed(() =>
                 >
                     Compare this run
                 </a>
+
+
+                <!--
+                    The savebar's own statement of what the press does, restored where it has to be
+                    read. R4 moved this sentence into the confirm dialog and left only that copy, so
+                    it became invisible to anyone who has not opened the dialog - and
+                    `legacy.spec.ts:228` reads it as the note beside the action, not as dialog text.
+                    The dialog keeps its own copy, because a Trainer reading the confirmation needs it
+                    there too; this is the one on the bar.
+                -->
+                <p v-if="hasAnyNode" class="text-sm text-ink-muted">
+                    Nothing is saved until you confirm.
+                </p>
 
                 <BaseButton
                     type="button"

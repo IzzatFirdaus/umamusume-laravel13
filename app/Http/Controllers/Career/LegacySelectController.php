@@ -9,9 +9,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\LegacyController;
 use App\Http\Requests\Career\StoreDraftLegacyRequest;
 use App\Models\Legacy\LegacySelectionPayload;
+use App\Models\Skill;
 use App\Models\Umamusume;
 use App\Models\Veteran;
 use App\Services\Career\SetupDraft;
+use App\Services\Legacy\AncestryGraph;
 use App\Services\ScenarioCaps;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -172,6 +174,19 @@ class LegacySelectController extends Controller
                 ->items(),
             'rosterTotal' => $library->total(),
             'affinityGrades' => LegacySelectionPayload::AFFINITY_GRADES,
+            // The four vocabularies the grandparent editors need, assembled from the same sources the
+            // Legacy Lab uses (LegacyController::show()), because both screens post against the one
+            // request: a Spark's category boundary check filters these same lists
+            // (StoreLegacySelectionRequest::assertTargetMatchesCategory), and a separate copy would let
+            // the two surfaces offer different options for one validated field.
+            'knownNames' => Umamusume::query()->orderBy('name')->pluck('name')->all(),
+            'sparkKinds' => AncestryGraph::SPARK_KIND_LABELS,
+            'rankLetters' => LegacySelectionPayload::RANK_LETTERS,
+            'sparkTargets' => [
+                'Stat' => array_values((array) config('scenarios.stat_order')),
+                'Aptitude' => LegacySelectionPayload::SPARK_APTITUDES,
+                'Skill' => Skill::query()->orderBy('name')->pluck('name')->all(),
+            ],
             'notice' => LegacyController::RECORD_ONLY_NOTICE,
             // The step's write URL, supplied server-side the way CareerLayout.vue:11 and
             // UnityCupEditor.vue:20 already receive URLs. No Ziggy dependency is introduced.

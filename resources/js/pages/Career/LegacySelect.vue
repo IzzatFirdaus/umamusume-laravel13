@@ -34,6 +34,7 @@
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import { BaseSelect } from '../../components/Form';
+import AncestorEditor from '../../components/legacy/AncestorEditor.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { nextTick } from 'vue';
 
@@ -92,6 +93,14 @@ const props = defineProps<{
     roster: { id: number; name: string; costume: string | null; label: string }[];
     rosterTotal: number;
     affinityGrades: string[];
+    /** The names a Trainer can pick from in a grandparent field: a spelling aid, never a requirement. */
+    knownNames: string[];
+    /** The Spark kind vocabulary, keyed by the stored value. */
+    sparkKinds: Record<string, string>;
+    /** The rank letters the client prints, for the rank-letter field's spelling aid. */
+    rankLetters: string[];
+    /** The targets each Spark category offers, from the same lists the write validates against. */
+    sparkTargets: { Stat: string[]; Aptitude: string[]; Skill: string[] };
     notice: string;
     /** `route('career.legacy.store')`, supplied by the server so the page never hard-codes the URL. */
     action: string;
@@ -103,8 +112,11 @@ const props = defineProps<{
  * out, because a half-read screen is a real state the payload exists to hold (`ADR-0010` Consequences
  * §3) and a zero would be a claim.
  *
- * The ancestor and spark rows are not edited on this step any more - the run-scoped Legacy Lab is
- * where a recorded node is built - but a stored payload is read back whole on save, so re-saving a
+ * The four grandparents **are** edited on this step: a parent's grandparents are frequently not in
+ * the local catalogue, so each node is recorded by name with its rank letter, star rank and Sparks.
+ * That half needs no library row and no new payload key - `ancestors`, `ancestors_rank_letters`,
+ * `ancestors_rank` and `ancestors_sparks` were already on the draft and already posted back here. A
+ * stored payload is read back whole on save, so re-saving a
  * pick never erases the record behind it.
  */
 const form = useForm({
@@ -211,6 +223,10 @@ function isBlankSpark(spark: SparkDraft): boolean {
 
 const errorFor = (index: number, field = 'legacy_id'): string | undefined =>
     (form.errors as Record<string, string | undefined>)[`legacies.${index}.${field}`];
+
+/** The server's message for one grandparent's name, keyed the way the rules name it. */
+const ancestorError = (index: number, ancestor: number): string | undefined =>
+    (form.errors as Record<string, string | undefined>)[`legacies.${index}.ancestors.${ancestor}`];
 
 const parents = (): (ParentCard | null)[] => [props.parentA, props.parentB];
 
@@ -346,6 +362,7 @@ const pickOptions = (): { value: string; label: string }[] => [
                     </p>
                 </div>
 
+
                 <div class="mt-3 flex flex-wrap gap-2">
                     <a
                         v-if="card !== null"
@@ -468,6 +485,46 @@ const pickOptions = (): { value: string; label: string }[] => [
         </div>
 
         <!--
+          The four grandparents, editable here, grouped by parent. A parent's grandparents are
+          frequently absent from the local catalogue, so they are recorded by name rather than picked
+          (`ADR-0010` Consequences §2). The editors live in their own card and not inside the parent
+          `<article>`: the parent card is measured against a 25-descendant ceiling by the step spec,
+          and two full editors per card would put every card permanently over it. The "two per parent"
+          grouping survives here as two labelled subgroups.
+        -->
+        <section class="card mt-4" aria-labelledby="grandparents">
+            <h2 id="grandparents">Grandparents</h2>
+            <div class="mt-3 grid grid-cols-1 gap-4 min-[1081px]:grid-cols-2">
+                <div v-for="(slotNames, parentIndex) in ['a', 'b']" :key="slotNames">
+                    <p class="text-sm font-semibold text-ink-strong">
+                        {{ parentIndex === 0 ? 'Grandparents of Parent A' : 'Grandparents of Parent B' }}
+                    </p>
+                    <ol class="mt-2 space-y-2">
+                        <li
+                            v-for="(slotName, ancestorIndex) in (parentIndex === 0 ? ['Grandparent A1', 'Grandparent A2'] : ['Grandparent B1', 'Grandparent B2'])"
+                            :key="slotName"
+                            class="rounded-md border border-rule bg-panel p-3"
+                        >
+                            <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                                {{ slotName }}
+                            </p>
+                            <AncestorEditor
+                                :legacy="form.legacies[parentIndex]"
+                                :ancestor-index="ancestorIndex"
+                                :slot="parentIndex === 0 ? 'a' : 'b'"
+                                :label="slotName"
+                                :spark-kinds="props.sparkKinds"
+                                :spark-targets="props.sparkTargets"
+                                empty-sparks-label="No Sparks recorded for this node."
+                                :error="ancestorError(parentIndex, ancestorIndex)"
+                            />
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!--
           DOMAIN OVERRIDE (DM-3): four spark families; HFW draws three
           The wireframe draws Blue, Pink and the unique-skill factor. Mechanics has four families, because
           Green (unique-skill hints) and White (skill hints and competition) both exist and a parent's
@@ -546,5 +603,17 @@ const pickOptions = (): { value: string; label: string }[] => [
                 nullable parent ids for exactly that reason, and no screen invents a default pair.
             </p>
         </section>
-    </SetupLayout>
+    
+        <!--
+          The two spelling aids the grandparent editors point at with `list=`. Both are aids and
+          never requirements: a name absent from the list is still storable, because a grandparent
+          is frequently not in the local catalogue (`ADR-0010` Consequences §2).
+        -->
+        <datalist id="known-umamusume-names">
+            <option v-for="name in props.knownNames" :key="name" :value="name" />
+        </datalist>
+        <datalist id="known-rank-letters">
+            <option v-for="letter in props.rankLetters" :key="letter" :value="letter" />
+        </datalist>
+</SetupLayout>
 </template>

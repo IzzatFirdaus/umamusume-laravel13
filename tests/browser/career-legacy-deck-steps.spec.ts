@@ -116,12 +116,37 @@ test.describe('Setup step 4 — Legacy', () => {
         await expect(page.getByRole('heading', { name: 'Parents must differ' })).toBeVisible();
         await expect(page.getByText(/Choosing no parents is a legitimate build/)).toBeVisible();
 
-        // The six-node graph and its editor are gone from this step: no SVG, no ancestor inputs, no
-        // spark rows, no rank fields.
+        // DELIBERATELY RETIRED, not weakened. This case used to assert the ancestor editor was
+        // *absent* from this step: no SVG, no ancestor inputs, no spark rows, no rank fields. That
+        // guard existed because the six-node graph had been taken off the wizard, and the claim it
+        // protected was "the editor does not live here". The step now renders the four grandparents
+        // on purpose (a parent's grandparents are frequently not in the local catalogue and are
+        // recorded by name), so the absence claim is no longer true and the positive form replaces
+        // it: four nodes, each with a name, two ranks and a Spark panel.
+        //
+        // The SVG claim survives as the sharper half of the original: the step draws no picture of
+        // the tree, only list items, which is what made the count the structure rather than a
+        // drawing of it.
         await expect(page.locator('.canvas svg')).toHaveCount(0);
-        await expect(page.locator('input[id^="ancestor-"]')).toHaveCount(0);
-        await expect(page.getByRole('button', { name: /Add Spark/ })).toHaveCount(0);
-        await expect(page.locator('input[id^="rank-"]')).toHaveCount(0);
+        // The four name inputs, counted by their exact ids rather than the `ancestor-` prefix: the
+        // same prefix also names the rank-letter and star-rank fields, so a prefix count would read 12
+        // and claim the editor drew three times what it did.
+        await expect(page.locator('input[id^="ancestor-a-"], input[id^="ancestor-b-"]')).toHaveCount(4);
+        for (const slot of ['a', 'b']) {
+            for (const index of [0, 1]) {
+                await expect(page.locator(`input[id="ancestor-${slot}-${index}"]`)).toBeVisible();
+                await expect(page.locator(`input[id="ancestor-rank-letter-${slot}-${index}"]`)).toBeVisible();
+                await expect(page.locator(`input[id="ancestor-rank-${slot}-${index}"]`)).toBeVisible();
+            }
+        }
+        // A Spark panel per node, as the same collapsed disclosure the Legacy Lab uses: four
+        // summaries, each naming its own grandparent, and no Spark fields until a node is opened and
+        // one is added.
+        // Scoped by content, never by tag (the idiom the Legacy Lab's own spec records): the
+        // disclosure's <summary> is what carries the node's name.
+        await expect(page.locator('summary').filter({ hasText: 'Sparks for Grandparent A1' })).toHaveCount(1);
+        await expect(page.locator('summary').filter({ hasText: 'Sparks for Grandparent B2' })).toHaveCount(1);
+        await expect(page.locator('input[id^="ancestor-spark-kind-"]')).toHaveCount(0);
     });
 
     test('places the projection beside the affinity card and the save inside it', async ({ page }) => {
