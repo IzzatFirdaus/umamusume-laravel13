@@ -82,35 +82,39 @@ test('the hub lists the nine areas and no deferred section', async ({ page }) =>
 });
 
 // Plan 5.4 (Sweep 1): the roster printed every costume form of every trainee, which made a 67-row
-// list unscannable. The trainee's own header stays visible; only the form rows fold, behind a count.
-test('folds each trainee costume-form list behind a disclosure', async ({ page }) => {
+// list unscannable. DELIBERATELY RETIRED, not weakened: this case pinned a per-trainee `<details>`
+// disclosure as the way to fold the form rows away, and the wireframe replaces that structure rather
+// than keeping it.
+//
+// The wireframe's own answer is stronger. `catalog.html` annotation 1 makes the list a grid of cards,
+// annotation 3 puts the form count BESIDE the name on the card, and annotation 8 (H8) puts every
+// further column behind the detail page. So the form rows are not folded here at all - they are on
+// the detail screen - which answers the scannability concern more directly than a closed disclosure
+// did. The card's form count beside her name is what tells a Trainer there is more to read.
+//
+// The concern behind the old assertion is kept, and the axe scan is kept with it: the list is a card
+// grid rather than a table, each card carries the count, no per-trainee disclosure remains, and the
+// page is axe-clean.
+test('the trainee list is a card grid that leaves the form rows to the detail page', async ({ page }) => {
     await page.goto('/database/trainees', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    // The trainee row is the `<li>` holding the disclosure; the form rows below it are plain `<li>`s.
-    const trainee = page.locator('li').filter({ has: page.locator('details') }).first();
-    const disclosure = trainee.locator('details');
+    // Cards, not a table: the grid is the list's structure, and no table renders on it.
+    const cards = page.locator('#catalog-results > li');
+    await expect(cards.first()).toBeVisible();
+    await expect(page.locator('#catalog-results table')).toHaveCount(0);
 
-    await expect(disclosure).toHaveCount(1);
+    // The form count sits beside the name on the card, which is what says there is more to read.
+    await expect(cards.first()).toContainText(/\d+ forms?/);
 
-    // The header is a sibling of the disclosure, not a child of it: folding the forms must not hide
-    // her name, which is the list's scanning column.
-    await expect(trainee.locator('h3')).toBeVisible();
-    await expect(trainee.locator('details h3')).toHaveCount(0);
+    // The rows themselves are gone from the list: every further column belongs to the detail page.
+    await expect(page.locator('#catalog-results details')).toHaveCount(0);
 
-    // Closed by default, and the summary states how many forms are behind it.
-    await expect(disclosure).not.toHaveAttribute('open', '');
-    await expect(disclosure.locator('summary')).toHaveText(/^\d+ forms?$/);
-    await expect(disclosure.locator('h4')).toBeHidden();
+    // The rarity of the form the card names is on the card, and the three aptitude letters are the
+    // rest of what a card identifies a trainee by (`catalog.html` annotations 2 and 3).
+    await expect(cards.first().locator('.pill-neutral')).toBeVisible();
 
-    await disclosure.locator('summary').click();
-    await expect(disclosure).toHaveAttribute('open', '');
-    await expect(disclosure.locator('h4').first()).toBeVisible();
-
-    // The disclosure is the new structure on this page, so the scan runs with it open — the state
-    // that exposes the most content. `buildAxe` scopes to `#app`, which is what makes it
-    // deterministic (KI-63).
-    await openAllDisclosures(page);
+    // `buildAxe` scopes to `#app`, which is what makes the scan deterministic (KI-63).
     const results = await buildAxe(page).analyze();
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });

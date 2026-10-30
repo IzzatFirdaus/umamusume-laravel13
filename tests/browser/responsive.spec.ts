@@ -64,12 +64,18 @@ test('/database/sources — the transcribed publisher link hit area meets the 44
     expect(box?.height ?? 0, `the transcribed publisher link is ${box?.height ?? 0}px tall, under the 44px bar`).toBeGreaterThanOrEqual(44);
 });
 
-test('/database/trainees — the trainee name link hit area meets the 44px house bar', async ({ page }) => {
+test('/database/trainees — the card hit area meets the 44px house bar', async ({ page }) => {
     await page.goto('/database/trainees', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    const link = page.locator('main ul li a.text-lg').first();
-    const box = await link.boundingBox();
+    // DELIBERATELY RETIRED, not weakened: this case pinned the old list's name link (`a.text-lg`,
+    // grown to `min-h-11`). The HFW alignment replaces that structure with the card grid from
+    // `catalog.html`: the whole tile is one link (`annotation 1`) and the name inside it is a
+    // `<p>`, not an anchor. So the selector names the card link instead - the same target, one
+    // level up - and the requirement it guards (DESIGN.md §12: every control at least 44px) is
+    // trivially met by a whole tile.
+    const card = page.locator('#catalog-results a.card').first();
+    const box = await card.boundingBox();
 
-    expect(box?.height ?? 0, `the trainee name link is ${box?.height ?? 0}px tall, under the 44px bar`).toBeGreaterThanOrEqual(44);
+    expect(box?.height ?? 0, `the trainee card link is ${box?.height ?? 0}px tall, under the 44px bar`).toBeGreaterThanOrEqual(44);
 });
