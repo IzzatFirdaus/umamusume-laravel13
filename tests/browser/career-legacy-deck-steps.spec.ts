@@ -285,6 +285,46 @@ test.describe('Setup step 4 — Legacy', () => {
         await expect(page.locator('#legacy-rank-letter-0')).toHaveValue('A');
     });
 
+    test('prints the reason a Spark write was refused, beside the field it refused', async ({ page }) => {
+        await hydrate(page, '/career/setup/legacy');
+
+        // `AUD-20261030-002` F-01 and F-02. The request refuses a Spark whose target does not belong to
+        // the category it is posted under (`StoreLegacySelectionRequest::assertTargetMatchesCategory`),
+        // and the pair is reachable from this editor because the category's reset does not run: BaseSelect
+        // has three root nodes and declares no `change` emit, so `@change="spark.target = ''"` is dropped
+        // and the form keeps the previous category's target. That is why the row below never re-selects the
+        // value: the stale target is the state under test, and the server's own message names it.
+        await page.locator('#legacy-pick-0').selectOption('__manual__');
+        await page.locator('#legacy-name-0').fill('Silence Suzuka');
+
+        const editor = page.locator('#legacy-pick-0').locator('xpath=ancestor::div[1]').locator('details');
+        await editor.locator('> summary').click();
+        await editor.getByRole('button', { name: 'Add Spark' }).click();
+
+        const category = page.locator('#legacy-spark-category-0-0');
+        const target = page.locator('#legacy-spark-target-0-0');
+
+        await category.selectOption('Aptitude');
+        await target.selectOption('Turf');
+        await page.locator('#legacy-spark-stars-0-0').fill('3');
+        await category.selectOption('Stat');
+
+        await page.getByRole('button', { name: 'Save Legacy' }).click();
+
+        // The refusal is on screen, in the field's own error node, and it quotes the value that arrived.
+        const message = page.locator('#legacy-spark-target-0-0-error');
+        await expect(message).toHaveText('A Stat Spark names one of Speed, Stamina, Power, Guts, Wit; [Turf] is not.');
+        await expect(message).toHaveAttribute('role', 'alert');
+        await expect(target).toHaveAttribute('aria-invalid', 'true');
+        await expect(target).toHaveAttribute('aria-describedby', 'legacy-spark-target-0-0-error');
+
+        // Nothing was recorded and nothing was lost: the typed parent is still there, the step still is
+        // the step, and the success sentence the saving frame promises has not appeared.
+        await expect(page.getByText('Legacy recorded.')).toHaveCount(0);
+        await expect(page.locator('#legacy-name-0')).toHaveValue('Silence Suzuka');
+        await expect(page.locator('#legacy-pick-0')).toHaveValue('__manual__');
+        expect(new URL(page.url()).pathname).toBe('/career/setup/legacy');
+    });
 
     test('updates the projected start from the form without a save', async ({ page }) => {
         await hydrate(page, '/career/setup/legacy');

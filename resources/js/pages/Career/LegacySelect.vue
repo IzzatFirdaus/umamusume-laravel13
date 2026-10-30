@@ -512,6 +512,7 @@ const pickOptions = (): { value: string; label: string }[] => [
                                         v-model="spark.target"
                                         label="Target"
                                         :options="[{ value: '', label: 'Not recorded' }, ...(props.sparkTargets[(spark.category as 'Stat' | 'Aptitude' | 'Skill')] || []).map((target) => ({ value: target, label: target }))]"
+                                        :error="errorFor(index, `sparks.${sparkIndex}.target`)"
                                     />
                                     <BaseInput
                                         :id="`legacy-spark-stars-${index}-${sparkIndex}`"
