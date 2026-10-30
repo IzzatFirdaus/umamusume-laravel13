@@ -195,8 +195,13 @@ test('the quick actions are four outline destinations and a note', async ({ page
     }
     // A quick action is never the filled primary; the resume card owns that.
     await expect(quick.locator('[data-variant="primary"]')).toHaveCount(0);
-    // index.html:184 -- the card's own note, in the wireframe's words.
-    await expect(quick.getByText(/Four destinations\./)).toBeVisible();
+    // index.html:184 -- the rationale is behind a closed disclosure now: the summary ships, the
+    // prose appears on click, so the card reads destinations-first.
+    const why = quick.locator('details').filter({ hasText: 'Why four destinations' });
+    await expect(why.getByText('Why four destinations')).toBeVisible();
+    await expect(why.getByText(/The running app's sidebar carries ten flat items/)).toBeHidden();
+    await why.locator('summary').click();
+    await expect(why.getByText(/The running app's sidebar carries ten flat items/)).toBeVisible();
 });
 
 test('with no active career the resume card names the absence and keeps its actions', async ({ page }) => {

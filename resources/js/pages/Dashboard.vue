@@ -401,61 +401,67 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                     <div class="flex flex-col gap-[9px]">
                         <!-- The risk edge reads the `stale` flag, not the word (index.html:113). -->
                         <div
-                            class="rounded-sm border border-rule bg-raised px-2.5 py-2"
+                            class="flex items-center justify-between gap-3 rounded-sm border border-rule bg-raised px-2.5 py-2"
                             :class="props.needsYou.dataStatus.stale ? 'border-l-[3px] border-l-risk' : ''"
                             data-needs-you="data_status"
                         >
-                            <div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Data status</div>
-                            <div class="text-[14px] font-extrabold leading-[1.3] text-ink-strong">
-                                {{ props.needsYou.dataStatus.label }} &middot; {{ props.needsYou.dataStatus.state }}
+                            <div class="min-w-0">
+                                <div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Data status</div>
+                                <div class="text-[14px] font-extrabold leading-[1.3] text-ink-strong">
+                                    {{ props.needsYou.dataStatus.label }} &middot; {{ props.needsYou.dataStatus.state }}
+                                </div>
+                                <p class="text-[11.5px] text-ink-muted">
+                                    <template v-if="props.needsYou.dataStatus.verified_at">
+                                        Verified {{ props.needsYou.dataStatus.verified_at }} &middot; {{ props.needsYou.dataStatus.source }}
+                                    </template>
+                                    <AbsenceValue
+                                        v-else
+                                        compact
+                                        reason="No verification date is recorded for the scenario matrix."
+                                    />
+                                </p>
                             </div>
-                            <p class="text-[11.5px] text-ink-muted">
-                                <template v-if="props.needsYou.dataStatus.verified_at">
-                                    Verified {{ props.needsYou.dataStatus.verified_at }} &middot; {{ props.needsYou.dataStatus.source }}
-                                </template>
-                                <AbsenceValue
-                                    v-else
-                                    compact
-                                    reason="No verification date is recorded for the scenario matrix."
-                                />
-                            </p>
                             <Link
                                 href="/database/sources"
-                                class="inline-flex min-h-11 items-center text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
+                                class="inline-flex min-h-11 shrink-0 items-center text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
                             >Source ledger</Link>
                         </div>
 
                         <div
-                            class="rounded-sm border border-rule bg-raised px-2.5 py-2"
+                            class="flex items-center justify-between gap-3 rounded-sm border border-rule bg-raised px-2.5 py-2"
                             data-needs-you="veterans"
                         >
-                            <div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Veterans</div>
-                            <div class="text-[14px] font-extrabold leading-[1.3] text-ink-strong">
-                                {{ group(props.needsYou.veteranCount) }} banked
+                            <div class="min-w-0">
+                                <div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Veterans</div>
+                                <div class="text-[14px] font-extrabold leading-[1.3] text-ink-strong">
+                                    {{ group(props.needsYou.veteranCount) }} banked
+                                </div>
                             </div>
                             <Link
                                 :href="props.recentVeterans.library_url"
-                                class="inline-flex min-h-11 items-center text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
+                                class="inline-flex min-h-11 shrink-0 items-center text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
                             >Open the library</Link>
                         </div>
 
                         <div
-                            class="rounded-sm border border-rule bg-raised px-2.5 py-2"
+                            class="flex items-center justify-between gap-3 rounded-sm border border-rule bg-raised px-2.5 py-2"
                             data-needs-you="review"
                         >
-                            <div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Review queue</div>
-                            <div class="text-[14px] font-extrabold leading-[1.3] text-ink-strong">
-                                <template v-if="props.needsYou.reviewPending > 0">
-                                    {{ group(props.needsYou.reviewPending) }} pending {{ props.needsYou.reviewPending === 1 ? 'match' : 'matches' }}
-                                </template>
-                                <!-- index.html:126 prints the bare instruction. With nothing waiting the
-                                     instruction is still the door's own words, and the count beside it
-                                     would read "0 pending matches" -- a figure that says nothing. -->
-                                <template v-else>Check pending matches</template>
+                            <div class="min-w-0">
+                                <div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Review queue</div>
+                                <div class="text-[14px] font-extrabold leading-[1.3] text-ink-strong">
+                                    <template v-if="props.needsYou.reviewPending > 0">
+                                        {{ group(props.needsYou.reviewPending) }} pending {{ props.needsYou.reviewPending === 1 ? 'match' : 'matches' }}
+                                    </template>
+                                    <!-- index.html:126 prints the bare instruction. With nothing waiting the
+                                         instruction is still the door's own words, and the count beside it
+                                         would read "0 pending matches" -- a figure that says nothing. -->
+                                    <template v-else>Check pending matches</template>
+                                </div>
                             </div>
                             <Link
                                 href="/review"
-                                class="inline-flex min-h-11 items-center text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
+                                class="inline-flex min-h-11 shrink-0 items-center text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
                             >Open review</Link>
                         </div>
                     </div>
@@ -479,27 +485,28 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                     <h2 id="kpi-trainees-heading" class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Trainees catalogued</h2>
                     <!-- The catalogue figure, not the app counter: the wireframe's 71 is what the
                          sourced dataset publishes, and the plan's §7.2 ruling prints it with the
-                         catalogue's own door beside it. -->
-                    <p class="font-mono text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.catalogueTrainees) }}</p>
-                    <p class="text-[11.5px] text-ink-muted">
-                        <Link href="/catalog" class="inline-flex min-h-11 items-center underline underline-offset-2 hover:decoration-2">Browse catalog</Link>
-                    </p>
+                         catalogue's own door beside it. The door sits on the number's empty right
+                         side instead of under it, so the card reads figure-first. -->
+                    <div class="flex items-center justify-between gap-3">
+                        <p class="font-mono text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.catalogueTrainees) }}</p>
+                        <Link href="/catalog" class="inline-flex min-h-11 shrink-0 items-center underline underline-offset-2 hover:decoration-2">Browse catalog</Link>
+                    </div>
                 </section>
 
                 <section class="card" aria-labelledby="kpi-skills-heading" data-card="kpi_skills">
                     <h2 id="kpi-skills-heading" class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Skills</h2>
-                    <p class="font-mono text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.skills) }}</p>
-                    <p class="text-[11.5px] text-ink-muted">
-                        <Link href="/skills" class="inline-flex min-h-11 items-center underline underline-offset-2 hover:decoration-2">Skill search</Link>
-                    </p>
+                    <div class="flex items-center justify-between gap-3">
+                        <p class="font-mono text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.skills) }}</p>
+                        <Link href="/skills" class="inline-flex min-h-11 shrink-0 items-center underline underline-offset-2 hover:decoration-2">Skill search</Link>
+                    </div>
                 </section>
 
                 <section class="card" aria-labelledby="kpi-support-heading" data-card="kpi_support">
                     <h2 id="kpi-support-heading" class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Support cards</h2>
-                    <p class="font-mono text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.supportCards) }}</p>
-                    <p class="text-[11.5px] text-ink-muted">
-                        <Link href="/support-cards" class="inline-flex min-h-11 items-center underline underline-offset-2 hover:decoration-2">Browse cards</Link>
-                    </p>
+                    <div class="flex items-center justify-between gap-3">
+                        <p class="font-mono text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.supportCards) }}</p>
+                        <Link href="/support-cards" class="inline-flex min-h-11 shrink-0 items-center underline underline-offset-2 hover:decoration-2">Browse cards</Link>
+                    </div>
                 </section>
             </div>
 
@@ -581,10 +588,15 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                             </li>
                         </ul>
                     </nav>
-                    <Note class="mt-3">
-                        Four destinations. The running app's sidebar carries ten flat items; this
-                        dashboard is the same set, grouped, with one primary action.
-                    </Note>
+                    <details class="mt-3">
+                        <summary class="cursor-pointer list-none text-[12.5px] font-semibold text-ink-strong">
+                            Why four destinations
+                        </summary>
+                        <p class="mt-1.5 text-[12.5px] text-ink-muted">
+                            The running app's sidebar carries ten flat items; this dashboard is the same
+                            set, grouped, with one primary action.
+                        </p>
+                    </details>
                 </section>
             </div>
         </div>
