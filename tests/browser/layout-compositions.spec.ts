@@ -115,9 +115,10 @@ test.describe('HFW layouts', () => {
     });
 
     test('no mode scrolls the document at 320, 390 or 768', async ({ page }) => {
-        // `/support-cards` and `/skills` are excluded: their wide tables overflow the document at
-        // 320px with or without the area strip (measured with the strip removed), which is a
-        // pre-existing defect outside this layout change.
+        // `/support-cards` is excluded: its wide table overflows the document at 320px with or without
+        // the area strip (measured with the strip removed), which is a pre-existing defect outside this
+        // layout change. `/skills` was excluded for the same reason until 2026-10-30, when its table
+        // moved inside a labelled scroll region and the exclusion was lifted.
         const paths = [
             '/',
             '/career/setup/scenario',
@@ -125,6 +126,7 @@ test.describe('HFW layouts', () => {
             '/database',
             '/training-runs',
             '/umamusume',
+            '/skills',
         ];
 
         for (const mode of ['compact', 'standard', 'wide'] as const) {

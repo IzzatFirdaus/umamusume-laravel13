@@ -2,7 +2,7 @@
 /*
  * The Database hub's Skills area (SCREEN-023, plan §8 D17).
  *
- * The skill search, on the Database URL. The same shared list body the skill search mounts, behind
+ * The skill search, on the Database URL. The same shared table body the skill search mounts, behind
  * `SkillController::databaseIndex`. See `Trainees.vue` for why this is a shared screen rather than a
  * redirect to `/skills`.
  */
@@ -18,11 +18,15 @@ interface Skill {
     is_unique: boolean;
     type: string | null;
     sp_cost: number | null;
+    conditions: (string | null)[];
 }
 
 interface Paginator<T> {
     data: T[];
-    links: { url: string | null; label: string; active: boolean }[];
+    current_page: number;
+    last_page: number;
+    from: number | null;
+    to: number | null;
     total: number;
 }
 
@@ -47,6 +51,7 @@ const props = defineProps<{
         <DatabaseNav />
 
         <SkillCatalog
+            heading="Skill catalog"
             :skills="props.skills"
             :search="props.search"
             :search-key="props.searchKey"

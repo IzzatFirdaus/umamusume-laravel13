@@ -296,6 +296,23 @@ for (const area of AREAS) {
     });
 }
 
+test('the Database Skills area mounts the same catalogue table as the Library URL', async ({ page }) => {
+    await page.goto('/database/skills', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // One body, two URLs: the host keeps its own h1 and names the shared body in an h2, while the
+    // table, the focusable region, the note and the footer are the component's.
+    await expect(page.getByRole('heading', { name: 'Skills', level: 1 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Skill catalog', level: 2 })).toBeVisible();
+
+    const region = page.getByRole('region', { name: 'Skill catalog, scrollable' });
+    await expect(region).toBeVisible();
+    await expect(region.getByRole('columnheader')).toHaveText([
+        'Skill', 'Type', 'Condition (engine)', 'Base cost', 'Open the skill',
+    ]);
+    await expect(page.locator('#skill-results tr').first()).toBeVisible();
+});
+
 test('the race database renders whichever state the catalogue is in', async ({ page }) => {
     await page.goto('/database/races', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();

@@ -1196,6 +1196,11 @@ Mandatory / Special words are the Race cell's second line rather than columns, a
 the filter row are present (the filters landed in `479a1cbb`), so "filters absent; extra Year/Tier/Gate
 columns; Distance bands + What a race pays cards absent" no longer describes the screen.
 
+**Dated correction 2026-10-30 (Skills HFW alignment).** The `skills` row above is the 2026-10-27 snapshot and stands
+as written. As of the 2026-10-30 alignment the page is the wireframe's one-card `table.t` with the Open column, the
+canonical count-and-page pager, `AbsenceValue` absence disclosures and `/database/skills` mounting the same body; "no
+Distance filter" remains true by HFW-OVERRIDE (skills store no distance column, only condition tokens).
+
 ## Verdict counts
 
 - **near — 17:** index, runs-index, runs-create, import, career-scenario, career-profile, career-legacy,

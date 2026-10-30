@@ -33,14 +33,16 @@ class SkillSearchRequest extends FormRequest
     public const UNSPECIFIED = 'Unspecified';
 
     /**
-     * Where a refused facet lands (SCREEN_SPEC.md §7-9, ADR-0018). Support cards already named its
-     * route for this reason; leaving it unset sends the refusal to `previous()`, which is the
-     * referer when the browser supplies one and `/` when it does not, so the field error would
-     * arrive on the run list instead of beside the picker that caused it.
-     *
-     * @var string
+     * Where a refused facet lands (SCREEN_SPEC.md §7-9, ADR-0018). The screen answers on two URLs and the
+     * refusal belongs beside the picker that caused it, so a request from the Database area lands back
+     * there rather than on `/skills`. Support cards already named its route for this reason; leaving it
+     * unset sends the refusal to `previous()`, which is the referer when the browser supplies one and `/`
+     * when it does not, so the field error could arrive on the run list instead of beside the picker.
      */
-    protected $redirectRoute = 'skills.index';
+    protected function getRedirectUrl(): string
+    {
+        return route($this->routeIs('database.skills') ? 'database.skills' : 'skills.index');
+    }
 
     public function authorize(): bool
     {

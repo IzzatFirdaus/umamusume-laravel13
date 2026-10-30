@@ -869,15 +869,15 @@ Nav "Skills"; run page "Search the skill catalog" link; skills/show return link.
 
 #### Route / Location
 
-`GET /skills` name `skills.index`. Query: `search` (≤120), `type` ∈ parser categories ∪ `Unspecified`, `unique` boolean, `page`, `pageSize` (1..100 clamped in controller).
+`GET /skills` name `skills.index`, and `GET /database/skills` name `database.skills` (the Database hub's Skills area: same controller props, same shared body, its own h1 "Skills" and h2 "Skill catalog"). Query: `search` (≤120), `type` ∈ parser categories ∪ `Unspecified`, `unique` boolean, `page`, `pageSize` (1..100 clamped in controller).
 
 #### Layout / Structure
 
-Title → GET filter form (Search, Type select incl. "Unspecified", Unique-only checkbox, Filter) → invitation line (only when no query is in flight — D-65: two states are not one screen) → facet error → results count line "X of Y skills available on [Global]" → result rows (name link → detail, Japanese name only when it differs, ✦ Unique pill + word, type word, SP cost or `N/A` + explanatory title) → pagination → footer explaining that the type word is this tool's derivation, not client copy, and that the "Unspecified" facet finds the rows the sign rule withheld.
+Title → area strip → (Database URL only) host h2 "Skill catalog" → GET filter form (Search, Unique select `Any`/`Unique only`, Type select `Any` + the parser's words + `Unspecified`, Filter, Clear) → invitation line (only when no query is in flight — D-65) → facet error → either the dashed empty/no-match panel or one `card` holding `div.relative.overflow-x-auto[role="region"][tabindex="0"][aria-label="Skill catalog, scrollable"] > table.t.min-w-2xl` with an sr-only caption and five columns (Skill: name link, ✦ Unique pill, Japanese name only when it differs; Type: outline pill; Condition (engine): mono tokens; Base cost: right-aligned mono `N SP`; Open: link button), then the condition note and the canonical pager as card children outside the region, then the footer (type derivation, Unique derivation, base-cost-only, name-only search, Distance override). No in-card count line: the head and the pager carry the two numbers.
 
 #### Data Displayed
 
-The D-30-permitted Skill surface only: name, name_ja, sp_cost, type, is_unique. Not rendered, each with a stated reason: icon (column unimported, G-SK-19), description (both English description fields fail the terminology table, G-SK-16/20), rarity/class code (ADR-0011 §3).
+The D-30-permitted Skill surface only: name, name_ja, sp_cost, type, is_unique, and the stored activation predicates the Condition column prints (`condition_groups`, one entry per group; a group with no predicate is an absence, rendered through `AbsenceValue`). Not rendered, each with a stated reason: icon (column unimported, G-SK-19), description (both English description fields fail the terminology table, G-SK-16/20), rarity/class code (ADR-0011 §3).
 
 #### Inputs
 
@@ -889,7 +889,7 @@ Filter; open skill detail; paginate.
 
 #### Screen States
 
-Pre-fetch empty table (distinct copy naming both `uma:fetch gametora-skills` and the `uma:reparse` KI-27 trap); no-results naming the ask (`"…"` + type + unique) and stating a missing skill is a data gap, not a query mistake — deliberately **no** link to the review queue (skills bypass `match_candidates` by design, so a link would promise what cannot happen); loaded.
+Empty catalogue: a dashed panel naming both `uma:fetch gametora-skills` and the `uma:reparse` KI-27 trap, static (a dataset state, not a live region). No-results: names the ask, says `Clear returns the full catalog.`, keeps the searched-key line and the data-gap sentence, and carries `role="status"` on its headline so an emptied set is announced — deliberately **no** link to the review queue (skills bypass `match_candidates` by design, so a link would promise what cannot happen). Loaded: the card described above. Pending: `aria-busy` on the form plus a `role="status"` "Loading results…" line.
 
 #### Validation & Error Handling
 
@@ -897,7 +897,7 @@ Pre-fetch empty table (distinct copy naming both `uma:fetch gametora-skills` and
 
 #### Security & Privacy / Accessibility / Responsive
 
-CSRF n/a (GET); `h-11` inputs measured against DESIGN.md §6.14; checkbox at the 24px WCAG 2.2 AA floor (the tool's first checkbox); rows are a `<ul>` with wrap-baselines; no breakpoint structure beyond wrap.
+CSRF n/a (GET); `h-11` inputs measured against DESIGN.md §6.14 (two selects and the search field; no checkbox); the table sits in a labelled, focusable scroll region, so `/skills` is in the 320/390/768 document-overflow sweep; `AbsenceValue`'s native `<details>` is the 24px compact form for the three absent fields (2.5.8's floor, not the 44px primary rule); the name link and the Open button meet the 44px bar.
 
 #### Localization / Content
 
@@ -913,7 +913,7 @@ Latin-script "Japanese" names (`#LookatCurren` etc.) dedupe against the English 
 
 #### Implementation References
 
-Page: `resources/js/pages/Skills/Index.vue`; Controller: `SkillController::index` (+`query`, `describeAsk`, `availableCount`); Request: `SkillSearchRequest`; ADR: `docs/adr/0011-skills-reference-import.md`; Tests: `SkillSearchScreenTest` (asserts the props), `tests/browser/skills.spec.ts`, `SkillsFetchTest` (family).
+Hosts: `resources/js/pages/Skills/Index.vue` and `resources/js/pages/Database/Skills.vue`; body: `resources/js/components/skills/SkillCatalog.vue`; Controller: `SkillController::index`/`databaseIndex` (+`indexProps`, `query`, `describeAsk`, `availableCount`); Request: `SkillSearchRequest` (its refusal target follows the route, so a bad facet on the Database URL stays there); ADR: `docs/adr/0011-skills-reference-import.md`; Tests: `SkillSearchScreenTest` (asserts the props and the Database-URL refusal), `tests/browser/skills.spec.ts`, `tests/browser/database.spec.ts`, `tests/browser/responsive.spec.ts`, `tests/browser/layout-compositions.spec.ts`, `SkillsFetchTest` (family).
 
 #### Current Status
 
@@ -922,6 +922,8 @@ Implemented.
 #### Open Questions / Gaps
 
 - Running-style eligibility display is an open product question (PRD OQ-5) — nothing here is authorized; the screen must not become a recommendation surface (OQ-5 forbids `best_for` outright).
+
+**Dated note 2026-10-30 (Skills HFW alignment).** The catalogue now has one rendering on two URLs: the shared body is `components/skills/SkillCatalog.vue`, mounted by `/skills` and, under its own h1 and the h2 "Skill catalog", by `/database/skills` — replacing the second rendering (a `<ul>` with a checkbox, no conditions column, no Clear). The body is the wireframe's `table.t` card grammar with an sr-only caption, row headers and a labelled focusable scroll region, so `/skills` left the 320px exclusion list. Absences (type, condition, cost) are `AbsenceValue` disclosures instead of hover-only `title` twins. Type's first option reads `Any` as the drawing does; the in-card count line is gone (the head and the pager carry both numbers); a refused facet lands on the URL whose picker caused it. The invitation line had never rendered — its guard compared a string ref to `null` — and now does. Kept overrides: no Distance facet (no column; tokens only) and name-only search (no description is stored).
 
 ---
 
@@ -1244,7 +1246,8 @@ payload carries the door. `database.spec.ts`'s hub case now asserts nine list it
 `href`, so the screen cannot lose its door silently again. The row above stands as written; this note
 supersedes its number.
 | Hub | Loading / error | None of its own: the hub is one server render with no user-initiated async action (`ADR-0007`), and a failed visit is the shell's. |
-| Trainees, Supports, Skills | Rendered | The shared component's own states, unchanged from the original screens (search, filters, `Loading results…` `role="status"`, the catalog empty state, pagination clamped 1..100 by `PageSize::clamp`). |
+| Trainees, Supports | Rendered | The shared list component's own states, unchanged from the original screens (search, filters, `Loading results…` `role="status"`, the catalog empty state, pagination clamped 1..100 by `PageSize::clamp`). |
+| Skills | Rendered | The table body `/skills` also mounts (`components/skills/SkillCatalog.vue`), under the area's own h1 "Skills" and the h2 "Skill catalog": the filter row, the focusable labelled region, the `AbsenceValue` cells, the note and the pager are the component's. Pagination is clamped 1..100 by the controller's own clamp. |
 | Races (`SCR-SYS-006`) | Empty, unseeded | "The race database is offline", why it matters (no turn number, distance, surface or fan gate to plan against), and the two commands that fill it: `php artisan uma:fetch gametora-race-catalog`, or `uma:reparse` when a fetch reports the document unchanged. No placeholder row. |
 | Races | Populated | One row per race per turn, ordered year then turn then sort order. Six columns: Race (the title, plus a muted second line carrying the career year, the turn and the Mandatory / Special race words where true), Grade, Surface, Distance (right-aligned mono, metres), Band, Fans (right-aligned mono). Course is omitted (HFW-OVERRIDE: the catalogue stores only a numeric `track_id`). The pager prints `Showing X to Y of Z slots` and `Page A of B`. |
 | Races | Unrecorded cell | `N/A` through the shared `AbsenceValue` disclosure: its summary reads `N/A, Not recorded` and opens on Enter, and the sentence under the table explains the marker. Never a zero, never a dash. Measured on this tree's first page: 2 of 25 rows carry no distance, surface or fan gate. |

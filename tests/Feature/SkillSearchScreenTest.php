@@ -416,3 +416,11 @@ it('carries the activation predicate the source states beside the row', function
         ));
     }
 });
+
+it('refuses an unknown type on the Database URL and lands back on it', function (): void {
+    // The same refusal as the Library URL, but the picker the error names lives on the Database area, so
+    // the field error must land beside that picker rather than bouncing the Trainer to `/skills`.
+    $this->get(route('database.skills', ['type' => 'Debuff']))
+        ->assertRedirect(route('database.skills'))
+        ->assertSessionHasErrors('type');
+});

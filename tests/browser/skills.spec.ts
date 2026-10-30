@@ -214,20 +214,51 @@ test('orders the filters as the HFW draws them and keeps the condition note insi
     await expect(unique.locator('option[value=""]')).toBeEnabled();
     await expect(page.getByLabel('Type').locator('option[value=""]')).toHaveCount(1);
     await expect(page.getByLabel('Type').locator('option[value=""]')).toBeEnabled();
+    await expect(page.getByLabel('Type').locator('option[value=""]')).toHaveText('Any');
 
     await expect(page.getByLabel('Distance'), 'a Distance facet the catalogue cannot answer').toHaveCount(0);
 
-    const table = page.locator('#skill-results');
-    const card = table.locator('xpath=ancestor::div[contains(@class,"overflow-x-auto")]');
-    const note = card.getByText(/The condition column prints the export's own tokens/);
-    await expect(note).toBeVisible();
+    // The table scrolls inside its own labelled, focusable region; the note and pager stay in the card
+    // outside it, so neither scrolls sideways with the columns.
+    const card = page.locator('div.card').filter({ has: page.locator('#skill-results') });
+    const region = card.locator('div[role="region"]');
+    await expect(region).toHaveAttribute('aria-label', 'Skill catalog, scrollable');
+    await expect(region).toHaveAttribute('tabindex', '0');
+
+    const note = card.locator('p.note');
+    await expect(note).toContainText("The condition column prints the export's own tokens");
+    expect(
+        await note.evaluate((node) => node.closest('[role="region"]') === null),
+        'the note sits in the card, not in the scroll region',
+    ).toBe(true);
 
     const noteBottom = await note.evaluate((node) => node.getBoundingClientRect().bottom);
-    const pagerTop = await page.locator('nav[aria-label="Pagination"]').evaluate((node) => node.getBoundingClientRect().top);
+    const pagerTop = await card.locator('nav[aria-label="Pagination"]').evaluate((node) => node.getBoundingClientRect().top);
     expect(noteBottom, 'the note sits above the pager').toBeLessThanOrEqual(pagerTop);
+
+    // At 320 the table overflows inside the region and the document does not (the region's own
+    // scrollWidth/clientWidth pair is the layout-compositions assertion; this proves it here too).
+    await page.setViewportSize({ width: 320, height: 900 });
+    expect(await region.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
+    const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow, '/skills scrolls the document sideways at 320px').toBeLessThanOrEqual(1);
 });
 
-test('shows absence labels only for missing skill values', async ({ page }) => {
+test('shows the invitation only before a search is made', async ({ page }) => {
+    // The line shipped with the shared body but never rendered: the guard compared a string ref to null.
+    // It belongs to the state where nobody has asked yet (D-65).
+    await page.goto('/skills');
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.getByText(/Type part of a skill name to narrow the catalog/)).toBeVisible();
+
+    await page.goto('/skills?search=lookatcurren');
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.getByText(/Type part of a skill name to narrow the catalog/)).toHaveCount(0);
+});
+
+test('shows absence disclosures only for missing skill values', async ({ page }) => {
     const response = await page.goto('/skills');
     expect(response?.ok()).toBe(true);
     await expect(page.locator('#skill-results tr')).not.toHaveCount(0);
@@ -235,11 +266,15 @@ test('shows absence labels only for missing skill values', async ({ page }) => {
     const populated = page.locator('#skill-results tr');
     let populatedCells = 0;
     for (const row of await populated.all()) {
-        for (const column of [1, 2, 3]) {
+        // The name cell is a row header, so the value cells are td indices 0..2 (type, condition, cost).
+        for (const column of [0, 1, 2]) {
             const cell = row.locator('td').nth(column);
-            const value = (await cell.innerText()).trim();
-            if (value.startsWith('N/A')) {
-                await expect(cell.locator('[title]')).toHaveCount(1);
+            const summaries = cell.locator('summary');
+            if ((await summaries.count()) === 1) {
+                // The summary's text carries the template's indentation, so the pattern allows the
+                // whitespace before the marker and then requires the comma and a reason after it.
+                await expect(summaries).toHaveText(/^\s*N\/A, \S/);
+                await expect(cell.locator('[title]')).toHaveCount(0);
                 continue;
             }
             populatedCells++;
@@ -249,9 +284,10 @@ test('shows absence labels only for missing skill values', async ({ page }) => {
     expect(populatedCells).toBeGreaterThan(0);
 
     await page.goto('/skills?search=lookatcurren');
-    const missingCost = page.locator(`#skill-results [title="${NO_SP_COST_TITLE}"]`);
-    await expect(missingCost).toBeVisible();
-    await expect(missingCost).toHaveText('N/A');
+    const missingCost = page.locator('#skill-results summary')
+        .filter({ hasText: 'The source states no SP cost for this class of skill.' });
+    await expect(missingCost.first()).toBeVisible();
+    await expect(missingCost.first()).toHaveText(/N\/A, The source states no SP cost/);
 });
 
 test('the hint ladder is a reference and the base cost never prints its absence beside a value', async ({ page }) => {
