@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Career;
 
+use App\Enums\CardRarity;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Career\StoreDraftDeckRequest;
 use App\Models\DeckSlot;
@@ -218,7 +219,42 @@ class DeckSelectController extends Controller
             'scenario_link' => $link['state'],
             'scenario_link_note' => $link['note'],
             'effects' => SupportCardEffects::atCap($card, $dictionary),
+            'ladder' => $this->levelLadder($card, $dictionary),
         ];
+    }
+
+    /**
+     * What a copy of this card is worth at each limit-break tier, 0 unbroken to four breaks.
+     *
+     * The tier's level is `CardRarity::levelAtBreak()`, and every one of those five levels is an anchor
+     * the export states (the ladder runs 1, 5, 10 … 50), so a cell is a published figure and not an
+     * interpolation. Where a card states nothing above its own last anchor, `SupportCardEffects` carries
+     * that anchor up, which is the same rule `atCap()` already applies.
+     *
+     * **This prints no break count for the Trainer's copy.** The draft stores a level and nothing else
+     * (`ADR-0029` D1: a numerator), and `ADR-0014` declines the card collection, so the step shows the
+     * ladder a card of this rarity has, not a claim about copies this tool has never seen.
+     * (`UMAMUSUME_REFERENCE.md` §1.4.2, §1.4.7.)
+     *
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @return list<array{breaks: int, is_maximum: bool, level: int, effects: list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>}>
+     */
+    private function levelLadder(SupportCard $card, array $dictionary): array
+    {
+        $tiers = [];
+
+        for ($breaks = 0; $breaks <= CardRarity::MAX_BREAKS; $breaks++) {
+            $level = $card->rarity->levelAtBreak($breaks);
+
+            $tiers[] = [
+                'breaks' => $breaks,
+                'is_maximum' => $breaks === CardRarity::MAX_BREAKS,
+                'level' => $level,
+                'effects' => SupportCardEffects::atLevel($card, $level, $dictionary),
+            ];
+        }
+
+        return $tiers;
     }
 
     /**

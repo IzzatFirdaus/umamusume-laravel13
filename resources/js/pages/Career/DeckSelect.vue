@@ -29,11 +29,18 @@
  * happen, and the forward door writes again before it navigates, so the step's one submit-shaped control
  * is the head band's `Continue to preflight`. The coverage panel belongs to the run's own deck screen
  * (`resources/js/pages/Support/Builder.vue`), where the effect anchors have a run to measure against.
+ *
+ * **The deck summary is identity, ownership and the published ladder, not an analysis.** `DeckSummary.vue`
+ * reads the six picks and, beside them, the level a card of that rarity reaches at each break tier from
+ * unbroken to Max Limit Break. The ladder arrives from the server (`CardRarity::levelAtBreak()` and the
+ * export's stated anchors) so the step can say what a card is worth at Lvl 45 without claiming to know how
+ * many copies anyone owns: `ADR-0014` declines the collection and `ADR-0029` D1 leaves a slot its level.
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import SupportSlot from '../../components/support/SupportSlot.vue';
 import CardPicker from '../../components/support/CardPicker.vue';
 import SupportTypeMark from '../../components/support/SupportTypeMark.vue';
+import DeckSummary from '../../components/support/DeckSummary.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import { BaseInput, BaseSelect, BaseButton } from '../../components/Form';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
@@ -58,6 +65,8 @@ interface SlotCard {
     scenario_link: 'linked' | 'not_linked' | 'unknown';
     scenario_link_note: string | null;
     effects: Effect[];
+    /** The limit-break tiers this card's rarity has, unbroken to Max Limit Break. */
+    ladder: { breaks: number; is_maximum: boolean; level: number; effects: Effect[] }[];
 }
 
 interface Slot {
@@ -158,8 +167,17 @@ const friendshipCount = computed(
     () => deckCards.value.filter((card) => card.effects.some((effect) => effect.name === 'Friendship Bonus')).length,
 );
 
-/** Cards the draft's chosen scenario links to. Zero when no scenario has been chosen yet. */
+/** Cards the draft's chosen scenario badges as a Scenario Link. Meaningless until `linkReadable` holds. */
 const linkedCount = computed(() => deckCards.value.filter((card) => card.scenario_link === 'linked').length);
+
+/**
+ * Whether the Scenario Link count means anything on this load. With no scenario chosen every card answers
+ * `unknown`, so the count is zero for want of a list to check against, and a zero printed as a figure is a
+ * reading the screen never took. An empty deck with a scenario still answers zero, and that is derivable.
+ */
+const linkReadable = computed(
+    () => props.scenarioPending === false && deckCards.value.every((card) => card.scenario_link !== 'unknown'),
+);
 
 /** The five stat-type marks, in the server's own order, for the first row of the card-types table. */
 const statTypes = computed(() => props.types.filter((type) => !['friend', 'group'].includes(type.key)));
@@ -400,14 +418,17 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
 
                 <p class="mt-1 text-xs text-ink-muted">
                     Not equipped. The six cards are the deck the run starts with, so an empty slot here is a
-                    gap the Trainer can still fill. Slot 6 is the friend slot: it takes a borrowed card, and
-                    the client draws it apart from the five owned positions.
+                    gap the Trainer can still fill. Position six is the one the client labels Friends. The role
+                    belongs to the position and not to the card parked in it, so any card may sit there. The
+                    owned or rented flag is kept in this setup draft, and Preflight writes it onto the run
+                    as one value per slot.
                 </p>
 
                 <!--
-                  DOMAIN OVERRIDE (DM-8): the sixth slot is a borrowed guest, and the HFW does not draw it
-                  distinct. The client separates a rented friend card from the five owned positions, so the
-                  slot states its ownership rather than leaving the Trainer to infer it from the card name.
+                  DOMAIN OVERRIDE (DM-8): the Friends position and the HFW. The wireframe does not draw slot
+                  six distinct, and this step does not either: the role is the position's, never the card's
+                  (`ADR-0014` correction 1, `DeckSlot`'s class docblock), so the page states ownership on
+                  every slot rather than leaving the Trainer to infer it from a card name.
                 -->
                 <!-- HFW-OVERRIDE (structure: slot grid) - `career-deck.html` draws three columns at
                      Wide and two at Standard; this list is two at every desktop width and one below
@@ -445,11 +466,11 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                 <!-- The deck screen's own multiplier rule, stated where the six slots it describes
                      are: HFW carries it inside this card, under the add action. The arithmetic is
                      shown as multiplication, because "+55%" teaches a model the client does not use
-                     and the wrong model costs a run. -->
+                     and the wrong model costs a run. Source: UMAMUSUME_REFERENCE.md §1.1.3. -->
                 <p class="note mt-3 text-sm text-ink-muted">
-                    <b>Two rainbow cards on one tile is the largest multiplier in a turn.</b> Bonuses
-                    multiply rather than add, so a +25% and a +30% card give 1.25 × 1.30 = <b>1.625</b>,
-                    not +55% (UMAMUSUME_REFERENCE.md §1.1.3).
+                    <b>Two or more rainbow cards on one tile is the largest multiplier in a training
+                    turn.</b> Bonuses multiply rather than add, so a +25% and a +30% card give 1.25 × 1.30 =
+                    <b>1.625</b>, not +55%.
                 </p>
 
                 <CardPicker
@@ -508,16 +529,28 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                             </tr>
                             <tr>
                                 <td class="py-1.5">Scenario link on a card</td>
-                                <td class="py-1.5 text-right font-mono">{{ linkedCount }}</td>
+                                <td class="py-1.5 text-right">
+                                    <span v-if="linkReadable" class="font-mono">{{ linkedCount }}</span>
+                                    <AbsenceValue
+                                        v-else
+                                        compact
+                                        reason="Not derivable. No scenario has been chosen in this setup draft yet, so no card has a linked list to check against, and a zero here would be an absence rather than a count."
+                                    />
+                                </td>
                             </tr>
                         </tbody>
                     </table>
 
+                    <!-- The gauge threshold, the fourth mark and the pace come from
+                         UMAMUSUME_REFERENCE.md §1.1.3 and §1.4.3. The pace is a guide figure, so the
+                         sentence attributes it rather than stating it as a measurement, and a section
+                         reference stays here rather than in the copy a Trainer reads. -->
                     <p class="note mt-3 text-xs text-ink-muted">
                         A card reaches friendship training at gauge <b>80</b>, which the client draws as the
-                        fourth mark and colours orange. The gauge rises about +5 per joint training, so a card
-                        with no head start needs most of a run to get there: which is why the "Initial
-                        Friendship Gauge" effect is the one that matters.
+                        fourth mark and colours orange. The guides put the pace at about +5 per joint
+                        training, so a card with no head start needs most of a run to reach it. A card's
+                        Initial Friendship Gauge is the effect that moves that starting value, and the deck
+                        summary below prints each card's stated effects at every level.
                     </p>
                 </section>
 
@@ -528,53 +561,66 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                         <caption class="sr-only">The support-card types and what each does</caption>
                         <thead>
                             <tr class="text-left text-xs text-ink-muted">
-                                <th scope="col" class="pb-1 font-semibold">Type</th>
+                                <th scope="col" class="pb-1 pr-6 font-semibold whitespace-nowrap">Type</th>
                                 <th scope="col" class="pb-1 font-semibold">What it does</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-rule">
                             <tr>
-                                <td class="py-2 align-top">
-                                    <span
-                                        v-for="(type, index) in statTypes"
-                                        :key="type.key"
-                                        class="inline-flex"
-                                        :class="index > 0 ? 'ml-2' : ''"
-                                    >
-                                        <SupportTypeMark :type="type.key" :label="type.label" />
+                                <td class="py-2 pr-6 align-top">
+                                    <!-- One mark per line, not five in one wrapping row: the five stat
+                                         types read as a column the eye walks down, and a wrapping
+                                         inline row was leaving the second-to-last mark stranded on
+                                         its own line. -->
+                                    <span class="flex flex-col items-start gap-1.5">
+                                        <SupportTypeMark
+                                            v-for="type in statTypes"
+                                            :key="type.key"
+                                            :type="type.key"
+                                            :label="type.label"
+                                        />
                                     </span>
                                 </td>
                                 <td class="py-2 align-top text-ink-muted">Boosts its own training tile; carries the friendship kit.</td>
                             </tr>
                             <tr>
-                                <td class="py-2 align-top">
+                                <td class="py-2 pr-6 align-top">
                                     <SupportTypeMark type="friend" :label="typeLabel('friend')" />
                                 </td>
                                 <td class="py-2 align-top text-ink-muted">No friendship bonus. Earns its slot on event chains: energy return, mood, failure protection.</td>
                             </tr>
                             <tr>
-                                <td class="py-2 align-top">
+                                <td class="py-2 pr-6 align-top">
                                     <SupportTypeMark type="group" :label="typeLabel('group')" />
                                 </td>
-                                <td class="py-2 align-top text-ink-muted">SSR only. Full friendship kit plus a friendship recovery; several trainees behind one card.</td>
+                                <td class="py-2 align-top text-ink-muted">SSR only. Full friendship kit plus a {{ typeLabel('intelligence') }} friendship recovery; several characters act as the one card.</td>
                             </tr>
                         </tbody>
                     </table>
 
+                    <!-- The seven types, the group type's standing as a type of its own and the two
+                         catalogues' SSR counts are UMAMUSUME_REFERENCE.md §1.4.1, and the counts match
+                         this tree's own imported rows. -->
                     <p class="mt-3 text-xs text-ink-muted">
                         Seven types in total, and {{ typeLabel('group') }} is a type rather than a flag on another one.
-                        Global holds 115 SSR cards against JP's 312, so the two catalogues are not interchangeable.
+                        Global holds 115 SSR cards against JP's 312, so the two catalogues are not
+                        interchangeable.
                     </p>
                 </section>
             </div>
         </div>
 
+        <DeckSummary :slots="props.slots" :live-levels="form.deck" />
+
         <!-- The deck screen's own rule statements: the multiplier lives inside the deck card,
              beside the slots it describes. The duplicate rule stays here because it governs the
-             picker, not the slots. -->
-        <p class="note mt-4 text-sm text-ink-muted">
+             picker, not the slots. The ban on two identical cards in one deck, and the duplicate going
+             into a limit break instead, are UMAMUSUME_REFERENCE.md §1.4.5 and §1.4.2. -->
+        <p id="deck-duplicate-rule" class="note mt-4 text-sm text-ink-muted">
             <b>Two identical cards cannot sit in one deck.</b> The client spends a duplicate on a limit
-            break instead, and the picker does not offer a card the deck already holds.
+            break instead, and the save here refuses a deck that repeats a card. The picker does list a
+            card the deck already holds, because the draft's own cards stay selectable so a slot can be
+            re-set to the card it has.
         </p>
 
         <!-- Back and "Continue to preflight" moved to the head band above (`#actions`), where the HFW draws

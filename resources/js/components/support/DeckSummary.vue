@@ -29,7 +29,7 @@
  */
 import AbsenceValue from '../AbsenceValue.vue';
 import SupportTypeMark from './SupportTypeMark.vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 interface LadderEffect {
     effect_id: number;
@@ -144,11 +144,19 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
 </script>
 
 <template>
-    <section class="card mt-4" aria-labelledby="deck-summary-heading">
-        <h2 id="deck-summary-heading">
-            Deck summary
-            <span class="text-xs font-semibold text-ink-muted">{{ entries.length }} assigned</span>
-        </h2>
+    <details class="card mt-4" aria-labelledby="deck-summary-heading" open>
+        <!-- A native `<details>` carries the disclosure, its `expanded` state, the keyboard path and the
+             marker, so none of that is hand-rolled here (`Cockpit.vue`'s Career tools card is the same
+             shape). `<summary>` is a `display: list-item` box, which is the only display that paints the
+             marker (`AbsenceValue.vue`'s measured note), and the heading stays inside it so the collapse
+             control is also the section's entry in the outline. The count sits in the heading, so a
+             collapsed card still says how much it is hiding. -->
+        <summary class="min-h-11 cursor-pointer">
+            <h2 id="deck-summary-heading">
+                Deck summary
+                <span class="text-xs font-semibold text-ink-muted">{{ entries.length }} assigned</span>
+            </h2>
+        </summary>
 
         <p class="mt-1 text-xs text-ink-muted">
             Every card the deck holds, whether this Trainer owns it or rented it from a friend, and what a
@@ -162,7 +170,24 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
         </p>
 
         <template v-else>
-            <table class="mt-3 w-full text-sm">
+            <!-- Seven columns of card facts will not fit 320 px, and the client's own table is the
+                 canonical two-dimensional exemption — the failure was that its width escaped the page.
+                 The region scrolls, the page does not. `tabindex="0"` with a name is `DataTable.vue`'s
+                 wrapper shape: without the focus stop a keyboard user cannot scroll it and the arrow keys
+                 move the page instead (WCAG 2.1.1). `contain-paint` is the half this surface needs and
+                 `DataTable.vue` does not: with `overflow-x: auto` alone the root still panned 73 px at a
+                 320 px viewport (the 414 px table reports its scrollable overflow out of a clipping block
+                 nested in a `<details>`), and of the three candidates measured on the rendered page,
+                 `container-type: inline-size` and `w-full min-w-0` left it at 393 while paint containment
+                 returned `documentElement.scrollWidth` to 320, the region still scrollable and its 2 px
+                 focus outline still painted. -->
+            <div
+                role="region"
+                tabindex="0"
+                aria-label="Assigned support cards, scrollable"
+                class="mt-3 contain-paint overflow-x-auto focus:outline-2 focus:outline-offset-2"
+            >
+            <table class="w-full text-sm">
                 <caption class="sr-only">The assigned support cards, how each is held, and its level</caption>
                 <thead>
                     <tr class="text-left text-xs text-ink-muted">
@@ -211,7 +236,10 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
                                 <span class="ml-1">{{ tierWord(entry.tier) }}</span>
                                 <span class="text-ink-muted"> · cap Lvl {{ entry.tier.level }}</span>
                             </template>
-                            <span v-else-if="entry.above" class="block text-risk">
+                            <!-- The ceiling is a published fact, not a danger, so it prints in ink: this
+                                 sat in the risk hue, spending the system's one risk colour on a rarity cap
+                                 and measuring 4.15:1 in the dark theme against 1.4.3's 4.5:1. -->
+                            <span v-else-if="entry.above" class="block text-ink">
                                 Above the ladder
                                 <span class="block text-xs font-normal text-ink-muted">
                                     No break takes an {{ entry.card.rarity_word }} card past Lvl
@@ -227,6 +255,7 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
                     </tr>
                 </tbody>
             </table>
+            </div>
 
             <!-- One ladder per assigned card. The values are the anchors the source states at each tier's
                  level, so a column is the catalogue's figure for a card of that rarity and not a reading of
@@ -242,7 +271,16 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
                     <span class="font-mono text-xs text-ink-muted">{{ entry.card.rarity_word }}</span>
                 </h3>
 
-                <table class="mt-1 w-full text-sm">
+                <!-- Six columns escape a 320 px page the same way the seven-column one above does, so the
+                     ladder scrolls inside its own named region rather than widening the document. The
+                     region carries the same `contain-paint` for the same measured reason. -->
+                <div
+                    role="region"
+                    tabindex="0"
+                    :aria-label="`${entry.card.name} values by level, scrollable`"
+                    class="mt-1 contain-paint overflow-x-auto focus:outline-2 focus:outline-offset-2"
+                >
+                <table class="w-full text-sm">
                     <caption class="sr-only">
                         {{ entry.card.name }} at each level from unbroken to Max Limit Break
                     </caption>
@@ -269,6 +307,7 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
                         </tr>
                     </tbody>
                 </table>
+                </div>
 
                 <p v-if="ladderRows(entry.card).length === 0" class="mt-1 text-xs text-ink-muted">
                     The source states no effect anchor for this card, so there is no ladder to print.
@@ -287,5 +326,5 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
             are the ones the source states at those levels, and where a card states no higher anchor its
             last value carries up.
         </p>
-    </section>
+    </details>
 </template>
