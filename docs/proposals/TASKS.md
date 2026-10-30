@@ -1201,6 +1201,13 @@ as written. As of the 2026-10-30 alignment the page is the wireframe's one-card 
 canonical count-and-page pager, `AbsenceValue` absence disclosures and `/database/skills` mounting the same body; "no
 Distance filter" remains true by HFW-OVERRIDE (skills store no distance column, only condition tokens).
 
+**Dated correction 2026-10-31 (skill detail alignment).** The `skill-detail` row above is the 2026-10-27 snapshot and
+stands as written. As of the 2026-10-31 alignment the page is the wireframe's two-column record: the hint table prices
+every level (None at the base, then Lv1..Lv Max) and the Related card has all three rows (condition string, stored class
+code, class code plus derived type); the engine card prints the export's class code integer and an "In your runs" card
+lists the runs that record the skill. The two remaining deltas are named rulings: no ladder row marks a current level
+(no per-run hint level is stored) and the wireframe's "Hinted · Lv3" pill is not reproduced.
+
 ## Verdict counts
 
 - **near — 17:** index, runs-index, runs-create, import, career-scenario, career-profile, career-legacy,

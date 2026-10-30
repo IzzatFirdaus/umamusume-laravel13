@@ -67,6 +67,26 @@ const props = defineProps<{
 }>();
 
 const page = usePage();
+
+/**
+ * The list's current query, carried onto the detail link so the way back can resume the search.
+ *
+ * Read off `page.url` rather than `window.location.search`: a `preserveState` visit keeps this component
+ * mounted, so the window value has no reactive dependency to update on and would serve a stale suffix.
+ */
+const querySuffix = computed<string>(() => {
+    const at = page.url.indexOf('?');
+
+    return at === -1 ? '' : page.url.slice(at);
+});
+
+/** The detail address, carrying the list's query and which list it came from (the back target). */
+const detailHref = (id: number): string => {
+    const params = new URLSearchParams(querySuffix.value);
+    params.set('from', props.filterPath);
+
+    return `/skills/${id}?${params.toString()}`;
+};
 /*
  * The filter's own validation errors, rendered on the field that failed. `SkillSearchRequest` rejects a
  * search longer than 120 characters and a type outside the parser's categories, and both messages belong
@@ -235,7 +255,7 @@ const engineCondition = (skill: Skill): string =>
                                              name link is the only way into the detail. `min-h-11` grows it to
                                              the house 44px bar without touching the type. -->
                                         <Link
-                                            :href="`/skills/${skill.id}`"
+                                            :href="detailHref(skill.id)"
                                             class="inline-flex min-h-11 items-center font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out"
                                         >{{ skill.name }}</Link>
                                         <!-- The badge is a claim about the source's class code, and the title
@@ -270,7 +290,7 @@ const engineCondition = (skill: Skill): string =>
                                     <AbsenceValue v-else compact reason="The source states no SP cost for this class of skill." />
                                 </td>
                                 <td class="n">
-                                    <LinkButton :href="`/skills/${skill.id}`" variant="secondary" size="sm">
+                                    <LinkButton :href="detailHref(skill.id)" variant="secondary" size="sm">
                                         Open
                                     </LinkButton>
                                 </td>
@@ -306,8 +326,9 @@ const engineCondition = (skill: Skill): string =>
             reading refuses a negative value and refuses a skill carrying two kinds of effect, so some
             rows show no word at all; the Type filter's “{{ props.unspecifiedType }}” choice finds those
             rows. The ✦ mark beside a name is the pipeline's derivation from the source's class code, not
-            a card's own list. Cost is the base cost only: a hint discount is per run, so the run planner
-            owns it. Search matches the skill's name; no readable effect text is stored, so effect text
+            a card's own list. Cost is the base cost only: the skill page prices each hint level against
+            it, and the run planner owns the level a run actually holds. Search matches the skill's name;
+            no readable effect text is stored, so effect text
             cannot be searched. Distance cannot be filtered separately: the catalogue stores it only
             inside the condition tokens, not in a distance column.
         </p>

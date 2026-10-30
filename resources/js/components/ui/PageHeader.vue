@@ -17,6 +17,12 @@ withDefaults(
     defineProps<{
         /** The page's name. Rendered once, as the `h1`. */
         title: string;
+        /**
+         * The Japanese name beside the client string, when the screen has both. Rendered inside the `h1`
+         * as its own `lang="ja"` span so a screen reader switches voice (WCAG 3.1.2); omitted means the
+         * header renders byte-identically to before.
+         */
+        titleJa?: string;
         /** Optional small caps line above the name, e.g. "Overview". */
         eyebrow?: string;
         /** Optional one-line sentence under the name, held to a readable measure. */
@@ -28,7 +34,7 @@ withDefaults(
          */
         position?: string;
     }>(),
-    { eyebrow: undefined, description: undefined, position: undefined },
+    { eyebrow: undefined, description: undefined, position: undefined, titleJa: undefined },
 );
 </script>
 
@@ -59,7 +65,7 @@ withDefaults(
                      `focus:outline-none` keeps a non-operable heading from drawing a control ring
                      (NRM-1); the layout's focus move still announces the new page to assistive tech. -->
                 <h1 tabindex="-1" class="mt-[7px] min-w-0 text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong focus:outline-none">
-                    {{ title }}
+                    {{ title }}<span v-if="titleJa" lang="ja" class="ml-2 text-ink-muted">{{ titleJa }}</span>
                 </h1>
                 <p v-if="description" data-region="lede" class="mt-[5px] text-[13px] text-ink-muted">
                     {{ description }}

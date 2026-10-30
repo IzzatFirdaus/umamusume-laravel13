@@ -47,6 +47,46 @@ final class HintDiscount
     }
 
     /**
+     * The full ladder priced against one skill's own base: the six rows the detail screen prints.
+     *
+     * The first row is the base itself (the "None" row the catalogue page draws); each tier then prices
+     * through `price()`, so the detail and the planner cannot disagree about the arithmetic. A null base
+     * prices every row null rather than inventing a zero: a class that states no cost has no ladder.
+     *
+     * @return list<array{key: string, label: string, discount: int, price: int|null}>
+     */
+    public static function priceLadder(?int $base): array
+    {
+        $labels = [
+            1 => 'Lv1',
+            2 => 'Lv2',
+            3 => 'Lv3',
+            4 => 'Lv4',
+            'max' => 'Lv Max',
+        ];
+
+        $rows = [[
+            'key' => 'none',
+            'label' => 'None',
+            'discount' => 0,
+            'price' => $base,
+        ]];
+
+        foreach (self::ladder() as $tier) {
+            $key = $tier['key'];
+
+            $rows[] = [
+                'key' => $key === 'max' ? 'max' : "lv{$key}",
+                'label' => $labels[$key] ?? (string) $tier['label'],
+                'discount' => $tier['discount'],
+                'price' => $base === null ? null : self::price($base, $key),
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
      * The discount percentage a hint level earns, or null when the level is outside the ladder.
      */
     public static function discountPct(int|string $hintLevel): ?int
@@ -58,7 +98,11 @@ final class HintDiscount
     }
 
     /**
-     * The displayed cost of a skill at one hint level: `floor(base × (1 − discount / 100))`.
+     * The displayed cost of a skill at one hint level: `floor(base × (1 - discount / 100))`.
+     *
+     * Integer arithmetic, not `floor($base * (1 - $discount / 100))`: the float form drifts. Measured
+     * at 180 SP and Lv3, `180 * (1 - 0.3)` evaluates to 125.99999999999999 and floors to 125, where
+     * the client's rule prints 126. `intdiv` is exact for an integer base.
      *
      * An unknown hint level leaves the base cost untouched rather than inventing a discount.
      */
@@ -74,6 +118,6 @@ final class HintDiscount
             throw new InvalidArgumentException("Hint discount [{$discount}] is outside 0 to 100.");
         }
 
-        return (int) floor($base * (1 - $discount / 100));
+        return intdiv($base * (100 - $discount), 100);
     }
 }

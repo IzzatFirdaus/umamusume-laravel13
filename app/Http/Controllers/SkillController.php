@@ -7,12 +7,15 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SkillSearchRequest;
 use App\Models\CharacterCard;
 use App\Models\Skill;
+use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Services\DataPipeline\NameNormalizer;
 use App\Services\DataPipeline\Parsers\GametoraSkillsParser;
+use App\Services\HintDiscount;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -28,7 +31,8 @@ use Inertia\Response;
  * Two of §6.11's elements are not here because the data cannot honour them: the icon (`iconid` is on all
  * 1,910 source rows and nothing stores it, G-SK-19) and the description (both English description fields
  * fail the terminology table, G-SK-16/G-SK-20). The cost stepper and the discount badge are §6.11's run
- * state, not a catalog row's, and hint level is out of this slice's scope entirely.
+ * state, not a catalog row's; no table stores a per-run hint level, so the detail prices the ladder for the
+ * catalogue base only.
  *
  * **No cache.** `CatalogController` caches its page ids and total behind a version key; that machinery buys
  * nothing here and its invalidation is a lie for this table. Measured on the imported document, the whole
@@ -38,6 +42,9 @@ use Inertia\Response;
  */
 class SkillController extends Controller
 {
+    /** The detail card's run list is capped; the total is stated beside it. */
+    private const RUN_CARD_LIMIT = 20;
+
     public function __construct(private readonly NameNormalizer $normalizer) {}
 
     /**
@@ -94,10 +101,10 @@ class SkillController extends Controller
                 // verbatim in monospace beside the readable name (`skills.html` annotation 1). Null is
                 // a group with no predicate, so the list carries only the strings the source wrote and
                 // the page states the absence once rather than inventing "none".
-                'conditions' => array_values(array_map(
+                'conditions' => array_map(
                     static fn (array $group): ?string => $group['condition'] ?? null,
                     $skill->condition_groups ?? [],
-                )),
+                ),
             ]);
 
         return [
@@ -115,7 +122,8 @@ class SkillController extends Controller
 
     /**
      * The detail page for one Global skill: the fields D-30 permits a Skill surface, the
-     * trainees whose forms carry the skill, and the absences the data holds.
+     * trainees whose forms carry the skill, the runs that record it, and the absences the
+     * data holds.
      *
      * The read starts from `availableOnGlobal()` for the reason index() states: no row
      * reaches a Trainer-facing surface that the scope rejects, and an unknown id is the
@@ -133,6 +141,9 @@ class SkillController extends Controller
                 'name_ja' => $model->name_ja,
                 'type' => $model->type,
                 'sp_cost' => $model->sp_cost,
+                // The export's class code, the integer ADR-0011 §3 keeps auditable. It renders as the
+                // integer and never as a rarity word; the dated erratum records the rendering.
+                'rarity' => $model->rarity,
                 'is_unique' => $model->is_unique,
                 'condition_groups' => $model->condition_groups,
                 'source_url' => $model->source_url,
@@ -147,33 +158,149 @@ class SkillController extends Controller
             // read one row against the whole (`skill-detail.html`, "Entries"). It is the same count the
             // index states, read through the same scope, so the two screens cannot disagree.
             'catalogueCount' => $this->availableCount(),
-            // The wireframe's "Related" card asks for three counts (`skill-detail.html:134-141`). One
-            // of the three is a fact this schema holds: skills sharing this row's exact stored
-            // condition groups. The other two are keyed on a class code, and no column in this
-            // database carries one, so they are stated as an absence rather than printed as a
-            // number this app cannot compute.
-            'relatedSameCondition' => $this->countSharingCondition($model),
+            // The ladder is a catalogue reference priced from this row's own base; the service owns the
+            // arithmetic, so the detail and the run planner cannot disagree. No row marks a "current"
+            // level: no table stores a per-run hint level.
+            'hintLadder' => [
+                'measuredAt' => Carbon::parse((string) config('uma.skills.hint_discount_measured_at'))->format('M j, Y'),
+                'rows' => HintDiscount::priceLadder($model->sp_cost),
+            ],
+            'related' => [
+                // The wireframe's three counts. Each reads a stored field; a missing input is an absence.
+                'sameCondition' => $this->countSharingConditionString($model),
+                'sameClassCode' => $this->countSharingClassCode($model),
+                'sameClassCodeAndType' => $this->countSharingClassCodeAndType($model),
+                // Built here, not in the page: the label states the only facet the index can answer.
+                'typeFilter' => [
+                    'url' => route('skills.index', ['type' => $model->type ?? SkillSearchRequest::UNSPECIFIED]),
+                    'label' => $model->type === null
+                        ? 'Search the skills with no type word'
+                        : 'Search the skills of this type',
+                ],
+            ],
+            'runs' => $this->runRows($model),
         ]);
     }
 
     /**
-     * How many other Global skills carry this skill's exact stored condition groups.
+     * How many other Global skills share at least one stored condition string with this row.
      *
-     * Compared as the stored JSON, not as prose: `condition_groups` is the source's own structure
-     * (`skills.html` annotation 1), so an exact match is the only comparison that cannot drift from
-     * what the export wrote.
+     * The comparison is the stored `condition` string, the unit the wireframe's Related card names. A
+     * skill with two groups is still one skill, so the subquery tests the group array and the outer query
+     * counts rows: a peer sharing either string counts once.
+     *
+     * ponytail: `json_each` over the JSON column, fine at 623 rows; a generated column is the upgrade if
+     * this ever runs per row in a list.
      */
-    private function countSharingCondition(Skill $model): ?int
+    private function countSharingConditionString(Skill $model): ?int
     {
-        if ($model->condition_groups === null) {
+        $conditions = array_values(array_filter(array_map(
+            static fn (array $group): ?string => is_string($group['condition'] ?? null) ? $group['condition'] : null,
+            $model->condition_groups ?? [],
+        ), static fn (?string $condition): bool => $condition !== null && $condition !== ''));
+
+        if ($conditions === []) {
+            return null;
+        }
+
+        $placeholders = implode(', ', array_fill(0, count($conditions), '?'));
+
+        return Skill::query()
+            ->availableOnGlobal()
+            ->whereKeyNot($model->id)
+            ->whereRaw(
+                "EXISTS (SELECT 1 FROM json_each(skills.condition_groups) WHERE json_extract(json_each.value, '$.condition') IN ({$placeholders}))",
+                $conditions,
+            )
+            ->count();
+    }
+
+    /**
+     * How many other Global skills carry this row's stored class code.
+     *
+     * `skills.rarity` is the export's class code (1-6), not a rarity word; it is the same field the engine
+     * card prints, so the card's two class-code rows count one thing.
+     */
+    private function countSharingClassCode(Skill $model): ?int
+    {
+        if ($model->rarity === null) {
             return null;
         }
 
         return Skill::query()
             ->availableOnGlobal()
             ->whereKeyNot($model->id)
-            ->where('condition_groups', json_encode($model->condition_groups))
+            ->where('rarity', $model->rarity)
             ->count();
+    }
+
+    /**
+     * How many other Global skills carry this row's class code and its derived type.
+     *
+     * A missing half is an absence rather than a match: two untyped skills do not share a type.
+     */
+    private function countSharingClassCodeAndType(Skill $model): ?int
+    {
+        if ($model->rarity === null || $model->type === null) {
+            return null;
+        }
+
+        return Skill::query()
+            ->availableOnGlobal()
+            ->whereKeyNot($model->id)
+            ->where('rarity', $model->rarity)
+            ->where('type', $model->type)
+            ->count();
+    }
+
+    /**
+     * The runs that record this skill, newest first, capped for the card.
+     *
+     * Status is the pivot's stored string (`RunSkill`'s contract); the level is the unique-skill level
+     * (`skill_levels`, ADR-0029 D4), never a hint level, which no table stores. The label keeps the run id
+     * because two careers of one trainee otherwise read alike, and the scenario label is config's so the
+     * slug never reaches the screen.
+     *
+     * @return array{rows: list<array{id: int, label: string, status: string, level: int|null, url: string}>, total: int}
+     */
+    private function runRows(Skill $model): array
+    {
+        $matching = TrainingRun::query()
+            ->whereHas('skills', static fn (Builder $builder): Builder => $builder->where('skills.id', $model->id));
+
+        $total = (clone $matching)->count();
+
+        $runs = $matching
+            ->with([
+                'umamusume:id,name',
+                'skills' => static fn ($builder) => $builder->where('skills.id', $model->id),
+                'skillLevels' => static fn ($builder) => $builder->where('skill_id', $model->id),
+            ])
+            ->latest('created_at')
+            ->latest('id')
+            ->limit(self::RUN_CARD_LIMIT)
+            ->get();
+
+        return [
+            'total' => $total,
+            'rows' => $runs->map(static function (TrainingRun $run): array {
+                $status = $run->skills->first()?->pivot?->status;
+
+                return [
+                    'id' => $run->id,
+                    'label' => implode(' · ', array_filter([
+                        $run->umamusume->name,
+                        $run->hasScenario()
+                            ? (config('scenarios.scenarios.'.$run->scenario.'.label') ?? $run->scenario)
+                            : null,
+                        "run {$run->id}",
+                    ])),
+                    'status' => is_string($status) ? $status : '',
+                    'level' => $run->skillLevels->first()?->current_level,
+                    'url' => route('runs.cockpit', $run),
+                ];
+            })->values()->all(),
+        ];
     }
 
     /**

@@ -3980,3 +3980,25 @@ instead of asserting the picker card's name against the record.
 Green in a session-private pair: `PLAYWRIGHT_PORT=8187`, JSON reporter `1 passed`. Flow coverage
 moves 2 of 5 to 3 of 5; the standing gaps are snapshot, import and save-veteran, which have
 page-level specs only.
+## KI-140 — FilterContractTest pins a support-card page size the controller stopped passing
+
+**State:** OPEN. Filed 2026-10-31 while running the skill-detail slice's focused tests; survived two slices
+(the Skills alignment `7454f29e` and this one) as an attributed pre-existing red.
+
+**Defect.** `tests/Feature/FilterContractTest.php:127` asserts `/support-cards` renders `cards.per_page` 25.
+`SupportCardController::index()` has passed `5` to its own `indexProps()` since `d6a27620` ("the wireframe's page
+size, five rows"), so the assertion has been failing since that commit. Nothing in the two skill slices touches the
+support-card surface.
+
+**Why.** The test line was written when the shared `PageSize::DEFAULT` (25) was the surface's default; the support-card
+slice then gave the surface its own default, which is the documented per-surface parameter, and this case was not
+re-baselined with it.
+
+**Evidence.** `php artisan test --compact tests/Feature/FilterContractTest.php` →
+`Failed asserting that 5 is identical to 25` at `FilterContractTest.php:127`; the controller's `index()` passes 5
+(`app/Http/Controllers/SupportCardController.php:42-45`). Not reproduced in isolation against an earlier commit
+because the file carries a peer session's uncommitted page-size cases, which this slice does not stage.
+
+**Closure.** Re-baseline the assertion to the committed default (or to `?pageSize=25`, which the surface still honours)
+and note the change in that slice's hand-off. Not fixed here: the file is peer-dirty and the failure is unrelated to
+the skill detail.

@@ -69,7 +69,8 @@ test('follows a search row to the detail page and states the absences there', as
 
     await page.locator('#skill-results').getByRole('link', { name: '#LookatCurren' }).click();
 
-    await expect(page).toHaveURL(/\/skills\/\d+$/);
+    // The detail URL carries the list's query and the list it came from, so the way back can resume it.
+    await expect(page).toHaveURL(/\/skills\/370\?.*search=lookatcurren/);
     await expect(page.getByRole('heading', { name: '#LookatCurren', level: 1 })).toBeVisible();
 
     // The two name columns agree on this row, so the pair prints once: no second slot.
@@ -80,10 +81,22 @@ test('follows a search row to the detail page and states the absences there', as
     await expect(badge).toBeVisible();
     await expect(badge).toHaveText('✦ Unique');
 
-    // D-220: an absent SP cost renders N/A with a title naming the kind of absence.
-    const spCost = page.locator(`[title="${NO_SP_COST_TITLE}"]`);
+    // The export's class code, printed as the integer only (ADR-0011 §3 as amended). Skill 370 is 5.
+    await expect(
+        page.getByRole('rowheader', { name: 'Class code', exact: true }).locator('xpath=following-sibling::td[1]'),
+    ).toHaveText('5');
+
+    // The Related card's three rows, each a count or a stated absence.
+    for (const name of ['Same condition', 'Same class code', 'Same class code and type']) {
+        await expect(page.getByRole('rowheader', { name, exact: true })).toBeVisible();
+    }
+
+    // D-220: an absent SP cost is the shared disclosure, with the reason behind its summary.
+    const spCost = page
+        .locator('section[aria-labelledby="mechanics"] summary')
+        .filter({ hasText: NO_SP_COST_TITLE });
     await expect(spCost).toBeVisible();
-    await expect(spCost).toHaveText('N/A');
+    await expect(spCost).toHaveText(/^\s*N\/A, The source states no SP cost/);
 
     // The page's own sections and its way back. Engine tokens lead (plan Slice 8), so the
     // condition table is a visible card and not a fold.
@@ -104,14 +117,21 @@ test('the skill detail prints the engine tokens first, with no fold over them', 
     await page.locator('#app > *').first().waitFor();
 
     await page.locator('#skill-results').getByRole('link', { name: '#LookatCurren' }).click();
-    await expect(page).toHaveURL(/\/skills\/\d+$/);
+    await expect(page).toHaveURL(/\/skills\/370\?.*search=lookatcurren/);
     await page.locator('#app > *').first().waitFor();
 
     // The condition table is the primary content, so it is not behind a disclosure: a fold would
-    // make the one representation that can be diffed against the export the second thing read.
+    // make the one representation that can be diffed against the export the second thing read. The
+    // absences elsewhere in the card use disclosures, so this checks the condition CELL itself.
     const mechanics = page.locator('section[aria-labelledby="mechanics"]');
-    await expect(mechanics.locator('details')).toHaveCount(0);
-    await expect(mechanics).toContainText('Condition');
+    const conditionCell = mechanics
+        .getByRole('rowheader', { name: 'Condition', exact: true })
+        .locator('xpath=following-sibling::td[1]');
+    await expect(conditionCell).toBeVisible();
+    expect(
+        await conditionCell.evaluate((cell) => cell.querySelector('details') === null),
+        'the engine condition is printed directly, not behind a fold',
+    ).toBe(true);
     await expect(mechanics).toContainText('Base cost');
     await expect(mechanics).toContainText('not client labels');
 });
@@ -135,7 +155,7 @@ test('does not scroll the detail page sideways at 390 or 768', async ({ page }) 
     await page.locator('#app > *').first().waitFor();
 
     await page.locator('#skill-results').getByRole('link', { name: '#LookatCurren' }).click();
-    await expect(page).toHaveURL(/\/skills\/\d+$/);
+    await expect(page).toHaveURL(/\/skills\/370\?.*search=lookatcurren/);
     await page.locator('#app > *').first().waitFor();
 
     for (const width of [390, 768]) {
@@ -290,9 +310,11 @@ test('shows absence disclosures only for missing skill values', async ({ page })
     await expect(missingCost.first()).toHaveText(/N\/A, The source states no SP cost/);
 });
 
-test('the hint ladder is a reference and the base cost never prints its absence beside a value', async ({ page }) => {
-    // The wireframe's ladder row (skill-detail.html, keybox 3). ADR-0011/ADR-0029 store no hint
-    // level, so the page prints the published ladder as a reference and derives no per-skill price.
+test('prices the hint ladder from the skill\'s own base, floored', async ({ page }) => {
+    // The wireframe's ladder (skill-detail.html:96-114): the client's measured discounts priced from this
+    // skill's own base. The old pin here asserted that no price was derived; the owner now requires the
+    // ladder priced, so that assertion is deliberately retired and replaced by the exact figures below.
+    // No row is "current": no table stores a per-run hint level.
     await page.goto('/skills/1');
     await page.locator('#app > *').first().waitFor();
 
@@ -301,31 +323,89 @@ test('the hint ladder is a reference and the base cost never prints its absence 
         .locator('xpath=following::table[1]');
     await expect(ladder).toBeVisible();
     await expect(ladder.getByRole('row')).toHaveCount(7);
-    // The wireframe's ladder opens at None / 0% (`skill-detail.html:101`), the row a Trainer reads a
-    // hinted skill against. A published reference row, not a computed price.
-    await expect(ladder.getByRole('row').nth(1)).toContainText('None');
-    await expect(ladder.getByRole('row').nth(1)).toContainText('0%');
-    await expect(ladder).toContainText('Lv1');
-    await expect(ladder).toContainText('Lv Max');
-    await expect(ladder).toContainText('40%');
-    // A reference, not a price: no SP figure is derived from the ladder.
-    await expect(ladder).not.toContainText('SP');
+    await expect(ladder.getByRole('columnheader')).toHaveText(['Hint', 'Discount', 'Displayed cost']);
 
-    // A value and its absence are mutually exclusive in the Base-cost cell. Before the fix the
-    // cell printed "180 SP" and the N/A twin at once because the absence span had no v-else.
+    // Skill 1's base is 180: None, Lv1, Lv2, Lv3, Lv4, Lv Max.
+    for (const [row, price] of [[1, '180'], [2, '162'], [3, '144'], [4, '126'], [5, '117'], [6, '108']] as const) {
+        await expect(ladder.getByRole('row').nth(row).locator('td').nth(1)).toHaveText(price);
+    }
+
+    // The wireframe's own base (170): Lv1 153 ... Lv Max 102.
+    await page.goto('/skills/6');
+    await page.locator('#app > *').first().waitFor();
+    const own = page
+        .getByRole('heading', { name: 'Displayed cost at each hint level' })
+        .locator('xpath=following::table[1]');
+    await expect(own.getByRole('row').nth(2).locator('td').nth(1)).toHaveText('153');
+    await expect(own.getByRole('row').nth(5).locator('td').nth(1)).toHaveText('110');
+    await expect(own.getByRole('row').nth(6).locator('td').nth(1)).toHaveText('102');
+
+    // The note states the rule, the one rounding case, and that no run stores a hint level.
+    await expect(page.getByText(/130 × 0\.65 = 84\.5 is shown as 84/)).toBeVisible();
+    await expect(page.getByText(/No run stores a hint level/)).toBeVisible();
+
+    // A value and its absence are mutually exclusive in the Base-cost cell.
     const costCell = page
         .getByRole('rowheader', { name: 'Base cost' })
         .locator('xpath=following-sibling::td[1]');
     await expect(costCell).toContainText('SP');
     await expect(costCell).not.toContainText('N/A');
 
-    // And the absent case still names the absence, on the skill whose cost is null.
+    // The absent case: no base, so the Displayed cost column is absent and the note says why.
     await page.goto('/skills/370');
     await page.locator('#app > *').first().waitFor();
+    const absentLadder = page
+        .getByRole('heading', { name: 'Displayed cost at each hint level' })
+        .locator('xpath=following::table[1]');
+    await expect(absentLadder.getByRole('columnheader')).toHaveText(['Hint', 'Discount']);
+    await expect(page.getByText(/no hint-level price can be computed/)).toBeVisible();
     const absentCell = page
         .getByRole('rowheader', { name: 'Base cost' })
         .locator('xpath=following-sibling::td[1]');
     await expect(absentCell).toContainText('N/A');
-    // Its sr-only reason names the SP cost, so the absence assertion is "no numeric SP figure".
+    // Its reason names the SP cost, so the absence assertion is "no numeric SP figure".
     await expect(absentCell).not.toContainText(/\d+ SP/);
+});
+
+test('prints the class code, the related counts and the head facts', async ({ page }) => {
+    await page.goto('/skills/6');
+    await page.locator('#app > *').first().waitFor();
+
+    // The export's integer only; no rarity word is claimed for it (ADR-0011 §3 as amended).
+    await expect(
+        page.getByRole('rowheader', { name: 'Class code', exact: true }).locator('xpath=following-sibling::td[1]'),
+    ).toHaveText('1');
+
+    // The three Related rows, and the type-filter link labelled for what it filters.
+    for (const name of ['Same condition', 'Same class code', 'Same class code and type']) {
+        await expect(page.getByRole('rowheader', { name, exact: true })).toBeVisible();
+    }
+    await expect(page.getByRole('link', { name: 'Search the skills of this type' })).toBeVisible();
+
+    // The lede states the type, the base and the style clause read from the conditions.
+    const lede = page.locator('[data-region="lede"]');
+    await expect(lede).toContainText('Speed · 170 Skill Points at base.');
+    await expect(lede).toContainText('No running-style precondition of its own.');
+});
+
+test('states that no run records the skill when the run table is empty', async ({ page }) => {
+    // The browser scratch database is seeded without runs by contract (tests/browser/global-setup.ts);
+    // the populated card is pinned by SkillDetailTest and shown in the dev-database screenshot.
+    await page.goto('/skills/370');
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.getByRole('heading', { name: 'In your runs', level: 2 })).toBeVisible();
+    await expect(page.getByText('No run records this skill.')).toBeVisible();
+});
+
+test('returns to the filtered list with its query intact', async ({ page }) => {
+    await page.goto('/skills?search=lookatcurren&unique=1');
+    await page.locator('#app > *').first().waitFor();
+
+    await page.locator('#skill-results').getByRole('link', { name: '#LookatCurren' }).click();
+    await expect(page).toHaveURL(/\/skills\/370\?.*search=lookatcurren.*unique=1/);
+
+    await page.getByRole('link', { name: 'Back to search' }).click();
+    await expect(page).toHaveURL(/\/skills\?.*search=lookatcurren.*unique=1/);
+    await expect(page.getByLabel('Search')).toHaveValue('lookatcurren');
+    await expect(page.getByLabel('Unique')).toHaveValue('1');
 });

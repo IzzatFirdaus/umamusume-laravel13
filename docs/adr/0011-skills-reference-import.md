@@ -121,3 +121,11 @@ architecture of this ADR — the import, `rarity` as a PRD amendment, the R37 hi
 unchanged; only the belief that the ladder does not exist is superseded. The ladder is now carried by
 `config/uma.php` `skills.hint_discount` and `App\Services\HintDiscount`, and a skill with no recorded
 hint level still prices at its base, because no column stores a per-skill hint level.
+
+## Dated erratum · 2026-10-31 · the class-code row renders the export's integer
+
+Decision 3 above ends "and renders nothing". The skill detail's engine card now prints a Class code row carrying
+the export's own integer (`skills.rarity`), together with a note saying the code is the export's and that no rarity
+word is claimed for it. What the decision was protecting is unchanged: the six stored values are not the client's
+three rarities, no label is derived from the integer, and the skill lists still print neither the integer nor a
+word. The value's authority is the PRD amendment this ADR records, not a widening of the Skill surface field set.

@@ -3,8 +3,12 @@
 declare(strict_types=1);
 
 use App\Enums\ReleaseStatus;
+use App\Enums\SkillAcquisition;
+use App\Http\Requests\SkillSearchRequest;
 use App\Models\CharacterCard;
 use App\Models\Skill;
+use App\Models\SkillLevel;
+use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -43,6 +47,7 @@ it('passes the recorded fields of a global skill to the detail page', function (
         'name_ja' => 'テスト固有スキル',
         'type' => 'Speed',
         'sp_cost' => 180,
+        'rarity' => 4,
         'is_unique' => true,
         'export_id' => 987654,
         'source_url' => 'https://gametora.test/skills.json',
@@ -56,6 +61,8 @@ it('passes the recorded fields of a global skill to the detail page', function (
             ->where('skill.name_ja', 'テスト固有スキル')
             ->where('skill.type', 'Speed')
             ->where('skill.sp_cost', 180)
+            // The export's class code, the integer the engine card prints (ADR-0011 §3's dated erratum).
+            ->where('skill.rarity', 4)
             ->where('skill.is_unique', true)
             ->where('skill.source_url', 'https://gametora.test/skills.json')
             // D-30: the export id is an engine key, and no export id reaches a screen.
@@ -79,8 +86,16 @@ it('passes the absences the dataset holds instead of a default', function (): vo
             ->component('Skills/Show')
             ->where('skill.type', null)
             ->where('skill.sp_cost', null)
+            ->where('skill.rarity', null)
             ->where('skill.source_url', null)
-            ->where('skill.fetched_at_display', null));
+            ->where('skill.fetched_at_display', null)
+            // A class that states no cost has no ladder: the None row's price is null, never zero.
+            ->where('hintLadder.rows.0.price', null)
+            ->where('related.sameCondition', null)
+            ->where('related.sameClassCode', null)
+            ->where('related.sameClassCodeAndType', null)
+            ->has('runs.rows', 0)
+            ->where('runs.total', 0));
 });
 
 it('refuses a skill the global client cannot meet rather than rendering it', function (): void {
@@ -235,20 +250,43 @@ it('states how many skills the Global catalogue holds for the provenance card', 
             ->where('catalogueCount', 2));
 });
 
-it('counts the skills that share the stored condition groups, and states nothing when none are stored', function (): void {
-    // The wireframe's Related card asks for "Same condition" (`skill-detail.html:137`). It reads the
-    // stored structure, so the count is the export's own comparison and not a phrase this app infers.
-    $groups = [['condition' => 'phase==1&corner!=0', 'precondition' => null]];
-
-    $skill = skillDetailSkill(['name' => 'Conditioned Skill', 'condition_groups' => $groups]);
-    skillDetailSkill(['name' => 'Twin Condition', 'condition_groups' => $groups]);
+it('counts the skills sharing a condition string, a class code, or both code and type', function (): void {
+    // Row 1 reads the stored condition string; a peer sharing either of a two-string skill's conditions
+    // counts, and a peer carrying both is one skill. Rows 2 and 3 read the stored class code
+    // (`skills.rarity`), row 3 adding the derived type.
+    $skill = skillDetailSkill([
+        'name' => 'Conditioned Skill',
+        'rarity' => 2,
+        'type' => 'Speed',
+        'condition_groups' => [
+            ['condition' => 'phase==1&corner!=0', 'precondition' => null],
+            ['condition' => 'is_last_straight==1', 'precondition' => null],
+        ],
+    ]);
+    // Shares one string, in a differently shaped group: the shape is not compared, the string is.
+    skillDetailSkill(['name' => 'One Shared String', 'condition_groups' => [
+        ['condition' => 'is_last_straight==1', 'precondition' => 'order<=5', 'effects' => [['type' => 27, 'value' => 4500]]],
+    ]]);
+    // Carries both strings: one skill, counted once (the subquery is over groups, the count over rows).
+    skillDetailSkill(['name' => 'Both Strings', 'condition_groups' => [
+        ['condition' => 'phase==1&corner!=0', 'precondition' => null],
+        ['condition' => 'is_last_straight==1', 'precondition' => null],
+    ]]);
     skillDetailSkill(['name' => 'Different Condition', 'condition_groups' => [
         ['condition' => 'phase==2', 'precondition' => null],
     ]]);
-    // Out of the Global scope, so it is not one of the skills the count names.
+    // Same class code, different type: row 2 only.
+    skillDetailSkill(['name' => 'Same Code Other Type', 'rarity' => 2, 'type' => 'Recovery']);
+    // Same class code and type: rows 2 and 3.
+    skillDetailSkill(['name' => 'Same Code And Type', 'rarity' => 2, 'type' => 'Speed']);
+    // Same class code, no type word: row 2 counts, row 3 has no half to match.
+    skillDetailSkill(['name' => 'Same Code No Type', 'rarity' => 2, 'type' => null]);
+    // Out of the Global scope, so none of the counts names it.
     Skill::factory()->create([
         'name' => 'Japan Only Twin',
-        'condition_groups' => $groups,
+        'rarity' => 2,
+        'type' => 'Speed',
+        'condition_groups' => [['condition' => 'phase==1&corner!=0', 'precondition' => null]],
         'release_status' => ReleaseStatus::JapanOnly,
         'name_is_client' => false,
     ]);
@@ -257,15 +295,84 @@ it('counts the skills that share the stored condition groups, and states nothing
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Skills/Show')
-            ->where('relatedSameCondition', 1));
+            ->where('related.sameCondition', 2)
+            ->where('related.sameClassCode', 3)
+            ->where('related.sameClassCodeAndType', 1)
+            ->where('related.typeFilter.url', route('skills.index', ['type' => 'Speed']))
+            ->where('related.typeFilter.label', 'Search the skills of this type'));
 
-    // A row storing no groups has nothing to compare, so the count is absent rather than zero: the
-    // page prints "Not recorded" instead of claiming no other skill shares a condition it does not have.
-    $bare = skillDetailSkill(['name' => 'Bare Skill', 'condition_groups' => null]);
+    // A row with no condition string has nothing to compare (an absence, not zero), and a row with no
+    // class code has no class-code counts. Its filter link names the Unspecified facet.
+    $bare = skillDetailSkill(['name' => 'Bare Skill', 'rarity' => null, 'type' => null, 'condition_groups' => []]);
 
     $this->get(route('skills.show', $bare))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
+            ->where('related.sameCondition', null)
+            ->where('related.sameClassCode', null)
+            ->where('related.sameClassCodeAndType', null)
+            ->where('related.typeFilter.url', route('skills.index', ['type' => SkillSearchRequest::UNSPECIFIED]))
+            ->where('related.typeFilter.label', 'Search the skills with no type word'));
+});
+
+it('prices the hint ladder from this skill\'s own base, floored', function (): void {
+    // UMAMUSUME_REFERENCE.md §1.1.4: floor(base × (1 − discount)); the one rounding case is 130 × 0.65.
+    $skill = skillDetailSkill(['name' => 'Priced Skill', 'sp_cost' => 130]);
+
+    $this->get(route('skills.show', $skill))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
             ->component('Skills/Show')
-            ->where('relatedSameCondition', null));
+            ->has('hintLadder.rows', 6)
+            ->where('hintLadder.rows.0.key', 'none')
+            ->where('hintLadder.rows.0.label', 'None')
+            ->where('hintLadder.rows.0.discount', 0)
+            ->where('hintLadder.rows.0.price', 130)
+            ->where('hintLadder.rows.1.price', 117)
+            ->where('hintLadder.rows.2.price', 104)
+            ->where('hintLadder.rows.3.price', 91)
+            // 130 × 0.65 = 84.5, floored: the one rounding case the reference records.
+            ->where('hintLadder.rows.4.price', 84)
+            ->where('hintLadder.rows.5.key', 'max')
+            ->where('hintLadder.rows.5.label', 'Lv Max')
+            ->where('hintLadder.rows.5.discount', 40)
+            ->where('hintLadder.rows.5.price', 78)
+            ->where('hintLadder.measuredAt', 'Oct 3, 2026'));
+});
+
+it('lists the runs that record the skill, newest first, with their stored status and level', function (): void {
+    $skill = skillDetailSkill(['name' => 'Recorded Skill']);
+
+    $older = TrainingRun::factory()->create(['scenario' => 'unity_cup', 'created_at' => now()->subDay()]);
+    $older->setSkillStatus($skill, SkillAcquisition::Acquired, 12);
+    SkillLevel::factory()->create([
+        'training_run_id' => $older->id,
+        'skill_id' => $skill->id,
+        'current_level' => 3,
+    ]);
+
+    $newer = TrainingRun::factory()->create(['scenario' => null]);
+    $newer->setSkillStatus($skill, SkillAcquisition::Skipped);
+
+    // A run that holds a different skill is not this card's.
+    $other = TrainingRun::factory()->create();
+    $other->setSkillStatus(skillDetailSkill(['name' => 'Other Skill']), SkillAcquisition::Acquired);
+
+    $this->get(route('skills.show', $skill))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Skills/Show')
+            ->where('runs.total', 2)
+            ->has('runs.rows', 2)
+            ->where('runs.rows.0.id', $newer->id)
+            ->where('runs.rows.0.status', 'Skipped')
+            ->where('runs.rows.0.level', null)
+            ->where('runs.rows.1.id', $older->id)
+            ->where('runs.rows.1.status', 'Acquired')
+            ->where('runs.rows.1.level', 3)
+            ->where('runs.rows.1.url', route('runs.cockpit', $older))
+            // The label keeps the run id and the config's scenario word, never the slug.
+            ->where('runs.rows.1.label', fn (string $label): bool => str_contains($label, $older->umamusume->name)
+                && str_contains($label, 'Unity Cup')
+                && str_contains($label, 'run '.$older->id)));
 });

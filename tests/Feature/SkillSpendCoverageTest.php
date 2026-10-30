@@ -129,8 +129,28 @@ final class SkillSpendCoverageTest extends TestCase
             ->and(HintDiscount::price(130, 'max'))->toBe(78)
             // A base the reference samples: 160 at Lv Max is 96 (160 × 0.6).
             ->and(HintDiscount::price(160, 'max'))->toBe(96)
+            // Integer arithmetic: the float form evaluates 180 × 0.7 as 125.999… and floors to 125,
+            // where the client's rule prints 126.
+            ->and(HintDiscount::price(180, 3))->toBe(126)
+            ->and(HintDiscount::price(200, 3))->toBe(140)
             // An unknown hint level leaves the base cost untouched rather than inventing a discount.
             ->and(HintDiscount::price(130, 9))->toBe(130);
+    }
+
+    public function test_prices_the_full_ladder_from_one_base_including_the_none_row(): void
+    {
+        // The detail page's six rows: the base itself, then each client tier priced through price().
+        expect(HintDiscount::priceLadder(130))->toBe([
+            ['key' => 'none', 'label' => 'None', 'discount' => 0, 'price' => 130],
+            ['key' => 'lv1', 'label' => 'Lv1', 'discount' => 10, 'price' => 117],
+            ['key' => 'lv2', 'label' => 'Lv2', 'discount' => 20, 'price' => 104],
+            ['key' => 'lv3', 'label' => 'Lv3', 'discount' => 30, 'price' => 91],
+            ['key' => 'lv4', 'label' => 'Lv4', 'discount' => 35, 'price' => 84],
+            ['key' => 'max', 'label' => 'Lv Max', 'discount' => 40, 'price' => 78],
+        ])
+            // A class that states no cost has no ladder: every price is null, never zero.
+            ->and(HintDiscount::priceLadder(null))->toHaveCount(6)
+            ->and(array_column(HintDiscount::priceLadder(null), 'price'))->each->toBeNull();
     }
 
     public function test_the_service_refuses_the_sum_when_any_price_is_absent(): void

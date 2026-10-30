@@ -446,12 +446,13 @@ return [
         'gold_prerequisites' => ['Burning Spirit' => 'Ignited Spirit'],
 
         /*
-         * The hint discount ladder, read off the `[Global]` Learn screen on 2026-10-03 and printed in
-         * `UMAMUSUME_REFERENCE.md` §1.1.4: `Hint Lvl 1` 10%, Lv2 20%, Lv3 30%, Lv4 35%, `Hint Lvl Max`
-         * 40%. Displayed cost is `floor(base × (1 − discount / 100))`; the one observed rounding case is
-         * Pace Chaser Corners ○ at 84 against a base of 130 (130 × 0.65 = 84.5, floored). The ladder is
-         * not linear past Lv3 (+5 then +5), so the percentages are stated per level rather than derived
-         * from a step. `Lv Max` is a client caption, not a level number, so its key is the string `max`.
+         * The hint discount ladder, read off the `[Global]` Learn screen on `hint_discount_measured_at`
+         * and printed in `UMAMUSUME_REFERENCE.md` §1.1.4: `Hint Lvl 1` 10%, Lv2 20%, Lv3 30%, Lv4 35%,
+         * `Hint Lvl Max` 40%. Displayed cost is `floor(base × (1 − discount / 100))`; the one observed
+         * rounding case is Pace Chaser Corners ○ at 84 against a base of 130 (130 × 0.65 = 84.5, floored).
+         * The ladder is not linear past Lv3 (+5 then +5), so the percentages are stated per level rather
+         * than derived from a step. `Lv Max` is a client caption, not a level number, so its key is the
+         * string `max`.
          *
          * The discount applies when a hint level sits on a skill; a run that has recorded no hint level
          * prices the skill at its base, which is what the planner's own arithmetic states.
@@ -459,6 +460,13 @@ return [
          * @var array<int|string, int>
          */
         'hint_discount' => [1 => 10, 2 => 20, 3 => 30, 4 => 35, 'max' => 40],
+
+        /*
+         * The date the ladder above was read off the `[Global]` Learn screen (68 frames). One home for the
+         * date: the skill detail's provenance row prints it, and the ladder's docblock reads it here
+         * instead of repeating it.
+         */
+        'hint_discount_measured_at' => '2026-10-03',
     ],
 
     /*

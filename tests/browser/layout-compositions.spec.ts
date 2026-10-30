@@ -127,6 +127,7 @@ test.describe('HFW layouts', () => {
             '/training-runs',
             '/umamusume',
             '/skills',
+            '/skills/370',
         ];
 
         for (const mode of ['compact', 'standard', 'wide'] as const) {

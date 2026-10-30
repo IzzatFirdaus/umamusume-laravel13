@@ -877,7 +877,7 @@ Title → area strip → (Database URL only) host h2 "Skill catalog" → GET fil
 
 #### Data Displayed
 
-The D-30-permitted Skill surface only: name, name_ja, sp_cost, type, is_unique, and the stored activation predicates the Condition column prints (`condition_groups`, one entry per group; a group with no predicate is an absence, rendered through `AbsenceValue`). Not rendered, each with a stated reason: icon (column unimported, G-SK-19), description (both English description fields fail the terminology table, G-SK-16/20), rarity/class code (ADR-0011 §3).
+The D-30-permitted Skill surface only: name, name_ja, sp_cost, type, is_unique, and the stored activation predicates the Condition column prints (`condition_groups`, one entry per group; a group with no predicate is an absence, rendered through `AbsenceValue`). Not rendered, each with a stated reason: icon (column unimported, G-SK-19), description (both English description fields fail the terminology table, G-SK-16/20), rarity/class code (ADR-0011 §3 as amended 2026-10-31: the detail prints the export's integer, this list prints neither the integer nor a word).
 
 #### Inputs
 
@@ -951,19 +951,19 @@ Screen-D rows; run-page/skill cross links from SCR-CAT-002 `SkillRow.vue`; suppo
 
 #### Layout / Structure
 
-Header (name + deduped Japanese line, "Back to skill search") → dl (Type, SP cost, Unique) → **Mechanics** (per activation group: condition/precondition as monospace engine expressions, base time ms, effect chips `effect {type}: ±{value}`; footer states these are the source's own data, and that description/awakening thresholds are not recorded) **or** its absence paragraph naming the three missing things → **Held by trainees** in four groups (unique/innate/awakening/event links to catalog detail, unconfirmed forms excluded) → **Provenance** (source link + read date, or "seeded or entered by hand").
+Header (name + deduped Japanese name carried as a `lang="ja"` span; "Back to search" returns to the list it came from with that list's query) → the nine-area subnav → a two-column `g-side` grid. Left: **The source's own engine data** (per activation group: condition/precondition/effects as monospace engine expressions and base time ms; then a meta table of Base cost, **Class code** — the export's integer only — and Unique; a note states the tokens are the export's and names the type word and the ✦ mark as this tool's readings) and **Displayed cost at each hint level** (Hint / Discount / Displayed cost; a None 0% row at the base, then Lv1..Lv Max priced server-side from this skill's own base; a note states the floor rule, the 130 → 84 rounding case, and that no per-run hint level is stored, which is why no row is current). Right: **Readable description** ("No client string." by ruling) → **Related** (Same condition, Same class code, Same class code and type; Global scope, excluding self; a type-filter link labelled for what it filters) → **In your runs** (each run that records the skill: trainee · scenario · run id, the stored acquisition status, the recorded unique-skill level; capped at 20 with the total stated) → **Held by trainees** (four groups, unconfirmed forms excluded) → **Provenance** (data family, Global entries, last read, and the ladder's Client-confirmed date).
 
 #### Data Displayed / Inputs / Actions
 
-Display only; link actions. No editing surface on this screen: the engine writes skills; the Trainer's skill opinions live on runs (C-3).
+name, name_ja, type, sp_cost, is_unique, `condition_groups` (the activation predicate and effect vector), `rarity` as the export's class code integer, the cost ladder computed from `sp_cost` (`HintDiscount::priceLadder`), the three Related counts, and the run rows (`run_skills.status`, `skill_levels.current_level`). Not rendered, each with a stated reason: icon (G-SK-19), description (G-SK-16/20). Display only; link actions. No editing surface: the engine writes skills, and a Trainer's skill opinions live on runs (C-3).
 
 #### Screen States
 
-Loaded; no mechanics recorded (naming absence); no holders ("No trainees recorded with this skill."); unknown/rejected id → 404.
+Loaded; no conditions recorded (the meta table still renders, naming only the missing activation data); no holders ("No trainees recorded with this skill."); no runs ("No run records this skill."); no SP cost (the ladder drops the Displayed cost column and the note says why); no class code or no type word (disclosures); unknown/rejected id → 404.
 
 #### Validation, Security, Accessibility, Responsive, Localization
 
-As SCR-SKL-001 (same view idiom; holder links use slug routes; monospace data blocks are text, selectable).
+As SCR-SKL-001 (same view idiom). Every table uses `table.t` with an sr-only caption and `th scope`; each card is its own named section; absences are `AbsenceValue` disclosures (the 24px compact form, 2.5.8's floor); holder and source links meet the 44px bar; the Japanese name carries `lang="ja"`; `/skills/{id}` is in the 320/390/768 document-overflow sweep.
 
 *Dated note 2026-10-17 (plan slice 1.2): the mechanics block no longer puts horizontal scroll on the document at 390. One cause, four sites: the shell `<main>` could not shrink below its content, so it carries `min-w-0` (`AppLayout.vue`, shared by every screen in the product); each activation group and its `@4xl:col-span-2` and base-time wrappers carry `min-w-0`; the condition and precondition `<dd>`s carry `min-w-0 break-words`, so an engine expression with no space in it breaks inside its own cell; and the Provenance source URL carries `break-all`, because an unbreakable URL overflowed the document the same way the condition string did. Pinned at 390 and 768 by `tests/browser/skills.spec.ts`.*
 
@@ -973,11 +973,11 @@ As SCR-SKL-001 (same view idiom; holder links use slug routes; monospace data bl
 
 #### Dependencies
 
-`Skill`, `CharacterCard` (JSON `whereJsonContains` over the four lists, `json_valid` guarded, missing-column tolerated with `QueryException` narrowing).
+`Skill`, `TrainingRun` (the `skills` pivot via `RunSkill`, and `skillLevels`), `CharacterCard` (JSON `whereJsonContains` over the four lists, `json_valid` guarded, missing-column tolerated with `QueryException` narrowing), `HintDiscount` (the priced ladder), `config('uma.skills.hint_discount_measured_at')`.
 
 #### Implementation References
 
-Page: `resources/js/pages/Skills/Show.vue`; Controller: `SkillController::show` (+`holderRows`, `holders`); Tests: `SkillDetailTest` (asserts the props), `CatalogSkillListsTest` (mirror read), `tests/browser/skills.spec.ts`, `GametoraSkillsParserTest`.
+Page: `resources/js/pages/Skills/Show.vue`; Controller: `SkillController::show` (+`holderRows`, `countSharingConditionString`, `countSharingClassCode`, `countSharingClassCodeAndType`, `runRows`); Service: `App\Services\HintDiscount` (`priceLadder`, `price`); Tests: `SkillDetailTest` (asserts the props), `SkillSpendCoverageTest` (the ladder arithmetic), `CatalogSkillListsTest` (mirror read), `tests/browser/skills.spec.ts`, `GametoraSkillsParserTest`.
 
 #### Current Status
 
@@ -986,6 +986,9 @@ Implemented.
 #### Open Questions / Gaps
 
 - Rendering mechanics expressions is **beyond D-30's current Skill entry**; the widening ask travels in `docs/research-scratch/PLANS-AND-BRIEFS.md` (view comment) — documentation pending an owner ruling.
+- The wireframe's middle Related row sampled the export's gate-key list, which is not stored; both class-code rows count the stored `rarity`, so the app's counts nest (row 3 ≤ row 2) and the card's note states what each row counts.
+
+**Dated note 2026-10-31 (skill detail alignment).** The page is now the wireframe's two-column record with seven cards. The hint ladder prints the full price ladder (None at the base, then Lv1..Lv Max) computed from this skill's own base by `HintDiscount::priceLadder`, with the rule and its one rounding case in the note; `HintDiscount::price` moved from float `floor()` to integer `intdiv()` because 180 × 0.7 evaluated to 125.999… and printed 125 where the client prints 126. The Class code row prints the export's integer (ADR-0011 §3 erratum), the Related card has all three rows (condition string, class code, class code and type), and "In your runs" lists run facts (stored status, recorded unique-skill level) with a note that no hint level is stored. Absences are disclosures; the header's Japanese name carries `lang="ja"`; "Back to search" (and the breadcrumb) return to the list with its filters, including the Database host.
 
 ---
 
@@ -3457,6 +3460,12 @@ claim-by-claim diff would suggest.
 **Not closed by this pass, named here so the screen blocks and the code cannot drift apart:** the journey
 spec's two-element locator (KI-136), the full browser suite (host failed the quiet-box precondition: CPU
 57.7%, 1.4 GB free), R9's snapshot field grouping, and the 82 page-specific claims above that were not concluded.
+
+**Dated correction 2026-10-31 (skill detail alignment).** The `SCR-SKL-002` row above is the 2026-10-30 snapshot
+and stands as written. As of the 2026-10-31 alignment: the hint ladder prices every row from the skill's own base
+(no row is marked current); the Class code row prints the export's integer (ADR-0011 §3 erratum); the Related card
+has all three rows, counting the stored condition string, the stored class code, and the class code with the derived
+type; "In your runs" lists the runs that record the skill; and "Back to search" returns to the filtered list.
 
 ## 5. Workflow Specifications
 
