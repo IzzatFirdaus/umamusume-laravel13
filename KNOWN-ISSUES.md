@@ -3871,7 +3871,7 @@ housekeeping call, not part of this defect.
 **Proven by** `.scratch-uma/mvs_4f49056156564f6c8c5dc2426cdb8c29/corrections/b1-second-blocker-128.md`.
 ## KI-138 — the walk's Train step waits for a button that no longer lives inside the training card
 
-**State:** OPEN. Filed 2026-10-30, fourth blocker while resolving B-1/KI-136/KI-137. Filed per the
+**State:** OPEN. Filed 2026-10-30, fourth blocker while resolving B-1/KI-136/KI-137. Filed per the dispatch boundary, which holds: a fourth one-off locator fix is not applied in this pass. Recommended closure is a full re-baseline pass against the shipped cockpit, not a fourth one-off locator fix. The three other locators in the same walk were fixed one at a time and each revealed the next; the file was written against a cockpit shape that four parity commits have since rewritten.
 dispatch boundary: a fourth locator fix is not applied in this pass.
 
 **Defect.** `full-career-journey.spec.ts:150` clicks
