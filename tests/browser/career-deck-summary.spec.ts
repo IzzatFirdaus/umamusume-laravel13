@@ -47,6 +47,15 @@ async function applyTheme(page: import('@playwright/test').Page, theme: string):
 const summarySection = (page: import('@playwright/test').Page) =>
     page.locator('details[aria-labelledby="deck-summary-heading"]');
 
+/** The disclosure line, which is also the section's only content while it is closed. */
+const disclosure = (page: import('@playwright/test').Page) => summarySection(page).locator('> summary');
+
+/** The section arrives closed, so every case that reads inside it opens it first. */
+async function openSummary(page: import('@playwright/test').Page): Promise<void> {
+    await disclosure(page).click();
+    await expect(summarySection(page)).toHaveAttribute('open', '');
+}
+
 /** Equip the one card the picker narrows to, and wait for the step's own read-back. */
 async function equip(
     page: import('@playwright/test').Page,
@@ -86,7 +95,9 @@ test.describe('Setup step 5 — the deck summary', () => {
         await expect(summary).toBeVisible();
         await expect(summary.getByRole('heading', { level: 2 })).toContainText('Deck summary');
         await expect(summary).toContainText('0 assigned');
-        await expect(summary).toContainText('Nothing assigned yet.');
+
+        await openSummary(page);
+        await expect(summary.locator('> p').nth(1)).toContainText('Nothing assigned yet.');
 
         // The brief places the section above the duplicate rule. Bounding boxes, not DOM order: the rule
         // sits outside the section, so ancestry assertions would pass even if the page moved it below.
@@ -96,6 +107,45 @@ test.describe('Setup step 5 — the deck summary', () => {
         expect(box!.y + box!.height).toBeLessThanOrEqual(rule!.y);
     });
 
+    test('arrives closed, states the count on the closed line, and remembers no opening', async ({ page }) => {
+        await page.setViewportSize({ width: 320, height: 900 });
+        await hydrate(page, '/career/setup/deck');
+        await equip(page, 1, 'Agnes Joy', SSR_CARD);
+
+        // The shipped default: closed, with the assigned count as the whole statement on the line.
+        const summary = summarySection(page);
+        await expect(summary).not.toHaveAttribute('open');
+        await expect(disclosure(page)).toContainText('1 assigned');
+        await expect(summary.locator('> p').first()).toBeHidden();
+
+        // A closed section holds no table in the accessibility tree at all, which is the arrival reading
+        // 1.4.10 asks for: the wide reference table is not on the page until the Trainer asks for it.
+        await expect(summary.getByRole('table')).toHaveCount(0);
+
+        for (const theme of ['light', 'dark']) {
+            await applyTheme(page, theme);
+
+            const reading = await page.evaluate(() => {
+                window.scrollTo(400, 0);
+
+                return { scroll: document.documentElement.scrollWidth, pan: window.scrollX };
+            });
+
+            expect(reading.scroll, `${theme}: the closed section still widens the page`).toBe(320);
+            expect(reading.pan, `${theme}: the page pans with the section closed`).toBe(0);
+        }
+
+        await openSummary(page);
+        // One card assigned, two tables open: the assigned-cards table and that card's own ladder.
+        await expect(summary.getByRole('table')).toHaveCount(2);
+
+        // Away and back. Nothing persists the open state, so the step re-arrives at the preview rather
+        // than wherever the last visit left it.
+        await hydrate(page, '/career/setup/target');
+        await hydrate(page, '/career/setup/deck');
+        await expect(summarySection(page)).not.toHaveAttribute('open');
+    });
+
     test('names an equipped card, its ownership and its ladder from unbroken to Max Limit Break', async ({ page }) => {
         await page.route('**/artwork/**', (route) => route.abort());
         await hydrate(page, '/career/setup/deck');
@@ -103,6 +153,7 @@ test.describe('Setup step 5 — the deck summary', () => {
 
         const summary = summarySection(page);
         await expect(summary).toContainText('1 assigned');
+        await openSummary(page);
 
         const row = summary.getByRole('table').first().locator('tbody > tr');
         await expect(row).toHaveCount(1);
@@ -146,37 +197,48 @@ test.describe('Setup step 5 — the deck summary', () => {
 
     test('contains its tables inside a focusable region at 320px and nowhere scrolls the page', async ({ page }) => {
         await assignThree(page);
+        await openSummary(page);
 
         const summary = summarySection(page);
         await expect(summary).toContainText('3 assigned');
 
-        // The audit's acceptance figure, on the populated state and in both themes: the document is exactly
-        // as wide as the viewport, so no table escapes it (WCAG 1.4.10 reflow).
-        const scrollWidth: Record<string, number> = {};
+        /**
+         * The audit's acceptance figure, on the populated state and in both themes: the document is exactly
+         * as wide as the viewport, so no table escapes it (WCAG 1.4.10 reflow), and at 320 px that width is
+         * 320. Measured with the section OPEN, which is the half default-closed does not cover.
+         */
+        async function measure(label: string): Promise<void> {
+            for (const width of WIDTHS) {
+                await page.setViewportSize({ width, height: 900 });
 
-        for (const width of WIDTHS) {
-            await page.setViewportSize({ width, height: 900 });
+                for (const theme of ['light', 'dark']) {
+                    await applyTheme(page, theme);
 
-            for (const theme of ['light', 'dark']) {
-                await applyTheme(page, theme);
-                scrollWidth[`${width}-${theme}`] = await page.evaluate(() => ({
-                    scroll: document.documentElement.scrollWidth,
-                    client: document.documentElement.clientWidth,
-                    pan: (window.scrollTo(400, 0), window.scrollX),
-                })).then((r) => {
-                    expect(r.scroll, `${width} ${theme}: the page scrolls sideways`).toBe(r.client);
-                    expect(r.pan, `${width} ${theme}: the document pans horizontally`).toBe(0);
+                    const r = await page.evaluate(() => ({
+                        scroll: document.documentElement.scrollWidth,
+                        client: document.documentElement.clientWidth,
+                        pan: (window.scrollTo(400, 0), window.scrollX),
+                    }));
 
-                    return r.scroll;
-                });
+                    expect(r.scroll, `${label} ${width} ${theme}: the page scrolls sideways`).toBe(r.client);
+                    expect(r.pan, `${label} ${width} ${theme}: the document pans horizontally`).toBe(0);
+
+                    if (width === 320) {
+                        expect(r.scroll, `${label} ${width} ${theme}: scrollWidth is not the viewport`).toBe(320);
+                    }
+                }
             }
         }
 
-        for (const theme of ['light', 'dark']) {
-            expect(scrollWidth[`320-${theme}`], `320 ${theme}: documentElement.scrollWidth is not 320`)
-                .toBe(320);
-        }
+        await measure('3 assigned');
 
+        // The same sweep at the deck's widest state: every slot filled, so seven regions are open at once.
+        await equip(page, 3, 'Your Team Ace', 'Mejiro McQueen [Your Team Ace]');
+        await equip(page, 4, 'Piece of Mind', 'Super Creek [Piece of Mind]');
+        await equip(page, 5, 'Poolside', 'Narita Taishin [Poolside High Tides]');
+        await expect(summary).toContainText('6 assigned');
+
+        await measure('6 assigned');
 
         // The tables scroll in their own region, which a keyboard user must be able to reach: a scroll
         // container with no focus stop cannot be scrolled by the arrow keys (WCAG 2.1.1).
@@ -185,7 +247,7 @@ test.describe('Setup step 5 — the deck summary', () => {
         await expect(region).toHaveCSS('overflow-x', 'auto');
 
         const scrolls = page.getByRole('region', { name: /values by level, scrollable/ });
-        await expect(scrolls).toHaveCount(3);
+        await expect(scrolls).toHaveCount(6);
 
         await page.setViewportSize({ width: 320, height: 900 });
         await applyTheme(page, 'light');
@@ -196,9 +258,96 @@ test.describe('Setup step 5 — the deck summary', () => {
         expect(await page.evaluate(() => document.documentElement.scrollLeft)).toBe(0);
     });
 
+    test('every focusable inside the scroll regions shows its whole ring at 320px', async ({ page }) => {
+        await assignThree(page);
+        await openSummary(page);
+        await page.setViewportSize({ width: 320, height: 900 });
+
+        const regions = [
+            page.getByRole('region', { name: 'Assigned support cards, scrollable' }),
+            page.getByRole('region', { name: /values by level, scrollable/ }).first(),
+        ];
+
+        let seen = 0;
+
+        for (const theme of ['light', 'dark']) {
+            await applyTheme(page, theme);
+
+            for (const region of regions) {
+                const focusables = await region.locator('a, summary, button, [tabindex]').all();
+                seen += focusables.length;
+
+                // The house ring is `outline: 2px` with a 2px offset (`app.css`'s `:focus-visible` rule), so
+                // a whole ring reaches 4 px outside the element's box. `contain-paint` on the region clips
+                // descendant painting at that box, which is what this measures: an element sitting entirely
+                // inside the scrollport must still show all four sides of its ring.
+                //
+                // One real Tab first: `:focus-visible` answers to the input modality, and programmatic focus
+                // after a keyboard press carries the ring the way a keyboard user's does.
+                await page.keyboard.press('Tab');
+                const name = await region.getAttribute('aria-label');
+
+                for (const [index, el] of focusables.entries()) {
+                    const reading = await el.evaluate((node, args) => {
+                        const host = node.closest('[role="region"]') as HTMLElement;
+                        host.scrollLeft = 0;
+                        node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                        (node as HTMLElement).focus();
+
+                        const s = getComputedStyle(node);
+                        const c = host.getBoundingClientRect();
+                        const r = node.getBoundingClientRect();
+                        const reach = (parseFloat(s.outlineWidth) || 0) + (parseFloat(s.outlineOffset) || 0);
+
+                        return {
+                            id: args.index,
+                            label: (node.getAttribute('aria-label') ?? node.textContent ?? node.tagName)
+                                .trim().replace(/\s+/g, ' ').slice(0, 28),
+                            outlineStyle: s.outlineStyle,
+                            outlineWidth: s.outlineWidth,
+                            ring: reach,
+                            element: { l: r.left, rt: r.right, t: r.top, b: r.bottom },
+                            clip: { l: c.left, rt: c.right, t: c.top, b: c.bottom },
+                            fullyInside: r.left >= c.left - 0.5 && r.right <= c.right + 0.5
+                                && r.top >= c.top - 0.5 && r.bottom <= c.bottom + 0.5,
+                        };
+                    }, { index });
+
+                    if (! reading.fullyInside) {
+                        // An element that straddles the scrollport edge is cut by the scroll, not by the
+                        // containment: the same geometry would clip without `contain-paint`.
+                        continue;
+                    }
+
+                    expect(reading.outlineStyle, `${theme} ${name} [${reading.label}] has no visible ring`)
+                        .not.toBe('none');
+                    expect(reading.ring, `${theme} ${name} [${reading.label}] draws no ring`).toBeGreaterThan(0);
+
+                    const clipped = reading.element.l - reading.ring < reading.clip.l - 0.5
+                        || reading.element.rt + reading.ring > reading.clip.rt + 0.5
+                        || reading.element.t - reading.ring < reading.clip.t - 0.5
+                        || reading.element.b + reading.ring > reading.clip.b + 0.5;
+
+                    expect(
+                        clipped,
+                        `${theme} ${name} [${reading.label}] ring cut by the region: `
+                        + `${JSON.stringify({ e: reading.element, c: reading.clip, ring: reading.ring })}`,
+                    ).toBe(false);
+                }
+            }
+        }
+
+        // The non-vacuity guard, on the state three cards make: one link per assigned card, and an
+        // `AbsenceValue` disclosure for the level and the tier while those are unrecorded. The ladder
+        // region is reference numbers and holds no focusable, which is its own measured answer.
+        // One theme's count is enough: it is the same DOM in both.
+        expect(seen, 'no focusable was measured inside either region').toBeGreaterThanOrEqual(3);
+    });
+
     test('prints the rarity ceiling in ink, not in the risk hue', async ({ page }) => {
         await hydrate(page, '/career/setup/deck');
         await equip(page, 2, 'Digital Tracen', R_CARD);
+        await openSummary(page);
         await page.getByRole('spinbutton', { name: 'Level for Slot 2' }).fill('45');
 
         // The sentence is the tier cell's own span: `getByText('Above the ladder', { exact: true })` finds
@@ -274,27 +423,30 @@ test.describe('Setup step 5 — the deck summary', () => {
         }
     });
 
-    test('collapses to its heading, and the collapsed heading still states the count', async ({ page }) => {
+    test('collapses back to its heading, which still states the count', async ({ page }) => {
         await hydrate(page, '/career/setup/deck');
         await equip(page, 1, 'Agnes Joy', SSR_CARD);
 
         const summary = summarySection(page);
-        const disclosure = summary.locator('> summary');
+        const line = summary.locator('> summary');
         const assignedTable = summary.locator('table').first();
 
-        // Open on arrival: the section earns its place by being read, not by being discovered.
+        // Closed on arrival, and the line carries the count while it is closed: the state a Trainer reads
+        // without asking for the detail.
+        await expect(assignedTable).toBeHidden();
+        await expect(line).toContainText('1 assigned');
+
+        await openSummary(page);
         await expect(assignedTable).toBeVisible();
         await expect(assignedTable.locator('thead th').first()).toHaveText('Slot');
 
-        await disclosure.click();
+        await line.click();
 
+        await expect(summary).not.toHaveAttribute('open');
         await expect(assignedTable).toBeHidden();
         await expect(summary.locator('section').first()).toBeHidden();
-        await expect(disclosure).toContainText('1 assigned');
-        await expect(disclosure).toBeVisible();
-
-        await disclosure.click();
-        await expect(assignedTable).toBeVisible();
+        await expect(line).toContainText('1 assigned');
+        await expect(line).toBeVisible();
     });
 
     test('sizes the disclosure to the 44px contract', async ({ page }) => {
@@ -311,6 +463,7 @@ test.describe('Setup step 5 — the deck summary', () => {
         await equip(page, 1, 'Agnes Joy', SSR_CARD);
 
         const summary = summarySection(page);
+        await openSummary(page);
         const tierCell = summary.getByRole('table').first().locator('tbody > tr th, tbody > tr td').last();
 
         // Equipping posts the slot with no level, so before a keystroke the tier is the named absence.
@@ -339,6 +492,7 @@ test.describe('Setup step 5 — the deck summary', () => {
         await equip(page, 2, 'Digital Tracen', R_CARD);
 
         const summary = summarySection(page);
+        await openSummary(page);
         const row = summary.getByRole('table').first().locator('tbody > tr');
         await expect(row).toContainText(R_CARD);
         await expect(row.getByText('R', { exact: true })).toBeVisible();

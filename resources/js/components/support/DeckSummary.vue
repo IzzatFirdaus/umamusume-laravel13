@@ -144,13 +144,22 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
 </script>
 
 <template>
-    <details class="card mt-4" aria-labelledby="deck-summary-heading" open>
+    <details class="card mt-4" aria-labelledby="deck-summary-heading">
         <!-- A native `<details>` carries the disclosure, its `expanded` state, the keyboard path and the
              marker, so none of that is hand-rolled here (`Cockpit.vue`'s Career tools card is the same
              shape). `<summary>` is a `display: list-item` box, which is the only display that paints the
              marker (`AbsenceValue.vue`'s measured note), and the heading stays inside it so the collapse
              control is also the section's entry in the outline. The count sits in the heading, so a
-             collapsed card still says how much it is hiding. -->
+             collapsed card still says how much it is hiding.
+
+             No `open`, and no controlled state: this is a reference table, not the decision input, and the
+             decision surface is the six slots and the diagnostics beside them. `IA-4` (an index previews,
+             a detail holds) and `GP-8` (only what the moment needs) both read one way, and the closed
+             default is also what makes arrival at a narrow viewport safe: the seven-column table is the
+             canonical two-dimensional exemption under 1.4.10 and it scrolls inside its own region when
+             opened, but a section that starts closed never puts it on the page at all. Nothing persists
+             the state, so every visit to the step starts from the preview rather than from wherever the
+             last one left off. -->
         <summary class="min-h-11 cursor-pointer">
             <h2 id="deck-summary-heading">
                 Deck summary
@@ -179,13 +188,20 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
                  320 px viewport (the 414 px table reports its scrollable overflow out of a clipping block
                  nested in a `<details>`), and of the three candidates measured on the rendered page,
                  `container-type: inline-size` and `w-full min-w-0` left it at 393 while paint containment
-                 returned `documentElement.scrollWidth` to 320, the region still scrollable and its 2 px
-                 focus outline still painted. -->
+                 returned `documentElement.scrollWidth` to 320, the region still scrollable.
+                 `p-2 scroll-p-2` is what that containment then costs, and both halves are measured rather
+                 than assumed: at 320 px the Level column's `N/A` disclosure lands flush against the
+                 region's right edge when the browser brings a focused element into view (element right
+                 287.17 against a clip at 287), and `contain-paint` cuts the house ring there (`2px`
+                 outline, `2px` offset, so 4 px of reach). Padding alone did not fix it — the flush scroll
+                 ignores it — so the region carries scroll padding as well, which is what focus-scrolling
+                 honours. Neither moves a page edge: the region is border-box, the table still scrolls
+                 inside it, and `documentElement.scrollWidth` still reads 320 at 320 px. -->
             <div
                 role="region"
                 tabindex="0"
                 aria-label="Assigned support cards, scrollable"
-                class="mt-3 contain-paint overflow-x-auto focus:outline-2 focus:outline-offset-2"
+                class="mt-3 contain-paint overflow-x-auto p-2 scroll-p-2 focus:outline-2 focus:outline-offset-2"
             >
             <table class="w-full text-sm">
                 <caption class="sr-only">The assigned support cards, how each is held, and its level</caption>
@@ -278,7 +294,7 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
                     role="region"
                     tabindex="0"
                     :aria-label="`${entry.card.name} values by level, scrollable`"
-                    class="mt-1 contain-paint overflow-x-auto focus:outline-2 focus:outline-offset-2"
+                    class="mt-1 contain-paint overflow-x-auto p-2 scroll-p-2 focus:outline-2 focus:outline-offset-2"
                 >
                 <table class="w-full text-sm">
                     <caption class="sr-only">
