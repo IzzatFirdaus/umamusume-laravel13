@@ -153,24 +153,16 @@ class SupportCardEffects
     /**
      * The card's effects at a level the run reached, interpolated between the stated anchors.
      *
-     * `forLevel()` derives the reached effect values for a card at a given level by linear interpolation
-     * between the two anchors bracketing `$level` on `support_cards.effects`. Below the lowest anchor,
-     * clamp to the lowest anchor's value. At or above the highest anchor, return the highest anchor's
-     * value (equivalent to `atCap()`). The method stores nothing — reached values are derived per
-     * ADR-0029 D2, never a per-run column. Source: UMAMUSUME_REFERENCE.md §1.4.2 (card level drives
-     * support effects only, not teammate stats).
+     * `forLevel()` answers the same question of a card id; `atLevel()` answers it of a card already in
+     * hand, because the deck step reads the ladder for all six equipped cards at once and six `find()`
+     * calls per tier would be thirty-two queries for rows the page already loaded. Same `valueAt()`,
+     * same floor rule, so the two cannot drift.
      *
      * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>|null  $dictionary
      * @return list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>
      */
-    public static function forLevel(int $cardId, int $level, ?array $dictionary = null): array
+    public static function atLevel(SupportCard $card, int $level, ?array $dictionary = null): array
     {
-        $card = SupportCard::query()->find($cardId);
-
-        if ($card === null) {
-            return [];
-        }
-
         $dictionary ??= self::dictionary();
         $rows = [];
 
@@ -199,6 +191,26 @@ class SupportCardEffects
         }
 
         return $rows;
+    }
+
+    /**
+     * The card's effects at a level the run reached, interpolated between the stated anchors.
+     *
+     * `forLevel()` derives the reached effect values for a card at a given level by linear interpolation
+     * between the two anchors bracketing `$level` on `support_cards.effects`. Below the lowest anchor,
+     * clamp to the lowest anchor's value. At or above the highest anchor, return the highest anchor's
+     * value (equivalent to `atCap()`). The method stores nothing — reached values are derived per
+     * ADR-0029 D2, never a per-run column. Source: UMAMUSUME_REFERENCE.md §1.4.2 (card level drives
+     * support effects only, not teammate stats).
+     *
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>|null  $dictionary
+     * @return list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>
+     */
+    public static function forLevel(int $cardId, int $level, ?array $dictionary = null): array
+    {
+        $card = SupportCard::query()->find($cardId);
+
+        return $card === null ? [] : self::atLevel($card, $level, $dictionary);
     }
 
     /**

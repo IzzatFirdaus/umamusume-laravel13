@@ -352,10 +352,9 @@ class SupportCardController extends Controller
             // than zero, which is why the screen cannot print one cell per break.
             'effectStages' => SupportCardEffects::stages($card, $dictionary),
             // The client's card-level cap for this rarity, so the detail can print what a fully broken
-            // copy reaches without inventing a stored level: the export's effect ladder stops at 50 for
-            // SSR, 45 for SR and 40 for R (`UMAMUSUME_REFERENCE.md` §1.4.2), which is the same set the
-            // in-client capture confirms.
-            'levelCap' => $this->levelCap($card->rarity),
+            // copy reaches without inventing a stored level: `CardRarity::levelAtBreak()` is the one
+            // owner of the base-plus-five-per-break ladder (`UMAMUSUME_REFERENCE.md` §1.4.2).
+            'levelCap' => $card->rarity->levelAtBreak(CardRarity::MAX_BREAKS),
             // Runs own their six slots, so one card can sit in several runs without conflict. The
             // detail answers "where is this used" from the slots rather than from a card-level owner,
             // and each row's level is the level that run recorded, not a catalogue figure.
@@ -367,22 +366,6 @@ class SupportCardController extends Controller
                 'url' => route('catalog.show', $trainee->slug),
             ],
         ]);
-    }
-
-    /**
-     * The level a card of this rarity reaches at four breaks.
-     *
-     * Four breaks at +5 each from the unbroken base (SSR 30, SR 25, R 20) give 50 / 45 / 40, and the
-     * export's own effect ladder stops at exactly those levels per rarity, so the cap is a property of
-     * the rarity rather than a stored column (`UMAMUSUME_REFERENCE.md` §1.4.2).
-     */
-    private function levelCap(CardRarity $rarity): int
-    {
-        return match ($rarity) {
-            CardRarity::ThreeStar => 50,
-            CardRarity::TwoStar => 45,
-            CardRarity::OneStar => 40,
-        };
     }
 
     /**
