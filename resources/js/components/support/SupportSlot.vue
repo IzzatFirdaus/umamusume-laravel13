@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ArtworkSlot from '../ArtworkSlot.vue';
 import SupportTypeMark from './SupportTypeMark.vue';
+import { computed } from 'vue';
 
 /*
  * One of the six deck slots (SCREEN-007).
@@ -42,6 +43,13 @@ interface SlotCard {
     scenario_link: 'linked' | 'not_linked' | 'unknown';
     scenario_link_note: string | null;
     effects: Effect[];
+    /**
+     * The card's published level ladder, unbroken tier first. Optional because a card row that does not
+     * print a ladder sends none; only the top tier's level is read here, and it is read as the ceiling of
+     * the level field. The rarity's ceiling is a published fact (`CardRarity::levelAtBreak()`), so the
+     * server sends it and this control never derives it from the rarity word.
+     */
+    ladder?: { level: number }[];
 }
 
 const props = defineProps<{
@@ -83,6 +91,14 @@ const emit = defineEmits<{
 function onLevel(event: Event): void {
     emit('level', props.position, (event.target as HTMLInputElement).value);
 }
+
+/**
+ * The highest level this slot's card can hold: the top tier of the ladder the server sent for it, which is
+ * that rarity's four-break ceiling (`CardRarity::levelAtBreak()`). A card row that sends no ladder falls
+ * back to 50, the highest ceiling any rarity has, so the field bounds what the payload states and never
+ * guesses what it does not.
+ */
+const levelCeiling = computed(() => props.card?.ladder?.at(-1)?.level ?? 50);
 
 /**
  * The focus target a replacement returns to, so a keyboard user is put back on the row they just
@@ -187,14 +203,18 @@ function focusRow(): void {
         </div>
 
         <div class="flex flex-wrap items-end gap-3 border-t border-rule-soft pt-2">
-            <!-- ADR-0029 D1: the level the card was at in this run, a numerator only. The cap and the
-                 limit-break count are collection state ADR-0014 declines and this control never asks for. -->
+            <!-- ADR-0029 D1: the level the card was at in this run, a numerator only. How many breaks the
+                 Trainer's own copy has, and whether they own one at all, are collection state ADR-0014
+                 declines and this control never asks for. What it does bound the field with is the rarity's
+                 published ceiling, read off the ladder the server sends rather than a number copied into
+                 this file, and `StoreDeckRequest` refuses the same bound so a value typed past the top
+                 cannot be saved. -->
             <div v-if="card" class="flex flex-col gap-1">
                 <span class="text-xs text-ink-muted">Level</span>
                 <input
                     type="number"
                     min="1"
-                    max="50"
+                    :max="levelCeiling"
                     class="min-h-11 w-20 rounded-md border border-rule bg-raised px-2 text-sm text-ink"
                     :value="cardLevel ?? ''"
                     :aria-label="`Level for ${label}`"

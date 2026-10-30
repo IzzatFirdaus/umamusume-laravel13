@@ -1794,12 +1794,12 @@ Six position slots, position six always labelled "Friends" whatever card it hold
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | Empty deck        | Every slot prints "Not equipped" with the next action; an empty deck is legal and rendered as a named absence.                          |
 | One picker open   | `?deck_slot=` names the slot being edited; closed slots post hidden inputs, and only one picker is open at a time.                      |
-| Refused write     | A duplicate card or an id outside the catalogue re-renders with the message ("Break the duplicate instead."); nothing is written.       |
+| Refused write     | A duplicate card, an id outside the catalogue, or a level above the card's rarity ceiling re-renders with the message ("Break the duplicate instead.", "Slot 3 cannot record Lvl 45: an R card reaches Lvl 40 at four breaks and no further."); nothing is written, and the level the slot already held stays held. *Dated note 2026-10-30 (audit AUD-20261030-001, F-03): the third refusal is new. `StoreDeckRequest::withValidator()` bounds each position's level by `CardRarity::levelAtBreak(CardRarity::MAX_BREAKS)` and names the position with `DeckSlot::positionLabel()`, the same words the slot prints; the wizard's step 5 (`SCR-CAR-009`) is the other caller of that request, and its level field reports the same ceiling as its `max`, read off the ladder the server sends rather than a number copied into the component.* |
 | Ownership         | Client-side `OWNED`/`RENTED` toggles; a reload returns the slot to Owned, disclosed because the table has no column to hold the flag.   |
 
 #### Validation & Error Handling
 
-`DeckPickerSearchRequest` for the facet query and `StoreDeckRequest` for the write: exactly six positions, cards that exist, no duplicate, and the off-dictionary flag refused. The write deletes and re-inserts all six rows in one transaction, so a slot is a position.
+`DeckPickerSearchRequest` for the facet query and `StoreDeckRequest` for the write: exactly six positions, cards that exist, no duplicate, the off-dictionary flag refused, and a level no higher than the card's own rarity ceiling. The write deletes and re-inserts all six rows in one transaction, so a slot is a position.
 
 #### Persistence
 

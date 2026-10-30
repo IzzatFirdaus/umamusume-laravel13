@@ -138,6 +138,10 @@ test.describe('Setup step 5 — the deck summary', () => {
         }
 
         await expect(summary).toContainText('not a reading of your collection');
+
+        // AUD-20261030-001 F-03: the level field is bounded by the card's own ceiling, which the payload
+        // states (the top tier of the ladder it sends) rather than a number this file copies.
+        await expect(page.getByRole('spinbutton', { name: 'Level for Slot 1' })).toHaveAttribute('max', '50');
     });
 
     test('contains its tables inside a focusable region at 320px and nowhere scrolls the page', async ({ page }) => {
@@ -341,8 +345,10 @@ test.describe('Setup step 5 — the deck summary', () => {
 
         await page.getByRole('spinbutton', { name: 'Level for Slot 2' }).fill('45');
 
-        // The sentence prints on the typed number, before any write, which is the point of it: the
-        // section reads the form, not the saved row.
+        // The field reports the R ceiling (AUD-20261030-001 F-03), a keystroke can still pass it, and the
+        // save refuses the value: `StoreDeckRequest` bounds the level to the same ladder this section
+        // prints. The sentence appears on the typed number, before any write, which is the point of it.
+        await expect(page.getByRole('spinbutton', { name: 'Level for Slot 2' })).toHaveAttribute('max', '40');
         await expect(row).toContainText('Above the ladder');
         await expect(row).toContainText('No break takes an R card past Lvl 40');
     });

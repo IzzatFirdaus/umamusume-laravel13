@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Enums\CardRarity;
 use App\Models\DeckSlot;
+use App\Models\SupportCard;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -93,6 +95,56 @@ class StoreDeckRequest extends FormRequest
 
             if ($ids !== array_unique($ids)) {
                 $validator->errors()->add('deck', 'The same card cannot be equipped twice. Break the duplicate instead.');
+            }
+
+            // A level is the numerator a run records (`ADR-0029` D1); the ceiling is the rarity's, so a
+            // level past it is a state the client cannot hold. `max:50` above is the highest ceiling any
+            // rarity has, which is why an R card at 45 passed the field rule and had to be refused here.
+            // The bound comes from the same `CardRarity` ladder the deck summary prints, so the two
+            // surfaces cannot disagree about a cap, and the refusal names the position in the words the
+            // slot itself prints (`DeckSlot::positionLabel()`).
+            $entered = [];
+
+            foreach ($deck as $position => $row) {
+                $level = is_array($row) ? ($row['card_level'] ?? null) : null;
+
+                if ($level !== null && $level !== '') {
+                    $entered[(int) $position] = (int) $level;
+                }
+            }
+
+            if ($entered === []) {
+                return;
+            }
+
+            $cards = SupportCard::query()
+                ->whereIn('id', $ids)
+                ->get(['id', 'rarity'])
+                ->keyBy('id');
+
+            foreach ($entered as $position => $level) {
+                $card = $cards->get((int) ($deck[$position]['support_card_id'] ?? 0));
+
+                // A card the catalogue does not hold already carries its own refusal above; a second
+                // message about its ceiling would describe a card this request has not read.
+                if ($card === null) {
+                    continue;
+                }
+
+                $cap = $card->rarity->levelAtBreak(CardRarity::MAX_BREAKS);
+
+                if ($level > $cap) {
+                    $validator->errors()->add(
+                        "deck.{$position}.card_level",
+                        sprintf(
+                            '%s cannot record Lvl %d: an %s card reaches Lvl %d at four breaks and no further.',
+                            DeckSlot::positionLabel($position),
+                            $level,
+                            $card->rarity->word(),
+                            $cap,
+                        ),
+                    );
+                }
             }
         });
     }
