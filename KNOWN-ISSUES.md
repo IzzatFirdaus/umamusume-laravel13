@@ -3871,7 +3871,9 @@ housekeeping call, not part of this defect.
 **Proven by** `.scratch-uma/mvs_4f49056156564f6c8c5dc2426cdb8c29/corrections/b1-second-blocker-128.md`.
 ## KI-138 — the walk's Train step waits for a button that no longer lives inside the training card
 
-**State:** OPEN. Filed 2026-10-30, fourth blocker while resolving B-1/KI-136/KI-137. Filed per the dispatch boundary, which holds: a fourth one-off locator fix is not applied in this pass. Recommended closure is a full re-baseline pass against the shipped cockpit, not a fourth one-off locator fix. The three other locators in the same walk were fixed one at a time and each revealed the next; the file was written against a cockpit shape that four parity commits have since rewritten.
+**State:** RESOLVED 2026-10-30 by `83105a45`, which carries the re-baseline pass this entry
+recommended: the walk now picks the discipline on the screen's own radio list and commits through the
+savebar's `Record turn N`. Filed 2026-10-30, fourth blocker while resolving B-1/KI-136/KI-137. Filed per the dispatch boundary, which holds: a fourth one-off locator fix is not applied in this pass. Recommended closure is a full re-baseline pass against the shipped cockpit, not a fourth one-off locator fix. The three other locators in the same walk were fixed one at a time and each revealed the next; the file was written against a cockpit shape that four parity commits have since rewritten.
 dispatch boundary: a fourth locator fix is not applied in this pass.
 
 **Defect.** `full-career-journey.spec.ts:150` clicks
@@ -3900,7 +3902,8 @@ Not applied here: fourth-blocker boundary.
 
 ## KI-139 — the walk's deck door lives inside a disclosure the walk never opens
 
-**State:** OPEN. Filed 2026-10-30, fifth blocker resolving B-1/KI-136/KI-137/KI-138. KI-138 is
+**State:** RESOLVED 2026-10-30 by `83105a45` (see the resolution at the end of this entry). Filed
+2026-10-30, fifth blocker resolving B-1/KI-136/KI-137/KI-138. KI-138 is
 fixed in the working tree, and fixing it moved the walk to this line. Per the dispatch boundary a
 fifth one-off patch is not applied; this entry is the aggregate close the previous four entries
 pointed at.
@@ -3947,3 +3950,33 @@ present"), seeded with the five rows above. The deck step should take the uncond
 
 **Proven by** `.scratch-uma/mvs_c29bb439b4eb461ab84682c2f1604577/corrections/journey-pass5-176.md`
 and `.scratch-uma/mvs_c29bb439b4eb461ab84682c2f1604577/journey-run1.json`.
+
+**RESOLVED 2026-10-30 by `83105a45`.** The recommended re-baseline pass ran: every step after `:145`
+was read against the shipped screens and landed as one commit, rather than a sixth one-off patch.
+The deck step now takes the always-rendered `Run deck` door in "Where to go", and it also became a
+genuine write — it opens the picker's own collapsed disclosure (`Builder.vue:351`; a slot door only
+re-queries with `slot`, it does not open the panel), equips a card, flags the slot owned, saves
+through the savebar's `Save deck`, and reads the result back from storage. The assertions the old
+steps made passed vacuously, because the builder draws all six slots whether or not a deck is
+stored.
+
+Four further stale locators fell out of the same reading, which is the confirmation the pattern
+predicted:
+
+| Line | Assumed | Ships |
+|---|---|---|
+| `:197` | one `Choose a card for Slot N` per slot | `Slot 6 · Friends`, and a filled slot draws `Replace the card in <slot>` (`SupportSlot.vue:241`, `TrainingRunController.php:349`) |
+| `:218` | the save answers with a flash the walk can read | `Deck saved.` is a client-side banner that clears after five seconds (`Flash.vue:24`), so the walk proves the write by the redirect plus the reload read-back instead |
+| `:232` | the race planner's heading is `Race planner` | `Race planner` is the eyebrow; the heading is `Plan the calendar` (`RacePlanner.vue:185-186`) |
+| `:236` | `Skill Point coverage` renders on arrival | the panel sits inside the screen's one collapsed disclosure (`SkillsPlanner.vue:446-447`) |
+
+Two doors were also re-pointed rather than removed: the Result screen's banking door is the
+`Bank as a veteran` anchor to `runs.veteran` (`Result.vue:255`), and the Save Veteran submit's
+accessible name is its own text, `Save Veteran` (`SaveVeteran.vue:412`). The Veteran screen prints
+`umamusume.name` alone while the wizard echo joins the name with the card title
+(`TraineeSelect.vue:575-579`, `SaveVeteranController.php:68`), so the walk derives the record name
+instead of asserting the picker card's name against the record.
+
+Green in a session-private pair: `PLAYWRIGHT_PORT=8187`, JSON reporter `1 passed`. Flow coverage
+moves 2 of 5 to 3 of 5; the standing gaps are snapshot, import and save-veteran, which have
+page-level specs only.

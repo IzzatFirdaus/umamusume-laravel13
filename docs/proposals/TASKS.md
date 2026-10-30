@@ -1756,6 +1756,14 @@ insertions / 17 deletions. They were the S3 dash removal plus a `rounded-[var(--
 > flow's start, asserts the URL after each primary, and deletes anything it creates in
 > `afterEach` (`tests/browser/wizard-flow.spec.ts` is the pattern).
 
+- **2026-10-30, `83105a45`: KI-139 closed, flow coverage 3 of 5.** The whole-career walk was
+  re-baselined against the shipped cockpit as one pass rather than a sixth one-off locator patch, and
+  is green in a session-private pair (`PLAYWRIGHT_PORT=8187`, JSON reporter 1 passed). Flow coverage
+  moves from the 1 of 5 recorded above — `wizard-flow.spec.ts` green, `full-career-journey.spec.ts`
+  red and peer-owned — to **3 of 5**. The two standing gaps are snapshot, import and save-veteran,
+  which still have page-level specs only. `SCREEN_SPEC.md` §4.25's standing-rule paragraph carries the
+  same figure.
+
 This pass committed nothing and staged nothing.
 
 **State moved again during the pass (measured at `868c173c`).** The records above stand at their own

@@ -3373,9 +3373,12 @@ authoritative description of everything the pass did not touch.
 | SCR-SYS-001 help | `GET /help` | The tag legend renders through the shipped `.trust-calculated` / `.trust-estimated` / `.trust-unknown` primitives instead of one flat `.tag`, so the three levels are visually distinct on the page whose job is distinguishing them. The meaning sentences are unchanged. | `4c360b7e` |
 
 **Standing rule recorded in `AGENTS.md` §9 by this same pass.** Every flow a user completes needs a spec
-that walks it end to end; a page spec is not a substitute. Flow coverage at the end of the pass is **1 of 5**
-(`wizard-flow.spec.ts` green; `full-career-journey.spec.ts` red and peer-owned, KI-136; snapshot, import and
-save-veteran have page-level specs only).
+that walks it end to end; a page spec is not a substitute. Flow coverage is now **3 of 5** after the
+2026-10-30 re-baseline of `full-career-journey.spec.ts` (`83105a45`, closing KI-139):
+`wizard-flow.spec.ts` and `full-career-journey.spec.ts` are both green in session-private pairs; the
+two remaining gaps are snapshot, import and save-veteran, which have page-level specs only. The walk
+was **1 of 5** at the end of the 2026-10-28 pass, when `full-career-journey.spec.ts` was red and
+peer-owned (KI-136).
 
 **Withdrawn after re-measurement.** The sweep first read the legacy builder's parent control as an
 unshipped "radios, not checkboxes" shape. The control is a single `<select>` bound to one `legacy_id` per
