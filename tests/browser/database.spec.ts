@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe, openAllDisclosures } from '../utils/accessibility';
+import { removeRaceSlots, seedRaceSlots } from '../utils/race-slots';
 
 /*
  * Rendered-copy evidence for the Database hub and its five areas (SCREEN-023, plan §8 D17). The props
@@ -326,11 +327,10 @@ test('the race database renders whichever state the catalogue is in', async ({ p
         /Showing \d+ to \d+ of \d+ slots/,
     );
 
-    // Rows carry stored values, and every unstored one is `N/A` rather than a zero. The reason used to
-    // sit in a per-cell `title`; the 12.1 sweep moved it out of the hover and into one note under the
-    // table, because a reason carried only in a `title` is invisible on touch. Measured on this tree's
-    // first page: 2 of 25 rows carry no distance, surface or fan gate, and 23 of 25 carry no entry gate.
-    const cells = table.getByText('N/A', { exact: true });
+    // Rows carry stored values, and every unstored one is the house absence disclosure rather than a
+    // zero or a dash: `AbsenceValue`'s summary reads "N/A, Not recorded" and opens on Enter. The one
+    // sentence under the table stays the visible explanation for the whole column set.
+    const cells = table.locator('summary', { hasText: 'N/A' });
     expect(await cells.count(), 'a populated catalogue states at least one unrecorded value')
         .toBeGreaterThan(0);
 
@@ -358,6 +358,48 @@ test('the race database pager names the range it shows and moves a page', async 
     await page.getByRole('button', { name: 'Next' }).click();
     await expect(status).toContainText(/Page 2 of \d+/);
     await expect(page).toHaveURL(/[?&]page=2/);
+});
+
+test('the race catalogue mounts the wireframe table when rows exist', async ({ page }) => {
+    // The scratch database is populated from the committed race export, so three fixture rows are
+    // added and the search isolates them: the assertions below are about this page's shape, not about
+    // whichever races page 1 of the export happens to hold.
+    const seeded = seedRaceSlots();
+
+    try {
+        await page.goto('/database/races?q=Fixture', { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
+
+        const table = page.getByRole('region', { name: 'Race slots, scrollable' });
+        await expect(table).toBeVisible();
+
+        // The wireframe's answerable column set, and only that set. Course is omitted (the catalogue
+        // stores a numeric track_id with no name mapping), and Year/Turn/obligation fold into the Race
+        // cell rather than spending columns on a row that already carries its own title.
+        await expect(table.getByRole('columnheader')).toHaveText([
+            'Race', 'Grade', 'Surface', 'Distance', 'Band', 'Fans',
+        ]);
+
+        // The fold line keeps the calendar position beside the name, which is what distinguishes the
+        // 106 duplicate titles the calendar carries.
+        const rows = table.getByRole('rowheader');
+        await expect(rows).toHaveCount(3);
+        await expect(rows.nth(0)).toContainText('Junior · turn 12 · Mandatory · Special race');
+        await expect(rows.nth(1)).toContainText('Classic · turn 7');
+
+        // Distance and fans print the wireframe's grouped mono figures; the derived band marks the
+        // disputed 1400 m line; the missing fan gate is a disclosure, not a zero.
+        await expect(table.getByText('1,600 m', { exact: true })).toBeVisible();
+        await expect(table.getByText('4,500', { exact: true })).toBeVisible();
+        await expect(table.getByText('Sprint*', { exact: true })).toBeVisible();
+        await expect(table.locator('summary', { hasText: 'N/A' })).toHaveCount(5);
+
+        await expect(page.locator('nav[aria-label="Pagination"] [role="status"]')).toContainText(
+            'Showing 1 to 3 of 3 slots',
+        );
+    } finally {
+        removeRaceSlots(seeded);
+    }
 });
 
 test('the scenario matrix prints config/scenarios.php, verification date and all', async ({ page }) => {

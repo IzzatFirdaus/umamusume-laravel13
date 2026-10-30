@@ -1189,6 +1189,13 @@ ruling broken. `divergent` = region order, composition, primitives, or a ruling 
 | error-419 | — | n/a | no GET route; static Blade document not route-audited |
 | error-500 | — | n/a | no GET route; static Blade document not route-audited |
 
+**Dated correction 2026-10-30 (Races HFW alignment).** The `database-races` row above is the 2026-10-27
+snapshot and stands as written. As of the 2026-10-30 alignment the page is the wireframe's six answerable
+columns (Course omitted: the catalogue stores a numeric `track_id` with no name mapping), Year/Turn and the
+Mandatory / Special words are the Race cell's second line rather than columns, and both reference cards and
+the filter row are present (the filters landed in `479a1cbb`), so "filters absent; extra Year/Tier/Gate
+columns; Distance bands + What a race pays cards absent" no longer describes the screen.
+
 ## Verdict counts
 
 - **near — 17:** index, runs-index, runs-create, import, career-scenario, career-profile, career-legacy,

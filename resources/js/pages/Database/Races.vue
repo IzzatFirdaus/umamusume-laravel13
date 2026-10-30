@@ -1,27 +1,33 @@
 <script setup lang="ts">
 /*
- * The race database (SCREEN-023, plan §8 D17). Every slot of the shared [Global] career calendar,
- * read straight off `race_catalog_slots` and paginated server-side.
+ * The race database (SCREEN-023, plan §8 D17). Every slot of the shared [Global] career calendar, read
+ * straight off `race_catalog_slots` and paginated server-side.
  *
- * The calendar is the second new area of this slice, and it is the one that can genuinely be empty:
- * unlike the three catalog areas, nothing seeds it and no seeder touches it, so a fresh database shows
- * the offline state below. The state names what is missing and what fills it, and the table renders no
- * placeholder race, because an invented row in a reference table is a lie the whole career workflow
- * would build on.
+ * The calendar is the one reference area that can genuinely be empty: nothing seeds it and no seeder
+ * touches it, so a fresh database shows the offline state below. The state names what is missing and
+ * what fills it, and the table renders no placeholder race, because an invented row in a reference
+ * table is a lie the whole career workflow would build on.
  *
- * Density is allowed on this screen only (plan §13, "Deliberately traded"): a reference table is dense
- * by nature. The table still scrolls inside its own container at 320px, never the page.
+ * Layout (`database-races.html`): one card holding the six-column table with the pager inside it, the
+ * filter row above, and the wireframe's two reference cards below. Density is the Database area's
+ * recorded exemption (plan §13, "Deliberately traded"), so the table uses the house `.t` grammar.
  *
- * HFW-OVERRIDE (column: course) - the wireframe's lead column is Course, and this build stores only
+ * HFW-OVERRIDE (column: course) - the wireframe's second column is Course, and this build stores only
  * the source's numeric `track_id` with no name mapping anywhere, so a Course column would print an id.
- * The distance band the same design asks for *is* stored (`distance_band`) and prints beside Distance.
+ * The drawing has no Year, Turn or obligation column either: those fold into the Race cell's second
+ * line, because the calendar holds 410 rows under 304 titles and a row without its position is
+ * indistinguishable from its sibling.
  */
-import AppLayout from '../../layouts/AppLayout.vue';
-import PageHeader from '../../components/ui/PageHeader.vue';
-import DatabaseNav from '../../components/database/DatabaseNav.vue';
-import Pagination from '../../components/ui/Pagination.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import AbsenceValue from '../../components/AbsenceValue.vue';
+import BaseButton from '../../components/Form/BaseButton.vue';
+import BaseInput from '../../components/Form/BaseInput.vue';
+import BaseSelect from '../../components/Form/BaseSelect.vue';
+import DatabaseNav from '../../components/database/DatabaseNav.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
+import Pagination from '../../components/ui/Pagination.vue';
+import AppLayout from '../../layouts/AppLayout.vue';
 
 interface Slot {
     id: number;
@@ -67,10 +73,19 @@ const q = ref(props.filters.q ?? '');
 const grade = ref(props.filters.grade ?? '');
 const surface = ref(props.filters.surface ?? '');
 const distance = ref(props.filters.distance ?? '');
+const loading = ref(false);
 
-const gradeOptions = ['G1', 'G2', 'G3', 'OP', 'Maiden', 'Debut'];
+/** Every stored tier is selectable: the database holds seven, the drawing lists four. */
+const gradeOptions = ['G1', 'G2', 'G3', 'OP', 'Pre-OP', 'Maiden', 'Debut'];
 const surfaceOptions = ['Turf', 'Dirt'];
 const distanceOptions = ['Sprint', 'Mile', 'Medium', 'Long'];
+
+/**
+ * `BaseSelect` answers the empty choice with `null`, which the native select paints as no selection
+ * at all. The facets are strings, where '' is the "Any" option's own value, so each update lands back
+ * on that string and the picker keeps painting the choice the request carried.
+ */
+const facet = (value: string | number | null): string => (value === null ? '' : String(value));
 
 function apply(): void {
     router.get(
@@ -81,16 +96,17 @@ function apply(): void {
             surface: surface.value || undefined,
             distance: distance.value || undefined,
         },
-        { preserveState: true, preserveScroll: true },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            onStart: () => {
+                loading.value = true;
+            },
+            onFinish: () => {
+                loading.value = false;
+            },
+        },
     );
-}
-
-function clear(): void {
-    q.value = '';
-    grade.value = '';
-    surface.value = '';
-    distance.value = '';
-    apply();
 }
 
 const gates = (slot: Slot): string[] =>
@@ -98,6 +114,18 @@ const gates = (slot: Slot): string[] =>
         slot.is_mandatory ? 'Mandatory' : null,
         slot.is_special_race ? 'Special race' : null,
     ].filter((mark): mark is string => mark !== null);
+
+/**
+ * The race cell's second line: the calendar position and the obligation words the wireframe does not
+ * spend columns on. An empty result prints no line, so a row with neither keeps the title alone.
+ */
+const slotLine = (slot: Slot): string =>
+    [slot.year_label, slot.turn === null ? null : `turn ${slot.turn}`, ...gates(slot)]
+        .filter((part): part is string => part !== null)
+        .join(' · ');
+
+/** The wireframe prints its mono figures grouped ("2,000 m"), not as raw digits. */
+const group = (value: number): string => value.toLocaleString('en-US');
 
 /**
  * The canonical pager owns the range, so the page owns the request. The pager it replaces was a set
@@ -131,61 +159,68 @@ function goToPage(page: number): void {
         <!--
             The wireframe's filter row (`database-races.html:72-77`). Every control reads a column
             this table stores, so a facet here narrows the same rows the table prints rather than
-            becoming a second surface over them.
+            becoming a second surface over them. The pending state is the sibling catalogs' own
+            (ADR-0007): the request is a user-initiated async action.
         -->
         <form
             v-if="props.totalCount > 0"
             class="mt-4 flex flex-wrap items-end gap-3"
+            :aria-busy="loading ? 'true' : null"
             @submit.prevent="apply"
         >
-            <label class="field flex-1 basis-56">
-                <span class="k">Search</span>
-                <input
+            <label class="flex min-w-0 flex-1 basis-56 flex-col gap-1 text-xs font-semibold text-ink-muted">
+                Search
+                <BaseInput
+                    id="race-q"
                     v-model="q"
-                    name="q"
                     type="search"
+                    name="q"
                     placeholder="Race name"
-                    class="min-h-11 w-full rounded-md border border-rule bg-panel px-3 text-sm text-ink"
-                >
+                />
             </label>
-            <label class="field basis-32">
-                <span class="k">Grade</span>
-                <select v-model="grade" name="grade" class="min-h-11 w-full rounded-md border border-rule bg-panel px-2 text-sm text-ink">
-                    <option value="">Any</option>
-                    <option v-for="option in gradeOptions" :key="option" :value="option">{{ option }}</option>
-                </select>
+            <label class="flex flex-col gap-1 text-xs font-semibold text-ink-muted">
+                Grade
+                <BaseSelect
+                    id="race-grade"
+                    :model-value="grade"
+                    name="grade"
+                    :options="[{ value: '', label: 'Any' }, ...gradeOptions.map((option) => ({ value: option, label: option }))]"
+                    @update:model-value="grade = facet($event)"
+                />
             </label>
-            <label class="field basis-32">
-                <span class="k">Surface</span>
-                <select v-model="surface" name="surface" class="min-h-11 w-full rounded-md border border-rule bg-panel px-2 text-sm text-ink">
-                    <option value="">Any</option>
-                    <option v-for="option in surfaceOptions" :key="option" :value="option">{{ option }}</option>
-                </select>
+            <label class="flex flex-col gap-1 text-xs font-semibold text-ink-muted">
+                Surface
+                <BaseSelect
+                    id="race-surface"
+                    :model-value="surface"
+                    name="surface"
+                    :options="[{ value: '', label: 'Any' }, ...surfaceOptions.map((option) => ({ value: option, label: option }))]"
+                    @update:model-value="surface = facet($event)"
+                />
             </label>
-            <label class="field basis-36">
-                <span class="k">Distance</span>
-                <select v-model="distance" name="distance" class="min-h-11 w-full rounded-md border border-rule bg-panel px-2 text-sm text-ink">
-                    <option value="">Any</option>
-                    <option v-for="option in distanceOptions" :key="option" :value="option">{{ option }}</option>
-                </select>
+            <label class="flex flex-col gap-1 text-xs font-semibold text-ink-muted">
+                Distance
+                <BaseSelect
+                    id="race-distance"
+                    :model-value="distance"
+                    name="distance"
+                    :options="[{ value: '', label: 'Any' }, ...distanceOptions.map((option) => ({ value: option, label: option }))]"
+                    @update:model-value="distance = facet($event)"
+                />
             </label>
-            <button
-                type="submit"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule bg-panel px-4 text-sm font-semibold text-ink"
-            >
+            <BaseButton type="submit" variant="primary" size="md" :loading="loading">
                 Filter
-            </button>
-            <button
-                type="button"
-                class="inline-flex min-h-11 items-center rounded-md px-3 text-sm text-ink-muted underline"
-                @click="clear"
-            >
-                Clear
-            </button>
+            </BaseButton>
+            <a
+                href="/database/races"
+                class="inline-flex min-h-11 items-center px-2 text-sm text-ink-muted hover:underline transition-colors duration-150 ease-out"
+            >Clear</a>
             <span v-if="props.slots.total === 0" class="basis-full text-sm text-ink-muted">
-                No race matches these facets.
+                No race matches these facets. Clear returns the full calendar.
             </span>
         </form>
+
+        <p v-if="loading" role="status" class="mt-3 text-sm text-ink-muted">Loading results…</p>
 
         <section
             v-if="props.totalCount === 0"
@@ -210,178 +245,162 @@ function goToPage(page: number): void {
         </section>
 
         <template v-else>
-            <!-- The range and the total live with the pager, under the table: a table that holds one
-                 page of rows cannot say "410 of 410" about itself without misleading the reader. -->
-
-            <div
-                 class="mt-6 overflow-x-auto rounded-md border border-rule bg-panel"
-                role="region"
-                tabindex="0"
-                aria-label="Race slots, scrollable"
-            >
-                <table class="w-full min-w-[40rem] text-sm">
-                    <caption class="sr-only">
-                        Career race slots: race, year, turn, tier, distance, distance band, surface, fan gate and entry gate
-                    </caption>
-                    <thead>
-                        <tr class="border-b border-rule bg-sunken text-left text-xs text-ink-muted">
-                            <th scope="col" class="py-1.5 px-3 font-semibold">Race</th>
-                            <th scope="col" class="py-1.5 px-3 font-semibold">Year</th>
-                            <th scope="col" class="py-1.5 px-3 font-semibold">Turn</th>
-                            <th scope="col" class="py-1.5 px-3 font-semibold">Tier</th>
-                            <th scope="col" class="py-1.5 px-3 font-semibold">Distance</th>
-                            <th scope="col" class="py-1.5 px-3 font-semibold">Band</th>
-                            <th scope="col" class="py-1.5 px-3 font-semibold">Surface</th>
-                            <th scope="col" class="py-1.5 px-3 font-semibold">Fans needed</th>
-                            <th scope="col" class="py-1.5 px-3 font-semibold">Gate</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-rule">
-                        <tr v-for="slot in props.slots.data" :key="slot.id" class="align-top">
-                            <th scope="row" class="py-1.5 px-3 text-left font-medium text-ink-strong">
-                                {{ slot.title }}
-                            </th>
-                            <td class="py-1.5 px-3 text-ink">{{ slot.year_label }}</td>
-                            <td class="py-1.5 px-3 text-ink">
-                                <span v-if="slot.turn === null">N/A</span>
-                                <span v-else>{{ slot.turn }}</span>
-                            </td>
-                            <td class="py-1.5 px-3 text-ink">
-                                <span v-if="slot.tier === null">N/A</span>
-                                <span v-else>{{ slot.tier }}</span>
-                            </td>
-                            <td class="py-1.5 px-3 text-ink">
-                                <span v-if="slot.distance === null">N/A</span>
-                                <span v-else>{{ slot.distance }} m</span>
-                            </td>
-                            <!-- Keybox 1: the asterisk marks the derived edge the sources dispute; the
-                                 cell's aria-label carries the reason for a screen reader, because an
-                                 absolutely positioned `sr-only` span inside the scroll region escapes its
-                                 clip and widened the document at 320px (measured 88px). -->
-                            <td
-                                class="py-1.5 px-3 text-ink"
-                                :aria-label="slot.distance === 1400
-                                    ? `${slot.distance_band}, on the disputed 1400 m boundary; the export's band is printed`
-                                    : undefined"
-                            >
-                                <span v-if="slot.distance_band === null">N/A</span>
-                                <span v-else>{{ slot.distance_band }}<template v-if="slot.distance === 1400">*</template></span>
-                            </td>
-                            <td class="py-1.5 px-3 text-ink">
-                                <span v-if="slot.surface === null">N/A</span>
-                                <span v-else>{{ slot.surface }}</span>
-                            </td>
-                            <td class="py-1.5 px-3 text-ink">
-                                <span v-if="slot.fans_needed === null">N/A</span>
-                                <span v-else>{{ slot.fans_needed }}</span>
-                            </td>
-                            <td class="py-1.5 px-3">
-                                <span v-if="gates(slot).length === 0">
-                                    N/A <span class="text-xs text-ink-muted">· no entry gate</span>
-                                </span>
-                                <span v-else class="flex flex-wrap gap-1">
+            <div class="card mt-4">
+                <div
+                    class="relative overflow-x-auto"
+                    role="region"
+                    tabindex="0"
+                    aria-label="Race slots, scrollable"
+                >
+                    <table class="t min-w-[40rem]">
+                        <caption class="sr-only">
+                            Career race slots: race, grade, surface, distance, distance band and fan threshold
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Race</th>
+                                <th scope="col">Grade</th>
+                                <th scope="col">Surface</th>
+                                <th scope="col" class="n">Distance</th>
+                                <th scope="col">Band</th>
+                                <th scope="col" class="n">Fans</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="slot in props.slots.data" :key="slot.id">
+                                <th scope="row" class="font-semibold text-ink-strong">
+                                    <b>{{ slot.title }}</b>
                                     <span
-                                        v-for="mark in gates(slot)"
-                                        :key="mark"
-                                        class="rounded-full bg-sunken px-2 py-0.5 text-xs text-ink-strong"
-                                    >
-                                        {{ mark }}
-                                    </span>
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <p class="mt-2 px-3 pb-2 text-xs text-ink-muted">
-                    N/A marks a field the source records nothing for. It is not a zero, and no column
-                    here fills a gap with a guess. A band marked * sits on the disputed 1400 m boundary.
-                </p>
-                <div class="px-3 pb-3">
-                    <Pagination
-                        :page="props.slots.current_page"
-                        :pages="props.slots.last_page"
-                        :from="props.slots.from ?? 0"
-                        :to="props.slots.to ?? 0"
-                        :total="props.slots.total"
-                        noun="slots"
-                        @navigate="goToPage"
-                    />
+                                        v-if="slotLine(slot) !== ''"
+                                        class="block text-xs font-normal text-ink-muted"
+                                    >{{ slotLine(slot) }}</span>
+                                </th>
+                                <td>
+                                    <AbsenceValue v-if="slot.tier === null" compact reason="Not recorded" />
+                                    <span v-else>{{ slot.tier }}</span>
+                                </td>
+                                <td>
+                                    <AbsenceValue v-if="slot.surface === null" compact reason="Not recorded" />
+                                    <span v-else>{{ slot.surface }}</span>
+                                </td>
+                                <td class="n">
+                                    <AbsenceValue v-if="slot.distance === null" compact reason="Not recorded" />
+                                    <span v-else class="font-mono tabular-nums">{{ group(slot.distance) }} m</span>
+                                </td>
+                                <!-- Keybox 1: the asterisk marks the derived edge the sources dispute; the
+                                     cell's aria-label carries the reason for a screen reader, because an
+                                     absolutely positioned `sr-only` span inside the scroll region escapes its
+                                     clip and widened the document at 320px (measured 88px). The `relative` on
+                                     the scroll region now contains it, so AbsenceValue's sr-only twin is safe. -->
+                                <td
+                                    :aria-label="slot.distance === 1400
+                                        ? `${slot.distance_band}, on the disputed 1400 m boundary; this catalogue's cut-off reads it as ${slot.distance_band} and the export reads it as Mile`
+                                        : undefined"
+                                >
+                                    <AbsenceValue v-if="slot.distance_band === null" compact reason="Not recorded" />
+                                    <span v-else>{{ slot.distance_band }}<template v-if="slot.distance === 1400">*</template></span>
+                                </td>
+                                <td class="n">
+                                    <AbsenceValue v-if="slot.fans_needed === null" compact reason="Not recorded" />
+                                    <span v-else class="font-mono tabular-nums">{{ group(slot.fans_needed) }}</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
+                <p class="note mt-3">
+                    <span class="g" aria-hidden="true">○</span>
+                    <span class="flex-1">
+                        <b>*1400 m is an open conflict.</b> This catalogue's cut-off puts it in Sprint, while
+                        the data export codes those courses as <span class="font-mono">distance_type==2</span>,
+                        which reads as Mile, and the client's "(Mile)"-tagged skills gate on that type; the row
+                        is marked and no winner is encoded. Band is derived from this row's Distance through
+                        the catalogue's cut-offs below, so it is shown as derived, not as a stored measurement.
+                        N/A marks a field the source records nothing for. It is not a zero, and no column here
+                        fills a gap with a guess.
+                    </span>
+                </p>
+                <Pagination
+                    :page="props.slots.current_page"
+                    :pages="props.slots.last_page"
+                    :from="props.slots.from ?? 0"
+                    :to="props.slots.to ?? 0"
+                    :total="props.slots.total"
+                    noun="slots"
+                    @navigate="goToPage"
+                />
             </div>
         </template>
-        <!-- The wireframe's two reference cards (`database-races.html:103-127`). The years, turns and
-             gates above stay as this build's own career-slot columns (the mock draws none), printed
-             before these; the bands and the payout are published mechanics, so they are stated here. -->
+
+        <!-- The wireframe's two reference cards (`database-races.html:102-132`). The bands are the
+             cut-offs the parser and the Distance facet use; the payout is the per-grade first-place
+             figure the reference guide carries for both career families. -->
         <div class="mt-4 grid gap-4 g-2">
             <section class="card" aria-labelledby="race-bands">
                 <h2 id="race-bands">Distance bands</h2>
-                <table class="mt-2 w-full border-collapse text-sm">
+                <table class="t">
                     <thead>
                         <tr>
-                            <th class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Band</th>
-                            <th class="border-b border-rule px-2 py-2 text-right text-xs font-semibold text-ink-strong">Metres</th>
+                            <th scope="col">Band</th>
+                            <th scope="col" class="n">Metres</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="border-b border-rule">
-                            <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Sprint</th>
-                            <td class="py-2 text-right font-mono tabular-nums text-ink">≤ 1400</td>
-                        </tr>
-                        <tr class="border-b border-rule">
-                            <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Mile</th>
-                            <td class="py-2 text-right font-mono tabular-nums text-ink">1401-1800</td>
-                        </tr>
-                        <tr class="border-b border-rule">
-                            <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Medium</th>
-                            <td class="py-2 text-right font-mono tabular-nums text-ink">1801-2400</td>
+                        <tr>
+                            <th scope="row" class="font-medium">Sprint</th>
+                            <td class="n font-mono tabular-nums">≤ 1400</td>
                         </tr>
                         <tr>
-                            <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Long</th>
-                            <td class="py-2 text-right font-mono tabular-nums text-ink">≥ 2401</td>
+                            <th scope="row" class="font-medium">Mile</th>
+                            <td class="n font-mono tabular-nums">1401-1800</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="font-medium">Medium</th>
+                            <td class="n font-mono tabular-nums">1801-2400</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="font-medium">Long</th>
+                            <td class="n font-mono tabular-nums">≥ 2401</td>
                         </tr>
                     </tbody>
                 </table>
                 <p class="note mt-3">
                     <span class="g" aria-hidden="true">○</span>
-                    <span>
-                        The 1400 m boundary is an open conflict: one guide places it in Sprint, the export
-                        files it under distance code 2, which reads as Mile. The catalogue prints the
-                        export's band, marks a 1400 m row with *, and does not encode a winner.
-                    </span>
+                    <span class="flex-1">The 1400 m boundary is the source of the conflict noted above.</span>
                 </p>
             </section>
 
             <section class="card" aria-labelledby="race-payout">
                 <h2 id="race-payout">What a race pays</h2>
-                <table class="mt-2 w-full border-collapse text-sm">
+                <table class="t">
                     <thead>
                         <tr>
-                            <th class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Grade</th>
-                            <th class="border-b border-rule px-2 py-2 text-right text-xs font-semibold text-ink-strong">Stat</th>
-                            <th class="border-b border-rule px-2 py-2 text-right text-xs font-semibold text-ink-strong">Skill Pt</th>
+                            <th scope="col">Grade</th>
+                            <th scope="col" class="n">Stat</th>
+                            <th scope="col" class="n">Skill Pt</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="border-b border-rule">
-                            <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">G1</th>
-                            <td class="py-2 text-right font-mono tabular-nums text-ink">+10</td>
-                            <td class="py-2 text-right font-mono tabular-nums text-ink">+45</td>
-                        </tr>
-                        <tr class="border-b border-rule">
-                            <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">G2 · G3</th>
-                            <td class="py-2 text-right font-mono tabular-nums text-ink">+8</td>
-                            <td class="py-2 text-right font-mono tabular-nums text-ink">+35</td>
+                        <tr>
+                            <th scope="row" class="font-medium">G1</th>
+                            <td class="n font-mono tabular-nums">+10</td>
+                            <td class="n font-mono tabular-nums">+45</td>
                         </tr>
                         <tr>
-                            <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">OP · Pre-OP</th>
-                            <td class="py-2 text-right font-mono tabular-nums text-ink">+5</td>
-                            <td class="py-2 text-right font-mono tabular-nums text-ink">+30</td>
+                            <th scope="row" class="font-medium">G2 · G3</th>
+                            <td class="n font-mono tabular-nums">+8</td>
+                            <td class="n font-mono tabular-nums">+35</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="font-medium">OP · Pre-OP</th>
+                            <td class="n font-mono tabular-nums">+5</td>
+                            <td class="n font-mono tabular-nums">+30</td>
                         </tr>
                     </tbody>
                 </table>
                 <p class="note mt-3">
                     <span class="g" aria-hidden="true">○</span>
-                    <span>
+                    <span class="flex-1">
                         First place at 0 Race Bonus in the standard career families. <b>Trackblazer pays the
                         same stat gain at a lower SP figure</b> (G1 +35, G2-G3 +25, OP-Pre-OP +20). Second
                         and third are not published.
