@@ -12,6 +12,15 @@ import { walkWizard } from '../utils/start-career';
  * Preflight, then the Cockpit's identity and team editors, the guided turn on Training Detail, the
  * run-scoped deck, both planners, the status finish and the Save Veteran door.
  *
+ * **Re-baselined 2026-10-30 against the shipped screens (KI-139).** The walk was written against a
+ * cockpit shape four parity commits replaced, and five stale locators were patched one at a time
+ * (:114, :128, :133, :150, :176). Every step after the cockpit editors is now read against what
+ * ships: the run deck is `Support/Builder.vue`, which saves through its own savebar and returns to
+ * the Cockpit with `Deck saved.`; the Result screen's banking door is `Bank as veteran`; the Save
+ * Veteran submit carries the trainee's name. The deck step also makes a write the old steps never
+ * made, so the slots it asserts are the ones the run stored. This is a re-baseline, not a
+ * weakening: every claim the old file made that still applies is present.
+ *
  * Run counting is one mechanism, fixed here: the scratch database is read directly with `node:sqlite`
  * (Node 22+'s own client; `better-sqlite3` is not a dependency of this package and none is added for
  * a test). The count is asserted as a delta against the file's state at the walk's start, which is
@@ -80,6 +89,12 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
 
     const traineeName = await walkToPreflight(page);
 
+    // The wizard echo joins the name with the card title (`TraineeSelect.vue:575-579`), while every
+    // screen after Preflight prints `umamusume.name` alone, which is what the run and the Veteran
+    // store (`SaveVeteranController.php:68`). Splitting on the title bracket is what keeps the later
+    // assertions about the actual record rather than about the picker card.
+    const traineeRecordName = traineeName.replace(/\s*\[.*\]$/, '');
+
     // The wizard's own contract, held at its end: no run row exists before Preflight.
     expect(scratchRunCount()).toBe(baseCount);
 
@@ -147,7 +162,12 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     // --- One guided turn, recorded on Training Detail (Slice 1.4's surface) ---
     await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await page.getByRole('article').filter({ hasText: /^Speed/ }).getByRole('button', { name: 'Train' }).click();
+    // The Train button this used to click lived inside a training card that the shipped screen no
+    // longer draws: the discipline is picked on the screen's own radio list, and the one filled action
+    // is the savebar's `Record turn N` (TrainingCard.vue:383-388, KI-138). The write boundary also
+    // requires the five client totals, which stay in one collapsed disclosure.
+    await page.getByRole('radio', { name: 'Speed training' }).check();
+    await page.getByText('Client totals this turn (required to record)').click();
     await page.locator('input[name="speed"]').fill('650');
     await page.locator('input[name="stamina"]').fill('600');
     await page.locator('input[name="power"]').fill('600');
@@ -167,26 +187,60 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     await expect(page.locator('#correction-turn-select').locator('option')).toHaveCount(1);
     await expect(page.locator('#correction-turn-select').locator('option')).toHaveText('Turn 1');
 
-    // --- The run-scoped deck: six slots, each with its ownership toggles (R2-06's semantics) ---
-    await page.getByRole('link', { name: "Edit this run's deck" }).click();
+    // --- The run-scoped deck: six slots, each with its own controls (R2-06's semantics) ---
+    //
+    // The door is the "Where to go" entry, not the Run identity link: that one sits inside the closed
+    // `data-region="run-tools"` disclosure (Cockpit.vue:1144, :1276-1283), and the walk reads and
+    // writes the deck rather than the identity, so it takes the path that is always rendered (KI-139).
+    await page.getByRole('link', { name: 'Run deck', exact: true }).click();
     await page.waitForURL(/\/deck$/, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
     for (let position = 1; position <= 6; position++) {
         await expect(page.locator(`#deck-slot-${position}`)).toBeVisible();
     }
+    // Each slot offers exactly one door whether it holds a card or not: `Choose a card for <slot>`
+    // when empty, `Replace the card in <slot>` when filled (SupportSlot.vue:241). Which one a slot
+    // draws is stored state, so this counts the doors and leaves the state to the read-back below.
+    // The Friends slot is labelled `Slot 6 · Friends`, so the match is on the `Slot ` prefix, not `Slot \d+`.
+    const slotList = page.getByRole('list').filter({ has: page.locator('#deck-slot-6') });
+    await expect(slotList.getByRole('button', { name: /^(Choose a card for|Replace the card in) Slot / })).toHaveCount(6);
 
-    await expect(page.getByRole('button', { name: 'Owned', exact: true })).toHaveCount(6);
-    await expect(page.getByRole('button', { name: 'Rented', exact: true })).toHaveCount(6);
+    // The write the old steps never made: this screen's savebar posts `runs.deck.sync`, so the walk
+    // equips a card and flags its slot before leaving, and the deck it later reads back is the one the
+    // run stored rather than one this page drew from the query string.
+    // The picker is its own collapsed disclosure and a slot door does not open it (Builder.vue:351;
+    // `startReplace` only re-queries with `slot`), so the walk opens it the way `support-deck.spec.ts`
+    // does. The door is `Choose a card for <slot>` on an empty slot and `Replace the card in <slot>`
+    // on a filled one, and the run arrives with two cards already stored, so both spellings are legal.
+    await page.locator('summary').filter({ hasText: 'Choose a card' }).click();
+    await page.getByRole('button', { name: /^(Choose a card for|Replace the card in) Slot 1$/ }).click();
+    await page.getByRole('button', { name: /^Equip to Slot 1/ }).first().click();
+    await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped');
+    await page.getByRole('group', { name: 'Ownership of Slot 1' }).getByRole('button', { name: 'Owned', exact: true }).click();
+
+    await page.getByRole('button', { name: 'Save deck' }).click();
+    await page.waitForURL(/\/cockpit$/, WRITE);
+    // The savebar answers with `Deck saved.`, but that flash is a client-side banner that clears
+    // itself after five seconds (Flash.vue:24), so asserting it here would race the walk. The
+    // redirect above plus the read-back below is the durable proof that the write landed.
+
+    // Read back from storage rather than from the write's own response.
+    await page.goto(`${runUrl}/deck`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped');
+    await expect(page.getByRole('group', { name: 'Ownership of Slot 1' }).getByRole('button', { name: 'Owned', exact: true }))
+        .toHaveAttribute('aria-pressed', 'true');
 
     // --- The two planners render for this run ---
     await page.goto(`${runUrl}/races/planner`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await expect(page.getByRole('heading', { name: 'Race planner' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Plan the calendar' })).toBeVisible();
 
     await page.goto(`${runUrl}/skills`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await expect(page.getByText('Skill Point coverage')).toBeVisible();
+    await page.locator('summary').filter({ hasText: 'Build target, recorded skills and the add form' }).click();
+    await expect(page.getByRole('heading', { name: 'Skill Point coverage' })).toBeVisible();
 
     // --- Finish through the status flow, then file the Veteran from the Result screen ---
     // The status form is the Cockpit's; the walk is on the Skills Planner after the planners' visit.
@@ -200,21 +254,25 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
 
     await page.goto(`${runUrl}/result`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    const next = page.getByRole('region', { name: 'What you can do next' });
-    await next.getByRole('link', { name: 'Save Veteran' }).click();
+    // The Result screen offers its banking door only once the career is finished, which is why the
+    // status write above belongs to the walk: `Bank as a veteran` is an anchor to
+    // `runs.veteran` rather than a control inside a region.
+    await page.getByRole('link', { name: 'Bank as a veteran' }).click();
     await page.waitForURL(/\/veteran$/, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
     await page.locator('#veteran-notes').fill('The whole journey, end to end.');
-    await page.getByRole('button', { name: 'Save Veteran' }).click();
+    // The submit's accessible name is its own text, `Save Veteran`; the trainee's name is the page
+    // title, not part of the button (SaveVeteran.vue:412).
+    await page.getByRole('button', { name: 'Save Veteran', exact: true }).click();
     await page.waitForURL(/\/veterans\/\d+$/, WRITE);
     await expect(page.getByText(/Veteran saved:/)).toBeVisible();
-    await expect(page.getByRole('heading', { name: traineeName })).toBeVisible();
+    await expect(page.getByRole('heading', { name: traineeRecordName })).toBeVisible();
 
     // Reload: the filed record is read back from storage.
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await expect(page.getByRole('heading', { name: traineeName })).toBeVisible();
+    await expect(page.getByRole('heading', { name: traineeRecordName })).toBeVisible();
 
     // And the library lists it: `/veterans` is the library the nav names, and the walk's filed
     // record is one of its rows. The row is addressed as the link whose accessible name carries
@@ -222,5 +280,5 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     // a hidden option, and `.first()` over `getByText` would read that one and fail.
     await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await expect(page.getByRole('link', { name: traineeName })).toBeVisible();
+    await expect(page.getByRole('link', { name: traineeRecordName, exact: true }).first()).toBeVisible();
 });
