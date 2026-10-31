@@ -110,6 +110,20 @@ const deficitValue = (stat: StatRow): string => (stat.deficit === null ? 'N/A' :
 const countOf = (key: string): number => props.races.counts[key] ?? 0;
 
 /**
+ * The download door, off the run's own URL.
+ *
+ * `GET /training-runs/{run}/export/{format}` exists (`routes/web.php`, `runs.export`) and serves
+ * `csv` and `json`; the payload does not carry it, and adding a prop for it would be a controller
+ * change this layout slice is not entitled to make.
+ *
+ * `run_url` is `route('runs.cockpit', $run)` (`ResultController:187`), NOT the record URL — it ends
+ * in `/cockpit`. So the export path is derived by dropping that one segment, which is the same
+ * run-scoped base `timeline_url` and `cockpit_url` hang off.
+ */
+const exportUrl = (format: 'csv' | 'json'): string =>
+    `${props.run.run_url.replace(/\/cockpit$/, '')}/export/${format}`;
+
+/**
  * The finale's own state in one phrase, for the accented tile: the outcome and placing when the run
  * recorded them, "reached, not recorded" when the block arrived without an entry, and the absence
  * when the career never got there or the scenario declares no finale row.
@@ -259,29 +273,34 @@ const bankable = [
 
             <section aria-labelledby="result-headline-heading" class="mt-4">
                 <h2 id="result-headline-heading" class="sr-only">How this career ended</h2>
-                <dl class="grid grid-cols-2 gap-3 min-[1081px]:grid-cols-4">
-                    <div class="rounded-md border border-rule border-l-4 border-l-brand-accent-ink bg-panel p-3">
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Finale</dt>
-                        <dd class="mt-1 text-xl font-semibold text-ink-strong">{{ finaleHeadline }}</dd>
+                <!-- The HFW's KPI strip (`result.html` `.tiles.g-4`): four facts, and the finale's own
+                     state is the accented one because it is the run's outcome rather than a computed
+                     grade. The previous strip hand-rolled `grid-cols-2 min-[1081px]:grid-cols-4` and
+                     marked the accent with `border-l-4`, which is a rule edge doing an accent's job
+                     (UI-7) and a crossing that fires at 1081px where the primitive fires at 845. -->
+                <dl class="tiles g-4 mt-1">
+                    <div class="tile border-l-4 border-l-brand-accent-ink">
+                        <dt class="k">Finale</dt>
+                        <dd class="v">{{ finaleHeadline }}</dd>
                         <p class="mt-0.5 text-xs text-ink-muted">
                             {{ props.finale_state === null ? 'This scenario declares no finale row' : props.finale_state.label }}
                         </p>
                     </div>
-                    <div class="rounded-md border border-rule bg-panel p-3">
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Final turn</dt>
-                        <dd class="mt-1 font-mono text-xl font-semibold tabular-nums text-ink-strong">
+                    <div class="tile">
+                        <dt class="k">Final turn</dt>
+                        <dd class="v font-mono tabular-nums">
                             {{ props.headline.turn === null ? 'Not recorded' : props.headline.turn }}
                         </dd>
                     </div>
-                    <div class="rounded-md border border-rule bg-panel p-3">
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Races won</dt>
-                        <dd class="mt-1 font-mono text-xl font-semibold tabular-nums text-ink-strong">
+                    <div class="tile">
+                        <dt class="k">Races won</dt>
+                        <dd class="v font-mono tabular-nums">
                             {{ countOf('wins') }} <span class="text-sm font-normal text-ink-muted">of {{ countOf('completed') }}</span>
                         </dd>
                     </div>
-                    <div class="rounded-md border border-rule bg-panel p-3">
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Skill points at end</dt>
-                        <dd class="mt-1 font-mono text-xl font-semibold tabular-nums text-ink-strong">
+                    <div class="tile">
+                        <dt class="k">Skill points at end</dt>
+                        <dd class="v font-mono tabular-nums">
                             {{ props.headline.sp === null ? 'Not recorded' : props.headline.sp }}
                         </dd>
                     </div>
@@ -298,56 +317,15 @@ const bankable = [
                 </p>
             </section>
 
-            <div class="mt-3.5 grid gap-3.5 g-2">
-                <section class="card" aria-labelledby="result-ready-heading">
-                    <h2 id="result-ready-heading">Finale-ready check</h2>
-                    <p class="sub">Measured against URA Finale's published targets.</p>
-                    <table class="t mt-1 w-full border-collapse text-sm">
-                        <tbody>
-                            <tr v-for="row in readiness" :key="row.label" class="border-b border-rule-soft">
-                                <td class="py-2 pr-3">{{ row.label }}</td>
-                                <td class="py-2 text-right"><span class="pill" :class="row.tone">{{ row.text }}</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <Note class="mt-2.5">
-                        These published figures are a recommendation, not a gate: no source says a run is refused
-                        for missing them, and this screen does not imply it.
-                    </Note>
-                </section>
+            <!-- The HFW body (`result.html` `.g-side`): the run's final build occupies the wide track,
+                 the three readings that qualify it stack in the narrow one. The previous layout put
+                 the three cards in a flat `g-2` group and printed the build underneath them, so the
+                 column read first was the commentary rather than the numbers it comments on (SHR-7).
 
-                <section class="card" aria-labelledby="result-bank-heading">
-                    <h2 id="result-bank-heading">What can be banked</h2>
-                    <table class="t mt-1 w-full border-collapse text-sm">
-                        <thead><tr><th class="text-left">Factor</th><th class="text-left">Grade</th><th class="text-right"></th></tr></thead>
-                        <tbody>
-                            <tr v-for="row in bankable" :key="row.factor" class="border-b border-rule-soft">
-                                <td class="py-2 pr-3">{{ row.factor }}</td>
-                                <td class="py-2 pr-3 text-ink-muted" :title="row.title">Not computed</td>
-                                <td class="py-2 text-right"><span class="pill pill-positive">Bankable</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <p class="mt-2 text-xs text-ink-muted">
-                        Banking saves a Veteran Umamusume record later runs can inherit from. Factor grades are held
-                        on ADR-0020 §3, so this screen prints "Not computed" rather than a star it cannot source.
-                    </p>
-                </section>
-                <section class="card" aria-labelledby="result-export-heading">
-                    <h2 id="result-export-heading">Export</h2>
-                    <p class="mt-1 text-sm text-ink-muted">
-                        No export route is built, so neither download exists. The record is readable on the
-                        timeline.
-                    </p>
-                </section>
-            </div>
-
-            <p class="mt-4 max-w-3xl text-sm text-ink-muted">
-                {{ props.run.trainee }}'s finished career, as the run recorded it. Every figure below is a
-                stored or entered value, and each deficit is measured against the target you set. The tool
-                computes no grade for the build and no score for the career.
-            </p>
-
+                 The build is FIRST in the DOM, not merely left in the painting: the composition gate
+                 reads region order off the document, and a screen reader follows the same order. -->
+            <div class="mt-3.5 grid gap-3.5 g-side">
+                <div class="min-w-0">
             <!-- Final build -->
             <section aria-labelledby="result-build-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
                 <h2 id="result-build-heading" class="text-lg font-semibold text-ink-strong">Final stats</h2>
@@ -424,7 +402,62 @@ const bankable = [
                         <AptitudeBadge :label="axis.label" :letter="axis.letter" />
                     </li>
                 </ul>
-            </section>
+                </section>
+                </div>
+
+                <div class="flex min-w-0 flex-col gap-3.5">
+                <p class="max-w-3xl text-sm text-ink-muted">
+                    {{ props.run.trainee }}'s finished career, as the run recorded it. Every figure below is a
+                    stored or entered value, and each deficit is measured against the target you set. The tool
+                    computes no grade for the build and no score for the career.
+                </p>
+                <section class="card" aria-labelledby="result-ready-heading">
+                    <h2 id="result-ready-heading">Finale-ready check</h2>
+                    <p class="sub">Measured against URA Finale's published targets.</p>
+                    <table class="t mt-1 w-full border-collapse text-sm">
+                        <tbody>
+                            <tr v-for="row in readiness" :key="row.label" class="border-b border-rule-soft">
+                                <td class="py-2 pr-3">{{ row.label }}</td>
+                                <td class="py-2 text-right"><span class="pill" :class="row.tone">{{ row.text }}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <Note class="mt-2.5">
+                        These published figures are a recommendation, not a gate: no source says a run is refused
+                        for missing them, and this screen does not imply it.
+                    </Note>
+                </section>
+
+                <section class="card" aria-labelledby="result-bank-heading">
+                    <h2 id="result-bank-heading">What can be banked</h2>
+                    <table class="t mt-1 w-full border-collapse text-sm">
+                        <thead><tr><th class="text-left">Factor</th><th class="text-left">Grade</th><th class="text-right"></th></tr></thead>
+                        <tbody>
+                            <tr v-for="row in bankable" :key="row.factor" class="border-b border-rule-soft">
+                                <td class="py-2 pr-3">{{ row.factor }}</td>
+                                <td class="py-2 pr-3 text-ink-muted" :title="row.title">Not computed</td>
+                                <td class="py-2 text-right"><span class="pill pill-positive">Bankable</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="mt-2 text-xs text-ink-muted">
+                        Banking saves a Veteran Umamusume record later runs can inherit from. Factor grades are held
+                        on ADR-0020 §3, so this screen prints "Not computed" rather than a star it cannot source.
+                    </p>
+                </section>
+                <section class="card" aria-labelledby="result-export-heading">
+                    <h2 id="result-export-heading">Export</h2>
+                    <div class="mt-1 flex flex-wrap gap-2">
+                        <a :href="exportUrl('csv')" class="btn btn-sm min-h-11 inline-flex items-center">Download CSV</a>
+                        <a :href="exportUrl('json')" class="btn btn-sm min-h-11 inline-flex items-center">Download JSON</a>
+                    </div>
+                    <p class="mt-1 text-xs text-ink-muted">
+                        Both are plain file downloads, not navigations. They export this run's own record,
+                        and nothing the tool inferred.
+                    </p>
+                </section>
+                </div>
+            </div>
 
             <!-- Race history -->
             <section aria-labelledby="result-races-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">

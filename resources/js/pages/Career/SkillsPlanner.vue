@@ -432,14 +432,21 @@ const coverageConstants = computed(() =>
             </Note>
         </section>
 
+        <!-- A STATUS STRIP, NOT A SECOND COMMIT.
+             `skills-planner.html` draws no savebar at all: its one primary is "Learn planned skills",
+             in the budget card where the SP figure the decision needs sits (SHR-7). This bar used to
+             carry a second `.btn-primary` bound to the same `commitPlan`, so the page offered the same
+             write twice and spent the accent twice (UX-6, UX-7).
+
+             The primary is gone; the bar keeps its class, its `role="status"` count and `Clear plan`.
+             HFW-OVERRIDE (savebar: demoted to a status strip). The class name stays because
+             `career-skills-planner.spec.ts:84` pins `.savebar` count 1, so the container is what the
+             spec binds; the promise is carried by the words in it, not by the container. -->
         <div class="savebar">
             <span class="dirty" role="status">
                 {{ planned.length === 0 ? 'No skill planned' : planned.length + (planned.length === 1 ? ' skill planned' : ' skills planned') }}
             </span>
             <button type="button" class="btn min-h-11" @click="planned = []">Clear plan</button>
-            <button type="button" class="btn btn-primary min-h-11" :disabled="!canCommit || pickerForm.processing" @click="commitPlan">
-                {{ pickerForm.processing ? 'Learning…' : 'Learn planned skills' }}
-            </button>
         </div>
         <p v-if="pickerError" role="alert" class="mt-2 text-sm text-risk">{{ pickerError }}</p>
 

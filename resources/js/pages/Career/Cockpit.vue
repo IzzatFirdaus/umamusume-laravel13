@@ -948,9 +948,15 @@ const jumpToShop = (): void => {
         </Section>
 
         <!-- The HFW's two-column body. Left: the run's stats, its scenario reading and the scenario's
-             own panels. Right: the advisor, then the doors a career leads into. The single-column
-             stack below `@4xl` keeps the reading order the tree already carries. -->
-        <div class="mt-4 grid grid-cols-1 gap-4 md:items-start @4xl:grid-cols-[2fr_1fr]">
+             own panels. Right: the advisor, then the doors a career leads into.
+
+             `g-side` is the HFW's own track pair (`cockpit-*.html` `.g-side`, 2.1fr / 1fr), and it
+             owns the crossing at the app's 585 container rather than Tailwind's 56rem. The page this
+             replaced hand-rolled `@4xl:grid-cols-[2fr_1fr]`, which is a different ratio AND a
+             crossing that fires a band later than every other career screen's. `md:items-start` stays:
+             the HFW's left column is taller than the right, and `stretch` would grow the advisor card
+             to a height its content does not fill. -->
+        <div class="mt-4 grid gap-4 g-side md:items-start">
             <div class="flex min-w-0 flex-col gap-4">
                 <CareerStatePanel
                     :stats="props.state.stats"

@@ -282,55 +282,78 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                 <h2 id="ancestry-heading">Inheritance</h2>
                 <p class="sub">Two parents and two grandparents behind each, per the six-ancestor rule. A repeated ancestor contributes compatibility 0.</p>
 
-                <div class="mt-2 flex flex-col gap-2" role="group" aria-label="Six ancestor slots">
-                    <div class="grid gap-2 g-3">
-                        <div class="rounded-md border border-dashed border-rule bg-raised px-3 py-2">
-                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Grandparent</span>
-                            <span class="block text-sm text-ink">{{ grandparent(parentA, 0) ?? 'Not set' }}</span>
-                            <span class="block text-[11px] text-ink-muted">{{ grandparent(parentA, 0) === null ? 'slot open' : 'recorded ancestor' }}</span>
+                <!-- The HFW's descent diagram (`inheritance.html` `.ancestry`): two branches, each
+                     three generation columns — grandparents, parent, then the trainee node (branch A)
+                     or the compatibility read (branch B). The columns are `.lin-gen` and the spine
+                     between them is the primitive's own left rule, so a sequence keeps one unbroken
+                     spine (GT-6, UI-5) instead of being drawn as two flat `g-3` rows where the
+                     grandparent→parent relation was carried by nothing but adjacency (GT-1).
+
+                     State is never colour alone (UI-3): `is-parent` takes the 2px pick boundary and
+                     `is-off` the dashed edge, and each node's own text names its state. -->
+                <div class="ancestry" role="group" aria-label="Six ancestor slots">
+                    <div class="lin-gen">
+                        <div class="lin-node" :class="grandparent(parentA, 0) === null ? 'is-off' : ''">
+                            <span class="k">Grandparent</span>
+                            <span class="v">{{ grandparent(parentA, 0) ?? 'Not set' }}</span>
+                            <span class="m">{{ grandparent(parentA, 0) === null ? 'slot open' : 'recorded ancestor' }}</span>
                         </div>
-                        <div class="rounded-md border border-dashed border-rule bg-raised px-3 py-2">
-                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Grandparent</span>
-                            <span class="block text-sm text-ink">{{ grandparent(parentA, 1) ?? 'Not set' }}</span>
-                            <span class="block text-[11px] text-ink-muted">{{ grandparent(parentA, 1) === null ? 'slot open' : 'recorded ancestor' }}</span>
-                        </div>
-                        <div class="rounded-md border border-rule bg-panel px-3 py-2">
-                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Parent A</span>
-                            <span class="block text-sm font-semibold text-ink-strong">{{ parentA?.name ?? 'Not set' }}</span>
-                            <span class="block text-[11px] text-ink-muted">{{ parentA === null ? 'slot open' : props.run.scenario_label }}</span>
-                        </div>
-                        <div class="rounded-md border-2 border-pick-line bg-green-tint px-3 py-2">
-                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Trainee</span>
-                            <span class="block text-sm font-semibold text-ink-strong">{{ props.run.trainee }}</span>
-                            <span class="block text-[11px] text-ink-muted">{{ props.run.scenario_label }}</span>
+                        <div class="lin-node" :class="grandparent(parentA, 1) === null ? 'is-off' : ''">
+                            <span class="k">Grandparent</span>
+                            <span class="v">{{ grandparent(parentA, 1) ?? 'Not set' }}</span>
+                            <span class="m">{{ grandparent(parentA, 1) === null ? 'slot open' : 'recorded ancestor' }}</span>
                         </div>
                     </div>
+                    <div class="lin-gen">
+                        <div class="lin-node" :class="parentA === null ? 'is-off' : 'is-parent'">
+                            <span class="k">Parent A</span>
+                            <span class="v">{{ parentA?.name ?? 'Not set' }}</span>
+                            <span class="m">{{ parentA === null ? 'slot open' : props.run.scenario_label }}</span>
+                        </div>
+                    </div>
+                    <div class="lin-gen">
+                        <div class="lin-node is-trainee">
+                            <span class="k">Trainee</span>
+                            <span class="v">{{ props.run.trainee }}</span>
+                            <span class="m">{{ props.run.scenario_label }}</span>
+                        </div>
+                    </div>
+                </div>
 
-                    <div class="grid gap-2 g-3">
-                        <div class="rounded-md border border-dashed border-rule bg-raised px-3 py-2">
-                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Grandparent</span>
-                            <span class="block text-sm text-ink">{{ grandparent(parentB, 0) ?? 'Not set' }}</span>
-                            <span class="block text-[11px] text-ink-muted">{{ grandparent(parentB, 0) === null ? 'slot open' : 'recorded ancestor' }}</span>
+                <div class="ancestry mt-3" role="group" aria-label="Second ancestor branch">
+                    <div class="lin-gen">
+                        <div class="lin-node" :class="grandparent(parentB, 0) === null ? 'is-off' : ''">
+                            <span class="k">Grandparent</span>
+                            <span class="v">{{ grandparent(parentB, 0) ?? 'Not set' }}</span>
+                            <span class="m">{{ grandparent(parentB, 0) === null ? 'slot open' : 'recorded ancestor' }}</span>
                         </div>
-                        <div class="rounded-md border border-dashed border-rule bg-raised px-3 py-2">
-                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Grandparent</span>
-                            <span class="block text-sm text-ink">{{ grandparent(parentB, 1) ?? 'Not set' }}</span>
-                            <span class="block text-[11px] text-ink-muted">{{ grandparent(parentB, 1) === null ? 'slot open' : 'recorded ancestor' }}</span>
+                        <div class="lin-node" :class="grandparent(parentB, 1) === null ? 'is-off' : ''">
+                            <span class="k">Grandparent</span>
+                            <span class="v">{{ grandparent(parentB, 1) ?? 'Not set' }}</span>
+                            <span class="m">{{ grandparent(parentB, 1) === null ? 'slot open' : 'recorded ancestor' }}</span>
                         </div>
-                        <div class="rounded-md border border-rule bg-panel px-3 py-2">
-                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Parent B</span>
-                            <span class="block text-sm font-semibold text-ink-strong">{{ parentB?.name ?? 'Not set' }}</span>
-                            <span class="block text-[11px] text-ink-muted">{{ parentB === null ? 'slot open' : props.run.scenario_label }}</span>
+                    </div>
+                    <div class="lin-gen">
+                        <div class="lin-node" :class="parentB === null ? 'is-off' : 'is-parent'">
+                            <span class="k">Parent B</span>
+                            <span class="v">{{ parentB?.name ?? 'Not set' }}</span>
+                            <span class="m">{{ parentB === null ? 'slot open' : props.run.scenario_label }}</span>
                         </div>
-                        <div class="rounded-md border border-rule bg-raised px-3 py-2">
-                            <span class="block text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Compatibility</span>
-                            <span class="block text-sm font-semibold text-ink-strong">{{ props.legacy?.affinity ?? 'Not recorded' }}</span>
-                            <span class="block text-[11px] text-ink-muted">raises trigger chance and payout</span>
+                    </div>
+                    <div class="lin-gen">
+                        <div class="lin-node">
+                            <span class="k">Compatibility</span>
+                            <span class="v">{{ props.legacy?.affinity ?? 'Not recorded' }}</span>
+                            <span class="m">raises trigger chance and payout</span>
                         </div>
                     </div>
                 </div>
             </section>
 
+            <!-- The parents' own cards, `g-2` (HFW `inheritance.html`). Each is one parent, not one
+                 half of a four-up grid: the previous markup packed two grandparents, a parent and the
+                 trainee into a single `g-3` row, so the card's own reading order never matched the
+                 diagram above it. -->
             <div class="mt-3.5 grid gap-3.5 g-2">
                 <section v-for="parent in [parentA, parentB]" :key="parent?.slot ?? 'none'" class="card" :aria-labelledby="'parent-' + (parent?.slot ?? 'none') + '-heading'">
                     <h2 :id="'parent-' + (parent?.slot ?? 'none') + '-heading'">
