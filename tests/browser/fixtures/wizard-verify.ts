@@ -23,6 +23,13 @@ export type VerifyOptions = {
     hfwUrl: string;
     /** Defaults to the wizard canvas, which both sides draw around the step body. */
     rootSelector?: string;
+    /**
+     * The app's root, when it differs from the wireframe's. The wizard draws `.canvas` on both sides, so it
+     * needs nothing here; the Database and Help pages sit under the shell's `[data-shell-band]` while their
+     * wireframes draw `.canvas`, and without this the harness would capture an empty app tree and call
+     * every region missing.
+     */
+    appRootSelector?: string;
     width?: number;
     height?: number;
 };
@@ -55,6 +62,7 @@ function textDrift(report: DiffReport): string[] {
 
 export async function verifyPage(page: Page, opts: VerifyOptions): Promise<VerifyReport> {
     const rootSelector = opts.rootSelector ?? '.canvas';
+    const appRootSelector = opts.appRootSelector ?? rootSelector;
     const width = opts.width ?? 1280;
     const height = opts.height ?? 800;
 
@@ -64,7 +72,7 @@ export async function verifyPage(page: Page, opts: VerifyOptions): Promise<Verif
     // wireframe is static markup and needs no mount.
     await page.goto(opts.appUrl);
     await page.locator('#app > *').first().waitFor();
-    const app = await captureSnapshot(page, rootSelector);
+    const app = await captureSnapshot(page, appRootSelector);
 
     await page.goto(opts.hfwUrl);
     const hfw = await captureSnapshot(page, rootSelector);
