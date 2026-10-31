@@ -63,13 +63,10 @@ test('walks the run-identity door and saves a field without leaving it', async (
     // `back(fallback:)` on `runs.update` means the save returns to this door, not to the Cockpit.
     await expect(page.getByText('Saved.')).toBeVisible();
 
-    // The value really landed: the Cockpit's own identity block reads it back. `edit-identity` is
-    // nested inside the closed `run-tools` disclosure, so both have to be opened in order. The
-    // child combinator matters: each disclosure has its own `summary` and a descendant selector
-    // matches all four of them.
-    await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
+    // The value really landed. It is read back on the door itself, because `C6b.7` deleted the
+    // Cockpit's duplicate identity block: the door is now the only surface that shows this field,
+    // so a reload of the door is the honest round-trip.
+    await page.goto(`${runUrl}/settings`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await page.locator('details[data-region="run-tools"] > summary').click();
-    await page.locator('details[data-region="edit-identity"] > summary').click();
     await expect(page.locator('#trainee_rarity')).toHaveValue('3');
 });
