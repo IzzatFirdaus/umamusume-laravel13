@@ -333,6 +333,11 @@ test.describe('Legacy Lab compare', () => {
         await expect(table.getByRole('columnheader').nth(1)).toContainText(`Run #${first}`);
         await expect(table.getByRole('columnheader').nth(2)).toContainText(`Run #${second}`);
 
+        // The verdict is this table's LAST column (`legacy-compare.html:70-83`), appended after the
+        // runs rather than drawn as a second table below them. Appending it does not move nth(1) or
+        // nth(2) above, which is why those two assertions are unchanged.
+        await expect(table.getByRole('columnheader', { name: 'Difference' })).toBeVisible();
+
         // Every property is a row header, and the row set is identical for each column: that is what
         // "aligned in rows" means, and a screen reader announces the property with every cell.
         // Sixteen is the eleven stored properties (trainee, each parent's name, rank and ancestors,
@@ -406,10 +411,10 @@ test.describe('Legacy Lab compare', () => {
         await expect(page.getByRole('table')).toHaveCount(0);
     });
 
-    test('prints the difference in its own column, and calls a no-difference verdict "Nothing decisive"', async ({ page }) => {
-        // Two runs with the same recorded selection: the difference column must exist, must print a
-        // match as `same` rather than hiding the row, and the page's verdict line must say the
-        // comparison is not decisive.
+    test('prints the difference as the last column of the one table, and calls a no-difference verdict "Nothing decisive"', async ({ page }) => {
+        // Two runs with the same recorded selection: the verdict must be a column of the comparison
+        // itself (`legacy-compare.html:70-83`), must print a match as `same` rather than hiding the
+        // row, and the page's verdict line must say the comparison is not decisive.
         const first = await createActiveRun(page, 'Special Week');
         const second = await createActiveRun(page, 'Special Week');
 
@@ -424,16 +429,16 @@ test.describe('Legacy Lab compare', () => {
         await page.goto(`/legacy/compare?runs[]=${first}&runs[]=${second}`, { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
-        const differenceTable = page
-            .getByRole('heading', { name: 'Where they differ' })
-            .locator('xpath=following-sibling::div[1]')
-            .getByRole('table');
-        await expect(differenceTable).toBeVisible();
-        await expect(differenceTable.getByRole('columnheader', { name: 'Difference' })).toBeVisible();
+        // ONE table: the old `Where they differ` heading and its second table are gone, and the
+        // verdict lives in this table's last column.
+        await expect(page.getByRole('region', { name: /side by side/i }).getByRole('table')).toHaveCount(1);
+        await expect(page.getByRole('heading', { name: 'Where they differ' })).toHaveCount(0);
+
+        const table = page.getByRole('region', { name: /side by side/i }).getByRole('table');
+        await expect(table.getByRole('columnheader', { name: 'Difference' })).toBeVisible();
 
         // Matching rows still print, and they print the word `same` rather than an empty cell.
-        await expect(differenceTable.getByRole('rowheader', { name: 'Trainee' })).toBeVisible();
-        await expect(differenceTable.getByRole('cell', { name: 'same' }).first()).toBeVisible();
+        await expect(table.getByRole('cell', { name: 'same' }).first()).toBeVisible();
 
         // No difference anywhere is a permitted verdict, and it is printed in words.
         await expect(page.getByText(/Nothing decisive/)).toBeVisible();

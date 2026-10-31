@@ -14,6 +14,11 @@
  * a grid of independent cards does. The table is inside a scroll container with a `tabindex="0"` and a
  * `role="region"` label, which is the WCAG 1.4.10 pattern for content that must scroll: without the
  * focusable container a keyboard user cannot reach the right-hand columns at 320px.
+ *
+ * HFW-OVERRIDE (structure: checkbox picker) — `legacy-compare.html` draws no selection UI at all: the
+ * run pair arrives in `?runs[]`. This page keeps its checkbox list because the cap of four is a limit
+ * the Trainer should see before submitting rather than discover from a rejected write, and a
+ * `<select multiple>` hides its options behind a click.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
@@ -252,11 +257,26 @@ const differences = computed((): Difference[] => {
         });
     }
 
+    // The table draws a verdict for every row, and `Spark chance` stores nothing on any column:
+    // `differenceOf` answers `same` for all-absent, which is the honest reading rather than a blank.
+    rows.push({ property: 'Spark chance', verdict: differenceOf(ofColumn((column) => parent(column, 'parent_a')?.probability.value ?? null)) });
     rows.push({ property: 'Tags', verdict: differenceOf(ofColumn((column) => column.tags.join(', '))) });
     rows.push({ property: 'Notes', verdict: differenceOf(ofColumn((column) => column.notes)) });
 
     return rows;
 });
+
+/*
+ * The fold (`legacy-compare.html:70-83`): the verdict is the LAST COLUMN of the one table, not a
+ * second table below it. It is a lookup over the same array the old section rendered, so the two
+ * cannot disagree — one verdict per property, computed once.
+ */
+const verdictBy = computed((): Record<string, string> =>
+    Object.fromEntries(differences.value.map((row) => [row.property, row.verdict])),
+);
+
+const verdictPill = (verdict: string): string =>
+    verdict === 'same' ? 'pill pill-neutral' : 'pill pill-caution';
 </script>
 
 <template>
@@ -363,6 +383,9 @@ const differences = computed((): Difference[] => {
                                     Run #{{ column.run_id }}
                                 </span>
                             </th>
+                            <th scope="col" class="px-3 py-2 text-left font-semibold text-ink-strong">
+                                Difference
+                            </th>
                         </tr>
                     </thead>
 
@@ -372,7 +395,11 @@ const differences = computed((): Difference[] => {
                         <tr class="border-b border-rule">
                             <th scope="row" class="px-3 py-2 text-left font-medium text-ink">Trainee</th>
                             <td v-for="column in columns" :key="column.run_id" class="px-3 py-2 text-ink">
-                                {{ column.graph.trainee.name ?? 'N/A' }}
+                                <span v-if="column.graph.trainee.name">{{ column.graph.trainee.name }}</span>
+                                <AbsenceValue v-else compact reason="No trainee name is recorded for this run." />
+                            </td>
+                            <td class="px-3 py-2">
+                                <span :class="verdictPill(verdictBy['Trainee'])">{{ verdictBy['Trainee'] }}</span>
                             </td>
                         </tr>
 
@@ -391,6 +418,9 @@ const differences = computed((): Difference[] => {
                                     compact
                                     reason="No parent recorded in slot A for this run."
                                 />
+                            </td>
+                            <td class="px-3 py-2">
+                                <span :class="verdictPill(verdictBy['Parent A'])">{{ verdictBy['Parent A'] }}</span>
                             </td>
                         </tr>
 
@@ -412,6 +442,9 @@ const differences = computed((): Difference[] => {
                                     </span>
                                 </template>
                             </td>
+                            <td class="px-3 py-2">
+                                <span :class="verdictPill(verdictBy['Parent A rank'])">{{ verdictBy['Parent A rank'] }}</span>
+                            </td>
                         </tr>
 
                         <tr class="border-b border-rule">
@@ -432,6 +465,9 @@ const differences = computed((): Difference[] => {
                                     reason="No ancestors recorded for Parent A on this run."
                                 />
                             </td>
+                            <td class="px-3 py-2">
+                                <span :class="verdictPill(verdictBy['Parent A ancestors'])">{{ verdictBy['Parent A ancestors'] }}</span>
+                            </td>
                         </tr>
 
                         <tr class="border-b border-rule">
@@ -448,6 +484,9 @@ const differences = computed((): Difference[] => {
                                     v-else
                                     class="text-ink-muted"
                                 >N/A <span class="text-xs">· no Parent B</span></span>
+                            </td>
+                            <td class="px-3 py-2">
+                                <span :class="verdictPill(verdictBy['Parent B'])">{{ verdictBy['Parent B'] }}</span>
                             </td>
                         </tr>
 
@@ -468,6 +507,9 @@ const differences = computed((): Difference[] => {
                                     </span>
                                 </template>
                             </td>
+                            <td class="px-3 py-2">
+                                <span :class="verdictPill(verdictBy['Parent B rank'])">{{ verdictBy['Parent B rank'] }}</span>
+                            </td>
                         </tr>
 
                         <tr class="border-b border-rule">
@@ -486,6 +528,9 @@ const differences = computed((): Difference[] => {
                                     v-else
                                     class="text-ink-muted"
                                 >N/A <span class="text-xs">· none recorded for Parent B</span></span>
+                            </td>
+                            <td class="px-3 py-2">
+                                <span :class="verdictPill(verdictBy['Parent B ancestors'])">{{ verdictBy['Parent B ancestors'] }}</span>
                             </td>
                         </tr>
 
@@ -507,6 +552,9 @@ const differences = computed((): Difference[] => {
                                 <span v-else class="text-ink-muted">
                                     No
                                 </span>
+                            </td>
+                            <td class="px-3 py-2">
+                                <span :class="verdictPill(verdictBy['Rented from a friend'])">{{ verdictBy['Rented from a friend'] }}</span>
                             </td>
                         </tr>
 
@@ -535,6 +583,9 @@ const differences = computed((): Difference[] => {
                                     </span>
                                 </span>
                             </td>
+                            <td class="px-3 py-2">
+                                <span :class="verdictPill(verdictBy[`${label} Sparks`])">{{ verdictBy[`${label} Sparks`] }}</span>
+                            </td>
                         </tr>
 
                         <tr class="border-b border-rule">
@@ -553,15 +604,19 @@ const differences = computed((): Difference[] => {
                                     </span>
                                 </span>
                             </td>
+                            <td class="px-3 py-2">
+                                <span :class="verdictPill(verdictBy['Spark chance'])">{{ verdictBy['Spark chance'] }}</span>
+                            </td>
                         </tr>
 
                         <tr class="border-b border-rule">
                             <th scope="row" class="px-3 py-2 text-left font-medium text-ink">Tags</th>
                             <td v-for="column in columns" :key="column.run_id" class="px-3 py-2 text-ink">
                                 <span v-if="column.tags.length > 0">{{ column.tags.join(', ') }}</span>
-                                <span v-else class="text-ink-muted">
-                                    N/A
-                                </span>
+                                <AbsenceValue v-else compact reason="No tags are recorded for this run." />
+                            </td>
+                            <td class="px-3 py-2">
+                                <span :class="verdictPill(verdictBy['Tags'])">{{ verdictBy['Tags'] }}</span>
                             </td>
                         </tr>
 
@@ -569,46 +624,21 @@ const differences = computed((): Difference[] => {
                             <th scope="row" class="px-3 py-2 text-left font-medium text-ink">Notes</th>
                             <td v-for="column in columns" :key="column.run_id" class="px-3 py-2 text-ink">
                                 <span v-if="column.notes">{{ column.notes }}</span>
-                                <span v-else class="text-ink-muted">
-                                    N/A
-                                </span>
+                                <AbsenceValue v-else compact reason="No note is recorded for this run." />
+                            </td>
+                            <td class="px-3 py-2">
+                                <span :class="verdictPill(verdictBy['Notes'])">{{ verdictBy['Notes'] }}</span>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <!-- The difference column (slice 7 step 3.3). It sits under the detail table because it is a
-                 reading of it: one verdict per property, matching rows included. -->
-            <h3 class="mt-8 text-base font-semibold text-ink-strong">Where they differ</h3>
-            <p class="mt-1 text-sm text-ink-muted">
-                One row per stored property. A row that matches still prints and says <b>same</b>; a row
-                that differs names the difference, and a star rank names it as a number.
-            </p>
-
-            <div class="mt-3 overflow-x-auto rounded-md border border-rule">
-                <table class="w-full border-collapse bg-raised text-sm">
-                    <caption class="px-3 py-2 text-left text-xs text-ink-muted">
-                        Differences only. Nothing here is scored or ranked.
-                    </caption>
-                    <thead>
-                        <tr class="border-b border-rule">
-                            <th scope="col" class="px-3 py-2 text-left font-semibold text-ink-strong">Property</th>
-                            <th scope="col" class="px-3 py-2 text-left font-semibold text-ink-strong">Difference</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr
-                            v-for="row in differences"
-                            :key="row.property"
-                            class="border-b border-rule last:border-b-0"
-                        >
-                            <th scope="row" class="px-3 py-2 text-left font-medium text-ink">{{ row.property }}</th>
-                            <td class="px-3 py-2 font-mono tabular-nums text-ink">{{ row.verdict }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <!-- The verdict is the LAST COLUMN of the table above (`legacy-compare.html:70-83`), so the
+                 separate table this section used to draw is gone. The fold is the slice working as
+                 written and not a divergence: the wireframe's comparison is one table with a
+                 Difference column. The wider row set kept under R2 is the divergence, and
+                 SCREEN_SPEC's register carries it. -->
 
             <p class="mt-3 text-xs text-ink-muted">
                 Affinity is stored per run and is not priced by this tool.
