@@ -167,6 +167,42 @@ test('the Shop items catalogue sits on its wireframe', async ({ page }) => {
     });
 });
 
+test('the Scenarios matrices sit on their wireframe', async ({ page }) => {
+    await assertParity(page, {
+        screen: 'scenarios',
+        appUrl: '/database/scenarios',
+        wireframe: 'database-scenarios.html',
+        allow: {
+            text: [
+                // HFW-OVERRIDE (copy: caps note): the mock's note carries its own two examples; this
+                // page keeps the base and hard-ceiling sentence and adds the matrix-verification
+                // sentences that used to sit in a band above the cards.
+                'div.card:nth-child(2) > p.note:nth-child(3)',
+                // HFW-OVERRIDE (data: panel row order): the matrix rows follow the config's own key
+                // order, and its column headers print the scenario labels rather than the mock's
+                // abbreviations. The harness pairs by position, so it compares a different panel on
+                // each row: read by panel, all 28 flags agree with `config/scenarios.php`.
+                'div.card:nth-child(3) > table.t:nth-child(2)',
+                // HFW-OVERRIDE (copy: heading): "Last rework" is ruled over "Ruleset dates" by `5fd9a8ad`.
+                'div.card:nth-child(4) > h2:nth-child(1)',
+                // HFW-OVERRIDE (data: rework text): the config's own event strings, not the mock's
+                // abbreviated ones.
+                'div.card:nth-child(4) > table.t:nth-child(2)',
+                // The note's antecedent moved with the heading: a rework date, not a ruleset date.
+                'div.card:nth-child(4) > p.note:nth-child(3)',
+            ],
+            computed: [
+                // HFW-OVERRIDE (style: no current row): the mock marks its Unity Cup row
+                // `tr.is-current`, and `table.t tr.is-current td` raises that row's weight to 700 (900
+                // inside its bold outlier). No row of a reference matrix is current, so the highlight
+                // is not drawn and the two cells that pair into it read lighter here.
+                'div.card:nth-child(2) > table.t:nth-child(2) > tbody:nth-child(2) > tr:nth-child(2)',
+            ],
+            rect: [],
+        },
+    });
+});
+
 test('the Events catalogue sits on its wireframe', async ({ page }) => {
     await assertParity(page, {
         screen: 'events',

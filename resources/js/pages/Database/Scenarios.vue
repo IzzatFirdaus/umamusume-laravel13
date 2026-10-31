@@ -1,11 +1,17 @@
 <script setup lang="ts">
 /*
  * The scenario matrix (SCREEN-023, plan §8 D17). The composition matrix in `config/scenarios.php`,
- * printed as it is: the caps, the panels, the widgets, the live date and the documentation marker, with
- * the matrix's own verification date beside the source the config's header cites.
+ * printed as it is: the caps, the panels, the widgets, the live date and the documentation marker,
+ * laid out as `database-scenarios.html`'s three cards. The matrix's own verification date sits in the
+ * caps note, where the wireframe keeps its caveats, rather than in a band above the cards.
+ *
+ * HFW-OVERRIDE (data: panel row order): the panels matrix lists its rows in the config's key order,
+ * and the harness pairs by position, so it reports a different panel on each row. Read by panel, every
+ * flag on the mock's matrix matches the config, which is the composition the cockpit renders.
  *
  * The page branches on nothing but resolved values from the matrix. No scenario name reaches the
- * template, so a fifth scenario is one config entry and no edit here (D-240, gate G-33).
+ * template as a key, so a fifth scenario is one config entry and no edit here (D-240, gate G-33); the
+ * two example sentences in the panels note name scenarios as examples only.
  *
  * Every panel renders, on or off. The Scenario Selection cards hide an off panel because a scenario must
  * not claim a system it does not compose; a reference matrix earns its place by stating the matrix, so
@@ -46,15 +52,11 @@ const props = defineProps<{
 
 const bonusText = (bonus: number): string => (bonus > 0 ? `+${bonus}` : `${bonus}`);
 
-const th = 'border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong';
-const thNum = 'border-b border-rule px-2 py-2 text-right text-xs font-semibold text-ink-strong';
-const td = 'border-b border-rule px-2 py-3 align-top text-sm text-ink';
-const tdNum = 'border-b border-rule px-2 py-3 text-right align-top font-mono tabular-nums text-sm text-ink';
-
 /*
- * The caps table and the panels table are the shared `DataTable` primitive, so a screen reader
- * announces each as a table with its rows and columns rather than as a list of numbers. The figures
- * are right-aligned and set in tabular figures, because a column of caps read down the page is
+ * The caps table and the panels table are the shared `DataTable` primitive in the per-scenario cards,
+ * so a screen reader announces each as a table with its rows and columns rather than as a list of
+ * numbers. The three matrices above are the wireframe's own `table.t` grammar. Figures are right
+ * aligned through `td.n` and set in tabular figures, because a column of caps read down the page is
  * compared, not read.
  */
 const capColumns: DataTableColumn[] = [
@@ -88,8 +90,12 @@ const entries = computed<[string, Scenario][]>(() => Object.entries(props.scenar
 const statNames = computed<string[]>(() => entries.value[0]?.[1].caps.map((cap) => cap.stat) ?? []);
 const panelNames = computed<string[]>(() => entries.value[0]?.[1].panels.map((panel) => panel.label) ?? []);
 
-const capOf = (scenario: Scenario, stat: string): number =>
-    scenario.caps.find((cap) => cap.stat === stat)?.cap ?? 0;
+/** The published cap, or the word for a stat this scenario's row does not carry. */
+const capText = (scenario: Scenario, stat: string): string => {
+    const cap = scenario.caps.find((entry) => entry.stat === stat)?.cap;
+
+    return cap === undefined ? 'N/A' : `${cap}`;
+};
 
 /**
  * The stat a row marks as its outlier: the row's highest cap when it is strictly above the second
@@ -123,69 +129,95 @@ const panelState = (scenario: Scenario, label: string): boolean =>
 
         <DatabaseNav />
 
-        <!-- The wireframe's matrix-verification bar (`database-scenarios.html:55`): a verification
-             date records when the matrix was checked, not when it was fetched. -->
-        <p class="mt-4 rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink-muted">
-            <span aria-hidden="true" class="mr-2 text-status-positive">i</span>
-            <b class="text-ink-strong">Matrix verified {{ props.verifiedAt }}.</b>
-            A verification date records when the matrix was checked against its sources. Nothing on this
-            page was fetched today.
-        </p>
-
-        <!-- The three wireframe tables (`database-scenarios.html:69-124`), read off the matrix. -->
-        <section class="card" aria-labelledby="scenario-caps">
+        <!--
+          The wireframe's three cards (`database-scenarios.html:72-125`), all read off the same matrix:
+          the caps with each row's outlier marked, the panel composition as a matrix, and the rework
+          date. Each is a bare `div.card` holding `h2` + `table.t` + `p.note`, in that order, because
+          that is the order the wireframe pairs on.
+          HFW-OVERRIDE (data: cap source): the mock's figures are its own; this page prints
+          `config/scenarios.php`'s base plus per-stat bonus against the published cap, and the dates
+          are the config's. The two cap layers the note states are the reference's own (section 1.3.4
+          at `:417` and `:422`); a JP guide's 2100 entry level at `:462` is a recommended
+          qualification, not a Global cap, and is not printed here.
+          HFW-OVERRIDE (copy: heading): the third card is headed "Last rework", not the mock's "Ruleset
+          dates" - `5fd9a8ad` ruled the heading names the fact (a launch or rework instant), and
+          `RulesetVersionVocabularyTest` is what pins "ruleset version" to the separate app fact.
+          The mock's Unity Cup row carries `tr.is-current`; no row on a reference matrix is current, so
+          the highlight is not drawn and the harness records it as missing.
+        -->
+        <div class="card mt-4" role="region" aria-labelledby="scenario-caps">
             <h2 id="scenario-caps">Caps</h2>
-            <div class="mt-2 overflow-x-auto">
-                <table class="w-full border-collapse">
+
+            <template v-if="entries.length > 0">
+                <table class="t" aria-label="Stat caps by scenario">
                     <thead>
                         <tr>
-                            <th :class="th">Scenario</th>
-                            <th :class="th">Live on Global</th>
-                            <th v-for="stat in statNames" :key="stat" :class="thNum">{{ stat }}</th>
+                            <th scope="col">Scenario</th>
+                            <th scope="col">Live on Global</th>
+                            <th v-for="stat in statNames" :key="stat" scope="col" class="n">{{ stat }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="[key, scenario] in entries" :key="key">
-                            <th scope="row" :class="[td, 'text-left font-medium']">{{ scenario.label }}</th>
-                            <td :class="[td, 'font-mono']">{{ scenario.live_on_global }}</td>
-                            <td v-for="stat in statNames" :key="stat" :class="tdNum">
-                                <b v-if="outlier(scenario) === stat">{{ capOf(scenario, stat) }}</b>
-                                <template v-else>{{ capOf(scenario, stat) }}</template>
+                            <th scope="row">{{ scenario.label }}</th>
+                            <td class="font-mono">{{ scenario.live_on_global }}</td>
+                            <td
+                                v-for="stat in statNames"
+                                :key="stat"
+                                class="n font-mono tabular-nums"
+                                :title="capText(scenario, stat) === 'N/A'
+                                    ? 'This scenario publishes no cap for that stat.'
+                                    : null"
+                            >
+                                <b v-if="outlier(scenario) === stat">{{ capText(scenario, stat) }}</b>
+                                <template v-else>{{ capText(scenario, stat) }}</template>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-            </div>
-            <p class="note mt-3">
-                <span class="g" aria-hidden="true">○</span>
-                <span>
-                    The bold figure in each row is that scenario's outlier, and the outlier is its
-                    mechanical identity. Base is {{ props.baseCap }} for every stat; the hard ceiling is
-                    2000. Bold marks the outlier, not the maximum.
-                </span>
-            </p>
-        </section>
+                <p class="note mt-3">
+                    <span class="g" aria-hidden="true">○</span>
+                    <span>
+                        The bold figure in each row is that scenario's outlier, and the outlier is its
+                        mechanical identity. Base is {{ props.baseCap }} for every stat; the hard ceiling
+                        is 2000. Bold marks the outlier, not the maximum. Verified
+                        {{ props.verifiedAt }} against the GameTora scenarios.json export and the Global
+                        prose sources the config header names. A verification date records when the
+                        matrix was checked, not when it was fetched, and nothing on this page was
+                        fetched today.
+                    </span>
+                </p>
+            </template>
 
-        <section class="card mt-4" aria-labelledby="scenario-panels">
+            <!-- ADR-0007: the empty state names the absence, and the three cards below it print no
+                 table. The path is reachable only through configuration, so a Feature test, not a
+                 browser spec, is what exercises it. -->
+            <p v-else class="mt-2 text-sm text-ink-muted">
+                No scenario matrix is configured, so there are no caps, panel states or rework dates to
+                print.
+            </p>
+        </div>
+
+        <div class="card mt-4" role="region" aria-labelledby="scenario-panels">
             <h2 id="scenario-panels">Panels each scenario composes</h2>
-            <div class="mt-2 overflow-x-auto">
-                <table class="w-full border-collapse">
-                    <thead>
-                        <tr>
-                            <th :class="th">Panel</th>
-                            <th v-for="[key, scenario] in entries" :key="key" :class="thNum">{{ scenario.label }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="panel in panelNames" :key="panel">
-                            <th scope="row" :class="[td, 'text-left font-medium']">{{ panel }}</th>
-                            <td v-for="[key, scenario] in entries" :key="key" :class="tdNum">
-                                {{ panelState(scenario, panel) ? 'on' : 'off' }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <table v-if="entries.length > 0" class="t" aria-label="Panels each scenario composes">
+                <thead>
+                    <tr>
+                        <th scope="col">Panel</th>
+                        <th v-for="[key, scenario] in entries" :key="key" scope="col" class="n">
+                            {{ scenario.label }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="panel in panelNames" :key="panel">
+                        <th scope="row">{{ panel }}</th>
+                        <td v-for="[key, scenario] in entries" :key="key" class="n">
+                            {{ panelState(scenario, panel) ? 'on' : 'off' }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
             <p class="note mt-3">
                 <span class="g" aria-hidden="true">○</span>
                 <span>
@@ -194,28 +226,26 @@ const panelState = (scenario: Scenario, label: string): boolean =>
                     both are correct.
                 </span>
             </p>
-        </section>
+        </div>
 
-        <section class="card mt-4" aria-labelledby="scenario-ruleset">
+        <div class="card mt-4" role="region" aria-labelledby="scenario-ruleset">
             <h2 id="scenario-ruleset">Last rework</h2>
-            <div class="mt-2 overflow-x-auto">
-                <table class="w-full border-collapse">
-                    <thead>
-                        <tr>
-                            <th :class="th">Scenario</th>
-                            <th :class="th">Date</th>
-                            <th :class="th">What it marks</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="[key, scenario] in entries" :key="key">
-                            <th scope="row" :class="[td, 'text-left font-medium']">{{ scenario.label }}</th>
-                            <td :class="[td, 'font-mono']">{{ scenario.ruleset.date }}</td>
-                            <td :class="td">{{ scenario.ruleset.event }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <table v-if="entries.length > 0" class="t" aria-label="Last rework date for each scenario">
+                <thead>
+                    <tr>
+                        <th scope="col">Scenario</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">What it marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="[key, scenario] in entries" :key="key">
+                        <th scope="row">{{ scenario.label }}</th>
+                        <td class="font-mono">{{ scenario.ruleset.date }}</td>
+                        <td>{{ scenario.ruleset.event }}</td>
+                    </tr>
+                </tbody>
+            </table>
             <p class="note mt-3">
                 <span class="g" aria-hidden="true">○</span>
                 <span>
@@ -224,16 +254,29 @@ const panelState = (scenario: Scenario, label: string): boolean =>
                     facts are never merged into one label.
                 </span>
             </p>
-        </section>
+        </div>
 
         <h2 class="mt-8 text-lg font-semibold text-ink-strong">Per-scenario detail</h2>
 
         <p class="mt-4 max-w-3xl text-sm text-ink-muted">
             The scenario's composition matrix, printed as it is. Caps are the base plus a per-stat
-            bonus, and the base is
-            {{ props.baseCap }}. Verified {{ props.verifiedAt }} against the GameTora
-            <code class="font-mono text-xs">scenarios.json</code> field <code class="font-mono text-xs">stats</code>
-            and the Global prose sources the config header names.
+            bonus, and the base is {{ props.baseCap }}. The caps note above carries the verification
+            date and names the sources the config header cites.
+        </p>
+
+        <!--
+          HFW-OVERRIDE (copy: table idiom note): the page draws two table idioms, and this one sentence
+          says which is which. It sits above the first detail wrapper because `DataTable` renders its own
+          card and has no slot for a note inside it, so the sentence is a block above rather than a Card
+          inside a Card, which `lint:ui` refuses. It is wrapping prose, never a fixed width, so the
+          320px reading in `database.spec.ts:455` stays a reflow rather than a pan.
+        -->
+        <p class="note mt-4">
+            <span class="g" aria-hidden="true">○</span>
+            <span>
+                The three tables above are this page's reference matrices; the cards below print one
+                scenario's own caps and panels in the shared data table this tool uses for its lists.
+            </span>
         </p>
 
         <div class="mt-6 space-y-6">

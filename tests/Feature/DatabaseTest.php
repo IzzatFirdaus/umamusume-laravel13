@@ -175,6 +175,28 @@ it('renders the Scenarios matrix with the config values and PARTIALLY DOCUMENTED
             ->where('scenarios.ura_finale.widgets.0.label', 'Turn'));
 });
 
+it('states the absence when no scenario matrix is configured', function (): void {
+    // The page has no empty branch by accident: every block reads the matrix, so with an empty config
+    // the caps card would print a two-column header over no rows. Reaching the branch needs
+    // configuration, not a factory, so this is the only honest way to exercise it (ADR-0007).
+    config(['scenarios.scenarios' => []]);
+
+    $this->get('/database/scenarios')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Database/Scenarios')
+            ->has('scenarios', 0)
+            ->where('scenarios', []));
+
+    // The sentence is template-side and an Inertia Feature request never renders the Vue page
+    // (`INERTIA_SSR_ENABLED=false`), so this pins the branch in the shipped source rather than claiming
+    // a render the test cannot see. The browser pass reads the same file the payload drives.
+    expect(str_contains(
+        (string) file_get_contents(base_path('resources/js/pages/Database/Scenarios.vue')),
+        'No scenario matrix is configured',
+    ))->toBeTrue();
+});
+
 it('renders the Events reference view with the ten recurring types', function (): void {
     $this->get('/database/events')
         ->assertOk()
