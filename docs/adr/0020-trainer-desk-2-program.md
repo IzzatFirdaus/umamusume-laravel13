@@ -145,3 +145,27 @@ shape 1 and is a separate, later slice; **it is not authorized by this ADR.**
   decision set. **No ruling is taken here.** The three items above are recorded as owed: an owner
   ruling that names the criteria the rewrite must meet, a ruling on whether the client-side visit falls
   inside `ADR-0007`'s scope, and the record of who owns the visit indicator.
+
+## Amendment 2026-10-31 / projection owner
+
+**Owner direction, 2026-10-31.** Delegated to the drafting agent ("I leave it to your discretion").
+This amends §3's record-only stance by carving out exactly one computation and naming its owner.
+
+**What `AncestryGraph` still does not do.** The charter at `app/Services/Legacy/AncestryGraph.php:20-21`
+stands unchanged: no inherited stat, no Affinity payout, no Spark roll, no score, no ranking, no
+recommended combination. Calling `AncestryGraph` never triggers a projection.
+
+**The one addition, and its owner.** `App\Services\Legacy\StartingCapProjection` computes a
+career-start ceiling for a run that has not started: it reads a `LegacySelectionPayload`'s recorded
+parents, filters to Blue basic-ability factors, sums the cap raise through
+`ScenarioCaps::capRaise()`, and returns `{stat => ceiling}`. Nothing else — no score, no affinity, no
+roll, no ranking. It is a separate object precisely so the graph's "computes nothing" charter stays
+literally true.
+
+**Why the carve-out is narrow.** After a run starts, its ceilings are the Trainer's readings (this
+ADR's own entered-cap rule), and nothing here derives them. Before it starts, there is no reading to
+enter, so the projection states the arithmetic those recorded factors imply and labels its source.
+`ADR-0025`'s amendment carries the prohibition this narrows and the provenance the figure must print.
+
+**Readers-branch list.** `LegacyController::builder` (the `projection` prop), the builder page's
+preview column, and any later tool that needs a starting ceiling for an unstarted run.
