@@ -262,7 +262,12 @@ test('reaches the race door from the keyboard without losing focus', async ({ pa
     const door = region.getByRole('link', { name: 'Record this race' }).first();
     await expect(door).toBeVisible();
 
+    // Chromium applies :focus-visible only for keyboard-modality focus, so a bare .focus() would
+    // read outlineStyle none even though the ring is correct. Stepping off and back on with Tab
+    // is what makes this a keyboard case rather than a programmatic-focus case.
     await door.focus();
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Tab');
     await expect(door).toBeFocused();
     const outline = await door.evaluate((el: HTMLElement) => getComputedStyle(el).outlineStyle);
     expect(outline, 'the door has no visible focus outline').not.toBe('none');

@@ -1173,7 +1173,10 @@ const jumpToShop = (): void => {
              so the `Career tools` disclosure can retire, and a destructive action belongs at the foot
              of the page rather than beside the doors a Trainer follows every turn. -->
         <div class="mt-4 flex justify-end">
-            <a :href="props.run.confirm_delete_url" class="text-xs text-ink-muted underline">
+            <a
+                :href="props.run.confirm_delete_url"
+                class="inline-flex min-h-11 items-center text-xs text-ink-muted underline"
+            >
                 Delete this run
             </a>
         </div>
