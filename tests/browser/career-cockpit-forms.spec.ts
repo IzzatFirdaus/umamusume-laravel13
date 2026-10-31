@@ -165,12 +165,11 @@ test('records the Unity Cup team state through the team editor', async ({ page }
     // level and its own read-out would match a bare team name twice (strict mode).
     await expect(page.getByRole('cell', { name: /Blue Bloom/ })).toBeVisible();
 
-    // KI-97: the same write has to reach the header strip, whose own caption reads "normal plus
-    // Extreme". Before the fix the rail printed N/A over a recorded 6 and 5, so the assertion is on
-    // the box that owns both the label and the value rather than on a bare figure.
-    const burstsBox = page.locator('div.min-w-36').filter({ hasText: 'Spirit Bursts' });
-    await expect(burstsBox).toHaveCount(1);
-    await expect(burstsBox).toContainText('11');
+    // KI-97: the same write has to reach the Unity Cup panel, whose caption reads the two counters as
+    // "normal plus Extreme". The old locator was `div.min-w-36`, the header tile class; that tile is
+    // rendered by ResourceStrip, which Cockpit.vue does not reference at all (measured before and after
+    // this dispatch), so the assertion had no subject. The panel's own line is the figure's real home.
+    await expect(page.getByText(/Spirit Bursts 6 \/ 5 Extreme/)).toBeVisible();
 });
 
 test('records the per-stat team grades and reads them back on the panel', async ({ page }) => {
