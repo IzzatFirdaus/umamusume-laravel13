@@ -10,7 +10,7 @@
  * columns — so the door adds a page and no write path. Validation feedback therefore lands where
  * it always did: `form.errors` from that request.
  */
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 
 import CareerLayout from '../../layouts/CareerLayout.vue';
@@ -71,6 +71,25 @@ const form = useForm({
     mood: props.turn.mood ?? '',
     condition: props.turn.condition ?? '',
 });
+
+/*
+ * R2-16, carried across from the Cockpit form this replaces: the band travels with the state that
+ * names it. A state of `exact` keeps no band, and any state but `band` clears it, so a correction
+ * that switches the state to `unknown` cannot leave the old band on the row for the next reader to
+ * take as a reading nobody made.
+ */
+watch(
+    () => form.energy_state,
+    (state: string) => {
+        if (state !== 'exact') {
+            form.energy = '';
+        }
+
+        if (state !== 'band') {
+            form.energy_band = '';
+        }
+    },
+);
 
 /**
  * An empty field is "not recorded" and `0` is a real reading, so the two stay apart rather than
