@@ -128,6 +128,8 @@ test.describe('HFW layouts', () => {
             '/umamusume',
             '/skills',
             '/skills/370',
+            '/legacy/compare',
+            '/veterans/compare',
         ];
 
         for (const mode of ['compact', 'standard', 'wide'] as const) {
