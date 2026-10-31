@@ -14,6 +14,15 @@
  *
  * Provenance is a row plus a link to the ledger. No file path and no snapshot location reaches this
  * screen; the source URL stays inside the disclosure that holds the fetch history.
+ *
+ * HFW-OVERRIDE (structure: artwork frame position) — `support-card-detail.html:57-58` puts the 64px
+ * frame inside the head row. `PageHeader` exposes one slot (`actions`) and no title-leading slot, so
+ * the frame stays in its own row under the sub-nav rather than editing a 29-importer component for a
+ * position difference. What that keybox item rules is the ABSENCE behaviour, and that holds: a file
+ * the mirror does not hold renders nothing at all.
+ * HFW-OVERRIDE (data: card events are not held) — the wireframe's `Event | Chain | Choice` card is
+ * illustrative by its own footnote, and this schema stores skill lists rather than card events, so
+ * the page keeps its sourced Hinted/Event skill cards.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
@@ -125,8 +134,21 @@ const tdMono = 'border-b border-rule px-2 py-2 align-top font-mono text-xs text-
 const rowLabel = 'w-1/3 px-2 py-2 align-top text-sm text-ink-muted';
 const rowValue = 'px-2 py-2 align-top text-sm text-ink';
 
-const statedAt = (stage: EffectStage): string =>
-    stage.anchors.map((anchor) => `${anchor.level}: ${anchor.display}`).join(' · ');
+/*
+ * The anchors the source states, spelled out.
+ *
+ * A level with no entry is an absence, not a zero (`support-card-detail.html:107-127`): when the
+ * source states nothing at level 1, the row says so rather than starting at whatever level it does
+ * state. More than half this catalogue's effect rows start above level 1, so this is the normal
+ * case rather than the wireframe's illustrative one.
+ */
+const statedAt = (stage: EffectStage): string => {
+    const pairs = stage.anchors.map((anchor) => `${anchor.level}: ${anchor.display}`);
+
+    if (pairs.length === 0) return 'Not recorded';
+
+    return stage.anchors[0].level === 1 ? pairs.join(' · ') : ['1: Not recorded', ...pairs].join(' · ');
+};
 </script>
 
 <template>
@@ -177,7 +199,7 @@ const statedAt = (stage: EffectStage): string =>
                         The source states no effect anchor for this card.
                     </p>
                     <template v-else>
-                        <table class="w-full border-collapse">
+                        <table class="t">
                             <thead>
                                 <tr>
                                     <th :class="th">Effect</th>
@@ -264,7 +286,7 @@ const statedAt = (stage: EffectStage): string =>
                         </div>
                     </div>
 
-                    <table class="mt-3 w-full border-collapse">
+                    <table class="t mt-3">
                         <tbody>
                             <tr>
                                 <th scope="row" :class="rowLabel">Released in Japan</th>
@@ -318,7 +340,7 @@ const statedAt = (stage: EffectStage): string =>
                          (`support-card-detail.html:170`), not a bare sentence. A card no run holds is
                          a normal state rather than a warning, so it reads as a labelled row carrying
                          the neutral pill the rest of the app uses for "known and unremarkable". -->
-                    <table v-if="props.usedBy.length === 0" class="w-full border-collapse">
+                    <table v-if="props.usedBy.length === 0" class="t">
                         <tbody>
                             <tr>
                                 <td :class="td">This card is in no run's deck.</td>
@@ -328,7 +350,7 @@ const statedAt = (stage: EffectStage): string =>
                             </tr>
                         </tbody>
                     </table>
-                    <table v-else class="w-full border-collapse">
+                    <table v-else class="t">
                         <tbody>
                             <tr v-for="run in props.usedBy" :key="run.run_id">
                                 <td :class="td">
@@ -354,7 +376,7 @@ const statedAt = (stage: EffectStage): string =>
 
                 <div class="card">
                     <h2>Provenance</h2>
-                    <table class="w-full border-collapse">
+                    <table class="t">
                         <tbody>
                             <tr>
                                 <th scope="row" :class="rowLabel">Data</th>
