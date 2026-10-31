@@ -171,3 +171,19 @@ test('drops the advisor rail and prints the outcome first on a Completed run', a
     const outcomeTop = await top(outcome);
     expect(outcomeTop).toBeLessThan(await top(scenario(page)));
 });
+
+test('prints the shell-density info banner above the body grid', async ({ page }) => {
+    const runUrl = await createRun(page, 'Active');
+    await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // `cockpit-unity-cup.html` carries one `.info` banner between the page head and the
+    // shell-density body. The app keeps the shape and states the reason in product terms.
+    const banner = page.locator('main .info[role="note"]');
+    await expect(banner).toHaveCount(1);
+    await expect(banner).toBeVisible();
+    await expect(banner).toContainText('shell-density view');
+
+    // It reads before the body's first region, so the note is not discovered mid-page.
+    expect(await top(banner)).toBeLessThan(await top(stats(page)));
+});

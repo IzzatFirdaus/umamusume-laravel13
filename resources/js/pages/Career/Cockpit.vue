@@ -956,6 +956,19 @@ const jumpToShop = (): void => {
              crossing that fires a band later than every other career screen's. `md:items-start` stays:
              the HFW's left column is taller than the right, and `stretch` would grow the advisor card
              to a height its content does not fill. -->
+        <!-- HFW-OVERRIDE (copy: info banner restated in product language). `cockpit-unity-cup.html`
+             prints a `.info` banner above the shell-density content, but its copy names a
+             research-document path (`docs/design-research/cockpit-wireframes-2026-10-21/
+             05-unity-cup-hfw-v2.html`). A repository path is a wireframe artifact, not shippable UI
+             copy, so the banner keeps the shape and the reason in product terms. -->
+        <div class="info mt-4" role="note">
+            <span aria-hidden="true">i</span>
+            <span>
+                This cockpit is a shell-density view. The full twelve-change treatment with token
+                mapping lives in the companion research document.
+            </span>
+        </div>
+
         <div class="mt-4 grid gap-4 g-side md:items-start">
             <div class="flex min-w-0 flex-col gap-4">
                 <CareerStatePanel
