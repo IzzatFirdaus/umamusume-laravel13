@@ -27,6 +27,10 @@ export async function deleteRun(page: Page, runUrl: string): Promise<void> {
 
     const response = await page.request.delete(`/training-runs/${id}`, {
         maxRedirects: 0,
+        // `C6b.3`: `runs.destroy` now requires an explicit confirmation flag, because deletion is
+        // irreversible and the ConfirmDelete door sets it. Teardown is a caller, so it sets it too;
+        // a delete without it is refused and the row would leak.
+        form: { confirmed: '1' },
         ...(cookie ? { headers: { 'X-XSRF-TOKEN': decodeURIComponent(cookie.value) } } : {}),
     });
 

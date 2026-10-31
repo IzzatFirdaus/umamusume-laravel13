@@ -882,11 +882,53 @@ class TrainingRunController extends Controller
             ->with('status', 'Purchase recorded.');
     }
 
-    public function destroy(TrainingRun $run): RedirectResponse
+    /**
+     * `C6b.3`: deletion is irreversible, so it now requires an explicit confirmation flag. The
+     * `ConfirmDelete` page sets it once the Trainer ticks the checkbox; the test teardown sends it
+     * too. A caller that omits it is refused rather than silently deleting a career, which is the
+     * whole point of a confirmation door.
+     */
+    public function destroy(Request $request, TrainingRun $run): RedirectResponse
     {
+        if (! $request->boolean('confirmed')) {
+            return redirect()
+                ->back(fallback: route('runs.confirm-delete', $run))
+                ->withErrors(['confirmed' => 'Confirm that this career should be deleted.']);
+        }
+
         $run->delete();
 
         return redirect()->route('runs.index')->with('status', 'Run deleted.');
+    }
+
+    /**
+     * The delete-run confirmation door (`C6b.3`, KI-144): what will be lost, and one destructive
+     * action behind a required checkbox. It is a READ; the DELETE itself stays on `runs.destroy`.
+     */
+    public function confirmDelete(TrainingRun $run): InertiaResponse
+    {
+        $run->loadMissing('umamusume');
+        $run->loadCount(['turnEntries', 'raceEntries']);
+
+        return Inertia::render('Career/ConfirmDelete', [
+            'run' => [
+                'id' => $run->id,
+                'trainee' => $run->umamusume->name,
+                'trainee_ja' => $run->umamusume->name_ja,
+                'status' => $run->status->value,
+                'status_label' => $run->status->label(),
+                'scenario_label' => $run->hasScenario()
+                    ? (string) config('scenarios.scenarios.'.$run->scenarioKey().'.label', $run->scenarioKey())
+                    : 'No scenario set',
+                'run_url' => route('runs.cockpit', $run),
+            ],
+            'counts' => [
+                'turns' => (int) $run->turn_entries_count,
+                'races' => (int) $run->race_entries_count,
+            ],
+            'destroy_url' => route('runs.destroy', $run),
+            'index_url' => route('runs.index'),
+        ]);
     }
 
     /**

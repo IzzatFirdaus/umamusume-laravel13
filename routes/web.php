@@ -202,6 +202,12 @@ Route::get('/training-runs/{run}/timeline', [TimelineController::class, 'show'])
 Route::get('/training-runs/{run}/result', [ResultController::class, 'show'])->name('runs.result');
 Route::put('/training-runs/{run}', [TrainingRunController::class, 'update'])->name('runs.update');
 Route::delete('/training-runs/{run}', [TrainingRunController::class, 'destroy'])->name('runs.destroy');
+/*
+ * The delete-run confirmation door (`C6b.3`, KI-144). A read that shows what will be lost; the
+ * DELETE stays on `runs.destroy` above, which now refuses a request that carries no confirmation.
+ */
+Route::get('/training-runs/{run}/delete', [TrainingRunController::class, 'confirmDelete'])
+    ->name('runs.confirm-delete');
 Route::get('/training-runs/{run}/export/{format}', [TrainingRunController::class, 'export'])->name('runs.export');
 Route::post('/training-runs/{run}/turns', [TrainingRunController::class, 'storeTurn'])->name('runs.turns.store');
 Route::put('/training-runs/{run}/turns/{turn}', [TrainingRunController::class, 'updateTurn'])->name('runs.turns.update');

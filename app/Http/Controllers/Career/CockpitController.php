@@ -307,6 +307,9 @@ class CockpitController extends Controller
             // their own, so the `Career tools` disclosure can retire. It reads; the writes stay on
             // `update_url` below.
             'settings_url' => route('runs.settings', $run),
+            // The delete-run confirmation door (`C6b.3`), so the write that used to live in the
+            // `Career tools` disclosure has a door of its own before that disclosure retires.
+            'confirm_delete_url' => route('runs.confirm-delete', $run),
             // The page head's own door back to the list. HFW parity gives every cockpit variant an
             // `All careers` action beside the one primary, and the route is the list's own.
             'index_url' => route('runs.index'),

@@ -1155,6 +1155,16 @@ const jumpToShop = (): void => {
             </div>
         </div>
 
+        <!-- HFW-OVERRIDE (structure: one footer door). No cockpit HFW draws a delete affordance: the
+             HFW has no write surfaces at all. `C6b.3` gives the destructive write a door of its own
+             so the `Career tools` disclosure can retire, and a destructive action belongs at the foot
+             of the page rather than beside the doors a Trainer follows every turn. -->
+        <div class="mt-4 flex justify-end">
+            <a :href="props.run.confirm_delete_url" class="text-xs text-ink-muted underline">
+                Delete this run
+            </a>
+        </div>
+
         <!-- The action grid is the set of doors a turn leads into, not a second ranking. No cockpit
              HFW draws it: `cockpit-unity-cup.html` reaches those screens through the stepper and the
              "Where to go" card, and the page head already carries the decision's single primary. It
