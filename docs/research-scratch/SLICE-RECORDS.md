@@ -12182,3 +12182,28 @@ All ten: N/A — no change recorded for this slice in this pass; three crossings
 ---
 
 N of 9 entries complete: Cockpit, TrainingDetail, RaceDecision, SkillsPlanner, EventDecision, InheritanceEvent, Builder, Timeline, Result.
+---
+
+### Legacy six-screen HFW parity — 2026-11-01
+
+**Scope.** Four fixed screens (`/legacy/{id}`, `/legacy/compare`, `/veterans/compare`, `/review/{id}`) and two verified-only screens (`/support-cards/{id}`, `/skills/{id}`). Commits baf7019e .. c40b1a86 (group j pending).
+
+**Fixed.**
+- `Legacy/Builder.vue` + `AncestryNode.vue`: four title-only absences closed (words become reasons); three HFW-OVERRIDE markers mirroring register rows :4213/:4214/:4215. Radio semantics per KI-135 not re-opened.
+- `Legacy/Compare.vue`: engine table -> class "t min-w-[40rem]"; caps-card title-only N/A -> AbsenceValue compact reason=cap.note. Wireframe "+8" aptitude filler refused (§1.5.2 grades are not star-to-point).
+- `Veterans/Compare.vue`: per-career article.rounded-md.border.border-rule.bg-raised.p-3 text-sm -> section.card text-sm + h2. Wireframe "Best for" mini-table refused (§1.5.4 / PRD G-4).
+- `Review/Detail.vue`: rarity title-only absence -> visible prose beside the pill; <p> -> <div>.
+- `ScenarioCaps::capRaise` returns 16 only for stars === 3 (§1.3.4 states ★3 only); `StartingCapProjection::label()` extended with the ★3-only basis. ★3+★2 test added to LegacyLabPageTest (raise 16, ceiling 1416).
+
+**Verified (no edits).** `/support-cards/{id}` matches register rows :4204-4206 (SupportCards slice 5.3 cross-ref: already-satisfied, no commit). `/skills/{id}` matches eleven keybox items (Skills slice 5.2 cross-ref: already-satisfied, no commit).
+
+**Overflow.** Six assertions pass: 2 new (layout-compositions.spec.ts: /legacy/compare, /veterans/compare) + 4 existing (fixture specs for /legacy/{id}, /review/{id}, /support-cards/{id}, /skills/370) — unchanged and re-run.
+
+**M1 / Index ten-item re-check.** §11 ten re-checks answered; item 8: no violation because no screen makes the Trainer carry something between two places. §1 six prime directives govern findings. Twelve-document table: no change recorded for this pass.
+
+**Reference figures.** +16 per ★3 Blue factor (§1.3.4, UMAMUSUME_REFERENCE.md:420) sanctioned; ★2/+8 refused as unsourced; wireframe "24-point cap gap" refused (ADR-0020 §3 / PRD G-4 at PRD.md:322). No star-roll odds rendered (§1.5.3 stale).
+
+---
+
+N of 1 entries complete: Legacy/Builder, Legacy/Compare, Veterans/Compare, Review/Detail (fixed); SupportCards/Show, Skills/Show (verified only).
+
