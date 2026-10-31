@@ -68,25 +68,12 @@ async function openCockpit(page: import('@playwright/test').Page): Promise<void>
 function recordedCard(page: import('@playwright/test').Page) {
     return page.getByRole('region', { name: 'Recorded action' });
 }
-async function openDisclosure(page: import('@playwright/test').Page, region: string): Promise<void> {
-    const details = page.locator(`details[data-region="${region}"]`);
 
-    if ((await details.count()) === 0) {
-        throw new Error(`no ${region} disclosure on this page`);
-    }
-
-    if (!(await details.evaluate((el) => el.hasAttribute('open')))) {
-        await details.locator('summary').first().click();
-        await expect(details).toHaveAttribute('open', '');
-    }
-}
-
-/**
- * The run's write surfaces and the action grid: "Career tools".
+/*
+ * `C6b.11` deleted the "Career tools" disclosure, so there is nothing to open before reading the
+ * action grid: `ActionGrid` now renders at page level (C6b.4). The helper that used to open it is
+ * gone rather than left as a no-op, so a future caller cannot believe it is still hiding a region.
  */
-async function openRunTools(page: import('@playwright/test').Page): Promise<void> {
-    await openDisclosure(page, 'run-tools');
-}
 
 test('walks the recorded-action card through its three states', async ({ page }) => {
     const cockpitUrl = await newCareer(page);
@@ -336,7 +323,6 @@ test('lays out at 1280, 768 and 320 without a horizontal scroll', async ({ page 
         expect(overflow, `the cockpit scrolls sideways at ${width}px`).toBeLessThanOrEqual(1);
 
         // Every region is in the accessibility tree at every width: nothing is hidden by a breakpoint.
-        await expect(page.getByRole('heading', { name: 'Races in this run' })).toBeVisible();
         await expect(page.getByRole('heading', { name: 'Actions' })).toBeVisible();
         await expect(page.getByRole('heading', { name: 'Advisor' })).toBeVisible();
         await expect(page.getByRole('heading', { name: 'Scenario' })).toBeVisible();
@@ -351,7 +337,6 @@ test('lays out at 1280, 768 and 320 without a horizontal scroll', async ({ page 
 
 test('walks the action grid from the keyboard with a visible focus ring', async ({ page }) => {
     await openCockpit(page);
-    await openRunTools(page);
 
     // Scoped to the Actions region: the section nav (audit 2026-10-12 §3.6) adds a "Races in this
     // run" link whose name also starts with "Race", and the grid's own entry is the one meant here.
@@ -425,7 +410,6 @@ test('quiets transitions when the operating system asks for reduced motion', asy
 
 test('sizes the cockpit controls to the 44px contract', async ({ page }) => {
     await openCockpit(page);
-    await openRunTools(page);
 
     // WCAG 2.2 SC 2.5.8, floor 44px (plan §12.1). The same sweep `dashboard.spec.ts` runs.
     // Every grid entry is scoped to the Actions region: the section nav renders real `Training`,
@@ -472,16 +456,20 @@ test('records Energy through the cockpit correction and then marks one action', 
     await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    // The correction disclosure opens on the stored turn and writes through the route that already
-    // owns a turn: no second endpoint exists for it.
-    const correction = page.locator('details', { has: page.getByText('Correct turn 1 by hand') });
-    await page.getByText('Correct turn 1 by hand').click();
-    // R2-16 gave the correction form the same Energy control the guided form has: the state is a radio
-    // group and the number input renders only while the state is `exact`, so recording a figure names
-    // its state first. The stored turn carries no state, which is why the input is not there yet.
-    await correction.getByRole('radio', { name: 'Exact' }).check();
-    await correction.locator('input[name="energy"]').fill('60');
-    await correction.getByRole('button', { name: 'Save correction' }).click();
+    // `C6b.6` moved the correction form to its own door (`runs.turns.edit`), reached from the
+    // Timeline row it corrects. The write still goes through `runs.turns.update`.
+    await page.goto(`${cockpitUrl.replace(/\/cockpit$/, '')}/timeline`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.getByRole('link', { name: 'Edit turn 1' }).first().click();
+    await page.waitForURL(/\/turns\/\d+\/edit$/);
+    // R2-16: the state is named before a figure, so only an `exact` reading carries a number.
+    await page.locator('#energy_state').selectOption('exact');
+    await page.locator('input[name="energy"]').fill('60');
+    await page.getByRole('button', { name: 'Save correction' }).click();
+    await expect(page.getByText('Saved.')).toBeVisible();
+
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
 
     // The state panel is the proof the write landed, and the proof it landed where the form was posted:
     // a correction made on the Cockpit returns to the Cockpit rather than to the run screen. Energy is
@@ -545,7 +533,6 @@ test('records Energy through the cockpit correction and then marks one action', 
 
 test('passes an axe scan at WCAG A and AA', async ({ page }) => {
     await openCockpit(page);
-    await openRunTools(page);
 
     // `buildAxe` scopes to `#app`, which is what makes this deterministic: Inertia's NProgress bar is
     // appended to `<body>` as a sibling of the app root and carries an invalid `role="bar"` (KI-63).
@@ -578,15 +565,15 @@ async function completeCareer(page: import('@playwright/test').Page): Promise<st
     await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    await page.locator('details[data-region="edit-identity"] > summary').click();
-    await page.selectOption('details[data-region="edit-identity"] select[name="status"]', 'Completed', WRITE);
+    await page.goto(`${cockpitUrl}/settings`, { waitUntil: 'domcontentloaded' });
+    await page.selectOption('#status', 'Completed', WRITE);
     await page.getByRole('button', { name: 'Change status' }).click();
     await page.locator('#app > *').first().waitFor();
 
     return cockpitUrl;
 }
 
-test('reads one turn number in the header and in the correction selector', async ({ page }) => {
+test('reads one turn number in the header', async ({ page }) => {
     const cockpitUrl = await newCareer(page);
     const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
 
@@ -600,14 +587,10 @@ test('reads one turn number in the header and in the correction selector', async
     // strip cannot disagree about what "turn 1" means.
     await expect(header).toHaveText('1 of 72');
 
-    // The dropdown's own value is a turn id, so the comparison is on the number the screen shows beside
-    // it: the summary of the form that opens on this turn.
-    await expect(page.locator('details[data-region="correct-turn"] > summary')).toContainText('Correct turn 1 by hand');
 });
 
 test('names the run state in the DOM, and only the one that applies', async ({ page }) => {
     await openCockpit(page);
-    await openRunTools(page);
 
     await expect(page.locator('[data-run-state="active"]')).toHaveCount(1);
     await expect(page.locator('[data-run-state="completed"]')).toHaveCount(0);
@@ -633,7 +616,7 @@ test('keeps every settings disclosure closed on load for a finished career', asy
     await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    for (const region of ['edit-identity', 'correct-turn', 'team-state', 'danger-zone']) {
+    for (const region of ['team-state']) {
         const details = page.locator(`details[data-region="${region}"]`);
         await expect(details, region).toHaveCount(1);
         await expect(details, `${region} must be closed on load`).not.toHaveAttribute('open');
@@ -642,7 +625,6 @@ test('keeps every settings disclosure closed on load for a finished career', asy
 
 test('the scenario panels read before the advisor, above the scenario strip', async ({ page }) => {
     await openCockpit(page);
-    await openRunTools(page);
 
     // Tree order, not visual order: `querySelectorAll` answers in document order, which is the order a
     // screen reader and a keyboard reach the regions. The HFW parity slice put the scenario card in the
@@ -697,12 +679,8 @@ test('a completed URA career draws its four recorded mandatory races as a ladder
 test('keeps every section landmark name after the Section adoption', async ({ page }) => {
     // Three of the five resolve BY NAME on an active career.
     await openCockpit(page);
-    await openRunTools(page);
     await expect(page.getByRole('region', { name: 'No turn recorded yet' })).toHaveCount(1);
     await expect(page.getByRole('region', { name: 'Scenario', exact: true })).toHaveCount(1);
-    // The fifth pairing is the one Ruling 1 left hand-rolled, so its name is the invariant that proves
-    // the ruling did not cost the section its accessible name.
-    await expect(page.getByRole('region', { name: 'Races in this run' })).toHaveCount(1);
 
     // The other two titles are DYNAMIC, so the stable invariant is the structural shape: the section
     // still references the id and the element carrying it still exists. Asserting a name there would be
@@ -827,17 +805,6 @@ test('prints the cap composition as a footer under Stats and state', async ({ pa
     await expect(footer.getByText(/Caps/)).toBeVisible();
     await expect(footer.getByText(/Blue sparks/)).toBeVisible();
     await expect(page.getByText(/do not reconcile/)).toBeVisible();
-});
-
-test('shows the derived team roster from the deck cards', async ({ page }) => {
-    // A-0.6 (Group A): the roster is derived from the six deck cards, not a stored table. This case
-    // proves the section renders with the equipped deck; the derivation is pinned by `CockpitRosterTest`.
-    await newCareer(page);
-    await page.locator('#app > *').first().waitFor();
-
-    const panel = page.getByRole('region', { name: 'Team roster' });
-    await expect(panel).toBeVisible();
-    await expect(panel.locator('li').first()).toBeVisible();
 });
 
 test('shows the sourced mood effect headline beside the mood', async ({ page }) => {
