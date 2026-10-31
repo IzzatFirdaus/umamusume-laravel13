@@ -102,3 +102,33 @@ a Legacy Select that offers aptitude *context* does.
 
 **Readers branched.** Every surface that prints a parent name resolves the stored library id first and falls back to the payload name: the wizard card builder, the Preflight count and its legacy line, the inheritance event, and the Legacy Lab graph. LegacySelectionSchemaTest carries three cases: a payload with and without the key both validate while an unknown key is still refused, a rented-parent payload round-trips, and a payload without a name reads back in the pre-change shape.
 
+## Amendment 2026-10-31 / optional `pick` key
+
+**Owner direction, 2026-10-31.** Delegated to the drafting agent ("I leave it to your discretion").
+The per-legacy payload gains an **optional** `pick` key, on the `ancestors_meta` / `name` precedent.
+
+**Shape.** `pick` is a nullable integer index into that legacy's own `sparks[]` array. It is admitted
+through `assertKeysAllowing`, **not** added to `KEYS` or `LEGACY_KEYS`, and written only when a payload
+actually carries one — so every existing payload keeps its byte-identical shape and the key's absence
+is a normal state.
+
+**Semantics, and what it is not.** `pick` records which recorded Spark the Trainer marked as that
+parent's **headline** for display: the parent card's first row and the compare view's headline column.
+It is **not** "which Spark fires at inheritance." `UMAMUSUME_REFERENCE.md:645` states career start is
+deterministic for stat and aptitude factors, and `:692` bounds a run to exactly one Blue and one Pink,
+so there is no per-parent choice of what fires. Any projected figure sums every recorded Spark; `pick`
+never gates it. This is the `HFW-OVERRIDE` the builder page records.
+
+**Validation.** `StoreLegacySelectionRequest` carries
+`'legacies.*.pick' => ['nullable', 'integer', 'min:0']` plus an `after()` cross-field bound that a
+present `pick` must be less than `count(sparks)`. Blank is absence, never zero. The bound is a
+refusability check on an index — it says the pointer points at a Spark, not that the Spark is a
+"choice."
+
+**Readers branched.** `AncestryNode` (renders the radio from `pick`), `Legacy/Compare.vue` and
+`Legacy/Index.vue` (headline column and chip), `LegacyController` (passes it through). The wizard's
+`Career/LegacySelect.vue` does not offer it: wizard parity for `pick` is out of scope, and the key's
+absence there is the normal state this amendment preserves.
+`LegacySelectionSchemaTest` gains the three cases the `name` amendment established: with the key,
+without it, and an out-of-range index refused.
+
