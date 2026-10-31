@@ -143,6 +143,13 @@ Route::get('/training-runs/{run}', [TrainingRunController::class, 'redirect'])->
  */
 Route::get('/training-runs/{run}/cockpit', [CockpitController::class, 'show'])->name('runs.cockpit');
 /*
+ * The run-identity door (`C6b.1`, KI-144). The Cockpit's `Run identity` fields get a page of their
+ * own so the cockpit can retire the `Career tools` disclosure it hosted them in. It is a READ: every
+ * field still writes through `runs.update` below, the one route and validator that already own these
+ * columns, so no second identity-write route exists.
+ */
+Route::get('/training-runs/{run}/settings', [CockpitController::class, 'settings'])->name('runs.settings');
+/*
  * The Race Decision (SCREEN-011, `SCR-CAR-013`, plan §8 D10). A read screen over the run's own
  * calendar; its one write is the existing `runs.races.store` below, so no second race-write route
  * exists. It descends from the run's URL the way the Cockpit does.

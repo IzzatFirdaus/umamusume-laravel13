@@ -758,7 +758,13 @@ class TrainingRunController extends Controller
     {
         $run->update($request->validated());
 
-        return redirect()->route('runs.cockpit', $run)->with('status', 'Run updated.');
+        // `back(fallback:)` rather than a fixed cockpit redirect: the identity fields are edited from
+        // two doors since `C6b.1` — the Cockpit's `Career tools` disclosure and `/settings` — and a
+        // fixed redirect would send the settings editor to a screen they did not submit from.
+        // Siblings in this controller already use the same pattern.
+        return redirect()
+            ->back(fallback: route('runs.cockpit', $run))
+            ->with('status', 'Run updated.');
     }
 
     /**

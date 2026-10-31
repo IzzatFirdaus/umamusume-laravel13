@@ -146,6 +146,30 @@ class CockpitController extends Controller
         private ScenarioSectionBuilder $scenario,
     ) {}
 
+    /**
+     * The run-identity door (`C6b.1`, KI-144): the Cockpit's `Run identity` write surfaces get a
+     * page of their own so the cockpit can stop hosting them inside a disclosure.
+     *
+     * It renders the same four forms the cockpit drew and hands them the same `update_url`, so every
+     * field writes through `runs.update` — the one route and validator that already own these
+     * columns (`F2`, plan §9.6 ruling 1). A second PUT for the same columns would be a second write
+     * path, which this repository treats as a defect; this door therefore adds a read and nothing.
+     */
+    public function settings(TrainingRun $run): Response
+    {
+        // The identity block reads the latest turn for the fan ladder, and the loaded collection is
+        // reused rather than re-queried, as `show()` does.
+        $run->load(['umamusume', 'characterCard', 'turnEntries']);
+
+        $latest = $run->turnEntries->sortByDesc('turn')->first();
+
+        return Inertia::render('Career/RunSettings', [
+            'run' => $this->runSection($run),
+            'identity' => $this->identitySection($run, $latest),
+            'gradeObjectives' => $run->gradeObjectives(),
+        ]);
+    }
+
     public function show(TrainingRun $run): Response
     {
         // The run with its trainee, its turns, and its race log with the slots and the turn link each
@@ -279,6 +303,10 @@ class CockpitController extends Controller
             // and grade-point period all POST through `runs.update`, the same route and validator the
             // 2.0.0 record screen used. The cockpit is the door, so the 2.0 edit URLs ride here.
             'run_url' => route('runs.cockpit', $run),
+            // The run-identity door (`C6b.1`): the same four forms the cockpit drew, on a page of
+            // their own, so the `Career tools` disclosure can retire. It reads; the writes stay on
+            // `update_url` below.
+            'settings_url' => route('runs.settings', $run),
             // The page head's own door back to the list. HFW parity gives every cockpit variant an
             // `All careers` action beside the one primary, and the route is the list's own.
             'index_url' => route('runs.index'),

@@ -1141,6 +1141,15 @@ const jumpToShop = (): void => {
                         <li v-for="link in whereToGo" :key="link.href">
                             <LinkButton :href="link.href" variant="secondary" size="sm">{{ link.label }}</LinkButton>
                         </li>
+                        <!-- HFW-OVERRIDE (structure: one extra door). `cockpit-unity-cup.html`'s
+                             "Where to go" card lists six doors and no run-settings one, because the
+                             HFW has no write surfaces at all. `C6b.1` (KI-144) gives the run-identity
+                             writes a page of their own so the `Career tools` disclosure can retire;
+                             that page needs a door, and this card is the page's own set of doors. The
+                             row disappears with the disclosure when `C6b.11` lands the retirement. -->
+                        <li>
+                            <LinkButton :href="props.run.settings_url" variant="secondary" size="sm">Run settings</LinkButton>
+                        </li>
                     </ul>
                 </section>
             </div>
