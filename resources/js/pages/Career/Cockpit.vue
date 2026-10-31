@@ -983,10 +983,10 @@ const jumpToShop = (): void => {
                 <!-- HFW-OVERRIDE (structure: cap composition as a footer note). No cockpit HFW
                      draws a cap card; the caps qualify the stat bars directly above, so they read
                      beside them rather than in a card of their own (`C6b.8`, KI-144). The card it
-                     replaces has been deleted from the career-tools disclosure. -->
+                     replaces has been deleted from the retired tools disclosure. -->
                 <p class="mt-2 text-xs text-ink-muted" data-region="cap-composition">
                     <span class="font-semibold">Caps</span>
-                    <span v-for="(cap, stat) in props.capComposition.caps" :key="stat" class="ml-2 whitespace-nowrap">
+                    <span v-for="(cap, stat) in props.capComposition.caps" :key="stat" class="ml-2">
                         {{ stat }}
                         <span class="font-mono tabular-nums text-ink-strong">{{ cap.toLocaleString('en-US') }}</span>
                     </span>
@@ -1200,32 +1200,11 @@ const jumpToShop = (): void => {
             Shop
         </button>
 
-        <!--
-          The run's own write surfaces, behind one disclosure. SCREEN_SPEC.md SCR-CAR-011 gives the
-          Cockpit the run identity, the cap composition, the roster, the run's races, the turn
-          correction and the action grid; no cockpit HFW draws any of them. Collapsed rather than
-          deleted so the doors stay reachable, and closed so the visible page is the wireframe's.
-          HFW-OVERRIDE (write-paths): the HFW has no write surfaces and no disclosure.
-        -->
-        <details class="mt-4 rounded-lg border border-rule bg-panel p-4" data-region="run-tools">
-            <summary class="min-h-11 cursor-pointer text-lg font-semibold text-ink-strong">Career tools</summary>
-
-            <!-- Trackblazer's Pro Shop is reachable from the Cockpit's action area (plan §9
-                 E4, design-2.0 §28 "The Shop should be quickly accessible from the Career
-                 Cockpit"). The button is rendered only when the matrix composes a shop, so
-                 other scenarios see no Shop affordance. WCAG 2.4.11: focus moves to the
-                 Shop heading after the visit, and the body has `scroll-margin-top` so the
-                 sticky mobile nav does not cover the focused control. -->
-
-        <!-- The run's settings, below the reading. The header edit forms (F2, plan §9.6 ruling 1).
-             Status, scenario and grade-point period all write through `runs.update`, the route and
-             validator the 2.0.0 record screen used. A failure comes back with `page.props.errors`,
-             which the page-level alert names. Each form carries the sibling fields the request still
-             writes, so editing one cannot blank another. -->
-
-        <!-- The team write path rides the same disclosure as the other edit panels. It is `open` while the
-             career is being played, so the Active screen keeps the panel it has always shown, and closed
-             once the career has ended, where it is a setting rather than a decision. -->
+        <!-- The team write path (Unity Cup only). It is `open` while the career is being
+             played, so the Active screen keeps the panel it has always shown, and closed
+             once the career has ended, where it is a setting rather than a decision.
+             `C6b.11`: it no longer rides the retired tools disclosure, which is gone; a
+             Unity Cup cockpit keeps this panel because no other screen hosts the write. -->
         <details
             v-if="composesTeamPanel && teamState !== null"
             data-region="team-state"
@@ -1245,7 +1224,6 @@ const jumpToShop = (): void => {
 
 
 
-        </details>
 
         </div>
     </CareerLayout>

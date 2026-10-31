@@ -122,9 +122,16 @@ test('puts stats and the advisor on one row, with the scenario card below them, 
     expect(statsTop).toBeLessThan(scenarioTop);
     expect(advisorTop).toBeLessThan(scenarioTop);
 
-    // One filled action on the page head, and it is the action the Next decision card offers.
-    const primaries = page.locator('a.bg-primary-action, button.bg-primary-action');
-    await expect(primaries).toHaveCount(1);
+    // At most one filled action, and if there is one it belongs to the page head. `headAction`'s own
+    // docblock is explicit that a career with nothing to recommend renders no primary at all, so 0 is
+    // a legal reading; what must never happen is a second primary elsewhere on the page. An earlier
+    // version of this assertion counted 1 only because the Cockpit's correction section carried a
+    // `bg-primary-action` 'Delete turn' button — a different control entirely, and one `C6b.6` deleted.
+    const allPrimaries = page.locator('a.bg-primary-action, button.bg-primary-action');
+    const headPrimaries = page.locator('header a.bg-primary-action, header button.bg-primary-action');
+    const headCount = await headPrimaries.count();
+    expect(headCount, 'the page head carries at most one primary').toBeLessThanOrEqual(1);
+    await expect(allPrimaries, 'every primary on the page is the page head\'s own').toHaveCount(headCount);
 });
 
 test('reflows to one column at 390px without losing the stats card or the advisor', async ({ page }) => {
