@@ -190,14 +190,18 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                         <!-- The rarity mark the HFW draws beside the name (`review-detail.html:90`).
                              Present when the trainee has a character card; when none exists the mark
                              states the absence in words instead of printing a zero-star reading. -->
-                        <p class="mt-2 flex flex-wrap gap-1.5">
+                        <div class="mt-2 flex flex-wrap gap-1.5">
                             <span v-if="props.bestMatch.max_rarity" class="pill pill-neutral">
                                 {{ props.bestMatch.max_rarity.label }}
                             </span>
-                            <span v-else class="pill pill-neutral" title="No character card is stored for this record">
-                                Rarity not recorded
-                            </span>
-                        </p>
+                            <template v-else>
+                                <span class="pill pill-neutral">Rarity not recorded</span>
+                                <p class="note mt-1 text-xs text-ink-muted">
+                                    No character card is stored for this record, so the rarity mark states the
+                                    absence.
+                                </p>
+                            </template>
+                        </div>
 
                         <ul v-if="props.bestMatch.aptitudes.length > 0" class="mt-2 flex list-none flex-wrap gap-1.5">
                             <li
