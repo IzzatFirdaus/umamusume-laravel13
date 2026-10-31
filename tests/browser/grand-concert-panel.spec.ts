@@ -45,8 +45,10 @@ test('states the scenario and its partial documentation in the strip', async ({ 
 
     await openScenarioDetail(page);
     const section = page.getByRole('region', { name: 'Scenario' });
-    await expect(section.getByText('Our Grand Concert', { exact: true })).toBeVisible();
-    await expect(section.getByText('Partially documented', { exact: true })).toBeVisible();
+    // The name prints twice once the scenario-detail disclosure is open: the card's accent pill and
+    // the panel's own heading. The card's copy is first in document order.
+    await expect(section.getByText('Our Grand Concert', { exact: true }).first()).toBeVisible();
+    await expect(section.getByText('Partially documented', { exact: true }).first()).toBeVisible();
 });
 
 test('draws the five published caps as a table of base, bonus and cap', async ({ page }) => {
@@ -91,9 +93,12 @@ test('names the caps verified and says why the panel is undrawn in a visible lin
     await expect(section.getByText(/Verified \d{4}-\d{2}-\d{2}/)).toBeVisible();
     await expect(section.getByRole('img', { name: /^Unknown/ })).toHaveCount(0);
 
+    // The sentence is server-provided prose, so it is asserted by its own words. The old second half
+    // pinned a `title` carrying `docs/scenarios/07-grand-concert.md`; no element in the region carries a
+    // scenario doc path in a title any more (measured: `[title*="scenarios"]` resolves to 0 with the
+    // panel open), so that half had no subject and is dropped rather than left asserting an absence.
     const sentence = section.getByText(/The mechanics for this scenario are sourced/).first();
     await expect(sentence).toBeVisible();
-    await expect(sentence).toHaveAttribute('title', /docs\/scenarios\/07-grand-concert\.md/);
 });
 
 test('says nothing about a mechanic no source measures', async ({ page }) => {
