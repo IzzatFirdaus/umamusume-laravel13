@@ -27,8 +27,15 @@ withDefaults(
         total: number;
         /** The i18n-ish noun for what is being counted, e.g. "races". Defaults to "rows". */
         noun?: string;
+        /**
+         * `range` (default) is the plan's three-fact form: the range, the page, the two moves.
+         * `compact` is the wireframe's in-card pager — `7 veterans · page 1 of 2` plus Previous/Next,
+         * with no range and no numeric chip — for a card footer where the count and the page are the
+         * only two questions left (the table above already shows the rows themselves).
+         */
+        variant?: 'range' | 'compact';
     }>(),
-    { noun: 'rows' },
+    { noun: 'rows', variant: 'range' },
 );
 
 const emit = defineEmits<{
@@ -41,18 +48,27 @@ const hasNext = (pages: number, page: number): boolean => page < pages;
 </script>
 
 <template>
-    <nav aria-label="Pagination" class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+    <nav
+        aria-label="Pagination"
+        data-region="pager"
+        class="flex flex-wrap items-center justify-between gap-3"
+        :class="variant === 'compact' ? 'mt-3 text-[12.5px] text-ink-muted' : 'mt-4 text-sm'"
+    >
         <!-- One polite status rather than three separate spans: a page change should be announced once,
              and `aria-live` on each fragment would read the reader three numbers in three sentences. -->
         <p class="text-ink-muted" role="status">
-            Showing {{ from }} to {{ to }} of {{ total }} {{ noun }}
-            <span class="ml-2">Page {{ page }} of {{ pages }}</span>
+            <template v-if="variant === 'compact'">{{ total }} {{ noun }} · page {{ page }} of {{ pages }}</template>
+            <template v-else>
+                Showing {{ from }}&#8211;{{ to }} of {{ total }} {{ noun }}
+                <span class="ml-2">Page {{ page }} of {{ pages }}</span>
+            </template>
         </p>
 
         <div class="flex items-center gap-2">
             <button
                 type="button"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm font-medium text-ink hover:text-ink-strong transition-colors duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-50"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:text-ink-strong transition-colors duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-50"
+                :class="variant === 'compact' ? 'text-[12px]' : 'text-sm'"
                 :disabled="!hasPrevious(page)"
                 @click="emit('navigate', page - 1)"
             >
@@ -60,8 +76,10 @@ const hasNext = (pages: number, page: number): boolean => page < pages;
             </button>
 
             <!-- The current page as a real link with `aria-current`, not a disabled button: the reader
-                 is here, and "here" is a state rather than an unavailable action. -->
+                 is here, and "here" is a state rather than an unavailable action. `compact` drops it:
+                 the summary already says "page 1 of 2", and a second copy of the same fact is noise. -->
             <span
+                v-if="variant !== 'compact'"
                 class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md bg-sunken px-3 font-semibold text-ink-strong"
                 aria-current="page"
             >
@@ -70,7 +88,8 @@ const hasNext = (pages: number, page: number): boolean => page < pages;
 
             <button
                 type="button"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm font-medium text-ink hover:text-ink-strong transition-colors duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-50"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:text-ink-strong transition-colors duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-50"
+                :class="variant === 'compact' ? 'text-[12px]' : 'text-sm'"
                 :disabled="!hasNext(pages, page)"
                 @click="emit('navigate', page + 1)"
             >

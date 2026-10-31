@@ -132,6 +132,7 @@ test('says the library holds nothing filed rather than showing a blank list', as
         await expect(page.getByRole('button', { name: 'Filter' })).toBeVisible();
         await expect(page.getByRole('link', { name: 'Clear' })).toBeVisible();
 
+
         // The brief's unsupportable features are stated as absences with their reason on the page.
         // The "Not in this build" section is now a collapsible <details> element.
         await expect(page.getByText('Not in this build')).toBeVisible();
@@ -175,15 +176,28 @@ test('says the library holds nothing filed rather than showing a blank list', as
         const widthBefore = (await aside.boundingBox())?.width ?? 0;
 
         // The owner asked for the marks at one width only: the full rail is words, and a mark never sits
-        // beside the word it stands for. Plan 1.2 moved the toggle into the 48px product bar, so the
-        // bar's chevron is no longer inside the aside: a full-width rail carries no mark at all.
-        await expect(aside.locator('svg')).toHaveCount(0);
+        // beside the word it stands for. The toggle's own chevron lives in the rail head, so the
+        // destination-mark count is scoped to the nav.
+        await expect(aside.locator('nav svg')).toHaveCount(0);
+        await expect(toggle.locator('svg')).toHaveCount(1);
+        await expect(aside.locator('[data-rail-dot]')).toHaveCount(10);
+
+        const markBefore = await aside.locator('[data-rail-mark]').boundingBox();
+        const toggleBefore = await toggle.boundingBox();
+        expect(toggleBefore?.y ?? 0).toBeLessThan((markBefore?.y ?? 0) + (markBefore?.height ?? 0));
+        expect(markBefore?.y ?? 0).toBeLessThan((toggleBefore?.y ?? 0) + (toggleBefore?.height ?? 0));
 
         await toggle.press('Enter');
 
-        // Collapsed, each destination carries its mark and the word moves to `sr-only`: ten, and the
-        // chevron belongs to the bar rather than to the rail.
-        await expect(aside.locator('svg')).toHaveCount(10);
+        // Collapsed, each destination carries its mark and the word moves to `sr-only`: ten. The dot
+        // spacers leave the painted column; the head stacks the tile above the toggle so both fit 56px.
+        await expect(aside.locator('nav svg')).toHaveCount(10);
+        await expect(toggle.locator('svg')).toHaveCount(1);
+        await expect(aside.locator('[data-rail-dot]')).toHaveCount(0);
+
+        const markAfter = await aside.locator('[data-rail-mark]').boundingBox();
+        const toggleAfter = await toggle.boundingBox();
+        expect(toggleAfter?.y ?? 0).toBeGreaterThanOrEqual((markAfter?.y ?? 0) + (markAfter?.height ?? 0));
 
         await expect(toggle).toHaveAttribute('aria-expanded', 'false');
         await expect(toggle).toHaveAccessibleName('Expand navigation');
@@ -200,11 +214,14 @@ test('says the library holds nothing filed rather than showing a blank list', as
         }
 
         // The current page still reads as current, and by more than colour: the collapsed active item
-        // carries a left rule as well as its fill. `border-l-4` since plan 1.2, which took the nearest
-        // stock step to the 3px the plan named rather than introducing an arbitrary value.
+        // carries the HFW's 3px inset rule as well as its fill. The rule is a child span, so the
+        // label does not shift when it appears.
         const current = aside.getByRole('link', { name: 'Dashboard', exact: true });
         await expect(current).toHaveAttribute('aria-current', 'page');
-        expect(((await current.getAttribute('class')) ?? '').split(' ')).toContain('border-l-4');
+        const rule = current.locator('[data-rail-current]');
+        await expect(rule).toHaveCount(1);
+        expect(await rule.evaluate((el) => getComputedStyle(el).width)).toBe('3px');
+        expect(await current.evaluate((el) => getComputedStyle(el).borderLeftWidth)).toBe('0px');
 
         // The choice outlives the visit. It lives in the browser, not in a preference row, so a reload
         // must carry it and a fresh context must not.
@@ -240,10 +257,13 @@ test.afterEach(async ({ page }) => {
     }
 });
 
-test.describe('Veteran cards', () => {
+test.describe('Veteran rows', () => {
     /**
      * Files a career, opens the library and returns the row it landed in. The library only shows a
      * non-empty list once something is filed, so every case below starts by putting one there.
+     *
+     * The row is a `<tr>` (`veterans.html:83-113`); `[data-veteran-row]` is the stable hook both the
+     * app and these cases read, because a table row has no role to filter on by text.
      */
     async function openLibraryRow(
         page: import('@playwright/test').Page,
@@ -256,7 +276,7 @@ test.describe('Veteran cards', () => {
         await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
-        return page.getByRole('listitem').filter({ hasText: trainee });
+        return page.locator('[data-veteran-row]').filter({ hasText: trainee });
     }
 
     /**
@@ -266,26 +286,26 @@ test.describe('Veteran cards', () => {
      */
     const trackedNote = (clause: string): string => `${clause} ${VETERAN_ANCESTRY_NOTE}`;
 
-    test('states the shared ancestry sentence once above the list, not once per card', async ({ page }) => {
+    test('states the shared ancestry sentence once above the list, not once per row', async ({ page }) => {
         await openLibraryRow(page, 'Agnes Digital', 'Speed', trackedNote('Career finished, Vodka 1st place.'));
         await openLibraryRow(page, 'Eishin Flash', null, trackedNote('Career ended, URA Finale Finals won 1st.'));
 
         const ancestry = page.getByText(/Legacy ancestry unrecorded:/);
 
-        // One statement for the whole list (Phase 8.1), and it sits outside every card: the sentence is
+        // One statement for the whole list (Phase 8.1), and it sits outside every row: the sentence is
         // about what the tracker did not record, which is the same for every row here.
         await expect(ancestry).toHaveCount(1);
-        expect(await ancestry.evaluate((element) => element.closest('li') !== null)).toBe(false);
+        expect(await ancestry.evaluate((element) => element.closest('tr') !== null)).toBe(false);
 
-        // Each card keeps only the clause that is its own, and none of them repeats the sentence the list
-        // just stated. A card printing the stored note verbatim would fail here twice over.
-        await expect(page.getByRole('listitem').filter({ hasText: 'Career finished, Vodka 1st place.' })).toHaveCount(1);
-        await expect(page.getByRole('listitem').filter({ hasText: 'Career ended, URA Finale Finals won 1st.' })).toHaveCount(1);
+        // Each row keeps only the clause that is its own, and none of them repeats the sentence the list
+        // just stated. A row printing the stored note verbatim would fail this twice over.
+        await expect(page.locator('[data-veteran-row]').filter({ hasText: 'Career finished, Vodka 1st place.' })).toHaveCount(1);
+        await expect(page.locator('[data-veteran-row]').filter({ hasText: 'Career ended, URA Finale Finals won 1st.' })).toHaveCount(1);
         expect(
-            await page.getByRole('listitem').evaluateAll((rows) =>
+            await page.locator('[data-veteran-row]').evaluateAll((rows) =>
                 rows.filter((row) => row.textContent?.includes('Legacy ancestry unrecorded:') ?? false).length,
             ),
-            'a card still repeats the sentence the list states once',
+            'a row still repeats the sentence the list states once',
         ).toBe(0);
     });
 
@@ -300,27 +320,16 @@ test.describe('Veteran cards', () => {
         await expect(page.getByText('No tags recorded')).toHaveCount(1);
     });
 
-    test('puts the career action in the header row rather than under the note', async ({ page }) => {
+    test('keeps the compare door in the row it belongs to, exactly once', async ({ page }) => {
         const row = await openLibraryRow(page, 'Agnes Digital', 'Speed');
 
-        // The row's children: `VeteranRow` supplies the card root, and its own blocks hang off that, so
-        // the header is the first block inside it and the footer actions the last. The Compare door is
-        // read as belonging to the row the Trainer is looking at rather than as a footnote below the
-        // paragraph (Phase 8.3; Law 6 Proximity).
-        const header = row.locator(':scope > div > div').first();
-        const footer = row.locator(':scope > div > div').last();
+        // Proximity (Law 6): the comparison door is read as belonging to the row the Trainer is looking
+        // at rather than as a footnote under the table.
+        await expect(row.getByRole('link', { name: 'Compare', exact: true })).toHaveCount(1);
 
-        // Exactly one in the whole card, and it sits in the header block: a second copy in the footer
-        // would fail both assertions at once.
-        await expect(row.getByRole('link', { name: 'Compare this career' })).toHaveCount(1);
-        await expect(header.getByRole('link', { name: 'Compare this career' })).toBeVisible();
-        expect(
-            await footer.getByRole('link', { name: 'Compare this career' }).count(),
-            'the card still carries a bottom action beside the Compare link',
-        ).toBe(0);
-
-        // The header block also names the action, so the row reads as one.
-        await expect(header).toContainText('Compare this career');
+        // One per row, not one per page: a second filed career must carry its own.
+        await openLibraryRow(page, 'Eishin Flash', null);
+        await expect(page.getByRole('link', { name: 'Compare', exact: true })).toHaveCount(2);
     });
 
     test('renders a portrait or the reserved absence cell on every veteran row', async ({ page }) => {
@@ -350,6 +359,24 @@ test.describe('Veteran cards', () => {
         }
     });
 
+    test('states the spark tallies as counts under their own unit', async ({ page }) => {
+        await openLibraryRow(page, 'Agnes Digital', 'Speed');
+
+        // The count-for-grade substitution (HFW-OVERRIDE (columns: spark counts, not grades)) is only
+        // honest while the unit is printed: three headers say what the numbers are, and every cell is one
+        // bare integer - never a star, never a compound, never a dash (ADR-0020 §3).
+        await expect(page.getByRole('columnheader', { name: 'Blue sparks' })).toBeVisible();
+        await expect(page.getByRole('columnheader', { name: 'Pink sparks' })).toBeVisible();
+        await expect(page.getByRole('columnheader', { name: 'Unique sparks' })).toBeVisible();
+
+        const counts = page.locator('[data-veteran-row]').first().locator('td[data-spark]');
+        await expect(counts).toHaveCount(3);
+
+        for (const cell of await counts.all()) {
+            await expect(cell).toHaveText(/^\d+$/);
+        }
+    });
+
     test('collapses the notes that are not in this build by default', async ({ page }) => {
         await page.goto('/veterans');
         await page.locator('#app > *').first().waitFor();
@@ -372,9 +399,9 @@ test.describe('Veteran cards', () => {
 
     // Plan slice 0.4. Two careers trained in the same form (Agnes Digital) filed in different
     // scenarios must not read as the same row. The date alone cannot separate them: both are filed
-    // within the same second by this spec, so the scenario is the part of the label that carries the
-    // difference. The data is created here, not assumed from the seeded library.
-    test('gives two careers of one trainee different row labels', async ({ page }) => {
+    // within the same second by this spec, so the scenario is the part of the record that carries the
+    // difference, and the row prints it in its own column.
+    test('gives two careers of one trainee different rows', async ({ page }) => {
         createdRunUrls.push(await fileCareer(page, 'Agnes Digital', null, null, 'ura_finale'));
         createdRunUrls.push(await fileCareer(page, 'Agnes Digital', null, null, 'unity_cup'));
 
@@ -384,13 +411,13 @@ test.describe('Veteran cards', () => {
         const rows = page.locator('[data-veteran-row]').filter({ hasText: 'Agnes Digital' });
         await expect(rows).toHaveCount(2);
 
-        const labels: string[] = [];
+        const texts: string[] = [];
         for (const row of await rows.all()) {
-            labels.push((await row.getByRole('link').first().innerText()).trim());
+            texts.push((await row.innerText()).replace(/\s+/g, ' ').trim());
         }
 
-        expect(new Set(labels).size, `row labels must differ: ${JSON.stringify(labels)}`).toBe(2);
-        expect(labels.some((label) => label.includes('URA Finale'))).toBe(true);
-        expect(labels.some((label) => label.includes('Unity Cup'))).toBe(true);
+        expect(new Set(texts).size, `rows must differ: ${JSON.stringify(texts)}`).toBe(2);
+        expect(texts.some((text) => text.includes('URA Finale'))).toBe(true);
+        expect(texts.some((text) => text.includes('Unity Cup'))).toBe(true);
     });
 });
