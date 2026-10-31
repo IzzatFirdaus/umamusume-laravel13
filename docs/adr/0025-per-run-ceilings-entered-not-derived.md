@@ -126,3 +126,36 @@ held last month.
   rule that produced it) and **TOG-3** (status may be stale or absent, but never wrong — an empty field
   reverts to the scenario's figure rather than zeroing it). The full finding and the framework rules the
   condition binds are in `ADR-0002`'s ledger.
+
+## Amendment 2026-10-31 / career-start projection
+
+**Owner direction, 2026-10-31.** The owner delegated the drafting of this amendment ("I leave it to
+your discretion"), grounded in `UMAMUSUME_REFERENCE.md`. It is landed under that delegation; a later
+Architect may append to widen or narrow it.
+
+**Clause narrowed, named in full.** The Decision's `Explicitly unchanged` bullet reads: "**No
+derivation.** Sparks, support-card effects and bursts contribute nothing to a ceiling anywhere in this
+application." That sentence is narrowed on its **scope**, not its mechanism: it now reads "…anywhere
+in this application **except a career-start projection for a run that has not started**, which may sum
+the ★3 basic-ability factors of its recorded parents (`StartingCapProjection`) to state that run's
+starting ceiling." Nothing about the entered-cap override itself changes.
+
+**What remains prohibited.** The Context above forbids the **reverse** direction: fitting an existing
+run's observed client ceilings from six blue sparks under any activation schedule. That stays
+forbidden. Projecting forward for an unstarted run is a different claim, and this amendment does not
+re-open what the Context measured.
+
+**Why this is arithmetic, not prediction.** `UMAMUSUME_REFERENCE.md:645` states career start is
+deterministic for stat and aptitude factors (the two mid-run moments are the probabilistic ones), and
+`:420` prices the cap raise at **+16 per ★3 basic-ability factor**, applied at 育成開始時. Two ★3
+basic-ability factors, one from each parent, is +32 over the scenario cap: arithmetic on a stated
+table, not a forecast.
+
+**Provenance consequence.** The `+16` is `[JP]`-tagged and cited to one `⚠️ STALE` guide (Game8,
+2025-11-21). The projected cell therefore carries that provenance in **visible words** (`GP-2`,
+`D-256`, `TOG-3`), naming itself as this tool's arithmetic on a JP-sourced cap-raise table rather than
+a client reading. The unique-skill cap raise the same row names is stated as a direction with no
+published magnitude, so it renders as a named absence and never as a number.
+
+**Owner ruling reference.** R5 ("Amend the ADRs, then compute") unless an owner direction supersedes
+it.
