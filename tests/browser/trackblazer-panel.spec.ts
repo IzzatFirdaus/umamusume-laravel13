@@ -262,16 +262,19 @@ test('the race plan prints three periods, their published figures and the gap th
 });
 
 test('the plan folds and the year-end gate appears once a period is reported', async ({ page }) => {
-    // The period select is one of the header's identity forms, and F2 (plan §9.6 ruling 1) put them
-    // behind a collapsed disclosure, so the case takes the user's path: open it, then report. The
-    // collapsed default is the design; the disclosure is opened here rather than in the component.
-    const identity = page.locator('details[data-region="edit-identity"]');
-    if (!(await identity.evaluate((el) => (el instanceof HTMLDetailsElement) && el.open))) {
-        await identity.locator('summary').click();
-    }
+    // The period select is one of the header's identity forms. `C6b.7` moved them off the Cockpit onto
+    // their own door, so the case takes the user's path: report the period there, then read the plan
+    // back on the Cockpit.
+    await page.goto(`${cockpitUrl.replace(/\/cockpit$/, '')}/settings`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
 
     await page.selectOption('#current_objective_index', '3');
     await page.getByRole('button', { name: 'Report period' }).click();
+    await expect(page.getByText('Saved.')).toBeVisible();
+
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await openScenarioDetail(page);
 
     const plan = page.getByRole('region', { name: 'Race plan' });
     await expect(plan.getByText(/periods behind it are folded/)).toBeVisible();
