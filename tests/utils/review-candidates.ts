@@ -71,6 +71,63 @@ export function seedPendingCandidates(count: number, options: { suggested?: bool
     }
 }
 
+/** The slug this fixture's extra trainee carries, so cleanup never guesses. */
+const OTHER_FORM_SLUG = 'fixture-review-other-form';
+
+/**
+ * A second catalog form of the trainee the seeded candidate points at.
+ *
+ * `ReviewController@show()` builds `otherForms` from a `LIKE %name%` on `umamusume`, and the seeded
+ * catalog has no trainee with two forms, so the detail page's `Use this` row has nothing to render
+ * without this. Returns the id and name the row is addressed by.
+ */
+export function seedOtherForm(): { id: number; name: string } {
+    const db = new DatabaseSync(resolvedScratchDatabase());
+
+    try {
+        const base = db.prepare('SELECT name FROM umamusume ORDER BY id LIMIT 1').get() as { name: string } | undefined;
+        const name = `${(base?.name ?? 'Fixture Trainee').replace(/^\[[^\]]+\]\s*/, '')} [Fixture Form]`;
+        const result = db.prepare('INSERT INTO umamusume (slug, name) VALUES (?, ?)').run(OTHER_FORM_SLUG, name);
+
+        return { id: Number(result.lastInsertRowid), name };
+    } finally {
+        db.close();
+    }
+}
+
+/**
+ * The `umamusume` id the last confirm promoted into.
+ *
+ * `ResolveMatchCandidate` sends a payload with no url through `PromoteMatchedRecord`, which writes
+ * that fallback as the provenance row's url — so this reads which record the press actually chose,
+ * not merely that something was written.
+ */
+export function promotedTargetId(): number | null {
+    const db = new DatabaseSync(resolvedScratchDatabase());
+
+    try {
+        const row = db
+            .prepare("SELECT umamusume_id FROM data_sources WHERE url = 'resolved-from-review-queue' ORDER BY id DESC LIMIT 1")
+            .get() as { umamusume_id: number } | undefined;
+
+        return row?.umamusume_id ?? null;
+    } finally {
+        db.close();
+    }
+}
+
+/** Remove the extra trainee and its provenance, leaving the catalog as the suite found it. */
+export function clearOtherForm(): void {
+    const db = new DatabaseSync(resolvedScratchDatabase());
+
+    try {
+        db.prepare("DELETE FROM data_sources WHERE url = 'resolved-from-review-queue'").run();
+        db.prepare('DELETE FROM umamusume WHERE slug = ?').run(OTHER_FORM_SLUG);
+    } finally {
+        db.close();
+    }
+}
+
 /** Remove exactly the rows this fixture wrote, so the queue is left as the suite found it. */
 export function clearPendingCandidates(): void {
     const db = new DatabaseSync(resolvedScratchDatabase());

@@ -20,6 +20,15 @@ const props = withDefaults(
         aliasLanguages: { value: string; label: string }[];
         accented?: boolean;
         /**
+         * Which surface this form renders on.
+         *
+         * `row` is the queue's inline three-control line; `savebar` is the detail page's sticky
+         * decision bar (`review-detail.html:119-122`). Read in the template at :144 and :204, so it
+         * has to be a declared prop: the component is multi-root, and as an undeclared attribute it
+         * resolved to undefined, leaving the detail page with the row grid class plus a savebar.
+         */
+        variant?: 'row' | 'savebar';
+        /**
          * Whether this row opens with its form showing.
          *
          * The queue's two halves want different answers. A row the engine proposed a match for is the
@@ -29,7 +38,7 @@ const props = withDefaults(
          */
         defaultExpanded?: boolean;
     }>(),
-    { accented: false, defaultExpanded: true },
+    { accented: false, variant: 'row', defaultExpanded: true },
 );
 
 const form = useForm({
@@ -263,9 +272,14 @@ defineExpose({ chooseRecord });
             </button>
         </div>
 
-        <span class="hidden text-xs text-ink-muted sm:block" aria-hidden="true">&nbsp;</span>
-        <span class="hidden text-xs text-ink-muted sm:block" aria-hidden="true">(optional)</span>
-        <span class="hidden text-xs text-ink-muted sm:block" aria-hidden="true">&nbsp;</span>
-        <span class="hidden sm:block" aria-hidden="true"></span>
+        <!-- The caption row exists to complete the four-column grid's second line, so it is a
+             `row`-variant thing only. In `savebar` the form is `flex flex-col`, and these would
+             stack as blank rows under the bar. -->
+        <template v-if="variant === 'row'">
+            <span class="hidden text-xs text-ink-muted sm:block" aria-hidden="true">&nbsp;</span>
+            <span class="hidden text-xs text-ink-muted sm:block" aria-hidden="true">(optional)</span>
+            <span class="hidden text-xs text-ink-muted sm:block" aria-hidden="true">&nbsp;</span>
+            <span class="hidden sm:block" aria-hidden="true"></span>
+        </template>
     </form>
 </template>

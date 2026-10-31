@@ -1,6 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
-import { clearPendingCandidates, seedPendingCandidates } from '../utils/review-candidates';
+import {
+    clearOtherForm,
+    clearPendingCandidates,
+    promotedTargetId,
+    seedOtherForm,
+    seedPendingCandidates,
+} from '../utils/review-candidates';
 
 /*
  * The review detail page (SCR-REV-001's decision screen, FQ-10).
@@ -128,6 +134,35 @@ test('prints the rarity mark from the proposed record, or states its absence', a
         marks.some((mark) => /^(One star|Two stars|Three stars|Rarity not recorded)$/.test(mark)),
         `the Best match card carries a rarity mark or states its absence; it rendered ${JSON.stringify(marks)}`,
     ).toBe(true);
+});
+
+test('commits the record its other-form action names, in one press', async ({ page }) => {
+    // The wireframe makes the other form an answer rather than a label
+    // (`review-detail.html:109`), and `CandidateForm.chooseRecord` commits in one press. Nothing
+    // covered that press: the write is a catalog merge with no undo, so the wiring is pinned here.
+    const [candidate] = seedPendingCandidates(1, { suggested: true });
+    const other = seedOtherForm();
+
+    try {
+        await page.goto(`/review/${candidate.id}`);
+        await page.locator('#app > *').first().waitFor();
+
+        const useThis = page.getByRole('button', { name: `Use ${other.name} as the match` });
+        await expect(useThis).toBeVisible();
+
+        // The house 44px bar applies to it: the press writes.
+        expect((await useThis.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+
+        await useThis.click();
+        await page.waitForURL(/\/review$/);
+
+        // The write targets the row that was pressed, not the candidate's own suggestion.
+        expect(promotedTargetId()).toBe(other.id);
+        // A confirmed candidate leaves the Pending-only queue.
+        await expect(page.getByText(candidate.proposedName)).toHaveCount(0);
+    } finally {
+        clearOtherForm();
+    }
 });
 
 test('passes an axe scan at WCAG A and AA on the literal detail URL', async ({ page }) => {

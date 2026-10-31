@@ -1,10 +1,25 @@
 <script setup lang="ts">
+/*
+ * Review a match (`review-detail.html`), HFW-aligned 2026-10-31.
+ *
+ * HFW-OVERRIDE (copy: "Proposed", not the wireframe's "Chosen") — the wireframe marks this row
+ * pill-positive `Chosen`; this page prints `Proposed`, because the engine's proposal is not the
+ * Trainer's decision until Confirm, and this screen exists because those two differ.
+ *
+ * Two markers were drafted here and withdrawn before landing, because neither was a divergence:
+ * the `.g-2` band is the sanctioned container-query port of the wireframe's own `grid g-2`
+ * (`layout-grid.css:8-10`), and the back link now sits in the head band, which is where
+ * `review-detail.html:61-63` puts it. An override records a deviation, not a translation.
+ */
 import AppLayout from '../../layouts/AppLayout.vue';
 import CandidateForm from '../../components/review/CandidateForm.vue';
+import AbsenceValue from '../../components/AbsenceValue.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import StatusPill from '../../components/StatusPill.vue';
 import SuggestionHint from '../../components/review/SuggestionHint.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { LinkButton } from '../../components/Form';
+import { Head } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface Candidate {
@@ -90,17 +105,33 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
 </script>
 
 <template>
-    <Head :title="`Review ${props.candidate.proposed_name}`" />
-
     <AppLayout>
         <Head :title="heading" />
-        <template #eyebrow>Review</template>
-        <template #title>{{ heading }}</template>
+        <!--
+            One `h1`, in the head band, with the way back in its action row.
+
+            `review-detail.html:61-63` puts `Back to queue` inside `.hrow`, beside the title. The
+            footer link this page used to carry is gone rather than duplicated: two ways out of one
+            screen is H7's duplicate affordance, and NRM-4 wants the same position to mean the same
+            thing, which on every other detail screen is the head band.
+        -->
+        <template #head>
+            <PageHeader eyebrow="Review" :title="heading">
+                <template #actions>
+                    <LinkButton href="/review" variant="secondary">Back to the queue</LinkButton>
+                </template>
+            </PageHeader>
+        </template>
 
         <div class="w-full">
             <!-- Source and candidate side by side in one row: the question this screen asks is a
-                 comparison, so the two halves of it are read together rather than stacked. -->
-            <div class="grid gap-5 min-[1081px]:grid-cols-2">
+                 comparison, so the two halves of it are read together rather than stacked.
+
+                 `g-2` rather than `min-[1081px]:grid-cols-2`: the viewport query ignored the
+                 shell-width preference and left the band two-up inside Compact. The container
+                 primitive is the one every other page uses (`layout-grid.css:25-35`), and it still
+                 stacks under 585px, which the wireframe's own 820px crossing does too. -->
+            <div class="grid gap-4 g-2">
                 <section class="card" aria-labelledby="review-source-heading">
                     <h2 id="review-source-heading" class="text-lg font-semibold text-ink-strong">Source</h2>
                     <p class="mt-1 text-xs text-ink-muted">What the text said, verbatim.</p>
@@ -174,7 +205,13 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                                 :key="axis.key"
                                 class="pill pill-outline"
                             >
-                                {{ axis.label }} {{ axis.letter ?? 'N/A' }}
+                                {{ axis.label }}
+                                <AbsenceValue
+                                    v-if="!axis.letter"
+                                    compact
+                                    reason="The catalog records no aptitude letter for this axis."
+                                />
+                                <span v-else>{{ axis.letter }}</span>
                             </li>
                         </ul>
 
@@ -183,7 +220,14 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                             <tbody class="divide-y divide-rule">
                                 <tr>
                                     <th scope="row" class="py-1.5 text-left font-normal text-ink-muted">Costume</th>
-                                    <td class="py-1.5">{{ props.bestMatch.costume ?? 'None' }}</td>
+                                    <td class="py-1.5">
+                                        <AbsenceValue
+                                            v-if="!props.bestMatch.costume"
+                                            compact
+                                            reason="The catalog records no costume tag for this record."
+                                        />
+                                        <span v-else>{{ props.bestMatch.costume }}</span>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th scope="row" class="py-1.5 text-left font-normal text-ink-muted">Slug</th>
@@ -261,7 +305,12 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                             </td>
                         </tr>
                         <tr>
-                            <td class="py-2">-</td>
+                            <td class="py-2">
+                                <AbsenceValue
+                                    compact
+                                    reason="An alias is a name variant, so it has no record row of its own."
+                                />
+                            </td>
                             <td class="py-2">Alias</td>
                             <td class="py-2 text-ink-muted">
                                 {{ props.hasAlias
@@ -269,7 +318,11 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                                     : 'No alias is registered for this name.' }}
                             </td>
                             <td class="py-2 text-right">
-                                <span class="pill pill-neutral">{{ props.hasAlias ? 'Registered' : 'none' }}</span>
+                                <!-- `Not registered` rather than the wireframe's lowercase `none`:
+                                     this is a known answer, not an unrecorded value, so it reads as a
+                                     value and keeps `Registered`'s case. The two words are the state
+                                     pair the row's own sentence above states in full. -->
+                                <span class="pill pill-neutral">{{ props.hasAlias ? 'Registered' : 'Not registered' }}</span>
                             </td>
                         </tr>
                     </tbody>
@@ -318,14 +371,6 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                 />
             </section>
 
-            <div class="mt-4">
-                <Link
-                    href="/review"
-                    class="text-sm text-ink-muted hover:text-ink-strong transition-colors duration-150 ease-out"
-                >
-                    ← Back to the queue
-                </Link>
-            </div>
         </div>
     </AppLayout>
 </template>
