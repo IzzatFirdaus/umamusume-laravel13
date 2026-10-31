@@ -75,7 +75,7 @@ withDefaults(defineProps<{
     options: () => [],
     error: undefined,
     assignable: false,
-    rankLabel: 'Not chosen',
+    rankLabel: 'Not recorded',
 });
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
@@ -88,10 +88,9 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
         <p class="text-xs font-semibold uppercase tracking-wide text-[var(--color-ink-muted)]">{{ label }}</p>
 
         <p class="mt-1 text-sm font-semibold text-[var(--color-ink-strong)]">
-            <!-- The absent name is a named absence, never a dash and never a default (AGENTS.md §5).
-                 `title` says which of the two absences it is: not chosen, or not read. -->
+            <!-- The absent name is a named absence, never a dash and never a default (AGENTS.md §5). -->
             <span v-if="name">{{ name }}</span>
-            <span v-else class="text-[var(--color-ink-muted)]" title="No Umamusume chosen for this node yet.">
+            <span v-else class="text-[var(--color-ink-muted)]">
                 Not chosen
             </span>
         </p>
@@ -99,9 +98,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
         <div class="mt-0.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-xs text-[var(--color-ink-muted)]">
             <!-- The letter rank the Trainer read, or the named absence. The star count is the numeric
                  `rank` beside it: two fields, because the client shows two. -->
-            <span :title="rank === null ? 'You have not recorded a star count for this parent.' : undefined">
-                {{ rankLabel }}<span v-if="rank !== null">, {{ rank }}★</span>
-            </span>
+            <span>{{ rankLabel }}<span v-if="rank !== null">, {{ rank }}★</span></span>
             <span v-if="isGuest">Rented from a friend</span>
         </div>
 
@@ -116,7 +113,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
             </li>
         </ul>
 
-        <p v-else class="mt-2 text-xs text-[var(--color-ink-muted)]" title="No Sparks recorded for this node.">
+        <p v-else class="mt-2 text-xs text-[var(--color-ink-muted)]">
             No Sparks recorded.
         </p>
 

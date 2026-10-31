@@ -20,6 +20,27 @@
  *
  * **D-260's fixity** — the Legacy Select result is fixed for the life of the run — is enforced by the
  * controller refusing a non-`Active` run, which is the first writer that now exists.
+ *
+ * **Radio semantics (`S7`, 2026-10-31).** The wireframe draws an unlabelled `<input type="radio">` in
+ * each Spark row's last cell; the shared `BaseRadio` is used instead, so the group comes from the
+ * `name` attribute and every radio is named by the Spark in its own row ("Primary spark for Vodka:
+ * blue speed") rather than the word `Primary` alone, which would be four identical names in one group
+ * (WCAG 3.3.2, 4.1.2, 2.5.3). `pick` records the parent's headline Spark for display only —
+ * `UMAMUSUME_REFERENCE.md:645` has every recorded factor fire at career start, so the field is not a
+ * projection input and `StartingCapProjection` never reads it. It is an index into the Sparks the
+ * server stores, so `postedPick()` re-reads it against the posted list: a blank draft row is
+ * discarded on the way out and would otherwise shift the pointer onto its neighbour.
+ * `HFW-OVERRIDE (structure: each parent's Sparks stay editable rows - Kind, Applies to, Stars,
+ *  Remove Spark - with the pick radio as the row's last cell; legacy-builder.html:75-82 and :88-95
+ *  draw a read-only Spark | Grade | Carries | (radio) table). The editor's rows carry inputs the
+ *  wireframe's read-only table cannot, so the table shape is refused rather than faked.
+ * `HFW-OVERRIDE (data: Carries column - the per-parent "+N aptitude" cell has no reference backing:
+ *  UMAMUSUME_REFERENCE.md:649 §1.5.2 gives aptitude grades at 1/4/7/10-18 stars, not a star-to-point
+ *  table, so the cell states the absence rather than rendering "+21".)
+ * `HFW-OVERRIDE (structure: grandparent editors stay visible under each parent; legacy-builder.html:70
+ *  - 97 draws only parents and their Spark rows. The editors carry ancestry state the wireframe's
+ *  two-card view has no slot for: two names, their own ranks and Sparks per parent. Hiding them would
+ *  make recorded ancestry uneditable.)
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import AncestryNode from '../../components/legacy/AncestryNode.vue';
@@ -31,6 +52,7 @@ import BaseSelect from '@/components/Form/BaseSelect.vue';
 import BaseCheckbox from '@/components/Form/BaseCheckbox.vue';
 import AncestorEditor from '@/components/legacy/AncestorEditor.vue';
 import BaseButton from '@/components/Form/BaseButton.vue';
+import BaseRadio from '@/components/Form/BaseRadio.vue';
 
 interface SparkRow {
     kind: string;
@@ -66,6 +88,7 @@ interface ParentNode {
     }[];
     sparks: SparkRow[];
     spark_counts: { kind: string; kind_label: string; count: number }[];
+    pick: number | null;
     probability: { value: null; title: string };
 }
 
@@ -93,6 +116,14 @@ const props = defineProps<{
      * this; no arithmetic is done in the page, and `note` carries the reason when `value` is null.
      */
     caps: { stat: string; label: string; value: number | null; note: string | null }[];
+    /**
+     * The career-start ceiling the recorded ★3 Blue factors imply, per stat, computed server-side by
+     * `StartingCapProjection` (the `ADR-0025` 2026-10-31 amendment and `ADR-0020` §3 amendment).
+     * `null` when the run has no Legacy selection yet. The page never re-derives it.
+     */
+    projection: { stat: string; label: string; base: number; raise: number; ceiling: number }[] | null;
+    /** The provenance the projected figure must print in visible words (`GP-2`, `D-256`, `TOG-3`). */
+    projectionNote: string;
     notice: string;
 }>();
 
@@ -145,6 +176,29 @@ function isBlankSpark(spark: SparkDraft): boolean {
     return spark.target === '' && spark.stars === '';
 }
 
+/**
+ * The picked Spark, as an index into the Sparks the server will actually store.
+ *
+ * A draft row with neither a target nor a star count is discarded on the way out (the request drops
+ * the same shape), so the editor's index and the stored index disagree the moment a blank draft sits
+ * above the picked row. `pick` is a pointer into the stored list, so it is re-read against that list
+ * rather than posted as the editor happened to order it. A pick that pointed at a discarded draft is
+ * the absence, since there is no Spark to name.
+ */
+function postedPick(sparks: SparkDraft[], pick: number | null): number | null {
+    if (pick === null) {
+        return null;
+    }
+
+    const picked = sparks[pick];
+
+    if (picked === undefined || isBlankSpark(picked)) {
+        return null;
+    }
+
+    return sparks.filter((spark) => !isBlankSpark(spark)).indexOf(picked);
+}
+
 const form = useForm({
     affinity: props.affinity ?? '',
     legacies: props.graph.parents.map((parent) => ({
@@ -152,7 +206,7 @@ const form = useForm({
         rank: parent.rank === null ? '' : String(parent.rank),
         rank_letter: parent.rank_letter ?? '',
         is_guest: parent.is_guest,
-        ancestors: parent.ancestors.map((ancestor) => ancestor.name ?? '') as [string, string],
+        pick: parent.pick ?? null,
         ancestors_rank_letters: parent.ancestors.map((ancestor) => ancestor.rank_letter ?? ''),
         ancestors_rank: parent.ancestors.map((ancestor) =>
             ancestor.rank === null || ancestor.rank === undefined ? '' : String(ancestor.rank),
@@ -237,7 +291,17 @@ function addSpark(index: number): void {
 }
 
 function removeSpark(index: number, sparkIndex: number): void {
-    form.legacies[index].sparks.splice(sparkIndex, 1);
+    const legacy = form.legacies[index];
+    legacy.sparks.splice(sparkIndex, 1);
+
+    // `pick` is an index into this parent's Sparks, so removing one moves it: the removed row's own
+    // pick becomes "no pick", and a later pick slides down with its Spark. Without this the stored
+    // index would name a neighbour, which the request would accept and the record would then show.
+    if (legacy.pick === sparkIndex) {
+        legacy.pick = null;
+    } else if (legacy.pick !== null && legacy.pick > sparkIndex) {
+        legacy.pick -= 1;
+    }
 }
 
 
@@ -260,33 +324,48 @@ function requestConfirm(): void {
     confirmDialog.value?.showModal();
 }
 
-/*
- * The preview's parent columns.
- *
- * Each parent cell prints the spark the record holds for that stat — its family and star rank, e.g.
- * "★3 Blue" — which is what `Career/LegacySelect.vue` prints for the same table. It never prints a
- * cap contribution, because summing one is the derivation ADR-0020 §3 bars (see the card's own
- * DOMAIN OVERRIDE comment).
- */
-function parentSparkFor(parentIndex: number, statLabel: string): string | null {
-    const sparks = form.legacies[parentIndex]?.sparks ?? [];
-    const match = sparks.find((spark) => spark.category === 'Stat' && spark.target === statLabel);
-
-    if (match === undefined) {
-        return null;
-    }
-
-    const stars = match.stars === '' ? '?' : match.stars;
-
-    return `★${stars} ${match.kind}`;
-}
-
 /** The recorded blue sparks across both parents — a count of what the record holds, not a price. */
 const blueSparkCount = computed((): number =>
     form.legacies.reduce(
         (total, parent) => total + parent.sparks.filter((spark) => spark.kind === 'blue').length,
         0,
     ),
+);
+
+/*
+ * The two tiles that are NOT the projection.
+ *
+ * `UMAMUSUME_REFERENCE.md:656` gives the aptitude grade ladder as "1 star = +1 grade, 4 = +2, 7 = +3,
+ * 10 to 18 = +4" and does not settle whether those numbers count one factor or the ancestry in total,
+ * so no summed grade shift is printed: the recorded Pinks are, and the mapping is a named absence.
+ * Green and White are mid-run events (`:645`), so they are shown as recorded with their timing
+ * stated, never as a career-start payoff. Neither tile feeds the projection.
+ */
+function recordedFactors(kinds: string[]): { parent: string; text: string }[] {
+    const out: { parent: string; text: string }[] = [];
+
+    for (const [index, parent] of form.legacies.entries()) {
+        for (const spark of parent.sparks) {
+            if (! kinds.includes(spark.kind)) {
+                continue;
+            }
+
+            out.push({
+                parent: index === 0 ? 'Parent A' : 'Parent B',
+                text: `${spark.target === '' ? 'no target' : spark.target} ★${spark.stars === '' ? '?' : spark.stars}`,
+            });
+        }
+    }
+
+    return out;
+}
+
+const recordedPinks = computed(() => recordedFactors(['pink']));
+const recordedSkillHints = computed(() => recordedFactors(['green', 'white']));
+
+/** The Blue cap raise the server summed, read from the prop so the figure is never re-typed here. */
+const blueRaise = computed((): number =>
+    (props.projection ?? []).reduce((total, row) => total + row.raise, 0),
 );
 
 /**
@@ -339,6 +418,7 @@ function submit(): void {
                 target: spark.target === '' ? null : spark.target,
                 stars: spark.stars === '' ? null : Number(spark.stars),
             })),
+            pick: postedPick(legacy.sparks, legacy.pick),
         })),
     })).put(`/legacy/${props.run.id}`);
 
@@ -414,7 +494,12 @@ const hasAnyNode = computed(() =>
                         row; the two ancestors follow it as their own list at the same nesting depth,
                         which is why this is one `<li>` and not two siblings.
                     -->
-                    <ul class="space-y-2">
+                    <!-- The wireframe's two-parent split (`legacy-builder.html:70`): `g-2` puts the two
+                         parents side by side from the container's 585px and stacks them below it, so the
+                         pair can be read across rather than down. The list stays a list — every id the
+                         ancestor editors bind (`rank-${slot}`, `ancestor-${slot}-${n}`) travels with the
+                         data, not with this container. -->
+                    <ul class="grid gap-4 g-2">
                         <li>
                             <AncestryNode
                                 :label="parent.label"
@@ -519,12 +604,12 @@ const hasAnyNode = computed(() =>
                                     <p
                                         v-if="form.legacies[index].sparks.length === 0"
                                         class="mt-1 text-xs text-ink-muted"
-                                        title="No Sparks entered for this parent yet."
+
                                     >
                                         No Sparks recorded.
                                     </p>
 
-<ul v-else class="mt-2 space-y-2">
+<ul v-else class="mt-2 space-y-2" role="group" :aria-label="`Sparks for ${parent.name}, and which one is primary`">
                                         <li
                                             v-for="(spark, sparkIndex) in form.legacies[index].sparks"
                                             :key="sparkIndex"
@@ -561,6 +646,30 @@ const hasAnyNode = computed(() =>
                                                 Remove Spark
                                                 <span class="sr-only"> from {{ parent.label }}</span>
                                             </button>
+
+                                            <!--
+                                                The pick (`legacy-builder.html:78`). The wireframe draws a
+                                                bare `input type="radio"` in the row's last cell; this is
+                                                the shared radio, so the group, the label, and the 44px
+                                                target come from one component rather than from markup
+                                                written again here. The visible word is `Primary` and the
+                                                row's own spark names the radio for a screen reader,
+                                                because "Primary" alone would be four identical names in
+                                                one group.
+                                            -->
+                                            <BaseRadio
+                                                :id="`spark-pick-${parent.slot}-${sparkIndex}`"
+                                                :name="`pick-${parent.slot}`"
+                                                :model-value="form.legacies[index].pick"
+                                                :value="sparkIndex"
+                                                @update:model-value="form.legacies[index].pick = Number($event)"
+                                            >
+                                                <span aria-hidden="true" class="text-xs font-medium text-ink">Primary</span>
+                                                <span class="sr-only">
+                                                    Primary spark for {{ parent.name }}:
+                                                    {{ spark.kind }} {{ spark.target || 'untitled spark' }}
+                                                </span>
+                                            </BaseRadio>
                                         </li>
                                     </ul>
 
@@ -628,59 +737,88 @@ const hasAnyNode = computed(() =>
                     Preview for a new run
                 </h2>
                 <p class="mt-1 text-xs text-ink-muted">
-                    What these two parents add to a run, before a single turn is played. Each parent
-                    column prints the spark the record holds; the projected sum is never computed,
-                    because an inheritance outcome is not this tool's to derive (ADR-0020 §3).
+                    What these two parents add to a run, before a single turn is played. The projection
+                    is this tool's arithmetic on a stated table, and it names whose rule it is beside
+                    the number.
                 </p>
 
-                <div class="mt-3 overflow-x-auto" role="region" tabindex="0" aria-label="Preview for a new run, scrollable">
+                <p v-if="props.projection === null" class="mt-3 text-sm text-ink-muted">
+                    No Legacy selection is recorded yet, so there is nothing to project. Record the two
+                    parents below and the ceiling this run starts from appears here.
+                </p>
+
+                <div v-else class="mt-3 overflow-x-auto" role="region" tabindex="0" aria-label="Preview for a new run, scrollable">
                     <table class="t">
                         <thead>
                             <tr>
                                 <th scope="col">Stat</th>
                                 <th scope="col" class="n">Scenario cap</th>
-                                <th scope="col" class="n">From Parent A</th>
-                                <th scope="col" class="n">From Parent B</th>
-                                <th scope="col" class="n">Projected</th>
+                                <th scope="col" class="n">From this legacy</th>
+                                <th scope="col" class="n">Starting ceiling</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="cap in props.caps" :key="cap.stat">
-                                <th scope="row" class="text-left font-normal">{{ cap.label }}</th>
+                            <tr v-for="row in props.projection ?? []" :key="row.stat">
+                                <th scope="row" class="text-left font-normal">{{ row.label }}</th>
+                                <td class="n font-mono tabular-nums">{{ row.base }}</td>
                                 <td class="n font-mono tabular-nums">
-                                    <template v-if="cap.value !== null">{{ cap.value }}</template>
-                                    <span v-else class="text-ink-muted" :title="cap.note ?? undefined">N/A</span>
+                                    <template v-if="row.raise > 0">+{{ row.raise }}</template>
+                                    <span v-else class="text-ink-muted">
+                                        N/A <span class="text-xs">· no recorded ★3 Blue factor raises this stat</span>
+                                    </span>
                                 </td>
-                                <td class="n font-mono tabular-nums">
-                                    {{ parentSparkFor(0, cap.label) ?? '-' }}
-                                </td>
-                                <td class="n font-mono tabular-nums">
-                                    {{ parentSparkFor(1, cap.label) ?? '-' }}
-                                </td>
-                                <td class="n text-ink-muted">not computed</td>
+                                <td class="n font-mono tabular-nums font-semibold">{{ row.ceiling }}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div class="tiles mt-3 sm:grid-cols-3">
+                <!-- The provenance belongs beside the figure, in words, not in a tooltip: the +16 is
+                     [JP]-tagged and stale, so the projected column is this tool's arithmetic on that
+                     table rather than a client reading (GP-2, D-256, TOG-3). -->
+                <p v-if="props.projection !== null" class="note mt-3 text-xs text-ink-muted">{{ props.projectionNote }}</p>
+
+                <div class="tiles mt-3 g-3">
                     <div class="tile">
-                        <div class="k">Blue sparks recorded</div>
-                        <div class="v">{{ blueSparkCount }}</div>
+                        <div class="k">Blue total</div>
+                        <div class="v font-mono">{{ blueRaise > 0 ? `+${blueRaise}` : '0' }}</div>
+                        <div class="mt-1 text-xs text-ink-muted">{{ blueSparkCount }} recorded</div>
                     </div>
                     <div class="tile">
                         <div class="k">Aptitude shifts</div>
-                        <div class="v na">none this pick</div>
+                        <template v-if="recordedPinks.length > 0">
+                            <div v-for="pink in recordedPinks" :key="`${pink.parent}-${pink.text}`" class="v text-sm">
+                                {{ pink.text }}
+                                <span class="text-xs text-ink-muted">· {{ pink.parent }}</span>
+                            </div>
+                        </template>
+                        <div v-else class="v na">none recorded</div>
+                        <p class="mt-1 text-xs text-ink-muted">
+                            Shown as recorded. The reference's grade ladder (1 / 4 / 7 / 10-18 stars) does not
+                            settle whether those count one factor or the ancestry in total, so no summed grade
+                            is printed.
+                        </p>
                     </div>
                     <div class="tile">
                         <div class="k">Skill hints</div>
-                        <div class="v na">none this pick</div>
+                        <template v-if="recordedSkillHints.length > 0">
+                            <div v-for="hint in recordedSkillHints" :key="`${hint.parent}-${hint.text}`" class="v text-sm">
+                                {{ hint.text }}
+                                <span class="text-xs text-ink-muted">· {{ hint.parent }}</span>
+                            </div>
+                        </template>
+                        <div v-else class="v na">none recorded</div>
+                        <p class="mt-1 text-xs text-ink-muted">
+                            These fire at the two mid-run inheritance moments, not at career start.
+                        </p>
                     </div>
                 </div>
 
+                <!-- The sourced half of the old note survives (`UMAMUSUME_REFERENCE.md:692`: a run yields
+                     exactly one Blue and one Pink); the unsourced "Choosing Memory instead of a spark"
+                     clause is deleted under R4. -->
                 <p class="note mt-3 text-xs text-ink-muted">
-                    Picking one blue per parent is the maximum this pair offers. Choosing Memory instead
-                    of a spark leaves that parent contributing nothing to the run's caps.
+                    Picking one blue per parent is the maximum this pair offers.
                 </p>
             </section>
 
