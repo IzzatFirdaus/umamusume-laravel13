@@ -814,17 +814,19 @@ test('names the fan ladder threshold beside the gap', async ({ page }) => {
     await expect(state.getByText(/30,755 to 240,000/)).toBeVisible();
 });
 
-test('shows the cap composition panel and its non-reconciliation note', async ({ page }) => {
-    // A-0.1 (Group A): the caps the run states sit beside the blue sparks its Legacy carries, and the
-    // panel states they do not reconcile (�1.2, the source's own open question). This case proves the
-    // section renders; the sparks themselves are pinned by `CockpitCapCompositionTest`.
+test('prints the cap composition as a footer under Stats and state', async ({ page }) => {
+    // A-0.1 (Group A) / `C6b.8`: the caps the run states sit beside the blue sparks its Legacy
+    // carries, and the line says they do not reconcile (§1.2, the source's own open question).
+    // The card became a footer note under `Stats and state`; the fact is asserted where it now
+    // reads rather than as a card that no longer exists.
     await newCareer(page);
     await page.locator('#app > *').first().waitFor();
 
-    const panel = page.getByRole('region', { name: 'Cap composition' });
-    await expect(panel).toBeVisible();
-    await expect(panel.getByText(/do not reconcile/)).toBeVisible();
-    await expect(panel.getByRole('term').first()).toBeVisible();
+    const footer = page.locator('[data-region="cap-composition"]');
+    await expect(footer).toBeVisible();
+    await expect(footer.getByText(/Caps/)).toBeVisible();
+    await expect(footer.getByText(/Blue sparks/)).toBeVisible();
+    await expect(page.getByText(/do not reconcile/)).toBeVisible();
 });
 
 test('shows the derived team roster from the deck cards', async ({ page }) => {

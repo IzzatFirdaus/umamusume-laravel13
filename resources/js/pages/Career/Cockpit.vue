@@ -980,6 +980,20 @@ const jumpToShop = (): void => {
                     :title="isActive ? 'Stats and state' : 'Final stats'"
                 />
 
+                <!-- HFW-OVERRIDE (structure: cap composition as a footer note). No cockpit HFW
+                     draws a cap card; the caps qualify the stat bars directly above, so they read
+                     beside them rather than in a card of their own (`C6b.8`, KI-144). The card it
+                     replaces has been deleted from the career-tools disclosure. -->
+                <p class="mt-2 text-xs text-ink-muted" data-region="cap-composition">
+                    <span class="font-semibold">Caps</span>
+                    <span v-for="(cap, stat) in props.capComposition.caps" :key="stat" class="ml-2 whitespace-nowrap">
+                        {{ stat }}
+                        <span class="font-mono tabular-nums text-ink-strong">{{ cap.toLocaleString('en-US') }}</span>
+                    </span>
+                    <span class="ml-2">· <span class="font-semibold">Blue sparks</span> {{ capSparkText }}</span>
+                </p>
+                <p class="mt-1 text-xs text-ink-muted">{{ props.capComposition.note }}</p>
+
                 <!-- Our Grand Concert's reading: five types, shared out of the turn-entry screen, and
                      the loop a Trainer plans the run against. Both draw from `performance.enabled`,
                      which is the matrix's own flag, so no scenario name reaches this page (G-33). -->
@@ -1229,23 +1243,6 @@ const jumpToShop = (): void => {
             />
         </details>
 
-        <!-- A-0.1: the cap arithmetic's recorded inputs (§1.2). The caps the run states sit beside the
-             blue sparks its Legacy tree carries, and the panel states plainly that the two do not
-             reconcile (the source's own open question). -->
-        <section aria-labelledby="cap-composition-heading" class="card mt-4 rounded-lg p-4">
-            <h2 id="cap-composition-heading" class="text-lg font-semibold text-ink-strong">Cap composition</h2>
-            <dl class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                <div v-for="(cap, stat) in props.capComposition.caps" :key="stat" class="flex items-baseline gap-1">
-                    <dt class="text-ink-muted">{{ stat }}</dt>
-                    <dd class="font-mono tabular-nums text-ink-strong">{{ cap.toLocaleString('en-US') }}</dd>
-                </div>
-            </dl>
-            <p class="mt-2 text-sm text-ink">
-                <span class="font-semibold text-ink-strong">Blue sparks:</span>
-                {{ capSparkText }}
-            </p>
-            <p class="mt-1 text-xs text-ink-muted">{{ props.capComposition.note }}</p>
-        </section>
 
         <!-- A-0.6: the derived team roster — the six deck cards' characters. No stored roster;
              the list is read off the run's own deck slots. -->
