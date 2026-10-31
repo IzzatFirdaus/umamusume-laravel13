@@ -1,3 +1,4 @@
+import { openScenarioDetail } from '../utils/scenario-detail';
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
@@ -35,12 +36,14 @@ async function openGrandConcertCockpit(page: import('@playwright/test').Page): P
     createdRunUrls.push(runUrl);
 
     await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await openScenarioDetail(page);
     await page.locator('#app > *').first().waitFor();
 }
 
 test('states the scenario and its partial documentation in the strip', async ({ page }) => {
     await openGrandConcertCockpit(page);
 
+    await openScenarioDetail(page);
     const section = page.getByRole('region', { name: 'Scenario' });
     await expect(section.getByText('Our Grand Concert', { exact: true })).toBeVisible();
     await expect(section.getByText('Partially documented', { exact: true })).toBeVisible();
@@ -49,6 +52,7 @@ test('states the scenario and its partial documentation in the strip', async ({ 
 test('draws the five published caps as a table of base, bonus and cap', async ({ page }) => {
     await openGrandConcertCockpit(page);
 
+    await openScenarioDetail(page);
     const section = page.getByRole('region', { name: 'Scenario' });
     const table = section.getByRole('table', { name: 'Published stat caps for this scenario' });
 
@@ -76,6 +80,7 @@ test('draws the five published caps as a table of base, bonus and cap', async ({
 test('names the caps verified and says why the panel is undrawn in a visible line', async ({ page }) => {
     await openGrandConcertCockpit(page);
 
+    await openScenarioDetail(page);
     const section = page.getByRole('region', { name: 'Scenario' });
 
     // The caps are published, and what says so is the `Verified {date}` span beside the heading — the
@@ -94,6 +99,7 @@ test('names the caps verified and says why the panel is undrawn in a visible lin
 test('says nothing about a mechanic no source measures', async ({ page }) => {
     await openGrandConcertCockpit(page);
 
+    await openScenarioDetail(page);
     const section = page.getByRole('region', { name: 'Scenario' });
     const text = (await section.innerText()).toLowerCase();
 

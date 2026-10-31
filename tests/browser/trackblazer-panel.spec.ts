@@ -1,3 +1,4 @@
+import { openScenarioDetail } from '../utils/scenario-detail';
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
@@ -45,6 +46,7 @@ test.beforeEach(async ({ page }) => {
     runUrl = page.url().replace(/\/cockpit$/, '');
     cockpitUrl = `${runUrl}/cockpit`;
     await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await openScenarioDetail(page);
     await page.locator('#app > *').first().waitFor();
 });
 
@@ -103,6 +105,7 @@ test('posts a valid purchase and reads the recorded row on the next cockpit visi
     // The boundary's redirect lands on the run screen; navigate the same run's cockpit to read
     // the purchase back through `scenario.shop.purchases`.
     await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await openScenarioDetail(page);
 
     const purchases = page.getByRole('region', { name: 'Pro Shop' })
         .getByRole('list', { name: 'Recorded purchases' });
@@ -296,6 +299,7 @@ test('races ahead prints the window with each row its published win value', asyn
     // carries. Fewer writes leave the window with nothing to be ahead of.
     await recordTurns(page, runId, 11);
     await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await openScenarioDetail(page);
 
     const calendar = page.getByRole('region', { name: 'Races ahead' });
     await expect(calendar).toBeVisible();
@@ -367,6 +371,7 @@ test('the ledger names what this run holds, against the cap, with the publisher 
     ]);
 
     await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await openScenarioDetail(page);
 
     const ledger = page.getByRole('region', { name: 'Shop ledger' });
     await expect(ledger).toBeVisible();

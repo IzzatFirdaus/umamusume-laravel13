@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
+import { openScenarioDetail } from '../utils/scenario-detail';
 import { expectTapTargets } from '../utils/tap-targets';
 
 /*
@@ -97,6 +98,15 @@ async function openScenarioRegion(
     // The region is the content-level anchor: waiting on `#app > *` alone can resolve while Inertia is
     // still swapping the page, and a control that has not been placed yet measures zero.
     await expect(page.getByRole('region', { name: 'Scenario' })).toBeVisible();
+    // The scenario panels render inside a closed `scenario-detail` disclosure: no cockpit HFW draws
+    // them, so the visible page is the wireframe's. A case that reads a panel opens it first.
+    const detail = page.locator('details[data-region="scenario-detail"]');
+    if ((await detail.count()) > 0) {
+        const open = await detail.first().evaluate((el) => (el as HTMLDetailsElement).open);
+        if (!open) {
+            await detail.first().locator('summary').first().click();
+        }
+    }
 
     return page.getByRole('region', { name: 'Scenario' });
 }
@@ -271,6 +281,15 @@ test('keeps the 44px floor and reflows at 320 px with the panel drawn', async ({
 
     await page.setViewportSize({ width: 320, height: 700 });
     await expect(page.getByRole('region', { name: 'Scenario' })).toBeVisible();
+    // The scenario panels render inside a closed `scenario-detail` disclosure: no cockpit HFW draws
+    // them, so the visible page is the wireframe's. A case that reads a panel opens it first.
+    const detail = page.locator('details[data-region="scenario-detail"]');
+    if ((await detail.count()) > 0) {
+        const open = await detail.first().evaluate((el) => (el as HTMLDetailsElement).open);
+        if (!open) {
+            await detail.first().locator('summary').first().click();
+        }
+    }
     const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
