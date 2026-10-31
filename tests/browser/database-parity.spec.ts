@@ -48,10 +48,27 @@ const recorded = (list: string[] | undefined, line: string): boolean =>
     (list ?? []).some((needle) => line.includes(needle));
 
 /**
- * The wireframe's `shell.css` palette is not this app's visual system: `DESIGN.md` owns the tokens and the
- * app's ink, surfaces, type steps and radii are its own, so comparing those props exactly would fail on
- * every element of every screen without saying anything about layout. They are recorded as the
- * design-system divergence; the layout props (display, grid, weight, spacing, borders) stay asserted.
+ * HFW-OVERRIDE (instrument: palette and type tokens are excluded, per property, not per instance).
+ *
+ * The wireframe's `shell.css` palette and type scale are not this app's visual system. DESIGN.md owns
+ * both, and the 2026-10-24 second ruling quoted there (`DESIGN.md:196-210`) fixes the app's values from
+ * `docs/design-research/HLF_reference/` samples - `--color-panel: #FFFEFF`, `--color-rule: #5C607B`,
+ * `--color-ink: #24243A` - which are not the numbers `shell.css` carries. Comparing the seven properties
+ * below would fail on every element of every screen and say nothing about layout, so the gate asserts
+ * structure, text, and the geometry and rhythm properties that are NOT token-owned: `display`,
+ * `gridTemplateColumns`, `fontWeight`, `gap`, `padding`, `borderWidth`, plus the spine rects.
+ *
+ * The consequence a reader must know: the `computed` counts in a commit body and in the evidence JSON
+ * are POST-FILTER. They count the differences the gate holds this build to, not every difference that
+ * exists. Each surviving entry still needs an `HFW-OVERRIDE` naming it, one entry per divergence.
+ *
+ * What the exclusion swallows, measured across the six reports rather than asserted: the ink and rule
+ * colours on every element (`rgb(50, 42, 47)` against the mock's `rgb(106, 86, 65)`, and the muted and
+ * surface pairs), one `borderRadius` pair per screen (`16px` against the mock's `10px`, the pill's `6px`
+ * once on Shop items), the type step on card headings (`16px` against `14px`, and `14px` against the
+ * mock's `12.5px` body step), and the card's own top margin (`16px 0 0` against the mock's `14px`
+ * inline). Each is a `DESIGN.md` token decision, not a layout decision, which is the line the filter
+ * draws. Narrowing the filter to colour alone would re-assert all of them as failures.
  */
 const DESIGN_TOKENS = new Set(['color', 'backgroundColor', 'borderColor', 'fontSize', 'lineHeight', 'borderRadius', 'margin']);
 

@@ -149,12 +149,15 @@ const CONFLICTS: ReadonlyArray<{ question: string; state: string }> = [
           carry: fetched (the pipeline read it) or transcribed (a hand pass read it).
           HFW-OVERRIDE (style: no current row): the mock marks its first ledger row `tr.is-current`;
           a ledger has no current row, so the tint is not drawn.
-          HFW-OVERRIDE (style: no scroll wrapper): the card is the scroll region, as in the mock, so the
-          explicit tab stop this page used to put around the table is gone. DESIGN.md scopes the
-          focusable-region rule to the race calendar and the turn log, and the twelve links inside this
-          ledger carry the keyboard across the clipped columns as focus reaches each one.
+          HFW-OVERRIDE (a11y: the scroll region is the card, and it is a tab stop): the wrapper this page
+          used to put around the table is gone, so the card is the region the wireframe draws. Measured at
+          320px the ledger overflows its card by 160px and its clipped Read and Link columns hold no
+          focusable node of their own, so the card carries `tabindex="0"` with its existing role and name -
+          DESIGN.md's mechanism for a scrolling region (`:447-455`), which says the clipped columns are
+          "reachable by arrow keys and not by trackpad alone". The mock scrolls the same 136px with no tab
+          stop at all, so this is a divergence the house rule requires rather than one the wireframe shows.
         -->
-        <div class="card mt-4" role="region" aria-labelledby="sources-ledger">
+        <div class="card mt-4" role="region" aria-labelledby="sources-ledger" tabindex="0">
             <h2 id="sources-ledger">Sources</h2>
             <table
                 class="t"

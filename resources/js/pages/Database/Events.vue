@@ -96,7 +96,22 @@ const close = async (): Promise<void> => {
             </p>
         </div>
 
-        <div v-else class="card mt-4">
+        <!--
+          HFW-OVERRIDE (a11y: the scroll region is the card, and it is a tab stop): measured at 320px this
+          card scrolls its five-column table by 213px and the clipped Source column holds no focusable
+          node, so the card carries the region role, a name and `tabindex="0"` - DESIGN.md's mechanism for
+          a horizontally scrolling region (`:447-455`), whose stated purpose is that the clipped columns
+          are reachable by arrow keys and not by trackpad alone. The mock scrolls the same table by 108px
+          with no tab stop, so the divergence is the house rule's, not the wireframe's. Sparks and Help
+          measure no overflow and therefore carry no tab stop.
+        -->
+        <div
+            v-else
+            class="card mt-4"
+            role="region"
+            aria-label="Recurring event types, scrollable"
+            tabindex="0"
+        >
             <!-- `aria-label` rather than a `<caption>`: a caption is the table's first child and shifts
                  every descendant's selector by one, which would stop the parity harness pairing the
                  header and rows with the wireframe's. The accessible name is identical. -->

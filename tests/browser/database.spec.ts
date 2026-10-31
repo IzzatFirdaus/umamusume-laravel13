@@ -475,7 +475,8 @@ test('no page scrolls sideways at 320px, and the race table scrolls inside its o
     }
 
     // The wide table is the one surface §6 says may overflow, and then only inside a labelled,
-    // focusable region rather than down the page (DESIGN.md:194-209).
+    // focusable region rather than down the page (DESIGN.md:447-455; the citation read `:194-209`,
+    // which is the palette ruling, until this pass measured the scroll regions and corrected it).
     await page.goto('/database/races', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 

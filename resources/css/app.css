@@ -1260,7 +1260,12 @@ table.t tr.is-current td {
 
 /* .card:has(> table.t): ported from shell.css; resolves to house tokens. This is how a wide matrix
    fits a 320px viewport without panning the document, and `scroll-padding` keeps a focused cell's
-   ring off the clip edge, the settlement the deck summary recorded for its own region. */
+   ring off the clip edge, the settlement the deck summary recorded for its own region.
+   The rule makes the card the scroll container, so the card is also the region DESIGN.md:447-455
+   requires to be labelled and focusable: any page whose card measures an overflow carries
+   `role="region"`, a name and `tabindex="0"` on the card itself. Events (213px), Shop items (35px),
+   the three Scenarios matrices (168/99/26px) and the Sources ledger (160px) do at 320px; Sparks and
+   Help measure none and carry no tab stop. */
 .card:has(> table.t) {
     overflow-x:auto;
     scroll-padding:6px;

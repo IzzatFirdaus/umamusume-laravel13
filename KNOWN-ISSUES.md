@@ -4002,3 +4002,45 @@ because the file carries a peer session's uncommitted page-size cases, which thi
 **Closure.** Re-baseline the assertion to the committed default (or to `?pageSize=25`, which the surface still honours)
 and note the change in that slice's hand-off. Not fixed here: the file is peer-dirty and the failure is unrelated to
 the skill detail.
+
+## KI-142 — the pager renders two range wordings, and the dash form slips past the copy gate that bans it
+
+**State:** OPEN. Filed 2026-10-31 while classifying the three Races browser failures during the Database and
+Help HFW parity pass. This slice did not cause it and did not fix it: the component and the four other specs
+named below are outside its file set.
+
+**Defect.** `resources/js/components/ui/Pagination.vue:62` prints the range with an en dash — the page reads
+`Showing 1–25 of 410 slots` — while five browser assertions across three specs pin the word form:
+`tests/browser/database.spec.ts:346`, `:373` and `:417` (the race database), `tests/browser/skills.spec.ts:146`
+and `tests/browser/support-cards.spec.ts:205`. The single assertion that pins the dash is
+`tests/browser/data-table.spec.ts:166`. Both wordings cannot ship, so the component now satisfies one spec and
+fails five. The dash is also the glyph the copy rule forbids in shipped text (D-79, enforced by
+`RenderedCopyHygieneTest`), and it reaches a Trainer because the source spells it as the character reference
+`&#8211;`: the gate's sweep matches the literal characters `\x{2013}` and `\x{2014}` on a source line, so an
+entity-written dash is invisible to it. That is the second half of this entry — a copy ban with a hole in the
+instrument that polices it.
+
+**Why.** `78b0f4e4` ("feat(veterans): bring the library to HFW parity") changed the line from
+`Showing {{ from }} to {{ to }} of {{ total }} {{ noun }}` to the `&#8211;` form and recorded the reason as
+"byte-identical (range wording restored to the en dash the data-table spec pins)". True of
+`data-table.spec.ts:166`, and the same commit did not re-baseline the five assertions that pin the word. The
+parity pass then read the three Races failures as a peer's uncommitted edit, which they are not: the wording
+is committed.
+
+**Evidence.** Two reproducible commands, both on a session-private harness
+(`PLAYWRIGHT_PORT=<port> PLAYWRIGHT_SCRATCH_DB=.scratch-uma/<session>/browser-<port>.sqlite`).
+`npx playwright test tests/browser/skills.spec.ts tests/browser/support-cards.spec.ts tests/browser/data-table.spec.ts`
+→ `2 failed, 41 passed`, the two failures being `skills.spec.ts:139` and `support-cards.spec.ts:198`, both
+"states the page it is showing", and `data-table.spec.ts:166` green in the same run.
+`npx playwright test tests/browser/database.spec.ts --grep "race"` → the three Races cases fail with
+`Received string: " Showing 1–25 of 410 slots Page 1 of 17"` against `/Showing \d+ to \d+ of \d+ slots/`.
+Attribution: `git show 78b0f4e4 -- resources/js/components/ui/Pagination.vue` carries the `-`/`+` pair, the
+removed line reading `Showing {{ from }} to {{ to }} of {{ total }} {{ noun }}` and the added line the
+`&#8211;` form, and none of the seven parity commits touches `Pagination.vue`.
+
+**Closure.** Choose one wording and re-baseline the other side. The dash is the form the copy rule forbids, so
+the expected resolution is the word form in the component plus `data-table.spec.ts:166` re-pinned to it, after
+which the three Races cases, the skills case and the support-cards case go green together. The gate half closes
+by widening `renderedDashLines()` to decode numeric character references before matching, or by failing on the
+`&#8211;`/`&#8212;` spellings directly — a source-level reading of the rule is what let the entity through.
+Neither half is fixed here.

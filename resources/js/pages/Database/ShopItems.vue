@@ -165,7 +165,19 @@ const close = async (): Promise<void> => {
           HFW-OVERRIDE (data: rows): the mock's ten rows are one publisher's priorities; this page
           prints the Pro Shop's config rows plus the §1.6.10 catalogue below.
         -->
-        <div class="card mt-4">
+        <!--
+          HFW-OVERRIDE (a11y: the scroll region is the card, and it is a tab stop): at 320px this card
+          scrolls its four-column table by 35px and the clipped Rating column holds no focusable node, so
+          the card carries the region role, a name and `tabindex="0"` - DESIGN.md's mechanism for a
+          horizontally scrolling region (`:447-455`), whose stated purpose is that the clipped columns are
+          reachable by arrow keys and not by trackpad alone. The mock scrolls with no tab stop.
+        -->
+        <div
+            class="card mt-4"
+            role="region"
+            :aria-label="`${props.scenarioShop.label} Pro Shop items, scrollable`"
+            tabindex="0"
+        >
             <table
                 class="t"
                 :aria-label="`${props.scenarioShop.label} Pro Shop items, with one publisher's rating`"

@@ -39,7 +39,9 @@
  * Laid out as the mock draws it: the two columns are plain `div`s and the cards inside them are
  * `div.card role="region"`, separated by the ported `.card + .card`; the card name is a bare `h2` and
  * the subordinate line is `p.sub`, both styled by their ported rules rather than by utilities, so a
- * card's children pair with a card's children.
+ * card's children pair with a card's children. The bare `h2` is the house's 15px card-name step, not
+ * the 18px `text-lg` this page used before: the size change is a convergence on `help.html`, which
+ * draws every card name with `.card > h2`, so it is not an override and needs no allowance.
  */
 import AppLayout from '../layouts/AppLayout.vue';
 import PageHeader from '../components/ui/PageHeader.vue';

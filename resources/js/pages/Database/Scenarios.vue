@@ -144,8 +144,13 @@ const panelState = (scenario: Scenario, label: string): boolean =>
           `RulesetVersionVocabularyTest` is what pins "ruleset version" to the separate app fact.
           The mock's Unity Cup row carries `tr.is-current`; no row on a reference matrix is current, so
           the highlight is not drawn and the harness records it as missing.
+          HFW-OVERRIDE (a11y: the scrolling card is a focusable region): the mock's cards scroll their
+          wide tables with no tab stop, and DESIGN.md's mechanism for a scrolling region (`:447-455`)
+          pairs `overflow-x:auto` with `role="region"`, `tabindex="0"` and a name. The card already
+          carries the role and the name, so only the tab stop is added; a keyboard reader pans the
+          clipped columns with the arrow keys instead of a trackpad.
         -->
-        <div class="card mt-4" role="region" aria-labelledby="scenario-caps">
+        <div class="card mt-4" role="region" aria-labelledby="scenario-caps" tabindex="0">
             <h2 id="scenario-caps">Caps</h2>
 
             <template v-if="entries.length > 0">
@@ -198,7 +203,7 @@ const panelState = (scenario: Scenario, label: string): boolean =>
             </p>
         </div>
 
-        <div class="card mt-4" role="region" aria-labelledby="scenario-panels">
+        <div class="card mt-4" role="region" aria-labelledby="scenario-panels" tabindex="0">
             <h2 id="scenario-panels">Panels each scenario composes</h2>
             <table v-if="entries.length > 0" class="t" aria-label="Panels each scenario composes">
                 <thead>
@@ -228,7 +233,7 @@ const panelState = (scenario: Scenario, label: string): boolean =>
             </p>
         </div>
 
-        <div class="card mt-4" role="region" aria-labelledby="scenario-ruleset">
+        <div class="card mt-4" role="region" aria-labelledby="scenario-ruleset" tabindex="0">
             <h2 id="scenario-ruleset">Last rework</h2>
             <table v-if="entries.length > 0" class="t" aria-label="Last rework date for each scenario">
                 <thead>
