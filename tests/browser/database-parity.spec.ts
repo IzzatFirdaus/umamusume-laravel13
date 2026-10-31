@@ -144,6 +144,29 @@ async function assertParity(page: import('@playwright/test').Page, opts: Screen)
     await shots(page, opts.screen);
 }
 
+test('the Shop items catalogue sits on its wireframe', async ({ page }) => {
+    await assertParity(page, {
+        screen: 'shop-items',
+        appUrl: '/database/shop-items',
+        wireframe: 'database-shop-items.html',
+        allow: {
+            text: [
+                // HFW-OVERRIDE (data: rows): the mock's ten rows are one publisher's priorities; this
+                // page prints the Pro Shop's config rows, so costs, effects and verdicts differ.
+                'div.card:nth-child(2) > table.t:nth-child(1)',
+                // HFW-OVERRIDE (copy: rules note): one sentence is added, §1.6.10's "no item guarantees
+                // training success".
+                'div.grid:nth-child(3) > div.card:nth-child(1) > p.note:nth-child(3)',
+                // HFW-OVERRIDE (copy: ratings note): the mock's sentence leaves its bold span empty and
+                // never names the two counters; this page says "Grade Points and Shop Coins".
+                'div.grid:nth-child(3) > div.card:nth-child(2) > p.note:nth-child(4)',
+            ],
+            computed: [],
+            rect: [],
+        },
+    });
+});
+
 test('the Events catalogue sits on its wireframe', async ({ page }) => {
     await assertParity(page, {
         screen: 'events',

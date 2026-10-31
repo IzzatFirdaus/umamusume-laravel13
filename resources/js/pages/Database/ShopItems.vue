@@ -158,43 +158,32 @@ const close = async (): Promise<void> => {
 
         <DatabaseNav />
 
-        <p class="mt-4 max-w-3xl text-sm text-ink-muted">
-            Consumables and currencies, with the client's own effect string and where each is actually
-            spent. Spendable items are not support effects: the spend site column is what tells a Career
-            item from a Team Trials one.
-        </p>
-
-        <SourceNote
-            :section="props.source.section"
-            :anchor="props.source.anchor"
-            :recheck="props.recheck"
-        />
-
-        <!-- The wireframe's main catalogue (`database-shop-items.html:69-84`): cost, effect and the
-             publisher's rating on every row, ten at a time with a client "Show all". -->
-        <section class="card mt-4" aria-labelledby="scenario-shop">
-            <table class="w-full border-collapse">
-                <caption class="sr-only">
-                    {{ props.scenarioShop.label }} Pro Shop items, with one publisher's rating
-                </caption>
+        <!--
+          The wireframe's bare catalogue card (`database-shop-items.html:69-84`): no heading, a `table.t`
+          with the item, its cost, its effect and one publisher's rating, and the client's pager under
+          it. The rating's source is in the column heading, which is the wireframe's own key.
+          HFW-OVERRIDE (data: rows): the mock's ten rows are one publisher's priorities; this page
+          prints the Pro Shop's config rows plus the §1.6.10 catalogue below.
+        -->
+        <div class="card mt-4">
+            <table
+                class="t"
+                :aria-label="`${props.scenarioShop.label} Pro Shop items, with one publisher's rating`"
+            >
                 <thead>
                     <tr>
-                        <th class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Item</th>
-                        <th class="border-b border-rule px-2 py-2 text-right text-xs font-semibold text-ink-strong">Cost</th>
-                        <th class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Effect</th>
-                        <th class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">
-                            Rating (one guide)
-                        </th>
+                        <th scope="col">Item</th>
+                        <th scope="col" class="n">Cost</th>
+                        <th scope="col">Effect</th>
+                        <th scope="col">Rating (one guide)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="item in visibleItems" :key="item.name">
-                        <th scope="row" class="border-b border-rule px-2 py-3 text-left text-sm font-medium text-ink">
-                            {{ item.name }}
-                        </th>
-                        <td class="border-b border-rule px-2 py-3 text-right font-mono tabular-nums text-sm text-ink">{{ item.cost }}</td>
-                        <td class="border-b border-rule px-2 py-3 text-sm text-ink">{{ item.effect }}</td>
-                        <td class="border-b border-rule px-2 py-3 text-sm text-ink">
+                        <th scope="row">{{ item.name }}</th>
+                        <td class="n font-mono tabular-nums">{{ item.cost }}</td>
+                        <td>{{ item.effect }}</td>
+                        <td>
                             <span
                                 v-if="props.ratings[item.name]"
                                 :class="ratingClass(props.ratings[item.name])"
@@ -205,7 +194,7 @@ const close = async (): Promise<void> => {
                     </tr>
                 </tbody>
             </table>
-            <div class="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-rule pt-3">
+            <div class="mt-3 flex flex-wrap items-center justify-end gap-1.5 border-t border-rule pt-3">
                 <p class="text-xs text-ink-muted">
                     {{ props.scenarioShop.items.length }} items · showing
                     {{ Math.min(shown, props.scenarioShop.items.length) }}
@@ -213,20 +202,20 @@ const close = async (): Promise<void> => {
                 <button
                     v-if="shown < props.scenarioShop.items.length"
                     type="button"
-                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
+                    class="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-rule px-3 text-sm font-extrabold text-ink hover:bg-raised transition-colors duration-150 ease-out"
                     @click="shown = props.scenarioShop.items.length"
                 >Show all</button>
             </div>
-        </section>
+        </div>
 
-        <div class="mt-4 grid gap-4 g-2">
-            <section class="card" aria-labelledby="shop-rules">
+        <div class="grid gap-3.5 g-2 mt-4">
+            <div class="card" role="region" aria-labelledby="shop-rules">
                 <h2 id="shop-rules">Shop rules</h2>
-                <table class="mt-2 w-full border-collapse text-sm">
+                <table class="t">
                     <tbody>
-                        <tr v-for="rule in shopRules" :key="rule.rule" class="border-b border-rule last:border-b-0">
-                            <th scope="row" class="w-40 py-2 pr-3 text-left font-medium text-ink">{{ rule.rule }}</th>
-                            <td class="py-2 text-ink">{{ rule.detail }}</td>
+                        <tr v-for="rule in shopRules" :key="rule.rule">
+                            <th scope="row" class="w-40">{{ rule.rule }}</th>
+                            <td>{{ rule.detail }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -235,18 +224,19 @@ const close = async (): Promise<void> => {
                     <span>
                         "Race-triggered items last 3 turns" is recorded as <b>unconfirmed</b>. No source in the
                         repository states a duration for that class, so the catalogue does not print one.
+                        No item on either client guarantees training success.
                     </span>
                 </p>
-            </section>
+            </div>
 
-            <section class="card" aria-labelledby="shop-ratings">
+            <div class="card" role="region" aria-labelledby="shop-ratings">
                 <h2 id="shop-ratings">What the ratings are</h2>
                 <p class="mt-2 text-sm text-ink-muted">
                     The "Rating" column is one publisher's priorities, transcribed. It is not this tool's
                     recommendation: <b>no row is recommended</b>, and a rating appears only where the
                     publisher's item matched the catalogue's cost and effect exactly.
                 </p>
-                <div class="mt-3 grid grid-cols-3 gap-2">
+                <div class="grid g-3 mt-3 gap-3.5">
                     <div class="tile">
                         <div class="k">Items</div>
                         <div class="v font-mono text-sm">{{ props.scenarioShop.items.length }}</div>
@@ -268,11 +258,38 @@ const close = async (): Promise<void> => {
                         the Grade Points.
                     </span>
                 </p>
-            </section>
+            </div>
         </div>
+
+        <p class="mt-4 max-w-3xl text-sm text-ink-muted">
+            Consumables and currencies, with the client's own effect string and where each is actually
+            spent. Spendable items are not support effects: the spend site column is what tells a Career
+            item from a Team Trials one.
+        </p>
+
+        <SourceNote
+            :section="props.source.section"
+            :anchor="props.source.anchor"
+            :recheck="props.recheck"
+        />
 
         <h2 class="mt-8 text-lg font-semibold text-ink-strong">Catalogue</h2>
         <p class="mt-1 text-sm text-ink-muted">{{ props.totalCount }} catalogue rows</p>
+
+        <!--
+          HFW-OVERRIDE (copy: table idiom note): the page draws two table idioms, and this one sentence
+          says which is which. It sits above the first `DataTable` wrapper; that component carries its
+          own card and has no slot for a note inside it, so the sentence is the block above rather than
+          a Card inside a Card (`lint:ui` refuses the nesting).
+        -->
+        <p class="note mt-4">
+            <span class="g" aria-hidden="true">○</span>
+            <span>
+                The Pro Shop table above is this page's reference table; the catalogue below is the
+                shared data table this tool uses for its own lists, with a focusable scroll region.
+                Both print the recorded facts and neither is a recommendation.
+            </span>
+        </p>
 
         <section
             v-if="props.rows.length === 0"
