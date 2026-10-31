@@ -31,6 +31,8 @@ const props = defineProps<{
         status_labels: Record<string, string>;
         scenarios: Record<string, string>;
         umamusume_id: number;
+        scenario: string | null;
+        current_objective_index: number | null;
         run_url: string;
         update_url: string;
         deck_url: string;
@@ -51,9 +53,22 @@ const capColumn = (stat: string): string => `cap_${stat.toLowerCase()}`;
 /** What this page is for, in one line, under the one `h1`. */
 const lede = computed(() => `The identity fields the Cockpit used to hold. Everything here writes through ${props.run.run_url}.`);
 
-const statusForm = useForm({ status: props.run.status });
-const scenarioForm = useForm({ scenario: props.run.scenario ?? '' });
-const periodForm = useForm({ current_objective_index: '' });
+/*
+ * Every form carries the whole key set `runs.update` demands, because `umamusume_id` and `status`
+ * are required and a partial payload is refused. The refusal arrives as `form.errors`, which this
+ * page does not print, so an incomplete form reads as "nothing happened" — the shape the cockpit
+ * forms had, and the reason they carried the siblings they were not editing.
+ */
+const base = {
+    umamusume_id: String(props.run.umamusume_id),
+    status: props.run.status,
+    scenario: props.run.scenario ?? '',
+    current_objective_index: props.run.current_objective_index === null ? '' : String(props.run.current_objective_index),
+};
+
+const statusForm = useForm({ ...base });
+const scenarioForm = useForm({ ...base });
+const periodForm = useForm({ ...base });
 
 const saveStatus = (): void => {
     statusForm.put(props.run.update_url, { preserveScroll: true });
