@@ -738,18 +738,18 @@ watch(orderedColumns, () => {
                  where it cannot wrap and reads as the same text repeated once per column. Each selected
                  career gets its own note card below the matrix, in the same column order. -->
             <div v-if="orderedColumns.length > 0" class="mt-4 grid gap-4 g-3">
-                <article
+                <section
                     v-for="column in orderedColumns"
                     :key="`note-${column.id}`"
-                    class="rounded-md border border-rule bg-raised p-3 text-sm"
+                    class="card text-sm"
                 >
-                    <header class="mb-1 flex flex-wrap items-baseline gap-2">
+                    <h2 class="mb-1 flex flex-wrap items-baseline gap-2">
                         <a :href="column.veteran_url" class="font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">{{ column.label }}</a>
                         <span v-if="column.trainee_ja" lang="ja" class="text-xs text-ink-muted">{{ column.trainee_ja }}</span>
-                    </header>
+                    </h2>
                     <p v-if="veteranResultClause(column.notes) !== null" class="whitespace-pre-wrap text-ink">{{ veteranResultClause(column.notes) }}</p>
                     <p v-else class="text-xs text-ink-muted">No note recorded for this career.</p>
-                </article>
+                </section>
             </div>
         </section>
 
