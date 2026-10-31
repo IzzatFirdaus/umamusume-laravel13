@@ -167,6 +167,34 @@ test('the Shop items catalogue sits on its wireframe', async ({ page }) => {
     });
 });
 
+test('the Data sources ledger sits on its wireframe', async ({ page }) => {
+    await assertParity(page, {
+        screen: 'sources',
+        appUrl: '/database/sources',
+        wireframe: 'database-sources.html',
+        allow: {
+            text: [
+                // HFW-OVERRIDE (copy: tier S row): the mock writes that row with an em dash; shipped
+                // copy bans the glyph, so the app's colon form is the required divergence.
+                'div.card:nth-child(3) > table.t:nth-child(2) > tbody:nth-child(2) > tr:nth-child(1)',
+                // HFW-OVERRIDE (data: ledger columns): the mock's Tier and State columns have no
+                // per-dataset value in this build, and its eight sources are not this build's twelve.
+                'div.card:nth-child(4) > table.t',
+                // HFW-OVERRIDE (data: conflicts): the mock lists four open disagreements; the mood race
+                // effect was resolved on 2026-09-27, and the app states each row's two sides in a
+                // sentence rather than a pill.
+                'div.grid:nth-child(5) > div.card:nth-child(1) > table.t',
+                // The note names the resolved row, which the mock's sentence cannot.
+                'div.grid:nth-child(5) > div.card:nth-child(1) > p.note',
+                // The tiles count this build's ledger and its open rows, not the mock's.
+                'div.grid:nth-child(5) > div.card:nth-child(2) > div.grid',
+            ],
+            computed: [],
+            rect: [],
+        },
+    });
+});
+
 test('the Scenarios matrices sit on their wireframe', async ({ page }) => {
     await assertParity(page, {
         screen: 'scenarios',

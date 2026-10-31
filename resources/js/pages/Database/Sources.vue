@@ -18,6 +18,12 @@
  *
  * **The guide is named, not cited.** `the reference guide` is what the Trainer can be told; its file
  * path is a repository detail that belongs in the commit, not on the screen.
+ *
+ * Laid out as `database-sources.html`: the `div.info` verification band, then the Tiers card, then the
+ * Sources ledger, then the two closing cards in a `g-2` grid. Every table is the ported `table.t` and
+ * every card is the ported `.card`, so the card is the scroll region a wide ledger needs.
+ * HFW-OVERRIDE (data: ledger columns) and (style: no current row) are recorded on the ledger itself;
+ * (data: conflicts) is recorded beside the list below.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
@@ -47,15 +53,20 @@ const props = defineProps<{
 }>();
 
 /*
- * The four disagreements the reference guide's Source Conflict Log still carries open
+ * The disagreements the reference guide's Source Conflict Log still carries open
  * (`docs/UMAMUSUME_REFERENCE.md` §7, rows 2, 7 and 10). They are printed as conflicts because the
  * app must not pick a side on the Trainer's behalf: the side that is wrong costs a run. Kept here
  * rather than in a table because they are a reading of two published sources, not row data this
  * build owns; a resolved row leaves this list when the log resolves it.
+ *
+ * The mood race effect used to sit in this list. It is settled: section 1.3's dated resolution
+ * (`:1385`, 2026-09-27) reads the client's own Mood Effect panel against the two guide camps and
+ * resolves the race-side figure in GameWith's favour, 4% and 2% rather than 10% and 5%. The mock
+ * still lists it as open (`database-sources.html:118`), so the ledger prints three conflicts and the
+ * wireframe's tile prints four; the reference wins and the difference is recorded on the card.
  */
 const CONFLICTS: ReadonlyArray<{ question: string; state: string }> = [
     { question: 'Is 1400 m Sprint or Mile?', state: 'Game8 says Sprint; the data export files every 1400 m course under Mile.' },
-    { question: 'Mood race effect: ±4% or ±10%?', state: 'The client panel prints ±4%; two guides print ±10%.' },
     { question: 'Can Wit training fail?', state: 'Unsettled: one guide lists a Wit failure branch, one argues the risk driver is absent.' },
     { question: 'Open League rank ceiling', state: 'Global notices exclude S and above; the JP notice excludes UC1 and above.' },
 ];
@@ -75,43 +86,47 @@ const CONFLICTS: ReadonlyArray<{ question: string; state: string }> = [
 
         <DatabaseNav />
 
-        <!-- The wireframe states the matrix's verification date beside this ledger
-             (`database-sources.html:74`). It records when the matrix was checked against the
-             sources, not when anything was fetched, and says so. -->
-        <p class="mt-4 rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink-muted">
-            <span aria-hidden="true" class="mr-2 text-status-positive">i</span>
-            <b class="text-ink-strong">Matrix verified {{ props.matrixVerifiedAt }}.</b>
-            The verification date records when the matrix was checked against these sources.
-            Nothing on this page was fetched today.
-        </p>
+        <!--
+          The wireframe's verification band (`database-sources.html:72-76`) is the ported `div.info`:
+          the mark is decoration, the words carry the fact. It records when the matrix was checked
+          against these sources, not when anything was fetched, and says so.
+        -->
+        <div class="info mt-4">
+            <span aria-hidden="true">i</span>
+            <span>
+                <b>Matrix verified {{ props.matrixVerifiedAt }}.</b>
+                A verification date records when the matrix was checked against its sources.
+                Nothing on this page was fetched today.
+            </span>
+        </div>
 
-        <!-- The wireframe's tier vocabulary (`database-sources.html:76-89`). A tier is a property of the
+        <!-- The wireframe's tier vocabulary (`database-sources.html:78-89`). A tier is a property of the
              source, not of a dataset, so it is stated once here and the lists below keep their dates. -->
-        <section class="card mt-4" aria-labelledby="source-tiers">
+        <div class="card mt-4" role="region" aria-labelledby="source-tiers">
             <h2 id="source-tiers">Tiers</h2>
-            <table class="mt-2 w-full border-collapse text-sm">
+            <table class="t" aria-label="Source tiers and what each one means">
                 <thead>
                     <tr>
-                        <th class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Tier</th>
-                        <th class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Meaning</th>
+                        <th scope="col">Tier</th>
+                        <th scope="col">Meaning</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="border-b border-rule">
-                        <th scope="row" class="py-2 pr-3 text-left"><span class="pill pill-positive">S</span></th>
-                        <td class="py-2 text-ink">Official publisher: the Cygames site or an in-game notice.</td>
-                    </tr>
-                    <tr class="border-b border-rule">
-                        <th scope="row" class="py-2 pr-3 text-left"><span class="pill pill-positive">A</span></th>
-                        <td class="py-2 text-ink">Maintained strategy wiki.</td>
-                    </tr>
-                    <tr class="border-b border-rule">
-                        <th scope="row" class="py-2 pr-3 text-left"><span class="pill pill-caution">B</span></th>
-                        <td class="py-2 text-ink">Data export or a single guide read.</td>
+                    <tr>
+                        <th scope="row"><span class="pill pill-positive">S</span></th>
+                        <td>Official publisher: the Cygames site or an in-game notice.</td>
                     </tr>
                     <tr>
-                        <th scope="row" class="py-2 pr-3 text-left"><span class="pill pill-neutral">C</span></th>
-                        <td class="py-2 text-ink">Community observation, one frame.</td>
+                        <th scope="row"><span class="pill pill-positive">A</span></th>
+                        <td>Maintained strategy wiki.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><span class="pill pill-caution">B</span></th>
+                        <td>Data export or a single guide read.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><span class="pill pill-neutral">C</span></th>
+                        <td>Community observation, one frame.</td>
                     </tr>
                 </tbody>
             </table>
@@ -122,73 +137,80 @@ const CONFLICTS: ReadonlyArray<{ question: string; state: string }> = [
                     read. Neither is merged into the other, and no row is recommended because of its tier.
                 </span>
             </p>
-        </section>
+        </div>
 
         <!--
-          The wireframe's ledger (`database-sources.html:90-136`): one row per source and one link to
+          The wireframe's ledger (`database-sources.html:91-109`): one row per source and one link to
           the publisher's page, because keybox 1 is that the screen replaces file paths in the
-          interface. The mock's Tier and State columns need a per-dataset tier and the row's own
-          confirmation sentence, which this build does not hold; they are filed as a prop delta rather
-          than invented. The Kind column states the one distinction the payload does carry: fetched
-          (the pipeline read it) or transcribed (a hand pass read it).
+          interface.
+          HFW-OVERRIDE (data: ledger columns): the mock's Tier and State columns need a per-dataset tier
+          and the row's own confirmation sentence, which this build does not hold; they are filed as a
+          prop delta rather than invented. The Kind column states the one distinction the payload does
+          carry: fetched (the pipeline read it) or transcribed (a hand pass read it).
+          HFW-OVERRIDE (style: no current row): the mock marks its first ledger row `tr.is-current`;
+          a ledger has no current row, so the tint is not drawn.
+          HFW-OVERRIDE (style: no scroll wrapper): the card is the scroll region, as in the mock, so the
+          explicit tab stop this page used to put around the table is gone. DESIGN.md scopes the
+          focusable-region rule to the race calendar and the turn log, and the twelve links inside this
+          ledger carry the keyboard across the clipped columns as focus reaches each one.
         -->
-        <section class="card mt-4" aria-labelledby="sources-ledger">
+        <div class="card mt-4" role="region" aria-labelledby="sources-ledger">
             <h2 id="sources-ledger">Sources</h2>
-            <div class="mt-2 overflow-x-auto" role="region" tabindex="0" aria-label="Sources, scrollable">
-                <table class="w-full border-collapse text-sm">
-                    <caption class="sr-only">Every source this tool reads, fetched or transcribed, with the date it was read</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col" class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Source</th>
-                            <th scope="col" class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Kind</th>
-                            <th scope="col" class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Supplies</th>
-                            <th scope="col" class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Read</th>
-                            <th scope="col" class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Link</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="dataset in props.fetched" :key="`fetched-${dataset.name}`" class="border-b border-rule align-top">
-                            <th scope="row" class="px-2 py-2 text-left font-medium text-ink-strong">{{ dataset.name }}</th>
-                            <td class="px-2 py-2"><span class="pill pill-outline">Fetched</span></td>
-                            <td class="px-2 py-2 text-ink-muted">{{ dataset.note }}</td>
-                            <td class="px-2 py-2 font-mono text-ink">
-                                <template v-if="dataset.fetched_at !== null">
-                                    <time :datetime="dataset.fetched_at">{{ dataset.fetched_at }}</time>
-                                </template>
-                                <template v-else>No fetch recorded</template>
-                            </td>
-                            <td class="px-2 py-2">
-                                <a
-                                    v-if="dataset.url !== ''"
-                                    :href="dataset.url"
-                                    class="inline-flex min-h-11 items-center underline"
-                                    rel="noreferrer noopener"
-                                    target="_blank"
-                                >Open source</a>
-                                <template v-else>N/A</template>
-                            </td>
-                        </tr>
-                        <tr v-for="dataset in props.transcribed" :key="`transcribed-${dataset.name}`" class="border-b border-rule align-top">
-                            <th scope="row" class="px-2 py-2 text-left font-medium text-ink-strong">{{ dataset.name }}</th>
-                            <td class="px-2 py-2"><span class="pill pill-outline">Transcribed</span></td>
-                            <td class="px-2 py-2 text-ink-muted">{{ dataset.note }}</td>
-                            <td class="px-2 py-2 font-mono text-ink">
-                                <time :datetime="dataset.anchored_at">{{ dataset.anchored_at }}</time>
-                            </td>
-                            <td class="px-2 py-2">
-                                <a
-                                    v-if="dataset.url !== ''"
-                                    :href="dataset.url"
-                                    class="inline-flex min-h-11 items-center underline"
-                                    rel="noreferrer noopener"
-                                    target="_blank"
-                                >Open source</a>
-                                <template v-else>N/A</template>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <table
+                class="t"
+                aria-label="Every source this tool reads, fetched or transcribed, with the date it was read"
+            >
+                <thead>
+                    <tr>
+                        <th scope="col">Source</th>
+                        <th scope="col">Kind</th>
+                        <th scope="col">Supplies</th>
+                        <th scope="col">Read</th>
+                        <th scope="col">Link</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="dataset in props.fetched" :key="`fetched-${dataset.name}`">
+                        <th scope="row">{{ dataset.name }}</th>
+                        <td><span class="pill pill-outline">Fetched</span></td>
+                        <td>{{ dataset.note }}</td>
+                        <td class="font-mono">
+                            <template v-if="dataset.fetched_at !== null">
+                                <time :datetime="dataset.fetched_at">{{ dataset.fetched_at }}</time>
+                            </template>
+                            <template v-else>No fetch recorded</template>
+                        </td>
+                        <td>
+                            <a
+                                v-if="dataset.url !== ''"
+                                :href="dataset.url"
+                                class="inline-flex min-h-11 items-center underline"
+                                rel="noreferrer noopener"
+                                target="_blank"
+                            >Open source</a>
+                            <template v-else>N/A<span class="sr-only">: this source publishes no page a Trainer can open.</span></template>
+                        </td>
+                    </tr>
+                    <tr v-for="dataset in props.transcribed" :key="`transcribed-${dataset.name}`">
+                        <th scope="row">{{ dataset.name }}</th>
+                        <td><span class="pill pill-outline">Transcribed</span></td>
+                        <td>{{ dataset.note }}</td>
+                        <td class="font-mono">
+                            <time :datetime="dataset.anchored_at">{{ dataset.anchored_at }}</time>
+                        </td>
+                        <td>
+                            <a
+                                v-if="dataset.url !== ''"
+                                :href="dataset.url"
+                                class="inline-flex min-h-11 items-center underline"
+                                rel="noreferrer noopener"
+                                target="_blank"
+                            >Open source</a>
+                            <template v-else>N/A<span class="sr-only">: this source publishes no page a Trainer can open.</span></template>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
             <p v-if="props.fetched.length === 0 && props.transcribed.length === 0" class="note mt-3">
                 No source datasets are configured in this build. The ledger fills as the source and
                 reference configs name their documents.
@@ -201,54 +223,59 @@ const CONFLICTS: ReadonlyArray<{ question: string; state: string }> = [
                     date, and neither is merged into the other.
                 </span>
             </p>
-        </section>
+        </div>
 
-        <div class="mt-4 grid gap-4 g-2">
-            <section class="card" aria-labelledby="conflicts-heading">
+        <div class="grid gap-3.5 g-2 mt-4">
+            <!--
+              HFW-OVERRIDE (data: conflicts): the mock lists four open disagreements, one of them the
+              mood race effect. The guide resolved that one on 2026-09-27 in GameWith's favour (4% and
+              2%, not 10% and 5%), so a resolved row does not stay on a list headed "Open conflicts".
+            -->
+            <div class="card" role="region" aria-labelledby="conflicts-heading">
                 <h2 id="conflicts-heading">Open conflicts</h2>
-                <div class="mt-2 overflow-x-auto" role="region" tabindex="0" aria-label="Open conflicts, scrollable">
-                    <table class="w-full border-collapse text-sm">
-                        <thead>
-                            <tr>
-                                <th scope="col" class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">Question</th>
-                                <th scope="col" class="border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong">State</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="conflict in CONFLICTS" :key="conflict.question" class="border-b border-rule">
-                                <th scope="row" class="px-2 py-2 text-left font-semibold text-ink">{{ conflict.question }}</th>
-                                <td class="px-2 py-2 text-ink">{{ conflict.state }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <table class="t" aria-label="Disagreements between sources that this build leaves open">
+                    <thead>
+                        <tr>
+                            <th scope="col">Question</th>
+                            <th scope="col">State</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="conflict in CONFLICTS" :key="conflict.question">
+                            <th scope="row">{{ conflict.question }}</th>
+                            <td>{{ conflict.state }}</td>
+                        </tr>
+                    </tbody>
+                </table>
                 <p class="note mt-3">
                     <span class="g" aria-hidden="true">○</span>
                     <span>
                         A conflict is printed as a conflict. The app does not pick a side on the Trainer's
-                        behalf, because the side that is wrong will cost a run.
+                        behalf, because the side that is wrong will cost a run. A disagreement the guide has
+                        since resolved leaves this list: the mood race effect settled on 2026-09-27 in the
+                        client panel's favour, so these three are the three still open.
                     </span>
                 </p>
-            </section>
+            </div>
 
-            <section class="card" aria-labelledby="purpose-heading">
+            <div class="card" role="region" aria-labelledby="purpose-heading">
                 <h2 id="purpose-heading">What this page is for</h2>
                 <p class="mt-1 text-sm text-ink-muted">
                     Every Source link in the app lands here instead of printing a file path and a line
                     number in the interface. A citation belongs on the record; the screen only needs to
                     say which source it is.
                 </p>
-                <div class="mt-3 grid grid-cols-2 gap-2.5">
+                <div class="grid g-2 mt-3 gap-3.5">
                     <div class="tile">
-                        <p class="k">Sources tracked</p>
-                        <p class="v">{{ props.fetched.length + props.transcribed.length }}</p>
+                        <div class="k">Sources tracked</div>
+                        <div class="v font-mono">{{ props.fetched.length + props.transcribed.length }}</div>
                     </div>
                     <div class="tile">
-                        <p class="k">Open conflicts</p>
-                        <p class="v">{{ CONFLICTS.length }}</p>
+                        <div class="k">Open conflicts</div>
+                        <div class="v font-mono">{{ CONFLICTS.length }}</div>
                     </div>
                 </div>
-            </section>
+            </div>
         </div>
     </AppLayout>
 </template>
