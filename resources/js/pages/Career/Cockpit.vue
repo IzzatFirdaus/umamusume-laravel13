@@ -1165,12 +1165,27 @@ const jumpToShop = (): void => {
             </a>
         </div>
 
-        <!-- The action grid is the set of doors a turn leads into, not a second ranking. No cockpit
-             HFW draws it: `cockpit-unity-cup.html` reaches those screens through the stepper and the
-             "Where to go" card, and the page head already carries the decision's single primary. It
-             moves inside the run's tools disclosure rather than off the screen, so every door stays
-             reachable while the visible page is the wireframe's. Trackblazer's Pro Shop rides with it
-             for the same reason (plan Â§9 E4, design-2.0 Â§28). -->
+        <!-- `C6b.4`: the action grid and the Pro Shop moved OUT of the `Career tools` disclosure.
+             They sat INSIDE it, not above it, so the disclosure could not retire while they stayed.
+             No cockpit HFW draws either: `cockpit-unity-cup.html` reaches those screens through the
+             stepper and the "Where to go" card. They keep their place on the page because they are
+             the doors a turn leads into, and two cockpit specs pin them by name. -->
+        <ActionGrid v-if="isActive" class="mt-4" :actions="props.actions" />
+
+        <!-- Trackblazer's Pro Shop is reachable from the Cockpit's action area (plan §9
+             E4, design-2.0 §28 "The Shop should be quickly accessible from the Career
+             Cockpit"). The button is rendered only when the matrix composes a shop, so
+             other scenarios see no Shop affordance. WCAG 2.4.11: focus moves to the
+             Shop heading after the visit, and the body has `scroll-margin-top` so the
+             sticky mobile nav does not cover the focused control. -->
+        <button
+            v-if="hasShop"
+            type="button"
+            class="mt-2 inline-flex min-h-11 items-center justify-center rounded-full border-2 border-rule px-4 font-semibold text-ink-strong"
+            @click="jumpToShop"
+        >
+            Shop
+        </button>
 
         <!--
           The run's own write surfaces, behind one disclosure. SCREEN_SPEC.md SCR-CAR-011 gives the
@@ -1182,23 +1197,12 @@ const jumpToShop = (): void => {
         <details class="mt-4 rounded-lg border border-rule bg-panel p-4" data-region="run-tools">
             <summary class="min-h-11 cursor-pointer text-lg font-semibold text-ink-strong">Career tools</summary>
 
-            <ActionGrid v-if="isActive" class="mt-4" :actions="props.actions" />
-
             <!-- Trackblazer's Pro Shop is reachable from the Cockpit's action area (plan §9
                  E4, design-2.0 §28 "The Shop should be quickly accessible from the Career
                  Cockpit"). The button is rendered only when the matrix composes a shop, so
                  other scenarios see no Shop affordance. WCAG 2.4.11: focus moves to the
                  Shop heading after the visit, and the body has `scroll-margin-top` so the
                  sticky mobile nav does not cover the focused control. -->
-            <button
-                v-if="hasShop"
-                type="button"
-                class="mt-2 inline-flex min-h-11 items-center justify-center rounded-full border-2 border-rule px-4 font-semibold text-ink-strong"
-                @click="jumpToShop"
-            >
-                Shop
-            </button>
-
         <section
             class="mt-4 rounded-lg border border-rule bg-panel p-4"
             aria-labelledby="career-timeline-heading"
