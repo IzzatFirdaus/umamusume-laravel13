@@ -295,7 +295,7 @@ const incompleteData = computed(
                 <tbody>
                     <tr v-for="row in objectives" :key="row.state + '-' + row.label" :class="row.state === 'current' ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft align-top">
                         <td class="py-2 pr-3">
-                            <a v-if="due === row && props.raceUrl !== null" :href="props.raceUrl" class="font-semibold text-ink-strong hover:underline">{{ row.label }}</a>
+                            <a v-if="due === row && props.raceUrl !== null" :href="props.raceUrl" class="inline-flex min-h-11 items-center font-semibold text-ink-strong hover:underline">{{ row.label }}</a>
                             <b v-else class="text-ink-strong">{{ row.label }}</b>
                             <ProvenanceBadge :state="row.badge" :title="row.title" />
                             <span v-if="row.consequence !== null" class="mt-0.5 block text-xs text-ink-muted">{{ row.consequence }}</span>

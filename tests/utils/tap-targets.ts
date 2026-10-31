@@ -35,7 +35,21 @@ export async function expectTapTargets(targets: Locator, minimumMeasured = 1): P
 
         measured++;
         const box = await target.boundingBox();
-        expect(box?.height ?? 0, `control ${i} is not sized to the 44px contract`).toBeGreaterThanOrEqual(44);
+
+        // The failure has to name the control: "control 20 is too small" sends the next reader hunting
+        // through the page, and an unnamed failure is the reason a 33px control sat here unnoticed.
+        const described = await target.evaluate((el) => {
+            const tag = el.tagName.toLowerCase();
+            const label = (el.getAttribute('aria-label') ?? el.textContent ?? '').trim().replace(/\s+/g, ' ').slice(0, 60);
+            const cls = (el.getAttribute('class') ?? '').trim().slice(0, 90);
+
+            return `${tag} "${label}" [class="${cls}"]`;
+        });
+
+        expect(
+            box?.height ?? 0,
+            `control ${i} (${described}) is not sized to the 44px contract: ${Math.round(box?.height ?? 0)}px`,
+        ).toBeGreaterThanOrEqual(44);
     }
 
     expect(measured, 'no control was visible to measure').toBeGreaterThanOrEqual(minimumMeasured);
