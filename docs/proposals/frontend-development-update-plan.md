@@ -527,6 +527,41 @@ Key rulings:
 
 Files: `resources/js/pages/Career/{TrainingDetail,RaceDecision,RacePlanner,EventDecision,InheritanceEvent,SkillsPlanner,Timeline,Result,SaveVeteran}.vue` + deck-sync page; matching `app/Http/Controllers/Career/*Controller.php` + `TrainingRunController@deckBuilder`.
 
+### Slice 6b — Retire the `Career tools` disclosure (`cockpit`, the run's write surfaces)
+
+**Why this is filed as 6b and not as a new number.** The work belongs to the run-lifecycle phase, whose
+slice is 6, and it has to land before the Slice 12 annotation sweep, which is the release gate. A new
+number at the end of the list would put it after the gate. `KI-144` is the defect entry.
+
+**The problem.** The cockpit's `▼ Career tools` disclosure (`Cockpit.vue`, `<details
+data-region="career-tools">`) is the interim home for the writes that `Runs/Show.vue` owned before F2
+(2026-10-09) retired that screen. It still carries four write surfaces that belong on screens of their
+own — run identity, turn correction, delete turn, delete run — and two sections the page already
+renders above it (`Actions`, `Races in this run`). The HFW cockpit ends at "Where to go".
+
+**The order is the whole slice.** Build the door, walk it, and only then delete one section of the
+disclosure at a time. Deleting the disclosure first makes the writes unreachable, which is a data-loss
+bug rather than a fix.
+
+**The three doors.**
+
+1. `GET/POST /training-runs/{run}/settings` — the run identity form, lifted verbatim (rarity,
+   potential level, aptitudes, growth rate, stat targets, skill points, notes). Reached from a link in
+   the page head or the run info card.
+2. `GET/POST /training-runs/{run}/turns/{turn}/edit` — the turn correction form, reached from the
+   timeline's own record view.
+3. `DELETE /training-runs/{run}` — a confirmation page, reached from a visible footer link at the
+   bottom of the cockpit (not a disclosure).
+
+**Then the disclosure.** Delete `Actions` and `Races in this run` (both are redundant), then the
+correction section, then the identity section, then the `<details>` element itself. Re-baseline the
+specs that pin the disclosure's existence — `career-cockpit.spec.ts` and `career-cockpit-forms.spec.ts`
+both drive its forms — and add a browser walk per door.
+
+**Done when.** The cockpit renders the HFW's regions and nothing below "Where to go"; each of the
+three doors is reachable, posts, and is walked by a spec; no write surface has become unreachable; and
+the `HFW-OVERRIDE (structure: career tools disclosure)` row in `SCREEN_SPEC.md` §7 is closed.
+
 ### Slice 7 — Legacy Lab & Veterans (`legacy`, `legacy-builder`, `legacy-compare`, `veterans`, `veteran-detail`, `veterans-compare`)
 
 - Legacy index: saved **pairs** are the unit (sparks combine); value table three rows
@@ -767,6 +802,7 @@ S0 recon ──► S1 shell ──► S2 dashboard ──► S3 careers/import �
                                           S7 backend integration (lands per-slice,
                                           consolidated review here)
                                                         ▼
+                                          S6b career-tools retirement ─►
                                           S12 annotation sweep ─► release 3.0.0
 ```
 

@@ -4044,3 +4044,40 @@ which the three Races cases, the skills case and the support-cards case go green
 by widening `renderedDashLines()` to decode numeric character references before matching, or by failing on the
 `&#8211;`/`&#8212;` spellings directly — a source-level reading of the rule is what let the entity through.
 Neither half is fixed here.
+## KI-144 — The `Career tools` disclosure on the cockpit still hosts v2.1.0 write surfaces that have no door of their own
+
+**State:** OPEN. Filed 2026-10-31 during the career-screens HFW parity pass, from a side-by-side of the rendered
+cockpit against `cockpit-unity-cup.html`.
+
+**Defect.** The cockpit's `▼ Career tools` disclosure (`resources/js/pages/Career/Cockpit.vue`, the `<details
+data-region="career-tools">` block) carries four write surfaces that belong on screens of their own: the run
+identity form (rarity, potential level, aptitudes, growth rate, stat targets, skill points, notes), the turn
+correction form (the five stats, SP, energy, fans, mood, outcome, origin note), a delete-turn action and a
+delete-run action. Two of its other sections are redundant with regions that already exist above it: the `Actions`
+grid duplicates the action grid the page already renders, and `Races in this run` duplicates the `RunRaceStrip` the
+cockpit's left column already renders. The wireframe's cockpit ends at "Where to go"; nothing of this kind is drawn
+below it.
+
+**Why.** The disclosure is the interim home for the writes that `Runs/Show.vue` owned when that screen was retired
+in F2 (2026-10-09): its forms had to go somewhere, and the cockpit was the somewhere. v3.x's separation — the
+cockpit is a read of the run plus one action, and write surfaces live on the desks that own them — arrived
+afterwards, and the retirement was never scheduled. Nothing in the plan's slice list carries it, so the disclosure
+reads as a design decision to a later session rather than as an unfiled debt.
+
+**Evidence.** `cockpit-unity-cup.html` has no region below "Where to go". The disclosure's own markup carries the
+four forms; `Cockpit.vue` renders both the action grid and the race strip outside it as well. Two
+`career-cockpit.spec.ts` cases that reach into it fail in this tree for the same reason and were proven
+pre-existing against `HEAD` before this entry was filed: `names every absent value and refuses to rank until Energy
+is entered` (the `Actions` heading the disclosure replaced is not a heading any more) and `records Energy through
+the cockpit correction and then marks one action` (the correction form's disclosure is closed on load, so the click
+times out).
+
+**Closure.** Build the door for each write surface first, verify each by walking it, and only then delete one
+section of the disclosure at a time — deleting the disclosure before the writes have homes makes the writes
+unreachable, which is a data-loss bug rather than a fix. The doors are: `GET/POST /training-runs/{run}/settings`
+(run identity), `GET/POST /training-runs/{run}/turns/{turn}/edit` (turn correction) and `DELETE
+/training-runs/{run}` (run deletion, on its own confirmation page). The redundant `Actions` and `Races in this run`
+sections can go as soon as the disclosure's own copy is settled. Filed rather than fixed here: the three new
+screens are outside the parity slice's scope, and the routing of four writes onto three doors is a decision, not a
+layout change. The slice spec is filed in `docs/proposals/frontend-development-update-plan.md` as **Slice 6b —
+Retire the Career tools disclosure**.

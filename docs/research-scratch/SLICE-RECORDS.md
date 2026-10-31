@@ -11684,3 +11684,107 @@ whether the deck picker's set is narrowed, and who writes a correction row.
 1. **ADR-0026's Decision is 529 words against the cap.** The cap and the template's "the Decision is the immutable ruling" rule cannot both hold here, and trimming an immutable section is the owner's call. Left as it stands, and reported.
 2. **The framework corpus's own WCAG gap register is partly stale.** It records the `line-*` tokens as carrying no contrast claim, while `DESIGN.md` now measures `--color-pick-line` at 6.24 light and 8.46 dark against 1.4.11's 3:1; `--color-goal-line` still carries none. The corpus is outside this dispatch's scope, so the entry is reported rather than edited.
 3. **No ruling was taken and no code was changed.** Every finding is a record; the three owner decisions the ledgers name are open.
+
+### 64. Career run screens brought onto the HFW composition primitives - 2026-10-31
+
+#### Method
+
+Nine career run screens (`/training-runs/{run}/{cockpit,training,races,skills,events,inheritance,deck,timeline,result}`)
+against twelve wireframes in `docs/design-research/frontend-v2-wireframes/`, judged by each wireframe's
+own annotation key and by the twelve documents in `docs/framework-ui-ux/`. Nine slices, opened in order,
+each gated by the previous slice's measured output.
+
+The composition system is the repo's own: `resources/css/layout-grid.css` already carries the HFW's
+track definitions as `.g-2`, `.g-3`, `.g-4` and `.g-side`, remapped from the wireframe's 1080/820
+viewport pixels to the app `main` container's 845/585. Six primitives the app never ported
+(`.ancestry`, `.lin-gen`, `.lin-node`, `.filters`, `.field`, `.field-label`, `.pager`) were ported from
+`assets/shell.css` into that file, translated to this app's `--color-*` and `--radius-*` tokens rather
+than copied verbatim: a verbatim copy would have resolved every variable to nothing.
+
+Every failure was attributed against the baseline before it was called a regression: the changed file
+was checked out at `HEAD`, rebuilt, and the failing case re-run. Four `career-cockpit.spec.ts` cases,
+the `unity-cup-panel.spec.ts` suite, and the `career-cockpit-forms.spec.ts` suite fail in this tree
+for that reason — the run's wizard no longer reaches the cockpit, the `Races in this run` region is
+gated on an active run, and the `Career tools` disclosure holds the surfaces those specs drive.
+
+#### Findings
+
+- **The Cockpit's page grid was hand-rolled.** `@4xl:grid-cols-[2fr_1fr]` is a different ratio from the
+  HFW's 2.1fr/1fr and fires at 56rem rather than at the app's 585 container, so the Cockpit broke to two
+  columns a band later than every other career screen.
+- **`/training-runs/{run}/deck` is `Support/Builder.vue`, not `Career/DeckSelect.vue`.** The dispatched
+  URL names the run deck; the wizard step `career-deck.html` is a different screen and was left alone.
+  Builder already matched `run-deck.html` — six cards in `g-3`, one savebar — so that slice recorded no
+  change.
+- **Training, Races and Events already closed their savebars with the right column.** The plan expected
+  moves; there were none to make.
+- **Skills offered the same write twice.** The budget card's "Learn planned skills" and the savebar's
+  button were both bound to `commitPlan`, spending the accent twice (UX-6, UX-7).
+- **Result's export card claimed a route that has existed all along.** It said "No export route is
+  built" while `runs.export` served `GET /training-runs/{run}/export/{format}`. `run_url` is
+  `route('runs.cockpit')` (`ResultController:187`), so the export path is derived by dropping that one
+  segment.
+- **A filed override was factually wrong.** The register claimed the advisor had no obligations data,
+  on the evidence of a grep for `obligation`. The data is `advisor.decision.objectives`
+  (`NextDecision.vue:77`), and the wireframe's word and the code's word do not match. The override was
+  deleted and replaced; the lesson is recorded in the commit body under the re-check item about what a
+  thing is called.
+- **The Advisor card's internal block order did not match the wireframe.** The obligations table was the
+  card's first block and "Current priority" was a section between the table and the recommendation —
+  a fact stated three times in one card. The wireframe reads: warn block, priority label, the
+  recommendation with its three bullets, then the "Obligations" table.
+
+#### Edits
+
+- `resources/css/layout-grid.css` — the six missing primitives, translated to this app's tokens.
+- `resources/js/pages/Career/Cockpit.vue` — the page grid onto `.g-side`.
+- `resources/js/pages/Career/SkillsPlanner.vue` — the savebar's duplicate primary removed; it is now a
+  status strip, and the commit stays in the budget card.
+- `resources/js/pages/Career/InheritanceEvent.vue` — the two flat `g-3` rows replaced by two `.ancestry`
+  branches of three `.lin-gen` generation columns.
+- `resources/js/pages/Career/Result.vue` — the KPI strip onto `.tiles.g-4`, the body onto `.g-side` with
+  the final build first in the DOM, and the export card wired to the route that serves it.
+- `resources/js/components/career/NextDecision.vue` — the Advisor card's block order: the warn block
+  opens the card, priority is the HFW's small-caps label above the recommendation and is not printed
+  when the warn block already states that fact, and the obligations table follows the recommendation
+  under the wireframe's own "Obligations" label.
+- `tests/browser/career-composition.spec.ts` — the composition gate: per screen, one `h1`, the
+  region `h2` order against the wireframe's list, no arbitrary grid, a `.g-*` region resolving more than
+  one track, and zero `.keybox`/`.mockbar`/`.toc`.
+- `tests/browser/career-cockpit.spec.ts` — the two re-pins and one new assertion: the obligations
+  label follows the recommendation in the DOM, which no region-level test could see.
+- `SCREEN_SPEC.md` §7 — the HFW-OVERRIDE register, six rows, each with its authority.
+- `KNOWN-ISSUES.md` — KI-144, the `Career tools` disclosure.
+- `docs/proposals/frontend-development-update-plan.md` — Slice 6b, the disclosure's retirement.
+
+#### Gates
+
+| Gate | Result |
+|---|---|
+| `npm run build` | Green after every structural edit. Two Vue compile errors were caught and fixed mid-pass (a dropped `</template>` and a duplicated warn block). |
+| `npx playwright test tests/browser/career-composition.spec.ts` | 2 passed. Nine screens: region order, one `h1`, no arbitrary grid, a `.g-*` region with more than one track, zero apparatus. |
+| `npx playwright test tests/browser/career-result.spec.ts` | 7 passed. |
+| `npx playwright test tests/browser/career-skills-planner.spec.ts` | 7 passed. |
+| `npx playwright test tests/browser/career-inheritance-event.spec.ts` | 7 passed. |
+| `npx playwright test tests/browser/career-training-detail.spec.ts tests/browser/career-race-decision.spec.ts` | 14 passed, 2 skipped. |
+| `npx playwright test tests/browser/career-event-decision.spec.ts tests/browser/career-timeline.spec.ts` | 15 passed. |
+| `npx playwright test tests/browser/support-deck.spec.ts` | 12 passed. |
+| `npx playwright test tests/browser/career-cockpit.spec.ts -g "lists the career obligations|puts the obligations table below"` | 2 passed, including the new card-order assertion. |
+| `npx playwright test tests/browser/career-composition.spec.ts tests/browser/cockpit-shell.spec.ts` | 6 passed. |
+| `npx playwright test tests/browser/career-cockpit.spec.ts -g "scenario panels read before the advisor"` | 1 passed — the case that pins the left/right column order. |
+| Built artefact | All ten ported selectors are present in `public/build/assets/spa-*.css`, so the primitives reach the browser and not only the source. |
+| `git grep` lore gate (the Makefile's own patterns) | 533 corpus hits against the recorded 478 at `5ed45d67`. **Zero hits in any file this dispatch touched.** |
+
+#### Deferred
+
+1. **The `Career tools` disclosure** carries four v2.1.0 write surfaces that have no door of their own.
+   It is the interim home for the writes `Runs/Show.vue` owned before F2, and its retirement needs three
+   new routes — outside this dispatch's scope. Filed as `KNOWN-ISSUES.md` KI-144, as an `HFW-OVERRIDE`
+   row in `SCREEN_SPEC.md` §7, and as **Slice 6b** in `docs/proposals/frontend-development-update-plan.md`.
+   The slice is filed as 6b rather than as a new number because Slice 9 is the database hub and Slice 12
+   is the release gate the annotation sweep runs into.
+2. **Four `career-cockpit.spec.ts` cases, the `unity-cup-panel.spec.ts` suite and the
+   `career-cockpit-forms.spec.ts` suite fail in this tree.** Each was re-run against `HEAD` with the
+   changed files checked out and rebuilt, and each fails identically there. They are recorded in
+   `SCREEN_SPEC.md` §7 with that evidence rather than fixed, because the fix is a decision about which
+   of the two is wrong in each case — the assertion or the gate it asserts.

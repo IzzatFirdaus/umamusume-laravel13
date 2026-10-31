@@ -4148,6 +4148,78 @@ left.
 | Screen-level UX findings & decisions owed                     | `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md`                                                                                                                      | Part 7 landed/closed ledger                                                                                                               |
 | When sources disagree                                         | `CONSTRAINTS.md` > GATE-REGISTRY > ADRs > DESIGN > slice plans (`AGENTS.md` precedence; `ARCHITECTURE.md` over its digest; `PRD.md` is product truth) — conflicts are recorded here (§7), not silently resolved |                                                                                                                                           |
 
+### HFW-OVERRIDE register: career layout parity (2026-10-31)
+
+The nine career run screens were brought onto the ported `.g-*` composition primitives and each
+savebar into the column its wireframe draws. Six divergences survive on purpose; each names its
+authority, so a later pass re-opens a decision rather than re-discovering the gap.
+
+| Screen | Override | Authority |
+| --- | --- | --- |
+| Cockpit (all four scenarios) | The advisor prints a "Priority" label above the recommendation on every scenario, and Unity Cup's HFW draws no priority line — it shows only "Recommended". | Priority is the recommendation's context, not a section of its own: `cockpit-trackblazer.html` and `cockpit-grand-concert.html` both carry a "Priority" small-caps label above their "Recommended" label, so the field is not a divergence on those two — only its label and position vary. Unity Cup is the one variant whose HFW omits it, because its due obligation opens the card as a warn block and the priority sentence would state that same fact twice; the app suppresses the line in exactly that case. |
+| Cockpit (all four scenarios) | The advisor's obligations table sits after the recommendation block, labelled "Obligations". | `cockpit-unity-cup.html` draws the table last, under an "Obligations" sublabel, and its annotation key's first item for that card is "The recommendation, its reason and its cost all live in one block" — the table is what qualifies them. The rows are `advisor.decision.objectives` (`NextDecision.vue:77`, rendered `:163`), not a separate obligations field. |
+| Skills | `.savebar` survives with no primary in it, as a status strip (plan count + "Clear plan"); the single commit is the budget card's "Learn planned skills". | `career-skills-planner.spec.ts:84` pins `.savebar` count 1, and `skills-planner.html` draws no savebar at all. Keeping the class and removing the second `.btn-primary` satisfies UX-6 (one accent) and UX-7 (last item carries the action) without deleting a spec-pinned element. |
+| Deck (`/training-runs/{run}/deck`) | No friendship-gauge pill and no gauge track, in any state. | No column stores a gauge (`database/migrations/*.php`, `SupportSlot.vue`, `Builder.vue` all return zero `gauge` matches), and `SupportSlot.vue:192-196` carries `DOMAIN OVERRIDE (DM-8)`: the client gives a Pal card no friendship gauge at all. `UMAMUSUME_REFERENCE.md:471-481` (§1.4.1) is the source for the Pal effect profile the card prints in its place. A three-state pill whose positive/neutral states no column can produce would be furniture (UX-10). |
+| Cockpit | The `▼ Career tools` disclosure still sits below the HFW's last region, carrying the run identity form, the turn correction form, a delete-turn action and a delete-run action. | The disclosure is the interim home for the writes `Runs/Show.vue` owned before F2 (2026-10-09) retired that screen, and v3.x's separation — the cockpit is a read of the run plus one action, writes live on the desks that own them — arrived after it was built. The three doors it needs do not exist yet, and deleting the disclosure before they do makes the writes unreachable, which is a data-loss bug rather than a fix. The debt is filed as `KNOWN-ISSUES.md` KI-144, and the slice as **Slice 6b — Retire the `Career tools` disclosure** in `docs/proposals/frontend-development-update-plan.md`. |
+
+Two further findings from the same pass, recorded because they are defects rather than overrides:
+
+- **`Result.vue`'s export sentence was stale.** It said "No export route is built, so neither
+  download exists" while `routes/web.php` has served `runs.export`
+  (`GET /training-runs/{run}/export/{format}`) all along. The card now links both downloads, derived
+  from `run_url` — which is `route('runs.cockpit')` (`ResultController:187`), not the record URL, so
+  the derivation strips that one segment.
+- **Some `career-cockpit.spec.ts` cases and the scenario panel specs fail on this tree, and did
+  before this pass.** `career-cockpit.spec.ts:267` ("lays out at 1280, 768 and 320 without a
+  horizontal scroll") and `:636` ("keeps every section landmark name after the Section adoption")
+  both assert the `Races in this run` region, which `Cockpit.vue:1174` renders only under
+  `v-if="isActive"`; and `names every absent value and refuses to rank until Energy is entered`
+  asserts an `Actions` heading the disclosure no longer renders, while `records Energy through the
+  cockpit correction and then marks one action` times out clicking a correction form that sits
+  inside a disclosure closed on load. The `unity-cup-panel.spec.ts` suite fails the same way: its
+  `openUnityCupCockpit` helper never leaves `/career/setup/scenario`, so every assertion is made
+  against the wizard instead of the cockpit.
+
+  Each of these was re-run with `Cockpit.vue` and `NextDecision.vue` checked out at HEAD and
+  rebuilt, and each fails identically there, so none is a regression from the layout work. The
+  pattern is one cause with three faces: the run's wizard no longer reaches the cockpit the specs
+  expect, the `Races in this run` region is gated on an active run, and the `Career tools`
+  disclosure holds two of the surfaces the specs drive (see the override row above and
+  `KNOWN-ISSUES.md` KI-144). Filed rather than fixed here, because the fix is a decision about
+  which of the two is wrong in each case — the assertion or the gate.
+
+### HFW-OVERRIDE register: detail and compare parity (2026-10-31)
+
+The review detail, support-card detail, skill detail and the two comparison screens were brought to
+their wireframes in this pass. One divergence survives on the review detail; every other change is
+either alignment (a control moved *to* where its wireframe already puts it) or a Floor fix (an
+untitled `N/A` moved onto `AbsenceValue`), and neither records here. Two markers drafted for the
+review detail were withdrawn before landing for exactly that reason: the `.g-2` band is the
+sanctioned container-query port of the wireframe's own `grid g-2`, and the back link now sits in the
+head band, which is where `review-detail.html:61-63` draws it.
+
+| Screen | Override | Authority |
+| --- | --- | --- |
+| Review detail (`/review/{id}`) | The other-candidates table marks the engine's proposal `Proposed`; the wireframe's first row carries `Chosen` in the same pill slot (`review-detail.html:104-116`). | The proposal is not the Trainer's decision. The verdict form opens unset by ruling — `review-detail.spec.ts:67-77` asserts it, and the wireframe's own keybox item 4 ("Confirm is the only filled action, and it is not pre-checked") forbids the alternative — so a `Chosen` pill would claim a decision nobody made. `Proposed` states what the row is; `Use this` is the row's actual way to adopt that record. | Support card detail (`/support-cards/{id}`) | The 64px artwork frame stays in its own row under the sub-nav; `support-card-detail.html:57-58` puts it inside the head row, leading the title. | `PageHeader` exposes one slot (`actions`) and no title-leading slot, so position parity would mean editing a 29-importer component whose h1 classes `page-header.spec.ts:44-46` pins. What the keybox item rules is the ABSENCE behaviour and that holds: a file the mirror does not hold renders nothing at all. |
+| Support card detail (`/support-cards/{id}`) | The wireframe's second effects card ("Effects, when no row is stated at the top anchor") is not drawn as a second table; its pattern is implemented inside the one effects table. | `support-card-detail.html:107-127` is an illustration of a shape, not a region every card gets. The shape is the ruling ("a level with no entry is an absence, not a zero"), so the table now prints `1: Not recorded` when the source states nothing at level 1. Measured on this catalogue: 2,756 of 5,114 effect rows have no level-1 anchor, so the pattern is the normal path rather than the mockup's edge case. |
+| Support card detail (`/support-cards/{id}`) | The wireframe's `Event | Chain | Choice` card is not drawn. | The wireframe's own footnote says "The event copy is illustrative", and this schema stores skill lists (`hint_skills`, `event_skills`) rather than card events. Inventing event names would be a fabricated client string, which the copy rule forbids; the page keeps its sourced Hinted/Event skill cards instead. |
+| Legacy comparison (`/legacy/compare`) | The page keeps a checkbox picker above the comparison; `legacy-compare.html` draws no selection UI at all, because the run pair arrives in `?runs[]`. | The four-run cap and the "no run has a selection yet" state both need somewhere to be seen before a submit. A `<select multiple>` hides its options behind a click and is awkward with a keyboard, and the server refuses a fifth tick with a field error, so the picker shows the limit rather than letting a Trainer discover it from a rejection. |
+| Legacy comparison (`/legacy/compare`) | The comparison keeps all sixteen property rows the app stores; `legacy-compare.html:71-83` draws six. | R2: the wireframe's row set is a curated subset, and dropping stats, aptitude axes, tags and notes would remove values this app records and a Trainer compares. The STRUCTURE is the wireframe's — one table with the verdict as its last column; the row set is the app's. `IA-4` ("density is an explicit exemption, never a drift") is why the exemption is named here instead of being taken quietly. |
+
+| Veteran comparison (`/veterans/compare`) | The matrix's first column and header row stay sticky; `veterans-compare.html` draws no sticky region. | Twenty-four rows and up to six careers: a property label that scrolls away from the value it names makes the matrix unreadable at the widths where it scrolls at all. `veteran-compare.spec.ts:165-201` pins the computed sticky style, and the alternative — deleting it — would delete that coverage to match a mockup that never had to render six careers. |
+| Veteran comparison (`/veterans/compare`) | The wireframe's per-subject `Best for` row (`Speed cap` / `Aptitude` / `Nothing decisive`) is not drawn. | No source prices a "best for" verdict: `UMAMUSUME_REFERENCE.md:692` bounds the Spark shape but states no rule that turns two recorded Sparks into a recommendation, and the wireframe's own keybox item 3 forbids the tool producing one ("A comparison that can only produce winners is a recommendation engine"). Under R4 an unsourced in-game claim is deleted rather than paraphrased, so the row is absent and `NOT IN THIS BUILD` names what is not computed. |
+| Veteran comparison (`/veterans/compare`) | The matrix keeps every property row the app stores (statistics, ten aptitude axes, counts, tags); `veterans-compare.html:71-83` draws six. | R2: the structure is the wireframe's — one table with `Difference` as its last column — and the row set is the app's. Dropping stats, aptitudes or counts would remove values a Trainer opened the screen to compare. `IA-4` ("density is an explicit exemption, never a drift") is why the exemption is written down instead of taken quietly. |
+
+**Design note, not an override (both comparison screens).** For rows the wireframe does not draw, a
+row where both sides are absent reads `same` in the `Difference` column: the two absences are equal,
+and the verdict vocabulary is two-state (`same` / differs), not three. A fourth state
+(`both not recorded`) would widen a vocabulary the wireframe's keybox item 1 does not draw, and the
+fix for that would be to widen the wireframe, not the column. `/veterans/compare` also keeps one
+page-level reading with no cell of its own: the "nothing decisive" note, because it is about the
+whole comparison rather than any single row.
+
+Rows for `/legacy/{run}` are appended by its own slice, not in advance.
+
 ## 9. Change Log
 
 | Date         | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Reason                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
