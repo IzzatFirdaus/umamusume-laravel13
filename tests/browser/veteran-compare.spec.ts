@@ -253,8 +253,10 @@ test('says so when two careers share every value instead of repeating them silen
     // it says the table has nothing to show them (Phase 8.15).
     await openTwoCareerComparison(page, 'Agnes Digital', 'Eishin Flash', 'Speed');
 
+    // The shipped sentence, not an earlier draft of it: the note is the HFW's "Nothing decisive"
+    // verdict ("a comparison that can only produce winners is a recommendation engine").
     await expect(
-        page.getByText('All selected careers share every value; nothing differs.'),
+        page.getByText('Nothing decisive: all selected careers share every value.'),
     ).toBeVisible();
     await expect(page.getByRole('rowheader', { name: 'Scenario' })).toBeVisible();
 });
@@ -272,6 +274,11 @@ test('shows one career at a time under lg rather than scrolling the matrix sidew
         cells.filter((cell) => cell.getClientRects().length > 0).length,
     );
     expect(visibleHeaders, 'more than the property column and one career show at 390px').toBe(2);
+
+    // The Difference column hides with the career columns it summarises (`hidden lg:table-cell`): a
+    // verdict over values paged out of view would be a comparison the reader cannot check. It is in
+    // the DOM, so the fold is real at every width; only its visibility follows the width.
+    await expect(page.getByRole('columnheader', { name: 'Difference' })).toHaveCount(1);
 
     // The document itself never scrolls sideways at phone width (WCAG 1.4.10).
     const overflow = await page.evaluate(
@@ -295,7 +302,9 @@ test('shows one career at a time under lg rather than scrolling the matrix sidew
     const wideHeaders = await page.locator('thead th').evaluateAll((cells) =>
         cells.filter((cell) => cell.getClientRects().length > 0).length,
     );
-    expect(wideHeaders, 'the full matrix does not render at 1280').toBe(3);
+    // Property + two careers + the Difference column: the verdict joined the matrix, so the full
+    // matrix is one column wider than it was.
+    expect(wideHeaders, 'the full matrix does not render at 1280').toBe(4);
 });
 
 test('pins a horizontal scrollbar that stays reachable when the matrix overflows', async ({ page }) => {

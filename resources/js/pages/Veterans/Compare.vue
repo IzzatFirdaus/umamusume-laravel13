@@ -244,9 +244,31 @@ const differences = computed<Difference[]>(() => {
             verdict: verdictOf(of((column) => column.aptitudes.find((aptitude) => aptitude.key === axis.key)?.letter ?? null)),
         })),
         { property: 'Tags', verdict: verdictOf(of((column) => column.tags.join(', '))) },
-        { property: 'Notes', verdict: verdictOf(of((column) => column.notes)) },
+        // The matrix's last row, and the one this array did not cover. Keyed on the read-back's own
+        // presence rather than a constant, so a mixed pair answers `only A records it` instead of
+        // claiming `same` on a row where one career has a configuration and the other does not.
+        {
+            property: 'Legacy read-back',
+            verdict: verdictOf(of((column) => (column.builder_url === null ? null : 'recorded'))),
+        },
     ];
 });
+
+/*
+ * The fold's seam, copied from `/legacy/compare` (S5): the column reads one lookup, and `differences`
+ * stays the single derivation — nothing re-computes a verdict per cell.
+ *
+ * ponytail: keyed on the property label, so the matrix's row headers and this array's `property`
+ * strings must agree. They do not yet — the matrix draws `Legacy read-back`, which this array has no
+ * entry for, and this array carries `Notes`, which the matrix no longer draws. Reconcile the two sets
+ * before wiring the column; a missing key must render an absence, never a third verdict.
+ */
+const verdictBy = computed<Record<string, string>>(() =>
+    Object.fromEntries(differences.value.map((row) => [row.property, row.verdict])),
+);
+
+const verdictPill = (verdict: string): string =>
+    verdict === 'same' ? 'pill pill-neutral' : 'pill pill-caution';
 
 /** Keep the pager on a career that still exists after a tick or untick changes the column set. */
 watch(orderedColumns, (columns) => {
@@ -508,6 +530,11 @@ watch(orderedColumns, () => {
                                 <span v-if="column.trainee_ja" lang="ja" class="block text-xs text-ink-muted">{{ column.trainee_ja }}</span>
                                 <span class="block text-xs text-ink-muted">{{ column.scenario_label }}</span>
                             </th>
+                            <!-- The verdict is the matrix's LAST column (`veterans-compare.html:70-84`).
+                                 Below `lg` it hides with the career columns it summarises: a verdict
+                                 over values paged out of view would be a comparison the reader cannot
+                                 check. -->
+                            <th scope="col" class="hidden p-2 text-left align-bottom lg:table-cell">Difference</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -521,6 +548,9 @@ watch(orderedColumns, () => {
                             >
                                 {{ column.scenario_label }}
                             </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy['Scenario'])">{{ verdictBy['Scenario'] }}</span>
+                            </td>
                         </tr>
                         <tr class="border-b border-rule">
                             <th scope="row" class="comparison-row-head p-2 text-left font-medium text-ink-muted">Status</th>
@@ -532,6 +562,9 @@ watch(orderedColumns, () => {
                             >
                                 {{ column.status_label }}
                             </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy['Status'])">{{ verdictBy['Status'] }}</span>
+                            </td>
                         </tr>
                         <tr class="border-b border-rule">
                             <th scope="row" class="comparison-row-head p-2 text-left font-medium text-ink-muted">Turns logged</th>
@@ -542,6 +575,9 @@ watch(orderedColumns, () => {
                                 :class="[careerColumnClass(index), { 'comparison-col-hover': hoveredColumn === index }]"
                             >
                                 {{ column.career.turns }}
+                            </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy['Turns logged'])">{{ verdictBy['Turns logged'] }}</span>
                             </td>
                         </tr>
                         <tr class="border-b border-rule">
@@ -555,6 +591,9 @@ watch(orderedColumns, () => {
                                 <template v-if="column.career.energy !== null">{{ column.career.energy }}</template>
                                 <AbsenceValue v-else compact reason="No logged turn on this career carries an end-of-turn Energy figure." />
                             </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy['Energy'])">{{ verdictBy['Energy'] }}</span>
+                            </td>
                         </tr>
                         <tr class="border-b border-rule">
                             <th scope="row" class="comparison-row-head p-2 text-left font-medium text-ink-muted">Fans</th>
@@ -566,6 +605,9 @@ watch(orderedColumns, () => {
                             >
                                 <template v-if="column.career.fans !== null">{{ column.career.fans }}</template>
                                 <AbsenceValue v-else compact reason="No logged turn on this career carries an end-of-turn Fans figure." />
+                            </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy['Fans'])">{{ verdictBy['Fans'] }}</span>
                             </td>
                         </tr>
 
@@ -579,6 +621,9 @@ watch(orderedColumns, () => {
                             >
                                 <template v-if="column.stats[key] !== null">{{ column.stats[key] }}</template>
                                 <AbsenceValue v-else compact reason="This career logged no turn, so it recorded no value for this stat." />
+                            </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy[key])">{{ verdictBy[key] }}</span>
                             </td>
                         </tr>
 
@@ -596,6 +641,9 @@ watch(orderedColumns, () => {
                             >
                                 {{ column.counts.skills }}
                             </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy['Skills recorded'])">{{ verdictBy['Skills recorded'] }}</span>
+                            </td>
                         </tr>
                         <tr class="border-b border-rule">
                             <th scope="row" class="comparison-row-head p-2 text-left font-medium text-ink-muted">Races recorded</th>
@@ -606,6 +654,9 @@ watch(orderedColumns, () => {
                                 :class="[careerColumnClass(index), { 'comparison-col-hover': hoveredColumn === index }]"
                             >
                                 {{ column.counts.races }}
+                            </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy['Races recorded'])">{{ verdictBy['Races recorded'] }}</span>
                             </td>
                         </tr>
 
@@ -619,6 +670,9 @@ watch(orderedColumns, () => {
                             >
                                 <template v-if="letterFor(column, axis.key) !== null">{{ letterFor(column, axis.key) }}</template>
                                 <AbsenceValue v-else compact reason="No source published this trainee's aptitude letter on this axis." />
+                            </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy[axis.label])">{{ verdictBy[axis.label] }}</span>
                             </td>
                         </tr>
 
@@ -635,6 +689,9 @@ watch(orderedColumns, () => {
                                 </ul>
                                 <span v-else class="text-xs text-ink-muted">No tags recorded</span>
                             </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy['Tags'])">{{ verdictBy['Tags'] }}</span>
+                            </td>
                         </tr>
                         <tr class="border-b border-rule">
                             <th scope="row" class="comparison-row-head p-2 text-left font-medium text-ink-muted">Legacy read-back</th>
@@ -646,6 +703,9 @@ watch(orderedColumns, () => {
                             >
                                 <a v-if="column.builder_url" :href="column.builder_url" class="underline">Open its graph</a>
                                 <span v-else>None recorded <span class="text-xs text-ink-muted">· no Legacy configuration on this career</span></span>
+                            </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy['Legacy read-back'])">{{ verdictBy['Legacy read-back'] }}</span>
                             </td>
                         </tr>
                     </tbody>
@@ -665,40 +725,19 @@ watch(orderedColumns, () => {
                 </div>
             </div>
 
-            <!-- The wireframe's difference column (`veterans-compare.html`, keyboxes 1–4), kept as its
-                 own reading of the matrix: the matrix can carry up to six careers, and a seventh column
-                 would push the values it summarises off the viewport. Matching rows print and say same. -->
-            <section class="card mt-4" aria-labelledby="veteran-differences">
-                <h2 id="veteran-differences">Where they differ</h2>
-                <p class="sub">
-                    One row per stored property. A row that matches still prints and says <b>same</b>; a
-                    row that differs names the difference and the side it favours.
-                </p>
-                <div class="mt-2 overflow-x-auto" role="region" tabindex="0" aria-label="Veteran differences, scrollable">
-                    <table class="w-full border-collapse text-sm">
-                        <thead>
-                            <tr class="border-b border-rule">
-                                <th scope="col" class="px-3 py-2 text-left font-semibold text-ink-strong">Property</th>
-                                <th scope="col" class="px-3 py-2 text-left font-semibold text-ink-strong">Difference</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="row in differences" :key="row.property" class="border-b border-rule last:border-b-0">
-                                <th scope="row" class="px-3 py-2 text-left font-medium text-ink">{{ row.property }}</th>
-                                <td class="px-3 py-2 font-mono tabular-nums text-ink">{{ row.verdict }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <p v-if="isEmptyDiff" class="mt-3 text-sm text-ink" role="note">
-                    Nothing decisive: all selected careers share every value.
-                </p>
-            </section>
+            <!-- The verdict is the matrix's LAST column (`veterans-compare.html:70-84`), so the separate
+                 "Where they differ" card is gone. `differences` becomes a MATRIX-ALIGNED array: a verdict
+                 for a row the matrix no longer draws (`Notes`) is dropped rather than given a cell. The
+                 one reading with no cell of its own is this page-level note, kept because it is about the
+                 whole comparison rather than any single row. -->
+            <p v-if="isEmptyDiff" class="mt-3 text-sm text-ink" role="note">
+                Nothing decisive: all selected careers share every value.
+            </p>
 
             <!-- `Note` moved out of the table: a long-form paragraph does not belong in a comparison cell
                  where it cannot wrap and reads as the same text repeated once per column. Each selected
                  career gets its own note card below the matrix, in the same column order. -->
-            <div v-if="orderedColumns.length > 0" class="mt-4 grid gap-3 @3xl:grid-cols-2 @5xl:grid-cols-3">
+            <div v-if="orderedColumns.length > 0" class="mt-4 grid gap-4 g-3">
                 <article
                     v-for="column in orderedColumns"
                     :key="`note-${column.id}`"
