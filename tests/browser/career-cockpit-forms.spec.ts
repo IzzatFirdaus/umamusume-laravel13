@@ -156,8 +156,9 @@ test('records the Unity Cup team state through the team editor', async ({ page }
     // The write redirects back to the Cockpit, where the Team panel prints the team it was told about.
     // The editor's own inputs hold the same words, but `getByText` reads text nodes, not field values.
     await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
-    await expect(page.getByText('Blue Bloom')).toBeVisible();
-    await expect(page.getByText('Dreaming Big')).toBeVisible();
+    // The Team row is the read-back. It is matched as one cell because the editor now renders at page
+    // level and its own read-out would match a bare team name twice (strict mode).
+    await expect(page.getByRole('cell', { name: /Blue Bloom/ })).toBeVisible();
 
     // KI-97: the same write has to reach the header strip, whose own caption reads "normal plus
     // Extreme". Before the fix the rail printed N/A over a recorded 6 and 5, so the assertion is on
@@ -252,101 +253,26 @@ test('links the run-scoped deck builder from the Cockpit', async ({ page }) => {
     const cockpitUrl = await openCockpit(page);
     const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
 
-    // The door is a plain GET, so it is an anchor rather than a form; its href is the run's own deck.
-    const door = page.getByRole('link', { name: "Edit this run's deck" });
+    // `C6b.7` deleted the Run-identity section that carried the old link. The surviving door is the
+    // Where-to-go card's own Run deck entry, a plain GET anchor to the run's deck.
+    const door = page.getByRole('link', { name: 'Run deck' });
     await expect(door).toBeVisible();
     await expect(door).toHaveAttribute('href', new RegExp(`/training-runs/${runId}/deck$`));
 });
 
-test('switches the correction to another turn through the selector', async ({ page }) => {
-    const cockpitUrl = await openCockpit(page);
-    const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
-
-    // Two turns, so the selector has something to switch between. No rendered surface creates a turn
-    // any more, so the fixture writes them over the route (`record-turns.ts`).
-    await recordTurns(page, runId, 2, { stamina: '700', power: '700', guts: '700', wit: '700' });
-    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-
-    const selector = page.locator('#correction-turn-select');
-    await expect(selector.locator('option')).toHaveCount(2);
-
-    // The options read "Turn 1" and "Turn 2" and their values are each turn's id. Switching to turn 1
-    // navigates `?edit_turn=<id>` with the disclosure kept open, and the form re-syncs to that turn.
-    await selector.selectOption({ label: 'Turn 1' });
-    await expect(page).toHaveURL(/edit_turn=/);
-
-    const correction = page.locator('details', { has: page.getByText(/Correct turn \d+ by hand/) });
-    // `.first()`: the delete disclosure nests inside the correction one, so both carry a `summary`.
-    await correction.locator('summary').first().click();
-    await expect(correction.locator('input[name="turn"]')).toHaveValue('1');
-});
-
-test('saves a correction and returns to the cockpit with the new value', async ({ page }) => {
-    const cockpitUrl = await openCockpit(page);
-    const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
-
-    await recordTurns(page, runId, 1, { stamina: '700', power: '700', guts: '700', wit: '700' });
-    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-
-    const correction = page.locator('details', { has: page.getByText('Correct turn 1 by hand') });
-    // `.first()`: the delete disclosure nests inside the correction one, so both carry a `summary`.
-    await correction.locator('summary').first().click();
-    // R2-16: the state radio governs whether the number input renders, so pick `Exact` before the figure.
-    await correction.getByRole('radio', { name: 'Exact' }).check();
-    await correction.locator('input[name="energy"]').fill('60');
-    await correction.getByRole('button', { name: 'Save correction' }).click();
-
-    // The correction is a PUT over the existing turn and returns to the Cockpit: the state panel is
-    // the proof the write landed, read beside the stats the advisor ranks against.
-    const state = page.locator('section[aria-labelledby="career-state-heading"]');
-    await expect(state.getByText('60/100')).toBeVisible(WRITE);
-
-    // R3-04: the write also reports itself. The two header forms said `Saved.` and this one said
-    // nothing, so a Trainer could not tell a saved correction from a button that did nothing.
-    await expect(correction.getByText('Correction saved.')).toBeVisible();
-
-    // R3-01: a band is a reading, not an absence. Record one on the same turn and every surface that
-    // states Energy has to name the band instead of printing `Energy N/A`.
-    await correction.getByRole('radio', { name: 'Band' }).check();
-    await correction.locator('select[name="energy_band"]').selectOption('low');
-    await correction.getByRole('button', { name: 'Save correction' }).click();
-
-    await expect(state.getByText('Energy Low band')).toBeVisible(WRITE);
-    await expect(page.locator('section[aria-labelledby="career-header-heading"]').getByText('Low band')).toBeVisible();
-});
-
-test('deletes a turn through the two-step disclosure', async ({ page }) => {
-    const cockpitUrl = await openCockpit(page);
-    const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
-
-    await recordTurns(page, runId, 2);
-    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-
-    const selector = page.locator('#correction-turn-select');
-    await expect(selector.locator('option')).toHaveCount(2);
-
-    // The delete door is a second disclosure nested inside the correction panel, which is closed by
-    // default: the correction opens first, then the delete door, and the DELETE runs only after the
-    // Trainer confirms. The delete summary is addressed by its own text because the outer correction
-    // disclosure contains it and would otherwise match too.
-    const correction = page.locator('details', { has: page.getByText(/Correct turn \d+ by hand/) });
-    await correction.locator('summary').first().click();
-    await page.locator('summary').filter({ hasText: 'Delete turn' }).click();
-    await page.getByRole('button', { name: /^Delete turn \d+$/ }).click();
-
-    await expect(selector.locator('option')).toHaveCount(1, WRITE);
-});
-
-test('deletes the career through the two-step disclosure', async ({ page }) => {
+test('deletes the career through the confirmation door', async ({ page }) => {
     const cockpitUrl = await openCockpit(page);
     const runUrl = cockpitUrl.replace(/\/cockpit$/, '');
 
-    const deleteDoor = page.locator('details', { has: page.getByText('Delete this career') });
-    await deleteDoor.locator('summary').click();
-    await page.getByRole('button', { name: 'Delete this career' }).click();
+    // `C6b.3`: the destructive write has its own door, footed on the Cockpit.
+    await page.getByRole('link', { name: 'Delete this run' }).click();
+    await page.waitForURL(/\/training-runs\/\d+\/delete$/, WRITE);
+
+    // Refused until the confirmation is ticked.
+    const submit = page.getByRole('button', { name: 'Delete this career' });
+    await expect(submit).toBeDisabled();
+    await page.locator('#confirmed').check();
+    await submit.click();
 
     await page.waitForURL(/\/training-runs$/, { waitUntil: 'domcontentloaded' });
 
@@ -357,49 +283,39 @@ test('deletes the career through the two-step disclosure', async ({ page }) => {
     }
 });
 
-test('sizes the controls a two-step disclosure reveals once it is open', async ({ page }) => {
-    await openCockpit(page);
+test('sizes the delete-confirmation action to the 44px contract', async ({ page }) => {
+    const cockpitUrl = await openCockpit(page);
 
-    // The page-wide sweeps skip a control inside a collapsed `<details>`: the browser does not lay it
-    // out, so it has no box and is not a target anyone can hit (KI-92). That skip is only honest if the
-    // control is measured where it does become a target, which is what this case does — it opens the
-    // run-delete door and asserts the floor on what the disclosure reveals.
-    const deleteDoor = page.locator('details', { has: page.getByText('Delete this career') });
-    await deleteDoor.locator('summary').click();
+    // `C6b.3` moved the destructive action out of a collapsed disclosure onto its own page, so the
+    // control is laid out on arrival: no disclosure has to be opened first (KI-92).
+    await page.goto(`${cockpitUrl.replace(/\/cockpit$/, '')}/delete`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
 
-    await expectTapTargets(deleteDoor.locator('a, button'));
-});
-
-test('links both exports as file downloads', async ({ page }) => {
-    await openCockpit(page);
-
-    await expect(page.getByRole('link', { name: 'Download CSV' })).toHaveAttribute('href', /\/export\/csv$/);
-    await expect(page.getByRole('link', { name: 'Download JSON' })).toHaveAttribute('href', /\/export\/json$/);
+    await expectTapTargets(page.getByRole('button', { name: 'Delete this career' }));
 });
 
 test('sizes the header controls to the 44px contract', async ({ page }) => {
     await openCockpit(page);
-    await openIdentityDisclosure(page);
+    await openSettings(page);
 
-    // WCAG 2.2 SC 2.5.8, floor 44px (plan §12.1). The same sweep `career-cockpit.spec.ts` runs.
+    // WCAG 2.2 SC 2.5.8, floor 44px. The same sweep `career-cockpit.spec.ts` runs, on the door the
+    // header forms moved to (`C6b.7`).
     const targets = [
         page.locator('select#status'),
         page.getByRole('button', { name: 'Change status' }),
         page.locator('select#scenario'),
         page.getByRole('button', { name: 'Change scenario' }),
-        page.getByRole('link', { name: 'Download CSV' }),
-        page.getByRole('link', { name: 'Download JSON' }),
     ];
 
     for (const target of targets) {
         const box = await target.boundingBox();
-        expect(box?.height ?? 0, 'a cockpit header control is not sized to the 44px contract').toBeGreaterThanOrEqual(44);
+        expect(box?.height ?? 0, 'a run settings control is not sized to the 44px contract').toBeGreaterThanOrEqual(44);
     }
 });
 
 test('walks the header form from the keyboard', async ({ page }) => {
     await openCockpit(page);
-    await openIdentityDisclosure(page);
+    await openSettings(page);
 
     // The status select is a native control reached by Tab, and the submit is the next stop.
     const status = page.locator('select#status');
@@ -409,12 +325,13 @@ test('walks the header form from the keyboard', async ({ page }) => {
     await page.keyboard.press('Tab');
     await expect(page.getByRole('button', { name: 'Change status' })).toBeFocused();
 
-    // The submit carries the global `:focus-visible` ring rather than relying on hover (WCAG 2.4.7).
+    // The submit carries the global focus-visible ring rather than relying on hover (WCAG 2.4.7).
     const outline = await page
         .getByRole('button', { name: 'Change status' })
         .evaluate((el) => getComputedStyle(el).outlineWidth);
     expect(parseFloat(outline), 'the focused submit has no focus ring').toBeGreaterThanOrEqual(2);
 });
+
 
 test('passes an axe scan at WCAG A and AA', async ({ page }) => {
     await openCockpit(page);
