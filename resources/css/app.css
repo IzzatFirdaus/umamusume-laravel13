@@ -1261,11 +1261,13 @@ table.t tr.is-current td {
 /* .card:has(> table.t): ported from shell.css; resolves to house tokens. This is how a wide matrix
    fits a 320px viewport without panning the document, and `scroll-padding` keeps a focused cell's
    ring off the clip edge, the settlement the deck summary recorded for its own region.
-   The rule makes the card the scroll container, so the card is also the region DESIGN.md:447-455
-   requires to be labelled and focusable: any page whose card measures an overflow carries
-   `role="region"`, a name and `tabindex="0"` on the card itself. Events (213px), Shop items (35px),
-   the three Scenarios matrices (168/99/26px) and the Sources ledger (160px) do at 320px; Sparks and
-   Help measure none and carry no tab stop. */
+   The rule makes the card the scroll container, so the card is also the region a keyboard reader has
+   to be able to move. DESIGN.md:447-455 names the labelled-and-focusable mechanism for two surfaces
+   only, the race calendar and the turn log; six cards on the aligned pages measure an overflow at
+   320px and so carry `role="region"`, a name and `tabindex="0"` on the authority of WCAG 2.1.1, which
+   asks whether the content is reachable and not which surfaces a design file listed: Events (213px),
+   the three Scenarios matrices (168/99/26px), the Sources ledger (160px) and Shop items (35px).
+   Sparks and Help measure no overflow and carry no tab stop. */
 .card:has(> table.t) {
     overflow-x:auto;
     scroll-padding:6px;

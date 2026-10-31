@@ -166,11 +166,13 @@ const close = async (): Promise<void> => {
           prints the Pro Shop's config rows plus the §1.6.10 catalogue below.
         -->
         <!--
-          HFW-OVERRIDE (a11y: the scroll region is the card, and it is a tab stop): at 320px this card
-          scrolls its four-column table by 35px and the clipped Rating column holds no focusable node, so
-          the card carries the region role, a name and `tabindex="0"` - DESIGN.md's mechanism for a
-          horizontally scrolling region (`:447-455`), whose stated purpose is that the clipped columns are
-          reachable by arrow keys and not by trackpad alone. The mock scrolls with no tab stop.
+          HFW-OVERRIDE (a11y: WCAG 2.1.1 exceeds DESIGN.md's two-surface scope): this card - the scenario's
+          Pro Shop table - scrolls 35px at a 320px measure, because the four columns (item, cost, effect,
+          one guide's rating) overflow the narrowest supported reading by the width of the rating pill, and
+          that rating column holds no focusable node. It therefore carries `role="region"`, a name and
+          `tabindex="0"`. DESIGN.md:447-455 names the mechanism for the race calendar and the turn log only;
+          the authority for extending it is WCAG 2.1.1, which asks whether a keyboard reader can reach the
+          content. The mock scrolls with no tab stop.
         -->
         <div
             class="card mt-4"

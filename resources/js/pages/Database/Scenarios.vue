@@ -144,11 +144,15 @@ const panelState = (scenario: Scenario, label: string): boolean =>
           `RulesetVersionVocabularyTest` is what pins "ruleset version" to the separate app fact.
           The mock's Unity Cup row carries `tr.is-current`; no row on a reference matrix is current, so
           the highlight is not drawn and the harness records it as missing.
-          HFW-OVERRIDE (a11y: the scrolling card is a focusable region): the mock's cards scroll their
-          wide tables with no tab stop, and DESIGN.md's mechanism for a scrolling region (`:447-455`)
-          pairs `overflow-x:auto` with `role="region"`, `tabindex="0"` and a name. The card already
-          carries the role and the name, so only the tab stop is added; a keyboard reader pans the
-          clipped columns with the arrow keys instead of a trackpad.
+          HFW-OVERRIDE (a11y: WCAG 2.1.1 exceeds DESIGN.md's two-surface scope): three cards on this page
+          scroll at a 320px measure - Caps by 168px (seven columns: name, live date, five stat caps),
+          Panels each scenario composes by 99px (a panel column plus four scenario columns), and Last rework
+          by 26px (the event sentence against a narrow date column). None of their clipped columns holds a
+          focusable node, so each card carries `tabindex="0"` beside the role and name it already had.
+          DESIGN.md:447-455 names the mechanism for the race calendar and the turn log; the authority for
+          extending it to these three is WCAG 2.1.1, which asks whether a keyboard reader can reach the
+          content, not which surfaces a design file listed. The mock's three cards scroll by 166px, 80px and
+          0px with no tab stop anywhere.
         -->
         <div class="card mt-4" role="region" aria-labelledby="scenario-caps" tabindex="0">
             <h2 id="scenario-caps">Caps</h2>

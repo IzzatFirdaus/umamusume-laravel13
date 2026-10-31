@@ -149,13 +149,15 @@ const CONFLICTS: ReadonlyArray<{ question: string; state: string }> = [
           carry: fetched (the pipeline read it) or transcribed (a hand pass read it).
           HFW-OVERRIDE (style: no current row): the mock marks its first ledger row `tr.is-current`;
           a ledger has no current row, so the tint is not drawn.
-          HFW-OVERRIDE (a11y: the scroll region is the card, and it is a tab stop): the wrapper this page
-          used to put around the table is gone, so the card is the region the wireframe draws. Measured at
-          320px the ledger overflows its card by 160px and its clipped Read and Link columns hold no
-          focusable node of their own, so the card carries `tabindex="0"` with its existing role and name -
-          DESIGN.md's mechanism for a scrolling region (`:447-455`), which says the clipped columns are
-          "reachable by arrow keys and not by trackpad alone". The mock scrolls the same 136px with no tab
-          stop at all, so this is a divergence the house rule requires rather than one the wireframe shows.
+          HFW-OVERRIDE (a11y: WCAG 2.1.1, applied where a card scrolls): the ledger card scrolls 160px at a
+          320px measure - five columns (source, kind, supplies, read date, link) against one phone reading.
+          Its last column holds the page's twelve links, so focusing one already pans the region, which is
+          why this card's case is weaker than Events', Shop items' and Scenarios', whose clipped columns hold
+          no focusable node at all. The tab stop is kept anyway, for two reasons: the region's left edge -
+          the source names, which is what a reader pans back to check - carries no focusable node either, and
+          one behaviour for every scrolling card is easier to reason about than four. DESIGN.md:447-455 names
+          the mechanism for the race calendar and the turn log; the authority for using it here is WCAG 2.1.1.
+          The mock scrolls the same ledger by 136px with no tab stop at all.
         -->
         <div class="card mt-4" role="region" aria-labelledby="sources-ledger" tabindex="0">
             <h2 id="sources-ledger">Sources</h2>

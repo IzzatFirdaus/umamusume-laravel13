@@ -97,13 +97,15 @@ const close = async (): Promise<void> => {
         </div>
 
         <!--
-          HFW-OVERRIDE (a11y: the scroll region is the card, and it is a tab stop): measured at 320px this
-          card scrolls its five-column table by 213px and the clipped Source column holds no focusable
-          node, so the card carries the region role, a name and `tabindex="0"` - DESIGN.md's mechanism for
-          a horizontally scrolling region (`:447-455`), whose stated purpose is that the clipped columns
-          are reachable by arrow keys and not by trackpad alone. The mock scrolls the same table by 108px
-          with no tab stop, so the divergence is the house rule's, not the wireframe's. Sparks and Help
-          measure no overflow and therefore carry no tab stop.
+          HFW-OVERRIDE (a11y: WCAG 2.1.1 exceeds DESIGN.md's two-surface scope): this card - the
+          recurring-types catalogue - scrolls 213px at a 320px measure, because five columns (event, server
+          tags, cadence, mechanics, provenance) do not fit one, and its clipped Source column holds no
+          focusable node of its own. It therefore carries `role="region"`, a name and `tabindex="0"`.
+          DESIGN.md:447-455 names that mechanism for exactly two surfaces, the race calendar and the turn
+          log; the authority for extending it here is WCAG 2.1.1, which asks whether a keyboard reader can
+          reach the content and does not care which surfaces a design file scoped. The mock scrolls the
+          same table by 108px with no tab stop, so the divergence is the house rule's, not the wireframe's.
+          Sparks and Help measure no overflow at 320px or 768px and so carry no tab stop.
         -->
         <div
             v-else
