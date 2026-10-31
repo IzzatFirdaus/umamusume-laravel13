@@ -321,6 +321,12 @@ points at this paragraph.
   The exact reference mechanism is a schema decision for the subsystem slice.
 - G-4: No inheritance computation: no Spark-firing prediction, no affinity payout, no expected-inheritance
   figure. §6.3's engine ban is unchanged.
+  *Amendment 2026-10-31 (owner-delegated, see `ADR-0020` §3 and the `ADR-0025` amendment):*
+  `StartingCapProjection` computes a **career-start ceiling** for a run that has not started — the
+  arithmetic a set of recorded ★3 factors implies, printed with its rule and source. That is a fact
+  about the run's starting position, not a Spark-firing prediction, an affinity payout, or an
+  expected-inheritance figure, and it is not a race prediction or a build score. G-4's prohibition
+  stands for everything else it names. The engine remains banned.
 
 ## 5. Non-Functional Requirements
 
