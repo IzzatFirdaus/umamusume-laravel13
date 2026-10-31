@@ -222,7 +222,10 @@ test('lists the career obligations the calendar states, each as a mark and a wor
     await openCockpit(page);
 
     const advisor = page.getByRole('region', { name: 'Advisor' });
-    await expect(advisor.getByRole('heading', { name: 'Objectives' })).toBeVisible();
+    // The label is the wireframe's word: `cockpit-unity-cup.html:144` draws the table under a small-caps
+    // "Obligations" sublabel. It is a label, not a heading, so it is read as text — the section keeps
+    // its accessible name through `aria-labelledby="career-objectives-heading"`.
+    await expect(advisor.getByText('Obligations', { exact: true })).toBeVisible();
 
     // The wireframe's obligations table: one row per obligation, the state as a pill that carries its
     // word, and the due turn in its own column ("no date" where the calendar dates nothing).
@@ -262,6 +265,61 @@ test('lists the career obligations the calendar states, each as a mark and a wor
 
     const scan = await buildAxe(page).analyze();
     expect(scan.violations, JSON.stringify(scan.violations, null, 2)).toEqual([]);
+});
+
+test('puts the obligations table below the recommendation, as the wireframe draws it', async ({ page }) => {
+    // The region-level composition gate (`career-composition.spec.ts`) reads each screen's `h2` list.
+    // It cannot see the order of the blocks inside a card, so the Advisor card's own order is asserted
+    // here — the gap that let the table sit above the recommendation while every region-level test
+    // passed.
+    //
+    // `cockpit-unity-cup.html`'s Advisor card reads: the recommendation and its three bullets, then the
+    // "Obligations" sublabel and the table. The annotation key's first item for that card is "The
+    // recommendation, its reason and its cost all live in one block", so the table is what qualifies
+    // them and belongs after them.
+    await openCockpit(page);
+
+    const advisor = page.getByRole('region', { name: 'Advisor' });
+    const obligations = advisor.getByText('Obligations', { exact: true });
+
+    await expect(obligations).toBeVisible();
+
+    // DOM order, not paint order: `compareDocumentPosition` answers "is the table after the
+    // recommendation", which a CSS `order` utility would not change.
+    //
+    // The anchor is whichever recommendation slot the card is in: the "Recommended action" heading
+    // when the advisor ranks, or the refusal sentence when it declines. A fresh run has no recorded
+    // Energy, so the advisor refuses and never renders the ranked block — and the correction form
+    // that would record one is broken in this tree (see the two pre-existing failures in this file).
+    // The refusal anchor is still a real anchor: in the layout this test was written against, the
+    // obligations table came FIRST, before the recommendation slot of either kind.
+    const order = await advisor.evaluate((region) => {
+        const nodes = Array.from(region.querySelectorAll('h3, p'));
+        const label = nodes.find((node) => node.id === 'career-objectives-heading');
+        if (!label) return { error: 'the obligations label is not in the card' };
+
+        const recommendation = nodes.find((node) => {
+            const text = (node.textContent ?? '').trim();
+            if (node.tagName === 'H3') return text.includes('Recommended action');
+            return text.startsWith('Not enough information to recommend an action.');
+        });
+        if (!recommendation) return { error: 'the recommendation slot is not in the card' };
+
+        const priority = nodes.find(
+            (node) => node.tagName === 'P' && (node.textContent ?? '').trim() === 'Priority',
+        );
+
+        // Node.DOCUMENT_POSITION_FOLLOWING === 4: the node comes after the other.
+        const follows = (other: Element): boolean =>
+            (other.compareDocumentPosition(label) & 4) !== 0;
+
+        return {
+            afterRecommendation: follows(recommendation),
+            afterPriority: priority === null ? null : follows(priority),
+        };
+    });
+
+    expect(order).toEqual({ afterRecommendation: true, afterPriority: true });
 });
 
 test('lays out at 1280, 768 and 320 without a horizontal scroll', async ({ page }) => {
@@ -435,7 +493,10 @@ test('records Energy through the cockpit correction and then marks one action', 
     // With Energy recorded the advisor ranks, and the five-element FD-2 shape renders in order:
     // priority, recommendation, benefit, alternatives, reasons, then what would change the answer.
     const advisorRegion = page.getByRole('region', { name: 'Advisor' });
-    await expect(advisorRegion.getByRole('heading', { name: 'Current priority' })).toBeVisible();
+    // Priority prints as the HFW's small-caps label above the recommendation, not as a section of its
+    // own — `cockpit-trackblazer.html` and `cockpit-grand-concert.html` draw it that way, and
+    // `cockpit-unity-cup.html` draws no priority line at all.
+    await expect(advisorRegion.getByText('Priority', { exact: true })).toBeVisible();
     await expect(advisorRegion.getByText('Close the largest deficit against the build target you entered.')).toBeVisible();
     await expect(advisorRegion.getByRole('heading', { name: 'Recommended action' })).toBeVisible();
     await expect(advisorRegion.getByText('Speed is 200 below target (the largest deficit).')).toBeVisible();

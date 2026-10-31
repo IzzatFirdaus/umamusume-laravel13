@@ -7,6 +7,22 @@
  * the conditions that would change the answer (design-2.0 §2 "State → Options → Recommendation →
  * Explanation → Decision"). Every branch below prints one of those five and nothing else.
  *
+ * **How the order reaches the screen is the HFW's, and the order of the elements is not the order of
+ * the blocks.** The wireframe's Advisor card reads: the warn block, the priority label, the
+ * recommendation with its three bullets, then the "Obligations" table (`cockpit-unity-cup.html`;
+ * `cockpit-trackblazer.html` and `cockpit-grand-concert.html` carry the same shape with their own
+ * tables). So:
+ *
+ * - Priority prints as the HFW's small-caps label above the recommendation, not as a section of its
+ *   own. It is not printed at all when a due obligation is opening the card, because the warn block
+ *   states that same fact — one fact, one statement.
+ * - The obligations table follows the recommendation block. Its label is the wireframe's word,
+ *   "Obligations"; the section keeps its accessible name through `aria-labelledby`.
+ *
+ * **A region is not a card is not a block.** The composition gate reads the region's `h2` list; it
+ * cannot see the order of the blocks inside a card, so the card's own order is asserted separately
+ * (`tests/browser/career-cockpit.spec.ts`).
+ *
  * **It receives the whole decision as one object and reads no scenario from anywhere.** There is no
  * scenario prop, no label comparison and no key literal in this file, so a fifth scenario reaches it
  * through the same payload with no edit here (gate G-33, D-240). The server owns the ranking
@@ -160,58 +176,35 @@ const incompleteData = computed(
 
 <template>
     <div class="card rounded-xl p-4">
-        <section v-if="hasObjectives" aria-labelledby="career-objectives-heading">
-            <h3 id="career-objectives-heading" class="text-lg font-semibold text-ink-strong">
-                Objectives
-            </h3>
+        <!-- The one obligation the calendar puts at or before this turn, marked the way the HFW
+             marks its current row: a caution pill carrying the word, beside the sentence that names
+             the obligation. The row itself already prints `Due` as a word, so the state never rides
+             on the pill's colour alone (WCAG 1.4.1, HFW `is-current` row).
 
-            <!-- The wireframe's obligations table (Obligation / State / Due): a table, not a row list,
-                 so the three aligned columns carry the comparison. The state is a pill AND a word, and
-                 an undated row prints "no date" rather than a dash. The provenance badge and the door
-                 stay inside the obligation cell. -->
-            <table class="t mt-2 w-full border-collapse text-sm">
-                <thead>
-                    <tr><th class="text-left">Obligation</th><th class="text-left">State</th><th class="text-right">Due</th></tr>
-                </thead>
-                <tbody>
-                    <tr v-for="row in objectives" :key="row.state + '-' + row.label" :class="row.state === 'current' ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft align-top">
-                        <td class="py-2 pr-3">
-                            <a v-if="due === row && props.raceUrl !== null" :href="props.raceUrl" class="font-semibold text-ink-strong hover:underline">{{ row.label }}</a>
-                            <b v-else class="text-ink-strong">{{ row.label }}</b>
-                            <ProvenanceBadge :state="row.badge" :title="row.title" />
-                            <span v-if="row.consequence !== null" class="mt-0.5 block text-xs text-ink-muted">{{ row.consequence }}</span>
-                        </td>
-                        <td class="py-2 pr-3"><span class="pill" :class="statePill(row.state).cls">{{ statePill(row.state).word }}</span></td>
-                        <td class="py-2 text-right font-mono" :title="row.due_turn === null ? 'The calendar does not date this obligation.' : null">{{ row.due_label ?? 'no date' }}</td>
-                    </tr>
-                </tbody>
-            </table>
+             It opens the card, where `cockpit-unity-cup.html` puts it: the fact comes before the
+             thing to do about it. -->
+        <div v-if="due !== null" class="flex flex-wrap items-start gap-2">
+            <span class="pill pill-caution shrink-0">current</span>
+            <AlertRow
+                class="min-w-0 flex-1"
+                glyph="▲"
+                tone="critical"
+                :text="due.label + ' is due and not recorded.' + (turnsAgo === null ? '' : ` It fell due on turn ${due.due_turn}, ${turnsAgo} turns ago.`)"
+                detail="The calendar puts it at or before the turn being decided and no race is recorded against it."
+            />
+        </div>
 
-            <!-- The one obligation the calendar puts at or before this turn, marked the way the HFW
-                 marks its current row: a caution pill carrying the word, beside the sentence that
-                 names the obligation. The row itself already prints `Due` as a word, so the state
-                 never rides on the pill's colour alone (WCAG 1.4.1, HFW `is-current` row). -->
-            <div v-if="due !== null" class="mt-2 flex flex-wrap items-start gap-2">
-                <span class="pill pill-caution shrink-0">current</span>
-                <AlertRow
-                    class="min-w-0 flex-1"
-                    glyph="▲"
-                    tone="critical"
-                    :text="due.label + ' is due and not recorded.' + (turnsAgo === null ? '' : ` It fell due on turn ${due.due_turn}, ${turnsAgo} turns ago.`)"
-                    detail="The calendar puts it at or before the turn being decided and no race is recorded against it."
-                />
-            </div>
-        </section>
-
-        <h3
-            class="text-lg font-semibold text-ink-strong"
-            :class="hasObjectives ? 'mt-4' : ''"
-        >
-            Current priority
-        </h3>
-        <p class="mt-1 text-sm font-semibold text-ink-strong" aria-live="polite">
-            {{ props.decision.priority }}
-        </p>
+        <!-- Priority, as the HFW's card carries it: a small-caps label with the sentence under it,
+             the context the recommendation is read against (`cockpit-trackblazer.html`,
+             `cockpit-grand-concert.html`). It is NOT a section of its own, and it is not printed
+             when the warn block above already states the fact — `cockpit-unity-cup.html` draws no
+             priority line at all, and the sentence would be that same fact twice. -->
+        <div v-if="due === null" class="mt-3">
+            <p class="text-[10px] font-extrabold uppercase tracking-[0.08em] text-ink-muted">Priority</p>
+            <p class="mt-1 text-sm font-semibold text-ink-strong" aria-live="polite">
+                {{ props.decision.priority }}
+            </p>
+        </div>
 
         <template v-if="refusal !== null">
             <p class="mt-3 text-sm text-ink-strong">
@@ -280,6 +273,39 @@ const incompleteData = computed(
                 </ul>
             </template>
         </template>
+
+        <!-- The HFW's obligations table, after the recommendation block (`cockpit-unity-cup.html`):
+             the recommendation, its reason and its cost live in one block, and the table is what
+             qualifies them. It is labelled "Obligations", which is the word the wireframe uses
+             (`cockpit-unity-cup.html:144`); the section keeps its accessible name through
+             `aria-labelledby`. -->
+        <section v-if="hasObjectives" aria-labelledby="career-objectives-heading">
+            <p id="career-objectives-heading" class="text-[10px] font-extrabold uppercase tracking-[0.08em] text-ink-muted">
+                Obligations
+            </p>
+
+            <!-- The wireframe's obligations table (Obligation / State / Due): a table, not a row list,
+                 so the three aligned columns carry the comparison. The state is a pill AND a word, and
+                 an undated row prints "no date" rather than a dash. The provenance badge and the door
+                 stay inside the obligation cell. -->
+            <table class="t mt-2 w-full border-collapse text-sm">
+                <thead>
+                    <tr><th class="text-left">Obligation</th><th class="text-left">State</th><th class="text-right">Due</th></tr>
+                </thead>
+                <tbody>
+                    <tr v-for="row in objectives" :key="row.state + '-' + row.label" :class="row.state === 'current' ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft align-top">
+                        <td class="py-2 pr-3">
+                            <a v-if="due === row && props.raceUrl !== null" :href="props.raceUrl" class="font-semibold text-ink-strong hover:underline">{{ row.label }}</a>
+                            <b v-else class="text-ink-strong">{{ row.label }}</b>
+                            <ProvenanceBadge :state="row.badge" :title="row.title" />
+                            <span v-if="row.consequence !== null" class="mt-0.5 block text-xs text-ink-muted">{{ row.consequence }}</span>
+                        </td>
+                        <td class="py-2 pr-3"><span class="pill" :class="statePill(row.state).cls">{{ statePill(row.state).word }}</span></td>
+                        <td class="py-2 text-right font-mono" :title="row.due_turn === null ? 'The calendar does not date this obligation.' : null">{{ row.due_label ?? 'no date' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
 
         <h3 class="mt-4 text-lg font-semibold text-ink-strong">
             Why this answer
