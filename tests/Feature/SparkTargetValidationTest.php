@@ -57,3 +57,23 @@ it('refuses an Aptitude Spark whose target is not an aptitude', function (): voi
     $this->put(route('career.legacy.store'), sparkTargetPayload('Aptitude', 'Speed'))
         ->assertSessionHasErrors(['legacies.0.sparks.0.target']);
 });
+
+it('accepts a pick naming a Spark that exists', function (): void {
+    // One Spark is recorded, so index 0 names it (`ADR-0010` Amendment 2026-10-31).
+    $payload = sparkTargetPayload('Stat', 'Speed');
+    $payload['legacies'][0]['pick'] = 0;
+
+    $this->put(route('career.legacy.store'), $payload)
+        ->assertSessionHasNoErrors();
+});
+
+it('refuses a pick at or beyond the recorded Sparks', function (): void {
+    // One Spark exists, so index 1 is not a Spark. A stored index that names nothing would render as
+    // a parent with a headline factor she does not carry, which is why the boundary refuses it
+    // rather than storing it and letting the reader cope.
+    $payload = sparkTargetPayload('Stat', 'Speed');
+    $payload['legacies'][0]['pick'] = 1;
+
+    $this->put(route('career.legacy.store'), $payload)
+        ->assertSessionHasErrors(['legacies.0.pick']);
+});

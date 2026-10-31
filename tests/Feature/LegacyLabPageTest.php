@@ -218,6 +218,122 @@ it('reports no Legacy selection as a named absence rather than an empty graph', 
         );
 });
 
+it('passes the career-start projection when a selection is recorded', function (): void {
+    // `StartingCapProjection` is the one owner of the cap arithmetic (`ADR-0020` §3 amendment,
+    // `ADR-0025` amendment), so the page receives the rows rather than deriving them: five stats, each
+    // with the base ceiling, the raise the recorded parents imply, and the sum.
+    $run = activeRun('Symboli Rudolf', [
+        'scenario' => 'ura_finale',
+        'legacy_selection' => sixNodePayload(),
+    ]);
+
+    test()->get("/legacy/{$run->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('projection', 5)
+            ->where('projection.0.stat', 'Speed')
+            ->where('projection.0.base', 1400)
+            ->where('projection.0.raise', 0)
+            ->where('projection.0.ceiling', 1400)
+            ->has('projection.0', fn (Assert $row) => $row
+                ->hasAll(['stat', 'label', 'base', 'raise', 'ceiling'])));
+});
+
+it('passes no projection when the run records nothing', function (): void {
+    // A run with no Legacy Select has no recorded factors, so there is no sum to state. Null is the
+    // absence: the preview card prints what it does not know rather than a ceiling equal to the base,
+    // which would read as "your parents add nothing".
+    $run = activeRun('Symboli Rudolf');
+
+    test()->get("/legacy/{$run->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('projection', null));
+});
+
+it('carries the JP-sourced stale provenance beside the projected ceiling', function (): void {
+    // The figure's own sourcing (`GP-2`, `D-256`, `TOG-3`): the +16 row is `[JP]` and cited to one
+    // guide marked stale, so the cell cannot print the number without the caveat. Asserted on the page
+    // prop rather than on the service, because the obligation is that the screen carries it.
+    $run = activeRun('Symboli Rudolf', ['legacy_selection' => sixNodePayload()]);
+
+    test()->get("/legacy/{$run->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where(
+            'projectionNote',
+            fn (mixed $note): bool => is_string($note)
+                && str_contains($note, 'Game8')
+                && str_contains($note, 'stale'),
+        ));
+});
+
+it('projects 1432 for a pair of ★3 Blue Speed parents against a 1400 cap', function (): void {
+    // The wireframe's own figure (`legacy-builder.html:105`: `1400 | +32 | 1432`), reached by the app's
+    // arithmetic rather than copied: two parents each carrying a ★3 Blue Speed factor at +16
+    // (`ScenarioCaps::capRaise`), against URA Finale's Speed ceiling of 1400 (the 1200 base cap plus the
+    // scenario's own +200 Speed bonus). A run with no scenario named starts from the base cap alone, so
+    // the scenario is part of the figure and is set here rather than assumed.
+    $run = activeRun('Symboli Rudolf', [
+        'scenario' => 'ura_finale',
+        'legacy_selection' => [
+            'legacies' => [
+                [
+                    'rank' => 3, 'is_guest' => false, 'ancestors' => [null, null],
+                    'sparks' => [['kind' => 'blue', 'target' => 'Speed', 'stars' => 3]],
+                ],
+                [
+                    'rank' => 3, 'is_guest' => false, 'ancestors' => [null, null],
+                    'sparks' => [['kind' => 'blue', 'target' => 'Speed', 'stars' => 3]],
+                ],
+            ],
+            'affinity' => null,
+        ],
+    ]);
+
+    test()->get("/legacy/{$run->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('projection.0.stat', 'Speed')
+            ->where('projection.0.base', 1400)
+            ->where('projection.0.raise', 32)
+            ->where('projection.0.ceiling', 1432)
+            // The other four stats carry no Blue factor here, so the projection does not inflate them.
+            ->where('projection.1.raise', 0));
+});
+
+it('projects 1416 for a ★3 plus ★2 Blue pair and states the ★3-only basis', function (): void {
+    // Ver 2 gap closure: the reference (§1.3.4, UMAMUSUME_REFERENCE.md:420) states +16 per ★3 Blue
+    // factor and no ★1/★2 figure, so capRaise returns 16 only for stars === 3. A ★3/★2 pair projects
+    // raise 16 (not 24, not the wireframe's +8 filler at legacy-builder.html:78), and projectionNote
+    // states the conservative reading of silence so a Trainer is not shown an undercounted ceiling
+    // as fact.
+    $run = activeRun('Symboli Rudolf', [
+        'scenario' => 'ura_finale',
+        'legacy_selection' => [
+            'legacies' => [
+                [
+                    'rank' => 3, 'is_guest' => false, 'ancestors' => [null, null],
+                    'sparks' => [['kind' => 'blue', 'target' => 'Speed', 'stars' => 3]],
+                ],
+                [
+                    'rank' => 3, 'is_guest' => false, 'ancestors' => [null, null],
+                    'sparks' => [['kind' => 'blue', 'target' => 'Speed', 'stars' => 2]],
+                ],
+            ],
+            'affinity' => null,
+        ],
+    ]);
+
+    test()->get("/legacy/{$run->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('projection.0.stat', 'Speed')
+            ->where('projection.0.base', 1400)
+            ->where('projection.0.raise', 16)
+            ->where('projection.0.ceiling', 1416)
+            ->where('projectionNote', fn (mixed $note): bool => is_string($note)
+                && str_contains($note, '★3 tier is stated')));
+});
+
 it('states no star-roll chance and no priced Affinity, and names both absences', function (): void {
     $run = activeRun(attributes: ['legacy_selection' => sixNodePayload()]);
 

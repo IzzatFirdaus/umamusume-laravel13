@@ -222,3 +222,36 @@ it('keeps the pre-change shape when no name is present', function (): void {
     expect($read)->toBe($without);
     expect(array_key_exists('name', $read['legacies'][0]))->toBeFalse();
 });
+
+it('stores the pick and reads it back at the index it names', function (): void {
+    // `pick` is the parent's headline Spark for display (ADR-0010 Amendment 2026-10-31), stored as an
+    // index into her own `sparks`. Two Sparks are recorded, so index 1 is a real Spark and not a
+    // figure the shape has to invent.
+    $payload = legacyPayload();
+    $payload['legacies'][0]['pick'] = 1;
+
+    $read = LegacySelectionPayload::fromArray($payload)->toArray();
+
+    expect($read['legacies'][0]['pick'])->toBe(1)
+        ->and($read['legacies'][0]['sparks'])->toHaveCount(2)
+        ->and($read)->toBe($payload);
+});
+
+it('omits pick when the payload carries none', function (): void {
+    // The same rule `name` follows: a payload that never had a pick keeps its exact shape, so an
+    // exact-shape reader is not handed a null it never asked for. This is the case for every Legacy
+    // recorded before the key existed.
+    $without = legacyPayload();
+
+    $read = LegacySelectionPayload::fromArray($without)->toArray();
+
+    expect($read)->toBe($without)
+        ->and(array_key_exists('pick', $read['legacies'][0]))->toBeFalse();
+
+    // An explicit null is the absence too, not a stored zero — index 0 is a real Spark (Speed).
+    $nulled = legacyPayload();
+    $nulled['legacies'][0]['pick'] = null;
+
+    expect(array_key_exists('pick', LegacySelectionPayload::fromArray($nulled)->toArray()['legacies'][0]))
+        ->toBeFalse();
+});
