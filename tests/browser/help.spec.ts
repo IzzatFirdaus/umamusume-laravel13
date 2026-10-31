@@ -20,8 +20,10 @@ test('the page answers the four questions in the wireframe order', async ({ page
         await expect(page.getByRole('heading', { name, level: 2 })).toBeVisible();
     }
 
-    // Proactive help leads: the turn loop is the first region after the page head.
-    const regions = await page.locator('main section[aria-labelledby]').evaluateAll((nodes) =>
+    // Proactive help leads: the turn loop is the first region after the page head. The selector names
+    // the role rather than the element, because the HFW's cards are `div.card` blocks and a `section`
+    // selector would only ever match the app's old markup.
+    const regions = await page.locator('main [role="region"][aria-labelledby]').evaluateAll((nodes) =>
         nodes.map((n) => n.getAttribute('aria-labelledby')),
     );
     expect(regions[0]).toBe('help-loop');

@@ -167,8 +167,7 @@ test('the Shop items catalogue sits on its wireframe', async ({ page }) => {
     });
 });
 
-test('the Sparks ladders sit on their wireframe', async ({ page }) => {
-    await assertParity(page, {
+test('the Sparks ladders sit on their wireframe', async ({ page }) => {    await assertParity(page, {
         screen: 'sparks',
         appUrl: '/database/sparks',
         wireframe: 'database-sparks.html',
@@ -279,6 +278,45 @@ test('the Events catalogue sits on its wireframe', async ({ page }) => {
                 'div.card:nth-child(2) > p.note:nth-child(2)',
             ],
             computed: [],
+            rect: [],
+        },
+    });
+});
+
+test('the Help page sits on its wireframe', async ({ page }) => {
+    await assertParity(page, {
+        screen: 'help',
+        appUrl: '/help',
+        wireframe: 'help.html',
+        allow: {
+            text: [
+                // HFW-OVERRIDE (copy: undo note): the mock describes the control as if the build had it
+                // and then says it does not; this build has no Undo, so its row states the gap.
+                'div.grid:nth-child(1) > div:nth-child(1) > div.card:nth-child(1) > p.note',
+                // HFW-OVERRIDE (copy: keyboard sub) and (keyboard: keys): the app names the controls it
+                // actually wires, across the shell rather than only the guided flow.
+                'div.grid:nth-child(1) > div:nth-child(1) > div.card:nth-child(2) > p.sub',
+                'div.grid:nth-child(1) > div:nth-child(1) > div.card:nth-child(2) > table.t',
+                // HFW-OVERRIDE (copy: tags note): the app's sentence names the channel the absence
+                // arrives by, which is the rule this build enforces.
+                'div.grid:nth-child(1) > div:nth-child(1) > div.card:nth-child(3) > p.note',
+                // HFW-OVERRIDE (rules: sparks): the app prints all four `[Global]` colours; the mock's
+                // sentence carries two.
+                'div.grid:nth-child(1) > div:nth-child(2) > div.card:nth-child(2) > table.t',
+                // HFW-OVERRIDE (copy: rules note): the mock explains its own status as a static
+                // wireframe and names a decision id; shipped copy names neither.
+                'div.grid:nth-child(1) > div:nth-child(2) > div.card:nth-child(2) > p.note',
+                // HFW-OVERRIDE (rows: diagnostics) and (copy: import): the app's fourth row, and rows
+                // that describe what this importer does rather than what a prototype would.
+                'div.grid:nth-child(1) > div:nth-child(2) > div.card:nth-child(3) > table.t',
+            ],
+            computed: [
+                // HFW-OVERRIDE (style: button primitive): the mock draws its two actions with `.btn`,
+                // which this set never ported (the Shop items pager records the same gap). The app's
+                // button is `LinkButton`, so the ledger door keeps the component's weight and padding
+                // rather than hand-matching a mock class on one instance.
+                'div.grid:nth-child(1) > div:nth-child(2) > div.card:nth-child(1) > a.inline-flex',
+            ],
             rect: [],
         },
     });
