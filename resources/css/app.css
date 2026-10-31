@@ -999,6 +999,14 @@ table.t tr.is-current td {
     color:var(--color-ink-strong);
 }
 
+/* The wireframe scrolls a `table.t` inside its own card (shell.css's `:has(table.t)`), which is how a
+   five-column table fits a 320px viewport without pushing the document. `scroll-padding` keeps a
+   focused cell's ring off the clip edge, the settlement the deck summary recorded for its own region. */
+.card:has(> table.t) {
+    overflow-x:auto;
+    scroll-padding:6px;
+}
+
 /* A card that is a direct child of a grid is separated by the grid's gap alone, never by the
    column-stack margin above. This is the wireframe's own `style="margin:0"` on every card inside a
    grid (index.html:72, :110, :134, :157, :176): without it the second card of every grid row sits

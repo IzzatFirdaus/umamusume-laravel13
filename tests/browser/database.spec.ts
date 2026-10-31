@@ -124,7 +124,9 @@ test('the Events view renders the recurring types with glyph-and-word provenance
     await page.goto('/database/events', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.getByRole('heading', { name: 'Recurring event types', level: 2 })).toBeVisible();
+    // The "Recurring event types" `<h2>` retired with the HFW retag (`154d4e15`): the wireframe draws a
+    // bare catalogue card, so the substantive claim — a named catalogue — is carried by the table's
+    // accessible name asserted at `:149`, and re-pinning the heading here would assert the same fact twice.
     await expect(page.getByText('10 recurring types')).toBeVisible();
 
     // Ten rows, the first and the unverified one by name.
