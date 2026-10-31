@@ -107,6 +107,9 @@ class StoreLegacySelectionRequest extends FormRequest
             // The letter rank the client prints, from the payload's own small vocabulary. The numeric
             // `rank` is the star count; this is the letter beside it, and neither is computed.
             'legacies.*.rank_letter' => ['nullable', 'string', Rule::in(LegacySelectionPayload::RANK_LETTERS)],
+            // The headline Spark's index into `sparks`, not a claim about what fires (`ADR-0010`
+            // Amendment 2026-10-31). Its upper bound is cross-field, so it is checked in `after()`.
+            'legacies.*.pick' => ['nullable', 'integer', 'min:0'],
             'legacies.*.is_guest' => ['required', 'boolean'],
             'legacies.*.ancestors' => ['present', 'array', 'max:'.LegacySelectionPayload::MAX_ANCESTORS],
             // The grandparents' own Sparks, one list per ancestor. Optional and nullable: a names-only
@@ -168,6 +171,16 @@ class StoreLegacySelectionRequest extends FormRequest
 
                 /** @var list<array<string, mixed>> $sparks */
                 $sparks = (array) ($legacy['sparks'] ?? []);
+
+                // A present `pick` must point at a Spark that exists (`ADR-0010` Amendment
+                // 2026-10-31): it indexes this legacy's own list, and an index at or past the length
+                // would silently fail to render the headline the key exists to mark.
+                if (isset($legacy['pick']) && $legacy['pick'] !== '' && (int) $legacy['pick'] >= count($sparks)) {
+                    $validator->errors()->add(
+                        "legacies.{$index}.pick",
+                        'The selected Spark does not exist on this parent.',
+                    );
+                }
 
                 foreach ($sparks as $sparkIndex => $spark) {
                     $this->assertTargetMatchesCategory($validator, (int) $index, (int) $sparkIndex, $spark);
@@ -330,6 +343,7 @@ class StoreLegacySelectionRequest extends FormRequest
                 'ancestors_rank_letters' => $ancestorLetters,
                 'ancestors_rank' => $ancestorRanks,
                 'sparks' => $sparks,
+                'pick' => isset($legacy['pick']) && $legacy['pick'] !== '' ? (int) $legacy['pick'] : null,
             ];
         }
 

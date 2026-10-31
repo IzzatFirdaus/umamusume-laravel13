@@ -200,6 +200,10 @@ final class AncestryGraph
             'ancestors' => $ancestors,
             'sparks' => $sparks,
             'spark_counts' => $counts,
+            // The headline Spark's index, passed through untouched (`ADR-0010` Amendment
+            // 2026-10-31). A read of the stored key, not a computation: the "computes nothing"
+            // charter above is unaffected by it.
+            'pick' => isset($legacy['pick']) ? (int) $legacy['pick'] : null,
             'probability' => [
                 'value' => null,
                 // Named on the element itself rather than only in the page's copy, so the reason

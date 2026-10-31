@@ -156,7 +156,7 @@ final readonly class LegacySelectionPayload
         self::assertKeysAllowing(
             $legacy,
             self::LEGACY_KEYS,
-            ['ancestors_meta', 'rank_letter', 'ancestors_sparks', 'ancestors_rank_letters', 'ancestors_rank', 'name'],
+            ['ancestors_meta', 'rank_letter', 'ancestors_sparks', 'ancestors_rank_letters', 'ancestors_rank', 'name', 'pick'],
             "Legacy #{$index}",
         );
 
@@ -223,6 +223,16 @@ final readonly class LegacySelectionPayload
 
         if ($letter !== null) {
             $record['rank_letter'] = $letter;
+        }
+
+        // The parent's headline Spark (`ADR-0010` Amendment 2026-10-31). An index into `sparks`, not a
+        // claim about which Spark fires: career start fires the recorded stat and aptitude factors
+        // regardless (`UMAMUSUME_REFERENCE.md:645`, `:692`). Stored only when present, so a payload
+        // that never had one keeps its shape.
+        $pick = self::nullableInt($legacy['pick'] ?? null, "Legacy #{$index} pick");
+
+        if ($pick !== null) {
+            $record['pick'] = $pick;
         }
 
         // The grandparents' own Sparks, aligned by index with `ancestors`: the two rows the client
