@@ -53,58 +53,66 @@ async function openCockpit(page: import('@playwright/test').Page, scenarioId = '
     return url;
 }
 
+
+/**
+ * The run settings door (`C6b.7`). The identity forms moved off the Cockpit, so a case that drives
+ * one navigates here instead of opening a disclosure that no longer exists.
+ */
+async function openSettings(page: import('@playwright/test').Page): Promise<void> {
+    const runId = /\/training-runs\/(\d+)/.exec(page.url())?.[1] ?? '';
+    await page.goto(`/training-runs/${runId}/settings`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+}
 /** The career bar that prints the trainee, scenario and status. */
 const careerBar = (page: import('@playwright/test').Page) => page.locator('section[aria-label="Career"]');
 
-test('changes the run status through the header form and prints the new label', async ({ page }) => {
+test('changes the run status through the settings door', async ({ page }) => {
     await openCockpit(page);
-    await openIdentityDisclosure(page);
-
-    await expect(careerBar(page).getByText('Active')).toBeVisible();
+    await openSettings(page);
 
     const status = page.locator('select#status');
     await expect(status).toHaveValue('Active');
     await status.selectOption('Completed');
     await page.getByRole('button', { name: 'Change status' }).click();
 
-    // The write flashes the controller's own line and the career bar prints the new status.
-    await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
-    await expect(careerBar(page).getByText('Completed')).toBeVisible();
+    // The write returns to this door (`back(fallback:)`) and the value survives a reload.
+    await expect(page.getByText('Saved.')).toBeVisible(WRITE);
+    await openSettings(page);
+    await expect(page.locator('select#status')).toHaveValue('Completed');
 });
 
-test('changes the run scenario through the header form and prints the new label', async ({ page }) => {
+test('changes the run scenario through the settings door', async ({ page }) => {
     await openCockpit(page);
-    await openIdentityDisclosure(page);
+    await openSettings(page);
 
     const scenario = page.locator('select#scenario');
     await expect(scenario).toHaveValue('unity_cup');
     await scenario.selectOption('ura_finale');
     await page.getByRole('button', { name: 'Change scenario' }).click();
 
-    await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
-    await expect(careerBar(page).getByText('URA Finale')).toBeVisible();
+    await expect(page.getByText('Saved.')).toBeVisible(WRITE);
+    await openSettings(page);
+    await expect(page.locator('select#scenario')).toHaveValue('ura_finale');
 });
 
 test('reports the grade-point period on a scenario that composes one', async ({ page }) => {
-    // The period form renders only when the scenario defines grade objectives (trackblazer).
     await openCockpit(page, 'trackblazer');
-    await openIdentityDisclosure(page);
+    await openSettings(page);
 
     const period = page.locator('select#current_objective_index');
     await expect(period).toBeVisible();
-
-    // "Not reported" is the honest first state; the first objective is a real period the Trainer can report.
     await expect(period).toHaveValue('');
     await period.selectOption('1');
     await page.getByRole('button', { name: 'Report period' }).click();
 
-    await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
-    await expect(period).toHaveValue('1');
+    await expect(page.getByText('Saved.')).toBeVisible(WRITE);
+    await openSettings(page);
+    await expect(page.locator('select#current_objective_index')).toHaveValue('1');
 });
 
-test('records the trainee rarity, potential and growth rate through the identity editor', async ({ page }) => {
+test('records the trainee rarity, potential and growth rate on the settings door', async ({ page }) => {
     await openCockpit(page);
-    await openIdentityDisclosure(page);
+    await openSettings(page);
 
     await page.selectOption('#trainee_rarity', '3');
     await page.locator('#potential_level').fill('2');
@@ -115,10 +123,10 @@ test('records the trainee rarity, potential and growth rate through the identity
 
     await page.getByRole('button', { name: 'Save identity' }).click();
 
-    // The header is the read-back: it prints `★3 · Potential 2` once both halves are stated, and the
-    // growth row it prints beside them comes from the same write (R2-13).
-    await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
-    await expect(page.locator('section[aria-labelledby="career-header-heading"]').getByText('★3 · Potential 2')).toBeVisible();
+    await expect(page.getByText('Saved.')).toBeVisible(WRITE);
+    await openSettings(page);
+    await expect(page.locator('#trainee_rarity')).toHaveValue('3');
+    await expect(page.locator('#potential_level')).toHaveValue('2');
 });
 
 test('records the Unity Cup team state through the team editor', async ({ page }) => {
