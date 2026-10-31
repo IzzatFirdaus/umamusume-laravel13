@@ -167,6 +167,39 @@ test('the Shop items catalogue sits on its wireframe', async ({ page }) => {
     });
 });
 
+test('the Sparks ladders sit on their wireframe', async ({ page }) => {
+    await assertParity(page, {
+        screen: 'sparks',
+        appUrl: '/database/sparks',
+        wireframe: 'database-sparks.html',
+        allow: {
+            text: [
+                // HFW-OVERRIDE (data: families): the mock lists four families and names the unique-skill
+                // one "Unique"; the reference renders Blue, Pink, Green and White Sparks plus the scenario
+                // kind, with white carrying both the skill and the competition sub-kinds.
+                'div.card:nth-child(2) > table.t',
+                // HFW-OVERRIDE (data: blue ladder) and the column heading that goes with it: the mock's
+                // "Cap added" +16 / +8 / +5 is the breakthrough figure with two unpublished grades
+                // attached; this card prints the +5 / +12 / +21 starting-stat ladder and the one
+                // published ★3 cap raise.
+                'div.grid:nth-child(3) > div.card:nth-child(1) > table.t',
+                // The card states the distinction the mock's note does not draw, so its sentence and its
+                // bold word are this build's.
+                'div.grid:nth-child(3) > div.card:nth-child(1) > p.note',
+                // HFW-OVERRIDE (data: pink ladder): the mock prints the stat figures under an "Aptitude
+                // shift" heading; the published aptitude ladder is graded in letters.
+                'div.grid:nth-child(3) > div.card:nth-child(2) > table.t',
+                'div.grid:nth-child(3) > div.card:nth-child(2) > p.note',
+                // The loop's own note says which factor raises the ceiling, because the mock's says
+                // "blue sparks" as though the whole family did it.
+                'div.card:nth-child(4) > p.note',
+            ],
+            computed: [],
+            rect: [],
+        },
+    });
+});
+
 test('the Data sources ledger sits on its wireframe', async ({ page }) => {
     await assertParity(page, {
         screen: 'sources',
