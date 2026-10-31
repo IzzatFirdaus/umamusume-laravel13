@@ -1244,21 +1244,6 @@ const jumpToShop = (): void => {
         </details>
 
 
-        <!-- A-0.6: the derived team roster — the six deck cards' characters. No stored roster;
-             the list is read off the run's own deck slots. -->
-        <section aria-labelledby="team-roster-heading" class="card mt-4 rounded-lg p-4">
-            <h2 id="team-roster-heading" class="text-lg font-semibold text-ink-strong">Team roster</h2>
-            <p v-if="props.roster.empty !== null" class="mt-1 text-sm text-ink-muted">{{ props.roster.empty }}</p>
-            <ol v-else class="mt-2 space-y-1 text-sm">
-                <li v-for="row in props.roster.rows" :key="row.slot" class="flex items-baseline justify-between gap-3">
-                    <span class="text-ink">
-                        {{ row.name ?? 'Unnamed card' }}
-                        <span v-if="row.friend" class="ml-1 text-xs text-ink-muted">(Friends)</span>
-                    </span>
-                    <span class="font-mono text-xs text-ink-muted">Slot {{ row.slot }}<template v-if="row.ownership !== null"> · {{ row.ownership }}</template></span>
-                </li>
-            </ol>
-        </section>
 
         </details>
 
