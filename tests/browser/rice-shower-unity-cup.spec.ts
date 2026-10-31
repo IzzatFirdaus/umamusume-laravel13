@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { deleteRun } from '../utils/delete-run';
-import { openIdentityDisclosure } from '../utils/identity-disclosure';
+import { openIdentitySettings } from '../utils/identity-disclosure';
 import { buildAxe } from '../utils/accessibility';
 import { SnapshotSetupPage } from './pages/SnapshotSetupPage';
 import { CockpitPage } from './pages/CockpitPage';
@@ -218,7 +218,7 @@ test.describe('Veteran lifecycle', () => {
         // Mark run completed through the Cockpit status form.
         const cockpit = new CockpitPage(page);
         await cockpit.goto(runUrl);
-        await openIdentityDisclosure(page);
+        await openIdentitySettings(page);
         const statusForm = page.locator('form').filter({ has: page.getByRole('button', { name: 'Change status' }) });
         await statusForm.locator('select[name="status"]').selectOption('Completed');
         await statusForm.getByRole('button', { name: 'Change status' }).click();

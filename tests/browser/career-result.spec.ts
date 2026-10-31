@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
-import { openIdentityDisclosure } from '../utils/identity-disclosure';
+import { openIdentitySettings } from '../utils/identity-disclosure';
 
 /*
  * Rendered-copy, state and accessibility evidence for SCREEN-019, the Career Result
@@ -49,7 +49,7 @@ async function createRun(page: import('@playwright/test').Page): Promise<void> {
 async function setStatus(page: import('@playwright/test').Page, status: 'Completed' | 'Retired'): Promise<void> {
     await page.goto(createdRunUrls[createdRunUrls.length - 1], { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await openIdentityDisclosure(page);
+    await openIdentitySettings(page);
 
     const form = page.locator('form', { has: page.getByRole('button', { name: 'Change status' }) });
     await form.locator('select[name="status"]').selectOption(status);

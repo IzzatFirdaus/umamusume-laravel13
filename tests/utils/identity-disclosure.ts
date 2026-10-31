@@ -1,72 +1,27 @@
 import { expect, type Page } from '@playwright/test';
 
 /*
- * The Cockpit's identity writes sit behind one disclosure (audit 2026-10-12 §3.3: the fields a Trainer
- * must open to change a value), and a collapsed `<details>` lays out none of its controls, so a case that
- * drives one has to open it first. Same reason `tap-targets.ts` skips an unrendered control: a locator
- * that waits on a box the browser never paints times out on a page that is working as designed.
+ * The run's identity and status writes live on their own door, `/training-runs/{run}/settings`
+ * (`C6b.1`, `6b5f45da`). They used to sit inside the Cockpit's "Career tools" disclosure, and this
+ * helper used to open that nested `<details>` chain. `C6b.11` deleted the disclosure, so a caller
+ * that needs to change a status, a scenario, a period or the trainee's identity navigates here.
  *
- * "Edit identity" is nested inside "Career tools", so the control sits under TWO collapsed disclosures
- * and the helper opens the chain from the outside in. A nested summary is not rendered while its parent
- * is closed — measured, not assumed: with "Career tools" shut, the "Edit identity" summary reports
- * `isVisible() === false` and `click()` waits out its timeout, and the control becomes visible only once
- * both are open.
+ * It keeps the shape callers already rely on: it resolves the run id from the URL they are on, so a
+ * case can call it straight after landing on the Cockpit, and it waits for the control before
+ * returning, so a caller that arrives on a cold cache does not race the select into the DOM.
  *
- * The guard counts the disclosures that OWN the control — those with no other disclosure between them
- * and the select — so a second identity disclosure is still a failure while the grouping above it is
- * not. Counting every containing disclosure instead would count "Career tools" as a second one, and
- * the helper would refuse the page it was written for.
- *
- * Idempotent because a blind `click()` closes an open one, and a summary is not the kind of control a
- * caller can tell the state of from outside. No caller here reaches it twice on one page load.
+ * A caller that asserts Cockpit-only content afterwards has to navigate back: this helper leaves the
+ * page on the settings door, which is where the forms are.
  */
-export async function openIdentityDisclosure(page: Page): Promise<void> {
-    // The Cockpit renders client-side, so a caller that arrives straight after a navigation can beat
-    // the select into the DOM and count zero owners. Wait for the control itself before counting.
+export async function openIdentitySettings(page: Page): Promise<void> {
+    const runId = /\/training-runs\/(\d+)/.exec(page.url())?.[1];
+
+    expect(runId, `the page is not a training-run URL: ${page.url()}`).toBeDefined();
+
+    await page.goto(`/training-runs/${runId}/settings`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // Waiting on the control the caller drives is what makes the return deterministic, rather than
+    // "the app mounted something".
     await page.locator('select#status').first().waitFor({ state: 'attached' });
-
-    const containers = page.locator('details').filter({ has: page.locator('select#status') });
-
-    // An owner is the disclosure with no OTHER disclosure between it and the select. The predicate
-    // cannot use `querySelector('details select#status')`: selector matching resolves the ancestor
-    // part against the whole document, so the node itself satisfies `details` and every container
-    // would look nested. Comparing the inner disclosures against the select is the real test.
-    const owners = await containers.evaluateAll((nodes) =>
-        nodes.filter((node) => {
-            const select = node.querySelector('select#status');
-
-            if (select === null) {
-                return false;
-            }
-
-            return !Array.from(node.querySelectorAll('details')).some((inner) => inner.contains(select));
-        }).length,
-    );
-
-    expect(owners, 'the Cockpit does not render exactly one disclosure holding select#status').toBe(1);
-
-    // Every disclosure between the select and the document, outermost first. The chain is the same set as
-    // `containers`, in the same DOM order: an ancestor contains the select, so it contains the select's
-    // own disclosure too, and an ancestor always precedes its descendant in document order.
-    const chain = await page.locator('select#status').evaluate((select) => {
-        const disclosures: HTMLDetailsElement[] = [];
-
-        for (let node: Element | null = select; node !== null; node = node.parentElement) {
-            if (node instanceof HTMLDetailsElement) {
-                disclosures.unshift(node);
-            }
-        }
-
-        return disclosures.map((disclosure) => disclosure.open);
-    });
-
-    for (const [index, open] of chain.entries()) {
-        if (open) {
-            continue;
-        }
-
-        // The disclosure's own summary is the first `<summary>` inside it; a nested disclosure's summary
-        // comes later in document order.
-        await containers.nth(index).locator('summary').first().click();
-    }
 }

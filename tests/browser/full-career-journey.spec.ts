@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { DatabaseSync } from 'node:sqlite';
 import path from 'node:path';
 import { deleteRun } from '../utils/delete-run';
-import { openIdentityDisclosure } from '../utils/identity-disclosure';
+import { openIdentitySettings } from '../utils/identity-disclosure';
 import { walkWizard } from '../utils/start-career';
 
 /*
@@ -110,7 +110,7 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     createdRunUrls.push(runUrl);
 
     // --- Identity and Unity Cup state, through the Cockpit's own editors (Slices 1.5 and 1.6) ---
-    await openIdentityDisclosure(page);
+    await openIdentitySettings(page);
     await page.selectOption('#trainee_rarity', '3');
     await page.locator('#potential_level').fill('2');
     // One growth figure is a legal sparse row: a stat with no growth is simply absent.
@@ -121,9 +121,13 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     // cockpit, so the walk reads the save back where it now lives: the identity editor after a reload.
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await openIdentityDisclosure(page);
+    await openIdentitySettings(page);
     await expect(page.locator('#trainee_rarity')).toHaveValue('3');
     await expect(page.locator('#potential_level')).toHaveValue('2');
+    // `C6b.7` leaves the page on the settings door, so the Cockpit regions read below have to be
+    // navigated back to: the identity helper no longer returns to the Cockpit.
+    await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
 
     // Neither the label text nor the team-name field is unique here: `run-tools` nests the
     // team-state disclosure, so a descendant match on the field finds both and the walk fails on
@@ -152,9 +156,13 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     // The old CockpitIdentityCard header this used to assert is no longer rendered by the shipped
     // cockpit (removed at 530d62b9, zero imports in resources/js), so the reload reads the save back
     // where it now lives - the identity editor - exactly as the peer's re-baseline does at :105-111.
-    await openIdentityDisclosure(page);
+    await openIdentitySettings(page);
     await expect(page.locator('#trainee_rarity')).toHaveValue('3');
     await expect(page.locator('#potential_level')).toHaveValue('2');
+    // `C6b.7` leaves the page on the settings door, so the Cockpit regions read below have to be
+    // navigated back to: the identity helper no longer returns to the Cockpit.
+    await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
     // The Scenario card's Team row survives the reload in the same always-visible cell, so the
     // scoped cell locator keeps this assertion single-element too.
     await expect(page.getByRole('cell', { name: 'Blue Bloom' })).toBeVisible();
@@ -246,7 +254,7 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     // The status form is the Cockpit's; the walk is on the Skills Planner after the planners' visit.
     await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await openIdentityDisclosure(page);
+    await openIdentitySettings(page);
     const statusForm = page.locator('form').filter({ has: page.getByRole('button', { name: 'Change status' }) });
     await statusForm.locator('select[name="status"]').selectOption('Completed');
     await statusForm.getByRole('button', { name: 'Change status' }).click();

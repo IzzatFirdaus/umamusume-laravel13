@@ -9,7 +9,7 @@
  * the assertions that depend on it.
  */
 import { expect, type Page } from '@playwright/test';
-import { openIdentityDisclosure } from './identity-disclosure';
+import { openIdentitySettings } from './identity-disclosure';
 
 const WRITE = { timeout: 60_000 } as const;
 
@@ -51,7 +51,7 @@ export async function fileCareer(
 
     // Scoped to its own form: the Cockpit's header edits and its correction panel share the page, so a
     // name query is ambiguous and a label query worse.
-    await openIdentityDisclosure(page);
+    await openIdentitySettings(page);
     const statusForm = page.locator('form').filter({ has: page.getByRole('button', { name: 'Change status' }) });
 
     await statusForm.locator('select[name="status"]').selectOption('Completed');

@@ -3,7 +3,6 @@ import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';
 import { expectTapTargets } from '../utils/tap-targets';
-import { openIdentityDisclosure } from '../utils/identity-disclosure';
 import { startCareer } from '../utils/start-career';
 
 /*
