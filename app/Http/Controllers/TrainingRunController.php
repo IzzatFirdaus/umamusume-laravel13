@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\ImportHistoricalRun;
 use App\Enums\CardRarity;
+use App\Enums\EnergyState;
 use App\Enums\MoodTier;
 use App\Enums\PerformanceType;
 use App\Enums\ReleaseStatus;
@@ -1035,6 +1036,59 @@ class TrainingRunController extends Controller
      * corrected a reading on the Cockpit off the screen they were reading. For the row form the two
      * are the same URL, so the run screen is unchanged.
      */
+    /**
+     * The turn-correction door (`C6b.2`, KI-144): the Cockpit's `Correct turn` section on a page of
+     * its own, so the `Career tools` disclosure can retire.
+     *
+     * It reads and renders; the form PUTs to `runs.turns.update` below, the one route and validator
+     * that already own a turn's columns. A second turn-write route would be a second write path for
+     * the same columns, so this door adds no write.
+     */
+    public function editTurn(TrainingRun $run, TurnEntry $turn): InertiaResponse
+    {
+        abort_unless($turn->training_run_id === $run->id, 404);
+
+        $run->loadMissing('umamusume');
+
+        return Inertia::render('Career/TurnEdit', [
+            'run' => [
+                'id' => $run->id,
+                'trainee' => $run->umamusume->name,
+                'trainee_ja' => $run->umamusume->name_ja,
+                'status' => $run->status->value,
+                'status_label' => $run->status->label(),
+                'scenario_label' => $run->hasScenario()
+                    ? (string) config('scenarios.scenarios.'.$run->scenarioKey().'.label', $run->scenarioKey())
+                    : 'No scenario set',
+                'run_url' => route('runs.cockpit', $run),
+            ],
+            // The turn's own reading, as the cockpit correction form prefilled it. Nulls stay null so
+            // the page can print "not recorded" rather than a zero nobody entered.
+            'turn' => [
+                'id' => $turn->id,
+                'turn' => $turn->turn,
+                'speed' => $turn->speed,
+                'stamina' => $turn->stamina,
+                'power' => $turn->power,
+                'guts' => $turn->guts,
+                'wit' => $turn->wit,
+                'sp' => $turn->sp,
+                'energy' => $turn->energy,
+                // A turn that recorded no state reads as `unknown`, which is the enum's own word for
+                // "no reading", never a fabricated `exact` with an invented figure.
+                'energy_state' => $turn->energy_state?->value ?? EnergyState::Unknown->value,
+                'energy_band' => $turn->energy_band,
+                'fans' => $turn->fans,
+                'mood' => $turn->mood?->value,
+                'condition' => $turn->condition,
+            ],
+            'update_url' => route('runs.turns.update', [$run, $turn]),
+            'timeline_url' => route('runs.timeline', $run),
+            'energy_states' => array_map(fn (EnergyState $state): string => $state->value, EnergyState::cases()),
+            'moods' => array_map(fn (MoodTier $tier): string => $tier->value, MoodTier::cases()),
+        ]);
+    }
+
     public function updateTurn(StoreTurnEntryRequest $request, TrainingRun $run, TurnEntry $turn): RedirectResponse
     {
         abort_unless($turn->training_run_id === $run->id, 404);

@@ -205,6 +205,13 @@ Route::delete('/training-runs/{run}', [TrainingRunController::class, 'destroy'])
 Route::get('/training-runs/{run}/export/{format}', [TrainingRunController::class, 'export'])->name('runs.export');
 Route::post('/training-runs/{run}/turns', [TrainingRunController::class, 'storeTurn'])->name('runs.turns.store');
 Route::put('/training-runs/{run}/turns/{turn}', [TrainingRunController::class, 'updateTurn'])->name('runs.turns.update');
+/*
+ * The turn-correction door (`C6b.2`, KI-144). The Cockpit's `Correct turn` section gets a page of
+ * its own so that disclosure can retire. It is a READ: the form PUTs to `runs.turns.update` above,
+ * the one route and validator that already own a turn's columns, so no second turn-write exists.
+ */
+Route::get('/training-runs/{run}/turns/{turn}/edit', [TrainingRunController::class, 'editTurn'])
+    ->name('runs.turns.edit')->whereNumber('turn');
 Route::delete('/training-runs/{run}/turns/{turn}', [TrainingRunController::class, 'destroyTurn'])->name('runs.turns.destroy');
 Route::post('/training-runs/{run}/skills', [TrainingRunController::class, 'syncSkills'])->name('runs.skills.sync');
 Route::post('/training-runs/{run}/indep-abandon', [TrainingRunController::class, 'abandonIndependent'])->name('runs.indep.abandon');

@@ -37,6 +37,8 @@ const props = defineProps<{
         corrected: boolean;
         correction_id: string | null;
         decision_url: string;
+        /** `C6b.2`: the turn-correction door. Turn rows carry it; race and event rows do not. */
+        edit_url?: string;
         position: string;
     }[];
     filters: { available: string[]; active: string[] };
@@ -201,7 +203,15 @@ const finaleText = computed(() => {
                                 <td class="py-2 pr-3 text-right font-mono">{{ entry.turn }}</td>
                                 <td class="py-2 pr-3">{{ entry.position }}</td>
                                 <td class="py-2 pr-3">{{ entry.kind_label }}</td>
-                                <td class="py-2 pr-3"><b>{{ entry.action_label }}</b> <span class="text-ink-muted">· {{ entry.result }}</span></td>
+                                <td class="py-2 pr-3">
+                                    <b>{{ entry.action_label }}</b> <span class="text-ink-muted">· {{ entry.result }}</span>
+                                    <!-- `C6b.2`: the turn-correction door, reached from the row it corrects. -->
+                                    <a
+                                        v-if="entry.edit_url"
+                                        :href="entry.edit_url"
+                                        class="ml-2 whitespace-nowrap text-xs text-ink-strong underline"
+                                    >Edit turn {{ entry.turn }}</a>
+                                </td>
                                 <td class="py-2 pr-3 text-right font-mono" title="This turn recorded no energy figure.">{{ energyOf(entry) ?? 'N/A' }}</td>
                                 <td class="py-2 pr-3 text-right font-mono" title="This turn recorded no skill-point figure.">{{ spOf(entry) ?? 'N/A' }}</td>
                             </tr>

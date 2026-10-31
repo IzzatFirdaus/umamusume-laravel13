@@ -243,6 +243,10 @@ class TimelineController extends Controller
             'result' => 'Recorded as entered',
             'corrected' => $corrected,
             'correction_id' => $corrected ? 'turn-'.$turn->turn : null,
+            // `C6b.2`: the turn-correction door, so the Timeline row reaches the same write the
+            // Cockpit's `Career tools` disclosure used to host. The cockpit query link stays for the
+            // screens that still read `?edit_turn=`.
+            'edit_url' => route('runs.turns.edit', [$run, $turn]),
             'decision_url' => route('runs.cockpit', $run).'?edit_turn='.$turn->id,
         ];
     }
