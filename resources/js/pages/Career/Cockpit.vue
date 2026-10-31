@@ -50,7 +50,6 @@ import ActionGrid from '../../components/career/ActionGrid.vue';
 import AdvisorRail from '../../components/career/AdvisorRail.vue';
 import Section from '../../components/ui/Section.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
-import RunRaceStrip from '../../components/career/RunRaceStrip.vue';
 import ScenarioPanel from '../../components/scenario/ScenarioPanel.vue';
 import UnityCupEditor from '../../components/career/UnityCupEditor.vue';
 import BaseInput from '@/Components/Form/BaseInput.vue';
@@ -1203,81 +1202,6 @@ const jumpToShop = (): void => {
                  other scenarios see no Shop affordance. WCAG 2.4.11: focus moves to the
                  Shop heading after the visit, and the body has `scroll-margin-top` so the
                  sticky mobile nav does not cover the focused control. -->
-        <section
-            class="mt-4 rounded-lg border border-rule bg-panel p-4"
-            aria-labelledby="career-timeline-heading"
-        >
-            <h2 v-if="isActive" id="career-timeline-heading" class="text-lg font-semibold text-ink-strong">
-                Races in this run
-            </h2>
-
-            <!-- Once the career has ended the race list is history, not a decision, so it collapses
-                 below the fold. The heading id moves onto the `summary` so the section keeps the one
-                 accessible name it has while open. -->
-            <details v-else data-region="races-in-this-run" class="mt-1 rounded-lg border border-rule bg-raised p-4">
-                <summary
-                    id="career-timeline-heading"
-                    class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong"
-                >
-                    Races in this run
-                </summary>
-                <RunRaceStrip class="mt-2" :strip="props.raceStrip as never" />
-            </details>
-
-            <RunRaceStrip v-if="isActive" :strip="props.raceStrip as never" />
-
-            <p class="mt-3 text-xs text-ink-muted">
-                This region carries the run's own races. Every logged turn, race and event, in order,
-                is on the Career Timeline.
-            </p>
-
-            <a
-                :href="props.run.timeline_url"
-                class="mt-2 inline-flex min-h-11 items-center text-xs font-medium text-ink-strong underline"
-            >
-                Career Timeline
-            </a>
-
-            <!-- The Career Result's only other door was the 2.0.0 record page's header, so it sits
-                 beside the timeline door here rather than in the action grid: the grid is the
-                 advisor's answer about the next turn, and this is a summary of the career. -->
-            <a
-                :href="props.run.result_url"
-                class="mt-2 inline-flex min-h-11 items-center text-xs font-medium text-ink-strong underline"
-            >
-                Career Result
-            </a>
-
-            <!-- The run-delete door (F2, plan §9.6 ruling 4). Two-step disclosure: the summary
-                 names the destructive action, the form inside submits the DELETE only after the
-                 Trainer opens it and confirms. `deleteForm` carries no fields — the route is run
-                 scoped and the controller deletes the bound row — so the only data that matters
-                 is the URL. -->
-            <details data-region="danger-zone" class="mt-4">
-                <summary
-                    class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-risk"
-                >
-                    Delete this career
-                </summary>
-                <p class="mt-2 text-sm text-ink-muted">
-                    Permanently removes this run and every record tied to it: turns, race entries,
-                    turn events, skills, support-deck slots, and the linked Veteran library record
-                    (if any was saved). There is no undo.
-                </p>
-                <form
-                    @submit.prevent="deleteRun"
-                    class="mt-2"
-                >
-                    <button
-                        type="submit"
-                        class="min-h-11 rounded-full border-2 border-risk px-4 font-semibold text-risk"
-                        :disabled="deleteForm.processing"
-                    >
-                        {{ deleteForm.processing ? 'Deleting…' : 'Delete this career' }}
-                    </button>
-                </form>
-            </details>
-        </section>
 
         <!-- The run's settings, below the reading. The header edit forms (F2, plan §9.6 ruling 1).
              Status, scenario and grade-point period all write through `runs.update`, the route and
