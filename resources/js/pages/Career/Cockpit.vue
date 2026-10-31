@@ -1124,7 +1124,7 @@ const jumpToShop = (): void => {
                      destination is spelled here and none can drift from the route table. -->
                 <section aria-labelledby="career-where-to-go-heading" class="card">
                     <h2 id="career-where-to-go-heading" class="text-lg font-semibold text-ink-strong">Where to go</h2>
-                    <ul class="mt-2 grid grid-cols-1 gap-2 @3xl:grid-cols-2">
+                    <ul class="mt-2 grid g-2 gap-2">
                         <li v-for="link in whereToGo" :key="link.href">
                             <LinkButton :href="link.href" variant="secondary" size="sm">{{ link.label }}</LinkButton>
                         </li>
