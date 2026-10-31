@@ -83,3 +83,53 @@ test('lists the saved pair as a table row and states what a legacy is worth', as
     await expect(page.locator('a.bg-primary-action')).toHaveCount(1);
     await expect(page.getByRole('link', { name: 'Compare two pairs' })).toHaveClass(/bg-primary-action/);
 });
+
+/**
+ * A run the walk-through can write into, created through the app's own form the way `runWithPair`
+ * does, but stopped at the builder rather than confirmed. The two helpers share the create path so
+ * the walk exercises the same code the browse surface's `Open` door leads to.
+ */
+async function runWithDraft(page: Page): Promise<string> {
+    await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.locator('#trainee-combobox').fill('Rice Shower');
+    await page.keyboard.press('Enter');
+    await page.selectOption('select[name="scenario"]', { value: 'unity_cup' });
+    await page.getByRole('button', { name: 'Create run' }).click();
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
+
+    const runUrl = page.url().replace(/\/cockpit$/, '');
+    createdRunUrls.push(runUrl);
+
+    await page.goto(`${runUrl}/legacy`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    return runUrl;
+}
+
+test('records a parent with a Spark, picks the primary, and reads it back on the compare surface', async ({ page }) => {
+    const runUrl = await runWithDraft(page);
+    const runId = runUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+
+    // Assign a parent and give her one Spark, then mark it primary. The pick is the wireframe's radio
+    // (`legacy-builder.html:78`): the group is named for the parent and each radio is named by the
+    // Spark in its own row, so "Primary" alone is not four identical names in one group.
+    await page.getByLabel('Assign to Parent A').selectOption({ label: 'Gold Ship' });
+    await page.getByLabel('Grandparent A1', { exact: true }).fill('Tokai Teio');
+    await page.getByLabel('Own rank').first().fill('3');
+    await page.getByRole('button', { name: 'Add Spark' }).first().click();
+    await page.getByLabel('Kind').first().selectOption('blue');
+    await page.getByLabel('Applies to').first().fill('Speed');
+    await page.getByLabel('Stars', { exact: true }).first().fill('3');
+    await page.getByRole('radio', { name: /Primary spark for Gold Ship: blue Speed/i }).check();
+
+    await page.getByRole('button', { name: 'Save legacy' }).click();
+    await page.waitForURL(/\/legacy\/compare/, { waitUntil: 'domcontentloaded' });
+
+    // The write lands on the compare surface, and the parent the Trainer assigned is the one that
+    // shows up. The `thead` carries the trainee (`column.trainee`), not the parent; the parent name
+    // is the "Parent A" row, which is what a Trainer opened the page to check.
+    const table = page.getByRole('region', { name: /side by side/i }).getByRole('table');
+    await expect(table).toBeVisible();
+    await expect(table.getByRole('row', { name: /Parent A/ })).toContainText('Gold Ship');
+});
