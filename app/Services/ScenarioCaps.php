@@ -100,6 +100,21 @@ class ScenarioCaps
     }
 
     /**
+     * The cap raise one inherited basic-ability factor contributes at career start.
+     *
+     * `UMAMUSUME_REFERENCE.md` §1.3.4 (`:420`): "+16 to that stat's cap per ★3 basic-ability factor
+     * inherited; the cap applies at 育成開始時, Classic and Senior inheritance moments." Only the ★3
+     * tier is stated, so ★1 and ★2 raise nothing; the aptitude family raises aptitude grades rather
+     * than caps, and the green/white families fire mid-run. This is the ONE place the 16 lives
+     * (`ADR-0025` amendment, `ADR-0020` §3 amendment); `StartingCapProjection` sums it and no
+     * template re-types it.
+     */
+    public static function capRaise(int $stars, string $family): int
+    {
+        return $family === 'blue' && $stars === 3 ? 16 : 0;
+    }
+
+    /**
      * The ceilings a run's turns are measured against.
      *
      * A ceiling the Trainer entered for that run wins over the scenario's own arithmetic, and a stat with

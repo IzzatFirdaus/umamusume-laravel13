@@ -13,6 +13,7 @@ use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Models\Veteran;
 use App\Services\Legacy\AncestryGraph;
+use App\Services\Legacy\StartingCapProjection;
 use App\Services\Legacy\VeteranRow;
 use App\Services\ScenarioCaps;
 use Illuminate\Http\RedirectResponse;
@@ -245,6 +246,12 @@ class LegacyController extends Controller
             // otherwise, with Wit carrying its reason because `ADR-0025` stores no `cap_wit`. Reused
             // rather than recomputed, so the builder and the compare screen cannot disagree about a cap.
             'caps' => $this->startingCaps($run),
+            // The career-start ceiling an unstarted run's recorded parents imply, and the provenance the
+            // cell must print beside it (`ADR-0025` 2026-10-31 amendment; `ADR-0020` §3 amendment). A
+            // separate prop from `caps`: `caps` is the ceiling the run starts FROM, this is what the
+            // recorded ★3 factors add to it, and the page shows both so the arithmetic stays visible.
+            'projection' => StartingCapProjection::project($run),
+            'projectionNote' => StartingCapProjection::label(),
             // The stored grade, so the select opens on what the run holds rather than on "Not recorded".
             // The edit form seeds from the payload for every field it carries; a re-confirm that wrote
             // blank would drop a grade the Trainer already read.
