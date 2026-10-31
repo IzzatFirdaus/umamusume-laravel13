@@ -361,7 +361,7 @@ const verdictPill = (verdict: string): string =>
                 tabindex="0"
                 class="mt-6 overflow-x-auto rounded-md border border-rule"
             >
-                <table class="w-full min-w-[40rem] border-collapse bg-raised text-sm">
+                <table class="t min-w-[40rem]">
                     <caption class="px-3 py-2 text-left text-xs text-ink-muted">
                         Recorded values only. Every cell is what a run stores; nothing here is scored,
                         ranked or totalled.
@@ -657,16 +657,17 @@ const verdictPill = (verdict: string): string =>
                     <h2 :id="`legacy-caps-${column.run_id}`">
                         Starting caps · legacy {{ String.fromCharCode(65 + index) }}
                     </h2>
-                    <table class="mt-2 w-full border-collapse text-sm">
+                    <table class="t mt-2">
                         <tbody>
                             <tr v-for="cap in column.caps" :key="cap.stat" class="border-b border-rule last:border-b-0">
                                 <th scope="row" class="py-2 pr-3 text-left font-medium text-ink">{{ cap.label }}</th>
-                                <td class="py-2 text-right font-mono tabular-nums text-ink">
+                                <td class="py-2 text-right n font-mono tabular-nums text-ink">
                                     <template v-if="cap.value !== null">{{ cap.value }}</template>
-                                    <template v-else>
-                                        <span :title="cap.note ?? undefined">N/A</span>
-                                        <span class="sr-only">: {{ cap.note }}</span>
-                                    </template>
+                                    <AbsenceValue
+                                        v-else
+                                        compact
+                                        :reason="cap.note ?? 'No ceiling is recorded for this stat.'"
+                                    />
                                 </td>
                             </tr>
                         </tbody>
