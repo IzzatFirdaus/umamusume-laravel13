@@ -1,3 +1,4 @@
+import { openScenarioDetail } from '../utils/scenario-detail';
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
@@ -48,6 +49,11 @@ async function newCareer(page: import('@playwright/test').Page, scenarioId = 'un
 async function openCockpit(page: import('@playwright/test').Page, scenarioId = 'unity_cup'): Promise<string> {
     const url = await newCareer(page, scenarioId);
     await page.locator('#app > *').first().waitFor();
+
+    // The Unity Cup panels render inside the closed scenario-detail disclosure; the cases below
+    // assert on them, so the shared entry point opens it.
+    await openScenarioDetail(page);
+
 
     return url;
 }
