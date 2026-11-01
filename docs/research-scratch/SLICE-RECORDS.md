@@ -12400,3 +12400,58 @@ Worth adding to the pending KI-142 text when `KNOWN-ISSUES.md` frees up.
 markup, a layout redesign, one complete slice), the picker move across
 `Veterans/Index.vue` + `Veterans/Compare.vue` as one atomic change, then the four Cockpit
 variants, each read-gated and page-local. Nine subjects were ten; two closed today.
+
+### Parity pass, three more method findings and the per-page filter ratios — 2026-11-01
+
+Continues `315c208a`. Findings 1 and 2 are there; 3, 4 and 5 are here, and the ratio
+correction below replaces the flattened "three-to-one" phrasing in the hand-off.
+
+**Correction: record the per-page filter ratio, never an average.** `/review` was not
+zero-real-delta. It reported 6 markers and landed 1 real block, the `Pending` heading,
+whose hash difference is the proof, plus 3 named refusals and 2 blind spots. That is a 6:1
+filter. `/support-cards` reported 27 and landed 0 real deltas: every one resolved as a
+blind spot or the page-size quirk. That is a 27:0 filter. Averaging the two hides the only
+thing that matters, which is that the pages needed different work. No page has yet required
+building a block that was genuinely absent; `b7922db0`'s deletions remain the only real-work
+class this pass has had to undo.
+
+**Finding 3 — a fallthrough attribute does not survive `v-if`/`v-else` roots.**
+`data-region="field"` placed on `<BaseInput>` and `<BaseSelect>` never reached the DOM.
+Both components switch between root elements with `v-if`/`v-else`, and Vue drops fallthrough
+attributes on a multi-root component; the sweep then reported `filters` present and all five
+`field` markers absent, which is the silent-fail proof. The rule is therefore "mark a real
+element", with two shapes: `/skills` marked the page's own `<form>` and `<label>` elements
+directly and needed no wrapper at all, while `/support-cards` needed a wrapper because its
+controls are components. Reach for a wrapper only when the marker's target is a component
+with conditional roots.
+
+**Finding 4 — matching a wireframe's marker count is worse than exceeding it.**
+`/support-cards` has five filter fields, not the four the enumeration listed. Marking four
+would have hit the count while leaving a real field unmarked. Subset mode allows surplus, so
+the rule is to mark every field the page actually has: the sweep's count is an upper bound
+and the page's own composition is the floor. This is `b7922db0`'s error in mirror image. That
+commit deleted real blocks to match a wireframe count; marking four fields to match a count
+would have been the same mistake pointed at additions instead of deletions. When a wireframe
+fact and a product fact disagree, the product wins.
+
+**Finding 5 — a parity guard on a paginated page must be page-size aware.**
+`SupportCardController::index()` ships five rows by deliberate choice; the wireframe draws
+seven. Compared row for row, the guard reported four phantom row-level gaps and cascaded
+everything after them, because the sweep cannot tell "this row's block is missing" from "this
+row is past the page limit". The guard now requests `?pageSize=20` and says why at its header.
+The rule: any guard on a paginated page either requests at least the mock's row count or names
+the row-count difference as a documented override.
+
+**What the three sequential filters predict for Cockpit.** `/skills` 4:0, `/review` 6:1,
+`/support-cards` 27:0. The four variants will likely follow it, with one inversion to watch:
+the shell-density rule means each variant carries regions the shell HFW does not draw at all
+and the companion doc does, so on Cockpit the sweep may **undercount**. The harness knows the
+shell's markers, not the companion's. Every variant still needs the code read, and there the
+companion document is the second authority.
+
+**Fresh-session scope, agreed.** The `veterans` family closes out in one session with three
+slices that share `veteran-compare.spec.ts` and one fixture: the `/veterans/{id}` rewrite
+(`<dl>` grid to card-with-`srow`, every recorded value preserved), the picker move across
+`Veterans/Index.vue` and `Veterans/Compare.vue`, and the KI-146 repair of that spec's seven
+stale locators. Splitting them leaves the spec red across two of the three. Its brief is this
+ledger entry, which now carries all five findings and the routing rules.
