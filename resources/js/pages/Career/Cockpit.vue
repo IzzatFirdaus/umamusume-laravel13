@@ -353,8 +353,52 @@ const closedOutcome = computed((): string => {
  * ("Deleted, because no cockpit HFW draws them: … the `CockpitIdentityCard` …"), so the sentence
  * pointed a reader at a shape this file no longer renders. Stars and the card form now live in the
  * "Run identity" write surface inside the closed "Career tools" disclosure, reached from the Actions
- * area; the page head still prints neither, which is what the deduplication rule asks for.
+ * area. Since the lede carries the identity and the condition line, the page head prints them once.
  */
+/**
+ * The run's own identity block, as the HFW cockpit ledes carry it: the card title, the rarity and the
+ * potential, one joined line. Each piece is absent until a writer records it, and `card_title` is the
+ * verbatim Global client string (brackets included, e.g. `[Rosy Dreams]`), so nothing here is derived
+ * or invented.
+ */
+const identityLine = computed((): string | null => {
+    const parts: string[] = [];
+
+    if (props.identity.card_title !== null) {
+        parts.push(props.identity.card_title);
+    }
+
+    if (props.identity.trainee_rarity !== null) {
+        parts.push(`★${props.identity.trainee_rarity}`);
+    }
+
+    if (props.identity.potential_level !== null) {
+        parts.push(`Potential ${props.identity.potential_level}`);
+    }
+
+    return parts.length > 0 ? parts.join(' · ') : null;
+});
+
+/**
+ * The energy and mood reading the HFW cockpit ledes print beside the identity (`cockpit-unity-cup.html`
+ * line 59: `Energy Low band, Mood GREAT ↑ +20%`). Both are the header's own readings and each stays
+ * absent rather than becoming a half answer; the mood figure is the client's published headline
+ * (`config('uma.mood_effect.training')`), never a per-tier guess.
+ */
+const conditionLine = computed((): string | null => {
+    const parts: string[] = [];
+
+    if (props.header.energy_text !== null) {
+        parts.push(`Energy ${props.header.energy_text}`);
+    }
+
+    if (props.header.mood !== null) {
+        parts.push(`Mood ${props.header.mood} ↑ +${props.moodEffect.training}%`);
+    }
+
+    return parts.length > 0 ? parts.join(', ') : null;
+});
+
 const lede = computed((): string => {
     const parts: string[] = [];
 
@@ -372,6 +416,25 @@ const lede = computed((): string => {
 
     if (props.header.turn > 0 && props.header.turn <= props.header.total_turns) {
         parts.push(turnPhrase.value);
+    }
+
+    if (props.run.status === 'Active') {
+        /*
+         * The HFW cockpit ledes carry the run's identity and its energy/mood reading, and do not repeat
+         * the scenario label here: the scenario is the crumb and the scenario card's pill, so a third
+         * reading of it would be a surplus. The identity and the condition follow the position line as
+         * one sentence, the way the wireframe draws them.
+         */
+        const identity = identityLine.value;
+
+        if (identity !== null) {
+            parts.push(identity);
+        }
+
+        const line = parts.join(' · ');
+        const condition = conditionLine.value;
+
+        return condition === null ? line : `${line}. ${condition}`;
     }
 
     parts.push(props.run.scenario_label);
