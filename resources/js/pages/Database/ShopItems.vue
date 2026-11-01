@@ -22,7 +22,7 @@ import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import SparkChip from '../../components/SparkChip.vue';
 import ReferenceDrawer from '../../components/database/ReferenceDrawer.vue';
 import SourceNote from '../../components/database/SourceNote.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { computed, nextTick, ref } from 'vue';
 import type { ProvenanceState } from '../../types';
 
@@ -238,7 +238,13 @@ const close = async (): Promise<void> => {
                     <span>
                         "Race-triggered items last 3 turns" is recorded as <b>unconfirmed</b>. No source in the
                         repository states a duration for that class, so the catalogue does not print one.
-                        No item on either client guarantees training success.
+                        No item on either client guarantees training success. The Artisan Cleat Hammer row
+                        prints <b>25 coins</b> while a published guide states 20, and the two figures are not
+                        reconciled here:
+                        <Link href="/database/sources" class="font-medium underline">
+                            the source ledger's Open conflicts row
+                        </Link>
+                        carries both.
                     </span>
                 </p>
             </div>
